@@ -1,3 +1,3 @@
 # web-wallet-vuejs
 
-## Testing only
+## Testing
