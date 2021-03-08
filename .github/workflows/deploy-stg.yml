@@ -3,7 +3,7 @@ name: deploy-stg
 on: 
   pull_request:
     branches: 
-      - master
+      - main
   
 jobs:
   # This workflow contains a single job called "build"
