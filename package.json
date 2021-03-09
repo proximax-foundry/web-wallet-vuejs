@@ -13,6 +13,7 @@
     "animate.css": "^4.1.1",
     "core-js": "^3.6.5",
     "mitt": "^2.1.0",
+    "node-sass": "^4.14.1",
     "postcss-custom-properties": "^10.0.0",
     "postcss-nested": "^4.2.3",
     "vue": "^3.0.0",
@@ -32,7 +33,9 @@
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^7.0.0-0",
     "postcss": "^7.0.35",
+    "sass-loader": "^7.3.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.3",
+    "tsjs-xpx-chain-sdk": "^0.8.1",
     "vue-cli-plugin-fontawesome": "~0.3.1"
   },
   "eslintConfig": {

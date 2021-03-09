@@ -7,7 +7,7 @@
       <input v-model="inputText" type="text" class="text-placeholder" :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()">
       <div class="w-1/12 flex-none"></div>
     </div>
-    <div class="h-3 mb-2"><div class="error error-password text-left" v-if="pswdErr">{{ errorMessage }}</div></div>
+    <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr">{{ errorMessage }}</div></div>
   </div>
 </template>
 
