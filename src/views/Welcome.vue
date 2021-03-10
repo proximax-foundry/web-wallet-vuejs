@@ -4,22 +4,22 @@
     <h2>The secure interface that connects to the Proximax Sirius platform.</h2>
     <div class="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-4 mt-10">
       <div class="text-center p-5">
-        <img src="/img/icon-blockchain-full-color-80h-proximax-sirius-wallet.svg" class="w-36 md:w-28 lg:w-18 inline-block mb-3">
+        <img src="../assets/img/icon-blockchain-full-color-80h-proximax-sirius-wallet.svg" class="w-36 md:w-28 lg:w-18 inline-block mb-3">
         <div class="font-bold text-md md:text-md lg:text-lg">Blockchain</div>
         <div class=" sm:text-tsm md:text-tmd lg:text-tlg">Multisig, aggregated tx, cross chain, metadata.</div>
       </div>
       <div class="text-center p-5">
-        <img src="/img/icon-storage-full-color-80h-proximax-sirius-wallet.svg" class="w-36 md:w-28 lg:w-18 inline-block mb-3">
+        <img src="../assets/img/icon-storage-full-color-80h-proximax-sirius-wallet.svg" class="w-36 md:w-28 lg:w-18 inline-block mb-3">
         <div class="font-bold text-md md:text-md lg:text-lg">Storage</div>
         <div class=" sm:text-tsm md:text-tmd lg:text-tlg">P2P decentralised storage for any type of file.</div>
       </div>
       <div class="text-center p-5">
-        <img src="/img/icon-streaming-full-color-80h-proximax-sirius-wallet.svg" class="w-36 md:w-28 lg:w-18 inline-block mb-3">
+        <img src="../assets/img/icon-streaming-full-color-80h-proximax-sirius-wallet.svg" class="w-36 md:w-28 lg:w-18 inline-block mb-3">
         <div class="font-bold text-md md:text-md lg:text-lg">Streaming</div>
         <div class=" sm:text-tsm md:text-tmd lg:text-tlg">P2P decentralised streaming for video and chat.</div>
       </div>
       <div class="text-center p-5">
-        <img src="/img/icon-supercontracts-full-color-80h-proximax-sirius-wallet.svg" class="w-36 md:w-28 lg:w-18 inline-block mb-3">
+        <img src="../assets/img/icon-supercontracts-full-color-80h-proximax-sirius-wallet.svg" class="w-36 md:w-28 lg:w-18 inline-block mb-3">
         <div class="font-bold text-md md:text-md lg:text-lg">Supercontracts</div>
         <div class=" sm:text-tsm md:text-tmd lg:text-tlg">Easily modifiable digital contracts.</div>
       </div>

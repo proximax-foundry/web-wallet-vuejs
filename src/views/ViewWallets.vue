@@ -7,7 +7,7 @@
         <div class='p-3'>
           <div class="bg-gray-200 rounded-2xl flex justify-between py-3">
             <div class="ml-5 text-left text-sm"><div class="font-bold mb-1">wallet_name</div><div class="text-xs">Account: <span class="font-bold">1</span></div></div>
-            <div class="mr-5 self-center"><img src="/img/icon-trash-can-gray-16h-proximax-sirius-wallet.svg" class="w-7"></div>
+            <div class="mr-5 self-center"><img src="../assets/img/icon-trash-can-gray-16h-proximax-sirius-wallet.svg" class="w-7"></div>
           </div>
         </div>
       </div>
