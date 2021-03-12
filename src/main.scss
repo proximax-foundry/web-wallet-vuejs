@@ -44,10 +44,6 @@ body{
   font-family: Lato,Arial,Helvetica,sans-serif !important;
 }
 
-.router-link-exact-active{
-  border-bottom: 3px solid var(--white);
-}
-
 .logo{
   margin-left: 10px;
 }
@@ -81,6 +77,10 @@ body{
   color: var(--red);
   font-size: 13px;
   font-weight: bold;
+}
+
+.error_box{
+  @apply bg-red-100 py-3 rounded-xl;
 }
 
 .blue-btn{
@@ -123,8 +123,8 @@ body{
   top: 20px; left: 0; right: 0; margin-left: auto; margin-right: auto; max-width: 800px;
 }
 
-.popup-box{
-  @apply transition ease-in duration-300 w-popup px-20 py-7 bg-white rounded-3xl shadow-xl;
+.modal-popup-box{
+  @apply transition ease-in duration-300 w-popup px-10 py-7 bg-white rounded-3xl shadow-xl;
 }
 
 .page-title-gray-line{
@@ -163,11 +163,70 @@ body{
   a{
     font-weight: bold;
     font-size: 16px;
-    display: inline-block;
+    display: block;
     padding: 2px 18px;
     padding-top: 5px;
-    color: var(--white);
     transition: all;
-    transition-duration: 500ms;
+    transition-duration: 50ms;
+    color: var(--white);
+  }
+}
+
+.navbar{
+  a.router-link-exact-active, a:hover{
+    background:var(--white);
+    color: var(--black) #{!important};
+  }
+}
+
+@screen md {
+  .navbar{
+    a.router-link-exact-active, a:hover{
+      background: linear-gradient(180deg, #2C71BF 0%, #215590 80%) !important;
+      border-bottom: 3px solid var(--white);
+      color: var(--white) #{!important};
+    }
+
+    a{
+      display: inline-block;
+      color: var(--white) #{!important};
+    }
+  }
+}
+.p-link{
+  @apply text-gray-400 p-2 mt-5;
+}
+
+.p-highlight{
+  @apply text-white inline bg-blue-primary rounded-sm px-3;
+}
+
+.p-datatable-wrapper{
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.p-datatable-thead{
+  @apply bg-black text-white text-xs;
+  th{
+    font-weight: normal; text-align: left; padding: 8px 20px;
+  }
+}
+
+.p-datatable-tbody{
+  td{
+    text-align: left; padding: 8px 20px; font-size: 12px; cursor: pointer;
+  }
+
+  tr:nth-child(2n+1){
+    td{
+      @apply bg-gray-100
+    }
+  }
+
+  tr:nth-child(2n){
+    td{
+      @apply bg-gray-200
+    }
   }
 }

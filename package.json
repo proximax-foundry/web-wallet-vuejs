@@ -16,6 +16,8 @@
     "node-sass": "^4.14.1",
     "postcss-custom-properties": "^10.0.0",
     "postcss-nested": "^4.2.3",
+    "primeicons": "^4.1.0",
+    "primevue": "^3.3.4",
     "vue": "^3.0.0",
     "vue-password": "^3.0.0",
     "vue-router": "^4.0.0-0"

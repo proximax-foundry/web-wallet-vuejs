@@ -4,13 +4,13 @@
       <div class="text-icon-outline text-icon">
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
       </div>
-      <input v-model="inputPassword" :type="inputType" class="text-placeholder" :placeholder="placeholder" @click="clickInputPassword()" @blur="blurInputPassword()" autocomplete="off">
+      <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" :type="inputType" class="text-placeholder" :placeholder="placeholder" @click="clickInputPassword()" @blur="blurInputPassword()" autocomplete="off">
       <div class="inline-block flex-none mr-2">
         <font-awesome-icon icon="eye" class="text-gray-400 relative" @click="hideShowPassword();" v-if="!showPassword"></font-awesome-icon>
         <font-awesome-icon icon="eye-slash" class="text-gray-400 relative" @click="hideShowPassword();" v-if="showPassword"></font-awesome-icon>
       </div>
     </div>
-    <div class="h-3 mb-2"><div class="error error-password text-left" v-if="pswdErr">{{ errorMessage }}</div></div>
+    <div class="h-3 mb-2"><div class="error error-password text-left" v-if="pswdErr || showError">{{ errorMessage }}</div></div>
   </div>
 </template>
 
@@ -20,6 +20,11 @@ export default{
     'placeholder',
     'errorMessage',
     'icon',
+    'showError',
+    'modelValue'
+  ],
+  emits:[
+    'update:modelValue'
   ],
   name: 'PasswordInput',
   data() {
@@ -46,9 +51,13 @@ export default{
     },
 
     blurInputPassword: function() {
-      this.borderColor = 'border-2 border-red-primary';
-      if(this.inputPassword == ''){
+      var passwdPattern = "^[^ ]{8,}$";
+      if(this.modelValue == '' || this.modelValue.match(passwdPattern) == null){
+        this.borderColor = 'border-2 border-red-primary';
         this.pswdErr = true;
+      }else{
+        this.borderColor = 'border-2 border-gray-100';
+        this.pswdErr = false;
       }
     },
   },
@@ -58,7 +67,6 @@ export default{
       this.pswdErr = false;
       this.borderColor = 'border border-gray-100';
     });
-
   }
 }
 </script>

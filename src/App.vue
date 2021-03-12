@@ -1,18 +1,8 @@
 <template>
   <div class="flex flex-col h-screen justify-between">
     <header class="h-16 flex items-stretch">
-      <div class="flex-none self-center flex items-end logo">
-        <router-link to="/"><img src="/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">v0.5.4</span>
-      </div>
-      <div class="flex-grow h-16"></div>
-      <div class="flex-none self-center header-menu">
-        <div class="w-16 text-center inline-block">
-          <router-link to="/" class="font-normal hover:font-bold inline-block">Home</router-link>
-        </div>
-        <div class="w-16 text-center inline-block">
-          <router-link to="/wallets" class="hover:font-bold">Wallets</router-link>
-        </div>
-      </div>
+      
+      <headerComponent></headerComponent>
     </header>
     <router-view class="mb-auto"></router-view>
     <footer class="h-12 text-center">
@@ -25,12 +15,19 @@
 </template>
 
 <script>
-
+import { provide } from "vue";
+import { appStore } from "@/store/app";
+import { siriusStore } from "@/store/sirius";
+import headerComponent from '@/components/headerComponent.vue'
 export default {
   name: 'App',
   components: {
-
-  }
+    headerComponent
+  },
+  setup() {
+    provide("appStore", appStore);
+    provide("siriusStore", siriusStore);
+  },
 }
 </script>
 
