@@ -35,17 +35,34 @@
         <div class="px-5 self-center"><router-link to="/create" class="block big-default-btn my-3 self-center">Create</router-link></div>
       </div>
     </div>
+    <NotificationModal :toggleModal="toggleModal" msg="You have signed out from Sirius Wallet" time='1500' />
   </div>
 </template>
 
 <script>
 import SignInSiriusIDModal from '@/components/SignInSiriusIDModal.vue'
 import SignInModal from '@/components/SignInModal.vue'
+import NotificationModal from '@/components/NotificationModal.vue';
 export default {
   name: 'Welcome',
+  props: ['signOut'],
   components: {
     SignInSiriusIDModal,
-    SignInModal
+    SignInModal,
+    NotificationModal
+  },
+  data(){
+    return{
+      toggleModal: false,
+    }
+  },
+  created(){
+    if(this.signOut){
+      this.toggleModal = true;
+    }
+    this.emitter.on("CLOSE_NOTIFICATION", payload => {
+      this.toggleModal = payload;
+    });
   }
 }
 </script>

@@ -4,10 +4,10 @@
       <div class="text-icon-outline text-icon">
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
       </div>
-      <input v-model="inputText" type="text" class="text-placeholder" :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()">
+      <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="text-placeholder" :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()">
       <div class="w-1/12 flex-none"></div>
     </div>
-    <div class="h-3 mb-2"><div class="error error-password text-left" v-if="pswdErr">{{ errorMessage }}</div></div>
+    <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr">{{ errorMessage }}</div></div>
   </div>
 </template>
 
@@ -17,6 +17,10 @@ export default{
     'placeholder',
     'errorMessage',
     'icon',
+    'modelValue'
+  ],
+  emits:[
+    'update:modelValue'
   ],
   name: 'TextInput',
   data() {
@@ -34,9 +38,12 @@ export default{
     },
 
     blurInputText: function() {
-      this.borderColor = 'border-2 border-red-primary';
-      if(this.inputText == ''){
+      if(this.modelValue == ''){
+        this.borderColor = 'border-2 border-red-primary';
         this.textErr = true;
+      }else{
+        this.borderColor = 'border-2 border-gray-100';
+        this.textErr = false;
       }
     },
   },

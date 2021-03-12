@@ -1,3 +1,5 @@
+// vue.config.js
+
 let publicPath = '/';
 
 switch(process.env.NODE_ENV){
@@ -12,7 +14,8 @@ switch(process.env.NODE_ENV){
         break;
 }
 
+
 module.exports = {
-    publicPath: publicPath,
-    assetsDir: "./assets/"
+  publicPath: publicPath,
+  assetsDir: './assets/'
 }

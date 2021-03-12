@@ -5,6 +5,7 @@ const routes = [
   {
     path: '/',
     name: 'Welcome',
+    props: true,
     component: () => import('@/views/Welcome.vue'),
     meta: {
       title: "Welcome to Sirius Web Wallet",
@@ -21,6 +22,7 @@ const routes = [
   {
     path: '/wallets',
     name: 'ViewWallets',
+    props: true,
     component: () => import('@/views/ViewWallets.vue'),
     meta: {
       title: "View all wallets stored on device",
@@ -41,8 +43,27 @@ const routes = [
     meta: {
       title: "Create wallet from private key",
     }
+  },
+  {
+    path: '/dashboard',
+    name: 'ViewDashboard',
+    component: () => import('@/views/ViewDashboard.vue'),
+    meta: {
+      title: "Dashboard",
+    }
+  },
+  {
+    path: '/delete-wallet-confirmd/:name',
+    name: 'ViewDeleteConfirmation',
+    props: true,
+    component: () => import('@/views/ViewDeleteConfirmation.vue'),
+    meta: {
+      title: "Confrim Remove Wallet?",
+    }
   }
 ]
+
+
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),

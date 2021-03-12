@@ -1,23 +1,26 @@
 {
   "name": "web-wallet",
-  "version": "0.1.0",
+  "version": "0.0.2",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
+    "lint": "vue-cli-service lint",
     "build": "cross-env NODE_ENV=production vue-cli-service build",
     "build-staging": "cross-env NODE_ENV=staging vue-cli-service build",
-    "build-development": "cross-env NODE_ENV=development vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "build-development": "cross-env NODE_ENV=development vue-cli-service build"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
     "@fortawesome/free-solid-svg-icons": "^5.15.2",
     "animate.css": "^4.1.1",
     "core-js": "^3.6.5",
-    "dotenv": "^8.2.0",
+    "cross-env": "^7.0.3",
     "mitt": "^2.1.0",
+    "node-sass": "^4.14.1",
     "postcss-custom-properties": "^10.0.0",
     "postcss-nested": "^4.2.3",
+    "primeicons": "^4.1.0",
+    "primevue": "^3.3.4",
     "vue": "^3.0.0",
     "vue-password": "^3.0.0",
     "vue-router": "^4.0.0-0"
@@ -36,7 +39,9 @@
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^7.0.0-0",
     "postcss": "^7.0.35",
+    "sass-loader": "^7.3.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.3",
+    "tsjs-xpx-chain-sdk": "^0.8.1",
     "vue-cli-plugin-fontawesome": "~0.3.1"
   },
   "eslintConfig": {
