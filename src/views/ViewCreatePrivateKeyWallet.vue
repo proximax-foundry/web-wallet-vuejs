@@ -33,11 +33,12 @@
       <div class="mx-auto page-title-gray-line pt-5 lg:px-20">
         <div class="text-xl mb-5">{{ newWallet.name }}</div>
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-          <div class="text-left w-full">
+          <div class="text-left w-full relative">
+            <div class="absolute z-20 w-full h-full"></div>
             <div class="text-xs font-bold mb-1">Address:</div>
             <input
               id="address"
-              class="text-sm w-full outline-none bg-gray-100"
+              class="text-sm w-full outline-none bg-gray-100 z-10"
               type="text"
               :value="newWallet.accounts[0].addresspretty"
             />
@@ -45,11 +46,12 @@
           <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
         </div>
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-          <div class="text-left w-full">
+          <div class="text-left w-full relative">
+            <div class="absolute z-20 w-full h-full"></div>
             <div class="text-xs font-bold mb-1">Public:</div>
             <input
               id="public"
-              class="text-sm w-full outline-none bg-gray-100"
+              class="text-sm w-full outline-none bg-gray-100 z-10"
               type="text"
               :value="newWallet.accounts[0].public"
             />
@@ -57,11 +59,12 @@
           <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
         </div>
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center" v-if="showPK">
-          <div class="text-left w-full">
+          <div class="text-left w-full relative">
+            <div class="absolute z-20 w-full h-full"></div>
             <div class="text-xs font-bold mb-1">Private:</div>
             <input
               id="private"
-              class="text-sm w-full outline-none bg-gray-100"
+              class="text-sm w-full outline-none bg-gray-100 z-10"
               type="text"
               :value="newWallet.accounts[0].pk"
             />
@@ -183,14 +186,12 @@ export default {
     const copy = (id) => {
       // Credits: https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
       var copyText = document.getElementById(id);
-      copyText.removeAttribute('disabled');
       /* Select the text field */
       copyText.select();
       copyText.setSelectionRange(0, 99999); /* For mobile devices */
 
       /* Copy the text inside the text field */
       document.execCommand("copy");
-      copyText.setAttribute('disabled','disabled');
 
       /* Alert the copied text */
       alert("Copied " + id + ": " + copyText.value);

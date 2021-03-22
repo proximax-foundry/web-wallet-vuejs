@@ -1,10 +1,9 @@
 <template>
   <div class="flex flex-col h-screen justify-between">
     <header class="h-16 flex items-stretch">
-      
       <headerComponent></headerComponent>
     </header>
-    <router-view class="mb-auto"></router-view>
+    <PageComponent class="flex-grow"></PageComponent>
     <footer class="h-12 text-center">
       <div class="text-xs py-2">
         <div class="font-bold">&copy; ProximaX 2021</div>
@@ -19,10 +18,12 @@ import { provide } from "vue";
 import { appStore } from "@/store/app";
 import { siriusStore } from "@/store/sirius";
 import headerComponent from '@/components/headerComponent.vue'
+import PageComponent from '@/components/PageComponent.vue'
 export default {
   name: 'App',
   components: {
-    headerComponent
+    headerComponent,
+    PageComponent,
   },
   setup() {
     provide("appStore", appStore);

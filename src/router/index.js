@@ -53,16 +53,112 @@ const routes = [
     }
   },
   {
-    path: '/delete-wallet-confirmd/:name',
+    path: '/delete-wallet-confirmed/:name',
     name: 'ViewDeleteConfirmation',
     props: true,
     component: () => import('@/views/ViewDeleteConfirmation.vue'),
     meta: {
-      title: "Confrim Remove Wallet?",
+      title: "Confirm remove wallet?",
     }
-  }
+  },
+  {
+    path: '/view-all-accounts',
+    name: 'ViewDisplayAllAccounts',
+    props: true,
+    component: () => import('@/views/ViewDisplayAllAccounts.vue'),
+    meta: {
+      title: "View all accounts",
+    }
+  },
+  {
+    path: '/select-type-creation-account',
+    name: 'SelectTypeCreateAccount',
+    props: true,
+    component: () => import('@/views/ViewSelectTypeCreateAccount.vue'),
+    meta: {
+      title: "View all accounts",
+    }
+  },
+  {
+    path: '/create-account',
+    name: 'ViewCreateAccount',
+    component: () => import('@/views/ViewCreateAccount.vue'),
+    meta: {
+      title: "Create account",
+    }
+  },
+  {
+    path: '/created-account',
+    name: 'createdAccount',
+    props: true,
+    component: () => import('@/views/ViewCreatedAccount.vue'),
+    meta: {
+      title: "Created account",
+    }
+  },
+  {
+    path: '/import-account',
+    name: 'ViewCreateAccountPrivateKey',
+    component: () => import('@/views/ViewCreateAccountPrivateKey.vue'),
+    meta: {
+      title: "Import account",
+    }
+  },
+  {
+    path: '/details-account/:name',
+    name: 'ViewAccountDetails',
+    props: true,
+    component: () => import('@/views/ViewAccountDetails.vue'),
+    meta: {
+      title: "Account details",
+    }
+  },
+  {
+    path: '/delete-account/:name',
+    name: 'ViewDeleteAccount',
+    props: true,
+    component: () => import('@/views/ViewDeleteAccount.vue'),
+    meta: {
+      title: "Delete account",
+    }
+  },
+  {
+    path: '/delete-account/:name',
+    name: 'ViewDeleteAccount',
+    props: true,
+    component: () => import('@/views/ViewDeleteAccount.vue'),
+    meta: {
+      title: "Delete account",
+    }
+  },
+  {
+    path: '/convert-account-multisign/:name',
+    name: 'ViewConvertAccountMultisig',
+    props: true,
+    component: () => import('@/views/ViewConvertAccountMultisig.vue'),
+    meta: {
+      title: "Convert to Multisig Account",
+    }
+  },
+  {
+    path: '/export-wallet',
+    name: 'ViewExportWallet',
+    component: () => import('@/views/ViewExportWallet.vue'),
+    meta: {
+      title: "Export wallet",
+    }
+  },
+  // {
+  //   path: '/delete-account-confirm/:name',
+  //   name: 'ViewDeleteAccountConfirm',
+  //   props: true,
+  //   component: () => import('@/views/ViewDeleteAccountConfirm.vue'),
+  //   meta: {
+  //     title: "Confirm delete account?",
+  //   }
+  // },
 ]
-
+// createdAccount
 
 
 const router = createRouter({

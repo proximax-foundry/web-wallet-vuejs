@@ -3,7 +3,7 @@
     <router-link to="/"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">v{{ appStore.version }}</span>
   </div>
   <div class="flex-grow h-16"></div>
-  <div class="flex-none header-menu mt-3" v-if="appStore.state.currentLoggedInWallet">
+  <div class="flex-none header-menu mt-3" v-if="loginStatus">
     <div class=" flex flex-row">
       <div class="w-10 text-center flex flex-row h-10 items-center">
         <img src="../assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
@@ -66,22 +66,42 @@ export default{
 
     const logout = () => {
       appStore.logoutOfWallet();
-      router.push({ name: "Welcome", params: {signOut: true }});
+      if(sessionStorage.getItem('pageRefresh') == 'y'){
+        window.location.href = '/';
+      }else{
+        router.push({ name: "Welcome"});
+      }
     };
 
     const getAccountInfo = async () => {
       if (!appStore.state.currentLoggedInWallet) {
-        useRouter().replace({ path: "/" });
-        return;
+        // check sessionStorage
+        if(!appStore.checkFromSession()){
+          useRouter().replace({ path: "/" });
+        }
       }
-    }
-
+      return;
+    };
     getAccountInfo();
+
+    const loginStatus = computed(
+      () => {
+        if(!appStore.state.currentLoggedInWallet){
+          // if empty, check from sessionStorage
+          return appStore.checkFromSession();
+        }else{
+          // remain logged in when state.wallet is available
+          return true;
+        }
+      }
+    );
 
     return {
       appStore,
       networkType,
+      loginStatus,
       logout,
+      // walletName
     };
   },
   created() {

@@ -1,11 +1,11 @@
 <template>
-  <div class="relative">
+  <div class="relative text-center">
     <font-awesome-icon @click="showhideMenu();" icon="bars" :class="menuColorClass" class="menuBar absolute w-4 cursor-pointer" style="right: 7px; top: 9px;" v-if="showBar"></font-awesome-icon>
     <nav class="navbar" ref="navbarRef" v-if="showMenu">
       <router-link class="col" class-active="active" to="/dashboard" exact>Dashboard</router-link>
       <router-link class="col" class-active="active" to="/" exact>Transfer</router-link>
-      <router-link class="col" class-active="active" to="/create-wallet" exact>Accounts</router-link>
-      <router-link class="col" class-active="active" to="/" exact>Services</router-link>
+      <router-link class="col" class-active="active" to="/view-all-accounts" exact>Accounts</router-link>
+      <router-link class="col" class-active="active" to="/export-wallet" exact>Services</router-link>
     </nav>
     <nav class="navbar h-9" v-else>
     </nav>

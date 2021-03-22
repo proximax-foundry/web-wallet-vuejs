@@ -18,7 +18,6 @@ function getWallets() {
   if (!localStorage.getItem(config.localStorage.walletKey)) {
     localStorage.setItem(config.localStorage.walletKey, "[]");
   }
-
   return JSON.parse(localStorage.getItem(config.localStorage.walletKey));
 }
 
@@ -30,7 +29,6 @@ const state = reactive({
     if (!currentWallet.value) {
       return undefined;
     }
-
     return currentWallet.value.accounts.find((element) => element.default);
   }),
 });
@@ -80,8 +78,50 @@ function getWalletIndexByName(walletName) {
 /* benjamin lai */
 function getAccountByWallet(walletName){
   const wallet = getWalletByName(walletName);
-  const account = wallet.accounts.find((element) => element.name == 'Primary');
+  const account = wallet.accounts.find((element) => element.default == true);
   return account;
+}
+
+function importWallet(decryptedData, network){
+  let walletName = decryptedData.name;
+  walletName = (walletName.includes(' ') === true) ? walletName.split(' ').join('_') : walletName;
+  if(getWalletByName(walletName) == undefined){
+    if (decryptedData.accounts[0].network == network) {
+      const accounts = [];
+      if (decryptedData.accounts.length !== undefined) {
+        for (const element of decryptedData.accounts) {
+          accounts.push(element);
+        }
+      } else {
+        // invalid without account
+        return 'invalid_wallet';
+      }
+
+      const wallet = {
+        name: walletName,
+        accounts: accounts
+      }
+      state.wallets.push(wallet);
+      try {
+        localStorage.setItem(
+          config.localStorage.walletKey,
+          JSON.stringify(state.wallets)
+        );
+      } catch (err) {
+        if (config.debug) {
+          console.error("importWallet error caught", err);
+        }
+        return 'invalid_wallet';
+      }
+      return 'wallet_added';
+    } else {
+      // invalid network type error message
+      return 'invalid_network';
+    }
+  } else {
+    // wallet already exist message
+    return 'existed_wallet';
+  }
 }
 
 function addNewWallet(walletName, password, networkType, privateKey) {
@@ -149,12 +189,10 @@ function addNewWallet(walletName, password, networkType, privateKey) {
     }
     return 0;
   }
-
   return 1;
 }
 
-function deleteWallet(walletName, password) {
-  /* verify with password benjamin lai 11/3 */
+function verifyWalletPassword(walletName, password){
   const wallet = getWalletByName(walletName);
   if (!wallet) {
     if (config.debug) {
@@ -171,15 +209,15 @@ function deleteWallet(walletName, password) {
   }
 
   const account = wallet.accounts.find((element) => element.firstAccount);
-  if (!account) {
-    if (config.debug) {
-      console.error(
-        "loginToWallet triggered with invalid accounts",
-        walletName
-      );
-    }
-    return -1;
-  }
+  // if (!account) {
+  //   if (config.debug) {
+  //     console.error(
+  //       "loginToWallet triggered with invalid accounts",
+  //       walletName
+  //     );
+  //   }
+  //   return -1;
+  // }
   const common = {
     password: password,
   };
@@ -203,6 +241,16 @@ function deleteWallet(walletName, password) {
     ).address.plain() === account.address
   ) {
     return 0;
+  }
+
+  return 1;
+}
+
+function deleteWallet(walletName, password) {
+  /* verify with password benjamin lai 11/3 */
+  let verify = verifyWalletPassword(walletName, password);
+  if(verify<1){
+    return verify;
   }
   // end verify with password
 
@@ -229,6 +277,22 @@ function deleteWallet(walletName, password) {
     return 1;
   }
   return -1;
+}
+
+function checkFromSession(){
+  const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
+
+  if(walletSession){
+    // session is not null - copy to state
+    currentWallet.value = walletSession;
+    // set bool for page refresh sign out hack
+    sessionStorage.setItem('pageRefresh', 'y');
+    return true;
+  }else{
+    // return false to remain not sign in
+    sessionStorage.setItem('pageRefresh', 'n');
+    return false;
+  }
 }
 
 function loginToWallet(walletName, password) {
@@ -282,6 +346,8 @@ function loginToWallet(walletName, password) {
   }
 
   currentWallet.value = wallet;
+  // set current wallet info to sessionStorage
+  sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
   return 1;
 }
 
@@ -292,9 +358,142 @@ function logoutOfWallet() {
   if (!currentWallet.value) {
     return false;
   }
-
   currentWallet.value = null;
+  sessionStorage.removeItem('currentWalletSession');
   return true;
+}
+
+// update state after creating account
+function updateAccountState(account, networkType, accountName){
+  const first_account = state.loggedInWalletFirstAccount;
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  // get wallet index
+  wallet.accounts.push({
+    algo: "pass:bip32",
+    brain: true,
+    default: false,
+    firstAccount: true,
+    name: accountName,
+    address: account.addressRaw.address,
+    addresspretty: account.address,
+    public: account.public,
+    pk: account.private,
+    encrypted: first_account.encrypted,
+    iv: first_account.iv,
+    network: networkType,
+  });
+  // update currentLoggedInWallet
+  currentWallet.value = wallet;
+  sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
+  // update localStorage
+  try {
+    localStorage.setItem(
+      config.localStorage.walletKey,
+      JSON.stringify(state.wallets)
+    );
+  } catch (err) {
+    if (config.debug) {
+      console.error("updateAccountState error caught", err);
+    }
+    return 0;
+  }
+  return 1;
+}
+
+function updateAccountName(name, oriName){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  const exist_account = wallet.accounts.find((element) => element.name == name);
+  const exist_account_index = wallet.accounts.findIndex((element) => element.name == name);
+  const account_index = wallet.accounts.findIndex((element) => element.name == oriName);
+  if(exist_account && (exist_account_index != account_index)){
+    return 2;
+  }
+  const account = wallet.accounts.find((element) => element.name == oriName);
+  if (!account) {
+    if (config.debug) {
+      console.error("updateAccountName triggered with invalid account name");
+    }
+    return -1;
+  }
+  account.name = name;
+  sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
+  // update localStorage
+  try {
+    localStorage.setItem(
+      config.localStorage.walletKey,
+      JSON.stringify(state.wallets)
+    );
+  } catch (err) {
+    if (config.debug) {
+      console.error("updateAccountState error caught", err);
+    }
+    return 0;
+  }
+  return 1;
+}
+
+function setAccountDefault(address){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  wallet.accounts.map(x => {x.default = false;});
+  // set account with the address as default
+  const account = wallet.accounts.find((element) => element.address == address);
+  account.default = true;
+  currentWallet.value = wallet;
+  sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
+  // update localStorage
+  try {
+    localStorage.setItem(
+      config.localStorage.walletKey,
+      JSON.stringify(state.wallets)
+    );
+  } catch (err) {
+    if (config.debug) {
+      console.error("updateAccountState error caught", err);
+    }
+    return 0;
+  }
+  return 1;
+}
+
+function getAccDetails(name){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  const account = wallet.accounts.find((element) => element.name == name);
+  if (!account) {
+    if (config.debug) {
+      console.error("getAccDetails triggered with invalid account name");
+    }
+    return -1;
+  }
+  return account;
+}
+
+function deleteAccount(password, address) {
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  const accountIndex = wallet.accounts.findIndex((element) => element.address == address);
+
+  const verify = verifyWalletPassword(state.currentLoggedInWallet.name, password);
+  if(verify<1){
+    return verify;
+  }
+  // end verify with password
+
+  if (accountIndex < 0) {
+    if (config.debug) {
+      console.error("deleteAccount triggered with non-existing account name");
+    }
+    console.log('hm');
+    return -1;
+  }
+  if (wallet.accounts.splice(accountIndex, 1).length != 0) {
+    currentWallet.value = wallet;
+    sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
+    localStorage.setItem(
+      config.localStorage.walletKey,
+      JSON.stringify(state.wallets)
+    );
+    return 1;
+  }
+  return -1;
 }
 
 export const appStore = readonly({
@@ -304,10 +503,20 @@ export const appStore = readonly({
   explorerBlockHttp,
   explorerPublicKeyHttp,
   toggleDarkTheme,
+  importWallet,
   addNewWallet,
   deleteWallet,
   loginToWallet,
   logoutOfWallet,
   getWalletByName,
   getAccountByWallet,
+  checkFromSession,
+  verifyWalletPassword,
+  updateAccountState,
+  setAccountDefault,
+  getAccDetails,
+  updateAccountName,
+  deleteAccount
 });
+
+

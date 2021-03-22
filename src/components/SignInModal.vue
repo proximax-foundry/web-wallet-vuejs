@@ -74,7 +74,6 @@ export default{
     );
 
     const login = () => {
-      // loading.value = true;
       // if (disableLogin.value) {
       //   err.value = "Please enter a valid password";
       //   loading.value = false;
@@ -89,8 +88,6 @@ export default{
       } else {
         router.push({ path: "/dashboard" });
       }
-
-      // loading.value = false;
     };
 
     return{
