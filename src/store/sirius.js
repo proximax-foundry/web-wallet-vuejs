@@ -7,6 +7,7 @@ import {
   Listener,
   NetworkHttp,
   NodeHttp,
+  Account
 } from "tsjs-xpx-chain-sdk";
 
 const config = require("@/../config/config.json");
@@ -143,6 +144,31 @@ function stopChainWSListener() {
   }
 }
 
+
+/* Account section - benjamin lai */
+function createNewAccount(networkType){
+  const account = Account.generateNewAccount(networkType);
+  const account_para = {
+    addressRaw: account.address,
+    address: account.address.pretty(),
+    public: account.publicKey,
+    private: account.privateKey
+  }
+  return account_para;
+}
+
+function createNewAccountPrivateKey(pk, networkType){
+  const account = Account.createFromPrivateKey(pk, networkType);
+  const account_para = {
+    addressRaw: account.address,
+    address: account.address.pretty(),
+    public: account.publicKey,
+    private: account.privateKey
+  }
+  return account_para;
+}
+
+
 export const siriusStore = readonly({
   state,
   accountHttp,
@@ -155,4 +181,6 @@ export const siriusStore = readonly({
   selectNewChainNode,
   stopChainWSListener,
   getNetworkByType,
+  createNewAccount,
+  createNewAccountPrivateKey
 });

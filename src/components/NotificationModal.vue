@@ -15,33 +15,45 @@
         </div>
       </div>
     </transition>
-    <div @click="close();" v-if="toggleModal" class="fixed inset-0 bg-opacity-30 bg-blue-primary"></div>
+    <div @click="close();" v-if="toggleModal" :class="`fixed inset-0 bg-opacity-30 ${bgColor}`"></div>
   </div>
 </template>
 
 <script>
+import { computed, getCurrentInstance } from 'vue';
 
 export default{
   name: 'SignInModal',
-  props:['name', 'toggleModal', 'msg', 'time'],
-  data() {
-    return {
+  props:['name', 'toggleModal', 'msg', 'time', 'notiType'],
 
-    };
-  },
+  setup(p){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
-  mounted(){
-    if(this.toggleModal){
+    const bgColor = computed(()=>{
+      if(p.notiType == 'warn'){
+        return 'bg-yellow-200';
+      }else if(p.notiType == 'err'){
+        return 'bg-pink-200';
+      }else{
+        return 'bg-blue-primary';
+      }
+    });
+
+    if(p.toggleModal){
       setTimeout(() => {
-        this.emitter.emit("CLOSE_NOTIFICATION", false);
-      }, this.time);
+        emitter.emit("CLOSE_NOTIFICATION", false);
+      }, p.time);
     }
-  },
 
-  methods: {
-    close: () => {
-      this.emitter.emit("CLOSE_NOTIFICATION", false);
+    const close= () => {
+      emitter.emit("CLOSE_NOTIFICATION", false);
     }
+
+    return{
+      bgColor,
+      close,
+    };
   },
 }
 </script>

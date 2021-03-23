@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-outline" :class="borderColor">
+    <div class="text-outline bg-white" :class="borderColor">
       <div class="text-icon-outline text-icon">
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
       </div>
@@ -32,7 +32,7 @@ export default{
       inputPassword: "",
       showPassword: false,
       inputType: 'password',
-      borderColor: 'border border-grey-100',
+      borderColor: 'border border-grey-300',
       eyeIcon: 'eye',
       pswdErr: false,
     };
@@ -56,7 +56,7 @@ export default{
         this.borderColor = 'border-2 border-red-primary';
         this.pswdErr = true;
       }else{
-        this.borderColor = 'border-2 border-gray-100';
+        this.borderColor = 'border-2 border-gray-300';
         this.pswdErr = false;
       }
     },
@@ -65,7 +65,7 @@ export default{
     this.emitter.on("CLEAR_PASSWORD", payload => {
       this.inputPassword = payload;
       this.pswdErr = false;
-      this.borderColor = 'border border-gray-100';
+      this.borderColor = 'border border-gray-300';
     });
   }
 }
