@@ -42,8 +42,7 @@
     "sass-loader": "^7.3.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.3",
     "tsjs-xpx-chain-sdk": "^0.8.1",
-    "vue-cli-plugin-fontawesome": "~0.3.1",
-    "vue-cryptojs": "^2.1.5"
+    "vue-cli-plugin-fontawesome": "~0.3.1"
   },
   "eslintConfig": {
     "root": true,
