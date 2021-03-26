@@ -56,7 +56,7 @@ export default {
     const primaryAccount = computed(
       () => {
           if (appStore.state.currentLoggedInWallet) {
-            return appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).addresspretty;
+            return appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).address;
           }else{
             return 0;
           }

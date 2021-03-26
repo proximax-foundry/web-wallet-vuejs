@@ -6,8 +6,8 @@
       </div>
       <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" :type="inputType" class="text-placeholder" :placeholder="placeholder" @click="clickInputPassword()" @blur="blurInputPassword()" autocomplete="off">
       <div class="inline-block flex-none mr-2">
-        <font-awesome-icon icon="eye" class="text-gray-400 relative" @click="hideShowPassword();" v-if="!showPassword"></font-awesome-icon>
-        <font-awesome-icon icon="eye-slash" class="text-gray-400 relative" @click="hideShowPassword();" v-if="showPassword"></font-awesome-icon>
+        <font-awesome-icon icon="eye" class="text-gray-400 relative cursor-pointer" @click="hideShowPassword();" v-if="!showPassword"></font-awesome-icon>
+        <font-awesome-icon icon="eye-slash" class="text-gray-400 relative cursor-pointer" @click="hideShowPassword();" v-if="showPassword"></font-awesome-icon>
       </div>
     </div>
     <div class="h-3 mb-2"><div class="error error-password text-left" v-if="pswdErr || showError">{{ errorMessage }}</div></div>

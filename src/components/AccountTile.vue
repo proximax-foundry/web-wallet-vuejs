@@ -29,7 +29,7 @@
                 <router-link :to="`/details-account/${account.name}`" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Edit</router-link>
                 <a v-if="!account.default" href="#" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="setAsDefaultAccount(account.address)">Make Default</a>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300">Make Default</div>
-                <a href="#" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="exportAccount(account.name)">Export</a>
+                <a href="#" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="exportWallet()">Export</a>
                 <router-link :to="`/delete-account/${account.name}`" v-if="!account.default" href="#" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Delete</router-link>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300">Delete</div>
                 <router-link :to="`/convert-account-multisign/${account.name}`" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">MultiSig</router-link>
@@ -46,6 +46,7 @@
 import { inject, getCurrentInstance } from "vue";
 import CryptoJS from 'crypto-js';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
+import { copyKeyFunc } from '../util/functions.js';
 
 export default{
   components: { FontAwesomeIcon },
@@ -56,18 +57,7 @@ export default{
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    // const show = ref(false);
-    const copy = (id) => {
-      // Credits: https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
-      var copyText = document.getElementById(id);
-      /* Select the text field */
-      copyText.select();
-      copyText.setSelectionRange(0, 99999); /* For mobile devices */
-      /* Copy the text inside the text field */
-      document.execCommand("copy");
-      /* Alert the copied text */
-      alert("Copied " + id + ": " + copyText.value);
-    };
+    const copy = (id) => copyKeyFunc(id);
 
     const setAsDefaultAccount = (add) => {
       if(appStore.setAccountDefault(add)){
@@ -75,19 +65,11 @@ export default{
       }
     };
 
-    const exportAccount = (name) => {
-      const acc = appStore.getAccDetails(name);
-      const accounts = [];
-      accounts.push(acc);
-      const wallet = {
-        name: `${appStore.state.currentLoggedInWallet.name}_${acc.name}`,
-        accounts
-      };
-
-      const wordArray = CryptoJS.enc.Utf8.parse(JSON.stringify(wallet));
-      const file = CryptoJS.enc.Base64.stringify(wordArray);
-      // Word array to base64
-      const now = Date.now();
+    const exportWallet = () => {
+      const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
+      let wordArray = CryptoJS.enc.Utf8.parse(JSON.stringify(wallet));
+      let file = CryptoJS.enc.Base64.stringify(wordArray);
+      const now = Date.now()
       const date = new Date(now);
       const year = date.getFullYear();
       const month = ((date.getMonth() + 1) < 10) ? `0${(date.getMonth() + 1)}` : date.getMonth() + 1;
@@ -121,7 +103,7 @@ export default{
       copy,
       showHideMenu,
       setAsDefaultAccount,
-      exportAccount
+      exportWallet
     }
   },
 }

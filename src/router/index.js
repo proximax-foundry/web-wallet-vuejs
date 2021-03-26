@@ -123,15 +123,6 @@ const routes = [
     }
   },
   {
-    path: '/delete-account/:name',
-    name: 'ViewDeleteAccount',
-    props: true,
-    component: () => import('@/views/ViewDeleteAccount.vue'),
-    meta: {
-      title: "Delete account",
-    }
-  },
-  {
     path: '/convert-account-multisign/:name',
     name: 'ViewConvertAccountMultisig',
     props: true,
@@ -148,15 +139,30 @@ const routes = [
       title: "Export wallet",
     }
   },
-  // {
-  //   path: '/delete-account-confirm/:name',
-  //   name: 'ViewDeleteAccountConfirm',
-  //   props: true,
-  //   component: () => import('@/views/ViewDeleteAccountConfirm.vue'),
-  //   meta: {
-  //     title: "Confirm delete account?",
-  //   }
-  // },
+  {
+    path: '/export-wallet',
+    name: 'ViewExportWallet',
+    component: () => import('@/views/ViewExportWallet.vue'),
+    meta: {
+      title: "Export wallet",
+    }
+  },
+  {
+    path: '/create-transfer',
+    name: 'ViewCreateTransfer',
+    component: () => import('@/views/ViewCreateTransfer.vue'),
+    meta: {
+      title: "Create Transfer",
+    }
+  },
+  {
+    path: '/add-contacts',
+    name: 'ViewAddContacts',
+    component: () => import('@/views/ViewAddContacts.vue'),
+    meta: {
+      title: "Add Contacts",
+    }
+  },
 ]
 // createdAccount
 
