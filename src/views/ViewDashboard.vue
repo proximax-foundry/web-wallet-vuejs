@@ -4,7 +4,7 @@
       <div class="font-bold">Primary_Account <span class="text-xs italic text-blue-700">Current default</span></div>
       <div class="text-xs my-2">{{ primaryAccount }} <img src="../assets/img/icon-copy-clipboard-gray-proximax-sirius-wallet.svg" class="w-5 inline mx-2"><img src="../assets/img/icon-qr-code.svg" class="w-5 inline"></div>
       <div class="text-center md:text-left">
-        <div class="inline-block mr-4"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"><span class="text-xs">100,000.000000 XPX</span></div>
+        <div class="inline-block mr-4"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"><span class="text-xs">{{ primaryAccountBalance }} XPX</span></div>
         <div class="inline-block"><img src="../assets/img/icon-usd-blue.svg" class="w-5 inline mr-1"><span class="text-sm">USD 204.451</span></div>
       </div>
     </div>
@@ -63,8 +63,19 @@ export default {
       }
     );
 
+    const primaryAccountBalance = computed(
+      () => {
+          if (appStore.state.currentLoggedInWallet) {
+            return appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).amount;
+          }else{
+            return 0;
+          }
+      }
+    );
+
     return {
       primaryAccount,
+      primaryAccountBalance,
     };
   }
 }

@@ -179,6 +179,7 @@ function addNewWallet(walletName, password, networkType, privateKey) {
     encrypted: wallet.encryptedPrivateKey.encryptedKey,
     iv: wallet.encryptedPrivateKey.iv,
     network: wallet.network,
+    amount: '0.000000',
   });
 
   state.wallets.push(newWallet);
@@ -299,7 +300,7 @@ function checkFromSession(){
   }
 }
 
-function loginToWallet(walletName, password) {
+function loginToWallet(walletName, password, accountHttp, namespaceHttp) {
   const wallet = getWalletByName(walletName);
   if (!wallet) {
     if (config.debug) {
@@ -339,6 +340,7 @@ function loginToWallet(walletName, password) {
   ) {
     return 0;
   }
+
   if (
     !isPrivateKeyValid(common.privateKey) ||
     !Account.createFromPrivateKey(
@@ -348,7 +350,8 @@ function loginToWallet(walletName, password) {
   ) {
     return 0;
   }
-
+  // get latest xpx amount
+  getXPXBalance(walletName, accountHttp, namespaceHttp);
   currentWallet.value = wallet;
   // set current wallet info to sessionStorage
   sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
@@ -385,6 +388,7 @@ function updateAccountState(account, networkType, accountName){
     encrypted: first_account.encrypted,
     iv: first_account.iv,
     network: networkType,
+    amount: '0.000000',
   });
   // update currentLoggedInWallet
   currentWallet.value = wallet;
@@ -547,8 +551,7 @@ function saveContact(contactName, contactAddress){
   }
 }
 
-function fetchAccountInfo(accountHttp){
-  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+function fetchAccountInfo(wallet, accountHttp){
   const addresses = [];
   wallet.accounts.forEach((element) => {
     addresses.push(Address.createFromPublicKey(element.public, element.network));
@@ -559,24 +562,24 @@ function fetchAccountInfo(accountHttp){
       accountHttp.getAccountsInfo(addresses).subscribe(accountInfo => {
         resolve(accountInfo);
       }, error => {
-        console.error(error);
+        console.warn(error);
         reject(false);
       });
     }catch(err){
-      console.log(err);
+      console.warn(err);
       reject(false);
     }
   });
 }
 
 // get XPX balance for each account in the current logged in wallet
-function getXPXBalance(accountHttp, namespaceHttp){
+function getXPXBalance(walletName, accountHttp, namespaceHttp){
 
-  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  const wallet = getWalletByName(walletName);
   const xpxNamespace = new sdk.NamespaceId('prx.xpx');
   let xpxAmount = 0;
 
-  fetchAccountInfo(accountHttp).then((res)=>{
+  fetchAccountInfo(wallet, accountHttp).then((res)=>{
     wallet.accounts.forEach((add) => {
       const address = res.find((element) => element.address.address == add.addressraw);
       if(address){
@@ -586,12 +589,10 @@ function getXPXBalance(accountHttp, namespaceHttp){
               xpxAmount = mosaic.amount.compact() / Math.pow(10, sdk.XpxMosaicProperties.MOSAIC_PROPERTIES.divisibility);
             }
           }
-          console.log('Amount: '+xpxAmount);
-          add.amount = xpxAmount;
+          add.amount = String(parseFloat(xpxAmount).toFixed(6));
         });
       }else{
-        console.log('0 amount')
-        add.amount = 0;
+        add.amount = '0.000000';
       }
     });
   });
@@ -609,7 +610,8 @@ function getFirstAccAdd(){
 
 function getFirstAccBalance(){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
-  return parseFloat(wallet.accounts[0].amount).toFixed(6);
+  console.log(wallet);
+  return wallet.accounts[0].amount;
 }
 
 function displayBalance(){
@@ -619,7 +621,7 @@ function displayBalance(){
     wallet.accounts.forEach((element)=> {
       amount = element.amount;
     });
-    return parseFloat(amount).toFixed(6);
+    return amount;
   }
 }
 
@@ -644,6 +646,42 @@ function getContact(){
   return contact;
 }
 
+function verifyPublicKey(add, accountHttp){
+  const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
+  let address;
+  address = Address.createFromRawAddress(add.toLocaleUpperCase());
+  return new Promise((resolve) => {
+    const accountInfo = accountHttp.getAccountInfo(address);
+    accountInfo.subscribe(
+      (acc) => {
+        if (acc.publicKey === invalidPublicKey) {
+          console.warn(`The receiver's public key is not valid for sending encrypted messages`);
+          resolve(true)
+        }
+        resolve(false);
+      },
+      (error) => {
+        console.warn('Err: ' + error);
+        resolve(true);
+      }
+    );
+  });
+}
+
+function verifyRecipientInfo(recipient,accountHttp) {
+  return new Promise((resolve, reject) => {
+    verifyPublicKey(recipient, accountHttp).then((res) => {
+      resolve(res);
+    }).catch(function(error) {
+      // handle error
+      reject("Error is: " + error);
+    })
+  });
+}
+
+
+
+
 export const appStore = readonly({
   name,
   version: require("@/../package.json").version,
@@ -667,12 +705,12 @@ export const appStore = readonly({
   deleteAccount,
   getCurrentAdd,
   saveContact,
-  getXPXBalance,
   getContact,
   displayBalance,
   getFirstAccName,
   getFirstAccAdd,
   getFirstAccBalance,
+  verifyRecipientInfo,
 });
 
 

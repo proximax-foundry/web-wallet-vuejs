@@ -47,6 +47,7 @@ export default{
 
   setup(){
     const appStore = inject("appStore");
+    const siriusStore = inject("siriusStore");
     const router = useRouter();
     const err = ref("");
     const walletPassword = ref("");
@@ -80,7 +81,7 @@ export default{
       //   return;
       // }
 
-      var result = appStore.loginToWallet(selectedWallet.value, walletPassword.value);
+      var result = appStore.loginToWallet(selectedWallet.value, walletPassword.value, siriusStore.accountHttp, siriusStore.namespaceHttp);
       if (result == -1) {
         err.value = "Invalid wallet name";
       } else if (result == 0) {

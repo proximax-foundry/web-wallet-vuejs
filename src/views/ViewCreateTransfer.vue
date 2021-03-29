@@ -26,7 +26,7 @@
           <SelectInput v-if="showContactSelection" placeholder="Contact" errorMessage="" v-model="selectContact" :options="contact" @default-selected="selectContact=0" @show-selection="updateAdd" />
           <div class="flex">
             <div class="flex-grow mr-5">
-              <TextInput placeholder="Recipient" errorMessage="Invalid Recipient" v-model="recipient" icon="wallet" />
+              <TextInput placeholder="Recipient" errorMessage="Invalid Recipient" :showError="showAddressError" v-model="recipient" icon="wallet" />
             </div>
             <div class="flex-none">
               <div class="rounded-full bg-gray-300 w-14 h-14 cursor-pointer relative" style="top: -5px;" @click="showContactSelection = !showContactSelection">
@@ -50,6 +50,11 @@
             <input id="hexMsg" type="radio" name="msgOption" value="hex" v-model="msgOption" @change="clearMsg()" /><label for="hexMsg" class="cursor-pointer font-bold ml-4">Hexadecimal</label>
           </div>
         </div>
+        <div class="mb-5" v-if="!encryptedMsgDisable">
+          <div class="rounded-2xl bg-gray-100 p-5">
+            <input id="encryptedMsg" type="checkbox" value="encryptedMsg" v-model="encryptedMsg" /><label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Encrypted</label>
+          </div>
+        </div>
         <TextareaInput placeholder="Message" errorMessage="Invalid message" v-model="messageText" icon="comment" class="mt-5" :msgOpt="msgOption" />
         <div class="rounded-2xl bg-gray-100 p-5 mb-5">
           <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Unconfirmed/Recommended Fee:  0.042750 XPX</div>
@@ -64,7 +69,7 @@
   </div>
 </template>
 <script>
-import { computed, ref, inject, getCurrentInstance } from 'vue';
+import { computed, ref, inject, getCurrentInstance, watch } from 'vue';
 // import { useRouter } from "vue-router";
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
@@ -95,18 +100,34 @@ export default {
     const messageText = ref('');
     const walletPassword = ref('');
     const err = ref('');
-    const showPasswdError = ref(false);
     const showMenu = ref(false);
+    const encryptedMsg = ref('');
+
+    const addressPattern = "^[0-9A-Za-z-]{40,46}$";
+    const showAddressError = computed(()=>{
+      if(recipient.value != ''){
+        if(recipient.value.match(addressPattern)){
+          return false;
+        }else{
+          return true;
+        }
+      }else{
+        return false;
+      }
+    });
+
     const passwdPattern = "^[^ ]{8,}$";
+    const showPasswdError = ref(false);
     const disableCreate = computed(() => !(
       walletPassword.value.match(passwdPattern)
     ));
     // get balance
-    appStore.getXPXBalance(siriusStore.accountHttp, siriusStore.namespaceHttp);
-
     const selectedAccName = ref(appStore.getFirstAccName());
     const selectedAccAdd = ref(appStore.getFirstAccAdd());
-    const balance = ref(appStore.getFirstAccBalance());
+    // const balance = ref(appStore.getFirstAccBalance());
+    const balance = ref('0.000000');
+    balance.value = appStore.getFirstAccBalance();
+
     const accounts = computed( () => appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts);
     const sendXPX = ref('0.000000');
     const moreThanOneAccount = computed(()=> (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false);
@@ -114,10 +135,22 @@ export default {
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.addressraw;
-      balance.value = parseFloat(i.amount).toFixed(6);
+      balance.value = i.amount;
+      console.log(balance.value);
       (balance.value==0)?showBalanceErr.value = true:showBalanceErr.value = false;
       showMenu.value = !showMenu.value;
     }
+
+    const encryptedMsgDisable = ref(true);
+    // const encryptedMsgDisable = computed(()=> {
+    //   if(recipient.value.match(addressPattern)){
+    //     // appStore.verifyRecipientInfo(recipient.value, siriusStore.accountHttp).then((res)=>console.log(res))
+    //     console.log(appStore.verifyRecipientInfo(recipient.value, siriusStore.accountHttp));
+    //     return appStore.verifyRecipientInfo(recipient.value, siriusStore.accountHttp);
+    //   }else{
+    //     return true;
+    //   }
+    // });
 
     const addMosaicsButton = computed(() => {
       return true;
@@ -142,12 +175,23 @@ export default {
       recipient.value = e;
     };
 
+    watch(recipient, (add) => {
+      if(add.match(addressPattern)){
+        appStore.verifyRecipientInfo(recipient.value, siriusStore.accountHttp).then((res)=>{
+          encryptedMsgDisable.value = res;
+        });
+      }else{
+        encryptedMsgDisable.value = true;
+      }
+    })
+
     return {
       appStore,
       moreThanOneAccount,
       showMenu,
       selectedAccName,
       selectedAccAdd,
+      showAddressError,
       balance,
       showBalanceErr,
       err,
@@ -167,6 +211,8 @@ export default {
       clearMsg,
       accounts,
       changeSelection,
+      encryptedMsgDisable,
+      encryptedMsg,
     }
   },
 
