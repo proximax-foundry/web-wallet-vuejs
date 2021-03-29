@@ -1,12 +1,15 @@
 import { computed, reactive, ref, readonly } from "vue";
+
 import {
   Account,
+  Address,
   Convert,
   Crypto,
   Password,
   SimpleWallet,
   WalletAlgorithm,
 } from "tsjs-xpx-chain-sdk";
+const sdk = require('tsjs-xpx-chain-sdk');
 
 const config = require("@/../config/config.json");
 
@@ -158,6 +161,7 @@ function addNewWallet(walletName, password, networkType, privateKey) {
         ? walletName.split(" ").join("_")
         : walletName,
     accounts: new Array(),
+    contacts: new Array(),
   };
 
   const account = wallet.open(encryptedPasswd);
@@ -168,8 +172,8 @@ function addNewWallet(walletName, password, networkType, privateKey) {
     default: true,
     firstAccount: true,
     name: "Primary",
-    address: wallet.address.address,
-    addresspretty: account.address.pretty(),
+    addressraw: wallet.address.address,
+    address: account.address.pretty(),
     public: account.publicKey,
     pk: account.privateKey,
     encrypted: wallet.encryptedPrivateKey.encryptedKey,
@@ -374,8 +378,8 @@ function updateAccountState(account, networkType, accountName){
     default: false,
     firstAccount: true,
     name: accountName,
-    address: account.addressRaw.address,
-    addresspretty: account.address,
+    addressraw: account.addressRaw.address,
+    address: account.address,
     public: account.public,
     pk: account.private,
     encrypted: first_account.encrypted,
@@ -496,6 +500,150 @@ function deleteAccount(password, address) {
   return -1;
 }
 
+function getCurrentAdd(walletName){
+  const wallet = getWalletByName(walletName);
+  const account = wallet.accounts.find((element) => element.firstAccount);
+  return account.address;
+}
+
+function saveContact(contactName, contactAddress){
+  contactAddress = contactAddress.split('-').join('')
+  // verify address and name
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  // check for existing account address in wallet
+  const accountAddIndex = wallet.accounts.findIndex((element) => element.address == contactAddress);
+  // check for existing account name in wallet
+  const accountNameIndex = wallet.accounts.findIndex((element) => element.name.toLowerCase() == contactName.toLowerCase());
+  const contactAddIndex = wallet.contacts.findIndex((element) => element.address == contactAddress);
+  const contactNameIndex = wallet.contacts.findIndex((element) => element.name.toLowerCase() == contactName.toLowerCase());
+  const errMsg = ref('');
+
+  if(contactAddIndex >= 0 || accountAddIndex >= 0 || contactNameIndex >= 0 || accountNameIndex >= 0 ){
+    errMsg.value = 'Address or Name already exist';
+  }
+
+  if(!errMsg.value){
+    // add into contact list
+    wallet.contacts.push({
+      name: contactName,
+      address: contactAddress,
+    });
+    sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
+    // update localStorage
+    try {
+      localStorage.setItem(
+        config.localStorage.walletKey,
+        JSON.stringify(state.wallets)
+      );
+    } catch (err) {
+      if (config.debug) {
+        console.error("saveContact error caught", err);
+      }
+      return 0;
+    }
+    return true;
+  }else{
+    return errMsg.value;
+  }
+}
+
+function fetchAccountInfo(accountHttp){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  const addresses = [];
+  wallet.accounts.forEach((element) => {
+    addresses.push(Address.createFromPublicKey(element.public, element.network));
+  });
+
+  return new Promise((resolve, reject) => {
+    try{
+      accountHttp.getAccountsInfo(addresses).subscribe(accountInfo => {
+        resolve(accountInfo);
+      }, error => {
+        console.error(error);
+        reject(false);
+      });
+    }catch(err){
+      console.log(err);
+      reject(false);
+    }
+  });
+}
+
+// get XPX balance for each account in the current logged in wallet
+function getXPXBalance(accountHttp, namespaceHttp){
+
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  const xpxNamespace = new sdk.NamespaceId('prx.xpx');
+  let xpxAmount = 0;
+
+  fetchAccountInfo(accountHttp).then((res)=>{
+    wallet.accounts.forEach((add) => {
+      const address = res.find((element) => element.address.address == add.addressraw);
+      if(address){
+        namespaceHttp.getLinkedMosaicId(xpxNamespace).subscribe((xpxMosaicId)=>{
+          for(const mosaic of address.mosaics){
+            if(mosaic.id.toHex() === xpxMosaicId.toHex() ){
+              xpxAmount = mosaic.amount.compact() / Math.pow(10, sdk.XpxMosaicProperties.MOSAIC_PROPERTIES.divisibility);
+            }
+          }
+          console.log('Amount: '+xpxAmount);
+          add.amount = xpxAmount;
+        });
+      }else{
+        console.log('0 amount')
+        add.amount = 0;
+      }
+    });
+  });
+}
+
+function getFirstAccName(){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  return wallet.accounts[0].name;
+}
+
+function getFirstAccAdd(){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  return wallet.accounts[0].addressraw;
+}
+
+function getFirstAccBalance(){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  return parseFloat(wallet.accounts[0].amount).toFixed(6);
+}
+
+function displayBalance(){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  if(wallet.accounts.length == 1){
+    let amount = 0;
+    wallet.accounts.forEach((element)=> {
+      amount = element.amount;
+    });
+    return parseFloat(amount).toFixed(6);
+  }
+}
+
+function getContact(){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  var contact = [];
+  var accountCount = wallet.accounts.length;
+  wallet.accounts.forEach((element, index) => {
+    contact.push({
+      val: element.addressraw,
+      text: element.name + ' - Owner account',
+      id: (index + 1),
+    });
+  });
+  wallet.contacts.forEach((element, index) => {
+    contact.push({
+      val: element.address,
+      text: element.name + ' - Contact',
+      id: (accountCount + index + 1),
+    });
+  });
+  return contact;
+}
+
 export const appStore = readonly({
   name,
   version: require("@/../package.json").version,
@@ -516,7 +664,15 @@ export const appStore = readonly({
   setAccountDefault,
   getAccDetails,
   updateAccountName,
-  deleteAccount
+  deleteAccount,
+  getCurrentAdd,
+  saveContact,
+  getXPXBalance,
+  getContact,
+  displayBalance,
+  getFirstAccName,
+  getFirstAccAdd,
+  getFirstAccBalance,
 });
 
 

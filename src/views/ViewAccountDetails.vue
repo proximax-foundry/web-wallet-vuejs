@@ -101,8 +101,9 @@
 import { ref, inject } from 'vue';
 import { useRouter } from "vue-router";
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
-import TextInput from '@/components/TextInput.vue'
-import PasswordInput from '@/components/PasswordInput.vue'
+import TextInput from '@/components/TextInput.vue';
+import PasswordInput from '@/components/PasswordInput.vue';
+import { copyKeyFunc } from '../util/functions.js';
 
 export default {
   name: 'ViewAccountDetails',
@@ -125,20 +126,8 @@ export default {
     const walletPasswdSwap = ref("");
     const showPwSwap = ref(false);
     const router = useRouter();
+    const copy = (id) => copyKeyFunc(id);
 
-    const copy = (id) => {
-      // Credits: https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
-      var copyText = document.getElementById(id);
-      /* Select the text field */
-      copyText.select();
-      copyText.setSelectionRange(0, 99999); /* For mobile devices */
-
-      /* Copy the text inside the text field */
-      document.execCommand("copy");
-
-      /* Alert the copied text */
-      alert("Copied " + id + ": " + copyText.value);
-    };
     const getAcccountDetails = () => {
       return appStore.getAccDetails(p.name);
     };

@@ -74,6 +74,7 @@
 <script>
 import { ref } from 'vue';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
+import { copyKeyFunc } from '../util/functions.js';
 
 export default {
   name: 'ViewCreatedAccount',
@@ -96,27 +97,14 @@ export default {
     const accountPublicKey = ref(p.publicKey);
     const accountPrivateKey = ref(p.privateKey);
     const accountAddress = ref(p.address);
-
-    const copy = (id) => {
-      // Credits: https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
-      var copyText = document.getElementById(id);
-      /* Select the text field */
-      copyText.select();
-      copyText.setSelectionRange(0, 99999); /* For mobile devices */
-
-      /* Copy the text inside the text field */
-      document.execCommand("copy");
-
-      /* Alert the copied text */
-      alert("Copied " + id + ": " + copyText.value);
-    };
+    const copy = (id) => copyKeyFunc(id);
 
     return {
+      copy,
       accountName,
       accountPublicKey,
       accountPrivateKey,
       accountAddress,
-      copy
     };
   },
 

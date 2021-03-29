@@ -44,6 +44,7 @@ import { ref, inject } from 'vue';
 import { useRouter } from "vue-router";
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import ConfirmDeleteAccountModal from '@/components/ConfirmDeleteAccountModal.vue';
+import { copyKeyFunc } from '../util/functions.js';
 
 export default {
   name: 'ViewDeleteAccount',
@@ -60,20 +61,8 @@ export default {
     const accountName = ref(p.name);
     const accountNameDisplay = ref(p.name);
     const router = useRouter();
+    const copy = (id) => copyKeyFunc(id);
 
-    const copy = (id) => {
-      // Credits: https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
-      var copyText = document.getElementById(id);
-      /* Select the text field */
-      copyText.select();
-      copyText.setSelectionRange(0, 99999); /* For mobile devices */
-
-      /* Copy the text inside the text field */
-      document.execCommand("copy");
-
-      /* Alert the copied text */
-      alert("Copied " + id + ": " + copyText.value);
-    };
     const getAcccountDetails = () => {
       return appStore.getAccDetails(p.name);
     };

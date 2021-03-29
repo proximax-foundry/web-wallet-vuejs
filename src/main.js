@@ -10,16 +10,27 @@ import "primeicons/primeicons.css";
 
 // Import Font Awesome Icons
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload, faCoins, faComment } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
-library.add(faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload);
+
+// import { appStore } from "./store/app";
+// import { siriusStore } from "./store/sirius";
+
+library.add(faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload, faCoins, faComment);
 const app = createApp(App);
+
 const emitter = mitt();
+app.config.globalProperties.emitter = emitter;
 app.use(router).mount('#app');
+app.use(PrimeVue);
+
+// app.provide(appStore);
+// app.provide(siriusStore);
+
 
 // Use Components
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.component(VuePassword);
-app.config.globalProperties.emitter = emitter;
-app.use(PrimeVue);
+
+
