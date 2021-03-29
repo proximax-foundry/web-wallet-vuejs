@@ -6,7 +6,7 @@
       <p class="mt-6">Accounts available in this wallet:</p>
       <div class="bg-gray-200 rounded-2xl text-left p-5 w-full lg:w-9/12 inline-block mt-5" v-if="accountsList.length > 0">
         <div class="font-bold">Primary</div>
-        <div v-for="i in accountsList" :key="i.addresspretty">{{ i.addresspretty }}</div>
+        <div v-for="i in accountsList" :key="i.address">{{ i.address }}</div>
       </div>
       <div class="my-5">Would you like to permanently delete this Sirius Wallet?</div>
       <div class="mt-10">

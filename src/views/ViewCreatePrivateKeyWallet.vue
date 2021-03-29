@@ -40,7 +40,7 @@
               id="address"
               class="text-sm w-full outline-none bg-gray-100 z-10"
               type="text"
-              :value="newWallet.accounts[0].addresspretty"
+              :value="newWallet.accounts[0].address"
             />
           </div>
           <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
@@ -102,7 +102,7 @@ import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import SelectInput from '@/components/SelectInput.vue';
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
-
+import { copyKeyFunc } from '../util/functions.js';
 
 export default {
   name: 'ViewCreateNewWallet',
@@ -133,6 +133,7 @@ export default {
     const showPasswdError = ref(false);
     const privKeyPattern = "^(0x|0X)?[a-fA-F0-9].{63,65}$";
     const passwdPattern = "^[^ ]{8,}$";
+    const copy = (id) => copyKeyFunc(id);
     const disableCreate = computed(
       () => !(
         walletName.value !== "" &&
@@ -181,20 +182,6 @@ export default {
       emitter.emit("CLEAR_SELECT", 0);
       emitter.emit("CLEAR_TEXT", "");
       emitter.emit("CLEAR_PASSWORD", "");
-    };
-
-    const copy = (id) => {
-      // Credits: https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
-      var copyText = document.getElementById(id);
-      /* Select the text field */
-      copyText.select();
-      copyText.setSelectionRange(0, 99999); /* For mobile devices */
-
-      /* Copy the text inside the text field */
-      document.execCommand("copy");
-
-      /* Alert the copied text */
-      alert("Copied " + id + ": " + copyText.value);
     };
 
     return {

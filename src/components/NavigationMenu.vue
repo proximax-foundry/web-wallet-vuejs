@@ -2,10 +2,10 @@
   <div class="relative text-center">
     <font-awesome-icon @click="showhideMenu();" icon="bars" :class="menuColorClass" class="menuBar absolute w-4 cursor-pointer" style="right: 7px; top: 9px;" v-if="showBar"></font-awesome-icon>
     <nav class="navbar" ref="navbarRef" v-if="showMenu">
-      <router-link class="col" class-active="active" to="/dashboard" exact>Dashboard</router-link>
-      <router-link class="col" class-active="active" to="/" exact>Transfer</router-link>
-      <router-link class="col" class-active="active" to="/view-all-accounts" exact>Accounts</router-link>
-      <router-link class="col" class-active="active" to="/export-wallet" exact>Services</router-link>
+      <router-link class="col" class-active="active" to="/dashboard">Dashboard</router-link>
+      <router-link class="col" class-active="active" to="/create-transfer">Transfer</router-link>
+      <router-link class="col" class-active="active" to="/view-all-accounts" :class="{'router-link-active': subIsActive(['/view-all-accounts', '/select-type-creation-account', '/create-account', '/import-account', '/created-account', '/convert-account-multisign'])}">Accounts</router-link>
+      <router-link class="col" class-active="active" to="/export-wallet">Services</router-link>
     </nav>
     <nav class="navbar h-9" v-else>
     </nav>
@@ -44,6 +44,12 @@ export default{
         this.showBar = false;
         this.showMenu = true;
       }
+    },
+    subIsActive(input) {
+      const paths = Array.isArray(input) ? input : [input]
+      return paths.some(path => {
+        return this.$route.path.indexOf(path) === 0 // current path starts with this path string
+      })
     }
   },
   created() {

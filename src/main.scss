@@ -173,7 +173,7 @@ body{
 }
 
 .navbar{
-  a.router-link-exact-active, a:hover{
+  a.router-link-active, a:hover{
     background:var(--white);
     color: var(--black) #{!important};
   }
@@ -181,7 +181,7 @@ body{
 
 @screen md {
   .navbar{
-    a.router-link-exact-active, a:hover{
+    a.router-link-active, a:hover{
       background: linear-gradient(180deg, #2C71BF 0%, #215590 80%) !important;
       border-bottom: 3px solid var(--white);
       color: var(--white) #{!important};

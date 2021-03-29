@@ -44,7 +44,7 @@
           <font-awesome-icon icon="id-card-alt" class="w-4 h-4 text-gray-500 hover:text-gray-400 cursor-pointer ml-3 mt-3"></font-awesome-icon>
         </div>
         <div class="text-lg" v-if="!coSign.length">Add at least 1 consignatories</div>
-        <button class="my-8 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none" @click="addCoSig" :disabled="addCoSigButton">(+) Add cosignatory</button>
+        <button class="my-8 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50" @click="addCoSig" :disabled="addCoSigButton">(+) Add cosignatory</button>
       </div>
       <div class="p-4 rounded-xl bg-gray-100 my-2 w-full text-xs text-gray-800">
         <img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"> Unconfirmed/Recommended Fee: 0.042750 XPX
