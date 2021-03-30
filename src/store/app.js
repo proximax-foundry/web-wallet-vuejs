@@ -179,7 +179,7 @@ function addNewWallet(walletName, password, networkType, privateKey) {
     encrypted: wallet.encryptedPrivateKey.encryptedKey,
     iv: wallet.encryptedPrivateKey.iv,
     network: wallet.network,
-    amount: '0.000000',
+    balance: '0.000000',
   });
 
   state.wallets.push(newWallet);
@@ -283,15 +283,16 @@ function deleteWallet(walletName, password) {
   }
   return -1;
 }
-
-function checkFromSession(){
+// check session to verify page has been refreshed
+function checkFromSession(accountHttp, namespaceHttp){
   const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
 
   if(walletSession){
     // session is not null - copy to state
     currentWallet.value = walletSession;
-    // set bool for page refresh sign out hack
-    sessionStorage.setItem('pageRefresh', 'y');
+    getXPXBalance(walletSession.name, accountHttp, namespaceHttp).then(()=>{
+      sessionStorage.setItem('pageRefresh', 'y');
+    });
     return true;
   }else{
     // return false to remain not sign in
@@ -350,12 +351,24 @@ function loginToWallet(walletName, password, accountHttp, namespaceHttp) {
   ) {
     return 0;
   }
+
   // get latest xpx amount
-  getXPXBalance(walletName, accountHttp, namespaceHttp);
-  currentWallet.value = wallet;
-  // set current wallet info to sessionStorage
-  sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
-  return 1;
+  getXPXBalance(walletName, accountHttp, namespaceHttp).then(()=> {
+    try {
+      const wallet = getWalletByName(walletName);
+      currentWallet.value = wallet;
+      sessionStorage.setItem(
+        'currentWalletSession',
+        JSON.stringify(wallet)
+      );
+    } catch (err) {
+      if (config.debug) {
+        console.error("updateAccountState error caught", err);
+      }
+      return 0;
+    }
+    return 1;
+  });
 }
 
 function logoutOfWallet() {
@@ -388,7 +401,7 @@ function updateAccountState(account, networkType, accountName){
     encrypted: first_account.encrypted,
     iv: first_account.iv,
     network: networkType,
-    amount: '0.000000',
+    balance: '0.000000',
   });
   // update currentLoggedInWallet
   currentWallet.value = wallet;
@@ -578,40 +591,48 @@ function getXPXBalance(walletName, accountHttp, namespaceHttp){
   const wallet = getWalletByName(walletName);
   const xpxNamespace = new sdk.NamespaceId('prx.xpx');
   let xpxAmount = 0;
-
-  fetchAccountInfo(wallet, accountHttp).then((res)=>{
-    wallet.accounts.forEach((add) => {
-      const address = res.find((element) => element.address.address == add.addressraw);
-      if(address){
-        namespaceHttp.getLinkedMosaicId(xpxNamespace).subscribe((xpxMosaicId)=>{
-          for(const mosaic of address.mosaics){
-            if(mosaic.id.toHex() === xpxMosaicId.toHex() ){
-              xpxAmount = mosaic.amount.compact() / Math.pow(10, sdk.XpxMosaicProperties.MOSAIC_PROPERTIES.divisibility);
+  return new Promise((resolve) => {
+    fetchAccountInfo(wallet, accountHttp).then((res)=>{
+      wallet.accounts.forEach((add, i) => {
+        const address = res.find((element) => element.address.address == add.addressraw);
+        console.log(address);
+        if(address != undefined){
+          namespaceHttp.getLinkedMosaicId(xpxNamespace).subscribe((xpxMosaicId)=>{
+            // let a  = 0;
+            for(const mosaic of address.mosaics){
+              if(mosaic.id.toHex() === xpxMosaicId.toHex() ){
+                xpxAmount = mosaic.amount.compact() / Math.pow(10, sdk.XpxMosaicProperties.MOSAIC_PROPERTIES.divisibility);
+              }
             }
-          }
-          add.amount = String(parseFloat(xpxAmount).toFixed(6));
-        });
-      }else{
-        add.amount = '0.000000';
-      }
+            add.balance = String(parseFloat(xpxAmount).toFixed(6));
+            console.log('wallet.accounts['+ i +'].balance: '+wallet.accounts[i].balance);
+          });
+        }else{
+          add.balance = '0.000000';
+          console.log('wallet.accounts['+ i +'].balance: '+wallet.accounts[i].balance);
+        }
+      });
+      resolve(wallet);
     });
   });
 }
 
 function getFirstAccName(){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
-  return wallet.accounts[0].name;
+  const acc = wallet.accounts.find((element) => element.default == true);
+  return acc.name;
 }
 
 function getFirstAccAdd(){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
-  return wallet.accounts[0].addressraw;
+  const acc = wallet.accounts.find((element) => element.default == true);
+  return acc.addressraw;
 }
 
 function getFirstAccBalance(){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
-  console.log(wallet);
-  return wallet.accounts[0].amount;
+  const acc = wallet.accounts.find((element) => element.default == true);
+  return acc.balance;
 }
 
 function displayBalance(){
@@ -619,7 +640,7 @@ function displayBalance(){
   if(wallet.accounts.length == 1){
     let amount = 0;
     wallet.accounts.forEach((element)=> {
-      amount = element.amount;
+      amount = element.balance;
     });
     return amount;
   }

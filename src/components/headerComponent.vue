@@ -76,7 +76,7 @@ export default{
     const getAccountInfo = async () => {
       if (!appStore.state.currentLoggedInWallet) {
         // check sessionStorage
-        if(!appStore.checkFromSession()){
+        if(!appStore.checkFromSession(siriusStore.accountHttp, siriusStore.namespaceHttp)){
           useRouter().replace({ path: "/" });
         }
       }
@@ -88,7 +88,7 @@ export default{
       () => {
         if(!appStore.state.currentLoggedInWallet){
           // if empty, check from sessionStorage
-          return appStore.checkFromSession();
+          return appStore.checkFromSession(siriusStore.accountHttp, siriusStore.namespaceHttp);
         }else{
           // remain logged in when state.wallet is available
           return true;

@@ -22,6 +22,7 @@
               </div>
             </div>
             </transition>
+            <input type="hidden" v-model="currentSelectedName">
           </div>
           <SelectInput v-if="showContactSelection" placeholder="Contact" errorMessage="" v-model="selectContact" :options="contact" @default-selected="selectContact=0" @show-selection="updateAdd" />
           <div class="flex">
@@ -102,6 +103,7 @@ export default {
     const err = ref('');
     const showMenu = ref(false);
     const encryptedMsg = ref('');
+    const currentSelectedName = ref('');
 
     const addressPattern = "^[0-9A-Za-z-]{40,46}$";
     const showAddressError = computed(()=>{
@@ -127,6 +129,9 @@ export default {
     // const balance = ref(appStore.getFirstAccBalance());
     const balance = ref('0.000000');
     balance.value = appStore.getFirstAccBalance();
+    if(balance.value == '0.000000'){
+      showBalanceErr.value = true;
+    }
 
     const accounts = computed( () => appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts);
     const sendXPX = ref('0.000000');
@@ -135,22 +140,13 @@ export default {
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.addressraw;
-      balance.value = i.amount;
-      console.log(balance.value);
+      balance.value = i.balance;
       (balance.value==0)?showBalanceErr.value = true:showBalanceErr.value = false;
       showMenu.value = !showMenu.value;
+      currentSelectedName.value = i.name;
     }
 
     const encryptedMsgDisable = ref(true);
-    // const encryptedMsgDisable = computed(()=> {
-    //   if(recipient.value.match(addressPattern)){
-    //     // appStore.verifyRecipientInfo(recipient.value, siriusStore.accountHttp).then((res)=>console.log(res))
-    //     console.log(appStore.verifyRecipientInfo(recipient.value, siriusStore.accountHttp));
-    //     return appStore.verifyRecipientInfo(recipient.value, siriusStore.accountHttp);
-    //   }else{
-    //     return true;
-    //   }
-    // });
 
     const addMosaicsButton = computed(() => {
       return true;
@@ -171,7 +167,6 @@ export default {
     }
 
     const updateAdd = (e) => {
-      // console.log(e);
       recipient.value = e;
     };
 
@@ -183,12 +178,19 @@ export default {
       }else{
         encryptedMsgDisable.value = true;
       }
-    })
+    });
+
+    watch(currentSelectedName, (n, o) => {
+      if(n!=o){
+        recipient.value = '';
+      }
+    });
 
     return {
       appStore,
       moreThanOneAccount,
       showMenu,
+      currentSelectedName,
       selectedAccName,
       selectedAccAdd,
       showAddressError,
