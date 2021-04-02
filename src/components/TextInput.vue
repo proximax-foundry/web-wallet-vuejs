@@ -4,7 +4,7 @@
       <div class="text-icon-outline text-icon">
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
       </div>
-      <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="text-placeholder bg-white" :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()">
+      <input :disabled="disabled=='true'" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="text-placeholder bg-white" :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()">
       <div class="w-1/12 flex-none"></div>
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
@@ -18,6 +18,7 @@ export default{
     'errorMessage',
     'icon',
     'showError',
+    'disabled',
     'modelValue'
   ],
   emits:[
@@ -33,18 +34,20 @@ export default{
   },
   methods: {
     clickInputText: function() {
-      if(!this.pswdErr){
+      if(!this.pswdErr && !this.disabled){
         this.borderColor = 'border-2 border-blue-primary';
       }
     },
 
     blurInputText: function() {
-      if(this.modelValue == ''){
-        this.borderColor = 'border-2 border-red-primary';
-        this.textErr = true;
-      }else{
-        this.borderColor = 'border-2 border-gray-300';
-        this.textErr = false;
+      if(!this.disabled){
+        if(this.modelValue == ''){
+          this.borderColor = 'border-2 border-red-primary';
+          this.textErr = true;
+        }else{
+          this.borderColor = 'border-2 border-gray-300';
+          this.textErr = false;
+        }
       }
     },
   },

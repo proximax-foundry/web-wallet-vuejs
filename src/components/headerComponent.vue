@@ -16,7 +16,7 @@
       <div class="w-52 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
         <div>
           <div class="text-xs inline-block">{{ appStore.state.currentLoggedInWallet.name }}</div>
-          <div class="text-xs">Total Balance: <span>100,000.0000</span> XPX</div>
+          <div class="text-xs">Total Balance: <span>{{ totalBalance }}</span> XPX</div>
         </div>
       </div>
       <div class="w-17 text-center h-10 items-center gray-line-left">
@@ -96,11 +96,16 @@ export default{
       }
     );
 
+    const totalBalance = computed(()=>{
+      return appStore.getTotalBalance();
+    });
+
     return {
       appStore,
       networkType,
       loginStatus,
       logout,
+      totalBalance,
       // walletName
     };
   },

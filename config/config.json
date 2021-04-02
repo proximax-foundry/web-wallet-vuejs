@@ -40,6 +40,11 @@
     }
   }],
 
+  "networkType":{
+    "PRIVATE": "Private",
+    "PRIVATE_TEST": "Private Testnet"
+  },
+
   "chainExplorer": {
     "url": "https://bctestnetexplorer.xpxsirius.io",
     "blockRoute": "#/result/blockHeight",

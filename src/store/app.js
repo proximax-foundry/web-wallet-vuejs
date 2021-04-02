@@ -254,7 +254,7 @@ function verifyWalletPassword(walletName, password){
 function deleteWallet(walletName, password) {
   /* verify with password benjamin lai 11/3 */
   let verify = verifyWalletPassword(walletName, password);
-  if(verify<1){
+  if(verify < 1){
     return verify;
   }
   // end verify with password
@@ -585,6 +585,15 @@ function fetchAccountInfo(wallet, accountHttp){
   });
 }
 
+function getTotalBalance(){
+  const wallet = getWalletByName(appStore.state.currentLoggedInWallet.name);
+  let balance = 0;
+  wallet.accounts.forEach((item) => {
+    balance += parseFloat(item.balance);
+  });
+  return balance.toFixed(6);
+}
+
 // get XPX balance for each account in the current logged in wallet
 function getXPXBalance(walletName, accountHttp, namespaceHttp){
 
@@ -700,7 +709,20 @@ function verifyRecipientInfo(recipient,accountHttp) {
   });
 }
 
+// transaction
+function makeTransaction(recipient, sendXPX, messageText, walletPassword){
+  // verify password
+  console.log(recipient + ' ' + sendXPX + ' ' + messageText);
+  let verify = verifyWalletPassword(state.currentLoggedInWallet.name, walletPassword);
+  if(verify < 1){
+    return verify;
+  }
+}
 
+function checkAvailableContact(recipient){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  return (wallet.contacts.findIndex((element) => element.address == recipient) == -1)?false:true;
+}
 
 
 export const appStore = readonly({
@@ -718,6 +740,7 @@ export const appStore = readonly({
   getWalletByName,
   getAccountByWallet,
   checkFromSession,
+  getTotalBalance,
   verifyWalletPassword,
   updateAccountState,
   setAccountDefault,
@@ -732,6 +755,8 @@ export const appStore = readonly({
   getFirstAccAdd,
   getFirstAccBalance,
   verifyRecipientInfo,
+  makeTransaction,
+  checkAvailableContact,
 });
 
 

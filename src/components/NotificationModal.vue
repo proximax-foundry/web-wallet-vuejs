@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { computed, getCurrentInstance } from 'vue';
+import { computed, getCurrentInstance, watch } from 'vue';
 
 export default{
   name: 'SignInModal',
@@ -49,6 +49,13 @@ export default{
     const close= () => {
       emitter.emit("CLOSE_NOTIFICATION", false);
     }
+
+    watch(() => p.toggleModal, () => {
+      setTimeout(() => {
+        emitter.emit("CLOSE_NOTIFICATION", false);
+      }, p.time);
+    });
+
 
     return{
       bgColor,

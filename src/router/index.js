@@ -163,6 +163,14 @@ const routes = [
       title: "Add Contacts",
     }
   },
+  {
+    path: '/create-mosaic',
+    name: 'ViewCreateMosaic',
+    component: () => import('@/views/ViewCreateMosaic.vue'),
+    meta: {
+      title: "Add Contacts",
+    }
+  },
 ]
 // createdAccount
 

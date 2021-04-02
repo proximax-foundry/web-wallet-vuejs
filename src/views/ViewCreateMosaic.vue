@@ -56,7 +56,7 @@
             <input id="encryptedMsg" type="checkbox" value="encryptedMsg" v-model="encryptedMsg" /><label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Encrypted</label>
           </div>
         </div>
-        <TextareaInput placeholder="Message" errorMessage="" v-model="messageText" icon="comment" class="mt-5" :msgOpt="msgOption" />
+        <TextareaInput placeholder="Message" errorMessage="Invalid message" v-model="messageText" icon="comment" class="mt-5" :msgOpt="msgOption" />
         <div class="rounded-2xl bg-gray-100 p-5 mb-5">
           <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Unconfirmed/Recommended Fee:  0.042750 XPX</div>
         </div>
@@ -67,9 +67,6 @@
         </div>
       </fieldset>
     </form>
-    <AddContactModal :toggleModal="togglaAddContact" :saveAddress="recipient" />
-    <NotificationModal :toggleModal="toggleAnounceNotification" msg="Unconfirmed transaction" notiType="noti" time='2500' />
-    <!-- <NotificationModal :toggleModal="toggleContactNotification" msg="Contact successfully saved" notiType="noti" time='2500' /> -->
   </div>
 </template>
 <script>
@@ -81,9 +78,7 @@ import SelectInput from '@/components/SelectInput.vue';
 import SendInput from '@/components/SendInput.vue';
 import TextareaInput from '@/components/TextareaInput.vue';
 import { makeTransaction } from '../util/transfer.js';
-import AddContactModal from '@/components/AddContactModal.vue';
-import NotificationModal from '@/components/NotificationModal.vue';
-import { verifyAddress } from '../util/functions.js';
+
 
 export default {
   name: 'ViewCreateAccount',
@@ -93,8 +88,6 @@ export default {
     SelectInput,
     SendInput,
     TextareaInput,
-    AddContactModal,
-    NotificationModal
   },
   setup(){
     const appStore = inject("appStore");
@@ -112,58 +105,34 @@ export default {
     const showMenu = ref(false);
     const encryptedMsg = ref('');
     const currentSelectedName = ref('');
-    const togglaAddContact = ref(false);
-    const toggleAnounceNotification = ref(false);
-    // const toggleContactNotification = ref(false);
 
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
-    const addressPatternLong = "^[0-9A-Za-z-]{46}$";
+    const addressPatternLong = "^([0-9A-Za-z-]-[0-9A-Za-z-]){46}$";
 
-    // const addressErrorMsg = computed(() =>{
-    //   if(recipient.value.length > 40 && !recipient.value.match(addressPatternLong)){
-    //     return 'Recipient Address Network unsupported';
-    //   }else{
-    //     return 'Invalid Recipient';
-    //   }
-    // });
-
-    // const showAddressError = computed(()=>{
-    //   if(recipient.value != ''){
-    //     if(recipient.value.match(addressPatternShort) || recipient.value.match(addressPatternLong)){
-    //       return false;
-    //     }else{
-    //       return true;
-    //     }
-    //   }else{
-    //     return false;
-    //   }
-    // });
-    const addMsg = ref('');
-    // const isVerifyRecipientAdd = ref(false);
-    const showAddressError = ref(false);
-    const addressErrorMsg = computed(
-      () => {
-        let addErrDefault = 'Invalid Recipient';
-        return addMsg.value?addMsg.value:addErrDefault;
-      }
-    );
-
-    watch(recipient, ()=>{
-      console.log((recipient.value.length == 46 && recipient.value.match(addressPatternLong)));
-      if((recipient.value.length == 46 && recipient.value.match(addressPatternLong)) || (recipient.value.length == 40 && recipient.value.match(addressPatternShort))) {
-        const verifyRecipientAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), recipient.value);
-        showAddressError.value = !verifyRecipientAddress.isPassed.value;
-        console.log('Pass: ' + showAddressError.value)
-        addMsg.value = verifyRecipientAddress.errMessage.value;
+    const addressErrorMsg = computed(() =>{
+      if(recipient.value.length > 40 && !recipient.value.match(addressPatternLong)){
+        return 'Recipient Address Network unsupported';
       }else{
-        (recipient.value.length>0)?(showAddressError.value = true):(showAddressError.value = false);
+        return 'Invalid Recipient';
+      }
+    });
+
+    const showAddressError = computed(()=>{
+      if(recipient.value != ''){
+        if(recipient.value.match(addressPatternShort) || recipient.value.match(addressPatternLong)){
+          return false;
+        }else{
+          return true;
+        }
+      }else{
+        return false;
       }
     });
 
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && !showAddressError.value && recipient.value.length > 0
+      walletPassword.value.match(passwdPattern) && !showAddressError.value && recipient.value != ''
     ));
     // get balance
     const selectedAccName = ref(appStore.getFirstAccName());
@@ -200,10 +169,6 @@ export default {
 
     const clearInput = () => {
       walletPassword.value = '';
-      recipient.value = '';
-      encryptedMsgDisable.value = true;
-      messageText.value = '';
-      sendXPX.value = '0.000000';
       emitter.emit("CLEAR_SELECT", 0);
     };
 
@@ -217,26 +182,9 @@ export default {
     };
 
     const makeTransfer = () => {
-      let transferStatus = makeTransaction(recipient.value.toUpperCase(), sendXPX.value, messageText.value, walletPassword.value, selectedAccName.value, encryptedMsg.value, appStore, siriusStore);
-      if(!transferStatus){
+      let transferStatus = makeTransaction(recipient.value, sendXPX.value, messageText.value, walletPassword.value, appStore);
+      if(transferStatus<0){
         err.value = 'Invalid wallet password';
-      }else{
-        // transaction made
-        err.value = '';
-        // display check if address is saved in the contact list
-        // if not display add contact model
-        if(!appStore.checkAvailableContact(recipient.value)){
-          // add new contact
-          togglaAddContact.value = true;
-        }else{
-          clearInput();
-        }
-        // shpw notification
-        toggleAnounceNotification.value = true;
-
-        // play notification sound
-        var audio = new Audio(require('@/assets/audio/ding.ogg'));
-        audio.play();
       }
     };
 
@@ -254,15 +202,6 @@ export default {
       if(n!=o){
         recipient.value = '';
       }
-    });
-
-    emitter.on("CLOSE_MODAL", payload => {
-      togglaAddContact.value = payload;
-      clearInput();
-    });
-
-    emitter.on("CLOSE_NOTIFICATION", payload => {
-      toggleAnounceNotification.value = payload;
     });
 
     return {
@@ -296,9 +235,6 @@ export default {
       encryptedMsgDisable,
       encryptedMsg,
       makeTransfer,
-      togglaAddContact,
-      toggleAnounceNotification,
-      // toggleContactNotification,
     }
   },
 

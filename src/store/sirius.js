@@ -29,6 +29,10 @@ function getNetworkByType(typeid){
   return config.network.find((element) => element.type == typeid);
 }
 
+// function getNetworkByName(name){
+//   return config.network.find((element) => element.name == name);
+// }
+
 // ALWAYS use function selectNewChainNode to change currentChainNode value, to avoid web socket listening on old node
 const currentChainNode = ref(getChainNodes()[0]);
 const listenerChainWS = ref(null);
@@ -172,6 +176,7 @@ function createNewAccountPrivateKey(pk, networkType){
 
 export const siriusStore = readonly({
   state,
+  // getNetworkByName,
   accountHttp,
   blockHttp,
   chainHttp,

@@ -6,7 +6,7 @@
         <div class="ml-6 text-xs mt-1 text-gray-500">Send</div>
       </div>
       <!-- <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="text-placeholder bg-white text-right" :placeholder="placeholder" @click="clickInputText()" @keypress="validate(event)"> -->
-      <input ref="inputRef" :value="formattedValue" :placeholder="placeholder" class="text-placeholder bg-white text-right" @click="clickInputText()" @keypress="validate(event)">
+      <input ref="inputRef" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" :placeholder="placeholder" class="text-placeholder bg-white text-right" @click="clickInputText()" @keypress="validate(event)">
       <div class="w-5"></div>
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
@@ -27,9 +27,12 @@ export default{
   },
 
   setup (props) {
-    const { formattedValue, inputRef } = useCurrencyInput(props.options)
+    const { formatedValue, inputRef } = useCurrencyInput(props.options)
 
-    return { inputRef, formattedValue }
+    return {
+      inputRef,
+      formatedValue,
+    }
   },
 
   emits:[
