@@ -106,11 +106,12 @@ export default{
       return appStore.getTotalBalance();
     });
 
-    trasnferEmitter.on("TRANSACTION_CONFIRMED_NOTIFICATION", payload => {
-      console.log('yay notify' + payload);
-      toggleAnounceNotification.value = true;
-      var audio = new Audio(require('@/assets/audio/ding.ogg'));
-      audio.play();
+    trasnferEmitter.on("TRANSACTION_CONFIRMED_NOTIFICATION", verify => {
+      if(verify){
+        toggleAnounceNotification.value = true;
+        var audio = new Audio(require('@/assets/audio/ding.ogg'));
+        audio.play();
+      }
     });
 
     trasnferEmitter.on("CLOSE_NOTIFICATION", payload => {

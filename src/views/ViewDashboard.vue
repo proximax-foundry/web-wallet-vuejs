@@ -38,7 +38,7 @@
           <div class="rounded-full bg-yellow-500 text-white w-24 h-15 px-2 py-1 inline-block">
             <div class="flex justify-between">
               <img src="../assets/img/icon-transaction-partial-white.svg" class="w-6 h-6" />
-              <div>1</div>
+              <div class="text-xs font-bold flex items-center">1</div>
             </div>
           </div>
         </div>
@@ -70,7 +70,7 @@ export default {
     const primaryAccount = computed(
       () => {
           if (appStore.state.currentLoggedInWallet) {
-            return appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).address;
+            return appStore.pretty(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).address);
           }else{
             return 0;
           }

@@ -31,6 +31,7 @@ async function getAccInfo(address, accountHttp){
     const accountInfo = accountHttp.getAccountInfo(address);
     accountInfo.subscribe(
       (acc) => {
+        console.log(acc);
         resolve(acc);
       },
       (error) => {
@@ -55,7 +56,7 @@ export const getMosaics = (appStore, siriusStore) => {
   wallet.accounts.forEach((account) => {
     const mosaicService = new MosaicService(siriusStore.accountHttp, siriusStore.mosaicHttp, siriusStore.namespaceHttp);
 
-    const address = Address.createFromRawAddress(account.addressraw);
+    const address = Address.createFromRawAddress(account.address);
     // console.log(account)
     account.mosaic = [];
     // console.log(siriusStore.accountHttp.getAccountInfo(address));
@@ -113,13 +114,13 @@ export const makeTransaction = (recipient, sendXPX, messageText, mosaicsSent, mo
     }
 
     // to get sender's private key
-    let acc = appStore.getAccDetails(senderAccName)
-
+    let accountDetails = appStore.getAccDetails(senderAccName)
+    let privateKey = appStore.decryptPrivateKey(sessionStorage.getItem('walletPassword'), accountDetails.encrypted, accountDetails.iv);
     // sending encrypted message
     let msg;
     if(encryptedMsg){
       let accountInfo = await getAccInfo(recipientAddress, siriusStore.accountHttp);
-      msg = EncryptedMessage.create(messageText, accountInfo, acc.pk);
+      msg = EncryptedMessage.create(messageText, accountInfo, privateKey);
     }else{
       msg = PlainMessage.create(messageText);
     }
@@ -131,7 +132,8 @@ export const makeTransaction = (recipient, sendXPX, messageText, mosaicsSent, mo
       .networkType(networkType)
       .recipient(recipientAddress)
       .build();
-    const account = Account.createFromPrivateKey(acc.pk, networkType);
+
+    const account = Account.createFromPrivateKey(privateKey, networkType);
     const signedTransaction = account.sign(transferTransaction, hash);
     // console.log(signedTransaction.hash);
     // const listener = siriusStore.chainWSListener;
@@ -163,15 +165,16 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
 
     let accountDetails = appStore.getAccDetails(accountName);
     // var mosaicDuration = (1 * 365 * 24 * 60 * 4 ); // 1 year - 15 sec per block
-    var mosaicDuration;
-    if(durationType == 'month'){
-      mosaicDuration = parseInt(duration) * 30 * 24 * 60 * 4;
-    }else{
-      mosaicDuration = parseInt(duration) * 365 * 24 * 60 * 4;
-    }
+    // var mosaicDuration;
+    // if(durationType == 'month'){
+    //   mosaicDuration = parseInt(duration) * 30 * 24 * 60 * 4;
+    // }else{
+    //   mosaicDuration = parseInt(duration) * 365 * 24 * 60 * 4;
+    // }
 
+    let privateKey = appStore.decryptPrivateKey(sessionStorage.getItem('walletPassword'), accountDetails.encrypted, accountDetails.iv);
     let networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
-    const account = Account.createFromPrivateKey(accountDetails.pk, networkType);
+    const account = Account.createFromPrivateKey(privateKey, networkType);
 
     var transactionBuilder = new TransactionBuilderFactory();
     const nonce = MosaicNonce.createRandom();
@@ -184,14 +187,14 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
           supplyMutable: (mutable)?true:false,
           transferable: (transferable)?true:false,
           divisibility: divisibility,
-          duration: (duration) ? UInt64.fromUint(mosaicDuration) : undefined
+          // duration: (duration) ? UInt64.fromUint(mosaicDuration) : undefined
+          duration: undefined
         })
       )
       .networkType(networkType)
       .build();
 
     let supp = parseFloat(supply) * Math.pow(10, divisibility);
-    console.log('Mosaic Supply: ' + supp);
     const mosaicSupplyChangeTransaction = transactionBuilder.mosaicSupplyChange()
       .deadline(Deadline.create(environment.deadlineTransfer.deadline, environment.deadlineTransfer.chronoUnit))
       .mosaicId(mosaicDefinitionTransaction.mosaicId)
@@ -212,7 +215,7 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
       .build();
 
     transactionBuilder.fee = amountFormatterSimple(aggregateTransaction.maxFee.compact());
-    console.log('TF: '+transactionBuilder.fee);
+    // console.log('TF: '+transactionBuilder.fee);
     const signedTransaction = account.sign(aggregateTransaction, hash);
     // listener
     // const listener = new Listener(siriusStore.state.selectedChainNode);

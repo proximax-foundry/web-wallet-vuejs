@@ -64,7 +64,7 @@ export default {
         const acc = siriusStore.createNewAccount(networkType);
         // update to state
         appStore.updateAccountState(acc, networkType, accountName.value);
-        router.push({ name: "createdAccount", params: {publicKey: acc.public, privateKey: acc.private, address: acc.address, name: accountName.value }});
+        router.push({ name: "createdAccount", params: {publicKey: acc.publicAccount.publicKey, privateKey: acc.private, address: acc.address, name: accountName.value }});
       }
     };
     return{

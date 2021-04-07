@@ -70,7 +70,7 @@ export default {
       } else {
         // create account
         const acc = siriusStore.createNewAccountPrivateKey(privKey.value, appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network);
-        router.push({ name: "createdAccount", params: {publicKey: acc.public, privateKey: acc.private, address: acc.address, name: accountName.value }});
+        router.push({ name: "createdAccount", params: {publicKey: acc.publicAccount.publicKey, privateKey: acc.private, address: acc.address, name: accountName.value }});
       }
     };
     return{

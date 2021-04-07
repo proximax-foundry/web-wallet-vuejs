@@ -33,7 +33,7 @@
             id="address"
             class="text-sm w-full outline-none bg-gray-100 z-10"
             type="text"
-            :value="acc.address"
+            :value="acc.pretty"
           />
         </div>
         <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
@@ -46,7 +46,7 @@
             id="public"
             class="text-sm w-full outline-none bg-gray-100 z-10"
             type="text"
-            :value="acc.public"
+            :value="acc.publicAccount.publicKey"
           />
         </div>
         <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
@@ -68,7 +68,7 @@
             id="private"
             class="text-sm w-full outline-none bg-gray-100 z-10"
             type="text"
-            :value="acc.pk"
+            :value="privateKey"
             v-if="showPK"
           />
         </div>
@@ -121,6 +121,7 @@ export default {
     const showName = ref(true);
     const showPwPK = ref(false);
     const showPK = ref(false);
+    const privateKey = ref('');
     const showPasswdError = ref(false);
     const walletPasswd = ref("");
     const walletPasswdSwap = ref("");
@@ -161,6 +162,7 @@ export default {
       }else{
         if(appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPasswd.value)){
           // pw is correct
+          privateKey.value = appStore.getAccountPassword(p.name, walletPasswd.value);
           showPK.value = true;
           err.value = '';
         }else{
@@ -184,6 +186,7 @@ export default {
     if(acc==-1){
       router.push({ name: "ViewDisplayAllAccounts"});
     }
+    acc.pretty = appStore.pretty(acc.address);
 
     return {
       err,
@@ -202,7 +205,8 @@ export default {
       accountName,
       acc,
       verifyWalletPwSwap,
-      copy
+      copy,
+      privateKey,
     };
   },
 }

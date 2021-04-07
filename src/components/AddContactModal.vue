@@ -23,7 +23,7 @@
               <fieldset class="w-full">
                 <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
                 <TextInput placeholder="Name" errorMessage="Name required" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
-                <TextInput placeholder="Address" v-model="address" icon="wallet" :showError="showAddErr" disabled=true />
+                <TextInput placeholder="Address" v-model="address" icon="wallet" :showError="showAddErr" :disabled="true" />
                 <div class="mt-10">
                   <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
                   <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="SaveContact()">Save</button>
