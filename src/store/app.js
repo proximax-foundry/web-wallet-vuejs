@@ -9,6 +9,7 @@ import {
   SimpleWallet,
   WalletAlgorithm,
 } from "tsjs-xpx-chain-sdk";
+
 const sdk = require('tsjs-xpx-chain-sdk');
 
 const config = require("@/../config/config.json");
@@ -290,7 +291,7 @@ function checkFromSession(accountHttp, namespaceHttp){
   if(walletSession){
     // session is not null - copy to state
     currentWallet.value = walletSession;
-    getXPXBalance(walletSession.name, accountHttp, namespaceHttp).then(()=>{
+    getXPXBalance(walletSession.name, accountHttp, namespaceHttp).then(() => {
       sessionStorage.setItem('pageRefresh', 'y');
     });
     return true;
@@ -502,7 +503,6 @@ function deleteAccount(password, address) {
     if (config.debug) {
       console.error("deleteAccount triggered with non-existing account name");
     }
-    console.log('hm');
     return -1;
   }
   if (wallet.accounts.splice(accountIndex, 1).length != 0) {
@@ -594,7 +594,7 @@ function getTotalBalance(){
   return balance.toFixed(6);
 }
 
-// get XPX balance for each account in the current logged in wallet
+// get XPX balance for each account in the current logged in wallet and update state
 function getXPXBalance(walletName, accountHttp, namespaceHttp){
 
   const wallet = getWalletByName(walletName);
@@ -602,27 +602,44 @@ function getXPXBalance(walletName, accountHttp, namespaceHttp){
   let xpxAmount = 0;
   return new Promise((resolve) => {
     fetchAccountInfo(wallet, accountHttp).then((res)=>{
-      wallet.accounts.forEach((add, i) => {
+      wallet.accounts.forEach((add) => {
         const address = res.find((element) => element.address.address == add.addressraw);
-        console.log(address);
+        // console.log(address);
         if(address != undefined){
           namespaceHttp.getLinkedMosaicId(xpxNamespace).subscribe((xpxMosaicId)=>{
             // let a  = 0;
             for(const mosaic of address.mosaics){
               if(mosaic.id.toHex() === xpxMosaicId.toHex() ){
                 xpxAmount = mosaic.amount.compact() / Math.pow(10, sdk.XpxMosaicProperties.MOSAIC_PROPERTIES.divisibility);
+                // console.log(mosaic.id.toHex() + ' [mosaic]: '+xpxAmount)
               }
             }
             add.balance = String(parseFloat(xpxAmount).toFixed(6));
-            console.log('wallet.accounts['+ i +'].balance: '+wallet.accounts[i].balance);
           });
         }else{
           add.balance = '0.000000';
-          console.log('wallet.accounts['+ i +'].balance: '+wallet.accounts[i].balance);
+          // console.log('wallet.accounts['+ i +'].balance: '+wallet.accounts[i].balance);
         }
       });
       resolve(wallet);
     });
+  });
+}
+
+function updateXPXBalance(walletName, accountHttp, namespaceHttp){
+  // get latest xpx amount
+  getXPXBalance(walletName, accountHttp, namespaceHttp).then(()=> {
+    try {
+      const wallet = getWalletByName(walletName);
+      currentWallet.value = wallet;
+      sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
+    } catch (err) {
+      if (config.debug) {
+        console.error("updateAccountState error caught", err);
+      }
+      return 0;
+    }
+    return 1;
   });
 }
 
@@ -638,10 +655,15 @@ function getFirstAccAdd(){
   return acc.addressraw;
 }
 
-function getFirstAccBalance(){
+function getFirstAccBalance(address){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
-  const acc = wallet.accounts.find((element) => element.default == true);
+  const acc = wallet.accounts.find((element) => element.addressraw == address);
   return acc.balance;
+
+  // const address = Address.createFromRawAddress(accountDetails.address);
+  // siriusStore.accountHttp
+  // .getAccountInfo(address)
+  // .subscribe(accountInfo => console.log(accountInfo.balance), err => console.error(err));
 }
 
 function displayBalance(){
@@ -654,6 +676,15 @@ function displayBalance(){
     return amount;
   }
 }
+
+// return mosaic divisibility
+function getMosaicInfo(add, mosaicId){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  const account = wallet.accounts.find((element) => element.addressraw = add);
+  const mosaic = account.mosaic.find((element) => element.id == mosaicId);
+  return mosaic;
+}
+
 
 function getContact(){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
@@ -709,21 +740,10 @@ function verifyRecipientInfo(recipient,accountHttp) {
   });
 }
 
-// transaction
-function makeTransaction(recipient, sendXPX, messageText, walletPassword){
-  // verify password
-  console.log(recipient + ' ' + sendXPX + ' ' + messageText);
-  let verify = verifyWalletPassword(state.currentLoggedInWallet.name, walletPassword);
-  if(verify < 1){
-    return verify;
-  }
-}
-
 function checkAvailableContact(recipient){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
   return (wallet.contacts.findIndex((element) => element.address == recipient) == -1)?false:true;
 }
-
 
 export const appStore = readonly({
   name,
@@ -755,8 +775,10 @@ export const appStore = readonly({
   getFirstAccAdd,
   getFirstAccBalance,
   verifyRecipientInfo,
-  makeTransaction,
+  // makeTransaction,
   checkAvailableContact,
+  getMosaicInfo,
+  updateXPXBalance,
 });
 
 

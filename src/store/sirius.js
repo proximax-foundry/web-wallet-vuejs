@@ -7,6 +7,7 @@ import {
   Listener,
   NetworkHttp,
   NodeHttp,
+  MosaicHttp,
   Account
 } from "tsjs-xpx-chain-sdk";
 const sdk = require('tsjs-xpx-chain-sdk');
@@ -51,6 +52,7 @@ const blockHttp = computed(() => new BlockHttp(state.selectedChainNode));
 const chainHttp = computed(() => new ChainHttp(state.selectedChainNode));
 const networkHttp = computed(() => new NetworkHttp(state.selectedChainNode));
 const nodeHttp = computed(() => new NodeHttp(state.selectedChainNode));
+const mosaicHttp = computed(() => new MosaicHttp(state.selectedChainNode));
 const namespaceHttp = computed(() => new sdk.NamespaceHttp(state.selectedChainNode));
 
 const chainWSListener = computed(() => {
@@ -181,6 +183,7 @@ export const siriusStore = readonly({
   blockHttp,
   chainHttp,
   networkHttp,
+  mosaicHttp,
   namespaceHttp,
   nodeHttp,
   chainWSListener,

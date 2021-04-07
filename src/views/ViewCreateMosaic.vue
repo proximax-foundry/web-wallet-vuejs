@@ -1,93 +1,107 @@
 <template>
   <div class="flex justify-between text-md">
-    <div><span class="text-gray-300">Transfer ></span> <span class="text-blue-primary font-bold">Make a Transaction</span></div>
+    <div><span class="text-gray-300">Mosaics ></span> <span class="text-blue-primary font-bold">Create</span></div>
     <div>
       <!-- <router-link to="/select-type-creation-account" class="font-bold">Back to Services</router-link> -->
     </div>
   </div>
-  <div class='mt-2 py-3 gray-line text-center'>
-    <form @submit.prevent="create" class="mt-10">
-      <fieldset class="w-full">
-        <div class="mb-5 border-b border-gray-200">
-          <div class="error error_box" v-if="err!=''">{{ err }}</div>
-          <div v-if="moreThanOneAccount" class="text-left p-4">
-            <div class="mb-1 cursor-pointer z-20 border-b border-gray-200" @click="showMenu = !showMenu">
-              <div class="font-bold text-xs">{{ selectedAccName }}</div>
-              <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
-            </div>
-            <transition name="slide">
-            <div v-if="showMenu" class="z-10">
-              <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50'" @click="changeSelection(item)" :title="'Address is ' + item.addressraw">
-                <div>{{ item.name }}</div>
+  <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-4'>
+    <div class="md:col-span-3">
+      <form @submit.prevent="create">
+        <fieldset class="w-full">
+          <div class="mb-5 border-b border-gray-200">
+            <div v-if="showNoBalance" class="border-2 rounded-3xl border-red-700 w-full h-24 text-center p-4">
+              <div class="h-5 text-center">
+                <div class="rounded-full w-8 h-8 border border-gray-500 inline-block relative"><font-awesome-icon icon="times" class="text-gray-500 h-5 w-5 absolute" style="top: 5px; left:4px"></font-awesome-icon></div><br>
+                <div class="inline-block text-tsm">Insufficient Balance</div>
               </div>
             </div>
-            </transition>
-            <input type="hidden" v-model="currentSelectedName">
-          </div>
-          <SelectInput v-if="showContactSelection" placeholder="Contact" errorMessage="" v-model="selectContact" :options="contact" @default-selected="selectContact=0" @show-selection="updateAdd" />
-          <div class="flex">
-            <div class="flex-grow mr-5">
-              <TextInput placeholder="Recipient" :errorMessage="addressErrorMsg" :showError="showAddressError" v-model="recipient" icon="wallet" />
-            </div>
-            <div class="flex-none">
-              <div class="rounded-full bg-gray-300 w-14 h-14 cursor-pointer relative" style="top: -5px;" @click="showContactSelection = !showContactSelection">
-                <font-awesome-icon icon="id-card-alt" class="h-20 w-20 inline text-blue-primary absolute" style="top:-12px; left: 19px;"></font-awesome-icon>
+            <div class="error error_box" v-if="err!=''">{{ err }}</div>
+            <div v-if="moreThanOneAccount" class="text-left p-4">
+              <div class="mb-1 cursor-pointer z-20 border-b border-gray-200" @click="showMenu = !showMenu">
+                <div class="font-bold text-xs">{{ selectedAccName }}</div>
+                <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
               </div>
+              <transition name="slide">
+              <div v-if="showMenu" class="z-10">
+                <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50'" @click="changeSelection(item)" :title="'Address is ' + item.addressraw">
+                  <div>{{ item.name }}</div>
+                </div>
+              </div>
+              </transition>
+              <input type="hidden" v-model="currentSelectedName">
             </div>
           </div>
-        </div>
-        <div class="text-left p-3 pb-0 border-l-8 border-gray-100">
-          <div class="bg-gray-100 rounded-2xl p-3">
-            <div class="inline-block mr-4 text-tsm"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} XPX</span></div>
+          <div class="text-left p-3 pb-0 border-l-8 border-gray-100">
+            <div class="bg-gray-100 rounded-2xl p-3">
+              <div class="inline-block mr-4 text-tsm"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ appStore.getFirstAccBalance(selectedAccAdd) }} XPX</span></div>
+            </div>
           </div>
-          <SendInput v-model="sendXPX" placeholder="Enter Amount" type="text" icon="coins" :showError="showBalanceErr" errorMessage="Insufficient balance" :options="{ currency: 'USD', precision: 6, autoDecimalMode:true, distractionFree: false, allowNegative: false }" class="mt-5" />
-        </div>
-        <div>
-          <button class="mb-5 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50" :disabled="addMosaicsButton">(+) Add Mosaics</button>
-        </div>
-        <div class="mb-5 border-t pt-4 border-gray-200">
-          <div class="rounded-2xl bg-gray-100 p-5">
-            <input id="regularMsg" type="radio" name="msgOption" value="regular" v-model="msgOption" @change="clearMsg()" /><label for="regularMsg" class="cursor-pointer font-bold ml-4 mr-5">Regular</label>
-            <input id="hexMsg" type="radio" name="msgOption" value="hex" v-model="msgOption" @change="clearMsg()" /><label for="hexMsg" class="cursor-pointer font-bold ml-4">Hexadecimal</label>
+          <NumberInput :disabled="disabledDivisibility" v-model="divisibility" max="6" placeholder="Divisibility" title="Divisibility" type="text" icon="coins" :showError="showDivisibilityErr" errorMessage="Required Field - Only Numbers (0 - 6)" class="mt-5" />
+          <SupplyInput :disabled="disabledSupply" v-model="supply" title="Supply" :balance="Number(appStore.getFirstAccBalance(selectedAccAdd))" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" :decimal="Number(supplyPrecision)" />
+          <div class="text-center p-3 pb-3 border-l-8 border-gray-100">
+            <div class="rounded-2xl bg-gray-100 p-5">
+              <input id="month" type="radio" value="month" name="durationOption" v-model="durationOption" :disabled="disabledDuration" /><label for="month" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Month</label>
+              <input id="year" type="radio" value="year" name="durationOption" v-model="durationOption" :disabled="disabledDuration" /><label for="year"  class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Year</label>
+            </div>
+            <NumberInput :disabled="disabledDuration" v-model="duration" :max="(durationOption=='year')?'10':'120'" placeholder="Duration" title="Duration" type="text" icon="coins" :showError="showDurationErr" :errorMessage="(durationOption=='year')?'Max is 10 years':'Max is 120 months'" class="mt-5" />
+            <input id="disabledDuration" type="checkbox" v-model="disabledDuration" value="true" :disabled="durationCheckDisabled"><label for="disabledDuration"  class="cursor-pointer font-bold ml-4 mr-5 text-tsm">No duration</label>
           </div>
-        </div>
-        <div class="mb-5" v-if="!encryptedMsgDisable">
-          <div class="rounded-2xl bg-gray-100 p-5">
-            <input id="encryptedMsg" type="checkbox" value="encryptedMsg" v-model="encryptedMsg" /><label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Encrypted</label>
+          <div class="mb-5 border-t pt-4 border-gray-200">
+            <div class="rounded-2xl bg-gray-100 p-5">
+              <input id="transferable" type="checkbox" value="transferable" v-model="isTransferable" :disabled="disabledTransferableCheck" /><label for="transferable" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Transferable</label>
+              <input id="mutable" type="checkbox" value="mutable" v-model="isMutable" :disabled="disabledMutableCheck" /><label for="mutable"  class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Supply Mutable</label>
+            </div>
           </div>
-        </div>
-        <TextareaInput placeholder="Message" errorMessage="Invalid message" v-model="messageText" icon="comment" class="mt-5" :msgOpt="msgOption" />
-        <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-          <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Unconfirmed/Recommended Fee:  0.042750 XPX</div>
-        </div>
-        <PasswordInput placeholder="Enter Your Wallet Password" :errorMessage="'Please enter your wallet ' + appStore.state.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
-        <div class="mt-10">
-          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
-          <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="makeTransfer();">Create</button>
-        </div>
-      </fieldset>
-    </form>
+          <div class="rounded-2xl bg-gray-100 p-5 mb-5">
+            <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Unconfirmed/Recommended Fee: 0.<span class="text-txs">062750</span> XPX</div>
+          </div>
+          <div class="rounded-2xl bg-gray-100 p-5 mb-5">
+            <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: 10,000.<span class="text-txs">000000</span> XPX</div>
+          </div>
+          <PasswordInput placeholder="Enter Your Wallet Password" :errorMessage="'Please enter your wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
+          <div class="mt-10">
+            <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">Clear</button>
+            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createMosaic()">Create</button>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+    <div class="px-10 text-left text-tsm mt-5 md:mt-0">
+      <div class="mb-2">
+        <i>Maximum divisibility is 6.</i><br>
+        <b>Example: 0.000000</b>
+      </div>
+      <div class="mb-2">
+        <i>Maximum supply is 900T.</i><br>
+        <b>Example: 900,000,000,000,000</b>
+      </div>
+      <div class="mb-2">
+        <div class="mb-3"><i>If you tick "Transferable", mosaic can be transferred.</i></div>
+        <div><i>If you tick "Supply Mutable", supply can be changed.</i></div>
+      </div>
+    </div>
+    <NotificationModal :toggleModal="toggleAnounceNotification" msg="Unconfirmed transaction" notiType="noti" time='2500' />
   </div>
 </template>
 <script>
 import { computed, ref, inject, getCurrentInstance, watch } from 'vue';
 // import { useRouter } from "vue-router";
-import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
-import SelectInput from '@/components/SelectInput.vue';
-import SendInput from '@/components/SendInput.vue';
-import TextareaInput from '@/components/TextareaInput.vue';
-import { makeTransaction } from '../util/transfer.js';
-
+import SupplyInput from '@/components/SupplyInput.vue';
+import NumberInput from '@/components/NumberInput.vue';
+import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
+import { mosaicTransaction } from '../util/transfer.js';
+import NotificationModal from '@/components/NotificationModal.vue';
 
 export default {
   name: 'ViewCreateAccount',
   components: {
-    TextInput,
     PasswordInput,
-    SelectInput,
-    SendInput,
-    TextareaInput,
+    SupplyInput,
+    FontAwesomeIcon,
+    NumberInput,
+    NotificationModal,
   },
   setup(){
     const appStore = inject("appStore");
@@ -95,7 +109,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showContactSelection = ref(false);
-    const showBalanceErr = ref(false);
+    const showSupplyErr = ref(false);
     const selectContact = ref("0");
     const recipient = ref('');
     const msgOption = ref('regular');
@@ -103,47 +117,61 @@ export default {
     const walletPassword = ref('');
     const err = ref('');
     const showMenu = ref(false);
-    const encryptedMsg = ref('');
     const currentSelectedName = ref('');
-
-    const addressPatternShort = "^[0-9A-Za-z]{40}$";
-    const addressPatternLong = "^([0-9A-Za-z-]-[0-9A-Za-z-]){46}$";
-
-    const addressErrorMsg = computed(() =>{
-      if(recipient.value.length > 40 && !recipient.value.match(addressPatternLong)){
-        return 'Recipient Address Network unsupported';
-      }else{
-        return 'Invalid Recipient';
-      }
-    });
-
-    const showAddressError = computed(()=>{
-      if(recipient.value != ''){
-        if(recipient.value.match(addressPatternShort) || recipient.value.match(addressPatternLong)){
-          return false;
-        }else{
-          return true;
-        }
-      }else{
-        return false;
-      }
-    });
+    const divisibility = ref("0");
+    const showDivisibilityErr = ref(false);
+    const isTransferable = ref('');
+    const isMutable = ref('');
+    const disabledMutableCheck = ref(false);
+    const disabledTransferableCheck = ref(false);
+    const disabledPassword = ref(false);
+    const disabledSupply = ref(false);
+    const disabledDivisibility = ref(false);
+    const disabledClear = ref(false);
+    const toggleAnounceNotification = ref(false);
+    const supplyPrecision = ref(divisibility.value);
+    const disabledDuration = ref(false);
+    const durationOption =ref('month');
+    const duration = ref('1');
+    const showDurationErr = ref(false);
 
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
+    const durationCheckDisabled = ref(false);
+
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && !showAddressError.value && recipient.value != ''
+      walletPassword.value.match(passwdPattern) && !disabledMutableCheck.value && (divisibility.value != '') && (supply.value > 0) && (!showDurationErr.value)
     ));
-    // get balance
+
     const selectedAccName = ref(appStore.getFirstAccName());
     const selectedAccAdd = ref(appStore.getFirstAccAdd());
-    // const balance = ref(appStore.getFirstAccBalance());
-    const balance = ref('0.000000');
-    balance.value = appStore.getFirstAccBalance();
-    if(balance.value == '0.000000'){
-      showBalanceErr.value = true;
+    const balance = ref(appStore.getFirstAccBalance(selectedAccAdd.value));
+    // balance.value = appStore.getFirstAccBalance();
+
+    const showNoBalance = ref(false);
+    console.log(balance.value);
+    if(balance.value < 10000){
+      showNoBalance.value = true;
+      disabledMutableCheck.value = true;
+      disabledTransferableCheck.value = true;
+      disabledPassword.value = true;
+      disabledSupply.value = true;
+      disabledDivisibility.value = true;
+      disabledClear.value = true;
+      disabledDuration.value = true;
+      durationCheckDisabled.value = true;
+    }else{
+      disabledMutableCheck.value = false;
+      disabledTransferableCheck.value = false;
+      disabledPassword.value = false;
+      disabledSupply.value = false;
+      disabledDivisibility.value = false;
+      disabledClear.value = false;
+      disabledDuration.value = false;
+      durationCheckDisabled.value = false;
     }
 
+    const supply = ref('0');
     const accounts = computed( () => appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts);
     const sendXPX = ref('0.000000');
     const moreThanOneAccount = computed(()=> (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false);
@@ -152,16 +180,10 @@ export default {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.addressraw;
       balance.value = i.balance;
-      (balance.value==0)?showBalanceErr.value = true:showBalanceErr.value = false;
+      (balance.value < 10000)?showNoBalance.value = true:showNoBalance.value = false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
     }
-
-    const encryptedMsgDisable = ref(true);
-
-    const addMosaicsButton = computed(() => {
-      return true;
-    });
 
     const contact = computed(() => {
       return appStore.getContact();
@@ -169,34 +191,15 @@ export default {
 
     const clearInput = () => {
       walletPassword.value = '';
+      divisibility.value = '0';
+      supply.value = '0';
+      duration.value = '1';
+      durationOption.value = 'month';
+      disabledDuration.value = '';
+      isTransferable.value = '';
+      isMutable.value = '';
       emitter.emit("CLEAR_SELECT", 0);
     };
-
-    const clearMsg = () => {
-      messageText.value = '';
-      emitter.emit("CLEAR_TEXTAREA", 0);
-    }
-
-    const updateAdd = (e) => {
-      recipient.value = e;
-    };
-
-    const makeTransfer = () => {
-      let transferStatus = makeTransaction(recipient.value, sendXPX.value, messageText.value, walletPassword.value, appStore);
-      if(transferStatus<0){
-        err.value = 'Invalid wallet password';
-      }
-    };
-
-    watch(recipient, (add) => {
-      if(add.match(addressPatternLong) || add.match(addressPatternShort)){
-        appStore.verifyRecipientInfo(recipient.value, siriusStore.accountHttp).then((res)=>{
-          encryptedMsgDisable.value = res;
-        });
-      }else{
-        encryptedMsgDisable.value = true;
-      }
-    });
 
     watch(currentSelectedName, (n, o) => {
       if(n!=o){
@@ -204,17 +207,83 @@ export default {
       }
     });
 
+    watch(divisibility, (n) => {
+      supplyPrecision.value = parseInt(n);
+    });
+
+    watch(balance, (n) => {
+      console.log(n);
+      if(n < 10000){
+        showNoBalance.value = true;
+        disabledMutableCheck.value = true;
+        disabledTransferableCheck.value = true;
+        disabledPassword.value = true;
+        disabledSupply.value = true;
+        disabledDivisibility.value = true;
+        disabledClear.value = true;
+        disabledDuration.value = true;
+        durationCheckDisabled.value = true;
+      }else{
+        disabledMutableCheck.value = false;
+        disabledTransferableCheck.value = false;
+        disabledPassword.value = false;
+        disabledSupply.value = false;
+        disabledDivisibility.value = false;
+        disabledClear.value = false;
+        disabledDuration.value = false;
+        durationCheckDisabled.value = false;
+      }
+    });
+
+    watch(durationOption, () => {
+      duration.value = '1';
+    });
+
+    watch(disabledDuration, (n) => {
+      (n)?duration.value = '':duration.value = '1';
+    });
+
+    watch(duration, (n) =>{
+      if(durationOption.value=='year' && n > 10){
+        showDurationErr.value = true;
+      }else if(durationOption.value=='month' && n > 120){
+        showDurationErr.value = true;
+      }else{
+        showDurationErr.value = false;
+      }
+    });
+
+    const createMosaic = () => {
+      let createStatus = mosaicTransaction(divisibility.value, supply.value, duration.value, durationOption.value, isMutable.value, isTransferable.value, walletPassword.value, selectedAccName.value, appStore, siriusStore);
+      if(!createStatus){
+        err.value = 'Invalid wallet password';
+      }else{
+        // transaction made
+        err.value = '';
+        toggleAnounceNotification.value = true;
+        var audio = new Audio(require('@/assets/audio/ding.ogg'));
+        audio.play();
+      }
+    };
+
+    emitter.on("CLOSE_NOTIFICATION", payload => {
+      toggleAnounceNotification.value = payload;
+    });
+
     return {
       appStore,
+      accounts,
       moreThanOneAccount,
       showMenu,
       currentSelectedName,
       selectedAccName,
       selectedAccAdd,
-      addressErrorMsg,
-      showAddressError,
+      isTransferable,
+      isMutable,
       balance,
-      showBalanceErr,
+      showNoBalance,
+      showSupplyErr,
+      showDivisibilityErr,
       err,
       contact,
       recipient,
@@ -227,14 +296,23 @@ export default {
       disableCreate,
       clearInput,
       showPasswdError,
-      updateAdd,
-      addMosaicsButton,
-      clearMsg,
-      accounts,
       changeSelection,
-      encryptedMsgDisable,
-      encryptedMsg,
-      makeTransfer,
+      supply,
+      divisibility,
+      disabledMutableCheck,
+      disabledTransferableCheck,
+      disabledPassword,
+      disabledSupply,
+      disabledDivisibility,
+      disabledClear,
+      supplyPrecision,
+      createMosaic,
+      toggleAnounceNotification,
+      disabledDuration,
+      durationOption,
+      duration,
+      showDurationErr,
+      durationCheckDisabled,
     }
   },
 

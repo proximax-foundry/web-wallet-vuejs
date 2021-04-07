@@ -4,7 +4,7 @@
       <div class="text-icon-outline text-icon">
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
       </div>
-      <input :disabled="disabled=='true'" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="text-placeholder bg-white" :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()">
+      <input :disabled="disabled" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="text-placeholder bg-white" :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()">
       <div class="w-1/12 flex-none"></div>
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
@@ -13,14 +13,14 @@
 
 <script>
 export default{
-  props: [
-    'placeholder',
-    'errorMessage',
-    'icon',
-    'showError',
-    'disabled',
-    'modelValue'
-  ],
+  props: {
+    placeholder: String,
+    errorMessage: String,
+    icon: String,
+    showError: Boolean,
+    disabled: Boolean,
+    modelValue: String,
+  },
   emits:[
     'update:modelValue'
   ],
@@ -57,7 +57,6 @@ export default{
       this.textErr = false;
       this.borderColor = 'border border-gray-300';
     });
-
   }
 }
 </script>

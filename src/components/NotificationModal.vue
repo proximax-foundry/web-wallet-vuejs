@@ -15,15 +15,17 @@
         </div>
       </div>
     </transition>
-    <div @click="close();" v-if="toggleModal" :class="`fixed inset-0 bg-opacity-30 ${bgColor}`"></div>
+    <div @click="close();" v-if="toggleModal" :class="`z-30 fixed inset-0 bg-opacity-30 ${bgColor}`"></div>
   </div>
 </template>
 
 <script>
 import { computed, getCurrentInstance, watch } from 'vue';
-
+import { trasnferEmitter } from '../util/transfer.js';
+import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 export default{
-  name: 'SignInModal',
+  name: 'NotificationModal',
+  components: { FontAwesomeIcon },
   props:['name', 'toggleModal', 'msg', 'time', 'notiType'],
 
   setup(p){
@@ -43,16 +45,19 @@ export default{
     if(p.toggleModal){
       setTimeout(() => {
         emitter.emit("CLOSE_NOTIFICATION", false);
+        trasnferEmitter.emit("CLOSE_NOTIFICATION", false);
       }, p.time);
     }
 
     const close= () => {
       emitter.emit("CLOSE_NOTIFICATION", false);
+      trasnferEmitter.emit("CLOSE_NOTIFICATION", false);
     }
 
     watch(() => p.toggleModal, () => {
       setTimeout(() => {
         emitter.emit("CLOSE_NOTIFICATION", false);
+        trasnferEmitter.emit("CLOSE_NOTIFICATION", false);
       }, p.time);
     });
 

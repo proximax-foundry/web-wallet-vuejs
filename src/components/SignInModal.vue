@@ -75,11 +75,6 @@ export default{
     );
 
     const login = () => {
-      // if (disableLogin.value) {
-      //   err.value = "Please enter a valid password";
-      //   loading.value = false;
-      //   return;
-      // }
 
       var result = appStore.loginToWallet(selectedWallet.value, walletPassword.value, siriusStore.accountHttp, siriusStore.namespaceHttp);
       if (result == -1) {

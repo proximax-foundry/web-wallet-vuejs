@@ -3,10 +3,10 @@
     <div class="text-outline bg-white" :class="borderColor">
       <div class="text-icon-outline text-icon">
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
-        <div class="ml-6 text-xs mt-1 text-gray-500">{{ (title!=undefined)?title:'Send' }}</div>
+        <div class="ml-6 text-xs mt-1 text-gray-500">Divisibility</div>
       </div>
       <!-- <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="text-placeholder bg-white text-right" :placeholder="placeholder" @click="clickInputText()" @keypress="validate(event)"> -->
-      <input :disabled="disabled" ref="inputRef" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" :placeholder="placeholder" class="text-placeholder bg-white text-right" @click="clickInputText()" @keypress="validate(event)">
+      <input :disabled="disabled" :value="modelValue" type="number" min="0" :max="max" @input="$emit('update:modelValue', $event.target.value)" :placeholder="placeholder" class="text-placeholder bg-white text-right" @click="clickInputText()" @keypress="validate(event)">
       <div class="w-5"></div>
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
@@ -14,7 +14,6 @@
 </template>
 
 <script>
-import useCurrencyInput from 'vue-currency-input';
 
 export default{
   props: {
@@ -23,25 +22,16 @@ export default{
     icon: String,
     showError: Boolean,
     modelValue: String,
-    options: Object,
     title: String,
     disabled: Boolean,
-  },
-
-  setup (props) {
-    const { formatedValue, inputRef } = useCurrencyInput(props.options)
-
-    return {
-      inputRef,
-      formatedValue,
-    }
+    max: String,
   },
 
   emits:[
     'update:modelValue'
   ],
 
-  name: 'SendInput',
+  name: 'DivisibilityInput',
 
   data() {
     return {

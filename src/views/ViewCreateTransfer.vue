@@ -38,12 +38,16 @@
         </div>
         <div class="text-left p-3 pb-0 border-l-8 border-gray-100">
           <div class="bg-gray-100 rounded-2xl p-3">
-            <div class="inline-block mr-4 text-tsm"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} XPX</span></div>
+            <div class="inline-block mr-4 tfaddext-tsm"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ appStore.getFirstAccBalance(selectedAccAdd) }} XPX</span></div>
           </div>
-          <SendInput v-model="sendXPX" placeholder="Enter Amount" type="text" icon="coins" :showError="showBalanceErr" errorMessage="Insufficient balance" :options="{ currency: 'USD', precision: 6, autoDecimalMode:true, distractionFree: false, allowNegative: false }" class="mt-5" />
+          <SupplyInput v-model="sendXPX" title="Send" :balance="Number(appStore.getFirstAccBalance(selectedAccAdd))" placeholder="Enter Amount" type="text" icon="coins" :showError="showBalanceErr" errorMessage="Insufficient balance" :decimal="6" class="mt-5" />
+        </div>
+        <div v-for="(mosaic, index) in mosaicsCreated" :key="index">
+          <MosaicInput placeholder="Select mosaic" errorMessage="" v-model="selectedMosaic[index].id" :index="index" :options="mosaics" :disableOptions="selectedMosaic" @show-mosaic-selection="updateMosaic" @remove-mosaic-selected="removeMosaic" />
+          <SupplyInput v-if="selectedMosaic[index].id!=0" v-model="selectedMosaic[index].amount" :balance="appStore.getMosaicInfo(selectedAccAdd, selectedMosaic[index].id).amount" placeholder="Enter Amount" type="text" icon="coins" :showError="showBalanceErr" errorMessage="Insufficient balance" :decimal="mosaicSupplyDivisibility[index]" />
         </div>
         <div>
-          <button class="mb-5 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50" :disabled="addMosaicsButton">(+) Add Mosaics</button>
+          <button class="mb-5 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50" :disabled="addMosaicsButton" @click="displayMosaicsOption">(+) Add Mosaics</button>
         </div>
         <div class="mb-5 border-t pt-4 border-gray-200">
           <div class="rounded-2xl bg-gray-100 p-5">
@@ -69,18 +73,18 @@
     </form>
     <AddContactModal :toggleModal="togglaAddContact" :saveAddress="recipient" />
     <NotificationModal :toggleModal="toggleAnounceNotification" msg="Unconfirmed transaction" notiType="noti" time='2500' />
-    <!-- <NotificationModal :toggleModal="toggleContactNotification" msg="Contact successfully saved" notiType="noti" time='2500' /> -->
   </div>
 </template>
 <script>
 import { computed, ref, inject, getCurrentInstance, watch } from 'vue';
-// import { useRouter } from "vue-router";
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInput from '@/components/SelectInput.vue';
-import SendInput from '@/components/SendInput.vue';
+import MosaicInput from '@/components/MosaicInput.vue';
+// import SendInput from '@/components/SendInput.vue';
+import SupplyInput from '@/components/SupplyInput.vue';
 import TextareaInput from '@/components/TextareaInput.vue';
-import { makeTransaction } from '../util/transfer.js';
+import { makeTransaction, getMosaics } from '../util/transfer.js';
 import AddContactModal from '@/components/AddContactModal.vue';
 import NotificationModal from '@/components/NotificationModal.vue';
 import { verifyAddress } from '../util/functions.js';
@@ -90,12 +94,15 @@ export default {
   components: {
     TextInput,
     PasswordInput,
+    MosaicInput,
     SelectInput,
-    SendInput,
+    // SendInput,
+    SupplyInput,
     TextareaInput,
     AddContactModal,
     NotificationModal
   },
+
   setup(){
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
@@ -114,32 +121,19 @@ export default {
     const currentSelectedName = ref('');
     const togglaAddContact = ref(false);
     const toggleAnounceNotification = ref(false);
-    // const toggleContactNotification = ref(false);
+    const selectedMosaic = ref([]);
+    const mosaicsCreated = ref([]);
+    const mosaicsSelected = ref([]);
+    const selectedMosaicAmount = ref([]);
+    const mosaicSupplyDivisibility = ref([]);
+    const currentlySelectedMosaic = ref([]);
+    const sendXPX = ref('0.000000');
+    const encryptedMsgDisable = ref(true);
 
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
 
-    // const addressErrorMsg = computed(() =>{
-    //   if(recipient.value.length > 40 && !recipient.value.match(addressPatternLong)){
-    //     return 'Recipient Address Network unsupported';
-    //   }else{
-    //     return 'Invalid Recipient';
-    //   }
-    // });
-
-    // const showAddressError = computed(()=>{
-    //   if(recipient.value != ''){
-    //     if(recipient.value.match(addressPatternShort) || recipient.value.match(addressPatternLong)){
-    //       return false;
-    //     }else{
-    //       return true;
-    //     }
-    //   }else{
-    //     return false;
-    //   }
-    // });
     const addMsg = ref('');
-    // const isVerifyRecipientAdd = ref(false);
     const showAddressError = ref(false);
     const addressErrorMsg = computed(
       () => {
@@ -148,35 +142,21 @@ export default {
       }
     );
 
-    watch(recipient, ()=>{
-      console.log((recipient.value.length == 46 && recipient.value.match(addressPatternLong)));
-      if((recipient.value.length == 46 && recipient.value.match(addressPatternLong)) || (recipient.value.length == 40 && recipient.value.match(addressPatternShort))) {
-        const verifyRecipientAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), recipient.value);
-        showAddressError.value = !verifyRecipientAddress.isPassed.value;
-        console.log('Pass: ' + showAddressError.value)
-        addMsg.value = verifyRecipientAddress.errMessage.value;
-      }else{
-        (recipient.value.length>0)?(showAddressError.value = true):(showAddressError.value = false);
-      }
-    });
-
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
     const disableCreate = computed(() => !(
       walletPassword.value.match(passwdPattern) && !showAddressError.value && recipient.value.length > 0
     ));
+
     // get balance
     const selectedAccName = ref(appStore.getFirstAccName());
     const selectedAccAdd = ref(appStore.getFirstAccAdd());
-    // const balance = ref(appStore.getFirstAccBalance());
-    const balance = ref('0.000000');
-    balance.value = appStore.getFirstAccBalance();
+    const balance = ref(appStore.getFirstAccBalance(selectedAccAdd.value));
     if(balance.value == '0.000000'){
       showBalanceErr.value = true;
     }
 
     const accounts = computed( () => appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts);
-    const sendXPX = ref('0.000000');
     const moreThanOneAccount = computed(()=> (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false);
 
     const changeSelection = (i) => {
@@ -186,13 +166,15 @@ export default {
       (balance.value==0)?showBalanceErr.value = true:showBalanceErr.value = false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
+
+      // reset mosaic selection
+      selectedMosaic.value = [];
+      mosaicsCreated.value = [];
+      selectedMosaicAmount.value = [];
+      mosaicSupplyDivisibility.value = [];
     }
 
-    const encryptedMsgDisable = ref(true);
-
-    const addMosaicsButton = computed(() => {
-      return true;
-    });
+    // get mosaic info
 
     const contact = computed(() => {
       return appStore.getContact();
@@ -205,6 +187,10 @@ export default {
       messageText.value = '';
       sendXPX.value = '0.000000';
       emitter.emit("CLEAR_SELECT", 0);
+      selectedMosaic.value = [];
+      mosaicsCreated.value = [];
+      selectedMosaicAmount.value = [];
+      mosaicSupplyDivisibility.value = [];
     };
 
     const clearMsg = () => {
@@ -212,12 +198,13 @@ export default {
       emitter.emit("CLEAR_TEXTAREA", 0);
     }
 
+    // update select
     const updateAdd = (e) => {
       recipient.value = e;
     };
 
     const makeTransfer = () => {
-      let transferStatus = makeTransaction(recipient.value.toUpperCase(), sendXPX.value, messageText.value, walletPassword.value, selectedAccName.value, encryptedMsg.value, appStore, siriusStore);
+      let transferStatus = makeTransaction(recipient.value.toUpperCase(), sendXPX.value, messageText.value, selectedMosaic.value, mosaicSupplyDivisibility.value, walletPassword.value, selectedAccName.value, encryptedMsg.value, appStore, siriusStore);
       if(!transferStatus){
         err.value = 'Invalid wallet password';
       }else{
@@ -233,14 +220,64 @@ export default {
         }
         // shpw notification
         toggleAnounceNotification.value = true;
-
+        // getMosaics(appStore, siriusStore);
         // play notification sound
         var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play();
       }
     };
 
+    // get mosaics of current selected account
+    getMosaics(appStore, siriusStore);
+    const addMosaicsButton = computed(() => {
+      return ((appStore.getAccDetails(selectedAccName.value).mosaic.length == 0) || (mosaicsCreated.value.length == appStore.getAccDetails(selectedAccName.value).mosaic.length));
+    });
+    // generate mosaic selector
+    const mosaics = computed(() => {
+        var mosaicOption = [];
+        if(appStore.getAccDetails(selectedAccName.value).mosaic.length > 0){
+          appStore.getAccDetails(selectedAccName.value).mosaic.forEach((i, index)=>{
+            mosaicOption.push({
+              val: i.id,
+              text: i.id + ' > Balance: ' + i.amount.toFixed(i.divisibility),
+              id: (index + 1),
+            });
+          });
+        }
+        return mosaicOption;
+    });
+
+    const displayMosaicsOption = () => {
+      mosaicsCreated.value.push(0);
+      selectedMosaic.value.push({ id: 0, amount: "0" });
+    };
+
+    // update mosaic
+    const updateMosaic = (e) => {
+      // get mosaic info and format divisibility in supply input
+      const mosaic = appStore.getMosaicInfo(selectedAccAdd.value, selectedMosaic.value[e.index].id);
+      selectedMosaic.value[e.index].amount = '0';
+      mosaicSupplyDivisibility.value[e.index] = mosaic.divisibility;
+    };
+
+    const removeMosaic = (e) => {
+      mosaicsCreated.value.splice(e.index, 1);
+      selectedMosaic.value.splice(e.index, 1);
+      mosaicSupplyDivisibility.value.splice(e.index, 1);
+    }
+
     watch(recipient, (add) => {
+      // console.log((recipient.value.length == 46 && recipient.value.match(addressPatternLong)));
+      if((recipient.value.length == 46 && recipient.value.match(addressPatternLong)) || (recipient.value.length == 40 && recipient.value.match(addressPatternShort))) {
+        const verifyRecipientAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), recipient.value);
+        showAddressError.value = !verifyRecipientAddress.isPassed.value;
+        // console.log('Pass: ' + showAddressError.value)
+        addMsg.value = verifyRecipientAddress.errMessage.value;
+      }else{
+        (recipient.value.length>0)?(showAddressError.value = true):(showAddressError.value = false);
+      }
+
+      // show and hide encrypted message option
       if(add.match(addressPatternLong) || add.match(addressPatternShort)){
         appStore.verifyRecipientInfo(recipient.value, siriusStore.accountHttp).then((res)=>{
           encryptedMsgDisable.value = res;
@@ -298,7 +335,16 @@ export default {
       makeTransfer,
       togglaAddContact,
       toggleAnounceNotification,
-      // toggleContactNotification,
+      displayMosaicsOption,
+      selectedMosaic,
+      mosaicsCreated,
+      mosaicsSelected,
+      mosaics,
+      selectedMosaicAmount,
+      mosaicSupplyDivisibility,
+      updateMosaic,
+      currentlySelectedMosaic,
+      removeMosaic,
     }
   },
 

@@ -28,6 +28,7 @@
         </div>
       </div>
     </div>
+    <NotificationModal :toggleModal="toggleAnounceNotification" msg="Transaction confirmed" notiType="noti" time='2500' />
   </div>
   <div class="flex-none self-center header-menu" v-else>
     <div class="w-16 text-center inline-block">
@@ -40,12 +41,16 @@
 </template>
 
 <script>
-import { computed, inject } from "vue";
+import { computed, inject, ref } from "vue";
 import { useRouter } from "vue-router";
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
+import { trasnferEmitter } from '../util/transfer.js';
+import NotificationModal from '@/components/NotificationModal.vue';
+
 export default{
   components: {
-    FontAwesomeIcon
+    FontAwesomeIcon,
+    NotificationModal,
   },
   name: 'headerComponent',
   data() {
@@ -58,6 +63,7 @@ export default{
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
     const router = useRouter();
+    const toggleAnounceNotification = ref(false);
     const networkType = computed(
       () => {
         return siriusStore.getNetworkByType(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network);
@@ -100,12 +106,24 @@ export default{
       return appStore.getTotalBalance();
     });
 
+    trasnferEmitter.on("TRANSACTION_CONFIRMED_NOTIFICATION", payload => {
+      console.log('yay notify' + payload);
+      toggleAnounceNotification.value = true;
+      var audio = new Audio(require('@/assets/audio/ding.ogg'));
+      audio.play();
+    });
+
+    trasnferEmitter.on("CLOSE_NOTIFICATION", payload => {
+      toggleAnounceNotification.value = payload;
+    });
+
     return {
       appStore,
       networkType,
       loginStatus,
       logout,
       totalBalance,
+      toggleAnounceNotification,
       // walletName
     };
   },
@@ -123,6 +141,9 @@ export default{
       }else{
         this.wideScreen = true;
       }
+    },
+    displayNotification: function (){
+      console.log('hellonotti')
     }
   }
 }
