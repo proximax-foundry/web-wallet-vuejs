@@ -1,6 +1,6 @@
 <template>
   <div class="flex-none self-center flex items-end logo">
-    <router-link to="/"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">v{{ appStore.version }}</span>
+    <router-link :to="(appStore.state.currentLoggedInWallet)?'/dashboard':'/'"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">v{{ appStore.version }}</span>
   </div>
   <div class="flex-grow h-16"></div>
   <div class="flex-none header-menu mt-3" v-if="loginStatus">
@@ -16,7 +16,7 @@
       <div class="w-52 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
         <div>
           <div class="text-xs inline-block">{{ appStore.state.currentLoggedInWallet.name }}</div>
-          <div class="text-xs">Total Balance: <span>100,000.0000</span> XPX</div>
+          <div class="text-xs">Total Balance: <span>{{ totalBalance }}</span> XPX</div>
         </div>
       </div>
       <div class="w-17 text-center h-10 items-center gray-line-left">
@@ -28,6 +28,7 @@
         </div>
       </div>
     </div>
+    <NotificationModal :toggleModal="toggleAnounceNotification" msg="Transaction confirmed" notiType="noti" time='2500' />
   </div>
   <div class="flex-none self-center header-menu" v-else>
     <div class="w-16 text-center inline-block">
@@ -40,12 +41,16 @@
 </template>
 
 <script>
-import { computed, inject } from "vue";
+import { computed, inject, ref } from "vue";
 import { useRouter } from "vue-router";
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
+import { trasnferEmitter } from '../util/transfer.js';
+import NotificationModal from '@/components/NotificationModal.vue';
+
 export default{
   components: {
-    FontAwesomeIcon
+    FontAwesomeIcon,
+    NotificationModal,
   },
   name: 'headerComponent',
   data() {
@@ -58,6 +63,7 @@ export default{
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
     const router = useRouter();
+    const toggleAnounceNotification = ref(false);
     const networkType = computed(
       () => {
         return siriusStore.getNetworkByType(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network);
@@ -76,7 +82,7 @@ export default{
     const getAccountInfo = async () => {
       if (!appStore.state.currentLoggedInWallet) {
         // check sessionStorage
-        if(!appStore.checkFromSession()){
+        if(!appStore.checkFromSession(siriusStore.accountHttp, siriusStore.namespaceHttp)){
           useRouter().replace({ path: "/" });
         }
       }
@@ -88,7 +94,7 @@ export default{
       () => {
         if(!appStore.state.currentLoggedInWallet){
           // if empty, check from sessionStorage
-          return appStore.checkFromSession();
+          return appStore.checkFromSession(siriusStore.accountHttp, siriusStore.namespaceHttp);
         }else{
           // remain logged in when state.wallet is available
           return true;
@@ -96,11 +102,28 @@ export default{
       }
     );
 
+    const totalBalance = computed(()=>{
+      return appStore.getTotalBalance();
+    });
+
+    trasnferEmitter.on("TRANSACTION_CONFIRMED_NOTIFICATION", payload => {
+      console.log('yay notify' + payload);
+      toggleAnounceNotification.value = true;
+      var audio = new Audio(require('@/assets/audio/ding.ogg'));
+      audio.play();
+    });
+
+    trasnferEmitter.on("CLOSE_NOTIFICATION", payload => {
+      toggleAnounceNotification.value = payload;
+    });
+
     return {
       appStore,
       networkType,
       loginStatus,
       logout,
+      totalBalance,
+      toggleAnounceNotification,
       // walletName
     };
   },
@@ -118,6 +141,9 @@ export default{
       }else{
         this.wideScreen = true;
       }
+    },
+    displayNotification: function (){
+      console.log('hellonotti')
     }
   }
 }

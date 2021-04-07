@@ -46,19 +46,21 @@ function verifyNetworkAddressEqualsNetwork(currentPrimaryAdd, add) {
 
 export const verifyAddress = (currentAdd, add) => {
   const address = (add !== undefined && add !== null && add !== '') ? add.split('-').join('') : '';
-  const verify = ref(false);
-  const msg = ref('');
+  const isPassed = ref(false);
+  const errMessage = ref('');
   if (address !== null && address !== undefined && address.length === 40) {
-    if(verifyNetworkAddressEqualsNetwork(currentAdd, add)){
-      verify.value =  true;
+    if(verifyNetworkAddressEqualsNetwork(currentAdd, add.toUpperCase())){
+      isPassed.value =  true;
     }else{
-      verify.value = false;
-      msg.value = 'Recipient Address Network unsupported';
+      isPassed.value = false;
+      errMessage.value = 'Recipient Address Network unsupported';
     }
   }else{
-    verify.value = false;
+    isPassed.value = false;
   }
   return {
-    verify, msg
+    isPassed, errMessage
   }
 }
+
+
