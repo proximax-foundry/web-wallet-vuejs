@@ -18,6 +18,7 @@
         </div>
         <div class="flex justify-between">
           <div class="inline-block mr-4"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"><span class="text-xs">{{ account.balance }} XPX</span></div>
+          <div class="inline-block mr-4" :title="`Other mosaic${(account.mosaic.length>1)?'s':''}: ${account.mosaic.length}`"><img src="../assets/img/icon-mosaics-green-16h.svg" class="w-5 inline mr-1"><span class="text-xs">{{ account.mosaic.length }}</span></div>
           <div class="relative inline-block text-left">
             <div>
               <button type="button" @click="showHideMenu();" class="justify-center px-4 py-2 text-gray-700 focus:outline-none" id="options-menu" aria-expanded="true" aria-haspopup="true">
