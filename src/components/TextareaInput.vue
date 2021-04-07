@@ -4,7 +4,7 @@
       <div class="text-icon-outline text-icon self-center">
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
       </div>
-      <textarea :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" @keypress="countChar" rows=2 class="mt-7 ml-2 self-center w-full text-gray-500 focus:outline-none bg-white text-md" :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()"></textarea>
+      <textarea :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" @keypress="countChar" rows=2 class="mt-7 ml-2 self-center w-full text-gray-500 focus:outline-none bg-white text-md" :placeholder="placeholder" @click="clickInputText()"></textarea>
       <div class="w-1 flex-none"></div>
     </div>
     <div class="float-right mt-1 text-tsm text-gray-800">{{remainingChar}}/1024</div>
@@ -80,15 +80,15 @@ export default{
       }
     },
 
-    blurInputText: function() {
-      if(this.modelValue == ''){
-        this.borderColor = 'border-2 border-red-primary';
-        this.textErr = true;
-      }else{
-        this.borderColor = 'border-2 border-gray-300';
-        this.textErr = false;
-      }
-    },
+    // blurInputText: function() {
+    //   if(this.modelValue == ''){
+    //     this.borderColor = 'border-2 border-red-primary';
+    //     this.textErr = true;
+    //   }else{
+    //     this.borderColor = 'border-2 border-gray-300';
+    //     this.textErr = false;
+    //   }
+    // },
   },
   mounted() {
     this.emitter.on("CLEAR_TEXT", payload => {

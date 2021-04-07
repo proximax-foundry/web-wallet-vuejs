@@ -60,14 +60,13 @@ export default {
     );
 
     watch(address, ()=>{
-      const a = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), address.value);
-      verifyAdd.value = a.verify.value;
-      addMsg.value = a.msg.value;
+      const verifyContactAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), address.value);
+      verifyAdd.value = verifyContactAddress.isPassed.value;
+      addMsg.value = verifyContactAddress.errMessage.value;
     });
 
     const SaveContact = () => {
       let added = appStore.saveContact(contactName.value, address.value);
-      console.log(added);
       if(added===true){
         err.value = '';
         contactName.value = '';

@@ -5,8 +5,7 @@
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
         <div class="ml-6 text-xs mt-1 text-gray-500">{{ (title!=undefined)?title:'Send' }}</div>
       </div>
-      <!-- <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="text-placeholder bg-white text-right" :placeholder="placeholder" @click="clickInputText()" @keypress="validate(event)"> -->
-      <input :disabled="disabled" ref="inputRef" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" :placeholder="placeholder" class="text-placeholder bg-white text-right" @click="clickInputText()" @keypress="validate(event)">
+      <input :disabled="disabled" :value="parseFloat(modelValue).toFixed(decimal)" @input="$emit('update:modelValue', parseFloat($event.target.value).toFixed(decimal))" :placeholder="placeholder" class="text-placeholder bg-white text-right" @click="clickInputText()" @keypress="validate($event)" @keyup="checkBalance($event)">
       <div class="w-5"></div>
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
@@ -14,7 +13,6 @@
 </template>
 
 <script>
-import useCurrencyInput from 'vue-currency-input';
 
 export default{
   props: {
@@ -26,22 +24,24 @@ export default{
     options: Object,
     title: String,
     disabled: Boolean,
+    decimal: Number,
+    balance: Number,
   },
 
-  setup (props) {
-    const { formatedValue, inputRef } = useCurrencyInput(props.options)
+  // setup (props) {
+  //   const { formatedValue, inputRef } = useCurrencyInput(props.options)
 
-    return {
-      inputRef,
-      formatedValue,
-    }
-  },
+  //   return {
+  //     inputRef,
+  //     formatedValue,
+  //   }
+  // },
 
   emits:[
     'update:modelValue'
   ],
 
-  name: 'SendInput',
+  name: 'SupplyInput',
 
   data() {
     return {
@@ -58,17 +58,16 @@ export default{
       }
     },
 
-    // blurInputText: function() {
-    //   if(this.modelValue == ''){
-    //     this.borderColor = 'border-2 border-red-primary';
-    //     this.textErr = true;
-    //   }else{
-    //     this.borderColor = 'border-2 border-gray-300';
-    //     this.textErr = false;
-    //   }
-    // },
+    checkBalance: function(evt){
+      if(this.balance < evt.target.value){
+        this.textErr = true;
+      }else{
+        this.textErr = false;
+      }
+    },
 
     validate: function(evt) {
+      // verify balance
       var theEvent = evt || window.event;
       // Handle paste
       if (theEvent.type === 'paste') {
@@ -85,6 +84,7 @@ export default{
       }
     }
   },
+
   mounted() {
     this.emitter.on("CLEAR_TEXT", payload => {
       this.inputText = payload;

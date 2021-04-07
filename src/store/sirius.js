@@ -7,6 +7,7 @@ import {
   Listener,
   NetworkHttp,
   NodeHttp,
+  MosaicHttp,
   Account
 } from "tsjs-xpx-chain-sdk";
 const sdk = require('tsjs-xpx-chain-sdk');
@@ -29,6 +30,10 @@ function getNetworkByType(typeid){
   return config.network.find((element) => element.type == typeid);
 }
 
+// function getNetworkByName(name){
+//   return config.network.find((element) => element.name == name);
+// }
+
 // ALWAYS use function selectNewChainNode to change currentChainNode value, to avoid web socket listening on old node
 const currentChainNode = ref(getChainNodes()[0]);
 const listenerChainWS = ref(null);
@@ -47,6 +52,7 @@ const blockHttp = computed(() => new BlockHttp(state.selectedChainNode));
 const chainHttp = computed(() => new ChainHttp(state.selectedChainNode));
 const networkHttp = computed(() => new NetworkHttp(state.selectedChainNode));
 const nodeHttp = computed(() => new NodeHttp(state.selectedChainNode));
+const mosaicHttp = computed(() => new MosaicHttp(state.selectedChainNode));
 const namespaceHttp = computed(() => new sdk.NamespaceHttp(state.selectedChainNode));
 
 const chainWSListener = computed(() => {
@@ -172,10 +178,12 @@ function createNewAccountPrivateKey(pk, networkType){
 
 export const siriusStore = readonly({
   state,
+  // getNetworkByName,
   accountHttp,
   blockHttp,
   chainHttp,
   networkHttp,
+  mosaicHttp,
   namespaceHttp,
   nodeHttp,
   chainWSListener,

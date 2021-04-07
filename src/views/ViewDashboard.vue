@@ -1,10 +1,21 @@
 <template>
   <div class="md:grid md:grid-cols-2 mb-8">
     <div class="w-full text-center md:text-left mx-5">
-      <div class="font-bold">Primary_Account <span class="text-xs italic text-blue-700">Current default</span></div>
-      <div class="text-xs my-2">{{ primaryAccount }} <img src="../assets/img/icon-copy-clipboard-gray-proximax-sirius-wallet.svg" class="w-5 inline mx-2"><img src="../assets/img/icon-qr-code.svg" class="w-5 inline"></div>
+      <div class="font-bold">{{ primaryAccountName }} <span class="text-xs italic text-blue-700">Current default</span></div>
+      <div class="text-xs my-2">
+        <div class="relative inline-block">
+          <div class="absolute z-20 w-96 h-full"></div>
+          <input
+            id="address"
+            class="text-xs outline-none z-10 w-96"
+            type="text"
+            :value="primaryAccount"
+          />
+        </div>
+        <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline mx-2"></font-awesome-icon><img src="../assets/img/icon-qr-code.svg" class="w-5 inline">
+      </div>
       <div class="text-center md:text-left">
-        <div class="inline-block mr-4"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"><span class="text-xs">100,000.000000 XPX</span></div>
+        <div class="inline-block mr-4"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"><span class="text-xs">{{ primaryAccountBalance }} XPX</span></div>
         <div class="inline-block"><img src="../assets/img/icon-usd-blue.svg" class="w-5 inline mr-1"><span class="text-sm">USD 204.451</span></div>
       </div>
     </div>
@@ -44,6 +55,8 @@
 import { computed, inject} from 'vue';
 import DashboardDataTable from '@/components/DashboardDataTable.vue'
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
+import { copyKeyFunc } from '../util/functions.js';
+
 export default {
   name: 'ViewDashboard',
   components: {
@@ -53,6 +66,7 @@ export default {
 
   setup(){
     const appStore = inject("appStore");
+    const copy = (id) => copyKeyFunc(id);
     const primaryAccount = computed(
       () => {
           if (appStore.state.currentLoggedInWallet) {
@@ -63,8 +77,31 @@ export default {
       }
     );
 
+    const primaryAccountBalance = computed(
+      () => {
+          if (appStore.state.currentLoggedInWallet) {
+            return appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
+          }else{
+            return 0;
+          }
+      }
+    );
+
+    const primaryAccountName = computed(
+      () => {
+          if (appStore.state.currentLoggedInWallet) {
+            return appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).name;
+          }else{
+            return 0;
+          }
+      }
+    );
+
     return {
+      copy,
       primaryAccount,
+      primaryAccountBalance,
+      primaryAccountName,
     };
   }
 }

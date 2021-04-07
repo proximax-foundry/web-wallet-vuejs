@@ -17,5 +17,8 @@ switch(process.env.NODE_ENV){
 
 module.exports = {
   publicPath: publicPath,
-  assetsDir: './assets/'
+  assetsDir: './assets/',
+  devServer: {
+    host: 'localhost',
+  },
 }

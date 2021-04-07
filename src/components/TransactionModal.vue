@@ -39,7 +39,7 @@
                   <div class="text-sm">{{ d.msg }}</div>
                 </div>
                 <div class="mt-5">
-                  <span class="font-bold text-md">Amount: </span> <img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-2"> <span>{{ d.amount }} XPX</span>
+                  <span class="font-bold text-md">Amount: </span> <img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-2"> <span>{{ d.balance }} XPX</span>
                 </div>
               </div>
               <div class="block md:w-5/12 md:inline-block bg-gray-200 rounded-2xl p-2">
