@@ -89,16 +89,19 @@ export const makeTransaction = (recipient, sendXPX, messageText, mosaicsSent, mo
 
     var mosaics = [];
     if(xpxAmount > 0){
+      console.log('xpxAmount: ' + xpxAmount);
       mosaics.push(new Mosaic(new MosaicId(environment.mosaicXpxInfo.id), UInt64.fromUint(Number(xpxAmount))));
     }
     if(mosaicsSent.length > 0){
       mosaicsSent.forEach((mosaicSentInfo, index) => {
-        mosaics.push(
-          new Mosaic(
-            new MosaicId(mosaicSentInfo.id),
-            UInt64.fromUint(Number(mosaicSentInfo.amount * Math.pow(10, mosaicDivisibility[index])))
-          )
-        );
+        if(mosaicSentInfo.amount>0){
+          mosaics.push(
+            new Mosaic(
+              new MosaicId(mosaicSentInfo.id),
+              UInt64.fromUint(Number(mosaicSentInfo.amount * Math.pow(10, mosaicDivisibility[index])))
+            )
+          );
+        }
       });
     }
 
