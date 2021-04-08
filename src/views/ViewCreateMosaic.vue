@@ -24,7 +24,7 @@
               </div>
               <transition name="slide">
               <div v-if="showMenu" class="z-10">
-                <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50'" @click="changeSelection(item)" :title="'Address is ' + item.addressraw">
+                <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50'" @click="changeSelection(item)" :title="'Address is ' + item.address">
                   <div>{{ item.name }}</div>
                 </div>
               </div>
@@ -178,7 +178,7 @@ export default {
 
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
-      selectedAccAdd.value = i.addressraw;
+      selectedAccAdd.value = i.address;
       balance.value = i.balance;
       (balance.value < 10000)?showNoBalance.value = true:showNoBalance.value = false;
       showMenu.value = !showMenu.value;
@@ -263,6 +263,7 @@ export default {
         toggleAnounceNotification.value = true;
         var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play();
+        clearInput();
       }
     };
 

@@ -67,7 +67,7 @@ export default {
     });
     return {
       toggleModal,
-      msg
+      msg,
     };
   },
 }

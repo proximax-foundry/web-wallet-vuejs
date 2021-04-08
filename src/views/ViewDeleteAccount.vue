@@ -22,7 +22,7 @@
             id="address"
             class="text-sm w-full outline-none bg-gray-100 z-10"
             type="text"
-            :value="acc.address"
+            :value="acc.pretty"
           />
         </div>
         <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
@@ -69,6 +69,7 @@ export default {
 
     // get account details
     const acc = getAcccountDetails();
+    acc.pretty = appStore.pretty(acc.address);
     if(acc==-1 && acc.default){
       router.push({ name: "ViewDisplayAllAccounts"});
     }
