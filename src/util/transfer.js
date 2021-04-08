@@ -31,7 +31,7 @@ async function getAccInfo(address, accountHttp){
     const accountInfo = accountHttp.getAccountInfo(address);
     accountInfo.subscribe(
       (acc) => {
-        console.log(acc);
+        // console.log(acc);
         resolve(acc);
       },
       (error) => {
@@ -89,7 +89,6 @@ export const makeTransaction = (recipient, sendXPX, messageText, mosaicsSent, mo
 
     var mosaics = [];
     if(xpxAmount > 0){
-      console.log('xpxAmount: ' + xpxAmount);
       mosaics.push(new Mosaic(new MosaicId(environment.mosaicXpxInfo.id), UInt64.fromUint(Number(xpxAmount))));
     }
     if(mosaicsSent.length > 0){
@@ -232,7 +231,7 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
       .announce(signedTransaction)
       .subscribe((x) => {
         console.log(x);
-        console.log('annoucement is made here');
+        // console.log('annoucement is made here');
         return true;
       }, err => console.error(err));
   });
