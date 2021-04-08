@@ -18,7 +18,7 @@
         </div>
         <div class="flex justify-between">
           <div class="inline-block mr-4"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"><span class="text-xs">{{ account.balance }} XPX</span></div>
-          <div class="inline-block mr-4" :title="`Other mosaic${(account.mosaic.length>1)?'s':''}: ${account.mosaic.length}`"><img src="../assets/img/icon-mosaics-green-16h.svg" class="w-5 inline mr-1"><span class="text-xs">{{ account.mosaic.length }}</span></div>
+          <div class="inline-block mr-4" v-if="mosaicNum>0" :title="`Other mosaic${(mosaicNum>1)?'s':''}: ${mosaicNum}`"><img src="../assets/img/icon-mosaics-green-16h.svg" class="w-5 inline mr-1"><span class="text-xs">{{ account.mosaic.length }}</span></div>
           <div class="relative inline-block text-left">
             <div>
               <button type="button" @click="showHideMenu();" class="justify-center px-4 py-2 text-gray-700 focus:outline-none" id="options-menu" aria-expanded="true" aria-haspopup="true">
@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { inject, getCurrentInstance } from "vue";
+import { computed, inject, getCurrentInstance } from "vue";
 import CryptoJS from 'crypto-js';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import { copyKeyFunc } from '../util/functions.js';
@@ -59,6 +59,9 @@ export default{
     const siriusStore = inject("siriusStore");
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const copy = (id) => copyKeyFunc(id);
+    const mosaicNum = computed(() => {
+      return (p.account.mosaic!=undefined)?p.account.mosaic.length:0;
+    });
 
     const setAsDefaultAccount = (add) => {
       if(appStore.setAccountDefault(add)){
@@ -104,7 +107,8 @@ export default{
       copy,
       showHideMenu,
       setAsDefaultAccount,
-      exportWallet
+      exportWallet,
+      mosaicNum,
     }
   },
 }

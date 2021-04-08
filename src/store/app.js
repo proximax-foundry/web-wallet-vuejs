@@ -9,6 +9,7 @@ import {
   SimpleWallet,
   WalletAlgorithm,
 } from "tsjs-xpx-chain-sdk";
+import { getMosaics } from '../util/transfer.js';
 
 const sdk = require('tsjs-xpx-chain-sdk');
 
@@ -294,12 +295,13 @@ function deleteWallet(walletName, password) {
   return -1;
 }
 // check session to verify page has been refreshed
-function checkFromSession(accountHttp, namespaceHttp){
+function checkFromSession(appStore, siriusStore){
   const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
   if(walletSession){
     // session is not null - copy to state
     currentWallet.value = walletSession;
-    getXPXBalance(walletSession.name, accountHttp, namespaceHttp).then(() => {
+    getMosaics(appStore, siriusStore);
+    getXPXBalance(walletSession.name, siriusStore.accountHttp, siriusStore.namespaceHttp).then(() => {
       sessionStorage.setItem('pageRefresh', 'y');
     });
     return true;
