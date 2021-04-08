@@ -97,26 +97,6 @@ export default {
       }
     );
 
-    const primaryAccountBalance = computed(
-      () => {
-          if (appStore.state.currentLoggedInWallet) {
-            return appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
-          }else{
-            return 0;
-          }
-      }
-    );
-
-    const primaryAccountName = computed(
-      () => {
-          if (appStore.state.currentLoggedInWallet) {
-            return appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).name;
-          }else{
-            return 0;
-          }
-      }
-    );
-
     return {
       copy,
       primaryAccount,
