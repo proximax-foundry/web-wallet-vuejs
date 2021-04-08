@@ -47,7 +47,7 @@
               id="public"
               class="text-sm w-full outline-none bg-gray-100 z-10"
               type="text"
-              :value="newWallet.accounts[0].public"
+              :value="newWallet.accounts[0].publicAccount.publicKey"
             />
           </div>
           <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>

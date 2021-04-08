@@ -41,7 +41,7 @@
         <div v-for="(coSignAddress, index) in coSign" :key="index" class="flex relative">
           <font-awesome-icon icon="trash-alt" class="w-4 h-4 text-gray-500 hover:text-gray-400 cursor-pointer mr-3 mt-3" @click="deleteCoSigAddressInput(index)"></font-awesome-icon>
           <TextInput placeholder="Cosignatory Account Public Key" errorMessage="Valid Cosignatory Account Public Key is required" :showError="showAddressError[index]" v-model="coSign[index]" icon="key" class="flex-grow" />
-          <font-awesome-icon icon="id-card-alt" class="w-4 h-4 text-gray-500 hover:text-gray-400 cursor-pointer ml-3 mt-3"></font-awesome-icon>
+          <font-awesome-icon icon="id-card-alt" class="w-4 h-4 text-gray-500 hover:text-gray-400 cursor-pointer ml-3 mt-3" @click="displayAddContactModal(index);"></font-awesome-icon>
         </div>
         <div class="text-lg" v-if="!coSign.length">Add at least 1 consignatories</div>
         <button class="my-8 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50" @click="addCoSig" :disabled="addCoSigButton">(+) Add cosignatory</button>
@@ -177,6 +177,10 @@ export default {
       router.push({ name: "ViewDisplayAllAccounts"});
     }
 
+    const displayAddContactModal = (i) => {
+      console.log(i)
+    }
+
     return {
       err,
       disableSend,
@@ -194,7 +198,8 @@ export default {
       addCoSig,
       coSign,
       addCoSigButton,
-      deleteCoSigAddressInput
+      deleteCoSigAddressInput,
+      displayAddContactModal
     };
   },
 }
