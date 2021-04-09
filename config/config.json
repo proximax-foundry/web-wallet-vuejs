@@ -6,21 +6,25 @@
   "chainNodes": [
     {
       "protocol": "http",
+      "sslProtocol": "https",
       "hostname": "bctestnet1.brimstone.xpxsirius.io",
       "port": 3000
     },
     {
       "protocol": "http",
+      "sslProtocol": "https",
       "hostname": "bctestnet2.brimstone.xpxsirius.io",
       "port": 3000
     },
     {
       "protocol": "http",
+      "sslProtocol": "https",
       "hostname": "bctestnet3.brimstone.xpxsirius.io",
       "port": 3000
     },
     {
       "protocol": "http",
+      "sslProtocol": "https",
       "hostname": "bctestnet4.brimstone.xpxsirius.io",
       "port": 3000
     }

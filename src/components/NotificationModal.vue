@@ -21,7 +21,7 @@
 
 <script>
 import { computed, getCurrentInstance, watch } from 'vue';
-import { trasnferEmitter } from '../util/transfer.js';
+import { transferEmitter } from '../util/listener.js';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 export default{
   name: 'NotificationModal',
@@ -45,19 +45,19 @@ export default{
     if(p.toggleModal){
       setTimeout(() => {
         emitter.emit("CLOSE_NOTIFICATION", false);
-        trasnferEmitter.emit("CLOSE_NOTIFICATION", false);
+        transferEmitter.emit("CLOSE_NOTIFICATION", false);
       }, p.time);
     }
 
     const close= () => {
       emitter.emit("CLOSE_NOTIFICATION", false);
-      trasnferEmitter.emit("CLOSE_NOTIFICATION", false);
+      transferEmitter.emit("CLOSE_NOTIFICATION", false);
     }
 
     watch(() => p.toggleModal, () => {
       setTimeout(() => {
         emitter.emit("CLOSE_NOTIFICATION", false);
-        trasnferEmitter.emit("CLOSE_NOTIFICATION", false);
+        transferEmitter.emit("CLOSE_NOTIFICATION", false);
       }, p.time);
     });
 

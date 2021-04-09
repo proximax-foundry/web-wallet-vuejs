@@ -1,7 +1,7 @@
 export default {
   parseNodeConfig(nodeConfig) {
-    return `${nodeConfig.protocol}://${nodeConfig.hostname}${
-      nodeConfig.port ? ":" + nodeConfig.port : ""
+    return `${(location.protocol=='https:')?nodeConfig.sslProtocol:nodeConfig.protocol}://${nodeConfig.hostname}${
+      (location.protocol=='https:') ? "" : (nodeConfig.port ? ":" + nodeConfig.port : "")
     }`;
   },
 };

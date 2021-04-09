@@ -44,7 +44,7 @@
         </div>
         <div v-for="(mosaic, index) in mosaicsCreated" :key="index">
           <MosaicInput placeholder="Select mosaic" errorMessage="" v-model="selectedMosaic[index].id" :index="index" :options="mosaics" :disableOptions="selectedMosaic" @show-mosaic-selection="updateMosaic" @remove-mosaic-selected="removeMosaic" />
-          <SupplyInput v-if="selectedMosaic[index].id!=0" v-model="selectedMosaic[index].amount" :balance="appStore.getMosaicInfo(selectedAccAdd, selectedMosaic[index].id).amount" placeholder="Enter Amount" type="text" icon="coins" :showError="showBalanceErr" errorMessage="Insufficient balance" :decimal="mosaicSupplyDivisibility[index]" />
+          <SupplyInput v-if="selectedMosaic[index].id!=0" v-model="selectedMosaic[index].amount" :balance="getSelectedMosaicBalance[index]" placeholder="Enter Amount" type="text" icon="coins" :showError="showBalanceErr" errorMessage="Insufficient balance" :decimal="mosaicSupplyDivisibility[index]" />
         </div>
         <div>
           <button class="mb-5 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50" :disabled="addMosaicsButton" @click="displayMosaicsOption">(+) Add Mosaics</button>
@@ -84,7 +84,7 @@ import MosaicInput from '@/components/MosaicInput.vue';
 // import SendInput from '@/components/SendInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
 import TextareaInput from '@/components/TextareaInput.vue';
-import { makeTransaction, getMosaics } from '../util/transfer.js';
+import { makeTransaction } from '../util/transfer.js'; //getMosaicsAllAccounts
 import AddContactModal from '@/components/AddContactModal.vue';
 import NotificationModal from '@/components/NotificationModal.vue';
 import { verifyAddress } from '../util/functions.js';
@@ -213,7 +213,6 @@ export default {
         err.value = '';
         // check if address is saved in the contact list
         // if not display add contact model
-        // console.log(appStore.checkAvailableContact(recipient.value));
         if(!appStore.checkAvailableContact(recipient.value)){
           // add new contact
           togglaAddContact.value = true;
@@ -222,15 +221,24 @@ export default {
         }
         // shpw notification
         toggleAnounceNotification.value = true;
-        // getMosaics(appStore, siriusStore);
+        // getMosaicsAllAccounts(appStore, siriusStore);
         // play notification sound
         var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play();
       }
     };
 
+    const getSelectedMosaicBalance = (index) =>{
+      let mosaic = appStore.getMosaicInfo(selectedAccAdd, selectedMosaic[index].id);
+      if(mosaic!=undefined){
+        return mosaic.amount;
+      }else{
+        return '0';
+      }
+    };
+
     // get mosaics of current selected account
-    getMosaics(appStore, siriusStore);
+    // getMosaicsAllAccounts(appStore, siriusStore);
     const addMosaicsButton = computed(() => {
       return ((appStore.getAccDetails(selectedAccName.value).mosaic.length == 0) || (mosaicsCreated.value.length == appStore.getAccDetails(selectedAccName.value).mosaic.length));
     });
@@ -260,6 +268,7 @@ export default {
       const mosaic = appStore.getMosaicInfo(selectedAccAdd.value, selectedMosaic.value[e.index].id);
       selectedMosaic.value[e.index].amount = '0';
       mosaicSupplyDivisibility.value[e.index] = mosaic.divisibility;
+      emitter.emit('CLOSE_MOSAIC_INSUFFICIENT_ERR', false);
     };
 
     const removeMosaic = (e) => {
@@ -269,11 +278,9 @@ export default {
     }
 
     watch(recipient, (add) => {
-      // console.log((recipient.value.length == 46 && recipient.value.match(addressPatternLong)));
       if((recipient.value.length == 46 && recipient.value.match(addressPatternLong)) || (recipient.value.length == 40 && recipient.value.match(addressPatternShort))) {
         const verifyRecipientAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), recipient.value);
         showAddressError.value = !verifyRecipientAddress.isPassed.value;
-        // console.log('Pass: ' + showAddressError.value)
         addMsg.value = verifyRecipientAddress.errMessage.value;
       }else{
         (recipient.value.length>0)?(showAddressError.value = true):(showAddressError.value = false);
@@ -343,6 +350,7 @@ export default {
       mosaicsSelected,
       mosaics,
       selectedMosaicAmount,
+      getSelectedMosaicBalance,
       mosaicSupplyDivisibility,
       updateMosaic,
       currentlySelectedMosaic,
