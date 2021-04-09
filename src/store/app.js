@@ -65,6 +65,13 @@ function isPrivateKeyValid(privateKey) {
   }
 }
 
+// verify private key and password
+function verifyExistingAccount(privateKey, networkType){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  const account = Account.createFromPrivateKey(privateKey, networkType);
+  return (wallet.accounts.findIndex((element) => element.address == account.address.address) >= 0 ) ? true : false ;
+}
+
 function getWalletByName(walletName) {
   walletName =
     walletName.includes(" ") === true
@@ -871,5 +878,6 @@ export const appStore = readonly({
   pretty,
   decryptPrivateKey,
   getAccountPassword,
+  verifyExistingAccount,
 });
 

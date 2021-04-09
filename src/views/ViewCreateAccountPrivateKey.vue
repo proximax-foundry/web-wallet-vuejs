@@ -62,15 +62,21 @@ export default {
       //   return;
       // }
 
+      const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
+      var verifyPrivateKey = appStore.verifyExistingAccount(privKey.value, networkType);
       var result = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword.value);
-      if (result == -1) {
+      if(verifyPrivateKey){
+        err.value = "Account with this Private Key is already in the wallet";
+      }else if (result == -1) {
         err.value = "Fail to create new account";
       } else if (result == 0) {
         err.value = "Password for wallet <b>" + appStore.state.currentLoggedInWallet.name + "</b> is invalid" ;
       } else {
         // create account
-        const acc = siriusStore.createNewAccountPrivateKey(privKey.value, appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network);
-        router.push({ name: "createdAccount", params: {publicKey: acc.publicAccount.publicKey, privateKey: acc.private, address: appStore.pretty(acc.address), name: accountName.value }});
+        const account = siriusStore.createNewAccountPrivateKey(privKey.value, networkType);
+        // update to state
+        appStore.updateAccountState(account, networkType, accountName.value);
+        router.push({ name: "createdAccount", params: {publicKey: account.public, privateKey: account.private, address: appStore.pretty(account.address), name: accountName.value }});
       }
     };
     return{
