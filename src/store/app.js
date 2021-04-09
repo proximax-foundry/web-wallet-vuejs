@@ -9,8 +9,9 @@ import {
   SimpleWallet,
   WalletAlgorithm,
 } from "tsjs-xpx-chain-sdk";
-// import { getMosaicsAllAccounts } from '../util/transfer.js';
-import { subscribeConfirmed } from '../util/listener.js';
+
+import { subscribeConfirmed, addListenerstoAccount } from '../util/listener.js';
+
 const sdk = require('tsjs-xpx-chain-sdk');
 
 const config = require("@/../config/config.json");
@@ -428,22 +429,28 @@ function updateAccountState(account, networkType, accountName){
     publicKey: account.public,
     address: addressObject
   };
-  wallet.accounts.push({
+
+  const acc = {
     algo: "pass:bip32",
     brain: true,
     default: false,
-    firstAccount: true,
+    firstAccount: false,
     name: accountName,
     address: account.address,
-    // public: account.public,
     publicAccount: publicKey,
     encrypted: first_account.encrypted,
     iv: first_account.iv,
     network: networkType,
     balance: '0.000000',
-  });
+  };
+
+  wallet.accounts.push(acc);
   // update currentLoggedInWallet
   currentWallet.value = wallet;
+
+  // enable listener
+  addListenerstoAccount(acc);
+
   sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
   // update localStorage
   try {
