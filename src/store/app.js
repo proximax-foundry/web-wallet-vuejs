@@ -9,8 +9,8 @@ import {
   SimpleWallet,
   WalletAlgorithm,
 } from "tsjs-xpx-chain-sdk";
-import { getMosaics } from '../util/transfer.js';
-
+// import { getMosaicsAllAccounts } from '../util/transfer.js';
+import { subscribeConfirmed } from '../util/listener.js';
 const sdk = require('tsjs-xpx-chain-sdk');
 
 const config = require("@/../config/config.json");
@@ -300,8 +300,10 @@ function checkFromSession(appStore, siriusStore){
   if(walletSession){
     // session is not null - copy to state
     currentWallet.value = walletSession;
-    getMosaics(appStore, siriusStore);
-    getXPXBalance(walletSession.name, siriusStore.accountHttp, siriusStore.namespaceHttp).then(() => {
+    // console.log(currentWallet.value);
+    subscribeConfirmed(currentWallet.value.accounts);
+    // getMosaicsAllAccounts(appStore, siriusStore);
+    getXPXBalance(walletSession.name, siriusStore).then(() => {
       sessionStorage.setItem('pageRefresh', 'y');
     });
     return true;
@@ -312,7 +314,7 @@ function checkFromSession(appStore, siriusStore){
   }
 }
 
-function loginToWallet(walletName, password, accountHttp, namespaceHttp) {
+function loginToWallet(walletName, password, siriusStore) {
   const wallet = getWalletByName(walletName);
   if (!wallet) {
     if (config.debug) {
@@ -328,7 +330,7 @@ function loginToWallet(walletName, password, accountHttp, namespaceHttp) {
     console.log("loginToWallet triggered with", walletName);
   }
 
-  const account = wallet.accounts.find((element) => element.firstAccount);
+  const account = wallet.accounts.find((element) => element.default == true);
   if (!account) {
     if (config.debug) {
       console.error(
@@ -366,8 +368,18 @@ function loginToWallet(walletName, password, accountHttp, namespaceHttp) {
   // store password into session
   sessionStorage.setItem('walletPassword', password);
 
+  // wallet.accounts.forEach((account) => {
+  //   let privateKey = appStore.decryptPrivateKey(password, account.encrypted, account.iv);
+  //   const accountDetail = Account.createFromPrivateKey(privateKey, account.network);
+  //   console.log(privateKey)
+  //   console.log(accountDetail.address)
+  //   subscribeConfirmed(accountDetail.address, appStore, siriusStore);
+  // });
+
+  subscribeConfirmed(wallet.accounts);
+
   // get latest xpx amount
-  getXPXBalance(walletName, accountHttp, namespaceHttp).then(()=> {
+  getXPXBalance(walletName, siriusStore).then(()=> {
     try {
       const wallet = getWalletByName(walletName);
       currentWallet.value = wallet;
@@ -384,6 +396,23 @@ function loginToWallet(walletName, password, accountHttp, namespaceHttp) {
     return 1;
   });
 }
+
+// function subscribeConfirmed (address, appStore, siriusStore) {
+//   const listener = siriusStore.chainWSListener;
+//   console.log(address);
+//   listener.open().then(() => {
+//     listener.confirmed(address).subscribe(() => {  // (transaction)
+//       console.log('Transaction')
+//       // console.log(JSON.stringify(transaction));
+//       transferEmitter.emit('TRANSACTION_CONFIRMED_NOTIFICATION', true);
+//       appStore.updateXPXBalance(appStore.state.currentLoggedInWallet.name, siriusStore);
+//     }, error => {
+//         console.error(error);
+//     }, () => {
+//         console.log('done.');
+//     })
+//   });
+// }
 
 function logoutOfWallet() {
   if (config.debug) {
@@ -597,10 +626,6 @@ function saveContact(contactName, contactAddress){
 function fetchAccountInfo(wallet, accountHttp){
   const addresses = [];
   wallet.accounts.forEach((element) => {
-    console.log('Element:');
-    console.log(element);
-    console.log(element.publicAccount.publicKey);
-    console.log(element.network);
     addresses.push(Address.createFromPublicKey(element.publicAccount.publicKey, element.network));
   });
 
@@ -629,22 +654,37 @@ function getTotalBalance(){
 }
 
 // get XPX balance for each account in the current logged in wallet and update state
-function getXPXBalance(walletName, accountHttp, namespaceHttp){
+function getXPXBalance(walletName, siriusStore){
 
   const wallet = getWalletByName(walletName);
   const xpxNamespace = new sdk.NamespaceId('prx.xpx');
   let xpxAmount = 0;
   return new Promise((resolve) => {
-    fetchAccountInfo(wallet, accountHttp).then((res)=>{
+    fetchAccountInfo(wallet, siriusStore.accountHttp).then((res)=>{
       wallet.accounts.forEach((add) => {
+        add.mosaic = [];
+        const mosaicList = [];
+        const mosaicAmount = [];
         const address = res.find((element) => element.address.address == add.address);
         if(address != undefined){
-          namespaceHttp.getLinkedMosaicId(xpxNamespace).subscribe((xpxMosaicId)=>{
+          siriusStore.namespaceHttp.getLinkedMosaicId(xpxNamespace).subscribe((xpxMosaicId)=>{
             for(const mosaic of address.mosaics){
               if(mosaic.id.toHex() === xpxMosaicId.toHex() ){
                 xpxAmount = mosaic.amount.compact() / Math.pow(10, sdk.XpxMosaicProperties.MOSAIC_PROPERTIES.divisibility);
+              }else{
+                mosaicList.push(mosaic.id);
+                mosaicAmount[mosaic.id.toHex()] = mosaic.amount.compact();
               }
             }
+            siriusStore.mosaicHttp.getMosaics(mosaicList).subscribe((mosaicInfo) => {
+              mosaicInfo.forEach((mosaic) => {
+                add.mosaic.push({ id: mosaic.mosaicId.toHex(), amount: mosaicAmount[mosaic.mosaicId.toHex()]/Math.pow(10, mosaic.divisibility), divisibility: mosaic.divisibility })
+              })
+            }, error => {
+                console.error(error);
+            }, () => {
+                console.log('Get balance of ' + add.address );
+            })
             add.balance = String(parseFloat(xpxAmount).toFixed(6));
           });
         }else{
@@ -656,9 +696,9 @@ function getXPXBalance(walletName, accountHttp, namespaceHttp){
   });
 }
 
-function updateXPXBalance(walletName, accountHttp, namespaceHttp){
+function updateXPXBalance(walletName, siriusStore){
   // get latest xpx amount
-  getXPXBalance(walletName, accountHttp, namespaceHttp).then(()=> {
+  getXPXBalance(walletName, siriusStore).then(()=> {
     try {
       const wallet = getWalletByName(walletName);
       currentWallet.value = wallet;
@@ -708,9 +748,9 @@ function displayBalance(){
 }
 
 // return mosaic divisibility
-function getMosaicInfo(add, mosaicId){
+function getMosaicInfo(address, mosaicId){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
-  const account = wallet.accounts.find((element) => element.address = add);
+  const account = wallet.accounts.find((element) => element.address == address);
   const mosaic = account.mosaic.find((element) => element.id == mosaicId);
   return mosaic;
 }
@@ -838,5 +878,4 @@ export const appStore = readonly({
   decryptPrivateKey,
   getAccountPassword,
 });
-
 

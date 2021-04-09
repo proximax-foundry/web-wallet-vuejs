@@ -44,7 +44,7 @@
 import { computed, inject, ref } from "vue";
 import { useRouter } from "vue-router";
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
-import { trasnferEmitter } from '../util/transfer.js';
+import { transferEmitter } from '../util/listener.js';
 import NotificationModal from '@/components/NotificationModal.vue';
 
 export default{
@@ -82,7 +82,7 @@ export default{
     const getAccountInfo = async () => {
       if (!appStore.state.currentLoggedInWallet) {
         // check sessionStorage
-        if(!appStore.checkFromSession(siriusStore.accountHttp, siriusStore.namespaceHttp)){
+        if(!appStore.checkFromSession(appStore, siriusStore)){
           useRouter().replace({ path: "/" });
         }
       }
@@ -106,7 +106,7 @@ export default{
       return appStore.getTotalBalance();
     });
 
-    trasnferEmitter.on("TRANSACTION_CONFIRMED_NOTIFICATION", verify => {
+    transferEmitter.on("TRANSACTION_CONFIRMED_NOTIFICATION", verify => {
       if(verify){
         toggleAnounceNotification.value = true;
         var audio = new Audio(require('@/assets/audio/ding.ogg'));
@@ -114,7 +114,7 @@ export default{
       }
     });
 
-    trasnferEmitter.on("CLOSE_NOTIFICATION", payload => {
+    transferEmitter.on("CLOSE_NOTIFICATION", payload => {
       toggleAnounceNotification.value = payload;
     });
 

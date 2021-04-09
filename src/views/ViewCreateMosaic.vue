@@ -39,14 +39,14 @@
           </div>
           <NumberInput :disabled="disabledDivisibility" v-model="divisibility" max="6" placeholder="Divisibility" title="Divisibility" type="text" icon="coins" :showError="showDivisibilityErr" errorMessage="Required Field - Only Numbers (0 - 6)" class="mt-5" />
           <SupplyInput :disabled="disabledSupply" v-model="supply" title="Supply" :balance="Number(appStore.getFirstAccBalance(selectedAccAdd))" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" :decimal="Number(supplyPrecision)" />
-          <div class="text-center p-3 pb-3 border-l-8 border-gray-100">
+          <!-- <div class="text-center p-3 pb-3 border-l-8 border-gray-100">
             <div class="rounded-2xl bg-gray-100 p-5">
               <input id="month" type="radio" value="month" name="durationOption" v-model="durationOption" :disabled="disabledDuration" /><label for="month" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Month</label>
               <input id="year" type="radio" value="year" name="durationOption" v-model="durationOption" :disabled="disabledDuration" /><label for="year"  class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Year</label>
             </div>
             <NumberInput :disabled="disabledDuration" v-model="duration" :max="(durationOption=='year')?'10':'120'" placeholder="Duration" title="Duration" type="text" icon="coins" :showError="showDurationErr" :errorMessage="(durationOption=='year')?'Max is 10 years':'Max is 120 months'" class="mt-5" />
             <input id="disabledDuration" type="checkbox" v-model="disabledDuration" value="true" :disabled="durationCheckDisabled"><label for="disabledDuration"  class="cursor-pointer font-bold ml-4 mr-5 text-tsm">No duration</label>
-          </div>
+          </div> -->
           <div class="mb-5 border-t pt-4 border-gray-200">
             <div class="rounded-2xl bg-gray-100 p-5">
               <input id="transferable" type="checkbox" value="transferable" v-model="isTransferable" :disabled="disabledTransferableCheck" /><label for="transferable" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Transferable</label>
@@ -149,7 +149,6 @@ export default {
     // balance.value = appStore.getFirstAccBalance();
 
     const showNoBalance = ref(false);
-    console.log(balance.value);
     if(balance.value < 10000){
       showNoBalance.value = true;
       disabledMutableCheck.value = true;
@@ -212,7 +211,6 @@ export default {
     });
 
     watch(balance, (n) => {
-      console.log(n);
       if(n < 10000){
         showNoBalance.value = true;
         disabledMutableCheck.value = true;

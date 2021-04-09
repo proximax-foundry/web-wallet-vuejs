@@ -14,14 +14,14 @@ import {
   UInt64,
   MosaicProperties,
   MosaicSupplyType,
-  MosaicService,
+  // MosaicService,
   MosaicNonce,
   // Listener,
 } from "tsjs-xpx-chain-sdk";
-import { mergeMap, /*timeout, filter, map, first, skip*/} from 'rxjs/operators';
+// import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { environment } from '../environment/environment.js';
-import mitt from 'mitt';
-export const trasnferEmitter = mitt();
+// import { subscribeConfirmed } from '../util/listener.js';
+
 const config = require("@/../config/config.json");
 
 
@@ -51,27 +51,23 @@ function amountFormatterSimple(amount, d = 6) {
   });
 }
 
-export const getMosaics = (appStore, siriusStore) => {
-  const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
-  wallet.accounts.forEach((account) => {
-    const mosaicService = new MosaicService(siriusStore.accountHttp, siriusStore.mosaicHttp, siriusStore.namespaceHttp);
-
-    const address = Address.createFromRawAddress(account.address);
-    // console.log(account)
-    account.mosaic = [];
-    // console.log(siriusStore.accountHttp.getAccountInfo(address));
-    mosaicService
-        .mosaicsAmountViewFromAddress(address)
-        .pipe(
-            mergeMap((_) => _)
-        )
-        .subscribe(mosaic => {
-          account.mosaic.push({ id: mosaic.fullName(), amount: mosaic.relativeAmount(), divisibility: mosaic.mosaicInfo.divisibility });
-          // console.log(mosaic)
-        },
-          err => console.error(err));
-  });
-};
+// export const getMosaicsAllAccounts = (appStore, siriusStore) => {
+//   const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
+//   wallet.accounts.forEach((account) => {
+//     const mosaicService = new MosaicService(siriusStore.accountHttp, siriusStore.mosaicHttp, siriusStore.namespaceHttp);
+//     const address = Address.createFromRawAddress(account.address);
+//     mosaicService
+//       .mosaicsAmountViewFromAddress(address)
+//       .pipe(
+//           mergeMap((_) => _)
+//       )
+//       .subscribe(mosaic => {
+//         console.warn(mosaic)
+//         // account.mosaic.push({ id: mosaic.fullName(), amount: mosaic.relativeAmount(), divisibility: mosaic.mosaicInfo.divisibility });
+//       },
+//         err => console.error(err));
+//   });
+// };
 
 export const makeTransaction = (recipient, sendXPX, messageText, mosaicsSent, mosaicDivisibility, walletPassword, senderAccName, encryptedMsg, appStore, siriusStore) => {
   // verify password
@@ -118,6 +114,7 @@ export const makeTransaction = (recipient, sendXPX, messageText, mosaicsSent, mo
     // to get sender's private key
     let accountDetails = appStore.getAccDetails(senderAccName)
     let privateKey = appStore.decryptPrivateKey(sessionStorage.getItem('walletPassword'), accountDetails.encrypted, accountDetails.iv);
+
     // sending encrypted message
     let msg;
     if(encryptedMsg){
@@ -137,22 +134,18 @@ export const makeTransaction = (recipient, sendXPX, messageText, mosaicsSent, mo
 
     const account = Account.createFromPrivateKey(privateKey, networkType);
     const signedTransaction = account.sign(transferTransaction, hash);
-    // console.log(signedTransaction.hash);
-    // const listener = siriusStore.chainWSListener;
     const transactionHttp = new TransactionHttp(siriusStore.state.selectedChainNode);
 
-    subscribeConfirmed(account.address, appStore, siriusStore);
+    // subscribeConfirmed(account.address, appStore, siriusStore);
 
     transactionHttp
       .announce(signedTransaction)
-      .subscribe((x) => {
-        console.log(x);
+      .subscribe(() => {
+        // console.log(x);
         return true;
       }, err => console.error(err));
   });
 }
-
-
 
 export const mosaicTransaction = (divisibility, supply, duration, durationType, mutable, transferable, walletPassword, accountName, appStore, siriusStore) => {
 
@@ -219,13 +212,9 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
     transactionBuilder.fee = amountFormatterSimple(aggregateTransaction.maxFee.compact());
     // console.log('TF: '+transactionBuilder.fee);
     const signedTransaction = account.sign(aggregateTransaction, hash);
-    // listener
-    // const listener = new Listener(siriusStore.state.selectedChainNode);
-    // const listener = new Listener('wss://bctestnet1.brimstone.xpxsirius.io', WebSocket);
-
     const transactionHttp = new TransactionHttp(siriusStore.state.selectedChainNode);
 
-    subscribeConfirmed(account.address, appStore, siriusStore);
+    // subscribeConfirmed(account.address, appStore, siriusStore);
 
     transactionHttp
       .announce(signedTransaction)
@@ -234,21 +223,5 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
         // console.log('annoucement is made here');
         return true;
       }, err => console.error(err));
-  });
-}
-
-function subscribeConfirmed(address, appStore, siriusStore){
-  const listener = siriusStore.chainWSListener;
-  listener.open().then(() => {
-      listener.confirmed(address).subscribe(transaction => {
-          console.log(JSON.stringify(transaction));
-          trasnferEmitter.emit('TRANSACTION_CONFIRMED_NOTIFICATION', true);
-          appStore.updateXPXBalance(appStore.state.currentLoggedInWallet.name, siriusStore.accountHttp, siriusStore.namespaceHttp);
-          getMosaics(appStore, siriusStore);
-      }, error => {
-          console.error(error);
-      }, () => {
-          console.log('done.');
-      })
   });
 }

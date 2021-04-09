@@ -57,6 +57,7 @@ const namespaceHttp = computed(() => new sdk.NamespaceHttp(state.selectedChainNo
 
 const chainWSListener = computed(() => {
   if (listenerChainWS.value == null) {
+    console.log('open new socket')
     listenerChainWS.value = new Listener(
       `${
         currentChainNode.value.protocol.startsWith("http") ? "ws://" : "wss://"
