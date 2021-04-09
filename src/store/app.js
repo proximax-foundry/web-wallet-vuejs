@@ -366,7 +366,7 @@ function loginToWallet(walletName, password, siriusStore) {
   }
 
   // store password into session
-  sessionStorage.setItem('walletPassword', password);
+  // sessionStorage.setItem('walletPassword', password);
 
   // wallet.accounts.forEach((account) => {
   //   let privateKey = appStore.decryptPrivateKey(password, account.encrypted, account.iv);
@@ -397,23 +397,6 @@ function loginToWallet(walletName, password, siriusStore) {
   });
 }
 
-// function subscribeConfirmed (address, appStore, siriusStore) {
-//   const listener = siriusStore.chainWSListener;
-//   console.log(address);
-//   listener.open().then(() => {
-//     listener.confirmed(address).subscribe(() => {  // (transaction)
-//       console.log('Transaction')
-//       // console.log(JSON.stringify(transaction));
-//       transferEmitter.emit('TRANSACTION_CONFIRMED_NOTIFICATION', true);
-//       appStore.updateXPXBalance(appStore.state.currentLoggedInWallet.name, siriusStore);
-//     }, error => {
-//         console.error(error);
-//     }, () => {
-//         console.log('done.');
-//     })
-//   });
-// }
-
 function logoutOfWallet() {
   if (config.debug) {
     console.error("logoutOfWallet triggered");
@@ -427,17 +410,23 @@ function logoutOfWallet() {
 }
 
 // update state after creating account
+// const account = {
+//   address:
+//   addressPretty:
+//   public:
+//   private:
+// }
 function updateAccountState(account, networkType, accountName){
   const first_account = state.loggedInWalletFirstAccount;
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
   // get wallet index
-  const address = {
-    address: account.publicAccount.address.address,
-    networktype: account.publicAccount.address.networkType
-  }
+  const addressObject = {
+    address: account.address,
+    networktype: networkType
+  };
   const publicKey = {
-    publicKey: account.publicAccount.publicKey,
-    address: address
+    publicKey: account.public,
+    address: addressObject
   };
   wallet.accounts.push({
     algo: "pass:bip32",
@@ -445,10 +434,9 @@ function updateAccountState(account, networkType, accountName){
     default: false,
     firstAccount: true,
     name: accountName,
-    address: account.publicAccount.address.address,
+    address: account.address,
     // public: account.public,
     publicAccount: publicKey,
-    pk: account.private,
     encrypted: first_account.encrypted,
     iv: first_account.iv,
     network: networkType,
@@ -553,7 +541,6 @@ function deleteAccount(password, address) {
     return verify;
   }
   // end verify with password
-
   if (accountIndex < 0) {
     if (config.debug) {
       console.error("deleteAccount triggered with non-existing account name");

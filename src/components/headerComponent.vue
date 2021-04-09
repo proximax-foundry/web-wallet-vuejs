@@ -28,7 +28,7 @@
         </div>
       </div>
     </div>
-    <NotificationModal :toggleModal="toggleAnounceNotification" msg="Transaction confirmed" notiType="noti" time='2500' />
+    <NotificationModal :toggleModal="toggleAnounceNotification" :msg="notificationMessage" notiType="noti" time='2500' />
   </div>
   <div class="flex-none self-center header-menu" v-else>
     <div class="w-16 text-center inline-block">
@@ -64,6 +64,7 @@ export default{
     const siriusStore = inject("siriusStore");
     const router = useRouter();
     const toggleAnounceNotification = ref(false);
+    const notificationMessage = ref('');
     const networkType = computed(
       () => {
         return siriusStore.getNetworkByType(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network);
@@ -106,9 +107,19 @@ export default{
       return appStore.getTotalBalance();
     });
 
-    transferEmitter.on("TRANSACTION_CONFIRMED_NOTIFICATION", verify => {
-      if(verify){
-        toggleAnounceNotification.value = true;
+    transferEmitter.on("CONFIRMED_NOTIFICATION", payload => {
+      if(payload.status){
+        toggleAnounceNotification.value = payload.status;
+        notificationMessage.value = payload.message;
+        var audio = new Audio(require('@/assets/audio/ding2.ogg'));
+        audio.play();
+      }
+    });
+
+    transferEmitter.on("UNCONFIRMED_NOTIFICATION", payload => {
+      if(payload.status){
+        toggleAnounceNotification.value = payload.status;
+        notificationMessage.value = payload.message;
         var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play();
       }
@@ -125,6 +136,7 @@ export default{
       logout,
       totalBalance,
       toggleAnounceNotification,
+      notificationMessage,
       // walletName
     };
   },

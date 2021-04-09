@@ -157,8 +157,7 @@ function stopChainWSListener() {
 function createNewAccount(networkType){
   const account = Account.generateNewAccount(networkType);
   const account_para = {
-    address: account.address,
-    addressPretty: account.address.pretty(),
+    address: account.address.address,
     public: account.publicKey,
     private: account.privateKey
   }
@@ -168,8 +167,7 @@ function createNewAccount(networkType){
 function createNewAccountPrivateKey(pk, networkType){
   const account = Account.createFromPrivateKey(pk, networkType);
   const account_para = {
-    address: account.address,
-    addressPretty: account.address.pretty(),
+    address: account.address.address,
     public: account.publicKey,
     private: account.privateKey
   }
