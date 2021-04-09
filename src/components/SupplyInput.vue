@@ -5,7 +5,7 @@
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
         <div class="ml-6 text-xs mt-1 text-gray-500">{{ (title!=undefined)?title:'Send' }}</div>
       </div>
-      <input :disabled="disabled" :value="parseFloat(modelValue).toFixed(decimal)" @input="$emit('update:modelValue', parseFloat($event.target.value).toFixed(decimal))" :placeholder="placeholder" class="text-placeholder bg-white text-right" @click="clickInputText()" @keypress="validate($event)" @keyup="checkBalance($event)">
+      <input type="text" :disabled="disabled" :value="parseFloat(modelValue).toFixed(decimal)" @input="$emit('update:modelValue', parseFloat($event.target.value).toFixed(decimal))" :placeholder="placeholder" class="text-placeholder bg-white text-right" @click="clickInputText()" @keypress="validate($event)" @keyup="checkBalance($event)">
       <div class="w-5"></div>
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
@@ -59,6 +59,7 @@ export default{
     },
 
     checkBalance: function(evt){
+      evt.target.value =  evt.target.value||0;
       if(this.balance < evt.target.value){
         this.textErr = true;
       }else{
@@ -92,6 +93,9 @@ export default{
       this.borderColor = 'border border-gray-300';
     });
 
+    this.emitter.on("CLOSE_MOSAIC_INSUFFICIENT_ERR", payload => {
+      this.textErr = payload;
+    });
   }
 }
 </script>
