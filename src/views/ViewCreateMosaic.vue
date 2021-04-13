@@ -342,8 +342,7 @@ export default {
 }
 
 .slide-enter-to, .slide-leave {
-   max-height: 100px;
-   overflow: hidden;
+  overflow: hidden;
 }
 
 .slide-enter, .slide-leave-to {

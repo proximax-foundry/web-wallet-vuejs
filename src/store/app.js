@@ -304,6 +304,7 @@ function deleteWallet(walletName, password) {
 }
 // check session to verify page has been refreshed
 function checkFromSession(appStore, siriusStore){
+  console.log(state.wallets)
   const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
   if(walletSession){
     // session is not null - copy to state
@@ -788,6 +789,8 @@ function verifyPublicKey(add, accountHttp){
     const accountInfo = accountHttp.getAccountInfo(address);
     accountInfo.subscribe(
       (acc) => {
+        console.log('acc');
+        console.log(acc);
         if (acc.publicKey === invalidPublicKey) {
           console.warn(`The receiver's public key is not valid for sending encrypted messages`);
           resolve(true)
@@ -879,5 +882,6 @@ export const appStore = readonly({
   decryptPrivateKey,
   getAccountPassword,
   verifyExistingAccount,
+  verifyPublicKey,
 });
 

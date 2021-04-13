@@ -363,21 +363,21 @@ export default {
 <style scoped lang="scss">
 
 .slide-enter-active {
-   -moz-transition-duration: 1.5s;
-   -webkit-transition-duration: 1.5s;
-   -o-transition-duration: 1.5s;
-   transition-duration: 1.5s;
-   -moz-transition-timing-function: ease-in;
-   -webkit-transition-timing-function: ease-in;
-   -o-transition-timing-function: ease-in;
-   transition-timing-function: ease-in;
+   -moz-transition-duration: 3s;
+   -webkit-transition-duration: 3s;
+   -o-transition-duration: 3s;
+   transition-duration: 3s;
+   -moz-transition-timing-function: ease-in-out;
+   -webkit-transition-timing-function: ease-in-out;
+   -o-transition-timing-function: ease-in-out;
+   transition-timing-function: ease-in-out;
 }
 
 .slide-leave-active {
-   -moz-transition-duration: 1.5s;
-   -webkit-transition-duration: 1.5s;
-   -o-transition-duration: 1.5s;
-   transition-duration: 1.5s;
+   -moz-transition-duration: 3s;
+   -webkit-transition-duration: 3s;
+   -o-transition-duration: 3s;
+   transition-duration: 3s;
    -moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
    -webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
    -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
@@ -385,7 +385,7 @@ export default {
 }
 
 .slide-enter-to, .slide-leave {
-   max-height: 100px;
+  //  max-height: 100px;
    overflow: hidden;
 }
 

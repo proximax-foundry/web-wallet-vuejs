@@ -28,7 +28,7 @@
         </div>
       </div>
     </div>
-    <NotificationModal :toggleModal="toggleAnounceNotification" :msg="notificationMessage" notiType="noti" time='2500' />
+    <NotificationModal :toggleModal="toggleAnounceNotification" :msg="notificationMessage" :notiType="notificationType" time='2500' />
   </div>
   <div class="flex-none self-center header-menu" v-else>
     <div class="w-16 text-center inline-block">
@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import { computed, inject, ref } from "vue";
+import { computed, inject, ref, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import { transferEmitter } from '../util/listener.js';
@@ -60,11 +60,14 @@ export default{
     };
   },
   setup() {
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
     const router = useRouter();
     const toggleAnounceNotification = ref(false);
     const notificationMessage = ref('');
+    const notificationType = ref('noti');
     const networkType = computed(
       () => {
         return siriusStore.getNetworkByType(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network);
@@ -110,6 +113,7 @@ export default{
     transferEmitter.on("CONFIRMED_NOTIFICATION", payload => {
       if(payload.status){
         toggleAnounceNotification.value = payload.status;
+        notificationType.value = payload.notificationType;
         notificationMessage.value = payload.message;
         var audio = new Audio(require('@/assets/audio/ding2.ogg'));
         audio.play();
@@ -119,9 +123,18 @@ export default{
     transferEmitter.on("UNCONFIRMED_NOTIFICATION", payload => {
       if(payload.status){
         toggleAnounceNotification.value = payload.status;
+        notificationType.value = payload.notificationType;
         notificationMessage.value = payload.message;
         var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play();
+      }
+    });
+
+    emitter.on("NOTIFICATION", payload => {
+      if(payload.status){
+        toggleAnounceNotification.value = payload.status;
+        notificationType.value = payload.notificationType;
+        notificationMessage.value = payload.message;
       }
     });
 
@@ -137,6 +150,7 @@ export default{
       totalBalance,
       toggleAnounceNotification,
       notificationMessage,
+      notificationType,
       // walletName
     };
   },

@@ -1,7 +1,7 @@
 <template>
   <div class="w-full mx-auto text-center" v-if="login">
     <NavigationMenu></NavigationMenu>
-    <div class="page container inline-block pt-5">
+    <div class="page container inline-block pt-5 px-10">
       <router-view></router-view>
     </div>
   </div>
