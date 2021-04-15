@@ -10,7 +10,7 @@
       </div>
       <div class="w-14 md:w-44 pl-3 text-center flex gray-line-left h-10 items-center">
         <div>
-          <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkType['name'] }}</div>
+          <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="siriusStore.state.selectedChainNode"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkType['name'] }}</div>
         </div>
       </div>
       <div class="w-52 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
@@ -28,7 +28,7 @@
         </div>
       </div>
     </div>
-    <NotificationModal :toggleModal="toggleAnounceNotification" msg="Transaction confirmed" notiType="noti" time='2500' />
+    <NotificationModal :toggleModal="toggleAnounceNotification" :msg="notificationMessage" :notiType="notificationType" time='2500' />
   </div>
   <div class="flex-none self-center header-menu" v-else>
     <div class="w-16 text-center inline-block">
@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import { computed, inject, ref } from "vue";
+import { computed, inject, ref, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import { transferEmitter } from '../util/listener.js';
@@ -60,10 +60,14 @@ export default{
     };
   },
   setup() {
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
     const router = useRouter();
     const toggleAnounceNotification = ref(false);
+    const notificationMessage = ref('');
+    const notificationType = ref('noti');
     const networkType = computed(
       () => {
         return siriusStore.getNetworkByType(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network);
@@ -106,11 +110,31 @@ export default{
       return appStore.getTotalBalance();
     });
 
-    transferEmitter.on("TRANSACTION_CONFIRMED_NOTIFICATION", verify => {
-      if(verify){
-        toggleAnounceNotification.value = true;
+    transferEmitter.on("CONFIRMED_NOTIFICATION", payload => {
+      if(payload.status){
+        toggleAnounceNotification.value = payload.status;
+        notificationType.value = payload.notificationType;
+        notificationMessage.value = payload.message;
+        var audio = new Audio(require('@/assets/audio/ding2.ogg'));
+        audio.play();
+      }
+    });
+
+    transferEmitter.on("UNCONFIRMED_NOTIFICATION", payload => {
+      if(payload.status){
+        toggleAnounceNotification.value = payload.status;
+        notificationType.value = payload.notificationType;
+        notificationMessage.value = payload.message;
         var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play();
+      }
+    });
+
+    emitter.on("NOTIFICATION", payload => {
+      if(payload.status){
+        toggleAnounceNotification.value = payload.status;
+        notificationType.value = payload.notificationType;
+        notificationMessage.value = payload.message;
       }
     });
 
@@ -120,11 +144,14 @@ export default{
 
     return {
       appStore,
+      siriusStore,
       networkType,
       loginStatus,
       logout,
       totalBalance,
       toggleAnounceNotification,
+      notificationMessage,
+      notificationType,
       // walletName
     };
   },

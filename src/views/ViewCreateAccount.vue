@@ -61,10 +61,10 @@ export default {
       } else {
         // create account
         const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
-        const acc = siriusStore.createNewAccount(networkType);
+        const account = siriusStore.createNewAccount(appStore.state.currentLoggedInWallet.name, networkType);
         // update to state
-        appStore.updateAccountState(acc, networkType, accountName.value);
-        router.push({ name: "createdAccount", params: {publicKey: acc.publicAccount.publicKey, privateKey: acc.private, address: acc.address, name: accountName.value }});
+        appStore.updateAccountState(account, networkType, accountName.value);
+        router.push({ name: "createdAccount", params: {publicKey: account.publicKey, privateKey: account.privateKey, address: appStore.pretty(account.address.address), name: accountName.value }});
       }
     };
     return{
