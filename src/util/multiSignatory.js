@@ -12,6 +12,7 @@ import {
   NetworkCurrencyMosaic,
   TransactionHttp,
   UInt64,
+  QueryParams,
 } from "tsjs-xpx-chain-sdk";
 
 // import { environment } from '../environment/environment.js';
@@ -19,8 +20,12 @@ import {
 import { appStore } from "@/store/app";
 import { siriusStore } from "@/store/sirius";
 import { announceAggregateBonded, announceLockfundAndWaitForConfirmation } from '../util/listener.js';
-// const config = require("@/../config/config.json");
+const config = require("@/../config/config.json");
 
+
+export class MultiSign {
+  
+}
 
 function verifyContactPublicKey(add, accountHttp){
   const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
@@ -86,6 +91,7 @@ function convertAccount(coSign, numApproveTransaction, numDeleteUser, accountToC
 
   return add.then((generationHash) => {
     const multisigCosignatory = [];
+    console.log('Account to convert name: ' + accountToConvertName);
     const accountDetails = appStore.getAccDetails(accountToConvertName);
 
     const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
@@ -152,9 +158,81 @@ function convertAccount(coSign, numApproveTransaction, numDeleteUser, accountToC
   });
 }
 
+function getAggregateBondedTransactions(publicAccount) {
+  return siriusStore.accountHttp.aggregateBondedTransactions(publicAccount, new QueryParams(100));
+}
+
+function onPartial(publicAccount){
+  return new Promise((resolve) => {
+    getAggregateBondedTransactions(publicAccount).subscribe((txOnpartial) => {
+      let isPartial = false;
+      if (txOnpartial !== null && txOnpartial.length > 0) {
+        for (const tx of txOnpartial) {
+          for (let i = 0; i < tx.innerTransactions.length; i++) {
+            isPartial = (tx.innerTransactions[i].signer.publicKey === publicAccount.publicKey);
+            if (isPartial) {
+              break;
+            }
+          }
+          if (isPartial) {
+            break;
+          }
+        }
+      }
+      resolve(isPartial);
+    });
+  });
+}
+
+function multisigAccountInfo(address) {
+  return siriusStore.accountHttp.getMultisigAccountInfo(address);
+}
+
+function checkIsMultiSig(accountAddress){
+  return new Promise((resolve, reject) => {
+    const address = Address.createFromRawAddress(accountAddress);
+    multisigAccountInfo(address).subscribe(info => {
+      const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
+      const account = wallet.accounts.find((element) => element.address == accountAddress);
+      account.isMultisign = info;
+      resolve(true);
+    }, error => {
+      console.error(error);
+      reject(false);
+    });
+  });
+}
+
+function updateAccountsMultiSign(walletName){
+  const wallet = appStore.getWalletByName(walletName);
+  try {
+    wallet.accounts.forEach((element) => {
+      const accountAddress = Address.createFromRawAddress(element.address);
+      multisigAccountInfo(accountAddress).subscribe(info => {
+        const account = wallet.accounts.find((e) => e.address == element.address);
+        account.isMultisign = info;
+      }, error => {
+          console.error(error);
+      });
+    });
+    localStorage.setItem(
+      config.localStorage.walletKey,
+      JSON.stringify(appStore.state.wallets)
+    );
+  } catch (err) {
+    if (config.debug) {
+      console.error("updateAccountsMultiSign error caught", err);
+    }
+    return 'invalid_wallet';
+  }
+}
+
 export const multiSign = readonly({
   // config,
   generateContact,
   verifyContactPublicKey,
   convertAccount,
+  onPartial,
+  checkIsMultiSig,
+  updateAccountsMultiSign,
 });

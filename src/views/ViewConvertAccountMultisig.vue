@@ -23,6 +23,23 @@
           <p class="text-xs mt-3">10.044500 XPX required to cover LockFund.</p>
         </div>
       </div>
+      <div class="flex justify-between p-4 rounded-xl border-red-800 border-2 bg-white mb-8" v-if="isMultisig">
+        <div class="text-center w-full">
+          <div class="border border-gray-500 rounded-full w-8 h-8 inline-block relative">
+            <font-awesome-icon icon="times" class="w-5 h-5 text-gray-500 inline-block absolute" style="top:5px; right: 5px;"></font-awesome-icon>
+          </div>
+          <div class="font-bold text-sm">Is Multisig</div>
+        </div>
+      </div>
+      <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 mb-8" v-if="onPartial">
+        <div class="text-center w-full">
+          <div class="w-8 h-8 inline-block relative">
+            <font-awesome-icon icon="bell" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:5px; right: 5px;"></font-awesome-icon>
+          </div>
+          <div class="font-bold text-sm">Partial</div>
+          <p class="text-xs mt-3">Has transactions in partial</p>
+        </div>
+      </div>
       <div>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="block mt-2 font-bold text-md lg:inline-block lg:mr-20">Scheme for ></div>
@@ -84,6 +101,7 @@ import TextInput from '@/components/TextInput.vue'
 import AddCosignModal from '../components/AddCosignModal.vue';
 import { multiSign } from '../util/multiSignatory.js';
 import NotificationModal from '@/components/NotificationModal.vue';
+import { transferEmitter } from '../util/listener.js';
 
 export default {
   name: 'ViewConvertAccountMultisig',
@@ -120,14 +138,16 @@ export default {
     const showAddressError = ref([]);
     const disabledPassword = ref(true);
     const toggleAnounceNotification = ref(false);
+    const onPartial = ref(false);
+    const isMultisig = ref(false);
 
-    const disableSend = computed(() => !( //passwd.value.match(passwdPattern) &&
-       coSign.value.length > 0 && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
+    const disableSend = computed(() => !(
+      !isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) && coSign.value.length > 0  &&  err.value == '' && (showAddressError.value.indexOf(true) == -1) && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
     ));
-    console.log(passwd.value.match(passwdPattern));
+
     const addCoSigButton = computed(() => {
       var status = false;
-      if(acc.balance >= 10.0445){
+      if(accountBalance.value >= 10.0445){
         for(var i = 0; i < coSign.value.length; i++){
           if(!coSign.value[i].match(publicKeyPattern)){
             status = true;
@@ -169,32 +189,38 @@ export default {
 
     watch(() => [...coSign.value], (n) => {
       for(var i = 0; i < coSign.value.length; i++){
-        if(!coSign.value[i].match(publicKeyPattern)){
-          showAddressError.value[i] = true;
-        }else{
-          showAddressError.value[i] = false;
-          //search for similar matching
-          // var match = existingAdd.findIndex((element) => element == coSign.value[i]);
-          // if(match != -1 && i != 0){
-          //   console.log('Match index: '+ match);
-          //   console.log('coSign of ' + i + ': '+ coSign.value[i]);
-          //   err.value = "Cosignee already exist";
-          //   break;
-          // }else{
-          //   err.value = '';
-          // }
-          const unique = Array.from(new Set(n));
-          if(unique.length != n.length){
-            err.value = "Cosignee already exist";
+        // if(coSign.value[i].length >= 40){
+          if(!coSign.value[i].match(publicKeyPattern) && coSign.value[i] != ''){
+            showAddressError.value[i] = true;
           }else{
-            err.value = '';
+            showAddressError.value[i] = false;
+            //search for similar matching
+            // var match = existingAdd.findIndex((element) => element == coSign.value[i]);
+            // if(match != -1 && i != 0){
+            //   console.log('Match index: '+ match);
+            //   console.log('coSign of ' + i + ': '+ coSign.value[i]);
+            //   err.value = "Cosignee already exist";
+            //   break;
+            // }else{
+            //   err.value = '';
+            // }
+            const unique = Array.from(new Set(n));
+            if(unique.length != n.length){
+              err.value = "Cosignee already exist";
+            }else{
+              err.value = '';
+            }
           }
-        }
+        // }
       }
     }, {deep:true});
 
     const getAcccountDetails = () => {
       return appStore.getAccDetails(p.name);
+    };
+
+    const accountBalance = () => {
+      return appStore.getAccDetails(p.name).balance;
     };
 
     const addCoSig = () => {
@@ -224,12 +250,37 @@ export default {
     if(acc==-1 && acc.default){
       router.push({ name: "ViewDisplayAllAccounts"});
     }
-    if(acc.balance < 10.0445){
-      fundStatus.value = true;
-      disabledPassword.value = true;
-    }else{
-      fundStatus.value = false;
-      disabledPassword.value = false;
+    setTimeout(()=> {
+      if(accountBalance.value < 10.0445){
+        fundStatus.value = true;
+        disabledPassword.value = true;
+      }else{
+        fundStatus.value = false;
+        disabledPassword.value = false;
+      }
+    }, 500);
+
+    watch(accountBalance, (n) => {
+      if(n < 10.0445){
+        fundStatus.value = true;
+        disabledPassword.value = true;
+      }else{
+        fundStatus.value = false;
+        disabledPassword.value = false;
+      }
+    });
+
+    // check if onPartial
+    multiSign.onPartial(acc.publicAccount).then((onPartialBoolean) => {
+      onPartial.value = onPartialBoolean;
+    });
+
+    try{
+      multiSign.checkIsMultiSig(acc.address).then((isMultiSigBoolean) => {
+        isMultisig.value = isMultiSigBoolean;
+      });
+    }catch(err) {
+      isMultisig.value = false;
     }
 
     emitter.on('ADD_CONTACT_COSIGN', payload => {
@@ -249,6 +300,28 @@ export default {
           }, 500);
         }
       });
+    });
+
+    // detech partial transaction announcement from listener
+    transferEmitter.on('ANNOUNCE_AGGREGATE_BONDED' , payload => {
+      if(payload.status){
+        multiSign.onPartial(acc.publicAccount).then((onPartialBoolean) => {
+          onPartial.value = onPartialBoolean;
+        })
+        clear();
+      }
+    });
+
+    // detech co signiture added from listener
+    transferEmitter.on('ANNOUNCE_COSIGNITURE_ADDED' , payload => {
+      if(payload.status){
+        if(acc.isMultisign != null){
+          isMultisig.value = true;
+          onPartial.value = false;
+        }else{
+          isMultisig.value = false;
+        }
+      }
     });
 
     return {
@@ -274,6 +347,8 @@ export default {
       convertAccount,
       disabledPassword,
       toggleAnounceNotification,
+      onPartial,
+      isMultisig,
     };
   },
 }

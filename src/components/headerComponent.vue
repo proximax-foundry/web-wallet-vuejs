@@ -10,7 +10,7 @@
       </div>
       <div class="w-14 md:w-44 pl-3 text-center flex gray-line-left h-10 items-center">
         <div>
-          <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkType['name'] }}</div>
+          <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="siriusStore.state.selectedChainNode"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkType['name'] }}</div>
         </div>
       </div>
       <div class="w-52 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
@@ -144,6 +144,7 @@ export default{
 
     return {
       appStore,
+      siriusStore,
       networkType,
       loginStatus,
       logout,

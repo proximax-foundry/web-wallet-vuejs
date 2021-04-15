@@ -7,6 +7,7 @@ import mitt from 'mitt';
 const transferEmitter = mitt();
 import { appStore } from "@/store/app";
 import { siriusStore } from "@/store/sirius";
+import { multiSign } from '../util/multiSignatory.js';
 
 const listener = siriusStore.chainWSListener;
 
@@ -61,6 +62,7 @@ function enableListeners(account){
 
   // transaction confirmed
   listener.confirmed(accountDetail).subscribe(() => {  // (transaction)
+    console.log('confirmed notification')
     transferEmitter.emit('CONFIRMED_NOTIFICATION', {
       status: true,
       message: 'Transaction confirmed',
@@ -88,29 +90,30 @@ function enableListeners(account){
   })
 
   // subscribe status
-  // listener.status(accountDetail).subscribe(transactionStatusError => {
-  //   transferEmitter.emit('UNCONFIRMED_NOTIFICATION', {
-  //     status: true,
-  //     message: transactionStatusError,
-  //     notificationType: 'noti'
-  //   });
-  // }, error => {
-  //     console.error(error);
-  // }, () => {
-  //     console.log('done.');
-  // })
+  listener.status(accountDetail).subscribe(transactionStatusError => {
+    transferEmitter.emit('UNCONFIRMED_NOTIFICATION', {
+      status: true,
+      message: transactionStatusError,
+      notificationType: 'noti'
+    });
+  }, error => {
+      console.error(error);
+  }, () => {
+      console.log('done.');
+  })
 
   // Unconfirmed removed
-  // listener.unconfirmedRemoved(accountDetail).subscribe(hash => {
-  //   transferEmitter.emit('UNCONFIRMED_NOTIFICATION', {
-  //     status: true,
-  //     message: hash
-  //   });
-  // }, error => {
-  //     console.error(error);
-  // }, () => {
-  //     console.log('done.');
-  // })
+  listener.unconfirmedRemoved(accountDetail).subscribe(hash => {
+    // transferEmitter.emit('UNCONFIRMED_NOTIFICATION', {
+    //   status: true,
+    //   message: hash
+    // });
+    console.log('Unconfirmed: ' + hash)
+  }, error => {
+      console.error(error);
+  }, () => {
+      console.log('done.');
+  })
 
   // partially added
   // listener.aggregateBondedAdded(accountDetail).subscribe(aggregateTransaction => {
@@ -138,11 +141,17 @@ function enableListeners(account){
       console.log('done.');
   })
 
+  // eslint-disable-next-line no-unused-vars
   listener.cosignatureAdded(accountDetail).subscribe(cosignatureSignedTransaction => {
+    // update multisign info on all accounts
+    multiSign.updateAccountsMultiSign(appStore.state.currentLoggedInWallet.name);
     transferEmitter.emit('UNCONFIRMED_NOTIFICATION', {
       status: true,
-      message: cosignatureSignedTransaction,
+      message: 'Cosignature added.',
       notificationType: 'noti'
+    });
+    transferEmitter.emit('ANNOUNCE_COSIGNITURE_ADDED', {
+      status: true,
     });
   }, error => {
       console.error(error);
@@ -269,25 +278,28 @@ async function announceAggregateBonded(senderAddress, aggBondTx, aggBondHash, tx
       });
 
       transactionHttp.announceAggregateBonded(aggBondTx).subscribe(
-          // eslint-disable-next-line no-unused-vars
-          (message)=>{
-            transferEmitter.emit('CONFIRMED_NOTIFICATION', {
-              status: true,
-              message: 'Aggregate transaction announced',
-              notificationType: 'noti'
-            });
-            console.log('Aggregate transaction (' + aggBondHash + ') announced');
-          }, 
-          (error)=>{
-              console.log(error);
-              if (txConfirmed) {
-                  txConfirmed.unsubscribe();
-              }
-              if (txStatus) {
-                  txStatus.unsubscribe();
-              }
-              reject(error);
+        // eslint-disable-next-line no-unused-vars
+        (message)=>{
+          transferEmitter.emit('CONFIRMED_NOTIFICATION', {
+            status: true,
+            message: 'Aggregate transaction announced',
+            notificationType: 'noti'
+          });
+          transferEmitter.emit('ANNOUNCE_AGGREGATE_BONDED', {
+            status: true,
+          });
+          console.log('Aggregate transaction (' + aggBondHash + ') announced');
+        }, 
+        (error)=>{
+          console.log(error);
+          if (txConfirmed) {
+              txConfirmed.unsubscribe();
           }
+          if (txStatus) {
+              txStatus.unsubscribe();
+          }
+          reject(error);
+        }
       );
 
     }).catch(reason => {

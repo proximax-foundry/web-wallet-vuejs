@@ -1,11 +1,10 @@
 <template>
-  <div class="w-full mx-auto text-center" v-if="login">
-    <NavigationMenu></NavigationMenu>
-    <div class="page container inline-block pt-5 px-10">
+  <div :class="login?`w-full mx-auto text-center`:``">
+    <NavigationMenu v-if="login"></NavigationMenu>
+    <div :class="login?`page container inline-block pt-5 px-10`:``">
       <router-view></router-view>
     </div>
   </div>
-  <router-view v-else></router-view>
 </template>
 <script>
 import { computed, inject} from 'vue';

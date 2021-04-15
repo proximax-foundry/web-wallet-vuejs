@@ -73,10 +73,10 @@ export default {
         err.value = "Password for wallet <b>" + appStore.state.currentLoggedInWallet.name + "</b> is invalid" ;
       } else {
         // create account
-        const account = siriusStore.createNewAccountPrivateKey(privKey.value, networkType);
+        const account = siriusStore.createNewAccountPrivateKey(appStore.state.currentLoggedInWallet.name, privKey.value, networkType);
         // update to state
         appStore.updateAccountState(account, networkType, accountName.value);
-        router.push({ name: "createdAccount", params: {publicKey: account.public, privateKey: account.private, address: appStore.pretty(account.address), name: accountName.value }});
+        router.push({ name: "createdAccount", params: {publicKey: account.publicKey, privateKey: account.privateKey, address: appStore.pretty(account.address.address), name: accountName.value }});
       }
     };
     return{

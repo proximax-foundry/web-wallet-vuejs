@@ -11,6 +11,7 @@ import {
 } from "tsjs-xpx-chain-sdk";
 
 import { subscribeConfirmed, addListenerstoAccount } from '../util/listener.js';
+import { multiSign } from '../util/multiSignatory.js';
 
 const sdk = require('tsjs-xpx-chain-sdk');
 
@@ -178,7 +179,7 @@ function addNewWallet(walletName, password, networkType, privateKey) {
 
   const address = {
     address: wallet.address.address,
-    networktype: wallet.networke
+    networktype: wallet.network
   }
   const publicKey = {
     publicKey: account.publicKey,
@@ -194,11 +195,13 @@ function addNewWallet(walletName, password, networkType, privateKey) {
     address: wallet.address.address,
     // public: account.publicKey,
     publicAccount: publicKey,
-    pk: account.privateKey,
     encrypted: wallet.encryptedPrivateKey.encryptedKey,
     iv: wallet.encryptedPrivateKey.iv,
     network: wallet.network,
     balance: '0.000000',
+    isMultisign: null,
+    multisigAccountGraphInfo: null,
+    nis1Account: null,
   });
 
   state.wallets.push(newWallet);
@@ -233,15 +236,7 @@ function verifyWalletPassword(walletName, password){
   }
 
   const account = wallet.accounts.find((element) => element.firstAccount);
-  // if (!account) {
-  //   if (config.debug) {
-  //     console.error(
-  //       "loginToWallet triggered with invalid accounts",
-  //       walletName
-  //     );
-  //   }
-  //   return -1;
-  // }
+
   const common = {
     password: password,
   };
@@ -386,6 +381,7 @@ function loginToWallet(walletName, password, siriusStore) {
   // });
 
   subscribeConfirmed(wallet.accounts);
+  multiSign.updateAccountsMultiSign(walletName);
 
   // get latest xpx amount
   getXPXBalance(walletName, siriusStore).then(()=> {
@@ -426,15 +422,14 @@ function logoutOfWallet() {
 //   private:
 // }
 function updateAccountState(account, networkType, accountName){
-  const first_account = state.loggedInWalletFirstAccount;
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
   // get wallet index
   const addressObject = {
-    address: account.address,
+    address: account.address.address,
     networktype: networkType
   };
   const publicKey = {
-    publicKey: account.public,
+    publicKey: account.publicKey,
     address: addressObject
   };
 
@@ -443,13 +438,16 @@ function updateAccountState(account, networkType, accountName){
     brain: true,
     default: false,
     firstAccount: false,
-    name: accountName,
-    address: account.address,
+    name: accountName.trim().replace(/ /g,"_"),
+    address: account.address.address,
     publicAccount: publicKey,
-    encrypted: first_account.encrypted,
-    iv: first_account.iv,
+    encrypted: account.encryptedPrivateKey.encryptedKey,
+    iv: account.encryptedPrivateKey.iv,
     network: networkType,
     balance: '0.000000',
+    isMultisign: null,
+    multisigAccountGraphInfo: null,
+    nis1Account: null,
   };
 
   wallet.accounts.push(acc);
@@ -490,7 +488,7 @@ function updateAccountName(name, oriName){
     }
     return -1;
   }
-  account.name = name;
+  account.name = name.trim().replace(/ /g,"_");
   sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
   // update localStorage
   try {
@@ -664,7 +662,8 @@ function getXPXBalance(walletName, siriusStore){
   return new Promise((resolve) => {
     fetchAccountInfo(wallet, siriusStore.accountHttp).then((res)=>{
       wallet.accounts.forEach((add) => {
-        add.mosaic = [];
+        const account = wallet.accounts.find((e) => e.address == add.address);
+        account.mosaic = [];
         const mosaicList = [];
         const mosaicAmount = [];
         const address = res.find((element) => element.address.address == add.address);
@@ -680,17 +679,17 @@ function getXPXBalance(walletName, siriusStore){
             }
             siriusStore.mosaicHttp.getMosaics(mosaicList).subscribe((mosaicInfo) => {
               mosaicInfo.forEach((mosaic) => {
-                add.mosaic.push({ id: mosaic.mosaicId.toHex(), amount: mosaicAmount[mosaic.mosaicId.toHex()]/Math.pow(10, mosaic.divisibility), divisibility: mosaic.divisibility })
+                account.mosaic.push({ id: mosaic.mosaicId.toHex(), amount: mosaicAmount[mosaic.mosaicId.toHex()]/Math.pow(10, mosaic.divisibility), divisibility: mosaic.divisibility })
               })
             }, error => {
                 console.error(error);
             }, () => {
                 console.log('Get balance of ' + add.address );
             })
-            add.balance = String(parseFloat(xpxAmount).toFixed(6));
+            account.balance = String(parseFloat(xpxAmount).toFixed(6));
           });
         }else{
-          add.balance = '0.000000';
+          account.balance = '0.000000';
         }
       });
       resolve(wallet);
@@ -826,7 +825,7 @@ function checkAvailableContact(recipient){
 }
 
 function pretty(address){
-  return address.replace(/([a-zA-Z0-9]{5})([a-zA-Z0-9]{5})([a-zA-Z0-9]{5})([a-zA-Z0-9]{5})([a-zA-Z0-9]{5})([a-zA-Z0-9]{5})([a-zA-Z0-9]{4})/, "$1-$2-$3-$4-$5-$6-$7");
+  return address.replace(/([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{4})/, "$1-$2-$3-$4-$5-$6-$7");
 }
 
 function decryptPrivateKey(password, encryptedKey, iv) {
