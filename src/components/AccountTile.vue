@@ -2,11 +2,7 @@
   <div class='p-3'>
     <div class="rounded-2xl flex justify-between py-3 border border-gray-200" :class="account.default?'bg-white':'bg-gray-100'">
       <div class="ml-5 text-left text-sm w-full">
-<<<<<<< Updated upstream
-        <div class="font-bold mb-1">{{ account.name }} <span v-if="account.default" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-yellow-200">Current default</span> <span v-if="account.isMultisign" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200">Multisig</span></div>
-=======
         <div class="font-bold mb-1">{{ account.name }} <span v-if="account.default" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-yellow-200">Current default</span> <span v-if="isMultiSig" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200">Multisig</span></div>
->>>>>>> Stashed changes
         <div class="flex justify-between pr-4 rounded-xl mb-4 items-center" :class="account.default?'bg-white':'bg-gray-100'">
           <div class="text-left w-full relative">
             <div class="absolute z-20 w-full h-full"></div>
@@ -70,7 +66,7 @@ export default{
 
     const isMultiSig = computed(() => {
       let isMulti = false;
-      if(p.account.isMultisign!=undefined){
+      if(p.account.isMultisign != undefined){
         if(p.account.isMultisign != '' || p.account.isMultisign != null){
           if(p.account.isMultisign.cosignatories != undefined){
             if(p.account.isMultisign.cosignatories.length > 0){
