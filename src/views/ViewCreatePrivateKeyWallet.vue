@@ -66,7 +66,7 @@
               id="private"
               class="text-sm w-full outline-none bg-gray-100 z-10"
               type="text"
-              :value="newWallet.accounts[0].pk"
+              :value="privateKey"
             />
           </div>
           <font-awesome-icon icon="copy" @click="copy('private')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
@@ -127,6 +127,7 @@ export default {
     const networks = ref(siriusStore.state.network);
     const walletName = ref("");
     const passwd = ref("");
+    const privateKey = ref("");
     const confirmPasswd = ref("");
     const nis1Swap = ref(false);
     const privKey = ref("");
@@ -165,6 +166,7 @@ export default {
         err.value =
           "Unable to create wallet. Your device storage might be full";
       } else {
+        privateKey.value = result;
         newWallet.value =
           appStore.state.wallets[appStore.state.wallets.length - 1];
       }
@@ -194,6 +196,7 @@ export default {
       confirmPasswd,
       nis1Swap,
       privKey,
+      privateKey,
       showPasswdError,
       showConfirmPasswdError,
       passwdPattern,
