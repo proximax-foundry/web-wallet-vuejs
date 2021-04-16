@@ -216,7 +216,7 @@ function addNewWallet(walletName, password, networkType, privateKey) {
     }
     return 0;
   }
-  return 1;
+  return account.privateKey;
 }
 
 function verifyWalletPassword(walletName, password){
