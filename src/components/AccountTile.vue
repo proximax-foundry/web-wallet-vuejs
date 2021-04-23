@@ -2,7 +2,7 @@
   <div class='p-3'>
     <div class="rounded-2xl flex justify-between py-3 border border-gray-200" :class="account.default?'bg-white':'bg-gray-100'">
       <div class="ml-5 text-left text-sm w-full">
-        <div class="font-bold mb-1">{{ account.name }} <span v-if="account.default" class="text-xs text-indigo-300 italic">- Current default</span></div>
+        <div class="font-bold mb-1">{{ account.name }} <span v-if="account.default" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-yellow-200">Current default</span> <span v-if="isMultiSig" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200">Multisig</span></div>
         <div class="flex justify-between pr-4 rounded-xl mb-4 items-center" :class="account.default?'bg-white':'bg-gray-100'">
           <div class="text-left w-full relative">
             <div class="absolute z-20 w-full h-full"></div>
@@ -64,6 +64,20 @@ export default{
       return (p.account.mosaic!=undefined)?p.account.mosaic.length:0;
     });
 
+    const isMultiSig = computed(() => {
+      let isMulti = false;
+      if(p.account.isMultisign != undefined){
+        if(p.account.isMultisign != '' || p.account.isMultisign != null){
+          if(p.account.isMultisign.cosignatories != undefined){
+            if(p.account.isMultisign.cosignatories.length > 0){
+              isMulti = true;
+            }
+          }
+        }
+      }
+      return isMulti;
+    });
+
     const setAsDefaultAccount = (add) => {
       if(appStore.setAccountDefault(add)){
         emitter.emit("CLOSE_MENU_TRIGGER", p.i);
@@ -110,6 +124,7 @@ export default{
       setAsDefaultAccount,
       exportWallet,
       mosaicNum,
+      isMultiSig,
     }
   },
 }

@@ -9,9 +9,10 @@ import {
   NetworkHttp,
   NodeHttp,
   MosaicHttp,
-  Account,
   NamespaceHttp,
   ChainConfigHttp
+  Password,
+  SimpleWallet,
 } from "tsjs-xpx-chain-sdk";
 const config = require("@/../config/config.json");
 
@@ -213,26 +214,29 @@ function stopChainWSListener() {
 
 
 /* Account section - benjamin lai */
-function createNewAccount(networkType){
-  const account = Account.generateNewAccount(networkType);
-  const account_para = {
-    address: account.address,
-    addressPretty: account.address.pretty(),
-    public: account.publicKey,
-    private: account.privateKey
-  }
-  return account_para;
+function createNewAccount(walletName, networkType){
+  // const account = Account.generateNewAccount(networkType);
+  const encryptedPasswd = new Password(sessionStorage.getItem('walletPassword'));
+  const account = SimpleWallet.create(walletName, encryptedPasswd, networkType);
+  const acc = account.open(encryptedPasswd);
+  account.publicKey = acc.publicKey;
+  account.privateKey = acc.privateKey;
+  return account;
 }
 
-function createNewAccountPrivateKey(pk, networkType){
-  const account = Account.createFromPrivateKey(pk, networkType);
-  const account_para = {
-    address: account.address,
-    addressPretty: account.address.pretty(),
-    public: account.publicKey,
-    private: account.privateKey
-  }
-  return account_para;
+function createNewAccountPrivateKey(walletName, pk, networkType){
+  // const account = Account.createFromPrivateKey(pk, networkType);
+  const encryptedPasswd = new Password(sessionStorage.getItem('walletPassword'));
+  const account = SimpleWallet.createFromPrivateKey(
+    walletName,
+    encryptedPasswd,
+    pk,
+    networkType
+  );
+  const acc = account.open(encryptedPasswd);
+  account.publicKey = acc.publicKey;
+  account.privateKey = acc.privateKey;
+  return account;
 }
 
 function buildChainConfigHttp(apiURL){
@@ -385,8 +389,7 @@ function buildWSEndpointURL(url, port = undefined){
   return location.protocol=='https:' ? `wss://${url}` : `ws://${url}:${portNumber}`;
 }
 
-
-export const siriusStore = {
+export const siriusStore = readonly({
   state,
   // getNetworkByName,
   accountHttp,
