@@ -8,7 +8,6 @@
       <div class="mx-auto page-title-gray-line pt-5">
         <div class="w-10/12 lg:w-8/12 self-center inline-block">
           <div class="error error_box" v-if="err!=''">{{ err }}</div>
-          <SelectInput placeholder="Select network" errorMessage="Select a Network" v-model="selectedNetwork" :options="networks" />
           <TextInput placeholder="Wallet Name" errorMessage="Insert wallet name" v-model="walletName" icon="wallet" />
           <div class="grid xs:grid-cols-1 md:grid-cols-2">
             <PasswordInput placeholder="Enter a New Password" errorMessage="Min. length 8, max. length 30." :showError="showPasswdError" icon="lock" v-model="passwd" class="mr-1" />
@@ -82,7 +81,7 @@
             <div class="px-5">
               <a href="#" class="block big-default-btn my-3 self-center w-full">Save Paper Wallet</a>
             </div>
-            <div class="px-5 self-center"><router-link to="/" class="block big-default-btn my-3 self-center">Continue</router-link></div>
+            <div class="px-5 self-center"><router-link :to="{name: 'Welcome'}" class="block big-default-btn my-3 self-center">Continue</router-link></div>
           </div>
         </div>
       </div>
@@ -93,7 +92,6 @@
 <script>
 import { computed, inject, ref, getCurrentInstance } from 'vue';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
-import SelectInput from '@/components/SelectInput.vue';
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { copyKeyFunc } from '../util/functions.js';
@@ -102,7 +100,7 @@ export default {
   name: 'ViewCreateNewWallet',
   components: {
     FontAwesomeIcon,
-    SelectInput, TextInput, PasswordInput
+    TextInput, PasswordInput
   },
   data() {
     return {
@@ -116,8 +114,7 @@ export default {
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref("");
     const newWallet = ref("");
-    const selectedNetwork = ref("168");
-    const networks = ref(siriusStore.state.network);
+    const selectedNetwork = computed(()=> siriusStore.getNetworkType());
     const walletName = ref("");
     const passwd = ref("");
     const confirmPasswd = ref("");
@@ -144,6 +141,7 @@ export default {
       let result = 0;
 
       result = appStore.addNewWallet(
+        siriusStore.state.chainNetworkName,
         walletName.value,
         passwd.value,
         selectedNetwork.value
@@ -175,7 +173,6 @@ export default {
       err,
       newWallet,
       selectedNetwork,
-      networks,
       walletName,
       passwd,
       confirmPasswd,
