@@ -81,13 +81,12 @@ export default{
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
     const router = useRouter();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const toggleAnounceNotification = ref(false);
     const chainsNetwork = computed(()=> ChainProfileNames.createDefault().names);
-    let selectedNetwork = localStorage.getItem("lastAccessNetwork") ? parseInt(localStorage.getItem("lastAccessNetwork")) : 0;
+    let selectedNetwork = ref(localStorage.getItem("lastAccessNetwork") ? parseInt(localStorage.getItem("lastAccessNetwork")) : 0);
 
-    if(chainsNetwork.value[selectedNetwork] === undefined){
-      selectedNetwork = 0;
+    if(chainsNetwork.value[selectedNetwork.value] === undefined){
+      selectedNetwork.value = 0;
     }    
 
     const notificationMessage = ref('');
@@ -181,8 +180,8 @@ export default{
         networkName = chainsNetwork.value[parseInt(e.target.value)];
         sessionStorage.setItem("selectedNetwork", e.target.value);
         sessionStorage.setItem("selectedNetworkName", networkName);
-        selectedNetwork = e.target.value.id;
         siriusStore.refreshselectedNetwork();
+        selectedNetwork.value = e.target.value;
         emitter.emit("SELECT NETWORK", { id: e.target.value, name: networkName });
       }
     }
@@ -197,7 +196,7 @@ export default{
       toggleAnounceNotification,
       chainsNetwork,
       selectedNetwork,
-      networkSelection
+      networkSelection,
       notificationMessage,
       notificationType,
     };

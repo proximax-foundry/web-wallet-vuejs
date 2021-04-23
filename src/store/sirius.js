@@ -1,6 +1,6 @@
 import utils from "@/utils";
 import { ChainProfile, ChainProfileConfig, ChainProfilePreferences } from "./storeClasses";
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, readonly } from "vue";
 import {
   AccountHttp,
   BlockHttp,
@@ -10,7 +10,7 @@ import {
   NodeHttp,
   MosaicHttp,
   NamespaceHttp,
-  ChainConfigHttp
+  ChainConfigHttp,
   Password,
   SimpleWallet,
 } from "tsjs-xpx-chain-sdk";
@@ -120,17 +120,15 @@ const mosaicHttp = computed(() => new MosaicHttp(buildAPIEndpointURL(state.selec
 const namespaceHttp = computed(() => new NamespaceHttp(buildAPIEndpointURL(state.selectedChainNode)));
 const chainConfigHttp = computed(() => new ChainConfigHttp(buildAPIEndpointURL(state.selectedChainNode)));
 
-const chainWSListener = computed(() => {
-  if (listenerChainWS.value == null) {
+function initListener(){
+  if(state.selectedChainNode.value){
     console.log('open new socket')
     listenerChainWS.value = new Listener(
       buildWSEndpointURL(state.selectedChainNode.value),
       WebSocket
     );
   }
-
-  return listenerChainWS.value;
-});
+}
 
 async function addChainNode(nodeConfigString) {
   const newNodeConfig = JSON.parse(nodeConfigString);
@@ -400,7 +398,6 @@ export const siriusStore = readonly({
   namespaceHttp,
   nodeHttp,
   chainConfigHttp,
-  chainWSListener,
   addChainNode,
   selectNewChainNode,
   stopChainWSListener,
@@ -416,5 +413,6 @@ export const siriusStore = readonly({
   getNetworkType,
   getCurrentProfileConfig,
   getCurrentProfile,
-  buildWSEndpointURL
-};
+  buildWSEndpointURL,
+  initListener
+});
