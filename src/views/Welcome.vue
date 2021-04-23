@@ -32,7 +32,7 @@
         <div class="px-5">
           <SignInSiriusIDModal />
         </div>
-        <div class="px-5 self-center"><router-link to="/create" class="block big-default-btn my-3 self-center">Create</router-link></div>
+        <div class="px-5 self-center"><router-link :to="{ name: 'CreateWalletSelection' }" class="block big-default-btn my-3 self-center">Create</router-link></div>
       </div>
     </div>
     <NotificationModal :toggleModal="toggleModal" :msg="msg" notiType="noti" time='1500' />

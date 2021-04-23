@@ -1,5 +1,10 @@
 <template>
   <div class="flex flex-col h-screen justify-between">
+    <Toast />
+    <Toast position="top-left" group="tl" />
+    <Toast position="bottom-left" group="bl" />
+    <Toast position="bottom-right" group="br" />
+    <ConfirmDialog></ConfirmDialog>
     <header class="h-16 flex items-stretch">
       <headerComponent></headerComponent>
     </header>
@@ -19,6 +24,7 @@ import { appStore } from "@/store/app";
 import { siriusStore } from "@/store/sirius";
 import headerComponent from '@/components/headerComponent.vue'
 import PageComponent from '@/components/PageComponent.vue'
+
 export default {
   name: 'App',
   components: {
@@ -28,7 +34,7 @@ export default {
   setup() {
     provide("appStore", appStore);
     provide("siriusStore", siriusStore);
-  },
+  }
 }
 </script>
 

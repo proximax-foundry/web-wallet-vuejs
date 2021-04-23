@@ -20,6 +20,7 @@ const config = require("@/../config/config.json");
 const name = "Sirius Wallet";
 
 const currentWallet = ref(null);
+const currentNetworkName = ref(null);
 
 function getWallets() {
   if (!localStorage.getItem(config.localStorage.walletKey)) {
@@ -31,6 +32,7 @@ function getWallets() {
 const state = reactive({
   darkTheme: false,
   wallets: getWallets(),
+  currentLoggedInNetwork: computed(()=> currentNetworkName.value),
   currentLoggedInWallet: computed(() => currentWallet.value),
   loggedInWalletFirstAccount: computed(() => {
     if (!currentWallet.value) {
@@ -74,19 +76,24 @@ function verifyExistingAccount(privateKey, networkType){
 }
 
 function getWalletByName(walletName) {
-  walletName =
-    walletName.includes(" ") === true
-      ? walletName.split(" ").join("_")
-      : walletName;
-  return state.wallets.find((element) => element.name == walletName);
+
+  return getWalletByNameAndNetwork(walletName, state.currentLoggedInNetwork);
 }
 
-function getWalletIndexByName(walletName) {
+function getWalletByNameAndNetwork(walletName, networkName) {
   walletName =
     walletName.includes(" ") === true
       ? walletName.split(" ").join("_")
       : walletName;
-  return state.wallets.findIndex((element) => element.name == walletName);
+  return state.wallets.find((element) => element.name == walletName && element.networkName == networkName);
+}
+
+function getWalletIndexByNameAndNetwork(walletName) {
+  walletName =
+    walletName.includes(" ") === true
+      ? walletName.split(" ").join("_")
+      : walletName;
+  return state.wallets.findIndex((element) => element.name == walletName && element.networkName == state.currentLoggedInNetwork);
 }
 
 /* benjamin lai */
@@ -96,14 +103,18 @@ function getAccountByWallet(walletName){
   return account;
 }
 
-function importWallet(decryptedData, network){
+function importWallet(decryptedData, networkName, networkType){
   let walletName = decryptedData.name;
   walletName = (walletName.includes(' ') === true) ? walletName.split(' ').join('_') : walletName;
-  if(getWalletByName(walletName) == undefined){
-    if (decryptedData.accounts[0].network == network) {
+  if(getWalletByNameAndNetwork(walletName, networkName) == undefined){
+    //if (decryptedData.accounts[0].network == network) {
       const accounts = [];
       if (decryptedData.accounts.length !== undefined) {
-        for (const element of decryptedData.accounts) {
+        for (let element of decryptedData.accounts) {
+          console.log(element);
+          var newAddress = Address.createFromPublicKey(element.publicAccount.publicKey, networkType);
+          element.address = newAddress.plain();
+          element.network = networkType;
           accounts.push(element);
         }
       } else {
@@ -113,7 +124,8 @@ function importWallet(decryptedData, network){
 
       const wallet = {
         name: walletName,
-        accounts: accounts
+        accounts: accounts,
+        networkName: networkName
       }
       state.wallets.push(wallet);
       try {
@@ -128,18 +140,20 @@ function importWallet(decryptedData, network){
         return 'invalid_wallet';
       }
       return 'wallet_added';
+    /*
     } else {
       // invalid network type error message
       return 'invalid_network';
     }
+    */
   } else {
     // wallet already exist message
     return 'existed_wallet';
   }
 }
 
-function addNewWallet(walletName, password, networkType, privateKey) {
-  let wallet = getWalletByName(walletName);
+function addNewWallet(networkName, walletName, password, networkType, privateKey) {
+  let wallet = getWalletByNameAndNetwork(walletName, networkName);
   if (wallet) {
     if (config.debug) {
       console.error(
@@ -173,6 +187,7 @@ function addNewWallet(walletName, password, networkType, privateKey) {
         : walletName,
     accounts: new Array(),
     contacts: new Array(),
+    networkName: networkName
   };
 
   const account = wallet.open(encryptedPasswd);
@@ -273,7 +288,7 @@ function deleteWallet(walletName, password) {
   }
   // end verify with password
 
-  const walletIndex = getWalletIndexByName(walletName);
+  const walletIndex = getWalletIndexByNameAndNetwork(walletName);
   if (walletIndex == -1) {
     if (config.debug) {
       console.error(
@@ -318,8 +333,8 @@ function checkFromSession(appStore, siriusStore){
   }
 }
 
-function loginToWallet(walletName, password, siriusStore) {
-  const wallet = getWalletByName(walletName);
+function loginToWallet(walletName, password, networkProfileName, siriusStore) {
+  const wallet = getWalletByNameAndNetwork(walletName, networkProfileName);
   if (!wallet) {
     if (config.debug) {
       console.error(
@@ -369,8 +384,7 @@ function loginToWallet(walletName, password, siriusStore) {
     return 0;
   }
 
-  // store password into session
-  // sessionStorage.setItem('walletPassword', password);
+  currentNetworkName.value = networkProfileName;
 
   // wallet.accounts.forEach((account) => {
   //   let privateKey = appStore.decryptPrivateKey(password, account.encrypted, account.iv);
@@ -645,7 +659,7 @@ function fetchAccountInfo(wallet, accountHttp){
 }
 
 function getTotalBalance(){
-  const wallet = getWalletByName(appStore.state.currentLoggedInWallet.name);
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
   let balance = 0;
   wallet.accounts.forEach((item) => {
     balance += parseFloat(item.balance);
@@ -665,7 +679,7 @@ function getXPXBalance(walletName, siriusStore){
         const account = wallet.accounts.find((e) => e.address == add.address);
         account.mosaic = [];
         const mosaicList = [];
-        const mosaicAmount = [];
+        const mosaicAmount = {};
         const address = res.find((element) => element.address.address == add.address);
         if(address != undefined){
           siriusStore.namespaceHttp.getLinkedMosaicId(xpxNamespace).subscribe((xpxMosaicId)=>{
@@ -856,6 +870,7 @@ export const appStore = readonly({
   loginToWallet,
   logoutOfWallet,
   getWalletByName,
+  getWalletByNameAndNetwork,
   getAccountByWallet,
   checkFromSession,
   getTotalBalance,

@@ -63,7 +63,7 @@
           <div class="px-5">
             <a href="#" class="block big-default-btn my-3 self-center w-full">Save Paper Wallet</a>
           </div>
-          <div class="px-5 self-center"><router-link to="/view-all-accounts" class="block big-default-btn my-3 self-center">Continue</router-link></div>
+          <div class="px-5 self-center"><router-link :to="{name: 'ViewDisplayAllAccounts'}" class="block big-default-btn my-3 self-center">Continue</router-link></div>
         </div>
       </div>
     </div>

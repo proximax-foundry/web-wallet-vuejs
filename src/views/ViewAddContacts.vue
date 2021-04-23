@@ -2,7 +2,7 @@
   <div class="flex justify-between text-md">
     <div><span class="text-gray-300">Address Book ></span> <span class="text-blue-primary font-bold">Add Contacts</span></div>
     <div>
-      <router-link to="/" class="font-bold">List</router-link>
+      <router-link :to="{name: 'Welcome'}" class="font-bold">List</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center'>
