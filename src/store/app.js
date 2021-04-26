@@ -1,5 +1,4 @@
 import { computed, reactive, ref, readonly } from "vue";
-
 import {
   Account,
   Address,
@@ -218,15 +217,12 @@ function addNewWallet(walletName, password, networkType, privateKey) {
     return 0;
   }
   return account.privateKey;
-<<<<<<< Updated upstream
-=======
 }
 
 function verifyExistingAccountName(walletName, accountName){
   const wallet = getWalletByName(walletName);
   const account = wallet.accounts.find((element) => element.name.toUpperCase() === accountName.toUpperCase().trim());
   return (account) ? 1 : 0;
->>>>>>> Stashed changes
 }
 
 function verifyWalletPassword(walletName, password){
