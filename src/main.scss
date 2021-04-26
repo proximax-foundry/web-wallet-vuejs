@@ -87,6 +87,10 @@ body{
   @apply bg-blue-primary text-sm text-white font-bold rounded-3xl transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
 }
 
+.small-default-btn{
+  @apply bg-blue-primary text-tsm py-1 px-5 text-white font-bold rounded-3xl transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
+}
+
 .default-btn{
   @apply blue-btn py-3 px-10;
 }
@@ -104,7 +108,7 @@ body{
 }
 
 .default-title{
-  @apply title text-sm md:text-lg lg:text-txl mt-10;
+  @apply title text-sm md:text-lg lg:text-txl;
 }
 
 .gray-line{

@@ -11,6 +11,7 @@ import {
   // Account
   Password,
   SimpleWallet,
+  TransactionHttp,
 } from "tsjs-xpx-chain-sdk";
 const sdk = require('tsjs-xpx-chain-sdk');
 const config = require("@/../config/config.json");
@@ -37,7 +38,7 @@ function getNetworkByType(typeid){
 // }
 
 // ALWAYS use function selectNewChainNode to change currentChainNode value, to avoid web socket listening on old node
-const currentChainNode = ref(getChainNodes()[0]);
+const currentChainNode = ref(getChainNodes()[1]);
 const listenerChainWS = ref(null);
 
 const state = reactive({
@@ -55,6 +56,7 @@ const chainHttp = computed(() => new ChainHttp(state.selectedChainNode));
 const networkHttp = computed(() => new NetworkHttp(state.selectedChainNode));
 const nodeHttp = computed(() => new NodeHttp(state.selectedChainNode));
 const mosaicHttp = computed(() => new MosaicHttp(state.selectedChainNode));
+const transactionHttp = computed(() => new TransactionHttp(state.selectedChainNode));
 const namespaceHttp = computed(() => new sdk.NamespaceHttp(state.selectedChainNode));
 
 const chainWSListener = computed(() => {
@@ -144,9 +146,7 @@ function selectNewChainNode(nodeConfigString) {
 }
 
 function stopChainWSListener() {
-  if (config.debug) {
-    console.log("stopChainWSListener triggered");
-  }
+  console.log("stopChainWSListener triggered");
 
   if (listenerChainWS.value != null) {
     listenerChainWS.value.terminate();
@@ -183,12 +183,14 @@ function createNewAccountPrivateKey(walletName, pk, networkType){
 
 export const siriusStore = readonly({
   state,
+  currentChainNode,
   // getNetworkByName,
   accountHttp,
   blockHttp,
   chainHttp,
   networkHttp,
   mosaicHttp,
+  transactionHttp,
   namespaceHttp,
   nodeHttp,
   chainWSListener,

@@ -82,7 +82,7 @@ export default{
       } else if (result == 0) {
         err.value = "Invalid password";
       } else {
-        router.push({ path: "/dashboard" });
+        router.push({ path: "/dashboard"});
       }
     };
 

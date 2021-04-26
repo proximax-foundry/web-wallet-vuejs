@@ -4,80 +4,128 @@
       <input v-model="filters['global'].value" type="text" class="w-full outline-none text-sm" placeholder="Search" @click="clickInputText()" @blur="blurInputText()">
     </div>
     <DataTable
-      :value="transaction"
+      :value="transactions"
       v-model:filters="filters"
-      filterDisplay="row"
       @row-click="rowClick"
       :paginator="true"
-      :rows="4"
+      :rows="10"
       responsiveLayout="scroll"
       scrollDirection="horizontal"
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
-      :globalFilterFields="['type','flow','sender','recipient']">
-      <Column field="type" header="Type" headerStyle="width:50px;"></Column>
-      <Column field="flow" header="In/Out" headerStyle="width:50px"></Column>
-      <Column field="sender" header="Sender" headerStyle="width:300px"></Column>
-      <Column field="recipient" header="Recipient" headerStyle="width:300px"></Column>
+      :globalFilterFields="['typeName','transferType','senderAddress', 'senderName','recipientAddress', 'recipientName', 'block']">
+      <Column field="typeName" header="Type" headerStyle="width:110px">
+        <template #body="{data}">
+          {{data.typeName}}
+        </template>
+      </Column>
+      <Column field="transferType" header="In/Out" headerStyle="width:10px">
+        <template #body="{data}">
+          <img src="../assets/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg" class="w-5 h-5 inline-block" v-if="data.transferType=='in'">
+          <img src="../assets/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg" class="w-5 h-5 inline-block" v-else>
+        </template>
+      </Column>
+      <Column field="senderName" header="Sender" headerStyle="width:300px">
+        <template #body="{data}">
+          <span :title="data.senderAddress" v-if="data.senderName">{{data.senderName}}</span>
+          <span v-else>{{data.senderAddress}}</span>
+        </template>
+      </Column>
+      <Column field="recipient" header="Recipient" headerStyle="width:300px">
+        <template #body="{data}">
+          <span :title="data.recipientAddress" v-if="data.recipientName">{{data.recipientName}}</span>
+          <span v-else>{{data.recipientAddress}}</span>
+        </template>
+      </Column>
+      <Column field="block" header="Block" headerStyle="width:100px"></Column>
       <template #empty>
         No records found
       </template>
     </DataTable>
-    <TransactionModal :showModal="showTransactionModel" :d="modalData" />
+    <DynamicModelComponent :modelName="dynamicModelComponentDisplay" :showModal="showTransactionModel" :transaction="modalData" />
   </div>
 </template>
 
 <script>
+import { getCurrentInstance, ref } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {FilterMatchMode} from 'primevue/api';
-import TransactionModal from '@/components/TransactionModal.vue'
+import DynamicModelComponent from '@/components/DynamicModelComponent.vue'
+
 
 export default{
-  components: { DataTable, Column, TransactionModal },
-  name: 'NavigationMenu',
-  data() {
-    return {
-      filters: {
-        'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
-      },
-      transaction: [
-        {"type": "Transfer", "flow": 'in', "sender": "VCYV4I-MG7FEN-QNRAAR-MEHAZE-ND5AI2-V4325W-RNRM", "recipient": "	VALIO3-KGXNUK-H2ELVZ-EKZILU-TSDCHD-DA62KD-HCWI", "date": "3/8/2021, 10:14:44 PM - UTC", "fee": "25.3260", "height":"48410065", typeid: "5265", msg: "Dummy testing", "amount":"10,000", "signature": "110473F78707A3EF7F8B5F1EE74BF381A6107E0C0E794634A4B7D6909B189840A63B70C7C8F7342B2DBD3041ED711807766DFD65D0A6C1DF1F64C1B3EA543C00", "hash": "FD182DFBB7CB01A0669DCEF9BD55A9945E4CB2F5DAB84039BCCD2550F3B7CE97"},
-        {"type": "Transfer", "flow": 'in', "sender": "VCYV4I-MG7FEN-QNRAAR-MEHAZE-ND5AI2-V4325W-RNRM", "recipient": "	VALIO3-KGXNUK-H2ELVZ-EKZILU-TSDCHD-DA62KD-HCWI", "date": "3/8/2021, 10:14:44 PM - UTC", "fee": "25.3260", "height":"48410065", typeid: "5265", msg: "Dummy testing 2", "amount":"10,000", "signature": "110473F78707A3EF7F8B5F1EE74BF381A6107E0C0E794634A4B7D6909B189840A63B70C7C8F7342B2DBD3041ED711807766DFD65D0A6C1DF1F64C1B3EA543C00", "hash": "FD182DFBB7CB01A0669DCEF9BD55A9945E4CB2F5DAB84039BCCD2550F3B7CE97"},
-        {"type": "Transfer", "flow": 'out', "sender": "VCYV4I-MG7FEN-QNRAAR-MEHAZE-ND5AI2-V4325W-RNRM", "recipient": "VALIO3-KGXNUK-H2ELVZ-EKZILU-TSDCHD-DA62KD-HCWI", "date": "3/8/2021, 10:14:44 PM - UTC", "fee": "25.3260", "height":"48410065", typeid: "5265", msg: "Dummy testing 3", "amount":"10,000", "signature": "110473F78707A3EF7F8B5F1EE74BF381A6107E0C0E794634A4B7D6909B189840A63B70C7C8F7342B2DBD3041ED711807766DFD65D0A6C1DF1F64C1B3EA543C00", "hash": "FD182DFBB7CB01A0669DCEF9BD55A9945E4CB2F5DAB84039BCCD2550F3B7CE97"},
-        {"type": "Req", "flow": 'out', "sender": "VCYV4I-MG7FEN-QNRAAR-MEHAZE-ND5AI2-V4325W-RNRM", "recipient": "VALIO3-KGXNUK-H2ELVZ-EKZILU-TSDCHD-DA62KD-HCWI", "date": "3/8/2021, 10:14:44 PM - UTC", "fee": "25.3260", "height":"48410065", typeid: "5265", msg: "Dummy testing 4", "amount":"10,000", "signature": "110473F78707A3EF7F8B5F1EE74BF381A6107E0C0E794634A4B7D6909B189840A63B70C7C8F7342B2DBD3041ED711807766DFD65D0A6C1DF1F64C1B3EA543C00", "hash": "FD182DFBB7CB01A0669DCEF9BD55A9945E4CB2F5DAB84039BCCD2550F3B7CE97"},
-        {"type": "Transfer", "flow": 'in', "sender": "VCYV4I-MG7FEN-QNRAAR-MEHAZE-ND5AI2-V4325W-RNRM", "recipient": "	VALIO3-KGXNUK-H2ELVZ-EKZILU-TSDCHD-DA62KD-HCWI", "date": "3/8/2021, 10:14:44 PM - UTC", "fee": "25.3260", "height":"48410065", typeid: "5265", msg: "Dummy testing 5", "amount":"10,000", "signature": "110473F78707A3EF7F8B5F1EE74BF381A6107E0C0E794634A4B7D6909B189840A63B70C7C8F7342B2DBD3041ED711807766DFD65D0A6C1DF1F64C1B3EA543C00", "hash": "FD182DFBB7CB01A0669DCEF9BD55A9945E4CB2F5DAB84039BCCD2550F3B7CE97"},
-        {"type": "Req", "flow": 'in', "sender": "MMMMM-MMMMM-MMMMM-MMMMMM-MMMMMM-MMMM", "recipient": "	MMMM-XXXXX-ZZZZZZ-WWWWWW", "date": "3/8/2021, 10:14:44 PM - UTC", "fee": "25.3260", "height":"48410065", typeid: "5265", msg: "Dummy testing 5", "amount":"10,000", "signature": "110473F78707A3EF7F8B5F1EE74BF381A6107E0C0E794634A4B7D6909B189840A63B70C7C8F7342B2DBD3041ED711807766DFD65D0A6C1DF1F64C1B3EA543C00", "hash": "FD182DFBB7CB01A0669DCEF9BD55A9945E4CB2F5DAB84039BCCD2550F3B7CE97"},
-        {"type": "Req", "flow": 'in', "sender": "MMMMM-OOOOO-YYYYYY-KKKK-JJJJJ-IIIIII", "recipient": "	VVVV-RRRRR-VVVVVVV-YYYYYYY", "date": "3/8/2021, 10:14:44 PM - UTC", "fee": "25.3260", "height":"48410065", typeid: "5265", msg: "Dummy testing 5", "amount":"10,000", "signature": "110473F78707A3EF7F8B5F1EE74BF381A6107E0C0E794634A4B7D6909B189840A63B70C7C8F7342B2DBD3041ED711807766DFD65D0A6C1DF1F64C1B3EA543C00", "hash": "FD182DFBB7CB01A0669DCEF9BD55A9945E4CB2F5DAB84039BCCD2550F3B7CE97"},
-        {"type": "Req", "flow": 'in', "sender": "MMMMM-MMMMM-MMMMM-MMMMMM-MMMMMM-MMMM", "recipient": "	MMMM-XXXXX-ZZZZZZ-WWWWWW", "date": "3/8/2021, 10:14:44 PM - UTC", "fee": "25.3260", "height":"48410065", typeid: "5265", msg: "Dummy testing 5", "amount":"10,000", "signature": "110473F78707A3EF7F8B5F1EE74BF381A6107E0C0E794634A4B7D6909B189840A63B70C7C8F7342B2DBD3041ED711807766DFD65D0A6C1DF1F64C1B3EA543C00", "hash": "FD182DFBB7CB01A0669DCEF9BD55A9945E4CB2F5DAB84039BCCD2550F3B7CE97"},
-        {"type": "Req", "flow": 'in', "sender": "MMMMM-OOOOO-YYYYYY-KKKK-JJJJJ-IIIIII", "recipient": "	VVVV-VVVV-DDDDDD-VVVVVVVVVV", "date": "3/8/2021, 10:14:44 PM - UTC", "fee": "25.3260", "height":"48410065", typeid: "5265", msg: "Dummy testing 5", "amount":"10,000", "signature": "110473F78707A3EF7F8B5F1EE74BF381A6107E0C0E794634A4B7D6909B189840A63B70C7C8F7342B2DBD3041ED711807766DFD65D0A6C1DF1F64C1B3EA543C00", "hash": "FD182DFBB7CB01A0669DCEF9BD55A9945E4CB2F5DAB84039BCCD2550F3B7CE97"},
-        {"type": "Req", "flow": 'in', "sender": "MMMMM-DDDDDD-GGGGGG-HHHHHH-MMMMMM-MMMM", "recipient": "	MMMM-XXXXX-CCCCC-WWWWWW", "date": "3/8/2021, 10:14:44 PM - UTC", "fee": "25.3260", "height":"48410065", typeid: "5265", msg: "Dummy testing 5", "amount":"10,000", "signature": "110473F78707A3EF7F8B5F1EE74BF381A6107E0C0E794634A4B7D6909B189840A63B70C7C8F7342B2DBD3041ED711807766DFD65D0A6C1DF1F64C1B3EA543C00", "hash": "FD182DFBB7CB01A0669DCEF9BD55A9945E4CB2F5DAB84039BCCD2550F3B7CE97"},
-        {"type": "Req", "flow": 'in', "sender": "MMMMM-OOOOO-YYYYYY-KKKK-JJJJJ-IIIIII", "recipient": "	VVVV-VVVV-VVVVVVV-VVVVVVVVVV", "date": "3/8/2021, 10:14:44 PM - UTC", "fee": "25.3260", "height":"48410065", typeid: "5265", msg: "Dummy testing 5", "amount":"10,000", "signature": "110473F78707A3EF7F8B5F1EE74BF381A6107E0C0E794634A4B7D6909B189840A63B70C7C8F7342B2DBD3041ED711807766DFD65D0A6C1DF1F64C1B3EA543C00", "hash": "FD182DFBB7CB01A0669DCEF9BD55A9945E4CB2F5DAB84039BCCD2550F3B7CE97"},
-      ],
-      borderColor: 'border border-gray-400',
-      showTransactionModel: false,
-      modalData: null,
-    };
+  components: { DataTable, Column, DynamicModelComponent }, //DynamicModelComponent
+  name: 'DashboardDataTable',
+  props: {
+    transactions: Array,
   },
-  methods: {
-    clickInputText: function() {
-      this.borderColor = 'border border-white-100 drop-shadow';
-    },
 
-    blurInputText: function() {
-      this.borderColor = 'border border-gray-400';
-    },
+  setup(){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const borderColor = ref('border border-gray-400');
+    const showTransactionModel = ref(false);
+    const modalData = ref(null);
+    const filters = ref({
+      'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
+    });
 
-    rowClick: function(e) {
-      this.showTransactionModel = true;
-      this.modalData = e.data;
+    const dynamicModelComponentDisplay = ref('TransferTransactionModal');
+
+    const clickInputText = () => {
+      borderColor.value = 'border border-white-100 drop-shadow';
+    };
+
+    const blurInputText = () => {
+      borderColor.value = 'border border-gray-400';
+    };
+
+    const rowClick = (e) => {
+      // console.log(e.data.typeName);
+      console.log(e.data);
+      switch(e.data.typeName){
+        case 'Transfer':
+          dynamicModelComponentDisplay.value = 'TransferTransactionModal';
+          break;
+        case 'LockFund':
+          dynamicModelComponentDisplay.value = 'LockFundModal';
+          break;
+        case 'Aggregate Bonded':
+          dynamicModelComponentDisplay.value = 'AggregateBondedModal';
+          break;
+        case 'Aggregate Complete':
+          dynamicModelComponentDisplay.value = 'AggregateBondedModal';
+          break;
+        default:
+          dynamicModelComponentDisplay.value = 'TransferTransactionModal';
+      }
+      showTransactionModel.value = true;
+      modalData.value = Object.assign({}, e.data);
+    };
+
+    emitter.on("CLOSE_MODAL", payload => {
+      showTransactionModel.value = payload;
+    });
+
+    return {
+      borderColor,
+      filters,
+      clickInputText,
+      blurInputText,
+      modalData,
+      rowClick,
+      showTransactionModel,
+      dynamicModelComponentDisplay,
     }
   },
-  mounted() {
-    this.emitter.on("CLOSE_MODAL", payload => {
-      this.showTransactionModel = payload;
-    });
-  }
 }
 </script>
 
+<style lang="scss">
+.p-datatable-tbody{
+  td{
+    font-size: 11px;
+  }
+}
+</style>
