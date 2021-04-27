@@ -17,11 +17,11 @@
             <TextInput placeholder="Account Name" errorMessage="Account name is required" v-model="accountName" icon="wallet" />
           </div>
         </div>
-        <div class="inlinbe-block ml-2">
+        <div class="inline-block ml-2">
           <font-awesome-icon icon="edit" @click="editName()" class="w-5 h-5 text-gray-500 cursor-pointer inline-block" v-if="showName"></font-awesome-icon>
           <div v-else>
             <font-awesome-icon icon="check-circle" @click="changeName()" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mb-1"></font-awesome-icon>
-            <font-awesome-icon @click="showName = !showName" icon="times-circle" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
+            <font-awesome-icon @click="showName = !showName; err=''" icon="times-circle" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
           </div>
         </div>
       </div>
@@ -144,7 +144,7 @@ export default {
         accountNameDisplay.value = accountName.value;
         err.value = '';
       }else if(acc==2){
-        err.value = "Name is already taken";
+        err.value = "Account name is already taken";
       }else{
         err.value = "Fail to change account name";
       }

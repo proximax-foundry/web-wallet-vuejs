@@ -1,5 +1,4 @@
 import { computed, reactive, ref, readonly } from "vue";
-
 import {
   Account,
   Address,
@@ -10,7 +9,7 @@ import {
   WalletAlgorithm,
 } from "tsjs-xpx-chain-sdk";
 
-import { subscribeConfirmed, addListenerstoAccount } from '../util/listener.js';
+import { startListening, stopListening, addListenerstoAccount } from '../util/listener.js';
 import { multiSign } from '../util/multiSignatory.js';
 
 const sdk = require('tsjs-xpx-chain-sdk');
@@ -217,6 +216,7 @@ function addNewWallet(networkName, walletName, password, networkType, privateKey
     isMultisign: null,
     multisigAccountGraphInfo: null,
     nis1Account: null,
+    mosaic: null,
   });
 
   state.wallets.push(newWallet);
@@ -232,6 +232,12 @@ function addNewWallet(networkName, walletName, password, networkType, privateKey
     return 0;
   }
   return account.privateKey;
+}
+
+function verifyExistingAccountName(walletName, accountName){
+  const wallet = getWalletByName(walletName);
+  const account = wallet.accounts.find((element) => element.name.toUpperCase() === accountName.toUpperCase().trim());
+  return (account) ? 1 : 0;
 }
 
 function verifyWalletPassword(walletName, password){
@@ -314,14 +320,12 @@ function deleteWallet(walletName, password) {
 }
 // check session to verify page has been refreshed
 function checkFromSession(appStore, siriusStore){
-  console.log(state.wallets)
   const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
   if(walletSession){
     // session is not null - copy to state
     currentWallet.value = walletSession;
-    // console.log(currentWallet.value);
-    subscribeConfirmed(currentWallet.value.accounts);
-    // getMosaicsAllAccounts(appStore, siriusStore);
+    stopListening();
+    startListening(currentWallet.value.accounts);
     getXPXBalance(walletSession.name, siriusStore).then(() => {
       sessionStorage.setItem('pageRefresh', 'y');
     });
@@ -394,14 +398,12 @@ function loginToWallet(walletName, password, networkProfileName, siriusStore) {
   //   subscribeConfirmed(accountDetail.address, appStore, siriusStore);
   // });
 
-  subscribeConfirmed(wallet.accounts);
+  currentWallet.value = wallet;
+  startListening(wallet.accounts);
   multiSign.updateAccountsMultiSign(walletName);
-
   // get latest xpx amount
   getXPXBalance(walletName, siriusStore).then(()=> {
     try {
-      const wallet = getWalletByName(walletName);
-      currentWallet.value = wallet;
       sessionStorage.setItem(
         'currentWalletSession',
         JSON.stringify(wallet)
@@ -420,6 +422,7 @@ function logoutOfWallet() {
   if (config.debug) {
     console.error("logoutOfWallet triggered");
   }
+  stopListening();
   if (!currentWallet.value) {
     return false;
   }
@@ -462,6 +465,7 @@ function updateAccountState(account, networkType, accountName){
     isMultisign: null,
     multisigAccountGraphInfo: null,
     nis1Account: null,
+    mosaic: null,
   };
 
   wallet.accounts.push(acc);
@@ -487,14 +491,38 @@ function updateAccountState(account, networkType, accountName){
   return 1;
 }
 
+function updateCurrentWallet(account){
+  const wallet = getWalletByName(appStore.state.currentLoggedInWallet.name);
+  wallet.accounts.push(account);
+  // enable listener
+  addListenerstoAccount(account);
+  sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
+  // update localStorage
+  try {
+    localStorage.setItem(
+      config.localStorage.walletKey,
+      JSON.stringify(state.wallets)
+    );
+  } catch (err) {
+    if (config.debug) {
+      console.error("updateAccountState error caught", err);
+    }
+    return 0;
+  }
+  return 1;
+}
+
 function updateAccountName(name, oriName){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
-  const exist_account = wallet.accounts.find((element) => element.name == name);
-  const exist_account_index = wallet.accounts.findIndex((element) => element.name == name);
+  const exist_account = wallet.accounts.find((element) => element.name == name.trim());
+  const exist_account_index = wallet.accounts.findIndex((element) => element.name == name.trim());
   const account_index = wallet.accounts.findIndex((element) => element.name == oriName);
+
   if(exist_account && (exist_account_index != account_index)){
     return 2;
   }
+
+  // get account
   const account = wallet.accounts.find((element) => element.name == oriName);
   if (!account) {
     if (config.debug) {
@@ -548,6 +576,20 @@ function getAccDetails(name){
   if (!account) {
     if (config.debug) {
       console.error("getAccDetails triggered with invalid account name");
+    }
+    return -1;
+  }
+  return account;
+}
+
+function getAccDetailsByAddress(address){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  const account = wallet.accounts.find((element) => element.address == address);
+  console.log('searching for this: ' + address);
+  console.log(account);
+  if (!account) {
+    if (config.debug) {
+      console.error("getAccDetails triggered with invalid account address");
     }
     return -1;
   }
@@ -680,9 +722,12 @@ function getXPXBalance(walletName, siriusStore){
         account.mosaic = [];
         const mosaicList = [];
         const mosaicAmount = {};
+        
         const address = res.find((element) => element.address.address == add.address);
         if(address != undefined){
-          siriusStore.namespaceHttp.getLinkedMosaicId(xpxNamespace).subscribe((xpxMosaicId)=>{
+
+          siriusStore.namespaceHttp.getLinkedMosaicId(xpxNamespace).subscribe((xpxMosaicId) => {
+
             for(const mosaic of address.mosaics){
               if(mosaic.id.toHex() === xpxMosaicId.toHex() ){
                 xpxAmount = mosaic.amount.compact() / Math.pow(10, sdk.XpxMosaicProperties.MOSAIC_PROPERTIES.divisibility);
@@ -698,7 +743,7 @@ function getXPXBalance(walletName, siriusStore){
             }, error => {
                 console.error(error);
             }, () => {
-                console.log('Get balance of ' + add.address );
+                // console.log('Get balance of ' + add.address );
             })
             account.balance = String(parseFloat(xpxAmount).toFixed(6));
           });
@@ -802,8 +847,6 @@ function verifyPublicKey(add, accountHttp){
     const accountInfo = accountHttp.getAccountInfo(address);
     accountInfo.subscribe(
       (acc) => {
-        console.log('acc');
-        console.log(acc);
         if (acc.publicKey === invalidPublicKey) {
           console.warn(`The receiver's public key is not valid for sending encrypted messages`);
           resolve(true)
@@ -874,10 +917,12 @@ export const appStore = readonly({
   getAccountByWallet,
   checkFromSession,
   getTotalBalance,
+  verifyExistingAccountName,
   verifyWalletPassword,
   updateAccountState,
   setAccountDefault,
   getAccDetails,
+  getAccDetailsByAddress,
   updateAccountName,
   deleteAccount,
   getCurrentAdd,
@@ -897,5 +942,6 @@ export const appStore = readonly({
   getAccountPassword,
   verifyExistingAccount,
   verifyPublicKey,
+  updateCurrentWallet,
 });
 

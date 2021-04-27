@@ -24,7 +24,7 @@
               </div>
               <transition name="slide">
               <div v-if="showMenu" class="z-10">
-                <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50'" @click="changeSelection(item)" :title="'Address is ' + item.address">
+                <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50 optionDiv'" @click="changeSelection(item)" :title="'Address is ' + item.address">
                   <div>{{ item.name }}</div>
                 </div>
               </div>
@@ -349,5 +349,9 @@ export default {
 .slide-enter-from, .slide-leave-to {
    overflow: hidden;
    max-height: 0;
+}
+
+.optionDiv:hover{
+  background: #D9EBFF;
 }
 </style>

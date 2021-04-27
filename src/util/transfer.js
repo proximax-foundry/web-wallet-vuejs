@@ -20,7 +20,6 @@ import {
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { environment } from '../environment/environment.js';
-// import { subscribeConfirmed } from '../util/listener.js';
 
 const config = require("@/../config/config.json");
 
@@ -136,12 +135,9 @@ export const makeTransaction = (recipient, sendXPX, messageText, mosaicsSent, mo
     const signedTransaction = account.sign(transferTransaction, hash);
     const transactionHttp = new TransactionHttp(siriusStore.state.selectedChainNode);
 
-    // subscribeConfirmed(account.address, appStore, siriusStore);
-
     transactionHttp
       .announce(signedTransaction)
       .subscribe(() => {
-        // console.log(x);
         return true;
       }, err => console.error(err));
   });
@@ -213,8 +209,6 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
     // console.log('TF: '+transactionBuilder.fee);
     const signedTransaction = account.sign(aggregateTransaction, hash);
     const transactionHttp = new TransactionHttp(siriusStore.state.selectedChainNode);
-
-    // subscribeConfirmed(account.address, appStore, siriusStore);
 
     transactionHttp
       .announce(signedTransaction)

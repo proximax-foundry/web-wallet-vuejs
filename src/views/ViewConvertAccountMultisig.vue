@@ -57,7 +57,7 @@
       <div class="mt-16">
         <div v-for="(coSignAddress, index) in coSign" :key="index" class="flex">
           <font-awesome-icon icon="trash-alt" class="w-4 h-4 text-gray-500 hover:text-gray-400 cursor-pointer mr-3 mt-3" @click="deleteCoSigAddressInput(index)"></font-awesome-icon>
-          <TextInput placeholder="Cosignatory Account Public Key" errorMessage="Valid Cosignatory Account Public Key is required" :showError="showAddressError[index]" v-model="coSign[index]" icon="key" class="flex-grow" />
+          <TextInput placeholder="Cosignatory Account Address or Public Key" errorMessage="Valid Cosignatory Account Address or Public Key is required" :showError="showAddressError[index]" v-model="coSign[index]" icon="key" class="flex-grow" />
           <add-cosign-modal :cosignPublicKeyIndex="index" :selectedAddress="selectedAddresses"></add-cosign-modal>
         </div>
         <div class="text-lg" v-if="!coSign.length">Add at least 1 consignatories</div>
@@ -132,7 +132,11 @@ export default {
     const numDeleteUser = ref(1);
     const maxNumApproveTransaction = ref(0);
     const maxNumDeleteUser = ref(0);
+    
     const publicKeyPattern = "^[0-9A-Fa-f]{64}$";
+    const addressPatternShort = "^[0-9A-Za-z]{40}$";
+    const addressPatternLong = "^[0-9A-Za-z-]{46}$";
+    
     const coSign = ref([]);
     const selectedAddresses = ref([]);
     const showAddressError = ref([]);
@@ -149,7 +153,13 @@ export default {
       var status = false;
       if(accountBalance.value >= 10.0445){
         for(var i = 0; i < coSign.value.length; i++){
-          if(!coSign.value[i].match(publicKeyPattern)){
+          if(!coSign.value[i].match(publicKeyPattern) && (coSign.value[i].length == 64)){
+            status = true;
+            break;
+          }else if(!coSign.value[i].match(addressPatternShort) && (coSign.value[i].length == 40)){
+            status = true;
+            break;
+          }else if(!coSign.value[i].match(addressPatternLong) && (coSign.value[i].length == 46)){
             status = true;
             break;
           }
@@ -162,7 +172,7 @@ export default {
       coSign.value = [];
       selectedAddresses.value = [];
       showAddressError.value = [];
-      passwd.value = [];
+      passwd.value = '';
       numApproveTransaction.value = 1;
       maxNumApproveTransaction.value = 0;
       numDeleteUser.value = 1;
@@ -189,21 +199,16 @@ export default {
 
     watch(() => [...coSign.value], (n) => {
       for(var i = 0; i < coSign.value.length; i++){
-        // if(coSign.value[i].length >= 40){
-          if(!coSign.value[i].match(publicKeyPattern) && coSign.value[i] != ''){
+        if((coSign.value[i].length == 64) || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)){
+          if(!coSign.value[i].match(publicKeyPattern) && (coSign.value[i].length == 64)){
+            showAddressError.value[i] = true;
+          }else if(!coSign.value[i].match(addressPatternLong) && (coSign.value[i].length == 46)){
+            showAddressError.value[i] = true;
+          }else if(!coSign.value[i].match(addressPatternShort) && (coSign.value[i].length == 40)){
             showAddressError.value[i] = true;
           }else{
             showAddressError.value[i] = false;
-            //search for similar matching
-            // var match = existingAdd.findIndex((element) => element == coSign.value[i]);
-            // if(match != -1 && i != 0){
-            //   console.log('Match index: '+ match);
-            //   console.log('coSign of ' + i + ': '+ coSign.value[i]);
-            //   err.value = "Cosignee already exist";
-            //   break;
-            // }else{
-            //   err.value = '';
-            // }
+
             const unique = Array.from(new Set(n));
             if(unique.length != n.length){
               err.value = "Cosignee already exist";
@@ -211,7 +216,9 @@ export default {
               err.value = '';
             }
           }
-        // }
+        }else{
+          showAddressError.value[i] = true;
+        }
       }
     }, {deep:true});
 

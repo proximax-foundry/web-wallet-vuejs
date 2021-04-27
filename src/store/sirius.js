@@ -13,6 +13,7 @@ import {
   ChainConfigHttp,
   Password,
   SimpleWallet,
+  TransactionHttp,
 } from "tsjs-xpx-chain-sdk";
 const config = require("@/../config/config.json");
 
@@ -107,7 +108,6 @@ function getSelectedChainNode(){
 //   return config.network.find((element) => element.name == name);
 // }
 
-// ALWAYS use function selectNewChainNode to change currentChainNode value, to avoid web socket listening on old node
 //const currentChainNode = ref(getChainNodes()[0]);
 const listenerChainWS = ref(null);
 
@@ -200,9 +200,7 @@ function selectNewChainNode(APIString) {
 }
 
 function stopChainWSListener() {
-  if (config.debug) {
-    console.log("stopChainWSListener triggered");
-  }
+  console.log("stopChainWSListener triggered");
 
   if (listenerChainWS.value != null) {
     listenerChainWS.value.terminate();
@@ -389,12 +387,14 @@ function buildWSEndpointURL(url, port = undefined){
 
 export const siriusStore = readonly({
   state,
+  currentChainNode,
   // getNetworkByName,
   accountHttp,
   blockHttp,
   chainHttp,
   networkHttp,
   mosaicHttp,
+  transactionHttp,
   namespaceHttp,
   nodeHttp,
   chainConfigHttp,

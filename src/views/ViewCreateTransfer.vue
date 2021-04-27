@@ -17,7 +17,7 @@
             </div>
             <transition name="slide">
             <div v-if="showMenu" class="z-10">
-              <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50'" @click="changeSelection(item)" :title="'Address is ' + item.address">
+              <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50 optionDiv'" @click="changeSelection(item)" :title="'Address is ' + item.address">
                 <div>{{ item.name }}</div>
               </div>
             </div>
@@ -73,6 +73,7 @@
     </form>
     <AddContactModal :toggleModal="togglaAddContact" :saveAddress="recipient" />
     <NotificationModal :toggleModal="toggleAnounceNotification" msg="Unconfirmed transaction" notiType="noti" time='2500' />
+    <ConfirmSendModal :toggleModal="toggleConfirm" />
   </div>
 </template>
 <script>
@@ -81,12 +82,12 @@ import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInput from '@/components/SelectInput.vue';
 import MosaicInput from '@/components/MosaicInput.vue';
-// import SendInput from '@/components/SendInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
 import TextareaInput from '@/components/TextareaInput.vue';
 import { makeTransaction } from '../util/transfer.js'; //getMosaicsAllAccounts
 import AddContactModal from '@/components/AddContactModal.vue';
 import NotificationModal from '@/components/NotificationModal.vue';
+import ConfirmSendModal from '@/components/ConfirmSendModal.vue';
 import { verifyAddress } from '../util/functions.js';
 
 export default {
@@ -96,11 +97,11 @@ export default {
     PasswordInput,
     MosaicInput,
     SelectInput,
-    // SendInput,
     SupplyInput,
     TextareaInput,
     AddContactModal,
-    NotificationModal
+    NotificationModal,
+    ConfirmSendModal,
   },
 
   setup(){
@@ -129,6 +130,8 @@ export default {
     const currentlySelectedMosaic = ref([]);
     const sendXPX = ref('0.000000');
     const encryptedMsgDisable = ref(true);
+    const toggleConfirm = ref(false);
+    const forceSend = ref(false);
 
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
@@ -152,9 +155,6 @@ export default {
     const selectedAccName = ref(appStore.getFirstAccName());
     const selectedAccAdd = ref(appStore.getFirstAccAdd());
     const balance = ref(appStore.getFirstAccBalance(selectedAccAdd.value));
-    if(balance.value == '0.000000'){
-      showBalanceErr.value = true;
-    }
 
     const accounts = computed( () => appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts);
     const moreThanOneAccount = computed(()=> (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false);
@@ -205,26 +205,32 @@ export default {
     };
 
     const makeTransfer = () => {
-      let transferStatus = makeTransaction(recipient.value.toUpperCase(), sendXPX.value, messageText.value, selectedMosaic.value, mosaicSupplyDivisibility.value, walletPassword.value, selectedAccName.value, encryptedMsg.value, appStore, siriusStore);
-      if(!transferStatus){
-        err.value = 'Invalid wallet password';
+      if(sendXPX.value == 0 && !forceSend.value){
+        toggleConfirm.value = true;
       }else{
-        // transaction made
-        err.value = '';
-        // check if address is saved in the contact list
-        // if not display add contact model
-        if(!appStore.checkAvailableContact(recipient.value)){
-          // add new contact
-          togglaAddContact.value = true;
+        console.log(recipient.value.toUpperCase() + ' : ' + walletPassword.value + ' : ' + selectedAccName.value + ' : ' + encryptedMsg.value)
+        let transferStatus = makeTransaction(recipient.value.toUpperCase(), sendXPX.value, messageText.value, selectedMosaic.value, mosaicSupplyDivisibility.value, walletPassword.value, selectedAccName.value, encryptedMsg.value, appStore, siriusStore);
+        if(!transferStatus){
+          err.value = 'Invalid wallet password';
         }else{
-          clearInput();
+          // transaction made
+          err.value = '';
+          // check if address is saved in the contact list
+          // if not display add contact model
+          if(!appStore.checkAvailableContact(recipient.value)){
+            // add new contact
+            togglaAddContact.value = true;
+          }else{
+            clearInput();
+          }
+          // shpw notification
+          toggleAnounceNotification.value = true;
+          // getMosaicsAllAccounts(appStore, siriusStore);
+          // play notification sound
+          var audio = new Audio(require('@/assets/audio/ding.ogg'));
+          audio.play();
+          forceSend.value = false;
         }
-        // shpw notification
-        toggleAnounceNotification.value = true;
-        // getMosaicsAllAccounts(appStore, siriusStore);
-        // play notification sound
-        var audio = new Audio(require('@/assets/audio/ding.ogg'));
-        audio.play();
       }
     };
 
@@ -240,7 +246,15 @@ export default {
     // get mosaics of current selected account
     // getMosaicsAllAccounts(appStore, siriusStore);
     const addMosaicsButton = computed(() => {
-      return ((appStore.getAccDetails(selectedAccName.value).mosaic.length == 0) || (mosaicsCreated.value.length == appStore.getAccDetails(selectedAccName.value).mosaic.length));
+      let mosaic = appStore.getAccDetails(selectedAccName.value).mosaic;
+      if(mosaic != undefined){
+        if((mosaic.length == 0) || (mosaicsCreated.value.length == mosaic.length)){
+          return true;
+        }else{
+          return false;
+        }
+      }
+      return true;
     });
     // generate mosaic selector
     const mosaics = computed(() => {
@@ -277,6 +291,12 @@ export default {
       mosaicSupplyDivisibility.value.splice(e.index, 1);
     }
 
+    watch(balance, (n) => {
+      if(n == '0.000000'){
+        showBalanceErr.value = true;
+      }
+    });
+
     watch(recipient, (add) => {
       if((recipient.value.length == 46 && recipient.value.match(addressPatternLong)) || (recipient.value.length == 40 && recipient.value.match(addressPatternShort))) {
         const verifyRecipientAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), recipient.value);
@@ -309,6 +329,21 @@ export default {
 
     emitter.on("CLOSE_NOTIFICATION", payload => {
       toggleAnounceNotification.value = payload;
+    });
+
+    // confirm modal
+    emitter.on("CLOSE_CONFIRM_SEND_MODAL", payload => {
+      toggleConfirm.value = payload;
+    });
+
+    emitter.on("CONFIRM_PROCEED_SEND", payload => {
+      console.log('Force send: ' + payload);
+      console.log('PW:' + walletPassword.value);
+      if(payload){
+        forceSend.value = payload;
+        toggleConfirm.value = false;
+        makeTransfer();
+      }
     });
 
     return {
@@ -355,6 +390,7 @@ export default {
       updateMosaic,
       currentlySelectedMosaic,
       removeMosaic,
+      toggleConfirm,
     }
   },
 
@@ -392,5 +428,9 @@ export default {
 .slide-enter-from, .slide-leave-to {
    overflow: hidden;
    max-height: 0;
+}
+
+.optionDiv:hover{
+  background: #D9EBFF;
 }
 </style>
