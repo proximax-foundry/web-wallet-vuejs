@@ -1,11 +1,10 @@
 import utils from "@/utils";
 import { ChainProfile, ChainProfileConfig, ChainProfilePreferences } from "./storeClasses";
-import { computed, reactive, ref, readonly } from "vue";
+import { computed, reactive, ref, readonly, watch } from "vue";
 import {
   AccountHttp,
   BlockHttp,
   ChainHttp,
-  Listener,
   NetworkHttp,
   NodeHttp,
   MosaicHttp,
@@ -23,9 +22,7 @@ const state = reactive({
   currentNetworkProfile: {},
   currentNetworkProfileConfig: {},
   networkAPIEndpoints: computed(() => formatNetwork()),
-  selectedChainNode: computed(() =>
-    getSelectedChainNode()
-  )
+  selectedChainNode: ''
 });
 
 function updateCurrentProfile(){
@@ -83,26 +80,31 @@ function getNetworkByType(typeid){
   return config.network.find((element) => element.type == typeid);
 }
 
-function getSelectedChainNode(){
-  var chainProfilePreferences = new ChainProfilePreferences(state.chainNetworkName + "_preferences");
+watch(
+  ()=> state.chainNetworkName, 
+  (newValues) => {
+
+  var chainProfilePreferences = new ChainProfilePreferences(newValues + "_preferences");
 
   chainProfilePreferences.init();
 
-  if(chainProfilePreferences.apiNode && getChainNodes().includes(chainProfilePreferences.apiNode)){
-    return chainProfilePreferences.apiNode;
+  let endpoints = getChainNodes();
+
+  if(chainProfilePreferences.apiNode && endpoints.includes(chainProfilePreferences.apiNode)){
+    state.selectedChainNode = chainProfilePreferences.apiNode;
   }
   else{
-    if(chainProfilePreferences.apiNode.length){
-      var randomAPINodeIndex = Math.floor(Math.random() * chainProfilePreferences.apiNode.length);
-      chainProfilePreferences.apiNode = chainProfilePreferences.apiNode[randomAPINodeIndex];
+    if(endpoints.length){
+      var randomAPINodeIndex = Math.floor(Math.random() * endpoints.length);
+      chainProfilePreferences.apiNode = endpoints[randomAPINodeIndex];
       chainProfilePreferences.saveToLocalStorage();
-      return chainProfilePreferences.apiNode[randomAPINodeIndex];
+      state.selectedChainNode = endpoints[randomAPINodeIndex];
     }
     else{
-      return '';
+      state.selectedChainNode = "";
     }
   }
-}
+})
 
 // function getNetworkByName(name){
 //   return config.network.find((element) => element.name == name);
@@ -119,16 +121,7 @@ const nodeHttp = computed(() => new NodeHttp(buildAPIEndpointURL(state.selectedC
 const mosaicHttp = computed(() => new MosaicHttp(buildAPIEndpointURL(state.selectedChainNode)));
 const namespaceHttp = computed(() => new NamespaceHttp(buildAPIEndpointURL(state.selectedChainNode)));
 const chainConfigHttp = computed(() => new ChainConfigHttp(buildAPIEndpointURL(state.selectedChainNode)));
-
-function initListener(){
-  if(state.selectedChainNode.value){
-    console.log('open new socket')
-    listenerChainWS.value = new Listener(
-      buildWSEndpointURL(state.selectedChainNode.value),
-      WebSocket
-    );
-  }
-}
+const transactionHttp = computed(()=> new TransactionHttp(buildAPIEndpointURL(state.selectedChainNode)));
 
 async function addChainNode(nodeConfigString) {
   const newNodeConfig = JSON.parse(nodeConfigString);
@@ -387,7 +380,6 @@ function buildWSEndpointURL(url, port = undefined){
 
 export const siriusStore = readonly({
   state,
-  currentChainNode,
   // getNetworkByName,
   accountHttp,
   blockHttp,
@@ -413,6 +405,5 @@ export const siriusStore = readonly({
   getNetworkType,
   getCurrentProfileConfig,
   getCurrentProfile,
-  buildWSEndpointURL,
-  initListener
+  buildWSEndpointURL
 });

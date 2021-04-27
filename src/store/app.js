@@ -9,7 +9,7 @@ import {
   WalletAlgorithm,
 } from "tsjs-xpx-chain-sdk";
 
-import { startListening, stopListening, addListenerstoAccount } from '../util/listener.js';
+import { startListening, stopListening, addListenerstoAccount, initListenerSetting } from '../util/listener.js';
 import { multiSign } from '../util/multiSignatory.js';
 
 const sdk = require('tsjs-xpx-chain-sdk');
@@ -20,6 +20,8 @@ const name = "Sirius Wallet";
 
 const currentWallet = ref(null);
 const currentNetworkName = ref(null);
+const currentConnectedEndpoint = ref(null);
+const currentConnectedEndpointPort = ref(null);
 
 function getWallets() {
   if (!localStorage.getItem(config.localStorage.walletKey)) {
@@ -32,6 +34,8 @@ const state = reactive({
   darkTheme: false,
   wallets: getWallets(),
   currentLoggedInNetwork: computed(()=> currentNetworkName.value),
+  currentConnectedEndpoint: computed(()=> currentConnectedEndpoint.value),
+  currentConnectedEndpointPort: computed(()=> currentConnectedEndpointPort.value),
   currentLoggedInWallet: computed(() => currentWallet.value),
   loggedInWalletFirstAccount: computed(() => {
     if (!currentWallet.value) {
@@ -48,6 +52,12 @@ const explorerBlockHttp = (compactBlock) => {
 const explorerPublicKeyHttp = (publicKey) => {
   return `${config.chainExplorer.url}/${config.chainExplorer.publicKeyRoute}/${publicKey}`;
 };
+
+function preLogin(endpoint, port, networkName){
+  currentNetworkName.value = networkName;
+  currentConnectedEndpoint.value = endpoint;
+  currentConnectedEndpointPort.value = port;
+}
 
 function toggleDarkTheme() {
   if (config.debug) {
@@ -337,8 +347,8 @@ function checkFromSession(appStore, siriusStore){
   }
 }
 
-function loginToWallet(walletName, password, networkProfileName, siriusStore) {
-  const wallet = getWalletByNameAndNetwork(walletName, networkProfileName);
+function loginToWallet(walletName, password, siriusStore) {
+  const wallet = getWalletByName(walletName);
   if (!wallet) {
     if (config.debug) {
       console.error(
@@ -387,9 +397,6 @@ function loginToWallet(walletName, password, networkProfileName, siriusStore) {
   ) {
     return 0;
   }
-
-  currentNetworkName.value = networkProfileName;
-
   // wallet.accounts.forEach((account) => {
   //   let privateKey = appStore.decryptPrivateKey(password, account.encrypted, account.iv);
   //   const accountDetail = Account.createFromPrivateKey(privateKey, account.network);
@@ -399,6 +406,8 @@ function loginToWallet(walletName, password, networkProfileName, siriusStore) {
   // });
 
   currentWallet.value = wallet;
+
+  initListenerSetting(state.currentConnectedEndpoint, state.currentConnectedEndpointPort);
   startListening(wallet.accounts);
   multiSign.updateAccountsMultiSign(walletName);
   // get latest xpx amount
@@ -910,6 +919,7 @@ export const appStore = readonly({
   importWallet,
   addNewWallet,
   deleteWallet,
+  preLogin,
   loginToWallet,
   logoutOfWallet,
   getWalletByName,

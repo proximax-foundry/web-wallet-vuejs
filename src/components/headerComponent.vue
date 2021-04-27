@@ -3,7 +3,7 @@
     <router-link :to="(appStore.state.currentLoggedInWallet)? {name : 'ViewDashboard'}: {name: 'Welcome'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">v{{ appStore.version }}</span>
   </div>
   <div class="flex-grow h-16"></div>
-  <div class="flex-none flex items-end">
+  <div class="flex-none flex items-end" v-if="!loginStatus">
     <div>
         <div class="select mb-3" style="position: relative">
           <font-awesome-icon icon="times" class="text-gray-400 hover:text-gray-600 cursor-pointer" style="display: inline-block; position: absolute; top: 9px; right: 25px;" @click="clearSelection()" v-if="displayClearIcon" />
@@ -165,7 +165,7 @@ export default{
       toggleAnounceNotification.value = payload;
     });
 
-    let networkName = chainsNetwork.value[selectedNetwork];
+    let networkName = chainsNetwork.value[selectedNetwork.value];
 
     if(networkName){
       sessionStorage.setItem("selectedNetwork", selectedNetwork);

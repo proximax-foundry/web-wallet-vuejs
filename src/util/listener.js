@@ -15,16 +15,21 @@ import { transactions } from '../util/transactions.js';
 const connectorListen = ref({});
 
 const state = reactive({
-  connector: []
+  connector: [],
+  host: '',
+  port: 3000
 });
+
+const initListenerSetting = (host, port)=>{
+  state.host = host;
+  state.port = port;
+}
 
 const startListening = (accounts) => {
   accounts.forEach((account) => {
 
     let connect = new Listener(
-      `${
-        siriusStore.currentChainNode.protocol.startsWith("http") ? "ws://" : "wss://"
-      }${siriusStore.currentChainNode.hostname}:${siriusStore.currentChainNode.port}`,
+      siriusStore.buildWSEndpointURL(state.host, state.port),
       WebSocket
     );
 
@@ -441,6 +446,7 @@ async function announceAggregateBonded(senderAddress, aggBondTx, aggBondHash, tx
 
 export{
   transferEmitter,
+  initListenerSetting,
   startListening,
   stopListening,
   addListenerstoAccount,
