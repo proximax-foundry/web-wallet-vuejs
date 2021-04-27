@@ -2,7 +2,7 @@
   <div class="flex justify-between text-sm">
     <div><span class="text-gray-400">Accounts ></span> <span class="text-blue-primary font-bold">View All</span></div>
     <div>
-      <router-link to="/select-type-creation-account" class="font-bold" active-class="accounts">Create a New Account</router-link>
+      <router-link :to="{ name: 'SelectTypeCreateAccount'}" class="font-bold" active-class="accounts">Create a New Account</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line'>

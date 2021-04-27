@@ -2,7 +2,7 @@
 <div class="flex justify-between text-sm">
   <div><span class="text-gray-400">Accounts ></span> <span class="text-blue-primary font-bold">Delete</span></div>
   <div>
-    <router-link to="/view-all-accounts" class="font-bold" active-class="accounts">View All Accounts</router-link>
+    <router-link :to="{name: 'ViewDisplayAllAccounts'}" class="font-bold" active-class="accounts">View All Accounts</router-link>
   </div>
 </div>
 <div class='mt-2 py-3 gray-line'>
@@ -30,7 +30,7 @@
       <div class="text-xl mt-10">Would you like to permanently delete this account?</div>
       <div class="xs:w-full inline-block lg:w-4/12 text-center mt-5">
         <div class="w-full flex justify-around">
-          <router-link to="/view-all-accounts" class="default-btn w-38 mr-2">Go Back</router-link>
+          <router-link :to="{name: 'ViewDisplayAllAccounts'}" class="default-btn w-38 mr-2">Go Back</router-link>
           <ConfirmDeleteAccountModal :name="name" :address="acc.address" />
         </div>
       </div>

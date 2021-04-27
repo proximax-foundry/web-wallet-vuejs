@@ -52,6 +52,7 @@ export default{
     const err = ref("");
     const walletPassword = ref("");
     const selectedWallet = ref("0");
+    const selectedNetworkName = computed(()=> siriusStore.state.chainNetworkName);
     const showPasswdError = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
     const disableSignin = computed(
@@ -64,6 +65,9 @@ export default{
       () =>{
         var w = [];
         appStore.state.wallets.forEach((i, index)=>{
+          if(i.networkName !== selectedNetworkName.value){
+            return;
+          }
           w.push({
             val: i.name,
             text: i.name,
@@ -76,7 +80,7 @@ export default{
 
     const login = () => {
 
-      var result = appStore.loginToWallet(selectedWallet.value, walletPassword.value, siriusStore);
+      var result = appStore.loginToWallet(selectedWallet.value, walletPassword.value, siriusStore.state.chainNetworkName, siriusStore);
       if (result == -1) {
         err.value = "Invalid wallet name";
       } else if (result == 0) {
