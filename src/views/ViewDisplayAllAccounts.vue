@@ -13,7 +13,7 @@
   <NotificationModal :toggleModal="toggleModal" msg="Account has been removed successfully" notiType="noti" time='1500' />
 </template>
 <script>
-import { computed, inject } from "vue";
+import { computed, inject, getCurrentInstance, ref } from "vue";
 import AccountTile from '@/components/AccountTile.vue';
 import NotificationModal from '@/components/NotificationModal.vue';
 
@@ -26,14 +26,48 @@ export default {
     AccountTile,
     NotificationModal,
   },
-  data() {
-    return {
-      toggleModal: false,
-      showMenu: [],
-    };
-  },
-  setup() {
+
+  setup(p) {
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const appStore = inject("appStore");
+    const currentMenu = ref('');
+    const toggleModal = false;
+    const showMenu = ref([]);
+
+    // get num of accounts
+    var num_acc = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length;
+    var i = 0;
+    while(i < num_acc){
+      showMenu.value[i] = false;
+      i++;
+    }
+
+    emitter.on("SHOW_MENU_TRIGGER", payload => {
+      showMenu.value[payload] = true;
+      currentMenu.value = payload;
+    });
+    emitter.on("CLOSE_MENU_TRIGGER", payload => {
+      showMenu.value[payload] = false;
+      currentMenu.value = payload;
+    });
+
+    emitter.on("CLOSE_ALL_MENU_TRIGGER", () => {
+      var j = 0;
+      while(j < num_acc){
+        showMenu.value[j] = false;
+        j++;
+      }
+    });
+
+    if(p.deleteAccount=='success'){
+      toggleModal.value = true;
+    }
+
+    emitter.on("CLOSE_NOTIFICATION", payload => {
+      toggleModal.value = payload;
+    });
+
     const accounts = computed(
       () => {
         // return appStore.state.currentLoggedInWallet.accounts;
@@ -41,40 +75,32 @@ export default {
         return appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts;
       }
     );
-    return {
-      appStore,
-      accounts
-    };
-  },
-  created(){
-    // get num of accounts
-    var num_acc = this.appStore.getWalletByName(this.appStore.state.currentLoggedInWallet.name).accounts.length;
-    var i = 0;
-    while(i < num_acc){
-      this.showMenu[i] = false;
-      i++;
-    }
 
-    this.emitter.on("SHOW_MENU_TRIGGER", payload => {
-      this.showMenu[payload] = true;
-    });
-    this.emitter.on("CLOSE_MENU_TRIGGER", payload => {
-      this.showMenu[payload] = false;
-    });
-    this.emitter.on("CLOSE_ALL_MENU_TRIGGER", () => {
-      var j = 0;
-      while(j < num_acc){
-        this.showMenu[j] = false;
-        j++;
+    emitter.on('PAGE_CLICK', () => {
+      console.log('click: ' + currentMenu.value);
+      if(currentMenu.value === ''){
+        var k = 0;
+        while(k < num_acc){
+          showMenu.value[k] = false;
+          k++;
+        }
       }
     });
 
-    if(this.deleteAccount=='success'){
-      this.toggleModal = true;
-    }
-    this.emitter.on("CLOSE_NOTIFICATION", payload => {
-      this.toggleModal = payload;
+    emitter.on('HOVER_OVER_MENU_TRIGGER', index => {
+      currentMenu.value = index;
     });
+
+    emitter.on('HOVER_OUT_MENU_TRIGGER', () => {
+      currentMenu.value = '';
+    });
+
+    return {
+      appStore,
+      accounts,
+      toggleModal,
+      showMenu,
+    };
   },
 }
 </script>
