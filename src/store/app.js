@@ -10,7 +10,7 @@ import {
 } from "tsjs-xpx-chain-sdk";
 
 import { startListening, stopListening, addListenerstoAccount, initListenerSetting } from '../util/listener.js';
-import { multiSign } from '../util/multiSignatory.js';
+//import { multiSign } from '../util/multiSignatory.js';
 
 const sdk = require('tsjs-xpx-chain-sdk');
 
@@ -329,16 +329,17 @@ function deleteWallet(walletName, password) {
   return -1;
 }
 // check session to verify page has been refreshed
-function checkFromSession(appStore, siriusStore){
+function checkFromSession(){
   const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
   if(walletSession){
     // session is not null - copy to state
     currentWallet.value = walletSession;
     stopListening();
     startListening(currentWallet.value.accounts);
-    getXPXBalance(walletSession.name, siriusStore).then(() => {
+    /*getXPXBalance(walletSession.name, siriusStore).then(() => {
       sessionStorage.setItem('pageRefresh', 'y');
     });
+    */
     return true;
   }else{
     // return false to remain not sign in
@@ -409,7 +410,7 @@ function loginToWallet(walletName, password, siriusStore) {
 
   initListenerSetting(state.currentConnectedEndpoint, state.currentConnectedEndpointPort);
   startListening(wallet.accounts);
-  multiSign.updateAccountsMultiSign(walletName);
+  //multiSign.updateAccountsMultiSign(walletName);
   // get latest xpx amount
   getXPXBalance(walletName, siriusStore).then(()=> {
     try {
@@ -501,7 +502,7 @@ function updateAccountState(account, networkType, accountName){
 }
 
 function updateCurrentWallet(account){
-  const wallet = getWalletByName(appStore.state.currentLoggedInWallet.name);
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
   wallet.accounts.push(account);
   // enable listener
   addListenerstoAccount(account);
@@ -712,6 +713,11 @@ function fetchAccountInfo(wallet, accountHttp){
 function getTotalBalance(){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
   let balance = 0;
+  
+  if(!wallet){
+    return balance.toFixed(6);
+  }
+
   wallet.accounts.forEach((item) => {
     balance += parseFloat(item.balance);
   });

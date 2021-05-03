@@ -20,8 +20,8 @@
 
 <script>
 import { provide } from "vue";
-import { appStore } from "@/store/app";
-import { siriusStore } from "@/store/sirius";
+import { App } from "./store/app2";
+import { Sirius } from "./store/sirius2";
 import headerComponent from '@/components/headerComponent.vue'
 import PageComponent from '@/components/PageComponent.vue'
 
@@ -32,6 +32,8 @@ export default {
     PageComponent,
   },
   setup() {
+    let appStore = new App();
+    let siriusStore = new Sirius();
     provide("appStore", appStore);
     provide("siriusStore", siriusStore);
   }

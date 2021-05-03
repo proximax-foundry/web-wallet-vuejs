@@ -48,7 +48,7 @@ import PasswordInput from '@/components/PasswordInput.vue'
 
 export default{
   name: 'ConfirmDeleteWalletModal',
-  props:['name'],
+  props:['name', 'networkName'],
   data() {
     return {
       toggleModal: false,
@@ -69,7 +69,7 @@ export default{
       )
     );
     const deleteWallet = () => {
-      var a = appStore.deleteWallet(p.name, passwd.value);
+      var a = appStore.deleteWallet(p.name, passwd.value, p.networkName);
       if(a>0){
         // this.emitter.emit("DELETE_WALLET", true);
         router.push({ name: 'ViewWallets', params: {deleteWallet: 'success' } });

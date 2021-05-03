@@ -25,7 +25,7 @@
       </div>
       <div class="w-14 md:w-44 pl-3 text-center flex gray-line-left h-10 items-center">
         <div>
-          <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="siriusStore.state.selectedChainNode"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkName }}</div>
+          <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="siriusStore.selectedChainNode.value"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ selectedNetworkName }}</div>
         </div>
       </div>
       <div class="w-52 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
@@ -56,12 +56,11 @@
 </template>
 
 <script>
-import { computed, inject, ref, getCurrentInstance } from "vue";
+import { computed, inject, ref, getCurrentInstance, watch } from "vue";
 import { useRouter } from "vue-router";
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import { transferEmitter } from '../util/listener.js';
 import NotificationModal from '@/components/NotificationModal.vue';
-import { ChainProfileNames } from '../store/storeClasses';
 
 export default{
   components: {
@@ -82,12 +81,20 @@ export default{
     const siriusStore = inject("siriusStore");
     const router = useRouter();
     const toggleAnounceNotification = ref(false);
-    const chainsNetwork = computed(()=> ChainProfileNames.createDefault().names);
-    let selectedNetwork = ref(localStorage.getItem("lastAccessNetwork") ? parseInt(localStorage.getItem("lastAccessNetwork")) : 0);
+    const chainsNetwork = computed(()=> siriusStore.availableNetworks.value);
+    let selectedNetwork = computed(()=> siriusStore.chainNetwork.value);
+    const selectedNetworkName = computed(()=> siriusStore.chainNetworkName.value);
 
-    if(chainsNetwork.value[selectedNetwork.value] === undefined){
-      selectedNetwork.value = 0;
-    }    
+    if(siriusStore.chainNetworkName.value){
+      appStore.updateSetting(siriusStore.selectedChainNode.value, siriusStore.currentNetworkProfile.value.httpPort, siriusStore.chainNetworkName.value);
+    }
+
+    watch(
+      ()=> siriusStore.chainNetworkName.value,
+      ()=>{
+        appStore.updateSetting(siriusStore.selectedChainNode.value, siriusStore.currentNetworkProfile.value.httpPort, siriusStore.chainNetworkName.value);
+      }
+    )
 
     const notificationMessage = ref('');
     const notificationType = ref('noti');
@@ -109,9 +116,9 @@ export default{
     const getAccountInfo = async () => {
       if (!appStore.state.currentLoggedInWallet) {
         // check sessionStorage
-        if(!appStore.checkFromSession(appStore, siriusStore)){
+        //if(!appStore.checkFromSession(appStore, siriusStore)){
           useRouter().replace({ path: "/" });
-        }
+        //}
       }
       return;
     };
@@ -121,7 +128,7 @@ export default{
       () => {
         if(!appStore.state.currentLoggedInWallet){
           // if empty, check from sessionStorage
-          return appStore.checkFromSession(siriusStore.accountHttp, siriusStore.namespaceHttp);
+          return false;
         }else{
           // remain logged in when state.wallet is available
           return true;
@@ -165,24 +172,13 @@ export default{
       toggleAnounceNotification.value = payload;
     });
 
-    let networkName = chainsNetwork.value[selectedNetwork.value];
-
-    if(networkName){
-      sessionStorage.setItem("selectedNetwork", selectedNetwork);
-      sessionStorage.setItem("selectedNetworkName", networkName);
-      siriusStore.refreshselectedNetwork();
-    }
-
     const networkSelection= (e) =>{
 
       if(e.target.value !== 'customize'){
 
-        networkName = chainsNetwork.value[parseInt(e.target.value)];
         sessionStorage.setItem("selectedNetwork", e.target.value);
-        sessionStorage.setItem("selectedNetworkName", networkName);
         siriusStore.refreshselectedNetwork();
         selectedNetwork.value = e.target.value;
-        emitter.emit("SELECT NETWORK", { id: e.target.value, name: networkName });
       }
     }
 
@@ -196,6 +192,7 @@ export default{
       toggleAnounceNotification,
       chainsNetwork,
       selectedNetwork,
+      selectedNetworkName,
       networkSelection,
       notificationMessage,
       notificationType,
