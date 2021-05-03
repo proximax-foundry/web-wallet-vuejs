@@ -19,11 +19,12 @@ const state = reactive({
 });
 
 const startListening = (accounts) => {
+  console.log(location.protocol);
   accounts.forEach((account) => {
-
     let connect = new Listener(
       `${
-        siriusStore.currentChainNode.protocol.startsWith("http") ? "ws://" : "wss://"
+        // siriusStore.currentChainNode.protocol.startsWith("http") ? "ws://" : "wss://"
+        location.protocol=='http:' ? "ws://" : "wss://"
       }${siriusStore.currentChainNode.hostname}:${siriusStore.currentChainNode.port}`,
       WebSocket
     );
@@ -53,7 +54,8 @@ const stopListening = () => {
 const addListenerstoAccount = (account) => {
   let connect = new Listener(
     `${
-      siriusStore.currentChainNode.protocol.startsWith("http") ? "ws://" : "wss://"
+      // siriusStore.currentChainNode.protocol.startsWith("http") ? "ws://" : "wss://"
+      location.protocol=='http:' ? "ws://" : "wss://"
     }${siriusStore.currentChainNode.hostname}:${siriusStore.currentChainNode.port}`,
     WebSocket
   );
@@ -89,6 +91,7 @@ function enableListeners(account, listener){
   // console.log('Connector for ' + account.address + ': ' + listener.isOpen());
   const accountDetail = Address.createFromPublicKey(account.publicAccount.publicKey, account.network);
   // newBlockListener(accountDetail, listener);
+  console.log(accountDetail);
   confirmedListener(accountDetail, listener);
   unconfirmedListener(accountDetail, listener);
   statusListener(accountDetail, listener);
