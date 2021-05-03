@@ -11,6 +11,7 @@ import {
   // Account
   Password,
   SimpleWallet,
+  TransactionHttp,
 } from "tsjs-xpx-chain-sdk";
 const sdk = require('tsjs-xpx-chain-sdk');
 const config = require("@/../config/config.json");
@@ -55,6 +56,7 @@ const chainHttp = computed(() => new ChainHttp(state.selectedChainNode));
 const networkHttp = computed(() => new NetworkHttp(state.selectedChainNode));
 const nodeHttp = computed(() => new NodeHttp(state.selectedChainNode));
 const mosaicHttp = computed(() => new MosaicHttp(state.selectedChainNode));
+const transactionHttp = computed(() => new TransactionHttp(state.selectedChainNode));
 const namespaceHttp = computed(() => new sdk.NamespaceHttp(state.selectedChainNode));
 
 const chainWSListener = computed(() => {
@@ -144,9 +146,7 @@ function selectNewChainNode(nodeConfigString) {
 }
 
 function stopChainWSListener() {
-  if (config.debug) {
-    console.log("stopChainWSListener triggered");
-  }
+  console.log("stopChainWSListener triggered");
 
   if (listenerChainWS.value != null) {
     listenerChainWS.value.terminate();
@@ -156,9 +156,9 @@ function stopChainWSListener() {
 
 
 /* Account section - benjamin lai */
-function createNewAccount(walletName, networkType){
+function createNewAccount(walletName, walletPassword, networkType){
   // const account = Account.generateNewAccount(networkType);
-  const encryptedPasswd = new Password(sessionStorage.getItem('walletPassword'));
+  const encryptedPasswd = new Password(walletPassword);
   const account = SimpleWallet.create(walletName, encryptedPasswd, networkType);
   const acc = account.open(encryptedPasswd);
   account.publicKey = acc.publicKey;
@@ -166,9 +166,9 @@ function createNewAccount(walletName, networkType){
   return account;
 }
 
-function createNewAccountPrivateKey(walletName, pk, networkType){
+function createNewAccountPrivateKey(walletName, walletPassword, pk, networkType){
   // const account = Account.createFromPrivateKey(pk, networkType);
-  const encryptedPasswd = new Password(sessionStorage.getItem('walletPassword'));
+  const encryptedPasswd = new Password(walletPassword);
   const account = SimpleWallet.createFromPrivateKey(
     walletName,
     encryptedPasswd,
@@ -183,12 +183,14 @@ function createNewAccountPrivateKey(walletName, pk, networkType){
 
 export const siriusStore = readonly({
   state,
+  currentChainNode,
   // getNetworkByName,
   accountHttp,
   blockHttp,
   chainHttp,
   networkHttp,
   mosaicHttp,
+  transactionHttp,
   namespaceHttp,
   nodeHttp,
   chainWSListener,

@@ -8,7 +8,7 @@
   <div class='mt-2 py-3 gray-line text-center'>
     <form @submit.prevent="create" class="mt-10">
       <fieldset class="w-full">
-        <div class="error error_box" v-if="err!=''">{{ err }}</div>
+        <div class="error error_box mb-2" v-if="err!=''">{{ err }}</div>
         <PasswordInput placeholder="Enter Private Key" errorMessage="Invalid private key" icon="key" v-model="privKey" class="ml-1" />
         <label class="inline-flex items-center mb-5">
             <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="nis1Swap">
@@ -62,21 +62,25 @@ export default {
       //   return;
       // }
 
-      const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
-      var verifyPrivateKey = appStore.verifyExistingAccount(privKey.value, networkType);
-      var result = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword.value);
-      if(verifyPrivateKey){
-        err.value = "Account with this Private Key is already in the wallet";
-      }else if (result == -1) {
-        err.value = "Fail to create new account";
-      } else if (result == 0) {
-        err.value = "Password for wallet <b>" + appStore.state.currentLoggedInWallet.name + "</b> is invalid" ;
-      } else {
-        // create account
-        const account = siriusStore.createNewAccountPrivateKey(appStore.state.currentLoggedInWallet.name, privKey.value, networkType);
-        // update to state
-        appStore.updateAccountState(account, networkType, accountName.value);
-        router.push({ name: "createdAccount", params: {publicKey: account.publicKey, privateKey: account.privateKey, address: appStore.pretty(account.address.address), name: accountName.value }});
+      if(!appStore.verifyExistingAccountName(appStore.state.currentLoggedInWallet.name, accountName.value)){
+        const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
+        var verifyPrivateKey = appStore.verifyExistingAccount(privKey.value, networkType);
+        var result = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword.value);
+        if(verifyPrivateKey){
+          err.value = "Account with this Private Key is already in the wallet";
+        }else if (result == -1) {
+          err.value = "Fail to create new account";
+        } else if (result == 0) {
+          err.value = "Password for wallet " + appStore.state.currentLoggedInWallet.name + " is invalid" ;
+        } else {
+          // create account
+          const account = siriusStore.createNewAccountPrivateKey(appStore.state.currentLoggedInWallet.name, walletPassword.value, privKey.value, networkType, appStore);
+          // update to state
+          appStore.updateAccountState(account, networkType, accountName.value);
+          router.push({ name: "createdAccount", params: {publicKey: account.publicKey, privateKey: account.privateKey, address: appStore.pretty(account.address.address), name: accountName.value }});
+        }
+      }else{
+        err.value = "Account name is already taken.";
       }
     };
     return{
