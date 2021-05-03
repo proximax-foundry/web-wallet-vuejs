@@ -132,6 +132,15 @@ const routes = [
     }
   },
   {
+    path: '/edit-account-multisign/:name',
+    name: 'ViewEditAccountMultisig',
+    props: true,
+    component: () => import('@/views/ViewEditAccountMultisig.vue'),
+    meta: {
+      title: "Edit Multisig Account",
+    }
+  },
+  {
     path: '/export-wallet',
     name: 'ViewExportWallet',
     component: () => import('@/views/ViewExportWallet.vue'),

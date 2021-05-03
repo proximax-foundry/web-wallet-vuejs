@@ -4,7 +4,7 @@
       <div class="text-icon-outline text-icon self-center">
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
       </div>
-      <textarea :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" @keypress="countChar" rows=2 class="mt-7 ml-2 self-center w-full text-gray-500 focus:outline-none bg-white text-md" :placeholder="placeholder" @click="clickInputText()"></textarea>
+      <textarea :value="modelValue" :disabled="disabled==1" @input="$emit('update:modelValue', $event.target.value)" @keypress="countChar" rows=2 class="mt-7 ml-2 self-center w-full text-gray-500 focus:outline-none bg-white text-md" :placeholder="placeholder" @click="clickInputText()"></textarea>
       <div class="w-1 flex-none"></div>
     </div>
     <div class="float-right mt-1 text-tsm text-gray-800">{{remainingChar}}/1024</div>
@@ -22,6 +22,7 @@ export default{
     'showError',
     'modelValue',
     'msgOpt',
+    'disabled',
   ],
   emits:[
     'update:modelValue'

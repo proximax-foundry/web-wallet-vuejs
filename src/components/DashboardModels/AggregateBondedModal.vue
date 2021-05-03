@@ -118,9 +118,12 @@ export default{
           transactionHeight.value = height;
           if (typeof (height) === 'number') {
             const existBlock = dataBridge.filterBlockStorage(height);
+            console.log('existBlock: ');
+            console.log(existBlock);
             if (existBlock) {
               timestamp.value = `${transactions.dateFormatUTC(new UInt64([existBlock.timestamp.lower, existBlock.timestamp.higher]))} - UTC`;
               const calculateEffectiveFee = transactions.amountFormatterSimple(existBlock.feeMultiplier * p.transaction.data.size);
+              console.log(p.transaction.data.size);
               effectiveFee.value = transactions.getDataPart(calculateEffectiveFee, 6);
             } else {
               dataBridge.getBlockInfo(height).subscribe(

@@ -148,7 +148,8 @@ const confirmedListener = (accountDetail, listener) => {
     transferEmitter.emit('UPDATE_DASHBOARD', {
       status: true,
       from: 'confirmed',
-      transaction: Object.assign({}, transaction),
+      // transaction: Object.assign({}, transaction),
+      transaction: transaction,
     });
     appStore.updateXPXBalance(appStore.state.currentLoggedInWallet.name, siriusStore);
   }, error => {
@@ -217,8 +218,8 @@ const unconfirmedRemovedListener = (accountDetail, listener) => {
 // partially added
 const aggregateBondedAddedListener = (accountDetail, listener) => {
   listener.aggregateBondedAdded(accountDetail).subscribe(aggregateTransaction => {
-    console.log('Emitting from aggregateBondedAddedListener ');
-    console.log(aggregateTransaction);
+    // console.log('Emitting from aggregateBondedAddedListener ');
+    // console.log(aggregateTransaction);
     // choose btw aggregateBondedAdded to partialdatatable or unconfirmedAdded to dashboarddatatable
     let innerTransactions = aggregateTransaction.innerTransactions;
     let innerTransactionType, message;

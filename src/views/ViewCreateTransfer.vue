@@ -12,22 +12,32 @@
           <div class="error error_box" v-if="err!=''">{{ err }}</div>
           <div v-if="moreThanOneAccount" class="text-left p-4">
             <div class="mb-1 cursor-pointer z-20 border-b border-gray-200" @click="showMenu = !showMenu">
-              <div class="font-bold text-xs">{{ selectedAccName }}</div>
+              <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
               <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
             </div>
             <transition name="slide">
             <div v-if="showMenu" class="z-10">
               <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50 optionDiv'" @click="changeSelection(item)" :title="'Address is ' + item.address">
-                <div>{{ item.name }}</div>
+                <div>{{ item.name }} <span v-if="isMultiSig(item.address)" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
               </div>
             </div>
             </transition>
             <input type="hidden" v-model="currentSelectedName">
           </div>
+          <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4">
+            <div v-if="getWalletCosigner().list.length > 0">
+              <div class="text-tsm">Cosigner:
+                <span class="font-bold" v-if="getWalletCosigner().list.length == 1">{{ getWalletCosigner().list[0].name }} (Balance: {{ getWalletCosigner().list[0].balance }} XPX) <span v-if="getWalletCosigner().list[0].balance < 10.0445" class="error">- Insufficient balance</span></span>
+                <span class="font-bold" v-else><select v-model="cosignAddress"><option v-for="(element, item) in getWalletCosigner().list" :value="element.address" :key="item">{{ element.name }} (Balance: {{ element.balance }} XPX)</option></select></span>
+                <div v-if="cosignerBalanceInsufficient" class="error">- Insufficient balance</div>
+              </div>
+            </div>
+            <div class="error" v-else>No eligible cosigner in this wallet</div>
+          </div>
           <SelectInput v-if="showContactSelection" placeholder="Contact" errorMessage="" v-model="selectContact" :options="contact" @default-selected="selectContact=0" @show-selection="updateAdd" />
           <div class="flex">
             <div class="flex-grow mr-5">
-              <TextInput placeholder="Recipient" :errorMessage="addressErrorMsg" :showError="showAddressError" v-model="recipient" icon="wallet" />
+              <TextInput placeholder="Recipient" :errorMessage="addressErrorMsg" :showError="showAddressError" v-model="recipient" icon="wallet" :disabled="disableRecipient" />
             </div>
             <div class="flex-none">
               <div class="rounded-full bg-gray-300 w-14 h-14 cursor-pointer relative" style="top: -5px;" @click="showContactSelection = !showContactSelection">
@@ -40,7 +50,7 @@
           <div class="bg-gray-100 rounded-2xl p-3">
             <div class="inline-block mr-4 tfaddext-tsm"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ appStore.getFirstAccBalance(selectedAccAdd) }} XPX</span></div>
           </div>
-          <SupplyInput v-model="sendXPX" title="Send" :balance="Number(appStore.getFirstAccBalance(selectedAccAdd))" placeholder="Enter Amount" type="text" icon="coins" :showError="showBalanceErr" errorMessage="Insufficient balance" :decimal="6" class="mt-5" />
+          <SupplyInput v-model="sendXPX" title="Send" :balance="Number(appStore.getFirstAccBalance(selectedAccAdd))" placeholder="Enter Amount" type="text" icon="coins" :showError="showBalanceErr" errorMessage="Insufficient balance" :decimal="6" class="mt-5" :disabled="disableSupply" />
         </div>
         <div v-for="(mosaic, index) in mosaicsCreated" :key="index">
           <MosaicInput placeholder="Select mosaic" errorMessage="" v-model="selectedMosaic[index].id" :index="index" :options="mosaics" :disableOptions="selectedMosaic" @show-mosaic-selection="updateMosaic" @remove-mosaic-selected="removeMosaic" />
@@ -51,20 +61,33 @@
         </div>
         <div class="mb-5 border-t pt-4 border-gray-200">
           <div class="rounded-2xl bg-gray-100 p-5">
-            <input id="regularMsg" type="radio" name="msgOption" value="regular" v-model="msgOption" @change="clearMsg()" /><label for="regularMsg" class="cursor-pointer font-bold ml-4 mr-5">Regular</label>
-            <input id="hexMsg" type="radio" name="msgOption" value="hex" v-model="msgOption" @change="clearMsg()" /><label for="hexMsg" class="cursor-pointer font-bold ml-4">Hexadecimal</label>
+            <input id="regularMsg" type="radio" name="msgOption" value="regular" v-model="msgOption" @change="clearMsg()" :disabled="disableRegularMsg==1" /><label for="regularMsg" class="cursor-pointer font-bold ml-4 mr-5">Regular</label>
+            <input id="hexMsg" type="radio" name="msgOption" value="hex" v-model="msgOption" @change="clearMsg()" :disabled="disableHexMsg==1" /><label for="hexMsg" class="cursor-pointer font-bold ml-4">Hexadecimal</label>
           </div>
         </div>
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <div class="rounded-2xl bg-gray-100 p-5">
-            <input id="encryptedMsg" type="checkbox" value="encryptedMsg" v-model="encryptedMsg" /><label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Encrypted</label>
+            <input id="encryptedMsg" type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg==1" /><label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Encrypted</label>
           </div>
         </div>
-        <TextareaInput placeholder="Message" errorMessage="" v-model="messageText" icon="comment" class="mt-5" :msgOpt="msgOption" />
-        <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-          <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Unconfirmed/Recommended Fee:  0.042750 XPX</div>
+        <TextareaInput placeholder="Message" errorMessage="" v-model="messageText" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput" />
+        <div class="rounded-2xl bg-gray-100 p-5">
+          <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Unconfirmed/Recommended Fee:  {{ effectiveFee }} XPX</div>
         </div>
-        <PasswordInput placeholder="Enter Your Wallet Password" :errorMessage="'Please enter your wallet ' + appStore.state.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+        <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800" v-if="isMultiSig(selectedAccAdd)">
+        <div class="text-center">
+          <div class="inline-block">
+            <div class="flex">
+              <img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
+              <div class="inline-block self-center text-left">
+                <div>LockFund: 10.000000 XPX</div>
+                <div>Unconfirmed/Recommended Fee: 0.044500 XPX</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+        <PasswordInput placeholder="Enter Your Wallet Password" :errorMessage="'Please enter your wallet ' + appStore.state.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5" :disabled="disablePassword" />
         <div class="mt-10">
           <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
           <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="makeTransfer();">Create</button>
@@ -84,11 +107,12 @@ import SelectInput from '@/components/SelectInput.vue';
 import MosaicInput from '@/components/MosaicInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
 import TextareaInput from '@/components/TextareaInput.vue';
-import { makeTransaction } from '../util/transfer.js'; //getMosaicsAllAccounts
+import { createTransaction, makeTransaction } from '../util/transfer.js'; //getMosaicsAllAccounts
 import AddContactModal from '@/components/AddContactModal.vue';
 import NotificationModal from '@/components/NotificationModal.vue';
 import ConfirmSendModal from '@/components/ConfirmSendModal.vue';
 import { verifyAddress } from '../util/functions.js';
+import { multiSign } from '../util/multiSignatory.js';
 
 export default {
   name: 'ViewCreateAccount',
@@ -132,6 +156,17 @@ export default {
     const encryptedMsgDisable = ref(true);
     const toggleConfirm = ref(false);
     const forceSend = ref(false);
+    const effectiveFee = ref('0.037750');
+    const cosignAddress = ref('');
+    const disableAllInput = ref(false);
+    const disableRecipient = computed(() => disableAllInput.value);
+    const disableSupply = computed(() => disableAllInput.value);
+    const disableRegularMsg = computed(() => disableAllInput.value);
+    const disableHexMsg = computed(() => disableAllInput.value);
+    const disableEncryptMsg = computed(() => disableAllInput.value);
+    const disableMsgInput = computed(() => disableAllInput.value);
+    const disablePassword = computed(() => disableAllInput.value);
+    const cosignerBalanceInsufficient = ref(false);
 
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
@@ -151,10 +186,42 @@ export default {
       walletPassword.value.match(passwdPattern) && !showAddressError.value && recipient.value.length > 0
     ));
 
+    const isMultiSig = (address) => {
+      const account = appStore.getAccDetailsByAddress(address);
+      let isMulti = false;
+      if(account.isMultisign != undefined){
+        if(account.isMultisign != '' || account.isMultisign != null){
+          if(account.isMultisign.cosignatories != undefined){
+            if(account.isMultisign.cosignatories.length > 0){
+              isMulti = true;
+            }
+          }
+        }
+      }
+      return isMulti;
+    };
+
     // get balance
     const selectedAccName = ref(appStore.getFirstAccName());
     const selectedAccAdd = ref(appStore.getFirstAccAdd());
     const balance = ref(appStore.getFirstAccBalance(selectedAccAdd.value));
+    const isMultiSigBool = ref(isMultiSig(appStore.getFirstAccAdd()));
+
+    // enable and disable inputs based on cosign balance
+    if(isMultiSigBool.value){
+      let cosign = getWalletCosigner();
+      if(cosign.list.length > 0){
+        if(cosign.list[0].balance < 10.0445){
+          disableAllInput.value = true;
+          cosignerBalanceInsufficient.value = true;
+        }else{
+          disableAllInput.value = false;
+          cosignerBalanceInsufficient.value = false;
+        }
+      }else{
+        disableAllInput.value = true;
+      }
+    }
 
     const accounts = computed( () => appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts);
     const moreThanOneAccount = computed(()=> (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false);
@@ -166,6 +233,27 @@ export default {
       (balance.value==0)?showBalanceErr.value = true:showBalanceErr.value = false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
+      isMultiSigBool.value = isMultiSig(i.address);
+      // set default of cosinger if multiple return
+      if(isMultiSigBool.value){
+        let cosign = getWalletCosigner();
+        if(cosign.list.length > 0){
+          cosignAddress.value = cosign.list[0].address;
+          console.log('cosign.list[0].balance');
+          console.log(cosign.list[0].balance);
+          if(cosign.list[0].balance < 10.0445){
+            disableAllInput.value = true;
+            console.log('disableAllInput();')
+          }else{
+            disableAllInput.value = false;
+            console.log('enableAllInput();')
+          }
+        }else{
+          disableAllInput.value = true;  
+        }
+      }else{
+        disableAllInput.value = false;
+      }
 
       // reset mosaic selection
       selectedMosaic.value = [];
@@ -174,7 +262,17 @@ export default {
       mosaicSupplyDivisibility.value = [];
     }
 
-    // get mosaic info
+    // get cosigner if available
+    const getWalletCosigner = () => {
+      let cosign = multiSign.fetchMultiSigCosigners(selectedAccAdd.value);
+      let list = [];
+      cosign.list.forEach((element) => {
+        const account = appStore.getAccDetailsByAddress(element.address);
+        list.push({ balance: account.balance, address: element.address, name: element.name });
+      });
+      list.sort((a, b) => (a.balance < b.balance) ? 1 : -1);
+      return { list:list, numCosigner: cosign.numCosigner };
+    };
 
     const contact = computed(() => {
       return appStore.getContact();
@@ -208,8 +306,8 @@ export default {
       if(sendXPX.value == 0 && !forceSend.value){
         toggleConfirm.value = true;
       }else{
-        console.log(recipient.value.toUpperCase() + ' : ' + walletPassword.value + ' : ' + selectedAccName.value + ' : ' + encryptedMsg.value)
-        let transferStatus = makeTransaction(recipient.value.toUpperCase(), sendXPX.value, messageText.value, selectedMosaic.value, mosaicSupplyDivisibility.value, walletPassword.value, selectedAccName.value, encryptedMsg.value, appStore, siriusStore);
+        // console.log(recipient.value.toUpperCase() + ' : ' + walletPassword.value + ' : ' + selectedAccName.value + ' : ' + encryptedMsg.value)
+        let transferStatus = createTransaction(recipient.value.toUpperCase(), sendXPX.value, messageText.value, selectedMosaic.value, mosaicSupplyDivisibility.value, walletPassword.value, selectedAccName.value, encryptedMsg.value, appStore, siriusStore);
         if(!transferStatus){
           err.value = 'Invalid wallet password';
         }else{
@@ -235,7 +333,7 @@ export default {
     };
 
     const getSelectedMosaicBalance = (index) =>{
-      let mosaic = appStore.getMosaicInfo(selectedAccAdd, selectedMosaic[index].id);
+      let mosaic = appStore.getMosaicInfo(selectedAccAdd.value, selectedMosaic[index].id);
       if(mosaic!=undefined){
         return mosaic.amount;
       }else{
@@ -246,29 +344,33 @@ export default {
     // get mosaics of current selected account
     // getMosaicsAllAccounts(appStore, siriusStore);
     const addMosaicsButton = computed(() => {
-      let mosaic = appStore.getAccDetails(selectedAccName.value).mosaic;
-      if(mosaic != undefined){
-        if((mosaic.length == 0) || (mosaicsCreated.value.length == mosaic.length)){
-          return true;
-        }else{
-          return false;
+      if(!disableSupply.value){
+        let mosaic = appStore.getAccDetails(selectedAccName.value).mosaic;
+        if(mosaic != undefined){
+          if((mosaic.length == 0) || (mosaicsCreated.value.length == mosaic.length)){
+            return true;
+          }else{
+            return false;
+          }
         }
+        return true;
+      }else{
+        return true;
       }
-      return true;
     });
     // generate mosaic selector
     const mosaics = computed(() => {
-        var mosaicOption = [];
-        if(appStore.getAccDetails(selectedAccName.value).mosaic.length > 0){
-          appStore.getAccDetails(selectedAccName.value).mosaic.forEach((i, index)=>{
-            mosaicOption.push({
-              val: i.id,
-              text: i.id + ' > Balance: ' + i.amount.toFixed(i.divisibility),
-              id: (index + 1),
-            });
+      var mosaicOption = [];
+      if(appStore.getAccDetails(selectedAccName.value).mosaic.length > 0){
+        appStore.getAccDetails(selectedAccName.value).mosaic.forEach((i, index)=>{
+          mosaicOption.push({
+            val: i.id,
+            text: i.id + ' > Balance: ' + i.amount.toFixed(i.divisibility),
+            id: (index + 1),
           });
-        }
-        return mosaicOption;
+        });
+      }
+      return mosaicOption;
     });
 
     const displayMosaicsOption = () => {
@@ -290,6 +392,16 @@ export default {
       selectedMosaic.value.splice(e.index, 1);
       mosaicSupplyDivisibility.value.splice(e.index, 1);
     }
+
+    watch(cosignAddress, (n, o) => {
+      if(n != o){
+        if(getWalletCosigner().list.find((element) => element.address == n).balance < 10.0455){
+          cosignerBalanceInsufficient.value = true;
+        }else{
+          cosignerBalanceInsufficient.value = false;
+        }
+      }
+    });
 
     watch(balance, (n) => {
       if(n == '0.000000'){
@@ -319,6 +431,12 @@ export default {
     watch(currentSelectedName, (n, o) => {
       if(n!=o){
         recipient.value = '';
+      }
+    });
+
+    watch(messageText, (n, o) => {
+      if(n!=o){
+        effectiveFee.value = makeTransaction.calculateFee(n, sendXPX.value, selectedMosaic.value);
       }
     });
 
@@ -391,6 +509,19 @@ export default {
       currentlySelectedMosaic,
       removeMosaic,
       toggleConfirm,
+      isMultiSig,
+      isMultiSigBool,
+      effectiveFee,
+      cosignAddress,
+      getWalletCosigner,
+      disableRecipient,
+      disableSupply,
+      disableRegularMsg,
+      disableHexMsg,
+      disableEncryptMsg,
+      disableMsgInput,
+      disablePassword,
+      cosignerBalanceInsufficient,
     }
   },
 

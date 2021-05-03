@@ -232,6 +232,7 @@ export default {
       let qp = new QueryParams(pageSize, lastId, order);
       let lastTransactionID = lastId;
       siriusStore.accountHttp.aggregateBondedTransactions(publicAccount, qp).subscribe(tx => {
+        console.log('AggregateBonded - partial length: ' + tx.length);
         if( tx.length > 0 ){
           tx.forEach((t)=>{
             let formattedTransaction = transactions.formatAggregateBondedTransaction(t, names);

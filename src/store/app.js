@@ -373,9 +373,6 @@ function loginToWallet(walletName, password, siriusStore) {
     return 0;
   }
 
-  // store password into session
-  sessionStorage.setItem('walletPassword', password);
-
   currentWallet.value = wallet;
   startListening(wallet.accounts);
   multiSign.updateAccountsMultiSign(walletName);
@@ -659,8 +656,9 @@ function saveContact(contactName, contactAddress){
 
 function fetchAccountInfo(wallet, accountHttp){
   const addresses = [];
+  const networkType = getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
   wallet.accounts.forEach((element) => {
-    addresses.push(Address.createFromPublicKey(element.publicAccount.publicKey, element.network));
+    addresses.push(Address.createFromPublicKey(element.publicAccount.publicKey, networkType));
   });
 
   return new Promise((resolve, reject) => {
@@ -700,7 +698,7 @@ function getXPXBalance(walletName, siriusStore){
         account.mosaic = [];
         const mosaicList = [];
         const mosaicAmount = [];
-
+        
         const address = res.find((element) => element.address.address == add.address);
         if(address != undefined){
 
@@ -741,6 +739,7 @@ function updateXPXBalance(walletName, siriusStore){
       const wallet = getWalletByName(walletName);
       currentWallet.value = wallet;
       sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
+      localStorage.setItem(config.localStorage.walletKey, JSON.stringify(state.wallets));
     } catch (err) {
       if (config.debug) {
         console.error("updateAccountState error caught", err);

@@ -94,9 +94,13 @@ const formatTransaction = (transaction, names) => {
 }
 
 const formatAggregateBondedTransaction = (transaction, names) => {
+
   const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
+
+  // check if signer is in the wallet
   let ownAddress = wallet.accounts.find((element) => element.address == transaction.signer.address.address);
-  if(ownAddress){
+
+  if(ownAddress){ // signer is in the wallet
     // display own as signer
     let linkedAccountName = names.find((element) =>  element.address == ownAddress.address);
     transaction.linkedAccountName = (linkedAccountName)?linkedAccountName.name:'';
@@ -105,13 +109,17 @@ const formatAggregateBondedTransaction = (transaction, names) => {
   }else{
     let matchAccount;
     // display first cosig
+    console.log('display first cosig');
+    // bug fixed for innerTransactions
     let linkedAccountName = names.find((element) =>  element.address == transaction.innerTransactions[0].modifications[0].cosignatoryPublicAccount.address.address);
     transaction.linkedAccountName = (linkedAccountName)?linkedAccountName.name:'';
     transaction.linkedAccount = appStore.pretty(transaction.innerTransactions[0].modifications[0].cosignatoryPublicAccount.address.address);
     // search for own account among cosig
     transaction.innerTransactions.forEach((inner) => {
       inner.modifications.forEach((modification) => {
+        console.log('cosignatory account: ' + modification.cosignatoryPublicAccount.address.address);
         matchAccount = wallet.accounts.find((element) => element.address == modification.cosignatoryPublicAccount.address.address);
+        console.log(matchAccount);
         if(matchAccount){
           return;
         }
@@ -120,7 +128,18 @@ const formatAggregateBondedTransaction = (transaction, names) => {
         return;
       }
     });
-    transaction.account = matchAccount.address;
+    if(matchAccount){
+      transaction.account = matchAccount.address;
+    }else{
+      if(transaction.cosignatures.length > 0){
+        transaction.cosignatures.forEach((cosigner) => {
+          matchAccount = wallet.accounts.find((element) => element.address == cosigner.signer.address.address);
+          transaction.account = matchAccount.address;
+        });
+      }else{
+        transaction.account = '-';
+      }
+    }
   }
 
   transaction.formattedDeadline = `${dateFormat(transaction.deadline)}`;

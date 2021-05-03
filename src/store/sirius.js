@@ -38,7 +38,7 @@ function getNetworkByType(typeid){
 // }
 
 // ALWAYS use function selectNewChainNode to change currentChainNode value, to avoid web socket listening on old node
-const currentChainNode = ref(getChainNodes()[1]);
+const currentChainNode = ref(getChainNodes()[0]);
 const listenerChainWS = ref(null);
 
 const state = reactive({
@@ -156,9 +156,9 @@ function stopChainWSListener() {
 
 
 /* Account section - benjamin lai */
-function createNewAccount(walletName, networkType){
+function createNewAccount(walletName, walletPassword, networkType){
   // const account = Account.generateNewAccount(networkType);
-  const encryptedPasswd = new Password(sessionStorage.getItem('walletPassword'));
+  const encryptedPasswd = new Password(walletPassword);
   const account = SimpleWallet.create(walletName, encryptedPasswd, networkType);
   const acc = account.open(encryptedPasswd);
   account.publicKey = acc.publicKey;
@@ -166,9 +166,9 @@ function createNewAccount(walletName, networkType){
   return account;
 }
 
-function createNewAccountPrivateKey(walletName, pk, networkType){
+function createNewAccountPrivateKey(walletName, walletPassword, pk, networkType){
   // const account = Account.createFromPrivateKey(pk, networkType);
-  const encryptedPasswd = new Password(sessionStorage.getItem('walletPassword'));
+  const encryptedPasswd = new Password(walletPassword);
   const account = SimpleWallet.createFromPrivateKey(
     walletName,
     encryptedPasswd,

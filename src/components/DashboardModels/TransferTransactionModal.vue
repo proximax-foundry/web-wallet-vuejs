@@ -19,9 +19,9 @@
                   <img src="../../assets/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg" class="w-7 h-7 inline-block absolute" style="top:-2px;" v-else>
                   &nbsp;<span class="ml-8 font-bold text-md">{{ transaction.transferType=='in'?'Received':'Sent' }}</span></div>
                 <div class="text-xs my-2">{{ timestamp }}</div>
-                <div><span class="font-bold">Effective Fee:</span> <img src="../../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mx-2"><span class="text-xs">{{ effectiveFee.part1 }}{{ effectiveFee.part2 }}</span> <span class="text-sm">XPX</span></div>
+                <div v-if="effectiveFee"><span class="font-bold">Effective Fee:</span> <img src="../../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mx-2"><span class="text-xs">{{ effectiveFee.part1 }}{{ effectiveFee.part2 }}</span> <span class="text-sm">XPX</span></div>
                 <div class="content">
-                  <div>
+                  <div v-if="transaction.block">
                     <div>Height:</div>
                     <div>{{ transaction.block }}</div>
                   </div>
@@ -34,7 +34,7 @@
                     <div>{{ transaction.senderAddress }}</div>
                   </div>
                   <div>
-                      <div>To:</div>
+                    <div>To:</div>
                     <div>{{ transaction.recipientAddress }}</div>
                   </div>
                 </div>
@@ -65,7 +65,7 @@
                   </div>
                   <div v-if="isShowLogin && !isShowMessage && !(transaction.transferType=='in')" class="mt-2 bg-gray-100 p-3 pt-4 rounded-xl mr-2">
                     <div class="error error_box mb-2 w-full" style="text-align: center" v-if="err!=''">{{ err }}</div>
-                    <TextInput placeholder="Recipient Public Key" errorMessage="Recipient Public key required" v-model="recipientPublicKey" icon="id-card-alt" :showError="showPublicKeyErr" class="w-full" />
+                    <TextInput placeholder="Recipient Address or Public Key" errorMessage="Recipient Address or Public key required" v-model="recipientAddressPublicKey" icon="id-card-alt" :showError="showPublicKeyErr" class="w-full" />
                     <PasswordInput placeholder="Enter Wallet Password" errorMessage="Password Required" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="w-full" />
                     <div class="text-center w-full">
                       <button type="button" class="small-default-btn mr-3 focus:outline-none" @click="isShowLogin = !isShowLogin">Cancel</button>
@@ -74,6 +74,7 @@
                   </div>
                   <div class="text-center py-4 bg-gray-100 mt-1 mr-2" v-if="!isShowLogin && !isShowMessage && !(transaction.transferType=='in')"><button class="small-default-btn" @click="isShowLogin = !isShowLogin">Show Message</button></div>
                   <div v-if="isShowMessage && !(transaction.transferType=='in')" class="p-2 bg-gray-100 rounded-r-2xl">
+                    <div class="text-tsm text-gray-500">{{ encryptErr }}</div>
                     <div style="text-align: center; display: block; margin: 0px; font-weight: normal">{{ encryptedMessage }}</div><br>
                     <div class="text-center"><button type="button" class="small-default-btn focus:outline-none inline-block" @click="isShowLogin = !isShowLogin; isShowMessage = !isShowMessage">Hide message</button></div>
                   </div>
@@ -107,6 +108,7 @@ import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { Account, Address, EncryptedMessage, PublicAccount } from "tsjs-xpx-chain-sdk";
 import { dataBridge } from '../../util/dataBridge.js';
+import { multiSign } from '../../util/multiSignatory.js';
 import {
   UInt64,
 } from "tsjs-xpx-chain-sdk";
@@ -136,25 +138,32 @@ export default{
     const transferTypeIcon = ref('');
     const isShowLogin = ref(false);
     const err = ref('');
-    const recipientPublicKey = ref('');
+    const recipientAddressPublicKey = ref('');
     const walletPassword = ref('');
     const showPublicKeyErr = ref(false);
     const showPasswdError = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
     const publicKeyPattern = "^[0-9A-Fa-f]{64}$";
+    const addressPatternShort = "^[0-9A-Za-z]{40}$";
+    const addressPatternLong = "^[0-9A-Za-z-]{46}$";
     const isShowMessage = ref(false);
     const encryptedMessage = ref('');
+    const encryptErr = ref('');
 
     const disableDecrypt = computed(() => {
       if(walletPassword.value.match(passwdPattern)){
-        if(validPublicKey.value){
-          if( recipientPublicKey.value.match(publicKeyPattern)){
+        if((recipientAddressPublicKey.value.length == 64) || (recipientAddressPublicKey.value.length == 46) || (recipientAddressPublicKey.value.length == 40)){
+          if(recipientAddressPublicKey.value.match(publicKeyPattern) && (recipientAddressPublicKey.value.length == 64)){
+            return false
+          }else if(recipientAddressPublicKey.value.match(addressPatternLong) && (recipientAddressPublicKey.value.length == 46)){
+            return false
+          }else if(recipientAddressPublicKey.value.match(addressPatternShort) && (recipientAddressPublicKey.value.length == 40)){
             return false;
           }else{
             return true;
           }
         }else{
-          return false;
+          return true;
         }
       }else{
         return true;
@@ -178,7 +187,7 @@ export default{
       return isValidPublicKey;
     });
 
-    const decryptMessage = () => {
+    const decryptMessage = async () => {
       if(appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword.value)){
 
         const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
@@ -188,33 +197,43 @@ export default{
           let address = Address.createFromRawAddress(p.transaction.recipient)
           const accountDetails = appStore.getAccDetailsByAddress(address.address);
 
-          // let verified = false;
-          // check if recipient public key is required, then validate
-          // if(validPublicKey.value){
-          //   if(validPublicKey.value != accountDetails.publicAccount.publicKey){
-          //     err.value = 'Public Key is invalid';
-          //   }else{
-          //     verified = true;
-          //   }
-          // }else{
-          //   verified = true;
-          // }
-          // if(verified){
-            let privateKey = appStore.decryptPrivateKey(walletPassword.value, accountDetails.encrypted, accountDetails.iv);
-            const certificateAccount = Account.createFromPrivateKey(privateKey, networkType);
-            err.value = '';
-            plainMessage = certificateAccount.decryptMessage(new EncryptedMessage(p.transaction.message.payload), p.transaction.signer);
-          // }
-        }else{
-          // decrypt message on the sender panel
-          let address = Address.createFromRawAddress(p.transaction.senderAddress)
-          const accountDetails = appStore.getAccDetailsByAddress(address.address);
           let privateKey = appStore.decryptPrivateKey(walletPassword.value, accountDetails.encrypted, accountDetails.iv);
-          let recipientPublicAccount = PublicAccount.createFromPublicKey(recipientPublicKey.value, networkType);
-          plainMessage = EncryptedMessage.decrypt(p.transaction.message, privateKey, recipientPublicAccount);
+          const certificateAccount = Account.createFromPrivateKey(privateKey, networkType);
+          err.value = '';
+          plainMessage = certificateAccount.decryptMessage(new EncryptedMessage(p.transaction.message.payload), p.transaction.signer);
+          isShowMessage.value = true;
+          encryptedMessage.value = plainMessage.payload;
+        }else{
+          // decrypt message on the sender's panel
+          let publicKey;
+          let invalid = false;
+          if(recipientAddressPublicKey.value.length == 64){
+            publicKey = recipientAddressPublicKey.value;
+          }else if(recipientAddressPublicKey.value.length == 40 || recipientAddressPublicKey.value.length == 46){
+            let address = Address.createFromRawAddress(recipientAddressPublicKey.value);
+            try {
+              publicKey = await multiSign.getPublicKey(address);
+            } catch (error) {
+              if(error == 'invalid'){
+                invalid = true;
+              }
+            }
+          }
+          if(!invalid){
+            let address = Address.createFromRawAddress(p.transaction.senderAddress)
+            const accountDetails = appStore.getAccDetailsByAddress(address.address);
+            let privateKey = appStore.decryptPrivateKey(walletPassword.value, accountDetails.encrypted, accountDetails.iv);
+            let recipientPublicAccount = PublicAccount.createFromPublicKey(publicKey, networkType);
+            plainMessage = EncryptedMessage.decrypt(p.transaction.message, privateKey, recipientPublicAccount);
+            isShowMessage.value = true;
+            encryptedMessage.value = plainMessage.payload;
+            if(plainMessage.payload ==''){
+              encryptErr.value = "Recipient's public key might be invalid with empty message decrypted";
+            }
+          }else{
+            err.value = "Recipient address/public key is incorrect";
+          }
         }
-        isShowMessage.value = true;
-        encryptedMessage.value = plainMessage.payload;
       }else{
         err.value = "Wallet password is incorrect";
       }
@@ -285,7 +304,7 @@ export default{
       transferTypeIcon,
       isShowLogin,
       err,
-      recipientPublicKey,
+      recipientAddressPublicKey,
       walletPassword,
       showPublicKeyErr,
       showPasswdError,
@@ -294,6 +313,7 @@ export default{
       disableDecrypt,
       decryptMessage,
       validPublicKey,
+      encryptErr,
     };
   }
 }

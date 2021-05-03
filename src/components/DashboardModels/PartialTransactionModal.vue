@@ -44,6 +44,10 @@
                     <div class="text-xs mb-2 font-bold">Signer Cosignatory Account:</div>
                     <div class="text-xs">{{ transaction.signer.address.address }}</div>
                   </div>
+                  <div v-if="transaction.cosignatures" class="bg-gray-200 py-4 px-4">
+                    <div class="text-xs mb-2 font-bold">Other cosigner{{ (transaction.cosignatures.length > 1)?'s':'' }}:</div>
+                    <div class="text-xs" v-for="(cosigner, i) in transaction.cosignatures" :key="i">{{ cosigner.signer.address.address }}</div>
+                  </div>
                   <div v-if="!transaction.isSigned">
                     <div class="py-4 px-4">
                       <div class="text-xs mb-2 font-bold">Cosignatory account signing below:</div>
