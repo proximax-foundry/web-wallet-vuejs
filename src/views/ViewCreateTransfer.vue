@@ -209,7 +209,7 @@ export default {
 
     // enable and disable inputs based on cosign balance
     if(isMultiSigBool.value){
-      let cosign = getWalletCosigner();
+      let cosign = multiSign.fetchWalletCosigner(selectedAccAdd.value);
       if(cosign.list.length > 0){
         if(cosign.list[0].balance < 10.0445){
           disableAllInput.value = true;
@@ -236,7 +236,7 @@ export default {
       isMultiSigBool.value = isMultiSig(i.address);
       // set default of cosinger if multiple return
       if(isMultiSigBool.value){
-        let cosign = getWalletCosigner();
+        let cosign = multiSign.fetchWalletCosigner(i.address);
         if(cosign.list.length > 0){
           cosignAddress.value = cosign.list[0].address;
           console.log('cosign.list[0].balance');
@@ -395,7 +395,8 @@ export default {
 
     watch(cosignAddress, (n, o) => {
       if(n != o){
-        if(getWalletCosigner().list.find((element) => element.address == n).balance < 10.0455){
+        let cosign = multiSign.fetchMultiSigCosigners(selectedAccAdd.value);
+        if(cosign.list.find((element) => element.address == n).balance < 10.0455){
           cosignerBalanceInsufficient.value = true;
         }else{
           cosignerBalanceInsufficient.value = false;

@@ -217,7 +217,7 @@ function updateAccountMultisigGraphInfo(accountAddress){
       const multigraph = [];
       // console.log('info.multisigAccounts');
       // console.log(accountAddress + ' ' + account.name);
-      console.log(info.multisigAccounts);
+      // console.log(info.multisigAccounts);
       info.multisigAccounts.forEach(( multi ) => {
         // console.log(multi);
         multi.forEach((m) =>{
@@ -326,7 +326,6 @@ const cosignMiltisigTransaction = (signedAggregateBoundedTransaction, walletPass
   });
 };
 
-
 const createNewMultiSigAccount = (publicAccount) => {
   const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
   const addressObject = {
@@ -408,7 +407,7 @@ function modifyMultisigAccount(coSign, removeSign, numApproveTransaction, numDel
 
     let relativeNumApproveTransaction = numApproveTransaction - multisigAccount.isMultisign.minApproval;
     let relativeNumDeleteUser = numDeleteUser - multisigAccount.isMultisign.minRemoval
-    
+
     const convertIntoMultisigTransaction = ModifyMultisigAccountTransaction.create(
       Deadline.create(),
       relativeNumApproveTransaction,
@@ -463,21 +462,20 @@ function modifyMultisigAccount(coSign, removeSign, numApproveTransaction, numDel
   });
 }
 
-const fetchMultiSigCosigners = (multiSigAddress) => {  
+const fetchMultiSigCosigners = (multiSigAddress) => {
   const account = appStore.getAccDetailsByAddress(multiSigAddress);
-  
   if(account.isMultisign.cosignatories){
     let list = [];
     let numCosigner;
     if(account.isMultisign.cosignatories.length > 0){
-      numCosigner = account.isMultisign.cosignatories.length;      
-      if( numCosigner > 1 ){      
+      numCosigner = account.isMultisign.cosignatories.length;
+      if( numCosigner > 1 ){
         account.isMultisign.cosignatories.forEach((element) => {
           let cosignAccount = appStore.getAccDetailsByAddress(element.address.address);
           if(cosignAccount != -1){
             list.push({ address: element.address.address, name: cosignAccount.name });
           }
-        });      
+        });
       }else{
         console.log(account.isMultisign.cosignatories.length)
         let cosignAccount = appStore.getAccDetailsByAddress(account.isMultisign.cosignatories[0].address.address);
@@ -491,10 +489,21 @@ const fetchMultiSigCosigners = (multiSigAddress) => {
     return { list: list, length: numCosigner };
   }else{
     return {
-      list: [], 
+      list: [],
       length: 0
     };
-  }      
+  }
+}
+
+function fetchWalletCosigner(address){
+  let cosign = multiSign.fetchMultiSigCosigners(address);
+  let list = [];
+  cosign.list.forEach((element) => {
+    const account = appStore.getAccDetailsByAddress(element.address);
+    list.push({ balance: account.balance, address: element.address, name: element.name });
+  });
+  list.sort((a, b) => (a.balance < b.balance) ? 1 : -1);
+  return { list:list, numCosigner: cosign.numCosigner };
 }
 
 export const multiSign = readonly({
@@ -512,4 +521,5 @@ export const multiSign = readonly({
   getMultisigAccountGraphInfo,
   modifyMultisigAccount,
   fetchMultiSigCosigners,
+  fetchWalletCosigner
 });
