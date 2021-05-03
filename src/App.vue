@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-screen justify-between">
+  <div class="flex flex-col h-screen justify-between" @click="clickEvent">
     <header class="h-16 flex items-stretch">
       <headerComponent></headerComponent>
     </header>
@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { provide } from "vue";
+import { provide, getCurrentInstance } from "vue";
 import { appStore } from "@/store/app";
 import { siriusStore } from "@/store/sirius";
 import headerComponent from '@/components/headerComponent.vue'
@@ -26,8 +26,19 @@ export default {
     PageComponent,
   },
   setup() {
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+
     provide("appStore", appStore);
     provide("siriusStore", siriusStore);
+
+    const clickEvent = () => {
+      emitter.emit("PAGE_CLICK");
+    };
+
+    return{
+      clickEvent,
+    }
   },
 }
 </script>
