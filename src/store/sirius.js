@@ -64,7 +64,8 @@ const chainWSListener = computed(() => {
     console.log('open new socket')
     listenerChainWS.value = new Listener(
       `${
-        currentChainNode.value.protocol.startsWith("http") ? "ws://" : "wss://"
+        // currentChainNode.value.protocol.startsWith("http") ? "ws://" : "wss://"
+        location.protocol=='http:' ? "ws://" : "wss://"
       }${currentChainNode.value.hostname}:${currentChainNode.value.port}`,
       WebSocket
     );
