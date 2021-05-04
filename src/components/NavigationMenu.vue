@@ -5,7 +5,8 @@
       <router-link class="col" class-active="active" to="/dashboard">Dashboard</router-link>
       <router-link class="col" class-active="active" to="/create-transfer">Transfer</router-link>
       <router-link class="col" class-active="active" to="/view-all-accounts" :class="{'router-link-active': subIsActive(['/view-all-accounts', '/select-type-creation-account', '/create-account', '/import-account', '/delete-account', '/details-account', '/created-account', '/convert-account-multisign', '/edit-account-multisign'])}">Accounts</router-link>
-      <router-link class="col" class-active="active" to="/create-mosaic" :class="{'router-link-active': subIsActive(['/export-wallet', '/add-contacts'])}">Services</router-link>
+      <!-- <router-link class="col" class-active="active" to="/create-mosaic" :class="{'router-link-active': subIsActive(['/export-wallet', '/add-contacts'])}">Services</router-link> -->
+      <router-link class="col" class-active="active" to="/services" :class="{'router-link-active': subIsActive(['/export-wallet', '/add-contacts', '/delete-wallet-confirmed'])}">Services</router-link>
     </nav>
     <nav class="navbar h-9" v-else>
     </nav>
