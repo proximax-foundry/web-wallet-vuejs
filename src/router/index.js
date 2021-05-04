@@ -149,14 +149,6 @@ const routes = [
     }
   },
   {
-    path: '/export-wallet',
-    name: 'ViewExportWallet',
-    component: () => import('@/views/ViewExportWallet.vue'),
-    meta: {
-      title: "Export wallet",
-    }
-  },
-  {
     path: '/create-transfer',
     name: 'ViewCreateTransfer',
     component: () => import('@/views/ViewCreateTransfer.vue'),
@@ -178,6 +170,14 @@ const routes = [
     component: () => import('@/views/ViewCreateMosaic.vue'),
     meta: {
       title: "Add Contacts",
+    }
+  },
+  {
+    path: '/services',
+    name: 'ViewAllServices',
+    component: () => import('@/views/ViewAllServices.vue'),
+    meta: {
+      title: "Services",
     }
   },
 ]

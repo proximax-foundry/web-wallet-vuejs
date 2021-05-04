@@ -22,6 +22,7 @@ export default {
         return appStore.state.currentLoggedInWallet;
       }
     );
+
     return {
       login,
     };

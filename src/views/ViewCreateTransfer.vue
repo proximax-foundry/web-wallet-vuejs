@@ -456,8 +456,8 @@ export default {
     });
 
     emitter.on("CONFIRM_PROCEED_SEND", payload => {
-      console.log('Force send: ' + payload);
-      console.log('PW:' + walletPassword.value);
+      // console.log('Force send: ' + payload);
+      // console.log('PW:' + walletPassword.value);
       if(payload){
         forceSend.value = payload;
         toggleConfirm.value = false;
