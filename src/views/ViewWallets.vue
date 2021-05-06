@@ -38,7 +38,7 @@ export default {
   setup() {
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
-    const selectedNetworkName = computed(()=> siriusStore.chainNetworkName.value);
+    const selectedNetworkName = computed(()=> siriusStore.chainNetworkName);
     const wallets = computed(
       () =>{
         var w = appStore.state.wallets.filter((i)=> i.networkName === selectedNetworkName.value);

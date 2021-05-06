@@ -19,7 +19,7 @@ export default {
     const appStore = inject("appStore");
     const login = computed(
       () => {
-        return appStore.state.currentLoggedInWallet;
+        return appStore.isLogin;
       }
     );
     return {

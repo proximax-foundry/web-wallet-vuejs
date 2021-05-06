@@ -1,6 +1,6 @@
 import utils from "@/utils";
 import { ChainProfile, ChainProfileConfig, ChainProfilePreferences, ChainProfileNames } from "./storeClasses";
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, reactive, readonly } from "vue";
 import {
   AccountHttp,
   BlockHttp,
@@ -16,7 +16,15 @@ import {
 } from "tsjs-xpx-chain-sdk";
 const config = require("@/../config/config.json");
 
-export class Sirius {
+const siriusState = reactive({
+  chainNetwork: 0,
+  chainNetworkName:'',
+  currentNetworkProfile: {},
+  currentNetworkProfileConfig: {},
+  selectedChainNode: ''
+});
+
+class Sirius {
   constructor() {
     this.name = "Sirius Wallet";
 
@@ -28,16 +36,7 @@ export class Sirius {
     this.networkAPIEndpoints = computed(() => this.formatNetwork());
     this.selectedChainNode = ref('');
 
-    /*
-    this.state = reactive({
-      chainNetwork: 0,
-      chainNetworkName:'',
-      currentNetworkProfile: {},
-      currentNetworkProfileConfig: {},
-      networkAPIEndpoints: computed(() => this.formatNetwork()),
-      selectedChainNode: ''
-    });
-    */
+    this.state = siriusState;
 
     this.accountHttp = computed(() => new AccountHttp(this.buildAPIEndpointURL(this.selectedChainNode.value)));
     this.blockHttp = computed(() => new BlockHttp(this.buildAPIEndpointURL(this.selectedChainNode.value)));
@@ -51,16 +50,28 @@ export class Sirius {
     this.connectors = ref([]);
 
     watch(
-      ()=> this.chainNetworkName.value, 
+      ()=> siriusState.chainNetwork, 
+      (newValues) => {
+        this.chainNetwork.value = newValues;
+    });
+
+    watch(
+      ()=> this.selectedChainNode.value, 
+      () => {
+
+    });
+
+    watch(
+      ()=> this.currentNetworkProfile.value, 
       (newValues) => {
 
-        var chainProfilePreferences = new ChainProfilePreferences(newValues + "_preferences");
+        this.state.currentNetworkProfile = newValues;
+
+        var chainProfilePreferences = new ChainProfilePreferences( this.chainNetworkName.value + "_preferences");
       
         chainProfilePreferences.init();
       
         let endpoints = this.getChainNodes();
-
-        console.log(endpoints);
       
         if(chainProfilePreferences.apiNode && endpoints.includes(chainProfilePreferences.apiNode)){
           this.selectedChainNode.value = chainProfilePreferences.apiNode;
@@ -70,22 +81,24 @@ export class Sirius {
             var randomAPINodeIndex = Math.floor(Math.random() * endpoints.length);
             chainProfilePreferences.apiNode = endpoints[randomAPINodeIndex];
             chainProfilePreferences.saveToLocalStorage();
-            console.log(endpoints[randomAPINodeIndex]);
+
             this.selectedChainNode.value = endpoints[randomAPINodeIndex];
           }
           else{
             this.selectedChainNode.value = "";
           }
         }
-        console.log(this.selectedChainNode.value);
+
+        this.state.selectedChainNode = this.selectedChainNode.value;
+
+        sessionStorage.setItem('nodePort', newValues.httpPort);
+        sessionStorage.setItem('selectedChainNode', this.selectedChainNode.value);
       }
     );
 
     watch(
       ()=> this.availableNetworks.value, 
       (newValues) => {
-
-        console.log(newValues);
 
         let selectedNetwork = 0;
         //let selectedNetworkName = "";
@@ -119,15 +132,28 @@ export class Sirius {
       ()=> this.chainNetwork.value, 
       (newValues) => {
 
-        console.log("In watch chainNetwork");
+        siriusState.chainNetwork = newValues;
+
+        sessionStorage.setItem('selectedNetwork', newValues);
 
         this.chainNetworkName.value = this.availableNetworks.value[newValues];
+
+        sessionStorage.setItem('selectedNetworkName', this.chainNetworkName.value);
 
         this.updateCurrentProfile();
         this.updateCurrentProfileConfig();
     });
 
     this.updateAvailableNetworks();
+  }
+
+  updateChainNetwork(network){
+    siriusState.chainNetwork = network;
+    /*
+    sessionStorage.setItem('selectedNetwork', network);
+    
+    this.refreshselectedNetwork();
+    */
   }
 
   updateAvailableNetworks(){
@@ -160,6 +186,8 @@ export class Sirius {
       profileConfig.init();
       this.currentNetworkProfileConfig.value = profileConfig;
     }
+
+    this.state.currentNetworkProfileConfig = this.currentNetworkProfileConfig.value;
   }
 
   getCurrentProfile(){
@@ -427,3 +455,7 @@ export class Sirius {
     return location.protocol=='https:' ? `wss://${url}` : `ws://${url}:${portNumber}`;
   }
 }
+
+const siriusStore_1 = new Sirius();
+
+export const siriusStore = readonly(siriusStore_1);

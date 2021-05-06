@@ -52,7 +52,7 @@ export default{
     const err = ref("");
     const walletPassword = ref("");
     const selectedWallet = ref("0");
-    const selectedNetworkName = computed(()=> siriusStore.chainNetworkName.value);
+    const selectedNetworkName = computed(()=> siriusStore.chainNetworkName);
     const showPasswdError = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
     const disableSignin = computed(
@@ -80,8 +80,6 @@ export default{
 
     const login = () => {
 
-      console.log(appStore.state);
-
       var result = appStore.loginToWallet(selectedWallet.value, walletPassword.value);
       console.log(result);
       if (result == -1) {
@@ -89,7 +87,7 @@ export default{
       } else if (result == 0) {
         err.value = "Invalid password";
       } else {
-        router.push({ path: "/dashboard"});
+        router.push({ name: "ViewDashboard"});
       }
     };
 

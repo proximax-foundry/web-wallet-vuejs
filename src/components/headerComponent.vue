@@ -1,6 +1,6 @@
 <template>
   <div class="flex-none self-center flex items-end logo">
-    <router-link :to="(appStore.state.currentLoggedInWallet)? {name : 'ViewDashboard'}: {name: 'Welcome'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">v{{ appStore.version }}</span>
+    <router-link :to="(loginStatus)? {name : 'ViewDashboard'}: {name: 'Welcome'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">v{{ appStore.version }}</span>
   </div>
   <div class="flex-grow h-16"></div>
   <div class="flex-none flex items-end" v-if="!loginStatus">
@@ -25,7 +25,7 @@
       </div>
       <div class="w-14 md:w-44 pl-3 text-center flex gray-line-left h-10 items-center">
         <div>
-          <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="siriusStore.selectedChainNode.value"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ selectedNetworkName }}</div>
+          <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="siriusStore.selectedChainNode"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ selectedNetworkName }}</div>
         </div>
       </div>
       <div class="w-52 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
@@ -81,18 +81,19 @@ export default{
     const siriusStore = inject("siriusStore");
     const router = useRouter();
     const toggleAnounceNotification = ref(false);
-    const chainsNetwork = computed(()=> siriusStore.availableNetworks.value);
-    let selectedNetwork = computed(()=> siriusStore.chainNetwork.value);
-    const selectedNetworkName = computed(()=> siriusStore.chainNetworkName.value);
+    const chainsNetwork = computed(()=> siriusStore.availableNetworks);
+    let selectedNetwork = computed(()=> siriusStore.chainNetwork);
+    const selectedNetworkName = computed(()=> siriusStore.chainNetworkName);
 
-    if(siriusStore.chainNetworkName.value){
-      appStore.updateSetting(siriusStore.selectedChainNode.value, siriusStore.currentNetworkProfile.value.httpPort, siriusStore.chainNetworkName.value);
+    if(siriusStore.selectedChainNode){
+      appStore.updateSetting();
     }
 
     watch(
-      ()=> siriusStore.chainNetworkName.value,
+      ()=> siriusStore.selectedChainNode,
       ()=>{
-        appStore.updateSetting(siriusStore.selectedChainNode.value, siriusStore.currentNetworkProfile.value.httpPort, siriusStore.chainNetworkName.value);
+        console.log("Call update");
+        appStore.updateSetting();
       }
     )
 
@@ -114,11 +115,13 @@ export default{
     };
 
     const getAccountInfo = async () => {
+      console.log(useRouter().currentRoute);
       if (!appStore.state.currentLoggedInWallet) {
         // check sessionStorage
-        //if(!appStore.checkFromSession(appStore, siriusStore)){
+        if(!appStore.checkFromSession()){
+          console.log("Route replaced");
           useRouter().replace({ path: "/" });
-        //}
+        }
       }
       return;
     };
@@ -126,13 +129,7 @@ export default{
 
     const loginStatus = computed(
       () => {
-        if(!appStore.state.currentLoggedInWallet){
-          // if empty, check from sessionStorage
-          return false;
-        }else{
-          // remain logged in when state.wallet is available
-          return true;
-        }
+        return appStore.isLogin;
       }
     );
 
@@ -176,9 +173,7 @@ export default{
 
       if(e.target.value !== 'customize'){
 
-        sessionStorage.setItem("selectedNetwork", e.target.value);
-        siriusStore.refreshselectedNetwork();
-        selectedNetwork.value = e.target.value;
+        siriusStore.updateChainNetwork(parseInt(e.target.value));
       }
     }
 

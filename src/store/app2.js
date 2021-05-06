@@ -1,4 +1,4 @@
-import { computed, reactive, ref, watch } from "vue";
+import { computed, ref, watch, reactive, readonly } from "vue";
 import {
   Account,
   Address,
@@ -26,7 +26,17 @@ import { ListenerStore } from '../util/listener2'
 
 const config = require("@/../config/config.json");
 
-export class App {
+const appState = reactive({
+  darkTheme: false,
+  wallets: [],
+  currentConnectedEndpoint: '',
+  currentConnectedEndpointPort: 3000,
+  currentNetworkName: '',
+  currentLoggedInWallet: {},
+  loggedInWalletFirstAccount: {}
+});
+
+class App {
   constructor() {
     this.name = "Sirius Wallet";
     this.version = require("@/../package.json").version;
@@ -35,20 +45,23 @@ export class App {
     this.isLogin = ref(false);
     this.connectors = new ListenerStore();
 
-    this.state = reactive({
-      darkTheme: false,
-      wallets: this.getWallets(),
-      currentLoggedInNetwork: '',
-      currentConnectedEndpoint: '',
-      currentConnectedEndpointPort: 3000,
-      currentLoggedInWallet: computed(() => this.currentWallet.value),
-      loggedInWalletFirstAccount: computed(() => {
-        if (!this.currentWallet.value) {
+    this.darkTheme = ref(false);
+    this.wallets = this.getWallets();
+    this.currentConnectedEndpoint = ref('');
+    this.currentConnectedEndpointPort = ref(3000);
+    this.currentNetworkName = ref('');
+    this.currentNetwork = ref(0);
+    this.currentLoggedInWallet = computed(() => this.currentWallet.value);
+    this.loggedInWalletFirstAccount = computed(() => {
+        if (!this.currentLoggedInWallet.value) {
+          console.log('No wallet yet');
           return undefined;
         }
-        return this.currentWallet.value.accounts.find((element) => element.default);
-      }),
+        console.log('Got wallet');
+        return this.currentLoggedInWallet.value.accounts.find((element) => element.default);
     });
+
+    this.state = appState;
 
     this.accountHttp = computed(() => new AccountHttp(this._buildAPIEndpointURL()));
     this.blockHttp = computed(() => new BlockHttp(this._buildAPIEndpointURL()));
@@ -63,12 +76,49 @@ export class App {
     this.init();
 
     watch(
-      ()=> this.isLogin,
+      ()=> this.currentConnectedEndpoint.value,
+      (newValues)=>{
+        this.state.currentConnectedEndpoint = newValues;
+      }
+    )
+
+    watch(
+      ()=> this.currentConnectedEndpointPort.value,
+      (newValues)=>{
+        this.state.currentConnectedEndpointPort = newValues;
+      }
+    )
+
+    watch(
+      ()=> this.currentLoggedInWallet.value,
       (newValues)=>{
 
-        if(newValues){
-          this.getXPXBalance(this.state.currentLoggedInWallet)
-        }
+        console.log(newValues);
+        console.log("Hey, I am really");
+        this.state.currentLoggedInWallet = newValues;
+          //this.getXPXBalance(newValues.name)
+      }
+    )
+
+    watch(
+      ()=> this.currentNetworkName.value,
+      (newValues)=>{
+
+        this.state.currentNetworkName = newValues;
+      }
+    )
+
+    watch(
+      ()=> this.loggedInWalletFirstAccount.value,
+      (newValues)=>{
+        this.state.loggedInWalletFirstAccount = newValues;
+      }
+    )
+
+    watch(
+      ()=> appState.currentLoggedInWallet,
+      (newValues)=>{
+        this.currentWallet.value = newValues;
       }
     )
   }
@@ -88,10 +138,11 @@ export class App {
     return `${config.chainExplorer.url}/${config.chainExplorer.publicKeyRoute}/${publicKey}`;
   }
 
-  updateSetting(endpoint, port, networkName){
-    this.state.currentNetworkName = networkName;
-    this.state.currentConnectedEndpoint = endpoint;
-    this.state.currentConnectedEndpointPort = port;
+  updateSetting(){
+    appState.currentConnectedEndpoint = sessionStorage.getItem('selectedChainNode');
+    appState.currentConnectedEndpointPort = parseInt(sessionStorage.getItem('nodePort'));
+    appState.currentNetwork = parseInt(sessionStorage.getItem('selectedNetwork'));
+    appState.currentNetworkName = sessionStorage.getItem('selectedNetworkName');
   }
 
   toggleDarkTheme() {
@@ -99,7 +150,7 @@ export class App {
       console.log("toggleDarkTheme triggered");
     }
   
-    this.state.darkTheme = !this.state.darkTheme;
+    this.darkTheme.value = !this.darkTheme.value;
   }
 
   static isPrivateKeyValid(privateKey) {
@@ -113,33 +164,30 @@ export class App {
   }
 
   verifyExistingAccount(privateKey, networkType){
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
     const account = Account.createFromPrivateKey(privateKey, networkType);
     return (wallet.accounts.findIndex((element) => element.address == account.address.address) >= 0 ) ? true : false ;
   }
 
   getWalletByName(walletName) {
 
-    return this.getWalletByNameAndNetwork(walletName, this.state.currentLoggedInNetwork);
+    return this.getWalletByNameAndNetwork(walletName, this.state.currentNetworkName);
   }
 
   getWalletByNameAndNetwork(walletName, networkName) {
-    walletName =
-      walletName.includes(" ") === true
-        ? walletName.split(" ").join("_")
-        : walletName;
-    return this.state.wallets.find((element) => element.name == walletName && element.networkName == networkName);
+    walletName = walletName.includes(" ") === true ? walletName.split(" ").join("_") : walletName;
+    return appState.wallets.find((element) => element.name == walletName && element.networkName == networkName);
   }
 
   getWalletIndexByNameAndNetwork(walletName, networkName = undefined) {
 
-    let networkNameToCompare = networkName ? networkName : this.state.currentLoggedInNetwork;
+    let networkNameToCompare = networkName ? networkName : this.state.currentNetworkName;
 
     walletName =
       walletName.includes(" ") === true
         ? walletName.split(" ").join("_")
         : walletName;
-    return this.state.wallets.findIndex((element) => element.name == walletName && element.networkName == networkNameToCompare);
+    return appState.wallets.findIndex((element) => element.name == walletName && element.networkName == networkNameToCompare);
   }
 
   getAccountByWallet(walletName){
@@ -156,7 +204,7 @@ export class App {
         const accounts = [];
         if (decryptedData.accounts.length !== undefined) {
           for (let element of decryptedData.accounts) {
-            console.log(element);
+            //console.log(element);
             var newAddress = Address.createFromPublicKey(element.publicAccount.publicKey, networkType);
             element.address = newAddress.plain();
             element.network = networkType;
@@ -339,7 +387,7 @@ export class App {
       return verify;
     }
     // end verify with password
-  
+
     const walletIndex = networkName ? this.getWalletIndexByNameAndNetwork(walletName, networkName) : this.getWalletIndexByNameAndNetwork(walletName);
     if (walletIndex == -1) {
       if (config.debug) {
@@ -350,15 +398,17 @@ export class App {
       }
       return -1;
     }
+
+    console.log(walletIndex);
   
     if (config.debug) {
       console.log("deleteWallet triggered with", walletName);
     }
   
-    if (this.state.wallets.splice(walletIndex, 1).length != 0) {
+    if (appState.wallets.splice(walletIndex, 1).length != 0) {
       localStorage.setItem(
         config.localStorage.walletKey,
-        JSON.stringify(this.state.wallets)
+        JSON.stringify(appState.wallets)
       );
       return 1;
     }
@@ -366,15 +416,25 @@ export class App {
   }
 
   init(){
+    this.state.wallets = this.wallets;
+
     const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
+
     if(walletSession){
       // session is not null - copy to state
       this.currentWallet.value = walletSession;
+      this.currentConnectedEndpoint.value = sessionStorage.getItem('selectedChainNode');
+      this.currentConnectedEndpointPort.value = sessionStorage.getItem('nodePort');
+      this.currentNetwork.value = sessionStorage.getItem('selectedNetwork');
       this.isLogin.value = true;
-      this.connectors.startListening(this.currentWallet.value.accounts);
-      
-      return true;
+      //this.connectors.startListening(this.currentWallet.value.accounts);
     }
+  }
+
+  checkFromSession(){
+    const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
+
+    return walletSession ? true : false;
   }
 
   loginToWallet(walletName, password) {
@@ -435,15 +495,17 @@ export class App {
     //   subscribeConfirmed(accountDetail.address, appStore, siriusStore);
     // });
   
-    this.currentWallet.value = wallet;
+    appState.currentLoggedInWallet = wallet;
   
-    this.connectors.initListenerSetting(this._buildWSEndpointURL());
+    //this.connectors.initListenerSetting(this._buildWSEndpointURL());
 
-    this.connectors.startListening(wallet.accounts);
+    //this.connectors.startListening(wallet.accounts);
     //multiSign.updateAccountsMultiSign(walletName);
     this.isLogin.value = true;
 
     try {
+      this.getXPXBalance(walletName);
+
       sessionStorage.setItem(
         'currentWalletSession',
         JSON.stringify(wallet)
@@ -471,7 +533,7 @@ export class App {
   }
 
   updateAccountState(account, networkType, accountName){
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
     // get wallet index
     const addressObject = {
       address: account.address.address,
@@ -524,7 +586,7 @@ export class App {
   }
 
   updateCurrentWallet(account){
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
     wallet.accounts.push(account);
     // enable listener
     //addListenerstoAccount(account);
@@ -545,7 +607,7 @@ export class App {
   }
 
   updateAccountName(name, oriName){
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
     const exist_account = wallet.accounts.find((element) => element.name == name.trim());
     const exist_account_index = wallet.accounts.findIndex((element) => element.name == name.trim());
     const account_index = wallet.accounts.findIndex((element) => element.name == oriName);
@@ -580,7 +642,7 @@ export class App {
   }
 
   setAccountDefault(address){
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
     wallet.accounts.map(x => {x.default = false;});
     // set account with the address as default
     const account = wallet.accounts.find((element) => element.address == address);
@@ -603,7 +665,7 @@ export class App {
   }
 
   getAccDetails(name){
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
     const account = wallet.accounts.find((element) => element.name == name);
     if (!account) {
       if (config.debug) {
@@ -615,7 +677,7 @@ export class App {
   }
 
   getAccDetailsByAddress(address){
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
     const account = wallet.accounts.find((element) => element.address == address);
     console.log('searching for this: ' + address);
     console.log(account);
@@ -634,10 +696,10 @@ export class App {
   }
 
   deleteAccount(password, address) {
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
     const accountIndex = wallet.accounts.findIndex((element) => element.address == address);
   
-    const verify = this.verifyWalletPassword(this.state.currentLoggedInWallet.name, password);
+    const verify = this.verifyWalletPassword(this.currentLoggedInWallet.value.name, password);
     if(verify<1){
       return verify;
     }
@@ -669,7 +731,7 @@ export class App {
   saveContact(contactName, contactAddress){
     contactAddress = contactAddress.split('-').join('')
     // verify address and name
-    const wallet =this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet =this.getWalletByName(this.currentLoggedInWallet.value.name);
     // check for existing account address in wallet
     const accountAddIndex = wallet.accounts.findIndex((element) => element.address == contactAddress);
     // check for existing account name in wallet
@@ -733,16 +795,27 @@ export class App {
   }
 
   getTotalBalance(){
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+
     let balance = 0;
+
+    /*
+    console.log(this.isLogin.value, this.currentNetworkName.value, this.currentLoggedInWallet.value.name);
+    if(this.isLogin.value && this.currentNetworkName.value !== '' && this.currentLoggedInWallet.value){
+      const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
+      
+      if(!wallet){
+        return balance.toFixed(6);
+      }
     
-    if(!wallet){
+      wallet.accounts.forEach((item) => {
+        balance += parseFloat(item.balance);
+      });
       return balance.toFixed(6);
     }
-  
-    wallet.accounts.forEach((item) => {
-      balance += parseFloat(item.balance);
-    });
+    else{
+      return balance.toFixed(6);
+    }
+    */
     return balance.toFixed(6);
   }
 
@@ -811,25 +884,25 @@ export class App {
   }
 
   getFirstAccName(){
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
     const acc = wallet.accounts.find((element) => element.default == true);
     return acc.name;
   }
 
   getFirstAccAdd(){
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
     const acc = wallet.accounts.find((element) => element.default == true);
     return acc.address;
   }
 
   getFirstAccBalance(address){
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
     const acc = wallet.accounts.find((element) => element.address == address);
     return acc.balance;
   }
 
   displayBalance(){
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
     if(wallet.accounts.length == 1){
       let amount = 0;
       wallet.accounts.forEach((element)=> {
@@ -840,14 +913,14 @@ export class App {
   }
 
   getMosaicInfo(address, mosaicId){
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
     const account = wallet.accounts.find((element) => element.address == address);
     const mosaic = account.mosaic.find((element) => element.id == mosaicId);
     return mosaic;
   }
 
   getContact(){
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
     var contact = [];
     var accountCount = wallet.accounts.length;
     wallet.accounts.forEach((element, index) => {
@@ -903,7 +976,7 @@ export class App {
   }
 
   checkAvailableContact(recipient){
-    const wallet = this.getWalletByName(this.state.currentLoggedInWallet.name);
+    const wallet = this.getWalletByName(this.currentLoggedInWallet.value.name);
     let isInContacts = true;
     if(wallet.contacts != undefined){
       isInContacts = (wallet.contacts.findIndex((element) => element.address == recipient) == -1);
@@ -933,17 +1006,21 @@ export class App {
 
   _buildAPIEndpointURL(){
 
-    var portNumber = this.state.currentConnectedEndpointPort;
-    var host = this.state.currentConnectedEndpoint;
+    var portNumber = this.state.currentConnectedEndpointPort.value;
+    var host = this.state.currentConnectedEndpoint.value;
       
     return location.protocol=='https:' ? `https://${host}` : `http://${host}:${portNumber}`;
   }
 
   _buildWSEndpointURL(){
 
-    var portNumber = this.state.currentConnectedEndpointPort;
-    var host = this.state.currentConnectedEndpoint;
+    var portNumber = this.state.currentConnectedEndpointPort.value;
+    var host = this.state.currentConnectedEndpoint.value;
       
     return location.protocol=='https:' ? `wss://${host}` : `ws://${host}:${portNumber}`;
   }
 }
+
+const appStore_1 = new App();
+
+export const appStore = readonly(appStore_1);
