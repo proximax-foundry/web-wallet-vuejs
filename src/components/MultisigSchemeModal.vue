@@ -46,7 +46,7 @@ export default{
   setup(p){
     const toggleModal = ref(false);
     const appStore = inject("appStore");
-    console.log(p.multiSigAccount.multisigAccountGraphInfo)
+    // console.log(p.multiSigAccount.multisigAccountGraphInfo)
     let graph = [];
     let layer = [];
     let newlayer = [];
@@ -59,7 +59,7 @@ export default{
       label = (multiSig.cosignatories.length>0)?'MULTISIG-':'Cosigner-';
       accountName = (account) ? account.name : (label + multiSig.account.address.address.substr(-4));
 
-      console.log(i+': ' + multiSig.account.address.address);
+      // console.log(i+': ' + multiSig.account.address.address);
       // first element
       if(i==0){
         layer.push({ address: multiSig.account.address.address, name: accountName, label: label, cosign: multiSig.cosignatories });
@@ -76,7 +76,7 @@ export default{
           }
         });
       }
-      console.log(graph)
+      // console.log(graph)
     });
     layer = newlayer;
     graph.push(layer);
@@ -176,6 +176,7 @@ li{
     border-top: 2px solid #dedede;
     height: 10px;
     width: 100%;
+    left: -10px;
   }
 
   li:first-child::before{

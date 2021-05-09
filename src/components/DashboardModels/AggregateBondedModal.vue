@@ -109,10 +109,8 @@ export default{
       }
     });
 
-
     watch(() => p.showModal, () => {
       if(p.showModal){
-        // console.log(p.transaction);
         if (p.transaction.transactionInfo && p.transaction.transactionInfo.height) {
           const height = p.transaction.transactionInfo.height.compact();
           transactionHeight.value = height;

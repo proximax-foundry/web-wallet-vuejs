@@ -47,11 +47,6 @@ export default {
       )
     );
     const create = () => {
-      // if (disableLogin.value) {
-      //   err.value = "Please enter a valid password";
-      //   loading.value = false;
-      //   return;
-      // }
       if(!appStore.verifyExistingAccountName(appStore.state.currentLoggedInWallet.name, accountName.value)){
         var result = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword.value);
         if (result == -1) {
@@ -70,6 +65,12 @@ export default {
         err.value = "Account name is already taken.";
       }
     };
+
+    const clearInput = () => {
+      accountName.value = "";
+      walletPassword.value = "";
+    };
+
     return{
       appStore,
       err,
@@ -77,14 +78,10 @@ export default {
       accountName,
       walletPassword,
       showPasswdError,
-      disableCreate
+      disableCreate,
+      clearInput
     }
   },
-  methods: {
-    clearInput: function() {
-      this.accountName = "";
-      this.walletPassword = "";
-    },
-  },
+
 }
 </script>

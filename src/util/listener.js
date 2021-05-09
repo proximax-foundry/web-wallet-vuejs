@@ -23,15 +23,11 @@ const startListening = (accounts) => {
   accounts.forEach((account) => {
     let connect = new Listener(
       `${
-        siriusStore.currentChainNode.protocol.startsWith("http:") ? "ws://" : "wss://"
-        // location.protocol=='http:' ? "ws://" : "wss://"
-      // }${siriusStore.currentChainNode.hostname}:${siriusStore.currentChainNode.port}`,
-      }${siriusStore.currentChainNode.hostname}${siriusStore.currentChainNode.protocol.startsWith("http:")?(':'+siriusStore.currentChainNode.port):''}`,
+        location.protocol == "http:" ? "ws://" : "wss://"
+      }${siriusStore.currentChainNode.hostname}${location.protocol == "http:" ?(':'+siriusStore.currentChainNode.port):''}`,
       WebSocket
     );
-
     state.connector.push({listener: connect, account: account});
-
     state.connector.find((element) => element.account.address == account.address).listener.open().then(() => {
       enableListeners(account, connect);
     });
@@ -55,9 +51,8 @@ const stopListening = () => {
 const addListenerstoAccount = (account) => {
   let connect = new Listener(
     `${
-      siriusStore.currentChainNode.protocol.startsWith("http:") ? "ws://" : "wss://"
-      // location.protocol=='http:' ? "ws://" : "wss://"
-    }${siriusStore.currentChainNode.hostname}${siriusStore.currentChainNode.protocol.startsWith("http:")?(':'+siriusStore.currentChainNode.port):''}`,
+      location.protocol == "http:" ? "ws://" : "wss://"
+    }${siriusStore.currentChainNode.hostname}${location.protocol == "http:" ?(':'+siriusStore.currentChainNode.port):''}`,
     WebSocket
   );
   state.connector.push({listener: connect, account: account});
@@ -77,8 +72,6 @@ const checkListener = () => {
   });
 }
 
-
-
 setInterval(() => {
   // console.log('Num of connectors: ' + state.connector.length);
   if(state.connector.length > 0){
@@ -92,7 +85,6 @@ function enableListeners(account, listener){
   // console.log('Connector for ' + account.address + ': ' + listener.isOpen());
   const accountDetail = Address.createFromPublicKey(account.publicAccount.publicKey, account.network);
   // newBlockListener(accountDetail, listener);
-  console.log(accountDetail);
   confirmedListener(accountDetail, listener);
   unconfirmedListener(accountDetail, listener);
   statusListener(accountDetail, listener);
@@ -119,7 +111,8 @@ const newBlockListener = (accountDetail, listener) => {
 const confirmedListener = (accountDetail, listener) => {
   listener.confirmed(accountDetail).subscribe((transaction) => {
     console.log('Confirmed notification ' + accountDetail.address)
-    console.log(transaction)
+    const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
+    // console.log(transaction)
     transferEmitter.emit('CONFIRMED_NOTIFICATION', {
       status: true,
       message: 'Transaction confirmed',
@@ -127,24 +120,23 @@ const confirmedListener = (accountDetail, listener) => {
     });
     // check to list multisig account
     if(transactions.getNameTypeTransaction(transaction.type) == 'aggregateBonded'){
-      const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
       let cosigneeCheck = false;
       transaction.cosignatures.forEach((cosignee) => {
-        console.log(cosignee.signer.address.address);
+        // console.log(cosignee.signer.address.address);
         const account = wallet.accounts.find((element) => element.address == cosignee.signer.address.address);
-        console.log(account);
+        // console.log(account);
         if(account){
           cosigneeCheck = true;
         }
       });
       if(cosigneeCheck){
-        transaction.innerTransactions.forEach((innerTransaction) => {
-          if(transactions.getNameTypeTransaction(innerTransaction.type) == 'modifyMultisigAccount'){
+        transaction.innerTransactions.forEach((innerTran) => {
+          if(transactions.getNameTypeTransaction(innerTran.type) == 'modifyMultisigAccount'){
             // create multisig account
-            console.log('List multisign account into wallet');
-            multiSign.createNewMultiSigAccount(transaction.signer);
+            // console.log('List multisign account into wallet');
+            multiSign.createNewMultiSigAccount(innerTran.signer);
             // update multisign info on all accounts
-            multiSign.updateAccountsMultiSign(appStore.state.currentLoggedInWallet.name);
+            // multiSign.updateAccountsMultiSign(appStore.state.currentLoggedInWallet.name);
           }
         });
       }
@@ -156,6 +148,10 @@ const confirmedListener = (accountDetail, listener) => {
       transaction: transaction,
     });
     appStore.updateXPXBalance(appStore.state.currentLoggedInWallet.name, siriusStore);
+    // update multisign info on all accounts
+    multiSign.updateAccountsMultiSign(appStore.state.currentLoggedInWallet.name);
+    // clean wallet from removed multisig account of cosigners
+    multiSign.removeUnrelatedMultiSig(appStore.state.currentLoggedInWallet.name);
   }, error => {
       console.error(error);
   }, () => {
@@ -164,6 +160,7 @@ const confirmedListener = (accountDetail, listener) => {
 }
 
 // transaction unconfirmed
+// eslint-disable-next-line no-unused-vars
 const unconfirmedListener = (accountDetail, listener) => {
   listener.unconfirmedAdded(accountDetail).subscribe((transaction) => {
     console.log('Unconfirmed notification ' + accountDetail.address);
@@ -187,11 +184,12 @@ const unconfirmedListener = (accountDetail, listener) => {
 }
 
 // subscribe status
+// eslint-disable-next-line no-unused-vars
 const statusListener = (accountDetail, listener) => {
   listener.status(accountDetail).subscribe(transactionStatusError => {
     console.log('status listener');
     console.log(transactionStatusError);
-    transferEmitter.emit('UNCONFIRMED_NOTIFICATION', {
+    transferEmitter.emit('STATUS_NOTIFICATION', {
       status: true,
       message: transactionStatusError,
       notificationType: 'noti'
@@ -204,6 +202,7 @@ const statusListener = (accountDetail, listener) => {
 }
 
 // Unconfirmed removed
+// eslint-disable-next-line no-unused-vars
 const unconfirmedRemovedListener = (accountDetail, listener) => {
   listener.unconfirmedRemoved(accountDetail).subscribe(hash => {
     console.log('Unconfirmed removed: ' + hash + ' ' + accountDetail.address);
@@ -220,6 +219,7 @@ const unconfirmedRemovedListener = (accountDetail, listener) => {
 }
 
 // partially added
+// eslint-disable-next-line no-unused-vars
 const aggregateBondedAddedListener = (accountDetail, listener) => {
   listener.aggregateBondedAdded(accountDetail).subscribe(aggregateTransaction => {
     // console.log('Emitting from aggregateBondedAddedListener ');
@@ -256,6 +256,7 @@ const aggregateBondedAddedListener = (accountDetail, listener) => {
 }
 
 // aggregate bonded removed
+// eslint-disable-next-line no-unused-vars
 const aggregateBondedRemovedListener = (accountDetail, listener) => {
   listener.aggregateBondedRemoved(accountDetail).subscribe(hash => {
     console.log('Aggregate bonded removed: ' + hash + ' ' + accountDetail.address);
@@ -271,6 +272,7 @@ const aggregateBondedRemovedListener = (accountDetail, listener) => {
   })
 }
 
+// eslint-disable-next-line no-unused-vars
 const cosignatureAddedListener = (accountDetail, listener) => {
   // eslint-disable-next-line no-unused-vars
   listener.cosignatureAdded(accountDetail).subscribe(cosignatureSignedTransaction => {
@@ -368,7 +370,7 @@ async function announceLockfundAndWaitForConfirmation(senderAddress, signedLockF
   });
 }
 
-async function announceAggregateBonded(senderAddress, aggBondTx, aggBondHash, txConfirmed, transactionHttp){
+function announceAggregateBonded(senderAddress, aggBondTx, aggBondHash, txConfirmed, transactionHttp){
   return new Promise((resolve, reject) => {
     const announceAggregateBondedListener = siriusStore.chainWSListener;
     announceAggregateBondedListener.open().then(() => {
@@ -443,6 +445,151 @@ async function announceAggregateBonded(senderAddress, aggBondTx, aggBondHash, tx
   });
 }
 
+async function modifyMultisigAnnounceLockfundAndWaitForConfirmation(announceLockfundListener, senderAddress, signedLockFundsTransaction, lockHash, transactionHttp){
+  return new Promise((resolve, reject) => {
+    announceLockfundListener.open().then(() => {
+      const txStatus = announceLockfundListener.status(senderAddress).subscribe(txStatusError => {
+        if (txStatusError.hash === lockHash) {
+          console.error('Lockfund status (' + lockHash + ') error: ' + txStatusError.status);
+          if (txConfirmed) {
+            txConfirmed.unsubscribe();
+          }
+          if (txStatus) {
+            txStatus.unsubscribe();
+          }
+          announceLockfundListener.close();
+          reject(txStatusError.status);
+        }
+      });
+
+      const txConfirmed = announceLockfundListener.confirmed(senderAddress).subscribe(confirmedTx => {
+        if (confirmedTx && confirmedTx.transactionInfo && confirmedTx.transactionInfo.hash === lockHash) {
+          console.log('Lockfund (' + lockHash + ') confirmed at height: ' + confirmedTx.transactionInfo.height.compact());
+          if (txConfirmed) {
+            txConfirmed.unsubscribe();
+          }
+          if (txStatus) {
+            txStatus.unsubscribe();
+          }
+          announceLockfundListener.close();
+          resolve(confirmedTx);
+        }
+      }, error => {
+        console.error('Lockfund confirmation (' + lockHash + ') subscription failed: ' + error);
+        if (txConfirmed) {
+          txConfirmed.unsubscribe();
+        }
+        if (txStatus) {
+          txStatus.unsubscribe();
+        }
+        announceLockfundListener.close();
+        reject(error);
+      });
+
+      transactionHttp.announce(signedLockFundsTransaction).subscribe(
+          // eslint-disable-next-line no-unused-vars
+          (message)=>{
+              console.log('Lockfund transaction (' + lockHash + ') announced');
+              transferEmitter.emit('CONFIRMED_NOTIFICATION', {
+                status: true,
+                message: 'Lockfund transaction announced',
+                notificationType: 'noti'
+              });
+              appStore.updateXPXBalance(appStore.state.currentLoggedInWallet.name, siriusStore);
+          },
+          (error)=>{
+              console.log(error);
+              if (txConfirmed) {
+                  txConfirmed.unsubscribe();
+              }
+              if (txStatus) {
+                  txStatus.unsubscribe();
+              }
+              reject(error);
+          }
+      );
+
+    }).catch(reason => {
+      console.error('Lockfund transaction (' + lockHash + ') listener exception caught: ' + reason);
+      announceLockfundListener.terminate();
+      reject(reason);
+    });
+  });
+}
+
+function modifyMultisigAnnounceAggregateBonded(announceAggregateBondedListener, senderAddress, aggBondTx, aggBondHash, txConfirmed, transactionHttp){
+  return new Promise((resolve, reject) => {
+    announceAggregateBondedListener.open().then(() => {
+      const txStatus = announceAggregateBondedListener.status(senderAddress).subscribe(txStatusError => {
+        if (txStatusError.hash === aggBondHash) {
+          console.error('Aggregate status (' + aggBondHash + ') error: ' + txStatusError.status);
+          if (partialAdded) {
+            partialAdded.unsubscribe();
+          }
+          if (txStatus) {
+            txStatus.unsubscribe();
+          }
+          announceAggregateBondedListener.close();
+          reject(txStatusError.status);
+        }
+      });
+
+      const partialAdded = announceAggregateBondedListener.aggregateBondedAdded(senderAddress).subscribe(aggTransaction => {
+        if (aggTransaction && aggTransaction.transactionInfo && aggTransaction.transactionInfo.hash === aggBondHash) {
+          console.log('Aggregate bonded transaction (' + aggBondHash + ') added');
+          if (partialAdded) {
+            partialAdded.unsubscribe();
+          }
+          if (txStatus) {
+            txStatus.unsubscribe();
+          }
+          announceAggregateBondedListener.close();
+          resolve(aggTransaction);
+        }
+      }, error => {
+        console.error('Aggregate bonded transaction (' + aggBondHash + ') subscription failed: ' + error);
+        if (partialAdded) {
+          partialAdded.unsubscribe();
+        }
+        if (txStatus) {
+          txStatus.unsubscribe();
+        }
+        announceAggregateBondedListener.close();
+        reject(error);
+      });
+
+      transactionHttp.announceAggregateBonded(aggBondTx).subscribe(
+        // eslint-disable-next-line no-unused-vars
+        (message)=>{
+          transferEmitter.emit('CONFIRMED_NOTIFICATION', {
+            status: true,
+            message: 'Aggregate transaction announced',
+            notificationType: 'noti'
+          });
+          transferEmitter.emit('ANNOUNCE_AGGREGATE_BONDED', {
+            status: true,
+          });
+          console.log('Aggregate transaction (' + aggBondHash + ') announced');
+        }, 
+        (error)=>{
+          console.log(error);
+          if (txConfirmed) {
+              txConfirmed.unsubscribe();
+          }
+          if (txStatus) {
+              txStatus.unsubscribe();
+          }
+          reject(error);
+        }
+      );
+
+    }).catch(reason => {
+      console.error('Aggregate bonded transaction (' + aggBondHash + ') listener exception caught: ' + reason);
+      announceAggregateBondedListener.terminate();
+      reject(reason);
+    });
+  });
+}
 
 export{
   transferEmitter,
@@ -451,4 +598,6 @@ export{
   addListenerstoAccount,
   announceAggregateBonded,
   announceLockfundAndWaitForConfirmation,
+  modifyMultisigAnnounceLockfundAndWaitForConfirmation,
+  modifyMultisigAnnounceAggregateBonded,
 }

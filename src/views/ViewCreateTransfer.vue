@@ -34,7 +34,7 @@
             </div>
             <div class="error" v-else>No eligible cosigner in this wallet</div>
           </div>
-          <SelectInput v-if="showContactSelection" placeholder="Contact" errorMessage="" v-model="selectContact" :options="contact" @default-selected="selectContact=0" @show-selection="updateAdd" />
+          <SelectInputPlugin v-if="showContactSelection" placeholder="Contact" errorMessage="" v-model="selectContact" :options="contact" @default-selected="selectContact=0" @show-selection="updateAdd" />
           <div class="flex">
             <div class="flex-grow mr-5">
               <TextInput placeholder="Recipient" :errorMessage="addressErrorMsg" :showError="showAddressError" v-model="recipient" icon="wallet" :disabled="disableRecipient" />
@@ -48,9 +48,9 @@
         </div>
         <div class="text-left p-3 pb-0 border-l-8 border-gray-100">
           <div class="bg-gray-100 rounded-2xl p-3">
-            <div class="inline-block mr-4 tfaddext-tsm"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ appStore.getFirstAccBalance(selectedAccAdd) }} XPX</span></div>
+            <div class="inline-block mr-4 tfaddext-tsm"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} XPX</span></div>
           </div>
-          <SupplyInput v-model="sendXPX" title="Send" :balance="Number(appStore.getFirstAccBalance(selectedAccAdd))" placeholder="Enter Amount" type="text" icon="coins" :showError="showBalanceErr" errorMessage="Insufficient balance" :decimal="6" class="mt-5" :disabled="disableSupply" />
+          <SupplyInput v-model="sendXPX" title="Send" :balance="Number(balance)" placeholder="Enter Amount" type="text" icon="coins" :showError="showBalanceErr" errorMessage="Insufficient balance" :decimal="6" class="mt-5" :disabled="disableSupply" />
         </div>
         <div v-for="(mosaic, index) in mosaicsCreated" :key="index">
           <MosaicInput placeholder="Select mosaic" errorMessage="" v-model="selectedMosaic[index].id" :index="index" :options="mosaics" :disableOptions="selectedMosaic" @show-mosaic-selection="updateMosaic" @remove-mosaic-selected="removeMosaic" />
@@ -103,7 +103,7 @@
 import { computed, ref, inject, getCurrentInstance, watch } from 'vue';
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
-import SelectInput from '@/components/SelectInput.vue';
+import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import MosaicInput from '@/components/MosaicInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
 import TextareaInput from '@/components/TextareaInput.vue';
@@ -120,7 +120,7 @@ export default {
     TextInput,
     PasswordInput,
     MosaicInput,
-    SelectInput,
+    SelectInputPlugin,
     SupplyInput,
     TextareaInput,
     AddContactModal,
@@ -182,9 +182,10 @@ export default {
 
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
-    const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && !showAddressError.value && recipient.value.length > 0
-    ));
+    const disableCreate = computed(() => {
+      // console.log(walletPassword.value.match(passwdPattern) && !showAddressError.value && recipient.value.length > 0);
+      return !(walletPassword.value.match(passwdPattern) && !showAddressError.value && recipient.value.length > 0);
+    });
 
     const isMultiSig = (address) => {
       const account = appStore.getAccDetailsByAddress(address);
@@ -223,8 +224,20 @@ export default {
       }
     }
 
+    // check account balance at first load
+    if(balance.value < 10.0445){
+      showBalanceErr.value = true;
+    }
+
+
     const accounts = computed( () => appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts);
-    const moreThanOneAccount = computed(()=> (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false);
+    const moreThanOneAccount = computed(()=> {
+      if(appStore.state.currentLoggedInWallet!=undefined){
+        return (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false;
+      }else{
+        return false;
+      }
+    });
 
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
@@ -239,17 +252,17 @@ export default {
         let cosign = multiSign.fetchWalletCosigner(i.address);
         if(cosign.list.length > 0){
           cosignAddress.value = cosign.list[0].address;
-          console.log('cosign.list[0].balance');
-          console.log(cosign.list[0].balance);
+          // console.log('cosign.list[0].balance');
+          // console.log(cosign.list[0].balance);
           if(cosign.list[0].balance < 10.0445){
             disableAllInput.value = true;
-            console.log('disableAllInput();')
+            // console.log('disableAllInput();')
           }else{
             disableAllInput.value = false;
-            console.log('enableAllInput();')
+            // console.log('enableAllInput();')
           }
         }else{
-          disableAllInput.value = true;  
+          disableAllInput.value = true;
         }
       }else{
         disableAllInput.value = false;
@@ -306,7 +319,7 @@ export default {
       if(sendXPX.value == 0 && !forceSend.value){
         toggleConfirm.value = true;
       }else{
-        // console.log(recipient.value.toUpperCase() + ' : ' + walletPassword.value + ' : ' + selectedAccName.value + ' : ' + encryptedMsg.value)
+        // console.log(recipient.value.toUpperCase() + ' : ' + walletPassword.value + ' : ' + selectedAccName.value + ' : ' + encryptedMsg.value + ' : ' + walletPassword.value)
         let transferStatus = createTransaction(recipient.value.toUpperCase(), sendXPX.value, messageText.value, selectedMosaic.value, mosaicSupplyDivisibility.value, walletPassword.value, selectedAccName.value, encryptedMsg.value, appStore, siriusStore);
         if(!transferStatus){
           err.value = 'Invalid wallet password';
@@ -319,14 +332,13 @@ export default {
             // add new contact
             togglaAddContact.value = true;
           }else{
+            // console.log('clearInput()');
             clearInput();
           }
-          // shpw notification
-          toggleAnounceNotification.value = true;
+          // show notification
+          // toggleAnounceNotification.value = true;
           // getMosaicsAllAccounts(appStore, siriusStore);
           // play notification sound
-          var audio = new Audio(require('@/assets/audio/ding.ogg'));
-          audio.play();
           forceSend.value = false;
         }
       }
@@ -358,6 +370,7 @@ export default {
         return true;
       }
     });
+
     // generate mosaic selector
     const mosaics = computed(() => {
       var mosaicOption = [];
@@ -443,6 +456,7 @@ export default {
 
     emitter.on("CLOSE_MODAL", payload => {
       togglaAddContact.value = payload;
+      console.log('clearInput()');
       clearInput();
     });
 

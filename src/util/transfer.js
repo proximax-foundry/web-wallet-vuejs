@@ -72,6 +72,7 @@ function amountFormatterSimple(amount, d = 6) {
 
 export const createTransaction = (recipient, sendXPX, messageText, mosaicsSent, mosaicDivisibility, walletPassword, senderAccName, encryptedMsg, appStore, siriusStore) => {
   // verify password
+  console.log('Pw after createTransaction: ' + walletPassword);
   let verify = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword);
   if(verify < 1){
     return verify;
@@ -272,7 +273,7 @@ const validateMosaicsToSend = (amountXpx, boxOtherMosaics) => {
     }
     realAmount = `${arrAmount[0]}${decimal}`;
     mosaics.push({
-      id: this.mosaicXpx.id,
+      id: environment.mosaicXpxInfo.id,
       amount: realAmount
     });
   }

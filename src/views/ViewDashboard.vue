@@ -144,21 +144,6 @@ export default {
       }
     };
 
-    // balance(xpxUsd) {
-    //   this.subscription.push(this.transactionService.getBalance$().subscribe(
-    //     next => {
-    //       this.vestedBalance = this.transactionService.getDataPart(next, 6);
-    //       if (this.xpxUsd != undefined) {
-    //         this.coinUsd = Number(next.replace(/,/g, '')) * xpxUsd;
-    //       }
-    //     },
-    //     error => this.vestedBalance = {
-    //       part1: '0',
-    //       part2: '000000'
-    //     }
-    //   ));
-    // }
-
     const generateNames = () => {
       const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
       var contact = [];
@@ -232,9 +217,10 @@ export default {
       let qp = new QueryParams(pageSize, lastId, order);
       let lastTransactionID = lastId;
       siriusStore.accountHttp.aggregateBondedTransactions(publicAccount, qp).subscribe(tx => {
-        console.log('AggregateBonded - partial length: ' + tx.length);
+        // console.log('AggregateBonded - partial length: ' + tx.length);
         if( tx.length > 0 ){
           tx.forEach((t)=>{
+            // console.log(t)
             let formattedTransaction = transactions.formatAggregateBondedTransaction(t, names);
             aggregateBondedTransactions.value.push(formattedTransaction);
             lastTransactionID = t.transactionInfo.id;
@@ -249,6 +235,7 @@ export default {
       });
     };
 
+    // eslint-disable-next-line no-unused-vars
     const getConfirmedAllTransactions = () => {
       const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
       const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);

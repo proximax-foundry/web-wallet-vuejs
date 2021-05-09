@@ -8,7 +8,6 @@ import {
   NetworkHttp,
   NodeHttp,
   MosaicHttp,
-  // Account
   Password,
   SimpleWallet,
   TransactionHttp,
@@ -24,7 +23,7 @@ function getChainNodes() {
 function formatNetwork(){
   var n = [];
   for(var i = 0; i < config.network.length; ++i){
-    n.push({ val: config.network[i].type, text: config.network[i].name, id: (i+1)});
+    n.push({ value: config.network[i].type, label: config.network[i].name, id: (i+1)});
   }
   return n;
 }
@@ -64,10 +63,10 @@ const chainWSListener = computed(() => {
     console.log('open new socket')
     listenerChainWS.value = new Listener(
       `${
-        currentChainNode.value.protocol.startsWith("http:") ? "ws://" : "wss://"
+        location.protocol == "http:" ? "ws://" : "wss://"
         // location.protocol=='http:' ? "ws://" : "wss://"
         // }${currentChainNode.value.hostname}:${currentChainNode.value.port}`,
-      }${siriusStore.currentChainNode.hostname}${siriusStore.currentChainNode.protocol.startsWith("http:")?(':'+siriusStore.currentChainNode.port):''}`,
+      }${siriusStore.currentChainNode.hostname}${location.protocol == "http:"?(':'+siriusStore.currentChainNode.port):''}`,
       WebSocket
     );
   }

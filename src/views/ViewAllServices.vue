@@ -16,11 +16,10 @@ export default {
     ServiceTile,
   },
 
-  setup(p) {
+  setup() {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const currentMenu = ref('');
-    const toggleModal = false;
     const showMenu = ref([]);
     const services = ref([
       {name: 'Accounts', desc: 'Manage your accounts', img: 'icon-accounts-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
@@ -132,16 +131,7 @@ export default {
       }
     });
 
-    if(p.deleteAccount=='success'){
-      toggleModal.value = true;
-    }
-
-    emitter.on("CLOSE_NOTIFICATION", payload => {
-      toggleModal.value = payload;
-    });
-
     emitter.on('PAGE_CLICK', () => {
-      console.log('click: ' + currentMenu.value);
       if(currentMenu.value === ''){
         var k = 0;
         while(k < num_service){
@@ -160,7 +150,6 @@ export default {
     });
 
     return {
-      toggleModal,
       showMenu,
       services,
     };
