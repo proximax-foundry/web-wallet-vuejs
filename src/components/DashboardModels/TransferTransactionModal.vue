@@ -276,8 +276,7 @@ export default{
         if(p.transaction.mosaics != undefined){
           if (p.transaction.mosaics.length > 0) {
             const id = p.transaction.mosaics[0].id;
-            // GOTTA_COME_BACK
-            // console.log(id)
+            console.log(id)
             transactions.getAmount(id, p.transaction).then((amountParts) => {
               amount.value = amountParts.part1 + amountParts.part2;
             });

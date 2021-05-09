@@ -48,16 +48,6 @@ export default{
       }
     },
 
-    // blurInputText: function() {
-    //   if(this.modelValue == ''){
-    //     this.borderColor = 'border-2 border-red-primary';
-    //     this.textErr = true;
-    //   }else{
-    //     this.borderColor = 'border-2 border-gray-300';
-    //     this.textErr = false;
-    //   }
-    // },
-
     validate: function(evt) {
       var theEvent = evt || window.event;
       // Handle paste
@@ -75,6 +65,7 @@ export default{
       }
     }
   },
+
   mounted() {
     this.emitter.on("CLEAR_TEXT", payload => {
       this.inputText = payload;

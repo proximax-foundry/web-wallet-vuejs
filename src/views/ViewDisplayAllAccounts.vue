@@ -32,7 +32,7 @@ export default {
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const appStore = inject("appStore");
     const currentMenu = ref('');
-    const toggleModal = false;
+    const toggleModal = ref(false);
     const showMenu = ref([]);
 
     // get num of accounts
@@ -60,7 +60,7 @@ export default {
       }
     });
 
-    if(p.deleteAccount=='success'){
+    if(p.deleteAccount == 'success'){
       toggleModal.value = true;
     }
 
@@ -77,7 +77,6 @@ export default {
     );
 
     emitter.on('PAGE_CLICK', () => {
-      console.log('click: ' + currentMenu.value);
       if(currentMenu.value === ''){
         var k = 0;
         while(k < num_acc){

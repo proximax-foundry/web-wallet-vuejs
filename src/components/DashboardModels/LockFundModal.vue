@@ -27,7 +27,7 @@
                   </div>
                 </div>
                 <div class="hash-div">
-                  <div>Hash Lock Transaction:</div>
+                  <div>Transaction hash:</div>
                   <div>{{ transaction.hash }}</div>
                 </div>
                 <div class="mt-5">
@@ -111,7 +111,6 @@ export default{
         } else {
           effectiveFee.value = transactions.getDataPart('0.00000', 6);
         }
-
         const id = p.transaction.mosaic.id;
         transactions.getLockFundAmount(id, p.transaction).then((amountParts) => {
           amount.value = amountParts.part1 + amountParts.part2;

@@ -15,7 +15,7 @@
             <form @submit.prevent="login">
               <fieldset class="w-full">
                 <div class="error error_box" v-if="err!=''">{{ err }}</div>
-                <SelectInput placeholder="Select a Wallet" errorMessage="Select a Wallet" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" />
+                <SelectInputPlugin placeholder="Select a Wallet" errorMessage="Select a Wallet" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" />
                 <PasswordInput placeholder="Enter Wallet Password" errorMessage="Password Required" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
                 <div class="mt-10">
                   <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
@@ -34,7 +34,7 @@
 <script>
 import { computed, inject, ref } from 'vue';
 import { useRouter } from "vue-router";
-import SelectInput from '@/components/SelectInput.vue'
+import SelectInputPlugin from '@/components/SelectInputPlugin.vue'
 import PasswordInput from '@/components/PasswordInput.vue'
 
 export default{
@@ -63,11 +63,10 @@ export default{
     const wallets = computed(
       () =>{
         var w = [];
-        appStore.state.wallets.forEach((i, index)=>{
+        appStore.state.wallets.forEach((i)=>{
           w.push({
-            val: i.name,
-            text: i.name,
-            id: (index+1),
+            value: i.name,
+            label: i.name,
           });
         });
         return w;
@@ -83,6 +82,7 @@ export default{
         err.value = "Invalid password";
       } else {
         router.push({ path: "/dashboard"});
+        // router.push({ path: "/create-transfer"});
       }
     };
 
@@ -107,7 +107,7 @@ export default{
   },
 
   components: {
-    SelectInput,
+    SelectInputPlugin,
     PasswordInput
   }
 }

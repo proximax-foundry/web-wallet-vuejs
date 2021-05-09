@@ -11,7 +11,7 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
           </div>
           <h1 class="default-title font-bold my-0">Contacts</h1>
-          <SelectInput placeholder="Contact" errorMessage="" v-model="selectContact" :options="contact" @default-selected="selectContact=0" @show-selection="selectCosign" />
+          <SelectInputPlugin placeholder="Contact" errorMessage="" v-model="selectContact" :options="contact" @default-selected="selectContact=0" @show-selection="selectCosign" />
         </div>
       </div>
     </transition>
@@ -21,7 +21,7 @@
 
 <script>
 import { computed, ref, getCurrentInstance } from 'vue'; 
-import SelectInput from '@/components/SelectInput.vue'
+import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import { multiSign } from '../util/multiSignatory.js';
 
@@ -51,7 +51,7 @@ export default{
         address: address,
         index: p.cosignPublicKeyIndex
       });
-      selectContact.value = '0';
+      selectContact.value = '';
     }
 
     return{
@@ -63,7 +63,7 @@ export default{
   },
 
   components: {
-    SelectInput,
+    SelectInputPlugin,
     FontAwesomeIcon
   }
 }

@@ -29,6 +29,7 @@
       </div>
     </div>
     <NotificationModal :toggleModal="toggleAnounceNotification" :msg="notificationMessage" :notiType="notificationType" time='2500' />
+    <StatusNotificationModal :toggleModal="toggleStatusNotification" :msg="notificationMessage" :notiType="notificationType" time='2500' />
   </div>
   <div class="flex-none self-center header-menu" v-else>
     <div class="w-16 text-center inline-block">
@@ -46,11 +47,13 @@ import { useRouter } from "vue-router";
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import { transferEmitter } from '../util/listener.js';
 import NotificationModal from '@/components/NotificationModal.vue';
+import StatusNotificationModal from '@/components/StatusNotificationModal.vue';
 
 export default{
   components: {
     FontAwesomeIcon,
     NotificationModal,
+    StatusNotificationModal,
   },
   name: 'headerComponent',
   data() {
@@ -64,8 +67,9 @@ export default{
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
-    const router = useRouter();
+    // const router = useRouter();
     const toggleAnounceNotification = ref(false);
+    const toggleStatusNotification = ref(false);
     const notificationMessage = ref('');
     const notificationType = ref('noti');
     const networkType = computed(
@@ -74,13 +78,14 @@ export default{
       }
     );
 
-    const logout = () => {
-      appStore.logoutOfWallet();
-      if(sessionStorage.getItem('pageRefresh') == 'y'){
-        window.location.href = '/';
-      }else{
-        router.push({ name: "Welcome"});
-      }
+    const logout = async () => {
+      await appStore.logoutOfWallet();
+      window.location.href = '/';
+      // if(sessionStorage.getItem('pageRefresh') == 'y'){
+      //   window.location.href = '/';
+      // }else{
+      //   router.push({ name: "Welcome"});
+      // }
     };
 
     const getAccountInfo = async () => {
@@ -130,6 +135,16 @@ export default{
       }
     });
 
+    transferEmitter.on("STATUS_NOTIFICATION", payload => {
+      if(payload.status){
+        toggleStatusNotification.value = payload.status;
+        notificationType.value = payload.notificationType;
+        notificationMessage.value = payload.message;
+        var audio = new Audio(require('@/assets/audio/ding.ogg'));
+        audio.play();
+      }
+    });
+
     emitter.on("NOTIFICATION", payload => {
       if(payload.status){
         toggleAnounceNotification.value = payload.status;
@@ -142,6 +157,10 @@ export default{
       toggleAnounceNotification.value = payload;
     });
 
+    transferEmitter.on("CLOSE_STATUS_NOTIFICATION", payload => {
+      toggleStatusNotification.value = payload;
+    });
+
     return {
       appStore,
       siriusStore,
@@ -150,6 +169,7 @@ export default{
       logout,
       totalBalance,
       toggleAnounceNotification,
+      toggleStatusNotification,
       notificationMessage,
       notificationType,
       // walletName
@@ -170,9 +190,6 @@ export default{
         this.wideScreen = true;
       }
     },
-    displayNotification: function (){
-      console.log('hellonotti')
-    }
   }
 }
 </script>

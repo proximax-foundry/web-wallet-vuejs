@@ -94,32 +94,26 @@ const formatTransaction = (transaction, names) => {
 }
 
 const formatAggregateBondedTransaction = (transaction, names) => {
-
   const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
 
-  // check if signer is in the wallet
-  let ownAddress = wallet.accounts.find((element) => element.address == transaction.signer.address.address);
+  // 1st matching - check if signer is in the wallet
+  let signerInWallet = wallet.accounts.find((element) => element.address == transaction.signer.address.address);
 
-  if(ownAddress){ // signer is in the wallet
+  if(signerInWallet){ // signer is in the wallet
     // display own as signer
-    let linkedAccountName = names.find((element) =>  element.address == ownAddress.address);
+    let linkedAccountName = names.find((element) =>  element.address == signerInWallet.address);
     transaction.linkedAccountName = (linkedAccountName)?linkedAccountName.name:'';
-    transaction.linkedAccount = appStore.pretty(ownAddress.address);
+    transaction.linkedAccount = appStore.pretty(signerInWallet.address);
     transaction.account = transaction.linkedAccount;
   }else{
     let matchAccount;
     // display first cosig
-    console.log('display first cosig');
     // bug fixed for innerTransactions
-    let linkedAccountName = names.find((element) =>  element.address == transaction.innerTransactions[0].modifications[0].cosignatoryPublicAccount.address.address);
-    transaction.linkedAccountName = (linkedAccountName)?linkedAccountName.name:'';
-    transaction.linkedAccount = appStore.pretty(transaction.innerTransactions[0].modifications[0].cosignatoryPublicAccount.address.address);
+    // 2nd matching - match innertransaction.modification.address to wallet's accounts or contact list
     // search for own account among cosig
     transaction.innerTransactions.forEach((inner) => {
       inner.modifications.forEach((modification) => {
-        console.log('cosignatory account: ' + modification.cosignatoryPublicAccount.address.address);
-        matchAccount = wallet.accounts.find((element) => element.address == modification.cosignatoryPublicAccount.address.address);
-        console.log(matchAccount);
+        matchAccount = wallet.accounts.find((element) => element.address === modification.cosignatoryPublicAccount.address.address);
         if(matchAccount){
           return;
         }
@@ -130,14 +124,36 @@ const formatAggregateBondedTransaction = (transaction, names) => {
     });
     if(matchAccount){
       transaction.account = matchAccount.address;
+      let linkedAccountName = names.find((element) =>  element.address == matchAccount.address);
+      transaction.linkedAccountName = (linkedAccountName)?linkedAccountName.name:'';
+      transaction.linkedAccount = appStore.pretty(matchAccount.address);
     }else{
+      // 3rd matching - match among cosignatures in transaction
+      var isMatchAccount = false;
       if(transaction.cosignatures.length > 0){
         transaction.cosignatures.forEach((cosigner) => {
           matchAccount = wallet.accounts.find((element) => element.address == cosigner.signer.address.address);
-          transaction.account = matchAccount.address;
+          if(matchAccount){
+            transaction.account = matchAccount.address;
+            let linkedAccountName = names.find((element) =>  element.address == matchAccount.address);
+            transaction.linkedAccountName = (linkedAccountName)?linkedAccountName.name:'';
+            isMatchAccount = true;
+          }
         });
-      }else{
-        transaction.account = '-';
+      }
+      if(!isMatchAccount){
+        // 4th matching - search in multisign property in state
+        let cosigner = getAccountsInfoTiedMultiSig(transaction.innerTransactions[0].signer.publicKey);
+        // if there is more than 1 signer, temporarily assign the first one to be displayed in partial datatable
+        if(cosigner.length > 0){
+          // if(cosigner.length > 1){
+            transaction.account = cosigner[0].address;
+            let linkedAccountName = names.find((element) =>  element.address == cosigner[0].address);
+            transaction.linkedAccountName = (linkedAccountName)?linkedAccountName.name:'';
+          // }
+        }else{
+          transaction.account = '';
+        }
       }
     }
   }
@@ -158,6 +174,25 @@ const formatAggregateBondedTransaction = (transaction, names) => {
   transaction.hash = transaction.transactionInfo.hash;
   return transaction;
 }
+
+const getAccountsInfoTiedMultiSig = (signerPublicKey) => {
+  let cosigner = [];
+  const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
+  wallet.accounts.forEach(account => {
+    if(account.isMultisign != undefined){
+      if(account.isMultisign.multisigAccounts != undefined){
+        if(account.isMultisign.multisigAccounts.length > 0){
+          account.isMultisign.multisigAccounts.forEach(multisig => {
+            if(multisig.publicKey == signerPublicKey){
+              cosigner.push({address: account.publicAccount.address.address});
+            }
+          });
+        }
+      }
+    }
+  });
+  return cosigner;
+};
 
 const formatTransfer = (transaction) => {
   const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
@@ -311,4 +346,5 @@ export const transactions = readonly({
   getLockFundAmount,
   formatAggregateBondedTransaction,
   amountFormatter,
+  getAccountsInfoTiedMultiSig,
 });

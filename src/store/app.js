@@ -192,7 +192,6 @@ function addNewWallet(walletName, password, networkType, privateKey) {
     firstAccount: true,
     name: "Primary",
     address: wallet.address.address,
-    // public: account.publicKey,
     publicAccount: publicKey,
     encrypted: wallet.encryptedPrivateKey.encryptedKey,
     iv: wallet.encryptedPrivateKey.iv,
@@ -221,7 +220,7 @@ function addNewWallet(walletName, password, networkType, privateKey) {
 
 function verifyExistingAccountName(walletName, accountName){
   const wallet = getWalletByName(walletName);
-  const account = wallet.accounts.find((element) => element.name.toUpperCase() === accountName.toUpperCase().trim());
+  const account = wallet.accounts.find((element) => element.name.toUpperCase() === accountName.toUpperCase().trim().replace(/ /g,"_"));
   return (account) ? 1 : 0;
 }
 
@@ -241,7 +240,7 @@ function verifyWalletPassword(walletName, password){
     console.log("loginToWallet triggered with", walletName);
   }
 
-  const account = wallet.accounts.find((element) => element.firstAccount);
+  const account = wallet.accounts.find((element) => element.default == true);
 
   const common = {
     password: password,
@@ -271,14 +270,7 @@ function verifyWalletPassword(walletName, password){
   return 1;
 }
 
-function deleteWallet(walletName, password) {
-  /* verify with password benjamin lai 11/3 */
-  let verify = verifyWalletPassword(walletName, password);
-  if(verify < 1){
-    return verify;
-  }
-  // end verify with password
-
+function deleteWallet(walletName) {
   const walletIndex = getWalletIndexByName(walletName);
   if (walletIndex == -1) {
     if (config.debug) {
@@ -322,6 +314,7 @@ function checkFromSession(appStore, siriusStore){
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 function loginToWallet(walletName, password, siriusStore) {
   const wallet = getWalletByName(walletName);
   if (!wallet) {
@@ -341,10 +334,7 @@ function loginToWallet(walletName, password, siriusStore) {
   const account = wallet.accounts.find((element) => element.default == true);
   if (!account) {
     if (config.debug) {
-      console.error(
-        "loginToWallet triggered with invalid accounts",
-        walletName
-      );
+      console.error("loginToWallet triggered with invalid accounts", walletName);
     }
     return -1;
   }
@@ -376,6 +366,7 @@ function loginToWallet(walletName, password, siriusStore) {
   currentWallet.value = wallet;
   startListening(wallet.accounts);
   multiSign.updateAccountsMultiSign(walletName);
+  multiSign.removeUnrelatedMultiSig(walletName);
   // get latest xpx amount
   getXPXBalance(walletName, siriusStore).then(()=> {
     try {
@@ -560,8 +551,6 @@ function getAccDetails(name){
 function getAccDetailsByAddress(address){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
   const account = wallet.accounts.find((element) => element.address == address);
-  console.log('searching for this: ' + address);
-  console.log(account);
   if (!account) {
     if (config.debug) {
       console.error("getAccDetails triggered with invalid account address");
@@ -576,21 +565,45 @@ function getAccountPassword(accountName, password){
   return decryptPrivateKey(password, account.encrypted, account.iv);
 }
 
-function deleteAccount(password, address) {
+function deleteAccount(address) {
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
   const accountIndex = wallet.accounts.findIndex((element) => element.address == address);
+  const account = getAccDetailsByAddress(address);
 
-  const verify = verifyWalletPassword(state.currentLoggedInWallet.name, password);
-  if(verify<1){
-    return verify;
-  }
-  // end verify with password
   if (accountIndex < 0) {
     if (config.debug) {
       console.error("deleteAccount triggered with non-existing account name");
     }
     return -1;
   }
+
+  // check if this account is the cosign of any multisig in the same wallet
+  if(account.isMultisign != undefined){
+    if(account.isMultisign.multisigAccounts != undefined){
+      account.isMultisign.multisigAccounts.forEach((multisig) => {
+        // check if there's other cosigner in the wallet before deleting
+        const multiSigAccount = getAccDetailsByAddress(multisig.address.address);
+        let isDeleteMultiSig = true;
+        if(!multiSigAccount){
+          if(multiSigAccount.isMultisign.cosignatories != undefined){
+            if(multiSigAccount.isMultisign.cosignatories.length > 1){
+              multiSigAccount.isMultisign.cosignatories.forEach((cosigner) => {
+                if(cosigner.address.address != address && getAccDetailsByAddress(cosigner.address.address)){
+                  // can't delete when there is another cosigner in the wallet
+                  isDeleteMultiSig = false;
+                }
+              });
+            }
+          }
+        }
+        if(isDeleteMultiSig){
+          const multiSigIndex = wallet.accounts.findIndex((element) => element.address == multisig.address.address);
+          wallet.accounts.splice(multiSigIndex, 1);
+        }
+      });
+    }
+  }
+
   if (wallet.accounts.splice(accountIndex, 1).length != 0) {
     currentWallet.value = wallet;
     sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
@@ -603,9 +616,26 @@ function deleteAccount(password, address) {
   return -1;
 }
 
+function removeMultiSigAccount(accounts){
+  if(accounts.length > 0){
+    const wallet = getWalletByName(state.currentLoggedInWallet.name);
+    accounts.forEach((multisig) => {
+      const accountIndex = wallet.accounts.findIndex((element) => element.address == multisig.address);
+      // console.log('Remove index: ' + accountIndex);
+      wallet.accounts.splice(accountIndex, 1);
+    });
+    currentWallet.value = wallet;
+    sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
+    localStorage.setItem(
+      config.localStorage.walletKey,
+      JSON.stringify(state.wallets)
+    );
+  }
+}
+
 function getCurrentAdd(walletName){
   const wallet = getWalletByName(walletName);
-  const account = wallet.accounts.find((element) => element.firstAccount);
+  const account = wallet.accounts.find((element) => element.default == true);
   return account.address;
 }
 
@@ -796,20 +826,17 @@ function getMosaicInfo(address, mosaicId){
 function getContact(){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
   var contact = [];
-  var accountCount = wallet.accounts.length;
-  wallet.accounts.forEach((element, index) => {
+  wallet.accounts.forEach((element) => {
     contact.push({
-      val: element.address,
-      text: element.name + ' - Owner account',
-      id: (index + 1),
+      value: element.address,
+      label: element.name + ' - Owner account',
     });
   });
   if(wallet.contacts!=undefined){
-    wallet.contacts.forEach((element, index) => {
+    wallet.contacts.forEach((element) => {
       contact.push({
-        val: element.address,
-        text: element.name + ' - Contact',
-        id: (accountCount + index + 1),
+        value: element.address,
+        label: element.name + ' - Contact',
       });
     });
   }
@@ -919,5 +946,6 @@ export const appStore = readonly({
   verifyExistingAccount,
   verifyPublicKey,
   updateCurrentWallet,
+  removeMultiSigAccount,
 });
 

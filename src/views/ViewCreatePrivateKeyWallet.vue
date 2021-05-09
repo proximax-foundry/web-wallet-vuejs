@@ -9,7 +9,7 @@
         <p>Restore your existing ProximaX Sirius Wallet, import a private key from another service or create a new wallet right now!</p>
         <div class="w-10/12 lg:w-8/12 self-center inline-block">
           <div class="error error_box" v-if="err!=''">{{ err }}</div>
-          <SelectInput placeholder="Select network" errorMessage="Select a Network" v-model="selectedNetwork" :options="networks" />
+          <SelectInputPlugin placeholder="Select network" errorMessage="Select a Network" v-model="selectedNetwork" :options="networks" />
           <PasswordInput placeholder="Private Key" errorMessage="Invalid private key" icon="key" v-model="privKey" class="ml-1" />
           <label class="inline-flex items-center mb-5">
               <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="nis1Swap">
@@ -99,7 +99,7 @@
 <script>
 import { computed, inject, ref, getCurrentInstance } from 'vue';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
-import SelectInput from '@/components/SelectInput.vue';
+import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { copyKeyFunc } from '../util/functions.js';
@@ -108,7 +108,7 @@ export default {
   name: 'ViewCreateNewWallet',
   components: {
     FontAwesomeIcon,
-    SelectInput, TextInput, PasswordInput
+    SelectInputPlugin, TextInput, PasswordInput
   },
   data() {
     return {
