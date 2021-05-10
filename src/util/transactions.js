@@ -4,7 +4,7 @@ import {
   PublicAccount,
   TransactionType,
 } from "tsjs-xpx-chain-sdk";
-import { appStore } from "@/store/app";
+import { appStore, App } from "@/store/app";
 // import { proximaxProvider } from '../util/proximaxProvider.js';
 import { namespaces } from '../util/namespaces.js';
 import { environment } from '../environment/environment.js';
@@ -79,14 +79,13 @@ const formatTransaction = (transaction, names) => {
   transaction.transferType = formatTransfer(transaction);
   let senderName = names.find((element) =>  element.address == getSender(transaction));
   transaction.senderName = (senderName)?senderName.name:'';
-  transaction.senderAddress = appStore.pretty(getSender(transaction));
+  transaction.senderAddress = App.pretty(getSender(transaction));
   let recipientAddress = getRecipient(transaction, keyName);
   let recipientName = names.find((element) =>  element.address == recipientAddress);
   transaction.recipientName = (recipientName)?recipientName.name:'';
-  if(recipientAddress.length > 10){
-    transaction.recipientAddress = appStore.pretty(recipientAddress);
+  if(recipientAddress.length >= 40){
+    transaction.recipientAddress = App.pretty(recipientAddress);
   }
-  transaction.recipientAddress = appStore.pretty(recipientAddress);
   transaction.block = transaction.transactionInfo.height.compact();
   transaction.data = transaction;
   transaction.hash = transaction.transactionInfo.hash;
@@ -100,14 +99,14 @@ const formatAggregateBondedTransaction = (transaction, names) => {
     // display own as signer
     let linkedAccountName = names.find((element) =>  element.address == ownAddress.address);
     transaction.linkedAccountName = (linkedAccountName)?linkedAccountName.name:'';
-    transaction.linkedAccount = appStore.pretty(ownAddress.address);
+    transaction.linkedAccount = App.pretty(ownAddress.address);
     transaction.account = transaction.linkedAccount;
   }else{
     let matchAccount;
     // display first cosig
     let linkedAccountName = names.find((element) =>  element.address == transaction.innerTransactions[0].modifications[0].cosignatoryPublicAccount.address.address);
     transaction.linkedAccountName = (linkedAccountName)?linkedAccountName.name:'';
-    transaction.linkedAccount = appStore.pretty(transaction.innerTransactions[0].modifications[0].cosignatoryPublicAccount.address.address);
+    transaction.linkedAccount = App.pretty(transaction.innerTransactions[0].modifications[0].cosignatoryPublicAccount.address.address);
     // search for own account among cosig
     transaction.innerTransactions.forEach((inner) => {
       inner.modifications.forEach((modification) => {

@@ -128,7 +128,7 @@ const confirmedListener = (accountDetail, listener) => {
     });
     // check to list multisig account
     if(transactions.getNameTypeTransaction(transaction.type) == 'aggregateBonded'){
-      const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
+      const wallet = appStore.getWalletByName(appStore.currentLoggedInWallet.value.name);
       let cosigneeCheck = false;
       transaction.cosignatures.forEach((cosignee) => {
         console.log(cosignee.signer.address.address);
@@ -145,7 +145,7 @@ const confirmedListener = (accountDetail, listener) => {
             console.log('List multisign account into wallet');
             multiSign.createNewMultiSigAccount(transaction.signer);
             // update multisign info on all accounts
-            multiSign.updateAccountsMultiSign(appStore.state.currentLoggedInWallet.name);
+            multiSign.updateAccountsMultiSign(appStore.currentLoggedInWallet.value.name);
           }
         });
       }
@@ -155,7 +155,7 @@ const confirmedListener = (accountDetail, listener) => {
       from: 'confirmed',
       transaction: Object.assign({}, transaction),
     });
-    appStore.updateXPXBalance(appStore.state.currentLoggedInWallet.name, siriusStore);
+    appStore.updateXPXBalance(appStore.currentLoggedInWallet.value.name, siriusStore);
   }, error => {
       console.error(error);
   }, () => {
@@ -247,7 +247,7 @@ const aggregateBondedAddedListener = (accountDetail, listener) => {
       // transaction: Object.assign({}, aggregateTransaction),
       transaction: aggregateTransaction,
     });
-    multiSign.updateAccountsMultiSign(appStore.state.currentLoggedInWallet.name);
+    multiSign.updateAccountsMultiSign(appStore.currentLoggedInWallet.value.name);
   }, error => {
       console.error(error);
   }, () => {
@@ -346,7 +346,7 @@ async function announceLockfundAndWaitForConfirmation(senderAddress, signedLockF
                 message: 'Lockfund transaction announced',
                 notificationType: 'noti'
               });
-              appStore.updateXPXBalance(appStore.state.currentLoggedInWallet.name, siriusStore);
+              appStore.updateXPXBalance(appStore.currentLoggedInWallet.value.name, siriusStore);
           },
           (error)=>{
               console.log(error);

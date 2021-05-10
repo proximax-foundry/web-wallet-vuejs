@@ -66,6 +66,8 @@ import { transactions } from '../util/transactions.js';
 import { PublicAccount, Order, QueryParams } from "tsjs-xpx-chain-sdk";
 import { transferEmitter } from '../util/listener.js';
 
+import { App } from '../store/app';
+
 export default {
   name: 'ViewDashboard',
   components: {
@@ -87,7 +89,7 @@ export default {
     const primaryAccount = computed(
       () => {
           if (appStore.state.currentLoggedInWallet) {
-            return appStore.pretty(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).address);
+            return App.pretty(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).address);
           }else{
             return 0;
           }

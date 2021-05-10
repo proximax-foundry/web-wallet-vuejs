@@ -52,7 +52,7 @@ export default{
     const err = ref("");
     const walletPassword = ref("");
     const selectedWallet = ref("0");
-    const selectedNetworkName = computed(()=> siriusStore.chainNetworkName);
+    const selectedNetworkName = computed(()=> siriusStore.state.chainNetworkName);
     const showPasswdError = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
     const disableSignin = computed(

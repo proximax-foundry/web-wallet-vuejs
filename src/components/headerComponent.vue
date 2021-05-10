@@ -25,7 +25,7 @@
       </div>
       <div class="w-14 md:w-44 pl-3 text-center flex gray-line-left h-10 items-center">
         <div>
-          <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="siriusStore.selectedChainNode"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ selectedNetworkName }}</div>
+          <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="siriusStore.state.selectedChainNode"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ selectedNetworkName }}</div>
         </div>
       </div>
       <div class="w-52 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import { computed, inject, ref, getCurrentInstance, watch } from "vue";
+import { computed, inject, ref, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import { transferEmitter } from '../util/listener.js';
@@ -81,21 +81,9 @@ export default{
     const siriusStore = inject("siriusStore");
     const router = useRouter();
     const toggleAnounceNotification = ref(false);
-    const chainsNetwork = computed(()=> siriusStore.availableNetworks);
-    let selectedNetwork = computed(()=> siriusStore.chainNetwork);
-    const selectedNetworkName = computed(()=> siriusStore.chainNetworkName);
-
-    if(siriusStore.selectedChainNode){
-      appStore.updateSetting();
-    }
-
-    watch(
-      ()=> siriusStore.selectedChainNode,
-      ()=>{
-        console.log("Call update");
-        appStore.updateSetting();
-      }
-    )
+    const chainsNetwork = computed(()=> siriusStore.state.availableNetworks);
+    let selectedNetwork = computed(()=> siriusStore.state.chainNetwork);
+    const selectedNetworkName = computed(()=> siriusStore.state.chainNetworkName);
 
     const notificationMessage = ref('');
     const notificationType = ref('noti');
@@ -129,7 +117,7 @@ export default{
 
     const loginStatus = computed(
       () => {
-        return appStore.isLogin;
+        return appStore.state.isLogin;
       }
     );
 
