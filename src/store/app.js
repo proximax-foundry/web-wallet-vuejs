@@ -65,7 +65,9 @@ export class App {
     this.transactionHttp = computed(()=> new TransactionHttp(this._buildAPIEndpointURL()));
 
     this.checkFromSession();
+  }
 
+  startWatch(){
     watch(
       ()=> appState.currentLoggedInWallet,
       (newValues)=>{
@@ -80,6 +82,19 @@ export class App {
         }
       }
     )
+  }
+
+  checkFromSession(){
+    const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
+
+    if(walletSession){
+      // session is not null - copy to state
+      appState.currentLoggedInWallet = walletSession;
+      appState.isLogin = true;
+      //this.connectors.startListening(this.currentWallet.value.accounts);
+    }
+
+    return appState.isLogin;
   }
 
   explorerBlockHttp = (compactBlock) => {
@@ -360,19 +375,6 @@ export class App {
     return -1;
   }
 
-  checkFromSession(){
-    const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
-
-    if(walletSession){
-      // session is not null - copy to state
-      appState.currentLoggedInWallet = walletSession;
-      appState.isLogin = true;
-      //this.connectors.startListening(this.currentWallet.value.accounts);
-    }
-
-    return appState.isLogin;
-  }
-
   loginToWallet(walletName, password) {
 
     const wallet = this.getWalletByName(walletName);
@@ -460,11 +462,10 @@ export class App {
     if (config.debug) {
       console.error("logoutOfWallet triggered");
     }
-    this.connectors.stopListening();
-    if (!this.currentWallet.value) {
-      return false;
-    }
-    this.currentWallet.value = null;
+    appState.isLogin = false;
+    //this.connectors.stopListening();
+
+    appState.currentLoggedInWallet = null;
     sessionStorage.removeItem('currentWalletSession');
     return true;
   }
@@ -735,7 +736,6 @@ export class App {
 
     let balance = 0;
 
-    /*
     if(appState.isLogin && appState.chainNetworkName !== '' && appState.currentLoggedInWallet){
       const wallet = this.getWalletByName(appState.currentLoggedInWallet.name);
       
@@ -748,10 +748,7 @@ export class App {
       });
       return balance.toFixed(6);
     }
-    else{
-      return balance.toFixed(6);
-    }
-    */
+
     return balance.toFixed(6);
   }
 
@@ -941,16 +938,16 @@ export class App {
 
   _buildAPIEndpointURL(){
 
-    var portNumber = siriusState.currentNetworkProfile.httpPort.value;
-    var host = siriusState.selectedChainNode.value;
+    var portNumber = siriusState.currentNetworkProfile.httpPort;
+    var host = siriusState.selectedChainNode;
       
     return location.protocol=='https:' ? `https://${host}` : `http://${host}:${portNumber}`;
   }
 
   _buildWSEndpointURL(){
 
-    var portNumber = siriusState.currentNetworkProfile.httpPort.value;
-    var host = siriusState.selectedChainNode.value; 
+    var portNumber = siriusState.currentNetworkProfile.httpPort;
+    var host = siriusState.selectedChainNode; 
       
     return location.protocol=='https:' ? `wss://${host}` : `ws://${host}:${portNumber}`;
   }

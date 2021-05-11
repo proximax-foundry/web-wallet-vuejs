@@ -95,11 +95,7 @@ export default{
 
     const logout = () => {
       appStore.logoutOfWallet();
-      if(sessionStorage.getItem('pageRefresh') == 'y'){
-        window.location.href = '/';
-      }else{
-        router.push({ name: "Welcome"});
-      }
+      router.push({ name: "Welcome"});
     };
 
     const getAccountInfo = async () => {

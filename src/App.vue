@@ -33,6 +33,7 @@ export default {
   },
   setup() {
     siriusStore.startWatch();
+    appStore.startWatch();
     provide("appStore", appStore);
     provide("siriusStore", siriusStore);
   }
