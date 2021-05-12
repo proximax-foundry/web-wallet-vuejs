@@ -218,6 +218,22 @@ class Sirius {
     return siriusState.currentNetworkProfileConfig ? siriusState.currentNetworkProfileConfig : null;
   }
 
+  getProfileNetwork(){
+    return this.getCurrentProfile().network;
+  }
+
+  getCurrency(){
+    return this.getProfileNetwork().currency;
+  }
+
+  getCurrencyDivisibility(){
+    return this.getCurrency().divisibility;
+  }
+
+  getCurrencyName(){
+    return this.getCurrency().name;
+  }
+
   getNetworkPort(){
     return siriusState.currentNetworkProfile.httpPort;
   }

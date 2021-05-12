@@ -57,7 +57,7 @@
             <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Unconfirmed/Recommended Fee: 0.<span class="text-txs">062750</span> XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: 10,000.<span class="text-txs">000000</span> XPX</div>
+            <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFee }} XPX</div>
           </div>
           <PasswordInput placeholder="Enter Your Wallet Password" :errorMessage="'Please enter your wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
@@ -91,7 +91,7 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
 import NumberInput from '@/components/NumberInput.vue';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
-import { mosaicTransaction } from '../util/transfer.js';
+import { mosaicTransaction, convertToCurrency } from '../util/transfer.js';
 import NotificationModal from '@/components/NotificationModal.vue';
 
 export default {
@@ -132,6 +132,8 @@ export default {
     const durationOption =ref('month');
     const duration = ref('1');
     const showDurationErr = ref(false);
+
+    const rentalFee = computed(()=> convertToCurrency(siriusStore.getProfileConfig().mosaicRentalFee, siriusStore.getCurrencyDivisibility()))
 
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
@@ -303,6 +305,7 @@ export default {
       duration,
       showDurationErr,
       durationCheckDisabled,
+      rentalFee
     }
   },
 

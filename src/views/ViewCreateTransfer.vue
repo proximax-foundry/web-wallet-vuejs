@@ -168,13 +168,13 @@ export default {
     const disablePassword = computed(() => disableAllInput.value);
     const cosignerBalanceInsufficient = ref(false);
 
-    const lockFund = computed(()=> siriusStore.getProfileConfig().lockedFundsPerAggregate )
+    const lockFund = computed(()=> siriusStore.getProfileConfig().lockedFundsPerAggregate)
+    const messageLimit = computed(()=> siriusStore.getProfileConfig().maxMessageSize - 1);
 
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
 
     const addMsg = ref('');
-    const messageLimit = computed(()=> siriusStore.getProfileConfig().maxMessageSize - 1);
     const remainingChar = ref(0);
     const showAddressError = ref(false);
     const addressErrorMsg = computed(
