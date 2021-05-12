@@ -214,6 +214,10 @@ class Sirius {
     return siriusState.currentNetworkProfile.apiNodes ? siriusState.currentNetworkProfile.apiNodes : [];
   }
 
+  getProfileConfig() {
+    return siriusState.currentNetworkProfileConfig ? siriusState.currentNetworkProfileConfig : null;
+  }
+
   getNetworkPort(){
     return siriusState.currentNetworkProfile.httpPort;
   }

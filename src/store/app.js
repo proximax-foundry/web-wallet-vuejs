@@ -31,7 +31,7 @@ const walletKey = "sw";
 const appState = reactive({
   darkTheme: false,
   wallets: getWallets(),
-  currentLoggedInWallet: undefined,
+  currentLoggedInWallet: null,
   loggedInWalletFirstAccount: {},
   isLogin: false
 });

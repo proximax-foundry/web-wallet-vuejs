@@ -17,6 +17,7 @@ import {
   TransferTransaction,
   TransactionHttp,
   TransactionBuilderFactory,
+  PublicAccount,
 } from "tsjs-xpx-chain-sdk";
 import * as FeeCalculationStrategy from 'tsjs-xpx-chain-sdk/dist/src/model/transaction/FeeCalculationStrategy';
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
@@ -331,3 +332,11 @@ const getFeeStrategy = () => {
 export const makeTransaction = readonly({
   calculateFee
 });
+
+export const getFakeEncryptedMessageSize =(message)=>{
+  return EncryptedMessage.create(message, PublicAccount.createFromPublicKey("0".repeat(64)), "0".repeat(64)).size();
+}
+
+export const getPlainMessageSize =(message)=>{
+  return PlainMessage.create(message).size();
+}
