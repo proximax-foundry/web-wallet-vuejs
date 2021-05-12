@@ -51,45 +51,47 @@
         </div>
         <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
       </div>
-      <div class="flex justify-between p-4 rounded-xl bg-yellow-100 mb-4">
-        <div class="text-center w-full">
-          <div class="border border-yellow-600 rounded-full w-8 h-8 inline-block mb-4">
-            <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-600 inline-block"></font-awesome-icon>
+      <div v-if="acc.encrypted != undefined && acc.encrypted != ''">
+        <div class="flex justify-between p-4 rounded-xl bg-yellow-100 mb-4">
+          <div class="text-center w-full">
+            <div class="border border-yellow-600 rounded-full w-8 h-8 inline-block mb-4">
+              <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-600 inline-block"></font-awesome-icon>
+            </div>
+            <p>Make sure you store your private key in a safe place.</p>
+            <p>Access to your digital assets cannot be recovered without it.</p>
           </div>
-          <p>Make sure you store your private key in a safe place.</p>
-          <p>Access to your digital assets cannot be recovered without it.</p>
         </div>
-      </div>
-      <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-        <div class="text-left w-full relative">
-          <div class="text-xs font-bold mr-2"><div class="mb-2 inline-block">Private Key:</div><div v-if="!showPwPK && !showPK">**************</div><PasswordInput v-if="showPwPK && !showPK" placeholder="Insert wallet password" errorMessage="Wallet password required." :showError="showPasswdError" icon="lock" v-model="walletPasswd" /></div>
-          <div class="absolute z-20 w-full h-full" v-if="showPK"></div>
-          <input
-            id="private"
-            class="text-sm w-full outline-none bg-gray-100 z-10"
-            type="text"
-            :value="privateKey"
-            v-if="showPK"
-          />
+        <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
+          <div class="text-left w-full relative">
+            <div class="text-xs font-bold mr-2"><div class="mb-2 inline-block">Private Key:</div><div v-if="!showPwPK && !showPK">**************</div><PasswordInput v-if="showPwPK && !showPK" placeholder="Insert wallet password" errorMessage="Wallet password required." :showError="showPasswdError" icon="lock" v-model="walletPasswd" /></div>
+            <div class="absolute z-20 w-full h-full" v-if="showPK"></div>
+            <input
+              id="private"
+              class="text-sm w-full outline-none bg-gray-100 z-10"
+              type="text"
+              :value="privateKey"
+              v-if="showPK"
+            />
+          </div>
+          <font-awesome-icon icon="copy" @click="copy('private')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mr-2" v-if="showPK"></font-awesome-icon>
+          <button class="default-btn w-36" @click="showPwPK = !showPwPK" v-if="!showPwPK && !showPK">Show</button>
+          <button class="default-btn w-36" @click="verifyWalletPwPk()" v-if="showPwPK && !showPK">Submit</button>
+          <button class="default-btn w-36" @click="showPwPK = false; showPK = false" v-if="showPK">Hide</button>
         </div>
-        <font-awesome-icon icon="copy" @click="copy('private')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mr-2" v-if="showPK"></font-awesome-icon>
-        <button class="default-btn w-36" @click="showPwPK = !showPwPK" v-if="!showPwPK && !showPK">Show</button>
-        <button class="default-btn w-36" @click="verifyWalletPwPk()" v-if="showPwPK && !showPK">Submit</button>
-        <button class="default-btn w-36" @click="showPwPK = false; showPK = false" v-if="showPK">Hide</button>
-      </div>
-      <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-        <div class="text-left w-full relative">
-          <div class="text-sm font-bold mb-1">Swap with this private key</div>
-          <PasswordInput v-if="showPwSwap" placeholder="Insert wallet password" errorMessage="Wallet password required." :showError="showPasswdError" icon="lock" v-model="walletPasswdSwap" />
+        <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
+          <div class="text-left w-full relative">
+            <div class="text-sm font-bold mb-1">Swap with this private key</div>
+            <PasswordInput v-if="showPwSwap" placeholder="Insert wallet password" errorMessage="Wallet password required." :showError="showPasswdError" icon="lock" v-model="walletPasswdSwap" />
+          </div>
+          <button class="default-btn w-36" @click="showPwSwap = !showPwSwap" v-if="!showPwSwap">Enable</button>
+          <button class="default-btn w-36" @click="verifyWalletPwSwap()" v-if="showPwSwap">Submit</button>
         </div>
-        <button class="default-btn w-36" @click="showPwSwap = !showPwSwap" v-if="!showPwSwap">Enable</button>
-        <button class="default-btn w-36" @click="verifyWalletPwSwap()" v-if="showPwSwap">Submit</button>
-      </div>
-      <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-        <div class="text-left w-full relative">
-          <div class="text-sm font-bold mb-1">Save Paper Wallet</div>
+        <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
+          <div class="text-left w-full relative">
+            <div class="text-sm font-bold mb-1">Save Paper Wallet</div>
+          </div>
+          <button class="default-btn w-36">Save</button>
         </div>
-        <button class="default-btn w-36">Save</button>
       </div>
     </div>
   </div>

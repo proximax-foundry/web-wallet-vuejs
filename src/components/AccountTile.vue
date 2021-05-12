@@ -20,7 +20,7 @@
           <div class="inline-block mr-4"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"><span class="text-xs">{{ account.balance }} XPX</span></div>
           <div class="inline-block mr-4" v-if="mosaicNum>0" :title="`Other mosaic${(mosaicNum>1)?'s':''}: ${mosaicNum}`"><img src="../assets/img/icon-mosaics-green-16h.svg" class="w-5 inline mr-1"><span class="text-xs">{{ mosaicNum }}</span></div>
 
-          <div class="relative inline-block text-left">
+          <div class="relative inline-block text-left" @mouseover="hoverOverMenu" @mouseout="hoverOutMenu">
             <div>
               <button type="button" @click="showHideMenu();" class="justify-center px-4 py-2 text-gray-700 focus:outline-none" id="options-menu" aria-expanded="true" aria-haspopup="true">
                 <font-awesome-icon icon="caret-down" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
@@ -34,7 +34,7 @@
                 <a href="#" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="exportWallet()">Export</a>
                 <router-link :to="{ name: 'ViewDeleteAccount', params: { name: account.name}}" v-if="!account.default" href="#" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Delete</router-link>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300">Delete</div>
-                <router-link :to="{ name: 'ViewConvertAccountMultisig', params: { name: account.name}}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">MultiSig</router-link>
+                <router-link :to="{ name: isMultiSig ? 'ViewEditAccountMultisig' : 'ViewConvertAccountMultisig', params: { name: account.name}}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">MultiSig</router-link>
               </div>
             </div>
           </div>
@@ -118,9 +118,19 @@ export default{
       }
     };
 
+    const hoverOverMenu = () => {
+      emitter.emit("HOVER_OVER_MENU_TRIGGER", p.i);
+    };
+
+    const hoverOutMenu = () => {
+      emitter.emit("HOVER_OUT_MENU_TRIGGER");
+    };
+
     return {
       copy,
       showHideMenu,
+      hoverOverMenu,
+      hoverOutMenu,
       setAsDefaultAccount,
       exportWallet,
       mosaicNum,

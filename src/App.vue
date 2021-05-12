@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-screen justify-between">
+  <div class="flex flex-col h-screen justify-between" @click="clickEvent">
     <Toast />
     <Toast position="top-left" group="tl" />
     <Toast position="bottom-left" group="bl" />
@@ -9,7 +9,7 @@
       <headerComponent></headerComponent>
     </header>
     <PageComponent class="flex-grow"></PageComponent>
-    <footer class="h-12 text-center">
+    <footer class="h-12 text-center mt-20">
       <div class="text-xs py-2">
         <div class="font-bold">&copy; ProximaX 2021</div>
         <div>Please report any issues identified to our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold hover:underline">helpdesk</a>.</div>
@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import { provide } from "vue";
+import { provide, getCurrentInstance } from "vue";
 import { appStore } from "./store/app";
 import { siriusStore } from "./store/sirius";
 import headerComponent from '@/components/headerComponent.vue'
@@ -32,11 +32,22 @@ export default {
     PageComponent,
   },
   setup() {
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+
     siriusStore.startWatch();
     appStore.startWatch();
     provide("appStore", appStore);
     provide("siriusStore", siriusStore);
-  }
+
+    const clickEvent = () => {
+      emitter.emit("PAGE_CLICK");
+    };
+
+    return{
+      clickEvent,
+    }
+  },
 }
 </script>
 

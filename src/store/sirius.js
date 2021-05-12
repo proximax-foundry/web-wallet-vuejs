@@ -13,6 +13,7 @@ import {
   Password,
   SimpleWallet,
   TransactionHttp,
+  Listener
 } from "tsjs-xpx-chain-sdk";
 const config = require("@/../config/config.json");
 
@@ -40,6 +41,10 @@ class Sirius {
 
     this.state = siriusState;
 
+    this.httpPort = 3000;
+
+    this.listenerChainWS = ref(null);
+
     this.accountHttp = computed(() => new AccountHttp(this.buildAPIEndpointURL(siriusState.selectedChainNode)));
     this.blockHttp = computed(() => new BlockHttp(this.buildAPIEndpointURL(siriusState.selectedChainNode)));
     this.chainHttp = computed(() => new ChainHttp(this.buildAPIEndpointURL(siriusState.selectedChainNode)));
@@ -51,6 +56,19 @@ class Sirius {
     this.transactionHttp = computed(()=> new TransactionHttp(this.buildAPIEndpointURL(siriusState.selectedChainNode)));
     this.connectors = ref([]);
 
+    this.chainWSListener = computed(() => {
+      if (this.listenerChainWS.value == null) {
+        console.log('open new socket')
+        this.listenerChainWS.value = new Listener(
+          this.buildWSEndpointURL(siriusState.selectedChainNode, this.getNetworkPort()),
+          WebSocket
+        );
+      }
+    
+      return this.listenerChainWS.value;
+    });
+
+    this.checkFromSession();
   }
 
   startWatch(){
@@ -136,6 +154,14 @@ class Sirius {
     this.updateAvailableNetworks();
   }
 
+  checkFromSession(){
+    const selectedNetwork = sessionStorage.getItem('selectedNetwork') ? parseInt(sessionStorage.getItem('selectedNetwork')) : -1;
+
+    if(selectedNetwork >= 0){
+      siriusState.selectedNetwork = parseInt(sessionStorage.getItem('selectedNetwork'));
+    }
+  }
+
   updateChainNetwork(network){
     siriusState.chainNetwork = network;
   }
@@ -147,7 +173,7 @@ class Sirius {
       console.log("Is empty");
       setTimeout(()=>{
         this.updateAvailableNetworks();
-      }, 100);
+      }, 50);
     }
     else{
       siriusState.availableNetworks = names;
@@ -186,6 +212,10 @@ class Sirius {
   
   getChainNodes() {
     return siriusState.currentNetworkProfile.apiNodes ? siriusState.currentNetworkProfile.apiNodes : [];
+  }
+
+  getNetworkPort(){
+    return siriusState.currentNetworkProfile.httpPort;
   }
   
   getNetworkType(){
@@ -252,34 +282,29 @@ class Sirius {
 
   stopChainWSListener() {
     console.log("stopChainWSListener triggered");
-  
-    if (this.connectors.value.length > 0) {
-      for (const listener in this.connectors.value) {
-        listener.terminate();
-      }
-    }
 
-    this.connectors.value = [];
+    if (this.listenerChainWS.value != null) {
+      this.listenerChainWS.value.terminate();
+      this.listenerChainWS.value = null;
+    }
   }
 
-  createNewAccount(walletName, networkType){
-    // const account = Account.generateNewAccount(networkType);
+  createNewAccount(walletName){
     const encryptedPasswd = new Password(sessionStorage.getItem('walletPassword'));
-    const account = SimpleWallet.create(walletName, encryptedPasswd, networkType);
+    const account = SimpleWallet.create(walletName, encryptedPasswd, this.getNetworkType());
     const acc = account.open(encryptedPasswd);
     account.publicKey = acc.publicKey;
     account.privateKey = acc.privateKey;
     return account;
   }
 
-  createNewAccountPrivateKey(walletName, pk, networkType){
-    // const account = Account.createFromPrivateKey(pk, networkType);
+  createNewAccountPrivateKey(walletName, pk){
     const encryptedPasswd = new Password(sessionStorage.getItem('walletPassword'));
     const account = SimpleWallet.createFromPrivateKey(
       walletName,
       encryptedPasswd,
       pk,
-      networkType
+      this.getNetworkType()
     );
     const acc = account.open(encryptedPasswd);
     account.publicKey = acc.publicKey;

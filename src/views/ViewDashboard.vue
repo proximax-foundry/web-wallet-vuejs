@@ -66,8 +66,6 @@ import { transactions } from '../util/transactions.js';
 import { PublicAccount, Order, QueryParams } from "tsjs-xpx-chain-sdk";
 import { transferEmitter } from '../util/listener.js';
 
-import { App } from '../store/app';
-
 export default {
   name: 'ViewDashboard',
   components: {
@@ -89,7 +87,7 @@ export default {
     const primaryAccount = computed(
       () => {
           if (appStore.state.currentLoggedInWallet) {
-            return App.pretty(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).address);
+            return appStore.pretty(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).address);
           }else{
             return 0;
           }
@@ -145,21 +143,6 @@ export default {
         isShowUnconfirmed.value = false;
       }
     };
-
-    // balance(xpxUsd) {
-    //   this.subscription.push(this.transactionService.getBalance$().subscribe(
-    //     next => {
-    //       this.vestedBalance = this.transactionService.getDataPart(next, 6);
-    //       if (this.xpxUsd != undefined) {
-    //         this.coinUsd = Number(next.replace(/,/g, '')) * xpxUsd;
-    //       }
-    //     },
-    //     error => this.vestedBalance = {
-    //       part1: '0',
-    //       part2: '000000'
-    //     }
-    //   ));
-    // }
 
     const generateNames = () => {
       const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
@@ -234,8 +217,10 @@ export default {
       let qp = new QueryParams(pageSize, lastId, order);
       let lastTransactionID = lastId;
       siriusStore.accountHttp.aggregateBondedTransactions(publicAccount, qp).subscribe(tx => {
+        // console.log('AggregateBonded - partial length: ' + tx.length);
         if( tx.length > 0 ){
           tx.forEach((t)=>{
+            // console.log(t)
             let formattedTransaction = transactions.formatAggregateBondedTransaction(t, names);
             aggregateBondedTransactions.value.push(formattedTransaction);
             lastTransactionID = t.transactionInfo.id;
@@ -250,6 +235,7 @@ export default {
       });
     };
 
+    // eslint-disable-next-line no-unused-vars
     const getConfirmedAllTransactions = () => {
       const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
       const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);

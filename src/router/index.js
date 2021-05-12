@@ -1,9 +1,8 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
-
 const routes = [
   {
-    path: '/',
+    path: '/home',
     name: 'Welcome',
     props: true,
     component: () => import('@/views/Welcome.vue'),
@@ -132,11 +131,12 @@ const routes = [
     }
   },
   {
-    path: '/export-wallet',
-    name: 'ViewExportWallet',
-    component: () => import('@/views/ViewExportWallet.vue'),
+    path: '/edit-account-multisign/:name',
+    name: 'ViewEditAccountMultisig',
+    props: true,
+    component: () => import('@/views/ViewEditAccountMultisig.vue'),
     meta: {
-      title: "Export wallet",
+      title: "Edit Multisig Account",
     }
   },
   {
@@ -169,6 +169,14 @@ const routes = [
     component: () => import('@/views/ViewCreateMosaic.vue'),
     meta: {
       title: "Add Contacts",
+    }
+  },
+  {
+    path: '/services',
+    name: 'ViewAllServices',
+    component: () => import('@/views/ViewAllServices.vue'),
+    meta: {
+      title: "Services",
     }
   },
 ]

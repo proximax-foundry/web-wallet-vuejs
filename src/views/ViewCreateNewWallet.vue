@@ -142,7 +142,7 @@ export default {
       let result = 0;
 
       result = appStore.addNewWallet(
-        siriusStore.chainNetworkName.value,
+        siriusStore.state.chainNetworkName,
         walletName.value,
         passwd.value,
         selectedNetwork.value

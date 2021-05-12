@@ -39,7 +39,7 @@ export default {
     const siriusStore = inject("siriusStore");
     //const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const selectedNetworkType = computed(()=> siriusStore.getNetworkType());
-    const selectedNetworkName = computed(()=> siriusStore.chainNetworkName.value);
+    const selectedNetworkName = computed(()=> siriusStore.state.chainNetworkName);
     const notificationType = ref("err");
     //const toggle = ref(false);
     const msg = ref('');

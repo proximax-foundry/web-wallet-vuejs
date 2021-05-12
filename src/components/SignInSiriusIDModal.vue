@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a href="#" @click="toggleModal = !toggleModal" class="block big-default-btn my-3 self-center">Sign In With SiriusID</a>
+    <a @click="toggleModal = !toggleModal" class="block big-default-btn my-3 self-center">Sign In With SiriusID</a>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"

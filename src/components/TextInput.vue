@@ -56,7 +56,7 @@ export default{
       this.textErr = false;
     }
   },
-  mounted() {
+  mounted() {    
     this.emitter.on("CLEAR_TEXT", payload => {
       this.inputText = payload;
       this.textErr = false;

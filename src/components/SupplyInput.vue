@@ -5,7 +5,7 @@
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
         <div class="ml-6 text-xs mt-1 text-gray-500">{{ (title!=undefined)?title:'Send' }}</div>
       </div>
-      <input type="number" :disabled="disabled" :value="parseFloat(modelValue).toFixed(decimal)" @input="$emit('update:modelValue', parseFloat($event.target.value).toFixed(decimal))" :placeholder="placeholder" class="text-placeholder bg-white text-right" @click="clickInputText()" @keyup="checkBalance($event)">
+      <input type="number" :disabled="disabled == 1" :value="parseFloat(modelValue).toFixed(decimal)" @input="$emit('update:modelValue', parseFloat($event.target.value).toFixed(decimal))" :placeholder="placeholder" class="text-placeholder bg-white text-right" @click="clickInputText()" @keyup="checkBalance($event)">
       <div class="w-5"></div>
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>

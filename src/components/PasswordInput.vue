@@ -4,7 +4,7 @@
       <div class="text-icon-outline text-icon">
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
       </div>
-      <input :type="inputType" :disabled="disabled" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="text-placeholder" :placeholder="placeholder" @click="clickInputPassword()" @blur="blurInputPassword()" autocomplete="off">
+      <input :type="inputType" :disabled="disabled == 1" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="text-placeholder" :placeholder="placeholder" @click="clickInputPassword()" @blur="blurInputPassword()" autocomplete="off">
       <div class="inline-block flex-none mr-2">
         <font-awesome-icon icon="eye" class="text-gray-400 relative cursor-pointer" @click="hideShowPassword();" v-if="!showPassword"></font-awesome-icon>
         <font-awesome-icon icon="eye-slash" class="text-gray-400 relative cursor-pointer" @click="hideShowPassword();" v-if="showPassword"></font-awesome-icon>

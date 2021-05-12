@@ -108,9 +108,7 @@ export default {
     const siriusStore = inject("siriusStore");
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const showContactSelection = ref(false);
     const showSupplyErr = ref(false);
-    const selectContact = ref("0");
     const recipient = ref('');
     const msgOption = ref('regular');
     const messageText = ref('');
@@ -183,10 +181,6 @@ export default {
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
     }
-
-    const contact = computed(() => {
-      return appStore.getContact();
-    });
 
     const clearInput = () => {
       walletPassword.value = '';
@@ -284,13 +278,10 @@ export default {
       showSupplyErr,
       showDivisibilityErr,
       err,
-      contact,
       recipient,
       sendXPX,
       messageText,
       msgOption,
-      showContactSelection,
-      selectContact,
       walletPassword,
       disableCreate,
       clearInput,
