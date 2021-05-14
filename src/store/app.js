@@ -16,16 +16,16 @@ import { siriusStore, chainNetwork } from '@/store/sirius';
 const sdk = require('tsjs-xpx-chain-sdk');
 
 const config = require("@/../config/config.json");
-
+const walletKey = "sw";
 const name = "Sirius Wallet";
 
 const currentWallet = ref(null);
 
 function getWallets() {
-  if (!localStorage.getItem(config.localStorage.walletKey)) {
-    localStorage.setItem(config.localStorage.walletKey, "[]");
+  if (!localStorage.getItem(walletKey)) {
+    localStorage.setItem(walletKey, "[]");
   }
-  return JSON.parse(localStorage.getItem(config.localStorage.walletKey));
+  return JSON.parse(localStorage.getItem(walletKey));
 }
 
 const state = reactive({
@@ -90,6 +90,21 @@ function getWalletIndexByName(walletName) {
   return state.wallets.findIndex((element) => element.name == walletName && element.networkName == siriusStore.state.chainNetworkName);
 }
 
+// with custom network param
+function getWalletByNameAndNetwork(walletName, networkName) {
+  walletName = walletName.includes(" ") === true ? walletName.split(" ").join("_") : walletName;
+  return state.wallets.find((element) => element.name == walletName && element.networkName == networkName);
+}
+
+function getWalletIndexByNameAndNetwork(walletName, networkName = undefined) {
+  let networkNameToCompare = networkName ? networkName : siriusStore.state.chainNetworkName;
+  walletName =
+    walletName.includes(" ") === true
+      ? walletName.split(" ").join("_")
+      : walletName;
+  return state.wallets.findIndex((element) => element.name == walletName && element.networkName == networkNameToCompare);
+}
+
 /* benjamin lai */
 function getAccountByWallet(walletName){
   const wallet = getWalletByName(walletName);
@@ -132,7 +147,7 @@ function importWallet(decryptedData, networkName, networkType){
       state.wallets.push(wallet);
       try {
         localStorage.setItem(
-          config.localStorage.walletKey,
+          walletKey,
           JSON.stringify(state.wallets)
         );
       } catch (err) {
@@ -222,7 +237,7 @@ function addNewWallet(networkName, walletName, password, networkType, privateKey
   state.wallets.push(newWallet);
   try {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
   } catch (err) {
@@ -286,8 +301,8 @@ function verifyWalletPassword(walletName, password){
   return 1;
 }
 
-function deleteWallet(walletName) {
-  const walletIndex = getWalletIndexByName(walletName);
+function deleteWallet(walletName, networkName) {
+  const walletIndex = getWalletIndexByNameAndNetwork(walletName, networkName);
   if (walletIndex == -1) {
     if (config.debug) {
       console.error(
@@ -304,7 +319,7 @@ function deleteWallet(walletName) {
 
   if (state.wallets.splice(walletIndex, 1).length != 0) {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
     return 1;
@@ -494,7 +509,7 @@ function updateAccountState(account, accountName){
   // update localStorage
   try {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
   } catch (err) {
@@ -515,7 +530,7 @@ function updateCurrentWallet(account){
   // update localStorage
   try {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
   } catch (err) {
@@ -550,7 +565,7 @@ function updateAccountName(name, oriName){
   // update localStorage
   try {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
   } catch (err) {
@@ -573,7 +588,7 @@ function setAccountDefault(address){
   // update localStorage
   try {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
   } catch (err) {
@@ -657,7 +672,7 @@ function deleteAccount(address) {
     currentWallet.value = wallet;
     sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
     return 1;
@@ -676,7 +691,7 @@ function removeMultiSigAccount(accounts){
     currentWallet.value = wallet;
     sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
   }
@@ -718,7 +733,7 @@ function saveContact(contactName, contactAddress){
     // update localStorage
     try {
       localStorage.setItem(
-        config.localStorage.walletKey,
+        walletKey,
         JSON.stringify(state.wallets)
       );
     } catch (err) {
@@ -816,7 +831,7 @@ function updateXPXBalance(walletName, siriusStore){
       const wallet = getWalletByName(walletName);
       currentWallet.value = wallet;
       sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
-      localStorage.setItem(config.localStorage.walletKey, JSON.stringify(state.wallets));
+      localStorage.setItem(walletKey, JSON.stringify(state.wallets));
     } catch (err) {
       if (config.debug) {
         console.error("updateAccountState error caught", err);
@@ -956,7 +971,7 @@ function deleteContact(contact){
   const contactIndex = wallet.contacts.findIndex((element) => element.name == contact.name && element.address == contact.address);
   if (wallet.contacts.splice(contactIndex, 1).length != 0) {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
     return 1;
@@ -969,7 +984,7 @@ function editContact(originalContact, contactName, contactAddress){
   const contactIndex = wallet.contacts.findIndex((element) => element.name == originalContact.name && element.address == originalContact.address);
   if (wallet.contacts.splice(contactIndex, 1).length != 0) {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
     let status = saveContact(contactName, contactAddress);
@@ -997,6 +1012,8 @@ export const appStore = readonly({
   loginToWallet,
   logoutOfWallet,
   getWalletByName,
+  getWalletIndexByName,
+  getWalletByNameAndNetwork,
   getAccountByWallet,
   checkFromSession,
   getTotalBalance,

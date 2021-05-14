@@ -117,19 +117,22 @@ export default {
 
     // get USD conversion
     const currencyConvert = ref(0);
-    console.log(appStore.state.currentLoggedInWallet.name)
     const getCurrencyConvert = () => {
-      let balance = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
-      currencyconverter(balance).then((total) => {
-        currencyConvert.value = total.toFixed(6);
-      });
+      if (appStore.state.currentLoggedInWallet) {
+        let balance = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
+        currencyconverter(balance).then((total) => {
+          currencyConvert.value = total.toFixed(6);
+        });
+      }
     };
     getCurrencyConvert();
     watch(primaryAccountBalance, () => {
-      let balance = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
-      currencyconverter(balance).then((total) => {
-        currencyConvert.value = total.toFixed(6);
-      });
+      if (appStore.state.currentLoggedInWallet) {
+        let balance = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
+        currencyconverter(balance).then((total) => {
+          currencyConvert.value = total.toFixed(6);
+        });
+      }
     });
 
     const confirmedTransactions = ref([]);

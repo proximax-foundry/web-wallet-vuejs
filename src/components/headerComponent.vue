@@ -22,7 +22,7 @@
       </div>
       <div class="w-17 text-center h-10 items-center gray-line-left">
         <div class="text-xs inline-block mt-3" v-if="wideScreen">
-          <a href="#" @click="logout()">Sign out</a>
+          <a @click="logout()">Sign out</a>
         </div>
         <div class="inline-block mt-2" v-else>
           <font-awesome-icon icon="sign-out-alt" @click="logout()" class="text-blue-400 w-6 h-6 cursor-pointer ml-3"></font-awesome-icon>
