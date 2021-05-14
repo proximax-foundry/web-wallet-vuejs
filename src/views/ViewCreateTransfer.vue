@@ -107,7 +107,7 @@ import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import MosaicInput from '@/components/MosaicInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
 import TextareaInput from '@/components/TextareaInput.vue';
-import { createTransaction, makeTransaction, getFakeEncryptedMessageSize, getPlainMessageSize } from '../util/transfer.js'; //getMosaicsAllAccounts
+import { createTransaction, makeTransaction, getFakeEncryptedMessageSize, getPlainMessageSize, convertToExact, convertToCurrency } from '../util/transfer.js'; //getMosaicsAllAccounts
 import AddContactModal from '@/components/AddContactModal.vue';
 import NotificationModal from '@/components/NotificationModal.vue';
 import ConfirmSendModal from '@/components/ConfirmSendModal.vue';

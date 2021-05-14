@@ -91,7 +91,7 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
 import NumberInput from '@/components/NumberInput.vue';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
-import { mosaicTransaction, convertToCurrency } from '../util/transfer.js';
+import { mosaicTransaction, convertToCurrency, convertToExact } from '../util/transfer.js';
 import NotificationModal from '@/components/NotificationModal.vue';
 
 export default {
@@ -139,6 +139,8 @@ export default {
     const durationCheckDisabled = ref(false);
 
     const currencyName = computed(() => chainNetwork.getCurrencyName());
+    const rentalFee = computed(()=> convertToExact(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
+    const rentalFeeCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
 
     const disableCreate = computed(() => !(
       walletPassword.value.match(passwdPattern) && !disabledMutableCheck.value && (divisibility.value != '') && (supply.value > 0) && (!showDurationErr.value)
@@ -150,7 +152,7 @@ export default {
     // balance.value = appStore.getFirstAccBalance();
 
     const showNoBalance = ref(false);
-    if(balance.value < 10000){
+    if(balance.value < rentalFee.value){
       showNoBalance.value = true;
       disabledMutableCheck.value = true;
       disabledTransferableCheck.value = true;
@@ -180,7 +182,7 @@ export default {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
       balance.value = i.balance;
-      (balance.value < 10000)?showNoBalance.value = true:showNoBalance.value = false;
+      (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
     }
@@ -208,7 +210,7 @@ export default {
     });
 
     watch(balance, (n) => {
-      if(n < 10000){
+      if(n < rentalFee.value){
         showNoBalance.value = true;
         disabledMutableCheck.value = true;
         disabledTransferableCheck.value = true;
@@ -261,9 +263,6 @@ export default {
         clearInput();
       }
     };
-
-    const rentalFee = computed(()=> convertToExact(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
-    const rentalFeeCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
 
     emitter.on("CLOSE_NOTIFICATION", payload => {
       toggleAnounceNotification.value = payload;
