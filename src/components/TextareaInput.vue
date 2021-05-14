@@ -4,17 +4,16 @@
       <div class="text-icon-outline text-icon self-center">
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
       </div>
-      <textarea :value="modelValue" :disabled="disabled==1" @input="countChar($event); $emit('update:modelValue', $event.target.value)" @keypress="countChar" rows=2 class="mt-7 ml-2 self-center w-full text-gray-500 focus:outline-none bg-white text-md" :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()"></textarea>
+      <textarea :value="modelValue" :disabled="disabled==1" @input="countChar($event); $emit('update:modelValue', $event.target.value)" rows=2 class="mt-7 ml-2 self-center w-full text-gray-500 focus:outline-none bg-white text-md" :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()"></textarea>
       <div class="w-1 flex-none"></div>
     </div>
-    <div class="float-right mt-1 text-tsm text-gray-800">{{remainingChar}}/{{ limit }}</div>
+    <div class="float-right mt-1 text-tsm text-gray-800">{{remainingLength}}/{{limit}}</div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
   </div>
 </template>
 
 <script>
 import { ref, getCurrentInstance, watch } from 'vue';
-// import { PlainMessage } from 'tsjs-xpx-chain-sdk';
 export default{
   props: [
     'placeholder',
@@ -25,7 +24,7 @@ export default{
     'msgOpt',
     'disabled',
     'limit',
-    'remainingChar',
+    'remainingChar'
   ],
   emits:[
     'update:modelValue'
@@ -35,15 +34,19 @@ export default{
   setup(p){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    // const remainingChar = ref(0);
+    const remainingLength = ref(0);
     const inputText = ref("");
     const borderColor = ref('border border-gray-300');
     const textErr = ref(false);
-    const remainingLength = ref(0);
+
+    watch(
+      ()=> p.remainingChar,
+      (n)=>{
+        remainingLength.value = n;
+    });
 
     const countChar = (e) => {
-      // var limit = 1023;
-      // remainingChar.value = PlainMessage.create(e.target.value).size();
+      //remainingLength.value = PlainMessage.create(e.target.value).size();
       if(p.msgOpt=='regular'){
         if( e.target.value.length > p.limit) {
           e.returnValue = false;
@@ -78,10 +81,6 @@ export default{
       textErr.value = false;
     };
 
-    watch( p.remainingChar, (n) => {
-      remainingLength.value = n;
-    });
-
     emitter.on("CLEAR_TEXTAREA", payload => {
       remainingLength.value = payload;
     });
@@ -99,7 +98,7 @@ export default{
       countChar,
       remainingLength,
       clickInputText,
-      blurInputText,
+      blurInputText
     }
   },
 }

@@ -38,7 +38,7 @@ function getNetworkByType(typeid){
 // }
 
 // ALWAYS use function selectNewChainNode to change currentChainNode value, to avoid web socket listening on old node
-const currentChainNode = ref(getChainNodes()[0]);
+// const currentChainNode = ref(getChainNodes()[0]);
 const listenerChainWS = ref(null);
 
 const state = reactive({
@@ -92,14 +92,8 @@ const namespaceHttp = computed(() => new NamespaceHttp(_buildAPIEndpointURL(stat
 const chainWSListener = computed(() => {
   if (listenerChainWS.value == null) {
     // console.log('open new socket')
-    listenerChainWS.value = new Listener(
-      `${
-        location.protocol == "http:" ? "ws://" : "wss://"
-      }${siriusStore.currentChainNode.hostname}${location.protocol == "http:"?(':' + siriusStore.currentChainNode.port):''}`,
-      WebSocket
-    );
+    listenerChainWS.value = new Listener(chainNetworkInstance.buildWSEndpointURL(state.selectedChainNode), WebSocket);
   }
-
   return listenerChainWS.value;
 });
 
@@ -170,7 +164,7 @@ function selectNewChainNode(nodeConfigString) {
   if (config.debug) {
     console.log("selectNewChainNode triggered with", nodeConfig.hostname);
   }
-  currentChainNode.value = found;
+  // currentChainNode.value = found;
   stopChainWSListener();
   return true;
 }
@@ -207,7 +201,7 @@ function restoreSiriusStateFromSessionStorage(selectedChainNode, selectedNetwork
 
 export const siriusStore = readonly({
   state,
-  currentChainNode,
+  // currentChainNode,
   getChainNodes,
   // getNetworkByName,
   accountHttp,

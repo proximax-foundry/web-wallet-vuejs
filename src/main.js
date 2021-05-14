@@ -46,7 +46,8 @@ const chainProfileIntegration = async () => {
       }
     }).then((res) => res.json()).then((configInfo) => { return configInfo });
 
-    // console.log(configInfo);
+    console.log('configInfo');
+    console.log(configInfo);
     var chainProfilesData = configInfo;
     var chainProfileNames = Object.keys(configInfo);
 
@@ -55,11 +56,14 @@ const chainProfileIntegration = async () => {
     chainProfilesNameStore.saveToLocalStorage();
 
     for(const chainProfileName of chainProfileNames){
+      console.log('chainProfileName')
+      console.log(chainProfileName);
       var chainProfileStore = new ChainProfileStore(chainProfileName);
 
       chainProfileStore.init();
       var chainProfileData = chainProfilesData[chainProfileName];
-
+      console.log(chainProfileStore.getVersion())
+      console.log(chainProfileData['version'])
       if(chainProfileStore.getVersion() !== chainProfileData['version']){
         var newChainProfile = new ChainProfile();
 
@@ -83,6 +87,8 @@ const chainProfileIntegration = async () => {
 
         var config = await chainNetwork.getChainConfig(chainHeight, chainConfigHttp)
         var chainProfileConfigStore = new ChainProfileConfigStore(chainProfileName+"_config");
+        console.log('config');
+        console.log(config);
 
         chainProfileConfigStore.init()
 
