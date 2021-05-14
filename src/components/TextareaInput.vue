@@ -4,17 +4,17 @@
       <div class="text-icon-outline text-icon self-center">
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
       </div>
-      <textarea :value="modelValue" :disabled="disabled==1" @input="$emit('update:modelValue', $event.target.value)" @keypress="countChar" rows=2 class="mt-7 ml-2 self-center w-full text-gray-500 focus:outline-none bg-white text-md" :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()"></textarea>
+      <textarea :value="modelValue" :disabled="disabled==1" @input="countChar($event); $emit('update:modelValue', $event.target.value)" @keypress="countChar" rows=2 class="mt-7 ml-2 self-center w-full text-gray-500 focus:outline-none bg-white text-md" :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()"></textarea>
       <div class="w-1 flex-none"></div>
     </div>
-    <div class="float-right mt-1 text-tsm text-gray-800">{{remainingChar}}/1023</div>
+    <div class="float-right mt-1 text-tsm text-gray-800">{{remainingChar}}/{{ limit }}</div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
   </div>
 </template>
 
 <script>
-import { ref, getCurrentInstance } from 'vue';
-import { PlainMessage } from 'tsjs-xpx-chain-sdk';
+import { ref, getCurrentInstance, watch } from 'vue';
+// import { PlainMessage } from 'tsjs-xpx-chain-sdk';
 export default{
   props: [
     'placeholder',
@@ -24,6 +24,8 @@ export default{
     'modelValue',
     'msgOpt',
     'disabled',
+    'limit',
+    'remainingChar',
   ],
   emits:[
     'update:modelValue'
@@ -33,16 +35,17 @@ export default{
   setup(p){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const remainingChar = ref(0);
+    // const remainingChar = ref(0);
     const inputText = ref("");
     const borderColor = ref('border border-gray-300');
     const textErr = ref(false);
+    const remainingLength = ref(0);
 
     const countChar = (e) => {
-      var limit = 1023;
-      remainingChar.value = PlainMessage.create(e.target.value).size();
+      // var limit = 1023;
+      // remainingChar.value = PlainMessage.create(e.target.value).size();
       if(p.msgOpt=='regular'){
-        if( e.target.value.length > limit) {
+        if( e.target.value.length > p.limit) {
           e.returnValue = false;
           if(e.preventDefault) e.preventDefault();
         }
@@ -57,7 +60,7 @@ export default{
           key = String.fromCharCode(key);
         }
         var regex = /[0-9A-Fa-f]|\./;
-        if( !regex.test(key) || e.target.value.length > limit) {
+        if( !regex.test(key) || e.target.value.length > p.limit) {
           theEvent.returnValue = false;
           if(theEvent.preventDefault) theEvent.preventDefault();
         }
@@ -75,8 +78,12 @@ export default{
       textErr.value = false;
     };
 
+    watch( p.remainingChar, (n) => {
+      remainingLength.value = n;
+    });
+
     emitter.on("CLEAR_TEXTAREA", payload => {
-      remainingChar.value = payload;
+      remainingLength.value = payload;
     });
 
     emitter.on("CLEAR_TEXT", payload => {
@@ -90,7 +97,7 @@ export default{
       textErr,
       borderColor,
       countChar,
-      remainingChar,
+      remainingLength,
       clickInputText,
       blurInputText,
     }

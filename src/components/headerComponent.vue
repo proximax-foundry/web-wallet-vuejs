@@ -1,6 +1,6 @@
 <template>
   <div class="flex-none self-center flex items-end logo">
-    <router-link :to="(appStore.state.currentLoggedInWallet)?'/dashboard':'/'"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">v{{ appStore.version }}</span>
+    <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Welcome'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">v{{ appStore.version }}</span>
   </div>
   <div class="flex-grow h-16"></div>
   <div class="flex-none header-menu mt-3" v-if="loginStatus">
@@ -44,10 +44,10 @@
       </select>
     </div>
     <div class="w-16 text-center inline-block">
-      <router-link to="/" class="font-normal hover:font-bold inline-block">Home</router-link>
+      <router-link :to="{ name: 'Welcome'}" class="font-normal hover:font-bold inline-block">Home</router-link>
     </div>
     <div class="w-16 text-center inline-block">
-      <router-link to="/wallets" class="hover:font-bold">Wallets</router-link>
+      <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold">Wallets</router-link>
     </div>
   </div>
 </template>

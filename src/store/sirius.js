@@ -323,7 +323,7 @@ class ChainNetwork{
     if(profile){
       profile.init();
       state.currentNetworkProfile = profile;
-      console.log(state.currentNetworkProfile)
+      // console.log(state.currentNetworkProfile)
     }
   }
 
@@ -353,6 +353,26 @@ class ChainNetwork{
   // another declared in siriusStore
   getChainNodes() {
     return state.currentNetworkProfile.apiNodes ? state.currentNetworkProfile.apiNodes : [];
+  }
+
+  getProfileConfig() {
+    return state.currentNetworkProfileConfig ? state.currentNetworkProfileConfig : null;
+  }
+
+  getProfileNetwork(){
+    return this.getCurrentProfile().network;
+  }
+
+  getCurrency(){
+    return this.getProfileNetwork().currency;
+  }
+
+  getCurrencyDivisibility(){
+    return this.getCurrency().divisibility;
+  }
+
+  getCurrencyName(){
+    return this.getCurrency().name;
   }
 
   getNetworkPort(){

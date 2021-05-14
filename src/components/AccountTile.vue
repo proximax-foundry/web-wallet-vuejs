@@ -28,13 +28,13 @@
             </div>
             <div :class="showMenuCall?'':'hidden'" class="absolute right-0 w-24 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div class="py-1" role="none">
-                <router-link :to="`/details-account/${account.name}`" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Details</router-link>
+                <router-link :to="{ name: 'ViewAccountDetails', params: { name: account.name }}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Details</router-link>
                 <a v-if="!account.default" href="#" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="setAsDefaultAccount(account.address)">Make Default</a>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300">Make Default</div>
                 <a href="#" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="exportWallet()">Export</a>
-                <router-link :to="`/delete-account/${account.name}`" v-if="!account.default" href="#" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Delete</router-link>
+                <router-link :to="{ name: 'ViewDeleteAccount', params: { name: account.name}}" v-if="!account.default" href="#" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Delete</router-link>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300">Delete</div>
-                <router-link :to="isMultiSig?`/edit-account-multisign/${account.name}`:`/convert-account-multisign/${account.name}`" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">MultiSig</router-link>
+                <router-link :to="{ name: isMultiSig ? 'ViewEditAccountMultisig' : 'ViewConvertAccountMultisig', params: { name: account.name}}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">MultiSig</router-link>
               </div>
             </div>
           </div>

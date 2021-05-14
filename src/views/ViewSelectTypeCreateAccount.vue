@@ -5,8 +5,8 @@
   <div class='mt-2 py-3 gray-line text-center'>
     <div class="inline-block">
       <div class="flex justify-around pt-16 buttons_outer">
-        <router-link to="/create-account" class="inline-block md:block default-btn my-3 self-center">New</router-link>
-        <router-link to="/import-account" class="inline-block md:block default-btn my-3 self-center">From a Private Key</router-link>
+        <router-link :to="{ name : 'ViewCreateAccount'}" class="inline-block md:block default-btn my-3 self-center">New</router-link>
+        <router-link :to="{ name: 'ViewCreateAccountPrivateKey'}" class="inline-block md:block default-btn my-3 self-center">From a Private Key</router-link>
       </div>
     </div>
   </div>

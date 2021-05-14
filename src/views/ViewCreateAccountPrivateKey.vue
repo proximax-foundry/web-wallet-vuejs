@@ -2,7 +2,7 @@
   <div class="flex justify-between text-md">
     <div><span class="text-gray-300">Accounts ></span> <span class="text-blue-primary font-bold">Import Account</span></div>
     <div>
-      <router-link to="/select-type-creation-account" class="font-bold">Back</router-link>
+      <router-link :to="{name: 'SelectTypeCreateAccount'}" class="font-bold">Back</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center'>
@@ -31,7 +31,7 @@ import TextInput from '@/components/TextInput.vue'
 import PasswordInput from '@/components/PasswordInput.vue'
 
 export default {
-  name: 'ViewCreateAccount',
+  name: 'ViewCreateAccountPrivateKey',
   components: {
     TextInput,
     PasswordInput

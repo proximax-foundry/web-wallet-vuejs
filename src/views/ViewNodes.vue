@@ -2,7 +2,7 @@
   <div class="flex justify-between text-sm">
     <div><span class="text-gray-400">Nodes ></span> <span class="text-blue-primary font-bold">Blockchain</span></div>
     <div>
-      <router-link to="/services" class="font-bold" active-class="accounts">Services</router-link>
+      <router-link :to="{name: 'ViewAllServices'}" class="font-bold" active-class="accounts">Services</router-link>
     </div>
   </div>
 

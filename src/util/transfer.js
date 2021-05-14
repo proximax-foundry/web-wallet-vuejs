@@ -387,3 +387,18 @@ const getFeeStrategy = () => {
 export const makeTransaction = readonly({
   calculateFee
 });
+
+export const getFakeEncryptedMessageSize =(message)=>{
+  return EncryptedMessage.create(message, PublicAccount.createFromPublicKey("0".repeat(64)), "0".repeat(64)).size();
+}
+
+export const getPlainMessageSize =(message)=>{
+  return PlainMessage.create(message).size();
+}
+
+export const convertToCurrency =(value, divisibility)=>{
+
+  const exactValue = value/Math.pow(10, divisibility);
+
+  return new Intl.NumberFormat('en', {maximumFractionDigits: divisibility}).format(exactValue);
+}

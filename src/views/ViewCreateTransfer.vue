@@ -2,7 +2,7 @@
   <div class="flex justify-between text-md">
     <div><span class="text-gray-300">Transfer ></span> <span class="text-blue-primary font-bold">Make a Transaction</span></div>
     <div>
-      <!-- <router-link to="/select-type-creation-account" class="font-bold">Back to Services</router-link> -->
+      <!-- <router-link :to="{ name: 'ViewAllServices' }" class="font-bold">Services</router-link> -->
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center'>
@@ -70,7 +70,7 @@
             <input id="encryptedMsg" type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg==1" /><label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Encrypted</label>
           </div>
         </div>
-        <TextareaInput placeholder="Message" errorMessage="" v-model="messageText" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput" />
+        <TextareaInput placeholder="Message" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput" />
         <div class="rounded-2xl bg-gray-100 p-5">
           <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Unconfirmed/Recommended Fee:  {{ effectiveFee }} XPX</div>
         </div>
@@ -80,7 +80,7 @@
             <div class="flex">
               <img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
               <div class="inline-block self-center text-left">
-                <div>LockFund: 10.000000 XPX</div>
+                <div>LockFund: {{ lockFund }} XPX</div>
                 <div>Unconfirmed/Recommended Fee: 0.044500 XPX</div>
               </div>
             </div>
@@ -107,7 +107,7 @@ import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import MosaicInput from '@/components/MosaicInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
 import TextareaInput from '@/components/TextareaInput.vue';
-import { createTransaction, makeTransaction } from '../util/transfer.js'; //getMosaicsAllAccounts
+import { createTransaction, makeTransaction, getFakeEncryptedMessageSize, getPlainMessageSize } from '../util/transfer.js'; //getMosaicsAllAccounts
 import AddContactModal from '@/components/AddContactModal.vue';
 import NotificationModal from '@/components/NotificationModal.vue';
 import ConfirmSendModal from '@/components/ConfirmSendModal.vue';
@@ -115,7 +115,7 @@ import { verifyAddress } from '../util/functions.js';
 import { multiSign } from '../util/multiSignatory.js';
 
 export default {
-  name: 'ViewCreateAccount',
+  name: 'ViewCreateTransfer',
   components: {
     TextInput,
     PasswordInput,
@@ -131,6 +131,7 @@ export default {
   setup(){
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
+    const chainNetwork = inject("chainNetwork");
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showContactSelection = ref(false);
@@ -168,10 +169,19 @@ export default {
     const disablePassword = computed(() => disableAllInput.value);
     const cosignerBalanceInsufficient = ref(false);
 
+
+    console.log('chainNetwork.getProfileConfig().lockedFundsPerAggregate')
+    console.log(chainNetwork.getProfileConfig().lockedFundsPerAggregate)
+    console.log(siriusStore.state.currentNetworkProfileConfig.maxMessageSize)
+    const lockFund = computed(()=> chainNetwork.getProfileConfig().lockedFundsPerAggregate)
+    // const messageLimit = computed(()=> chainNetwork.getProfileConfig().maxMessageSize - 1);
+    const messageLimit = computed(()=> siriusStore.state.currentNetworkProfileConfig.maxMessageSize - 1);
+
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
 
     const addMsg = ref('');
+    const remainingChar = ref(0);
     const showAddressError = ref(false);
     const addressErrorMsg = computed(
       () => {
@@ -461,6 +471,29 @@ export default {
     watch(messageText, (n, o) => {
       if(n!=o){
         effectiveFee.value = makeTransaction.calculateFee(n, sendXPX.value, selectedMosaic.value);
+        if(encryptedMsg.value && messageText.value){
+          remainingChar.value = getFakeEncryptedMessageSize(messageText.value);
+        }
+        else{
+          remainingChar.value = getPlainMessageSize(messageText.value);
+        }
+      }
+    });
+
+    watch(encryptedMsgDisable, (n) => {
+      if(!n){
+        encryptedMsg.value = "";
+      }
+    });
+
+    watch(encryptedMsg, (n) => {
+      if(n){
+        if(messageText.value){
+          remainingChar.value = getFakeEncryptedMessageSize(messageText.value);
+        }
+      }
+      else{
+        remainingChar.value = getPlainMessageSize(messageText.value);
       }
     });
 
@@ -546,6 +579,9 @@ export default {
       disableMsgInput,
       disablePassword,
       cosignerBalanceInsufficient,
+      messageLimit,
+      remainingChar,
+      lockFund
     }
   },
 

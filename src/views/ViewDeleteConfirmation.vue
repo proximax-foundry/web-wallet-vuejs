@@ -12,7 +12,7 @@
       </div>
       <div class="my-5">Would you like to permanently delete this Sirius Wallet?</div>
       <div class="mt-10">
-        <router-link to="/wallets" class="default-btn mr-5 w-50 inline-block">Go Back</router-link>
+        <router-link :to="{name: 'ViewDisplayAllAccounts'}" class="default-btn mr-5 w-50 inline-block">Go Back</router-link>
         <ConfirmDeleteWalletModal :name="name" />
       </div>
     </div>

@@ -11,7 +11,7 @@
       </div>
     </div>
     <div class="mt-32">
-      <router-link to="/" class="blue-btn p-3 px-5">Home</router-link>
+      <router-link :to="{ name : 'Welcome'}" class="blue-btn p-3 px-5">Home</router-link>
     </div>
     <NotificationModal :toggleModal="toggleModal" msg="Wallet has been removed successfully" notiType="noti" time='1500' />
   </div>

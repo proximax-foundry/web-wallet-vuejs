@@ -2,8 +2,8 @@
   <div class="flex justify-between text-sm">
     <div><span class="text-gray-400">Address Book ></span> <span class="text-blue-primary font-bold">List</span></div>
     <div>
-      <router-link to="/add-contacts" class="font-bold" active-class="accounts">Add New Contact</router-link> |
-      <router-link to="/services" class="font-bold" active-class="accounts">Services</router-link>
+      <router-link :to="{name: 'ViewAddContacts'}" class="font-bold" active-class="accounts">Add New Contact</router-link> |
+      <router-link :to="{name: 'ViewAllServices'}" class="font-bold" active-class="accounts">Services</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line'>
