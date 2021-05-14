@@ -22,8 +22,7 @@ import {
 import { appStore } from "@/store/app";
 import { siriusStore } from "@/store/sirius";
 import { announceAggregateBonded, announceLockfundAndWaitForConfirmation, modifyMultisigAnnounceLockfundAndWaitForConfirmation, modifyMultisigAnnounceAggregateBonded } from '../util/listener.js';
-// 
-const config = require("@/../config/config.json");
+const walletKey = "sw";
 
 function verifyContactPublicKey(add, accountHttp){
   const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
@@ -231,7 +230,7 @@ function updateAccountMultisigGraphInfo(accountAddress){
           JSON.stringify(wallet)
         );
         localStorage.setItem(
-          config.localStorage.walletKey,
+          walletKey,
           JSON.stringify(appStore.state.wallets)
         );
       } catch (err) {
@@ -265,7 +264,7 @@ function checkIsMultiSig(accountAddress){
           JSON.stringify(wallet)
         );
         localStorage.setItem(
-          config.localStorage.walletKey,
+          walletKey,
           JSON.stringify(appStore.state.wallets)
         );
       } catch (err) {

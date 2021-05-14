@@ -1,7 +1,7 @@
 {
   "localStorage": {
     "chainNodesKey": "chain-nodes",
-    "walletKey": "sw-testnet"
+    "walletKey": "sw"
   },
   "chainNodes": [
     {
