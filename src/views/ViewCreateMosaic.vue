@@ -168,9 +168,9 @@ export default {
       durationCheckDisabled.value = false;
     }
 
-    const supply = ref('0');
+    const supply = ref(0);
     const accounts = computed( () => appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts);
-    const sendXPX = ref('0.000000');
+    const sendXPX = ref(0);
     const moreThanOneAccount = computed(()=> (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false);
 
     const changeSelection = (i) => {

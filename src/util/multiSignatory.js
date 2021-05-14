@@ -361,7 +361,7 @@ const createNewMultiSigAccount = (publicAccount) => {
     name: 'MULTISIG-' + publicAccount.address.address.substr(-4),
     address: publicAccount.address.address,
     publicAccount: publicKey,
-    balance: '0.000000',
+    balance: 0,
     isMultisign: null,
     multisigAccountGraphInfo: null,
     nis1Account: null,

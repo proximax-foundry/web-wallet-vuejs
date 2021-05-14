@@ -11,6 +11,7 @@ import {
 
 import { startListening, stopListening, addListenerstoAccount } from '../util/listener.js';
 import { multiSign } from '../util/multiSignatory.js';
+import { siriusStore, chainNetwork } from '@/store/sirius';
 
 const sdk = require('tsjs-xpx-chain-sdk');
 
@@ -37,6 +38,7 @@ const state = reactive({
     }
     return currentWallet.value.accounts.find((element) => element.default);
   }),
+  isLogin: false,
 });
 
 const explorerBlockHttp = (compactBlock) => {
@@ -66,9 +68,9 @@ function isPrivateKeyValid(privateKey) {
 }
 
 // verify private key and password
-function verifyExistingAccount(privateKey, networkType){
+function verifyExistingAccount(privateKey){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
-  const account = Account.createFromPrivateKey(privateKey, networkType);
+  const account = Account.createFromPrivateKey(privateKey, chainNetwork.getNetworkType());
   return (wallet.accounts.findIndex((element) => element.address == account.address.address) >= 0 ) ? true : false ;
 }
 
@@ -77,7 +79,7 @@ function getWalletByName(walletName) {
     walletName.includes(" ") === true
       ? walletName.split(" ").join("_")
       : walletName;
-  return state.wallets.find((element) => element.name == walletName);
+  return state.wallets.find((element) => element.name == walletName && element.networkName == siriusStore.state.chainNetworkName);
 }
 
 function getWalletIndexByName(walletName) {
@@ -85,7 +87,7 @@ function getWalletIndexByName(walletName) {
     walletName.includes(" ") === true
       ? walletName.split(" ").join("_")
       : walletName;
-  return state.wallets.findIndex((element) => element.name == walletName);
+  return state.wallets.findIndex((element) => element.name == walletName && element.networkName == siriusStore.state.chainNetworkName);
 }
 
 /* benjamin lai */
@@ -95,14 +97,19 @@ function getAccountByWallet(walletName){
   return account;
 }
 
-function importWallet(decryptedData, network){
+function importWallet(decryptedData, networkName, networkType){
   let walletName = decryptedData.name;
+  console.log(decryptedData);
   walletName = (walletName.includes(' ') === true) ? walletName.split(' ').join('_') : walletName;
   if(getWalletByName(walletName) == undefined){
-    if (decryptedData.accounts[0].network == network) {
+    // if (decryptedData.accounts[0].network == network) {
       const accounts = [];
+      const contacts = [];
       if (decryptedData.accounts.length !== undefined) {
-        for (const element of decryptedData.accounts) {
+        for (let element of decryptedData.accounts) {
+          var newAddress = Address.createFromPublicKey(element.publicAccount.publicKey, networkType);
+          element.address = newAddress.plain();
+          element.network = networkType;
           accounts.push(element);
         }
       } else {
@@ -110,9 +117,17 @@ function importWallet(decryptedData, network){
         return 'invalid_wallet';
       }
 
+      if (decryptedData.contacts.length !== undefined) {
+        for (const element of decryptedData.contacts) {
+          contacts.push(element);
+        }
+      }
+
       const wallet = {
         name: walletName,
-        accounts: accounts
+        accounts: accounts,
+        contacts: contacts,
+        networkName: networkName,
       }
       state.wallets.push(wallet);
       try {
@@ -127,17 +142,17 @@ function importWallet(decryptedData, network){
         return 'invalid_wallet';
       }
       return 'wallet_added';
-    } else {
-      // invalid network type error message
-      return 'invalid_network';
-    }
+    // } else {
+    //   // invalid network type error message
+    //   return 'invalid_network';
+    // }
   } else {
     // wallet already exist message
     return 'existed_wallet';
   }
 }
 
-function addNewWallet(walletName, password, networkType, privateKey) {
+function addNewWallet(networkName, walletName, password, networkType, privateKey) {
   let wallet = getWalletByName(walletName);
   if (wallet) {
     if (config.debug) {
@@ -172,6 +187,7 @@ function addNewWallet(walletName, password, networkType, privateKey) {
         : walletName,
     accounts: new Array(),
     contacts: new Array(),
+    networkName: networkName,
   };
 
   const account = wallet.open(encryptedPasswd);
@@ -195,8 +211,8 @@ function addNewWallet(walletName, password, networkType, privateKey) {
     publicAccount: publicKey,
     encrypted: wallet.encryptedPrivateKey.encryptedKey,
     iv: wallet.encryptedPrivateKey.iv,
-    network: wallet.network,
-    balance: '0.000000',
+    network: chainNetwork.getNetworkType(),
+    balance: 0,
     isMultisign: null,
     multisigAccountGraphInfo: null,
     nis1Account: null,
@@ -295,12 +311,43 @@ function deleteWallet(walletName) {
   }
   return -1;
 }
+
+/* Account section - benjamin lai */
+function createNewAccount(walletName, walletPassword){
+  const encryptedPasswd = new Password(walletPassword);
+  const account = SimpleWallet.create(walletName, encryptedPasswd, chainNetwork.getNetworkType());
+  const acc = account.open(encryptedPasswd);
+  account.publicKey = acc.publicKey;
+  account.privateKey = acc.privateKey;
+  return account;
+}
+
+function createNewAccountPrivateKey(walletName, walletPassword, pk){
+  const encryptedPasswd = new Password(walletPassword);
+  const account = SimpleWallet.createFromPrivateKey(
+    walletName,
+    encryptedPasswd,
+    pk,
+    chainNetwork.getNetworkType()
+  );
+  const acc = account.open(encryptedPasswd);
+  account.publicKey = acc.publicKey;
+  account.privateKey = acc.privateKey;
+  return account;
+}
+
 // check session to verify page has been refreshed
-function checkFromSession(appStore, siriusStore){
+function checkFromSession(siriusStore){
   const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
+  const selectedChainNode = sessionStorage.getItem('selectedChainNode');
+  const selectedNetwork = sessionStorage.getItem('selectedNetwork');
+  // const nodePort = sessionStorage.getItem('nodePort');
+  const selectedNetworkName = sessionStorage.getItem('selectedNetworkName');
+  siriusStore.restoreSiriusStateFromSessionStorage(selectedChainNode, selectedNetwork, selectedNetworkName);
   if(walletSession){
     // session is not null - copy to state
     currentWallet.value = walletSession;
+    state.isLogin = true;
     stopListening();
     startListening(currentWallet.value.accounts);
     getXPXBalance(walletSession.name, siriusStore).then(() => {
@@ -364,6 +411,7 @@ function loginToWallet(walletName, password, siriusStore) {
   }
 
   currentWallet.value = wallet;
+  state.isLogin = true;
   startListening(wallet.accounts);
   multiSign.updateAccountsMultiSign(walletName);
   multiSign.removeUnrelatedMultiSig(walletName);
@@ -392,6 +440,7 @@ function logoutOfWallet() {
   if (!currentWallet.value) {
     return false;
   }
+  state.isLogin = false;
   currentWallet.value = null;
   sessionStorage.removeItem('currentWalletSession');
   return true;
@@ -404,12 +453,12 @@ function logoutOfWallet() {
 //   public:
 //   private:
 // }
-function updateAccountState(account, networkType, accountName){
+function updateAccountState(account, accountName){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
   // get wallet index
   const addressObject = {
     address: account.address.address,
-    networktype: networkType
+    networktype: chainNetwork.getNetworkType()
   };
   const publicKey = {
     publicKey: account.publicKey,
@@ -426,8 +475,8 @@ function updateAccountState(account, networkType, accountName){
     publicAccount: publicKey,
     encrypted: account.encryptedPrivateKey.encryptedKey,
     iv: account.encryptedPrivateKey.iv,
-    network: networkType,
-    balance: '0.000000',
+    network: chainNetwork.getNetworkType(),
+    balance: 0,
     isMultisign: null,
     multisigAccountGraphInfo: null,
     nis1Account: null,
@@ -686,9 +735,8 @@ function saveContact(contactName, contactAddress){
 
 function fetchAccountInfo(wallet, accountHttp){
   const addresses = [];
-  const networkType = getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
   wallet.accounts.forEach((element) => {
-    addresses.push(Address.createFromPublicKey(element.publicAccount.publicKey, networkType));
+    addresses.push(Address.createFromPublicKey(element.publicAccount.publicKey, chainNetwork.getNetworkType()));
   });
 
   return new Promise((resolve, reject) => {
@@ -728,7 +776,6 @@ function getXPXBalance(walletName, siriusStore){
         account.mosaic = [];
         const mosaicList = [];
         const mosaicAmount = [];
-        
         const address = res.find((element) => element.address.address == add.address);
         if(address != undefined){
 
@@ -754,7 +801,7 @@ function getXPXBalance(walletName, siriusStore){
             account.balance = String(parseFloat(xpxAmount).toFixed(6));
           });
         }else{
-          account.balance = '0.000000';
+          account.balance = 0;
         }
       });
       resolve(wallet);
@@ -899,9 +946,40 @@ function decryptPrivateKey(password, encryptedKey, iv) {
     encrypted: encryptedKey,
     iv,
   };
-
+  console.log(common);
   Crypto.passwordToPrivateKey(common, wallet, WalletAlgorithm.Pass_bip32);
   return common.privateKey;
+}
+
+function deleteContact(contact){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  const contactIndex = wallet.contacts.findIndex((element) => element.name == contact.name && element.address == contact.address);
+  if (wallet.contacts.splice(contactIndex, 1).length != 0) {
+    localStorage.setItem(
+      config.localStorage.walletKey,
+      JSON.stringify(state.wallets)
+    );
+    return 1;
+  }
+  return -1;
+}
+
+function editContact(originalContact, contactName, contactAddress){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  const contactIndex = wallet.contacts.findIndex((element) => element.name == originalContact.name && element.address == originalContact.address);
+  if (wallet.contacts.splice(contactIndex, 1).length != 0) {
+    localStorage.setItem(
+      config.localStorage.walletKey,
+      JSON.stringify(state.wallets)
+    );
+    let status = saveContact(contactName, contactAddress);
+    if(status === true){
+      return true;
+    }else{
+      return status;
+    }
+  }
+  return -1;
 }
 
 export const appStore = readonly({
@@ -914,6 +992,8 @@ export const appStore = readonly({
   importWallet,
   addNewWallet,
   deleteWallet,
+  createNewAccount,
+  createNewAccountPrivateKey,
   loginToWallet,
   logoutOfWallet,
   getWalletByName,
@@ -947,5 +1027,7 @@ export const appStore = readonly({
   verifyPublicKey,
   updateCurrentWallet,
   removeMultiSigAccount,
+  deleteContact,
+  editContact,
 });
 

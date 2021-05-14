@@ -10,7 +10,8 @@
       </div>
       <div class="w-14 md:w-44 pl-3 text-center flex gray-line-left h-10 items-center">
         <div>
-          <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="siriusStore.state.selectedChainNode"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkType['name'] }}</div>
+          <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="siriusStore.state.selectedChainNode"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ siriusStore.state.chainNetworkName }}</div>
+          <!-- networkType['name'] -->
         </div>
       </div>
       <div class="w-52 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
@@ -32,6 +33,16 @@
     <StatusNotificationModal :toggleModal="toggleStatusNotification" :msg="notificationMessage" :notiType="notificationType" time='2500' />
   </div>
   <div class="flex-none self-center header-menu" v-else>
+    <div class="select mb-3 relative inline-block">
+      <select v-model="selectedNetwork" class="text-gray-600 w-full border-solid border-b border-gray-200 p-2 mb-2 focus:outline-none cursor-pointer" @change="selectNetwork">
+          <optgroup label="Networks">
+          <option v-for="(name, index) of chainsNetworks" :value="index" :key="index" >{{ name }}</option>
+          </optgroup>
+          <optgroup label="Setting">
+            <option value="customize" >Customize</option>
+          </optgroup>
+      </select>
+    </div>
     <div class="w-16 text-center inline-block">
       <router-link to="/" class="font-normal hover:font-bold inline-block">Home</router-link>
     </div>
@@ -67,49 +78,42 @@ export default{
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
-    // const router = useRouter();
+    const chainNetwork = inject("chainNetwork");
+    const router = useRouter();
     const toggleAnounceNotification = ref(false);
     const toggleStatusNotification = ref(false);
     const notificationMessage = ref('');
     const notificationType = ref('noti');
-    const networkType = computed(
-      () => {
-        return siriusStore.getNetworkByType(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network);
+    // const networkType = computed(
+    //   () => {
+    //     return siriusStore.getNetworkByType(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network);
+    //   }
+    // );
+
+    const loginStatus = computed(() => appStore.state.isLogin);
+    const chainsNetworks = computed(()=> siriusStore.state.availableNetworks);
+    const selectedNetwork = ref(siriusStore.state.selectedNetwork);
+    // set default for network selection if state.selectedNetwork is null
+    if(siriusStore.state.selectedNetwork === ''){
+      selectedNetwork.value = 0;
+    }
+
+    const selectNetwork= (e) =>{
+      if(e.target.value !== 'customize'){
+        chainNetwork.updateChainNetwork(parseInt(e.target.value));
       }
-    );
+    }
 
-    const logout = async () => {
-      await appStore.logoutOfWallet();
-      window.location.href = '/';
-      // if(sessionStorage.getItem('pageRefresh') == 'y'){
-      //   window.location.href = '/';
-      // }else{
-      //   router.push({ name: "Welcome"});
-      // }
-    };
-
-    const getAccountInfo = async () => {
-      if (!appStore.state.currentLoggedInWallet) {
-        // check sessionStorage
-        if(!appStore.checkFromSession(appStore, siriusStore)){
-          useRouter().replace({ path: "/" });
-        }
-      }
-      return;
-    };
-    getAccountInfo();
-
-    const loginStatus = computed(
-      () => {
-        if(!appStore.state.currentLoggedInWallet){
-          // if empty, check from sessionStorage
-          return appStore.checkFromSession(siriusStore.accountHttp, siriusStore.namespaceHttp);
+    const logout = () => {
+      let status = appStore.logoutOfWallet();
+      if(status){
+        if(sessionStorage.getItem('pageRefresh') == 'y'){
+          window.location.href = '/';
         }else{
-          // remain logged in when state.wallet is available
-          return true;
+          router.push({ name: "Welcome"});
         }
       }
-    );
+    };
 
     const totalBalance = computed(()=>{
       return appStore.getTotalBalance();
@@ -164,7 +168,7 @@ export default{
     return {
       appStore,
       siriusStore,
-      networkType,
+      // networkType,
       loginStatus,
       logout,
       totalBalance,
@@ -172,6 +176,10 @@ export default{
       toggleStatusNotification,
       notificationMessage,
       notificationType,
+      chainsNetworks,
+      selectedNetwork,
+      // selectedNetworkName,
+      selectNetwork,
       // walletName
     };
   },

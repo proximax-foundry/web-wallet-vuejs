@@ -8,7 +8,7 @@ import {
 import mitt from 'mitt';
 const transferEmitter = mitt();
 import { appStore } from "@/store/app";
-import { siriusStore } from "@/store/sirius";
+import { siriusStore, chainNetwork } from "@/store/sirius";
 import { multiSign } from '../util/multiSignatory.js';
 import { transactions } from '../util/transactions.js';
 
@@ -21,12 +21,7 @@ const state = reactive({
 const startListening = (accounts) => {
   // console.log(location.protocol);
   accounts.forEach((account) => {
-    let connect = new Listener(
-      `${
-        location.protocol == "http:" ? "ws://" : "wss://"
-      }${siriusStore.currentChainNode.hostname}${location.protocol == "http:" ?(':'+siriusStore.currentChainNode.port):''}`,
-      WebSocket
-    );
+    let connect = new Listener(chainNetwork.buildWSEndpointURL(siriusStore.state.selectedChainNode), WebSocket);
     state.connector.push({listener: connect, account: account});
     state.connector.find((element) => element.account.address == account.address).listener.open().then(() => {
       enableListeners(account, connect);
@@ -49,12 +44,7 @@ const stopListening = () => {
 
 // add listener to single account
 const addListenerstoAccount = (account) => {
-  let connect = new Listener(
-    `${
-      location.protocol == "http:" ? "ws://" : "wss://"
-    }${siriusStore.currentChainNode.hostname}${location.protocol == "http:" ?(':'+siriusStore.currentChainNode.port):''}`,
-    WebSocket
-  );
+  let connect = new Listener(chainNetwork.buildWSEndpointURL(siriusStore.state.selectedChainNode), WebSocket);
   state.connector.push({listener: connect, account: account});
   state.connector.find((element) => element.account.address == account.address).listener.open().then(() => {
     enableListeners(account, connect);
@@ -187,8 +177,8 @@ const unconfirmedListener = (accountDetail, listener) => {
 // eslint-disable-next-line no-unused-vars
 const statusListener = (accountDetail, listener) => {
   listener.status(accountDetail).subscribe(transactionStatusError => {
-    console.log('status listener');
-    console.log(transactionStatusError);
+    // console.log('status listener');
+    // console.log(transactionStatusError);
     transferEmitter.emit('STATUS_NOTIFICATION', {
       status: true,
       message: transactionStatusError,
@@ -205,7 +195,7 @@ const statusListener = (accountDetail, listener) => {
 // eslint-disable-next-line no-unused-vars
 const unconfirmedRemovedListener = (accountDetail, listener) => {
   listener.unconfirmedRemoved(accountDetail).subscribe(hash => {
-    console.log('Unconfirmed removed: ' + hash + ' ' + accountDetail.address);
+    // console.log('Unconfirmed removed: ' + hash + ' ' + accountDetail.address);
     transferEmitter.emit('UPDATE_DASHBOARD', {
       status: true,
       from: 'unconfirmedRemoved',
@@ -259,7 +249,7 @@ const aggregateBondedAddedListener = (accountDetail, listener) => {
 // eslint-disable-next-line no-unused-vars
 const aggregateBondedRemovedListener = (accountDetail, listener) => {
   listener.aggregateBondedRemoved(accountDetail).subscribe(hash => {
-    console.log('Aggregate bonded removed: ' + hash + ' ' + accountDetail.address);
+    // console.log('Aggregate bonded removed: ' + hash + ' ' + accountDetail.address);
     transferEmitter.emit('UPDATE_DASHBOARD', {
       status: true,
       from: 'aggregateBondedRemoved',
@@ -317,7 +307,7 @@ async function announceLockfundAndWaitForConfirmation(senderAddress, signedLockF
 
       const txConfirmed = announceLockfundListener.confirmed(senderAddress).subscribe(confirmedTx => {
         if (confirmedTx && confirmedTx.transactionInfo && confirmedTx.transactionInfo.hash === lockHash) {
-          console.log('Lockfund (' + lockHash + ') confirmed at height: ' + confirmedTx.transactionInfo.height.compact());
+          // console.log('Lockfund (' + lockHash + ') confirmed at height: ' + confirmedTx.transactionInfo.height.compact());
           if (txConfirmed) {
             txConfirmed.unsubscribe();
           }
@@ -328,7 +318,7 @@ async function announceLockfundAndWaitForConfirmation(senderAddress, signedLockF
           resolve(confirmedTx);
         }
       }, error => {
-        console.error('Lockfund confirmation (' + lockHash + ') subscription failed: ' + error);
+        // console.error('Lockfund confirmation (' + lockHash + ') subscription failed: ' + error);
         if (txConfirmed) {
           txConfirmed.unsubscribe();
         }
@@ -342,7 +332,7 @@ async function announceLockfundAndWaitForConfirmation(senderAddress, signedLockF
       transactionHttp.announce(signedLockFundsTransaction).subscribe(
           // eslint-disable-next-line no-unused-vars
           (message)=>{
-              console.log('Lockfund transaction (' + lockHash + ') announced');
+              // console.log('Lockfund transaction (' + lockHash + ') announced');
               transferEmitter.emit('CONFIRMED_NOTIFICATION', {
                 status: true,
                 message: 'Lockfund transaction announced',
@@ -363,7 +353,7 @@ async function announceLockfundAndWaitForConfirmation(senderAddress, signedLockF
       );
 
     }).catch(reason => {
-      console.error('Lockfund transaction (' + lockHash + ') listener exception caught: ' + reason);
+      // console.error('Lockfund transaction (' + lockHash + ') listener exception caught: ' + reason);
       announceLockfundListener.terminate();
       reject(reason);
     });
@@ -401,7 +391,7 @@ function announceAggregateBonded(senderAddress, aggBondTx, aggBondHash, txConfir
           resolve(aggTransaction);
         }
       }, error => {
-        console.error('Aggregate bonded transaction (' + aggBondHash + ') subscription failed: ' + error);
+        // console.error('Aggregate bonded transaction (' + aggBondHash + ') subscription failed: ' + error);
         if (partialAdded) {
           partialAdded.unsubscribe();
         }
@@ -438,7 +428,7 @@ function announceAggregateBonded(senderAddress, aggBondTx, aggBondHash, txConfir
       );
 
     }).catch(reason => {
-      console.error('Aggregate bonded transaction (' + aggBondHash + ') listener exception caught: ' + reason);
+      // console.error('Aggregate bonded transaction (' + aggBondHash + ') listener exception caught: ' + reason);
       announceAggregateBondedListener.terminate();
       reject(reason);
     });
@@ -510,7 +500,7 @@ async function modifyMultisigAnnounceLockfundAndWaitForConfirmation(announceLock
       );
 
     }).catch(reason => {
-      console.error('Lockfund transaction (' + lockHash + ') listener exception caught: ' + reason);
+      // console.error('Lockfund transaction (' + lockHash + ') listener exception caught: ' + reason);
       announceLockfundListener.terminate();
       reject(reason);
     });
@@ -536,7 +526,7 @@ function modifyMultisigAnnounceAggregateBonded(announceAggregateBondedListener, 
 
       const partialAdded = announceAggregateBondedListener.aggregateBondedAdded(senderAddress).subscribe(aggTransaction => {
         if (aggTransaction && aggTransaction.transactionInfo && aggTransaction.transactionInfo.hash === aggBondHash) {
-          console.log('Aggregate bonded transaction (' + aggBondHash + ') added');
+          // console.log('Aggregate bonded transaction (' + aggBondHash + ') added');
           if (partialAdded) {
             partialAdded.unsubscribe();
           }
@@ -547,7 +537,7 @@ function modifyMultisigAnnounceAggregateBonded(announceAggregateBondedListener, 
           resolve(aggTransaction);
         }
       }, error => {
-        console.error('Aggregate bonded transaction (' + aggBondHash + ') subscription failed: ' + error);
+        // console.error('Aggregate bonded transaction (' + aggBondHash + ') subscription failed: ' + error);
         if (partialAdded) {
           partialAdded.unsubscribe();
         }
@@ -569,7 +559,7 @@ function modifyMultisigAnnounceAggregateBonded(announceAggregateBondedListener, 
           transferEmitter.emit('ANNOUNCE_AGGREGATE_BONDED', {
             status: true,
           });
-          console.log('Aggregate transaction (' + aggBondHash + ') announced');
+          // console.log('Aggregate transaction (' + aggBondHash + ') announced');
         }, 
         (error)=>{
           console.log(error);
@@ -584,7 +574,7 @@ function modifyMultisigAnnounceAggregateBonded(announceAggregateBondedListener, 
       );
 
     }).catch(reason => {
-      console.error('Aggregate bonded transaction (' + aggBondHash + ') listener exception caught: ' + reason);
+      // console.error('Aggregate bonded transaction (' + aggBondHash + ') listener exception caught: ' + reason);
       announceAggregateBondedListener.terminate();
       reject(reason);
     });

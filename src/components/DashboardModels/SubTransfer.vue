@@ -15,6 +15,10 @@
             <div>Type:</div>
             <div>{{ innerTransaction.type }}</div>
           </div>
+          <div v-if="amount > 0">
+            <div>Amount:</div>
+            <div>{{ amount }} XPX</div>
+          </div>
           <div>
             <div>From:</div><br>
             <div>{{ innerTransaction.signer.address.address }}</div>
@@ -111,6 +115,7 @@ export default{
     const publicKeyPattern = "^[0-9A-Fa-f]{64}$";
     const isShowMessage = ref(false);
     const encryptedMessage = ref('');
+    const amount = ref('');
 
     const disableDecrypt = computed(() => {
       if(walletPassword.value.match(passwdPattern)){
@@ -134,6 +139,17 @@ export default{
 
     nameType.value = transactions.arraTypeTransaction[transactions.getNameTypeTransaction(p.innerTransaction.type)].name;
 
+    //get amount
+    if(p.innerTransaction.mosaics != undefined){
+      if (p.innerTransaction.mosaics.length > 0) {
+        transactions.getAmount(p.innerTransaction.mosaics[0].id, p.innerTransaction).then((amountParts) => {
+          amount.value = amountParts.part1 + amountParts.part2;
+        });
+        amount.value = '';
+      }
+    }else{
+      amount.value = '';
+    }
     // get recipient addresss
     let isValidPublicKey = false;
     // const initiate = () => {
@@ -206,6 +222,7 @@ export default{
       disableDecrypt,
       isShowMessage,
       encryptedMessage,
+      amount,
     }
   }
 }

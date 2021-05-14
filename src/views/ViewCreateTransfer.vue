@@ -152,7 +152,7 @@ export default {
     const selectedMosaicAmount = ref([]);
     const mosaicSupplyDivisibility = ref([]);
     const currentlySelectedMosaic = ref([]);
-    const sendXPX = ref('0.000000');
+    const sendXPX = ref(0);
     const encryptedMsgDisable = ref(true);
     const toggleConfirm = ref(false);
     const forceSend = ref(false);
@@ -297,12 +297,13 @@ export default {
       recipient.value = '';
       encryptedMsgDisable.value = true;
       messageText.value = '';
-      sendXPX.value = '0.000000';
+      sendXPX.value = 0;
       emitter.emit("CLEAR_SELECT", 0);
       selectedMosaic.value = [];
       mosaicsCreated.value = [];
       selectedMosaicAmount.value = [];
       mosaicSupplyDivisibility.value = [];
+      showContactSelection.value = false;
     };
 
     const clearMsg = () => {
@@ -320,7 +321,17 @@ export default {
         toggleConfirm.value = true;
       }else{
         // console.log(recipient.value.toUpperCase() + ' : ' + walletPassword.value + ' : ' + selectedAccName.value + ' : ' + encryptedMsg.value + ' : ' + walletPassword.value)
-        let transferStatus = createTransaction(recipient.value.toUpperCase(), sendXPX.value, messageText.value, selectedMosaic.value, mosaicSupplyDivisibility.value, walletPassword.value, selectedAccName.value, encryptedMsg.value, appStore, siriusStore);
+        let selectedCosign;
+        if(isMultiSigBool.value){
+          // if this is a multisig, get cosigner name along
+          let selectedCosignList = getWalletCosigner().list;
+          if(selectedCosignList.length > 1){
+            selectedCosign = cosignAddress.value;
+          }else{
+            selectedCosign = getWalletCosigner().list[0].address;
+          }
+        }
+        let transferStatus = createTransaction(recipient.value.toUpperCase(), sendXPX.value, messageText.value, selectedMosaic.value, mosaicSupplyDivisibility.value, walletPassword.value, selectedAccName.value, selectedCosign, encryptedMsg.value, appStore, siriusStore);
         if(!transferStatus){
           err.value = 'Invalid wallet password';
         }else{
@@ -332,7 +343,6 @@ export default {
             // add new contact
             togglaAddContact.value = true;
           }else{
-            // console.log('clearInput()');
             clearInput();
           }
           // show notification
@@ -418,7 +428,7 @@ export default {
     });
 
     watch(balance, (n) => {
-      if(n == '0.000000'){
+      if(n == 0){
         showBalanceErr.value = true;
       }
     });
@@ -456,7 +466,6 @@ export default {
 
     emitter.on("CLOSE_MODAL", payload => {
       togglaAddContact.value = payload;
-      console.log('clearInput()');
       clearInput();
     });
 

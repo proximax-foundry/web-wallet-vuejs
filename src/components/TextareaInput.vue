@@ -7,13 +7,14 @@
       <textarea :value="modelValue" :disabled="disabled==1" @input="$emit('update:modelValue', $event.target.value)" @keypress="countChar" rows=2 class="mt-7 ml-2 self-center w-full text-gray-500 focus:outline-none bg-white text-md" :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()"></textarea>
       <div class="w-1 flex-none"></div>
     </div>
-    <div class="float-right mt-1 text-tsm text-gray-800">{{remainingChar}}/1024</div>
+    <div class="float-right mt-1 text-tsm text-gray-800">{{remainingChar}}/1023</div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
   </div>
 </template>
 
 <script>
 import { ref, getCurrentInstance } from 'vue';
+import { PlainMessage } from 'tsjs-xpx-chain-sdk';
 export default{
   props: [
     'placeholder',
@@ -38,8 +39,8 @@ export default{
     const textErr = ref(false);
 
     const countChar = (e) => {
-      var limit = 1024;
-      remainingChar.value = e.target.value.length;
+      var limit = 1023;
+      remainingChar.value = PlainMessage.create(e.target.value).size();
       if(p.msgOpt=='regular'){
         if( e.target.value.length > limit) {
           e.returnValue = false;

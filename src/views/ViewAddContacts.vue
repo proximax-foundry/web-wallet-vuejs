@@ -1,11 +1,12 @@
 <template>
-  <div class="flex justify-between text-md">
-    <div><span class="text-gray-300">Address Book ></span> <span class="text-blue-primary font-bold">Add Contacts</span></div>
+  <div class="flex justify-between text-sm">
+    <div><span class="text-gray-400">Address Book ></span> <span class="text-blue-primary font-bold">Add Contacts</span></div>
     <div>
-      <router-link to="/" class="font-bold">List</router-link>
+      <router-link to="/address-book" class="font-bold" active-class="accounts">Address Book</router-link> | 
+      <router-link to="/services" class="font-bold" active-class="accounts">Services</router-link>
     </div>
   </div>
-  <div class='mt-2 py-3 gray-line text-center'>
+  <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>
     <form @submit.prevent="create" class="mt-10">
       <fieldset class="w-full">
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
@@ -20,9 +21,10 @@
   </div>
 </template>
 <script>
-import { computed, ref, inject, watch } from 'vue';
+import { computed, getCurrentInstance, ref, inject, watch } from 'vue';
 import TextInput from '@/components/TextInput.vue';
 import { verifyAddress } from '../util/functions.js';
+import { useRouter } from 'vue-router';
 
 export default {
   name: 'ViewCreateAccount',
@@ -30,13 +32,15 @@ export default {
     TextInput
   },
   setup(){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const appStore = inject("appStore");
-    // const siriusStore = inject("siriusStore");
     const contactName = ref('');
     const address = ref('');
     const err = ref('');
     const verifyAdd = ref(false);
     const addMsg = ref('');
+    const router = useRouter();
 
     const disableSave = computed(
       () => !(
@@ -71,11 +75,21 @@ export default {
         err.value = '';
         contactName.value = '';
         address.value = '';
-        alert('Contact added');
+        emitter.emit('CONFIRMED_NOTIFICATION', {
+          status: true,
+          message: 'Transaction confirmed',
+          notificationType: 'noti'
+        });
+        router.push({ name: 'ViewAddressBook' });
       }else{
         err.value = added;
       }
     }
+
+    const clearInput =() => {
+      contactName.value = '';
+      address.value = '';
+    };
 
     return {
       err,
@@ -85,7 +99,8 @@ export default {
       disableSave,
       showAddErr,
       showNameErr,
-      SaveContact
+      SaveContact,
+      clearInput,
     }
   },
 
