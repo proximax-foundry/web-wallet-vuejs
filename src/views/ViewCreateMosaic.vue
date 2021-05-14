@@ -57,7 +57,7 @@
             <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Unconfirmed/Recommended Fee: 0.<span class="text-txs">062750</span> XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFee }} XPX<span class="text-txs">000000</span> XPX</div>
+            <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFeeCurrency }} {{currencyName}}</div>
           </div>
           <PasswordInput placeholder="Enter Your Wallet Password" :errorMessage="'Please enter your wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
@@ -137,6 +137,8 @@ export default {
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
     const durationCheckDisabled = ref(false);
+
+    const currencyName = computed(() => chainNetwork.getCurrencyName());
 
     const disableCreate = computed(() => !(
       walletPassword.value.match(passwdPattern) && !disabledMutableCheck.value && (divisibility.value != '') && (supply.value > 0) && (!showDurationErr.value)
@@ -260,7 +262,8 @@ export default {
       }
     };
 
-    const rentalFee = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
+    const rentalFee = computed(()=> convertToExact(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
+    const rentalFeeCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
 
     emitter.on("CLOSE_NOTIFICATION", payload => {
       toggleAnounceNotification.value = payload;
@@ -306,7 +309,8 @@ export default {
       duration,
       showDurationErr,
       durationCheckDisabled,
-      rentalFee,
+      rentalFeeCurrency,
+      currencyName
     }
   },
 

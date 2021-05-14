@@ -27,7 +27,7 @@
           <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4">
             <div v-if="getWalletCosigner().list.length > 0">
               <div class="text-tsm">Cosigner:
-                <span class="font-bold" v-if="getWalletCosigner().list.length == 1">{{ getWalletCosigner().list[0].name }} (Balance: {{ getWalletCosigner().list[0].balance }} XPX) <span v-if="getWalletCosigner().list[0].balance < 10.0445" class="error">- Insufficient balance</span></span>
+                <span class="font-bold" v-if="getWalletCosigner().list.length == 1">{{ getWalletCosigner().list[0].name }} (Balance: {{ getWalletCosigner().list[0].balance }} XPX) <span v-if="getWalletCosigner().list[0].balance < lockFundTotalFee.value" class="error">- Insufficient balance</span></span>
                 <span class="font-bold" v-else><select v-model="cosignAddress"><option v-for="(element, item) in getWalletCosigner().list" :value="element.address" :key="item">{{ element.name }} (Balance: {{ element.balance }} XPX)</option></select></span>
                 <div v-if="cosignerBalanceInsufficient" class="error">- Insufficient balance</div>
               </div>
@@ -80,8 +80,8 @@
             <div class="flex">
               <img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
               <div class="inline-block self-center text-left">
-                <div>LockFund: {{ lockFund }} XPX</div>
-                <div>Unconfirmed/Recommended Fee: 0.044500 XPX</div>
+                <div>LockFund: {{ lockFundCurrency }} {{ currencyName }}</div>
+                <div>Unconfirmed/Recommended Fee: {{ lockFundTxFee }} {{ currencyName }}</div>
               </div>
             </div>
           </div>
@@ -169,11 +169,17 @@ export default {
     const disablePassword = computed(() => disableAllInput.value);
     const cosignerBalanceInsufficient = ref(false);
 
+    const currencyName = computed(() => chainNetwork.getCurrencyName());
 
     console.log('chainNetwork.getProfileConfig().lockedFundsPerAggregate')
     console.log(chainNetwork.getProfileConfig().lockedFundsPerAggregate)
     console.log(siriusStore.state.currentNetworkProfileConfig.maxMessageSize)
-    const lockFund = computed(()=> chainNetwork.getProfileConfig().lockedFundsPerAggregate)
+    const lockFund = computed(()=> convertToExact(chainNetwork.getProfileConfig().lockedFundsPerAggregate, chainNetwork.getCurrencyDivisibility()))
+    const lockFundCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().lockedFundsPerAggregate, chainNetwork.getCurrencyDivisibility()))
+
+    const lockFundTxFee = ref(0.0445);
+    const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
+
     // const messageLimit = computed(()=> chainNetwork.getProfileConfig().maxMessageSize - 1);
     const messageLimit = computed(()=> siriusStore.state.currentNetworkProfileConfig.maxMessageSize - 1);
 
@@ -222,7 +228,7 @@ export default {
     if(isMultiSigBool.value){
       let cosign = multiSign.fetchWalletCosigner(selectedAccAdd.value);
       if(cosign.list.length > 0){
-        if(cosign.list[0].balance < 10.0445){
+        if(cosign.list[0].balance < lockFundTotalFee.value){
           disableAllInput.value = true;
           cosignerBalanceInsufficient.value = true;
         }else{
@@ -235,7 +241,7 @@ export default {
     }
 
     // check account balance at first load
-    if(balance.value < 10.0445){
+    if(balance.value < lockFundTotalFee.value){
       showBalanceErr.value = true;
     }
 
@@ -264,7 +270,7 @@ export default {
           cosignAddress.value = cosign.list[0].address;
           // console.log('cosign.list[0].balance');
           // console.log(cosign.list[0].balance);
-          if(cosign.list[0].balance < 10.0445){
+          if(cosign.list[0].balance < lockFundTotalFee.value){
             disableAllInput.value = true;
             // console.log('disableAllInput();')
           }else{
@@ -429,7 +435,7 @@ export default {
     watch(cosignAddress, (n, o) => {
       if(n != o){
         let cosign = multiSign.fetchMultiSigCosigners(selectedAccAdd.value);
-        if(cosign.list.find((element) => element.address == n).balance < 10.0455){
+        if(cosign.list.find((element) => element.address == n).balance < lockFundTotalFee.value){
           cosignerBalanceInsufficient.value = true;
         }else{
           cosignerBalanceInsufficient.value = false;
@@ -581,7 +587,9 @@ export default {
       cosignerBalanceInsufficient,
       messageLimit,
       remainingChar,
-      lockFund
+      lockFundCurrency,
+      currencyName,
+      lockFundTxFee
     }
   },
 
