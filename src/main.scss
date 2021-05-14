@@ -40,6 +40,10 @@
   --font-family-monospace: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
 }
 
+a{
+  @apply cursor-pointer;
+}
+
 body{
   font-family: Lato,Arial,Helvetica,sans-serif !important;
 }

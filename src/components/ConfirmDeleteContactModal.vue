@@ -1,6 +1,6 @@
 <template>
   <div class="inline-block">
-    <a href="#" class="action-icon border rounded-xl relative bg-gray-100 border-gray-400 w-10 h-8 inline-block shadow-md" @click="toggleModal = !toggleModal">
+    <a class="action-icon border rounded-xl relative bg-gray-100 border-gray-400 w-10 h-8 inline-block shadow-md" @click="toggleModal = !toggleModal">
       <font-awesome-icon icon="trash-alt" class="w-5 h-5 text-gray-400 text-sm cursor-pointer inline-block absolute" title="Remove this contact" style="top: 5px; left: 11px;"></font-awesome-icon>
     </a>
     <transition

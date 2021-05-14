@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a href="#" @click="toggleModal = !toggleModal" class="block big-default-btn my-3 self-center w-full">Sign In</a>
+    <a @click="toggleModal = !toggleModal" class="block big-default-btn my-3 self-center w-full">Sign In</a>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"

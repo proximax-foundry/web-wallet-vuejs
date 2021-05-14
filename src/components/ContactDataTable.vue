@@ -4,7 +4,7 @@
       <div class="flex-grow transition ease-in duration-300 w-full rounded-full px-5 py-1 mb-5" :class="borderColor">
         <input v-model="filters['global'].value" type="text" class="w-full outline-none text-sm" placeholder="Search" @click="clickInputText()" @blur="blurInputText()">
       </div>
-      <a href="#" @click="exportCSV($event)" class="export-icon border-gray-300 border rounded-lg bg-gray-100 w-9 h-9 ml-3 relative">
+      <a @click="exportCSV($event)" class="export-icon border-gray-300 border rounded-lg bg-gray-100 w-9 h-9 ml-3 relative">
         <font-awesome-icon icon="download" class="w-5 h-5 text-gray-400 cursor-pointer inline-block absolute" style="top: 5px; left: 8px;" title="Download CSV file"></font-awesome-icon>
       </a>
     </div>
