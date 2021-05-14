@@ -83,10 +83,10 @@ const formatTransaction = (transaction, names) => {
   let recipientAddress = getRecipient(transaction, keyName);
   let recipientName = names.find((element) =>  element.address == recipientAddress);
   transaction.recipientName = (recipientName)?recipientName.name:'';
-  if(recipientAddress.length > 10){
+  if(recipientAddress.length >= 40){
     transaction.recipientAddress = appStore.pretty(recipientAddress);
   }
-  transaction.recipientAddress = appStore.pretty(recipientAddress);
+  // transaction.recipientAddress = appStore.pretty(recipientAddress);
   transaction.block = transaction.transactionInfo.height.compact();
   transaction.data = transaction;
   transaction.hash = transaction.transactionInfo.hash;

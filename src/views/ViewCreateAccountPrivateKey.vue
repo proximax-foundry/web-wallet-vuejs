@@ -2,7 +2,7 @@
   <div class="flex justify-between text-md">
     <div><span class="text-gray-300">Accounts ></span> <span class="text-blue-primary font-bold">Import Account</span></div>
     <div>
-      <router-link to="/select-type-creation-account" class="font-bold">Back</router-link>
+      <router-link :to="{name: 'SelectTypeCreateAccount'}" class="font-bold">Back</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center'>
@@ -31,14 +31,13 @@ import TextInput from '@/components/TextInput.vue'
 import PasswordInput from '@/components/PasswordInput.vue'
 
 export default {
-  name: 'ViewCreateAccount',
+  name: 'ViewCreateAccountPrivateKey',
   components: {
     TextInput,
     PasswordInput
   },
   setup(){
     const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
     const err = ref(false);
     const nis1Swap = ref(false);
     const privKey = ref("");
@@ -63,8 +62,7 @@ export default {
       // }
 
       if(!appStore.verifyExistingAccountName(appStore.state.currentLoggedInWallet.name, accountName.value)){
-        const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
-        var verifyPrivateKey = appStore.verifyExistingAccount(privKey.value, networkType);
+        var verifyPrivateKey = appStore.verifyExistingAccount(privKey.value);
         var result = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword.value);
         if(verifyPrivateKey){
           err.value = "Account with this Private Key is already in the wallet";
@@ -74,9 +72,9 @@ export default {
           err.value = "Password for wallet " + appStore.state.currentLoggedInWallet.name + " is invalid" ;
         } else {
           // create account
-          const account = siriusStore.createNewAccountPrivateKey(appStore.state.currentLoggedInWallet.name, walletPassword.value, privKey.value, networkType, appStore);
+          const account = appStore.createNewAccountPrivateKey(appStore.state.currentLoggedInWallet.name, walletPassword.value, privKey.value, appStore);
           // update to state
-          appStore.updateAccountState(account, networkType, accountName.value);
+          appStore.updateAccountState(account, accountName.value);
           router.push({ name: "createdAccount", params: {publicKey: account.publicKey, privateKey: account.privateKey, address: appStore.pretty(account.address.address), name: accountName.value }});
         }
       }else{
@@ -99,6 +97,7 @@ export default {
     clearInput: function() {
       this.accountName = "";
       this.walletPassword = "";
+      this.privKey = "";
     },
   },
 }

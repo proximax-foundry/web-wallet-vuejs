@@ -46,7 +46,7 @@ import { useRouter } from 'vue-router';
 
 export default{
   name: 'ConfirmDeleteWalletModal',
-  props:['name'],
+  props:['name', 'networkName'],
   data() {
     return {
       toggleModal: false,
@@ -64,7 +64,7 @@ export default{
       )
     );
     const deleteWallet = () => {
-      var a = appStore.deleteWallet(p.name);
+      var a = appStore.deleteWallet(p.name, p.networkName);
       if(a>0){
         // this.emitter.emit("DELETE_WALLET", true);
         router.push({ name: 'ViewWallets', params: {deleteWallet: 'success' } });

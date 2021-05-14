@@ -104,6 +104,7 @@ export default{
 
     // get divisibility
     p.transaction.innerTransactions.forEach((innerTransaction) => {
+      console.log(innerTransaction);
       if(transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.mosaicDefinition.id){
         divisibility.value = innerTransaction.mosaicProperties.divisibility;
       }

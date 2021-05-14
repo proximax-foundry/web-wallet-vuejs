@@ -9,7 +9,7 @@
         <p>Restore your existing ProximaX Sirius Wallet, import a private key from another service or create a new wallet right now!</p>
         <div class="w-10/12 lg:w-8/12 self-center inline-block">
           <div class="error error_box" v-if="err!=''">{{ err }}</div>
-          <SelectInputPlugin placeholder="Select network" errorMessage="Select a Network" v-model="selectedNetwork" :options="networks" />
+          <div class="text-left text-tsm my-4 ml-4 text-gray-600"><b>Network</b>: {{ selectedNetworkName }}</div>
           <PasswordInput placeholder="Private Key" errorMessage="Invalid private key" icon="key" v-model="privKey" class="ml-1" />
           <label class="inline-flex items-center mb-5">
               <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="nis1Swap">
@@ -83,12 +83,12 @@
         <div class="inline-block mt-10 w-full">
           <div class="grid xs:grid-cols-1 md:grid-cols-3">
             <div class="px-5 self-center">
-              <a href="#" class="block big-default-btn my-3 self-center w-full" @click="showPK = !showPK">{{ showPK?'Hide':'Show' }} Private Key</a>
+              <a class="block big-default-btn my-3 self-center w-full" @click="showPK = !showPK">{{ showPK?'Hide':'Show' }} Private Key</a>
             </div>
             <div class="px-5">
-              <a href="#" class="block big-default-btn my-3 self-center w-full">Save Paper Wallet</a>
+              <a class="block big-default-btn my-3 self-center w-full">Save Paper Wallet</a>
             </div>
-            <div class="px-5 self-center"><router-link to="/" class="block big-default-btn my-3 self-center">Continue</router-link></div>
+            <div class="px-5 self-center"><router-link :to="{name: 'Welcome'}" class="block big-default-btn my-3 self-center">Continue</router-link></div>
           </div>
         </div>
       </div>
@@ -99,7 +99,6 @@
 <script>
 import { computed, inject, ref, getCurrentInstance } from 'vue';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
-import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { copyKeyFunc } from '../util/functions.js';
@@ -108,7 +107,8 @@ export default {
   name: 'ViewCreateNewWallet',
   components: {
     FontAwesomeIcon,
-    SelectInputPlugin, TextInput, PasswordInput
+    TextInput,
+    PasswordInput
   },
   data() {
     return {
@@ -120,11 +120,14 @@ export default {
     const internalInstance = getCurrentInstance();
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
+    const chainNetwork = inject("chainNetwork");
+    const selectedNetwork = computed(()=> chainNetwork.getNetworkType());
+    const selectedNetworkName = computed(()=> siriusStore.state.chainNetworkName );
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref("");
     const newWallet = ref("");
-    const selectedNetwork = ref("168");
-    const networks = ref(siriusStore.state.network);
+    // const selectedNetwork = ref("168");
+    // const networks = ref(siriusStore.state.network);
     const walletName = ref("");
     const passwd = ref("");
     const privateKey = ref("");
@@ -155,6 +158,7 @@ export default {
       let result = 0;
 
       result = appStore.addNewWallet(
+        siriusStore.state.chainNetworkName,
         walletName.value,
         passwd.value,
         selectedNetwork.value,
@@ -175,7 +179,6 @@ export default {
     };
 
     const clearInput = () => {
-      selectedNetwork.value = 0;
       walletName.value = '';
       passwd.value = "";
       confirmPasswd.value = "";
@@ -190,7 +193,8 @@ export default {
       err,
       newWallet,
       selectedNetwork,
-      networks,
+      selectedNetworkName,
+      // networks,
       walletName,
       passwd,
       confirmPasswd,

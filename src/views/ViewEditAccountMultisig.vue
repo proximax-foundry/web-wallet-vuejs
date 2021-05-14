@@ -2,7 +2,7 @@
 <div class="flex justify-between text-sm">
   <div><span class="text-gray-400">Accounts > Multisign ></span> <span class="text-blue-primary font-bold">Edit multisig Account</span></div>
   <div>
-    <router-link to="/view-all-accounts" class="font-bold" active-class="accounts">View All Accounts</router-link>
+    <router-link :to="{name: 'ViewDisplayAllAccounts'}" class="font-bold" active-class="accounts">View All Accounts</router-link>
   </div>
 </div>
 <div class='mt-2 py-3 gray-line'>
@@ -34,7 +34,7 @@
                   <div class="text-tsm">{{ appStore.pretty(cosigner.address.address) }}</div>
                 </div>
                 <font-awesome-icon v-if="(!checkRemoval(cosigner.publicKey))" icon="trash-alt" class="w-4 h-4 self-center" :class="`${(onPartial || fundStatus || !isCoSigner)?'text-gray-200 cursor-auto':'text-gray-400 hover:text-gray-600 cursor-pointer'}`" @click="addToRemovalList(cosigner.publicKey)"></font-awesome-icon>
-                <a v-else class="self-center text-gray-400 hover:text-gray-600" href="#" @click="restoreFromRemovalList(cosigner.publicKey)"><font-awesome-icon icon="trash-restore" class="inline-block w-4 h-4"></font-awesome-icon> <span class="text-xs">Restore</span></a>
+                <a v-else class="self-center text-gray-400 hover:text-gray-600" @click="restoreFromRemovalList(cosigner.publicKey)"><font-awesome-icon icon="trash-restore" class="inline-block w-4 h-4"></font-awesome-icon> <span class="text-xs">Restore</span></a>
 
               </div>
             </div>

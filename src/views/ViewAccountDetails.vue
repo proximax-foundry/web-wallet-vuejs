@@ -2,7 +2,7 @@
 <div class="flex justify-between text-sm">
   <div><span class="text-gray-400">Accounts ></span> <span class="text-blue-primary font-bold">Details</span></div>
   <div>
-    <router-link to="/view-all-accounts" class="font-bold" active-class="accounts">View All Accounts</router-link>
+    <router-link :to="{name : 'ViewDisplayAllAccounts'}" class="font-bold" active-class="accounts">View All Accounts</router-link>
   </div>
 </div>
 <div class='mt-2 py-3 gray-line'>
@@ -21,7 +21,7 @@
           <font-awesome-icon icon="edit" @click="editName()" class="w-5 h-5 text-gray-500 cursor-pointer inline-block" v-if="showName"></font-awesome-icon>
           <div v-else>
             <font-awesome-icon icon="check-circle" @click="changeName()" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mb-1"></font-awesome-icon>
-            <font-awesome-icon @click="showName = !showName; err=''" icon="times-circle" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
+            <font-awesome-icon @click="hidePanel()" icon="times-circle" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
           </div>
         </div>
       </div>
@@ -115,11 +115,20 @@ export default {
   props: {
     name: String,
   },
+
   setup(p){
     const appStore = inject("appStore");
+
+    // get account details
+    const acc = appStore.getAccDetails(p.name);
+    if(acc==-1){
+      router.push({ name: "ViewDisplayAllAccounts"});
+    }
+    acc.pretty = appStore.pretty(acc.address);
+
     const err = ref(false);
-    const accountName = ref(p.name);
-    const accountNameDisplay = ref(p.name);
+    const accountName = ref(acc.name);
+    const accountNameDisplay = ref(acc.name);
     const showName = ref(true);
     const showPwPK = ref(false);
     const showPK = ref(false);
@@ -131,30 +140,36 @@ export default {
     const router = useRouter();
     const copy = (id) => copyKeyFunc(id);
 
-    const getAcccountDetails = () => {
-      return appStore.getAccDetails(p.name);
-    };
-
     const editName = () => {
       showName.value = !showName.value;
     };
 
     const changeName = () => {
-      let acc = appStore.updateAccountName(accountName.value, p.name);
-      if(acc==1){
-        showName.value = true;
-        accountNameDisplay.value = accountName.value;
-        err.value = '';
-      }else if(acc==2){
-        err.value = "Account name is already taken";
+      if(accountName.value.trim()){
+        let acc = appStore.updateAccountName(accountName.value, p.name);
+        if(acc==1){
+          showName.value = true;
+          accountNameDisplay.value = accountName.value;
+          err.value = '';
+        }else if(acc==2){
+          err.value = "Account name is already taken";
+        }else{
+          err.value = "Fail to change account name";
+        }
       }else{
-        err.value = "Fail to change account name";
+        err.value = "Please insert account name";
       }
     };
 
     const showPasswordPanel = () => {
       showPwPK.value = !showPwPK.value;
     };
+
+    const hidePanel = () => {
+      accountName.value = acc.name;
+      showName.value = !showName.value;
+      err.value = '';
+    }
 
     const verifyWalletPwPk = () => {
       if(walletPasswd.value == ''){
@@ -183,13 +198,6 @@ export default {
       }
     }
 
-    // get account details
-    const acc = getAcccountDetails();
-    if(acc==-1){
-      router.push({ name: "ViewDisplayAllAccounts"});
-    }
-    acc.pretty = appStore.pretty(acc.address);
-
     return {
       err,
       showPK,
@@ -209,6 +217,7 @@ export default {
       verifyWalletPwSwap,
       copy,
       privateKey,
+      hidePanel,
     };
   },
 }

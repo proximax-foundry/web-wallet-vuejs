@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 const routes = [
   {
@@ -179,12 +179,35 @@ const routes = [
       title: "Services",
     }
   },
+  {
+    path: '/address-book',
+    name: 'ViewAddressBook',
+    component: () => import('@/views/ViewAddressBook.vue'),
+    meta: {
+      title: "Address Book",
+    }
+  },
+  {
+    path: '/add-contacts',
+    name: 'ViewAddContacts',
+    component: () => import('@/views/ViewAddContacts.vue'),
+    meta: {
+      title: "Add Contacts",
+    }
+  },
+  {
+    path: '/nodes',
+    name: 'ViewNodes',
+    component: () => import('@/views/ViewNodes.vue'),
+    meta: {
+      title: "Nodes",
+    }
+  },
 ]
 // createdAccount
 
-
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHashHistory(), //createWebHistory(process.env.BASE_URL),
   routes
 })
 

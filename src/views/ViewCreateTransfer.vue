@@ -2,7 +2,7 @@
   <div class="flex justify-between text-md">
     <div><span class="text-gray-300">Transfer ></span> <span class="text-blue-primary font-bold">Make a Transaction</span></div>
     <div>
-      <!-- <router-link to="/select-type-creation-account" class="font-bold">Back to Services</router-link> -->
+      <!-- <router-link :to="{ name: 'ViewAllServices' }" class="font-bold">Services</router-link> -->
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center'>
@@ -27,7 +27,7 @@
           <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4">
             <div v-if="getWalletCosigner().list.length > 0">
               <div class="text-tsm">Cosigner:
-                <span class="font-bold" v-if="getWalletCosigner().list.length == 1">{{ getWalletCosigner().list[0].name }} (Balance: {{ getWalletCosigner().list[0].balance }} XPX) <span v-if="getWalletCosigner().list[0].balance < 10.0445" class="error">- Insufficient balance</span></span>
+                <span class="font-bold" v-if="getWalletCosigner().list.length == 1">{{ getWalletCosigner().list[0].name }} (Balance: {{ getWalletCosigner().list[0].balance }} XPX) <span v-if="getWalletCosigner().list[0].balance < lockFundTotalFee.value" class="error">- Insufficient balance</span></span>
                 <span class="font-bold" v-else><select v-model="cosignAddress"><option v-for="(element, item) in getWalletCosigner().list" :value="element.address" :key="item">{{ element.name }} (Balance: {{ element.balance }} XPX)</option></select></span>
                 <div v-if="cosignerBalanceInsufficient" class="error">- Insufficient balance</div>
               </div>
@@ -70,7 +70,7 @@
             <input id="encryptedMsg" type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg==1" /><label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Encrypted</label>
           </div>
         </div>
-        <TextareaInput placeholder="Message" errorMessage="" v-model="messageText" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput" />
+        <TextareaInput placeholder="Message" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput" />
         <div class="rounded-2xl bg-gray-100 p-5">
           <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Unconfirmed/Recommended Fee:  {{ effectiveFee }} XPX</div>
         </div>
@@ -80,8 +80,8 @@
             <div class="flex">
               <img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
               <div class="inline-block self-center text-left">
-                <div>LockFund: 10.000000 XPX</div>
-                <div>Unconfirmed/Recommended Fee: 0.044500 XPX</div>
+                <div>LockFund: {{ lockFundCurrency }} {{ currencyName }}</div>
+                <div>Unconfirmed/Recommended Fee: {{ lockFundTxFee }} {{ currencyName }}</div>
               </div>
             </div>
           </div>
@@ -107,7 +107,7 @@ import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import MosaicInput from '@/components/MosaicInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
 import TextareaInput from '@/components/TextareaInput.vue';
-import { createTransaction, makeTransaction } from '../util/transfer.js'; //getMosaicsAllAccounts
+import { createTransaction, makeTransaction, getFakeEncryptedMessageSize, getPlainMessageSize, convertToExact, convertToCurrency } from '../util/transfer.js'; //getMosaicsAllAccounts
 import AddContactModal from '@/components/AddContactModal.vue';
 import NotificationModal from '@/components/NotificationModal.vue';
 import ConfirmSendModal from '@/components/ConfirmSendModal.vue';
@@ -115,7 +115,7 @@ import { verifyAddress } from '../util/functions.js';
 import { multiSign } from '../util/multiSignatory.js';
 
 export default {
-  name: 'ViewCreateAccount',
+  name: 'ViewCreateTransfer',
   components: {
     TextInput,
     PasswordInput,
@@ -131,6 +131,7 @@ export default {
   setup(){
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
+    const chainNetwork = inject("chainNetwork");
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showContactSelection = ref(false);
@@ -152,7 +153,7 @@ export default {
     const selectedMosaicAmount = ref([]);
     const mosaicSupplyDivisibility = ref([]);
     const currentlySelectedMosaic = ref([]);
-    const sendXPX = ref('0.000000');
+    const sendXPX = ref(0);
     const encryptedMsgDisable = ref(true);
     const toggleConfirm = ref(false);
     const forceSend = ref(false);
@@ -168,10 +169,25 @@ export default {
     const disablePassword = computed(() => disableAllInput.value);
     const cosignerBalanceInsufficient = ref(false);
 
+    const currencyName = computed(() => chainNetwork.getCurrencyName());
+
+    console.log('chainNetwork.getProfileConfig().lockedFundsPerAggregate')
+    console.log(chainNetwork.getProfileConfig().lockedFundsPerAggregate)
+    console.log(siriusStore.state.currentNetworkProfileConfig.maxMessageSize)
+    const lockFund = computed(()=> convertToExact(chainNetwork.getProfileConfig().lockedFundsPerAggregate, chainNetwork.getCurrencyDivisibility()))
+    const lockFundCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().lockedFundsPerAggregate, chainNetwork.getCurrencyDivisibility()))
+
+    const lockFundTxFee = ref(0.0445);
+    const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
+
+    // const messageLimit = computed(()=> chainNetwork.getProfileConfig().maxMessageSize - 1);
+    const messageLimit = computed(()=> siriusStore.state.currentNetworkProfileConfig.maxMessageSize - 1);
+
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
 
     const addMsg = ref('');
+    const remainingChar = ref(0);
     const showAddressError = ref(false);
     const addressErrorMsg = computed(
       () => {
@@ -212,7 +228,7 @@ export default {
     if(isMultiSigBool.value){
       let cosign = multiSign.fetchWalletCosigner(selectedAccAdd.value);
       if(cosign.list.length > 0){
-        if(cosign.list[0].balance < 10.0445){
+        if(cosign.list[0].balance < lockFundTotalFee.value){
           disableAllInput.value = true;
           cosignerBalanceInsufficient.value = true;
         }else{
@@ -225,7 +241,7 @@ export default {
     }
 
     // check account balance at first load
-    if(balance.value < 10.0445){
+    if(balance.value < lockFundTotalFee.value){
       showBalanceErr.value = true;
     }
 
@@ -254,7 +270,7 @@ export default {
           cosignAddress.value = cosign.list[0].address;
           // console.log('cosign.list[0].balance');
           // console.log(cosign.list[0].balance);
-          if(cosign.list[0].balance < 10.0445){
+          if(cosign.list[0].balance < lockFundTotalFee.value){
             disableAllInput.value = true;
             // console.log('disableAllInput();')
           }else{
@@ -297,12 +313,13 @@ export default {
       recipient.value = '';
       encryptedMsgDisable.value = true;
       messageText.value = '';
-      sendXPX.value = '0.000000';
+      sendXPX.value = 0;
       emitter.emit("CLEAR_SELECT", 0);
       selectedMosaic.value = [];
       mosaicsCreated.value = [];
       selectedMosaicAmount.value = [];
       mosaicSupplyDivisibility.value = [];
+      showContactSelection.value = false;
     };
 
     const clearMsg = () => {
@@ -320,7 +337,17 @@ export default {
         toggleConfirm.value = true;
       }else{
         // console.log(recipient.value.toUpperCase() + ' : ' + walletPassword.value + ' : ' + selectedAccName.value + ' : ' + encryptedMsg.value + ' : ' + walletPassword.value)
-        let transferStatus = createTransaction(recipient.value.toUpperCase(), sendXPX.value, messageText.value, selectedMosaic.value, mosaicSupplyDivisibility.value, walletPassword.value, selectedAccName.value, encryptedMsg.value, appStore, siriusStore);
+        let selectedCosign;
+        if(isMultiSigBool.value){
+          // if this is a multisig, get cosigner name along
+          let selectedCosignList = getWalletCosigner().list;
+          if(selectedCosignList.length > 1){
+            selectedCosign = cosignAddress.value;
+          }else{
+            selectedCosign = getWalletCosigner().list[0].address;
+          }
+        }
+        let transferStatus = createTransaction(recipient.value.toUpperCase(), sendXPX.value, messageText.value, selectedMosaic.value, mosaicSupplyDivisibility.value, walletPassword.value, selectedAccName.value, selectedCosign, encryptedMsg.value, appStore, siriusStore);
         if(!transferStatus){
           err.value = 'Invalid wallet password';
         }else{
@@ -332,7 +359,6 @@ export default {
             // add new contact
             togglaAddContact.value = true;
           }else{
-            // console.log('clearInput()');
             clearInput();
           }
           // show notification
@@ -409,7 +435,7 @@ export default {
     watch(cosignAddress, (n, o) => {
       if(n != o){
         let cosign = multiSign.fetchMultiSigCosigners(selectedAccAdd.value);
-        if(cosign.list.find((element) => element.address == n).balance < 10.0455){
+        if(cosign.list.find((element) => element.address == n).balance < lockFundTotalFee.value){
           cosignerBalanceInsufficient.value = true;
         }else{
           cosignerBalanceInsufficient.value = false;
@@ -418,7 +444,7 @@ export default {
     });
 
     watch(balance, (n) => {
-      if(n == '0.000000'){
+      if(n == 0){
         showBalanceErr.value = true;
       }
     });
@@ -451,12 +477,34 @@ export default {
     watch(messageText, (n, o) => {
       if(n!=o){
         effectiveFee.value = makeTransaction.calculateFee(n, sendXPX.value, selectedMosaic.value);
+        if(encryptedMsg.value && messageText.value){
+          remainingChar.value = getFakeEncryptedMessageSize(messageText.value);
+        }
+        else{
+          remainingChar.value = getPlainMessageSize(messageText.value);
+        }
+      }
+    });
+
+    watch(encryptedMsgDisable, (n) => {
+      if(!n){
+        encryptedMsg.value = "";
+      }
+    });
+
+    watch(encryptedMsg, (n) => {
+      if(n){
+        if(messageText.value){
+          remainingChar.value = getFakeEncryptedMessageSize(messageText.value);
+        }
+      }
+      else{
+        remainingChar.value = getPlainMessageSize(messageText.value);
       }
     });
 
     emitter.on("CLOSE_MODAL", payload => {
       togglaAddContact.value = payload;
-      console.log('clearInput()');
       clearInput();
     });
 
@@ -537,6 +585,11 @@ export default {
       disableMsgInput,
       disablePassword,
       cosignerBalanceInsufficient,
+      messageLimit,
+      remainingChar,
+      lockFundCurrency,
+      currencyName,
+      lockFundTxFee
     }
   },
 

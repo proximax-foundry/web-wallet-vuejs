@@ -17,6 +17,7 @@ import {
   TransferTransaction,
   TransactionHttp,
   TransactionBuilderFactory,
+  PublicAccount,
 } from "tsjs-xpx-chain-sdk";
 import * as FeeCalculationStrategy from 'tsjs-xpx-chain-sdk/dist/src/model/transaction/FeeCalculationStrategy';
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
@@ -70,15 +71,17 @@ function amountFormatterSimple(amount, d = 6) {
 //   });
 // };
 
-export const createTransaction = (recipient, sendXPX, messageText, mosaicsSent, mosaicDivisibility, walletPassword, senderAccName, encryptedMsg, appStore, siriusStore) => {
+export const createTransaction = (recipient, sendXPX, messageText, mosaicsSent, mosaicDivisibility, walletPassword, senderAccName, encryptedMsg) => {
   // verify password
   console.log('Pw after createTransaction: ' + walletPassword);
+  console.log(appStore.state.currentLoggedInWallet);
   let verify = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword);
   if(verify < 1){
     return verify;
   }
-  const add = fetch(siriusStore.state.selectedChainNode + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
-
+  const add = fetch(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode) + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
+  // console.log(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
+  // console.log(add);
   return add.then(async(hash) => {
     let networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
     const recipientAddress = Address.createFromRawAddress(recipient);
@@ -136,7 +139,7 @@ export const createTransaction = (recipient, sendXPX, messageText, mosaicsSent, 
 
     const account = Account.createFromPrivateKey(privateKey, networkType);
     const signedTransaction = account.sign(transferTransaction, hash);
-    const transactionHttp = new TransactionHttp(siriusStore.state.selectedChainNode);
+    const transactionHttp = new TransactionHttp(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
 
     transactionHttp
       .announce(signedTransaction)
@@ -153,7 +156,7 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
   if(verify < 1){
     return verify;
   }
-  const add = fetch(siriusStore.state.selectedChainNode + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
+  const add = fetch(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode) + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
 
   return add.then((hash) => {
 
@@ -211,7 +214,7 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
     transactionBuilder.fee = amountFormatterSimple(aggregateTransaction.maxFee.compact());
     // console.log('TF: '+transactionBuilder.fee);
     const signedTransaction = account.sign(aggregateTransaction, hash);
-    const transactionHttp = new TransactionHttp(siriusStore.state.selectedChainNode);
+    const transactionHttp = new TransactionHttp(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
 
     transactionHttp
       .announce(signedTransaction)
@@ -331,3 +334,23 @@ const getFeeStrategy = () => {
 export const makeTransaction = readonly({
   calculateFee
 });
+
+export const getFakeEncryptedMessageSize =(message)=>{
+  return EncryptedMessage.create(message, PublicAccount.createFromPublicKey("0".repeat(64)), "0".repeat(64)).size();
+}
+
+export const getPlainMessageSize =(message)=>{
+  return PlainMessage.create(message).size();
+}
+
+export const convertToCurrency =(value, divisibility)=>{
+
+  const exactValue = value/Math.pow(10, divisibility);
+
+  return new Intl.NumberFormat('en', {maximumFractionDigits: divisibility}).format(exactValue);
+}
+
+export const convertToExact =(value, divisibility)=>{
+
+  return value/Math.pow(10, divisibility);
+}

@@ -22,8 +22,7 @@ import {
 import { appStore } from "@/store/app";
 import { siriusStore } from "@/store/sirius";
 import { announceAggregateBonded, announceLockfundAndWaitForConfirmation, modifyMultisigAnnounceLockfundAndWaitForConfirmation, modifyMultisigAnnounceAggregateBonded } from '../util/listener.js';
-// 
-const config = require("@/../config/config.json");
+const walletKey = "sw";
 
 function verifyContactPublicKey(add, accountHttp){
   const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
@@ -94,7 +93,7 @@ function convertAccount(coSign, numApproveTransaction, numDeleteUser, accountToC
     return verify;
   }
 
-  const add = fetch(siriusStore.state.selectedChainNode + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
+  const add = fetch(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode) + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
 
   return add.then( async (generationHash) => {
     const multisigCosignatory = [];
@@ -153,7 +152,7 @@ function convertAccount(coSign, numApproveTransaction, numDeleteUser, accountToC
 
     const lockFundsTransactionSigned = accountToConvert.sign(lockFundsTransaction, generationHash);
 
-    const transactionHttp = new TransactionHttp(siriusStore.state.selectedChainNode);
+    const transactionHttp = new TransactionHttp(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
     (async ()=>{
       try {
           const confirmedTx = await announceLockfundAndWaitForConfirmation(accountToConvert.address, lockFundsTransactionSigned, lockFundsTransactionSigned.hash, transactionHttp);
@@ -231,7 +230,7 @@ function updateAccountMultisigGraphInfo(accountAddress){
           JSON.stringify(wallet)
         );
         localStorage.setItem(
-          config.localStorage.walletKey,
+          walletKey,
           JSON.stringify(appStore.state.wallets)
         );
       } catch (err) {
@@ -265,7 +264,7 @@ function checkIsMultiSig(accountAddress){
           JSON.stringify(wallet)
         );
         localStorage.setItem(
-          config.localStorage.walletKey,
+          walletKey,
           JSON.stringify(appStore.state.wallets)
         );
       } catch (err) {
@@ -361,7 +360,7 @@ const createNewMultiSigAccount = (publicAccount) => {
     name: 'MULTISIG-' + publicAccount.address.address.substr(-4),
     address: publicAccount.address.address,
     publicAccount: publicKey,
-    balance: '0.000000',
+    balance: 0,
     isMultisign: null,
     multisigAccountGraphInfo: null,
     nis1Account: null,
@@ -378,7 +377,7 @@ function modifyMultisigAccount(coSign, removeCosign, numApproveTransaction, numD
     return verify;
   }
 
-  const add = fetch(siriusStore.state.selectedChainNode + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
+  const add = fetch(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode) + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
 
   return add.then( async (generationHash) => {
     const multisigCosignatory = [];
@@ -458,7 +457,7 @@ function modifyMultisigAccount(coSign, removeCosign, numApproveTransaction, numD
         transactions.push({ coSignerAccount: coSignerAccount, signedAggregateBoundedTransaction: signedAggregateBoundedTransaction, lockFundsTransactionSigned: lockFundsTransactionSigned });
       });
 
-      const transactionHttp = new TransactionHttp(siriusStore.state.selectedChainNode);
+      const transactionHttp = new TransactionHttp(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
       (async ()=>{
         try {
           let lockFundListeners = [];
