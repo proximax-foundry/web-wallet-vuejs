@@ -55,9 +55,9 @@ export default {
       a.style.display = 'none';
       a.href = url;
       // the filename you want
-      let networkTypeName = siriusStore.getNetworkByType(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network).name;
-      networkTypeName = (networkTypeName.includes(' ')) ? networkTypeName.split(' ').join('') : networkTypeName;
-      a.download = `${wallet.name}_${networkTypeName}_${year}-${month}-${day}.wlt`;
+      // let networkTypeName = siriusStore.getNetworkByType(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network).name;
+      // networkTypeName = (networkTypeName.includes(' ')) ? networkTypeName.split(' ').join('') : networkTypeName;
+      a.download = `${wallet.name}_${ siriusStore.state.chainNetworkName }_${year}-${month}-${day}.wlt`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

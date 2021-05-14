@@ -2,8 +2,8 @@
   <div class="container mx-auto text-center">
     <h1 class="font-bold big-title mt-20">Wallets</h1>
     <div class='mt-2 py-3 gray-line'>
-      <p>These are the Sirius Wallets available in the local storage of your device.</p>
-      <div v-if="wallets == 0" class="text-center h4 my-2">
+      <p>These are the {{siriusStore.state.chainNetworkName}} Wallets available in the local storage of your device.</p>
+      <div v-if="wallets.length == 0" class="text-center h4 my-2">
         No wallets found
       </div>
       <div class="grid xs-grid-cols-1 sm:grid-cols-2 mt-10" v-else>
@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { inject, computed } from "vue";
+import { computed, inject } from "vue";
 import WalletTile from '@/components/WalletTile.vue';
 import NotificationModal from '@/components/NotificationModal.vue';
 
@@ -38,16 +38,17 @@ export default {
   setup() {
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
-    const selectedNetworkName = computed(()=> siriusStore.state.chainNetworkName);
     const wallets = computed(
       () =>{
-        var w = appStore.state.wallets.filter((i)=> i.networkName === selectedNetworkName.value);
-        return w;
+        var wallet = appStore.state.wallets.filter((i)=> i.networkName === siriusStore.state.chainNetworkName);
+        return wallet;
       }
     );
+
     return {
+      wallets,
       appStore,
-      wallets
+      siriusStore,
     };
   },
   created(){

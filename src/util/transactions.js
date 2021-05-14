@@ -86,6 +86,7 @@ const formatTransaction = (transaction, names) => {
   if(recipientAddress.length >= 40){
     transaction.recipientAddress = appStore.pretty(recipientAddress);
   }
+  // transaction.recipientAddress = appStore.pretty(recipientAddress);
   transaction.block = transaction.transactionInfo.height.compact();
   transaction.data = transaction;
   transaction.hash = transaction.transactionInfo.hash;

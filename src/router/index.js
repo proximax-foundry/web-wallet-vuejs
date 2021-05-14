@@ -179,6 +179,30 @@ const routes = [
       title: "Services",
     }
   },
+  {
+    path: '/address-book',
+    name: 'ViewAddressBook',
+    component: () => import('@/views/ViewAddressBook.vue'),
+    meta: {
+      title: "Address Book",
+    }
+  },
+  {
+    path: '/add-contacts',
+    name: 'ViewAddContacts',
+    component: () => import('@/views/ViewAddContacts.vue'),
+    meta: {
+      title: "Add Contacts",
+    }
+  },
+  {
+    path: '/nodes',
+    name: 'ViewNodes',
+    component: () => import('@/views/ViewNodes.vue'),
+    meta: {
+      title: "Nodes",
+    }
+  },
 ]
 // createdAccount
 

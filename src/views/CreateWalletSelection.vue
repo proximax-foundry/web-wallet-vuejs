@@ -17,42 +17,46 @@
         </label>
       </div>
     </div>
+    <!-- <NotificationModal :toggleModal="toggle" :msg="msg" :notiType="notificationType" time='1500' /> -->
   </div>
 </template>
 
 <script>
-import { inject, computed, ref } from 'vue';
-//import { useRouter } from "vue-router";
+import { inject, ref, computed } from 'vue'; //getCurrentInstance
+// import { useRouter } from "vue-router";
 import CryptoJS from 'crypto-js';
-//import NotificationModal from '@/components/NotificationModal.vue';
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
+// import NotificationModal from '@/components/NotificationModal.vue';
 
 export default {
   name: 'CreateWalletSelection',
+  components: {
+    // NotificationModal,
+  },
   setup(){
     const confirm = useConfirm();
     const toast = useToast();
-    //const router = useRouter();
-    //const internalInstance = getCurrentInstance();
+    // const router = useRouter();
+    // const internalInstance = getCurrentInstance();
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
-    //const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const selectedNetworkType = computed(()=> siriusStore.getNetworkType());
+    const chainNetwork = inject("chainNetwork");
+    // const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    // comparing with default networktype 168 till multiple network selection interface is added
+    // const selectedNetwork = ref("168");
+    const selectedNetworkType = computed(()=> chainNetwork.getNetworkType());
     const selectedNetworkName = computed(()=> siriusStore.state.chainNetworkName);
     const notificationType = ref("err");
-    //const toggle = ref(false);
+    // const toggle = ref(false);
     const msg = ref('');
     const walletFile = ref('');
 
-/*
-    emitter.on("CLOSE_NOTIFICATION", payload => {
-      toggle.value = payload;
-    });
-*/
+    // emitter.on("CLOSE_NOTIFICATION", payload => {
+    //   toggle.value = payload;
+    // });
 
     const readWalletBackup = (e) => {
-
       const file = e.target.files[0];
       const reader = new FileReader();
       reader.onload = e => {
@@ -61,16 +65,16 @@ export default {
           const dataDecryp = JSON.parse(file.toString(CryptoJS.enc.Utf8));
 
           if(dataDecryp.networkName === undefined || dataDecryp.networkName !== selectedNetworkName.value){
-              confirm.require({
-                  message: `You are about to import a wallet into ${selectedNetworkName.value}. Proceed ?`,
-                  header: 'Confirm Import',
-                  icon: 'pi pi-exclamation-triangle',
-                  accept: () => {
-                    var importResult = importBackup(dataDecryp);
-                    toast.add({severity: importResult.status, summary: importResult.msg, group: 'br', life: 3000});
-                  },
-                  reject: () => {}
-              });
+            confirm.require({
+              message: `You are about to import a wallet into ${selectedNetworkName.value}. Proceed ?`,
+              header: 'Confirm Import',
+              icon: 'pi pi-exclamation-triangle',
+              accept: () => {
+                var importResult = importBackup(dataDecryp);
+                toast.add({severity: importResult.status, summary: importResult.msg, group: 'br', life: 3000});
+              },
+              reject: () => {}
+            });
           }
           else{
             var importResult = importBackup(dataDecryp);
@@ -78,14 +82,12 @@ export default {
           }
         } catch (error) {
           msg.value = 'Unable to add wallet. Invalid file.';
-          //notificationType.value = 'err';
           toast.add({severity:'error', summary:'Import Failed', detail: msg.value, group: 'br', life: 5000});
-          /*
-          toggle.value = true;
-          setTimeout(() => {
-            toggle.value = false;
-          }, 1500);
-          */
+          // notificationType.value = 'err';
+          // toggle.value = true;
+          // setTimeout(() => {
+          //   toggle.value = false;
+          // }, 1500);
         }
       }
       reader.readAsText(file);
@@ -97,53 +99,50 @@ export default {
       switch (returnMsg){
         case 'wallet_added':
           msg.value = 'Wallet is added successfully.';
-          //router.push({ name: "Welcome", params: {toggle: true, modalMsg: 'Wallet is added successfully.' }});
+          // router.push({ name: "Welcome", params: {toggle: true, modalMsg: 'Wallet is added successfully.' }});
           break;
         case 'invalid_network':
           msg.value = 'Network is invalid';
-          //notificationType.value = 'err';
-          //toggle.value = true;
           status = "error";
+          // notificationType.value = 'err';
+          // toggle.value = true;
           break;
         case 'existed_wallet':
           msg.value = 'Wallet already exist';
-          //notificationType.value = 'warn';
-          //toggle.value = true;
           status = "warn";
+          // notificationType.value = 'warn';
+          // toggle.value = true;
           break;
         case 'invalid_wallet':
           msg.value = 'Wallet is invalid';
-          //notificationType.value = 'err';
           status = "error";
-          //toggle.value = true;
+          // notificationType.value = 'err';
+          // toggle.value = true;
           break;
         default:
           msg.value = 'Unable to add wallet';
           status = "error";
-          //notificationType.value = 'err';
-          //toggle.value = true;
+          // notificationType.value = 'err';
+          // toggle.value = true;
       }
-
+      // setTimeout(() => {
+      //   toggle.value = false;
+      //   notificationType.value = '';
+      // }, 1500);
       return {
-            msg: msg.value,
-            status: status
+        msg: msg.value,
+        status: status
       };
-      /*
-      setTimeout(() => {
-        toggle.value = false;
-        notificationType.value = '';
-      }, 1500);
-      */
-    }
+    };
 
     return {
       walletFile,
-      //toggle,
+      // toggle,
       appStore,
       readWalletBackup,
       msg,
       notificationType
     };
-  }
+  },
 }
 </script>

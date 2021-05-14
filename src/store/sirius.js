@@ -1,174 +1,306 @@
 import utils from "@/utils";
-import { ChainProfile, ChainProfileConfig, ChainProfilePreferences, ChainProfileNames } from "./storeClasses";
-import { computed, ref, watch, reactive, readonly } from "vue";
+import { computed, reactive, ref, readonly, watch } from "vue";
 import {
   AccountHttp,
   BlockHttp,
   ChainHttp,
+  ChainConfigHttp,
+  Listener,
   NetworkHttp,
+  NamespaceHttp,
   NodeHttp,
   MosaicHttp,
-  NamespaceHttp,
-  ChainConfigHttp,
-  Password,
-  SimpleWallet,
   TransactionHttp,
-  Listener
 } from "tsjs-xpx-chain-sdk";
+import { ChainProfile, ChainProfileConfig, ChainProfilePreferences, ChainProfileNames } from "./storeClasses";
+
 const config = require("@/../config/config.json");
 
-export const siriusState = reactive({
+function getChainNodes() {
+  const existingNodes = localStorage.getItem(config.localStorage.chainNodesKey);
+  return existingNodes ? JSON.parse(existingNodes) : config.chainNodes;
+}
+
+// function formatNetwork(){
+//   var n = [];
+//   for(var i = 0; i < config.network.length; ++i){
+//     n.push({ value: config.network[i].type, label: config.network[i].name, id: (i+1)});
+//   }
+//   return n;
+// }
+
+function getNetworkByType(typeid){
+  return config.network.find((element) => element.type == typeid);
+}
+
+// function getNetworkByName(name){
+//   return config.network.find((element) => element.name == name);
+// }
+
+// ALWAYS use function selectNewChainNode to change currentChainNode value, to avoid web socket listening on old node
+// const currentChainNode = ref(getChainNodes()[0]);
+const listenerChainWS = ref(null);
+
+const state = reactive({
+  chainNodes: getChainNodes(),
+  // network: config.network,
+  // network: formatNetwork(),
+  // selectedChainNode: computed(() =>
+  //   utils.parseNodeConfig(currentChainNode.value)
+  // ),
+  selectedChainNode: '',
+  selectedNetwork: '',
   chainNetwork: 0,
   chainNetworkName:'',
   currentNetworkProfile: {},
   currentNetworkProfileConfig: {},
-  selectedChainNode: '',
   networkAPIEndpoints: [],
-  availableNetworks: []
+  availableNetworks: [],
 });
 
-class Sirius {
-  constructor() {
-    //this.name = "Sirius Wallet";
+function _buildAPIEndpointURL(url, port = undefined){
+  var portNumber;
+  if(port){
+    portNumber = port;
+  }
+  else if(state.currentNetworkProfile.httpPort){
+    portNumber = state.currentNetworkProfile.httpPort;
+  }
+  return location.protocol=='https:' ? `https://${url}` : `http://${url}:${portNumber}`;
+}
 
-    // this.availableNetworks = ref([]);
-    // this.chainNetwork = ref(0);
-    // this.chainNetworkName = ref('');
-    // this.currentNetworkProfile = ref({});
-    // this.currentNetworkProfileConfig = ref({});
-    //this.networkAPIEndpoints = computed(() => this.formatNetwork());
-    //this.selectedChainNode = ref('');
+// const accountHttp = computed(() => new AccountHttp(state.selectedChainNode));
+// const blockHttp = computed(() => new BlockHttp(state.selectedChainNode));
+// const chainHttp = computed(() => new ChainHttp(state.selectedChainNode));
+// const chainConfigHttp = computed(() => new ChainConfigHttp(state.selectedChainNode));
+// const networkHttp = computed(() => new NetworkHttp(state.selectedChainNode));
+// const nodeHttp = computed(() => new NodeHttp(state.selectedChainNode));
+// const mosaicHttp = computed(() => new MosaicHttp(state.selectedChainNode));
+// const transactionHttp = computed(() => new TransactionHttp(state.selectedChainNode));
+// const namespaceHttp = computed(() => new NamespaceHttp(state.selectedChainNode));
 
-    this.state = siriusState;
+const accountHttp = computed(() => new AccountHttp(_buildAPIEndpointURL(state.selectedChainNode)));
+const blockHttp = computed(() => new BlockHttp(_buildAPIEndpointURL(state.selectedChainNode)));
+const chainHttp = computed(() => new ChainHttp(_buildAPIEndpointURL(state.selectedChainNode)));
+const chainConfigHttp = computed(() => new ChainConfigHttp(_buildAPIEndpointURL(state.selectedChainNode)));
+const networkHttp = computed(() => new NetworkHttp(_buildAPIEndpointURL(state.selectedChainNode)));
+const nodeHttp = computed(() => new NodeHttp(_buildAPIEndpointURL(state.selectedChainNode)));
+const mosaicHttp = computed(() => new MosaicHttp(_buildAPIEndpointURL(state.selectedChainNode)));
+const transactionHttp = computed(() => new TransactionHttp(_buildAPIEndpointURL(state.selectedChainNode)));
+const namespaceHttp = computed(() => new NamespaceHttp(_buildAPIEndpointURL(state.selectedChainNode)));
 
-    this.httpPort = 3000;
+const chainWSListener = computed(() => {
+  if (listenerChainWS.value == null) {
+    // console.log('open new socket')
+    listenerChainWS.value = new Listener(chainNetworkInstance.buildWSEndpointURL(state.selectedChainNode), WebSocket);
+  }
+  return listenerChainWS.value;
+});
 
-    this.listenerChainWS = ref(null);
-
-    this.accountHttp = computed(() => new AccountHttp(this.buildAPIEndpointURL(siriusState.selectedChainNode)));
-    this.blockHttp = computed(() => new BlockHttp(this.buildAPIEndpointURL(siriusState.selectedChainNode)));
-    this.chainHttp = computed(() => new ChainHttp(this.buildAPIEndpointURL(siriusState.selectedChainNode)));
-    this.networkHttp = computed(() => new NetworkHttp(this.buildAPIEndpointURL(siriusState.selectedChainNode)));
-    this.nodeHttp = computed(() => new NodeHttp(this.buildAPIEndpointURL(siriusState.selectedChainNode)));
-    this.mosaicHttp = computed(() => new MosaicHttp(this.buildAPIEndpointURL(siriusState.selectedChainNode)));
-    this.namespaceHttp = computed(() => new NamespaceHttp(this.buildAPIEndpointURL(siriusState.selectedChainNode)));
-    this.chainConfigHttp = computed(() => new ChainConfigHttp(this.buildAPIEndpointURL(siriusState.selectedChainNode)));
-    this.transactionHttp = computed(()=> new TransactionHttp(this.buildAPIEndpointURL(siriusState.selectedChainNode)));
-    this.connectors = ref([]);
-
-    this.chainWSListener = computed(() => {
-      if (this.listenerChainWS.value == null) {
-        console.log('open new socket')
-        this.listenerChainWS.value = new Listener(
-          this.buildWSEndpointURL(siriusState.selectedChainNode, this.getNetworkPort()),
-          WebSocket
-        );
-      }
-    
-      return this.listenerChainWS.value;
-    });
-
-    this.checkFromSession();
+async function addChainNode(nodeConfigString) {
+  const newNodeConfig = JSON.parse(nodeConfigString);
+  if (config.debug) {
+    console.log("addChainNode triggered with", newNodeConfig.hostname);
   }
 
-  startWatch(){
-    watch(
-      ()=> siriusState.currentNetworkProfile, 
-      (newValues) => {
+  if (
+    state.chainNodes.find(
+      (element) =>
+        element.protocol == newNodeConfig.protocol &&
+        element.hostname == newNodeConfig.hostname &&
+        element.port == newNodeConfig.port
+    )
+  ) {
+    return -1;
+  }
 
-        siriusState.networkAPIEndpoints = this.formatNetwork();
+  try {
+    const http = new BlockHttp(utils.parseNodeConfig(newNodeConfig));
+    const blockInfo = await http.getBlockByHeight(1).toPromise();
+    if (
+      blockInfo.generationHash.toUpperCase() !=
+      config.network.generationHash.toUpperCase()
+    ) {
+      return 0;
+    }
 
-        var chainProfilePreferences = new ChainProfilePreferences( siriusState.chainNetworkName + "_preferences");
-      
-        chainProfilePreferences.init();
-      
-        let endpoints = this.getChainNodes();
-  
-        if(chainProfilePreferences.apiNode && endpoints.includes(chainProfilePreferences.apiNode)){
-          siriusState.selectedChainNode = chainProfilePreferences.apiNode;
-        }
-        else{
-          if(endpoints.length > 0){
-            var randomAPINodeIndex = Math.floor(Math.random() * endpoints.length);
-            chainProfilePreferences.apiNode = endpoints[randomAPINodeIndex];
-            chainProfilePreferences.saveToLocalStorage();
-
-            siriusState.selectedChainNode = endpoints[randomAPINodeIndex];
-          }
-          else{
-            siriusState.selectedChainNode = "";
-          }
-        }
-
-        sessionStorage.setItem('nodePort', newValues.httpPort);
-        sessionStorage.setItem('selectedChainNode', siriusState.selectedChainNode);
-      }
+    state.chainNodes.unshift({
+      protocol: newNodeConfig.protocol,
+      hostname: newNodeConfig.hostname,
+      port: newNodeConfig.port,
+    });
+    localStorage.setItem(
+      config.localStorage.chainNodesKey,
+      JSON.stringify(state.chainNodes)
     );
+    return 1;
+  } catch (err) {
+    if (config.debug) {
+      console.error("addChainNode error caught", err);
+    }
+    return 0;
+  }
+}
 
-    watch(
-      ()=> siriusState.availableNetworks, 
-      (newValues) => {
+function selectNewChainNode(nodeConfigString) {
+  const nodeConfig = JSON.parse(nodeConfigString);
+  const found = state.chainNodes.find(
+    (element) =>
+      element.protocol == nodeConfig.protocol &&
+      element.hostname == nodeConfig.hostname &&
+      element.port == nodeConfig.port
+  );
 
-        let selectedNetwork = 0;
-        //let selectedNetworkName = "";
-        let sessionSelectedNetwork = sessionStorage.getItem("selectedNetwork") ? parseInt(sessionStorage.getItem("selectedNetwork")) : 0;
-        //let sessionSelectedNetworkName = sessionStorage.getItem("selectedNetworkName") ? sessionStorage.getItem("selectedNetworkName") : "";
-        let lastAccessNetwork = localStorage.getItem("lastAccessNetwork") ? parseInt(localStorage.getItem("lastAccessNetwork")) : 0;
-        //let lastAccessNetworkName = localStorage.getItem("lastAccessNetworkName") ? localStorage.getItem("lastAccessNetwork") : "";
-
-        if(sessionSelectedNetwork){
-          selectedNetwork = parseInt(sessionSelectedNetwork);
-          //selectedNetworkName = sessionSelectedNetworkName;
-        }
-        else{
-          selectedNetwork = lastAccessNetwork;
-          //selectedNetworkName = lastAccessNetworkName;
-        }
-
-        if(newValues[selectedNetwork] === undefined){
-          selectedNetwork = 0;
-        }
-        /*
-        else if(newValues[selectedNetwork] !== selectedNetworkName){
-          selectedNetwork = 0;
-        }
-        */
-
-        siriusState.chainNetwork = selectedNetwork;
-    });
-
-    watch(
-      ()=> siriusState.chainNetwork, 
-      (newValues) => {
-
-        sessionStorage.setItem('selectedNetwork', newValues);
-
-        siriusState.chainNetworkName = siriusState.availableNetworks[newValues];
-
-        sessionStorage.setItem('selectedNetworkName', siriusState.chainNetworkName);
-
-        this.updateCurrentProfile();
-        this.updateCurrentProfileConfig();
-    });
-
-    this.updateAvailableNetworks();
+  if (!found) {
+    if (config.debug) {
+      console.error(
+        "selectNewChainNode triggered with invalid node url",
+        nodeConfig.hostname
+      );
+    }
+    return false;
   }
 
-  checkFromSession(){
-    const selectedNetwork = sessionStorage.getItem('selectedNetwork') ? parseInt(sessionStorage.getItem('selectedNetwork')) : -1;
+  if (config.debug) {
+    console.log("selectNewChainNode triggered with", nodeConfig.hostname);
+  }
+  // currentChainNode.value = found;
+  stopChainWSListener();
+  return true;
+}
 
+function stopChainWSListener() {
+  console.log("stopChainWSListener triggered");
+
+  if (listenerChainWS.value != null) {
+    listenerChainWS.value.terminate();
+    listenerChainWS.value = null;
+  }
+}
+
+function getSelectedNetworkSessionStorage(){
+  return sessionStorage.getItem('selectedNetworkName');
+}
+
+// update session storage for network
+function updateNetworkSessionStorage(networkId){
+  sessionStorage.setItem('selectedNetwork', networkId);
+  state.chainNetworkName = state.availableNetworks[networkId];
+  sessionStorage.setItem('selectedNetworkName', state.chainNetworkName);
+  chainNetworkInstance.updateCurrentProfile();
+  chainNetworkInstance.updateCurrentProfileConfig();
+}
+
+function restoreSiriusStateFromSessionStorage(selectedChainNode, selectedNetwork, selectedNetworkName){
+  state.chainNetworkName = selectedNetworkName;
+  state.selectedChainNode = selectedChainNode;
+  state.chainNetwork = selectedNetwork;
+  chainNetworkInstance.updateCurrentProfile();
+  chainNetworkInstance.updateCurrentProfileConfig();
+}
+
+export const siriusStore = readonly({
+  state,
+  // currentChainNode,
+  getChainNodes,
+  // getNetworkByName,
+  accountHttp,
+  blockHttp,
+  chainHttp,
+  chainConfigHttp,
+  networkHttp,
+  mosaicHttp,
+  transactionHttp,
+  namespaceHttp,
+  nodeHttp,
+  chainWSListener,
+  addChainNode,
+  selectNewChainNode,
+  stopChainWSListener,
+  getNetworkByType,
+  _buildAPIEndpointURL,
+  updateNetworkSessionStorage,
+  getSelectedNetworkSessionStorage,
+  restoreSiriusStateFromSessionStorage,
+});
+
+watch( () => state.currentNetworkProfile, (newValues) => {
+  state.networkAPIEndpoints = chainNetworkInstance.formatNetwork();
+  var chainProfilePreferences = new ChainProfilePreferences( state.chainNetworkName + "_preferences");
+  chainProfilePreferences.init();
+  let endpoints = chainNetworkInstance.getChainNodes();
+
+  if(chainProfilePreferences.apiNode && endpoints.includes(chainProfilePreferences.apiNode)){
+    state.selectedChainNode = chainProfilePreferences.apiNode;
+  }
+  else{
+    if(endpoints.length > 0){
+      var randomAPINodeIndex = Math.floor(Math.random() * endpoints.length);
+      chainProfilePreferences.apiNode = endpoints[randomAPINodeIndex];
+      chainProfilePreferences.saveToLocalStorage();
+
+      state.selectedChainNode = endpoints[randomAPINodeIndex];
+    }
+    else{
+      state.selectedChainNode = "";
+    }
+  }
+  sessionStorage.setItem('nodePort', newValues.httpPort);
+  sessionStorage.setItem('selectedChainNode', state.selectedChainNode);
+}, {deep: true});
+
+watch( ()=> state.availableNetworks, (newValues) => {
+  let selectedNetwork = 0;
+  //let selectedNetworkName = "";
+  let sessionSelectedNetwork = sessionStorage.getItem("selectedNetwork") ? parseInt(sessionStorage.getItem("selectedNetwork")) : 0;
+  //let sessionSelectedNetworkName = sessionStorage.getItem("selectedNetworkName") ? sessionStorage.getItem("selectedNetworkName") : "";
+  let lastAccessNetwork = localStorage.getItem("lastAccessNetwork") ? parseInt(localStorage.getItem("lastAccessNetwork")) : 0;
+  //let lastAccessNetworkName = localStorage.getItem("lastAccessNetworkName") ? localStorage.getItem("lastAccessNetwork") : "";
+
+  if(sessionSelectedNetwork){
+    selectedNetwork = parseInt(sessionSelectedNetwork);
+    //selectedNetworkName = sessionSelectedNetworkName;
+  }
+  else{
+    selectedNetwork = lastAccessNetwork;
+    //selectedNetworkName = lastAccessNetworkName;
+  }
+
+  if(newValues[selectedNetwork] === undefined){
+    selectedNetwork = 0;
+  }
+  /*
+  else if(newValues[selectedNetwork] !== selectedNetworkName){
+    selectedNetwork = 0;
+  }
+  */
+  state.chainNetwork = selectedNetwork;
+});
+
+watch( ()=> state.chainNetwork, (newValues) => {
+  updateNetworkSessionStorage(newValues);
+});
+
+// chainNode class
+class ChainNetwork{
+  constructor() {
+    this.httpPort = 3000;
+    this.getSelectedNetwork();
+  }
+
+  getSelectedNetwork(){
+    const selectedNetwork = sessionStorage.getItem('selectedNetwork') ? parseInt(sessionStorage.getItem('selectedNetwork')) : -1;
     if(selectedNetwork >= 0){
-      siriusState.selectedNetwork = parseInt(sessionStorage.getItem('selectedNetwork'));
+      state.selectedNetwork = parseInt(sessionStorage.getItem('selectedNetwork'));
     }
   }
 
   updateChainNetwork(network){
-    siriusState.chainNetwork = network;
+    state.chainNetwork = network;
   }
 
   updateAvailableNetworks(){
     let names = ChainProfileNames.createDefault().names;
-
     if(names.length === 0){
       console.log("Is empty");
       setTimeout(()=>{
@@ -176,46 +308,49 @@ class Sirius {
       }, 50);
     }
     else{
-      siriusState.availableNetworks = names;
+      state.availableNetworks = names;
     }
   }
 
   updateCurrentProfile(){
-    let profile = siriusState.chainNetworkName ? new ChainProfile(siriusState.chainNetworkName) : null;
-  
+    let profile = state.chainNetworkName ? new ChainProfile(state.chainNetworkName) : null;
     if(profile){
       profile.init();
-      siriusState.currentNetworkProfile = profile;
+      state.currentNetworkProfile = profile;
+      // console.log(state.currentNetworkProfile)
     }
   }
 
   updateCurrentProfileConfig(){
-    let profileConfig = siriusState.chainNetworkName ? new ChainProfileConfig(siriusState.chainNetworkName+ '_config') : null;
-  
+    let profileConfig = state.chainNetworkName ? new ChainProfileConfig(state.chainNetworkName + '_config') : null;
+
     if(profileConfig){
       profileConfig.init();
-      siriusState.currentNetworkProfileConfig = profileConfig;
+      state.currentNetworkProfileConfig = profileConfig;
+      // console.log('state.currentNetworkProfileConfig')
+      // console.log(state.currentNetworkProfileConfig)
     }
   }
 
   getCurrentProfile(){
-    return siriusState.currentNetworkProfile;
+    return state.currentNetworkProfile;
   }
-  
+
   getCurrentProfileConfig(){
-    return siriusState.currentNetworkProfileConfig;
+    return state.currentNetworkProfileConfig;
   }
-  
+
   refreshselectedNetwork() {
-    siriusState.chainNetwork = sessionStorage.getItem('selectedNetwork');
+    state.chainNetwork = sessionStorage.getItem('selectedNetwork');
   }
-  
+
+  // another declared in siriusStore
   getChainNodes() {
-    return siriusState.currentNetworkProfile.apiNodes ? siriusState.currentNetworkProfile.apiNodes : [];
+    return state.currentNetworkProfile.apiNodes ? state.currentNetworkProfile.apiNodes : [];
   }
 
   getProfileConfig() {
-    return siriusState.currentNetworkProfileConfig ? siriusState.currentNetworkProfileConfig : null;
+    return state.currentNetworkProfileConfig ? state.currentNetworkProfileConfig : null;
   }
 
   getProfileNetwork(){
@@ -235,13 +370,13 @@ class Sirius {
   }
 
   getNetworkPort(){
-    return siriusState.currentNetworkProfile.httpPort;
+    return state.currentNetworkProfile.httpPort;
   }
-  
+
   getNetworkType(){
-    return siriusState.currentNetworkProfile.network.type;
+    return state.currentNetworkProfile.network.type;
   }
-  
+
   formatNetwork(){
     var list = this.getChainNodes();
     var n = [];
@@ -250,112 +385,29 @@ class Sirius {
     }
     return n;
   }
-  
-  getNetworkByType(typeid){
-    return config.network.find((element) => element.type == typeid);
-  }
 
-  async addChainNode(nodeConfigString){
-    const newNodeConfig = JSON.parse(nodeConfigString);
-    if (config.debug) {
-      console.log("addChainNode triggered with", newNodeConfig.hostname);
-    }
-  
-    if (
-      this.chainNodes.value.find(
-        (element) =>
-          element.protocol == newNodeConfig.protocol &&
-          element.hostname == newNodeConfig.hostname &&
-          element.port == newNodeConfig.port
-      )
-    ) {
-      return -1;
-    }
-  
-    try {
-      const http = new BlockHttp(utils.parseNodeConfig(newNodeConfig));
-      const blockInfo = await http.getBlockByHeight(1).toPromise();
-      if (
-        blockInfo.generationHash.toUpperCase() !=
-        config.network.generationHash.toUpperCase()
-      ) {
-        return 0;
-      }
-  
-      this.chainNodes.value.unshift({
-        protocol: newNodeConfig.protocol,
-        hostname: newNodeConfig.hostname,
-        port: newNodeConfig.port,
-      });
-      localStorage.setItem(
-        config.localStorage.chainNodesKey,
-        JSON.stringify(this.chainNodes.value)
-      );
-      return 1;
-    } catch (err) {
-      if (config.debug) {
-        console.error("addChainNode error caught", err);
-      }
-      return 0;
-    }
-  }
-
-  stopChainWSListener() {
-    console.log("stopChainWSListener triggered");
-
-    if (this.listenerChainWS.value != null) {
-      this.listenerChainWS.value.terminate();
-      this.listenerChainWS.value = null;
-    }
-  }
-
-  createNewAccount(walletName){
-    const encryptedPasswd = new Password(sessionStorage.getItem('walletPassword'));
-    const account = SimpleWallet.create(walletName, encryptedPasswd, this.getNetworkType());
-    const acc = account.open(encryptedPasswd);
-    account.publicKey = acc.publicKey;
-    account.privateKey = acc.privateKey;
-    return account;
-  }
-
-  createNewAccountPrivateKey(walletName, pk){
-    const encryptedPasswd = new Password(sessionStorage.getItem('walletPassword'));
-    const account = SimpleWallet.createFromPrivateKey(
-      walletName,
-      encryptedPasswd,
-      pk,
-      this.getNetworkType()
-    );
-    const acc = account.open(encryptedPasswd);
-    account.publicKey = acc.publicKey;
-    account.privateKey = acc.privateKey;
-    return account;
-  }
+  // getNetworkByType(typeid){
+  //   return config.network.find((element) => element.type == typeid);
+  // }
 
   static buildChainConfigHttp(apiURL){
     return new ChainConfigHttp(apiURL);
   }
 
   static buildChainHttp(apiURL){
-
     return new ChainHttp(apiURL);
   }
 
   static async getChainConfig(chainHeight, chainConfigHttp){
-    
     return new Promise((resolve, reject)=>{
       chainConfigHttp.getChainConfig(chainHeight).subscribe((configString)=>{
-  
         var regex = /[^=\n{1}]+=\s*(.*)/g;
-  
         var configs = configString.networkConfig.match(regex);
-  
         var networkConfig = configs.reduce((result, data)=>{
           var [config, value] = data.split("=");
           result[config.trim()] = value.trim();
           return result;
         }, {});
-  
         const chainConfig = {
           publicKey: networkConfig['publicKey'],
           blockGenerationTargetTime: networkConfig['blockGenerationTargetTime'],
@@ -404,7 +456,7 @@ class Sirius {
           maxNameSize: this.convertConfigNumberToInteger(networkConfig['maxNameSize']),
           maxNamespaceDuration: networkConfig['maxNamespaceDuration'],
           namespaceGracePeriodDuration: networkConfig['namespaceGracePeriodDuration'],
-          reservedRootNamespaceNames: networkConfig['reservedRootNamespaceNames'],  
+          reservedRootNamespaceNames: networkConfig['reservedRootNamespaceNames'],
           namespaceRentalFeeSinkPublicKey: networkConfig['namespaceRentalFeeSinkPublicKey'],
           rootNamespaceRentalFeePerBlock: this.convertConfigNumberToInteger(networkConfig['rootNamespaceRentalFeePerBlock']),
           childNamespaceRentalFee: this.convertConfigNumberToInteger(networkConfig['childNamespaceRentalFee']),
@@ -421,7 +473,6 @@ class Sirius {
           downloadCacheEnabled: networkConfig['downloadCacheEnabled'] === 'true' ? true : false,
           maxSuperContractsOnDrive: this.convertConfigNumberToInteger(networkConfig['maxSuperContractsOnDrive']),
         };
-  
         resolve(chainConfig);
       },
       (error)=>{
@@ -431,21 +482,16 @@ class Sirius {
   }
 
   convertConfigNumberToInteger(amount){
-
     if(!amount){
       return 0;
     }
-  
     return parseInt(amount.split("'").join(""));
   }
 
   async getChainHeight(chainHttp){
-    
     return new Promise((resolve, reject)=>{
       chainHttp.getBlockchainHeight().subscribe((height)=>{
-  
         const chainHeight = height.compact();
-  
         resolve(chainHeight);
       },
       (error)=>{
@@ -455,34 +501,28 @@ class Sirius {
   }
 
   buildAPIEndpointURL(url, port = undefined){
-
     var portNumber;
-  
     if(port){
       portNumber = port;
     }
-    else if(siriusState.currentNetworkProfile.httpPort){
-      portNumber = siriusState.currentNetworkProfile.httpPort;
+    else if(state.currentNetworkProfile.httpPort){
+      portNumber = state.currentNetworkProfile.httpPort;
     }
-      
     return location.protocol=='https:' ? `https://${url}` : `http://${url}:${portNumber}`;
   }
 
   buildWSEndpointURL(url, port = undefined){
 
     var portNumber;
-  
     if(port){
       portNumber = port;
     }
-    else if(siriusState.currentNetworkProfile.httpPort){
-      portNumber = siriusState.currentNetworkProfile.httpPort;
+    else if(state.currentNetworkProfile.httpPort){
+      portNumber = state.currentNetworkProfile.httpPort;
     }
-      
     return location.protocol=='https:' ? `wss://${url}` : `ws://${url}:${portNumber}`;
   }
 }
 
-const siriusStore_1 = new Sirius();
-
-export const siriusStore = readonly(siriusStore_1);
+const chainNetworkInstance = new ChainNetwork();
+export const chainNetwork = readonly(chainNetworkInstance);

@@ -2,7 +2,7 @@
   <div class="flex justify-between text-md">
     <div><span class="text-gray-300">Mosaics ></span> <span class="text-blue-primary font-bold">Create</span></div>
     <div>
-      <!-- <router-link to="/select-type-creation-account" class="font-bold">Back to Services</router-link> -->
+      <!-- <router-link :to="{ name: 'ViewAllServices' }" class="font-bold">Back to Services</router-link> -->
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-4'>
@@ -57,7 +57,7 @@
             <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Unconfirmed/Recommended Fee: 0.<span class="text-txs">062750</span> XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFee }} XPX</div>
+            <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFee }} XPX<span class="text-txs">000000</span> XPX</div>
           </div>
           <PasswordInput placeholder="Enter Your Wallet Password" :errorMessage="'Please enter your wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
@@ -95,7 +95,7 @@ import { mosaicTransaction, convertToCurrency } from '../util/transfer.js';
 import NotificationModal from '@/components/NotificationModal.vue';
 
 export default {
-  name: 'ViewCreateAccount',
+  name: 'ViewCreateMosaic',
   components: {
     PasswordInput,
     SupplyInput,
@@ -106,6 +106,7 @@ export default {
   setup(){
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
+    const chainNetwork = inject("chainNetwork");
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showSupplyErr = ref(false);
@@ -132,8 +133,6 @@ export default {
     const durationOption =ref('month');
     const duration = ref('1');
     const showDurationErr = ref(false);
-
-    const rentalFee = computed(()=> convertToCurrency(siriusStore.getProfileConfig().mosaicRentalFee, siriusStore.getCurrencyDivisibility()))
 
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
@@ -170,9 +169,9 @@ export default {
       durationCheckDisabled.value = false;
     }
 
-    const supply = ref('0');
+    const supply = ref(0);
     const accounts = computed( () => appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts);
-    const sendXPX = ref('0.000000');
+    const sendXPX = ref(0);
     const moreThanOneAccount = computed(()=> (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false);
 
     const changeSelection = (i) => {
@@ -261,6 +260,8 @@ export default {
       }
     };
 
+    const rentalFee = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
+
     emitter.on("CLOSE_NOTIFICATION", payload => {
       toggleAnounceNotification.value = payload;
     });
@@ -305,7 +306,7 @@ export default {
       duration,
       showDurationErr,
       durationCheckDisabled,
-      rentalFee
+      rentalFee,
     }
   },
 

@@ -43,8 +43,8 @@ export default {
         {name: 'Transfer Assets', link: ''},
       ]},
       {name: 'Address Book', desc: 'Assign labels to addresses', img: 'icon-address-book-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'List', link: ''},
-        {name: 'Add Contacts', link: ''},
+        {name: 'List', link: '/address-book'},
+        {name: 'Add Contacts', link: '/add-contacts'},
       ]},
       {name: 'Wallets', desc: 'Manage your wallets', img: 'icon-address-book-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: 'Change Password', link: ''},
@@ -57,7 +57,7 @@ export default {
         {name: 'Partial', link: ''},
       ]},
       {name: 'Nodes', desc: 'Add and edit nodes', img: 'icon-nodes-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Blockchain', link: ''},
+        {name: 'Blockchain', link: '/nodes'},
         {name: 'Storage', link: ''},
         {name: 'Streaming', link: ''},
       ]},

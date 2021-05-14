@@ -17,7 +17,7 @@
       </div>
       <div class="text-center md:text-left">
         <div class="inline-block mr-4"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"><span class="text-xs">{{ primaryAccountBalance }} XPX</span></div>
-        <div class="inline-block"><img src="../assets/img/icon-usd-blue.svg" class="w-5 inline mr-1"><span class="text-xs">USD 204.451</span></div>
+        <div class="inline-block"><img src="../assets/img/icon-usd-blue.svg" class="w-5 inline mr-1"><span class="text-xs">USD {{ currencyConvert }}</span></div>
       </div>
     </div>
     <div class="w-full lg:w-6/12 mt-5 md:mt-0">
@@ -55,16 +55,17 @@
 </template>
 
 <script>
-import { computed, inject, ref, getCurrentInstance } from 'vue';
+import { computed, inject, ref, getCurrentInstance, watch } from 'vue';
 import DashboardDataTable from '@/components/DashboardDataTable.vue'
 import PartialDashboardDataTable from '@/components/PartialDashboardDataTable.vue'
 import SetAccountDefaultModal from '@/components/SetAccountDefaultModal.vue'
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
-import { copyKeyFunc } from '../util/functions.js';
+import { copyKeyFunc, currencyconverter } from '../util/functions.js';
 import { transactions } from '../util/transactions.js';
 // eslint-disable-next-line no-unused-vars
 import { PublicAccount, Order, QueryParams } from "tsjs-xpx-chain-sdk";
 import { transferEmitter } from '../util/listener.js';
+
 
 export default {
   name: 'ViewDashboard',
@@ -113,6 +114,23 @@ export default {
           }
       }
     );
+
+    // get USD conversion
+    const currencyConvert = ref(0);
+    console.log(appStore.state.currentLoggedInWallet.name)
+    const getCurrencyConvert = () => {
+      let balance = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
+      currencyconverter(balance).then((total) => {
+        currencyConvert.value = total.toFixed(6);
+      });
+    };
+    getCurrencyConvert();
+    watch(primaryAccountBalance, () => {
+      let balance = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
+      currencyconverter(balance).then((total) => {
+        currencyConvert.value = total.toFixed(6);
+      });
+    });
 
     const confirmedTransactions = ref([]);
     const unconfirmedTransactions = ref([]);
@@ -177,6 +195,7 @@ export default {
       siriusStore.accountHttp.transactions(publicAccount, qp).subscribe(tx => {
         if( tx.length > 0 ){
           tx.forEach((t)=>{
+            // console.log(t)
             let formattedTransaction = transactions.formatTransaction(t, names);
             confirmedTransactions.value.push(formattedTransaction);
             lastTransactionID = t.transactionInfo.id;
@@ -335,6 +354,7 @@ export default {
       clickUnconfirmedTransaction,
       clickAggregateBondedTransactions,
       openSetDefaultModal,
+      currencyConvert,
     };
   }
 }

@@ -9,6 +9,7 @@
         <p>Restore your existing ProximaX Sirius Wallet, import a private key from another service or create a new wallet right now!</p>
         <div class="w-10/12 lg:w-8/12 self-center inline-block">
           <div class="error error_box" v-if="err!=''">{{ err }}</div>
+          <div class="text-left text-tsm my-4 ml-4 text-gray-600"><b>Network</b>: {{ selectedNetworkName }}</div>
           <PasswordInput placeholder="Private Key" errorMessage="Invalid private key" icon="key" v-model="privKey" class="ml-1" />
           <label class="inline-flex items-center mb-5">
               <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="nis1Swap">
@@ -106,7 +107,8 @@ export default {
   name: 'ViewCreateNewWallet',
   components: {
     FontAwesomeIcon,
-    TextInput, PasswordInput
+    TextInput,
+    PasswordInput
   },
   data() {
     return {
@@ -118,10 +120,14 @@ export default {
     const internalInstance = getCurrentInstance();
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
+    const chainNetwork = inject("chainNetwork");
+    const selectedNetwork = computed(()=> chainNetwork.getNetworkType());
+    const selectedNetworkName = computed(()=> siriusStore.state.chainNetworkName );
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref("");
     const newWallet = ref("");
-    const selectedNetwork = computed(()=> siriusStore.getNetworkType());
+    // const selectedNetwork = ref("168");
+    // const networks = ref(siriusStore.state.network);
     const walletName = ref("");
     const passwd = ref("");
     const privateKey = ref("");
@@ -173,7 +179,6 @@ export default {
     };
 
     const clearInput = () => {
-      selectedNetwork.value = 0;
       walletName.value = '';
       passwd.value = "";
       confirmPasswd.value = "";
@@ -188,6 +193,8 @@ export default {
       err,
       newWallet,
       selectedNetwork,
+      selectedNetworkName,
+      // networks,
       walletName,
       passwd,
       confirmPasswd,

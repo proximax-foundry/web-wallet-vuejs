@@ -2,7 +2,7 @@
 <div class="flex justify-between text-sm">
   <div><span class="text-gray-400">Accounts > Multisign ></span> <span class="text-blue-primary font-bold">Edit multisig Account</span></div>
   <div>
-    <router-link to="/view-all-accounts" class="font-bold" active-class="accounts">View All Accounts</router-link>
+    <router-link :to="{name: 'ViewDisplayAllAccounts'}" class="font-bold" active-class="accounts">View All Accounts</router-link>
   </div>
 </div>
 <div class='mt-2 py-3 gray-line'>

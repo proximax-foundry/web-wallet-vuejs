@@ -33,7 +33,6 @@ export default {
   },
   setup(){
     const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
     const err = ref(false);
     const accountName = ref("");
     const walletPassword = ref("");
@@ -55,7 +54,7 @@ export default {
           err.value = "Password for wallet " + appStore.state.currentLoggedInWallet.name + " is invalid" ;
         } else {
           // create account
-          const account = siriusStore.createNewAccount(appStore.state.currentLoggedInWallet.name, walletPassword.value);
+          const account = appStore.createNewAccount(appStore.state.currentLoggedInWallet.name, walletPassword.value);
           // update to state
           appStore.updateAccountState(account, accountName.value);
           router.push({ name: "createdAccount", params: {publicKey: account.publicKey, privateKey: account.privateKey, address: appStore.pretty(account.address.address), name: accountName.value }});
