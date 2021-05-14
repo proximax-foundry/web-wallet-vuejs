@@ -58,10 +58,10 @@
         <div v-for="(coSignAddress, index) in coSign" :key="index" class="flex">
           <font-awesome-icon icon="trash-alt" class="w-4 h-4 text-gray-500 hover:text-gray-400 cursor-pointer mr-3 mt-3" @click="deleteCoSigAddressInput(index)"></font-awesome-icon>
           <TextInput placeholder="Cosignatory Account Address or Public Key" errorMessage="Valid Cosignatory Account Address or Public Key is required" :showError="showAddressError[index]" v-model="coSign[index]" icon="key" class="flex-grow" />
-          <add-cosign-modal :cosignPublicKeyIndex="index" :selectedAddress="selectedAddresses"></add-cosign-modal>
+          <AddCosignModal :cosignPublicKeyIndex="index" :selectedAddress="selectedAddresses" />
         </div>
-        <div class="text-lg" v-if="!coSign.length">Add at least 1 consignatories</div>
-        <button class="my-8 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50" @click="addCoSig" :disabled="addCoSigButton">(+) Add cosignatory</button>
+        <div class="text-lg" v-if="!coSign.length">Add at least 1 cosignatories</div>
+        <button class="my-8 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">(+) Add cosignatory</button>
       </div>
       <div class="p-4 rounded-xl bg-gray-100 my-2 w-full text-xs text-gray-800">
         <img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"> Unconfirmed/Recommended Fee: 0.042750 XPX
@@ -82,7 +82,7 @@
       <PasswordInput placeholder="Enter Wallet Password" errorMessage="Wallet password is required to convert to MultiSig Account" :showError="showPasswdError" v-model="passwd" icon="lock" :disabled="disabledPassword" />
       <div class="mt-10">
         <button type="button" class="default-btn mr-5 focus:outline-none" @click="clear()">Clear</button>
-        <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="convertAccount()" :disabled="disableSend">Send</button>
+        <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="convertAccount()" :disabled="disableSend">Send</button>
       </div>
 
     </div>
@@ -132,15 +132,14 @@ export default {
     const numDeleteUser = ref(1);
     const maxNumApproveTransaction = ref(0);
     const maxNumDeleteUser = ref(0);
-    
+
     const publicKeyPattern = "^[0-9A-Fa-f]{64}$";
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
-    
+
     const coSign = ref([]);
     const selectedAddresses = ref([]);
     const showAddressError = ref([]);
-    const disabledPassword = ref(true);
     const toggleAnounceNotification = ref(false);
     const onPartial = ref(false);
     const isMultisig = ref(false);
@@ -151,19 +150,18 @@ export default {
 
     const addCoSigButton = computed(() => {
       var status = false;
-      if(accountBalance.value >= 10.0445){
+      if(accountBalance() >= 10.0445){
         for(var i = 0; i < coSign.value.length; i++){
-          if(!coSign.value[i].match(publicKeyPattern) && (coSign.value[i].length == 64)){
+          if(showAddressError.value[i] != ''){
             status = true;
             break;
-          }else if(!coSign.value[i].match(addressPatternShort) && (coSign.value[i].length == 40)){
-            status = true;
-            break;
-          }else if(!coSign.value[i].match(addressPatternLong) && (coSign.value[i].length == 46)){
+          }else if(coSign.value[i].length < 40){
             status = true;
             break;
           }
         }
+      }else{
+        status = true;
       }
       return status;
     });
@@ -211,7 +209,7 @@ export default {
 
             const unique = Array.from(new Set(n));
             if(unique.length != n.length){
-              err.value = "Cosignee already exist";
+              err.value = "Cosigner already exist";
             }else{
               err.value = '';
             }
@@ -239,6 +237,7 @@ export default {
     };
 
     const deleteCoSigAddressInput = (i) => {
+      console.log('Delete index: ' + i);
       maxNumApproveTransaction.value -= 1;
       maxNumDeleteUser.value -= 1;
       if(numDeleteUser.value > maxNumDeleteUser.value){
@@ -252,28 +251,26 @@ export default {
       selectedAddresses.value.splice(i, 1);
     }
 
+    const disabledPassword = computed(() => (onPartial.value || isMultisig.value ));
+
     // get account details
     const acc = getAcccountDetails();
     if(acc==-1 && acc.default){
       router.push({ name: "ViewDisplayAllAccounts"});
     }
     setTimeout(()=> {
-      if(accountBalance.value < 10.0445){
+      if(accountBalance() < 10.0445){
         fundStatus.value = true;
-        disabledPassword.value = true;
       }else{
         fundStatus.value = false;
-        disabledPassword.value = false;
       }
     }, 500);
 
     watch(accountBalance, (n) => {
       if(n < 10.0445){
         fundStatus.value = true;
-        disabledPassword.value = true;
       }else{
         fundStatus.value = false;
-        disabledPassword.value = false;
       }
     });
 
@@ -282,6 +279,7 @@ export default {
       onPartial.value = onPartialBoolean;
     });
 
+    // check if this address has cosigner
     try{
       multiSign.checkIsMultiSig(acc.address).then((isMultiSigBoolean) => {
         isMultisig.value = isMultiSigBoolean;

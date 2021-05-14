@@ -2,7 +2,7 @@
   <div class="flex justify-between text-md">
     <div><span class="text-gray-300">Mosaics ></span> <span class="text-blue-primary font-bold">Create</span></div>
     <div>
-      <!-- <router-link to="/select-type-creation-account" class="font-bold">Back to Services</router-link> -->
+      <!-- <router-link :to="{ name: 'ViewAllServices' }" class="font-bold">Back to Services</router-link> -->
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-4'>
@@ -57,7 +57,7 @@
             <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Unconfirmed/Recommended Fee: 0.<span class="text-txs">062750</span> XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: 10,000.<span class="text-txs">000000</span> XPX</div>
+            <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFeeCurrency }} {{currencyName}}</div>
           </div>
           <PasswordInput placeholder="Enter Your Wallet Password" :errorMessage="'Please enter your wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
@@ -91,11 +91,11 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
 import NumberInput from '@/components/NumberInput.vue';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
-import { mosaicTransaction } from '../util/transfer.js';
+import { mosaicTransaction, convertToCurrency, convertToExact } from '../util/transfer.js';
 import NotificationModal from '@/components/NotificationModal.vue';
 
 export default {
-  name: 'ViewCreateAccount',
+  name: 'ViewCreateMosaic',
   components: {
     PasswordInput,
     SupplyInput,
@@ -106,11 +106,10 @@ export default {
   setup(){
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
+    const chainNetwork = inject("chainNetwork");
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const showContactSelection = ref(false);
     const showSupplyErr = ref(false);
-    const selectContact = ref("0");
     const recipient = ref('');
     const msgOption = ref('regular');
     const messageText = ref('');
@@ -139,6 +138,10 @@ export default {
     const showPasswdError = ref(false);
     const durationCheckDisabled = ref(false);
 
+    const currencyName = computed(() => chainNetwork.getCurrencyName());
+    const rentalFee = computed(()=> convertToExact(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
+    const rentalFeeCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
+
     const disableCreate = computed(() => !(
       walletPassword.value.match(passwdPattern) && !disabledMutableCheck.value && (divisibility.value != '') && (supply.value > 0) && (!showDurationErr.value)
     ));
@@ -149,7 +152,7 @@ export default {
     // balance.value = appStore.getFirstAccBalance();
 
     const showNoBalance = ref(false);
-    if(balance.value < 10000){
+    if(balance.value < rentalFee.value){
       showNoBalance.value = true;
       disabledMutableCheck.value = true;
       disabledTransferableCheck.value = true;
@@ -170,23 +173,19 @@ export default {
       durationCheckDisabled.value = false;
     }
 
-    const supply = ref('0');
+    const supply = ref(0);
     const accounts = computed( () => appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts);
-    const sendXPX = ref('0.000000');
+    const sendXPX = ref(0);
     const moreThanOneAccount = computed(()=> (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false);
 
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
       balance.value = i.balance;
-      (balance.value < 10000)?showNoBalance.value = true:showNoBalance.value = false;
+      (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
     }
-
-    const contact = computed(() => {
-      return appStore.getContact();
-    });
 
     const clearInput = () => {
       walletPassword.value = '';
@@ -211,7 +210,7 @@ export default {
     });
 
     watch(balance, (n) => {
-      if(n < 10000){
+      if(n < rentalFee.value){
         showNoBalance.value = true;
         disabledMutableCheck.value = true;
         disabledTransferableCheck.value = true;
@@ -284,13 +283,10 @@ export default {
       showSupplyErr,
       showDivisibilityErr,
       err,
-      contact,
       recipient,
       sendXPX,
       messageText,
       msgOption,
-      showContactSelection,
-      selectContact,
       walletPassword,
       disableCreate,
       clearInput,
@@ -312,6 +308,8 @@ export default {
       duration,
       showDurationErr,
       durationCheckDisabled,
+      rentalFeeCurrency,
+      currencyName
     }
   },
 

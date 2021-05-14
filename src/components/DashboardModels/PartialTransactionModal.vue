@@ -42,12 +42,16 @@
                   <div class="bg-yellow-500 text-white text-sm font-bold text-center py-3">Action Required</div>
                   <div class="bg-gray-200 py-4 px-4">
                     <div class="text-xs mb-2 font-bold">Signer Cosignatory Account:</div>
-                    <div class="text-xs">{{ transaction.signer.address.address }}</div>
+                    <div class="text-txs">{{ appStore.pretty(transaction.signer.address.address) }}</div>
+                  </div>
+                  <div v-if="transaction.cosignatures.length > 0" class="bg-gray-200 py-4 px-4">
+                    <div class="text-xs mb-2 font-bold">Other cosigner{{ (transaction.cosignatures.length > 1)?'s':'' }}:</div>
+                    <div class="text-txs" v-for="(cosigner, i) in transaction.cosignatures" :key="i">{{ appStore.pretty(cosigner.signer.address.address) }}</div>
                   </div>
                   <div v-if="!transaction.isSigned">
                     <div class="py-4 px-4">
                       <div class="text-xs mb-2 font-bold">Cosignatory account signing below:</div>
-                      <div class="text-xs">{{ transaction.account }}</div>
+                      <div class="text-txs">{{ appStore.pretty(transaction.account) }}</div>
                     </div>
                     <div class="error error_box p-2 mb-3" v-if="err!=''">{{ err }}</div>
                     <PasswordInput placeholder="Enter Wallet Password" errorMessage="Password is required" :showError="showPasswdError" v-model="passwd" icon="lock" />
@@ -130,6 +134,7 @@ export default{
     }, {immediate: true})
 
     return {
+      appStore,
       err,
       transactions,
       closeModal,

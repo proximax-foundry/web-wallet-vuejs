@@ -23,7 +23,6 @@
               </div>
             </div>
             <fieldset class="w-full">
-              <PasswordInput placeholder="Enter Wallet Password" errorMessage="Password is required to remove wallet" :showError="showPasswdError" v-model="passwd" icon="lock" />
               <label class="inline-flex items-center mb-10">
                 <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="readCheck">
                 <span class="ml-2 cursor-pointer text-xs">I have read the warning, understand the consequences, and wish to proceed.</span>
@@ -44,7 +43,6 @@
 <script>
 import { computed, ref, inject } from 'vue';
 import { useRouter } from 'vue-router';
-import PasswordInput from '@/components/PasswordInput.vue'
 
 export default{
   name: 'ConfirmDeleteWalletModal',
@@ -58,18 +56,15 @@ export default{
   setup(p){
     const appStore = inject("appStore");
     const router = useRouter();
-    const passwd = ref('');
-    const showPasswdError = false;
     const err = ref("");
     const readCheck = ref(false);
-    const passwdPattern = "^[^ ]{8,}$";
     const disableDelete = computed(
       () => !(
-          passwd.value.match(passwdPattern) && readCheck.value
+          readCheck.value
       )
     );
     const deleteWallet = () => {
-      var a = appStore.deleteWallet(p.name, passwd.value, p.networkName);
+      var a = appStore.deleteWallet(p.name, p.networkName);
       if(a>0){
         // this.emitter.emit("DELETE_WALLET", true);
         router.push({ name: 'ViewWallets', params: {deleteWallet: 'success' } });
@@ -81,16 +76,10 @@ export default{
     };
     return {
       err,
-      passwd,
       readCheck,
-      showPasswdError,
       disableDelete,
       deleteWallet,
     };
   },
-
-  components: {
-    PasswordInput
-  }
 }
 </script>

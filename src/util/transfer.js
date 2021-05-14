@@ -1,14 +1,11 @@
+import { readonly } from "vue";
 import {
   Account,
   Address,
   Deadline,
   EncryptedMessage,
-  TransactionHttp,
   // NetworkCurrencyMosaic,
-  PlainMessage,
-  TransactionBuilderFactory,
-  FeeCalculationStrategy,
-  // MosaicHttp,
+  // FeeCalculationStrategy,
   Mosaic,
   MosaicId,
   UInt64,
@@ -16,11 +13,17 @@ import {
   MosaicSupplyType,
   // MosaicService,
   MosaicNonce,
-  // Listener,
+  PlainMessage,
+  TransferTransaction,
+  TransactionHttp,
+  TransactionBuilderFactory,
+  PublicAccount,
 } from "tsjs-xpx-chain-sdk";
+import * as FeeCalculationStrategy from 'tsjs-xpx-chain-sdk/dist/src/model/transaction/FeeCalculationStrategy';
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { environment } from '../environment/environment.js';
-
+import { appStore } from "@/store/app";
+import { siriusStore } from "@/store/sirius";
 const config = require("@/../config/config.json");
 
 
@@ -68,14 +71,17 @@ function amountFormatterSimple(amount, d = 6) {
 //   });
 // };
 
-export const makeTransaction = (recipient, sendXPX, messageText, mosaicsSent, mosaicDivisibility, walletPassword, senderAccName, encryptedMsg, appStore, siriusStore) => {
+export const createTransaction = (recipient, sendXPX, messageText, mosaicsSent, mosaicDivisibility, walletPassword, senderAccName, encryptedMsg) => {
   // verify password
+  console.log('Pw after createTransaction: ' + walletPassword);
+  console.log(appStore.state.currentLoggedInWallet);
   let verify = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword);
   if(verify < 1){
     return verify;
   }
-  const add = fetch(siriusStore.state.selectedChainNode + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
-
+  const add = fetch(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode) + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
+  // console.log(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
+  // console.log(add);
   return add.then(async(hash) => {
     let networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
     const recipientAddress = Address.createFromRawAddress(recipient);
@@ -112,7 +118,7 @@ export const makeTransaction = (recipient, sendXPX, messageText, mosaicsSent, mo
 
     // to get sender's private key
     let accountDetails = appStore.getAccDetails(senderAccName)
-    let privateKey = appStore.decryptPrivateKey(sessionStorage.getItem('walletPassword'), accountDetails.encrypted, accountDetails.iv);
+    let privateKey = appStore.decryptPrivateKey(walletPassword, accountDetails.encrypted, accountDetails.iv);
 
     // sending encrypted message
     let msg;
@@ -133,7 +139,7 @@ export const makeTransaction = (recipient, sendXPX, messageText, mosaicsSent, mo
 
     const account = Account.createFromPrivateKey(privateKey, networkType);
     const signedTransaction = account.sign(transferTransaction, hash);
-    const transactionHttp = new TransactionHttp(siriusStore.state.selectedChainNode);
+    const transactionHttp = new TransactionHttp(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
 
     transactionHttp
       .announce(signedTransaction)
@@ -150,7 +156,7 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
   if(verify < 1){
     return verify;
   }
-  const add = fetch(siriusStore.state.selectedChainNode + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
+  const add = fetch(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode) + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
 
   return add.then((hash) => {
 
@@ -163,7 +169,7 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
     //   mosaicDuration = parseInt(duration) * 365 * 24 * 60 * 4;
     // }
 
-    let privateKey = appStore.decryptPrivateKey(sessionStorage.getItem('walletPassword'), accountDetails.encrypted, accountDetails.iv);
+    let privateKey = appStore.decryptPrivateKey(walletPassword, accountDetails.encrypted, accountDetails.iv);
     let networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
     const account = Account.createFromPrivateKey(privateKey, networkType);
 
@@ -208,7 +214,7 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
     transactionBuilder.fee = amountFormatterSimple(aggregateTransaction.maxFee.compact());
     // console.log('TF: '+transactionBuilder.fee);
     const signedTransaction = account.sign(aggregateTransaction, hash);
-    const transactionHttp = new TransactionHttp(siriusStore.state.selectedChainNode);
+    const transactionHttp = new TransactionHttp(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
 
     transactionHttp
       .announce(signedTransaction)
@@ -218,4 +224,133 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
         return true;
       }, err => console.error(err));
   });
+}
+
+/**
+ *
+ *
+ * @param message
+ * @memberof ViewTransferComponent
+ */
+
+ const calculateFee = (message, amount, mosaic) => {
+  let mosaicsToSend = validateMosaicsToSend(amount, mosaic);
+  const x = TransferTransaction.calculateSize(PlainMessage.create(message).size(), mosaicsToSend.length);
+  const b = FeeCalculationStrategy.calculateFee(x, getFeeStrategy());
+  let fee;
+  if (message > 0) {
+    fee = amountFormatterSimple(b.compact());
+  } else if (message === 0 && mosaicsToSend.length === 0) {
+    if(getFeeStrategy() === FeeCalculationStrategy.FeeCalculationStrategy.ZeroFeeCalculationStrategy)
+      fee = '0.000000';
+    else{
+      fee = TransferTransaction.calculateSize(message, mosaicsToSend.length) * getFeeStrategy() / 1000000;
+      //fee = '0.037250';
+    }
+  } else {
+    fee = amountFormatterSimple(b.compact());
+  }
+  return fee;
+}
+
+/**
+ *
+ *
+ * @returns
+ * @memberof CreateTransferComponent
+ */
+const validateMosaicsToSend = (amountXpx, boxOtherMosaics) => {
+  const mosaics = [];
+
+  if (amountXpx !== '' && amountXpx !== null && Number(amountXpx) !== 0) {
+    // console.log(amountXpx);
+    const arrAmount = amountXpx.toString().replace(/,/g, '').split('.');
+    let decimal;
+    let realAmount;
+
+    if (arrAmount.length < 2) {
+      decimal = addZeros(environment.mosaicXpxInfo.divisibility);
+    } else {
+      const arrDecimals = arrAmount[1].split('');
+      decimal = addZeros(environment.mosaicXpxInfo.divisibility - arrDecimals.length, arrAmount[1]);
+    }
+    realAmount = `${arrAmount[0]}${decimal}`;
+    mosaics.push({
+      id: environment.mosaicXpxInfo.id,
+      amount: realAmount
+    });
+  }
+
+  boxOtherMosaics.forEach(element => {
+    if (element.id !== '' && element.amount !== '' && Number(element.amount) !== 0) {
+      const arrAmount = element.amount.toString().replace(/,/g, '').split('.');
+      let realAmount;
+      realAmount = arrAmount[0];
+      mosaics.push({
+        id: element.id,
+        amount: realAmount
+      });
+    }
+  });
+  return mosaics;
+}
+
+/**
+   *
+   *
+   * @param {*} cant
+   * @param {string} [amount='0']
+   * @returns
+   * @memberof CreateTransferComponent
+   */
+ const addZeros = (cant, amount = '0') => {
+  const x = '0';
+  if (amount === '0') {
+    for (let index = 0; index < cant - 1; index++) {
+      amount += x;
+    }
+  } else {
+    for (let index = 0; index < cant; index++) {
+      amount += x;
+    }
+  }
+  return amount;
+}
+
+const getFeeStrategy = () => {
+  const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
+  var transactionBuilder = new TransactionBuilderFactory();
+    // calculate fee strategy
+    let networkName = siriusStore.getNetworkByType(networkType);
+    if(networkName === config.networkType.PRIVATE || networkName === config.networkType.PRIVATE_TEST){
+      transactionBuilder.feeCalculationStrategy = FeeCalculationStrategy.ZeroFeeCalculationStrategy;
+    }
+    else{
+      transactionBuilder.feeCalculationStrategy = FeeCalculationStrategy.MiddleFeeCalculationStrategy;
+    }
+    return transactionBuilder.feeCalculationStrategy;
+}
+
+export const makeTransaction = readonly({
+  calculateFee
+});
+
+export const getFakeEncryptedMessageSize =(message)=>{
+  return EncryptedMessage.create(message, PublicAccount.createFromPublicKey("0".repeat(64)), "0".repeat(64)).size();
+}
+
+export const getPlainMessageSize =(message)=>{
+  return PlainMessage.create(message).size();
+}
+
+export const convertToCurrency =(value, divisibility)=>{
+
+  const exactValue = value/Math.pow(10, divisibility);
+
+  return new Intl.NumberFormat('en', {maximumFractionDigits: divisibility}).format(exactValue);
+}
+
+export const convertToExact =(value, divisibility)=>{
+
+  return value/Math.pow(10, divisibility);
 }

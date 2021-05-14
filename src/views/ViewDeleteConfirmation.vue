@@ -7,12 +7,14 @@
       <div class="mt-2 text-xl">{{ networkName }}</div>
       <p class="mt-6">Accounts available in this wallet:</p>
       <div class="bg-gray-200 rounded-2xl text-left p-5 w-full lg:w-9/12 inline-block mt-5" v-if="accountsList.length > 0">
-        <div class="font-bold">Primary</div>
-        <div v-for="i in accountsList" :key="i.address">{{ i.address }}</div>
+        <div v-for="i in accountsList" :key="i.address">
+          <div class="font-bold text-sm">{{ i.name }}</div>
+          <div class="mb-2 text-tsm">{{ i.address }}</div>
+        </div>
       </div>
       <div class="my-5">Would you like to permanently delete this Sirius Wallet?</div>
       <div class="mt-10">
-        <router-link :to="{ name: 'ViewWallets'}" class="default-btn mr-5 w-50 inline-block">Go Back</router-link>
+        <router-link :to="{name: 'ViewWallets'}" class="default-btn mr-5 w-50 inline-block">Go Back</router-link>
         <ConfirmDeleteWalletModal :name="name" :networkName="networkName" />
       </div>
     </div>
@@ -42,7 +44,7 @@ export default {
   setup(p){
     const appStore = inject("appStore");
     const accountsList = computed(() =>{
-      var w = appStore.getWalletByNameAndNetwork(p.name, p.networkName);
+      var w =appStore.getWalletByNameAndNetwork(p.name, p.networkName);
       if(w){
         return w.accounts;
       }else{

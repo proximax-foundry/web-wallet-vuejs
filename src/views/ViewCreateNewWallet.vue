@@ -8,6 +8,7 @@
       <div class="mx-auto page-title-gray-line pt-5">
         <div class="w-10/12 lg:w-8/12 self-center inline-block">
           <div class="error error_box" v-if="err!=''">{{ err }}</div>
+          <div class="text-left text-tsm my-4 ml-4 text-gray-600"><b>Network</b>: {{ selectedNetworkName }}</div>
           <TextInput placeholder="Wallet Name" errorMessage="Insert wallet name" v-model="walletName" icon="wallet" />
           <div class="grid xs:grid-cols-1 md:grid-cols-2">
             <PasswordInput placeholder="Enter a New Password" errorMessage="Min. length 8, max. length 30." :showError="showPasswdError" icon="lock" v-model="passwd" class="mr-1" />
@@ -76,10 +77,10 @@
         <div class="inline-block mt-10 w-full">
           <div class="grid xs:grid-cols-1 md:grid-cols-3">
             <div class="px-5 self-center">
-              <a href="#" class="block big-default-btn my-3 self-center w-full" @click="showPK = !showPK">{{ showPK?'Hide':'Show' }} Private Key</a>
+              <a class="block big-default-btn my-3 self-center w-full" @click="showPK = !showPK">{{ showPK?'Hide':'Show' }} Private Key</a>
             </div>
             <div class="px-5">
-              <a href="#" class="block big-default-btn my-3 self-center w-full">Save Paper Wallet</a>
+              <a class="block big-default-btn my-3 self-center w-full">Save Paper Wallet</a>
             </div>
             <div class="px-5 self-center"><router-link :to="{name: 'Welcome'}" class="block big-default-btn my-3 self-center">Continue</router-link></div>
           </div>
@@ -92,6 +93,7 @@
 <script>
 import { computed, inject, ref, getCurrentInstance } from 'vue';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
+// import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { copyKeyFunc } from '../util/functions.js';
@@ -100,7 +102,9 @@ export default {
   name: 'ViewCreateNewWallet',
   components: {
     FontAwesomeIcon,
-    TextInput, PasswordInput
+    // SelectInputPlugin,
+    TextInput,
+    PasswordInput
   },
   data() {
     return {
@@ -111,10 +115,14 @@ export default {
     const internalInstance = getCurrentInstance();
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
+    const chainNetwork = inject("chainNetwork");
+    const selectedNetwork = computed(()=> chainNetwork.getNetworkType());
+    const selectedNetworkName = computed(()=> siriusStore.state.chainNetworkName );
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref("");
     const newWallet = ref("");
-    const selectedNetwork = computed(()=> siriusStore.getNetworkType());
+    // const selectedNetwork = ref(168);
+    // const networks = ref(siriusStore.state.network);
     const walletName = ref("");
     const passwd = ref("");
     const confirmPasswd = ref("");
@@ -142,7 +150,7 @@ export default {
       let result = 0;
 
       result = appStore.addNewWallet(
-        siriusStore.chainNetworkName.value,
+        siriusStore.state.chainNetworkName,
         walletName.value,
         passwd.value,
         selectedNetwork.value
@@ -162,7 +170,6 @@ export default {
     };
 
     const clearInput = () => {
-      selectedNetwork.value = 0;
       walletName.value = '';
       passwd.value = "";
       confirmPasswd.value = "";
@@ -175,6 +182,8 @@ export default {
       err,
       newWallet,
       selectedNetwork,
+      selectedNetworkName,
+      // networks,
       walletName,
       passwd,
       privateKey,

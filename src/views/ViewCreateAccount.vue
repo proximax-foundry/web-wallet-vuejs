@@ -33,7 +33,6 @@ export default {
   },
   setup(){
     const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
     const err = ref(false);
     const accountName = ref("");
     const walletPassword = ref("");
@@ -47,11 +46,6 @@ export default {
       )
     );
     const create = () => {
-      // if (disableLogin.value) {
-      //   err.value = "Please enter a valid password";
-      //   loading.value = false;
-      //   return;
-      // }
       if(!appStore.verifyExistingAccountName(appStore.state.currentLoggedInWallet.name, accountName.value)){
         var result = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword.value);
         if (result == -1) {
@@ -60,16 +54,21 @@ export default {
           err.value = "Password for wallet " + appStore.state.currentLoggedInWallet.name + " is invalid" ;
         } else {
           // create account
-          const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
-          const account = siriusStore.createNewAccount(appStore.state.currentLoggedInWallet.name, networkType);
+          const account = appStore.createNewAccount(appStore.state.currentLoggedInWallet.name, walletPassword.value);
           // update to state
-          appStore.updateAccountState(account, networkType, accountName.value);
+          appStore.updateAccountState(account, accountName.value);
           router.push({ name: "createdAccount", params: {publicKey: account.publicKey, privateKey: account.privateKey, address: appStore.pretty(account.address.address), name: accountName.value }});
         }
       }else{
         err.value = "Account name is already taken.";
       }
     };
+
+    const clearInput = () => {
+      accountName.value = "";
+      walletPassword.value = "";
+    };
+
     return{
       appStore,
       err,
@@ -77,14 +76,10 @@ export default {
       accountName,
       walletPassword,
       showPasswdError,
-      disableCreate
+      disableCreate,
+      clearInput
     }
   },
-  methods: {
-    clearInput: function() {
-      this.accountName = "";
-      this.walletPassword = "";
-    },
-  },
+
 }
 </script>

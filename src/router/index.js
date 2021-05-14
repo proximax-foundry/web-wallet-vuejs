@@ -1,5 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
-
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 const routes = [
   {
@@ -12,7 +11,7 @@ const routes = [
     }
   },
   {
-    path: '/#/create',
+    path: '/create',
     name: 'CreateWalletSelection',
     component: () => import('@/views/CreateWalletSelection.vue'),
     meta: {
@@ -20,7 +19,7 @@ const routes = [
     }
   },
   {
-    path: '/#/wallets',
+    path: '/wallets',
     name: 'ViewWallets',
     props: true,
     component: () => import('@/views/ViewWallets.vue'),
@@ -29,7 +28,7 @@ const routes = [
     }
   },
   {
-    path: '/#/create-wallet',
+    path: '/create-wallet',
     name: 'ViewCreateNewWallet',
     component: () => import('@/views/ViewCreateNewWallet.vue'),
     meta: {
@@ -45,7 +44,7 @@ const routes = [
     }
   },
   {
-    path: '/#/dashboard',
+    path: '/dashboard',
     name: 'ViewDashboard',
     component: () => import('@/views/ViewDashboard.vue'),
     meta: {
@@ -53,7 +52,7 @@ const routes = [
     }
   },
   {
-    path: '/#/delete-wallet-confirmed/:name',
+    path: '/delete-wallet-confirmed/:name',
     name: 'ViewDeleteConfirmation',
     props: true,
     component: () => import('@/views/ViewDeleteConfirmation.vue'),
@@ -62,7 +61,7 @@ const routes = [
     }
   },
   {
-    path: '/#/view-all-accounts',
+    path: '/view-all-accounts',
     name: 'ViewDisplayAllAccounts',
     props: true,
     component: () => import('@/views/ViewDisplayAllAccounts.vue'),
@@ -71,7 +70,7 @@ const routes = [
     }
   },
   {
-    path: '/#/select-type-creation-account',
+    path: '/select-type-creation-account',
     name: 'SelectTypeCreateAccount',
     props: true,
     component: () => import('@/views/ViewSelectTypeCreateAccount.vue'),
@@ -80,7 +79,7 @@ const routes = [
     }
   },
   {
-    path: '/#/create-account',
+    path: '/create-account',
     name: 'ViewCreateAccount',
     component: () => import('@/views/ViewCreateAccount.vue'),
     meta: {
@@ -88,7 +87,7 @@ const routes = [
     }
   },
   {
-    path: '/#/created-account',
+    path: '/created-account',
     name: 'createdAccount',
     props: true,
     component: () => import('@/views/ViewCreatedAccount.vue'),
@@ -97,7 +96,7 @@ const routes = [
     }
   },
   {
-    path: '/#/import-account',
+    path: '/import-account',
     name: 'ViewCreateAccountPrivateKey',
     component: () => import('@/views/ViewCreateAccountPrivateKey.vue'),
     meta: {
@@ -105,7 +104,7 @@ const routes = [
     }
   },
   {
-    path: '/#/details-account/:name',
+    path: '/details-account/:name',
     name: 'ViewAccountDetails',
     props: true,
     component: () => import('@/views/ViewAccountDetails.vue'),
@@ -114,7 +113,7 @@ const routes = [
     }
   },
   {
-    path: '/#/delete-account/:name',
+    path: '/delete-account/:name',
     name: 'ViewDeleteAccount',
     props: true,
     component: () => import('@/views/ViewDeleteAccount.vue'),
@@ -123,7 +122,7 @@ const routes = [
     }
   },
   {
-    path: '/#/convert-account-multisign/:name',
+    path: '/convert-account-multisign/:name',
     name: 'ViewConvertAccountMultisig',
     props: true,
     component: () => import('@/views/ViewConvertAccountMultisig.vue'),
@@ -132,7 +131,16 @@ const routes = [
     }
   },
   {
-    path: '/#/export-wallet',
+    path: '/edit-account-multisign/:name',
+    name: 'ViewEditAccountMultisig',
+    props: true,
+    component: () => import('@/views/ViewEditAccountMultisig.vue'),
+    meta: {
+      title: "Edit Multisig Account",
+    }
+  },
+  {
+    path: '/export-wallet',
     name: 'ViewExportWallet',
     component: () => import('@/views/ViewExportWallet.vue'),
     meta: {
@@ -140,15 +148,7 @@ const routes = [
     }
   },
   {
-    path: '/#/export-wallet',
-    name: 'ViewExportWallet',
-    component: () => import('@/views/ViewExportWallet.vue'),
-    meta: {
-      title: "Export wallet",
-    }
-  },
-  {
-    path: '/#/create-transfer',
+    path: '/create-transfer',
     name: 'ViewCreateTransfer',
     component: () => import('@/views/ViewCreateTransfer.vue'),
     meta: {
@@ -156,7 +156,7 @@ const routes = [
     }
   },
   {
-    path: '/#/add-contacts',
+    path: '/add-contacts',
     name: 'ViewAddContacts',
     component: () => import('@/views/ViewAddContacts.vue'),
     meta: {
@@ -164,18 +164,50 @@ const routes = [
     }
   },
   {
-    path: '/#/create-mosaic',
+    path: '/create-mosaic',
     name: 'ViewCreateMosaic',
     component: () => import('@/views/ViewCreateMosaic.vue'),
     meta: {
       title: "Add Contacts",
     }
   },
+  {
+    path: '/services',
+    name: 'ViewAllServices',
+    component: () => import('@/views/ViewAllServices.vue'),
+    meta: {
+      title: "Services",
+    }
+  },
+  {
+    path: '/address-book',
+    name: 'ViewAddressBook',
+    component: () => import('@/views/ViewAddressBook.vue'),
+    meta: {
+      title: "Address Book",
+    }
+  },
+  {
+    path: '/add-contacts',
+    name: 'ViewAddContacts',
+    component: () => import('@/views/ViewAddContacts.vue'),
+    meta: {
+      title: "Add Contacts",
+    }
+  },
+  {
+    path: '/nodes',
+    name: 'ViewNodes',
+    component: () => import('@/views/ViewNodes.vue'),
+    meta: {
+      title: "Nodes",
+    }
+  },
 ]
 // createdAccount
 
 const router = createRouter({
-  history: createWebHistory(), //createWebHistory(process.env.BASE_URL),
+  history: createWebHashHistory(), //createWebHistory(process.env.BASE_URL),
   routes
 })
 

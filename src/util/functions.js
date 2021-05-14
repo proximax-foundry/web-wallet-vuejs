@@ -1,4 +1,6 @@
 import { ref } from 'vue';
+import { environment } from '../environment/environment.js';
+
 // copy address keys
 export const copyKeyFunc = (id) => {
   // Credits: https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
@@ -63,4 +65,16 @@ export const verifyAddress = (currentAdd, add) => {
   }
 }
 
+
+const getCoingecko = (coinId) => {
+  return fetch(`${environment.coingecko.url}${coinId}`).then((res) => res.json()).then((data) => { return data.market_data.current_price.usd });
+}
+
+export const currencyconverter = async (balance) => {
+  let total;
+  let coinId = 'proximax';
+  let rate = await getCoingecko(coinId);
+  total = rate * balance;
+  return total;
+}
 

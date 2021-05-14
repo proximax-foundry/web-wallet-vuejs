@@ -5,7 +5,12 @@
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
         <div class="ml-6 text-xs mt-1 text-gray-500">{{ (title!=undefined)?title:'Send' }}</div>
       </div>
-      <input type="number" :disabled="disabled" :value="parseFloat(modelValue).toFixed(decimal)" @input="$emit('update:modelValue', parseFloat($event.target.value).toFixed(decimal))" :placeholder="placeholder" class="text-placeholder bg-white text-right" @click="clickInputText()" @keyup="checkBalance($event)">
+      <input v-if="decimal==1" v-maska="'#*.#'" :disabled="disabled == 1"  class="text-placeholder bg-white text-right" :value="parseFloat(modelValue)" @input="$emit('update:modelValue', parseFloat($event.target.value))" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()">
+      <input v-else-if="decimal==2" v-maska="'#*.##'" :disabled="disabled == 1"  class="text-placeholder bg-white text-right" :value="parseFloat(modelValue)" @input="$emit('update:modelValue', parseFloat($event.target.value))" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()">
+      <input v-else-if="decimal==3" v-maska="'#*.###'" :disabled="disabled == 1"  class="text-placeholder bg-white text-right" :value="parseFloat(modelValue)" @input="$emit('update:modelValue', parseFloat($event.target.value))" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()">
+      <input v-else-if="decimal==4" v-maska="'#*.####'" :disabled="disabled == 1"  class="text-placeholder bg-white text-right" :value="parseFloat(modelValue)" @input="$emit('update:modelValue', parseFloat($event.target.value))" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()">
+      <input v-else-if="decimal==5" v-maska="'#*.#####'" :disabled="disabled == 1"  class="text-placeholder bg-white text-right" :value="parseFloat(modelValue)" @input="$emit('update:modelValue', parseFloat($event.target.value))" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()">
+      <input v-else v-maska="'#*.######'" :disabled="disabled == 1"  class="text-placeholder bg-white text-right" :value="parseFloat(modelValue)" @input="$emit('update:modelValue', parseFloat($event.target.value))" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()">
       <div class="w-5"></div>
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
@@ -13,14 +18,16 @@
 </template>
 
 <script>
-
+import { ref } from 'vue';
+import { maska } from 'maska';
 export default{
+  directives: { maska },
   props: {
     placeholder: String,
     errorMessage: String,
     icon: String,
     showError: Boolean,
-    modelValue: String,
+    modelValue: Number,
     options: Object,
     title: String,
     disabled: Boolean,
@@ -28,14 +35,13 @@ export default{
     balance: Number,
   },
 
-  // setup (props) {
-  //   const { formatedValue, inputRef } = useCurrencyInput(props.options)
-
-  //   return {
-  //     inputRef,
-  //     formatedValue,
-  //   }
-  // },
+  setup (props) {
+    const formatMask = ref("'#*." + ('#')^props.decimal + "'");
+    console.log(formatMask.value)
+    return {
+      formatMask,
+    }
+  },
 
   emits:[
     'update:modelValue'

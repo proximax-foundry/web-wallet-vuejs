@@ -104,23 +104,25 @@ export default{
 
     // get divisibility
     p.transaction.innerTransactions.forEach((innerTransaction) => {
+      console.log(innerTransaction);
       if(transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.mosaicDefinition.id){
         divisibility.value = innerTransaction.mosaicProperties.divisibility;
       }
     });
 
-
     watch(() => p.showModal, () => {
       if(p.showModal){
-        // console.log(p.transaction);
         if (p.transaction.transactionInfo && p.transaction.transactionInfo.height) {
           const height = p.transaction.transactionInfo.height.compact();
           transactionHeight.value = height;
           if (typeof (height) === 'number') {
             const existBlock = dataBridge.filterBlockStorage(height);
+            console.log('existBlock: ');
+            console.log(existBlock);
             if (existBlock) {
               timestamp.value = `${transactions.dateFormatUTC(new UInt64([existBlock.timestamp.lower, existBlock.timestamp.higher]))} - UTC`;
               const calculateEffectiveFee = transactions.amountFormatterSimple(existBlock.feeMultiplier * p.transaction.data.size);
+              console.log(p.transaction.data.size);
               effectiveFee.value = transactions.getDataPart(calculateEffectiveFee, 6);
             } else {
               dataBridge.getBlockInfo(height).subscribe(

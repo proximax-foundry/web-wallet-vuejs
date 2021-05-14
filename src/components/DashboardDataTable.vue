@@ -101,7 +101,8 @@ export default{
           dynamicModelComponentDisplay.value = 'TransferTransactionModal';
       }
       showTransactionModel.value = true;
-      modalData.value = Object.assign({}, e.data);
+      // modalData.value = Object.assign({}, e.data);
+      modalData.value = e.data;
     };
 
     emitter.on("CLOSE_MODAL", payload => {
