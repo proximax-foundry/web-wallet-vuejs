@@ -349,3 +349,8 @@ export const convertToCurrency =(value, divisibility)=>{
 
   return new Intl.NumberFormat('en', {maximumFractionDigits: divisibility}).format(exactValue);
 }
+
+export const convertToExact =(value, divisibility)=>{
+
+  return value/Math.pow(10, divisibility);
+}
