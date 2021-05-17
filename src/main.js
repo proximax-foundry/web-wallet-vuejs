@@ -102,7 +102,7 @@ const chainProfileIntegration = async () => {
     }
 
     if(namesUpdate){
-      siriusStore.refreshAvailableNetwork();
+      chainNetwork.refreshAvailableNetwork();
     }
 
   } catch (e) {
