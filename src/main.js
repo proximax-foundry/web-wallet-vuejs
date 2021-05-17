@@ -12,9 +12,8 @@ import "primeicons/primeicons.css";
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { appStore } from './store/app';
-import { chainNetwork, siriusStore } from './store/sirius';
-import { ChainProfileStore, chainProfilesNameStore, ChainProfileConfigStore } from './store/main';
-import { ChainProfile } from './store/storeClasses'
+import { chainNetwork, siriusStore, ChainNetwork } from './store/sirius';
+import { ChainProfile, ChainProfileNames, ChainProfileConfig } from './store/storeClasses'
 
 // Import Font Awesome Icons
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -39,64 +38,73 @@ app.component(VuePassword);
 
 const chainProfileIntegration = async () => {
   try {
-    let configInfo = await fetch('./chainProfile.json', {
+    let networksInfo = await fetch('./chainProfile.json', {
       headers: {
         'Cache-Control': 'no-store',
         'Pragma' : 'no-cache'
       }
-    }).then((res) => res.json()).then((configInfo) => { return configInfo });
+    }).then((res) => res.json()).then((networksInfo) => { return networksInfo });
 
-    console.log('configInfo');
-    console.log(configInfo);
-    var chainProfilesData = configInfo;
-    var chainProfileNames = Object.keys(configInfo);
+    var chainProfilesData = networksInfo;
+    var chainProfileNames = Object.keys(networksInfo);
 
-    chainProfilesNameStore.init()
-    chainProfilesNameStore.replaceFirst2Names(chainProfileNames);
-    chainProfilesNameStore.saveToLocalStorage();
+    var chainProfileNamesStore = ChainProfileNames.createDefault();
+
+    var namesUpdate = 0;
+
+    switch (chainProfileNames.length) {
+      case 2:
+        namesUpdate = chainProfileNamesStore.replaceFirst2Names(chainProfileNames);
+        break;
+      case 3:
+        namesUpdate = chainProfileNamesStore.replaceFirst3Names(chainProfileNames);
+        break;
+    
+      default:
+        break;
+    }
+    chainProfileNamesStore.saveToLocalStorage();
 
     for(const chainProfileName of chainProfileNames){
-      console.log('chainProfileName')
-      console.log(chainProfileName);
-      var chainProfileStore = new ChainProfileStore(chainProfileName);
+      var chainProfileStore = new ChainProfile(chainProfileName);
 
       chainProfileStore.init();
       var chainProfileData = chainProfilesData[chainProfileName];
-      console.log(chainProfileStore.getVersion())
-      console.log(chainProfileData['version'])
+
       if(chainProfileStore.getVersion() !== chainProfileData['version']){
-        var newChainProfile = new ChainProfile();
 
-        newChainProfile.version = chainProfileData['version'];
-        newChainProfile.apiNodes = chainProfileData['apiNodes'];
-        newChainProfile.chainExplorer = chainProfileData['chainExplorer'];
-        newChainProfile.generationHash = chainProfileData['generationHash'];
-        newChainProfile.httpPort = chainProfileData['httpPort'];
-        newChainProfile.network = chainProfileData['network'];
-
-        chainProfileStore.state = newChainProfile;
+        chainProfileStore.version = chainProfileData['version'];
+        chainProfileStore.apiNodes = chainProfileData['apiNodes'];
+        chainProfileStore.chainExplorer = chainProfileData['chainExplorer'];
+        chainProfileStore.generationHash = chainProfileData['generationHash'];
+        chainProfileStore.httpPort = chainProfileData['httpPort'];
+        chainProfileStore.network = chainProfileData['network'];
 
         chainProfileStore.saveToLocalStorage();
 
-        var endpoint = chainNetwork.buildAPIEndpointURL(newChainProfile.apiNodes[0], newChainProfile.httpPort);
+        var endpoint = chainNetwork.buildAPIEndpointURL(chainProfileStore.apiNodes[0], chainProfileStore.httpPort);
 
-        var chainConfigHttp = chainNetwork.buildChainConfigHttp(endpoint);
-        var chainHttp = chainNetwork.buildChainHttp(endpoint);
+        var chainConfigHttp = ChainNetwork.buildChainConfigHttp(endpoint);
+        var chainHttp = ChainNetwork.buildChainHttp(endpoint);
 
         var chainHeight = await chainNetwork.getChainHeight(chainHttp)
 
-        var config = await chainNetwork.getChainConfig(chainHeight, chainConfigHttp)
-        var chainProfileConfigStore = new ChainProfileConfigStore(chainProfileName+"_config");
-        console.log('config');
-        console.log(config);
+        var config = await ChainNetwork.getChainConfig(chainHeight, chainConfigHttp)
+        var chainProfileConfigStore = new ChainProfileConfig(chainProfileName+"_config");
 
         chainProfileConfigStore.init()
 
-        chainProfileConfigStore.state = config;
-        chainProfileConfigStore.state.chainHeight = chainHeight;
+        chainProfileConfigStore.chainHeight = chainHeight;
+        chainProfileConfigStore.updateConfig(config);
+        
         chainProfileConfigStore.saveToLocalStorage();
       }
     }
+
+    if(namesUpdate){
+      siriusStore.refreshAvailableNetwork();
+    }
+
   } catch (e) {
     console.error(e);
   }
