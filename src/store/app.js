@@ -1046,5 +1046,6 @@ export const appStore = readonly({
   removeMultiSigAccount,
   deleteContact,
   editContact,
+  getXPXBalance,
 });
 
