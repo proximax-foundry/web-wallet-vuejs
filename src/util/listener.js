@@ -27,17 +27,25 @@ const startListening = (accounts) => {
       enableListeners(account, connect);
     });
   });
+  let connect_block = new Listener(chainNetwork.buildWSEndpointURL(siriusStore.state.selectedChainNode), WebSocket);
+  state.connector.push({listener: connect_block, type: 'Bridge'});
+  state.connector.find((element) => element.type === 'Bridge').listener.open().then(() => {
+    newBlockListener(connect_block);
+  });
 }
 
 
 const stopListening = () => {
   // console.log('Connector length before stopping: ' + state.connector.length);
   state.connector.forEach((connect) => {
+    // console.log(connect)
     // console.log('Is connector listening: ' + connect.listener.isOpen());
     if(connect.listener.isOpen()){
+      connect.listener.close();
       connect.listener.terminate();
     }
   });
+  state.connector = [];
 
   connectorListen.value = {};
 }
@@ -53,10 +61,7 @@ const addListenerstoAccount = (account) => {
 
 const checkListener = () => {
   state.connector.forEach((connect) => {
-    // console.log('Connector for ' + connect.account.address + ': ' + connect.listener.isOpen());
-    // console.log(connect.listener);
     if(!connect.listener.isOpen()){
-      // console.log('open connect again for ' + connect.account.address);
       connect.listener.open();
     }
   });
@@ -74,7 +79,6 @@ setInterval(() => {
 function enableListeners(account, listener){
   // console.log('Connector for ' + account.address + ': ' + listener.isOpen());
   const accountDetail = Address.createFromPublicKey(account.publicAccount.publicKey, account.network);
-  // newBlockListener(accountDetail, listener);
   confirmedListener(accountDetail, listener);
   unconfirmedListener(accountDetail, listener);
   statusListener(accountDetail, listener);
@@ -86,10 +90,11 @@ function enableListeners(account, listener){
 
 // subscribe new block
 // eslint-disable-next-line no-unused-vars
-const newBlockListener = (accountDetail, listener) => {
+const newBlockListener = (listener) => {
+  // console.log(listener);
   // eslint-disable-next-line no-unused-vars
   listener.newBlock().subscribe(blockInfo => {
-    console.log('Confirmed new block ' + blockInfo)
+    chainNetwork.updateBlockHeight(blockInfo);
   }, error => {
       console.error(error);
   }, () => {

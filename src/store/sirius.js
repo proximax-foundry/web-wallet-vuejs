@@ -11,6 +11,7 @@ import {
   NodeHttp,
   MosaicHttp,
   TransactionHttp,
+  UInt64,
 } from "tsjs-xpx-chain-sdk";
 import { ChainProfile, ChainProfileConfig, ChainProfilePreferences, ChainProfileNames } from "./storeClasses";
 
@@ -56,6 +57,7 @@ const state = reactive({
   currentNetworkProfileConfig: {},
   networkAPIEndpoints: [],
   availableNetworks: [],
+  blockHeight: '',
 });
 
 function _buildAPIEndpointURL(url, port = undefined){
@@ -68,16 +70,6 @@ function _buildAPIEndpointURL(url, port = undefined){
   }
   return location.protocol=='https:' ? `https://${url}` : `http://${url}:${portNumber}`;
 }
-
-// const accountHttp = computed(() => new AccountHttp(state.selectedChainNode));
-// const blockHttp = computed(() => new BlockHttp(state.selectedChainNode));
-// const chainHttp = computed(() => new ChainHttp(state.selectedChainNode));
-// const chainConfigHttp = computed(() => new ChainConfigHttp(state.selectedChainNode));
-// const networkHttp = computed(() => new NetworkHttp(state.selectedChainNode));
-// const nodeHttp = computed(() => new NodeHttp(state.selectedChainNode));
-// const mosaicHttp = computed(() => new MosaicHttp(state.selectedChainNode));
-// const transactionHttp = computed(() => new TransactionHttp(state.selectedChainNode));
-// const namespaceHttp = computed(() => new NamespaceHttp(state.selectedChainNode));
 
 const accountHttp = computed(() => new AccountHttp(_buildAPIEndpointURL(state.selectedChainNode)));
 const blockHttp = computed(() => new BlockHttp(_buildAPIEndpointURL(state.selectedChainNode)));
@@ -521,6 +513,32 @@ class ChainNetwork{
       portNumber = state.currentNetworkProfile.httpPort;
     }
     return location.protocol=='https:' ? `wss://${url}` : `ws://${url}:${portNumber}`;
+  }
+
+  updateBlockHeight(blockInfo){
+    let blockHeight = new UInt64([blockInfo.height.lower, blockInfo.height.higher]).compact()
+    state.blockHeight = blockHeight;
+  }
+
+  updateChainNode(apiNode){
+    var chainProfilePreferences = new ChainProfilePreferences( state.chainNetworkName + "_preferences");
+    chainProfilePreferences.apiNode = apiNode;
+    chainProfilePreferences.saveToLocalStorage();
+    state.selectedChainNode = apiNode;
+    sessionStorage.setItem('selectedChainNode', state.selectedChainNode);
+    // this.dashboardService.destroySubscription();
+    // this.dataBridgeService.reconnect();
+    // this.nemProvider.validaTransactionsSwap();
+    // const address: Address[] = [];
+    // for (let account of this.walletService.currentWallet.accounts) {
+    //   address.push(this.proximaxProvider.createFromRawAddress(account.address));
+    // }
+
+    // this.mosaicService.getMosaicXPX();
+    // this.namespaces.searchNamespacesFromAccounts(address);
+    // this.transactionService.searchAccountsInfo(this.walletService.currentWallet.accounts);
+    // this.dataBridgeService.searchBlockInfo();
+    // this.dataBridgeService.searchBlockInfo(true);
   }
 }
 
