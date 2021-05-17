@@ -11,6 +11,7 @@ import {
   NodeHttp,
   MosaicHttp,
   TransactionHttp,
+  UInt64,
 } from "tsjs-xpx-chain-sdk";
 import { ChainProfile, ChainProfileConfig, ChainProfilePreferences, ChainProfileNames } from "./storeClasses";
 
@@ -56,6 +57,7 @@ const state = reactive({
   currentNetworkProfileConfig: {},
   networkAPIEndpoints: [],
   availableNetworks: [],
+  blockHeight: '',
 });
 
 function _buildAPIEndpointURL(url, port = undefined){
@@ -68,16 +70,6 @@ function _buildAPIEndpointURL(url, port = undefined){
   }
   return location.protocol=='https:' ? `https://${url}` : `http://${url}:${portNumber}`;
 }
-
-// const accountHttp = computed(() => new AccountHttp(state.selectedChainNode));
-// const blockHttp = computed(() => new BlockHttp(state.selectedChainNode));
-// const chainHttp = computed(() => new ChainHttp(state.selectedChainNode));
-// const chainConfigHttp = computed(() => new ChainConfigHttp(state.selectedChainNode));
-// const networkHttp = computed(() => new NetworkHttp(state.selectedChainNode));
-// const nodeHttp = computed(() => new NodeHttp(state.selectedChainNode));
-// const mosaicHttp = computed(() => new MosaicHttp(state.selectedChainNode));
-// const transactionHttp = computed(() => new TransactionHttp(state.selectedChainNode));
-// const namespaceHttp = computed(() => new NamespaceHttp(state.selectedChainNode));
 
 const accountHttp = computed(() => new AccountHttp(_buildAPIEndpointURL(state.selectedChainNode)));
 const blockHttp = computed(() => new BlockHttp(_buildAPIEndpointURL(state.selectedChainNode)));
@@ -282,7 +274,7 @@ watch( ()=> state.chainNetwork, (newValues) => {
 });
 
 // chainNode class
-class ChainNetwork{
+export class ChainNetwork{
   constructor() {
     this.httpPort = 3000;
     this.getSelectedNetwork();
@@ -297,6 +289,12 @@ class ChainNetwork{
 
   updateChainNetwork(network){
     state.chainNetwork = network;
+  }
+
+  refreshAvailableNetwork(){
+    let names = ChainProfileNames.createDefault().names;
+
+    state.availableNetworks = names;
   }
 
   updateAvailableNetworks(){
@@ -411,67 +409,67 @@ class ChainNetwork{
         const chainConfig = {
           publicKey: networkConfig['publicKey'],
           blockGenerationTargetTime: networkConfig['blockGenerationTargetTime'],
-          blockTimeSmoothingFactor: this.convertConfigNumberToInteger(networkConfig['blockTimeSmoothingFactor']),
+          blockTimeSmoothingFactor: ChainNetwork.convertConfigNumberToInteger(networkConfig['blockTimeSmoothingFactor']),
           greedDelta: Number(networkConfig['greedDelta']),
           greedExponent: Number(networkConfig['greedExponent']),
-          importanceGrouping: this.convertConfigNumberToInteger(networkConfig['importanceGrouping']),
-          maxRollbackBlocks: this.convertConfigNumberToInteger(networkConfig['maxRollbackBlocks']),
-          maxDifficultyBlocks: this.convertConfigNumberToInteger(networkConfig['maxDifficultyBlocks']),
+          importanceGrouping: ChainNetwork.convertConfigNumberToInteger(networkConfig['importanceGrouping']),
+          maxRollbackBlocks: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxRollbackBlocks']),
+          maxDifficultyBlocks: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxDifficultyBlocks']),
           maxTransactionLifetime: networkConfig['maxTransactionLifetime'],
           maxBlockFutureTime: networkConfig['maxBlockFutureTime'],
-          maxMosaicAtomicUnits: this.convertConfigNumberToInteger(networkConfig['maxMosaicAtomicUnits']),
-          totalChainImportance: this.convertConfigNumberToInteger(networkConfig['totalChainImportance']),
-          minHarvesterBalance: this.convertConfigNumberToInteger(networkConfig['minHarvesterBalance']),
-          harvestBeneficiaryPercentage: this.convertConfigNumberToInteger(networkConfig['harvestBeneficiaryPercentage']),
-          blockPruneInterval: this.convertConfigNumberToInteger(networkConfig['blockPruneInterval']),
-          maxTransactionsPerBlock: this.convertConfigNumberToInteger(networkConfig['maxTransactionsPerBlock']),
-          maxTransactionsPerAggregate: this.convertConfigNumberToInteger(networkConfig['maxTransactionsPerAggregate']),
-          maxCosignaturesPerAggregate: this.convertConfigNumberToInteger(networkConfig['maxCosignaturesPerAggregate']),
+          maxMosaicAtomicUnits: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxMosaicAtomicUnits']),
+          totalChainImportance: ChainNetwork.convertConfigNumberToInteger(networkConfig['totalChainImportance']),
+          minHarvesterBalance: ChainNetwork.convertConfigNumberToInteger(networkConfig['minHarvesterBalance']),
+          harvestBeneficiaryPercentage: ChainNetwork.convertConfigNumberToInteger(networkConfig['harvestBeneficiaryPercentage']),
+          blockPruneInterval: ChainNetwork.convertConfigNumberToInteger(networkConfig['blockPruneInterval']),
+          maxTransactionsPerBlock: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxTransactionsPerBlock']),
+          maxTransactionsPerAggregate: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxTransactionsPerAggregate']),
+          maxCosignaturesPerAggregate: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxCosignaturesPerAggregate']),
           enableStrictCosignatureCheck: networkConfig['enableStrictCosignatureCheck'] === 'true' ? true : false,
           enableBondedAggregateSupport: networkConfig['enableBondedAggregateSupport'] === 'true' ? true : false,
           maxBondedTransactionLifetime: networkConfig['maxBondedTransactionLifetime'],
           maxBlockChainConfigSize: networkConfig['maxBlockChainConfigSize'],
           maxSupportedEntityVersionsSize: networkConfig['maxSupportedEntityVersionsSize'],
-          minPercentageOfApproval: this.convertConfigNumberToInteger(networkConfig['minPercentageOfApproval']),
-          minPercentageOfRemoval: this.convertConfigNumberToInteger(networkConfig['minPercentageOfRemoval']),
-          maxOfferDuration: this.convertConfigNumberToInteger(networkConfig['maxOfferDuration']),
+          minPercentageOfApproval: ChainNetwork.convertConfigNumberToInteger(networkConfig['minPercentageOfApproval']),
+          minPercentageOfRemoval: ChainNetwork.convertConfigNumberToInteger(networkConfig['minPercentageOfRemoval']),
+          maxOfferDuration: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxOfferDuration']),
           longOfferKey: networkConfig['longOfferKey'],
-          lockedFundsPerAggregate: this.convertConfigNumberToInteger(networkConfig['lockedFundsPerAggregate']),
+          lockedFundsPerAggregate: ChainNetwork.convertConfigNumberToInteger(networkConfig['lockedFundsPerAggregate']),
           maxHashLockDuration: networkConfig['maxHashLockDuration'],
           maxSecretLockDuration: networkConfig['maxSecretLockDuration'],
-          minProofSize: this.convertConfigNumberToInteger(networkConfig['minProofSize']),
-          maxProofSize: this.convertConfigNumberToInteger(networkConfig['maxProofSize']),
-          maxFields: this.convertConfigNumberToInteger(networkConfig['maxFields']),
-          maxFieldKeySize: this.convertConfigNumberToInteger(networkConfig['maxFieldKeySize']),
-          maxFieldValueSize: this.convertConfigNumberToInteger(networkConfig['maxFieldValueSize']),
-          maxMosaicsPerAccount: this.convertConfigNumberToInteger(networkConfig['maxMosaicsPerAccount']),
+          minProofSize: ChainNetwork.convertConfigNumberToInteger(networkConfig['minProofSize']),
+          maxProofSize: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxProofSize']),
+          maxFields: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxFields']),
+          maxFieldKeySize: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxFieldKeySize']),
+          maxFieldValueSize: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxFieldValueSize']),
+          maxMosaicsPerAccount: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxMosaicsPerAccount']),
           maxMosaicDuration: networkConfig['maxMosaicDuration'],
-          maxMosaicDivisibility: this.convertConfigNumberToInteger(networkConfig['maxMosaicDivisibility']),
+          maxMosaicDivisibility: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxMosaicDivisibility']),
           mosaicRentalFeeSinkPublicKey: networkConfig['mosaicRentalFeeSinkPublicKey'],
-          mosaicRentalFee: this.convertConfigNumberToInteger(networkConfig['mosaicRentalFee']),
-          maxMultisigDepth: this.convertConfigNumberToInteger(networkConfig['maxMultisigDepth']),
-          maxCosignersPerAccount: this.convertConfigNumberToInteger(networkConfig['maxCosignersPerAccount']),
-          maxCosignedAccountsPerAccount: this.convertConfigNumberToInteger(networkConfig['maxCosignedAccountsPerAccount']),
+          mosaicRentalFee: ChainNetwork.convertConfigNumberToInteger(networkConfig['mosaicRentalFee']),
+          maxMultisigDepth: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxMultisigDepth']),
+          maxCosignersPerAccount: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxCosignersPerAccount']),
+          maxCosignedAccountsPerAccount: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxCosignedAccountsPerAccount']),
           newCosignersMustApprove: networkConfig['newCosignersMustApprove'] === 'true' ? true : false,
-          maxNameSize: this.convertConfigNumberToInteger(networkConfig['maxNameSize']),
+          maxNameSize: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxNameSize']),
           maxNamespaceDuration: networkConfig['maxNamespaceDuration'],
           namespaceGracePeriodDuration: networkConfig['namespaceGracePeriodDuration'],
           reservedRootNamespaceNames: networkConfig['reservedRootNamespaceNames'],
           namespaceRentalFeeSinkPublicKey: networkConfig['namespaceRentalFeeSinkPublicKey'],
-          rootNamespaceRentalFeePerBlock: this.convertConfigNumberToInteger(networkConfig['rootNamespaceRentalFeePerBlock']),
-          childNamespaceRentalFee: this.convertConfigNumberToInteger(networkConfig['childNamespaceRentalFee']),
-          maxChildNamespaces: this.convertConfigNumberToInteger(networkConfig['maxChildNamespaces']),
+          rootNamespaceRentalFeePerBlock: ChainNetwork.convertConfigNumberToInteger(networkConfig['rootNamespaceRentalFeePerBlock']),
+          childNamespaceRentalFee: ChainNetwork.convertConfigNumberToInteger(networkConfig['childNamespaceRentalFee']),
+          maxChildNamespaces: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxChildNamespaces']),
           maxOperationDuration: networkConfig['maxOperationDuration'],
-          maxPropertyValues: this.convertConfigNumberToInteger(networkConfig['maxPropertyValues']),
-          maxMessageSize: this.convertConfigNumberToInteger(networkConfig['maxMessageSize']),
-          maxMosaicsSize: this.convertConfigNumberToInteger(networkConfig['maxMosaicsSize']),
-          minUpgradePeriod: this.convertConfigNumberToInteger(networkConfig['minUpgradePeriod']),
-          maxFilesOnDrive: this.convertConfigNumberToInteger(networkConfig['maxFilesOnDrive']),
-          verificationFee: this.convertConfigNumberToInteger(networkConfig['verificationFee']),
-          verificationDuration: this.convertConfigNumberToInteger(networkConfig['verificationDuration']),
-          downloadDuration: this.convertConfigNumberToInteger(networkConfig['downloadDuration']),
+          maxPropertyValues: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxPropertyValues']),
+          maxMessageSize: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxMessageSize']),
+          maxMosaicsSize: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxMosaicsSize']),
+          minUpgradePeriod: ChainNetwork.convertConfigNumberToInteger(networkConfig['minUpgradePeriod']),
+          maxFilesOnDrive: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxFilesOnDrive']),
+          verificationFee: ChainNetwork.convertConfigNumberToInteger(networkConfig['verificationFee']),
+          verificationDuration: ChainNetwork.convertConfigNumberToInteger(networkConfig['verificationDuration']),
+          downloadDuration: ChainNetwork.convertConfigNumberToInteger(networkConfig['downloadDuration']),
           downloadCacheEnabled: networkConfig['downloadCacheEnabled'] === 'true' ? true : false,
-          maxSuperContractsOnDrive: this.convertConfigNumberToInteger(networkConfig['maxSuperContractsOnDrive']),
+          maxSuperContractsOnDrive: ChainNetwork.convertConfigNumberToInteger(networkConfig['maxSuperContractsOnDrive']),
         };
         resolve(chainConfig);
       },
@@ -481,7 +479,7 @@ class ChainNetwork{
     });
   }
 
-  convertConfigNumberToInteger(amount){
+  static convertConfigNumberToInteger(amount){
     if(!amount){
       return 0;
     }
@@ -521,6 +519,32 @@ class ChainNetwork{
       portNumber = state.currentNetworkProfile.httpPort;
     }
     return location.protocol=='https:' ? `wss://${url}` : `ws://${url}:${portNumber}`;
+  }
+
+  updateBlockHeight(blockInfo){
+    let blockHeight = new UInt64([blockInfo.height.lower, blockInfo.height.higher]).compact()
+    state.blockHeight = blockHeight;
+  }
+
+  updateChainNode(apiNode){
+    var chainProfilePreferences = new ChainProfilePreferences( state.chainNetworkName + "_preferences");
+    chainProfilePreferences.apiNode = apiNode;
+    chainProfilePreferences.saveToLocalStorage();
+    state.selectedChainNode = apiNode;
+    sessionStorage.setItem('selectedChainNode', state.selectedChainNode);
+    // this.dashboardService.destroySubscription();
+    // this.dataBridgeService.reconnect();
+    // this.nemProvider.validaTransactionsSwap();
+    // const address: Address[] = [];
+    // for (let account of this.walletService.currentWallet.accounts) {
+    //   address.push(this.proximaxProvider.createFromRawAddress(account.address));
+    // }
+
+    // this.mosaicService.getMosaicXPX();
+    // this.namespaces.searchNamespacesFromAccounts(address);
+    // this.transactionService.searchAccountsInfo(this.walletService.currentWallet.accounts);
+    // this.dataBridgeService.searchBlockInfo();
+    // this.dataBridgeService.searchBlockInfo(true);
   }
 }
 
