@@ -54,7 +54,7 @@ const stopListening = () => {
 const addListenerstoAccount = (account) => {
   let connect = new Listener(chainNetwork.buildWSEndpointURL(siriusStore.state.selectedChainNode), WebSocket);
   state.connector.push({listener: connect, account: account});
-  state.connector.find((element) => element.account.address == account.address).listener.open().then(() => {
+  state.connector.find((element) => (element.account != undefined)?(element.account.address == account.address):'').listener.open().then(() => {
     enableListeners(account, connect);
   });
 }
