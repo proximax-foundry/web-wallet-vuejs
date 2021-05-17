@@ -1,3 +1,5 @@
+const walletKey = 'sw';
+
 class StoreProperties{
 
     constructor(storeName){
@@ -34,6 +36,10 @@ export class ChainProfile extends StoreProperties{
         this.generationHash = "";
         this.network = new Network();
         this.chainExplorer = new ChainExplorer();
+    }
+
+    getVersion(){
+        return this.version;
     }
 
     serialize(){
@@ -177,6 +183,10 @@ export class ChainProfileConfig extends StoreProperties {
         this.downloadCacheEnabled  = null; // boolean
         this.maxSuperContractsOnDrive = null
     }
+
+    updateConfig(config){
+        Object.assign(this, config);
+    }
 }
 
 export class ChainProfileNames extends StoreProperties {
@@ -189,6 +199,57 @@ export class ChainProfileNames extends StoreProperties {
         var newObj = new ChainProfileNames("ChainProfilesName");
         newObj.init();
         return newObj;
+    }
+
+    replaceFirst2Names(names) {
+
+        var count = 0;
+
+        for(var i = 0; i < 2; i++){
+            var updated = this.replaceAndUpdateWallet(this.names[i], names[i], i);
+
+            count += updated ? 1 : 0;
+        }
+
+       return count;
+    }
+
+    replaceFirst3Names(names) {
+
+        var count = 0;
+
+        for(var i = 0; i < 3; i++){
+            var updated = this.replaceAndUpdateWallet(this.names[i], names[i], i);
+
+            count += updated ? 1 : 0;
+        }
+
+        return count;
+    }
+
+    replaceAndUpdateWallet(oldName, newName, index){
+        if(oldName !== newName){
+            var allWallets = JSON.parse(localStorage.getItem(walletKey));
+            var newWallets = [];
+
+            if(allWallets){
+                newWallets = allWallets.map((wallet)=>{
+                    if(wallet.networkName === oldName){
+                        wallet.networkName = newName;
+                    }
+                    
+                    return wallet;
+                });
+            }
+
+            localStorage.setItem(walletKey, JSON.stringify(newWallets));
+
+            this.names[index] = newName;
+
+            return true;
+        }
+
+        return false;
     }
 }
 
