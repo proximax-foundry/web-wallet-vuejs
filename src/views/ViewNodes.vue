@@ -90,7 +90,6 @@ export default {
     const options = computed(() => {
       let nodeList = [];
       chainNetwork.getChainNodes().forEach((node) => {
-        // let link = (location.protocol == "http:" ? node.protocol : node.sslProtocol) + "://" + node.hostname + (location.protocol == "http:" ?(':' + node.port):'');
         nodeList.push({ value: node, name: siriusStore._buildAPIEndpointURL(node) });
       });
       return nodeList;
@@ -100,13 +99,15 @@ export default {
     const blockHeight = computed(() => siriusStore.state.blockHeight);
 
     const makeNodeSelection = (e) => {
-      showSelectTitle.value = true;
-      chainNetwork.updateChainNode(e);
-      stopListening();
-      const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
-      startListening(walletSession.accounts);
-      appStore.getXPXBalance(walletSession.name, siriusStore);
-      toggleNotification.value = true;
+      if(e != siriusStore.state.selectedChainNode){
+        showSelectTitle.value = true;
+        chainNetwork.updateChainNode(e);
+        stopListening();
+        const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
+        startListening(walletSession.accounts);
+        appStore.getXPXBalance(walletSession.name, siriusStore);
+        toggleNotification.value = true;
+      }
     };
 
     const closeSelection =() => {

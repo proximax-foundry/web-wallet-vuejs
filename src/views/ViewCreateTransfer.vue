@@ -221,7 +221,7 @@ export default {
     // get balance
     const selectedAccName = ref(appStore.getFirstAccName());
     const selectedAccAdd = ref(appStore.getFirstAccAdd());
-    const balance = ref(appStore.getFirstAccBalance(selectedAccAdd.value));
+    const balance = computed(() => appStore.getBalanceByAddress(selectedAccAdd.value));
     const isMultiSigBool = ref(isMultiSig(appStore.getFirstAccAdd()));
 
     // enable and disable inputs based on cosign balance
