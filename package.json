@@ -22,14 +22,12 @@
     "@vueform/multiselect": "^1.5.0",
     "animate.css": "^4.1.1",
     "autoprefixer": "^9.8.6",
-    "axios": "^0.21.1",
     "babel-eslint": "^10.1.0",
     "core-js": "^3.6.5",
     "cross-env": "^7.0.3",
     "crypto-js": "^3.3.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^7.0.0-0",
-    "fsevents": ">=1.0.0 <2.3.2",
     "js-joda": "^1.11.0",
     "maska": "^1.4.1",
     "mitt": "^2.1.0",
@@ -75,8 +73,5 @@
     "> 1%",
     "last 2 versions",
     "not dead"
-  ],
-  "optionalDependencies": {
-    "fsevents": ">=1.0.0 <2.3.2"
-  }
+  ]
 }

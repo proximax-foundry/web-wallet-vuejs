@@ -573,26 +573,26 @@ function updateCreatedMultiSigToWallet(multisigPublicKey, multisigAddress){
   };
 
   wallet.accounts.push(account);
-  console.log(account)
-  console.log(wallet)
+  // console.log(account)
+  // console.log(wallet)
   currentWallet.value = wallet;
-  console.log(currentWallet.value)
+  // console.log(currentWallet.value)
 
-  // // enable listener
-  // addListenerstoAccount(account);
-  // sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
-  // // update localStorage
-  // try {
-  //   localStorage.setItem(
-  //     walletKey,
-  //     JSON.stringify(state.wallets)
-  //   );
-  // } catch (err) {
-  //   if (config.debug) {
-  //     console.error("updateAccountState error caught", err);
-  //   }
-  //   return 0;
-  // }
+  // enable listener
+  addListenerstoAccount(account);
+  sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
+  // update localStorage
+  try {
+    localStorage.setItem(
+      walletKey,
+      JSON.stringify(state.wallets)
+    );
+  } catch (err) {
+    if (config.debug) {
+      console.error("updateAccountState error caught", err);
+    }
+    return 0;
+  }
   return 1;
 }
 
