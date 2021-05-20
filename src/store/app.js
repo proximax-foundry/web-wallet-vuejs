@@ -373,6 +373,7 @@ function checkFromSession(siriusStore){
     state.isLogin = true;
     stopListening();
     startListening(currentWallet.value.accounts);
+    multiSign.createMultiSigAccount(walletSession.name);
     getXPXBalance(walletSession.name, siriusStore).then(() => {
       sessionStorage.setItem('pageRefresh', 'y');
     });
@@ -438,6 +439,7 @@ function loginToWallet(walletName, password, siriusStore) {
   startListening(wallet.accounts);
   multiSign.updateAccountsMultiSign(walletName);
   multiSign.removeUnrelatedMultiSig(walletName);
+  multiSign.createMultiSigAccount(walletName);
   // get latest xpx amount
   getXPXBalance(walletName, siriusStore).then(()=> {
     try {
