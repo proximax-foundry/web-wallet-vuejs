@@ -31,10 +31,38 @@
         "assetInfoRoute": "#/result/assetInfo"
       }
     },
-    "Sirius Testnet 2": {
+    "Sirius Testnet 1": {
       "version": "0.0.1",
       "apiNodes":[
-        "api-1.testnet2.xpxsirius.io"
+          "bctestnet1.brimstone.xpxsirius.io",
+          "bctestnet2.brimstone.xpxsirius.io"
+      ],
+      "httpPort": 3000,
+      "generationHash": "56D112C98F7A7E34D1AEDC4BD01BC06CA2276DD546A93E36690B785E82439CA9",
+      "network":{
+        "type": 168,
+        "currency":{
+            "name": "XPX",
+            "namespace": "prx.xpx",
+            "mosaicId": "",
+            "namespaceId": "bffb42a19116bdf6",
+            "divisibility": 6
+        }
+      },
+      "chainExplorer": {
+        "url": "https://bctestnetexplorer.xpxsirius.io",
+        "blockRoute": "#/result/blockHeight",
+        "publicKeyRoute": "#/result/publicKey",
+        "addressRoute": "#/result/address",
+        "hashRoute": "#/result/hash",
+        "namespaceInfoRoute": "#/result/namespaceInfo",
+        "assetInfoRoute": "#/result/assetInfo"
+      }
+    },
+    "Sirius Testnet 2": {
+      "version": "0.0.2",
+      "apiNodes":[
+          "api-1.testnet2.xpxsirius.io"
       ],
       "httpPort": 3000,
       "generationHash": "56D112C98F7A7E34D1AEDC4BD01BC06CA2276DD546A93E36690B785E82439CA9",

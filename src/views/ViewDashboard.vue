@@ -79,6 +79,7 @@ export default {
   setup(){
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
+    // const chainNetwork = inject("chainNetwork");
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
 

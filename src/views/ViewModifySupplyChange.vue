@@ -19,13 +19,13 @@
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
             <div v-if="moreThanOneAccount" class="text-left p-4">
               <div class="mb-1 cursor-pointer z-20 border-b border-gray-200" @click="showMenu = !showMenu">
-                <div class="font-bold text-xs">{{ selectedAccName }}</div>
+                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
                 <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
               </div>
               <transition name="slide">
               <div v-if="showMenu" class="z-10">
                 <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50 optionDiv'" @click="changeSelection(item)" :title="'Address is ' + item.address">
-                  <div>{{ item.name }}</div>
+                  <div>{{ item.name }} <span v-if="isMultiSig(item.address)" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
                 </div>
               </div>
               </transition>
@@ -95,7 +95,7 @@ import { mosaicTransaction, convertToCurrency, convertToExact } from '../util/tr
 import NotificationModal from '@/components/NotificationModal.vue';
 
 export default {
-  name: 'ViewCreateMosaic',
+  name: 'ViewModifySupplyChange',
   components: {
     PasswordInput,
     SupplyInput,
@@ -146,11 +146,25 @@ export default {
       walletPassword.value.match(passwdPattern) && !disabledMutableCheck.value && (divisibility.value != '') && (supply.value > 0) && (!showDurationErr.value)
     ));
 
+    const isMultiSig = (address) => {
+      const account = appStore.getAccDetailsByAddress(address);
+      let isMulti = false;
+      if(account.isMultisign != undefined){
+        if(account.isMultisign != '' || account.isMultisign != null){
+          if(account.isMultisign.cosignatories != undefined){
+            if(account.isMultisign.cosignatories.length > 0){
+              isMulti = true;
+            }
+          }
+        }
+      }
+      return isMulti;
+    };
+
     const selectedAccName = ref(appStore.getFirstAccName());
     const selectedAccAdd = ref(appStore.getFirstAccAdd());
-    const balance = computed( () => {
-      return appStore.getBalanceByAddress(selectedAccAdd.value)
-    });
+    const balance = ref(appStore.getBalanceByAddress(selectedAccAdd.value));
+    const isMultiSigBool = ref(isMultiSig(appStore.getFirstAccAdd()));
     // balance.value = appStore.getFirstAccBalance();
 
     const showNoBalance = ref(false);
@@ -187,6 +201,7 @@ export default {
       (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
+      isMultiSigBool.value = isMultiSig(i.address);
     }
 
     const clearInput = () => {
@@ -311,7 +326,9 @@ export default {
       showDurationErr,
       durationCheckDisabled,
       rentalFeeCurrency,
-      currencyName
+      currencyName,
+      isMultiSig,
+      isMultiSigBool,
     }
   },
 
