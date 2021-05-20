@@ -46,12 +46,12 @@
         <div class="mt-2 lg:inline-block lg:mr-20">
           <span class="font-bold">Approve transactions:</span>
           <div class="ml-2 border rounded-2xl p-2 py-2 inline-block">
-            <input type="number" required min="0" :max="maxNumApproveTransaction" v-model="numApproveTransaction" class="text-right outline-none">
+            <input type="number" required min="0" :max="maxNumApproveTransaction" v-model="numApproveTransaction" class="text-right outline-none" @keypress="validateApproval">
           </div> of {{ maxNumApproveTransaction }} cosignatories</div>
         <div class="mt-2 lg:inline-block">
           <span class="font-bold">Delete users:</span>
           <div class="ml-2 border rounded-2xl p-2 py-2 inline-block">
-            <input type="number" required min="0" :max="maxNumDeleteUser" v-model="numDeleteUser" class="text-right outline-none">
+            <input type="number" required min="0" :max="maxNumDeleteUser" v-model="numDeleteUser" class="text-right outline-none" @keypress="validateDelete">
           </div> of {{ maxNumDeleteUser }} cosignatories</div>
       </div>
       <div class="mt-16">
@@ -84,7 +84,6 @@
         <button type="button" class="default-btn mr-5 focus:outline-none" @click="clear()">Clear</button>
         <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="convertAccount()" :disabled="disableSend">Send</button>
       </div>
-
     </div>
   </div>
   <NotificationModal :toggleModal="toggleAnounceNotification" msg="Unconfirmed transaction" notiType="noti" time='2500' />
@@ -150,7 +149,7 @@ export default {
 
     const addCoSigButton = computed(() => {
       var status = false;
-      if(accountBalance() >= 10.0445){
+      if(accountBalance() >= 10.0445 && !onPartial.value){
         for(var i = 0; i < coSign.value.length; i++){
           if(showAddressError.value[i] != ''){
             status = true;
@@ -225,7 +224,9 @@ export default {
     };
 
     const accountBalance = () => {
-      return appStore.getAccDetails(p.name).balance;
+      if(appStore.state.currentLoggedInWallet){
+        return appStore.getAccDetails(p.name).balance;
+      }
     };
 
     const addCoSig = () => {
@@ -238,8 +239,12 @@ export default {
 
     const deleteCoSigAddressInput = (i) => {
       console.log('Delete index: ' + i);
-      maxNumApproveTransaction.value -= 1;
-      maxNumDeleteUser.value -= 1;
+      if(maxNumApproveTransaction.value > 1){
+        maxNumApproveTransaction.value -= 1;
+      }
+      if(maxNumDeleteUser.value > 1){
+        maxNumDeleteUser.value -= 1;
+      }
       if(numDeleteUser.value > maxNumDeleteUser.value){
         numDeleteUser.value = maxNumDeleteUser.value;
       }
@@ -249,6 +254,30 @@ export default {
       }
       coSign.value.splice(i, 1);
       selectedAddresses.value.splice(i, 1);
+    }
+
+    const validateApproval = (e) => {
+      if((~~(numApproveTransaction.value/10)) > (~~(maxNumApproveTransaction.value/10))){
+        e.preventDefault();
+      }else if((~~(numApproveTransaction.value/10)) == (~~(maxNumApproveTransaction.value/10))){
+        e.preventDefault();
+      }else{
+        if((numApproveTransaction.value * 10*(~~(maxNumApproveTransaction.value/10)) + e.charCode - 48) > maxNumApproveTransaction.value){
+          e.preventDefault();
+        }
+      }
+    }
+
+    const validateDelete = (e) => {
+      if((~~(numDeleteUser.value/10)) > (~~(maxNumDeleteUser.value/10))){
+        e.preventDefault();
+      }else if((~~(numDeleteUser.value/10)) == (~~(maxNumDeleteUser.value/10))){
+        e.preventDefault();
+      }else{
+        if((numDeleteUser.value * 10*(~~(maxNumDeleteUser.value/10)) + e.charCode - 48) > maxNumDeleteUser.value){
+          e.preventDefault();
+        }
+      }
     }
 
     const disabledPassword = computed(() => (onPartial.value || isMultisig.value ));
@@ -354,6 +383,9 @@ export default {
       toggleAnounceNotification,
       onPartial,
       isMultisig,
+      passwdPattern,
+      validateApproval,
+      validateDelete,
     };
   },
 }

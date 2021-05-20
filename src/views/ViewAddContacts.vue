@@ -2,7 +2,7 @@
   <div class="flex justify-between text-sm">
     <div><span class="text-gray-400">Address Book ></span> <span class="text-blue-primary font-bold">Add Contacts</span></div>
     <div>
-      <router-link :to="{name: 'Welcome'}" class="font-bold" active-class="accounts">Address Book</router-link> | 
+      <router-link :to="{name: 'ViewAddressBook'}" class="font-bold" active-class="accounts">Address Book</router-link> | 
       <router-link :to="{name: 'ViewAllServices'}" class="font-bold" active-class="accounts">Services</router-link>
     </div>
   </div>

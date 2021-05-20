@@ -16,6 +16,7 @@
 import { computed, inject, getCurrentInstance, ref } from "vue";
 import AccountTile from '@/components/AccountTile.vue';
 import NotificationModal from '@/components/NotificationModal.vue';
+import { multiSign } from '../util/multiSignatory.js';
 
 export default {
   name: 'ViewDisplayAllAccounts',
@@ -34,6 +35,8 @@ export default {
     const currentMenu = ref('');
     const toggleModal = ref(false);
     const showMenu = ref([]);
+
+    multiSign.createMultiSigAccount(appStore.state.currentLoggedInWallet.name);
 
     // get num of accounts
     var num_acc = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length;
