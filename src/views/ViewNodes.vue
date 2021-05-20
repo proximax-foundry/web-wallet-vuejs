@@ -100,13 +100,15 @@ export default {
     const blockHeight = computed(() => siriusStore.state.blockHeight);
 
     const makeNodeSelection = (e) => {
-      showSelectTitle.value = true;
-      chainNetwork.updateChainNode(e);
-      stopListening();
-      const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
-      startListening(walletSession.accounts);
-      appStore.getXPXBalance(walletSession.name, siriusStore);
-      toggleNotification.value = true;
+      if(e != siriusStore.state.selectedChainNode){
+        showSelectTitle.value = true;
+        chainNetwork.updateChainNode(e);
+        stopListening();
+        const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
+        startListening(walletSession.accounts);
+        appStore.getXPXBalance(walletSession.name, siriusStore);
+        toggleNotification.value = true;
+      }
     };
 
     const closeSelection =() => {

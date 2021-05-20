@@ -19,6 +19,8 @@ import { ChainProfile, ChainProfileNames, ChainProfileConfig } from './store/sto
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload, faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import ConfirmDialog from 'primevue/confirmdialog';
+import Toast from 'primevue/toast';
 
 library.add(faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload, faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore );
 const app = createApp(App);
@@ -31,8 +33,8 @@ app.use(ConfirmationService);
 app.use(ToastService);
 
 // Use Components
-// app.component('ConfirmDialog', ConfirmDialog);
-// app.component('Toast', Toast);
+app.component('ConfirmDialog', ConfirmDialog);
+app.component('Toast', Toast);
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.component(VuePassword);
 
@@ -59,7 +61,6 @@ const chainProfileIntegration = async () => {
       case 3:
         namesUpdate = chainProfileNamesStore.replaceFirst3Names(chainProfileNames);
         break;
-    
       default:
         break;
     }
@@ -96,7 +97,6 @@ const chainProfileIntegration = async () => {
 
         chainProfileConfigStore.chainHeight = chainHeight;
         chainProfileConfigStore.updateConfig(config);
-        
         chainProfileConfigStore.saveToLocalStorage();
       }
     }

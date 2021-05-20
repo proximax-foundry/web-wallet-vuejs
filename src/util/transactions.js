@@ -94,6 +94,7 @@ const formatTransaction = (transaction, names) => {
 }
 
 const formatAggregateBondedTransaction = (transaction, names) => {
+  console.log(transaction);
   const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
 
   // 1st matching - check if signer is in the wallet
@@ -101,25 +102,27 @@ const formatAggregateBondedTransaction = (transaction, names) => {
 
   if(signerInWallet){ // signer is in the wallet
     // display own as signer
+    console.log('1st level')
     let linkedAccountName = names.find((element) =>  element.address == signerInWallet.address);
     transaction.linkedAccountName = (linkedAccountName)?linkedAccountName.name:'';
     transaction.linkedAccount = appStore.pretty(signerInWallet.address);
     transaction.account = transaction.linkedAccount;
   }else{
-    let matchAccount;
     // display first cosig
     // bug fixed for innerTransactions
     // 2nd matching - match innertransaction.modification.address to wallet's accounts or contact list
     // search for own account among cosig
+    console.log('2nd level')
+    var matchAccount;
     transaction.innerTransactions.forEach((inner) => {
-      inner.modifications.forEach((modification) => {
-        matchAccount = wallet.accounts.find((element) => element.address === modification.cosignatoryPublicAccount.address.address);
-        if(matchAccount){
-          return;
-        }
-      });
-      if(matchAccount){
-        return;
+      if(inner.modifications != undefined){
+        inner.modifications.forEach((modification) => {
+          var matchStatus;
+          matchStatus = wallet.accounts.find((element) => element.address == modification.cosignatoryPublicAccount.address.address);
+          if(matchStatus){
+            matchAccount = matchStatus;
+          }
+        });
       }
     });
     if(matchAccount){
@@ -129,6 +132,7 @@ const formatAggregateBondedTransaction = (transaction, names) => {
       transaction.linkedAccount = appStore.pretty(matchAccount.address);
     }else{
       // 3rd matching - match among cosignatures in transaction
+      console.log('3rd level')
       var isMatchAccount = false;
       if(transaction.cosignatures.length > 0){
         transaction.cosignatures.forEach((cosigner) => {
@@ -142,6 +146,7 @@ const formatAggregateBondedTransaction = (transaction, names) => {
         });
       }
       if(!isMatchAccount){
+        console.log('4th level')
         // 4th matching - search in multisign property in state
         let cosigner = getAccountsInfoTiedMultiSig(transaction.innerTransactions[0].signer.publicKey);
         // if there is more than 1 signer, temporarily assign the first one to be displayed in partial datatable
@@ -183,6 +188,7 @@ const getAccountsInfoTiedMultiSig = (signerPublicKey) => {
       if(account.isMultisign.multisigAccounts != undefined){
         if(account.isMultisign.multisigAccounts.length > 0){
           account.isMultisign.multisigAccounts.forEach(multisig => {
+            console.log(multisig.publicKey + ' ' + signerPublicKey)
             if(multisig.publicKey == signerPublicKey){
               cosigner.push({address: account.publicAccount.address.address});
             }

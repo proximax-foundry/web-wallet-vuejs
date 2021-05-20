@@ -171,9 +171,9 @@ export default {
 
     const currencyName = computed(() => chainNetwork.getCurrencyName());
 
-    console.log('chainNetwork.getProfileConfig().lockedFundsPerAggregate')
-    console.log(chainNetwork.getProfileConfig().lockedFundsPerAggregate)
-    console.log(siriusStore.state.currentNetworkProfileConfig.maxMessageSize)
+    // console.log('chainNetwork.getProfileConfig().lockedFundsPerAggregate')
+    // console.log(chainNetwork.getProfileConfig().lockedFundsPerAggregate)
+    // console.log(siriusStore.state.currentNetworkProfileConfig.maxMessageSize)
     const lockFund = computed(()=> convertToExact(chainNetwork.getProfileConfig().lockedFundsPerAggregate, chainNetwork.getCurrencyDivisibility()))
     const lockFundCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().lockedFundsPerAggregate, chainNetwork.getCurrencyDivisibility()))
 
@@ -221,7 +221,7 @@ export default {
     // get balance
     const selectedAccName = ref(appStore.getFirstAccName());
     const selectedAccAdd = ref(appStore.getFirstAccAdd());
-    const balance = ref(appStore.getFirstAccBalance(selectedAccAdd.value));
+    const balance = computed(() => appStore.getBalanceByAddress(selectedAccAdd.value));
     const isMultiSigBool = ref(isMultiSig(appStore.getFirstAccAdd()));
 
     // enable and disable inputs based on cosign balance
@@ -245,7 +245,6 @@ export default {
       showBalanceErr.value = true;
     }
 
-
     const accounts = computed( () => appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts);
     const moreThanOneAccount = computed(()=> {
       if(appStore.state.currentLoggedInWallet!=undefined){
@@ -258,7 +257,7 @@ export default {
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
-      balance.value = i.balance;
+      // balance.value = i.balance;
       (balance.value==0)?showBalanceErr.value = true:showBalanceErr.value = false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
@@ -347,7 +346,7 @@ export default {
             selectedCosign = getWalletCosigner().list[0].address;
           }
         }
-        let transferStatus = createTransaction(recipient.value.toUpperCase(), sendXPX.value, messageText.value, selectedMosaic.value, mosaicSupplyDivisibility.value, walletPassword.value, selectedAccName.value, selectedCosign, encryptedMsg.value, appStore, siriusStore);
+        let transferStatus = createTransaction(recipient.value.toUpperCase(), sendXPX.value, messageText.value, selectedMosaic.value, mosaicSupplyDivisibility.value, walletPassword.value, selectedAccName.value, selectedCosign, encryptedMsg.value);
         if(!transferStatus){
           err.value = 'Invalid wallet password';
         }else{
@@ -589,7 +588,8 @@ export default {
       remainingChar,
       lockFundCurrency,
       currencyName,
-      lockFundTxFee
+      lockFundTxFee,
+      lockFundTotalFee,
     }
   },
 

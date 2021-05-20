@@ -20,6 +20,7 @@ import {
   PublicAccount,
 } from "tsjs-xpx-chain-sdk";
 import * as FeeCalculationStrategy from 'tsjs-xpx-chain-sdk/dist/src/model/transaction/FeeCalculationStrategy';
+import { announceAggregateBonded, announceLockfundAndWaitForConfirmation } from '../util/listener.js';
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { environment } from '../environment/environment.js';
 import { appStore } from "@/store/app";
@@ -71,17 +72,15 @@ function amountFormatterSimple(amount, d = 6) {
 //   });
 // };
 
-export const createTransaction = (recipient, sendXPX, messageText, mosaicsSent, mosaicDivisibility, walletPassword, senderAccName, encryptedMsg) => {
+export const createTransaction = (recipient, sendXPX, messageText, mosaicsSent, mosaicDivisibility, walletPassword, senderAccName, cosigner = '', encryptedMsg) => {
   // verify password
-  console.log('Pw after createTransaction: ' + walletPassword);
-  console.log(appStore.state.currentLoggedInWallet);
+  // console.log('Pw after createTransaction: ' + walletPassword);
   let verify = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword);
   if(verify < 1){
     return verify;
   }
   const add = fetch(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode) + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
-  // console.log(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
-  // console.log(add);
+
   return add.then(async(hash) => {
     let networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
     const recipientAddress = Address.createFromRawAddress(recipient);
@@ -117,7 +116,18 @@ export const createTransaction = (recipient, sendXPX, messageText, mosaicsSent, 
     }
 
     // to get sender's private key
-    let accountDetails = appStore.getAccDetails(senderAccName)
+    let accountDetails, multisigAccountDetails, multisigPublicAccount;
+    if(!cosigner){ // no cosigner, get private key from sender acc name
+      accountDetails = appStore.getAccDetails(senderAccName);
+    }else{
+      // a multisig, get cosigner's private key
+      accountDetails = appStore.getAccDetailsByAddress(cosigner);
+      // get multisig account info
+      multisigAccountDetails = appStore.getAccDetails(senderAccName);
+      multisigPublicAccount = PublicAccount.createFromPublicKey(multisigAccountDetails.publicAccount.publicKey, networkType);
+    }
+
+    console.log('Getting acc details from: ' + accountDetails.address);
     let privateKey = appStore.decryptPrivateKey(walletPassword, accountDetails.encrypted, accountDetails.iv);
 
     // sending encrypted message
@@ -130,22 +140,65 @@ export const createTransaction = (recipient, sendXPX, messageText, mosaicsSent, 
     }
 
     var transferTransaction = transactionBuilder.transfer()
-      .deadline(Deadline.create())
-      .mosaics(mosaics)
-      .message(msg)
-      .networkType(networkType)
-      .recipient(recipientAddress)
-      .build();
+        .deadline(Deadline.create(environment.deadlineTransfer.deadline, environment.deadlineTransfer.chronoUnit))
+        .mosaics(mosaics)
+        .message(msg)
+        .networkType(networkType)
+        .recipient(recipientAddress)
+        .build();
 
     const account = Account.createFromPrivateKey(privateKey, networkType);
-    const signedTransaction = account.sign(transferTransaction, hash);
     const transactionHttp = new TransactionHttp(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
 
-    transactionHttp
-      .announce(signedTransaction)
-      .subscribe(() => {
-        return true;
-      }, err => console.error(err));
+    if(!cosigner){ // no cosigner, normal transaction
+      const signedTransaction = account.sign(transferTransaction, hash);
+      transactionHttp
+        .announce(signedTransaction)
+        .subscribe(() => {
+          return true;
+        }, err => console.error(err));
+    }else{ // there is a cosigner, aggregate transaction
+      console.log('multisigPublicAccount');
+      console.log(multisigPublicAccount);
+      const innerTxn = [transferTransaction.toAggregate(multisigPublicAccount)];
+
+      const aggregateBondedTransaction = transactionBuilder.aggregateBonded()
+        .deadline(Deadline.create(environment.deadlineTransfer.deadline, environment.deadlineTransfer.chronoUnit))
+        .innerTransactions(innerTxn)
+        .networkType(networkType)
+        .build();
+      console.log('aggregateBondedTransaction');
+      console.log(aggregateBondedTransaction);
+      // if (otherCosigners.length > 0) {
+      //   return cosignatoryAccount.signTransactionWithCosignatories(bondedCreated, otherCosigners, generationHash);
+      // }
+      const aggregateBondedTransactionSigned = account.sign(aggregateBondedTransaction, hash);
+      console.log('aggregateBondedTransactionSigned');
+      console.log(aggregateBondedTransactionSigned);
+      const hashLockTransaction = transactionBuilder.hashLock()
+        .deadline(Deadline.create())
+        .duration(UInt64.fromUint(environment.lockFundDuration))
+        .mosaic(new Mosaic(new MosaicId(environment.mosaicXpxInfo.id), UInt64.fromUint(Number(10000000))))
+        .signedTransaction(aggregateBondedTransactionSigned)
+        .networkType(networkType)
+        .build();
+      const hashLockTransactionSigned = account.sign(hashLockTransaction, hash);
+
+      (async ()=>{
+        try {
+            const confirmedTx = await announceLockfundAndWaitForConfirmation(account.address, hashLockTransactionSigned, hashLockTransactionSigned.hash, transactionHttp);
+            console.log('confirmedTx');
+            console.log(confirmedTx);
+            // eslint-disable-next-line no-unused-vars
+            var aggregateTx = await announceAggregateBonded(account.address, aggregateBondedTransactionSigned, aggregateBondedTransactionSigned.hash, confirmedTx, transactionHttp )
+            console.log('aggregateTx');
+            console.log(aggregateTx);
+            console.log("Done");
+        } catch (error) {
+            console.log(error);
+        }
+      })();
+    }
   });
 }
 

@@ -113,15 +113,17 @@ export default {
     FontAwesomeIcon, TextInput, PasswordInput
   },
   props: {
-    name: String,
+    address: String,
   },
 
   setup(p){
     const appStore = inject("appStore");
+    const router = useRouter();
 
     // get account details
-    const acc = appStore.getAccDetails(p.name);
-    if(acc==-1){
+    const acc = appStore.getAccDetailsByAddress(p.address);
+    console.log(acc)
+    if(acc === -1){
       router.push({ name: "ViewDisplayAllAccounts"});
     }
     acc.pretty = appStore.pretty(acc.address);
@@ -137,7 +139,6 @@ export default {
     const walletPasswd = ref("");
     const walletPasswdSwap = ref("");
     const showPwSwap = ref(false);
-    const router = useRouter();
     const copy = (id) => copyKeyFunc(id);
 
     const editName = () => {
@@ -146,12 +147,13 @@ export default {
 
     const changeName = () => {
       if(accountName.value.trim()){
-        let acc = appStore.updateAccountName(accountName.value, p.name);
-        if(acc==1){
+        let status = appStore.updateAccountName(accountName.value, acc.address);
+        console.log(status);
+        if(status==1){
           showName.value = true;
           accountNameDisplay.value = accountName.value;
           err.value = '';
-        }else if(acc==2){
+        }else if(status==2){
           err.value = "Account name is already taken";
         }else{
           err.value = "Fail to change account name";
@@ -179,7 +181,7 @@ export default {
       }else{
         if(appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPasswd.value)){
           // pw is correct
-          privateKey.value = appStore.getAccountPassword(p.name, walletPasswd.value);
+          privateKey.value = appStore.getAccountPassword(acc.name, walletPasswd.value);
           showPK.value = true;
           err.value = '';
         }else{

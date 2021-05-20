@@ -25,7 +25,6 @@ import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import { multiSign } from '../util/multiSignatory.js';
 
-
 export default{
   name: 'AddCoSignModal',
 
