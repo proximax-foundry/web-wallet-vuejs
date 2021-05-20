@@ -15,7 +15,7 @@
             <form @submit.prevent="login">
               <fieldset class="w-full">
                 <div class="error error_box" v-if="err!=''">{{ err }}</div>
-                <SelectInputPlugin placeholder="Select a Wallet" errorMessage="Select a Wallet" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" />
+                <SelectInputPlugin placeholder="Select a Wallet" errorMessage="Select a Wallet" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
                 <PasswordInput placeholder="Enter Wallet Password" errorMessage="Password Required" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
                 <div class="mt-10">
                   <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
@@ -51,15 +51,20 @@ export default{
     const router = useRouter();
     const err = ref("");
     const walletPassword = ref("");
-    const selectedWallet = ref("0");
+    const selectedWallet = ref("");
     const showPasswdError = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
     const disableSignin = computed(
       () => !(
         walletPassword.value.match(passwdPattern) &&
-        selectedWallet.value != '0'
+        selectedWallet.value != ''
       )
     );
+
+    const clearWalletOption = () => {
+      selectedWallet.value = '';
+    }
+
     const wallets = computed(
       () =>{
         var w = [];
@@ -103,6 +108,7 @@ export default{
       showPasswdError,
       disableSignin,
       login,
+      clearWalletOption,
     };
   },
 

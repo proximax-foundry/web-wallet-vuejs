@@ -104,7 +104,7 @@ const routes = [
     }
   },
   {
-    path: '/details-account/:name',
+    path: '/details-account/:address',
     name: 'ViewAccountDetails',
     props: true,
     component: () => import('@/views/ViewAccountDetails.vue'),

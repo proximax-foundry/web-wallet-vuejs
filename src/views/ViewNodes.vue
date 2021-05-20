@@ -90,6 +90,7 @@ export default {
     const options = computed(() => {
       let nodeList = [];
       chainNetwork.getChainNodes().forEach((node) => {
+        // let link = (location.protocol == "http:" ? node.protocol : node.sslProtocol) + "://" + node.hostname + (location.protocol == "http:" ?(':' + node.port):'');
         nodeList.push({ value: node, name: siriusStore._buildAPIEndpointURL(node) });
       });
       return nodeList;

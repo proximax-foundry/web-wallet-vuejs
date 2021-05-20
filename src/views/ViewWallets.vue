@@ -10,7 +10,7 @@
         <WalletTile :key="item.name" v-for="item in wallets" :wallet="item" @delete="appStore.deleteWallet(item.name)" />
       </div>
     </div>
-    <div class="mt-32">
+    <div class="mt-32" v-if="!appStore.state.currentLoggedInWallet">
       <router-link :to="{ name : 'Welcome'}" class="blue-btn p-3 px-5">Home</router-link>
     </div>
     <NotificationModal :toggleModal="toggleModal" msg="Wallet has been removed successfully" notiType="noti" time='1500' />

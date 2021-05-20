@@ -1,10 +1,5 @@
 <template>
   <div class="flex flex-col h-screen justify-between" @click="clickEvent">
-    <Toast />
-    <Toast position="top-left" group="tl" />
-    <Toast position="bottom-left" group="bl" />
-    <Toast position="bottom-right" group="br" />
-    <ConfirmDialog></ConfirmDialog>
     <header class="h-16 flex items-stretch">
       <headerComponent></headerComponent>
     </header>
@@ -33,15 +28,12 @@ import { siriusStore, chainNetwork } from "@/store/sirius";
 import headerComponent from '@/components/headerComponent.vue'
 // import PageComponent from '@/components/PageComponent.vue'
 import NavigationMenu from '@/components/NavigationMenu.vue'
-import ConfirmDialog from 'primevue/confirmdialog';
-import Toast from 'primevue/toast';
+
 export default {
   name: 'App',
   components: {
     headerComponent,
     // PageComponent,
-    ConfirmDialog,
-    Toast,
     NavigationMenu,
   },
   setup() {

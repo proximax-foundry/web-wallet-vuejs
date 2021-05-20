@@ -83,12 +83,12 @@
         <div class="mt-2 lg:inline-block lg:mr-20">
           <span class="font-bold">Approve transactions:</span>
           <div class="ml-2 border rounded-2xl p-2 py-2 inline-block">
-            <input type="number" required min="0" :max="maxNumApproveTransaction" v-model="numApproveTransaction" class="text-right outline-none">
+            <input type="number" required min="0" :max="maxNumApproveTransaction" v-model="numApproveTransaction" class="text-right outline-none" @keypress="validateApproval">
           </div> of {{ maxNumApproveTransaction }} cosignatories</div>
         <div class="mt-2 lg:inline-block">
           <span class="font-bold">Delete users:</span>
           <div class="ml-2 border rounded-2xl p-2 py-2 inline-block">
-            <input type="number" required min="0" :max="maxNumDeleteUser" v-model="numDeleteUser" class="text-right outline-none">
+            <input type="number" required min="0" :max="maxNumDeleteUser" v-model="numDeleteUser" class="text-right outline-none" @keypress="validateDelete">
           </div> of {{ maxNumDeleteUser }} cosignatories</div>
       </div>
       <div class="p-4 rounded-xl bg-gray-100 my-2 w-full text-xs text-gray-800">
@@ -333,11 +333,15 @@ export default {
     }, {deep:true});
 
     const getAcccountDetails = () => {
-      return appStore.getAccDetails(p.name);
+      if(appStore.state.currentLoggedInWallet){
+        return appStore.getAccDetails(p.name);
+      }
     };
 
     const accountBalance = () => {
-      return appStore.getAccDetails(p.name).balance;
+      if(appStore.state.currentLoggedInWallet){
+        return appStore.getAccDetails(p.name).balance;
+      }
     };
 
     const addCoSig = () => {
@@ -386,13 +390,21 @@ export default {
     const acc = getAcccountDetails();
 
     const maxNumApproveTransaction = computed( () => {
-      const account = getAcccountDetails();
-      return account.isMultisign.cosignatories.length
+      if(appStore.state.currentLoggedInWallet){
+        const account = getAcccountDetails();
+        return account.isMultisign.cosignatories.length
+      }else{
+        return '';
+      }
     });
 
     const maxNumDeleteUser = computed( () => {
-      const account = getAcccountDetails();
-      return account.isMultisign.cosignatories.length
+      if(appStore.state.currentLoggedInWallet){
+        const account = getAcccountDetails();
+        return account.isMultisign.cosignatories.length
+      }else{
+        return '';
+      }
     });
 
     numApproveTransaction.value = acc.isMultisign.minApproval;
@@ -400,10 +412,36 @@ export default {
 
     // refecth min number for both scheme if there is changes in max num for both approval and deletion
     watch(maxNumApproveTransaction, () => {
-      const account = getAcccountDetails();
-      numApproveTransaction.value = account.isMultisign.minApproval;
-      numDeleteUser.value = account.isMultisign.minRemoval;
+      if(appStore.state.currentLoggedInWallet){
+        const account = getAcccountDetails();
+        numApproveTransaction.value = account.isMultisign.minApproval;
+        numDeleteUser.value = account.isMultisign.minRemoval;
+      }
     });
+
+    const validateApproval = (e) => {
+      if((~~(numApproveTransaction.value/10)) > (~~(maxNumApproveTransaction.value/10))){
+        e.preventDefault();
+      }else if((~~(numApproveTransaction.value/10)) == (~~(maxNumApproveTransaction.value/10))){
+        e.preventDefault();
+      }else{
+        if((numApproveTransaction.value * 10*(~~(maxNumApproveTransaction.value/10)) + e.charCode - 48) > maxNumApproveTransaction.value){
+          e.preventDefault();
+        }
+      }
+    }
+
+    const validateDelete = (e) => {
+      if((~~(numDeleteUser.value/10)) > (~~(maxNumDeleteUser.value/10))){
+        e.preventDefault();
+      }else if((~~(numDeleteUser.value/10)) == (~~(maxNumDeleteUser.value/10))){
+        e.preventDefault();
+      }else{
+        if((numDeleteUser.value * 10*(~~(maxNumDeleteUser.value/10)) + e.charCode - 48) > maxNumDeleteUser.value){
+          e.preventDefault();
+        }
+      }
+    }
 
     // get cosigners in this wallet for this multisig;
     const cosigners = computed(() => {
@@ -524,6 +562,8 @@ export default {
       selectMainCosign,
       selectOtherCosignerOptions,
       selectOtherCosign,
+      validateApproval,
+      validateDelete,
     };
   },
 }
