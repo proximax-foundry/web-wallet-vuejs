@@ -253,38 +253,47 @@ export default {
     }
 
     const validateApproval = (e) => {
-      if((~~(numApproveTransaction.value/10)) > (~~(maxNumApproveTransaction.value/10))){
+      if((numApproveTransaction.value * 10*(~~(maxNumApproveTransaction.value/10)) + e.charCode - 48) > maxNumApproveTransaction.value){
         e.preventDefault();
-      }else{
-        if((numApproveTransaction.value * 10*(~~(maxNumApproveTransaction.value/10)) + e.charCode - 48) > maxNumApproveTransaction.value){
-          e.preventDefault();
-        }
       }
     }
 
-     watch(numApproveTransaction, (n) => {
-      if(n > maxNumApproveTransaction.value){
-        err.value = 'Number of cosignatories for Approve transaction is more than number of cosignatories for this account';
+    let deleteUserErrorMsg = 'Number of cosignatories for Delete users is more than number of cosignatories for this account';
+    let approveTransactionErrMsg = 'Number of cosignatories for Approve transaction is more than number of cosignatories for this account';
+
+    watch(numApproveTransaction, (n) => {
+      if(maxNumApproveTransaction.value == 0 && n > 1){
+        err.value = approveTransactionErrMsg;
+      }else if((n > maxNumApproveTransaction.value) && (n !=1 && maxNumApproveTransaction.value != 0 )){
+        err.value = approveTransactionErrMsg;
       }else{
-        err.value = '';
+        // check again for num delete user
+        if((numDeleteUser.value > maxNumDeleteUser.value) && (numDeleteUser.value !=1 && maxNumDeleteUser.value != 0 )){
+          err.value = deleteUserErrorMsg;
+        }else{
+          err.value = '';
+        }
       }
     });
 
     const validateDelete = (e) => {
-      if((~~(numDeleteUser.value/10)) > (~~(maxNumDeleteUser.value/10))){
+      if((numDeleteUser.value * 10*(~~(maxNumDeleteUser.value/10)) + e.charCode - 48) > maxNumDeleteUser.value){
         e.preventDefault();
-      }else{
-        if((numDeleteUser.value * 10*(~~(maxNumDeleteUser.value/10)) + e.charCode - 48) > maxNumDeleteUser.value){
-          e.preventDefault();
-        }
       }
     }
 
     watch(numDeleteUser, (n) => {
-      if(n > maxNumDeleteUser.value){
-        err.value = 'Number of cosignatories for Delete users is more than number of cosignatories for this account';
+      if(maxNumDeleteUser.value == 0 && n > 1){
+        err.value = deleteUserErrorMsg;
+      }else if((n > maxNumDeleteUser.value) && (n !=1 && maxNumDeleteUser.value != 0 )){
+        err.value = deleteUserErrorMsg;
       }else{
-        err.value = '';
+        // check again for num approval transaction
+        if((numApproveTransaction.value > maxNumApproveTransaction.value) && (numApproveTransaction.value !=1 && maxNumApproveTransaction.value != 0 )){
+          err.value = approveTransactionErrMsg;
+        }else{
+          err.value = '';
+        }
       }
     });
 
