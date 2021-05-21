@@ -10,7 +10,7 @@
             class="text-xs outline-none z-10"
             type="text"
             :value="primaryAccount"
-            style="width: 325px;"
+            style="width: 335px;"
           />
         </div>
         <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline mx-2"></font-awesome-icon><img src="../assets/img/icon-qr-code.svg" class="w-5 inline">
