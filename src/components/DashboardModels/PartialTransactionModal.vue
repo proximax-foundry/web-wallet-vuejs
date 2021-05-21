@@ -12,7 +12,7 @@
           <div>
             <h1 class="default-title font-bold my-5">Transaction Information</h1>
             <div class="text-left md:justify-start md:flex md:items-stretch">
-              <div class="block md:w-6/12 md:inline-block break-words">
+              <div class="block md:w-7/12 md:inline-block break-words">
                 <div class="relative"><span class="font-bold text-md mr-3">Aggregate Bonded</span></div>
                 <div class="content">
                   <div>
@@ -32,15 +32,17 @@
                   <div>Hash:</div>
                   <div class="break-words pr-3">{{ transaction.transactionInfo.hash }}</div>
                 </div>
-                <div class="font-bold border-b border-gray-300 pb-1 mt-5">Transactions ({{ transaction.innerTransactions.length }})</div>
-                <div class="transactionDetailDiv" v-for="(innerTransaction, index ) in transaction.innerTransactions" :key="index">
-                  <transfer :innerTransaction = "innerTransaction" :sender="transaction.signer" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.transfer.id" />
-                  <modify-multisig-account-type :innerTransaction = "innerTransaction" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.modifyMultisigAccount.id" />
-                  <mosaic-definition :innerTransaction = "innerTransaction" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.mosaicDefinition.id"/>
-                  <mosaic-supply-change :innerTransaction = "innerTransaction" :divisibility="divisibility" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.mosaicSupplyChange.id"/>
+                <div style="width: 400px;">
+                  <div class="font-bold border-b border-gray-300 pb-1 mt-5">Transactions ({{ transaction.innerTransactions.length }})</div>
+                  <div class="transactionDetailDiv" v-for="(innerTransaction, index ) in transaction.innerTransactions" :key="index">
+                    <transfer :innerTransaction = "innerTransaction" :sender="transaction.signer" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.transfer.id" />
+                    <modify-multisig-account-type :innerTransaction = "innerTransaction" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.modifyMultisigAccount.id" />
+                    <mosaic-definition :innerTransaction = "innerTransaction" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.mosaicDefinition.id"/>
+                    <mosaic-supply-change :innerTransaction = "innerTransaction" :divisibility="divisibility" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.mosaicSupplyChange.id"/>
+                  </div>
                 </div>
               </div>
-              <div class="block md:w-6/12 md:inline-block">
+              <div class="block md:w-5/12 md:inline-block">
                 <div class="Notifytable">
                   <div class="bg-yellow-500 text-white text-sm font-bold text-center py-3">Action Required</div>
                   <div class="bg-gray-200 py-4 px-4">
@@ -123,7 +125,7 @@ export default{
       if(verify < 1){
         err.value = 'Invalid wallet password';
       }else{
-        multiSign.cosignMiltisigTransaction(p.transaction, passwd.value);
+        multiSign.cosignMultisigTransaction(p.transaction, passwd.value);
         err.value = '';
         closeModal();
       }

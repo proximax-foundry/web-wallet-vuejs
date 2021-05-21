@@ -78,11 +78,11 @@ const formatTransaction = (transaction, names) => {
   transaction.typeName = arraTypeTransaction[keyName].name;
   transaction.transferType = formatTransfer(transaction);
   let senderName = names.find((element) =>  element.address == getSender(transaction));
-  transaction.senderName = (senderName)?senderName.name:'';
+  transaction.senderName = (senderName)?senderName.name:'-';
   transaction.senderAddress = appStore.pretty(getSender(transaction));
   let recipientAddress = getRecipient(transaction, keyName);
   let recipientName = names.find((element) =>  element.address == recipientAddress);
-  transaction.recipientName = (recipientName)?recipientName.name:'';
+  transaction.recipientName = (recipientName)?recipientName.name:'-';
   if(recipientAddress.length >= 40){
     transaction.recipientAddress = appStore.pretty(recipientAddress);
   }
@@ -123,6 +123,14 @@ const formatAggregateBondedTransaction = (transaction, names) => {
             matchAccount = matchStatus;
           }
         });
+      }else{
+        if(inner.recipient != undefined){
+          var matchStatus;
+          matchStatus = wallet.accounts.find((element) => element.address == inner.recipient.address);
+          if(matchStatus){
+            matchAccount = matchStatus;
+          }
+        }
       }
     });
     if(matchAccount){
