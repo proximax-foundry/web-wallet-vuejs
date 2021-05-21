@@ -41,7 +41,7 @@
         </div>
       </div>
       <div>
-        <div class="error error_box" v-if="err!=''">{{ err }}</div>
+        <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <div class="block mt-2 font-bold text-md lg:inline-block lg:mr-20">Scheme for ></div>
         <div class="mt-2 lg:inline-block lg:mr-20">
           <span class="font-bold">Approve transactions:</span>
@@ -219,10 +219,6 @@ export default {
       }
     }, {deep:true});
 
-    const getAcccountDetails = () => {
-      return appStore.getAccDetails(p.name);
-    };
-
     const accountBalance = () => {
       if(appStore.state.currentLoggedInWallet){
         return appStore.getAccDetails(p.name).balance;
@@ -259,8 +255,6 @@ export default {
     const validateApproval = (e) => {
       if((~~(numApproveTransaction.value/10)) > (~~(maxNumApproveTransaction.value/10))){
         e.preventDefault();
-      }else if((~~(numApproveTransaction.value/10)) == (~~(maxNumApproveTransaction.value/10))){
-        e.preventDefault();
       }else{
         if((numApproveTransaction.value * 10*(~~(maxNumApproveTransaction.value/10)) + e.charCode - 48) > maxNumApproveTransaction.value){
           e.preventDefault();
@@ -268,10 +262,16 @@ export default {
       }
     }
 
+     watch(numApproveTransaction, (n) => {
+      if(n > maxNumApproveTransaction.value){
+        err.value = 'Number of cosignatories for Approve transaction is more than number of cosignatories for this account';
+      }else{
+        err.value = '';
+      }
+    });
+
     const validateDelete = (e) => {
       if((~~(numDeleteUser.value/10)) > (~~(maxNumDeleteUser.value/10))){
-        e.preventDefault();
-      }else if((~~(numDeleteUser.value/10)) == (~~(maxNumDeleteUser.value/10))){
         e.preventDefault();
       }else{
         if((numDeleteUser.value * 10*(~~(maxNumDeleteUser.value/10)) + e.charCode - 48) > maxNumDeleteUser.value){
@@ -280,11 +280,19 @@ export default {
       }
     }
 
+    watch(numDeleteUser, (n) => {
+      if(n > maxNumDeleteUser.value){
+        err.value = 'Number of cosignatories for Delete users is more than number of cosignatories for this account';
+      }else{
+        err.value = '';
+      }
+    });
+
     const disabledPassword = computed(() => (onPartial.value || isMultisig.value ));
 
     // get account details
-    const acc = getAcccountDetails();
-    if(acc==-1 && acc.default){
+    const acc =  appStore.getAccDetails(p.name);
+    if(acc==-1){
       router.push({ name: "ViewDisplayAllAccounts"});
     }
     setTimeout(()=> {
@@ -336,25 +344,21 @@ export default {
       });
     });
 
-    // detech partial transaction announcement from listener
+    // detect partial transaction announcement from listener
     transferEmitter.on('ANNOUNCE_AGGREGATE_BONDED' , payload => {
-      if(payload.status){
-        multiSign.onPartial(acc.publicAccount).then((onPartialBoolean) => {
-          onPartial.value = onPartialBoolean;
-        })
+      if(payload.status && payload.address == acc.address){
+        onPartial.value = true;
         clear();
       }
     });
 
-    // detech co signiture added from listener
+    // detect co signiture added from listener
     transferEmitter.on('ANNOUNCE_COSIGNITURE_ADDED' , payload => {
-      if(payload.status){
-        if(acc.isMultisign != null){
-          isMultisig.value = true;
-          onPartial.value = false;
-        }else{
-          isMultisig.value = false;
-        }
+      if(payload.status && payload.address == acc.address){
+        isMultisig.value = true;
+        onPartial.value = false;
+      }else{
+        isMultisig.value = false;
       }
     });
 
