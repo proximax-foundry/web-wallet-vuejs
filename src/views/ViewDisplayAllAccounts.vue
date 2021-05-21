@@ -36,7 +36,12 @@ export default {
     const toggleModal = ref(false);
     const showMenu = ref([]);
 
-    multiSign.createMultiSigAccount(appStore.state.currentLoggedInWallet.name);
+    (async()=> {
+      await multiSign.checkToCreateMultiSigAccount(appStore.state.currentLoggedInWallet.name);
+      // await multiSign.updateAccountsMultiSign(appStore.state.currentLoggedInWallet.name);
+      // clean wallet from removed multisig account of cosigners
+      await multiSign.removeUnrelatedMultiSig(appStore.state.currentLoggedInWallet.name);
+    })();
 
     // get num of accounts
     var num_acc = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length;

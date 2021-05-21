@@ -373,7 +373,10 @@ function checkFromSession(siriusStore){
     state.isLogin = true;
     stopListening();
     startListening(currentWallet.value.accounts);
-    multiSign.createMultiSigAccount(walletSession.name);
+    multiSign.updateAccountsMultiSign(walletSession.name);
+    multiSign.removeUnrelatedMultiSig(walletSession.name);
+    multiSign.checkToCreateMultiSigAccount(walletSession.name);
+
     getXPXBalance(walletSession.name, siriusStore).then(() => {
       sessionStorage.setItem('pageRefresh', 'y');
     });
@@ -439,7 +442,7 @@ function loginToWallet(walletName, password, siriusStore) {
   startListening(wallet.accounts);
   multiSign.updateAccountsMultiSign(walletName);
   multiSign.removeUnrelatedMultiSig(walletName);
-  multiSign.createMultiSigAccount(walletName);
+  multiSign.checkToCreateMultiSigAccount(walletName);
   // get latest xpx amount
   getXPXBalance(walletName, siriusStore).then(()=> {
     try {
@@ -546,7 +549,7 @@ function updateAccountState(account, accountName){
   return 1;
 }
 
-function updateCreatedMultiSigToWallet(multisigPublicKey, multisigAddress){
+async function updateCreatedMultiSigToWallet(multisigPublicKey, multisigAddress, cosignerPublicAccount){
 
   const wallet = getWalletByName(appStore.state.currentLoggedInWallet.name);
 
@@ -560,6 +563,10 @@ function updateCreatedMultiSigToWallet(multisigPublicKey, multisigAddress){
     address: addressObject
   };
 
+  let cosignatories = {
+    cosignatories: [cosignerPublicAccount]
+  }
+
   let account = {
     default: false,
     firstAccount: false,
@@ -568,7 +575,7 @@ function updateCreatedMultiSigToWallet(multisigPublicKey, multisigAddress){
     publicAccount: publicKeyObj,
     balance: 0,
     network: chainNetwork.getNetworkType(),
-    isMultisign: null,
+    isMultisign: cosignatories,
     multisigAccountGraphInfo: null,
     nis1Account: null,
     mosaic: [],
@@ -740,8 +747,8 @@ function removeMultiSigAccount(accounts){
   if(accounts.length > 0){
     const wallet = getWalletByName(state.currentLoggedInWallet.name);
     accounts.forEach((multisig) => {
-      const accountIndex = wallet.accounts.findIndex((element) => element.address == multisig.address);
-      // console.log('Remove index: ' + accountIndex);
+      const accountIndex = wallet.accounts.findIndex((element) => element.address === multisig.address);
+      // console.log('Remove index: ' + accountIndex + ' ' + multisig.address);
       wallet.accounts.splice(accountIndex, 1);
     });
     currentWallet.value = wallet;
