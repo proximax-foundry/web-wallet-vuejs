@@ -44,6 +44,7 @@
     "tsjs-xpx-chain-sdk": "^0.8.1",
     "vue": "^3.0.0",
     "vue-cli-plugin-fontawesome": "~0.3.1",
+    "vue-country-flag-next": "^2.1.1",
     "vue-currency-input": "^2.0.0-rc.2",
     "vue-password": "^3.0.0",
     "vue-router": "^4.0.0-0",
@@ -73,8 +74,5 @@
     "> 1%",
     "last 2 versions",
     "not dead"
-  ],
-  "optionalDependencies": {
-    "fsevents": ">=1.0.0 <2.3.2"
-  }
+  ]
 }
