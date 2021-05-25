@@ -5,7 +5,8 @@
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
         <div class="ml-6 text-xs mt-1 text-gray-500">{{ (title!=undefined)?title:'Send' }}</div>
       </div>
-      <input v-if="decimal==1" v-maska="'#*.#'" :disabled="disabled == 1"  class="text-placeholder bg-white text-right" :value="parseFloat(modelValue)" @input="$emit('update:modelValue', parseFloat($event.target.value))" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()">
+      <input v-if="decimal==0" v-maska="'#*'" :disabled="disabled == 1" class="text-placeholder bg-white text-right" :value="parseFloat(modelValue)" @input="$emit('update:modelValue', parseFloat($event.target.value))" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()">
+      <input v-else-if="decimal==1" v-maska="'#*.#'" :disabled="disabled == 1"  class="text-placeholder bg-white text-right" :value="parseFloat(modelValue)" @input="$emit('update:modelValue', parseFloat($event.target.value))" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()">
       <input v-else-if="decimal==2" v-maska="'#*.##'" :disabled="disabled == 1"  class="text-placeholder bg-white text-right" :value="parseFloat(modelValue)" @input="$emit('update:modelValue', parseFloat($event.target.value))" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()">
       <input v-else-if="decimal==3" v-maska="'#*.###'" :disabled="disabled == 1"  class="text-placeholder bg-white text-right" :value="parseFloat(modelValue)" @input="$emit('update:modelValue', parseFloat($event.target.value))" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()">
       <input v-else-if="decimal==4" v-maska="'#*.####'" :disabled="disabled == 1"  class="text-placeholder bg-white text-right" :value="parseFloat(modelValue)" @input="$emit('update:modelValue', parseFloat($event.target.value))" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()">
@@ -37,7 +38,7 @@ export default{
 
   setup (props) {
     const formatMask = ref("'#*." + ('#')^props.decimal + "'");
-    console.log(formatMask.value)
+    // console.log(formatMask.value)
     return {
       formatMask,
     }

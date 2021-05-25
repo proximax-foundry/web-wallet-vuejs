@@ -747,7 +747,7 @@ function removeMultiSigAccount(accounts){
   if(accounts.length > 0){
     const wallet = getWalletByName(state.currentLoggedInWallet.name);
     accounts.forEach((multisig) => {
-      const accountIndex = wallet.accounts.findIndex((element) => element.address === multisig.address);
+      const accountIndex = wallet.accounts.findIndex((element) => element.address === multisig.address );
       // console.log('Remove index: ' + accountIndex + ' ' + multisig.address);
       wallet.accounts.splice(accountIndex, 1);
     });

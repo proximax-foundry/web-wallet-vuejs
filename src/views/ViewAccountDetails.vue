@@ -106,6 +106,7 @@ import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { copyKeyFunc } from '../util/functions.js';
+import { useToast } from "primevue/usetoast";
 
 export default {
   name: 'ViewAccountDetails',
@@ -117,6 +118,7 @@ export default {
   },
 
   setup(p){
+    const toast = useToast();
     const appStore = inject("appStore");
     const router = useRouter();
 
@@ -139,7 +141,7 @@ export default {
     const walletPasswd = ref("");
     const walletPasswdSwap = ref("");
     const showPwSwap = ref(false);
-    const copy = (id) => copyKeyFunc(id);
+    const copy = (id) => copyKeyFunc(id, toast);
 
     const editName = () => {
       showName.value = !showName.value;

@@ -95,7 +95,6 @@
       </fieldset>
     </form>
     <AddContactModal :toggleModal="togglaAddContact" :saveAddress="recipient" />
-    <NotificationModal :toggleModal="toggleAnounceNotification" msg="Unconfirmed transaction" notiType="noti" time='2500' />
     <ConfirmSendModal :toggleModal="toggleConfirm" />
   </div>
 </template>
@@ -109,7 +108,6 @@ import SupplyInput from '@/components/SupplyInput.vue';
 import TextareaInput from '@/components/TextareaInput.vue';
 import { createTransaction, makeTransaction, getFakeEncryptedMessageSize, getPlainMessageSize, convertToExact, convertToCurrency } from '../util/transfer.js'; //getMosaicsAllAccounts
 import AddContactModal from '@/components/AddContactModal.vue';
-import NotificationModal from '@/components/NotificationModal.vue';
 import ConfirmSendModal from '@/components/ConfirmSendModal.vue';
 import { verifyAddress } from '../util/functions.js';
 import { multiSign } from '../util/multiSignatory.js';
@@ -124,7 +122,6 @@ export default {
     SupplyInput,
     TextareaInput,
     AddContactModal,
-    NotificationModal,
     ConfirmSendModal,
   },
 
@@ -146,7 +143,6 @@ export default {
     const encryptedMsg = ref('');
     const currentSelectedName = ref('');
     const togglaAddContact = ref(false);
-    const toggleAnounceNotification = ref(false);
     const selectedMosaic = ref([]);
     const mosaicsCreated = ref([]);
     const mosaicsSelected = ref([]);
@@ -367,7 +363,6 @@ export default {
             clearInput();
           }
           // show notification
-          // toggleAnounceNotification.value = true;
           // getMosaicsAllAccounts(appStore, siriusStore);
           // play notification sound
           forceSend.value = false;
@@ -513,10 +508,6 @@ export default {
       clearInput();
     });
 
-    emitter.on("CLOSE_NOTIFICATION", payload => {
-      toggleAnounceNotification.value = payload;
-    });
-
     // confirm modal
     emitter.on("CLOSE_CONFIRM_SEND_MODAL", payload => {
       toggleConfirm.value = payload;
@@ -564,7 +555,6 @@ export default {
       encryptedMsg,
       makeTransfer,
       togglaAddContact,
-      toggleAnounceNotification,
       displayMosaicsOption,
       selectedMosaic,
       mosaicsCreated,

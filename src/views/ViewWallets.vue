@@ -13,14 +13,14 @@
     <div class="mt-32" v-if="!appStore.state.currentLoggedInWallet">
       <router-link :to="{ name : 'Welcome'}" class="blue-btn p-3 px-5">Home</router-link>
     </div>
-    <NotificationModal :toggleModal="toggleModal" msg="Wallet has been removed successfully" notiType="noti" time='1500' />
   </div>
 </template>
 
 <script>
 import { computed, inject } from "vue";
 import WalletTile from '@/components/WalletTile.vue';
-import NotificationModal from '@/components/NotificationModal.vue';
+
+import { useToast } from "primevue/usetoast";
 
 export default {
   name: 'ViewWallets',
@@ -28,14 +28,10 @@ export default {
     'deleteWallet'
   ],
   components: {
-    WalletTile, NotificationModal
+    WalletTile
   },
-  data() {
-    return {
-      toggleModal: false,
-    };
-  },
-  setup() {
+  setup(p) {
+    const toast = useToast();
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
     const wallets = computed(
@@ -45,19 +41,15 @@ export default {
       }
     );
 
+    if(p.deleteWallet=='success'){
+      toast.add({severity:'success', summary: 'Notification', detail: 'Wallet has been removed successfully', group: 'br', life: 5000});
+    }
+
     return {
       wallets,
       appStore,
       siriusStore,
     };
   },
-  created(){
-    if(this.deleteWallet=='success'){
-      this.toggleModal = true;
-    }
-    this.emitter.on("CLOSE_NOTIFICATION", payload => {
-      this.toggleModal = payload;
-    });
-  }
 }
 </script>
