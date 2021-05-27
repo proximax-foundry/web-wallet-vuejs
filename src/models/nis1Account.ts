@@ -1,5 +1,3 @@
-
-
 export class nis1Account{
 
     address: string;

@@ -13,7 +13,7 @@ export class ChainProfileNames extends StoreProperties {
     }
 
     static createDefault(){
-        var newObj = new ChainProfileNames(key);
+        const newObj = new ChainProfileNames(key);
         newObj.init();
         return newObj;
     }
@@ -24,10 +24,10 @@ export class ChainProfileNames extends StoreProperties {
 
     replaceFirst2Names(names: string[]) {
 
-        var count = 0;
+        let count = 0;
 
-        for(var i = 0; i < 2; i++){
-            var updated = this.replaceAndUpdateWallet(this.names[i], names[i], i);
+        for(let i = 0; i < 2; i++){
+            const updated = this.replaceAndUpdateWallet(this.names[i], names[i], i);
 
             count += updated ? 1 : 0;
         }
@@ -37,10 +37,10 @@ export class ChainProfileNames extends StoreProperties {
 
     replaceFirst3Names(names: string[]) {
 
-        var count = 0;
+        let count = 0;
 
-        for(var i = 0; i < 3; i++){
-            var updated = this.replaceAndUpdateWallet(this.names[i], names[i], i);
+        for(let i = 0; i < 3; i++){
+            const updated = this.replaceAndUpdateWallet(this.names[i], names[i], i);
 
             count += updated ? 1 : 0;
         }
@@ -50,8 +50,8 @@ export class ChainProfileNames extends StoreProperties {
 
     replaceAndUpdateWallet(oldName: string, newName: string, index: number){
         if(oldName !== newName){
-            var allWallets = new Wallets();
-            var newWallets: Wallet[];
+            const allWallets = new Wallets();
+            let newWallets: Wallet[];
 
             if(allWallets){
                 newWallets = allWallets.wallets.map((wallet)=>{

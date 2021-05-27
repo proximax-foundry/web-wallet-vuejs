@@ -4,8 +4,20 @@ export class SessionService{
         return sessionStorage.getItem(key);
     }
 
-    static getJSONParse(key: string){
-        return JSON.parse(sessionStorage.getItem(key)) || {};
+    static getJSONParse(key: string): any{
+
+        try {
+            var value = sessionStorage.getItem(key);
+
+            if(value){
+                return JSON.parse(value)
+            }
+            else{
+                return null;
+            }
+        } catch (error) {
+            return null;
+        }
     }
 
     static setRaw(key: string, value: string){

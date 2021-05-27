@@ -9,7 +9,7 @@ export class StoreProperties{
     }
 
     init() {
-        let stateFromLocalStorage = localStorage.getItem(this.storeName);
+        const stateFromLocalStorage = localStorage.getItem(this.storeName);
 
         if (stateFromLocalStorage) {
                 if(typeof stateFromLocalStorage === 'string'){

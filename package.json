@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "lint": "vue-cli-service lint",
     "build": "cross-env NODE_ENV=production vue-cli-service build",
-    "build-staging": "cross-env NODE_ENV=staging vue-cli-service build",
-    "build-development": "cross-env NODE_ENV=development vue-cli-service build"
+    "lint": "vue-cli-service lint",
+    "build-development": "cross-env NODE_ENV=development vue-cli-service build",
+    "build-staging": "cross-env NODE_ENV=staging vue-cli-service build"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
@@ -43,11 +43,19 @@
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.3",
     "tsjs-xpx-chain-sdk": "^0.8.1",
     "vue": "^3.0.0",
+    "vue-class-component": "^8.0.0-0",
     "vue-cli-plugin-fontawesome": "~0.3.1",
     "vue-currency-input": "^2.0.0-rc.2",
     "vue-password": "^3.0.0",
     "vue-router": "^4.0.0-0",
     "vue3-loading-overlay": "0.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.18.0",
+    "@typescript-eslint/parser": "^4.18.0",
+    "@vue/cli-plugin-typescript": "~4.5.0",
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "typescript": "~4.1.5"
   },
   "eslintConfig": {
     "root": true,
@@ -56,10 +64,11 @@
     },
     "extends": [
       "plugin:vue/vue3-essential",
-      "eslint:recommended"
+      "eslint:recommended",
+      "@vue/typescript"
     ],
     "parserOptions": {
-      "parser": "babel-eslint"
+      "parser": "@typescript-eslint/parser"
     },
     "rules": {}
   },

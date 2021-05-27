@@ -19,7 +19,7 @@ export class Wallet{
     }
 
     removeAccount(accountName: string){
-        var index = this.accounts.findIndex((account)=> account.name == accountName);
+        const index = this.accounts.findIndex((account)=> account.name == accountName);
 
         this.accounts.splice(index, 1);
     }
@@ -29,14 +29,14 @@ export class Wallet{
     }
 
     convertAddressToName(address: string){
-        var aliasName :string;
+        let aliasName :string = "";
 
-        var addressBook = this.contacts.find((addressBook)=> addressBook.address === address);
+        const addressBook = this.contacts.find((addressBook)=> addressBook.address === address);
 
         if(addressBook){
             aliasName = addressBook.name;
         }else{
-            var walletAccount = this.accounts.find((walletAccount)=> walletAccount.address === address);
+            const walletAccount = this.accounts.find((walletAccount)=> walletAccount.address === address);
 
             if(walletAccount){
                 aliasName = walletAccount.name;

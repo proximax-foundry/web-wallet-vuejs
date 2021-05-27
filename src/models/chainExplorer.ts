@@ -13,7 +13,7 @@ export class ChainExplorer{
     }
 
     static createDefault(){
-        var chainExplorer = new ChainExplorer("https://bctestnetexplorer.xpxsirius.io");
+        const chainExplorer = new ChainExplorer("https://bctestnetexplorer.xpxsirius.io");
         chainExplorer.blockRoute = "#/result/blockHeight";
         chainExplorer.publicKeyRoute = "#/result/publicKey";
         chainExplorer.addressRoute = "#/result/address";

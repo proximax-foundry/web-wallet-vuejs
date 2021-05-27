@@ -12,10 +12,10 @@ export class WalletAccount extends Account{
     algo: string;
     encrypted: string;
     iv: string;
-    nis1Account: nis1Account = null;
-    multisigInfo: MultisigInfo[] = null;
-    assets: Asset[] = null;
-    namespaces: Namespace[] = null;
+    nis1Account: nis1Account | null = null;
+    multisigInfo: MultisigInfo[] = [];
+    assets: Asset[] = [];
+    namespaces: Namespace[] = [];
 
     constructor(name: string, publicKey: string, address: string, algo: string, encrypted: string, iv: string){
         super(name, publicKey, address);
@@ -30,7 +30,7 @@ export class WalletAccount extends Account{
     }
 
     removeAsset(id: string){
-        var index = this.assets.findIndex((asset)=> asset.idHex === id);
+        const index = this.assets.findIndex((asset)=> asset.idHex === id);
 
         this.assets.splice(index, 1);
     }
@@ -40,7 +40,7 @@ export class WalletAccount extends Account{
     }
 
     removeNamespace(id: string){
-        var index = this.namespaces.findIndex((namespace)=> namespace.idHex === id);
+        const index = this.namespaces.findIndex((namespace)=> namespace.idHex === id);
 
         this.namespaces.splice(index, 1);
     }

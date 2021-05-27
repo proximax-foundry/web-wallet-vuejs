@@ -1,13 +1,20 @@
 import { reactive } from "vue";
-import { ChainProfileNames } from "../models/stores/chainProfileNames"
+import { ChainProfileNames, ChainProfile, ChainProfileConfig } from "../models/stores/"
 
-export const networkState = reactive({
+interface networkStateInterface {
+    chainNetwork: number
+    chainNetworkName: string
+    currentNetworkProfile: ChainProfile | null
+    currentNetworkProfileConfig: ChainProfileConfig | null
+    selectedAPIEndpoint: string
+    availableNetworks: string[]
+}
+
+export const networkState = reactive<networkStateInterface>({
     chainNetwork: 0,
     chainNetworkName:'',
-    currentNetworkProfile: {},
-    currentNetworkProfileConfig: {},
+    currentNetworkProfile: null,
+    currentNetworkProfileConfig: null,
     selectedAPIEndpoint: "",
-    networkAPIEndpoints: [],
     availableNetworks: ChainProfileNames.createDefault().names,
-    blockHeight: '',
-  });
+});

@@ -4,20 +4,35 @@ const walletKey = "sw";
 const walletUpdateTimeKey = "sw_updated"
 
 export class Wallets {
-    wallets: Wallet[];
-    updateTime: number;
+    wallets: Wallet[] = [];
+    updateTime: number = 0;
 
     constructor(){
         this.fetchFromLocalStorage();
     }
 
     static fetchUpdateTime(){
-        return localStorage.getItem(walletUpdateTimeKey) ? parseInt(localStorage.getItem(walletUpdateTimeKey)): 0;
+        var tempUpdateTime = localStorage.getItem(walletUpdateTimeKey);
+        return tempUpdateTime ?  parseInt(tempUpdateTime) : 0;
     }
 
     fetchFromLocalStorage(){
-        this.wallets = JSON.parse(localStorage.getItem(walletKey)) || [];
-        this.updateTime = localStorage.getItem(walletUpdateTimeKey) ? parseInt(localStorage.getItem(walletUpdateTimeKey)) : new Date().getTime();
+        var tempWallets = localStorage.getItem(walletKey);
+
+        try {
+            if(tempWallets){
+                this.wallets = JSON.parse(tempWallets);
+            }
+            else{
+                this.wallets = [];
+            }
+        } catch (error) {
+            this.wallets = [];
+        }
+
+        var tempUpdateTime = localStorage.getItem(walletUpdateTimeKey);
+
+        this.updateTime = tempUpdateTime ?  parseInt(tempUpdateTime) : new Date().getTime();
     }
 
     isWalletOutdated(){
@@ -45,7 +60,7 @@ export class Wallets {
     }
 
     removeWalletByNetworkNameAndName(networkName: string, name: string){
-        var index = this.getWalletIndex(networkName, name);
+        const index = this.getWalletIndex(networkName, name);
         
         if(index){
             this.removeWallet(index);

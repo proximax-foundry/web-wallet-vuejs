@@ -2,10 +2,10 @@ export class Asset{
 
     idHex: string;
     amount: number = 0;
-    supply: number;
+    supply: number = 0;
     divisibility: number;
-    duration: number;
-    expirationBlock: number = null;
+    duration: number | null = null;
+    expirationBlock: number | null = null;
     supplyMutable: boolean;
     transferable: boolean;
     owner: string;
