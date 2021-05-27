@@ -11,7 +11,15 @@ export const copyKeyFunc = (id, toast) => {
 
   /* Copy the text inside the text field */
   document.execCommand("copy");
-  toast.add({severity:'info', summary: "Address copied", detail: copyText.value, group: 'br', life: 5000});
+  let titleType;
+  if(id=='private'){
+    titleType = 'Private key';
+  }else if(id=='public'){
+    titleType = 'Public key';
+  }else{
+    titleType = 'Address';
+  }
+  toast.add({severity:'info', summary: titleType + ' copied', detail: copyText.value, group: 'br', life: 5000});
 };
 
 

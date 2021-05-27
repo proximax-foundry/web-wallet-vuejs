@@ -3,7 +3,7 @@
     <Toast />
     <Toast position="top-left" group="tl" />
     <Toast position="bottom-left" group="bl" />
-    <Toast position="bottom-right" group="br" />
+    <Toast position="bottom-right" group="br" style="word-break: break-all;" />
     <ConfirmDialog></ConfirmDialog>
     <header class="h-16 flex items-stretch">
       <headerComponent></headerComponent>

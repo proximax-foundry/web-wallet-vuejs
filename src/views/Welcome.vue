@@ -1,6 +1,7 @@
 <template>
   <div class="container mx-auto text-center md:px-20 lg:px-40 mt-10">
     <h1 class="big-title">ProximaX Sirius Wallet</h1>
+    <!-- {{ hello }} {{ $t('message.hello') }} -->
     <h2>The secure interface that connects to the Proximax Sirius platform.</h2>
     <div class="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-4 mt-10">
       <div class="text-center p-5">
@@ -39,7 +40,8 @@
 </template>
 
 <script>
-
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import SignInSiriusIDModal from '@/components/SignInSiriusIDModal.vue'
 import SignInModal from '@/components/SignInModal.vue'
 export default {
@@ -48,5 +50,13 @@ export default {
     SignInSiriusIDModal,
     SignInModal,
   },
+  setup(){
+    const { tm } = useI18n();
+    const hello = ref(tm('message')['hello']);
+
+    return{
+      hello
+    };
+  }
 }
 </script>
