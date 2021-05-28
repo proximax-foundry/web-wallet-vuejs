@@ -26,7 +26,7 @@
                 <font-awesome-icon icon="caret-down" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
               </button>
             </div>
-            <div :class="showMenuCall?'':'hidden'" class="absolute right-0 w-24 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+            <div :class="showMenuCall?'':'hidden'" class="absolute right-0 w-28 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div class="py-1" role="none">
                 <router-link :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Details</router-link>
                 <a v-if="!account.default" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="setAsDefaultAccount(account.address)">Make Default</a>
@@ -35,6 +35,10 @@
                 <router-link :to="{ name: 'ViewDeleteAccount', params: { name: account.name}}" v-if="!account.default" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Delete</router-link>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300">Delete</div>
                 <router-link :to="{ name: isMultiSig ? 'ViewEditAccountMultisig' : 'ViewConvertAccountMultisig', params: { name: account.name}}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">MultiSig</router-link>
+                <router-link :to="{ name: 'ViewDisplayAllAccounts'}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Restrictions</router-link>
+                <router-link :to="{ name: 'ViewDisplayAllAccounts'}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Metadata</router-link>
+                <router-link :to="{ name: 'ViewDisplayAllAccounts'}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Delegate</router-link>
+                <router-link :to="{ name: 'ViewDisplayAllAccounts'}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Link to Namespace</router-link>
               </div>
             </div>
           </div>
