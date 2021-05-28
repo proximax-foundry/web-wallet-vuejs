@@ -11,23 +11,23 @@ import "primeicons/primeicons.css";
 // import "primevue/resources/themes/saga-blue/theme.css";
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
+import ConfirmDialog from 'primevue/confirmdialog';
+import Toast from 'primevue/toast';
 import { appStore } from './store/app';
-import { chainNetwork, siriusStore, ChainNetwork } from './store/sirius';
+import { chainNetwork, siriusStore } from './store/sirius';
 import { ChainProfile, ChainProfileNames, ChainProfileConfig } from './store/storeClasses'
 
 // Import Font Awesome Icons
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload, faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import ConfirmDialog from 'primevue/confirmdialog';
-import Toast from 'primevue/toast';
 
 library.add(faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload, faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore );
 const app = createApp(App);
 const emitter = mitt();
 
 app.config.globalProperties.emitter = emitter;
-app.use(router).mount('#app');
+app.use(router);
 app.use(PrimeVue);
 app.use(ConfirmationService);
 app.use(ToastService);
@@ -37,6 +37,7 @@ app.component('ConfirmDialog', ConfirmDialog);
 app.component('Toast', Toast);
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.component(VuePassword);
+app.mount('#app');
 
 const chainProfileIntegration = async () => {
   try {
@@ -85,12 +86,12 @@ const chainProfileIntegration = async () => {
 
         var endpoint = chainNetwork.buildAPIEndpointURL(chainProfileStore.apiNodes[0], chainProfileStore.httpPort);
 
-        var chainConfigHttp = ChainNetwork.buildChainConfigHttp(endpoint);
-        var chainHttp = ChainNetwork.buildChainHttp(endpoint);
+        var chainConfigHttp = chainNetwork.buildChainConfigHttp(endpoint);
+        var chainHttp = chainNetwork.buildChainHttp(endpoint);
 
         var chainHeight = await chainNetwork.getChainHeight(chainHttp)
 
-        var config = await ChainNetwork.getChainConfig(chainHeight, chainConfigHttp)
+        var config = await chainNetwork.getChainConfig(chainHeight, chainConfigHttp)
         var chainProfileConfigStore = new ChainProfileConfig(chainProfileName+"_config");
 
         chainProfileConfigStore.init()

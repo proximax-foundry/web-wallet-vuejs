@@ -22,19 +22,11 @@ export default {
     const currentMenu = ref('');
     const showMenu = ref([]);
     const services = ref([
-      {name: 'Accounts', desc: 'Manage your accounts', img: 'icon-accounts-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Accounts', link: '/view-all-accounts'},
-        {name: 'Multisig', link: ''},
-        {name: 'Restrictions', link: ''},
-        {name: 'Metadata', link: ''},
-        {name: 'Delegate', link: ''},
-        {name: 'Link to Namespace', link: ''}
-      ]},
       {name: 'Namespaces', desc: 'Create namespaces and sub-namespaces', img: 'icon-namespace-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: 'Register', link: ''},
         {name: 'Extend Duration', link: ''}
       ]},
-      {name: 'Mosaics', desc: 'Create digital representations with customized properties', img: 'icon-mosaics-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+      {name: 'Assets', desc: 'Create digital representations with customized properties', img: 'icon-mosaics-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: 'Create', link: '/create-mosaic'},
         {name: 'Modify Supply', link: ''},
         {name: 'Link to Namespace', link: ''}

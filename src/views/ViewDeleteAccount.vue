@@ -45,6 +45,7 @@ import { useRouter } from "vue-router";
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import ConfirmDeleteAccountModal from '@/components/ConfirmDeleteAccountModal.vue';
 import { copyKeyFunc } from '../util/functions.js';
+import { useToast } from "primevue/usetoast";
 
 export default {
   name: 'ViewDeleteAccount',
@@ -56,12 +57,13 @@ export default {
     name: String,
   },
   setup(p){
+    const toast = useToast();
     const appStore = inject("appStore");
     const err = ref(false);
     const accountName = ref(p.name);
     const accountNameDisplay = ref(p.name);
     const router = useRouter();
-    const copy = (id) => copyKeyFunc(id);
+    const copy = (id) => copyKeyFunc(id, toast);
 
     const getAcccountDetails = () => {
       return appStore.getAccDetails(p.name);

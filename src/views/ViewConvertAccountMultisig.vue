@@ -8,11 +8,14 @@
 <div class='mt-2 py-3 gray-line'>
   <div class="container mx-auto text-center">
     <div class="mx-auto pt-5 lg:px-20">
-      <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-8 items-center">
+      <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-8 items-center" v-if="accountName">
         <div class="text-left w-full relative">
-          <div class="text-xs font-bold mb-1">{{ accountNameDisplay }}</div>
+          <div class="text-xs font-bold mb-1">{{ accountName }}</div>
           <div>{{ acc.address }}</div>
         </div>
+      </div>
+      <div v-else>
+        <SelectInputPlugin placeholder="Contact" errorMessage="Select an account to convert" v-model="selectedAccount" :options="getNonMultiSigAcc" @default-selected="selectedAccount=0" @show-selection="selectAccount" />
       </div>
       <div class="flex justify-between p-4 rounded-xl bg-red-100 mb-8" v-if="fundStatus">
         <div class="text-center w-full">
@@ -86,8 +89,6 @@
       </div>
     </div>
   </div>
-  <NotificationModal :toggleModal="toggleAnounceNotification" msg="Unconfirmed transaction" notiType="noti" time='2500' />
-
 </div>
 </template>
 
@@ -99,8 +100,8 @@ import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import AddCosignModal from '../components/AddCosignModal.vue';
 import { multiSign } from '../util/multiSignatory.js';
-import NotificationModal from '@/components/NotificationModal.vue';
 import { transferEmitter } from '../util/listener.js';
+import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 
 export default {
   name: 'ViewConvertAccountMultisig',
@@ -109,7 +110,7 @@ export default {
     PasswordInput,
     TextInput,
     AddCosignModal,
-    NotificationModal,
+    SelectInputPlugin,
   },
   props: {
     name: String,
@@ -122,8 +123,53 @@ export default {
     const siriusStore = inject("siriusStore");
     const err = ref(false);
     const fundStatus = ref(false);
+
+    const getNonMultiSigAcc = () => {
+      const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
+      let nonMultiSig = [];
+      wallet.accounts.forEach((element) => {
+        if(!element.isMultisign){
+          nonMultiSig.push({
+            value: element.address,
+            label: element.name,
+          });
+        }
+      });
+      nonMultiSig.sort(compare);
+      return nonMultiSig;
+    };
+
+    function compare( a, b ) {
+      if ( a.label.toLowerCase() < b.label.toLowerCase() ){
+        return -1;
+      }
+      if ( a.label.toLowerCase() > b.label.toLowerCase() ){
+        return 1;
+      }
+      return 0;
+    }
+
+    // get details from name property
     const accountName = ref(p.name);
-    const accountNameDisplay = ref(p.name);
+    let selectedName;
+    if(accountName.value == undefined){
+      selectedName = '';
+    }else{
+      selectedName = accountName.value;
+    }
+    
+    const accountBalance = () => {
+      if(appStore.state.currentLoggedInWallet){
+        return appStore.getAccDetails(selectedName).balance;
+      }
+    };
+
+    // get account details
+    const acc =  appStore.getAccDetails(selectedName);
+    if(acc==-1){
+      router.push({ name: "ViewDisplayAllAccounts"});
+    }
+
     const passwd = ref('');
     const showPasswdError = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
@@ -139,7 +185,6 @@ export default {
     const coSign = ref([]);
     const selectedAddresses = ref([]);
     const showAddressError = ref([]);
-    const toggleAnounceNotification = ref(false);
     const onPartial = ref(false);
     const isMultisig = ref(false);
 
@@ -183,16 +228,9 @@ export default {
       }else{
         // transaction made
         err.value = '';
-        toggleAnounceNotification.value = true;
-        var audio = new Audio(require('@/assets/audio/ding.ogg'));
-        audio.play();
         clear();
       }
     };
-
-    emitter.on("CLOSE_NOTIFICATION", payload => {
-      toggleAnounceNotification.value = payload;
-    });
 
     watch(() => [...coSign.value], (n) => {
       for(var i = 0; i < coSign.value.length; i++){
@@ -218,12 +256,6 @@ export default {
         }
       }
     }, {deep:true});
-
-    const accountBalance = () => {
-      if(appStore.state.currentLoggedInWallet){
-        return appStore.getAccDetails(p.name).balance;
-      }
-    };
 
     const addCoSig = () => {
       coSign.value.push('');
@@ -299,11 +331,6 @@ export default {
 
     const disabledPassword = computed(() => (onPartial.value || isMultisig.value ));
 
-    // get account details
-    const acc =  appStore.getAccDetails(p.name);
-    if(acc==-1){
-      router.push({ name: "ViewDisplayAllAccounts"});
-    }
     setTimeout(()=> {
       if(accountBalance() < 10.0445){
         fundStatus.value = true;
@@ -379,7 +406,6 @@ export default {
       maxNumApproveTransaction,
       maxNumDeleteUser,
       fundStatus,
-      accountNameDisplay,
       accountName,
       acc,
       passwd,
@@ -393,12 +419,12 @@ export default {
       clear,
       convertAccount,
       disabledPassword,
-      toggleAnounceNotification,
       onPartial,
       isMultisig,
       passwdPattern,
       validateApproval,
       validateDelete,
+      getNonMultiSigAcc,
     };
   },
 }
