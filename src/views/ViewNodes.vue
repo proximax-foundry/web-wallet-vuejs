@@ -54,14 +54,13 @@
         </Multiselect>
       </div>
     </div>
-    <NotificationModal :toggleModal="toggleNotification" msg="Node updated" notiType="noti" time='2500' />
   </div>
 </template>
 <script>
 import Multiselect from '@vueform/multiselect';
-import { computed, inject, ref, getCurrentInstance } from "vue";
+import { computed, inject, ref } from "vue";
 import { startListening, stopListening } from '../util/listener.js';
-import NotificationModal from '@/components/NotificationModal.vue';
+import { useToast } from "primevue/usetoast";
 // import { DataBridgeService } from '../util/dataBridge.js';
 
 export default {
@@ -69,12 +68,10 @@ export default {
 
   components: {
     Multiselect,
-    NotificationModal,
   },
 
   setup() {
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const toast = useToast();
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
     const chainNetwork = inject("chainNetwork");
@@ -85,7 +82,6 @@ export default {
     const canDeselect = ref(false);
     const maxHeight = ref(200);
     const selected = ref('');
-    const toggleNotification = ref(false);
 
     const options = computed(() => {
       let nodeList = [];
@@ -106,7 +102,7 @@ export default {
         const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
         startListening(walletSession.accounts);
         appStore.getXPXBalance(walletSession.name, siriusStore);
-        toggleNotification.value = true;
+        toast.add({severity:'success', summary: 'Services', detail: 'Node updated', group: 'br', life: 5000});
       }
     };
 
@@ -119,10 +115,6 @@ export default {
     const clearSelection = () => {
       showSelectTitle.value = false;
     };
-
-    emitter.on("CLOSE_NOTIFICATION", payload => {
-      toggleNotification.value = payload;
-    });
 
     // var dataBridgeInstance = new DataBridgeService();
     // dataBridgeInstance.connectBlockSocket();
@@ -141,7 +133,6 @@ export default {
       closeSelection,
       currentNode,
       blockHeight,
-      toggleNotification,
     };
   },
 }

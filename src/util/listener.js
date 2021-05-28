@@ -425,9 +425,10 @@ function announceAggregateBonded(senderAddress, aggBondTx, aggBondHash, txConfir
             message: 'Aggregate transaction announced',
             notificationType: 'noti'
           });
+          console.log('Announce ABT')
           transferEmitter.emit('ANNOUNCE_AGGREGATE_BONDED', {
             status: true,
-            address: senderAddress
+            address: senderAddress.address
           });
           // console.log('Aggregate transaction (' + aggBondHash + ') announced');
         }, 
@@ -574,10 +575,10 @@ function modifyMultisigAnnounceAggregateBonded(announceAggregateBondedListener, 
           });
           transferEmitter.emit('ANNOUNCE_AGGREGATE_BONDED', {
             status: true,
-            address: senderAddress
+            address: senderAddress.address
           });
           // console.log('Aggregate transaction (' + aggBondHash + ') announced');
-        }, 
+        },
         (error)=>{
           console.log(error);
           if (txConfirmed) {

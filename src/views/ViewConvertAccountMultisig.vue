@@ -86,8 +86,6 @@
       </div>
     </div>
   </div>
-  <NotificationModal :toggleModal="toggleAnounceNotification" msg="Unconfirmed transaction" notiType="noti" time='2500' />
-
 </div>
 </template>
 
@@ -99,9 +97,7 @@ import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import AddCosignModal from '../components/AddCosignModal.vue';
 import { multiSign } from '../util/multiSignatory.js';
-import NotificationModal from '@/components/NotificationModal.vue';
 import { transferEmitter } from '../util/listener.js';
-
 export default {
   name: 'ViewConvertAccountMultisig',
   components: {
@@ -109,7 +105,6 @@ export default {
     PasswordInput,
     TextInput,
     AddCosignModal,
-    NotificationModal,
   },
   props: {
     name: String,
@@ -131,22 +126,17 @@ export default {
     const numDeleteUser = ref(1);
     const maxNumApproveTransaction = ref(0);
     const maxNumDeleteUser = ref(0);
-
     const publicKeyPattern = "^[0-9A-Fa-f]{64}$";
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
-
     const coSign = ref([]);
     const selectedAddresses = ref([]);
     const showAddressError = ref([]);
-    const toggleAnounceNotification = ref(false);
     const onPartial = ref(false);
     const isMultisig = ref(false);
-
     const disableSend = computed(() => !(
       !isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) && coSign.value.length > 0  &&  err.value == '' && (showAddressError.value.indexOf(true) == -1) && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
     ));
-
     const addCoSigButton = computed(() => {
       var status = false;
       if(accountBalance() >= 10.0445 && !onPartial.value){
@@ -164,7 +154,6 @@ export default {
       }
       return status;
     });
-
     const clear = () => {
       coSign.value = [];
       selectedAddresses.value = [];
@@ -175,7 +164,6 @@ export default {
       numDeleteUser.value = 1;
       maxNumDeleteUser.value = 0;
     };
-
     const convertAccount = () => {
       let convertstatus = multiSign.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.name, passwd.value);
       if(!convertstatus){
@@ -183,17 +171,12 @@ export default {
       }else{
         // transaction made
         err.value = '';
-        toggleAnounceNotification.value = true;
-        var audio = new Audio(require('@/assets/audio/ding.ogg'));
-        audio.play();
+        // toggleAnounceNotification.value = true;
+        // var audio = new Audio(require('@/assets/audio/ding.ogg'));
+        // audio.play();
         clear();
       }
     };
-
-    emitter.on("CLOSE_NOTIFICATION", payload => {
-      toggleAnounceNotification.value = payload;
-    });
-
     watch(() => [...coSign.value], (n) => {
       for(var i = 0; i < coSign.value.length; i++){
         if((coSign.value[i].length == 64) || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)){
@@ -205,7 +188,6 @@ export default {
             showAddressError.value[i] = true;
           }else{
             showAddressError.value[i] = false;
-
             const unique = Array.from(new Set(n));
             if(unique.length != n.length){
               err.value = "Cosigner already exist";
@@ -218,13 +200,11 @@ export default {
         }
       }
     }, {deep:true});
-
     const accountBalance = () => {
       if(appStore.state.currentLoggedInWallet){
         return appStore.getAccDetails(p.name).balance;
       }
     };
-
     const addCoSig = () => {
       coSign.value.push('');
       // addresses.value.push('');
@@ -232,7 +212,6 @@ export default {
       maxNumApproveTransaction.value += 1;
       maxNumDeleteUser.value += 1;
     };
-
     const deleteCoSigAddressInput = (i) => {
       console.log('Delete index: ' + i);
       if(maxNumApproveTransaction.value > 1){
@@ -244,23 +223,19 @@ export default {
       if(numDeleteUser.value > maxNumDeleteUser.value){
         numDeleteUser.value = maxNumDeleteUser.value;
       }
-
       if(numApproveTransaction.value > maxNumApproveTransaction.value){
         numApproveTransaction.value = maxNumApproveTransaction.value;
       }
       coSign.value.splice(i, 1);
       selectedAddresses.value.splice(i, 1);
     }
-
     const validateApproval = (e) => {
       if((numApproveTransaction.value * 10*(~~(maxNumApproveTransaction.value/10)) + e.charCode - 48) > maxNumApproveTransaction.value){
         e.preventDefault();
       }
     }
-
     let deleteUserErrorMsg = 'Number of cosignatories for Delete users is more than number of cosignatories for this account';
     let approveTransactionErrMsg = 'Number of cosignatories for Approve transaction is more than number of cosignatories for this account';
-
     watch(numApproveTransaction, (n) => {
       if(maxNumApproveTransaction.value == 0 && n > 1){
         err.value = approveTransactionErrMsg;
@@ -275,13 +250,11 @@ export default {
         }
       }
     });
-
     const validateDelete = (e) => {
       if((numDeleteUser.value * 10*(~~(maxNumDeleteUser.value/10)) + e.charCode - 48) > maxNumDeleteUser.value){
         e.preventDefault();
       }
     }
-
     watch(numDeleteUser, (n) => {
       if(maxNumDeleteUser.value == 0 && n > 1){
         err.value = deleteUserErrorMsg;
@@ -296,9 +269,7 @@ export default {
         }
       }
     });
-
     const disabledPassword = computed(() => (onPartial.value || isMultisig.value ));
-
     // get account details
     const acc =  appStore.getAccDetails(p.name);
     if(acc==-1){
@@ -311,7 +282,6 @@ export default {
         fundStatus.value = false;
       }
     }, 500);
-
     watch(accountBalance, (n) => {
       if(n < 10.0445){
         fundStatus.value = true;
@@ -319,12 +289,10 @@ export default {
         fundStatus.value = false;
       }
     });
-
     // check if onPartial
     multiSign.onPartial(acc.publicAccount).then((onPartialBoolean) => {
       onPartial.value = onPartialBoolean;
     });
-
     // check if this address has cosigner
     try{
       multiSign.checkIsMultiSig(acc.address).then((isMultiSigBoolean) => {
@@ -333,7 +301,6 @@ export default {
     }catch(err) {
       isMultisig.value = false;
     }
-
     emitter.on('ADD_CONTACT_COSIGN', payload => {
       multiSign.verifyContactPublicKey(payload.address, siriusStore.accountHttp).then((res)=>{
         if(res.status){
@@ -352,15 +319,16 @@ export default {
         }
       });
     });
-
     // detect partial transaction announcement from listener
     transferEmitter.on('ANNOUNCE_AGGREGATE_BONDED' , payload => {
+      console.log(acc.address);
+      console.log(payload.address);
+      console.log(payload.status);
       if(payload.status && payload.address == acc.address){
         onPartial.value = true;
         clear();
       }
     });
-
     // detect co signiture added from listener
     transferEmitter.on('ANNOUNCE_COSIGNITURE_ADDED' , payload => {
       if(payload.status && payload.address == acc.address){
@@ -370,7 +338,6 @@ export default {
         isMultisig.value = false;
       }
     });
-
     return {
       err,
       disableSend,
@@ -393,7 +360,6 @@ export default {
       clear,
       convertAccount,
       disabledPassword,
-      toggleAnounceNotification,
       onPartial,
       isMultisig,
       passwdPattern,

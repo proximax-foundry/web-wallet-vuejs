@@ -6,7 +6,8 @@
         <div class="ml-6 text-xs mt-1 text-gray-500">{{ title }}</div>
       </div>
       <!-- <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="text-placeholder bg-white text-right" :placeholder="placeholder" @click="clickInputText()" @keypress="validate(event)"> -->
-      <input :disabled="disabled" :value="modelValue" type="number" min="0" :max="max" @input="$emit('update:modelValue', $event.target.value)" :placeholder="placeholder" class="text-placeholder bg-white text-right" @click="clickInputText()" @keypress="validate(event)">
+      <!-- @keydown="validate" -->
+      <input :disabled="disabled" :value="modelValue" @input="validate" @keypress="validateKey" type="number" size="1" maxlength="1" min=0 :max="max" :placeholder="placeholder" class="text-placeholder bg-white text-right" @click="clickInputText()">
       <div class="w-5"></div>
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
@@ -24,10 +25,11 @@ export default{
     modelValue: String,
     title: String,
     disabled: Boolean,
-    max: String,
+    max: Number,
   },
 
   emits:[
+    // 'update-divisibility'
     'update:modelValue'
   ],
 
@@ -48,33 +50,22 @@ export default{
       }
     },
 
-    // blurInputText: function() {
-    //   if(this.modelValue == ''){
-    //     this.borderColor = 'border-2 border-red-primary';
-    //     this.textErr = true;
-    //   }else{
-    //     this.borderColor = 'border-2 border-gray-300';
-    //     this.textErr = false;
-    //   }
-    // },
-
-    validate: function(evt) {
-      var theEvent = evt || window.event;
-      // Handle paste
-      if (theEvent.type === 'paste') {
-        key = theEvent.clipboardData.getData('text/plain');
-      } else {
-      // Handle key press
-        var key = theEvent.keyCode || theEvent.which;
-        key = String.fromCharCode(key);
+    validateKey: function(e){
+      if(e.charCode < 48 || e.charCode > 54){
+        e.preventDefault();
+      }else{
+        return e.key;
       }
-      var regex = /[0-9]|/;
-      if( !regex.test(key) ) {
-        theEvent.returnValue = false;
-        if(theEvent.preventDefault) theEvent.preventDefault();
+
+    },
+
+    validate: function(e) {
+      if(e.data > -1 && e.data <7){
+        this.$emit('update:modelValue', e.data);
       }
     }
   },
+
   mounted() {
     this.emitter.on("CLEAR_TEXT", payload => {
       this.inputText = payload;

@@ -1,6 +1,6 @@
 <template>
   <div class="md:grid md:grid-cols-2 mb-8">
-    <div class="w-full text-center md:text-left mx-5">
+    <div class="w-full text-center md:text-left mx-0 lg:mx-5">
       <div class="font-bold hover:bg-gray-100 cursor-pointer inline-block py-1 px-2 pl-0 rounded-lg" @click="openSetDefaultModal = !openSetDefaultModal"><font-awesome-icon icon="caret-down" class="h-5 w-5 text-gray-600 inline-block"></font-awesome-icon>&nbsp;{{ primaryAccountName }} <div class="text-xs font-normal ml-1 inline-block px-2 py-1 rounded bg-yellow-200">Default</div></div>
       <div class="text-xs my-2">
         <div class="relative inline-block">
@@ -10,10 +10,12 @@
             class="text-xs outline-none z-10"
             type="text"
             :value="primaryAccount"
-            style="width: 335px;"
+            style="width: 350px;"
           />
         </div>
-        <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline mx-2"></font-awesome-icon><img src="../assets/img/icon-qr-code.svg" class="w-5 inline">
+        <div class="mt-2 sm:inline-block">
+          <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline mx-2"></font-awesome-icon><img src="../assets/img/icon-qr-code.svg" class="w-5 inline">
+        </div>
       </div>
       <div class="text-center md:text-left">
         <div class="inline-block mr-4"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"><span class="text-xs">{{ primaryAccountBalance }} XPX</span></div>
@@ -21,8 +23,8 @@
       </div>
     </div>
     <div class="w-full lg:w-6/12 mt-5 md:mt-0">
-      <div class="text-md text-center md:text-left">Transactions: <span>{{ confirmedTransactions.length + unconfirmedTransactions.length }}</span></div>
-      <div class="text-center md:text-left">
+      <div class="text-md text-center sm:text-right lg:text-left">Transactions: <span>{{ confirmedTransactions.length + unconfirmedTransactions.length }}</span></div>
+      <div class="xs:text-center sm:text-right lg:text-left">
         <div class="mt-2">
           <div class="rounded-full bg-blue-primary text-white w-24 h-15 px-2 py-1 mr-3 inline-block" :class="confirmedTransactions.length>0?'cursor-pointer':''" @click="clickConfirmedTransaction()">
             <div class="flex justify-between">
@@ -65,6 +67,7 @@ import { transactions } from '../util/transactions.js';
 // eslint-disable-next-line no-unused-vars
 import { PublicAccount, Order, QueryParams } from "tsjs-xpx-chain-sdk";
 import { transferEmitter } from '../util/listener.js';
+import { useToast } from "primevue/usetoast";
 
 
 export default {
@@ -77,6 +80,7 @@ export default {
   },
 
   setup(){
+    const toast = useToast();
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
     // const chainNetwork = inject("chainNetwork");
@@ -85,7 +89,7 @@ export default {
 
     const openSetDefaultModal = ref(false);
 
-    const copy = (id) => copyKeyFunc(id);
+    const copy = (id) => copyKeyFunc(id, toast);
     const primaryAccount = computed(
       () => {
           if (appStore.state.currentLoggedInWallet) {

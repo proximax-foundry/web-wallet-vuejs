@@ -35,40 +35,17 @@
         <div class="px-5 self-center"><router-link :to="{ name: 'CreateWalletSelection' }" class="block big-default-btn my-3 self-center">Create</router-link></div>
       </div>
     </div>
-    <NotificationModal :toggleModal="toggleModal" :msg="msg" notiType="noti" time='1500' />
   </div>
 </template>
 
 <script>
-import { ref, getCurrentInstance } from 'vue';
 import SignInSiriusIDModal from '@/components/SignInSiriusIDModal.vue'
 import SignInModal from '@/components/SignInModal.vue'
-import NotificationModal from '@/components/NotificationModal.vue';
 export default {
   name: 'Welcome',
-  props: ['toggle', 'modalMsg'],
   components: {
     SignInSiriusIDModal,
     SignInModal,
-    NotificationModal
-  },
-
-  setup(p){
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const toggleModal = ref(false);
-    const msg = ref(p.modalMsg);
-
-    if(p.toggle){
-      toggleModal.value = true;
-    }
-    emitter.on("CLOSE_NOTIFICATION", payload => {
-      toggleModal.value = payload;
-    });
-    return {
-      toggleModal,
-      msg,
-    };
   },
 }
 </script>

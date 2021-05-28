@@ -76,57 +76,58 @@
           <p class="text-xs mt-3">Has transactions in partial</p>
         </div>
       </div>
-      <div class="mt-16">
-        <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <div v-for="(coSignAddress, index) in coSign" :key="index" class="flex">
-          <font-awesome-icon icon="trash-alt" class="w-4 h-4 text-gray-500 hover:text-gray-400 cursor-pointer mr-3 mt-3" @click="deleteCoSigAddressInput(index)"></font-awesome-icon>
-          <TextInput placeholder="Cosignatory Account Address or Public Key" errorMessage="Valid Cosignatory Account Address or Public Key is required" :showError="showAddressError[index]" v-model="coSign[index]" icon="key" class="flex-grow" />
-          <add-cosign-modal :cosignPublicKeyIndex="index" :selectedAddress="selectedAddresses"></add-cosign-modal>
+      <div v-if="isCoSigner">
+        <div class="mt-16">
+          <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
+          <div v-for="(coSignAddress, index) in coSign" :key="index" class="flex">
+            <font-awesome-icon icon="trash-alt" class="w-4 h-4 text-gray-500 hover:text-gray-400 cursor-pointer mr-3 mt-3" @click="deleteCoSigAddressInput(index)"></font-awesome-icon>
+            <TextInput placeholder="Cosignatory Account Address or Public Key" errorMessage="Valid Cosignatory Account Address or Public Key is required" :showError="showAddressError[index]" v-model="coSign[index]" icon="key" class="flex-grow" />
+            <add-cosign-modal :cosignPublicKeyIndex="index" :selectedAddress="selectedAddresses"></add-cosign-modal>
+          </div>
+          <div class="text-lg" v-if="!coSign.length">Add at least 1 cosignatory (s)</div>
+          <button class="my-8 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50 disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">(+) Add cosignatory</button>
         </div>
-        <div class="text-lg" v-if="!coSign.length">Add at least 1 cosignatory (s)</div>
-        <button class="my-8 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50 disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">(+) Add cosignatory</button>
-      </div>
-      <div class="mb-10">
-        <div class="block mt-2 font-bold text-md lg:inline-block lg:mr-20">Scheme for ></div>
-        <div class="mt-2 lg:inline-block lg:mr-20">
-          <span class="font-bold">Approve transactions:</span>
-          <div class="ml-2 border rounded-2xl p-2 py-2 inline-block">
-            <input type="number" required min="0" :max="maxNumApproveTransaction" v-model="numApproveTransaction" class="text-right outline-none" @keypress="validateApproval">
-          </div> of {{ maxNumApproveTransaction }} cosignatories</div>
-        <div class="mt-2 lg:inline-block">
-          <span class="font-bold">Delete users:</span>
-          <div class="ml-2 border rounded-2xl p-2 py-2 inline-block">
-            <input type="number" required min="0" :max="maxNumDeleteUser" v-model="numDeleteUser" class="text-right outline-none" @keypress="validateDelete">
-          </div> of {{ maxNumDeleteUser }} cosignatories</div>
-      </div>
-      <div class="p-4 rounded-xl bg-gray-100 my-2 w-full text-xs text-gray-800">
-        <img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"> Unconfirmed/Recommended Fee: 0.042750 XPX
-      </div>
-      <div class="p-4 rounded-xl bg-gray-100 mb-8 items-center w-full text-xs text-gray-800">
-        <div class="text-center">
-          <div class="inline-block">
-            <div class="flex">
-              <img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
-              <div class="inline-block self-center text-left">
-                <div>LockFund: 10.000000 XPX</div>
-                <div>Unconfirmed/Recommended Fee: 0.044500 XPX</div>
+        <div class="mb-10">
+          <div class="block mt-2 font-bold text-md lg:inline-block lg:mr-20">Scheme for ></div>
+          <div class="mt-2 lg:inline-block lg:mr-20">
+            <span class="font-bold">Approve transactions:</span>
+            <div class="ml-2 border rounded-2xl p-2 py-2 inline-block">
+              <input type="number" required min="0" :max="maxNumApproveTransaction" v-model="numApproveTransaction" class="text-right outline-none" @keypress="validateApproval">
+            </div> of {{ maxNumApproveTransaction }} cosignatories</div>
+          <div class="mt-2 lg:inline-block">
+            <span class="font-bold">Delete users:</span>
+            <div class="ml-2 border rounded-2xl p-2 py-2 inline-block">
+              <input type="number" required min="0" :max="maxNumDeleteUser" v-model="numDeleteUser" class="text-right outline-none" @keypress="validateDelete">
+            </div> of {{ maxNumDeleteUser }} cosignatories</div>
+        </div>
+        <div class="p-4 rounded-xl bg-gray-100 my-2 w-full text-xs text-gray-800">
+          <img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"> Unconfirmed/Recommended Fee: 0.042750 XPX
+        </div>
+        <div class="p-4 rounded-xl bg-gray-100 mb-8 items-center w-full text-xs text-gray-800">
+          <div class="text-center">
+            <div class="inline-block">
+              <div class="flex">
+                <img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
+                <div class="inline-block self-center text-left">
+                  <div>LockFund: 10.000000 XPX</div>
+                  <div>Unconfirmed/Recommended Fee: 0.044500 XPX</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div v-if="getWalletCosigner().list.length > 1">
-        <SelectInputPlugin placeholder="Main cosignatory to sign" errorMessage="" v-model="selectMainCosign" :options="selectCosign" />
-        <MultiSelectInputPlugin placeholder="Also I will sign with these cosignatories" errorMessage="" v-model="selectOtherCosign" :options="selectOtherCosignerOptions" />
-      </div>
-      <PasswordInput placeholder="Enter Wallet Password" errorMessage="Wallet password is required to convert to MultiSig Account" :showError="showPasswdError" v-model="passwd" icon="lock" :disabled="disabledPassword" />
-      <div class="mt-10">
-        <button type="button" class="default-btn mr-5 focus:outline-none" @click="clear()">Clear</button>
-        <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="modifyAccount()" :disabled="disableSend">Send</button>
+        <div v-if="getWalletCosigner().list.length > 1">
+          <SelectInputPlugin placeholder="Main cosignatory to sign" errorMessage="" v-model="selectMainCosign" :options="selectCosign" />
+          <MultiSelectInputPlugin placeholder="Also I will sign with these cosignatories" errorMessage="" v-model="selectOtherCosign" :options="selectOtherCosignerOptions" />
+        </div>
+        <PasswordInput placeholder="Enter Wallet Password" errorMessage="Wallet password is required to convert to MultiSig Account" :showError="showPasswdError" v-model="passwd" icon="lock" :disabled="disabledPassword" />
+        <div class="mt-10">
+          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clear()">Clear</button>
+          <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="modifyAccount()" :disabled="disableSend">Send</button>
+        </div>
       </div>
     </div>
   </div>
-  <NotificationModal :toggleModal="toggleAnounceNotification" msg="Unconfirmed transaction" notiType="noti" time='2500' />
 
 </div>
 </template>
@@ -139,7 +140,6 @@ import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import AddCosignModal from '../components/AddCosignModal.vue';
 import { multiSign } from '../util/multiSignatory.js';
-import NotificationModal from '@/components/NotificationModal.vue';
 import MultisigSchemeModal from '@/components/MultisigSchemeModal.vue';
 import { transferEmitter } from '../util/listener.js';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
@@ -152,7 +152,6 @@ export default {
     PasswordInput,
     TextInput,
     AddCosignModal,
-    NotificationModal,
     MultisigSchemeModal,
     SelectInputPlugin,
     MultiSelectInputPlugin,
@@ -182,7 +181,6 @@ export default {
     const removeCosign = ref([]);
     const selectedAddresses = ref([]);
     const showAddressError = ref([]);
-    const toggleAnounceNotification = ref(false);
     const onPartial = ref(false);
     const isMultisig = ref(true);
     const showCosigners = ref(false);
@@ -305,16 +303,11 @@ export default {
       }else{
         // transaction made
         err.value = '';
-        // toggleAnounceNotification.value = true;
         var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play();
         clear();
       }
     };
-
-    emitter.on("CLOSE_NOTIFICATION", payload => {
-      toggleAnounceNotification.value = payload;
-    });
 
     watch(selectMainCosign, (n) => {
       selectOtherCosign.value.splice(selectOtherCosign.value.indexOf(n), 1);
@@ -584,7 +577,6 @@ export default {
       clear,
       modifyAccount,
       disabledPassword,
-      toggleAnounceNotification,
       onPartial,
       isMultisig,
       isCoSigner,
