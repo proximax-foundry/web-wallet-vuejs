@@ -1,6 +1,12 @@
 # web-wallet
 
-## Project setup
+## Prerequisite
+```
+NodeJS >= 10
+NPM7 or NPM6 (We are using NPM7, the package-lock.json is in different version)
+```
+
+## Install Project dependencies
 ```
 npm install
 ```
