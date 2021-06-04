@@ -4,7 +4,8 @@ import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainProfilePrefer
 
 const sessionNetworkName = "networkName";
 const sessionNetworkIndex = "network";
-const localStorageSelectedChainNode = "selectedChainNode";
+const sessionSelectedAPINode = "selectedChainNode";
+const lastAccessNetworkName = "lastAccessNetworkName";
 
 export class NetworkStateUtils{
 
@@ -29,6 +30,8 @@ export class NetworkStateUtils{
 
      SessionService.setRaw(sessionNetworkIndex, networkChain.toString());
      SessionService.setRaw(sessionNetworkName, networkState.chainNetworkName);
+
+     NetworkStateUtils.updateNetworkProfile();
   }
 
   static changeNetworkByIndex(index: number){
@@ -48,7 +51,7 @@ export class NetworkStateUtils{
     networkState.chainNetworkName = selectedNetworkName;
     networkState.chainNetwork = selectedIndex;
 
-    SessionService.setRaw(sessionNetworkIndex, selectedIndex.toString());
+    SessionService.setNumber(sessionNetworkIndex, selectedIndex);
     SessionService.setRaw(sessionNetworkName, selectedNetworkName);
 
     NetworkStateUtils.updateNetworkProfile();
@@ -63,6 +66,34 @@ export class NetworkStateUtils{
 
     chainProfileConfig.init();
     networkState.currentNetworkProfileConfig = chainProfileConfig;
+
+    NetworkStateUtils.setAPINodeInit();
+  }
+
+  static setAPINodeInit(){
+    const chainProfilePreferences = new ChainProfilePreferences(networkState.chainNetworkName);
+
+    chainProfilePreferences.init();
+
+    const endpoints = networkState.currentNetworkProfile ? networkState.currentNetworkProfile.apiNodes : [];
+
+    if(chainProfilePreferences.apiNode && endpoints.includes(chainProfilePreferences.apiNode)){
+      networkState.selectedAPIEndpoint = chainProfilePreferences.apiNode;
+    }
+    else{
+      if(endpoints.length > 0){
+        const randomAPINodeIndex = Math.floor(Math.random() * endpoints.length);
+        chainProfilePreferences.apiNode = endpoints[randomAPINodeIndex];
+        chainProfilePreferences.saveToLocalStorage();
+  
+        networkState.selectedAPIEndpoint = endpoints[randomAPINodeIndex];
+      }
+      else{
+        networkState.selectedAPIEndpoint = "";
+      }
+    }
+    SessionService.setNumber('nodePort', networkState.currentNetworkProfile?.httpPort || 3000);
+    sessionStorage.setRaw('selectedChainNode', networkState.selectedAPIEndpoint);
   }
 
   static updateChainNode(apiNode: string){
@@ -70,7 +101,7 @@ export class NetworkStateUtils{
     chainProfilePreferences.apiNode = apiNode;
     chainProfilePreferences.saveToLocalStorage();
     networkState.selectedAPIEndpoint = apiNode;
-    SessionService.setRaw(localStorageSelectedChainNode, networkState.selectedAPIEndpoint);
+    SessionService.setRaw(sessionSelectedAPINode, networkState.selectedAPIEndpoint);
   }
 
   static buildAPIEndpointURL(url: string): string{
@@ -84,5 +115,24 @@ export class NetworkStateUtils{
     const portNumber = networkState.currentNetworkProfile ? networkState.currentNetworkProfile.httpPort : 3000;
 
     return location.protocol=='https:' ? `wss://${url}` : `ws://${url}:${portNumber}`;
+  }
+
+  static setLocalDefaultNetwork(networkName: string){
+    localStorage.setItem(lastAccessNetworkName, networkName);
+  }
+
+  static checkDefaultNetwork(){
+    const networkName = localStorage.getItem(lastAccessNetworkName);
+
+    if(networkName){
+      NetworkStateUtils.changeNetworkByName(networkName);
+    }
+    else{
+      NetworkStateUtils.changeNetworkByIndex(0);
+    }
+  }
+
+  static updateBlockHeight(height: number){
+    networkState.blockHeight = height;
   }
 }

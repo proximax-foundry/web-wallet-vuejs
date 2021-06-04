@@ -1,27 +1,19 @@
 import { Account } from './account';
-import { nis1Account } from './nis1Account';
 import { MultisigInfo } from './multisigInfo';
 import { Asset } from './asset';
 import { Namespace } from './namespace';
+import { WalletAcountType } from "./const/otherAccountType"
 
-export class WalletAccount extends Account{
+export class OtherAccount extends Account{
 
-    default: boolean = false;
-    isBrain: boolean = false;
-    algo: string;
-    encrypted: string;
-    iv: string;
-    nis1Account: nis1Account | null = null;
     multisigInfo: MultisigInfo[] = [];
     assets: Asset[] = [];
     namespaces: Namespace[] = [];
+    type: WalletAcountType;
 
-    constructor(name: string, publicKey: string, address: string, algo: string, encrypted: string, iv: string){
+    constructor(name: string, publicKey: string, address: string, type: WalletAcountType){
         super(name, publicKey, address);
-        
-        this.algo = algo;
-        this.encrypted = encrypted;
-        this.iv = iv;
+        this.type = type;
     }
 
     addAsset(asset: Asset){

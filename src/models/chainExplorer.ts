@@ -1,12 +1,12 @@
 export class ChainExplorer{
 
     url: string;
-    blockRoute: string;
-    publicKeyRoute: string;
-    addressRoute: string;
-    hashRoute: string;
-    namespaceInfoRoute: string;
-    assetInfoRoute: string;
+    blockRoute: string = "";
+    publicKeyRoute: string = "";
+    addressRoute: string = "";
+    hashRoute: string = "";
+    namespaceInfoRoute: string = "";
+    assetInfoRoute: string = "";
 
     constructor(url){
         this.url = url;

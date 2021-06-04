@@ -57,12 +57,16 @@
     <NotificationModal :toggleModal="toggleNotification" msg="Node updated" notiType="noti" time='2500' />
   </div>
 </template>
-<script>
+<script lang="ts">
 import Multiselect from '@vueform/multiselect';
-import { computed, inject, ref, getCurrentInstance } from "vue";
+import { computed, ref, getCurrentInstance } from "vue";
 import { startListening, stopListening } from '../util/listener.js';
 import NotificationModal from '@/components/NotificationModal.vue';
-// import { DataBridgeService } from '../util/dataBridge.js';
+import { networkState } from "../state/networkState"
+import { walletState } from "../state/walletState"
+import { NetworkStateUtils } from "../state/utils/networkStateUtils"
+import { ChainAPICall } from '@/models/REST/chainAPICall';
+import { WalletUtils } from '@/util/walletUtils';
 
 export default {
   name: 'ViewNodes',
@@ -74,10 +78,7 @@ export default {
 
   setup() {
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
-    const chainNetwork = inject("chainNetwork");
+    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
     const showSelectTitle = ref(false);
     // const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
     const borderColor = ref('border border-gray-300');
@@ -87,25 +88,29 @@ export default {
     const selected = ref('');
     const toggleNotification = ref(false);
 
+    interface nodeListInterface{
+      value: string,
+      name: string
+    }
+
     const options = computed(() => {
-      let nodeList = [];
-      chainNetwork.getChainNodes().forEach((node) => {
-        nodeList.push({ value: node, name: siriusStore._buildAPIEndpointURL(node) });
+      let nodeList: nodeListInterface[] = [];
+      networkState.currentNetworkProfile?.apiNodes.forEach((node) => {
+        nodeList.push({ value: node, name: NetworkStateUtils.buildAPIEndpointURL(node) });
       });
       return nodeList;
     });
 
-    const currentNode = computed(() => siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
-    const blockHeight = computed(() => siriusStore.state.blockHeight);
+    const currentNode = computed(() => NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
+    const blockHeight = computed(() => networkState.blockHeight);
 
     const makeNodeSelection = (e) => {
-      if(e != siriusStore.state.selectedChainNode){
+      if(e != networkState.selectedAPIEndpoint){
         showSelectTitle.value = true;
-        chainNetwork.updateChainNode(e);
+        NetworkStateUtils.updateChainNode(e);
         stopListening();
-        const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
-        startListening(walletSession.accounts);
-        appStore.getXPXBalance(walletSession.name, siriusStore);
+        startListening(walletState.currentLoggedInWallet?.accounts);
+        WalletUtils.getTotalBalanceWithCurrentNetwork();
         toggleNotification.value = true;
       }
     };
@@ -128,8 +133,6 @@ export default {
     // dataBridgeInstance.connectBlockSocket();
 
     return {
-      appStore,
-      // wallet,
       selected,
       showSelectTitle,
       borderColor,

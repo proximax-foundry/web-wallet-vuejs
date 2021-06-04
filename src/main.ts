@@ -1,0 +1,139 @@
+import "./main.scss";
+import { createApp } from 'vue';
+import App from './App.vue';
+import router from './router';
+import 'animate.css';
+import { VuePassword } from 'vue-password';
+import mitt from 'mitt';
+import PrimeVue from 'primevue/config';
+import "primeicons/primeicons.css";
+// import "primevue/resources/primevue.min.css";
+// import "primevue/resources/themes/saga-blue/theme.css";
+import ConfirmationService from 'primevue/confirmationservice';
+import ToastService from 'primevue/toastservice';
+import { walletState } from './state/walletState';
+import { WalletStateUtils } from './state/utils/walletStateUtils';
+import { NetworkStateUtils } from './state/utils/networkStateUtils';
+import { ChainUtils } from './util/chainUtils';
+import { ChainProfile, ChainProfileConfig, ChainProfileNames } from "./models/stores/"
+
+// Import Font Awesome Icons
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload, faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import ConfirmDialog from 'primevue/confirmdialog';
+import Toast from 'primevue/toast';
+
+library.add(faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload, faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore );
+const app = createApp(App);
+const emitter = mitt();
+
+app.config.globalProperties.emitter = emitter;
+app.use(router).mount('#app');
+app.use(PrimeVue);
+app.use(ConfirmationService);
+app.use(ToastService);
+
+// Use Components
+app.component('ConfirmDialog', ConfirmDialog);
+app.component('Toast', Toast);
+app.component('font-awesome-icon', FontAwesomeIcon);
+app.component(VuePassword);
+
+const chainProfileIntegration = async () => {
+  try {
+    const networksInfo = await fetch('./chainProfile.json', {
+      headers: {
+        'Cache-Control': 'no-store',
+        'Pragma' : 'no-cache'
+      }
+    }).then((res) => res.json()).then((networksInfo) => { return networksInfo });
+
+    const chainProfilesData = networksInfo;
+    const chainProfileNames = Object.keys(networksInfo);
+
+    const chainProfileNamesStore = ChainProfileNames.createDefault();
+
+    let namesUpdate = 0;
+
+    switch (chainProfileNames.length) {
+      case 2:
+        namesUpdate = chainProfileNamesStore.replaceFirst2Names(chainProfileNames);
+        break;
+      case 3:
+        namesUpdate = chainProfileNamesStore.replaceFirst3Names(chainProfileNames);
+        break;
+      default:
+        break;
+    }
+    chainProfileNamesStore.saveToLocalStorage();
+
+    for(const chainProfileName of chainProfileNames){
+      const chainProfileStore = new ChainProfile(chainProfileName);
+
+      chainProfileStore.init();
+      const chainProfileData = chainProfilesData[chainProfileName];
+
+      if(chainProfileStore.getVersion() !== chainProfileData['version']){
+
+        chainProfileStore.version = chainProfileData['version'];
+        chainProfileStore.apiNodes = chainProfileData['apiNodes'];
+        chainProfileStore.chainExplorer = chainProfileData['chainExplorer'];
+        chainProfileStore.generationHash = chainProfileData['generationHash'];
+        chainProfileStore.httpPort = chainProfileData['httpPort'];
+        chainProfileStore.network = chainProfileData['network'];
+
+        chainProfileStore.saveToLocalStorage();
+
+        const endpoint = ChainUtils.buildAPIEndpoint(chainProfileStore.apiNodes[0], chainProfileStore.httpPort);
+
+        const chainConfigHttp = ChainUtils.buildChainConfigHttp(endpoint);
+        const chainHttp = ChainUtils.buildChainHttp(endpoint);
+
+        try {
+          const chainHeight = await ChainUtils.getChainHeight(chainHttp)
+
+          const config = await ChainUtils.getChainConfig(chainHeight, chainConfigHttp)
+
+          const chainProfileConfigStore = new ChainProfileConfig(chainProfileName);
+
+          chainProfileConfigStore.init()
+  
+          if(typeof config !== "string"){
+            config.chainHeight = chainHeight;
+            chainProfileConfigStore.updateConfig(config);
+            chainProfileConfigStore.saveToLocalStorage();
+          }
+          else{
+            console.error(config);
+          }
+          
+        } catch (error) {
+          
+        }
+        
+       
+      }
+    }
+
+    if(namesUpdate){
+      NetworkStateUtils.refreshAvailableNetwork();
+    }
+
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+chainProfileIntegration();
+
+// check from session when page refreshed
+if (!walletState.currentLoggedInWallet) {
+  // check sessionStorage
+  if(!WalletStateUtils.checkFromSession()){
+    router.push({ name: "Welcome"});
+  }
+}
+
+NetworkStateUtils.checkDefaultNetwork();
+

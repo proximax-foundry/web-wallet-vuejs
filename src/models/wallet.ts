@@ -1,11 +1,13 @@
 import { WalletAccount } from './walletAccount';
 import { AddressBook } from './addressBook';
+import { OtherAccount } from './otherAccount';
 
 export class Wallet{
 
     name: string;
     networkName: string;
     accounts: WalletAccount[];
+    others: OtherAccount[] = [];
     contacts: AddressBook[] = [];
 
     constructor(name: string, networkName: string, accounts: WalletAccount[]){
@@ -22,10 +24,6 @@ export class Wallet{
         const index = this.accounts.findIndex((account)=> account.name == accountName);
 
         this.accounts.splice(index, 1);
-    }
-
-    getMandatoryAccount(){
-        return this.accounts.find((walletAccount)=> !walletAccount.isPopulated)
     }
 
     convertAddressToName(address: string){

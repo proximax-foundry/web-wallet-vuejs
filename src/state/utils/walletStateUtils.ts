@@ -21,4 +21,18 @@ export class WalletStateUtils{
     if(walletState.wallets.isWalletOutdated())
       walletState.wallets = new Wallets();
   }
+
+  static checkFromSession(){
+
+    var wallet = SessionService.getJSONParse(sessionWalletKey);
+
+    if(wallet){
+      walletState.currentLoggedInWallet = wallet;
+      walletState.isLogin = true;
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
 }

@@ -8,14 +8,14 @@ export class Asset{
     expirationBlock: number | null = null;
     supplyMutable: boolean;
     transferable: boolean;
-    owner: string;
+    owner: string | null;
     namespaceId: string[] = []; 
 
-    constructor(idHex: string, owner: string, divisibility: number, supplyMutable: boolean, transferable: boolean){
+    constructor(idHex: string, divisibility: number, supplyMutable: boolean, transferable: boolean, owner?: string){
         
         this.idHex = idHex;
         this.divisibility = divisibility;
-        this.owner = owner;
+        this.owner = owner ? owner: null;
         this.supplyMutable = supplyMutable;
         this.transferable = transferable;
     }

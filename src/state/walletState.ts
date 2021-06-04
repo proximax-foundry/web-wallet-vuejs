@@ -1,10 +1,10 @@
 import { reactive } from "vue";
 import { Wallets } from "../models/wallets"
-import { WalletAccount } from "../models/walletAccount"
+import { Wallet } from "../models/wallet"
 
 interface walletStateInterface {
     wallets: Wallets
-    currentLoggedInWallet: WalletAccount | null
+    currentLoggedInWallet: Wallet | null
     isLogin: boolean
 }
 

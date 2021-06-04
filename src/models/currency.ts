@@ -2,7 +2,7 @@ export class Currency{
 
     name: string;
     namespace: string;
-    assetId: string;
+    assetId: string | null = null;
     namespaceId: string;
     divisibility: number;
 
@@ -10,7 +10,7 @@ export class Currency{
         this.name = name;
         this.namespace = namespace;
         this.namespaceId = assetId;
-        this.namespaceId =namespaceId;
+        this.namespaceId = namespaceId;
         this.divisibility = divisibility;
     }
 

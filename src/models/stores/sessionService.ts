@@ -20,11 +20,19 @@ export class SessionService{
         }
     }
 
+    static getNumber(key: string){
+        return Number(sessionStorage.getItem(key));
+    }
+
     static setRaw(key: string, value: string){
         sessionStorage.setItem(key, value);
     }
 
     static setObject(key: string, value: object){
         sessionStorage.setItem(key, JSON.stringify(value));
+    }
+
+    static setNumber(key: string, value:number){
+        sessionStorage.setItem(key, value.toString());
     }
 }

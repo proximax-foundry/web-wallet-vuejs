@@ -8,6 +8,7 @@ interface networkStateInterface {
     currentNetworkProfileConfig: ChainProfileConfig | null
     selectedAPIEndpoint: string
     availableNetworks: string[]
+    blockHeight?: number
 }
 
 export const networkState = reactive<networkStateInterface>({
@@ -17,4 +18,5 @@ export const networkState = reactive<networkStateInterface>({
     currentNetworkProfileConfig: null,
     selectedAPIEndpoint: "",
     availableNetworks: ChainProfileNames.createDefault().names,
+    blockHeight: 0
 });

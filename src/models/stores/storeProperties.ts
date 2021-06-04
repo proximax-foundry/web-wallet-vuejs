@@ -22,8 +22,19 @@ export class StoreProperties{
     }
 
     saveToLocalStorage(){
-        const stateCopy = Object.assign({}, this);
-        delete stateCopy.storeName;
-        localStorage.setItem(this.storeName, JSON.stringify(stateCopy));
+        let data = StateCopy.removeStateNameStringify(JSON.stringify(this));
+
+        localStorage.setItem(this.storeName, data);
+    }
+}
+
+class StateCopy{
+
+    static removeStateNameStringify(json: string){
+
+        let storeCopy = JSON.parse(json);
+
+        delete storeCopy.storeName;
+        return JSON.stringify(storeCopy);
     }
 }

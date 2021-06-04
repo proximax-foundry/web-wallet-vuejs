@@ -21,15 +21,14 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { computed, provide, getCurrentInstance } from "vue";
-import { appStore } from "@/store/app";
-import { siriusStore, chainNetwork } from "@/store/sirius";
+import { walletState } from "./state/walletState";
 import headerComponent from '@/components/headerComponent.vue'
 // import PageComponent from '@/components/PageComponent.vue'
 import NavigationMenu from '@/components/NavigationMenu.vue'
 
-export default {
+export default{
   name: 'App',
   components: {
     headerComponent,
@@ -38,18 +37,13 @@ export default {
   },
   setup() {
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
-
-    provide("appStore", appStore);
-    provide("siriusStore", siriusStore);
-    provide("chainNetwork", chainNetwork);
-    chainNetwork.updateAvailableNetworks();
+    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
 
     const clickEvent = () => {
       emitter.emit("PAGE_CLICK");
     };
 
-    const login = computed(() => appStore.state.isLogin);
+    const login = computed(() =>walletState.isLogin);
 
     return{
       clickEvent, login,

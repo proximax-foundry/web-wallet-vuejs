@@ -39,7 +39,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { ref, getCurrentInstance } from 'vue';
 import SignInSiriusIDModal from '@/components/SignInSiriusIDModal.vue'
 import SignInModal from '@/components/SignInModal.vue'
@@ -55,7 +55,7 @@ export default {
 
   setup(p){
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const emitter = internalInstance ? internalInstance.appContext.config.globalProperties.emitter: null;
     const toggleModal = ref(false);
     const msg = ref(p.modalMsg);
 
