@@ -15,6 +15,7 @@ import { walletState } from './state/walletState';
 import { WalletStateUtils } from './state/utils/walletStateUtils';
 import { NetworkStateUtils } from './state/utils/networkStateUtils';
 import { ChainUtils } from './util/chainUtils';
+import { ChainAPICall } from './models/REST/chainAPICall';
 import { ChainProfile, ChainProfileConfig, ChainProfileNames } from "./models/stores/"
 
 // Import Font Awesome Icons
@@ -87,13 +88,12 @@ const chainProfileIntegration = async () => {
 
         const endpoint = ChainUtils.buildAPIEndpoint(chainProfileStore.apiNodes[0], chainProfileStore.httpPort);
 
-        const chainConfigHttp = ChainUtils.buildChainConfigHttp(endpoint);
-        const chainHttp = ChainUtils.buildChainHttp(endpoint);
+        let chainAPICall = new ChainAPICall(endpoint);
 
         try {
-          const chainHeight = await ChainUtils.getChainHeight(chainHttp)
+          const chainHeight = await chainAPICall.chainAPI.getBlockchainHeight();
 
-          const config = await ChainUtils.getChainConfig(chainHeight, chainConfigHttp)
+          const config = await ChainUtils.getChainConfig(chainHeight, chainAPICall.chainConfigAPI.chainConfigHttp)
 
           const chainProfileConfigStore = new ChainProfileConfig(chainProfileName);
 
