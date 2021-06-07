@@ -6,6 +6,7 @@ import { Listener, Address,
 import { Subscription } from "rxjs"
 import { ListenerType } from "./const/listenerType"
 import { ListenerStateUtils } from "../state/utils/listenerStateUtils";
+import { watch } from "vue";
 
 export class Connector{
     
@@ -13,15 +14,17 @@ export class Connector{
     listener: Listener;
     subscriptions: ListenerAddressSubscription[] = [];
     watcher: any;
+    isRequestConnect: boolean = false;
 
     constructor(endpoint: string, addresses: string[]){
-        this.listener = new Listener(endpoint);
+        this.listener = new Listener(endpoint, WebSocket);
         this.addresses = addresses;
     }
 
     startListen(){
+        this.isRequestConnect = true;
         this.listener.open().then(()=>{
-
+            this.startWatcher();
             this.listener.newBlock().subscribe(ListenerHandler.handleNewBlock);
 
             this.addresses.forEach(rawAddress => {
@@ -55,6 +58,8 @@ export class Connector{
     }
 
     terminate(){
+        this.isRequestConnect = false;
+        this.stopWatcher();
         this.subscriptions.forEach((listenerSubscription)=>{
             listenerSubscription.subscription.unsubscribe();
         });
@@ -69,6 +74,26 @@ export class Connector{
     reconnect(){
         this.terminate();
         this.startListen();
+    }
+
+    startWatcher(){
+        let watcher = watch(
+            () => this.listener.isOpen(),
+            (newValue) => {
+                if(!newValue && this.isRequestConnect){
+                    this.reconnect();
+                }
+            }
+          );
+
+        this.watcher = watcher;
+    }
+
+    stopWatcher(){
+        if(this.watcher)
+            this.watcher();
+
+        this.watcher = undefined;
     }
 }
 
