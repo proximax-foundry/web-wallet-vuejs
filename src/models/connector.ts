@@ -28,9 +28,9 @@ export class Connector{
             this.listener.newBlock().subscribe(ListenerHandler.handleNewBlock);
 
             this.addresses.forEach(rawAddress => {
-                let address = Address.createFromRawAddress(rawAddress);
+                const address = Address.createFromRawAddress(rawAddress);
 
-                let listenerHandler = new ListenerHandler(address);
+                const listenerHandler = new ListenerHandler(address);
 
                 const confirmSubscription = this.listener.confirmed(address).subscribe(listenerHandler.handleConfirmTx.bind(listenerHandler))
                 const unconfirmAddedSubscription = this.listener.unconfirmedAdded(address).subscribe(listenerHandler.handleUnconfirmedTxAdded.bind(listenerHandler))
@@ -77,7 +77,7 @@ export class Connector{
     }
 
     startWatcher(){
-        let watcher = watch(
+        const watcher = watch(
             () => this.listener.isOpen(),
             (newValue) => {
                 if(!newValue && this.isRequestConnect){

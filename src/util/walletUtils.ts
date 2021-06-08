@@ -6,13 +6,72 @@ import { Wallet } from "../models/wallet"
 import { ChainProfile } from "../models/stores/chainProfile"
 import { Asset } from "../models/asset";
 import { ChainAPICall } from "../models/REST/chainAPICall"
+import { SecretKeyPair } from "../models/interface/secretKeyPair"
 import {
     SimpleWallet, Password, RawAddress, Convert, Crypto,
     WalletAlgorithm, PublicAccount, Account, NetworkType, 
-    AggregateTransaction, CosignatureTransaction, MosaicNonce
+    AggregateTransaction, CosignatureTransaction, MosaicNonce,
 } from "tsjs-xpx-chain-sdk"
+import { computed } from "vue";
+
+const config = require("@/../config/config.json");
+
+const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
 
 export class WalletUtils {
+
+    static verifyWalletPassword(name: string, networkName: string, password: string){
+        const wallet = walletState.wallets.filterByNetworkNameAndName(networkName, name);
+        if (!wallet) {
+            if (config.debug) {
+                console.error(
+                    "wallet not found",
+                    name, networkName
+                );
+            }
+            return false;
+        }
+
+        if (config.debug) {
+            console.log("verifyWalletPassword triggered with", name, networkName);
+        }
+
+        const account = wallet.accounts.find((element) => element.default == true);
+
+        const common: SecretKeyPair = {
+            password: password,
+            privateKey: ""
+        };
+
+        if(account){
+            if (
+                !Crypto.passwordToPrivateKey(
+                common,
+                account,
+                account.algo == "pass:bip32" ? WalletAlgorithm.Pass_bip32 : account.algo
+                )
+            ) {
+                console.log('fail');
+                return false;
+            }
+            else{
+                if (!ChainUtils.isPrivateKeyValid(common.privateKey)) {
+                    return false;
+                }
+                else{
+                    const checkingAddress = Account.createFromPrivateKey(common.privateKey, localNetworkType.value).address.plain();
+                    
+                    if(checkingAddress !== account.address){
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        return false;
+        
+    }
 
     static async getTotalBalanceWithCurrentNetwork(): Promise<Wallet> {
 
@@ -29,17 +88,17 @@ export class WalletUtils {
             return wallet;
         }
 
-        let chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
 
         const nativeTokenNamespace = new NamespaceId(namespace);
         let amount = 0;
         return new Promise(async (resolve) => {
-            let accountsInfo = await WalletUtils.fetchAccountInfoCurrentWalletAccounts();
+            const accountsInfo = await WalletUtils.fetchAccountInfoCurrentWalletAccounts();
 
-            let nativeNetworkMosaicId = await chainAPICall.namespaceAPI.getLinkedMosaicId(nativeTokenNamespace);
+            const nativeNetworkMosaicId = await chainAPICall.namespaceAPI.getLinkedMosaicId(nativeTokenNamespace);
 
             if (accountsInfo) {
-                let accInfo: AccountInfo[] = accountsInfo as AccountInfo[];
+                const accInfo: AccountInfo[] = accountsInfo as AccountInfo[];
 
                 wallet.accounts.forEach((account) => {
                     account.assets = [];
@@ -51,7 +110,7 @@ export class WalletUtils {
                         for (const mosaic of address.mosaics) {
                             if (mosaic.id.toHex() === nativeNetworkMosaicId.toHex()) {
                                 amount = mosaic.amount.compact() / Math.pow(10, currentNetworkProfile.network.currency.divisibility);
-                                let newAsset = new Asset(mosaic.id.toHex(), currentNetworkProfile.network.currency.divisibility, false, true);
+                                const newAsset = new Asset(mosaic.id.toHex(), currentNetworkProfile.network.currency.divisibility, false, true);
                                 newAsset.amount = amount;
                                 account.assets.push(newAsset);
                                 account.updateBalance(nativeNetworkMosaicId.toHex());
@@ -63,7 +122,7 @@ export class WalletUtils {
 
                         chainAPICall.assetAPI.getMosaics(mosaicList).then((mosaicInfo) => {
                             mosaicInfo.forEach((asset) => {
-                                let newAsset = new Asset(asset.mosaicId.toHex(), asset.divisibility, asset.isSupplyMutable(), asset.isTransferable(), asset.owner.publicKey);
+                                const newAsset = new Asset(asset.mosaicId.toHex(), asset.divisibility, asset.isSupplyMutable(), asset.isTransferable(), asset.owner.publicKey);
                                 newAsset.supply = asset.supply.compact();
                                 newAsset.amount = mosaicAmount[newAsset.idHex] / Math.pow(10, asset.divisibility)
                                 newAsset.duration = asset.duration ? asset.duration.compact() : null;
@@ -85,14 +144,14 @@ export class WalletUtils {
 
     static fetchAccountInfoCurrentWalletAccounts(): false | Promise<AccountInfo[]> {
 
-        let wallet = walletState.currentLoggedInWallet;
-        let networkTypeId = networkState.currentNetworkProfile?.network.type;
+        const wallet = walletState.currentLoggedInWallet;
+        const networkTypeId = networkState.currentNetworkProfile?.network.type;
 
         if (!wallet || !networkTypeId) {
             return false;
         }
 
-        let networkType = ChainUtils.getNetworkType(networkTypeId);
+        const networkType = ChainUtils.getNetworkType(networkTypeId);
         const addresses: Address[] = [];
         wallet.accounts.forEach((element) => {
             addresses.push(Address.createFromPublicKey(element.publicKey, networkType));
@@ -107,7 +166,7 @@ export class WalletUtils {
             return false;
         }
 
-        let chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, currentNetworkProfile.httpPort));
+        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, currentNetworkProfile.httpPort));
 
         return new Promise((resolve, reject) => {
             try {

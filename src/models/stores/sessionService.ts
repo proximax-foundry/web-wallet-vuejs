@@ -7,7 +7,7 @@ export class SessionService{
     static getJSONParse(key: string): any{
 
         try {
-            var value = sessionStorage.getItem(key);
+            const value = sessionStorage.getItem(key);
 
             if(value){
                 return JSON.parse(value)

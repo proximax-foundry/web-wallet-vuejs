@@ -22,7 +22,7 @@ export class StoreProperties{
     }
 
     saveToLocalStorage(){
-        let data = StateCopy.removeStateNameStringify(JSON.stringify(this));
+        const data = StateCopy.removeStateNameStringify(JSON.stringify(this));
 
         localStorage.setItem(this.storeName, data);
     }
@@ -32,7 +32,7 @@ class StateCopy{
 
     static removeStateNameStringify(json: string){
 
-        let storeCopy = JSON.parse(json);
+        const storeCopy = JSON.parse(json);
 
         delete storeCopy.storeName;
         return JSON.stringify(storeCopy);

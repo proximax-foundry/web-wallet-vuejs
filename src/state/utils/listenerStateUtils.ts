@@ -16,10 +16,10 @@ export class ListenerStateUtils{
         let addressConfirmedTransactions = listenerState.confirmedTransactions.find((x)=> x.address === address.plain());
 
         if(addressConfirmedTransactions){
-            let existingTx = addressConfirmedTransactions.confirmedTransactions.find((tx=> tx.transactionInfo?.hash === transaction.transactionInfo?.hash))
+            const existingTx = addressConfirmedTransactions.confirmedTransactions.find((tx=> tx.transactionInfo?.hash === transaction.transactionInfo?.hash))
 
             if(!existingTx){
-                let index = listenerState.confirmedTransactions.findIndex((x)=> x.address === address.plain());
+                const index = listenerState.confirmedTransactions.findIndex((x)=> x.address === address.plain());
                 addressConfirmedTransactions.confirmedTransactions.push(transaction);
                 listenerState.confirmedTransactions[index] = addressConfirmedTransactions;
             }
@@ -35,10 +35,10 @@ export class ListenerStateUtils{
         let addressUnconfirmedTransactions = listenerState.unconfirmedTransactions.find((x)=> x.address === address.plain());
 
         if(addressUnconfirmedTransactions){
-            let existingTx = addressUnconfirmedTransactions.unconfirmedTransactions.find((tx=> tx.transactionInfo?.hash === transaction.transactionInfo?.hash))
+            const existingTx = addressUnconfirmedTransactions.unconfirmedTransactions.find((tx=> tx.transactionInfo?.hash === transaction.transactionInfo?.hash))
 
             if(!existingTx){
-                let index = listenerState.unconfirmedTransactions.findIndex((x)=> x.address === address.plain());
+                const index = listenerState.unconfirmedTransactions.findIndex((x)=> x.address === address.plain());
                 addressUnconfirmedTransactions.unconfirmedTransactions.push(transaction);
                 listenerState.unconfirmedTransactions[index] = addressUnconfirmedTransactions;
             }
@@ -51,14 +51,14 @@ export class ListenerStateUtils{
 
     static removeUnconfirmedTransactions(transactionHash: string, address: Address){
 
-        let addressUnconfirmedTransactions = listenerState.unconfirmedTransactions.find((x)=> x.address === address.plain());
+        const addressUnconfirmedTransactions = listenerState.unconfirmedTransactions.find((x)=> x.address === address.plain());
 
         if(addressUnconfirmedTransactions){
-            let existingTxIndex = addressUnconfirmedTransactions.unconfirmedTransactions.findIndex((tx=> tx.transactionInfo?.hash === transactionHash))
+            const existingTxIndex = addressUnconfirmedTransactions.unconfirmedTransactions.findIndex((tx=> tx.transactionInfo?.hash === transactionHash))
 
             if(existingTxIndex >= 0){
                 addressUnconfirmedTransactions.unconfirmedTransactions.splice(existingTxIndex, 1);
-                let index = listenerState.unconfirmedTransactions.findIndex((x)=> x.address === address.plain());
+                const index = listenerState.unconfirmedTransactions.findIndex((x)=> x.address === address.plain());
                 listenerState.unconfirmedTransactions[index] = addressUnconfirmedTransactions;
             }
         }
@@ -69,10 +69,10 @@ export class ListenerStateUtils{
         let addressTransactionStatuses = listenerState.transactionStatus.find((x)=> x.address === address.plain());
 
         if(addressTransactionStatuses){
-            let existingStatus = addressTransactionStatuses.transactionStatus.find((tx=> tx.hash === transactionStatusError.hash))
+            const existingStatus = addressTransactionStatuses.transactionStatus.find((tx=> tx.hash === transactionStatusError.hash))
 
             if(!existingStatus){
-                let index = listenerState.transactionStatus.findIndex((x)=> x.address === address.plain());
+                const index = listenerState.transactionStatus.findIndex((x)=> x.address === address.plain());
                 addressTransactionStatuses.transactionStatus.push(transactionStatusError);
                 listenerState.transactionStatus[index] = addressTransactionStatuses;
             }
@@ -88,10 +88,10 @@ export class ListenerStateUtils{
         let addressAggregateTransaction = listenerState.aggregateBondedTransaction.find((x)=> x.address === address.plain());
 
         if(addressAggregateTransaction){
-            let existingTransaction = addressAggregateTransaction.aggregateBonded.find((tx=> tx.transactionInfo?.hash === transaction.transactionInfo?.hash))
+            const existingTransaction = addressAggregateTransaction.aggregateBonded.find((tx=> tx.transactionInfo?.hash === transaction.transactionInfo?.hash))
 
             if(!existingTransaction){
-                let index = listenerState.transactionStatus.findIndex((x)=> x.address === address.plain());
+                const index = listenerState.transactionStatus.findIndex((x)=> x.address === address.plain());
                 addressAggregateTransaction.aggregateBonded.push(transaction);
                 listenerState.aggregateBondedTransaction[index] = addressAggregateTransaction;
             }
@@ -104,14 +104,14 @@ export class ListenerStateUtils{
 
     static removeAggregateBonded(transactionHash: string, address: Address){
 
-        let addressAggregateBondedTransaction = listenerState.aggregateBondedTransaction.find((x)=> x.address === address.plain());
+        const addressAggregateBondedTransaction = listenerState.aggregateBondedTransaction.find((x)=> x.address === address.plain());
 
         if(addressAggregateBondedTransaction){
-            let existingTxIndex = addressAggregateBondedTransaction.aggregateBonded.findIndex((tx=> tx.transactionInfo?.hash === transactionHash))
+            const existingTxIndex = addressAggregateBondedTransaction.aggregateBonded.findIndex((tx=> tx.transactionInfo?.hash === transactionHash))
 
             if(existingTxIndex >= 0){
                 addressAggregateBondedTransaction.aggregateBonded.splice(existingTxIndex, 1);
-                let index = listenerState.aggregateBondedTransaction.findIndex((x)=> x.address === address.plain());
+                const index = listenerState.aggregateBondedTransaction.findIndex((x)=> x.address === address.plain());
                 listenerState.aggregateBondedTransaction[index] = addressAggregateBondedTransaction;
             }
         }
@@ -122,12 +122,12 @@ export class ListenerStateUtils{
         let addressCosignatureAdded = listenerState.cosignatureAdded.find((x)=> x.address === address.plain());
 
         if(addressCosignatureAdded){
-            let existingTransaction = addressCosignatureAdded.cosignatureAdded.find(
+            const existingTransaction = addressCosignatureAdded.cosignatureAdded.find(
                 (tx=> tx.parentHash === cosignatureSignedTransaction.parentHash && tx.signer === cosignatureSignedTransaction.signer)
                 );
 
             if(!existingTransaction){
-                let index = listenerState.cosignatureAdded.findIndex((x)=> x.address === address.plain());
+                const index = listenerState.cosignatureAdded.findIndex((x)=> x.address === address.plain());
                 addressCosignatureAdded.cosignatureAdded.push(cosignatureSignedTransaction);
                 listenerState.cosignatureAdded[index] = addressCosignatureAdded;
             }
@@ -140,10 +140,10 @@ export class ListenerStateUtils{
 
     static removeCosignatureSignedTransactionByHash(transactionHash: string){
 
-        let finalAddressCosignatures: AddressCosignatureSignedTransactions[] = [];
+        const finalAddressCosignatures: AddressCosignatureSignedTransactions[] = [];
 
         listenerState.cosignatureAdded.forEach((addressCosignature)=>{
-            let filteredCosignature = addressCosignature.cosignatureAdded.filter((x)=> x.parentHash !== transactionHash );
+            const filteredCosignature = addressCosignature.cosignatureAdded.filter((x)=> x.parentHash !== transactionHash );
 
             addressCosignature.cosignatureAdded = filteredCosignature;
 

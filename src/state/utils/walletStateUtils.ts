@@ -24,7 +24,7 @@ export class WalletStateUtils{
 
   static checkFromSession(){
 
-    var wallet = SessionService.getJSONParse(sessionWalletKey);
+    const wallet = SessionService.getJSONParse(sessionWalletKey);
 
     if(wallet){
       walletState.currentLoggedInWallet = wallet;

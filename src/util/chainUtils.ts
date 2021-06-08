@@ -1,17 +1,23 @@
-import { ChainConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, 
+import { ChainConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, Convert,
   NetworkType } from "tsjs-xpx-chain-sdk";
 import { NetworkConfig } from "../models/stores/chainProfileConfig";
 
 export class ChainUtils{
 
-    static buildWSEndpoint(endpoint :string, port: number){
+    static buildWSEndpoint(endpoint :string, port: number | undefined){
 
-        return location.protocol=='https:' ? `wss://${endpoint}` : `ws://${endpoint}:${port}`;
+      if(!port)
+        port = 3000;
+
+      return location.protocol=='https:' ? `wss://${endpoint}` : `ws://${endpoint}:${port}`;
     }
 
-    static buildAPIEndpoint(endpoint :string, port: number){
+    static buildAPIEndpoint(endpoint :string, port: number | undefined){
 
-        return location.protocol=='https:' ? `https://${endpoint}` : `http://${endpoint}:${port}`;
+      if(!port)
+        port = 3000;
+
+      return location.protocol=='https:' ? `https://${endpoint}` : `http://${endpoint}:${port}`;
     }
 
     static async getChainConfig(chainHeight: number, chainConfigHttp: ChainConfigHttp): Promise<NetworkConfig | string>{
@@ -109,29 +115,35 @@ export class ChainUtils{
         return parseInt(amount.split("'").join(""));
     }
 
-    static getNetworkType(id: number){
-
-      let networkType: NetworkType;
+    static getNetworkType(id: number | undefined): NetworkType{
 
       switch (id) {
         case NetworkType.MAIN_NET:
-          networkType = NetworkType.MAIN_NET;
+          return NetworkType.MAIN_NET;
           break;
         case NetworkType.TEST_NET:
-          networkType = NetworkType.TEST_NET;
+          return NetworkType.TEST_NET;
           break;
         case NetworkType.PRIVATE:
-          networkType = NetworkType.PRIVATE;
+          return NetworkType.PRIVATE;
           break;
         case NetworkType.PRIVATE_TEST:
-          networkType = NetworkType.PRIVATE_TEST;
+          return NetworkType.PRIVATE_TEST;
           break;
 
         default:
-          throw new Error("Invalid network type ID");
+          return NetworkType.TEST_NET;
           break;
       }
+    }
 
-      return networkType;
+    static isPrivateKeyValid(privateKey) {
+      if (privateKey.length !== 64 && privateKey.length !== 66) {
+        return false;
+      } else if (!Convert.isHexString(privateKey)) {
+        return false;
+      } else {
+        return true;
+      }
     }
 }

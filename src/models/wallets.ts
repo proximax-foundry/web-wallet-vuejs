@@ -12,12 +12,12 @@ export class Wallets {
     }
 
     static fetchUpdateTime(){
-        var tempUpdateTime = localStorage.getItem(walletUpdateTimeKey);
+        const tempUpdateTime = localStorage.getItem(walletUpdateTimeKey);
         return tempUpdateTime ?  parseInt(tempUpdateTime) : 0;
     }
 
     fetchFromLocalStorage(){
-        var tempWallets = localStorage.getItem(walletKey);
+        const tempWallets = localStorage.getItem(walletKey);
 
         try {
             if(tempWallets){
@@ -30,7 +30,7 @@ export class Wallets {
             this.wallets = [];
         }
 
-        var tempUpdateTime = localStorage.getItem(walletUpdateTimeKey);
+        const tempUpdateTime = localStorage.getItem(walletUpdateTimeKey);
 
         this.updateTime = tempUpdateTime ?  parseInt(tempUpdateTime) : new Date().getTime();
     }

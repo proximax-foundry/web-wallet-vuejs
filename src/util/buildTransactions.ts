@@ -81,7 +81,7 @@ export class BuildTransaction {
     }
 
 
-    transfer(address: Address, message?: any, sendingMosaics?: Mosaic[]): TransferTransaction {
+    transfer(recipient: Address | NamespaceId, message?: any, sendingMosaics?: Mosaic[]): TransferTransaction {
         let mosaics: any = [];
 
         if (sendingMosaics) {
@@ -91,7 +91,7 @@ export class BuildTransaction {
 
         return this.transactionBuilderFactory.transfer()
             .deadline(Deadline.create())
-            .recipient(address)
+            .recipient(recipient)
             .mosaics(mosaics)
             .message(message)
             .build();
