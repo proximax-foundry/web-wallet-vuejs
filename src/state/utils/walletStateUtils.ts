@@ -1,6 +1,6 @@
 import { walletState } from "../walletState";
 import { Wallets } from "../../models/wallets"
-import { WalletAccount } from "../../models/walletAccount";
+import { Wallet } from "../../models/wallet";
 import { SessionService } from "../../models/stores/sessionService"
 
 const sessionWalletKey = "loggedInWallet";
@@ -11,7 +11,7 @@ export class WalletStateUtils{
     walletState.wallets = new Wallets();
   }
 
-  static updateLoggedIn(wallet: WalletAccount){
+  static updateLoggedIn(wallet: Wallet){
     walletState.currentLoggedInWallet = wallet;
     walletState.isLogin = true;
     SessionService.setObject(sessionWalletKey, wallet);
