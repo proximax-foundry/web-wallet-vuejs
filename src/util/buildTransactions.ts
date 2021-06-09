@@ -1,73 +1,59 @@
 import {
-    Password,
-    SimpleWallet,
-    MosaicInfo,
-    TransactionHttp,
-    ChainConfigHttp,
-    AccountHttp,
-    MosaicHttp,
-    NamespaceHttp,
-    MosaicService,
-    NamespaceService,
-    TransactionStatusError,
     SignedTransaction,
     NamespaceId,
-    QueryParams,
     NetworkType,
-    Account,
     PublicAccount,
-    TransferTransaction,
     Deadline,
     Mosaic,
     MosaicId,
     UInt64,
-    PlainMessage,
     Address,
-    Transaction,
+    TransferTransaction,
+    TransferTransactionBuilder,
     MosaicSupplyChangeTransaction,
+    MosaicSupplyChangeTransactionBuilder,
     RegisterNamespaceTransaction,
-    AccountInfo,
-    MosaicNonce,
+    RegisterRootNamespaceTransactionBuilder,
+    RegisterSubNamespaceTransactionBuilder,
     MosaicProperties,
-    TransactionStatus,
-    TransactionAnnounceResponse,
     MosaicSupplyType,
     AliasActionType,
-    ChainHttp,
-    NamespaceInfo,
-    MultisigAccountInfo,
     AggregateTransaction,
-    CosignatureTransaction,
-    BlockHttp,
-    BlockInfo,
-    MosaicAliasTransaction,
-    Convert,
-    RawAddress,
+    AggregateBondedTransactionBuilder,
+    AggregateCompleteTransactionBuilder,
     MosaicDefinitionTransaction,
+    MosaicDefinitionTransactionBuilder,
     TransactionBuilderFactory,
     FeeCalculationStrategy,
     InnerTransaction,
     HashLockTransaction,
+    HashLockTransactionBuilder,
     ModifyMultisigAccountTransaction,
-    MultisigCosignatoryModification,
+    ModifyMultisigAccountTransactionBuilder,
     AddressAliasTransaction,
+    AddressAliasTransactionBuilder,
     AccountLinkTransaction,
+    AccountLinkTransactionBuilder,
+    MultisigCosignatoryModification,
+    MosaicAliasTransaction,
+    MosaicAliasTransactionBuilder,
     LinkAction,
-    Crypto,
-    MultisigAccountGraphInfo,
-    WalletAlgorithm
+    Message,
 } from 'tsjs-xpx-chain-sdk';
 import { WalletUtils } from "./walletUtils";
+import { Helper } from "./helper";
 
-export class BuildTransaction {
+export class BuildTransactions {
 
     //environment.deadlineTransfer.deadline, environment.deadlineTransfer.chronoUnit
 
     transactionBuilderFactory: TransactionBuilderFactory;
 
-    constructor(feeStrategy: FeeCalculationStrategy, networkType: NetworkType, generationHash?: string) {
+    constructor(networkType: NetworkType, generationHash?: string, feeStrategy?: FeeCalculationStrategy) {
         this.transactionBuilderFactory = new TransactionBuilderFactory();
-        this.transactionBuilderFactory.feeCalculationStrategy = feeStrategy;
+        if(feeStrategy)
+            this.transactionBuilderFactory.feeCalculationStrategy = feeStrategy;
+        
         this.transactionBuilderFactory.networkType = networkType;
         this.transactionBuilderFactory.generationHash = generationHash ? generationHash: "";
     }
@@ -80,8 +66,7 @@ export class BuildTransaction {
         this.transactionBuilderFactory.generationHash = generationHash;
     }
 
-
-    transfer(recipient: Address | NamespaceId, message?: any, sendingMosaics?: Mosaic[]): TransferTransaction {
+    transfer(recipient: Address | NamespaceId, message: Message, sendingMosaics?: Mosaic[]): TransferTransaction {
         let mosaics: any = [];
 
         if (sendingMosaics) {
@@ -97,6 +82,11 @@ export class BuildTransaction {
             .build();
     }
 
+    transferBuilder(): TransferTransactionBuilder {
+
+        return this.transactionBuilderFactory.transfer();
+    }
+
     /**
      *
      * @param {NetworkType} network
@@ -107,7 +97,6 @@ export class BuildTransaction {
   
      */
     buildMosaicSupplyChange(
-        network: NetworkType,
         mosaicId: MosaicId,
         mosaicSupplyType: MosaicSupplyType,
         delta: UInt64
@@ -118,15 +107,18 @@ export class BuildTransaction {
             .mosaicId(mosaicId)
             .direction(mosaicSupplyType)
             .delta(delta)
-            .networkType(network)
             .build();
-
     }
 
-    mosaicDefinition(network: NetworkType, owner: PublicAccount, 
+    buildMosaicSupplyChangeBuilder(): MosaicSupplyChangeTransactionBuilder {
+
+        return this.transactionBuilderFactory.mosaicSupplyChange();
+    }
+
+    mosaicDefinition(owner: PublicAccount, 
         supplyMutable: boolean, transferable: boolean, 
-        divisibility: number, duration?: number): MosaicDefinitionTransaction {
-        const nonce = WalletUtils.createNonceRandom();
+        divisibility: number, duration?: UInt64): MosaicDefinitionTransaction {
+        const nonce = Helper.createNonceRandom();
 
         return this.transactionBuilderFactory.mosaicDefinition()
             .deadline(Deadline.create())
@@ -137,112 +129,152 @@ export class BuildTransaction {
                     supplyMutable: supplyMutable,
                     transferable: transferable,
                     divisibility: divisibility,
-                    duration: (duration) ? UInt64.fromUint(duration) : undefined
+                    duration: (duration) ? duration : undefined
                 })
             )
-            .networkType(network)
             .build();
     }
 
-    aggregateBonded(network: NetworkType, innerTxn: InnerTransaction[]): AggregateTransaction {
+    mosaicDefinitionBuilder(): MosaicDefinitionTransactionBuilder {
+
+        return this.transactionBuilderFactory.mosaicDefinition();
+    }
+
+    aggregateBonded(innerTxn: InnerTransaction[]): AggregateTransaction {
 
         return this.transactionBuilderFactory.aggregateBonded()
             .deadline(Deadline.create())
             .innerTransactions(innerTxn)
-            .networkType(network)
             .build();
     }
 
-    aggregateComplete(network: NetworkType, innerTxn: InnerTransaction[]): AggregateTransaction {
+    aggregateBondedBuilder(): AggregateBondedTransactionBuilder {
+
+        return this.transactionBuilderFactory.aggregateBonded();
+    }
+
+    aggregateComplete(innerTxn: InnerTransaction[]): AggregateTransaction {
 
         return this.transactionBuilderFactory.aggregateComplete()
             .deadline(Deadline.create())
             .innerTransactions(innerTxn)
-            .networkType(network)
             .build();
     }
 
-    hashLock(mosaic: Mosaic, duration: UInt64, signedTransaction: SignedTransaction, network: NetworkType): HashLockTransaction {
+    aggregateCompleteBuilder(): AggregateCompleteTransactionBuilder {
+
+        return this.transactionBuilderFactory.aggregateComplete();
+    }
+
+    hashLock(mosaic: Mosaic, duration: UInt64, signedTransaction: SignedTransaction): HashLockTransaction {
 
         return this.transactionBuilderFactory.hashLock()
             .deadline(Deadline.create())
             .duration(duration)
             .mosaic(mosaic)
             .signedTransaction(signedTransaction)
-            .networkType(network)
             .build();
     }
 
-    modifyMultisigAccount(minApprovalDelta: number, minRemovalDelta: number, modifications: MultisigCosignatoryModification[], network: NetworkType): ModifyMultisigAccountTransaction {
+    hashLockBuilder(): HashLockTransactionBuilder {
+
+        return this.transactionBuilderFactory.hashLock();
+    }
+
+    modifyMultisigAccount(minApprovalDelta: number, minRemovalDelta: number, modifications: MultisigCosignatoryModification[]): ModifyMultisigAccountTransaction {
 
         return this.transactionBuilderFactory.modifyMultisig()
             .deadline(Deadline.create())
             .minApprovalDelta(minApprovalDelta)
             .minRemovalDelta(minRemovalDelta)
             .modifications(modifications)
-            .networkType(network)
             .build();
     }
 
-    addressAlias(aliasActionType: AliasActionType, namespaceId: NamespaceId, address: Address, network: NetworkType): AddressAliasTransaction {
+    modifyMultisigAccountBuilder(): ModifyMultisigAccountTransactionBuilder {
+
+        return this.transactionBuilderFactory.modifyMultisig();
+    }
+
+    addressAlias(aliasActionType: AliasActionType, namespaceId: NamespaceId, address: Address): AddressAliasTransaction {
 
         return this.transactionBuilderFactory.addressAlias()
             .deadline(Deadline.create())
             .actionType(aliasActionType)
             .address(address)
             .namespaceId(namespaceId)
-            .networkType(network)
             .build();
     }
 
-    accountLink(network: NetworkType, remoteAccountKey: string, linkAction: LinkAction) {
+    addressAliasBuilder(): AddressAliasTransactionBuilder {
+
+        return this.transactionBuilderFactory.addressAlias();
+    }
+
+    accountLink(remoteAccountKey: string, linkAction: LinkAction): AccountLinkTransaction {
 
         return this.transactionBuilderFactory.accountLink()
             .deadline(Deadline.create())
             .linkAction(linkAction)
             .remoteAccountKey(remoteAccountKey)
-            .networkType(network)
             .build();
     }
 
-    assetAlias(aliasActionType: AliasActionType, namespaceId: NamespaceId, mosaicId: MosaicId, network: NetworkType) {
+    accountLinkBuilder(): AccountLinkTransactionBuilder {
+
+        return this.transactionBuilderFactory.accountLink();
+    }
+
+    assetAlias(aliasActionType: AliasActionType, namespaceId: NamespaceId, mosaicId: MosaicId): MosaicAliasTransaction {
         return this.transactionBuilderFactory.mosaicAlias()
             .deadline(Deadline.create())
             .actionType(aliasActionType)
             .namespaceId(namespaceId)
             .mosaicId(mosaicId)
-            .networkType(network)
             .build();
     }
 
-    mosaicSupplyChange(mosaicId: string, supply: number, mosaicSupplyType: number, network: NetworkType): MosaicSupplyChangeTransaction {
+    assetAliasBuilder(): MosaicAliasTransactionBuilder {
+        return this.transactionBuilderFactory.mosaicAlias();
+    }
+
+    mosaicSupplyChange(mosaicId: string, supply: number, mosaicSupplyType: number): MosaicSupplyChangeTransaction {
         return this.transactionBuilderFactory.mosaicSupplyChange()
             .deadline(Deadline.create())
             .mosaicId(new MosaicId(mosaicId))
             .direction(mosaicSupplyType)
             .delta(UInt64.fromUint(supply))
-            .networkType(network)
             .build();
     }
 
-    registerRootNamespace(name: string, network: NetworkType, duration: number = 100): RegisterNamespaceTransaction {
+    mosaicSupplyChangeBuilder(): MosaicSupplyChangeTransactionBuilder {
+        return this.transactionBuilderFactory.mosaicSupplyChange();
+    }
+
+    registerRootNamespace(name: string, duration: UInt64 = UInt64.fromUint(100)): RegisterNamespaceTransaction {
         return this.transactionBuilderFactory.registerRootNamespace()
             .deadline(Deadline.create())
             .namespaceName(name)
-            .duration(UInt64.fromUint(duration))
-            .networkType(network)
+            .duration(duration)
             .build();
-
     }
 
-    registersubNamespace(rootNamespace: string, subnamespaceName: string, network: NetworkType): RegisterNamespaceTransaction {
+    registerRootNamespaceBuilder(): RegisterRootNamespaceTransactionBuilder {
+        return this.transactionBuilderFactory.registerRootNamespace();
+    }
+
+    registersubNamespace(rootNamespace: string, subnamespaceName: string): RegisterNamespaceTransaction {
 
         return this.transactionBuilderFactory.registerSubNamespace()
             .deadline(Deadline.create())
             .namespaceName(subnamespaceName)
             .parentNamespace(rootNamespace)
-            .networkType(network)
             .build();
+    }
+
+    registersubNamespaceBuilder(): RegisterSubNamespaceTransactionBuilder {
+
+        return this.transactionBuilderFactory.registerSubNamespace();
     }
 
     getFeeStrategy(): FeeCalculationStrategy {

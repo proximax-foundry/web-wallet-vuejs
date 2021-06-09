@@ -3,6 +3,9 @@ import { networkState } from "../state/networkState"
 import { walletState } from "../state/walletState"
 import { ChainUtils } from "../util/chainUtils"
 import { Wallet } from "../models/wallet"
+import { Wallets } from "../models/wallets"
+import { WalletAccount } from "../models/walletAccount"
+import { nis1Account } from "../models/nis1Account"
 import { ChainProfile } from "../models/stores/chainProfile"
 import { Asset } from "../models/asset";
 import { ChainAPICall } from "../models/REST/chainAPICall"
@@ -13,6 +16,7 @@ import {
     AggregateTransaction, CosignatureTransaction, MosaicNonce,
 } from "tsjs-xpx-chain-sdk"
 import { computed } from "vue";
+import { Helper } from "./helper";
 
 const config = require("@/../config/config.json");
 
@@ -321,11 +325,6 @@ export class WalletUtils {
         return Address.createFromRawAddress(address);
     }
 
-    static createNonceRandom() {
-        const nonce = MosaicNonce.createRandom();
-        return nonce;
-    }
-
     getPublicAccountFromPrivateKey(privateKey: string, net: NetworkType): PublicAccount {
         return Account.createFromPrivateKey(privateKey, net).publicAccount;
     }
@@ -444,6 +443,109 @@ export class WalletUtils {
     static getWalletAlgorithm() {
         return WalletAlgorithm;
     }
+
+    static importWltOldFormat(base64Wlt: string, networkName: string, networkType: NetworkType){
+        let wltFile: oldWltFile = Helper.base64decode(base64Wlt);
+
+        let wallets = new Wallets();
+
+        if(!wallets.filterByNetworkNameAndName(networkName, wltFile.name)){
+            throw new Error("Wallet with same name already exist");
+        }
+
+        let walletAccounts: WalletAccount[] = [];
+
+        wltFile.accounts.forEach((account)=>{
+            let walletAccount = new WalletAccount(account.name, 
+                account.publicAccount.publicKey, account.publicAccount.address.address, account.algo, 
+                account.encrypted, account.iv);
+
+            if(account.nis1Account){
+                walletAccount.nis1Account = new nis1Account(account.nis1Account.address, account.nis1Account.publicKey);
+            }
+
+            walletAccount.default = account.default;
+            walletAccount.isBrain = account.brain;
+            walletAccount.fixAddress(networkType);
+            walletAccounts.push(walletAccount);
+        });
+
+        let newWallet = new Wallet(wltFile.name, networkName, walletAccounts);
+
+        wallets.wallets.push(newWallet);
+
+        wallets.savetoLocalStorage();
+    }
+
+    static importWalletNewFormat(base64Wlt: string, networkName: string, networkType: NetworkType){
+        let wltFile: Wallet = Helper.base64decode(base64Wlt);
+
+        let wallets = new Wallets();
+
+        if(!wallets.filterByNetworkNameAndName(networkName, wltFile.name)){
+            throw new Error("Wallet with same name already exist");
+        }
+
+        let walletAccounts: WalletAccount[] = [];
+
+        wltFile.accounts.forEach((account)=>{
+            let walletAccount = new WalletAccount(account.name, 
+                account.publicKey, account.address, account.algo, 
+                account.encrypted, account.iv);
+
+            if(account.nis1Account){
+                walletAccount.nis1Account = new nis1Account(account.nis1Account.address, account.nis1Account.publicKey);
+            }
+
+            walletAccount.default = account.default;
+            walletAccount.isBrain = account.isBrain;
+
+            walletAccount.fixAddress(networkType);
+
+            walletAccounts.push(walletAccount);
+        });
+
+        let newWallet = new Wallet(wltFile.name, networkName, walletAccounts);
+
+        wallets.wallets.push(newWallet);
+
+        wallets.savetoLocalStorage();
+    }
+
+    static export(wallet: Wallet){
+
+        let walletJSON = JSON.stringify(wallet);
+
+        return Helper.base64encode(walletJSON);
+    }
+}
+
+interface oldWltFile{
+    name: string,
+    accounts: oldAccountStructure[]
+}
+
+interface oldAccountStructure{
+    algo: string,
+    address: string,
+    brain: boolean,
+    default: boolean,
+    encrypted: string,
+    firstAccount: boolean,
+    iv: string,
+    name: string,
+    network?: 184,
+    publicAccount: {
+        publicKey: string,
+        address: {
+            address: string,
+            networkType?: number
+        }
+    },
+    nis1Account: {
+        address: string,
+        publicKey: string
+    } | null
 }
 
 interface commonInterface {

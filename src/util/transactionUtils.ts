@@ -1,377 +1,229 @@
-import { readonly } from "vue";
+import { readonly, computed } from "vue";
 import {
-    Account,
-    Address,
-    Deadline,
-    EncryptedMessage,
-    // NetworkCurrencyMosaic,
-    // FeeCalculationStrategy,
-    Mosaic,
-    MosaicId,
-    UInt64,
-    MosaicProperties,
-    MosaicSupplyType,
-    // MosaicService,
-    MosaicNonce,
-    PlainMessage,
-    TransferTransaction,
-    TransactionHttp,
-    TransactionBuilderFactory,
-    PublicAccount,
-    AccountHttp,
-    AccountInfo
+  Account,
+  Address,
+  Deadline,
+  EncryptedMessage,
+  // NetworkCurrencyMosaic,
+  // FeeCalculationStrategy,
+  Mosaic,
+  MosaicId,
+  UInt64,
+  MosaicProperties,
+  MosaicSupplyType,
+  // MosaicService,
+  MosaicNonce,
+  PlainMessage,
+  TransferTransaction,
+  TransactionHttp,
+  TransactionBuilderFactory,
+  PublicAccount,
+  AccountHttp,
+  AccountInfo,
+  FeeCalculationStrategy,
+  NetworkType,
+  Transaction,
+  TransactionType,
+  AggregateTransaction,
+  CosignatureTransaction
 } from "tsjs-xpx-chain-sdk";
-import * as FeeCalculationStrategy from 'tsjs-xpx-chain-sdk/dist/src/model/transaction/FeeCalculationStrategy';
-import { announceAggregateBonded, announceLockfundAndWaitForConfirmation } from '../util/listener.js';
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { walletState } from "../state/walletState";
 import { networkState } from "../state/networkState";
+import { ChainUtils } from "../util/chainUtils";
+import { WalletUtils } from "../util/walletUtils";
+import { ChainAPICall } from "../models/REST/chainAPICall";
+import { BuildTransactions } from "../util/buildTransactions";
+import { Helper } from "./helper";
 
 const divisibility = 6;
 const xpxMosaicId = "";
 const lockFundDuration = 10000;
 
-export class TransactionUtils{
+const networkAPIEndpoint = computed(() => ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
+const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
 
-    static async getAccInfo(address: Address, accountHttp: AccountHttp): AccountInfo | null{
-        // return await getPublicKey(recipientAddress, siriusStore.accountHttp);
-        let promise = new Promise<AccountInfo | null>((resolve) => {
-          const accountInfo = accountHttp.getAccountInfo(address);
-          accountInfo.subscribe(
-            (acc) => {
-              // console.log(acc);
-              resolve(acc);
-            },
-            (error) => {
-              console.warn('Err: ' + error);
-              resolve(null);
-            }
-          );
-        });
-        let publicKey = await promise;
-        // console.log(publicKey);
-        return publicKey;
-    }
-
-    static amountFormatterSimple(amount, d = 6) {
-        const amountDivisibility = Number(amount) / Math.pow(10, d);
-        return amountDivisibility.toLocaleString('en-us', {
-          minimumFractionDigits: d
-        });
-    }
-
-    static createTransaction = (recipient, sendXPX, messageText, mosaicsSent, mosaicDivisibility, walletPassword, senderAccName, cosigner = '', encryptedMsg) => {
-        // verify password
-        // console.log('Pw after createTransaction: ' + walletPassword);
-        let verify = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword);
-        if(verify < 1){
-          return verify;
-        }
-        const add = fetch(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode) + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
-      
-        return add.then(async(hash) => {
-          let networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
-          const recipientAddress = Address.createFromRawAddress(recipient);
-      
-          let xpxAmount = parseFloat(sendXPX) * Math.pow(10, 6);
-      
-          var mosaics = [];
-          if(xpxAmount > 0){
-            mosaics.push(new Mosaic(new MosaicId(xpxMosaicId), UInt64.fromUint(Number(xpxAmount))));
-          }
-          if(mosaicsSent.length > 0){
-            mosaicsSent.forEach((mosaicSentInfo, index) => {
-              if(mosaicSentInfo.amount>0){
-                mosaics.push(
-                  new Mosaic(
-                    new MosaicId(mosaicSentInfo.id),
-                    UInt64.fromUint(Number(mosaicSentInfo.amount * Math.pow(10, mosaicDivisibility[index])))
-                  )
-                );
-              }
-            });
-          }
-      
-          var transactionBuilder = new TransactionBuilderFactory();
-      
-          // calculate fee strategy
-          let networkName = siriusStore.getNetworkByType(networkType);
-          if(networkName === config.networkType.PRIVATE || networkName === config.networkType.PRIVATE_TEST){
-            transactionBuilder.feeCalculationStrategy = FeeCalculationStrategy.ZeroFeeCalculationStrategy;
-          }
-          else{
-            transactionBuilder.feeCalculationStrategy = FeeCalculationStrategy.MiddleFeeCalculationStrategy;
-          }
-      
-          // to get sender's private key
-          let accountDetails, multisigAccountDetails, multisigPublicAccount;
-          if(!cosigner){ // no cosigner, get private key from sender acc name
-            accountDetails = appStore.getAccDetails(senderAccName);
-          }else{
-            // a multisig, get cosigner's private key
-            accountDetails = appStore.getAccDetailsByAddress(cosigner);
-            // get multisig account info
-            multisigAccountDetails = appStore.getAccDetails(senderAccName);
-            multisigPublicAccount = PublicAccount.createFromPublicKey(multisigAccountDetails.publicAccount.publicKey, networkType);
-          }
-      
-          console.log('Getting acc details from: ' + accountDetails.address);
-          let privateKey = appStore.decryptPrivateKey(walletPassword, accountDetails.encrypted, accountDetails.iv);
-      
-          // sending encrypted message
-          let msg;
-          if(encryptedMsg){
-            let accountInfo = await getAccInfo(recipientAddress, siriusStore.accountHttp);
-            msg = EncryptedMessage.create(messageText, accountInfo, privateKey);
-          }else{
-            msg = PlainMessage.create(messageText);
-          }
-      
-          var transferTransaction = transactionBuilder.transfer()
-              .deadline(Deadline.create())
-              .mosaics(mosaics)
-              .message(msg)
-              .networkType(networkType)
-              .recipient(recipientAddress)
-              .build();
-      
-          const account = Account.createFromPrivateKey(privateKey, networkType);
-          const transactionHttp = new TransactionHttp(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
-      
-          if(!cosigner){ // no cosigner, normal transaction
-            const signedTransaction = account.sign(transferTransaction, hash);
-            transactionHttp
-              .announce(signedTransaction)
-              .subscribe(() => {
-                return true;
-              }, err => console.error(err));
-          }else{ // there is a cosigner, aggregate transaction
-            console.log('multisigPublicAccount');
-            console.log(multisigPublicAccount);
-            const innerTxn = [transferTransaction.toAggregate(multisigPublicAccount)];
-      
-            const aggregateBondedTransaction = transactionBuilder.aggregateBonded()
-              .deadline(Deadline.create())
-              .innerTransactions(innerTxn)
-              .networkType(networkType)
-              .build();
-            console.log('aggregateBondedTransaction');
-            console.log(aggregateBondedTransaction);
-            // if (otherCosigners.length > 0) {
-            //   return cosignatoryAccount.signTransactionWithCosignatories(bondedCreated, otherCosigners, generationHash);
-            // }
-            const aggregateBondedTransactionSigned = account.sign(aggregateBondedTransaction, hash);
-            console.log('aggregateBondedTransactionSigned');
-            console.log(aggregateBondedTransactionSigned);
-            const hashLockTransaction = transactionBuilder.hashLock()
-              .deadline(Deadline.create())
-              .duration(UInt64.fromUint(lockFundDuration))
-              .mosaic(new Mosaic(new MosaicId(xpxMosaicId), UInt64.fromUint(Number(10000000))))
-              .signedTransaction(aggregateBondedTransactionSigned)
-              .networkType(networkType)
-              .build();
-            const hashLockTransactionSigned = account.sign(hashLockTransaction, hash);
-      
-            (async ()=>{
-              try {
-                  const confirmedTx = await announceLockfundAndWaitForConfirmation(account.address, hashLockTransactionSigned, hashLockTransactionSigned.hash, transactionHttp);
-                  console.log('confirmedTx');
-                  console.log(confirmedTx);
-                  // eslint-disable-next-line no-unused-vars
-                  var aggregateTx = await announceAggregateBonded(account.address, aggregateBondedTransactionSigned, aggregateBondedTransactionSigned.hash, confirmedTx, transactionHttp )
-                  console.log('aggregateTx');
-                  console.log(aggregateTx);
-                  console.log("Done");
-              } catch (error) {
-                  console.log(error);
-              }
-            })();
-          }
-        });
-      }
-
-    static mosaicTransaction = (divisibility, supply, duration, durationType, mutable, transferable, walletPassword, accountName, appStore, siriusStore) => {
-
-    // verify password
-  let verify = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword);
-  if(verify < 1){
-    return verify;
+const transactionTypeName = {
+  transfer: {
+    id: TransactionType.TRANSFER,
+    name: 'Transfer'
+  },
+  registerNameSpace: {
+    id: TransactionType.REGISTER_NAMESPACE,
+    name: 'Register Namespace'
+  },
+  mosaicDefinition: {
+    id: TransactionType.MOSAIC_DEFINITION,
+    name: 'Mosaic Definition'
+  },
+  mosaicSupplyChange: {
+    id: TransactionType.MOSAIC_SUPPLY_CHANGE,
+    name: 'Mosaic Supply Change'
+  },
+  modifyMultisigAccount: {
+    id: TransactionType.MODIFY_MULTISIG_ACCOUNT,
+    name: 'Modify Multisig Account'
+  },
+  aggregateComplete: {
+    id: TransactionType.AGGREGATE_COMPLETE,
+    name: 'Aggregate Complete'
+  },
+  aggregateBonded: {
+    id: TransactionType.AGGREGATE_BONDED,
+    name: 'Aggregate Bonded'
+  },
+  mosaicAlias: {
+    id: TransactionType.MOSAIC_ALIAS,
+    name: 'Mosaic Alias'
+  },
+  addressAlias: {
+    id: TransactionType.ADDRESS_ALIAS,
+    name: 'Address Alias'
+  },
+  lock: {
+    id: TransactionType.LOCK,
+    name: 'LockFund'
+  },
+  accountLink: {
+    id: TransactionType.LINK_ACCOUNT,
+    name: 'Account Link'
+  },
+  exchangeOffer: {
+    id: TransactionType.EXCHANGE_OFFER,
+    name: 'Exchange Offer'
+  },
+  addExchangeOffer: {
+    id: TransactionType.ADD_EXCHANGE_OFFER,
+    name: 'Add Exchange Offer'
+  },
+  removeExchangeOffer: {
+    id: TransactionType.REMOVE_EXCHANGE_OFFER,
+    name: 'Remove Exchange Offer'
+  },
+  modifyAccountMetadata: {
+    id: TransactionType.MODIFY_ACCOUNT_METADATA,
+    name: 'Modify Account Metadata'
+  },
+  modifyMosaicMetadata: {
+    id: TransactionType.MODIFY_MOSAIC_METADATA,
+    name: 'Modify Asset Metadata'
+  },
+  modifyNamespaceMetadata: {
+    id: TransactionType.MODIFY_NAMESPACE_METADATA,
+    name: 'Modify Namespace Metadata'
+  },
+  modifyAccountRestrictionAddress: {
+    id: TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS,
+    name: 'Modify Account Restriction Address'
+  },
+  modifyAccountRestrictionMosaic: {
+    id: TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC,
+    name: 'Modify Account Restriction Asset'
+  },
+  modifyAccountRestrictionOperation: {
+    id: TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION,
+    name: 'Modify Account Restriction Operation'
+  },
+  chainConfigure: {
+    id: TransactionType.CHAIN_CONFIGURE,
+    name: 'Chain Configure'
+  },
+  chainUpgrade: {
+    id: TransactionType.CHAIN_UPGRADE,
+    name: 'Chain Upgrade'
+  },
+  secretLock: {
+    id: TransactionType.SECRET_LOCK,
+    name: "Secret lock"
+  },
+  secretProof: {
+    id: TransactionType.SECRET_PROOF,
+    name: "Secret proof"
   }
-  const add = fetch(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode) + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
+};
 
-  return add.then((hash) => {
+export class TransactionUtils {
 
-    let accountDetails = appStore.getAccDetails(accountName);
-    // var mosaicDuration = (1 * 365 * 24 * 60 * 4 ); // 1 year - 15 sec per block
-    // var mosaicDuration;
-    // if(durationType == 'month'){
-    //   mosaicDuration = parseInt(duration) * 30 * 24 * 60 * 4;
-    // }else{
-    //   mosaicDuration = parseInt(duration) * 365 * 24 * 60 * 4;
-    // }
+  static async getAccInfo(address: Address, accountHttp: AccountHttp): Promise<AccountInfo> {
 
-    let privateKey = appStore.decryptPrivateKey(walletPassword, accountDetails.encrypted, accountDetails.iv);
-    let networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
-    const account = Account.createFromPrivateKey(privateKey, networkType);
+    const chainAPICall = new ChainAPICall(networkAPIEndpoint.value);
 
-    var transactionBuilder = new TransactionBuilderFactory();
-    const nonce = MosaicNonce.createRandom();
-    var mosaicDefinitionTransaction = transactionBuilder.mosaicDefinition()
-      .deadline(Deadline.create())
-      .mosaicNonce(nonce)
-      .mosaicId(MosaicId.createFromNonce(nonce, account))
-      .mosaicProperties(
-        MosaicProperties.create({
-          supplyMutable: (mutable)?true:false,
-          transferable: (transferable)?true:false,
-          divisibility: divisibility,
-          // duration: (duration) ? UInt64.fromUint(mosaicDuration) : undefined
-          duration: undefined
-        })
-      )
-      .networkType(networkType)
-      .build();
-
-    let supp = parseFloat(supply) * Math.pow(10, divisibility);
-    const mosaicSupplyChangeTransaction = transactionBuilder.mosaicSupplyChange()
-      .deadline(Deadline.create())
-      .mosaicId(mosaicDefinitionTransaction.mosaicId)
-      .direction(MosaicSupplyType.Increase)
-      .delta(UInt64.fromUint(supp))
-      .networkType(networkType)
-      .build();
-
-    var innerTxn = [
-      mosaicDefinitionTransaction.toAggregate(account.publicAccount),
-      mosaicSupplyChangeTransaction.toAggregate(account.publicAccount)
-    ]
-
-    const aggregateTransaction = transactionBuilder.aggregateComplete()
-      .deadline(Deadline.create())
-      .innerTransactions(innerTxn)
-      .networkType(networkType)
-      .build();
-
-    transactionBuilder.fee = amountFormatterSimple(aggregateTransaction.maxFee.compact());
-    // console.log('TF: '+transactionBuilder.fee);
-    const signedTransaction = account.sign(aggregateTransaction, hash);
-    const transactionHttp = new TransactionHttp(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
-
-    transactionHttp
-      .announce(signedTransaction)
-      .subscribe((x) => {
-        console.log(x);
-        // console.log('annoucement is made here');
-        return true;
-      }, err => console.error(err));
-  });
-}
-
- static calculateFee = (message, amount, mosaic) => {
-  let mosaicsToSend = validateMosaicsToSend(amount, mosaic);
-  const x = TransferTransaction.calculateSize(PlainMessage.create(message).size(), mosaicsToSend.length);
-  const b = FeeCalculationStrategy.calculateFee(x, getFeeStrategy());
-  let fee;
-  if (message > 0) {
-    fee = amountFormatterSimple(b.compact());
-  } else if (message === 0 && mosaicsToSend.length === 0) {
-    if(getFeeStrategy() === FeeCalculationStrategy.FeeCalculationStrategy.ZeroFeeCalculationStrategy)
-      fee = '0.000000';
-    else{
-      fee = TransferTransaction.calculateSize(message, mosaicsToSend.length) * getFeeStrategy() / 1000000;
-      //fee = '0.037250';
-    }
-  } else {
-    fee = amountFormatterSimple(b.compact());
+    const accountInfo = await chainAPICall.accountAPI.getAccountInfo(address);
+    // console.log(publicKey);
+    return accountInfo;
   }
-  return fee;
-}
 
- static validateMosaicsToSend = (amountXpx, boxOtherMosaics) => {
-  const mosaics = [];
-
-  if (amountXpx !== '' && amountXpx !== null && Number(amountXpx) !== 0) {
-    // console.log(amountXpx);
-    const arrAmount = amountXpx.toString().replace(/,/g, '').split('.');
-    let decimal;
-    let realAmount;
-
-    if (arrAmount.length < 2) {
-      decimal = addZeros(divisibility);
-    } else {
-      const arrDecimals = arrAmount[1].split('');
-      decimal = addZeros(divisibility - arrDecimals.length, arrAmount[1]);
-    }
-    realAmount = `${arrAmount[0]}${decimal}`;
-    mosaics.push({
-      id: xpxMosaicId,
-      amount: realAmount
+  static amountFormatterSimple(amount: number, d: number = 6) {
+    const amountDivisibility = Number(amount) / Math.pow(10, d);
+    return amountDivisibility.toLocaleString('en-us', {
+      minimumFractionDigits: d
     });
   }
 
-  boxOtherMosaics.forEach(element => {
-    if (element.id !== '' && element.amount !== '' && Number(element.amount) !== 0) {
-      const arrAmount = element.amount.toString().replace(/,/g, '').split('.');
-      let realAmount;
-      realAmount = arrAmount[0];
-      mosaics.push({
-        id: element.id,
-        amount: realAmount
-      });
-    }
-  });
-  return mosaics;
-}
+  static getFee = (transaction: Transaction) => {
 
-    static addZeros = (cant, amount = '0') => {
-        const x = '0';
-        if (amount === '0') {
-            for (let index = 0; index < cant - 1; index++) {
-            amount += x;
-            }
-        } else {
-            for (let index = 0; index < cant; index++) {
-            amount += x;
-            }
-        }
-        return amount;
-    }
+    return transaction.maxFee.compact();
+  }
 
-    static getFeeStrategy = () => {
-        const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
-        var transactionBuilder = new TransactionBuilderFactory();
-        // calculate fee strategy
-        let networkName = siriusStore.getNetworkByType(networkType);
-        if(networkName === config.networkType.PRIVATE || networkName === config.networkType.PRIVATE_TEST){
-        transactionBuilder.feeCalculationStrategy = FeeCalculationStrategy.ZeroFeeCalculationStrategy;
-        }
-        else{
-        transactionBuilder.feeCalculationStrategy = FeeCalculationStrategy.MiddleFeeCalculationStrategy;
-        }
-        return transactionBuilder.feeCalculationStrategy;
-    }
+  static convertDisplayDateTimeFormat(dateTimeJSON: string): string {
+    const date = new Date(dateTimeJSON);
 
-    static makeTransaction = readonly({
-    calculateFee
-    });
+    return new Intl.DateTimeFormat('default').format(date);
+  }
 
-    static getFakeEncryptedMessageSize =(message)=>{
-    return EncryptedMessage.create(message, PublicAccount.createFromPublicKey("0".repeat(64)), "0".repeat(64)).size();
-    }
+  static formatFixedDateTime(dateTimeJSON: string) {
 
-    static getPlainMessageSize =(message)=>{
+    const newDate = new Date(dateTimeJSON);
+
+    return new Intl.DateTimeFormat('en-GB',
+      {
+        year: 'numeric', month: 'numeric', day: 'numeric',
+        hour: 'numeric', minute: 'numeric', second: 'numeric'
+      }).format(newDate);
+  }
+
+  static numberToJSONDate(dateNumber: number) {
+    const newDate = new Date(dateNumber);
+
+    return newDate.toISOString();
+  }
+
+  static getFakeEncryptedMessageSize = (message: string) => {
+    return EncryptedMessage.create(message, PublicAccount.createFromPublicKey("0".repeat(64), ChainUtils.getNetworkType(localNetworkType.value)), "0".repeat(64)).size();
+  }
+
+  static getPlainMessageSize = (message: string) => {
     return PlainMessage.create(message).size();
-    }
+  }
 
-    static convertToCurrency =(value, divisibility)=>{
+  static convertToCurrency = (value: number, divisibility: number) => {
 
-    const exactValue = value/Math.pow(10, divisibility);
+    const exactValue = value / Math.pow(10, divisibility);
 
-    return new Intl.NumberFormat('en', {maximumFractionDigits: divisibility}).format(exactValue);
-    }
+    return new Intl.NumberFormat('en', { maximumFractionDigits: divisibility }).format(exactValue);
+  }
 
-    static convertToExact =(value, divisibility)=>{
+  static convertToExact = (value: number, divisibility: number) => {
 
-    return value/Math.pow(10, divisibility);
-    }
+    return value / Math.pow(10, divisibility);
+  }
+
+  static convertToAbsolute = (value: number, divisibility: number) => {
+
+    return value * Math.pow(10, divisibility);
+  }
+
+  static signTransaction(transaction: Transaction, account: Account, generationHash: string) {
+    return account.sign(transaction, generationHash);
+  }
+
+  static aggregateToCosignatureTransaction(aggregateTransaction: AggregateTransaction) {
+    return CosignatureTransaction.create(aggregateTransaction);
+  }
+
+  static cosignTransaction(transactionToCosign: AggregateTransaction, account: Account) {
+    const cosignatureTransaction = TransactionUtils.aggregateToCosignatureTransaction(transactionToCosign);
+
+    return account.signCosignatureTransaction(cosignatureTransaction);
+  }
 }

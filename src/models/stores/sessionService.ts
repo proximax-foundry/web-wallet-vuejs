@@ -1,6 +1,6 @@
 export class SessionService{
 
-    static getRaw(key: string){
+    static getRaw(key: string): string | null{
         return sessionStorage.getItem(key);
     }
 

@@ -1,3 +1,4 @@
+import { NetworkType, PublicAccount } from 'tsjs-xpx-chain-sdk';
 
 export class Account{
     name: string;
@@ -9,5 +10,9 @@ export class Account{
         this.name = name;
         this.publicKey = publicKey;
         this.address = address;
+    }
+
+    fixAddress(networkType: NetworkType){
+        this.address = PublicAccount.createFromPublicKey(this.publicKey, networkType).address.plain();
     }
 }
