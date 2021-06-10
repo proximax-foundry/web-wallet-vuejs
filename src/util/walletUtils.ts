@@ -187,21 +187,13 @@ export class WalletUtils {
         });
     }
 
-    importWallet() {
-
-    }
-
-    exportWallet() {
-
-    }
-
     /**
    *
    *
    * @param {*} address
    * @returns
    */
-    createAddressFromEncode(address: any) {
+    static createAddressFromEncode(address: string) {
         return Address.createFromRawAddress(RawAddress.addressToString(Convert.hexToUint8(address)));
     }
 
@@ -214,7 +206,7 @@ export class WalletUtils {
      * @param {number} network
      * @returns {SimpleWallet}
      */
-    createAccountSimple(walletName: string, password: Password, network: number): SimpleWallet {
+     static createAccountSimple(walletName: string, password: Password, network: number): SimpleWallet {
         return SimpleWallet.create(walletName, password, network);
     }
 
@@ -223,9 +215,8 @@ export class WalletUtils {
      *
      * @param {string} value
      * @returns {Password}
-     * @memberof ProximaxProvider
      */
-    createPassword(value: string): Password {
+     static createPassword(value: string): Password {
         return new Password(value);
     }
 
@@ -239,7 +230,7 @@ export class WalletUtils {
      * @returns {SimpleWallet}
      * @memberof ProximaxProvider
      */
-    createAccountFromPrivateKey(nameWallet: string, password: Password, privateKey: string, network: number): SimpleWallet {
+     static createAccountFromPrivateKey(nameWallet: string, password: Password, privateKey: string, network: number): SimpleWallet {
         return SimpleWallet.createFromPrivateKey(nameWallet, password, privateKey, network);
     }
 
@@ -252,7 +243,7 @@ export class WalletUtils {
      * @returns {string}
      * @memberof ProximaxProvider
      */
-    decryptPrivateKey(password: Password, encryptedKey: string, iv: string): string {
+     static decryptPrivateKey(password: Password, encryptedKey: string, iv: string): string {
         const common: commonInterface = {
             password: password.value,
             privateKey: ''
@@ -273,37 +264,19 @@ export class WalletUtils {
      * @param address address
      * @return checkAddress
      */
-    checkAddress(privateKey: string, net: NetworkType, address: string): boolean {
+     static checkAddress(privateKey: string, net: NetworkType, address: string): boolean {
         return (Account.createFromPrivateKey(privateKey, net).address.plain() === address) ? true : false;
     }
 
-
-
-    /**
-     *
-     *
-     * @param {string} publicKey
-     * @param {NetworkType} [network=environment.typeNetwork.value]
-     * @returns {PublicAccount}
-     * @memberof ProximaxProvider
-     */
-    createPublicAccount(publicKey: string, network: NetworkType): PublicAccount {
+     static createPublicAccount(publicKey: string, network: NetworkType): PublicAccount {
         return PublicAccount.createFromPublicKey(publicKey, network);
     }
 
-    /**
-     *
-     *
-     * @param {string} publicKey
-     * @param {NetworkType} networkType
-     * @returns {Address}
-     * @memberof ProximaxProvider
-     */
-    createAddressFromPublicKey(publicKey: string, networkType: NetworkType): Address {
+    static createAddressFromPublicKey(publicKey: string, networkType: NetworkType): Address {
         return Address.createFromPublicKey(publicKey, networkType);
     }
 
-    cosignAggregateBondedTransaction(transaction: AggregateTransaction, account: Account) {
+    static cosignAggregateBondedTransaction(transaction: AggregateTransaction, account: Account) {
         const cosignatureTransaction = CosignatureTransaction.create(transaction);
 
         let chainProfile;
@@ -321,27 +294,27 @@ export class WalletUtils {
         );
     }
 
-    createFromRawAddress(address: string): Address {
+    static createFromRawAddress(address: string): Address {
         return Address.createFromRawAddress(address);
     }
 
-    getPublicAccountFromPrivateKey(privateKey: string, net: NetworkType): PublicAccount {
+    static getPublicAccountFromPrivateKey(privateKey: string, net: NetworkType): PublicAccount {
         return Account.createFromPrivateKey(privateKey, net).publicAccount;
     }
 
-    generateNewAccount(network: NetworkType): Account {
+    static generateNewAccount(network: NetworkType): Account {
         return Account.generateNewAccount(network);
     }
 
-    getNamespaceId(id: string | number[]): NamespaceId {
+    static getNamespaceId(id: string | number[]): NamespaceId {
         return new NamespaceId(id);
     }
 
-    getMosaicId(id: string | number[]): MosaicId {
+    static getMosaicId(id: string | number[]): MosaicId {
         return new MosaicId(id);
     }
 
-    isHexString(data: string): boolean {
+    static isHexString(data: string): boolean {
         return Convert.isHexString(data);
     }
 
@@ -350,7 +323,7 @@ export class WalletUtils {
      * @returns {boolean}
   
      */
-     isPrivateNet(network: NetworkType): boolean {
+    static isPrivateNet(network: NetworkType): boolean {
         return network === NetworkType.PRIVATE || network === NetworkType.PRIVATE_TEST;
     }
 
@@ -361,7 +334,7 @@ export class WalletUtils {
      * @returns
   
      */
-    isValidKeyPublicPrivate(data: string) {
+    static isValidKeyPublicPrivate(data: string) {
         if (data !== null && data.length === 64) {
             return this.isHexString(data);
         } else {
@@ -376,7 +349,7 @@ export class WalletUtils {
      * @returns
   
      */
-     validateAddress(address: string) {
+    static validateAddress(address: string) {
         if (address !== '') {
             const addressTrimAndUpperCase = address.trim().toUpperCase().replace(/-/g, '');
             if (addressTrimAndUpperCase.length === 40) {
@@ -407,7 +380,7 @@ export class WalletUtils {
      * @returns
   
      */
-    verifyNetworkAddressEqualsNetwork(value: string, value2: string) {
+    static verifyNetworkAddressEqualsNetwork(value: string, value2: string) {
         if ((value.length === 40 || value.length === 46) && (value2.length === 40 || value2.length === 46)) {
             if (value.charAt(0) === 'S' && value2.charAt(0) === 'S') {
                 // NetworkType.MIJIN_TEST
