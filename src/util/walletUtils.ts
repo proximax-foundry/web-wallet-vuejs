@@ -485,6 +485,17 @@ export class WalletUtils {
         wallets.savetoLocalStorage();
     }
 
+    static checkIsNewFormat(base64Wlt: string){
+        let wltFile: Wallet = Helper.base64decode(base64Wlt);
+
+        if(wltFile.accounts[0].publicKey){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
     static export(wallet: Wallet){
 
         let walletJSON = JSON.stringify(wallet);
