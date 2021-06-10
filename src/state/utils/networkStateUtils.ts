@@ -93,7 +93,7 @@ export class NetworkStateUtils{
       }
     }
     SessionService.setNumber('nodePort', networkState.currentNetworkProfile?.httpPort || 3000);
-    sessionStorage.setRaw('selectedChainNode', networkState.selectedAPIEndpoint);
+    SessionService.setRaw('selectedChainNode', networkState.selectedAPIEndpoint);
   }
 
   static updateChainNode(apiNode: string){
