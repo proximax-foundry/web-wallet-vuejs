@@ -88,7 +88,7 @@ const chainProfileIntegration = async () => {
 
         const endpoint = ChainUtils.buildAPIEndpoint(chainProfileStore.apiNodes[0], chainProfileStore.httpPort);
 
-        let chainAPICall = new ChainAPICall(endpoint);
+        const chainAPICall = new ChainAPICall(endpoint);
 
         try {
           const chainHeight = await chainAPICall.chainAPI.getBlockchainHeight();
@@ -109,7 +109,7 @@ const chainProfileIntegration = async () => {
           }
           
         } catch (error) {
-          
+          console.log(error);
         }
         
        
