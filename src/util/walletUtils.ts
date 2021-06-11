@@ -226,11 +226,10 @@ export class WalletUtils {
      * @param {string} nameWallet
      * @param {Password} password
      * @param {string} privateKey
-     * @param {number} network
+     * @param {NetworkType} network
      * @returns {SimpleWallet}
-     * @memberof ProximaxProvider
      */
-     static createAccountFromPrivateKey(nameWallet: string, password: Password, privateKey: string, network: number): SimpleWallet {
+     static createAccountFromPrivateKey(nameWallet: string, password: Password, privateKey: string, network: NetworkType): SimpleWallet {
         return SimpleWallet.createFromPrivateKey(nameWallet, password, privateKey, network);
     }
 
@@ -241,7 +240,6 @@ export class WalletUtils {
      * @param {string} encryptedKey
      * @param {string} iv
      * @returns {string}
-     * @memberof ProximaxProvider
      */
      static decryptPrivateKey(password: Password, encryptedKey: string, iv: string): string {
         const common: commonInterface = {
