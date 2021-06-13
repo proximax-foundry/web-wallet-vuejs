@@ -55,4 +55,8 @@ export class Wallet{
     updateAddressBook(index: number, addressBook: AddressBook){
         this.contacts[index] = addressBook;
     }
+
+    selectDefaultAccount(){
+        return this.accounts.find((walletAccount)=> walletAccount.default === true);
+    }
 }
