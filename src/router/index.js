@@ -122,7 +122,7 @@ const routes = [
     }
   },
   {
-    path: '/convert-account-multisign/:name',
+    path: '/convert-account-multisign/:name?',
     name: 'ViewConvertAccountMultisig',
     props: true,
     component: () => import('@/views/ViewConvertAccountMultisig.vue'),
@@ -201,6 +201,14 @@ const routes = [
     component: () => import('@/views/ViewNodes.vue'),
     meta: {
       title: "Nodes",
+    }
+  },
+  {
+    path: '/multisig-multi-level',
+    name: 'ViewMultisigMultiLevel',
+    component: () => import('@/views/ViewMultisigMultiLevel.vue'),
+    meta: {
+      title: "View All Multisig Accounts",
     }
   },
 ]

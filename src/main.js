@@ -16,7 +16,7 @@ import Toast from 'primevue/toast';
 import { appStore } from './store/app';
 import { chainNetwork, siriusStore } from './store/sirius';
 import { ChainProfile, ChainProfileNames, ChainProfileConfig } from './store/storeClasses'
-
+import { createI18n } from 'vue-i18n'
 
 // Import Font Awesome Icons
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -27,11 +27,35 @@ library.add(faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExcl
 const app = createApp(App);
 const emitter = mitt();
 
+const messages = {
+  en: {
+    message: {
+      hello: 'hello world'
+    }
+  },
+  zh: {
+    message: {
+      hello: '世界你好'
+    }
+  }
+};
+
+const i18n = createI18n({
+  locale: 'zh', // set locale
+  fallbackLocale: 'en', // set fallback locale
+  messages, // set locale messages
+  // If you need to specify other options, you can set other options
+  // ...
+})
+
+
+
 app.config.globalProperties.emitter = emitter;
 app.use(router);
 app.use(PrimeVue);
 app.use(ConfirmationService);
 app.use(ToastService);
+app.use(i18n);
 
 // Use Components
 app.component('ConfirmDialog', ConfirmDialog);
