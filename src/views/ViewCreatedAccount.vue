@@ -75,6 +75,7 @@
 import { ref } from 'vue';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import { copyKeyFunc } from '../util/functions.js';
+import { useToast } from "primevue/usetoast";
 
 export default {
   name: 'ViewCreatedAccount',
@@ -93,11 +94,12 @@ export default {
     };
   },
   setup(p){
+    const toast = useToast();
     const accountName = ref(p.name);
     const accountPublicKey = ref(p.publicKey);
     const accountPrivateKey = ref(p.privateKey);
     const accountAddress = ref(p.address);
-    const copy = (id) => copyKeyFunc(id);
+    const copy = (id) => copyKeyFunc(id, toast);
 
     return {
       copy,

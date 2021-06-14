@@ -54,11 +54,11 @@
         </Multiselect>
       </div>
     </div>
-    <NotificationModal :toggleModal="toggleNotification" msg="Node updated" notiType="noti" time='2500' />
   </div>
 </template>
 <script lang="ts">
 import Multiselect from '@vueform/multiselect';
+<<<<<<< HEAD
 import { computed, ref, getCurrentInstance } from "vue";
 import { startListening, stopListening } from '../util/listener.js';
 import NotificationModal from '@/components/NotificationModal.vue';
@@ -67,18 +67,30 @@ import { walletState } from "../state/walletState"
 import { NetworkStateUtils } from "../state/utils/networkStateUtils"
 import { ChainAPICall } from '@/models/REST/chainAPICall';
 import { WalletUtils } from '@/util/walletUtils';
+=======
+import { computed, inject, ref } from "vue";
+import { startListening, stopListening } from '../util/listener.js';
+import { useToast } from "primevue/usetoast";
+// import { DataBridgeService } from '../util/dataBridge.js';
+>>>>>>> a0d9159... v 0.0.10 - Toast notifications
 
 export default {
   name: 'ViewNodes',
 
   components: {
     Multiselect,
-    NotificationModal,
   },
 
   setup() {
+<<<<<<< HEAD
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance?.appContext.config.globalProperties.emitter;
+=======
+    const toast = useToast();
+    const appStore = inject("appStore");
+    const siriusStore = inject("siriusStore");
+    const chainNetwork = inject("chainNetwork");
+>>>>>>> a0d9159... v 0.0.10 - Toast notifications
     const showSelectTitle = ref(false);
     // const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
     const borderColor = ref('border border-gray-300');
@@ -86,7 +98,6 @@ export default {
     const canDeselect = ref(false);
     const maxHeight = ref(200);
     const selected = ref('');
-    const toggleNotification = ref(false);
 
     interface nodeListInterface{
       value: string,
@@ -109,9 +120,16 @@ export default {
         showSelectTitle.value = true;
         NetworkStateUtils.updateChainNode(e);
         stopListening();
+<<<<<<< HEAD
         startListening(walletState.currentLoggedInWallet?.accounts);
         WalletUtils.getTotalBalanceWithCurrentNetwork();
         toggleNotification.value = true;
+=======
+        const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
+        startListening(walletSession.accounts);
+        appStore.getXPXBalance(walletSession.name, siriusStore);
+        toast.add({severity:'success', summary: 'Services', detail: 'Node updated', group: 'br', life: 5000});
+>>>>>>> a0d9159... v 0.0.10 - Toast notifications
       }
     };
 
@@ -124,10 +142,6 @@ export default {
     const clearSelection = () => {
       showSelectTitle.value = false;
     };
-
-    emitter.on("CLOSE_NOTIFICATION", payload => {
-      toggleNotification.value = payload;
-    });
 
     // var dataBridgeInstance = new DataBridgeService();
     // dataBridgeInstance.connectBlockSocket();
@@ -144,7 +158,6 @@ export default {
       closeSelection,
       currentNode,
       blockHeight,
-      toggleNotification,
     };
   },
 }

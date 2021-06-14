@@ -32,6 +32,8 @@ import { walletState } from "./state/walletState";
 import headerComponent from '@/components/headerComponent.vue'
 // import PageComponent from '@/components/PageComponent.vue'
 import NavigationMenu from '@/components/NavigationMenu.vue'
+import ConfirmDialog from 'primevue/confirmdialog';
+import Toast from 'primevue/toast';
 
 <<<<<<< HEAD
 export default{
@@ -43,20 +45,36 @@ export default {
     headerComponent,
     // PageComponent,
     NavigationMenu,
+    ConfirmDialog,
+    Toast,
   },
   setup() {
     const internalInstance = getCurrentInstance();
+<<<<<<< HEAD
     const emitter = internalInstance?.appContext.config.globalProperties.emitter;
+=======
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    provide("appStore", appStore);
+    provide("siriusStore", siriusStore);
+    provide("chainNetwork", chainNetwork);
+    chainNetwork.updateAvailableNetworks();
+>>>>>>> a0d9159... v 0.0.10 - Toast notifications
 
+    const login = computed(() => appStore.state.isLogin);
+
+    // emitter for drop down menu in viewAllAccounts and Services page
     const clickEvent = () => {
       emitter.emit("PAGE_CLICK");
     };
 
+<<<<<<< HEAD
     const login = computed(() =>walletState.isLogin);
 
+=======
+>>>>>>> a0d9159... v 0.0.10 - Toast notifications
     return{
-      clickEvent,
       login,
+      clickEvent,
     }
   },
 }

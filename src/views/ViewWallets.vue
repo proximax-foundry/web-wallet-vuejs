@@ -13,7 +13,6 @@
     <div class="mt-32" v-if="!walletState.currentLoggedInWallet">
       <router-link :to="{ name : 'Welcome'}" class="blue-btn p-3 px-5">Home</router-link>
     </div>
-    <NotificationModal :toggleModal="toggleModal" msg="Wallet has been removed successfully" notiType="noti" time='1500' />
   </div>
 </template>
 
@@ -30,12 +29,7 @@ export default {
     'deleteWallet'
   ],
   components: {
-    WalletTile, NotificationModal
-  },
-  data() {
-    return {
-      toggleModal: false,
-    };
+    WalletTile
   },
   setup() {
     const wallets = computed(
@@ -45,17 +39,13 @@ export default {
       }
     );
 
+    if(p.deleteWallet=='success'){
+      toast.add({severity:'success', summary: 'Notification', detail: 'Wallet has been removed successfully', group: 'br', life: 5000});
+    }
+
     return {
       wallets
     };
   },
-  created(){
-    if(this.deleteWallet=='success'){
-      this.toggleModal = true;
-    }
-    this.emitter.on("CLOSE_NOTIFICATION", payload => {
-      this.toggleModal = payload;
-    });
-  }
 }
 </script>

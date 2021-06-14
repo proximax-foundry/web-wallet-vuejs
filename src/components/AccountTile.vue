@@ -49,17 +49,19 @@ import { computed, inject, getCurrentInstance } from "vue";
 import CryptoJS from 'crypto-js';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import { copyKeyFunc } from '../util/functions.js';
+import { useToast } from "primevue/usetoast";
 
 export default{
   components: { FontAwesomeIcon },
   name: 'AccountTile',
   props: ['account', 'showMenuCall', 'i'],
   setup(p){
+    const toast = useToast();
     const internalInstance = getCurrentInstance();
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const copy = (id) => copyKeyFunc(id);
+    const copy = (id) => copyKeyFunc(id, toast);
     const mosaicNum = computed(() => {
       return (p.account.mosaic!=undefined)?p.account.mosaic.length:0;
     });

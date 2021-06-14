@@ -126,7 +126,6 @@
       </div>
     </div>
   </div>
-  <NotificationModal :toggleModal="toggleAnounceNotification" msg="Unconfirmed transaction" notiType="noti" time='2500' />
 
 </div>
 </template>
@@ -139,7 +138,6 @@ import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import AddCosignModal from '../components/AddCosignModal.vue';
 import { multiSign } from '../util/multiSignatory.js';
-import NotificationModal from '@/components/NotificationModal.vue';
 import MultisigSchemeModal from '@/components/MultisigSchemeModal.vue';
 import { transferEmitter } from '../util/listener.js';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
@@ -152,7 +150,6 @@ export default {
     PasswordInput,
     TextInput,
     AddCosignModal,
-    NotificationModal,
     MultisigSchemeModal,
     SelectInputPlugin,
     MultiSelectInputPlugin,
@@ -182,7 +179,6 @@ export default {
     const removeCosign = ref([]);
     const selectedAddresses = ref([]);
     const showAddressError = ref([]);
-    const toggleAnounceNotification = ref(false);
     const onPartial = ref(false);
     const isMultisig = ref(true);
     const showCosigners = ref(false);
@@ -305,16 +301,11 @@ export default {
       }else{
         // transaction made
         err.value = '';
-        // toggleAnounceNotification.value = true;
         var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play();
         clear();
       }
     };
-
-    emitter.on("CLOSE_NOTIFICATION", payload => {
-      toggleAnounceNotification.value = payload;
-    });
 
     watch(selectMainCosign, (n) => {
       selectOtherCosign.value.splice(selectOtherCosign.value.indexOf(n), 1);
@@ -584,7 +575,6 @@ export default {
       clear,
       modifyAccount,
       disabledPassword,
-      toggleAnounceNotification,
       onPartial,
       isMultisig,
       isCoSigner,

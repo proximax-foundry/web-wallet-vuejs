@@ -13,13 +13,13 @@
       @mouseleave="closeList"
     >
       <template v-slot:singlelabel="{ value }">
-        <div class="multiselect-single-label">
-          <country-flag :country="value.icon" size='normal'/>
+        <div class="multiselect-single-label font-bold text-gray-600">
+          {{ value.value }}
         </div>
       </template>
 
       <template v-slot:option="{ option }">
-        <country-flag :country="option.icon" size='small' /><span class="inline-block ml-3">{{ option.label }}</span>
+        <span class="inline-block ml-3">{{ option.label }}</span>
       </template>
     </Multiselect>
   </div>
@@ -28,7 +28,6 @@
 <script>
 import { ref } from 'vue';
 import Multiselect from '@vueform/multiselect';
-import CountryFlag from 'vue-country-flag-next'
 
 export default{
   name: 'SelectLanguagePlugin',
@@ -40,12 +39,12 @@ export default{
     const canDeselect = ref(false);
     const caretOption = ref(false);
     const options = [
-      { value: 'en', label: 'English', icon: 'gb' },
-      { value: 'cn', label: '中文', icon: 'cn' },
-      { value: 'ru', label: 'русский', icon: 'ru' },
+      { value: 'EN', label: 'English', icon: 'gb' },
+      { value: 'CN', label: '中文', icon: 'cn' },
+      { value: 'RU', label: 'русский', icon: 'ru' },
     ]
 
-    const selected = ref('en')
+    const selected = ref('EN')
 
     const makeSelection =() => {
       console.log('Change language')
@@ -75,7 +74,6 @@ export default{
 
   components: {
     Multiselect,
-    CountryFlag,
   },
 }
 </script>
@@ -95,7 +93,7 @@ export default{
     overflow-y: hidden !important;
   }
   .multiselect-single-label{
-    font-size: 14px;;
+    font-size: 13px;
   }
   .multiselect-option{
     padding: 5px !important;

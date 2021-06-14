@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { environment } from '../environment/environment.js';
 
 // copy address keys
-export const copyKeyFunc = (id) => {
+export const copyKeyFunc = (id, toast) => {
   // Credits: https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
   var copyText = document.getElementById(id);
   /* Select the text field */
@@ -11,9 +11,7 @@ export const copyKeyFunc = (id) => {
 
   /* Copy the text inside the text field */
   document.execCommand("copy");
-
-  /* Alert the copied text */
-  alert("Copied " + id + ": " + copyText.value);
+  toast.add({severity:'info', summary: "Address copied", detail: copyText.value, group: 'br', life: 5000});
 };
 
 

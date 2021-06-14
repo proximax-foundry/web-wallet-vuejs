@@ -19,13 +19,13 @@
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
             <div v-if="moreThanOneAccount" class="text-left p-4">
               <div class="mb-1 cursor-pointer z-20 border-b border-gray-200" @click="showMenu = !showMenu">
-                <div class="font-bold text-xs">{{ selectedAccName }}</div>
+                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
                 <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
               </div>
               <transition name="slide">
               <div v-if="showMenu" class="z-10">
-                <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50 optionDiv'" @click="changeSelection(item)" :title="'Address is ' + item.address">
-                  <div>{{ item.name }}</div>
+                <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50 optionDiv'" @click="changeSelection(item)" :title="'Address is ' + item.address" @update-divisibility="updateDivisibility">
+                  <div>{{ item.name }} <span v-if="isMultiSig(item.address)" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
                 </div>
               </div>
               </transition>
@@ -37,7 +37,7 @@
               <div class="inline-block mr-4 text-tsm"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ appStore.getBalanceByAddress(selectedAccAdd) }} XPX</span></div>
             </div>
           </div>
-          <NumberInput :disabled="disabledDivisibility" v-model="divisibility" max="6" placeholder="Divisibility" title="Divisibility" type="text" icon="coins" :showError="showDivisibilityErr" errorMessage="Required Field - Only Numbers (0 - 6)" class="mt-5" />
+          <NumberInput :disabled="disabledDivisibility" v-model="divisibility" :max="6" placeholder="Divisibility" title="Divisibility" icon="coins" :showError="showDivisibilityErr" errorMessage="Required Field - Only Numbers (0 - 6)" class="mt-5" />
           <SupplyInput :disabled="disabledSupply" v-model="supply" title="Supply" :balance="Number(appStore.getBalanceByAddress(selectedAccAdd))" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" :decimal="Number(supplyPrecision)" />
           <!-- <div class="text-center p-3 pb-3 border-l-8 border-gray-100">
             <div class="rounded-2xl bg-gray-100 p-5">
@@ -54,10 +54,23 @@
             </div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Unconfirmed/Recommended Fee: 0.<span class="text-txs">062750</span> XPX</div>
+            <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: 0.<span class="text-txs">062750</span> XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFeeCurrency }} {{currencyName}}</div>
+          </div>
+          <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800" v-if="isMultiSig(selectedAccAdd)">
+            <div class="text-center">
+              <div class="inline-block">
+                <div class="flex">
+                  <img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
+                  <div class="inline-block self-center text-left">
+                    <div>LockFund: {{ lockFundCurrency }} {{ currencyName }}</div>
+                    <div>Unconfirmed/Recommended Fee: {{ lockFundTxFee }} {{ currencyName }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <PasswordInput placeholder="Enter Your Wallet Password" :errorMessage="'Please enter your wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
@@ -81,7 +94,6 @@
         <div><i>If you tick "Supply Mutable", supply can be changed.</i></div>
       </div>
     </div>
-    <NotificationModal :toggleModal="toggleAnounceNotification" msg="Unconfirmed transaction" notiType="noti" time='2500' />
   </div>
 </template>
 <script>
@@ -92,7 +104,6 @@ import SupplyInput from '@/components/SupplyInput.vue';
 import NumberInput from '@/components/NumberInput.vue';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import { mosaicTransaction, convertToCurrency, convertToExact } from '../util/transfer.js';
-import NotificationModal from '@/components/NotificationModal.vue';
 
 export default {
   name: 'ViewCreateMosaic',
@@ -101,7 +112,6 @@ export default {
     SupplyInput,
     FontAwesomeIcon,
     NumberInput,
-    NotificationModal,
   },
   setup(){
     const appStore = inject("appStore");
@@ -127,7 +137,6 @@ export default {
     const disabledSupply = ref(false);
     const disabledDivisibility = ref(false);
     const disabledClear = ref(false);
-    const toggleAnounceNotification = ref(false);
     const supplyPrecision = ref(divisibility.value);
     const disabledDuration = ref(false);
     const durationOption =ref('month');
@@ -142,15 +151,39 @@ export default {
     const rentalFee = computed(()=> convertToExact(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
     const rentalFeeCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
 
+    const lockFund = computed(()=> convertToExact(chainNetwork.getProfileConfig().lockedFundsPerAggregate, chainNetwork.getCurrencyDivisibility()))
+    const lockFundCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().lockedFundsPerAggregate, chainNetwork.getCurrencyDivisibility()))
+
+    const lockFundTxFee = ref(0.0445);
+    const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
+
+
     const disableCreate = computed(() => !(
       walletPassword.value.match(passwdPattern) && !disabledMutableCheck.value && (divisibility.value != '') && (supply.value > 0) && (!showDurationErr.value)
     ));
+
+    const isMultiSig = (address) => {
+      const account = appStore.getAccDetailsByAddress(address);
+      let isMulti = false;
+      if(account.isMultisign != undefined){
+        if(account.isMultisign != '' || account.isMultisign != null){
+          if(account.isMultisign.cosignatories != undefined){
+            if(account.isMultisign.cosignatories.length > 0){
+              isMulti = true;
+            }
+          }
+        }
+      }
+      return isMulti;
+    };
 
     const selectedAccName = ref(appStore.getFirstAccName());
     const selectedAccAdd = ref(appStore.getFirstAccAdd());
     const balance = computed( () => {
       return appStore.getBalanceByAddress(selectedAccAdd.value)
     });
+
+    const isMultiSigBool = ref(isMultiSig(appStore.getFirstAccAdd()));
     // balance.value = appStore.getFirstAccBalance();
 
     const showNoBalance = ref(false);
@@ -183,7 +216,8 @@ export default {
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
-      balance.value = i.balance;
+      isMultiSigBool.value = isMultiSig(i.address);
+      // balance.value = i.balance;
       (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
@@ -191,8 +225,8 @@ export default {
 
     const clearInput = () => {
       walletPassword.value = '';
-      divisibility.value = '0';
-      supply.value = '0';
+      divisibility.value = 0;
+      supply.value = 0;
       duration.value = '1';
       durationOption.value = 'month';
       disabledDuration.value = '';
@@ -259,16 +293,14 @@ export default {
       }else{
         // transaction made
         err.value = '';
-        toggleAnounceNotification.value = true;
-        var audio = new Audio(require('@/assets/audio/ding.ogg'));
-        audio.play();
         clearInput();
       }
     };
 
-    emitter.on("CLOSE_NOTIFICATION", payload => {
-      toggleAnounceNotification.value = payload;
-    });
+    const updateDivisibility = (e) => {
+      console.log('e' + e)
+      divisibility.value = e;
+    }
 
     return {
       appStore,
@@ -304,14 +336,19 @@ export default {
       disabledClear,
       supplyPrecision,
       createMosaic,
-      toggleAnounceNotification,
       disabledDuration,
       durationOption,
       duration,
       showDurationErr,
       durationCheckDisabled,
+      isMultiSig,
+      isMultiSigBool,
       rentalFeeCurrency,
-      currencyName
+      lockFundCurrency,
+      currencyName,
+      lockFundTxFee,
+      lockFundTotalFee,
+      updateDivisibility,
     }
   },
 

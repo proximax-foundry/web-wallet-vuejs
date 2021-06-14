@@ -86,8 +86,6 @@
       </div>
     </div>
   </div>
-  <NotificationModal :toggleModal="toggleAnounceNotification" msg="Unconfirmed transaction" notiType="noti" time='2500' />
-
 </div>
 </template>
 
@@ -99,7 +97,6 @@ import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import AddCosignModal from '../components/AddCosignModal.vue';
 import { multiSign } from '../util/multiSignatory.js';
-import NotificationModal from '@/components/NotificationModal.vue';
 import { transferEmitter } from '../util/listener.js';
 
 export default {
@@ -109,7 +106,6 @@ export default {
     PasswordInput,
     TextInput,
     AddCosignModal,
-    NotificationModal,
   },
   props: {
     name: String,
@@ -139,7 +135,6 @@ export default {
     const coSign = ref([]);
     const selectedAddresses = ref([]);
     const showAddressError = ref([]);
-    const toggleAnounceNotification = ref(false);
     const onPartial = ref(false);
     const isMultisig = ref(false);
 
@@ -183,16 +178,12 @@ export default {
       }else{
         // transaction made
         err.value = '';
-        toggleAnounceNotification.value = true;
-        var audio = new Audio(require('@/assets/audio/ding.ogg'));
-        audio.play();
+        // toggleAnounceNotification.value = true;
+        // var audio = new Audio(require('@/assets/audio/ding.ogg'));
+        // audio.play();
         clear();
       }
     };
-
-    emitter.on("CLOSE_NOTIFICATION", payload => {
-      toggleAnounceNotification.value = payload;
-    });
 
     watch(() => [...coSign.value], (n) => {
       for(var i = 0; i < coSign.value.length; i++){
@@ -355,6 +346,9 @@ export default {
 
     // detect partial transaction announcement from listener
     transferEmitter.on('ANNOUNCE_AGGREGATE_BONDED' , payload => {
+      console.log(acc.address);
+      console.log(payload.address);
+      console.log(payload.status);
       if(payload.status && payload.address == acc.address){
         onPartial.value = true;
         clear();
@@ -393,7 +387,6 @@ export default {
       clear,
       convertAccount,
       disabledPassword,
-      toggleAnounceNotification,
       onPartial,
       isMultisig,
       passwdPattern,

@@ -102,6 +102,7 @@ import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { copyKeyFunc } from '../util/functions.js';
+import { useToast } from "primevue/usetoast";
 
 export default {
   name: 'ViewCreateNewWallet',
@@ -117,6 +118,7 @@ export default {
   },
 
   setup(){
+    const toast = useToast();
     const internalInstance = getCurrentInstance();
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
@@ -137,7 +139,7 @@ export default {
     const showPasswdError = ref(false);
     const privKeyPattern = "^(0x|0X)?[a-fA-F0-9].{63,65}$";
     const passwdPattern = "^[^ ]{8,}$";
-    const copy = (id) => copyKeyFunc(id);
+    const copy = (id) => copyKeyFunc(id, toast);
     const disableCreate = computed(
       () => !(
         walletName.value !== "" &&

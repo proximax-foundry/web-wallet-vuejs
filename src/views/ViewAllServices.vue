@@ -34,7 +34,7 @@ export default {
         {name: 'Register', link: ''},
         {name: 'Extend Duration', link: ''}
       ]},
-      {name: 'Mosaics', desc: 'Create digital representations with customized properties', img: 'icon-mosaics-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+      {name: 'Assets', desc: 'Create digital representations with customized properties', img: 'icon-mosaics-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: 'Create', link: '/create-mosaic'},
         {name: 'Modify Supply', link: ''},
         {name: 'Link to Namespace', link: ''}

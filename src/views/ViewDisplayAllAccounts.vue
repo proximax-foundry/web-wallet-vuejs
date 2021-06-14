@@ -10,13 +10,12 @@
       <AccountTile :key="index" :account="item" :showMenuCall="showMenu[index]" :i="index" v-for="(item, index) in accounts" />
     </div>
   </div>
-  <NotificationModal :toggleModal="toggleModal" msg="Account has been removed successfully" notiType="noti" time='1500' />
 </template>
 <script>
 import { computed, inject, getCurrentInstance, ref } from "vue";
 import AccountTile from '@/components/AccountTile.vue';
-import NotificationModal from '@/components/NotificationModal.vue';
 import { multiSign } from '../util/multiSignatory.js';
+import { useToast } from "primevue/usetoast";
 
 export default {
   name: 'ViewDisplayAllAccounts',
@@ -25,15 +24,14 @@ export default {
   ],
   components: {
     AccountTile,
-    NotificationModal,
   },
 
   setup(p) {
+    const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const appStore = inject("appStore");
     const currentMenu = ref('');
-    const toggleModal = ref(false);
     const showMenu = ref([]);
 
     (async()=> {
@@ -69,12 +67,8 @@ export default {
     });
 
     if(p.deleteAccount == 'success'){
-      toggleModal.value = true;
+      toast.add({severity:'success', summary: 'Notification', detail: 'Account has been removed successfully', group: 'br', life: 5000});
     }
-
-    emitter.on("CLOSE_NOTIFICATION", payload => {
-      toggleModal.value = payload;
-    });
 
     const accounts = computed(
       () => {
@@ -84,6 +78,7 @@ export default {
       }
     );
 
+    // emitted from App.vue when click on any part of the page
     emitter.on('PAGE_CLICK', () => {
       if(currentMenu.value === ''){
         var k = 0;
@@ -105,7 +100,6 @@ export default {
     return {
       appStore,
       accounts,
-      toggleModal,
       showMenu,
     };
   },

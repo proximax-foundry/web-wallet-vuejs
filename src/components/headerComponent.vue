@@ -5,7 +5,7 @@
   <div class="flex-grow h-16"></div>
   <div class="flex-none header-menu mt-3" v-if="loginStatus">
     <div class=" flex flex-row">
-      <div class="w-16 inline-block mr-2 items-center relative">
+      <div class="w-16 inline-block items-center relative">
         <SelectLanguagePlugin style="position: absolute; top: 0px" />
       </div>
       <div class="w-10 text-center flex flex-row h-10 items-center">
@@ -32,8 +32,6 @@
         </div>
       </div>
     </div>
-    <NotificationModal :toggleModal="toggleAnounceNotification" :msg="notificationMessage" :notiType="notificationType" time='2500' />
-    <StatusNotificationModal :toggleModal="toggleStatusNotification" :msg="notificationMessage" :notiType="notificationType" time='2500' />
   </div>
   <div class="flex-none self-center header-menu" v-else>
     <div class="w-16 inline-block mr-3 self-center">
@@ -64,19 +62,17 @@ import { computed, inject, ref, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import { transferEmitter } from '../util/listener.js';
-import NotificationModal from '@/components/NotificationModal.vue';
-import StatusNotificationModal from '@/components/StatusNotificationModal.vue';
 import Dropdown from 'primevue/dropdown';
 import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
+import { useToast } from "primevue/usetoast";
 
 export default{
   components: {
     FontAwesomeIcon,
-    NotificationModal,
-    StatusNotificationModal,
     Dropdown,
     SelectLanguagePlugin,
   },
+
   name: 'headerComponent',
   data() {
     return {
@@ -85,14 +81,13 @@ export default{
     };
   },
   setup() {
+    const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
     const chainNetwork = inject("chainNetwork");
     const router = useRouter();
-    const toggleAnounceNotification = ref(false);
-    const toggleStatusNotification = ref(false);
     const notificationMessage = ref('');
     const notificationType = ref('noti');
     // const networkType = computed(
@@ -152,9 +147,7 @@ export default{
 
     transferEmitter.on("CONFIRMED_NOTIFICATION", payload => {
       if(payload.status){
-        toggleAnounceNotification.value = payload.status;
-        notificationType.value = payload.notificationType;
-        notificationMessage.value = payload.message;
+        toast.add({severity:'success', summary: 'Notification', detail: payload.message, group: 'br', life: 5000});
         var audio = new Audio(require('@/assets/audio/ding2.ogg'));
         audio.play();
       }
@@ -162,9 +155,7 @@ export default{
 
     transferEmitter.on("UNCONFIRMED_NOTIFICATION", payload => {
       if(payload.status){
-        toggleAnounceNotification.value = payload.status;
-        notificationType.value = payload.notificationType;
-        notificationMessage.value = payload.message;
+        toast.add({severity:'info', summary: 'Notification', detail: payload.message, group: 'br', life: 5000});
         var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play();
       }
@@ -172,9 +163,7 @@ export default{
 
     transferEmitter.on("STATUS_NOTIFICATION", payload => {
       if(payload.status){
-        toggleStatusNotification.value = payload.status;
-        notificationType.value = payload.notificationType;
-        notificationMessage.value = payload.message;
+        toast.add({severity:'error', summary: 'Error status', detail: payload.message, group: 'br', life: 5000});
         var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play();
       }
@@ -182,34 +171,20 @@ export default{
 
     emitter.on("NOTIFICATION", payload => {
       if(payload.status){
-        toggleAnounceNotification.value = payload.status;
-        notificationType.value = payload.notificationType;
-        notificationMessage.value = payload.message;
+        toast.add({severity:'warn', summary: 'Alert', detail: payload.message, group: 'br', life: 5000});
       }
-    });
-
-    transferEmitter.on("CLOSE_NOTIFICATION", payload => {
-      toggleAnounceNotification.value = payload;
-    });
-
-    transferEmitter.on("CLOSE_STATUS_NOTIFICATION", payload => {
-      toggleStatusNotification.value = payload;
     });
 
     return {
       appStore,
       siriusStore,
-      // networkType,
       loginStatus,
       logout,
       totalBalance,
-      toggleAnounceNotification,
-      toggleStatusNotification,
       notificationMessage,
       notificationType,
       chainsNetworks,
       selectedNetwork,
-      // selectedNetworkName,
       selectNetwork,
       chainsNetworkOption,
     };

@@ -17,7 +17,6 @@
         </label>
       </div>
     </div>
-    <!-- <NotificationModal :toggleModal="toggle" :msg="msg" :notiType="notificationType" time='1500' /> -->
   </div>
 </template>
 
@@ -27,34 +26,23 @@ import { inject, ref, computed } from 'vue'; //getCurrentInstance
 import CryptoJS from 'crypto-js';
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
-// import NotificationModal from '@/components/NotificationModal.vue';
 
 export default {
   name: 'CreateWalletSelection',
-  components: {
-    // NotificationModal,
-  },
   setup(){
     const confirm = useConfirm();
     const toast = useToast();
     // const router = useRouter();
-    // const internalInstance = getCurrentInstance();
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
     const chainNetwork = inject("chainNetwork");
-    // const emitter = internalInstance.appContext.config.globalProperties.emitter;
     // comparing with default networktype 168 till multiple network selection interface is added
     // const selectedNetwork = ref("168");
     const selectedNetworkType = computed(()=> chainNetwork.getNetworkType());
     const selectedNetworkName = computed(()=> siriusStore.state.chainNetworkName);
-    const notificationType = ref("err");
     // const toggle = ref(false);
     const msg = ref('');
     const walletFile = ref('');
-
-    // emitter.on("CLOSE_NOTIFICATION", payload => {
-    //   toggle.value = payload;
-    // });
 
     const readWalletBackup = (e) => {
       const file = e.target.files[0];
@@ -83,11 +71,6 @@ export default {
         } catch (error) {
           msg.value = 'Unable to add wallet. Invalid file.';
           toast.add({severity:'error', summary:'Import Failed', detail: msg.value, group: 'br', life: 5000});
-          // notificationType.value = 'err';
-          // toggle.value = true;
-          // setTimeout(() => {
-          //   toggle.value = false;
-          // }, 1500);
         }
       }
       reader.readAsText(file);
@@ -99,36 +82,23 @@ export default {
       switch (returnMsg){
         case 'wallet_added':
           msg.value = 'Wallet is added successfully.';
-          // router.push({ name: "Welcome", params: {toggle: true, modalMsg: 'Wallet is added successfully.' }});
           break;
         case 'invalid_network':
           msg.value = 'Network is invalid';
           status = "error";
-          // notificationType.value = 'err';
-          // toggle.value = true;
           break;
         case 'existed_wallet':
           msg.value = 'Wallet already exist';
           status = "warn";
-          // notificationType.value = 'warn';
-          // toggle.value = true;
           break;
         case 'invalid_wallet':
           msg.value = 'Wallet is invalid';
           status = "error";
-          // notificationType.value = 'err';
-          // toggle.value = true;
           break;
         default:
           msg.value = 'Unable to add wallet';
           status = "error";
-          // notificationType.value = 'err';
-          // toggle.value = true;
       }
-      // setTimeout(() => {
-      //   toggle.value = false;
-      //   notificationType.value = '';
-      // }, 1500);
       return {
         msg: msg.value,
         status: status
@@ -137,11 +107,9 @@ export default {
 
     return {
       walletFile,
-      // toggle,
       appStore,
       readWalletBackup,
       msg,
-      notificationType
     };
   },
 }
