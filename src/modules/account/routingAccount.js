@@ -1,3 +1,7 @@
+import { DelegateRoutes } from '@/modules/account/submodule/delegate/routingDelegate';
+import { LinkToNamespaceRoutes } from '@/modules/account/submodule/linkToNamespace/routingLinkToNamespace';
+import { MultisigRoutes } from '@/modules/account/submodule/multisig/routingMultisig';
+
 export const AccountRoutes = [
   {
     path: '/view-all-accounts',
@@ -60,4 +64,7 @@ export const AccountRoutes = [
       title: "Delete account",
     }
   },
+  ...DelegateRoutes,
+  ...LinkToNamespaceRoutes,
+  ...MultisigRoutes,
 ];

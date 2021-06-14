@@ -22,16 +22,16 @@ export default {
     const showMenu = ref([]);
     const services = ref([
       {name: 'Namespaces', desc: 'Create namespaces and sub-namespaces', img: 'icon-namespace-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Register', link: ''},
-        {name: 'Extend Duration', link: ''}
+        {name: 'Register', link: 'ViewServicesNamespaceCreate'},
+        {name: 'Extend Duration', link: 'ViewServicesNamespaceExtend'}
       ]},
       {name: 'Assets', desc: 'Create digital representations with customized properties', img: 'icon-mosaics-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: 'Create', link: 'ViewMosaicCreate'},
-        {name: 'Modify Supply', link: ''},
-        {name: 'Link to Namespace', link: ''}
+        {name: 'Modify Supply', link: 'ViewMosaicModifySupplyChange'},
+        {name: 'Link to Namespace', link: 'ViewMosaicLinkToNamespace'}
       ]},
       {name: 'Mainnet Swap', desc: 'Swap from NEM to Sirius', img: 'icon-swap-process-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Transfer Assets', link: ''},
+        {name: 'Transfer Assets', link: 'ViewServicesMainnetSwapAccountList'},
       ]},
       {name: 'Address Book', desc: 'Assign labels to addresses', img: 'icon-address-book-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: 'List', link: 'ViewAddressBook'},
@@ -43,9 +43,8 @@ export default {
         {name: 'Delete', link: 'ViewWallets'},
       ]},
       {name: 'Transactions', desc: 'Explorer all transactions', img: 'icon-transaction-explorer-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Change Password', link: ''},
-        {name: 'Explorer', link: ''},
-        {name: 'Partial', link: ''},
+        {name: 'Explorer', link: 'ViewServicesExplorer'},
+        {name: 'Partial', link: 'ViewServicesExplorerPartial'},
       ]},
       {name: 'Nodes', desc: 'Add and edit nodes', img: 'icon-nodes-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: 'Blockchain', link: 'ViewNodes'},
@@ -53,25 +52,25 @@ export default {
         {name: 'Streaming', link: ''},
       ]},
       {name: 'Attestation', desc: 'Proof of existence and origination', img: 'icon-attestation-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Attest', link: ''},
-        {name: 'Audit', link: ''},
+        {name: 'Attest', link: 'ViewServicesAttestationCreate'},
+        {name: 'Audit', link: 'ViewServicesAttestationAudit'},
       ]},
       {name: 'Notifications', desc: 'Check alerts and information about your accounts', img: 'icon-notifications-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Notifications', link: ''},
+        {name: 'Notifications', link: 'ViewServicesNotifications'},
       ]},
       {name: 'Voting', desc: 'Create, vote, and view results', img: 'icon-voting-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Create Poll', link: ''},
-        {name: 'Vote', link: ''},
+        {name: 'Create Poll', link: 'ViewServicesVotingCreatePoll'},
+        {name: 'Vote', link: 'ViewServicesVotingPoll'},
         {name: 'View Results', link: ''},
       ]},
       {name: 'Storage', desc: 'Upload and download your files and encrypt them', img: 'icon-storage-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Files', link: ''},
-        {name: 'Upload File', link: ''},
+        {name: 'Files', link: 'ViewServicesStorageMyFile'},
+        {name: 'Upload File', link: 'ViewServicesStorageUploadFile'},
         {name: 'Send / Share', link: ''},
       ]},
       {name: 'Sirius Gift', desc: 'Create a redeemable gift', img: 'icon-gift-sirius-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Create', link: ''},
-        {name: 'Redeem', link: ''},
+        {name: 'Create', link: 'ViewServicesSiriusGiftCreateGift'},
+        {name: 'Redeem', link: 'ViewServicesSiriusGiftRedeem'},
       ]},
       {name: 'Aggregate Transactions', desc: 'Merge multiple transactions into one', img: 'icon-aggregate-transactions-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
         {name: 'Complete', link: ''},

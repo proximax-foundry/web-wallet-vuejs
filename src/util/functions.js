@@ -16,6 +16,8 @@ export const copyKeyFunc = (id, toast) => {
     titleType = 'Private key';
   }else if(id=='public'){
     titleType = 'Public key';
+  }else if(id=='pollIndexAddress'){
+    titleType = 'Poll Index Address';
   }else{
     titleType = 'Address';
   }

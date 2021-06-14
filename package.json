@@ -23,6 +23,7 @@
     "animate.css": "^4.1.1",
     "autoprefixer": "^9.8.6",
     "babel-eslint": "^10.1.0",
+    "chart.js": "^2.9.4",
     "core-js": "^3.6.5",
     "cross-env": "^7.0.3",
     "crypto-js": "^3.3.0",
@@ -42,6 +43,8 @@
     "sass-loader": "^7.3.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.3",
     "tsjs-xpx-chain-sdk": "^0.8.1",
+    "v-tooltip": "^4.0.0-alpha.1",
+    "v-wave": "^1.2.8",
     "vue": "^3.0.0",
     "vue-class-component": "^8.0.0-0",
     "vue-cli-plugin-fontawesome": "~0.3.1",
@@ -49,7 +52,9 @@
     "vue-i18n": "^9.1.6",
     "vue-password": "^3.0.0",
     "vue-router": "^4.0.0-0",
-    "vue3-loading-overlay": "0.0.0"
+    "vue-tippy": "^6.0.0-alpha.29",
+    "vue3-loading-overlay": "0.0.0",
+    "vue3-simple-file-input": "^1.0.3"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.18.0",

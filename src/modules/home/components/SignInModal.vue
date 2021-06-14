@@ -5,7 +5,7 @@
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
     >
-      <div v-if="toggleModal" class="popup-outer absolute flex z-50">
+      <div v-show="toggleModal" class="popup-outer absolute flex z-50">
         <div class="modal-popup-box">
           <div class="delete-position">
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import { computed, inject, ref } from 'vue';
+import { computed, getCurrentInstance, inject, ref } from 'vue';
 import { useRouter } from "vue-router";
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue'
 import PasswordInput from '@/components/PasswordInput.vue'
@@ -46,6 +46,8 @@ export default{
   },
 
   setup(){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
     const router = useRouter();
@@ -64,6 +66,13 @@ export default{
     const clearWalletOption = () => {
       selectedWallet.value = '';
     }
+
+    const clearInput = () => {
+      selectedWallet.value = '';
+      walletPassword.value = "";
+      emitter.emit("CLEAR_SELECT", selectedWallet.value);
+      emitter.emit("CLEAR_PASSWORD", walletPassword.value);
+    };
 
     const wallets = computed(
       () =>{
@@ -109,16 +118,8 @@ export default{
       disableSignin,
       login,
       clearWalletOption,
+      clearInput,
     };
-  },
-
-  methods: {
-    clearInput: function() {
-      this.selectedWallet = 0;
-      this.walletPassword = "";
-      this.emitter.emit("CLEAR_SELECT", this.selectedWallet);
-      this.emitter.emit("CLEAR_PASSWORD", this.walletPassword);
-    },
   },
 
   components: {

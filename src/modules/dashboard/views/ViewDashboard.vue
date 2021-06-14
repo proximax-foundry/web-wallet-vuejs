@@ -58,7 +58,7 @@
 <script>
 import { computed, inject, ref, getCurrentInstance, watch } from 'vue';
 import DashboardDataTable from '@/modules/dashboard/components/DashboardDataTable.vue';
-import PartialDashboardDataTable from '@/modules/dashboard/components/PartialDashboardDataTable.vue';
+import PartialDashboardDataTable from '@/components/PartialDashboardDataTable.vue';
 import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
 import { copyKeyFunc, currencyconverter } from '@/util/functions.js';
 import { transactions } from '@/util/transactions.js';

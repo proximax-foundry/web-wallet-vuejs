@@ -2,7 +2,7 @@
   <div class="flex justify-between text-md">
     <div><span class="text-gray-300">Transfer ></span> <span class="text-blue-primary font-bold">Make a Transaction</span></div>
     <div>
-      <!-- <router-link :to="{ name: 'ViewServices' }" class="font-bold">Services</router-link> -->
+      <!-- <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link> -->
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center'>
@@ -70,7 +70,7 @@
             <input id="encryptedMsg" type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg==1" /><label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Encrypted</label>
           </div>
         </div>
-        <TextareaInput placeholder="Message" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput" />
+        <TransferTextareaInput placeholder="Message" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput" />
         <div class="rounded-2xl bg-gray-100 p-5">
           <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Unconfirmed/Recommended Fee:  {{ effectiveFee }} XPX</div>
         </div>
@@ -87,7 +87,7 @@
           </div>
         </div>
       </div>
-        <PasswordInput placeholder="Enter Your Wallet Password" :errorMessage="'Please enter your wallet ' + appStore.state.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5" :disabled="disablePassword" />
+        <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet ' + appStore.state.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5" :disabled="disablePassword" />
         <div class="mt-10">
           <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
           <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="makeTransfer();">Create</button>
@@ -105,7 +105,7 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import MosaicInput from '@/modules/transfer/components/MosaicInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
-import TextareaInput from '@/modules/transfer/components/TextareaInput.vue';
+import TransferTextareaInput from '@/modules/transfer/components/TransferTextareaInput.vue';
 import { createTransaction, makeTransaction, getFakeEncryptedMessageSize, getPlainMessageSize, convertToExact, convertToCurrency } from '@/util/transfer.js'; //getMosaicsAllAccounts
 import AddContactModal from '@/modules/transfer/components/AddContactModal.vue';
 import ConfirmSendModal from '@/modules/transfer/components/ConfirmSendModal.vue';
@@ -120,7 +120,7 @@ export default {
     MosaicInput,
     SelectInputPlugin,
     SupplyInput,
-    TextareaInput,
+    TransferTextareaInput,
     AddContactModal,
     ConfirmSendModal,
   },

@@ -10,7 +10,7 @@
       <fieldset class="w-full">
         <div class="error error_box mb-2" v-if="err!=''">{{ err }}</div>
         <TextInput placeholder="Account Name" errorMessage="Account name is required" v-model="accountName" icon="wallet" />
-        <PasswordInput placeholder="Enter Your Wallet Password" :errorMessage="'Please enter your wallet ' + appStore.state.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+        <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter your wallet ' + appStore.state.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
         <div class="mt-10">
           <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
           <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">Create</button>

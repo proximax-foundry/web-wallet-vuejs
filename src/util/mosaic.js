@@ -1,14 +1,14 @@
-import { readonly } from "vue";
-import {
+// import { readonly } from "vue";
+// import {
   // Deadline,
   // PublicAccount,
   // TransactionType,
-  MosaicId,
-} from "tsjs-xpx-chain-sdk";
+  // MosaicId,
+// } from "tsjs-xpx-chain-sdk";
 // import { appStore } from "@/store/app";
-import { siriusStore } from "@/store/sirius";
-import { environment } from '../environment/environment.js';
-import { namespaces } from '../util/namespaces.js';
+// import { siriusStore } from "@/store/sirius";
+// import { environment } from '../environment/environment.js';
+// import { namespaces } from '../util/namespaces.js';
 // function getItemMosaicStorage() {
 //   return environment.nameKeyMosaicStorage;
 // }
@@ -223,11 +223,11 @@ import { namespaces } from '../util/namespaces.js';
 
 
 
-export const mosaic = readonly({
-  getMosaics,
-  getMosaicId,
-  // filterMosaics,
-  searchInfoMosaics,
-  getMosaicsFromStorage,
-  getItemMosaicStorage,
-});
+// export const mosaic = readonly({
+//   getMosaics,
+//   getMosaicId,
+//   // filterMosaics,
+//   searchInfoMosaics,
+//   getMosaicsFromStorage,
+//   getItemMosaicStorage,
+// });

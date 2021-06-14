@@ -15,7 +15,7 @@
           <span class="ml-2 cursor-pointer">Check this box if you wish to swap with this private key.</span>
         </label>
         <TextInput placeholder="Account Name" errorMessage="Account name is required" v-model="accountName" icon="wallet" />
-        <PasswordInput placeholder="Enter Your Wallet Password" :errorMessage="'Please enter your wallet ' + appStore.state.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+        <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter your wallet ' + appStore.state.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
         <div class="mt-10">
           <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
           <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">Import</button>

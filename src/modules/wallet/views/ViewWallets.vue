@@ -1,4 +1,4 @@
-<template>
+s<template>
   <div class="container mx-auto text-center">
     <h1 class="font-bold big-title mt-20">Wallets</h1>
     <div class='mt-2 py-3 gray-line'>

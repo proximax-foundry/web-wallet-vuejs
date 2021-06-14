@@ -481,6 +481,10 @@ function updateWalletConfig(wallet){
       'currentWalletSession',
       JSON.stringify(wallet)
     );
+    localStorage.setItem(
+      walletKey,
+      JSON.stringify(state.wallets)
+    );
   } catch (err) {
     if (config.debug) {
       console.error("updateAccountState error caught", err);

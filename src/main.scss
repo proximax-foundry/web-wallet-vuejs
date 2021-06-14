@@ -223,7 +223,8 @@ body{
 
 .p-datatable-tbody{
   td{
-    text-align: left; padding: 8px 20px; font-size: 12px; cursor: pointer;
+    text-align: left; padding: 8px 20px; font-size: 13px; cursor: pointer;
+    @apply text-gray-600;
   }
 
   tr:nth-child(2n+1){

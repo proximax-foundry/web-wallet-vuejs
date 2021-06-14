@@ -1,9 +1,11 @@
 <template>
   <div>
     <div class="text-outline bg-white" :class="borderColor">
-      <div class="text-icon-outline text-icon">
-        <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
+      <div class="text-icon-outline text-icon" v-if="icon">
+        <img v-if="imgRequired" :src="getIcon()">
+        <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position" v-else></font-awesome-icon>
       </div>
+      <div v-else class="mr-4"></div>
       <input :disabled="disabled" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="text-placeholder bg-white" :placeholder="placeholder" @click="clickInputText()" @focus="focusInputText()" @blur="blurInputText()">
       <div class="w-1/12 flex-none"></div>
     </div>
@@ -12,6 +14,7 @@
 </template>
 
 <script>
+
 export default{
   props: {
     placeholder: String,
@@ -20,6 +23,7 @@ export default{
     showError: Boolean,
     disabled: Boolean,
     modelValue: String,
+    imgRequired: Boolean,
   },
   emits:[
     'update:modelValue'
@@ -39,6 +43,10 @@ export default{
       }
     },
 
+    getIcon() {
+      return require(`@/${this.icon}`);
+    },
+
     blurInputText: function() {
       if(!this.disabled){
         if(this.modelValue == ''){
@@ -56,7 +64,7 @@ export default{
       this.textErr = false;
     }
   },
-  mounted() {    
+  mounted() {
     this.emitter.on("CLEAR_TEXT", payload => {
       this.inputText = payload;
       this.textErr = false;

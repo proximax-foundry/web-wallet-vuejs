@@ -13,7 +13,7 @@
       scrollDirection="horizontal"
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
-      :globalFilterFields="['typeName','transferType','senderAddress', 'senderName','recipientAddress', 'recipientName', 'block']">
+      :globalFilterFields="['typeName','transferType','senderAddress', 'senderAddressRaw', 'senderName','recipientAddress', 'recipientAddressRaw', 'recipientName', 'block']">
       <Column field="typeName" header="Type" headerStyle="width:110px">
         <template #body="{data}">
           {{data.typeName}}
@@ -123,7 +123,7 @@ export default{
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .p-datatable-tbody{
   td{
     font-size: 11px;

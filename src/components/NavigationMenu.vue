@@ -4,7 +4,19 @@
     <nav class="navbar" ref="navbarRef" v-if="showMenu">
       <router-link class="col" class-active="active" :to="{ name : 'ViewDashboard'}">Dashboard</router-link>
       <router-link class="col" class-active="active" :to="{ name : 'ViewTransferCreate'}">Transfer</router-link>
-      <router-link class="col" class-active="active" :to="{ name : 'ViewAccountDisplayAll'}" :class="{'router-link-active': subIsActive(['/view-all-accounts', '/select-type-creation-account', '/create-account', '/import-account', '/delete-account', '/details-account', '/created-account', '/convert-account-multisign', '/edit-account-multisign'])}">Accounts</router-link>
+      <router-link class="col" class-active="active" :to="{ name : 'ViewAccountDisplayAll'}" :class="{'router-link-active': subIsActive([
+        '/view-all-accounts',
+        '/select-type-creation-account',
+        '/create-account',
+        '/import-account',
+        '/delete-account',
+        '/details-account',
+        '/created-account',
+        '/convert-account-multisign',
+        '/edit-account-multisign',
+        '/delegate',
+        '/alias-address-to-namespace',
+      ])}">Accounts</router-link>
       <router-link class="col" class-active="active" :to="{ name : 'ViewServices'}" :class="{'router-link-active': subIsActive([
         '/export-wallet',
         '/wallets',
@@ -14,6 +26,22 @@
         '/delete-wallet-confirmed' ,
         '/nodes',
         '/multisig-multi-level',
+        '/create-namespace',
+        '/extend-namespace',
+        '/mosaic-supply-change',
+        '/swap-account-list',
+        '/create-attestation',
+        '/audit-attestation',
+        '/notifications',
+        '/create-poll',
+        '/polls',
+        '/vote-poll',
+        '/my-file',
+        '/upload-file',
+        '/create-gift',
+        '/redeem-gift-card',
+        '/explorer',
+        '/partial',
       ])}">Services</router-link>
     </nav>
     <nav class="navbar h-9" v-else>
