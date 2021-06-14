@@ -1119,7 +1119,5 @@ export const appStore = readonly({
   deleteContact,
   editContact,
   getXPXBalance,
-  getWalletByNameOnly,
-  updateWalletConfig,
 });
 
