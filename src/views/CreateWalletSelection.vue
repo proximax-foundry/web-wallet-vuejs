@@ -1,10 +1,5 @@
 <template>
   <div class="container mx-auto text-center">
-    <Toast />
-    <Toast position="top-left" group="tl" />
-    <Toast position="bottom-left" group="bl" />
-    <Toast position="bottom-right" group="br" />
-    <ConfirmDialog></ConfirmDialog>
     <h1 class="font-bold default-title mt-20">Select Wallet Creation Type</h1>
     <div class="page-title-gray-line grid grid-cols-1 md:grid-cols-3 pt-20">
       <div class="px-5 self-center text-center mb-10">

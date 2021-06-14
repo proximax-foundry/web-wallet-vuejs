@@ -1,5 +1,10 @@
 <template>
   <div class="flex flex-col h-screen justify-between" @click="clickEvent">
+    <Toast />
+    <Toast position="top-left" group="tl" />
+    <Toast position="bottom-left" group="bl" />
+    <Toast position="bottom-right" group="br" />
+    <ConfirmDialog></ConfirmDialog>
     <header class="h-16 flex items-stretch">
       <headerComponent></headerComponent>
     </header>
@@ -50,7 +55,8 @@ export default {
     const login = computed(() =>walletState.isLogin);
 
     return{
-      clickEvent, login,
+      clickEvent,
+      login,
     }
   },
 }

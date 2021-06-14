@@ -15,6 +15,7 @@ import { appStore } from './store/app';
 import { chainNetwork, siriusStore, ChainNetwork } from './store/sirius';
 import { ChainProfile, ChainProfileNames, ChainProfileConfig } from './store/storeClasses'
 
+
 // Import Font Awesome Icons
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload, faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore } from '@fortawesome/free-solid-svg-icons';
