@@ -117,7 +117,7 @@ chainProfileIntegration();
 if (!appStore.state.currentLoggedInWallet) {
   // check sessionStorage
   if(!appStore.checkFromSession(siriusStore)){
-    router.push({ name: "Welcome"});
+    router.push({ name: "Home"});
   }
 }
 

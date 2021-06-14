@@ -1,6 +1,6 @@
 <template>
   <div class="flex-none self-center flex items-end logo">
-    <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Welcome'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">v{{ appStore.version }}</span>
+    <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">v{{ appStore.version }}</span>
   </div>
   <div class="flex-grow h-16"></div>
   <div class="flex-none header-menu mt-3" v-if="loginStatus">
@@ -49,7 +49,7 @@
       <Dropdown v-model="selectedNetwork" name="selectedNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
     </div>
     <div class="w-16 text-center inline-block">
-      <router-link :to="{ name: 'Welcome'}" class="font-normal hover:font-bold inline-block">Home</router-link>
+      <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">Home</router-link>
     </div>
     <div class="w-16 text-center inline-block">
       <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold">Wallets</router-link>
@@ -60,7 +60,6 @@
 <script>
 import { computed, inject, ref, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
-import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 import { transferEmitter } from '../util/listener.js';
 import Dropdown from 'primevue/dropdown';
 import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
@@ -68,7 +67,6 @@ import { useToast } from "primevue/usetoast";
 
 export default{
   components: {
-    FontAwesomeIcon,
     Dropdown,
     SelectLanguagePlugin,
   },
@@ -137,7 +135,7 @@ export default{
     const logout = () => {
       let status = appStore.logoutOfWallet();
       if(status){
-        router.push({ name: "Welcome"});
+        router.push({ name: "Home"});
       }
     };
 

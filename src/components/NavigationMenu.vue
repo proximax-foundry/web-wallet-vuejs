@@ -3,9 +3,9 @@
     <font-awesome-icon @click="showhideMenu();" icon="bars" :class="menuColorClass" class="menuBar absolute w-4 cursor-pointer" style="right: 7px; top: 9px;" v-if="showBar"></font-awesome-icon>
     <nav class="navbar" ref="navbarRef" v-if="showMenu">
       <router-link class="col" class-active="active" :to="{ name : 'ViewDashboard'}">Dashboard</router-link>
-      <router-link class="col" class-active="active" :to="{ name : 'ViewCreateTransfer'}">Transfer</router-link>
-      <router-link class="col" class-active="active" :to="{ name : 'ViewDisplayAllAccounts'}" :class="{'router-link-active': subIsActive(['/view-all-accounts', '/select-type-creation-account', '/create-account', '/import-account', '/delete-account', '/details-account', '/created-account', '/convert-account-multisign', '/edit-account-multisign'])}">Accounts</router-link>
-      <router-link class="col" class-active="active" :to="{ name : 'ViewAllServices'}" :class="{'router-link-active': subIsActive([
+      <router-link class="col" class-active="active" :to="{ name : 'ViewTransferCreate'}">Transfer</router-link>
+      <router-link class="col" class-active="active" :to="{ name : 'ViewAccountDisplayAll'}" :class="{'router-link-active': subIsActive(['/view-all-accounts', '/select-type-creation-account', '/create-account', '/import-account', '/delete-account', '/details-account', '/created-account', '/convert-account-multisign', '/edit-account-multisign'])}">Accounts</router-link>
+      <router-link class="col" class-active="active" :to="{ name : 'ViewServices'}" :class="{'router-link-active': subIsActive([
         '/export-wallet',
         '/wallets',
         '/create-mosaic',
@@ -22,9 +22,7 @@
 </template>
 
 <script>
-import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
 export default{
-  components: { FontAwesomeIcon },
   name: 'NavigationMenu',
   data() {
     return {
