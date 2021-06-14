@@ -27,17 +27,25 @@ const startListening = (accounts) => {
       enableListeners(account, connect);
     });
   });
+  let connect_block = new Listener(chainNetwork.buildWSEndpointURL(siriusStore.state.selectedChainNode), WebSocket);
+  state.connector.push({listener: connect_block, type: 'Bridge'});
+  state.connector.find((element) => element.type === 'Bridge').listener.open().then(() => {
+    newBlockListener(connect_block);
+  });
 }
 
 
 const stopListening = () => {
   // console.log('Connector length before stopping: ' + state.connector.length);
   state.connector.forEach((connect) => {
+    // console.log(connect)
     // console.log('Is connector listening: ' + connect.listener.isOpen());
     if(connect.listener.isOpen()){
+      connect.listener.close();
       connect.listener.terminate();
     }
   });
+  state.connector = [];
 
   connectorListen.value = {};
 }
@@ -46,17 +54,14 @@ const stopListening = () => {
 const addListenerstoAccount = (account) => {
   let connect = new Listener(chainNetwork.buildWSEndpointURL(siriusStore.state.selectedChainNode), WebSocket);
   state.connector.push({listener: connect, account: account});
-  state.connector.find((element) => element.account.address == account.address).listener.open().then(() => {
+  state.connector.find((element) => (element.account != undefined)?(element.account.address == account.address):'').listener.open().then(() => {
     enableListeners(account, connect);
   });
 }
 
 const checkListener = () => {
   state.connector.forEach((connect) => {
-    // console.log('Connector for ' + connect.account.address + ': ' + connect.listener.isOpen());
-    // console.log(connect.listener);
     if(!connect.listener.isOpen()){
-      // console.log('open connect again for ' + connect.account.address);
       connect.listener.open();
     }
   });
@@ -74,7 +79,6 @@ setInterval(() => {
 function enableListeners(account, listener){
   // console.log('Connector for ' + account.address + ': ' + listener.isOpen());
   const accountDetail = Address.createFromPublicKey(account.publicAccount.publicKey, account.network);
-  // newBlockListener(accountDetail, listener);
   confirmedListener(accountDetail, listener);
   unconfirmedListener(accountDetail, listener);
   statusListener(accountDetail, listener);
@@ -86,10 +90,11 @@ function enableListeners(account, listener){
 
 // subscribe new block
 // eslint-disable-next-line no-unused-vars
-const newBlockListener = (accountDetail, listener) => {
+const newBlockListener = (listener) => {
+  // console.log(listener);
   // eslint-disable-next-line no-unused-vars
   listener.newBlock().subscribe(blockInfo => {
-    console.log('Confirmed new block ' + blockInfo)
+    chainNetwork.updateBlockHeight(blockInfo);
   }, error => {
       console.error(error);
   }, () => {
@@ -112,19 +117,23 @@ const confirmedListener = (accountDetail, listener) => {
     if(transactions.getNameTypeTransaction(transaction.type) == 'aggregateBonded'){
       let cosigneeCheck = false;
       transaction.cosignatures.forEach((cosignee) => {
-        // console.log(cosignee.signer.address.address);
+        console.log( 'cosignee.signer.address.address: ' + cosignee.signer.address.address);
         const account = wallet.accounts.find((element) => element.address == cosignee.signer.address.address);
-        // console.log(account);
+        console.log('account');
+        console.log(account);
         if(account){
           cosigneeCheck = true;
         }
       });
       if(cosigneeCheck){
         transaction.innerTransactions.forEach((innerTran) => {
+          console.log( 'InnerTran: ' + transactions.getNameTypeTransaction(innerTran.type))
           if(transactions.getNameTypeTransaction(innerTran.type) == 'modifyMultisigAccount'){
             // create multisig account
             // console.log('List multisign account into wallet');
-            multiSign.createNewMultiSigAccount(innerTran.signer);
+            console.log(innerTran.signer.publicKey, innerTran.signer.address.address)
+            // multiSign.createNewMultiSigAccount(innerTran.signer);
+            multiSign.createNewMultiSigAccount(innerTran.signer.publicKey, innerTran.signer.address.address);
             // update multisign info on all accounts
             // multiSign.updateAccountsMultiSign(appStore.state.currentLoggedInWallet.name);
           }
@@ -195,7 +204,7 @@ const statusListener = (accountDetail, listener) => {
 // eslint-disable-next-line no-unused-vars
 const unconfirmedRemovedListener = (accountDetail, listener) => {
   listener.unconfirmedRemoved(accountDetail).subscribe(hash => {
-    // console.log('Unconfirmed removed: ' + hash + ' ' + accountDetail.address);
+    console.log('Unconfirmed removed: ' + hash + ' ' + accountDetail.address);
     transferEmitter.emit('UPDATE_DASHBOARD', {
       status: true,
       from: 'unconfirmedRemoved',
@@ -249,7 +258,7 @@ const aggregateBondedAddedListener = (accountDetail, listener) => {
 // eslint-disable-next-line no-unused-vars
 const aggregateBondedRemovedListener = (accountDetail, listener) => {
   listener.aggregateBondedRemoved(accountDetail).subscribe(hash => {
-    // console.log('Aggregate bonded removed: ' + hash + ' ' + accountDetail.address);
+    console.log('Aggregate bonded removed: ' + hash + ' ' + accountDetail.address);
     transferEmitter.emit('UPDATE_DASHBOARD', {
       status: true,
       from: 'aggregateBondedRemoved',
@@ -264,6 +273,7 @@ const aggregateBondedRemovedListener = (accountDetail, listener) => {
 
 // eslint-disable-next-line no-unused-vars
 const cosignatureAddedListener = (accountDetail, listener) => {
+  console.log('cosignatureAddedListener');
   // eslint-disable-next-line no-unused-vars
   listener.cosignatureAdded(accountDetail).subscribe(cosignatureSignedTransaction => {
     transferEmitter.emit('UNCONFIRMED_NOTIFICATION', {

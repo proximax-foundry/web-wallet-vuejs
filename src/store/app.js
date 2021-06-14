@@ -16,16 +16,16 @@ import { siriusStore, chainNetwork } from '@/store/sirius';
 const sdk = require('tsjs-xpx-chain-sdk');
 
 const config = require("@/../config/config.json");
-
+const walletKey = "sw";
 const name = "Sirius Wallet";
 
 const currentWallet = ref(null);
 
 function getWallets() {
-  if (!localStorage.getItem(config.localStorage.walletKey)) {
-    localStorage.setItem(config.localStorage.walletKey, "[]");
+  if (!localStorage.getItem(walletKey)) {
+    localStorage.setItem(walletKey, "[]");
   }
-  return JSON.parse(localStorage.getItem(config.localStorage.walletKey));
+  return JSON.parse(localStorage.getItem(walletKey));
 }
 
 const state = reactive({
@@ -79,7 +79,15 @@ function getWalletByName(walletName) {
     walletName.includes(" ") === true
       ? walletName.split(" ").join("_")
       : walletName;
-  return state.wallets.find((element) => element.name == walletName && element.networkName == siriusStore.state.chainNetworkName);
+  return state.wallets.find((element) => element.name == walletName && element.networkName === siriusStore.state.chainNetworkName);
+}
+
+function getWalletByNameOnly(walletName) {
+  walletName =
+    walletName.includes(" ") === true
+      ? walletName.split(" ").join("_")
+      : walletName;
+  return state.wallets.find((element) => element.name == walletName);
 }
 
 function getWalletIndexByName(walletName) {
@@ -87,7 +95,22 @@ function getWalletIndexByName(walletName) {
     walletName.includes(" ") === true
       ? walletName.split(" ").join("_")
       : walletName;
-  return state.wallets.findIndex((element) => element.name == walletName && element.networkName == siriusStore.state.chainNetworkName);
+  return state.wallets.findIndex((element) => element.name == walletName && element.networkName === siriusStore.state.chainNetworkName);
+}
+
+// with custom network param
+function getWalletByNameAndNetwork(walletName, networkName) {
+  walletName = walletName.includes(" ") === true ? walletName.split(" ").join("_") : walletName;
+  return state.wallets.find((element) => element.name == walletName && element.networkName === networkName);
+}
+
+function getWalletIndexByNameAndNetwork(walletName, networkName = undefined) {
+  let networkNameToCompare = networkName ? networkName : siriusStore.state.chainNetworkName;
+  walletName =
+    walletName.includes(" ") === true
+      ? walletName.split(" ").join("_")
+      : walletName;
+  return state.wallets.findIndex((element) => element.name == walletName && element.networkName === networkNameToCompare);
 }
 
 /* benjamin lai */
@@ -132,7 +155,7 @@ function importWallet(decryptedData, networkName, networkType){
       state.wallets.push(wallet);
       try {
         localStorage.setItem(
-          config.localStorage.walletKey,
+          walletKey,
           JSON.stringify(state.wallets)
         );
       } catch (err) {
@@ -222,7 +245,7 @@ function addNewWallet(networkName, walletName, password, networkType, privateKey
   state.wallets.push(newWallet);
   try {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
   } catch (err) {
@@ -286,8 +309,8 @@ function verifyWalletPassword(walletName, password){
   return 1;
 }
 
-function deleteWallet(walletName) {
-  const walletIndex = getWalletIndexByName(walletName);
+function deleteWallet(walletName, networkName) {
+  const walletIndex = getWalletIndexByNameAndNetwork(walletName, networkName);
   if (walletIndex == -1) {
     if (config.debug) {
       console.error(
@@ -304,7 +327,7 @@ function deleteWallet(walletName) {
 
   if (state.wallets.splice(walletIndex, 1).length != 0) {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
     return 1;
@@ -350,6 +373,7 @@ function checkFromSession(siriusStore){
     state.isLogin = true;
     stopListening();
     startListening(currentWallet.value.accounts);
+    multiSign.createMultiSigAccount(walletSession.name);
     getXPXBalance(walletSession.name, siriusStore).then(() => {
       sessionStorage.setItem('pageRefresh', 'y');
     });
@@ -415,6 +439,7 @@ function loginToWallet(walletName, password, siriusStore) {
   startListening(wallet.accounts);
   multiSign.updateAccountsMultiSign(walletName);
   multiSign.removeUnrelatedMultiSig(walletName);
+  multiSign.createMultiSigAccount(walletName);
   // get latest xpx amount
   getXPXBalance(walletName, siriusStore).then(()=> {
     try {
@@ -430,6 +455,21 @@ function loginToWallet(walletName, password, siriusStore) {
     }
     return 1;
   });
+}
+
+function updateWalletConfig(wallet){
+  try {
+    sessionStorage.setItem(
+      'currentWalletSession',
+      JSON.stringify(wallet)
+    );
+  } catch (err) {
+    if (config.debug) {
+      console.error("updateAccountState error caught", err);
+    }
+    return 0;
+  }
+  return 1;
 }
 
 function logoutOfWallet() {
@@ -494,7 +534,7 @@ function updateAccountState(account, accountName){
   // update localStorage
   try {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
   } catch (err) {
@@ -506,16 +546,47 @@ function updateAccountState(account, accountName){
   return 1;
 }
 
-function updateCurrentWallet(account){
+function updateCreatedMultiSigToWallet(multisigPublicKey, multisigAddress){
+
   const wallet = getWalletByName(appStore.state.currentLoggedInWallet.name);
+
+  let addressObject = {
+    address: multisigAddress,
+    networktype: chainNetwork.getNetworkType()
+  };
+
+  let publicKeyObj = {
+    publicKey: multisigPublicKey,
+    address: addressObject
+  };
+
+  let account = {
+    default: false,
+    firstAccount: false,
+    address: multisigAddress,
+    name: 'MULTISIG-' + multisigAddress.substr(-4),
+    publicAccount: publicKeyObj,
+    balance: 0,
+    network: chainNetwork.getNetworkType(),
+    isMultisign: null,
+    multisigAccountGraphInfo: null,
+    nis1Account: null,
+    mosaic: [],
+  };
+
   wallet.accounts.push(account);
+  // console.log(account)
+  // console.log(wallet)
+  currentWallet.value = wallet;
+  // console.log(currentWallet.value)
+
   // enable listener
   addListenerstoAccount(account);
   sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
   // update localStorage
   try {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
   } catch (err) {
@@ -527,18 +598,18 @@ function updateCurrentWallet(account){
   return 1;
 }
 
-function updateAccountName(name, oriName){
+function updateAccountName(name, address){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
   const exist_account = wallet.accounts.find((element) => element.name == name.trim());
   const exist_account_index = wallet.accounts.findIndex((element) => element.name == name.trim());
-  const account_index = wallet.accounts.findIndex((element) => element.name == oriName);
+  const account_index = wallet.accounts.findIndex((element) => element.address == address);
 
   if(exist_account && (exist_account_index != account_index)){
     return 2;
   }
 
   // get account
-  const account = wallet.accounts.find((element) => element.name == oriName);
+  const account = wallet.accounts.find((element) => element.address == address);
   if (!account) {
     if (config.debug) {
       console.error("updateAccountName triggered with invalid account name");
@@ -550,7 +621,7 @@ function updateAccountName(name, oriName){
   // update localStorage
   try {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
   } catch (err) {
@@ -573,7 +644,7 @@ function setAccountDefault(address){
   // update localStorage
   try {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
   } catch (err) {
@@ -657,7 +728,7 @@ function deleteAccount(address) {
     currentWallet.value = wallet;
     sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
     return 1;
@@ -676,7 +747,7 @@ function removeMultiSigAccount(accounts){
     currentWallet.value = wallet;
     sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
   }
@@ -718,7 +789,7 @@ function saveContact(contactName, contactAddress){
     // update localStorage
     try {
       localStorage.setItem(
-        config.localStorage.walletKey,
+        walletKey,
         JSON.stringify(state.wallets)
       );
     } catch (err) {
@@ -816,7 +887,7 @@ function updateXPXBalance(walletName, siriusStore){
       const wallet = getWalletByName(walletName);
       currentWallet.value = wallet;
       sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
-      localStorage.setItem(config.localStorage.walletKey, JSON.stringify(state.wallets));
+      localStorage.setItem(walletKey, JSON.stringify(state.wallets));
     } catch (err) {
       if (config.debug) {
         console.error("updateAccountState error caught", err);
@@ -839,15 +910,16 @@ function getFirstAccAdd(){
   return acc.address;
 }
 
-function getFirstAccBalance(address){
+function getBalanceByAddress(address){
   const wallet = getWalletByName(state.currentLoggedInWallet.name);
   const acc = wallet.accounts.find((element) => element.address == address);
   return acc.balance;
+}
 
-  // const address = Address.createFromRawAddress(accountDetails.address);
-  // siriusStore.accountHttp
-  // .getAccountInfo(address)
-  // .subscribe(accountInfo => console.log(accountInfo.balance), err => console.error(err));
+function getFirstAccBalance(){
+  const wallet = getWalletByName(state.currentLoggedInWallet.name);
+  const acc = wallet.accounts.find((element) => element.default == true);
+  return acc.balance;
 }
 
 function displayBalance(){
@@ -946,7 +1018,6 @@ function decryptPrivateKey(password, encryptedKey, iv) {
     encrypted: encryptedKey,
     iv,
   };
-  console.log(common);
   Crypto.passwordToPrivateKey(common, wallet, WalletAlgorithm.Pass_bip32);
   return common.privateKey;
 }
@@ -956,7 +1027,7 @@ function deleteContact(contact){
   const contactIndex = wallet.contacts.findIndex((element) => element.name == contact.name && element.address == contact.address);
   if (wallet.contacts.splice(contactIndex, 1).length != 0) {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
     return 1;
@@ -969,7 +1040,7 @@ function editContact(originalContact, contactName, contactAddress){
   const contactIndex = wallet.contacts.findIndex((element) => element.name == originalContact.name && element.address == originalContact.address);
   if (wallet.contacts.splice(contactIndex, 1).length != 0) {
     localStorage.setItem(
-      config.localStorage.walletKey,
+      walletKey,
       JSON.stringify(state.wallets)
     );
     let status = saveContact(contactName, contactAddress);
@@ -997,6 +1068,8 @@ export const appStore = readonly({
   loginToWallet,
   logoutOfWallet,
   getWalletByName,
+  getWalletIndexByName,
+  getWalletByNameAndNetwork,
   getAccountByWallet,
   checkFromSession,
   getTotalBalance,
@@ -1015,6 +1088,7 @@ export const appStore = readonly({
   getFirstAccName,
   getFirstAccAdd,
   getFirstAccBalance,
+  getBalanceByAddress,
   verifyRecipientInfo,
   // makeTransaction,
   checkAvailableContact,
@@ -1025,9 +1099,12 @@ export const appStore = readonly({
   getAccountPassword,
   verifyExistingAccount,
   verifyPublicKey,
-  updateCurrentWallet,
+  updateCreatedMultiSigToWallet,
   removeMultiSigAccount,
   deleteContact,
   editContact,
+  getXPXBalance,
+  getWalletByNameOnly,
+  updateWalletConfig,
 });
 

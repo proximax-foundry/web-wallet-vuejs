@@ -34,7 +34,10 @@
                 </div>
                 <div class="font-bold border-b border-gray-300 pb-1 mt-5">Transactions ({{ transaction.innerTransactions.length }})</div>
                 <div class="transactionDetailDiv" v-for="(innerTransaction, index ) in transaction.innerTransactions" :key="index">
-                  <modify-multisig-account-type  :innerTransaction = "innerTransaction" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.modifyMultisigAccount.id" />
+                  <transfer :innerTransaction = "innerTransaction" :sender="transaction.signer" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.transfer.id" />
+                  <modify-multisig-account-type :innerTransaction = "innerTransaction" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.modifyMultisigAccount.id" />
+                  <mosaic-definition :innerTransaction = "innerTransaction" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.mosaicDefinition.id"/>
+                  <mosaic-supply-change :innerTransaction = "innerTransaction" :divisibility="divisibility" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.mosaicSupplyChange.id"/>
                 </div>
               </div>
               <div class="block md:w-6/12 md:inline-block">
@@ -74,7 +77,10 @@
 import { computed, getCurrentInstance, inject, ref, watch } from "vue";
 import { transactions } from '../../util/transactions.js';
 import { multiSign } from '../../util/multiSignatory.js';
+import Transfer from '@/components/DashboardModels/SubTransfer.vue';
 import ModifyMultisigAccountType from '@/components/DashboardModels/SubModifyMultisigAccountType.vue';
+import MosaicDefinition from '@/components/DashboardModels/SubMosaicDefinition.vue';
+import MosaicSupplyChange from '@/components/DashboardModels/SubMosaicSupplyChange.vue';
 import PasswordInput from '@/components/PasswordInput.vue'
 // import {
 //   UInt64,
@@ -86,7 +92,10 @@ export default{
 
   components: {
     ModifyMultisigAccountType,
+    MosaicDefinition,
+    MosaicSupplyChange,
     PasswordInput,
+    Transfer,
   },
 
   props: {

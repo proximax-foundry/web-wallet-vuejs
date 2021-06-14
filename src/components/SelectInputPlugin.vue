@@ -17,6 +17,7 @@
           :maxHeight="maxHeight"
           @deselect="$emit('update:modelValue', selected)"
           @select="makeSelection;$emit('update:modelValue', selected);$emit('show-selection', selected)"
+          @clear="$emit('clear-selection')"
         />
       <div class="h-3 mb-2"><div class="error text-left" v-if="selectErr">{{ errorMessage }}</div></div>
     </div>
@@ -35,7 +36,7 @@ export default{
     'modelValue',
   ],
   emits:[
-    'update:modelValue', 'show-selection'
+    'update:modelValue', 'show-selection', 'clear-selection'
   ],
   name: 'SelectInputPlugin',
 
@@ -45,7 +46,7 @@ export default{
     const selectModel = ref(0);
     const selected = ref([]);
     const maxHeight = ref(300);
-    const canDeselect = ref(false);
+    const canDeselect = ref(true);
 
     const clearSelection = () => {
       selectModel.value = 0;

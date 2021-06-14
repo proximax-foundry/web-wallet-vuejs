@@ -2,7 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 
 const routes = [
   {
-    path: '/home',
+    path: '/',
     name: 'Welcome',
     props: true,
     component: () => import('@/views/Welcome.vue'),
@@ -104,7 +104,7 @@ const routes = [
     }
   },
   {
-    path: '/details-account/:name',
+    path: '/details-account/:address',
     name: 'ViewAccountDetails',
     props: true,
     component: () => import('@/views/ViewAccountDetails.vue'),

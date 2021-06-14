@@ -34,11 +34,11 @@
           </div>
           <div class="text-left p-3 pb-0 border-l-8 border-gray-100">
             <div class="bg-gray-100 rounded-2xl p-3">
-              <div class="inline-block mr-4 text-tsm"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ appStore.getFirstAccBalance(selectedAccAdd) }} XPX</span></div>
+              <div class="inline-block mr-4 text-tsm"><img src="../assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ appStore.getBalanceByAddress(selectedAccAdd) }} XPX</span></div>
             </div>
           </div>
           <NumberInput :disabled="disabledDivisibility" v-model="divisibility" max="6" placeholder="Divisibility" title="Divisibility" type="text" icon="coins" :showError="showDivisibilityErr" errorMessage="Required Field - Only Numbers (0 - 6)" class="mt-5" />
-          <SupplyInput :disabled="disabledSupply" v-model="supply" title="Supply" :balance="Number(appStore.getFirstAccBalance(selectedAccAdd))" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" :decimal="Number(supplyPrecision)" />
+          <SupplyInput :disabled="disabledSupply" v-model="supply" title="Supply" :balance="Number(appStore.getBalanceByAddress(selectedAccAdd))" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" :decimal="Number(supplyPrecision)" />
           <!-- <div class="text-center p-3 pb-3 border-l-8 border-gray-100">
             <div class="rounded-2xl bg-gray-100 p-5">
               <input id="month" type="radio" value="month" name="durationOption" v-model="durationOption" :disabled="disabledDuration" /><label for="month" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Month</label>
@@ -91,7 +91,7 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
 import NumberInput from '@/components/NumberInput.vue';
 import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
-import { mosaicTransaction, convertToCurrency } from '../util/transfer.js';
+import { mosaicTransaction, convertToCurrency, convertToExact } from '../util/transfer.js';
 import NotificationModal from '@/components/NotificationModal.vue';
 
 export default {
@@ -139,6 +139,8 @@ export default {
     const durationCheckDisabled = ref(false);
 
     const currencyName = computed(() => chainNetwork.getCurrencyName());
+    const rentalFee = computed(()=> convertToExact(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
+    const rentalFeeCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
 
     const disableCreate = computed(() => !(
       walletPassword.value.match(passwdPattern) && !disabledMutableCheck.value && (divisibility.value != '') && (supply.value > 0) && (!showDurationErr.value)
@@ -146,11 +148,13 @@ export default {
 
     const selectedAccName = ref(appStore.getFirstAccName());
     const selectedAccAdd = ref(appStore.getFirstAccAdd());
-    const balance = ref(appStore.getFirstAccBalance(selectedAccAdd.value));
+    const balance = computed( () => {
+      return appStore.getBalanceByAddress(selectedAccAdd.value)
+    });
     // balance.value = appStore.getFirstAccBalance();
 
     const showNoBalance = ref(false);
-    if(balance.value < 10000){
+    if(balance.value < rentalFee.value){
       showNoBalance.value = true;
       disabledMutableCheck.value = true;
       disabledTransferableCheck.value = true;
@@ -180,7 +184,7 @@ export default {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
       balance.value = i.balance;
-      (balance.value < 10000)?showNoBalance.value = true:showNoBalance.value = false;
+      (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
     }
@@ -208,7 +212,7 @@ export default {
     });
 
     watch(balance, (n) => {
-      if(n < 10000){
+      if(n < rentalFee.value){
         showNoBalance.value = true;
         disabledMutableCheck.value = true;
         disabledTransferableCheck.value = true;
@@ -261,9 +265,6 @@ export default {
         clearInput();
       }
     };
-
-    const rentalFee = computed(()=> convertToExact(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
-    const rentalFeeCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
 
     emitter.on("CLOSE_NOTIFICATION", payload => {
       toggleAnounceNotification.value = payload;

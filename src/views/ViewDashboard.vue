@@ -79,6 +79,7 @@ export default {
   setup(){
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
+    // const chainNetwork = inject("chainNetwork");
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
@@ -117,19 +118,22 @@ export default {
 
     // get USD conversion
     const currencyConvert = ref(0);
-    console.log(appStore.state.currentLoggedInWallet.name)
     const getCurrencyConvert = () => {
-      let balance = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
-      currencyconverter(balance).then((total) => {
-        currencyConvert.value = total.toFixed(6);
-      });
+      if (appStore.state.currentLoggedInWallet) {
+        let balance = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
+        currencyconverter(balance).then((total) => {
+          currencyConvert.value = total.toFixed(6);
+        });
+      }
     };
     getCurrencyConvert();
     watch(primaryAccountBalance, () => {
-      let balance = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
-      currencyconverter(balance).then((total) => {
-        currencyConvert.value = total.toFixed(6);
-      });
+      if (appStore.state.currentLoggedInWallet) {
+        let balance = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
+        currencyconverter(balance).then((total) => {
+          currencyConvert.value = total.toFixed(6);
+        });
+      }
     });
 
     const confirmedTransactions = ref([]);

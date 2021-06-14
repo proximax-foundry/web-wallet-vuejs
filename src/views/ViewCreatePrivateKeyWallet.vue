@@ -83,10 +83,10 @@
         <div class="inline-block mt-10 w-full">
           <div class="grid xs:grid-cols-1 md:grid-cols-3">
             <div class="px-5 self-center">
-              <a href="#" class="block big-default-btn my-3 self-center w-full" @click="showPK = !showPK">{{ showPK?'Hide':'Show' }} Private Key</a>
+              <a class="block big-default-btn my-3 self-center w-full" @click="showPK = !showPK">{{ showPK?'Hide':'Show' }} Private Key</a>
             </div>
             <div class="px-5">
-              <a href="#" class="block big-default-btn my-3 self-center w-full">Save Paper Wallet</a>
+              <a class="block big-default-btn my-3 self-center w-full">Save Paper Wallet</a>
             </div>
             <div class="px-5 self-center"><router-link :to="{name: 'Welcome'}" class="block big-default-btn my-3 self-center">Continue</router-link></div>
           </div>

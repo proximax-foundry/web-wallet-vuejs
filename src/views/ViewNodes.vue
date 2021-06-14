@@ -12,7 +12,7 @@
         <img src="../assets/img/icon-block-height-blue-30h.svg" class="h-7 w-7 inline-block ml-4">
         <div class="ml-2 text-tsm mt-1 text-gray-500 w-30 inline-block">Block Height</div>
       </div>
-      <input disabled="disabled"  class="text-placeholder bg-white text-right">
+      <input disabled="disabled" v-model="blockHeight" class="text-placeholder bg-white text-right">
       <div class="w-5"></div>
     </div>
 
@@ -21,7 +21,7 @@
         <img src="../assets/img/icon-nodes-blue-60h.svg" class="h-7 w-7 inline-block ml-4">
         <div class="ml-2 text-tsm mt-1 text-gray-500 w-30 inline-block">Current Node</div>
       </div>
-      <input disabled="disabled"  class="text-placeholder bg-white text-right">
+      <input disabled="disabled" v-model="currentNode" class="text-placeholder bg-white text-right">
       <div class="w-5"></div>
     </div>
 
@@ -54,24 +54,31 @@
         </Multiselect>
       </div>
     </div>
+    <NotificationModal :toggleModal="toggleNotification" msg="Node updated" notiType="noti" time='2500' />
   </div>
 </template>
-<script>
+<script lang="ts">
 import Multiselect from '@vueform/multiselect';
-import { computed, inject, ref } from "vue";
+import { computed, ref, getCurrentInstance } from "vue";
+import { startListening, stopListening } from '../util/listener.js';
+import NotificationModal from '@/components/NotificationModal.vue';
+import { networkState } from "../state/networkState"
+import { walletState } from "../state/walletState"
+import { NetworkStateUtils } from "../state/utils/networkStateUtils"
+import { ChainAPICall } from '@/models/REST/chainAPICall';
+import { WalletUtils } from '@/util/walletUtils';
 
 export default {
   name: 'ViewNodes',
 
   components: {
-    Multiselect
+    Multiselect,
+    NotificationModal,
   },
 
   setup() {
-    // const internalInstance = getCurrentInstance();
-    // const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
     const showSelectTitle = ref(false);
     // const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
     const borderColor = ref('border border-gray-300');
@@ -79,21 +86,33 @@ export default {
     const canDeselect = ref(false);
     const maxHeight = ref(200);
     const selected = ref('');
+    const toggleNotification = ref(false);
+
+    interface nodeListInterface{
+      value: string,
+      name: string
+    }
 
     const options = computed(() => {
-      let nodeList = [];
-      siriusStore.getChainNodes().forEach((node) => {
-        let link = (location.protocol == "http:" ? node.protocol : node.sslProtocol) + "://" + node.hostname + (location.protocol == "http:" ?(':' + node.port):'');
-        nodeList.push({ value: node.hostname, name: link });
+      let nodeList: nodeListInterface[] = [];
+      networkState.currentNetworkProfile?.apiNodes.forEach((node) => {
+        nodeList.push({ value: node, name: NetworkStateUtils.buildAPIEndpointURL(node) });
       });
-      console.log(nodeList)
       return nodeList;
     });
 
+    const currentNode = computed(() => NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
+    const blockHeight = computed(() => networkState.blockHeight);
+
     const makeNodeSelection = (e) => {
-      showSelectTitle.value = true;
-      // selectNewChainNode()
-      console.log(e)
+      if(e != networkState.selectedAPIEndpoint){
+        showSelectTitle.value = true;
+        NetworkStateUtils.updateChainNode(e);
+        stopListening();
+        startListening(walletState.currentLoggedInWallet?.accounts);
+        WalletUtils.getTotalBalanceWithCurrentNetwork();
+        toggleNotification.value = true;
+      }
     };
 
     const closeSelection =() => {
@@ -106,9 +125,14 @@ export default {
       showSelectTitle.value = false;
     };
 
+    emitter.on("CLOSE_NOTIFICATION", payload => {
+      toggleNotification.value = payload;
+    });
+
+    // var dataBridgeInstance = new DataBridgeService();
+    // dataBridgeInstance.connectBlockSocket();
+
     return {
-      appStore,
-      // wallet,
       selected,
       showSelectTitle,
       borderColor,
@@ -118,6 +142,9 @@ export default {
       options,
       makeNodeSelection,
       closeSelection,
+      currentNode,
+      blockHeight,
+      toggleNotification,
     };
   },
 }
