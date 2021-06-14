@@ -28,7 +28,11 @@ import headerComponent from '@/components/headerComponent.vue'
 // import PageComponent from '@/components/PageComponent.vue'
 import NavigationMenu from '@/components/NavigationMenu.vue'
 
+<<<<<<< HEAD
 export default{
+=======
+export default {
+>>>>>>> 6441db2... v 0.0.10 bug fixes
   name: 'App',
   components: {
     headerComponent,

@@ -116,7 +116,7 @@ function getWalletIndexByNameAndNetwork(walletName, networkName = undefined) {
 // with custom network param
 function getWalletByNameAndNetwork(walletName, networkName) {
   walletName = walletName.includes(" ") === true ? walletName.split(" ").join("_") : walletName;
-  return state.wallets.find((element) => element.name == walletName && element.networkName == networkName);
+  return state.wallets.find((element) => element.name == walletName && element.networkName === networkName);
 }
 
 function getWalletIndexByNameAndNetwork(walletName, networkName = undefined) {
@@ -125,7 +125,7 @@ function getWalletIndexByNameAndNetwork(walletName, networkName = undefined) {
     walletName.includes(" ") === true
       ? walletName.split(" ").join("_")
       : walletName;
-  return state.wallets.findIndex((element) => element.name == walletName && element.networkName == networkNameToCompare);
+  return state.wallets.findIndex((element) => element.name == walletName && element.networkName === networkNameToCompare);
 }
 
 /* benjamin lai */
@@ -1119,5 +1119,7 @@ export const appStore = readonly({
   deleteContact,
   editContact,
   getXPXBalance,
+  getWalletByNameOnly,
+  updateWalletConfig,
 });
 
