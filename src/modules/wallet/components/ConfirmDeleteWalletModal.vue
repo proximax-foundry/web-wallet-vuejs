@@ -40,13 +40,16 @@
   </div>
 </template>
 
-<script>
-import { computed, ref, inject } from 'vue';
+<script lang="ts">
+import { computed, ref } from 'vue';
+import { Wallets } from "@/models/wallets";
+import { WalletStateUtils } from '@/state/utils/walletStateUtils';
+import { networkState } from "@/state/networkState";
 import { useRouter } from 'vue-router';
 
 export default{
   name: 'ConfirmDeleteWalletModal',
-  props:['name', 'networkName'],
+  props:['name'],
   data() {
     return {
       toggleModal: false,
@@ -54,7 +57,6 @@ export default{
   },
 
   setup(p){
-    const appStore = inject("appStore");
     const router = useRouter();
     const err = ref("");
     const readCheck = ref(false);
@@ -64,12 +66,11 @@ export default{
       )
     );
     const deleteWallet = () => {
-      var a = appStore.deleteWallet(p.name, p.networkName);
-      if(a>0){
-        // this.emitter.emit("DELETE_WALLET", true);
+      let walletInstance = new Wallets();
+      let removeWalletStatus = walletInstance.removeWalletByNetworkNameAndName(networkState.chainNetworkName, p.name)
+      if(removeWalletStatus){
+        WalletStateUtils.refreshWallets();
         router.push({ name: 'ViewWallets', params: {deleteWallet: 'success' } });
-      }else if(a == 0){
-        err.value = "Password is incorrect.";
       }else{
         err.value = "Unable to remove wallet";
       }

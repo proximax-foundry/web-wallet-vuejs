@@ -2,7 +2,7 @@
   <div class="container mx-auto text-center">
     <h1 class="font-bold big-title mt-20">Wallets</h1>
     <div class='mt-2 py-3 gray-line'>
-      <p>These are the {{siriusStore.state.chainNetworkName}} Wallets available in the local storage of your device.</p>
+      <p>These are the {{ networkState.chainNetworkName }} Wallets available in the local storage of your device.</p>
       <div v-if="wallets.length == 0" class="text-center h4 my-2">
         No wallets found
       </div>
@@ -10,7 +10,7 @@
         <WalletTile :key="item.name" v-for="item in wallets" :wallet="item" />
       </div>
     </div>
-    <div class="mt-32" v-if="!appStore.state.currentLoggedInWallet">
+    <div class="mt-32" v-if="!walletState.currentLoggedInWallet">
       <router-link :to="{ name : 'Home'}" class="blue-btn p-3 px-5">Home</router-link>
     </div>
   </div>
@@ -19,7 +19,8 @@
 <script>
 import { computed, inject } from "vue";
 import WalletTile from '@/modules/wallet/components/WalletTile.vue';
-
+import { networkState } from "@/state/networkState";
+import { walletState } from '@/state/walletState';
 import { useToast } from "primevue/usetoast";
 
 export default {
@@ -32,11 +33,9 @@ export default {
   },
   setup(p) {
     const toast = useToast();
-    const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
     const wallets = computed(
       () =>{
-        var wallet = appStore.state.wallets.filter((i)=> i.networkName === siriusStore.state.chainNetworkName);
+        var wallet = walletState.wallets.filterByNetworkName(networkState.chainNetworkName);
         return wallet;
       }
     );
@@ -47,8 +46,8 @@ export default {
 
     return {
       wallets,
-      appStore,
-      siriusStore,
+      walletState,
+      networkState,
     };
   },
 }

@@ -10,7 +10,7 @@
         <div class="w-10/12 lg:w-8/12 self-center inline-block">
           <div class="error error_box" v-if="err!=''">{{ err }}</div>
           <div class="text-left text-tsm my-4 ml-4 text-gray-600"><b>Network</b>: {{ selectedNetworkName }}</div>
-          <PasswordInput placeholder="Private Key" errorMessage="Invalid private key" icon="key" v-model="privKey" class="ml-1" />
+          <PasswordInput placeholder="Private Key" errorMessage="Invalid private key" icon="key" v-model="privateKeyInput" class="ml-1" />
           <label class="inline-flex items-center mb-5">
               <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="nis1Swap">
             <span class="ml-2 cursor-pointer">Check this box if you wish to swap with this private key.</span>
@@ -96,14 +96,21 @@
   </div>
 </template>
 
-<script>
-import { computed, inject, ref, getCurrentInstance } from 'vue';
+<script lang="ts">
+import { computed, defineComponent, ref } from 'vue';
+import { useToast } from "primevue/usetoast";
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
-import { copyKeyFunc } from '@/util/functions.js';
-import { useToast } from "primevue/usetoast";
+import { copyKeyFunc } from '@/util/functions';
+import { Wallet } from "@/models/wallet";
+import { Wallets } from "@/models/wallets";
+import { WalletAccount } from "@/models/walletAccount";
+import { WalletUtils } from '@/util/walletUtils';
+import { WalletStateUtils } from '@/state/utils/walletStateUtils';
+import { ChainUtils } from '@/util/chainUtils';
+import { networkState } from "@/state/networkState";
 
-export default {
+export default defineComponent({
   name: 'ViewWalletCreatePrivateKey',
   components: {
     TextInput,
@@ -117,33 +124,26 @@ export default {
 
   setup(){
     const toast = useToast();
-    const internalInstance = getCurrentInstance();
-    const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
-    const chainNetwork = inject("chainNetwork");
-    const selectedNetwork = computed(()=> chainNetwork.getNetworkType());
-    const selectedNetworkName = computed(()=> siriusStore.state.chainNetworkName );
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const selectedNetwork = computed(()=> ChainUtils.getNetworkType(networkState.chainNetwork));
+    const selectedNetworkName = computed(()=> networkState.chainNetworkName );
     const err = ref("");
-    const newWallet = ref("");
-    // const selectedNetwork = ref("168");
-    // const networks = ref(siriusStore.state.network);
+    const newWallet = ref<unknown>("");
     const walletName = ref("");
     const passwd = ref("");
     const privateKey = ref("");
     const confirmPasswd = ref("");
     const nis1Swap = ref(false);
-    const privKey = ref("");
+    const privateKeyInput = ref("");
     const showPasswdError = ref(false);
     const privKeyPattern = "^(0x|0X)?[a-fA-F0-9].{63,65}$";
     const passwdPattern = "^[^ ]{8,}$";
-    const copy = (id) => copyKeyFunc(id, toast);
+    const copy = (id) => copyKeyFunc(id);
     const disableCreate = computed(
       () => !(
         walletName.value !== "" &&
           passwd.value.match(passwdPattern) &&
           confirmPasswd.value === passwd.value &&
-          privKey.value.match(privKeyPattern)
+          privateKeyInput.value.match(privKeyPattern)
       )
     );
 
@@ -152,41 +152,36 @@ export default {
       () => (confirmPasswd.value != passwd.value && confirmPasswd.value != '')
     );
 
-    const createWallet = async () => {
-      // loading.value = true;
+    const createWallet = () => {
       err.value = "";
       let result = 0;
+      let wallets = new Wallets();
 
-      result = appStore.addNewWallet(
-        siriusStore.state.chainNetworkName,
-        walletName.value,
-        passwd.value,
-        selectedNetwork.value,
-        privKey.value
-      );
-      if (result === -1) {
+      if(wallets.filterByNetworkNameAndName(selectedNetworkName.value, walletName.value)){
         err.value = "Wallet name is already taken";
-      } else if (result === 0) {
-        err.value =
-          "Unable to create wallet. Your device storage might be full";
-      } else {
-        privateKey.value = result;
-        newWallet.value =
-          appStore.state.wallets[appStore.state.wallets.length - 1];
+      }else{
+        let password = WalletUtils.createPassword(passwd.value);
+        const wallet = WalletUtils.createAccountFromPrivateKey(walletName.value, password, privateKeyInput.value, selectedNetwork.value);
+        const account = wallet.open(password);
+        let walletAccounts: WalletAccount[] = [];
+        let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.address['address'], "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
+        walletAccounts.push(walletAccount);
+        let newWalletInstance = new Wallet(walletName.value, selectedNetworkName.value, walletAccounts);
+        
+        wallets.wallets.push(newWalletInstance);
+        wallets.savetoLocalStorage();
+        privateKey.value = privateKeyInput.value;
+        newWallet.value = newWalletInstance;
+        WalletStateUtils.refreshWallets();
       }
-
-      // loading.value = false;
     };
 
     const clearInput = () => {
       walletName.value = '';
       passwd.value = "";
       confirmPasswd.value = "";
-      privKey.value = "";
+      privateKeyInput.value = "";
       nis1Swap.value = false;
-      emitter.emit("CLEAR_SELECT", 0);
-      emitter.emit("CLEAR_TEXT", "");
-      emitter.emit("CLEAR_PASSWORD", "");
     };
 
     return {
@@ -194,12 +189,11 @@ export default {
       newWallet,
       selectedNetwork,
       selectedNetworkName,
-      // networks,
       walletName,
       passwd,
       confirmPasswd,
       nis1Swap,
-      privKey,
+      privateKeyInput,
       privateKey,
       showPasswdError,
       showConfirmPasswdError,
@@ -211,5 +205,5 @@ export default {
       copy
     };
   },
-}
+});
 </script>

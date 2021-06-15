@@ -26,13 +26,13 @@
 </template>
 
 <script>
-
-export default {
+import { defineComponent } from 'vue';
+export default defineComponent({
   name: 'SignInSiriusIDModal',
   data() {
     return {
       toggleModal: false
     };
   },
-}
+});
 </script>

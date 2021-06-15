@@ -30,11 +30,11 @@ const app = createApp(App);
 const emitter = mitt();
 
 app.config.globalProperties.emitter = emitter;
-app.use(router).mount('#app');
+app.use(router);
 app.use(PrimeVue);
 app.use(ConfirmationService);
 app.use(ToastService);
-
+app.mount('#app');
 // Use Components
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('Toast', Toast);
@@ -131,7 +131,7 @@ chainProfileIntegration();
 if (!walletState.currentLoggedInWallet) {
   // check sessionStorage
   if(!WalletStateUtils.checkFromSession()){
-    router.push({ name: "Welcome"});
+    router.push({ name: "Home"});
   }
 }
 

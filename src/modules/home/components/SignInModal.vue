@@ -11,7 +11,7 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
           </div>
           <div class="w-104">
-            <h1 class="default-title font-bold my-10">Sign in to {{siriusStore.state.chainNetworkName}} Wallet</h1>
+            <h1 class="default-title font-bold my-10">Sign in to {{networkState.chainNetworkName}} Wallet</h1>
             <form @submit.prevent="login">
               <fieldset class="w-full">
                 <div class="error error_box" v-if="err!=''">{{ err }}</div>
@@ -32,12 +32,16 @@
 </template>
 
 <script>
-import { computed, getCurrentInstance, inject, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, ref } from 'vue';
 import { useRouter } from "vue-router";
-import SelectInputPlugin from '@/components/SelectInputPlugin.vue'
-import PasswordInput from '@/components/PasswordInput.vue'
+import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
+import PasswordInput from '@/components/PasswordInput.vue';
+import { networkState } from "@/state/networkState";
+import { walletState } from '@/state/walletState';
+import { WalletUtils } from '@/util/walletUtils';
+import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 
-export default{
+export default defineComponent({
   name: 'SignInModal',
   data() {
     return {
@@ -48,8 +52,6 @@ export default{
   setup(){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
     const router = useRouter();
     const err = ref("");
     const walletPassword = ref("");
@@ -77,10 +79,7 @@ export default{
     const wallets = computed(
       () =>{
         var w = [];
-        appStore.state.wallets.forEach((wallet)=>{
-          if(wallet.networkName !== siriusStore.state.chainNetworkName){
-            return;
-          }
+        walletState.wallets.filterByNetworkName(networkState.chainNetworkName).forEach((wallet)=>{
           w.push({
             value: wallet.name,
             label: wallet.name,
@@ -96,20 +95,22 @@ export default{
     );
 
     const login = () => {
-
-      var result = appStore.loginToWallet(selectedWallet.value, walletPassword.value, siriusStore);
+      var result = WalletUtils.verifyWalletPassword(selectedWallet.value, networkState.chainNetworkName, walletPassword.value);
       if (result == -1) {
         err.value = "Invalid wallet name";
       } else if (result == 0) {
         err.value = "Invalid password";
       } else {
+        // let wallets = new Wallets();
+        let wallet = walletState.wallets.filterByNetworkNameAndName(networkState.chainNetworkName, selectedWallet.value);
+        WalletStateUtils.updateLoggedIn(wallet);
         router.push({ path: "/dashboard"});
         // router.push({ path: "/create-transfer"});
       }
     };
 
     return{
-      siriusStore,
+      networkState,
       err,
       wallets,
       walletPassword,
@@ -126,5 +127,5 @@ export default{
     SelectInputPlugin,
     PasswordInput
   }
-}
+});
 </script>

@@ -55,20 +55,28 @@
   </div>
 </template>
 
-<script>
-import { computed, inject, ref, getCurrentInstance, watch } from 'vue';
+<script lang="ts">
+import { computed, defineComponent, ref, getCurrentInstance, watch } from 'vue';
 import DashboardDataTable from '@/modules/dashboard/components/DashboardDataTable.vue';
 import PartialDashboardDataTable from '@/components/PartialDashboardDataTable.vue';
 import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
-import { copyKeyFunc, currencyconverter } from '@/util/functions.js';
+import { copyKeyFunc, currencyconverter } from '@/util/functions';
 import { transactions } from '@/util/transactions.js';
 // eslint-disable-next-line no-unused-vars
 import { PublicAccount, Order, QueryParams } from "tsjs-xpx-chain-sdk";
 import { transferEmitter } from '@/util/listener.js';
 import { useToast } from "primevue/usetoast";
+import { Wallet } from "@/models/wallet";
+import { walletState } from '@/state/walletState';
+import { ChainUtils } from '@/util/chainUtils';
+import { networkState } from "@/state/networkState";
+import { AccountAPI } from '@/models/REST/account';
+import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
+// import { dashboardUtils } from '@/util/dashboardUtils';
+// import { ConfirmedTransaction, UnconfirmedTransaction, AggregateBondedTransaction, contactInterface } from '@/models/interface/transaction';
 
 
-export default {
+export default defineComponent({
   name: 'ViewDashboard',
   components: {
     DashboardDataTable,
@@ -78,202 +86,200 @@ export default {
 
   setup(){
     const toast = useToast();
-    const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
+    // const appStore = inject("appStore");
+    // const siriusStore = inject("siriusStore");
     // const chainNetwork = inject("chainNetwork");
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
 
     const openSetDefaultModal = ref(false);
 
-    const copy = (id) => copyKeyFunc(id, toast);
+    const copy = (id) => copyKeyFunc(id);
     const primaryAccount = computed(
       () => {
-          if (appStore.state.currentLoggedInWallet) {
-            return appStore.pretty(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).address);
-          }else{
-            return 0;
-          }
+        // if (appStore.state.currentLoggedInWallet) {
+        //   return appStore.pretty(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).address);
+        // }else{
+        //   return 0;
+        // }
+        if (walletState.currentLoggedInWallet) {
+          let wallet = new Wallet(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletState.currentLoggedInWallet.accounts);
+          return wallet.selectDefaultAccount.name;
+        }else{
+          return '';
+        }
       }
     );
 
     const primaryAccountBalance = computed(
-      () => {
-          if (appStore.state.currentLoggedInWallet) {
-            return appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
-          }else{
-            return 0;
-          }
+      () => {          
+        return '[balance]';
       }
     );
 
     const primaryAccountName = computed(
       () => {
-          if (appStore.state.currentLoggedInWallet) {
-            return appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).name;
-          }else{
-            return 0;
-          }
+        return '[name]';
       }
     );
 
     // get USD conversion
-    const currencyConvert = ref(0);
+    const currencyConvert = ref('0');
     const getCurrencyConvert = () => {
-      if (appStore.state.currentLoggedInWallet) {
-        let balance = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
-        currencyconverter(balance).then((total) => {
-          currencyConvert.value = total.toFixed(6);
-        });
-      }
+      currencyConvert.value = '[total.toFixed(6)]';
     };
     getCurrencyConvert();
-    watch(primaryAccountBalance, () => {
-      if (appStore.state.currentLoggedInWallet) {
-        let balance = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
-        currencyconverter(balance).then((total) => {
-          currencyConvert.value = total.toFixed(6);
-        });
-      }
-    });
+    // watch(primaryAccountBalance, () => {
+    //   let balance = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
+    //   currencyconverter(balance).then((total) => {
+    //     currencyConvert.value = total.toFixed(6);
+    //   });
+    // });
 
-    const confirmedTransactions = ref([]);
-    const unconfirmedTransactions = ref([]);
-    const aggregateBondedTransactions = ref([]);
-    const pageSize = 10;
-    const isShowConfirmed = ref(true);
-    const isShowUnconfirmed = ref(false);
-    const isShowAggregateBonded = ref(false);
+    
 
-    const clickConfirmedTransaction = () => {
-      isShowConfirmed.value = true;
-      isShowUnconfirmed.value = false;
-      isShowAggregateBonded.value = false;
-    };
+    // const confirmedTransactions = ref<ConfirmedTransaction[]>([]);
+    // const unconfirmedTransactions = ref<UnconfirmedTransaction[]>([]);
+    // const aggregateBondedTransactions = ref<AggregateBondedTransaction[]>([]);
+    // const pageSize:number = 10;
+    // const isShowConfirmed = ref(true);
+    // const isShowUnconfirmed = ref(false);
+    // const isShowAggregateBonded = ref(false);
 
-    const clickUnconfirmedTransaction = () => {
-      if(unconfirmedTransactions.value.length > 0){
-        isShowUnconfirmed.value = true;
-        isShowConfirmed.value = false;
-        isShowAggregateBonded.value = false;
-      }
-    };
+    // const clickConfirmedTransaction = () => {
+    //   isShowConfirmed.value = true;
+    //   isShowUnconfirmed.value = false;
+    //   isShowAggregateBonded.value = false;
+    // };
 
-    const clickAggregateBondedTransactions = () => {
-      if(aggregateBondedTransactions.value.length > 0){
-        isShowAggregateBonded.value = true;
-        isShowConfirmed.value = false;
-        isShowUnconfirmed.value = false;
-      }
-    };
+    // const clickUnconfirmedTransaction = () => {
+    //   if(unconfirmedTransactions.value.length > 0){
+    //     isShowUnconfirmed.value = true;
+    //     isShowConfirmed.value = false;
+    //     isShowAggregateBonded.value = false;
+    //   }
+    // };
 
-    const generateNames = () => {
-      const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
-      var contact = [];
-      var accountCount = wallet.accounts.length;
-      wallet.accounts.forEach((element, index) => {
-        contact.push({
-          address: element.address,
-          name: element.name + ' - Owner\'s account',
-          id: (index + 1),
-        });
-      });
-      if(wallet.contacts!=undefined){
-        wallet.contacts.forEach((element, index) => {
-          contact.push({
-            address: element.address,
-            name: element.name + ' - Contact',
-            id: (accountCount + index + 1),
-          });
-        });
-      }
-      return contact;
-    }
-    let names = generateNames();
+    // const clickAggregateBondedTransactions = () => {
+    //   if(aggregateBondedTransactions.value.length > 0){
+    //     isShowAggregateBonded.value = true;
+    //     isShowConfirmed.value = false;
+    //     isShowUnconfirmed.value = false;
+    //   }
+    // };
 
-    const getTransaction = (publicAccount, item, pageSize, lastId = null) => {
-      let order = Order.ASC;
-      let qp = new QueryParams(pageSize, lastId, order);
-      let lastTransactionID = lastId;
-      // format names
+    // const generateNames = () => {
+    //   // let wallet = new Wallet(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletState.currentLoggedInWallet.accounts);
+    //   if (walletState.currentLoggedInWallet) {
 
-      siriusStore.accountHttp.transactions(publicAccount, qp).subscribe(tx => {
-        if( tx.length > 0 ){
-          tx.forEach((t)=>{
-            // console.log(t)
-            let formattedTransaction = transactions.formatTransaction(t, names);
-            confirmedTransactions.value.push(formattedTransaction);
-            lastTransactionID = t.transactionInfo.id;
-          })
-        }
-        if(tx.length == pageSize){
-          // run again
-          getTransaction(publicAccount, item, pageSize, lastTransactionID);
-        }
-      }, error => {
-        console.error(error);
-      });
-    };
+    //     let contact : Array<contactInterface> = [];
+    //     var accountCount = walletState.currentLoggedInWallet.accounts.length;
+    //     walletState.currentLoggedInWallet.accounts.forEach((element, index) => {
+    //       contact.push({
+    //         address: element.address,
+    //         name: element.name + ' - Owner\'s account',
+    //         id: (index + 1),
+    //       });
+    //     });
+    //     if(walletState.currentLoggedInWallet.contacts!=undefined){
+    //       walletState.currentLoggedInWallet.contacts.forEach((element, index) => {
+    //         contact.push({
+    //           address: element.address,
+    //           name: element.name + ' - Contact',
+    //           id: (accountCount + index + 1),
+    //         });
+    //       });
+    //     }
+    //     return contact;
+    //   }else{
+    //     return '';
+    //   }
+    // };
+    // let names = generateNames();
 
-    const getUnconfirmedTransaction = (publicAccount, item, pageSize, lastId = null) => {
-      let order = Order.ASC;
-      let qp = new QueryParams(pageSize, lastId, order);
-      let lastTransactionID = lastId;
-      siriusStore.accountHttp.unconfirmedTransactions(publicAccount, qp).subscribe(tx => {
-        if( tx.length > 0 ){
-          tx.forEach((t)=>{
-            let formattedTransaction = transactions.formatTransaction(t, names);
-            unconfirmedTransactions.value.push(formattedTransaction);
-            lastTransactionID = t.transactionInfo.id;
-          })
-        }
-        if(tx.length == pageSize){
-          // run again
-          getUnconfirmedTransaction(publicAccount, item, pageSize, lastTransactionID);
-        }
-      }, error => {
-        console.error(error);
-      });
-    };
+    // let accountApiInstance = new AccountAPI(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
 
-    const getAggregateBondedTransaction = (publicAccount, item, pageSize, lastId = null) => {
-      let order = Order.ASC;
-      let qp = new QueryParams(pageSize, lastId, order);
-      let lastTransactionID = lastId;
-      siriusStore.accountHttp.aggregateBondedTransactions(publicAccount, qp).subscribe(tx => {
-        // console.log('AggregateBonded - partial length: ' + tx.length);
-        if( tx.length > 0 ){
-          tx.forEach((t)=>{
-            // console.log(t)
-            let formattedTransaction = transactions.formatAggregateBondedTransaction(t, names);
-            aggregateBondedTransactions.value.push(formattedTransaction);
-            lastTransactionID = t.transactionInfo.id;
-          });
-        }
-        if(tx.length == pageSize){
-          // run again
-          getAggregateBondedTransaction(publicAccount, item, pageSize, lastTransactionID);
-        }
-      }, error => {
-        console.error(error);
-      });
-    };
+    // const getTransaction = (publicAccount, item, pageSize:number, lastId:string = '') => {
+    //   let order = Order.ASC;
+    //   let qp = new QueryParams(pageSize, lastId, order);
+    //   let lastTransactionID = lastId;
+    //   // format names
+    //   accountApiInstance.transactions(publicAccount, qp).then(tx => {
+    //     if( tx.length > 0 ){
+    //       tx.forEach((t)=>{
+    //         let formattedTransaction = dashboardUtils.formatTransaction(t, names);
+    //         confirmedTransactions.value.push(formattedTransaction);
+    //         // lastTransactionID = t.transactionInfo.id;
+    //         lastTransactionID = null;
+    //       })
+    //     }
+    //     if(tx.length == pageSize){
+    //       // run again
+    //       getTransaction(publicAccount, item, pageSize, lastTransactionID);
+    //     }
+    //   }, error => {
+    //     console.error(error);
+    //   });
+    // };
 
-    // eslint-disable-next-line no-unused-vars
-    const getConfirmedAllTransactions = () => {
-      const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
-      const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
-      wallet.accounts.forEach((item) => {
-        const publicAccount = PublicAccount.createFromPublicKey(item.publicAccount.publicKey, networkType);
-        getTransaction(publicAccount, item, pageSize);
-        getUnconfirmedTransaction(publicAccount, item, pageSize);
-        getAggregateBondedTransaction(publicAccount, item, pageSize);
-      });
-    };
+    // const getUnconfirmedTransaction = (publicAccount, item, pageSize, lastId = null) => {
+    //   let order = Order.ASC;
+    //   let qp = new QueryParams(pageSize, lastId, order);
+    //   let lastTransactionID = lastId;
+    //   accountApiInstance.unconfirmedTransactions(publicAccount, qp).then(tx => {
+    //     if( tx.length > 0 ){
+    //       tx.forEach((t)=>{
+    //         let formattedTransaction = dashboardUtils.formatTransaction(t, names);
+    //         unconfirmedTransactions.value.push(formattedTransaction);
+    //         // lastTransactionID = t.transactionInfo.id;
+    //         lastTransactionID = null;
+    //       })
+    //     }
+    //     if(tx.length == pageSize){
+    //       // run again
+    //       getUnconfirmedTransaction(publicAccount, item, pageSize, lastTransactionID);
+    //     }
+    //   }, error => {
+    //     console.error(error);
+    //   });
+    // };
 
-    getConfirmedAllTransactions();
+    // const getAggregateBondedTransaction = (publicAccount, item, pageSize, lastId = null) => {
+    //   let order = Order.ASC;
+    //   let qp = new QueryParams(pageSize, lastId, order);
+    //   let lastTransactionID = lastId;
+    //   accountApiInstance.aggregateBondedTransactions(publicAccount, qp).then(tx => {
+    //     // console.log('AggregateBonded - partial length: ' + tx.length);
+    //     if( tx.length > 0 ){
+    //       tx.forEach((t)=>{
+    //         // console.log(t)
+    //         let formattedTransaction = dashboardUtils.formatAggregateBondedTransaction(t, names);
+    //         aggregateBondedTransactions.value.push(formattedTransaction);
+    //         lastTransactionID = t.transactionInfo.id;
+    //       });
+    //     }
+    //     if(tx.length == pageSize){
+    //       // run again
+    //       getAggregateBondedTransaction(publicAccount, item, pageSize, lastTransactionID);
+    //     }
+    //   }, error => {
+    //     console.error(error);
+    //   });
+    // };
 
-    transferEmitter.on("UPDATE_DASHBOARD", payload => {
+    // // eslint-disable-next-line no-unused-vars
+    // const getConfirmedAllTransactions = () => {
+    //   walletState.currentLoggedInWallet.accounts.forEach((item) => {
+    //     const publicAccount = PublicAccount.createFromPublicKey(item.publicAccount.publicKey, ChainUtils.getNetworkType(networkState.chainNetwork));
+    //     getTransaction(publicAccount, item, pageSize);
+    //     getUnconfirmedTransaction(publicAccount, item, pageSize);
+    //     getAggregateBondedTransaction(publicAccount, item, pageSize);
+    //   });
+    // };
+
+    // getConfirmedAllTransactions();
+
+    /*transferEmitter.on("UPDATE_DASHBOARD", payload => {
         switch(payload.from){
           case 'confirmed':{
             // console.log(payload.from)
@@ -342,27 +348,27 @@ export default {
       if(payload){
         openSetDefaultModal.value = false;
       }
-    });
+    });*/
 
     return {
       copy,
       primaryAccount,
       primaryAccountBalance,
       primaryAccountName,
-      confirmedTransactions,
-      unconfirmedTransactions,
-      aggregateBondedTransactions,
-      isShowConfirmed,
-      isShowUnconfirmed,
-      isShowAggregateBonded,
-      clickConfirmedTransaction,
-      clickUnconfirmedTransaction,
-      clickAggregateBondedTransactions,
+      // confirmedTransactions,
+      // unconfirmedTransactions,
+      // aggregateBondedTransactions,
+      // isShowConfirmed,
+      // isShowUnconfirmed,
+      // isShowAggregateBonded,
+      // clickConfirmedTransaction,
+      // clickUnconfirmedTransaction,
+      // clickAggregateBondedTransactions,
       openSetDefaultModal,
       currencyConvert,
     };
   }
-}
+});
 </script>
 <style lang="scss" scoped>
 .address_div{

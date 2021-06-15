@@ -21,26 +21,23 @@
 </template>
 
 <script>
-import { inject, ref, computed } from 'vue'; //getCurrentInstance
-// import { useRouter } from "vue-router";
+import { defineComponent, inject, ref, computed } from 'vue';
 import CryptoJS from 'crypto-js';
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
+import { ChainUtils } from '@/util/chainUtils';
+import { networkState } from "@/state/networkState";
+import { WalletUtils } from '@/util/walletUtils';
+import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 
-export default {
+export default defineComponent({
   name: 'ViewWalletCreateSelection',
   setup(){
     const confirm = useConfirm();
     const toast = useToast();
-    // const router = useRouter();
-    const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
-    const chainNetwork = inject("chainNetwork");
     // comparing with default networktype 168 till multiple network selection interface is added
-    // const selectedNetwork = ref("168");
-    const selectedNetworkType = computed(()=> chainNetwork.getNetworkType());
-    const selectedNetworkName = computed(()=> siriusStore.state.chainNetworkName);
-    // const toggle = ref(false);
+    const selectedNetworkType = computed(()=> ChainUtils.getNetworkType(networkState.chainNetwork));
+    const selectedNetworkName = computed(()=> networkState.chainNetworkName);
     const msg = ref('');
     const walletFile = ref('');
 
@@ -61,7 +58,6 @@ export default {
                 var importResult = importBackup(dataDecryp);
                 toast.add({severity: importResult.status, summary: importResult.msg, group: 'br', life: 3000});
               },
-              reject: () => {}
             });
           }
           else{
@@ -77,11 +73,12 @@ export default {
     };
 
     const importBackup = (dataDecryp) =>{
-      const returnMsg = appStore.importWallet(dataDecryp, selectedNetworkName.value, selectedNetworkType.value);
+      const returnMsg = WalletUtils.importWalletNewFormat(dataDecryp, selectedNetworkName.value, selectedNetworkType.value);
       let status = "success";
       switch (returnMsg){
         case 'wallet_added':
           msg.value = 'Wallet is added successfully.';
+          WalletStateUtils.refreshWallets();
           break;
         case 'invalid_network':
           msg.value = 'Network is invalid';
@@ -107,10 +104,9 @@ export default {
 
     return {
       walletFile,
-      appStore,
       readWalletBackup,
       msg,
     };
   },
-}
+});
 </script>

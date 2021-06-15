@@ -47,7 +47,7 @@
               id="public"
               class="text-sm w-full outline-none bg-gray-100 z-10"
               type="text"
-              :value="newWallet.accounts[0].publicAccount.publicKey"
+              :value="newWallet.accounts[0].publicKey"
             />
           </div>
           <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
@@ -90,14 +90,22 @@
   </div>
 </template>
 
-<script>
-import { computed, inject, ref, getCurrentInstance } from 'vue';
+<script lang="ts">
+import { computed, defineComponent, ref } from 'vue';
+import { useToast } from "primevue/usetoast";
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
-import { copyKeyFunc } from '@/util/functions.js';
-import { useToast } from "primevue/usetoast";
+import { copyKeyFunc } from '@/util/functions';
+import { Wallet } from "@/models/wallet";
+import { Wallets } from "@/models/wallets";
+import { WalletAccount } from "@/models/walletAccount";
+import { WalletUtils } from '@/util/walletUtils';
+import { WalletStateUtils } from '@/state/utils/walletStateUtils';
+import { ChainUtils } from '@/util/chainUtils';
+import { networkState } from "@/state/networkState";
 
-export default {
+
+export default defineComponent({
   name: 'ViewWalletCreate',
   components: {
     TextInput,
@@ -110,22 +118,17 @@ export default {
   },
   setup(){
     const toast = useToast();
-    const internalInstance = getCurrentInstance();
-    const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
-    const chainNetwork = inject("chainNetwork");
-    const selectedNetwork = computed(()=> chainNetwork.getNetworkType());
-    const selectedNetworkName = computed(()=> siriusStore.state.chainNetworkName );
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const err = ref("");
-    const newWallet = ref("");
-    const walletName = ref("");
-    const passwd = ref("");
-    const confirmPasswd = ref("");
-    const privateKey = ref("");
-    const showPasswdError = ref(false);
+    const selectedNetwork = computed(()=> ChainUtils.getNetworkType(networkState.chainNetwork));
+    const selectedNetworkName = computed(()=> networkState.chainNetworkName );
+    const err = ref<string>("");
+    const newWallet = ref<unknown>();
+    const walletName = ref<string>("");
+    const passwd = ref<string>("");
+    const confirmPasswd = ref<string>("");
+    const privateKey = ref<string>("");
+    const showPasswdError = ref<boolean>(false);
     const passwdPattern = "^[^ ]{8,}$";
-    const copy = (id) => copyKeyFunc(id, toast);
+    const copy = (id: string) => copyKeyFunc(id);
     const disableCreate = computed(
       () => !(
         walletName.value !== "" &&
@@ -139,38 +142,34 @@ export default {
       () => (confirmPasswd.value != passwd.value && confirmPasswd.value != '')
     );
 
-    const createWallet = async () => {
-      // loading.value = true;
+    const createWallet = () => {
       err.value = "";
       let result = 0;
+      let wallets = new Wallets();
 
-      result = appStore.addNewWallet(
-        siriusStore.state.chainNetworkName,
-        walletName.value,
-        passwd.value,
-        selectedNetwork.value
-      );
-      if (result === -1) {
+      if(wallets.filterByNetworkNameAndName(selectedNetworkName.value, walletName.value)){
         err.value = "Wallet name is already taken";
-      } else if (result === 0) {
-        err.value =
-          "Unable to create wallet. Your device storage might be full";
-      } else {
-        privateKey.value = result;
-        newWallet.value =
-          appStore.state.wallets[appStore.state.wallets.length - 1];
-      }
+      }else{
+        let password = WalletUtils.createPassword(passwd.value);
+        const wallet = WalletUtils.createAccountSimple(walletName.value, password, selectedNetwork.value);
+        const account = wallet.open(password);
+        let walletAccounts: WalletAccount[] = [];
+        let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.address['address'], "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
+        walletAccounts.push(walletAccount);
+        let newWalletInstance = new Wallet(walletName.value, selectedNetworkName.value, walletAccounts);
 
-      // loading.value = false;
+        wallets.wallets.push(newWalletInstance);
+        wallets.savetoLocalStorage();
+        privateKey.value = account.privateKey;
+        newWallet.value = newWalletInstance;
+        WalletStateUtils.refreshWallets();
+      }
     };
 
     const clearInput = () => {
       walletName.value = '';
       passwd.value = "";
       confirmPasswd.value = "";
-      emitter.emit("CLEAR_SELECT", 0);
-      emitter.emit("CLEAR_TEXT", "");
-      emitter.emit("CLEAR_PASSWORD", "");
     };
 
     return {
@@ -192,5 +191,5 @@ export default {
     };
   },
 
-}
+});
 </script>
