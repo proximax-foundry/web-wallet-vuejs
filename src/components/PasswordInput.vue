@@ -4,7 +4,7 @@
       <div class="text-icon-outline text-icon">
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
       </div>
-      <input :type="inputType" :disabled="disabled == 1" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="text-placeholder" :placeholder="placeholder" @click="clickInputPassword()" @blur="blurInputPassword()" autocomplete="off">
+      <input :type="inputType" :disabled="disabled == true" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="text-placeholder" :placeholder="placeholder" @click="clickInputPassword()" @blur="blurInputPassword()" autocomplete="off">
       <div class="inline-block flex-none mr-2">
         <font-awesome-icon icon="eye" class="text-gray-400 relative cursor-pointer" @click="hideShowPassword();" v-if="!showPassword"></font-awesome-icon>
         <font-awesome-icon icon="eye-slash" class="text-gray-400 relative cursor-pointer" @click="hideShowPassword();" v-if="showPassword"></font-awesome-icon>
@@ -14,15 +14,28 @@
   </div>
 </template>
 
-<script>
-export default{
+<script lang="ts">
+import { defineComponent } from 'vue';
+export default defineComponent({
   props: {
-    placeholder: String,
-    errorMessage: String,
-    icon: String,
-    showError: Boolean,
-    modelValue: String,
-    disabled: Boolean,
+    placeholder: {
+      type: String
+    },
+    errorMessage: {
+      type: String
+    },
+    icon: {
+      type: String
+    },
+    showError: {
+      type: Boolean
+    },
+    modelValue: {
+      type: String
+    },
+    disabled: {
+      type: Boolean
+    }
   },
   emits:[
     'update:modelValue'
@@ -39,35 +52,42 @@ export default{
     };
   },
   methods: {
-    hideShowPassword: function() {
+    hideShowPassword: function() : void {
       this.showPassword = !this.showPassword;
       this.showPassword?this.eyeIcon='eye-slash':this.eyeIcon='eye';
       this.showPassword?this.inputType='text':this.inputType='password';
     },
 
-    clickInputPassword: function() {
+    clickInputPassword: function() :void {
       if(!this.pswdErr){
         this.borderColor = 'border-2 border-blue-primary';
       }
     },
 
-    blurInputPassword: function() {
+    blurInputPassword: function() :void {
       var passwdPattern = "^[^ ]{8,}$";
-      if(this.modelValue == '' || this.modelValue.match(passwdPattern) == null){
+      if(this.modelValue == ''){
         this.borderColor = 'border-2 border-red-primary';
         this.pswdErr = true;
       }else{
-        this.borderColor = 'border-2 border-gray-300';
-        this.pswdErr = false;
+        // if(this.modelValue != undefined){
+        //   if(this.modelValue.match(passwdPattern) == null){
+        //     this.borderColor = 'border-2 border-red-primary';
+        //     this.pswdErr = true;
+        //   }
+        // }else{
+          this.borderColor = 'border-2 border-gray-300';
+          this.pswdErr = false;
+        // }
       }
     },
   },
   mounted() {
-    this.emitter.on("CLEAR_PASSWORD", payload => {
-      this.inputPassword = payload;
-      this.pswdErr = false;
-      this.borderColor = 'border border-gray-300';
-    });
+    // this.emitter.on("CLEAR_PASSWORD", (payload) => {
+    //   this.inputPassword = payload;
+    //   this.pswdErr = false;
+    //   this.borderColor = 'border border-gray-300';
+    // });
   }
-}
+});
 </script>

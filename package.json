@@ -1,34 +1,22 @@
 {
-  "name": "web-wallet",
-  "version": "0.0.11",
+  "name": "ts-dev-wallet",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "cross-env NODE_ENV=production vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "build-development": "cross-env NODE_ENV=development vue-cli-service build",
-    "build-staging": "cross-env NODE_ENV=staging vue-cli-service build"
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
     "@fortawesome/free-solid-svg-icons": "^5.15.2",
     "@fortawesome/vue-fontawesome": "^3.0.0-3",
     "@tailwindcss/postcss7-compat": "^2.0.3",
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-plugin-eslint": "~4.5.0",
-    "@vue/cli-plugin-router": "~4.5.0",
-    "@vue/cli-service": "^4.5.13",
-    "@vue/compiler-sfc": "^3.0.0",
     "@vueform/multiselect": "^1.5.0",
     "animate.css": "^4.1.1",
-    "autoprefixer": "^9.8.6",
-    "babel-eslint": "^10.1.0",
     "chart.js": "^2.9.4",
-    "core-js": "^3.6.5",
     "cross-env": "^7.0.3",
     "crypto-js": "^3.3.0",
-    "eslint": "^6.7.2",
-    "eslint-plugin-vue": "^7.0.0-0",
     "js-joda": "^1.11.0",
     "maska": "^1.4.1",
     "mitt": "^2.1.0",
@@ -43,11 +31,10 @@
     "sass-loader": "^7.3.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.3",
     "tsjs-xpx-chain-sdk": "^0.8.1",
+    "tslib": "^2.2.0",
     "v-tooltip": "^4.0.0-alpha.1",
     "v-wave": "^1.2.8",
     "vue": "^3.0.0",
-    "vue-class-component": "^8.0.0-0",
-    "vue-cli-plugin-fontawesome": "~0.3.1",
     "vue-currency-input": "^2.0.0-rc.2",
     "vue-i18n": "^9.1.6",
     "vue-password": "^3.0.0",
@@ -59,34 +46,12 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-plugin-router": "~4.5.0",
     "@vue/cli-plugin-typescript": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/compiler-sfc": "^3.0.0",
     "@vue/eslint-config-typescript": "^7.0.0",
     "typescript": "~4.1.5"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/vue3-essential",
-      "eslint:recommended",
-      "@vue/typescript"
-    ],
-    "parserOptions": {
-      "parser": "@typescript-eslint/parser"
-    },
-    "rules": {}
-  },
-  "postcss": {
-    "plugins": {
-      "tailwindcss": {},
-      "autoprefixer": {}
-    }
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ]
+  }
 }

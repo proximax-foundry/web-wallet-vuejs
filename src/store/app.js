@@ -113,21 +113,6 @@ function getWalletIndexByNameAndNetwork(walletName, networkName = undefined) {
   return state.wallets.findIndex((element) => element.name == walletName && element.networkName === networkNameToCompare);
 }
 
-// with custom network param
-function getWalletByNameAndNetwork(walletName, networkName) {
-  walletName = walletName.includes(" ") === true ? walletName.split(" ").join("_") : walletName;
-  return state.wallets.find((element) => element.name == walletName && element.networkName === networkName);
-}
-
-function getWalletIndexByNameAndNetwork(walletName, networkName = undefined) {
-  let networkNameToCompare = networkName ? networkName : siriusStore.state.chainNetworkName;
-  walletName =
-    walletName.includes(" ") === true
-      ? walletName.split(" ").join("_")
-      : walletName;
-  return state.wallets.findIndex((element) => element.name == walletName && element.networkName === networkNameToCompare);
-}
-
 /* benjamin lai */
 function getAccountByWallet(walletName){
   const wallet = getWalletByName(walletName);

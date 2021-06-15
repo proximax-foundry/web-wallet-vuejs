@@ -105,7 +105,7 @@ const newBlockListener = (listener) => {
 // transaction confirmed
 const confirmedListener = (accountDetail, listener) => {
   listener.confirmed(accountDetail).subscribe((transaction) => {
-    console.log('Confirmed notification ' + accountDetail.address);
+    console.log('Confirmed notification ' + accountDetail.address)
     const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
     // console.log(transaction)
     transferEmitter.emit('CONFIRMED_NOTIFICATION', {
@@ -117,20 +117,25 @@ const confirmedListener = (accountDetail, listener) => {
     if(transactions.getNameTypeTransaction(transaction.type) == 'aggregateBonded'){
       let cosigneeCheck = false;
       transaction.cosignatures.forEach((cosignee) => {
-        // console.log( 'cosignee.signer.address.address: ' + cosignee.signer.address.address);
+        console.log( 'cosignee.signer.address.address: ' + cosignee.signer.address.address);
         const account = wallet.accounts.find((element) => element.address == cosignee.signer.address.address);
-        // console.log('account');
-        // console.log(account);
+        console.log('account');
+        console.log(account);
         if(account){
           cosigneeCheck = true;
         }
       });
       if(cosigneeCheck){
         transaction.innerTransactions.forEach((innerTran) => {
-          // console.log( 'InnerTran: ' + transactions.getNameTypeTransaction(innerTran.type))
+          console.log( 'InnerTran: ' + transactions.getNameTypeTransaction(innerTran.type))
           if(transactions.getNameTypeTransaction(innerTran.type) == 'modifyMultisigAccount'){
             // create multisig account
-            multiSign.createNewMultiSigAccount(innerTran.signer.publicKey, innerTran.signer.address.address, accountDetail.publicAccount);
+            // console.log('List multisign account into wallet');
+            console.log(innerTran.signer.publicKey, innerTran.signer.address.address)
+            // multiSign.createNewMultiSigAccount(innerTran.signer);
+            multiSign.createNewMultiSigAccount(innerTran.signer.publicKey, innerTran.signer.address.address);
+            // update multisign info on all accounts
+            // multiSign.updateAccountsMultiSign(appStore.state.currentLoggedInWallet.name);
           }
         });
       }
@@ -140,11 +145,6 @@ const confirmedListener = (accountDetail, listener) => {
       from: 'confirmed',
       // transaction: Object.assign({}, transaction),
       transaction: transaction,
-    });
-    transferEmitter.emit('UPDATE_EDIT_MULTISIG', {
-      status: true,
-      from: 'confirmed',
-      signerAddress: accountDetail.address
     });
     appStore.updateXPXBalance(appStore.state.currentLoggedInWallet.name, siriusStore);
     // update multisign info on all accounts
@@ -221,8 +221,8 @@ const unconfirmedRemovedListener = (accountDetail, listener) => {
 // eslint-disable-next-line no-unused-vars
 const aggregateBondedAddedListener = (accountDetail, listener) => {
   listener.aggregateBondedAdded(accountDetail).subscribe(aggregateTransaction => {
-    console.log('Emitting from aggregateBondedAddedListener ');
-    console.log(aggregateTransaction);
+    // console.log('Emitting from aggregateBondedAddedListener ');
+    // console.log(aggregateTransaction);
     // choose btw aggregateBondedAdded to partialdatatable or unconfirmedAdded to dashboarddatatable
     let innerTransactions = aggregateTransaction.innerTransactions;
     let innerTransactionType, message;
@@ -246,7 +246,7 @@ const aggregateBondedAddedListener = (accountDetail, listener) => {
       // transaction: Object.assign({}, aggregateTransaction),
       transaction: aggregateTransaction,
     });
-    // multiSign.updateAccountsMultiSign(appStore.state.currentLoggedInWallet.name);
+    multiSign.updateAccountsMultiSign(appStore.state.currentLoggedInWallet.name);
   }, error => {
       console.error(error);
   }, () => {
@@ -264,10 +264,6 @@ const aggregateBondedRemovedListener = (accountDetail, listener) => {
       from: 'aggregateBondedRemoved',
       hash: hash,
     });
-    transferEmitter.emit('ANNOUNCE_AGGREGATE_BONDED', {
-      status: true,
-      address: accountDetail.address
-    });
   }, error => {
       console.error(error);
   }, () => {
@@ -277,7 +273,7 @@ const aggregateBondedRemovedListener = (accountDetail, listener) => {
 
 // eslint-disable-next-line no-unused-vars
 const cosignatureAddedListener = (accountDetail, listener) => {
-  // console.log('cosignatureAddedListener');
+  console.log('cosignatureAddedListener');
   // eslint-disable-next-line no-unused-vars
   listener.cosignatureAdded(accountDetail).subscribe(cosignatureSignedTransaction => {
     transferEmitter.emit('UNCONFIRMED_NOTIFICATION', {
@@ -288,7 +284,6 @@ const cosignatureAddedListener = (accountDetail, listener) => {
     // update viewconvertaccountmultisig
     transferEmitter.emit('ANNOUNCE_COSIGNITURE_ADDED', {
       status: true,
-      address: accountDetail.address
     });
     transferEmitter.emit('UPDATE_DASHBOARD', {
       status: true,
@@ -425,12 +420,10 @@ function announceAggregateBonded(senderAddress, aggBondTx, aggBondHash, txConfir
             message: 'Aggregate transaction announced',
             notificationType: 'noti'
           });
-          console.log('Announce ABT')
           transferEmitter.emit('ANNOUNCE_AGGREGATE_BONDED', {
             status: true,
-            address: senderAddress.address
           });
-          // console.log('Aggregate transaction (' + aggBondHash + ') announced');
+          console.log('Aggregate transaction (' + aggBondHash + ') announced');
         }, 
         (error)=>{
           console.log(error);
@@ -575,10 +568,9 @@ function modifyMultisigAnnounceAggregateBonded(announceAggregateBondedListener, 
           });
           transferEmitter.emit('ANNOUNCE_AGGREGATE_BONDED', {
             status: true,
-            address: senderAddress.address
           });
           // console.log('Aggregate transaction (' + aggBondHash + ') announced');
-        },
+        }, 
         (error)=>{
           console.log(error);
           if (txConfirmed) {

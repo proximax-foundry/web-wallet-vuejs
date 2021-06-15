@@ -1,4 +1,4 @@
-# web-wallet
+# ts-dev-wallet
 
 ## Project setup
 ```

@@ -30,7 +30,7 @@ const app = createApp(App);
 const emitter = mitt();
 
 app.config.globalProperties.emitter = emitter;
-app.use(router);
+app.use(router)
 app.use(PrimeVue);
 app.use(ConfirmationService);
 app.use(ToastService);

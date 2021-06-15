@@ -43,7 +43,7 @@ const lockFundDuration = 10000;
 const networkAPIEndpoint = computed(() => ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
 const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
 
-const transactionTypeName = {
+export const transactionTypeName = {
   transfer: {
     id: TransactionType.TRANSFER,
     name: 'Transfer'

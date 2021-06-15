@@ -78,15 +78,13 @@ const formatTransaction = (transaction, names) => {
   transaction.typeName = arraTypeTransaction[keyName].name;
   transaction.transferType = formatTransfer(transaction);
   let senderName = names.find((element) =>  element.address == getSender(transaction));
-  transaction.senderName = (senderName)?senderName.name:'-';
+  transaction.senderName = (senderName)?senderName.name:'';
   transaction.senderAddress = appStore.pretty(getSender(transaction));
-  transaction.senderAddressRaw = getSender(transaction);
   let recipientAddress = getRecipient(transaction, keyName);
   let recipientName = names.find((element) =>  element.address == recipientAddress);
-  transaction.recipientName = (recipientName)?recipientName.name:'-';
+  transaction.recipientName = (recipientName)?recipientName.name:'';
   if(recipientAddress.length >= 40){
     transaction.recipientAddress = appStore.pretty(recipientAddress);
-    transaction.recipientAddressRaw = recipientAddress;
   }
   // transaction.recipientAddress = appStore.pretty(recipientAddress);
   transaction.block = transaction.transactionInfo.height.compact();
@@ -108,7 +106,6 @@ const formatAggregateBondedTransaction = (transaction, names) => {
     let linkedAccountName = names.find((element) =>  element.address == signerInWallet.address);
     transaction.linkedAccountName = (linkedAccountName)?linkedAccountName.name:'';
     transaction.linkedAccount = appStore.pretty(signerInWallet.address);
-    transaction.linkedAccountRaw = signerInWallet.address;
     transaction.account = transaction.linkedAccount;
   }else{
     // display first cosig
@@ -126,14 +123,6 @@ const formatAggregateBondedTransaction = (transaction, names) => {
             matchAccount = matchStatus;
           }
         });
-      }else{
-        if(inner.recipient != undefined){
-          var matchStatus;
-          matchStatus = wallet.accounts.find((element) => element.address == inner.recipient.address);
-          if(matchStatus){
-            matchAccount = matchStatus;
-          }
-        }
       }
     });
     if(matchAccount){
@@ -141,7 +130,6 @@ const formatAggregateBondedTransaction = (transaction, names) => {
       let linkedAccountName = names.find((element) =>  element.address == matchAccount.address);
       transaction.linkedAccountName = (linkedAccountName)?linkedAccountName.name:'';
       transaction.linkedAccount = appStore.pretty(matchAccount.address);
-      transaction.linkedAccountRaw = matchAccount.address;
     }else{
       // 3rd matching - match among cosignatures in transaction
       console.log('3rd level')
@@ -150,8 +138,7 @@ const formatAggregateBondedTransaction = (transaction, names) => {
         transaction.cosignatures.forEach((cosigner) => {
           matchAccount = wallet.accounts.find((element) => element.address == cosigner.signer.address.address);
           if(matchAccount){
-            transaction.linkedAccount = appStore.pretty(matchAccount.address);
-            transaction.linkedAccountRaw = matchAccount.address;
+            transaction.account = matchAccount.address;
             let linkedAccountName = names.find((element) =>  element.address == matchAccount.address);
             transaction.linkedAccountName = (linkedAccountName)?linkedAccountName.name:'';
             isMatchAccount = true;
@@ -168,8 +155,6 @@ const formatAggregateBondedTransaction = (transaction, names) => {
             transaction.account = cosigner[0].address;
             let linkedAccountName = names.find((element) =>  element.address == cosigner[0].address);
             transaction.linkedAccountName = (linkedAccountName)?linkedAccountName.name:'';
-            transaction.linkedAccount = appStore.pretty(cosigner[0].address);
-            transaction.linkedAccountRaw = cosigner[0].address;
           // }
         }else{
           transaction.account = '';

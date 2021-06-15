@@ -26,10 +26,10 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import Multiselect from '@vueform/multiselect';
 
-export default{
+export default defineComponent({
   props: [
     'placeholder',
     'errorMessage',
@@ -90,8 +90,8 @@ export default{
   },
 
   mounted() {
-    console.log('this.$refs.selectRef');
-    console.log(this.$refs.selectRef);
+    // console.log('this.$refs.selectRef');
+    // console.log(this.$refs.selectRef);
     if(this.selectDefault){
       this.$refs.selectRef.select(this.selectDefault, this.options);
     }
@@ -100,14 +100,16 @@ export default{
   created() {
     // eslint-disable-next-line no-unused-vars
     this.emitter.on('CLEAR_SELECT', payload => {
-      console.log('this.$refs.selectRef');
-      console.log(this.$refs.selectRef);
-      this.$refs.selectRef.clear();
+      // console.log('this.$refs.selectRef');
+      // console.log(this.$refs.selectRef);
+      if(!payload){
+        this.$refs.selectRef.clear();
+      }
     });
   }
-}
+});
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import "@/assets/scss/multiselect.scss";
 </style>

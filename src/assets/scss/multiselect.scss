@@ -248,8 +248,7 @@
 }
 
 .multiselect-option.is-selected {
-  @apply bg-blue-primary;
-  color: #ffffff;
+  @apply bg-blue-200;
 }
 
 .multiselect-option.is-selected.is-pointed {

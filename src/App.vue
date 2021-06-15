@@ -27,19 +27,14 @@
 </template>
 
 <script lang="ts">
-import { computed, provide, getCurrentInstance } from "vue";
-import { walletState } from "./state/walletState";
+import { computed, defineComponent, getCurrentInstance } from "vue";
+import { walletState } from "@/state/walletState";
 import headerComponent from '@/components/headerComponent.vue'
-// import PageComponent from '@/components/PageComponent.vue'
 import NavigationMenu from '@/components/NavigationMenu.vue'
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
 
-<<<<<<< HEAD
-export default{
-=======
-export default {
->>>>>>> 6441db2... v 0.0.10 bug fixes
+export default defineComponent({
   name: 'App',
   components: {
     headerComponent,
@@ -50,34 +45,24 @@ export default {
   },
   setup() {
     const internalInstance = getCurrentInstance();
-<<<<<<< HEAD
     const emitter = internalInstance?.appContext.config.globalProperties.emitter;
-=======
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    provide("appStore", appStore);
-    provide("siriusStore", siriusStore);
-    provide("chainNetwork", chainNetwork);
-    chainNetwork.updateAvailableNetworks();
->>>>>>> a0d9159... v 0.0.10 - Toast notifications
 
-    const login = computed(() => appStore.state.isLogin);
+    // chainNetwork.updateAvailableNetworks();
+
 
     // emitter for drop down menu in viewAllAccounts and Services page
     const clickEvent = () => {
       emitter.emit("PAGE_CLICK");
     };
 
-<<<<<<< HEAD
     const login = computed(() =>walletState.isLogin);
 
-=======
->>>>>>> a0d9159... v 0.0.10 - Toast notifications
     return{
       login,
       clickEvent,
     }
   },
-}
+});
 </script>
 
 <style>

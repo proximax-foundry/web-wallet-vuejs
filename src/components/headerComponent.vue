@@ -1,6 +1,6 @@
 <template>
   <div class="flex-none self-center flex items-end logo">
-    <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">v{{ appStore.version }}</span>
+    <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">v{{ versioning }}</span>
   </div>
   <div class="flex-grow h-16"></div>
   <div class="flex-none header-menu mt-3" v-if="loginStatus">
@@ -14,7 +14,6 @@
       <div class="w-14 md:w-44 pl-3 text-center flex gray-line-left h-10 items-center">
         <div>
           <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode)"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ siriusStore.state.chainNetworkName }}</div>
-          <!-- networkType['name'] -->
         </div>
       </div>
       <div class="w-52 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
@@ -38,14 +37,6 @@
       <SelectLanguagePlugin />
     </div>
     <div class="select mb-3 inline-block">
-      <!-- <select v-model="selectedNetwork" class="text-gray-600 w-full border-solid border-b border-gray-200 p-2 mb-2 focus:outline-none cursor-pointer" @change="selectNetwork">
-          <optgroup label="Networks">
-          <option v-for="(name, index) of chainsNetworks" :value="index" :key="index" >{{ name }}</option>
-          </optgroup>
-          <optgroup label="Setting">
-            <option value="customize" >Customize</option>
-          </optgroup>
-      </select> -->
       <Dropdown v-model="selectedNetwork" name="selectedNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
     </div>
     <div class="w-16 text-center inline-block">
@@ -57,18 +48,24 @@
   </div>
 </template>
 
-<script>
-import { computed, inject, ref, getCurrentInstance } from "vue";
+<script lang="ts">
+import { computed, defineComponent, getCurrentInstance, ref } from "vue"; //getCurrentInstance
+import { walletState } from "@/state/walletState";
+import { networkState } from "@/state/networkState";
 import { useRouter } from "vue-router";
-import { transferEmitter } from '../util/listener.js';
+import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
+import { ChainProfile } from "@/models/stores/chainProfile";
+// import { transferEmitter } from '../util/listener.js';
 import Dropdown from 'primevue/dropdown';
 import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
-import { useToast } from "primevue/usetoast";
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+// import { useToast } from "primevue/usetoast";
 
-export default{
+export default defineComponent({
   components: {
     Dropdown,
     SelectLanguagePlugin,
+    FontAwesomeIcon,
   },
 
   name: 'headerComponent',
@@ -79,103 +76,111 @@ export default{
     };
   },
   setup() {
-    const toast = useToast();
+    // const toast = useToast();
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
-    const chainNetwork = inject("chainNetwork");
+    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
+    // const chainNetwork = inject("chainNetwork");
     const router = useRouter();
     const notificationMessage = ref('');
     const notificationType = ref('noti');
-    // const networkType = computed(
-    //   () => {
-    //     return siriusStore.getNetworkByType(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network);
-    //   }
-    // );
 
-    const loginStatus = computed(() => appStore.state.isLogin);
+    const loginStatus = computed(() => walletState.isLogin);
     const chainsNetworks = computed(()=> {
-      let options = [];
-      siriusStore.state.availableNetworks.forEach((network, index) => {
+      interface optionInterface {
+        label: string,
+        value: number
+      }
+      let options : Array<optionInterface> = [];
+      networkState.availableNetworks.forEach((network: string, index: number) => {
         options.push({ label: network, value: index });
       });
       return options;
     });
 
+    interface itemInterface{
+      label: string,
+      value: number
+    }
 
-    const chainsNetworkOption = [{
+    interface chainsNetworkOptionInterface {
+      label:string,
+      items: Array<itemInterface>
+    }
+
+    const chainsNetworkOption : Array<chainsNetworkOptionInterface> = [{
       label: 'Networks',
       items: chainsNetworks.value
-    }, {
-      label: 'Setting',
-      items: [
-        {label: 'Customize', value: 'customize'}
-      ]
     }];
+    // , {
+    //   label: 'Setting',
+    //   items: [
+    //     {label: 'Customize', value: 'customize'}
+    //   ]
+    // }
 
-    // const selectedNetwork = ref({ label: siriusStore.state.selectedNetworkName, value: siriusStore.state.selectedNetwork });
     const selectedNetwork = ref();
-    selectedNetwork.value= { label: siriusStore.state.availableNetworks[siriusStore.state.selectedNetwork], value: siriusStore.state.selectedNetwork };
-    // set default for network selection if state.selectedNetwork is null
-    if(siriusStore.state.selectedNetwork === ''){
-      selectedNetwork.value= { label: siriusStore.state.availableNetworks[0], value: 0 };
-    }
+    console.log('net:' + networkState.chainNetworkName);
+    selectedNetwork.value= { label: networkState.chainNetworkName, value: networkState.chainNetwork };
+    // // set default for network selection if state.selectedNetwork is null
+    // if(networkState.chainNetworkNamee === ''){
+    //   selectedNetwork.value= { label: networkState.availableNetworks[0], value: 0 };
+    // }
 
     const selectNetwork= (e) =>{
-      if(e.value.value !== 'customize'){
-        chainNetwork.updateChainNetwork(parseInt(e.value.value));
-      }
+      // if(e.value.value !== 'customize'){
+        NetworkStateUtils.changeNetworkByIndex(parseInt(e.value.value));
+      //}
+      // console.log(e.value.value);
     }
 
-    // watch(selectedNetwork, (n) => {
-    //   console.log(n)
-    // });
-
     const logout = () => {
-      let status = appStore.logoutOfWallet();
-      if(status){
-        router.push({ name: "Home"});
-      }
+      // let status = appStore.logoutOfWallet();
+      // if(status){
+      //   router.push({ name: "Home"});
+      // }
+      console.log('logout')
     };
 
-    const totalBalance = computed(()=>{
-      return appStore.getTotalBalance();
-    });
+    const totalBalance = ref('');
+    // const totalBalance = computed(()=>{
+    //   return appStore.getTotalBalance();
+    // });
 
-    transferEmitter.on("CONFIRMED_NOTIFICATION", payload => {
-      if(payload.status){
-        toast.add({severity:'success', summary: 'Notification', detail: payload.message, group: 'br', life: 5000});
-        var audio = new Audio(require('@/assets/audio/ding2.ogg'));
-        audio.play();
-      }
-    });
+    // transferEmitter.on("CONFIRMED_NOTIFICATION", payload => {
+    //   if(payload.status){
+    //     toast.add({severity:'success', summary: 'Notification', detail: payload.message, group: 'br', life: 5000});
+    //     var audio = new Audio(require('@/assets/audio/ding2.ogg'));
+    //     audio.play();
+    //   }
+    // });
 
-    transferEmitter.on("UNCONFIRMED_NOTIFICATION", payload => {
-      if(payload.status){
-        toast.add({severity:'info', summary: 'Notification', detail: payload.message, group: 'br', life: 5000});
-        var audio = new Audio(require('@/assets/audio/ding.ogg'));
-        audio.play();
-      }
-    });
+    // transferEmitter.on("UNCONFIRMED_NOTIFICATION", payload => {
+    //   if(payload.status){
+    //     toast.add({severity:'info', summary: 'Notification', detail: payload.message, group: 'br', life: 5000});
+    //     var audio = new Audio(require('@/assets/audio/ding.ogg'));
+    //     audio.play();
+    //   }
+    // });
 
-    transferEmitter.on("STATUS_NOTIFICATION", payload => {
-      if(payload.status){
-        toast.add({severity:'error', summary: 'Error status', detail: payload.message, group: 'br', life: 5000});
-        var audio = new Audio(require('@/assets/audio/ding.ogg'));
-        audio.play();
-      }
-    });
+    // transferEmitter.on("STATUS_NOTIFICATION", payload => {
+    //   if(payload.status){
+    //     toast.add({severity:'error', summary: 'Error status', detail: payload.message, group: 'br', life: 5000});
+    //     var audio = new Audio(require('@/assets/audio/ding.ogg'));
+    //     audio.play();
+    //   }
+    // });
 
-    emitter.on("NOTIFICATION", payload => {
-      if(payload.status){
-        toast.add({severity:'warn', summary: 'Alert', detail: payload.message, group: 'br', life: 5000});
-      }
-    });
+    // emitter.on("NOTIFICATION", payload => {
+    //   if(payload.status){
+    //     toast.add({severity:'warn', summary: 'Alert', detail: payload.message, group: 'br', life: 5000});
+    //   }
+    // });
+
+    const versioning = ref('0.0.1');
 
     return {
-      appStore,
-      siriusStore,
+      versioning,
+      networkState,
       loginStatus,
       logout,
       totalBalance,
@@ -196,14 +201,14 @@ export default{
   },
   methods: {
     headerMenuHandler: function (){
-      if(window.innerWidth < '768'){
+      if(window.innerWidth < 768){
         this.wideScreen = false;
       }else{
         this.wideScreen = true;
       }
     },
   }
-}
+});
 </script>
 
 <style lang="scss">
@@ -236,6 +241,7 @@ export default{
 .p-inputtext {
   width: 100%;
 }
+
 
 .p-inputtext {
   // font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
@@ -283,7 +289,6 @@ export default{
   border-radius: 3px;
   width: 150px;
 }
-
 .p-dropdown.p-dropdown-clearable .p-dropdown-label {
   padding-right: 1.5rem;
 }

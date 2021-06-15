@@ -30,7 +30,6 @@ export class WalletAccount extends Account{
 
     removeAsset(id: string){
         const index = this.assets.findIndex((asset)=> asset.idHex === id);
-
         this.assets.splice(index, 1);
     }
 
