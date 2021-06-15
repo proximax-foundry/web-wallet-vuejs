@@ -18,7 +18,7 @@ s<template>
 
 <script lang="ts">
 import { computed } from "vue";
-import WalletTile from '@/components/WalletTile.vue';
+import WalletTile from '@/module/wallet/components/WalletTile.vue';
 import NotificationModal from '@/components/NotificationModal.vue';
 import { networkState } from '../state/networkState';
 import { walletState } from '../state/walletState';
