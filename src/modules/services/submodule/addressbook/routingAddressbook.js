@@ -1,7 +1,7 @@
 export const AddressbookRoutes = [
   {
     path: '/add-contacts',
-    name: 'ViewAddressBookAddContacts',
+    name: 'ViewServicesAddressBookAddContacts',
     component: () => import('@/modules/services/submodule/addressbook/views/ViewServicesAddressBookAddContacts.vue'),
     meta: {
       title: "Add Contacts",
@@ -9,7 +9,7 @@ export const AddressbookRoutes = [
   },
   {
     path: '/address-book',
-    name: 'ViewAddressBook',
+    name: 'ViewServicesAddressBook',
     component: () => import('@/modules/services/submodule/addressbook/views/ViewServicesAddressBook.vue'),
     meta: {
       title: "Address Book",

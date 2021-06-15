@@ -2,7 +2,7 @@
   <div class="flex justify-between text-sm">
     <div><span class="text-gray-400">Address Book ></span> <span class="text-blue-primary font-bold">Add Contacts</span></div>
     <div>
-      <router-link :to="{name: 'ViewAddressBook'}" class="font-bold" active-class="accounts">Address Book</router-link> | 
+      <router-link :to="{name: 'ViewServicesAddressBook'}" class="font-bold" active-class="accounts">Address Book</router-link> | 
       <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">All Services</router-link>
     </div>
   </div>
@@ -76,7 +76,7 @@ export default {
         contactName.value = '';
         address.value = '';
         toast.add({severity:'info', summary: 'Address Book', detail: 'New contact added to Address Book', group: 'br', life: 5000});
-        router.push({ name: 'ViewAddressBook' });
+        router.push({ name: 'ViewServicesAddressBook' });
       }else{
         err.value = added;
       }

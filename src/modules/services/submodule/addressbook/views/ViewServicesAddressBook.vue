@@ -2,7 +2,7 @@
   <div class="flex justify-between text-sm">
     <div><span class="text-gray-400">Address Book ></span> <span class="text-blue-primary font-bold">List</span></div>
     <div>
-      <router-link :to="{name: 'ViewAddressBookAddContacts'}" class="font-bold" active-class="accounts">Add New Contact</router-link> |
+      <router-link :to="{name: 'ViewServiceAddressBookAddContacts'}" class="font-bold" active-class="accounts">Add New Contact</router-link> |
       <DisplayImportContactModal class="inline-block" /> |
       <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">All Services</router-link>
     </div>
@@ -18,7 +18,7 @@ import DisplayImportContactModal from '@/modules/services/submodule/addressbook/
 import { inject, getCurrentInstance, ref } from "vue";
 
 export default {
-  name: 'ViewAddressBook',
+  name: 'ViewServicesAddressBook',
 
   components: {
     ContactDataTable,

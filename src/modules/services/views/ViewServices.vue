@@ -34,8 +34,8 @@ export default {
         {name: 'Transfer Assets', link: 'ViewServicesMainnetSwapAccountList'},
       ]},
       {name: 'Address Book', desc: 'Assign labels to addresses', img: 'icon-address-book-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'List', link: 'ViewAddressBook'},
-        {name: 'Add Contacts', link: 'ViewAddressBookAddContacts'},
+        {name: 'List', link: 'ViewServicesAddressBook'},
+        {name: 'Add Contacts', link: 'ViewServicesAddressBookAddContacts'},
       ]},
       {name: 'Wallets', desc: 'Manage your wallets', img: 'icon-address-book-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: 'Change Password', link: ''},
