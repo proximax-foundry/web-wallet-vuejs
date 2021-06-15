@@ -47,7 +47,7 @@ export default {
         {name: 'Partial', link: 'ViewServicesExplorerPartial'},
       ]},
       {name: 'Nodes', desc: 'Add and edit nodes', img: 'icon-nodes-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Blockchain', link: 'ViewNodes'},
+        {name: 'Blockchain', link: 'ViewServicesNodes'},
         {name: 'Storage', link: ''},
         {name: 'Streaming', link: ''},
       ]},

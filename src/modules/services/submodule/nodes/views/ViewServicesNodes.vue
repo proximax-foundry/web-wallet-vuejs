@@ -64,7 +64,7 @@ import { useToast } from "primevue/usetoast";
 // import { DataBridgeService } from '../util/dataBridge.js';
 
 export default {
-  name: 'ViewNodes',
+  name: 'ViewServicesNodes',
 
   components: {
     Multiselect,
