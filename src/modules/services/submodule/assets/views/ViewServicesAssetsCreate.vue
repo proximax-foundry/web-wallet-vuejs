@@ -1,8 +1,8 @@
 <template>
   <div class="flex justify-between text-md">
-    <div><span class="text-gray-300">Mosaics ></span> <span class="text-blue-primary font-bold">Create</span></div>
+    <div><span class="text-gray-300">Assets ></span> <span class="text-blue-primary font-bold">Create</span></div>
     <div>
-      <!-- <router-link :to="{ name: 'ViewServices' }" class="font-bold">Back to Services</router-link> -->
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-4'>
@@ -72,7 +72,7 @@
               </div>
             </div>
           </div>
-          <PasswordInput placeholder="Enter Your Wallet Password" :errorMessage="'Please enter your wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
+          <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
             <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">Clear</button>
             <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createMosaic()">Create</button>
@@ -101,7 +101,7 @@ import { computed, ref, inject, getCurrentInstance, watch } from 'vue';
 // import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
-import NumberInput from '@/modules/mosaic/components/NumberInput.vue';
+import NumberInput from '@/modules/services/submodule/assets/components/NumberInput.vue';
 import { mosaicTransaction, convertToCurrency, convertToExact } from '@/util/transfer.js';
 
 export default {

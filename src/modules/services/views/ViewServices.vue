@@ -26,9 +26,9 @@ export default {
         {name: 'Extend Duration', link: 'ViewServicesNamespaceExtend'}
       ]},
       {name: 'Assets', desc: 'Create digital representations with customized properties', img: 'icon-mosaics-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Create', link: 'ViewMosaicCreate'},
-        {name: 'Modify Supply', link: 'ViewMosaicModifySupplyChange'},
-        {name: 'Link to Namespace', link: 'ViewMosaicLinkToNamespace'}
+        {name: 'Create', link: 'ViewServicesAssetsCreate'},
+        {name: 'Modify Supply', link: 'ViewServicesAssetsModifySupplyChange'},
+        {name: 'Link to Namespace', link: 'ViewServicesAssetsLinkToNamespace'}
       ]},
       {name: 'Mainnet Swap', desc: 'Swap from NEM to Sirius', img: 'icon-swap-process-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: 'Transfer Assets', link: 'ViewServicesMainnetSwapAccountList'},
