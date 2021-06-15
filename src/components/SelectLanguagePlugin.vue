@@ -79,7 +79,7 @@ export default{
 </script>
 
 <style lang="scss" scoped>
-// @import "../assets/scss/multiselect.scss";
+@import "../assets/scss/multiselect.scss";
 #langSelector ::v-deep {
   top: 7px;
   position: absolute;

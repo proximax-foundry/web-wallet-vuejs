@@ -237,7 +237,6 @@ export default{
   width: 100%;
 }
 
-
 .p-inputtext {
   // font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   font-size: 1rem;
@@ -284,15 +283,7 @@ export default{
   border-radius: 3px;
   width: 150px;
 }
-// .p-dropdown:not(.p-disabled):hover {
-//   border-color: #2196F3;
-// }
-// .p-dropdown:not(.p-disabled).p-focus {
-//   outline: 0 none;
-//   outline-offset: 0;
-//   box-shadow: 0 0 0 0.2rem #a6d5fa;
-//   border-color: #2196F3;
-// }
+
 .p-dropdown.p-dropdown-clearable .p-dropdown-label {
   padding-right: 1.5rem;
 }
@@ -314,10 +305,7 @@ export default{
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
 }
-// .p-dropdown .p-dropdown-clear-icon {
-//   color: #6c757d;
-//   right: 0px;
-// }
+
 .p-dropdown.p-invalid.p-component {
   border-color: #f44336;
 }
