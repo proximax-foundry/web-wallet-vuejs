@@ -96,3 +96,7 @@ export class Helper{
         return Base64.stringify(toEncode);
     }
 }
+
+export interface LooseObject {
+    [key: string]: any
+}

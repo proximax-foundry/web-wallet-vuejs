@@ -28,7 +28,7 @@ export class SessionService{
         sessionStorage.setItem(key, value);
     }
 
-    static setObject(key: string, value: object){
+    static setObject(key: string, value: any){
         sessionStorage.setItem(key, JSON.stringify(value));
     }
 

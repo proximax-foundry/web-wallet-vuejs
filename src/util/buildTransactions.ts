@@ -41,7 +41,7 @@ import {
     Message,
 } from 'tsjs-xpx-chain-sdk';
 import { WalletUtils } from "./walletUtils";
-import { Helper } from "./helper";
+import { Helper } from "./typeHelper";
 
 export class BuildTransactions {
 

@@ -16,7 +16,7 @@ import {
     AggregateTransaction, CosignatureTransaction, MosaicNonce,
 } from "tsjs-xpx-chain-sdk"
 import { computed } from "vue";
-import { Helper } from "./helper";
+import { Helper, LooseObject } from "./typeHelper";
 
 const config = require("@/../config/config.json");
 
@@ -40,7 +40,7 @@ export class WalletUtils {
             console.log("verifyWalletPassword triggered with", name, networkName);
         }
 
-        const account = wallet.accounts.find((element) => element.default == true);
+        const account = wallet.accounts.find((element: WalletAccount) => element.default == true);
 
         const common: SecretKeyPair = {
             password: password,
@@ -107,7 +107,7 @@ export class WalletUtils {
                 wallet.accounts.forEach((account) => {
                     account.assets = [];
                     const mosaicList: MosaicId[] = [];
-                    const mosaicAmount = {};
+                    const mosaicAmount: LooseObject = {};
                     const address = accInfo.find((element) => element.address['address'] == account.address);
                     if (address != undefined) {
 
@@ -157,7 +157,7 @@ export class WalletUtils {
 
         const networkType = ChainUtils.getNetworkType(networkTypeId);
         const addresses: Address[] = [];
-        wallet.accounts.forEach((element) => {
+        wallet.accounts.forEach((element: WalletAccount) => {
             addresses.push(Address.createFromPublicKey(element.publicKey, networkType));
         });
 
@@ -416,18 +416,18 @@ export class WalletUtils {
     }
 
     static importWltOldFormat(base64Wlt: string, networkName: string, networkType: NetworkType){
-        let wltFile: oldWltFile = Helper.base64decode(base64Wlt);
+        const wltFile: oldWltFile = Helper.base64decode(base64Wlt);
 
-        let wallets = new Wallets();
+        const wallets = new Wallets();
 
         if(!wallets.filterByNetworkNameAndName(networkName, wltFile.name)){
             throw new Error("Wallet with same name already exist");
         }
 
-        let walletAccounts: WalletAccount[] = [];
+        const walletAccounts: WalletAccount[] = [];
 
         wltFile.accounts.forEach((account)=>{
-            let walletAccount = new WalletAccount(account.name, 
+            const walletAccount = new WalletAccount(account.name, 
                 account.publicAccount.publicKey, account.publicAccount.address.address, account.algo, 
                 account.encrypted, account.iv);
 
@@ -441,7 +441,7 @@ export class WalletUtils {
             walletAccounts.push(walletAccount);
         });
 
-        let newWallet = new Wallet(wltFile.name, networkName, walletAccounts);
+        const newWallet = new Wallet(wltFile.name, networkName, walletAccounts);
 
         wallets.wallets.push(newWallet);
 
@@ -449,18 +449,18 @@ export class WalletUtils {
     }
 
     static importWalletNewFormat(base64Wlt: string, networkName: string, networkType: NetworkType){
-        let wltFile: Wallet = Helper.base64decode(base64Wlt);
+        const wltFile: Wallet = Helper.base64decode(base64Wlt);
 
-        let wallets = new Wallets();
+        const wallets = new Wallets();
 
         if(!wallets.filterByNetworkNameAndName(networkName, wltFile.name)){
             throw new Error("Wallet with same name already exist");
         }
 
-        let walletAccounts: WalletAccount[] = [];
+        const walletAccounts: WalletAccount[] = [];
 
         wltFile.accounts.forEach((account)=>{
-            let walletAccount = new WalletAccount(account.name, 
+            const walletAccount = new WalletAccount(account.name, 
                 account.publicKey, account.address, account.algo, 
                 account.encrypted, account.iv);
 
@@ -476,7 +476,7 @@ export class WalletUtils {
             walletAccounts.push(walletAccount);
         });
 
-        let newWallet = new Wallet(wltFile.name, networkName, walletAccounts);
+        const newWallet = new Wallet(wltFile.name, networkName, walletAccounts);
 
         wallets.wallets.push(newWallet);
 
@@ -484,7 +484,7 @@ export class WalletUtils {
     }
 
     static checkIsNewFormat(base64Wlt: string){
-        let wltFile: Wallet = Helper.base64decode(base64Wlt);
+        const wltFile: Wallet = Helper.base64decode(base64Wlt);
 
         if(wltFile.accounts[0].publicKey){
             return true;
@@ -496,7 +496,7 @@ export class WalletUtils {
 
     static export(wallet: Wallet){
 
-        let walletJSON = JSON.stringify(wallet);
+        const walletJSON = JSON.stringify(wallet);
 
         return Helper.base64encode(walletJSON);
     }

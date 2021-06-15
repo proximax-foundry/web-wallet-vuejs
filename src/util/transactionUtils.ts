@@ -34,7 +34,7 @@ import { ChainUtils } from "../util/chainUtils";
 import { WalletUtils } from "../util/walletUtils";
 import { ChainAPICall } from "../models/REST/chainAPICall";
 import { BuildTransactions } from "../util/buildTransactions";
-import { Helper } from "./helper";
+import { Helper } from "./typeHelper";
 
 const divisibility = 6;
 const xpxMosaicId = "";
