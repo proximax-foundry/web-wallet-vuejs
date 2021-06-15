@@ -38,34 +38,14 @@
   </div>
 </template>
 
-<script lang="ts">
-import { ref, getCurrentInstance } from 'vue';
-import SignInSiriusIDModal from '@/components/SignInSiriusIDModal.vue'
-import SignInModal from '@/components/SignInModal.vue'
+<script>
+import SignInSiriusIDModal from '@/modules/home/components/SignInSiriusIDModal.vue'
+import SignInModal from '@/modules/home/components/SignInModal.vue'
 export default {
   name: 'Home',
   components: {
     SignInSiriusIDModal,
     SignInModal,
-    NotificationModal
-  },
-
-  setup(p){
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance ? internalInstance.appContext.config.globalProperties.emitter: null;
-    const toggleModal = ref(false);
-    const msg = ref(p.modalMsg);
-
-    if(p.toggle){
-      toggleModal.value = true;
-    }
-    emitter.on("CLOSE_NOTIFICATION", payload => {
-      toggleModal.value = payload;
-    });
-    return {
-      toggleModal,
-      msg,
-    };
   },
 }
 </script>
