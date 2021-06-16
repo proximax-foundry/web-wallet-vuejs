@@ -7,22 +7,28 @@ const sessionWalletKey = "loggedInWallet";
 
 export class WalletStateUtils{
 
-  static refreshWallets(){
+  static refreshWallets(): void{
     walletState.wallets = new Wallets();
   }
 
-  static updateLoggedIn(wallet: Wallet){
+  static updateLoggedIn(wallet: Wallet): void{
     walletState.currentLoggedInWallet = wallet;
     walletState.isLogin = true;
     SessionService.setObject(sessionWalletKey, wallet);
   }
 
-  static checkWalletUpdate(){
+  static checkWalletUpdate(): void{
     if(walletState.wallets.isWalletOutdated())
       walletState.wallets = new Wallets();
   }
 
-  static checkFromSession(){
+  static doLogout(): void{
+    walletState.currentLoggedInWallet = null;
+    walletState.isLogin = false;
+    sessionStorage.removeItem(sessionWalletKey);
+  }
+
+  static checkFromSession(): boolean{
 
     const wallet = SessionService.getJSONParse(sessionWalletKey);
 

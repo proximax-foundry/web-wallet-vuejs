@@ -15,7 +15,7 @@ export class ChainProfile extends StoreProperties{
         super(storeName);
     }
 
-    getVersion(){
+    getVersion(): string{
         return this.version;
     }
 

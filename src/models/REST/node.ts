@@ -1,5 +1,5 @@
 import { 
-    NodeHttp
+    NodeHttp, NodeInfo, NodeTime
 } from "tsjs-xpx-chain-sdk";
 
 export class NodeAPI {
@@ -10,11 +10,11 @@ export class NodeAPI {
         this.nodeHttp = new NodeHttp(endpoint);
     }
 
-    getNodeInfo(){
+    getNodeInfo(): Promise<NodeInfo>{
         return this.nodeHttp.getNodeInfo().toPromise();
     }
 
-    getNodeTime(){
+    getNodeTime(): Promise<NodeTime>{
         return this.nodeHttp.getNodeTime().toPromise();
     }
 }

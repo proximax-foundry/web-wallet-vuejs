@@ -1,6 +1,7 @@
 import { 
     MetadataHttp, NetworkHttp,
-    MosaicId, NamespaceId
+    MosaicId, NamespaceId, 
+    AddressMetadata, NamespaceMetadata, MosaicMetadata
 } from "tsjs-xpx-chain-sdk";
 
 export class MetadataAPI {
@@ -16,15 +17,15 @@ export class MetadataAPI {
      * @param accountId - Account address/public key
      *
      */
-    getAccountMetadata(accountId: string){
+    getAccountMetadata(accountId: string): Promise<AddressMetadata>{
         return this.metadataHttp.getAccountMetadata(accountId).toPromise();
     }
 
-    getMosaicMetadata(mosaicId: MosaicId){
+    getMosaicMetadata(mosaicId: MosaicId): Promise<MosaicMetadata>{
         return this.metadataHttp.getMosaicMetadata(mosaicId).toPromise();
     }
 
-    getNamespaceMetadata(namespaceId: NamespaceId){
+    getNamespaceMetadata(namespaceId: NamespaceId): Promise<NamespaceMetadata>{
         return this.metadataHttp.getNamespaceMetadata(namespaceId).toPromise();
     }
 }

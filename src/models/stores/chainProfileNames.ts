@@ -12,17 +12,17 @@ export class ChainProfileNames extends StoreProperties {
         super(storeName);
     }
 
-    static createDefault(){
+    static createDefault(): ChainProfileNames{
         const newObj = new ChainProfileNames(key);
         newObj.init();
         return newObj;
     }
 
-    fetchFromLocalStorage(){
+    fetchFromLocalStorage(): void{
         this.init();
     }
 
-    replaceFirst2Names(names: string[]) {
+    replaceFirst2Names(names: string[]): number {
 
         let count = 0;
 
@@ -35,7 +35,7 @@ export class ChainProfileNames extends StoreProperties {
        return count;
     }
 
-    replaceFirst3Names(names: string[]) {
+    replaceFirst3Names(names: string[]): number {
 
         let count = 0;
 
@@ -48,7 +48,7 @@ export class ChainProfileNames extends StoreProperties {
         return count;
     }
 
-    replaceAndUpdateWallet(oldName: string, newName: string, index: number){
+    replaceAndUpdateWallet(oldName: string, newName: string, index: number): boolean{
         if(oldName !== newName){
             const allWallets = new Wallets();
             let newWallets: Wallet[];
@@ -75,7 +75,7 @@ export class ChainProfileNames extends StoreProperties {
         return false;
     }
 
-    getIndexByName(name: string){
+    getIndexByName(name: string): number{
         return this.names.findIndex(currentName=> currentName == name)
     }
 }

@@ -12,7 +12,7 @@ export class Account{
         this.address = address;
     }
 
-    fixAddress(networkType: NetworkType){
+    fixAddress(networkType: NetworkType): void{
         this.address = PublicAccount.createFromPublicKey(this.publicKey, networkType).address.plain();
     }
 }

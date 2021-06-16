@@ -14,7 +14,7 @@ export class Currency{
         this.divisibility = divisibility;
     }
 
-    static createDefault(){
+    static createDefault(): Currency{
         return new Currency("XPX", "prx.xpx", "", "bffb42a19116bdf6", 6);
     }
 

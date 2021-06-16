@@ -138,7 +138,7 @@ export class ChainProfileConfig extends StoreProperties implements NetworkConfig
         super(storeName + "_config");
     }
 
-    updateConfig(config: NetworkConfig){
+    updateConfig(config: NetworkConfig): void{
         Object.assign(this, config);
     }
 }

@@ -7,11 +7,11 @@ import { BlockInfo, Transaction, TransactionStatusError,
 
 export class ListenerStateUtils{
 
-    static addBlock(blockInfo: BlockInfo){
+    static addBlock(blockInfo: BlockInfo): void{
         listenerState.newBlocks.push(blockInfo);
     }
 
-    static addConfirmedTransactions(transaction: Transaction, address: Address){
+    static addConfirmedTransactions(transaction: Transaction, address: Address): void{
         
         let addressConfirmedTransactions = listenerState.confirmedTransactions.find((x)=> x.address === address.plain());
 
@@ -30,7 +30,7 @@ export class ListenerStateUtils{
         }
     }
 
-    static addUnconfirmedTransactions(transaction: Transaction, address: Address){
+    static addUnconfirmedTransactions(transaction: Transaction, address: Address): void{
 
         let addressUnconfirmedTransactions = listenerState.unconfirmedTransactions.find((x)=> x.address === address.plain());
 
@@ -49,7 +49,7 @@ export class ListenerStateUtils{
         }
     }
 
-    static removeUnconfirmedTransactions(transactionHash: string, address: Address){
+    static removeUnconfirmedTransactions(transactionHash: string, address: Address): void{
 
         const addressUnconfirmedTransactions = listenerState.unconfirmedTransactions.find((x)=> x.address === address.plain());
 
@@ -64,7 +64,7 @@ export class ListenerStateUtils{
         }
     }
 
-    static addTransactionStatus(transactionStatusError: TransactionStatusError, address: Address){
+    static addTransactionStatus(transactionStatusError: TransactionStatusError, address: Address): void{
         
         let addressTransactionStatuses = listenerState.transactionStatus.find((x)=> x.address === address.plain());
 
@@ -83,7 +83,7 @@ export class ListenerStateUtils{
         }
     }
 
-    static addAggregateBonded(transaction: AggregateTransaction, address: Address){
+    static addAggregateBonded(transaction: AggregateTransaction, address: Address): void{
 
         let addressAggregateTransaction = listenerState.aggregateBondedTransaction.find((x)=> x.address === address.plain());
 
@@ -102,7 +102,7 @@ export class ListenerStateUtils{
         }
     }
 
-    static removeAggregateBonded(transactionHash: string, address: Address){
+    static removeAggregateBonded(transactionHash: string, address: Address): void{
 
         const addressAggregateBondedTransaction = listenerState.aggregateBondedTransaction.find((x)=> x.address === address.plain());
 
@@ -117,7 +117,7 @@ export class ListenerStateUtils{
         }
     }
 
-    static addCosignatureSignedTransaction(cosignatureSignedTransaction: CosignatureSignedTransaction, address: Address){
+    static addCosignatureSignedTransaction(cosignatureSignedTransaction: CosignatureSignedTransaction, address: Address): void{
         
         let addressCosignatureAdded = listenerState.cosignatureAdded.find((x)=> x.address === address.plain());
 
@@ -138,7 +138,7 @@ export class ListenerStateUtils{
         }
     }
 
-    static removeCosignatureSignedTransactionByHash(transactionHash: string){
+    static removeCosignatureSignedTransactionByHash(transactionHash: string): void{
 
         const finalAddressCosignatures: AddressCosignatureSignedTransactions[] = [];
 
@@ -153,7 +153,7 @@ export class ListenerStateUtils{
         listenerState.cosignatureAdded = finalAddressCosignatures;
     }
 
-    static reset(){
+    static reset(): void{
         listenerState.aggregateBondedTransaction = [];
         listenerState.confirmedTransactions = [];
         listenerState.cosignatureAdded = [];
