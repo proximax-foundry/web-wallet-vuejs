@@ -1,4 +1,5 @@
-export const DashboardRoutes = [
+import { RouteRecordRaw } from 'vue-router'
+export const DashboardRoutes: RouteRecordRaw[] = [
   {
     path: '/dashboard',
     name: 'ViewDashboard',

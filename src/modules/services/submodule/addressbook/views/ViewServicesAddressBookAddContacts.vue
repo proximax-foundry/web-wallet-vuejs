@@ -23,7 +23,7 @@
 <script>
 import { computed, ref, inject, watch } from 'vue';
 import TextInput from '@/components/TextInput.vue';
-import { verifyAddress } from '@/util/functions.js';
+import { verifyAddress } from '@/util/functions';
 import { useRouter } from 'vue-router';
 import { useToast } from "primevue/usetoast";
 

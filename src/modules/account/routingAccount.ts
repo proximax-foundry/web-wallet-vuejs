@@ -1,8 +1,9 @@
 import { DelegateRoutes } from '@/modules/account/submodule/delegate/routingDelegate';
 import { LinkToNamespaceRoutes } from '@/modules/account/submodule/linkToNamespace/routingLinkToNamespace';
 import { MultisigRoutes } from '@/modules/account/submodule/multisig/routingMultisig';
+import { RouteRecordRaw } from 'vue-router';
 
-export const AccountRoutes = [
+export const AccountRoutes: RouteRecordRaw[] = [
   {
     path: '/view-all-accounts',
     name: 'ViewAccountDisplayAll',

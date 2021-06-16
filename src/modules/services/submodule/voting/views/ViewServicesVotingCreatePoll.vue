@@ -172,7 +172,7 @@ import TextareaInput from '@/modules/services/submodule/voting/components/Textar
 import DisplayOptionModal from '@/modules/services/submodule/voting/components/DisplayOptionModal.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
-import { copyKeyFunc } from '@/util/functions.js';
+import { copyKeyFunc } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 
 export default {

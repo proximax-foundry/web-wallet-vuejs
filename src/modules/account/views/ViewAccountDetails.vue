@@ -104,7 +104,7 @@ import { ref, inject } from 'vue';
 import { useRouter } from "vue-router";
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
-import { copyKeyFunc } from '@/util/functions.js';
+import { copyKeyFunc } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 
 export default {

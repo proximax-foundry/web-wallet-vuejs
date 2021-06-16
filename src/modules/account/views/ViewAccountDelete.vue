@@ -43,7 +43,7 @@
 import { ref, inject } from 'vue';
 import { useRouter } from "vue-router";
 import ConfirmDeleteAccountModal from '@/modules/account/components/ConfirmDeleteAccountModal.vue';
-import { copyKeyFunc } from '@/util/functions.js';
+import { copyKeyFunc } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 
 export default {
