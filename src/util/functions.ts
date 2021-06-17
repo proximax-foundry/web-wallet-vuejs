@@ -30,7 +30,7 @@ export const copyKeyFunc = (id:string):void => {
 
 
 
-const getCoingecko = (coinId)=> {
+const getCoingecko = (coinId: string): Promise<number>=> {
   return fetch(`${environment.coingecko.url}${coinId}`).then((res) => res.json()).then((data) => { return data.market_data.current_price.usd });
 }
 

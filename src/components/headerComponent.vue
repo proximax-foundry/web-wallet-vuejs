@@ -13,13 +13,13 @@
       </div>
       <div class="w-14 md:w-44 pl-3 text-center flex gray-line-left h-10 items-center">
         <div>
-          <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode)"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ siriusStore.state.chainNetworkName }}</div>
+          <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="chainAPIEndpoint"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkState.chainNetworkName }}</div>
         </div>
       </div>
       <div class="w-52 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
         <div>
-          <div class="text-xs inline-block">{{ appStore.state.currentLoggedInWallet.name }}</div>
-          <div class="text-xs">Total Balance: <span>{{ totalBalance }}</span> XPX</div>
+          <div class="text-xs inline-block">{{ walletState.currentLoggedInWallet.name }}</div>
+          <div class="text-xs">Total Balance: <span>{{ totalBalance }}</span> {{ currentNativeTokenName}}</div>
         </div>
       </div>
       <div class="w-17 text-center h-10 items-center gray-line-left">
@@ -37,7 +37,7 @@
       <SelectLanguagePlugin />
     </div>
     <div class="select mb-3 inline-block">
-      <Dropdown v-model="selectedNetwork" name="selectedNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
+      <Dropdown v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
     </div>
     <div class="w-16 text-center inline-block">
       <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">Home</router-link>
@@ -48,17 +48,19 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { computed, defineComponent, getCurrentInstance, ref } from "vue"; //getCurrentInstance
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { useRouter } from "vue-router";
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
+import { ChainUtils } from '@/util/chainUtils';
 import { ChainProfile } from "@/models/stores/chainProfile";
 // import { transferEmitter } from '../util/listener.js';
 import Dropdown from 'primevue/dropdown';
 import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 // import { useToast } from "primevue/usetoast";
 
 export default defineComponent({
@@ -78,25 +80,31 @@ export default defineComponent({
   setup() {
     // const toast = useToast();
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    //const emitter = internalInstance?.appContext.config.globalProperties.emitter;
     // const chainNetwork = inject("chainNetwork");
     const router = useRouter();
     const notificationMessage = ref('');
     const notificationType = ref('noti');
 
+    const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort))
     const loginStatus = computed(() => walletState.isLogin);
     const chainsNetworks = computed(()=> {
-      interface optionInterface {
+      /*interface optionInterface {
         label: string,
         value: number
       }
-      let options : Array<optionInterface> = [];
-      networkState.availableNetworks.forEach((network: string, index: number) => {
+      let options : Array<optionInterface> = [];*/
+      let options = [];
+      networkState.availableNetworks.forEach((network, index) => {
         options.push({ label: network, value: index });
       });
       return options;
     });
 
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+
+/*
     interface itemInterface{
       label: string,
       value: number
@@ -111,6 +119,11 @@ export default defineComponent({
       label: 'Networks',
       items: chainsNetworks.value
     }];
+  */
+  const chainsNetworkOption = [{
+      label: 'Networks',
+      items: chainsNetworks.value
+    }];
     // , {
     //   label: 'Setting',
     //   items: [
@@ -118,9 +131,9 @@ export default defineComponent({
     //   ]
     // }
 
-    const selectedNetwork = ref();
-    console.log('net:' + networkState.chainNetworkName);
-    selectedNetwork.value= { label: networkState.chainNetworkName, value: networkState.chainNetwork };
+    const selectedNetwork = computed(()=>{ return {label: networkState.chainNetworkName, value: networkState.chainNetwork }});
+
+    //selectedNetwork.value= { label: networkState.chainNetworkName, value: networkState.chainNetwork };
     // // set default for network selection if state.selectedNetwork is null
     // if(networkState.chainNetworkNamee === ''){
     //   selectedNetwork.value= { label: networkState.availableNetworks[0], value: 0 };
@@ -134,10 +147,9 @@ export default defineComponent({
     }
 
     const logout = () => {
-      // let status = appStore.logoutOfWallet();
-      // if(status){
-      //   router.push({ name: "Home"});
-      // }
+      WalletStateUtils.doLogout();
+
+      router.push({ name: "Home"});
       console.log('logout')
     };
 
@@ -181,6 +193,7 @@ export default defineComponent({
     return {
       versioning,
       networkState,
+      walletState,
       loginStatus,
       logout,
       totalBalance,
@@ -189,7 +202,9 @@ export default defineComponent({
       chainsNetworks,
       selectedNetwork,
       selectNetwork,
+      chainAPIEndpoint,
       chainsNetworkOption,
+      currentNativeTokenName
     };
   },
   created() {

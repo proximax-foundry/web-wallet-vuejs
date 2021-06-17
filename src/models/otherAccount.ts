@@ -16,39 +16,40 @@ export class OtherAccount extends Account{
         this.type = type;
     }
 
-    addAsset(asset: Asset){
+    addAsset(asset: Asset): void{
         this.assets.push(asset);
     }
 
-    removeAsset(id: string){
+    removeAsset(id: string): void{
         const index = this.assets.findIndex((asset)=> asset.idHex === id);
 
         this.assets.splice(index, 1);
     }
 
-    addNamespace(namespace: Namespace){
+    addNamespace(namespace: Namespace): void{
         this.namespaces.push(namespace);
     }
 
-    removeNamespace(id: string){
+    removeNamespace(id: string): void{
         const index = this.namespaces.findIndex((namespace)=> namespace.idHex === id);
 
         this.namespaces.splice(index, 1);
     }
 
-    updateMultisigInfo(multisigInfo: MultisigInfo[]){
+    updateMultisigInfo(multisigInfo: MultisigInfo[]): void{
         this.multisigInfo = multisigInfo;
     }
 
-    getNativeTokenBalance(assetId :string){
+    getNativeTokenBalance(assetId :string): number | null{
         return this.assets.find((asset)=> asset.idHex === assetId)?.amount;
     }
 
-    getNativeTokenBalanceByNamespaceId(namespaceId :string){
+    getNativeTokenBalanceByNamespaceId(namespaceId :string): number | null{
         return this.assets.find((asset)=> asset.namespaceId.includes(namespaceId))?.amount;
     }
 
-    updateBalance(assetId: string){
-        this.balance = this.getNativeTokenBalance(assetId) || 0;
+    updateBalance(assetId: string): void{
+        let tokenBalance = this.getNativeTokenBalance(assetId);
+        this.balance = tokenBalance ? tokenBalance : 0;
     }
 }

@@ -51,7 +51,7 @@
 <script>
 import { computed, inject, getCurrentInstance } from "vue";
 import CryptoJS from 'crypto-js';
-import { copyKeyFunc } from '@/util/functions.js';
+import { copyKeyFunc } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 
 export default{

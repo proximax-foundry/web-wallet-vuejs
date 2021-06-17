@@ -19,12 +19,12 @@ export class MultisigInfo{
         this.minRemoval = minRemoval;
     }
 
-    getCosignaturiesAddress(networkType: number){
+    getCosignaturiesAddress(networkType: number): string[]{
 
         return this.cosignaturies.map((publicKey)=> Address.createFromPublicKey(publicKey, networkType).pretty());
     }
 
-    getMultisigAccountsAddress(networkType: number){
+    getMultisigAccountsAddress(networkType: number): string[]{
 
         return this.multisigAccounts.map((publicKey)=> Address.createFromPublicKey(publicKey, networkType).pretty());
     }

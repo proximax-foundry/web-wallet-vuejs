@@ -1,5 +1,5 @@
 import { 
-    ChainConfigHttp
+    ChainConfigHttp, ChainConfig
 } from "tsjs-xpx-chain-sdk";
 
 export class ChainConfigAPI {
@@ -10,7 +10,7 @@ export class ChainConfigAPI {
         this.chainConfigHttp = new ChainConfigHttp(endpoint);
     }
 
-    getChainConfig(height: number){
+    getChainConfig(height: number): Promise<ChainConfig>{
         return this.chainConfigHttp.getChainConfig(height).toPromise();
     }
 

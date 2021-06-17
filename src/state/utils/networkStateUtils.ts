@@ -9,11 +9,11 @@ const lastAccessNetworkName = "lastAccessNetworkName";
 
 export class NetworkStateUtils{
 
-  static refreshAvailableNetwork(){
+  static refreshAvailableNetwork(): void{
     networkState.availableNetworks = ChainProfileNames.createDefault().names;
   }
 
-  static changeNetworkByName(networkName:string){
+  static changeNetworkByName(networkName:string): void{
     const chainProfileNames = ChainProfileNames.createDefault();
 
     let networkChain = chainProfileNames.getIndexByName(networkName);
@@ -34,7 +34,7 @@ export class NetworkStateUtils{
      NetworkStateUtils.updateNetworkProfile();
   }
 
-  static changeNetworkByIndex(index: number){
+  static changeNetworkByIndex(index: number): void{
     const chainProfileNames = ChainProfileNames.createDefault();
     let selectedIndex = index < 0 ? 0 : index;
     let selectedNetworkName = "";
@@ -57,7 +57,7 @@ export class NetworkStateUtils{
     NetworkStateUtils.updateNetworkProfile();
   }
 
-  static updateNetworkProfile(){
+  static updateNetworkProfile(): void{
     const chainProfile = new ChainProfile(networkState.chainNetworkName);
     chainProfile.init();
     networkState.currentNetworkProfile = chainProfile;
@@ -70,7 +70,7 @@ export class NetworkStateUtils{
     NetworkStateUtils.setAPINodeInit();
   }
 
-  static setAPINodeInit(){
+  static setAPINodeInit(): void{
     const chainProfilePreferences = new ChainProfilePreferences(networkState.chainNetworkName);
 
     chainProfilePreferences.init();
@@ -96,7 +96,7 @@ export class NetworkStateUtils{
     SessionService.setRaw('selectedChainNode', networkState.selectedAPIEndpoint);
   }
 
-  static updateChainNode(apiNode: string){
+  static updateChainNode(apiNode: string): void{
     const chainProfilePreferences = new ChainProfilePreferences(networkState.chainNetworkName);
     chainProfilePreferences.apiNode = apiNode;
     chainProfilePreferences.saveToLocalStorage();
@@ -117,11 +117,11 @@ export class NetworkStateUtils{
     return location.protocol=='https:' ? `wss://${url}` : `ws://${url}:${portNumber}`;
   }
 
-  static setLocalDefaultNetwork(networkName: string){
+  static setLocalDefaultNetwork(networkName: string): void{
     localStorage.setItem(lastAccessNetworkName, networkName);
   }
 
-  static checkDefaultNetwork(){
+  static checkDefaultNetwork(): void{
     const networkName = localStorage.getItem(lastAccessNetworkName);
 
     if(networkName){
@@ -132,7 +132,7 @@ export class NetworkStateUtils{
     }
   }
 
-  static updateBlockHeight(height: number){
+  static updateBlockHeight(height: number): void{
     networkState.blockHeight = height;
   }
 }

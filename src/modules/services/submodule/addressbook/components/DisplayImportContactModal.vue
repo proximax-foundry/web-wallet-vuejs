@@ -37,7 +37,7 @@
 
 <script>
 import { inject, getCurrentInstance, ref } from "vue";
-import { verifyAddress } from '@/util/functions.js';
+import { verifyAddress } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 export default{
   name: 'DisplayImportContactModal',

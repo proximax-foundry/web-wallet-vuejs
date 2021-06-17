@@ -109,7 +109,7 @@ import TransferTextareaInput from '@/modules/transfer/components/TransferTextare
 import { createTransaction, makeTransaction, getFakeEncryptedMessageSize, getPlainMessageSize, convertToExact, convertToCurrency } from '@/util/transfer.js'; //getMosaicsAllAccounts
 import AddContactModal from '@/modules/transfer/components/AddContactModal.vue';
 import ConfirmSendModal from '@/modules/transfer/components/ConfirmSendModal.vue';
-import { verifyAddress } from '@/util/functions.js';
+import { verifyAddress } from '@/util/functions';
 import { multiSign } from '@/util/multiSignatory.js';
 
 export default {
