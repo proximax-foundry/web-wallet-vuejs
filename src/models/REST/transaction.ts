@@ -1,6 +1,7 @@
 import { 
     TransactionHttp,
-    SignedTransaction, CosignatureSignedTransaction
+    SignedTransaction, CosignatureSignedTransaction,
+    TransactionAnnounceResponse, Transaction, TransactionStatus
 } from "tsjs-xpx-chain-sdk";
 
 export class TransactionAPI {
@@ -11,15 +12,15 @@ export class TransactionAPI {
         this.transactionHttp = new TransactionHttp(endpoint);
     }
 
-    announce(signedTransaction: SignedTransaction){
+    announce(signedTransaction: SignedTransaction): Promise<TransactionAnnounceResponse>{
         return this.transactionHttp.announce(signedTransaction).toPromise();
     }
 
-    announceAggregateBonded(signedTransaction: SignedTransaction){
+    announceAggregateBonded(signedTransaction: SignedTransaction): Promise<TransactionAnnounceResponse>{
         return this.transactionHttp.announceAggregateBonded(signedTransaction).toPromise();
     }
 
-    announceAggregateBondedCosignature(cosignatureSignedTransaction: CosignatureSignedTransaction){
+    announceAggregateBondedCosignature(cosignatureSignedTransaction: CosignatureSignedTransaction): Promise<TransactionAnnounceResponse>{
         return this.transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction).toPromise();
     }
 
@@ -27,7 +28,7 @@ export class TransactionAPI {
      * Gets a transaction for a transactionId
      * @param transactionId - Transaction id or hash.
      */
-    getTransaction(transactionId: string){
+    getTransaction(transactionId: string): Promise<Transaction>{
         return this.transactionHttp.getTransaction(transactionId).toPromise();
     }
 
@@ -36,7 +37,7 @@ export class TransactionAPI {
      * @param transactionIds - Array of transactions id and/or hash.
      *
      */
-    getTransactions(transactionIds: string[]){
+    getTransactions(transactionIds: string[]): Promise<Transaction[]>{
         return this.transactionHttp.getTransactions(transactionIds).toPromise();
     }
 
@@ -44,15 +45,15 @@ export class TransactionAPI {
      * Gets a transaction for a transactionId
      * @param transactionId - Transaction id or hash.
      */
-    getTransactionEffectiveFee(transactionId: string){
+    getTransactionEffectiveFee(transactionId: string): Promise<number>{
         return this.transactionHttp.getTransactionEffectiveFee(transactionId).toPromise();
     }
 
-    getTransactionStatus(transactionHash: string){
+    getTransactionStatus(transactionHash: string): Promise<TransactionStatus>{
         return this.transactionHttp.getTransactionStatus(transactionHash).toPromise();
     }
 
-    getTransactionsStatuses(transactionHashes: string[]){
+    getTransactionsStatuses(transactionHashes: string[]): Promise<TransactionStatus[]>{
         return this.transactionHttp.getTransactionsStatuses(transactionHashes).toPromise();
     }
 }

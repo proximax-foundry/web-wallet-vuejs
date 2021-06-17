@@ -1,4 +1,5 @@
-export const TransferRoutes = [
+import { RouteRecordRaw } from 'vue-router'
+export const TransferRoutes: RouteRecordRaw[] = [
   {
     path: '/create-transfer',
     name: 'ViewTransferCreate',

@@ -1,11 +1,13 @@
 {
-  "name": "ts-dev-wallet",
-  "version": "0.1.0",
+  "name": "web-wallet-vuejs",
+  "version": "0.0.11",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "build": "cross-env NODE_ENV=production vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "build-development": "cross-env NODE_ENV=development vue-cli-service build",
+    "build-staging": "cross-env NODE_ENV=staging vue-cli-service build"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.34",

@@ -21,7 +21,7 @@ export class Connector{
         this.addresses = addresses;
     }
 
-    startListen(){
+    startListen(): void{
         this.isRequestConnect = true;
         this.listener.open().then(()=>{
             this.startWatcher();
@@ -57,7 +57,7 @@ export class Connector{
         });
     }
 
-    terminate(){
+    terminate(): void{
         this.isRequestConnect = false;
         this.stopWatcher();
         this.subscriptions.forEach((listenerSubscription)=>{
@@ -66,17 +66,17 @@ export class Connector{
         this.listener.terminate();
     }
 
-    connectNewEndpoint(endpoint: string){
+    connectNewEndpoint(endpoint: string): void{
         this.listener = new Listener(endpoint, WebSocket);
         this.startListen();
     }
 
-    reconnect(){
+    reconnect(): void{
         this.terminate();
         this.startListen();
     }
 
-    startWatcher(){
+    startWatcher(): void{
         const watcher = watch(
             () => this.listener.isOpen(),
             (newValue) => {
@@ -89,7 +89,7 @@ export class Connector{
         this.watcher = watcher;
     }
 
-    stopWatcher(){
+    stopWatcher(): void{
         if(this.watcher)
             this.watcher();
 
@@ -106,40 +106,40 @@ class ListenerHandler{
         this.address = address
     }
 
-    static handleNewBlock(newBlock: BlockInfo){
+    static handleNewBlock(newBlock: BlockInfo): void{
 
         ListenerStateUtils.addBlock(newBlock);
         //console.log(`New block added: ${ newBlock.height.compact() }` );
     }
 
-    handleConfirmTx(confirmedTransaction: Transaction){
+    handleConfirmTx(confirmedTransaction: Transaction): void{
 
         ListenerStateUtils.addConfirmedTransactions(confirmedTransaction, this.address);
         //console.log(`Transaction confirmed for ${this.address.pretty()}`);
     }
 
-    handleUnconfirmedTxAdded(unconfirmedTransaction: Transaction){
+    handleUnconfirmedTxAdded(unconfirmedTransaction: Transaction): void{
         
         ListenerStateUtils.addUnconfirmedTransactions(unconfirmedTransaction, this.address);
     }
 
-    handleUnconfirmedTxRemoved(transactionHash: string){
+    handleUnconfirmedTxRemoved(transactionHash: string): void{
         ListenerStateUtils.removeUnconfirmedTransactions(transactionHash, this.address);
     }
 
-    handleAggregateBondedAdded(aggregateTransaction: AggregateTransaction){
+    handleAggregateBondedAdded(aggregateTransaction: AggregateTransaction): void{
         ListenerStateUtils.addAggregateBonded(aggregateTransaction, this.address);
     }
 
-    handleAggregateBondedRemoved(transactionHash: string){
+    handleAggregateBondedRemoved(transactionHash: string): void{
         ListenerStateUtils.removeAggregateBonded(transactionHash, this.address);
     }
 
-    handleCosignatureAdded(cosignatureSignedTransaction: CosignatureSignedTransaction){
+    handleCosignatureAdded(cosignatureSignedTransaction: CosignatureSignedTransaction): void{
         ListenerStateUtils.addCosignatureSignedTransaction(cosignatureSignedTransaction, this.address);
     }
 
-    handleStatus(transactionStatusError: TransactionStatusError){
+    handleStatus(transactionStatusError: TransactionStatusError): void{
         ListenerStateUtils.addTransactionStatus(transactionStatusError, this.address);
     }
 

@@ -1,5 +1,5 @@
 import { 
-    NetworkHttp
+    NetworkHttp, NetworkType
 } from "tsjs-xpx-chain-sdk";
 
 export class NetworkAPI {
@@ -10,7 +10,7 @@ export class NetworkAPI {
         this.networkHttp = new NetworkHttp(endpoint);
     }
 
-    getNetworkType(){
+    getNetworkType(): Promise<NetworkType>{
         return this.networkHttp.getNetworkType().toPromise();
     }
 }

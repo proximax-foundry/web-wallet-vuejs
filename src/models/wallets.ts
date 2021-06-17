@@ -11,12 +11,12 @@ export class Wallets {
         this.fetchFromLocalStorage();
     }
 
-    static fetchUpdateTime(){
+    static fetchUpdateTime(): number{
         const tempUpdateTime = localStorage.getItem(walletUpdateTimeKey);
         return tempUpdateTime ?  parseInt(tempUpdateTime) : 0;
     }
 
-    fetchFromLocalStorage(){
+    fetchFromLocalStorage(): void{
         const tempWallets = localStorage.getItem(walletKey);
 
         try {
@@ -35,7 +35,7 @@ export class Wallets {
         this.updateTime = tempUpdateTime ?  parseInt(tempUpdateTime) : new Date().getTime();
     }
 
-    isWalletOutdated(){
+    isWalletOutdated(): boolean{
 
         if(this.updateTime < Wallets.fetchUpdateTime()){
             return true;
@@ -44,13 +44,13 @@ export class Wallets {
         return false;
     }
 
-    savetoLocalStorage(){
+    savetoLocalStorage(): void{
         localStorage.setItem(walletKey, JSON.stringify(this.wallets));
         this.updateTime = new Date().getTime();
         localStorage.setItem(walletUpdateTimeKey, this.updateTime.toString());
     }
 
-    removeWallet(index: number){
+    removeWallet(index: number): void{
         try {
             this.wallets.splice(index, 1);
             this.savetoLocalStorage();
@@ -59,7 +59,7 @@ export class Wallets {
         }
     }
 
-    removeWalletByNetworkNameAndName(networkName: string, name: string){
+    removeWalletByNetworkNameAndName(networkName: string, name: string): boolean{
         const index = this.getWalletIndex(networkName, name);
         
         if(index){
@@ -69,15 +69,15 @@ export class Wallets {
         return index ? true: false;
     }
 
-    getWalletIndex(networkName: string, name: string){
+    getWalletIndex(networkName: string, name: string): number{
         return this.wallets.findIndex((wallet)=> wallet.networkName == networkName && wallet.name == name)
     }
 
-    filterByNetworkName(networkName: string){
+    filterByNetworkName(networkName: string): Wallet[]{
         return this.wallets.filter((wallet)=> wallet.networkName == networkName)
     }
 
-    filterByNetworkNameAndName (networkName: string, name: string){
+    filterByNetworkNameAndName (networkName: string, name: string): Wallet{
         return this.wallets.find((wallet)=> wallet.networkName == networkName && wallet.name == name)
     }
 }

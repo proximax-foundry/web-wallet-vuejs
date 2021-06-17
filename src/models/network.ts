@@ -11,7 +11,7 @@ export class Network{
         this.currency = currency;
     }
 
-    static createDefault(){
+    static createDefault(): Network{
         return new Network(NetworkType.TEST_NET, Currency.createDefault());
     }
 

@@ -1,5 +1,5 @@
 import { RouteRecordRaw } from 'vue-router'
-export const HomeRoutes:Array<RouteRecordRaw> = [
+export const HomeRoutes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Home',

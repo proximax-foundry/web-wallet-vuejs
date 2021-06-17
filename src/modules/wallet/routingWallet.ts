@@ -1,5 +1,5 @@
 import { RouteRecordRaw } from 'vue-router'
-export const WalletRoutes:Array<RouteRecordRaw> = [
+export const WalletRoutes: RouteRecordRaw[] = [
   {
     path: '/create',
     name: 'ViewWalletCreateSelection',

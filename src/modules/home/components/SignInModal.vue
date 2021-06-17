@@ -104,7 +104,8 @@ export default defineComponent({
         // let wallets = new Wallets();
         let wallet = walletState.wallets.filterByNetworkNameAndName(networkState.chainNetworkName, selectedWallet.value);
         WalletStateUtils.updateLoggedIn(wallet);
-        router.push({ path: "/dashboard"});
+        WalletUtils.updateWalletMultisigInfo(wallet);
+        router.push({ name: "ViewDashboard"});
         // router.push({ path: "/create-transfer"});
       }
     };

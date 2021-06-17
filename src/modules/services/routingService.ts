@@ -9,8 +9,9 @@ import { SiriusGiftRoutes } from '@/modules/services/submodule/siriusGift/routin
 import { ExplorerRoutes } from '@/modules/services/submodule/explorer/routingExplorer';
 import { NodesRoutes } from '@/modules/services/submodule/nodes/routingNodes';
 import { AssetsRoutes } from '@/modules/services/submodule/assets/routingAssets';
+import { RouteRecordRaw } from 'vue-router'
 
-export const ServiceRoutes = [
+export const ServiceRoutes: RouteRecordRaw[] = [
   {
     path: '/services',
     name: 'ViewServices',

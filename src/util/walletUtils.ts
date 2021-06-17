@@ -10,6 +10,7 @@ import { ChainProfile } from "../models/stores/chainProfile"
 import { Asset } from "../models/asset";
 import { ChainAPICall } from "../models/REST/chainAPICall"
 import { SecretKeyPair } from "../models/interface/secretKeyPair"
+import { MultisigInfo } from "../models/multisigInfo"
 import {
     SimpleWallet, Password, RawAddress, Convert, Crypto,
     WalletAlgorithm, PublicAccount, Account, NetworkType, 
@@ -17,6 +18,7 @@ import {
 } from "tsjs-xpx-chain-sdk"
 import { computed } from "vue";
 import { Helper, LooseObject } from "./typeHelper";
+import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 
 const config = require("@/../config/config.json");
 
@@ -24,7 +26,7 @@ const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.c
 
 export class WalletUtils {
 
-    static verifyWalletPassword(name: string, networkName: string, password: string){
+    static verifyWalletPassword(name: string, networkName: string, password: string): boolean{
         const wallet = walletState.wallets.filterByNetworkNameAndName(networkName, name);
         if (!wallet) {
             if (config.debug) {
@@ -85,7 +87,7 @@ export class WalletUtils {
         let currentNetworkProfile: ChainProfile;
 
         if (networkState.currentNetworkProfile) {
-            namespace = networkState.currentNetworkProfile?.network.currency.namespace;
+            namespace = networkState.currentNetworkProfile!.network.currency.namespace;
             currentNetworkProfile = networkState.currentNetworkProfile as ChainProfile;
         }
         else {
@@ -149,7 +151,7 @@ export class WalletUtils {
     static fetchAccountInfoCurrentWalletAccounts(): false | Promise<AccountInfo[]> {
 
         const wallet = walletState.currentLoggedInWallet;
-        const networkTypeId = networkState.currentNetworkProfile?.network.type;
+        const networkTypeId = networkState.currentNetworkProfile!.network.type;
 
         if (!wallet || !networkTypeId) {
             return false;
@@ -193,7 +195,7 @@ export class WalletUtils {
    * @param {*} address
    * @returns
    */
-    static createAddressFromEncode(address: string) {
+    static createAddressFromEncode(address: string) : Address {
         return Address.createFromRawAddress(RawAddress.addressToString(Convert.hexToUint8(address)));
     }
 
@@ -332,7 +334,7 @@ export class WalletUtils {
      * @returns
   
      */
-    static isValidKeyPublicPrivate(data: string) {
+    static isValidKeyPublicPrivate(data: string) : boolean{
         if (data !== null && data.length === 64) {
             return this.isHexString(data);
         } else {
@@ -347,7 +349,7 @@ export class WalletUtils {
      * @returns
   
      */
-    static validateAddress(address: string) {
+    static validateAddress(address: string) : boolean{
         if (address !== '') {
             const addressTrimAndUpperCase = address.trim().toUpperCase().replace(/-/g, '');
             if (addressTrimAndUpperCase.length === 40) {
@@ -378,7 +380,7 @@ export class WalletUtils {
      * @returns
   
      */
-    static verifyNetworkAddressEqualsNetwork(value: string, value2: string) {
+    static verifyNetworkAddressEqualsNetwork(value: string, value2: string): boolean {
         if ((value.length === 40 || value.length === 46) && (value2.length === 40 || value2.length === 46)) {
             if (value.charAt(0) === 'S' && value2.charAt(0) === 'S') {
                 // NetworkType.MIJIN_TEST
@@ -411,11 +413,11 @@ export class WalletUtils {
      * @returns {WalletAlgorithm}
   
      */
-    static getWalletAlgorithm() {
+    static getWalletAlgorithm(): typeof WalletAlgorithm {
         return WalletAlgorithm;
     }
 
-    static importWltOldFormat(base64Wlt: string, networkName: string, networkType: NetworkType){
+    static importWltOldFormat(base64Wlt: string, networkName: string, networkType: NetworkType): void{
         const wltFile: oldWltFile = Helper.base64decode(base64Wlt);
 
         const wallets = new Wallets();
@@ -448,7 +450,7 @@ export class WalletUtils {
         wallets.savetoLocalStorage();
     }
 
-    static importWalletNewFormat(base64Wlt: string, networkName: string, networkType: NetworkType){
+    static importWalletNewFormat(base64Wlt: string, networkName: string, networkType: NetworkType): void{
         const wltFile: Wallet = Helper.base64decode(base64Wlt);
 
         const wallets = new Wallets();
@@ -483,7 +485,24 @@ export class WalletUtils {
         wallets.savetoLocalStorage();
     }
 
-    static checkIsNewFormat(base64Wlt: string){
+    static createNewWalletAccountFromOldFormat(jsonString: string): WalletAccount{
+        const wltAccount: oldAccountStructure = JSON.parse(jsonString);
+
+        const walletAccount = new WalletAccount(wltAccount.name, 
+            wltAccount.publicAccount.publicKey, wltAccount.publicAccount.address.address, wltAccount.algo, 
+            wltAccount.encrypted, wltAccount.iv);
+
+        if(wltAccount.nis1Account){
+            walletAccount.nis1Account = new nis1Account(wltAccount.nis1Account.address, wltAccount.nis1Account.publicKey);
+        }
+
+        walletAccount.default = wltAccount.default;
+        walletAccount.isBrain = wltAccount.brain;
+
+        return walletAccount;
+    }
+
+    static checkIsNewFormat(base64Wlt: string): boolean{
         const wltFile: Wallet = Helper.base64decode(base64Wlt);
 
         if(wltFile.accounts[0].publicKey){
@@ -494,11 +513,105 @@ export class WalletUtils {
         }
     }
 
-    static export(wallet: Wallet){
+    static checkIsNewFormatAccountRaw(jsonString: string): boolean{
+
+        console.log(jsonString);
+
+        const account: LooseObject = JSON.parse(jsonString);
+
+        if(account.publicKey){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    static export(wallet: Wallet): string{
 
         const walletJSON = JSON.stringify(wallet);
 
         return Helper.base64encode(walletJSON);
+    }
+
+    static updateWalletMultisigInfo(wallet: Wallet): void{
+
+        WalletUtils.updateMultisigsDetails(wallet.accounts);
+    }
+
+    static updateMultisigsDetails(walletAccounts: WalletAccount[]): void{
+        
+        walletAccounts.forEach(walletAccount => {
+            WalletUtils.updateMultisigDetails(walletAccount);
+        });
+    }
+
+    static async updateMultisigDetails(walletAccount: WalletAccount): Promise<void>{
+
+        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+
+        const address = Helper.createAddress(walletAccount.address);
+
+        const graphInfo = await chainAPICall.accountAPI.getMultisigAccountGraphInfo(address);
+
+        let multisigInfos: MultisigInfo[] = [];
+
+        graphInfo.multisigAccounts.forEach((value, key)=>{
+            const level = key;
+
+            value.forEach((multiInfo)=>{
+                let newMultisigInfo = new MultisigInfo(
+                    multiInfo.account.publicKey, 
+                    level, 
+                    multiInfo.cosignatories.map((c)=> c.publicKey), 
+                    multiInfo.multisigAccounts.map((c)=> c.publicKey),
+                    multiInfo.minApproval,
+                    multiInfo.minRemoval
+                );
+
+                multisigInfos.push(newMultisigInfo);
+            });
+        });
+
+        walletAccount.multisigInfo = multisigInfos;
+
+        walletState.wallets.savetoLocalStorage();
+    }
+
+    static populateOtherAccountTypeMultisig(wallet: Wallet): void{
+
+        console.log(wallet);
+    }
+
+    static initFixOldFormat(walletsToCheck: Wallets): void{
+        let walletsInstance = new Wallets();
+        let wallets: Wallet[] = [];
+
+        walletsToCheck.wallets.forEach((wallet)=>{
+
+            let walletAccounts: WalletAccount[] = [];
+
+            wallet.accounts.forEach((account)=>{
+
+                let stringJSON = JSON.stringify(account);
+
+                if(WalletUtils.checkIsNewFormatAccountRaw(stringJSON)){
+                    walletAccounts.push(account);
+                }
+                else{
+                    let newWalletAccount = WalletUtils.createNewWalletAccountFromOldFormat(stringJSON);
+        
+                    walletAccounts.push(newWalletAccount);
+                }
+            });
+
+            wallet.accounts = walletAccounts;
+            wallets.push(wallet);
+        });
+
+        walletsInstance.wallets = wallets;
+        walletsInstance.savetoLocalStorage();
+        WalletStateUtils.refreshWallets();
     }
 }
 

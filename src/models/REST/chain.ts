@@ -1,5 +1,5 @@
 import { 
-    ChainHttp, 
+    ChainHttp, BlockchainScore, 
 } from "tsjs-xpx-chain-sdk";
 
 export class ChainAPI {
@@ -10,11 +10,11 @@ export class ChainAPI {
         this.chainHttp = new ChainHttp(endpoint);
     }
 
-    getBlockchainHeight(){
+    getBlockchainHeight(): Promise<number>{
         return this.chainHttp.getBlockchainHeight().toPromise().then((blockNum)=> blockNum.compact());
     }
 
-    getBlockchainScore(){
+    getBlockchainScore(): Promise<BlockchainScore>{
         return this.chainHttp.getBlockchainScore().toPromise();
     }
 }

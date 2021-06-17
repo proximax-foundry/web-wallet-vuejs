@@ -8,7 +8,7 @@ export class StoreProperties{
         this.storeName = storeName;
     }
 
-    init() {
+    init(): void {
         const stateFromLocalStorage = localStorage.getItem(this.storeName);
 
         if (stateFromLocalStorage) {
@@ -21,7 +21,7 @@ export class StoreProperties{
         }
     }
 
-    saveToLocalStorage(){
+    saveToLocalStorage(): void{
         const data = StateCopy.removeStateNameStringify(JSON.stringify(this));
 
         localStorage.setItem(this.storeName, data);
@@ -30,7 +30,7 @@ export class StoreProperties{
 
 class StateCopy{
 
-    static removeStateNameStringify(json: string){
+    static removeStateNameStringify(json: string): any{
 
         const storeCopy = JSON.parse(json);
 

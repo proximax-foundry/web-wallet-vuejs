@@ -12,7 +12,7 @@ export class ChainExplorer{
         this.url = url;
     }
 
-    static createDefault(){
+    static createDefault(): ChainExplorer{
         const chainExplorer = new ChainExplorer("https://bctestnetexplorer.xpxsirius.io");
         chainExplorer.blockRoute = "#/result/blockHeight";
         chainExplorer.publicKeyRoute = "#/result/publicKey";

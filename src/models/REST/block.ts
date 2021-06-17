@@ -1,6 +1,7 @@
 import { 
     BlockHttp, NetworkHttp,
-    LimitType
+    LimitType, 
+    MerkleProofInfo, BlockInfo, Transaction, Statement
 } from "tsjs-xpx-chain-sdk";
 
 export class BlockAPI {
@@ -11,19 +12,19 @@ export class BlockAPI {
         this.blockHttp = new BlockHttp(endpoint, networkHttp);
     }
 
-    getBlockByHeight(height: number){
+    getBlockByHeight(height: number): Promise<BlockInfo>{
         return this.blockHttp.getBlockByHeight(height).toPromise();
     }
     
-    getBlockReceipts(height: number){
+    getBlockReceipts(height: number): Promise<Statement>{
         return this.blockHttp.getBlockReceipts(height).toPromise();
     }
 
-    getBlockTransactions(height: number){
+    getBlockTransactions(height: number): Promise<Transaction[]>{
         return this.blockHttp.getBlockTransactions(height).toPromise();
     }
 
-    getBlocksByHeightWithLimit(height: number, limitType?:LimitType){
+    getBlocksByHeightWithLimit(height: number, limitType?:LimitType): Promise<BlockInfo[]>{
         return this.blockHttp.getBlocksByHeightWithLimit(height, limitType).toPromise();
     }
 
@@ -31,7 +32,7 @@ export class BlockAPI {
      * @param height - The height of the block.
      * @param hash - The hash of the receipt statement or resolution.
      */
-    getMerkleReceipts(height: number, hash: string){
+    getMerkleReceipts(height: number, hash: string): Promise<MerkleProofInfo>{
         return this.blockHttp.getMerkleReceipts(height, hash).toPromise();
     }
 
@@ -39,7 +40,7 @@ export class BlockAPI {
      * @param height - The height of the block.
      * @param hash - The hash of the transaction.
      */
-    getMerkleTransaction(height: number, hash: string){
+    getMerkleTransaction(height: number, hash: string): Promise<MerkleProofInfo>{
         return this.blockHttp.getMerkleTransaction(height, hash).toPromise();
     }
 }

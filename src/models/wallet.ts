@@ -16,17 +16,17 @@ export class Wallet{
         this.accounts = accounts;
     }
 
-    updateAccount(index: number, WalletAccount: WalletAccount){
+    updateAccount(index: number, WalletAccount: WalletAccount): void{
         this.accounts[index] = WalletAccount;
     }
 
-    removeAccount(accountName: string){
+    removeAccount(accountName: string): void{
         const index = this.accounts.findIndex((account)=> account.name == accountName);
 
         this.accounts.splice(index, 1);
     }
 
-    convertAddressToName(address: string){
+    convertAddressToName(address: string): string{
         let aliasName :string = "";
 
         const addressBook = this.contacts.find((addressBook)=> addressBook.address === address);
@@ -44,19 +44,19 @@ export class Wallet{
         return aliasName ? aliasName : address;
     }
 
-    addAddressBook(addressBook: AddressBook){
+    addAddressBook(addressBook: AddressBook): void{
         this.contacts.push(addressBook);
     }
 
-    removeAddressBook(index: number){
+    removeAddressBook(index: number): void{
         this.contacts.splice(index, 1);
     }
 
-    updateAddressBook(index: number, addressBook: AddressBook){
+    updateAddressBook(index: number, addressBook: AddressBook): void{
         this.contacts[index] = addressBook;
     }
 
-    selectDefaultAccount(){
+    selectDefaultAccount(): WalletAccount{
         return this.accounts.find((walletAccount)=> walletAccount.default === true);
     }
 }

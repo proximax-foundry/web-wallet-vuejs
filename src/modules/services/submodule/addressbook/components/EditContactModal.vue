@@ -36,7 +36,7 @@
 <script>
 import { computed, getCurrentInstance, inject, ref, watch } from 'vue';
 import TextInput from '@/components/TextInput.vue';
-import { verifyAddress } from '@/util/functions.js';
+import { verifyAddress } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 export default{
   name: 'EditContactModal',

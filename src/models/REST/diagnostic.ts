@@ -1,5 +1,5 @@
 import { 
-    DiagnosticHttp
+    DiagnosticHttp, BlockchainStorageInfo, ServerInfo
 } from "tsjs-xpx-chain-sdk";
 
 export class DiagnosticAPI {
@@ -10,11 +10,11 @@ export class DiagnosticAPI {
         this.diagnosticHttp = new DiagnosticHttp(endpoint);
     }
 
-    getServerInfo(){
+    getServerInfo(): Promise<ServerInfo>{
         return this.diagnosticHttp.getServerInfo().toPromise();
     }
 
-    getDiagnosticStorage(){
+    getDiagnosticStorage(): Promise<BlockchainStorageInfo>{
         return this.diagnosticHttp.getDiagnosticStorage().toPromise();
     }
 }

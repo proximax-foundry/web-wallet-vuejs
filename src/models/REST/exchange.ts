@@ -1,7 +1,7 @@
 import { 
     ExchangeHttp, NetworkHttp,
     Address, PublicAccount, MosaicId,
-    ExchangeOfferType
+    ExchangeOfferType, MosaicExchange, AccountExchanges
 } from "tsjs-xpx-chain-sdk";
 
 export class ExchangeAPI {
@@ -12,11 +12,11 @@ export class ExchangeAPI {
         this.exchangeHttp = new ExchangeHttp(endpoint, networkHttp);
     }
 
-    getAccountExchanges(accountId: Address | PublicAccount){
+    getAccountExchanges(accountId: Address | PublicAccount): Promise<AccountExchanges>{
         return this.exchangeHttp.getAccountExchanges(accountId).toPromise();
     }
 
-    getExchangeOffers(offerType: ExchangeOfferType, mosaicId: MosaicId){
+    getExchangeOffers(offerType: ExchangeOfferType, mosaicId: MosaicId): Promise<MosaicExchange[]>{
         return this.exchangeHttp.getExchangeOffers(offerType, mosaicId).toPromise();
     }
 
