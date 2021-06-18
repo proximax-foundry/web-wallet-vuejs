@@ -41,7 +41,7 @@ jobs:
         run: npm install
       
       - name: Setup firefox
-        uses: browser-actions/setup-firefox@latest
+        run: sudo apt-get update && sudo apt-get install -y firefox-esr
       - run: firefox --version
 
       - name: Run nightwatchJs example
