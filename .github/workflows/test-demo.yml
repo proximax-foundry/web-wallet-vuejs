@@ -41,3 +41,11 @@ jobs:
 
       - name: Run nightwatchJs example
         run: npm run test-demo
+      
+      - name: Test Report
+        uses: actions/upload-artifact@v2  # upload test results
+        if: success() || failure()        # run this step even if previous step failed
+        with:
+          name: test-results
+          path: tests_output/*.xml
+          reporter: jest-junit
