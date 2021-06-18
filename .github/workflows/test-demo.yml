@@ -53,4 +53,4 @@ jobs:
         with:
           name: test-results
           path: tests_output/*.xml
-          reporter: jest-junit
+          reporter: java-junit
