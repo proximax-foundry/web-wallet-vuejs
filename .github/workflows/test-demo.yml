@@ -1,5 +1,7 @@
 name: test-demo
 
+on: push
+
 jobs:
   # This workflow contains a single job called "test"
   test:
