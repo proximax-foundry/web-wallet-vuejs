@@ -21,3 +21,9 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# nightwatch
+/nightwatch.json
+/nightwatch.conf.js 
+/*.log
+tests_output
