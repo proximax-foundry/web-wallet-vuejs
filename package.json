@@ -8,7 +8,7 @@
     "lint": "vue-cli-service lint",
     "build-development": "cross-env NODE_ENV=development vue-cli-service build",
     "build-staging": "cross-env NODE_ENV=staging vue-cli-service build",
-    "test-demo": "npx nightwatch --headless --no-sandbox node_modules/nightwatch/examples/tests/ecosia.js"
+    "test": "npx nightwatch --headless --no-sandbox tests"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
