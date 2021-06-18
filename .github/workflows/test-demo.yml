@@ -49,7 +49,7 @@ jobs:
 
       - name: Run nightwatchJs example
         # run: npm run test-demo
-        run: npx nightwatch --headless --no-sandbox --verbose node_modules/nightwatch/examples/tests/ecosia.js
+        run: npx nightwatch --headless --verbose --no-sandbox node_modules/nightwatch/examples/tests/ecosia.js
       
       - name: Test Report
         uses: dorny/test-reporter@v1
