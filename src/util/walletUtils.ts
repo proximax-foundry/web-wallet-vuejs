@@ -517,8 +517,6 @@ export class WalletUtils {
 
     static checkIsNewFormatAccountRaw(jsonString: string): boolean{
 
-        console.log(jsonString);
-
         const account: LooseObject = JSON.parse(jsonString);
 
         if(account.publicKey){
@@ -753,9 +751,7 @@ export class WalletUtils {
                 if(existingAsset){
                     let newAsset = existingAsset.duplicateNewInstance(); 
                     newAsset.amount = mosaic.amount.compact();
-                    console.log(newAsset);
                     assets.push(newAsset);
-                    account.addAsset(newAsset);
                 }
                 else{
                     let assetInfo = await chainAPICall.assetAPI.getMosaic(mosaic.id);
@@ -769,10 +765,10 @@ export class WalletUtils {
                     let newAsset = newTempAsset.duplicateNewInstance();
                     newAsset.amount = mosaic.amount.compact();
                     assets.push(newAsset);
-                    account.addAsset(newAsset);
-                    console.log(newAsset);
                 }
             }
+
+            account.assets= assets;
         }
     }
 
@@ -873,7 +869,7 @@ export class WalletUtils {
         }
     }
 
-    static async refreshAllAccountDetails(wallet: Wallet): Promise<void>{
+    static async refreshAllAccountDetails(wallet: Wallet, networkProfile: ChainProfile): Promise<void>{
         wallet.others = [];
 
         await WalletUtils.updateWalletMultisigInfo(wallet);
@@ -882,7 +878,29 @@ export class WalletUtils {
         await WalletUtils.updateWalletOtherAccountMultisigInfo(wallet);
         await WalletUtils.updateOtherAccountDetails(wallet);
 
+        try {
+            let mosaicId = await ChainUtils.getLinkedMosaicId(Helper.createNamespaceId(networkProfile.network.currency.namespace));
+
+            networkProfile.network.currency.assetId = mosaicId.toHex();
+            networkProfile.saveToLocalStorage();
+
+            WalletUtils.updateAllAccountBalance(wallet, mosaicId.toHex());
+        } catch (error) {
+            console.log(error);   
+        }
+
         walletState.wallets.savetoLocalStorage();
+    }
+
+    static updateAllAccountBalance(wallet: Wallet, assetId: string): void{
+
+        for(let i = 0; i < wallet.accounts.length; ++i){
+            wallet.accounts[i].updateBalance(assetId);
+        }
+
+        for(let i = 0; i < wallet.others.length; ++i){
+            wallet.others[i].updateBalance(assetId);
+        }
     }
 
     static initFixOldFormat(walletsToCheck: Wallets): void{

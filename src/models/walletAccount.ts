@@ -51,16 +51,13 @@ export class WalletAccount extends Account{
         this.multisigInfo = multisigInfo;
     }
 
-    getNativeTokenBalance(assetId :string): number | null{
-        return this.assets.find((asset)=> asset.idHex === assetId)?.amount;
-    }
-
-    getNativeTokenBalanceByNamespaceId(namespaceId :string): number | null{
-        return this.assets.find((asset)=> asset.namespaceId.includes(namespaceId))?.amount;
+    getAssetBalance(assetId :string): number | null{
+        let asset = this.assets.find((asset)=> asset.idHex === assetId);
+        return asset ? asset.amount/ Math.pow(10, asset.divisibility): null;
     }
 
     updateBalance(assetId: string): void{
-        this.balance = this.getNativeTokenBalance(assetId) || 0;
+        this.balance = this.getAssetBalance(assetId) || 0;
     }
 
     getDirectChildMultisig(): string[]{
