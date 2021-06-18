@@ -36,7 +36,7 @@ export default defineComponent({
     const confirm = useConfirm();
     const toast = useToast();
     // comparing with default networktype 168 till multiple network selection interface is added
-    const selectedNetworkType = computed(()=> ChainUtils.getNetworkType(networkState.chainNetwork));
+    const selectedNetworkType = computed(()=> ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
     const selectedNetworkName = computed(()=> networkState.chainNetworkName);
     const msg = ref('');
     const walletFile = ref('');

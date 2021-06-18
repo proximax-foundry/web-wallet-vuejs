@@ -118,7 +118,8 @@ export default defineComponent({
   },
   setup(){
     const toast = useToast();
-    const selectedNetwork = computed(()=> ChainUtils.getNetworkType(networkState.chainNetwork));
+    const selectedNetwork = computed(()=> networkState.chainNetwork);
+    const selectedNetworkType = computed(()=> ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
     const selectedNetworkName = computed(()=> networkState.chainNetworkName );
     const err = ref<string>("");
     const newWallet = ref<unknown>();
@@ -151,7 +152,7 @@ export default defineComponent({
         err.value = "Wallet name is already taken";
       }else{
         let password = WalletUtils.createPassword(passwd.value);
-        const wallet = WalletUtils.createAccountSimple(walletName.value, password, selectedNetwork.value);
+        const wallet = WalletUtils.createAccountSimple(walletName.value, password, selectedNetworkType.value);
         const account = wallet.open(password);
         let walletAccounts: WalletAccount[] = [];
         let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.address['address'], "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
