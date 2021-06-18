@@ -31,7 +31,6 @@ export class Wallets {
         try {
             if(tempWallets){
                 this.wallets = Reconstruct.reconstruct(JSON.parse(tempWallets));
-                //this.wallets = WalletsExtension.reconstructClass(JSON.parse(tempWallets));
             }
             else{
                 this.wallets = [];
@@ -95,7 +94,7 @@ export class Wallets {
 
 class Reconstruct{
 
-    static reconstruct(JSON_Wallets: Wallet[]){
+    static reconstruct(JSON_Wallets: Wallet[]): Wallet[]{
 
         let wallets: Wallet[] = [];
 
@@ -234,7 +233,7 @@ class Reconstruct{
         return newNamespace;
     }
 
-    static recreateMutlisigInfo(multisigInfo: MultisigInfo){
+    static recreateMutlisigInfo(multisigInfo: MultisigInfo): MultisigInfo{
 
         let newMultisigInfo = new MultisigInfo(multisigInfo.publicKey, multisigInfo.level,  
             multisigInfo.cosignaturies, multisigInfo.multisigAccounts, 
