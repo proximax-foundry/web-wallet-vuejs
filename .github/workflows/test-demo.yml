@@ -38,14 +38,18 @@ jobs:
       #       ${{ runner.os }}-
           
       - name: Installing Dependencies
-        run: npm install
+        run: |
+          npm install nightwatch
+          npm install geckodriver
+          npm install chromedriver
       
       - name: Setup firefox
         run: sudo apt-get update && sudo apt-get install -y firefox
       - run: firefox --version
 
       - name: Run nightwatchJs example
-        run: npm run test-demo
+        # run: npm run test-demo
+        run: npx nightwatch --headless --no-sandbox --verbose node_modules/nightwatch/examples/tests/ecosia.js
       
       - name: Test Report
         uses: dorny/test-reporter@v1
