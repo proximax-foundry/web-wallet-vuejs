@@ -1,8 +1,8 @@
-name: deploy-stg
-  
+name: test-demo
+
 jobs:
-  # This workflow contains a single job called "build"
-  build:
+  # This workflow contains a single job called "test"
+  test:
     
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -37,4 +37,5 @@ jobs:
         uses: browser-actions/setup-firefox@latest
       - run: firefox --version
 
-      - name: npm run test-demo
+      - name: Run nightwatchJs example
+        run: npm run test-demo
