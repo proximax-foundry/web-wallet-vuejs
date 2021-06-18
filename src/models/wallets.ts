@@ -1,4 +1,13 @@
+import { Asset } from './asset';
+import { Namespace } from './namespace';
 import { Wallet } from './wallet';
+import { WalletAccount } from './walletAccount';
+import { OtherAccount } from './otherAccount';
+import { Address, AliasType } from "tsjs-xpx-chain-sdk";
+import { MultisigInfo } from './multisigInfo';
+import { nis1Account } from './nis1Account';
+import { AddressBook } from './addressBook';
+import { WalletAcountType } from './const/otherAccountType';
 
 const walletKey = "sw";
 const walletUpdateTimeKey = "sw_updated"
@@ -21,7 +30,8 @@ export class Wallets {
 
         try {
             if(tempWallets){
-                this.wallets = JSON.parse(tempWallets);
+                this.wallets = Reconstruct.reconstruct(JSON.parse(tempWallets));
+                //this.wallets = WalletsExtension.reconstructClass(JSON.parse(tempWallets));
             }
             else{
                 this.wallets = [];
@@ -79,5 +89,202 @@ export class Wallets {
 
     filterByNetworkNameAndName (networkName: string, name: string): Wallet{
         return this.wallets.find((wallet)=> wallet.networkName == networkName && wallet.name == name)
+    }
+}
+
+
+class Reconstruct{
+
+    static reconstruct(JSON_Wallets: Wallet[]){
+
+        let wallets: Wallet[] = [];
+
+        for(let i =0; i < JSON_Wallets.length; ++i){
+
+            let accounts: WalletAccount[] = [];
+
+            for(let k =0; k < JSON_Wallets[i].accounts.length; ++k){
+                
+                let tempAccount = JSON_Wallets[i].accounts[k];
+
+                let newWalletAccount = Reconstruct.recreateWalletAccount(tempAccount);
+
+                newWalletAccount.assets = [];
+
+                for(let x =0; x < tempAccount.assets.length; ++x){
+                    let tempAsset = tempAccount.assets[x];
+                    
+                    newWalletAccount.addAsset(Reconstruct.recreateAsset(tempAsset));
+                }
+
+                newWalletAccount.namespaces = [];
+
+                for(let x =0; x < tempAccount.namespaces.length; ++x){
+                    let tempNamespace = tempAccount.namespaces[x];
+
+                    newWalletAccount.addNamespace(Reconstruct.recreateNamespace(tempNamespace));
+                }
+
+                newWalletAccount.multisigInfo = [];
+
+                for(let x =0; x < tempAccount.multisigInfo.length; ++x){
+                    let tempMultisigInfo = tempAccount.multisigInfo[x];
+
+                    newWalletAccount.multisigInfo.push(Reconstruct.recreateMutlisigInfo(tempMultisigInfo));
+                }
+                
+                newWalletAccount.nis1Account = tempAccount.nis1Account ? Reconstruct.recreateNis1Account(tempAccount.nis1Account)  : null;
+
+                accounts.push(newWalletAccount);
+            }
+
+            
+
+            let otherAccounts: OtherAccount[] = [];
+
+            for(let k =0; k < JSON_Wallets[i].others.length; ++k){
+                
+                let tempOtherAccount = JSON_Wallets[i].others[k];
+
+                let newOtherAccount = Reconstruct.recreateOtherAccount(tempOtherAccount);
+
+                newOtherAccount.assets = [];
+
+                for(let x =0; x < tempOtherAccount.assets.length; ++x){
+                    let tempAsset = tempOtherAccount.assets[x];
+                    
+                    newOtherAccount.addAsset(Reconstruct.recreateAsset(tempAsset));
+                }
+
+                newOtherAccount.namespaces = [];
+
+                for(let x =0; x < tempOtherAccount.namespaces.length; ++x){
+                    let tempNamespace = tempOtherAccount.namespaces[x];
+
+                    newOtherAccount.addNamespace(Reconstruct.recreateNamespace(tempNamespace));
+                }
+
+                newOtherAccount.multisigInfo = [];
+
+                for(let x =0; x < tempOtherAccount.multisigInfo.length; ++x){
+                    let tempMultisigInfo = tempOtherAccount.multisigInfo[x];
+
+                    newOtherAccount.multisigInfo.push(Reconstruct.recreateMutlisigInfo(tempMultisigInfo));
+                }
+
+                otherAccounts.push(newOtherAccount);
+            }
+
+            let contacts: AddressBook[] = [];
+
+            for(let k =0; k < JSON_Wallets[i].contacts.length; ++k){
+                let tempContact = JSON_Wallets[i].contacts[k];
+
+                contacts.push(Reconstruct.recreateAddressBook(tempContact));
+            }
+
+            let newWallet = new Wallet(JSON_Wallets[i].name, JSON_Wallets[i].networkName, accounts);
+            newWallet.others = otherAccounts;
+            newWallet.contacts = contacts;
+
+            wallets.push(newWallet);
+        }
+
+        return wallets;
+    }
+
+    static recreateAsset(tempAsset: Asset): Asset{
+        let newAsset = new Asset(tempAsset.idHex, tempAsset.divisibility, tempAsset.supplyMutable, tempAsset.transferable, tempAsset.owner);
+        newAsset.amount = tempAsset.amount ? tempAsset.amount : 0;
+        newAsset.duration = tempAsset.duration ? tempAsset.duration : null;
+        newAsset.expirationBlock = tempAsset.expirationBlock ? tempAsset.expirationBlock : null;
+        newAsset.namespaceId = tempAsset.namespaceId ? tempAsset.namespaceId : [];
+        newAsset.owner = tempAsset.owner ? tempAsset.owner : null;
+        newAsset.supply = tempAsset.supply ? tempAsset.supply : 0;
+
+        return newAsset;
+    }
+
+    static recreateNamespace(tempNamespace: Namespace): Namespace{
+        let newNamespace = new Namespace(tempNamespace.idHex, tempNamespace.name);
+
+        newNamespace.active = tempNamespace.active ? tempNamespace.active : false;
+        newNamespace.parentId = tempNamespace.parentId ? tempNamespace.parentId : "";
+        newNamespace.startHeight = tempNamespace.startHeight ? tempNamespace.startHeight : null;
+        newNamespace.endHeight = tempNamespace.endHeight ? tempNamespace.endHeight : null;
+        newNamespace.linkedId = tempNamespace.linkedId ? tempNamespace.linkedId : "";
+
+        if(tempNamespace.linkType){
+            switch (tempNamespace.linkType) {
+                case AliasType.Address:
+                    newNamespace.linkType = AliasType.None;
+                    break;
+                case AliasType.Mosaic:
+                    newNamespace.linkType = AliasType.Mosaic;
+                    break;
+                default:
+                    newNamespace.linkType = AliasType.None;
+                    break;
+            }
+        }
+        else{
+            newNamespace.linkType = AliasType.None;
+        }
+
+        return newNamespace;
+    }
+
+    static recreateMutlisigInfo(multisigInfo: MultisigInfo){
+
+        let newMultisigInfo = new MultisigInfo(multisigInfo.publicKey, multisigInfo.level,  
+            multisigInfo.cosignaturies, multisigInfo.multisigAccounts, 
+            multisigInfo.minApproval, multisigInfo.minRemoval);
+
+        return newMultisigInfo;
+    }
+
+    static recreateAddressBook(addressBook: AddressBook): AddressBook{
+        let newAddressBook = new AddressBook(addressBook.name, addressBook.address);
+        return newAddressBook;
+    }
+
+    static recreateOtherAccount(tempAccount: OtherAccount): OtherAccount{
+
+        let accountType: WalletAcountType = WalletAcountType.MULTISIG_CHILD;
+
+        switch(tempAccount.type){
+            case WalletAcountType.MULTISIG_CHILD:
+                accountType = WalletAcountType.MULTISIG_CHILD;
+                break;
+            case WalletAcountType.DELEGATE_VALIDATE:
+                accountType = WalletAcountType.DELEGATE_VALIDATE;
+                break;
+            default:
+                accountType = WalletAcountType.MULTISIG_CHILD;
+                break;
+        }
+
+        let newAccount = new OtherAccount(tempAccount.name, tempAccount.publicKey, 
+            tempAccount.address, accountType);
+
+        newAccount.balance = tempAccount.balance ? tempAccount.balance : 0;
+
+        return newAccount;
+    }
+
+    static recreateWalletAccount(tempAccount: WalletAccount): WalletAccount{
+        let newAccount = new WalletAccount(tempAccount.name, tempAccount.publicKey, 
+            tempAccount.address, tempAccount.algo, tempAccount.encrypted, tempAccount.iv);
+
+        newAccount.balance = tempAccount.balance ? tempAccount.balance : 0;
+        newAccount.default = tempAccount.default ? tempAccount.default : false;
+        newAccount.isBrain = tempAccount.isBrain ? tempAccount.isBrain : false;
+
+        return newAccount;
+    }
+
+    static recreateNis1Account(temp_nis1Account: nis1Account): nis1Account{
+        let new_nisAccount = new nis1Account(temp_nis1Account.address, temp_nis1Account.publicKey, temp_nis1Account.balance);
+        return new_nisAccount;
     }
 }

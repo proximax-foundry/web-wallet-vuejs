@@ -19,4 +19,15 @@ export class Asset{
         this.supplyMutable = supplyMutable;
         this.transferable = transferable;
     }
+
+    duplicateNewInstance(){
+        let newAsset = new Asset(this.idHex, this.divisibility, this.supplyMutable, this.transferable, this.owner);
+
+        newAsset.duration = this.duration;
+        newAsset.expirationBlock = this.expirationBlock;
+        newAsset.namespaceId = this.namespaceId;
+        newAsset.supply = this.supply;
+        newAsset.amount = this.amount;
+        return newAsset;
+    }
 }

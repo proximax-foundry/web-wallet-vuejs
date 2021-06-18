@@ -6,10 +6,14 @@ export class Namespace{
     name: string = "";
     linkType: AliasType = AliasType.None;
     linkedId: string = "";
+    parentId: string = "";
+    startHeight: number | null; 
+    endHeight: number | null;
+    active: boolean = true;
 
-    constructor(idHex: string, name: string){
+    constructor(idHex: string, name?: string){
         
         this.idHex = idHex;
-        this.name = name;
+        this.name = name ? name : "";
     }
 }
