@@ -11,8 +11,8 @@
     <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100" @click="selectAccount">
       <div class="text-tsm ml-3 text-gray-700">
         <div><b>Account Name:</b> [[accountName]]</div>
-        <div><b>NIS1 Address:</b> [[account address]]</div>
-        <div><b>NIS1 balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] XPX</div>
+        <div><b>Sirius Address:</b> [[account address]]</div>
+        <div><b>Sirius balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] XPX</div>
       </div>
       <div class="self-center">
         <img src="@/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg" class="w-10 inline mr-3">
@@ -21,8 +21,8 @@
     <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100" @click="selectAccount">
       <div class="text-tsm ml-3 text-gray-700">
         <div><b>Account Name:</b> [[accountName]]</div>
-        <div><b>NIS1 Address:</b> [[account address]]</div>
-        <div><b>NIS1 balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] XPX</div>
+        <div><b>Sirius Address:</b> [[account address]]</div>
+        <div><b>Sirius balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] XPX</div>
       </div>
       <div class="self-center">
         <img src="@/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg" class="w-10 inline mr-3">
@@ -31,8 +31,8 @@
     <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100" @click="selectAccount">
       <div class="text-tsm ml-3 text-gray-700">
         <div><b>Account Name:</b> [[accountName]]</div>
-        <div><b>NIS1 Address:</b> [[account address]]</div>
-        <div><b>NIS1 balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] XPX</div>
+        <div><b>Sirius Address:</b> [[account address]]</div>
+        <div><b>Sirius balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] XPX</div>
       </div>
       <div class="self-center">
         <img src="@/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg" class="w-10 inline mr-3">
@@ -44,8 +44,8 @@
     <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left">
       <div class="text-tsm ml-3 text-gray-700">
         <div><b>Account Name:</b> [[accountName]]</div>
-        <div><b>NIS1 Address:</b> [[account address]]</div>
-        <div><b>NIS1 balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] XPX</div>
+        <div><b>Sirius Address:</b> [[account address]]</div>
+        <div><b>Sirius balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] XPX</div>
       </div>
       <div class="self-center">
         <button @click="currentPage=1" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none">Change</button>
