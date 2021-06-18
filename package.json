@@ -7,7 +7,8 @@
     "build": "cross-env NODE_ENV=production vue-cli-service build",
     "lint": "vue-cli-service lint",
     "build-development": "cross-env NODE_ENV=development vue-cli-service build",
-    "build-staging": "cross-env NODE_ENV=staging vue-cli-service build"
+    "build-staging": "cross-env NODE_ENV=staging vue-cli-service build",
+    "test-demo": "npx nightwatch --headless --no-sandbox node_modules/nightwatch/examples/tests/ecosia.js"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
@@ -55,8 +56,11 @@
     "@vue/compiler-sfc": "^3.0.0",
     "@vue/eslint-config-typescript": "^7.0.0",
     "babel-eslint": "^10.1.0",
+    "chromedriver": "^91.0.1",
     "eslint": "^7.28.0",
     "eslint-plugin-vue": "^7.11.1",
+    "geckodriver": "^2.0.0",
+    "nightwatch": "^1.7.3",
     "typescript": "~4.1.5"
   },
   "optionalDependencies": {
