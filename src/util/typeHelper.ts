@@ -12,6 +12,7 @@ import {
     AliasActionType,
 } from "tsjs-xpx-chain-sdk";
 import Base64 from 'crypto-js/enc-base64';
+import { WalletAcountType } from "../models/const/otherAccountType";
 
 export class Helper{
 
@@ -82,6 +83,10 @@ export class Helper{
 
     static getWalletAlgorithm(){
         return WalletAlgorithm;
+    }
+
+    static getOtherWalletAccountType(){
+        return WalletAcountType;
     }
 
     static getAliasActionType(){

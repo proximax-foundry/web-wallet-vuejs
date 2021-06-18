@@ -39,6 +39,7 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import { networkState } from "@/state/networkState";
 import { walletState } from '@/state/walletState';
 import { WalletUtils } from '@/util/walletUtils';
+import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 
 export default defineComponent({
@@ -103,8 +104,9 @@ export default defineComponent({
       } else {
         // let wallets = new Wallets();
         let wallet = walletState.wallets.filterByNetworkNameAndName(networkState.chainNetworkName, selectedWallet.value);
+        WalletUtils.refreshAllAccountDetails(wallet, networkState.currentNetworkProfile);
         WalletStateUtils.updateLoggedIn(wallet);
-        WalletUtils.updateWalletMultisigInfo(wallet);
+        NetworkStateUtils.updateLastAccessNetworkName(networkState.chainNetworkName);
         router.push({ name: "ViewDashboard"});
         // router.push({ path: "/create-transfer"});
       }

@@ -124,7 +124,12 @@ export class NetworkStateUtils{
   static checkDefaultNetwork(): void{
     const networkName = localStorage.getItem(lastAccessNetworkName);
 
-    if(networkName){
+    const sessionSelectedNetworkName = sessionStorage.getItem(sessionNetworkName);
+
+    if(sessionSelectedNetworkName){
+      NetworkStateUtils.changeNetworkByName(sessionSelectedNetworkName);
+    }
+    else if(networkName){
       NetworkStateUtils.changeNetworkByName(networkName);
     }
     else{
@@ -134,5 +139,9 @@ export class NetworkStateUtils{
 
   static updateBlockHeight(height: number): void{
     networkState.blockHeight = height;
+  }
+
+  static updateLastAccessNetworkName(networkName: string): void{
+    localStorage.setItem(lastAccessNetworkName, networkName);
   }
 }
