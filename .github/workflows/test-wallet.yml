@@ -1,10 +1,10 @@
 name: test-wallet
 
-on: push
-#  workflow_run:
-#     workflows: ['deploy-stg']                     # runs after deploy-stg workflow
-#     types:
-#       - completed
+on:
+ workflow_run:
+    workflows: ['deploy-stg']                     # runs after deploy-stg workflow
+    types:
+      - completed
 
 jobs:
   # This workflow contains a single job called "test"
