@@ -106,12 +106,13 @@ const commands = [{
             .pause(1000)
             .click('@copy_public_key')
             .waitForElementVisible('@copy_prompt')
+            .pause(7000)
             .click('@continue')
             .assert.urlEquals(browser, 'When Continue button is clicked, user is navigated to the Home page.')
     },
     existingname_validation(name, password) {
         return this
-            .pause(4000)
+            .pause(1000)
             .click("@create")
             .click("@createnew")
             .setValue("@input_walletname", name)
@@ -191,12 +192,13 @@ const commands = [{
             .pause(1000)
             .click('@copy_public_key')
             .waitForElementVisible('@copy_prompt')
+            .pause(7000)
             .click('@continue')
             .assert.urlEquals(browser, 'When Continue button is clicked, user is navigated to the Home page.')
     },
     existingname_validation2(privatekey, name, password) {
         return this
-            .pause(4000)
+            .pause(1000)
             .click("@create")
             .click("@createfromprivatekey")
             .setValue('@input_privatekey', privatekey)
