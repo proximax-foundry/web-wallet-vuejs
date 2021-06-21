@@ -44,7 +44,7 @@ export class WalletUtils {
             console.log("verifyWalletPassword triggered with", name, networkName);
         }
 
-        const account = wallet.accounts.find((element: WalletAccount) => element.default == true);
+        const account = wallet.accounts[0];
 
         const common: SecretKeyPair = {
             password: password,
@@ -210,8 +210,12 @@ export class WalletUtils {
      * @param {number} network
      * @returns {SimpleWallet}
      */
-     static createAccountSimple(walletName: string, password: Password, network: number): SimpleWallet {
+     static createAccountSimple(walletName: string, password: Password, network: NetworkType): SimpleWallet {
         return SimpleWallet.create(walletName, password, network);
+    }
+
+    static createAccountSimpleFromPrivateKey(walletName: string, password: Password, privateKey: string, network: NetworkType){
+        return SimpleWallet.createFromPrivateKey(walletName, password, privateKey, network)
     }
 
     /**
@@ -933,6 +937,27 @@ export class WalletUtils {
         walletsInstance.savetoLocalStorage();
         WalletStateUtils.refreshWallets();
     }
+
+    static addNewWallet(allWallets: Wallets, password: Password, walletName: string, networkName: string, networkType: NetworkType): tempNewWalletInterface{
+        const account = Account.generateNewAccount(networkType);
+        const wallet = WalletUtils.createAccountSimpleFromPrivateKey(walletName, password, account.privateKey, networkType);
+        let walletAccounts: WalletAccount[] = [];
+        let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.address['address'], "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
+        walletAccount.isBrain = true;
+        walletAccount.default = true;
+        walletAccounts.push(walletAccount);
+        let newWalletInstance = new Wallet(walletName, networkName, walletAccounts);
+
+        allWallets.wallets.push(newWalletInstance);
+        allWallets.savetoLocalStorage();
+
+        let data:tempNewWalletInterface = {
+            wallet: walletAccount,
+            privateKey: account.privateKey
+        };
+
+        return data;
+    }
 }
 
 interface oldWltFile{
@@ -966,4 +991,9 @@ interface oldAccountStructure{
 interface commonInterface {
     password: string,
     privateKey: string
+}
+
+interface tempNewWalletInterface{
+    privateKey: string,
+    wallet: WalletAccount
 }
