@@ -30,6 +30,7 @@ const commands = [{
   },
   click_homecomponents(browser) {
     return this
+      .pause(2000)
       .click('@signin_close')
       .click("@create")
       .assert.urlEquals(browser + 'create', 'When Create Button is clicked, user is navigated to the Select Wallet Creation Type page.')
