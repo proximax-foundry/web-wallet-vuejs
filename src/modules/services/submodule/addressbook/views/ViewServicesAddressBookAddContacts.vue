@@ -21,11 +21,14 @@
   </div>
 </template>
 <script>
-import { computed, ref, inject, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import TextInput from '@/components/TextInput.vue';
-import { verifyAddress } from '@/util/functions';
 import { useRouter } from 'vue-router';
 import { useToast } from "primevue/usetoast";
+import { AddressBookUtils } from '@/util/addressBookUtils';
+import { Wallet } from "@/models/wallet";
+import { walletState } from '@/state/walletState';
+import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 
 export default {
   name: 'ViewCreateContacts',
@@ -34,7 +37,7 @@ export default {
   },
   setup(){
     const toast = useToast();
-    const appStore = inject("appStore");
+    // const appStore = inject("appStore");
     const contactName = ref('');
     const address = ref('');
     const err = ref('');
@@ -64,22 +67,21 @@ export default {
     );
 
     watch(address, ()=>{
-      const verifyContactAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), address.value);
-      verifyAdd.value = verifyContactAddress.isPassed.value;
-      addMsg.value = verifyContactAddress.errMessage.value;
+      const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
+      const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address.value);
+      verifyAdd.value = verifyContactAddress.isPassed;
+      addMsg.value = verifyContactAddress.errMessage;
     });
 
     const SaveContact = () => {
-      let added = appStore.saveContact(contactName.value, address.value);
-      if(added===true){
-        err.value = '';
-        contactName.value = '';
-        address.value = '';
-        toast.add({severity:'info', summary: 'Address Book', detail: 'New contact added to Address Book', group: 'br', life: 5000});
-        router.push({ name: 'ViewServicesAddressBook' });
-      }else{
-        err.value = added;
-      }
+      const walletInstance = new Wallet();
+      walletInstance.addAddressBook({ name: contactName.value, address: address.value });
+      WalletStateUtils.refreshWallets();
+      err.value = '';
+      contactName.value = '';
+      address.value = '';
+      toast.add({severity:'info', summary: 'Address Book', detail: 'New contact added to Address Book', group: 'br', life: 5000});
+      router.push({ name: 'ViewServicesAddressBook' });
     }
 
     const clearInput =() => {

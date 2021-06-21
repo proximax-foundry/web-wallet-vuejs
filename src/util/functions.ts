@@ -1,7 +1,7 @@
 import { useToast } from "primevue/usetoast";
 import { ref } from 'vue';
 import { environment } from '../environment/environment.js';
-
+import { Address } from "tsjs-xpx-chain-sdk";
 
 // copy address keys
 export const copyKeyFunc = (id:string):void => {
@@ -42,3 +42,8 @@ export const currencyconverter = async (balance: number):Promise<number> => {
   return total;
 }
 
+
+// export const getPrettyAddress = (address: string) => {
+//   const prettyAddress = Address.createFromRawAddress(address);
+//   return prettyAddress.pretty();
+// }

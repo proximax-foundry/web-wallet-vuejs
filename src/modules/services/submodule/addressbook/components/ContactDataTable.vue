@@ -26,7 +26,7 @@
       </Column>
       <Column field="address" header="Account Address" headerStyle="width:50%">
         <template #body="{data}">
-          {{appStore.pretty(data.address)}}
+          {{ Helper.createAddress(data.address).pretty() }}
         </template>
       </Column>
       <Column header="Action" headerStyle="width:10%">
@@ -49,6 +49,7 @@ import Column from 'primevue/column';
 import {FilterMatchMode} from 'primevue/api';
 import ConfirmDeleteContactModal from '@/modules/services/submodule/addressbook/components/ConfirmDeleteContactModal.vue';
 import EditContactModal from '@/modules/services/submodule/addressbook/components/EditContactModal.vue';
+import { Helper } from "@/util/typeHelper";
 
 export default{
   components: { DataTable, Column, ConfirmDeleteContactModal, EditContactModal },
@@ -58,7 +59,6 @@ export default{
   },
 
   setup(){
-    const appStore = inject("appStore");
     const borderColor = ref('border border-gray-400');
     const filters = ref({
       'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
@@ -79,13 +79,13 @@ export default{
     const dt = ref();
 
     return {
-      dt,
-      appStore,
+      dt,      
       borderColor,
       filters,
       clickInputText,
       blurInputText,
       exportCSV,
+      Helper,
     }
   },
 }

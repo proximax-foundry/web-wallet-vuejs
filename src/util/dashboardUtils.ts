@@ -11,7 +11,8 @@ import { namespaces } from '../util/namespaces.js';
 import { environment } from '../environment/environment.js';
 import { transactionTypeName } from '@/util/transactionUtils';
 import { walletState } from '@/state/walletState';
-import { ConfirmedTransaction, UnconfirmedTransaction, AggregateBondedTransaction, contactInterface } from '@/models/interface/transaction';
+import { ConfirmedTransaction, UnconfirmedTransaction, AggregateBondedTransaction } from '@/models/interface/transaction';
+import { contactInterface } from '@/models/interface/contact';
 
 // let provider =  proximaxProvider;
 

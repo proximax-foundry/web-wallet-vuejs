@@ -56,7 +56,7 @@ export default{
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const appStore = inject("appStore");
+    // const appStore = inject("appStore");
     const csv = ref([]);
     const contactAdded = ref(0);
     const contactExisted = ref(0);
@@ -84,7 +84,7 @@ export default{
 
       promise.then(
         result => {
-          const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
+          // const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
           /* handle a successful result */
           var array = result.match(/[^\r\n]+/g);
           let exist = [];
@@ -117,14 +117,14 @@ export default{
             if(contactAddIndex >= 0 || accountAddIndex >= 0){
               exist.push({label: label, address: address });
             }else if( contactNameIndex >= 0 || accountNameIndex >= 0 ){
-              const verifyContactAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), address);
+              // const verifyContactAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), address);
               if(verifyContactAddress.isPassed.value){
                 addContact.push({label: label + ' - 2', address: address });
               }else{
                 errContact.push({label: label, address: address });
               }
             }else{
-              const verifyContactAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), address);
+              // const verifyContactAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), address);
               if(verifyContactAddress.isPassed.value){
                 addContact.push({label: label, address: address });
               }else{

@@ -33,9 +33,3 @@ export interface AggregateBondedTransaction extends Transaction{
   isSigned: boolean,
   hash: string,
 }
-
-export interface contactInterface {
-  address: string,
-  name: string,
-  id: number
-}
