@@ -87,7 +87,7 @@
           </div>
         </div>
       </div>
-        <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet ' + appStore.state.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5" :disabled="disablePassword" />
+        <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet ' +walletState.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5" :disabled="disablePassword" />
         <div class="mt-10">
           <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
           <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="makeTransfer();">Create</button>
@@ -98,7 +98,7 @@
     <ConfirmSendModal :toggleModal="toggleConfirm" />
   </div>
 </template>
-<script>
+<script lang = 'ts'>
 import { computed, ref, inject, getCurrentInstance, watch } from 'vue';
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
@@ -109,8 +109,10 @@ import TransferTextareaInput from '@/modules/transfer/components/TransferTextare
 import { createTransaction, makeTransaction, getFakeEncryptedMessageSize, getPlainMessageSize, convertToExact, convertToCurrency } from '@/util/transfer.js'; //getMosaicsAllAccounts
 import AddContactModal from '@/modules/transfer/components/AddContactModal.vue';
 import ConfirmSendModal from '@/modules/transfer/components/ConfirmSendModal.vue';
+
 import { verifyAddress } from '@/util/functions';
 import { multiSign } from '@/util/multiSignatory.js';
+import { walletState } from "@/state/walletState";
 
 export default {
   name: 'ViewTransferCreate',
@@ -124,7 +126,6 @@ export default {
     AddContactModal,
     ConfirmSendModal,
   },
-
   setup(){
     const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
@@ -200,7 +201,8 @@ export default {
     });
 
     const isMultiSig = (address) => {
-      const account = appStore.getAccDetailsByAddress(address);
+       const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address);
+    /*   appStore.getAccDetailsByAddress(address); */
       let isMulti = false;
       if(account.isMultisign != undefined){
         if(account.isMultisign != '' || account.isMultisign != null){
@@ -211,20 +213,25 @@ export default {
           }
         }
       }
+      
       return isMulti;
     };
 
     // get balance
-    const selectedAccName = ref(appStore.getFirstAccName());
-    const selectedAccAdd = ref(appStore.getFirstAccAdd());
+    const selectedAccName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
+    /* appStore.getFirstAccName() */
+    const selectedAccAdd = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
+    /* appStore.getFirstAccAdd() */
     const balance = computed(() => {
-      if(appStore.state.currentLoggedInWallet){
-        return appStore.getBalanceByAddress(selectedAccAdd.value);
+      if(walletState.currentLoggedInWallet){
+        return walletState.currentLoggedInWallet.selectDefaultAccount().balance;
+        /* appStore.getBalanceByAddress(selectedAccAdd.value); */
       }else{
         return '';
       }
     });
-    const isMultiSigBool = ref(isMultiSig(appStore.getFirstAccAdd()));
+    const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
+   /*  appStore.getFirstAccAdd() */
 
     // enable and disable inputs based on cosign balance
     if(isMultiSigBool.value){
@@ -247,13 +254,15 @@ export default {
       showBalanceErr.value = true;
     }
 
-    const accounts = computed( () => appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts);
+    const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
+   /*  appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts */
     const moreThanOneAccount = computed(()=> {
-      if(appStore.state.currentLoggedInWallet!=undefined){
+     /*  if(appStore.state.currentLoggedInWallet!=undefined){
         return (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false;
       }else{
         return false;
-      }
+      } */
+     return ( accounts.value.length > 1 )
     });
 
     const changeSelection = (i) => {
@@ -297,7 +306,8 @@ export default {
       let cosign = multiSign.fetchMultiSigCosigners(selectedAccAdd.value);
       let list = [];
       cosign.list.forEach((element) => {
-        const account = appStore.getAccDetailsByAddress(element.address);
+        const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === element.address);
+       /*  appStore.getAccDetailsByAddress(element.address) */
         list.push({ balance: account.balance, address: element.address, name: element.name });
       });
       list.sort((a, b) => (a.balance < b.balance) ? 1 : -1);
@@ -305,7 +315,24 @@ export default {
     };
 
     const contact = computed(() => {
-      return appStore.getContact();
+      const wallet = walletState.currentLoggedInWallet
+  var contact = [];
+  wallet.accounts.forEach((element) => {
+    contact.push({
+      value: element.address,
+      label: element.name + ' - Owner account',
+    });
+  });
+  if(wallet.contacts!=undefined){
+    wallet.contacts.forEach((element) => {
+      contact.push({
+        value: element.address,
+        label: element.name + ' - Contact',
+      });
+    });
+  }
+  return contact;
+      /* appStore.getContact() */
     });
 
     const clearInput = () => {
@@ -371,7 +398,9 @@ export default {
     };
 
     const getSelectedMosaicBalance = (index) =>{
-      let mosaic = appStore.getMosaicInfo(selectedAccAdd.value, selectedMosaic[index].id);
+      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === selectedAccAdd.value);
+      let mosaic = account.assets.find((asset) => asset.idHex == selectedMosaic[index].id);
+      /* let mosaic = appStore.getMosaicInfo(selectedAccAdd.value, selectedMosaic[index].id); */
       if(mosaic!=undefined){
         return mosaic.amount;
       }else{
