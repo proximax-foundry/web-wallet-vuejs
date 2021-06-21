@@ -6,7 +6,7 @@ const elements = {
   home: '.font-normal',
   signin_button: '.w-full',
   signin_title: '.default-title',
-  signin_close: '.fixed',
+  signin_close: '.delete-position',
   siriusid: 'div.px-5:nth-child(2) > div:nth-child(1) > a:nth-child(1)',
   siriusid_title: '.default-title',
   wallet: 'div.w-16:nth-child(4) > a:nth-child(1)',
