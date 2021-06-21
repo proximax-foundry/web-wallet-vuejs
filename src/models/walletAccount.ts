@@ -28,6 +28,10 @@ export class WalletAccount extends Account{
         this.assets.push(asset);
     }
 
+    findAsset(id: string): Asset | undefined{
+        return this.assets.find((asset)=> asset.idHex === id);
+    }
+
     removeAsset(id: string): void{
         const index = this.assets.findIndex((asset)=> asset.idHex === id);
         this.assets.splice(index, 1);
@@ -47,23 +51,20 @@ export class WalletAccount extends Account{
         this.multisigInfo = multisigInfo;
     }
 
-    getNativeTokenBalance(assetId :string): number | null{
-        return this.assets.find((asset)=> asset.idHex === assetId)?.amount;
-    }
-
-    getNativeTokenBalanceByNamespaceId(namespaceId :string): number | null{
-        return this.assets.find((asset)=> asset.namespaceId.includes(namespaceId))?.amount;
+    getAssetBalance(assetId :string): number | null{
+        let asset = this.assets.find((asset)=> asset.idHex === assetId);
+        return asset ? asset.amount/ Math.pow(10, asset.divisibility): null;
     }
 
     updateBalance(assetId: string): void{
-        this.balance = this.getNativeTokenBalance(assetId) || 0;
+        this.balance = this.getAssetBalance(assetId) || 0;
     }
 
     getDirectChildMultisig(): string[]{
 
         let temp: MultisigInfo[] = this.multisigInfo.filter(( multiInfo)=> multiInfo.level === 1);
 
-        return WalletAccount.getMultisigInfoPublicKey(temp);
+        return temp.length ? WalletAccount.getMultisigInfoPublicKey(temp) : [];
     }
 
     getDirectParentMultisig(): string[]{
@@ -73,7 +74,7 @@ export class WalletAccount extends Account{
         return WalletAccount.getMultisigInfoPublicKey(temp);
     }
 
-    private static getMultisigInfoPublicKey(multisigInfo: MultisigInfo[]): string[]{
+    static getMultisigInfoPublicKey(multisigInfo: MultisigInfo[]): string[]{
         let publicKeyArray: string[] = [];
 
         publicKeyArray = multisigInfo.map((multiInfo)=> multiInfo.publicKey)

@@ -1,6 +1,14 @@
 import { ChainConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, Convert,
-  NetworkType } from "tsjs-xpx-chain-sdk";
+  NetworkType, 
+  NamespaceId,
+  MosaicId} from "tsjs-xpx-chain-sdk";
 import { NetworkConfig } from "../models/stores/chainProfileConfig";
+import { ChainAPICall } from "../models/REST/chainAPICall";
+import { networkState } from "../state/networkState";
+import { computed } from "vue";
+
+const currentEndPoint = computed(() => networkState.selectedAPIEndpoint);
+const connectionPort = computed(() => networkState.currentNetworkProfile.httpPort);
 
 export class ChainUtils{
 
@@ -145,5 +153,14 @@ export class ChainUtils{
       } else {
         return true;
       }
+    }
+
+    static async getLinkedMosaicId(namespaceId: NamespaceId): Promise<MosaicId>{
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let mosaicId: MosaicId = await chainRESTCall.namespaceAPI.getLinkedMosaicId(namespaceId);
+
+      return mosaicId;
     }
 }

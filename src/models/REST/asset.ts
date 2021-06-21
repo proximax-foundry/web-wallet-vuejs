@@ -15,7 +15,7 @@ export class AssetAPI {
         return this.mosaicHttp.getMosaic(mosaicId).toPromise();
     }
 
-    getMosaicRichlist(mosaicId: MosaicId, queryParams: PageQueryParams): Promise<RichlistEntry[]>{
+    getMosaicRichlist(mosaicId: MosaicId, queryParams?: PageQueryParams): Promise<RichlistEntry[]>{
         return this.mosaicHttp.getMosaicRichlist(mosaicId, queryParams).toPromise();
     }
 
