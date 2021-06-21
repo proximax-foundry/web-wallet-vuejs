@@ -4,11 +4,12 @@ import { environment } from '../environment/environment.js';
 
 
 // copy address keys
-export const copyKeyFunc = (id:string):void => {
+export const copyKeyFunc = (id:string, ):void => {
   const toast = useToast();
   // Credits: https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
   let copyText = document.getElementById(id) as HTMLInputElement;
   /* Select the text field */
+  //copyText.innerText;
   copyText?.select();
   copyText?.setSelectionRange(0, 99999); /* For mobile devices */
 
@@ -28,6 +29,16 @@ export const copyKeyFunc = (id:string):void => {
   // toast.add({severity:'info', summary: titleType + ' copied', detail: copyText.value, group: 'br', life: 5000});
 };
 
+
+export const copyToClipboard = (data: string): void => {
+  const listener = (e: ClipboardEvent) => {
+    e.clipboardData.setData('text/plain', data);
+    e.preventDefault();
+    document.removeEventListener('copy', listener);
+  };
+  document.addEventListener('copy', listener);
+  document.execCommand('copy');
+}
 
 
 const getCoingecko = (coinId: string): Promise<number>=> {
