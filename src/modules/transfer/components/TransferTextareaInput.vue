@@ -12,7 +12,7 @@
   </div>
 </template>
 
-<script>
+<script lang = 'ts'>
 import { ref, getCurrentInstance, watch } from 'vue';
 export default{
   props: [

@@ -4,7 +4,7 @@
   </keep-alive>
 </template>
 
-<script>
+<script lang = 'ts'>
 import {computed, defineAsyncComponent, ref, watch} from "vue";
 
 export default {
