@@ -113,7 +113,7 @@ import ConfirmSendModal from '@/modules/transfer/components/ConfirmSendModal.vue
 import { verifyAddress } from '@/util/functions';
 import { multiSign } from '@/util/multiSignatory.js';
 import { walletState } from "@/state/walletState";
-
+import { networkState } from '@/state/networkState';
 export default {
   name: 'ViewTransferCreate',
   components: {
@@ -127,9 +127,9 @@ export default {
     ConfirmSendModal,
   },
   setup(){
-    const appStore = inject("appStore");
+    /* const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
-    const chainNetwork = inject("chainNetwork");
+    const chainNetwork = inject("chainNetwork"); */
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showContactSelection = ref(false);
@@ -154,7 +154,7 @@ export default {
     const encryptedMsgDisable = ref(true);
     const toggleConfirm = ref(false);
     const forceSend = ref(false);
-    const effectiveFee = ref('0.037750');
+    const effectiveFee = ref( '0.037750');
     const cosignAddress = ref('');
     const disableAllInput = ref(false);
     const disableRecipient = computed(() => disableAllInput.value);
@@ -166,19 +166,24 @@ export default {
     const disablePassword = computed(() => disableAllInput.value);
     const cosignerBalanceInsufficient = ref(false);
 
-    const currencyName = computed(() => chainNetwork.getCurrencyName());
+    const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
+    /* chainNetwork.getCurrencyName() */
 
     // console.log('chainNetwork.getProfileConfig().lockedFundsPerAggregate')
     // console.log(chainNetwork.getProfileConfig().lockedFundsPerAggregate)
     // console.log(siriusStore.state.currentNetworkProfileConfig.maxMessageSize)
-    const lockFund = computed(()=> convertToExact(chainNetwork.getProfileConfig().lockedFundsPerAggregate, chainNetwork.getCurrencyDivisibility()))
-    const lockFundCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().lockedFundsPerAggregate, chainNetwork.getCurrencyDivisibility()))
-
+    const lockFund = computed(()=> convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
+   /*  chainNetwork.getProfileConfig().lockedFundsPerAggregate */
+  /*  chainNetwork.getCurrencyDivisibility() */
+    const lockFundCurrency = computed(()=> convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,  networkState.currentNetworkProfile.network.currency.divisibility))
+  /*  chainNetwork.getProfileConfig().lockedFundsPerAggregate */
+    /*  chainNetwork.getCurrencyDivisibility() */
     const lockFundTxFee = ref(0.0445);
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     // const messageLimit = computed(()=> chainNetwork.getProfileConfig().maxMessageSize - 1);
-    const messageLimit = computed(()=> siriusStore.state.currentNetworkProfileConfig.maxMessageSize - 1);
+    const messageLimit = computed(()=> networkState.currentNetworkProfileConfig.maxMessageSize -1);
+   /*  siriusStore.state.currentNetworkProfileConfig.maxMessageSize - 1 */
 
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
@@ -203,8 +208,9 @@ export default {
     const isMultiSig = (address) => {
        const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address);
     /*   appStore.getAccDetailsByAddress(address); */
-      let isMulti = false;
-      if(account.isMultisign != undefined){
+     /*  let isMulti = false; */
+      let isMulti = account.getDirectParentMultisig().length ? true: false
+      /* if(account.isMultisign != undefined){
         if(account.isMultisign != '' || account.isMultisign != null){
           if(account.isMultisign.cosignatories != undefined){
             if(account.isMultisign.cosignatories.length > 0){
@@ -212,8 +218,8 @@ export default {
             }
           }
         }
-      }
-      
+      } */
+
       return isMulti;
     };
 
@@ -359,6 +365,15 @@ export default {
     const updateAdd = (e) => {
       recipient.value = e;
     };
+/* added for line 401 */
+function checkAvailableContact(recipient){
+  const wallet =walletState.currentLoggedInWallet;
+  let isInContacts = true;
+  if(wallet.contacts != undefined){
+    isInContacts = (wallet.contacts.findIndex((element) => element.address == recipient) == -1);
+  }
+  return ( isInContacts && (wallet.accounts.findIndex((element) => element.address == recipient) == -1))?false:true;
+}
 
     const makeTransfer = () => {
       if(sendXPX.value == 0 && !forceSend.value){
@@ -383,7 +398,8 @@ export default {
           err.value = '';
           // check if address is saved in the contact list
           // if not display add contact model
-          if(!appStore.checkAvailableContact(recipient.value)){
+          if(!checkAvailableContact(recipient.value)){
+            /* appStore.checkAvailableContact(recipient.value) */
             // add new contact
             togglaAddContact.value = true;
           }else{
@@ -412,7 +428,8 @@ export default {
     // getMosaicsAllAccounts(appStore, siriusStore);
     const addMosaicsButton = computed(() => {
       if(!disableSupply.value){
-        let mosaic = appStore.getAccDetails(selectedAccName.value).mosaic;
+         const mosaic = walletState.currentLoggedInWallet.accounts.find((element) => element.name == selectedAccName.value).assets;
+        /* let mosaic = appStore.getAccDetails(selectedAccName.value).mosaic; */
         if(mosaic != undefined){
           if((mosaic.length == 0) || (mosaicsCreated.value.length == mosaic.length)){
             return true;
@@ -429,11 +446,15 @@ export default {
     // generate mosaic selector
     const mosaics = computed(() => {
       var mosaicOption = [];
-      if(appStore.getAccDetails(selectedAccName.value).mosaic.length > 0){
-        appStore.getAccDetails(selectedAccName.value).mosaic.forEach((i, index)=>{
+      const account =  walletState.currentLoggedInWallet.accounts.find((element) => element.name == selectedAccName.value)
+      if(account.assets.length > 0){
+      /*   appStore.getAccDetails(selectedAccName.value).mosaic.length > 0 */
+       account.assets.forEach((i, index)=>{
+         /*  appStore.getAccDetails(selectedAccName.value).mosaic.forEach((i, index) */
           mosaicOption.push({
-            val: i.id,
-            text: i.id + ' > Balance: ' + i.amount.toFixed(i.divisibility),
+            val: i.idHex,
+           /*  i.id */
+            text: i.idHex + ' > Balance: ' + i.amount.toFixed(i.divisibility),
             id: (index + 1),
           });
         });
@@ -449,7 +470,9 @@ export default {
     // update mosaic
     const updateMosaic = (e) => {
       // get mosaic info and format divisibility in supply input
-      const mosaic = appStore.getMosaicInfo(selectedAccAdd.value, selectedMosaic.value[e.index].id);
+       const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === selectedAccAdd.value);
+      let mosaic = account.assets.find((asset) => asset.idHex == selectedMosaic.value[e.index].id);
+     /*  const mosaic = appStore.getMosaicInfo(selectedAccAdd.value, selectedMosaic.value[e.index].id); */
       selectedMosaic.value[e.index].amount = '0';
       mosaicSupplyDivisibility.value[e.index] = mosaic.divisibility;
       emitter.emit('CLOSE_MOSAIC_INSUFFICIENT_ERR', false);
@@ -461,8 +484,10 @@ export default {
       mosaicSupplyDivisibility.value.splice(e.index, 1);
     }
 
+
     watch(cosignAddress, (n, o) => {
       if(n != o){
+        
         let cosign = multiSign.fetchMultiSigCosigners(selectedAccAdd.value);
         if(cosign.list.find((element) => element.address == n).balance < lockFundTotalFee.value){
           cosignerBalanceInsufficient.value = true;
@@ -480,7 +505,8 @@ export default {
 
     watch(recipient, (add) => {
       if((recipient.value.length == 46 && recipient.value.match(addressPatternLong)) || (recipient.value.length == 40 && recipient.value.match(addressPatternShort))) {
-        const verifyRecipientAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), recipient.value);
+        const verifyRecipientAddress = verifyAddress(walletState.currentLoggedInWallet.selectDefaultAccount().address, recipient.value);
+        /* appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name) */
         showAddressError.value = !verifyRecipientAddress.isPassed.value;
         addMsg.value = verifyRecipientAddress.errMessage.value;
       }else{
@@ -490,6 +516,7 @@ export default {
       // show and hide encrypted message option
       if(add.match(addressPatternLong) || add.match(addressPatternShort)){
         appStore.verifyRecipientInfo(recipient.value, siriusStore.accountHttp).then((res)=>{
+         /*  siriusStore.accountHttp */
           encryptedMsgDisable.value = res;
         });
       }else{
@@ -553,7 +580,6 @@ export default {
     });
 
     return {
-      appStore,
       moreThanOneAccount,
       showMenu,
       currentSelectedName,
