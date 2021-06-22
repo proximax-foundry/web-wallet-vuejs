@@ -192,8 +192,9 @@ export class WalletUtils {
 
     static getAccountHttp(){
         
-        const accountAPI = new AccountAPI(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort))
-        return accountAPI.accountHttp
+       const accountAPI = new AccountAPI(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort))
+
+       return accountAPI.getAccountInfo
     }
   
     /**
