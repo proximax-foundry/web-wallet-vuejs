@@ -110,10 +110,12 @@ import { createTransaction, makeTransaction, getFakeEncryptedMessageSize, getPla
 import AddContactModal from '@/modules/transfer/components/AddContactModal.vue';
 import ConfirmSendModal from '@/modules/transfer/components/ConfirmSendModal.vue';
 
-import { verifyAddress } from '@/util/functions';
 import { multiSign } from '@/util/multiSignatory.js';
 import { walletState } from "@/state/walletState";
 import { networkState } from '@/state/networkState';
+import {accountUtils} from '@/util/accountUtils'
+import {WalletUtils} from '@/util/walletUtils'
+
 export default {
   name: 'ViewTransferCreate',
   components: {
@@ -365,15 +367,7 @@ export default {
     const updateAdd = (e) => {
       recipient.value = e;
     };
-/* added for line 401 */
-function checkAvailableContact(recipient){
-  const wallet =walletState.currentLoggedInWallet;
-  let isInContacts = true;
-  if(wallet.contacts != undefined){
-    isInContacts = (wallet.contacts.findIndex((element) => element.address == recipient) == -1);
-  }
-  return ( isInContacts && (wallet.accounts.findIndex((element) => element.address == recipient) == -1))?false:true;
-}
+
 
     const makeTransfer = () => {
       if(sendXPX.value == 0 && !forceSend.value){
@@ -398,7 +392,7 @@ function checkAvailableContact(recipient){
           err.value = '';
           // check if address is saved in the contact list
           // if not display add contact model
-          if(!checkAvailableContact(recipient.value)){
+          if(!accountUtils.checkAvailableContact(recipient.value)){
             /* appStore.checkAvailableContact(recipient.value) */
             // add new contact
             togglaAddContact.value = true;
@@ -489,6 +483,7 @@ function checkAvailableContact(recipient){
       if(n != o){
         
         let cosign = multiSign.fetchMultiSigCosigners(selectedAccAdd.value);
+         
         if(cosign.list.find((element) => element.address == n).balance < lockFundTotalFee.value){
           cosignerBalanceInsufficient.value = true;
         }else{
@@ -505,7 +500,7 @@ function checkAvailableContact(recipient){
 
     watch(recipient, (add) => {
       if((recipient.value.length == 46 && recipient.value.match(addressPatternLong)) || (recipient.value.length == 40 && recipient.value.match(addressPatternShort))) {
-        const verifyRecipientAddress = verifyAddress(walletState.currentLoggedInWallet.selectDefaultAccount().address, recipient.value);
+        const verifyRecipientAddress = accountUtils.verifyAddress(walletState.currentLoggedInWallet.selectDefaultAccount().address, recipient.value);
         /* appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name) */
         showAddressError.value = !verifyRecipientAddress.isPassed.value;
         addMsg.value = verifyRecipientAddress.errMessage.value;
@@ -515,9 +510,10 @@ function checkAvailableContact(recipient){
 
       // show and hide encrypted message option
       if(add.match(addressPatternLong) || add.match(addressPatternShort)){
-        appStore.verifyRecipientInfo(recipient.value, siriusStore.accountHttp).then((res)=>{
+        accountUtils.verifyRecipientInfo(recipient.value, WalletUtils.getAccountHttp).then((res)=>{
          /*  siriusStore.accountHttp */
-          encryptedMsgDisable.value = res;
+         encryptedMsgDisable.value = res
+          
         });
       }else{
         encryptedMsgDisable.value = true;

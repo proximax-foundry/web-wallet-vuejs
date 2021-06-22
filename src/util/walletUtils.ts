@@ -19,6 +19,7 @@ import {
 import { computed } from "vue";
 import { Helper, LooseObject } from "./typeHelper";
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
+import { AccountAPI } from "@/models/REST/account";
 
 const config = require("@/../config/config.json");
 
@@ -78,7 +79,7 @@ export class WalletUtils {
         return false;
         
     }
-
+    
     static async getTotalBalanceWithCurrentNetwork(): Promise<Wallet> {
 
         const wallet = walletState.currentLoggedInWallet as Wallet;
@@ -189,6 +190,12 @@ export class WalletUtils {
         });
     }
 
+    static getAccountHttp(){
+        
+        const accountAPI = new AccountAPI(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort))
+        return accountAPI.accountHttp
+    }
+  
     /**
    *
    *
