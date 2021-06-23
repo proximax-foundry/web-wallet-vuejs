@@ -1,24 +1,26 @@
 <template>
   <div class="md:grid md:grid-cols-2 mb-8">
     <div class="w-full text-center md:text-left mx-0 lg:mx-5">
-      <div class="font-bold hover:bg-gray-100 cursor-pointer inline-block py-1 px-2 pl-0 rounded-lg" @click="openSetDefaultModal = !openSetDefaultModal"><font-awesome-icon icon="caret-down" class="h-5 w-5 text-gray-600 inline-block"></font-awesome-icon>&nbsp;{{ primaryAccountName }} <div class="text-xs font-normal ml-1 inline-block px-2 py-1 rounded bg-yellow-200">Default</div></div>
+      <div class="font-bold hover:bg-gray-100 cursor-pointer inline-block py-1 px-2 pl-0 rounded-lg" @click="openSetDefaultModal = !openSetDefaultModal">
+        <font-awesome-icon icon="caret-down" class="h-5 w-5 text-gray-600 inline-block"></font-awesome-icon>&nbsp;{{ primaryAccountName }} 
+        <div v-if="isDefault" class="text-xs font-normal ml-1 inline-block px-2 py-1 rounded bg-yellow-200">Default</div>
+        <div v-if="isMultiSig" class="text-xs font-normal ml-2 py-1 px-2 rounded bg-blue-200" >MultiSig</div>
+      </div>
       <div class="text-xs mb-2">
         <div class="relative inline-block overflow-x-hidden address_div">
           <div class="absolute z-20 h-full"></div>
-          <input
+          <div
             id="address"
-            class=" outline-none z-10 break-all"
-            type="text"
-            :value="primaryAccount"
-          />
+            class=" outline-none z-10 break-all" :copyValue="selectedAccountAddressPlain" copySubject="Address"
+          >{{ selectedAccountAddress }}</div>
         </div>
         <div class="mt-2 sm:inline-block relative">
           <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 text-md cursor-pointer inline mx-2" style="top: 3px;"></font-awesome-icon><img src="@/modules/dashboard/img/icon-qr-code.svg" class="w-5 inline absolute">
         </div>
       </div>
       <div class="text-center md:text-left">
-        <div class="inline-block mr-4"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 h-5 inline mr-1"><span class="text-xs">{{ primaryAccountBalance }} XPX</span></div>
-        <div class="inline-block"><img src="@/assets/img/icon-usd-blue.svg" class="w-5 inline mr-1"><span class="text-xs">USD {{ currencyConvert }}</span></div>
+        <div class="inline-block mr-4"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 h-5 inline mr-1"><span class="text-xs">{{ primaryAccountBalance }} {{ currentNativeTokenName }}</span></div>
+        <div class="inline-block" v-if="displayConvertion"><img src="@/assets/img/icon-usd-blue.svg" class="w-5 inline mr-1"><span class="text-xs" >USD {{ currencyConvert }}</span></div>
       </div>
     </div>
     <div class="w-full mt-5 md:mt-0">
@@ -37,10 +39,10 @@
               <div class="text-xs font-bold flex items-center">{{ unconfirmedTransactions.length }}</div>
             </div>
           </div>
-          <div class="rounded-full bg-yellow-500 text-white w-24 h-15 px-2 py-1 inline-block" :class="aggregateBondedTransactions.length>0?'cursor-pointer':''" @click="clickAggregateBondedTransactions()">
+          <div class="rounded-full bg-yellow-500 text-white w-24 h-15 px-2 py-1 inline-block" :class="partialTransactions.length>0?'cursor-pointer':''" @click="clickPartialTransactions()">
             <div class="flex justify-between">
               <img src="@/modules/dashboard/img/icon-transaction-partial-white.svg" class="w-6 h-6" />
-              <div class="text-xs font-bold flex items-center">{{ aggregateBondedTransactions.length }}</div>
+              <div class="text-xs font-bold flex items-center">{{ partialTransactions.length }}</div>
             </div>
           </div>
         </div>
@@ -50,17 +52,18 @@
   <div>
     <DashboardDataTable :transactions="confirmedTransactions.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed"></DashboardDataTable>
     <DashboardDataTable :transactions="unconfirmedTransactions.sort((a, b) => b.block - a.block)" v-if="isShowUnconfirmed"></DashboardDataTable>
-    <PartialDashboardDataTable :transactions="aggregateBondedTransactions.sort((a, b) => b.deadline - a.deadline)" v-if="isShowAggregateBonded"></PartialDashboardDataTable>
-    <SetAccountDefaultModal :toggleModal="openSetDefaultModal" />
+    <PartialDashboardDataTable :transactions="partialTransactions.sort((a, b) => b.deadline - a.deadline)" v-if="isShowPartial"></PartialDashboardDataTable>
+    <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { computed, defineComponent, ref, getCurrentInstance, watch } from 'vue';
 import DashboardDataTable from '@/modules/dashboard/components/DashboardDataTable.vue';
 import PartialDashboardDataTable from '@/components/PartialDashboardDataTable.vue';
 import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
-import { copyKeyFunc, currencyconverter } from '@/util/functions';
+import { copyToClipboard, getXPXcurrencyPrice } from '@/util/functions';
+import { Helper } from '@/util/typeHelper';
 import { transactions } from '@/util/transactions.js';
 // eslint-disable-next-line no-unused-vars
 import { PublicAccount, Order, QueryParams } from "tsjs-xpx-chain-sdk";
@@ -73,7 +76,6 @@ import { networkState } from "@/state/networkState";
 import { AccountAPI } from '@/models/REST/account';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 // import { dashboardUtils } from '@/util/dashboardUtils';
-// import { ConfirmedTransaction, UnconfirmedTransaction, AggregateBondedTransaction, contactInterface } from '@/models/interface/transaction';
 
 
 export default defineComponent({
@@ -86,15 +88,23 @@ export default defineComponent({
 
   setup(){
     const toast = useToast();
-    // const appStore = inject("appStore");
-    // const siriusStore = inject("siriusStore");
-    // const chainNetwork = inject("chainNetwork");
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
+    const displayConvertion = ref(false);
     const openSetDefaultModal = ref(false);
 
-    const copy = (id) => copyKeyFunc(id);
+    let confirmedTransactions = ref([]);
+    let unconfirmedTransactions = ref([]);
+    let partialTransactions = ref([]);
+
+    const copy = (id) =>{
+      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
+      let copySubject = document.getElementById(id).getAttribute("copySubject");
+      copyToClipboard(stringToCopy);
+
+      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+    };
     const primaryAccount = computed(
       () => {
         // if (appStore.state.currentLoggedInWallet) {
@@ -103,70 +113,107 @@ export default defineComponent({
         //   return 0;
         // }
         if (walletState.currentLoggedInWallet) {
-          let wallet = new Wallet(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletState.currentLoggedInWallet.accounts);
-          return wallet.selectDefaultAccount.name;
+          
+          if(walletState.currentLoggedInWallet.selectDefaultAccount){
+            return walletState.currentLoggedInWallet.selectDefaultAccount.address;
+          }
+
+          return walletState.currentLoggedInWallet.accounts[0].address;
         }else{
           return '';
         }
       }
     );
 
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+
+    let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
+    currentAccount.default = true;
+
+    let selectedAccount = ref(currentAccount);
+
+    const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty());
+    const selectedAccountAddressPlain = computed(()=> selectedAccount.value.address);
+
     const primaryAccountBalance = computed(
       () => {          
-        return '[balance]';
+        return Helper.toCurrencyFormat(selectedAccount.value.balance, currentNativeTokenDivisibility.value);
       }
     );
 
     const primaryAccountName = computed(
       () => {
-        return '[name]';
+        return selectedAccount.value.name;
       }
     );
 
-    // get USD conversion
-    const currencyConvert = ref('0');
-    const getCurrencyConvert = () => {
-      currencyConvert.value = '[total.toFixed(6)]';
-    };
-    getCurrencyConvert();
-    // watch(primaryAccountBalance, () => {
-    //   let balance = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
-    //   currencyconverter(balance).then((total) => {
-    //     currencyConvert.value = total.toFixed(6);
-    //   });
-    // });
+    const isDefault = computed(()=> selectedAccount.value.default ? true : false );
+    const isMultisig =  computed(()=>{
 
-    
+      console.log(selectedAccount.value.multisigInfo.filter((multisigInfo)=> multisigInfo.level === 1));
+
+      return selectedAccount.value.multisigInfo.filter((multisigInfo)=> multisigInfo.level === 1).length ? true : false;
+    });
+
+    const getCurrencyPrice = () => {
+      let balance = selectedAccount.value.balance;
+      getXPXcurrencyPrice(balance).then((total) => {
+        currencyConvert.value = Helper.toCurrencyFormat(total, 6);
+      });
+    };
+
+    // get USD conversion
+    const currencyConvert = ref('');
+
+    if(networkState.currentNetworkProfile.network.currency.name === "XPX"){
+       displayConvertion.value = true;
+       getCurrencyPrice();
+
+       watch(primaryAccountBalance, () => {
+        getCurrencyPrice();
+      });
+    }
 
     // const confirmedTransactions = ref<ConfirmedTransaction[]>([]);
     // const unconfirmedTransactions = ref<UnconfirmedTransaction[]>([]);
     // const aggregateBondedTransactions = ref<AggregateBondedTransaction[]>([]);
     // const pageSize:number = 10;
-    // const isShowConfirmed = ref(true);
-    // const isShowUnconfirmed = ref(false);
-    // const isShowAggregateBonded = ref(false);
+    const isShowConfirmed = ref(true);
+    const isShowUnconfirmed = ref(false);
+    const isShowPartial = ref(false);
 
-    // const clickConfirmedTransaction = () => {
-    //   isShowConfirmed.value = true;
-    //   isShowUnconfirmed.value = false;
-    //   isShowAggregateBonded.value = false;
-    // };
+    const clickConfirmedTransaction = () => {
+      isShowConfirmed.value = true;
+      isShowUnconfirmed.value = false;
+      isShowPartial.value = false;
+    };
 
-    // const clickUnconfirmedTransaction = () => {
-    //   if(unconfirmedTransactions.value.length > 0){
-    //     isShowUnconfirmed.value = true;
-    //     isShowConfirmed.value = false;
-    //     isShowAggregateBonded.value = false;
-    //   }
-    // };
+    const clickUnconfirmedTransaction = () => {
+      if(unconfirmedTransactions.value.length > 0){
+        isShowUnconfirmed.value = true;
+        isShowConfirmed.value = false;
+        isShowPartial.value = false;
+      }
+    };
 
-    // const clickAggregateBondedTransactions = () => {
-    //   if(aggregateBondedTransactions.value.length > 0){
-    //     isShowAggregateBonded.value = true;
-    //     isShowConfirmed.value = false;
-    //     isShowUnconfirmed.value = false;
-    //   }
-    // };
+    const clickPartialTransactions = () => {
+      if(partialTransactions.value.length > 0){
+        isShowPartial.value = true;
+        isShowConfirmed.value = false;
+        isShowUnconfirmed.value = false;
+      }
+    };
+
+    const updateSelectedAccount = (data)=>{    
+      console.log(data);  
+      if(data.type == 0){
+        selectedAccount.value = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === data.name);
+      }
+      else{
+        selectedAccount.value = walletState.currentLoggedInWallet.others.find((account)=> account.name === data.name);
+      }
+    }
 
     // const generateNames = () => {
     //   // let wallet = new Wallet(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletState.currentLoggedInWallet.accounts);
@@ -343,29 +390,37 @@ export default defineComponent({
         }
         // getConfirmedAllTransactions();
     });
+    */
 
     emitter.on('CLOSE_SET_DEFAULT_ACCOUNT_MODAL', payload => {
       if(payload){
         openSetDefaultModal.value = false;
       }
-    });*/
+    });
 
     return {
       copy,
       primaryAccount,
       primaryAccountBalance,
       primaryAccountName,
-      // confirmedTransactions,
-      // unconfirmedTransactions,
-      // aggregateBondedTransactions,
-      // isShowConfirmed,
-      // isShowUnconfirmed,
-      // isShowAggregateBonded,
-      // clickConfirmedTransaction,
-      // clickUnconfirmedTransaction,
-      // clickAggregateBondedTransactions,
+      confirmedTransactions,
+      unconfirmedTransactions,
+      partialTransactions,
+      isShowConfirmed,
+      isShowUnconfirmed,
+      isShowPartial,
+      clickConfirmedTransaction,
+      clickUnconfirmedTransaction,
+      clickPartialTransactions,
       openSetDefaultModal,
       currencyConvert,
+      displayConvertion,
+      currentNativeTokenName,
+      selectedAccountAddress,
+      selectedAccountAddressPlain,
+      updateSelectedAccount,
+      isDefault,
+      isMultisig
     };
   }
 });
@@ -377,7 +432,7 @@ export default defineComponent({
 
 #address{
   width: 350px;
-  @apply text-xs;
+  @extend .text-xs !optional;
 }
 
 @media (min-width: 640px) {
@@ -393,7 +448,7 @@ export default defineComponent({
 
   #address{
     width: 480px;
-    @apply text-sm;
+    @extend .text-sm !optional;
   }
 }
 
