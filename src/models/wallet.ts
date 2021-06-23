@@ -59,4 +59,28 @@ export class Wallet{
     selectDefaultAccount(): WalletAccount{
         return this.accounts.find((walletAccount)=> walletAccount.default === true);
     }
+
+    setDefaultAccountByAddress(address: string): void{
+        let accounts: WalletAccount[] = this.accounts.filter((account)=> account.default === true);
+
+        for(let i = 0; i < accounts.length; ++i){
+            accounts[i].default = false;
+        }
+
+        let account: WalletAccount = this.accounts.find((account)=> account.address === address);
+
+        account.default = true;
+    }
+
+    setDefaultAccountByName(name: string): void{
+        let accounts: WalletAccount[] = this.accounts.filter((account)=> account.default === true);
+
+        for(let i = 0; i < accounts.length; ++i){
+            accounts[i].default = false;
+        }
+
+        let account: WalletAccount = this.accounts.find((account)=> account.name === name);
+
+        account.default = true;
+    }
 }

@@ -11,7 +11,7 @@ import { namespaces } from '../util/namespaces.js';
 import { environment } from '../environment/environment.js';
 import { transactionTypeName } from '@/util/transactionUtils';
 import { walletState } from '@/state/walletState';
-import { ConfirmedTransaction, UnconfirmedTransaction, AggregateBondedTransaction, contactInterface } from '@/models/interface/transaction';
+import { DashboardTransaction, PartialTransaction, TransactionDetailList } from '@/models/interface/transaction';
 
 // let provider =  proximaxProvider;
 
@@ -22,7 +22,8 @@ const getNameTypeTransaction = (type) => {
 }
 
 
-const formatTransaction = (transaction:ConfirmedTransaction, names:contactInterface[]) :ConfirmedTransaction => {
+const formatTransaction = (transaction:Transaction) :void => {
+  /*
   let keyName = getNameTypeTransaction(transaction.type);
   transaction.typeName = transactionTypeName[keyName].name;
   transaction.transferType = formatTransfer(transaction);
@@ -39,6 +40,7 @@ const formatTransaction = (transaction:ConfirmedTransaction, names:contactInterf
   transaction.data = transaction;
   transaction.hash = transaction.transactionInfo.hash;
   return transaction;
+  */
 };
 
 
