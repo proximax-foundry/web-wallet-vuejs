@@ -153,39 +153,9 @@ export class TransactionUtils {
     return accountInfo;
   }
 
-  static amountFormatterSimple(amount: number, d: number = 6) {
-    const amountDivisibility = Number(amount) / Math.pow(10, d);
-    return amountDivisibility.toLocaleString('en-us', {
-      minimumFractionDigits: d
-    });
-  }
-
   static getFee = (transaction: Transaction) => {
 
     return transaction.maxFee.compact();
-  }
-
-  static convertDisplayDateTimeFormat(dateTimeJSON: string): string {
-    const date = new Date(dateTimeJSON);
-
-    return new Intl.DateTimeFormat('default').format(date);
-  }
-
-  static formatFixedDateTime(dateTimeJSON: string) {
-
-    const newDate = new Date(dateTimeJSON);
-
-    return new Intl.DateTimeFormat('en-GB',
-      {
-        year: 'numeric', month: 'numeric', day: 'numeric',
-        hour: 'numeric', minute: 'numeric', second: 'numeric'
-      }).format(newDate);
-  }
-
-  static numberToJSONDate(dateNumber: number) {
-    const newDate = new Date(dateNumber);
-
-    return newDate.toISOString();
   }
 
   static getFakeEncryptedMessageSize = (message: string) => {
@@ -194,23 +164,6 @@ export class TransactionUtils {
 
   static getPlainMessageSize = (message: string) => {
     return PlainMessage.create(message).size();
-  }
-
-  static convertToCurrency = (value: number, divisibility: number) => {
-
-    const exactValue = value / Math.pow(10, divisibility);
-
-    return new Intl.NumberFormat('en', { maximumFractionDigits: divisibility }).format(exactValue);
-  }
-
-  static convertToExact = (value: number, divisibility: number) => {
-
-    return value / Math.pow(10, divisibility);
-  }
-
-  static convertToAbsolute = (value: number, divisibility: number) => {
-
-    return value * Math.pow(10, divisibility);
   }
 
   static signTransaction(transaction: Transaction, account: Account, generationHash: string) {
