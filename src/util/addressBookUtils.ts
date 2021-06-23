@@ -46,6 +46,7 @@ export class AddressBookUtils {
     if (address !== null && address !== undefined && address.length === 40) {
       if(this.verifyNetworkAddressEqualsNetwork(currentAdd, add.toUpperCase())){
         verification.isPassed =  true;
+        
       }else{
         verification.isPassed = false;
         verification.errMessage = 'Recipient Address Network unsupported';

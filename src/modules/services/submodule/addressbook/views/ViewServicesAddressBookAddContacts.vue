@@ -25,8 +25,10 @@ import { computed, ref, watch } from 'vue';
 import TextInput from '@/components/TextInput.vue';
 import { useRouter } from 'vue-router';
 import { useToast } from "primevue/usetoast";
+import { AddressBook } from '@/models/addressBook';
 import { AddressBookUtils } from '@/util/addressBookUtils';
 import { Wallet } from "@/models/wallet";
+import { Wallets } from "@/models/wallets";
 import { walletState } from '@/state/walletState';
 import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 
@@ -74,9 +76,9 @@ export default {
     });
 
     const SaveContact = () => {
-      const walletInstance = new Wallet();
-      walletInstance.addAddressBook({ name: contactName.value, address: address.value });
-      WalletStateUtils.refreshWallets();
+      let addressBook = new AddressBook(contactName.value, address.value);
+      walletState.currentLoggedInWallet.addAddressBook(addressBook);
+      walletState.wallets.savetoLocalStorage();
       err.value = '';
       contactName.value = '';
       address.value = '';

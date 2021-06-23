@@ -33,10 +33,9 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { computed, getCurrentInstance, ref, watch } from 'vue';
 import TextInput from '@/components/TextInput.vue';
-import { verifyAddress } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { Helper } from "@/util/typeHelper";
 import { AddressBookUtils } from '@/util/addressBookUtils';
@@ -95,9 +94,9 @@ export default{
     const EditContact = () => {
       // @param index, AddressBook
       const contactIndex = walletState.currentLoggedInWallet.contacts.findIndex((contact) => contact.address == p.data.address);
-      const walletInstance = new Wallet();
-      walletInstance.updateAddressBook(contactIndex, { name: contactName.value, address: address.value });
-      WalletStateUtils.refreshWallets();
+      // const walletInstance = new Wallet();
+      walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value, address: address.value });
+      walletState.wallets.savetoLocalStorage();
       toggleModal.value = !toggleModal.value;
       emitter.emit('REFRESH_CONTACT_LIST', true);
       toast.add({severity:'info', summary: 'Address Book', detail: 'Contact info updated in Address Book', group: 'br', life: 5000});

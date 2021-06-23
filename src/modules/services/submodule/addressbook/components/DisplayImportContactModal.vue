@@ -36,8 +36,10 @@
 </template>
 
 <script>
-import { inject, getCurrentInstance, ref } from "vue";
-import { verifyAddress } from '@/util/functions';
+import { getCurrentInstance, ref } from "vue";
+import { AddressBookUtils } from '@/util/addressBookUtils';
+import { AddressBook } from '@/models/addressBook';
+import { walletState } from '@/state/walletState';
 import { useToast } from "primevue/usetoast";
 export default{
   name: 'DisplayImportContactModal',
@@ -56,7 +58,6 @@ export default{
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    // const appStore = inject("appStore");
     const csv = ref([]);
     const contactAdded = ref(0);
     const contactExisted = ref(0);
@@ -84,7 +85,7 @@ export default{
 
       promise.then(
         result => {
-          // const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
+          const wallet = walletState.currentLoggedInWallet;
           /* handle a successful result */
           var array = result.match(/[^\r\n]+/g);
           let exist = [];
@@ -108,24 +109,28 @@ export default{
 
             // check if address or name is already in the contact book
             // check for existing account address in wallet
-            const accountAddIndex = wallet.accounts.findIndex((element) => element.address == arr[1]);
+            const accountAddIndex = wallet.accounts.findIndex((account) => account.address == arr[1]);
             // check for existing account name in wallet
-            const accountNameIndex = wallet.accounts.findIndex((element) => element.name.toLowerCase() == arr[0].toLowerCase());
-            const contactAddIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((element) => element.address == arr[1]):(-1);
-            const contactNameIndex =(wallet.contacts!=undefined)?wallet.contacts.findIndex((element) => element.name.toLowerCase() == arr[0].toLowerCase()):(-1);
+            const accountNameIndex = wallet.accounts.findIndex((account) => account.name.toLowerCase() == arr[0].toLowerCase());
+            const contactAddIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.address == arr[1]):(-1);
+            const contactNameIndex =(wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.name.toLowerCase() == arr[0].toLowerCase()):(-1);
+
+            const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
 
             if(contactAddIndex >= 0 || accountAddIndex >= 0){
               exist.push({label: label, address: address });
             }else if( contactNameIndex >= 0 || accountNameIndex >= 0 ){
-              // const verifyContactAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), address);
-              if(verifyContactAddress.isPassed.value){
+              const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address);
+              if(verifyContactAddress.isPassed){
                 addContact.push({label: label + ' - 2', address: address });
               }else{
                 errContact.push({label: label, address: address });
               }
             }else{
-              // const verifyContactAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), address);
-              if(verifyContactAddress.isPassed.value){
+              console.log(defaultAccount.address)
+              console.log(address)
+              const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address);
+              if(verifyContactAddress.isPassed){
                 addContact.push({label: label, address: address });
               }else{
                 errContact.push({label: label, address: address });
@@ -138,12 +143,10 @@ export default{
           }
           if(addContact.length > 0){
             addContact.forEach((element) => {
-              wallet.contacts.push({
-                name: element.label,
-                address: element.address,
-              });
+              let addressBook = new AddressBook(element.label, element.address);
+              walletState.currentLoggedInWallet.addAddressBook(addressBook);
             });
-            appStore.updateWalletConfig(wallet);
+            walletState.wallets.savetoLocalStorage();
             contactAdded.value = addContact.length;
             emitter.emit('REFRESH_CONTACT_LIST', true);
             toast.add({severity:'info', summary: 'Address Book', detail: 'New contact' + ((contactAdded.value>1)?'s':'') + ' imported to Address Book', group: 'br', life: 5000});
