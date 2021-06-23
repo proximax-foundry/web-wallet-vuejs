@@ -423,13 +423,13 @@ export class WalletUtils {
         return WalletAlgorithm;
     }
 
-    static importWltOldFormat(base64Wlt: string, networkName: string, networkType: NetworkType): void{
-        const wltFile: oldWltFile = Helper.base64decode(base64Wlt);
+    static importWltOldFormat(wallets: Wallets, parsedObj: any, networkName: string, networkType: NetworkType): void{
+        const wltFile: oldWltFile = parsedObj;
 
-        const wallets = new Wallets();
-
-        if(!wallets.filterByNetworkNameAndName(networkName, wltFile.name)){
-            throw new Error("Wallet with same name already exist");
+        if(wallets.filterByNetworkNameAndName(networkName, wltFile.name)){
+            let error = new Error("Wallet with same name already exist");
+            error.name = "SAME_NAME";
+            throw error;
         }
 
         const walletAccounts: WalletAccount[] = [];
@@ -456,13 +456,13 @@ export class WalletUtils {
         wallets.savetoLocalStorage();
     }
 
-    static importWalletNewFormat(base64Wlt: string, networkName: string, networkType: NetworkType): void{
-        const wltFile: Wallet = Helper.base64decode(base64Wlt);
+    static importWalletNewFormat(wallets: Wallets, parsedObj: any, networkName: string, networkType: NetworkType): void{
+        const wltFile: Wallet = parsedObj;
 
-        const wallets = new Wallets();
-
-        if(!wallets.filterByNetworkNameAndName(networkName, wltFile.name)){
-            throw new Error("Wallet with same name already exist");
+        if(wallets.filterByNetworkNameAndName(networkName, wltFile.name)){
+            let error = new Error("Wallet with same name already exist");
+            error.name = "SAME_NAME";
+            throw error;
         }
 
         const walletAccounts: WalletAccount[] = [];
@@ -508,8 +508,8 @@ export class WalletUtils {
         return walletAccount;
     }
 
-    static checkIsNewFormat(base64Wlt: string): boolean{
-        const wltFile: Wallet = Helper.base64decode(base64Wlt);
+    static checkIsNewFormat(base64Wlt: any): boolean{
+        const wltFile: Wallet = base64Wlt;//Helper.base64decode(base64Wlt);
 
         if(wltFile.accounts[0].publicKey){
             return true;
@@ -942,7 +942,7 @@ export class WalletUtils {
         const account = Account.generateNewAccount(networkType);
         const wallet = WalletUtils.createAccountSimpleFromPrivateKey(walletName, password, account.privateKey, networkType);
         let walletAccounts: WalletAccount[] = [];
-        let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.address['address'], "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
+        let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
         walletAccount.isBrain = true;
         walletAccount.default = true;
         walletAccounts.push(walletAccount);
@@ -957,6 +957,22 @@ export class WalletUtils {
         };
 
         return data;
+    }
+
+    static addNewWalletWithPrivateKey(allWallets: Wallets, privateKey: string, password: Password, walletName: string, networkName: string, networkType: NetworkType): WalletAccount{
+        const account = Account.createFromPrivateKey(privateKey, networkType);
+        const wallet = WalletUtils.createAccountSimpleFromPrivateKey(walletName, password, privateKey, networkType);
+        let walletAccounts: WalletAccount[] = [];
+        let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
+        walletAccount.isBrain = true;
+        walletAccount.default = true;
+        walletAccounts.push(walletAccount);
+        let newWalletInstance = new Wallet(walletName, networkName, walletAccounts);
+
+        allWallets.wallets.push(newWalletInstance);
+        allWallets.savetoLocalStorage();
+
+        return walletAccount;
     }
 }
 
