@@ -2,12 +2,12 @@
   <div class="flex justify-between text-md">
     <div><span class="text-gray-300">Namespaces ></span> <span class="text-blue-primary font-bold">Create</span></div>
     <div>
-      <!-- <router-link :to="{ name: 'ViewServices' }" class="font-bold">Back to Services</router-link> -->
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">Back to Services</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-4'>
     <div class="md:col-span-3">
-      <form @submit.prevent="create">
+      <form @submit.prevent="createNamespace">
         <fieldset class="w-full">
           <div class="mb-5">
             <div v-if="showNoBalance" class="border-2 rounded-3xl border-red-700 w-full h-24 text-center p-4">
@@ -19,13 +19,13 @@
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
             <div v-if="moreThanOneAccount" class="text-left p-4">
               <div class="mb-1 cursor-pointer z-20 border-b border-gray-200" @click="showMenu = !showMenu">
-                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
+                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="false" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
                 <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
               </div>
               <transition name="slide">
               <div v-if="showMenu" class="z-10">
                 <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50 optionDiv'" @click="changeSelection(item)" :title="'Address is ' + item.address">
-                  <div>{{ item.name }} <span v-if="isMultiSig(item.address)" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
+                  <div>{{ item.name }} <span v-if="false" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
                 </div>
               </div>
               </transition>
@@ -34,7 +34,7 @@
           </div>
           <div class="text-left p-3 pb-0 border-l-8 border-gray-100">
             <div class="bg-gray-100 rounded-2xl p-3">
-              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ appStore.getBalanceByAddress(selectedAccAdd) }} XPX</span></div>
+              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ `balance` }} XPX</span></div>
             </div>
           </div>
           <div class="mt-5">
@@ -46,9 +46,9 @@
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: 0.<span class="text-txs">062750</span> XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFeeCurrency }} {{currencyName}}</div>
+            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFee }} {{currencyName}}</div>
           </div>
-          <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800" v-if="isMultiSig(selectedAccAdd)">
+          <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800" v-if="false">
             <div class="text-center">
               <div class="inline-block">
                 <div class="flex">
@@ -64,7 +64,7 @@
           <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
             <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">Clear</button>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">Create</button>
+            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createNamespace">Create</button>
           </div>
         </fieldset>
       </form>
@@ -91,7 +91,12 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import DurationInput from '@/modules/services/submodule/namespaces/components/DurationInput.vue';
 import TextInput from '@/components/TextInput.vue';
-import { convertToCurrency, convertToExact } from '@/util/transfer.js';
+import { TransactionUtils } from '@/util/transactionUtils';
+import { ChainProfileConfig } from "@/models/stores/";
+import { Wallet } from "@/models/wallet";
+import { walletState } from "@/state/walletState";
+import { networkState } from "@/state/networkState";
+import { Currency } from "@/models/currency";
 
 export default {
   name: 'ViewServicesNamespaceCreate',
@@ -102,8 +107,6 @@ export default {
     SelectInputPlugin,
   },
   setup(){
-    const appStore = inject("appStore");
-    const chainNetwork = inject("chainNetwork");
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showNamespacenameError = ref(false);
@@ -129,12 +132,13 @@ export default {
       return namespace;
     };
 
-    const currencyName = computed(() => chainNetwork.getCurrencyName());
-    const rentalFee = computed(()=> convertToExact(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
-    const rentalFeeCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
+    const currencyName = computed(() => Currency.name);
+    const rentalFee = computed(()=> TransactionUtils.convertToExact(ChainProfileConfig.mosaicRentalFee, Currency.divisibility));
+    console.log(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock)
+    console.log(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate)
 
-    const lockFund = computed(()=> convertToExact(chainNetwork.getProfileConfig().lockedFundsPerAggregate, chainNetwork.getCurrencyDivisibility()))
-    const lockFundCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().lockedFundsPerAggregate, chainNetwork.getCurrencyDivisibility()))
+    const lockFund = computed(()=> TransactionUtils.convertToExact(ChainProfileConfig.lockedFundsPerAggregate, Currency.divisibility))
+    const lockFundCurrency = computed(()=> TransactionUtils.convertToCurrency(ChainProfileConfig.lockedFundsPerAggregate, Currency.divisibility))
 
     const lockFundTxFee = ref(0.0445);
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
@@ -144,28 +148,26 @@ export default {
       walletPassword.value.match(passwdPattern) && (supply.value > 0) && (!showDurationErr.value)
     ));
 
-    const isMultiSig = (address) => {
-      const account = appStore.getAccDetailsByAddress(address);
-      let isMulti = false;
-      if(account.isMultisign != undefined){
-        if(account.isMultisign != '' || account.isMultisign != null){
-          if(account.isMultisign.cosignatories != undefined){
-            if(account.isMultisign.cosignatories.length > 0){
-              isMulti = true;
-            }
-          }
-        }
-      }
-      return isMulti;
-    };
+    // const isMultiSig = (address) => {
+    //   const account = appStore.getAccDetailsByAddress(address);
+    //   let isMulti = false;
+    //   if(account.isMultisign != undefined){
+    //     if(account.isMultisign != '' || account.isMultisign != null){
+    //       if(account.isMultisign.cosignatories != undefined){
+    //         if(account.isMultisign.cosignatories.length > 0){
+    //           isMulti = true;
+    //         }
+    //       }
+    //     }
+    //   }
+    //   return isMulti;
+    // };
 
-    const selectedAccName = ref(appStore.getFirstAccName());
-    const selectedAccAdd = ref(appStore.getFirstAccAdd());
-    const balance = computed( () => {
-      return appStore.getBalanceByAddress(selectedAccAdd.value)
-    });
+    const selectedAccName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
+    const selectedAccAdd = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
+    const balance = ref(walletState.currentLoggedInWallet.selectDefaultAccount().balance);
 
-    const isMultiSigBool = ref(isMultiSig(appStore.getFirstAccAdd()));
+    // const isMultiSigBool = ref(isMultiSig(appStore.getFirstAccAdd()));
     // balance.value = appStore.getFirstAccBalance();
 
     const showNoBalance = ref(false);
@@ -181,14 +183,14 @@ export default {
     }
 
     const supply = ref(0);
-    const accounts = computed( () => appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts);
+    const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
     const sendXPX = ref(0);
-    const moreThanOneAccount = computed(()=> (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false);
+    const moreThanOneAccount = computed(()=> (walletState.currentLoggedInWallet.accounts.length > 1)?true:false);
 
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
-      isMultiSigBool.value = isMultiSig(i.address);
+      // isMultiSigBool.value = false; // temp
       // balance.value = i.balance;
       (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
       showMenu.value = !showMenu.value;
@@ -200,6 +202,10 @@ export default {
       duration.value = '0';
       namespaceName.value = '';
       emitter.emit("CLEAR_SELECT", 0);
+    };
+
+    const createNamespace = () => {
+      console.log('Add namespace');
     };
 
     watch(balance, (n) => {
@@ -216,7 +222,6 @@ export default {
     });
 
     return {
-      appStore,
       accounts,
       moreThanOneAccount,
       showMenu,
@@ -241,15 +246,16 @@ export default {
       disabledDuration,
       duration,
       showDurationErr,
-      isMultiSig,
-      isMultiSigBool,
-      rentalFeeCurrency,
+      // isMultiSig,
+      // isMultiSigBool,
+      rentalFee,
       lockFundCurrency,
       currencyName,
       lockFundTxFee,
       lockFundTotalFee,
       selectNamespace, 
       namespaceOption,
+      createNamespace,
     }
   },
 
