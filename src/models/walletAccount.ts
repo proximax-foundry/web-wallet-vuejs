@@ -62,14 +62,14 @@ export class WalletAccount extends Account{
 
     getDirectChildMultisig(): string[]{
 
-        let temp: MultisigInfo[] = this.multisigInfo.filter(( multiInfo)=> multiInfo.level === 1);
+        let temp: MultisigInfo[] = this.multisigInfo.filter(( multiInfo)=> multiInfo.level === -1);
 
         return temp.length ? WalletAccount.getMultisigInfoPublicKey(temp) : [];
     }
 
     getDirectParentMultisig(): string[]{
 
-        let temp: MultisigInfo[] = this.multisigInfo.filter(( multiInfo)=> multiInfo.level === -1);
+        let temp: MultisigInfo[] = this.multisigInfo.filter(( multiInfo)=> multiInfo.level === 1);
 
         return WalletAccount.getMultisigInfoPublicKey(temp);
     }

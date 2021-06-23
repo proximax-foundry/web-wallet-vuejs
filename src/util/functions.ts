@@ -42,10 +42,10 @@ export const copyToClipboard = (data: string): void => {
 
 
 const getCoingecko = (coinId: string): Promise<number>=> {
-  return fetch(`${environment.coingecko.url}${coinId}`).then((res) => res.json()).then((data) => { return data.market_data.current_price.usd });
+  return fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`).then((res) => res.json()).then((data) => { return data.market_data.current_price.usd });
 }
 
-export const currencyconverter = async (balance: number):Promise<number> => {
+export const getXPXcurrencyPrice = async (balance: number):Promise<number> => {
   let total:number;
   let coinId = 'proximax';
   let rate = await getCoingecko(coinId);
