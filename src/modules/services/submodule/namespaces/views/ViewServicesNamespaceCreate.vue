@@ -46,7 +46,7 @@
           <div class="mt-5">
             <TextInput placeholder="Enter Name" errorMessage="Required field, minlength 2, max length 16. Alphanumeric characters" :showError="showNamespaceNameError" v-model="namespaceName" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :disabled="disableNamespaceName" />
           </div>
-          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" v-model="selectNamespace" :options="namespaceOption()"  />
+          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" v-model="selectNamespace" :options="namespaceOption()" selectDefault="1" />
           <DurationInput :disabled="disabledDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span class="text-xs">{{ transactionFee }}</span> XPX</div>
@@ -139,6 +139,10 @@ export default {
 
     const namespaceOption = () => {
       let namespace = [];
+      namespace.push({
+        value: '1',
+        label: 'New Root Namespace',
+      })//disabled: true
       return namespace;
     };
 
@@ -197,7 +201,7 @@ export default {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
       isMultiSigBool.value = false;
-      // balance.value = i.balance;
+      balance.value = i.balance;
       (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
