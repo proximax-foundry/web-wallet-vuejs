@@ -42,10 +42,9 @@
 
 <script lang="ts">
 import { computed, ref } from 'vue';
-import { Wallets } from "@/models/wallets";
-import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 import { networkState } from "@/state/networkState";
 import { useRouter } from 'vue-router';
+import { walletState } from '@/state/walletState';
 
 export default{
   name: 'ConfirmDeleteWalletModal',
@@ -66,10 +65,8 @@ export default{
       )
     );
     const deleteWallet = () => {
-      let walletInstance = new Wallets();
-      let removeWalletStatus = walletInstance.removeWalletByNetworkNameAndName(networkState.chainNetworkName, p.name)
+      let removeWalletStatus = walletState.wallets.removeWalletByNetworkNameAndName(networkState.chainNetworkName, p.name)
       if(removeWalletStatus){
-        WalletStateUtils.refreshWallets();
         router.push({ name: 'ViewWallets', params: {deleteWallet: 'success' } });
       }else{
         err.value = "Unable to remove wallet";
