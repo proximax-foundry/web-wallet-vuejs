@@ -13,14 +13,24 @@
             <h1 class="default-title font-bold my-5">Accounts</h1>
             <div class="mb-2">Account available in wallet:</div>
             <div style="height: 400px; overflow-y: scroll">
-              <div v-for="(account, index) in defaultAccount" :key="index" @click="setDefault(account.address)" class="flex text-left p-2 py-2 text-gray-800 bg-blue-100">
+              <div @click="selectAccount(defaultAccount.name, 0)" class="flex text-left p-2 py-2 text-gray-800 bg-blue-100 hover:bg-yellow-50 cursor-pointer">
+                <div>
+                  <div class="font-bold text-tsm">{{ defaultAccount.name }}</div>
+                  <div class="text-sm mt-1">{{ defaultAccount.address }}</div>
+                </div>
+                <div class="self-center">
+                  <span class="text-xs font-normal ml-2 py-1 px-2 rounded bg-yellow-200">Default</span> 
+                  <span class="text-xs font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(defaultAccount)">MultiSig</span>
+                </div>
+              </div>
+              <div v-for="(account, index) in accounts" :key="index" @click="selectAccount(account.name, 0)" class="flex text-left p-2 py-2 text-gray-800 hover:bg-yellow-50 cursor-pointer" :class="`${ (index%2==0)?'bg-blue-50':'bg-blue-100' }`">
                 <div>
                   <div class="font-bold text-tsm">{{ account.name }}</div>
                   <div class="text-sm mt-1">{{ account.address }}</div>
                 </div>
-                <div class="self-center"><span class="text-xs font-normal ml-2 py-1 px-2 rounded bg-yellow-200">Default</span> <span class="text-xs font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(account)">MultiSig</span></div>
+                <div class="self-center"><span class="text-xs font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(account)">MultiSig</span></div>
               </div>
-              <div v-for="(account, index) in accounts" :key="index" @click="setDefault(account.address)" class="flex text-left p-2 py-2 text-gray-800 hover:bg-yellow-50 cursor-pointer" :class="`${ (index%2==0)?'bg-blue-50':'bg-blue-100' }`">
+              <div v-for="(account, index) in otherAccounts" :key="index" @click="selectAccount(account.name, 1)" class="flex text-left p-2 py-2 text-gray-800 hover:bg-yellow-50 cursor-pointer" :class="`${ (index%2==0)?'bg-blue-50':'bg-blue-100' }`">
                 <div>
                   <div class="font-bold text-tsm">{{ account.name }}</div>
                   <div class="text-sm mt-1">{{ account.address }}</div>
@@ -37,56 +47,48 @@
 </template>
 
 <script>
-import { computed, inject, getCurrentInstance } from 'vue';
+import { computed, getCurrentInstance } from 'vue';
+import { walletState } from '@/state/walletState';
 
 export default{
   name: 'SetAccountDefaultModal',
   props: ['toggleModal'],
 
   setup(){
-    const appStore = inject("appStore");
-    // const siriusStore = inject("siriusStore");
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
     const accounts = computed(
       () =>{
-        const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
-        let filteredAccounts = wallet.accounts.filter((element) => element.default == false);
-        return filteredAccounts;
+        return walletState.currentLoggedInWallet.accounts.filter((element) => element.default == false)
+      }
+    );
+
+    const otherAccounts = computed(
+      () =>{
+        return walletState.currentLoggedInWallet.others;
       }
     );
 
     const defaultAccount = computed( () => {
-      const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
-      let defaultAccount = wallet.accounts.filter((element) => element.default == true);
-      return defaultAccount;
+      return walletState.currentLoggedInWallet.selectDefaultAccount();
     });
 
     const isMultiSig = (account) => {
-      if(account.isMultisign != undefined){
-        if(account.isMultisign != '' || account.isMultisign != null){
-          if(account.isMultisign.cosignatories != undefined){
-            if(account.isMultisign.cosignatories.length > 0){
-              return true;
-            }else{
-              return false;
-            }
-          }else{
-            return false;
-          }
-        }else{
-          return false;
-        }
-      }else{
-        return false;
+      if(account.multisigInfo){
+
+        let multisigInfos = account.multisigInfo.filter((multisigInfo)=> multisigInfo.level === 1);
+
+        return multisigInfos.length ? true : false;
+      }
+      else{
+        return false
       }
     }
 
-    const setDefault = (address) => {
-      if(appStore.setAccountDefault(address)){
-        closeModal();
-      }
+    const setDefault = (name) => {
+      walletState.currentLoggedInWallet.setDefaultAccountByName(name);
+      selectAccount(name);
     };
 
     const closeModal = () => {
@@ -99,7 +101,20 @@ export default{
       defaultAccount,
       isMultiSig,
       closeModal,
+      otherAccounts
     };
   },
+  methods:{
+    selectAccount(name, type){
+      let data = {
+        name: name,
+        type: type
+      };
+
+      if(this.$emit("dashboardSelectAccount", data)){
+        this.closeModal();
+      }
+    }
+  }
 }
 </script>

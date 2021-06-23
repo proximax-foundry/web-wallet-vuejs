@@ -1,41 +1,38 @@
-import { Transaction } from "tsjs-xpx-chain-sdk";
+import { Transaction, AggregateTransaction } from "tsjs-xpx-chain-sdk";
 
-export interface ConfirmedTransaction extends Transaction{
+export interface DashboardTransaction{
   typeName: string,
-  transferType: string,
-  senderName: string,
-  senderAddress: string,
-  recipientName: string,
-  recipientAddress: string,
-  block: number,
+  inOutType: string,
+  signerName?: string | null,
+  signerAddress: string,
+  recipientName?: string,
+  recipientAddress?: string,
+  signer: string, // publicKey
   data: Transaction,
   hash: string,
+  timestamp?: number | null,
+  block?: number | null,
+  fee?: number,
+  spend?: number,
+  transferList: TransactionDetailList[],
+  formattedDeadline?: string,
+  relatedAddress: string[]
 }
 
-export interface UnconfirmedTransaction extends Transaction{
-  typeName: string,
-  transferType: string,
-  senderName: string,
-  senderAddress: string,
-  recipientNameL: string,
-  recipientAddress: string,
-  block: number,
-  data: Transaction,
+export interface TransactionDetailList{
+  typeName?: string;
+  from: string;
+  to?: string;
+  what?: string[];
+}
+
+export interface PartialTransaction{
+  cosigner: string[],
+  signer: string,
+  formattedDeadline: string,
+  data: AggregateTransaction,
+  signedPublicKey: string[],
   hash: string,
-}
-
-export interface AggregateBondedTransaction extends Transaction{
-  linkedAccountName: string,
-  linkedAccount: string,
-  account: string,
-  formattedDeadline: Date,
-  totalSigned: number, 
-  isSigned: boolean,
-  hash: string,
-}
-
-export interface contactInterface {
-  address: string,
-  name: string,
-  id: number
+  transferList: TransactionDetailList[],
+  relatedAddress: string[]
 }
