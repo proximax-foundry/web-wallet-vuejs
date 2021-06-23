@@ -100,6 +100,60 @@ export class Helper{
     static base64encode(toEncode: string){
         return Base64.stringify(toEncode);
     }
+
+    static amountFormatterSimple(amount: number, d: number = 6) {
+        const amountDivisibility = Number(amount) / Math.pow(10, d);
+        return amountDivisibility.toLocaleString('en-us', {
+          minimumFractionDigits: d
+        });
+      }
+    
+      static convertDisplayDateTimeFormat(dateTimeJSON: string): string {
+        const date = new Date(dateTimeJSON);
+    
+        return new Intl.DateTimeFormat('default').format(date);
+      }
+    
+      static formatFixedDateTime(dateTimeJSON: string) {
+    
+        const newDate = new Date(dateTimeJSON);
+    
+        return new Intl.DateTimeFormat('en-GB',
+          {
+            year: 'numeric', month: 'numeric', day: 'numeric',
+            hour: 'numeric', minute: 'numeric', second: 'numeric'
+          }).format(newDate);
+      }
+    
+      static numberToJSONDate(dateNumber: number) {
+        const newDate = new Date(dateNumber);
+    
+        return newDate.toISOString();
+      }
+    
+      static convertToCurrency = (value: number, divisibility: number) => {
+    
+        const exactValue = value / Math.pow(10, divisibility);
+    
+        return new Intl.NumberFormat('en', { maximumFractionDigits: divisibility }).format(exactValue);
+      }
+
+      static toCurrencyFormat = (value: number, divisibility: number) => {
+    
+        const exactValue = value;
+    
+        return new Intl.NumberFormat('en', { maximumFractionDigits: divisibility }).format(exactValue);
+      }
+    
+      static convertToExact = (value: number, divisibility: number) => {
+    
+        return value / Math.pow(10, divisibility);
+      }
+    
+      static convertToAbsolute = (value: number, divisibility: number) => {
+    
+        return value * Math.pow(10, divisibility);
+      }
 }
 
 export interface LooseObject {
