@@ -24,7 +24,7 @@ import { Namespace } from "@/models/namespace";
 
 const config = require("@/../config/config.json");
 
-const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
+const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile!.network.type));
 
 export class WalletUtils {
 
@@ -658,10 +658,6 @@ export class WalletUtils {
 
         for(let i = 0; i < wallet.accounts.length; ++i){
 
-            if(wallet.accounts[i].multisigInfo === null){
-                continue;
-            }
-
             let publicKeys = wallet.accounts[i].getDirectChildMultisig();
 
             for(let i = 0; i < publicKeys.length; ++i){
@@ -677,7 +673,7 @@ export class WalletUtils {
 
                 let address = publicAccount.address.plain();
 
-                let stripedAddress = address.substr(0, -4);
+                let stripedAddress = address.substr(-4);
 
                 let newOtherAccount = new OtherAccount("MULTISIG-" + stripedAddress, publicKeys[i], address, Helper.getOtherWalletAccountType().MULTISIG_CHILD);
             

@@ -19,13 +19,21 @@ export class MultisigInfo{
         this.minRemoval = minRemoval;
     }
 
-    getCosignaturiesAddress(networkType: number): string[]{
+    getCosignaturiesAddress(networkType: number, pretty: boolean = false): string[]{
 
-        return this.cosignaturies.map((publicKey)=> Address.createFromPublicKey(publicKey, networkType).pretty());
+        if(pretty){
+            return this.cosignaturies.map((publicKey)=> Address.createFromPublicKey(publicKey, networkType).pretty());
+        }
+    
+        return this.cosignaturies.map((publicKey)=> Address.createFromPublicKey(publicKey, networkType).plain());
     }
 
-    getMultisigAccountsAddress(networkType: number): string[]{
+    getMultisigAccountsAddress(networkType: number, pretty: boolean = false): string[]{
 
-        return this.multisigAccounts.map((publicKey)=> Address.createFromPublicKey(publicKey, networkType).pretty());
+        if(pretty){
+            return this.multisigAccounts.map((publicKey)=> Address.createFromPublicKey(publicKey, networkType).pretty());
+        }
+
+        return this.multisigAccounts.map((publicKey)=> Address.createFromPublicKey(publicKey, networkType).plain());
     }
 }
