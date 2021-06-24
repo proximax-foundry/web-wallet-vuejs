@@ -7,7 +7,7 @@
   </div>
   <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-4'>
     <div class="md:col-span-3">
-      <form @submit.prevent="create">
+      <form @submit.prevent="modifyMosaic">
         <fieldset class="w-full">
           <div class="mb-5">
             <div v-if="showNoBalance" class="border-2 rounded-3xl border-red-700 w-full h-24 text-center p-4">
@@ -34,19 +34,19 @@
           </div>
           <div class="text-left p-3 pb-0 border-l-8 border-gray-100 mb-5">
             <div class="bg-gray-100 rounded-2xl p-3">
-              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ appStore.getBalanceByAddress(selectedAccAdd) }} XPX</span></div>
+              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} XPX</span></div>
             </div>
           </div>
           <SelectInputPlugin showSelectTitleProp="true" placeholder="Select asset" errorMessage="" v-model="selectAsset" :options="assetOptions()"  />
           <SelectInputPlugin selectDefault="0" showSelectTitleProp="true" placeholder="Increase or decrease" errorMessage="" v-model="selectIncreaseDecrease" :options="increaseDecreaseOption()"  />
-          <SupplyInput :disabled="disabledSupply" v-model="supply" title="Quantity of Increase/Decrease" :balance="Number(appStore.getBalanceByAddress(selectedAccAdd))" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" />
+          <SupplyInput :disabled="disabledSupply" v-model="supply" title="Quantity of Increase/Decrease" :balance="balance" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span class="text-txs"></span> XPX</div>
           </div>
           <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
             <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">Clear</button>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createMosaic()">Create</button>
+            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="modifyMosaic()">Create</button>
           </div>
         </fieldset>
       </form>
@@ -88,7 +88,13 @@ import { computed, ref, inject, getCurrentInstance } from 'vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
-// import {  convertToCurrency, convertToExact } from '@/util/transfer.js';
+import { ChainProfileConfig } from "@/models/stores/";
+import { Wallet } from "@/models/wallet";
+import { walletState } from "@/state/walletState";
+import { networkState } from "@/state/networkState";
+import { Currency } from "@/models/currency";
+import { Helper } from '@/util/typeHelper';
+import { ChainUtils } from '@/util/chainUtils';
 
 export default {
   name: 'ViewMosaicLinkToNamespace',
@@ -98,9 +104,6 @@ export default {
     SelectInputPlugin,
   },
   setup(){
-    const appStore = inject("appStore");
-    // const siriusStore = inject("siriusStore");
-    const chainNetwork = inject("chainNetwork");
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showSupplyErr = ref(false);
@@ -115,34 +118,36 @@ export default {
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
 
-    const currencyName = computed(() => chainNetwork.getCurrencyName());
-    // const rentalFee = computed(()=> convertToExact(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
-    // const rentalFeeCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
+    const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
+    const rentalFee = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.mosaicRentalFee, networkState.currentNetworkProfile.network.currency.divisibility) );
+    const rentalFeeCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.mosaicRentalFee, networkState.currentNetworkProfile.network.currency.divisibility) );
+
+    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
+    const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
+
+    const lockFundTxFee = ref(0.0445);
+    const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
+
 
     const disableCreate = computed(() => !(
       walletPassword.value.match(passwdPattern) && (supply.value > 0)
     ));
 
     const isMultiSig = (address) => {
-      const account = appStore.getAccDetailsByAddress(address);
+      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
       let isMulti = false;
-      if(account.isMultisign != undefined){
-        if(account.isMultisign != '' || account.isMultisign != null){
-          if(account.isMultisign.cosignatories != undefined){
-            if(account.isMultisign.cosignatories.length > 0){
-              isMulti = true;
-            }
-          }
+      if(account.multisigInfo != undefined){
+        if(account.multisigInfo[0].cosignaturies.length > 0){
+          isMulti = true;
         }
       }
       return isMulti;
     };
 
-    const selectedAccName = ref(appStore.getFirstAccName());
-    const selectedAccAdd = ref(appStore.getFirstAccAdd());
-    const balance = ref(appStore.getBalanceByAddress(selectedAccAdd.value));
-    const isMultiSigBool = ref(isMultiSig(appStore.getFirstAccAdd()));
-    // balance.value = appStore.getFirstAccBalance();
+    const selectedAccName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
+    const selectedAccAdd = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
+    const balance = ref(Helper.toCurrencyFormat(walletState.currentLoggedInWallet.selectDefaultAccount().balance, networkState.currentNetworkProfile.network.currency.divisibility));
+    const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
 
     const showNoBalance = ref(false);
     // if(balance.value < rentalFee.value){
@@ -157,14 +162,15 @@ export default {
     // }
 
     const supply = ref(0);
-    const accounts = computed( () => appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts);
-    const moreThanOneAccount = computed(()=> (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false);
+    const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
+    const moreThanOneAccount = computed(()=> (walletState.currentLoggedInWallet.accounts.length > 1)?true:false);
+    const transactionFee = ref('0.000000');
 
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
       balance.value = i.balance;
-      // (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
+      (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
       isMultiSigBool.value = isMultiSig(i.address);
@@ -191,6 +197,10 @@ export default {
       emitter.emit("CLEAR_SELECT", 0);
     };
 
+    const modifyMosaic = () => {
+      console.log('Modify mosaic');
+    };
+
     // watch(balance, (n) => {
     //   if(n < rentalFee.value){
     //     showNoBalance.value = true;
@@ -205,7 +215,6 @@ export default {
     // });
 
     return {
-      appStore,
       accounts,
       moreThanOneAccount,
       showMenu,
@@ -232,6 +241,7 @@ export default {
       increaseDecreaseOption,
       selectAsset,
       selectIncreaseDecrease,
+      modifyMosaic,
     }
   },
 
