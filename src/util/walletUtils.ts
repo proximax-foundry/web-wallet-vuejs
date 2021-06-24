@@ -4,7 +4,7 @@ import { walletState } from "../state/walletState"
 import { ChainUtils } from "../util/chainUtils"
 import { Wallet } from "../models/wallet"
 import { Wallets } from "../models/wallets"
-import { WalletAccount } from "../models/walletAccount"
+import { WalletAccount } from "../models/walletAccount" 
 import { nis1Account } from "../models/nis1Account"
 import { ChainProfile } from "../models/stores/chainProfile"
 import { Asset } from "../models/asset";
@@ -193,8 +193,7 @@ export class WalletUtils {
     static getAccountHttp(){
         
        const accountAPI = new AccountAPI(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort))
-
-       return accountAPI.getAccountInfo
+       return accountAPI.accountHttp
     }
   
     /**

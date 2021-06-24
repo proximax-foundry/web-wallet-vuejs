@@ -18,7 +18,7 @@ const verifyPublicKey = (add, accountHttp) => {
                 if (acc.publicKey === invalidPublicKey) {
                     console.warn(`The receiver's public key is not valid for sending encrypted messages`);
                     resolve(true)
-                }
+                } 
                 resolve(false);
             },
             (error) => {

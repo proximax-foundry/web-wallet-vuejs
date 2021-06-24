@@ -20,11 +20,12 @@ import {
 // import { environment } from '../environment/environment.js';
 
 import { appStore } from "@/store/app";
+import { walletState } from '../state/walletState'
 import { siriusStore } from "@/store/sirius"; // chainNetwork
 import { announceAggregateBonded, announceLockfundAndWaitForConfirmation, modifyMultisigAnnounceLockfundAndWaitForConfirmation, modifyMultisigAnnounceAggregateBonded } from '../util/listener.js';
 const walletKey = "sw";
 
-function verifyContactPublicKey(add, accountHttp){
+function verifyContactPublicKey(add, accountHttp) {
   const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
   let address;
   address = Address.createFromRawAddress(add.toLocaleUpperCase());
@@ -34,8 +35,8 @@ function verifyContactPublicKey(add, accountHttp){
       (account) => {
         if (account.publicKey == invalidPublicKey) {
           console.warn(`The receiver's public key is not valid for sending encrypted messages`);
-          resolve({status: false});
-        }else{
+          resolve({ status: false });
+        } else {
           let payload = { status: true, publicKey: account.publicKey };
           resolve(payload);
         }
@@ -48,20 +49,20 @@ function verifyContactPublicKey(add, accountHttp){
   });
 }
 
-function generateContact(selected){
+function generateContact(selected) {
   const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
   var contact = [];
   wallet.accounts.forEach((element) => {
-    if(selected.indexOf(element.address) < 0){
+    if (selected.indexOf(element.address) < 0) {
       contact.push({
         value: element.address,
         label: element.name + ' - Owner account',
       });
     }
   });
-  if(wallet.contacts != undefined){
+  if (wallet.contacts != undefined) {
     wallet.contacts.forEach((element) => {
-      if(selected.indexOf(element.address) < 0){
+      if (selected.indexOf(element.address) < 0) {
         contact.push({
           value: element.address,
           label: element.name + ' - Contact',
@@ -80,22 +81,22 @@ const getPublicKey = (address) => {
       reject('invalid');
       console.error(error);
     }, () => {
-        console.log('done.');
+      console.log('done.');
     });
   });
 }
 
 /* coSign: array() */
-function convertAccount(coSign, numApproveTransaction, numDeleteUser, accountToConvertName, walletPassword){
+function convertAccount(coSign, numApproveTransaction, numDeleteUser, accountToConvertName, walletPassword) {
 
   let verify = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword);
-  if(verify < 1){
+  if (verify < 1) {
     return verify;
   }
 
   const add = fetch(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode) + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
 
-  return add.then( async (generationHash) => {
+  return add.then(async (generationHash) => {
     const multisigCosignatory = [];
     // console.log('Account to convert name: ' + accountToConvertName);
     const accountDetails = appStore.getAccDetails(accountToConvertName);
@@ -105,10 +106,10 @@ function convertAccount(coSign, numApproveTransaction, numDeleteUser, accountToC
     const accountToConvert = Account.createFromPrivateKey(privateKey, networkType);
 
     const cosignatory = [];
-    coSign.forEach( async (cosignKey, index) => {
-      if(cosignKey.length == 64){
+    coSign.forEach(async (cosignKey, index) => {
+      if (cosignKey.length == 64) {
         cosignatory[index] = PublicAccount.createFromPublicKey(cosignKey, networkType);
-      }else if(cosignKey.length == 40 || cosignKey.length == 46){
+      } else if (cosignKey.length == 40 || cosignKey.length == 46) {
         let address = Address.createFromRawAddress(cosignKey);
 
         try {
@@ -153,18 +154,18 @@ function convertAccount(coSign, numApproveTransaction, numDeleteUser, accountToC
     const lockFundsTransactionSigned = accountToConvert.sign(lockFundsTransaction, generationHash);
 
     const transactionHttp = new TransactionHttp(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
-    (async ()=>{
+    (async () => {
       try {
-          const confirmedTx = await announceLockfundAndWaitForConfirmation(accountToConvert.address, lockFundsTransactionSigned, lockFundsTransactionSigned.hash, transactionHttp);
-          console.log('confirmedTx');
-          console.log(confirmedTx);
-          // eslint-disable-next-line no-unused-vars
-          var aggregateTx = await announceAggregateBonded(accountToConvert.address, signedAggregateBoundedTransaction, signedAggregateBoundedTransaction.hash, confirmedTx, transactionHttp )
-          console.log('aggregateTx');
-          console.log(aggregateTx);
-          console.log("Done");
+        const confirmedTx = await announceLockfundAndWaitForConfirmation(accountToConvert.address, lockFundsTransactionSigned, lockFundsTransactionSigned.hash, transactionHttp);
+        console.log('confirmedTx');
+        console.log(confirmedTx);
+        // eslint-disable-next-line no-unused-vars
+        var aggregateTx = await announceAggregateBonded(accountToConvert.address, signedAggregateBoundedTransaction, signedAggregateBoundedTransaction.hash, confirmedTx, transactionHttp)
+        console.log('aggregateTx');
+        console.log(aggregateTx);
+        console.log("Done");
       } catch (error) {
-          console.log(error);
+        console.log(error);
       }
     })();
   });
@@ -174,7 +175,7 @@ function getAggregateBondedTransactions(publicAccount) {
   return siriusStore.accountHttp.aggregateBondedTransactions(publicAccount, new QueryParams(100));
 }
 
-function onPartial(publicAccount){
+function onPartial(publicAccount) {
   return new Promise((resolve) => {
     getAggregateBondedTransactions(publicAccount).subscribe((txOnpartial) => {
       let isPartial = false;
@@ -204,7 +205,7 @@ function getMultisigAccountGraphInfo(address) {
   return siriusStore.accountHttp.getMultisigAccountGraphInfo(address);
 }
 
-function updateAccountMultisigGraphInfo(accountAddress){
+function updateAccountMultisigGraphInfo(accountAddress) {
   return new Promise((resolve) => {
     const address = Address.createFromRawAddress(accountAddress);
     getMultisigAccountGraphInfo(address).subscribe(info => {
@@ -214,9 +215,9 @@ function updateAccountMultisigGraphInfo(accountAddress){
       // console.log('info.multisigAccounts');
       // console.log(accountAddress + ' ' + account.name);
       // console.log(info.multisigAccounts);
-      info.multisigAccounts.forEach(( multi ) => {
+      info.multisigAccounts.forEach((multi) => {
         // console.log(multi);
-        multi.forEach((m) =>{
+        multi.forEach((m) => {
           // console.log(m)
           // console.log(m.address)
           multigraph.push(m);
@@ -242,7 +243,7 @@ function updateAccountMultisigGraphInfo(accountAddress){
   });
 }
 
-function checkIsMultiSig(accountAddress){
+function checkIsMultiSig(accountAddress) {
   return new Promise((resolve) => {
     const address = Address.createFromRawAddress(accountAddress);
     multisigAccountInfo(address).subscribe(info => {
@@ -250,9 +251,9 @@ function checkIsMultiSig(accountAddress){
       const account = wallet.accounts.find((element) => element.address == accountAddress);
       account.isMultisign = info;
       let verify = false;
-      if(account.isMultisign != '' || account.isMultisign != null){
-        if(account.isMultisign.cosignatories != undefined){
-          if(account.isMultisign.cosignatories.length > 0){
+      if (account.isMultisign != '' || account.isMultisign != null) {
+        if (account.isMultisign.cosignatories != undefined) {
+          if (account.isMultisign.cosignatories.length > 0) {
             verify = true;
           }
         }
@@ -277,9 +278,9 @@ function checkIsMultiSig(accountAddress){
   });
 }
 
-function updateAccountsMultiSign(walletName){
+function updateAccountsMultiSign(walletName) {
   const wallet = appStore.getWalletByName(walletName);
-  wallet.accounts.forEach( async (element) => {
+  wallet.accounts.forEach(async (element) => {
     try {
       await checkIsMultiSig(element.address);
       await updateAccountMultisigGraphInfo(element.address);
@@ -291,22 +292,22 @@ function updateAccountsMultiSign(walletName){
   return 'invalid_wallet';
 }
 
-function createMultiSigAccount(walletName){
+function createMultiSigAccount(walletName) {
   const wallet = appStore.getWalletByName(walletName);
-  wallet.accounts.forEach( (element) => {
-    if(element.isMultisign){
-      if(element.isMultisign.cosignatories.length == 0){
+  wallet.accounts.forEach((element) => {
+    if (element.isMultisign) {
+      if (element.isMultisign.cosignatories.length == 0) {
         console.log(element.address)
         element.isMultisign.multisigAccounts.forEach((multisig) => {
           let multisigStatus = wallet.accounts.find((element) => element.address === multisig.address.address);
-          if(!multisigStatus){
+          if (!multisigStatus) {
             console.log(multisig)
             appStore.updateCreatedMultiSigToWallet(multisig.publicKey, multisig.address.address);
           }
         });
         updateAccountsMultiSign(walletName);
         // get latest xpx amount
-        appStore.getXPXBalance(walletName, siriusStore).then(()=> {
+        appStore.getXPXBalance(walletName, siriusStore).then(() => {
           appStore.updateWalletConfig(wallet);
         });
       }
@@ -318,16 +319,16 @@ const removeUnrelatedMultiSig = (walletName) => {
   const wallet = appStore.getWalletByName(walletName);
   let multiSigAccounts = wallet.accounts.filter((element) => element.encrypted === undefined);
   let removeMultiSig = [];
-  multiSigAccounts.forEach( (element) => {
+  multiSigAccounts.forEach((element) => {
     let validMultiSig = false;
-    if(element.isMultisign){
+    if (element.isMultisign) {
       element.isMultisign.cosignatories.forEach((account) => {
-        if(wallet.accounts.find(element => element.address == account.address.address)){
+        if (wallet.accounts.find(element => element.address == account.address.address)) {
           validMultiSig = true;
         }
       });
     }
-    if(!validMultiSig){
+    if (!validMultiSig) {
       removeMultiSig.push(element.address);
     }
   });
@@ -350,14 +351,14 @@ const cosignMiltisigTransaction = (signedAggregateBoundedTransaction, walletPass
     let signStatus = account.signCosignatureTransaction(cosignatureTransaction);
     return signStatus;
   };
-  siriusStore.accountHttp.aggregateBondedTransactions(account.publicAccount).subscribe((transactions)=>{
+  siriusStore.accountHttp.aggregateBondedTransactions(account.publicAccount).subscribe((transactions) => {
     console.log(transactions);
-    for(const aggregateTx of transactions){
+    for (const aggregateTx of transactions) {
       // view transaction details...
       let cosigned = aggregateTx.signedByAccount(account.publicAccount);
-      if(!cosigned && aggregateTx.transactionInfo.hash === signedAggregateBoundedTransaction.transactionInfo.hash){
-          let cosignatureSignedTransaction = cosignAggregateBondedTransaction(aggregateTx, account);
-          siriusStore.transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction);
+      if (!cosigned && aggregateTx.transactionInfo.hash === signedAggregateBoundedTransaction.transactionInfo.hash) {
+        let cosignatureSignedTransaction = cosignAggregateBondedTransaction(aggregateTx, account);
+        siriusStore.transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction);
       }
     }
   });
@@ -370,26 +371,26 @@ const createNewMultiSigAccount = (publicKey, address) => {
   // console.log(publicAccount);
   const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
   let multiSig = wallet.accounts.find((element) => element.address === address);
-  if(!multiSig){
+  if (!multiSig) {
     appStore.updateCreatedMultiSigToWallet(publicKey, address);
   }
 }
 
 // modify multisig
-function modifyMultisigAccount(coSign, removeCosign, numApproveTransaction, numDeleteUser, cosigners, multisigAccount, walletPassword){
+function modifyMultisigAccount(coSign, removeCosign, numApproveTransaction, numDeleteUser, cosigners, multisigAccount, walletPassword) {
 
   let verify = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword);
-  if(verify < 1){
+  if (verify < 1) {
     return verify;
   }
 
   const add = fetch(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode) + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
 
-  return add.then( async (generationHash) => {
+  return add.then(async (generationHash) => {
     const multisigCosignatory = [];
     let coSigner = [];
     const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
-    if(cosigners.length > 0){
+    if (cosigners.length > 0) {
       cosigners.forEach((signer) => {
         const accountDetails = appStore.getAccDetailsByAddress(signer.address);
         let privateKey = appStore.decryptPrivateKey(walletPassword, accountDetails.encrypted, accountDetails.iv);
@@ -398,10 +399,10 @@ function modifyMultisigAccount(coSign, removeCosign, numApproveTransaction, numD
     }
 
     const cosignatory = [];
-    coSign.forEach( async (cosignKey, index) => {
-      if(cosignKey.length == 64){
+    coSign.forEach(async (cosignKey, index) => {
+      if (cosignKey.length == 64) {
         cosignatory[index] = PublicAccount.createFromPublicKey(cosignKey, networkType);
-      }else if(cosignKey.length == 40 || cosignKey.length == 46){
+      } else if (cosignKey.length == 40 || cosignKey.length == 46) {
         // option to accept address
         let address = Address.createFromRawAddress(cosignKey);
 
@@ -420,7 +421,7 @@ function modifyMultisigAccount(coSign, removeCosign, numApproveTransaction, numD
       ));
     });
 
-    removeCosign.forEach( (element, index) => {
+    removeCosign.forEach((element, index) => {
       cosignatory[coSign.length + index] = PublicAccount.createFromPublicKey(element, networkType);
       multisigCosignatory.push(new MultisigCosignatoryModification(
         MultisigCosignatoryModificationType.Remove,
@@ -445,7 +446,7 @@ function modifyMultisigAccount(coSign, removeCosign, numApproveTransaction, numD
       networkType
     );
 
-    if(coSigner.length > 0){
+    if (coSigner.length > 0) {
       let transactions = [];
       coSigner.forEach((coSignerAccount) => {
         const signedAggregateBoundedTransaction = coSignerAccount.sign(aggregateTransaction, generationHash);
@@ -464,7 +465,7 @@ function modifyMultisigAccount(coSign, removeCosign, numApproveTransaction, numD
       });
 
       const transactionHttp = new TransactionHttp(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
-      (async ()=>{
+      (async () => {
         try {
           let lockFundListeners = [];
           let aggregateBoundedListeners = [];
@@ -476,11 +477,11 @@ function modifyMultisigAccount(coSign, removeCosign, numApproveTransaction, numD
             lockFundListeners[item] = siriusStore.chainWSListener;
             confirmedTx[item] = await modifyMultisigAnnounceLockfundAndWaitForConfirmation(lockFundListeners[item], transaction.coSignerAccount.address, transaction.lockFundsTransactionSigned, transaction.lockFundsTransactionSigned.hash, transactionHttp);
             aggregateBoundedListeners[item] = siriusStore.chainWSListener;
-            aggregateTx[item] = await modifyMultisigAnnounceAggregateBonded(aggregateBoundedListeners[item], transaction.coSignerAccount.address, transaction.signedAggregateBoundedTransaction, transaction.signedAggregateBoundedTransaction.hash, confirmedTx[item], transactionHttp );
+            aggregateTx[item] = await modifyMultisigAnnounceAggregateBonded(aggregateBoundedListeners[item], transaction.coSignerAccount.address, transaction.signedAggregateBoundedTransaction, transaction.signedAggregateBoundedTransaction.hash, confirmedTx[item], transactionHttp);
             ++item;
           }
         } catch (error) {
-            console.log(error);
+          console.log(error);
         }
       })();
     }
@@ -488,46 +489,31 @@ function modifyMultisigAccount(coSign, removeCosign, numApproveTransaction, numD
 }
 
 const fetchMultiSigCosigners = (multiSigAddress) => {
-  const account = appStore.getAccDetailsByAddress(multiSigAddress);
-  if(account.isMultisign.cosignatories){
-    let list = [];
-    let numCosigner = account.isMultisign.cosignatories.length;
-    if(numCosigner > 0){
-      if( numCosigner > 1 ){
-        account.isMultisign.cosignatories.forEach((element) => {
-          let cosignAccount = appStore.getAccDetailsByAddress(element.address.address);
-          if(cosignAccount != -1){
-            list.push({ address: element.address.address, name: cosignAccount.name });
-          }
-        });
-      }else{
-        // console.log(account.isMultisign.cosignatories.length)
-        let cosignAccount = appStore.getAccDetailsByAddress(account.isMultisign.cosignatories[0].address.address);
-        if(cosignAccount != -1){
-          list.push({ address: account.isMultisign.cosignatories[0].address.address, name: cosignAccount.name });
-        }
-      }
-    }else{
-      list = [];
+
+  const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === multiSigAddress); 
+  let list = [];
+  let numCosigner = account.getDirectParentMultisig().length;   //number of cosigners
+  if (numCosigner > 0) {
+    const multisigAccount = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress) //select multisig account with address
+    const cosignAccount = multisigAccount.multisigInfo.find((element)=>element.level === 0)     
+    for (var i = 0; i < numCosigner; i++) {                                                     
+      list.push({ address: cosignAccount.getCosignaturiesAddress[i], name: walletState.currentLoggedInWallet.convertAddressToName(cosignAccount.getCosignaturiesAddress[i]) });
     }
-    return { list: list, length: numCosigner };
-  }else{
-    return {
-      list: [],
-      length: 0
-    };
   }
+  return { list: list, length: numCosigner };
 }
 
-function fetchWalletCosigner(address){
+
+
+function fetchWalletCosigner(address) {
   let cosign = multiSign.fetchMultiSigCosigners(address);
   let list = [];
   cosign.list.forEach((element) => {
-    const account = appStore.getAccDetailsByAddress(element.address);
+    const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address); 
     list.push({ balance: account.balance, address: element.address, name: element.name });
   });
   list.sort((a, b) => (a.balance < b.balance) ? 1 : -1);
-  return { list:list, numCosigner: cosign.numCosigner };
+  return { list: list, numCosigner: cosign.length };
 }
 
 export const multiSign = readonly({

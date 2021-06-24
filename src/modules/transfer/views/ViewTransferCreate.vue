@@ -110,7 +110,7 @@ import { createTransaction, makeTransaction, getFakeEncryptedMessageSize, getPla
 import AddContactModal from '@/modules/transfer/components/AddContactModal.vue';
 import ConfirmSendModal from '@/modules/transfer/components/ConfirmSendModal.vue';
 
-import { multiSign } from '@/util/multiSignatory.js';
+import { multiSign } from '@/util/multiSignatory';
 import { walletState } from "@/state/walletState";
 import { networkState } from '@/state/networkState';
 import {accountUtils} from '@/util/accountUtils'
@@ -156,7 +156,7 @@ export default {
     const encryptedMsgDisable = ref(true);
     const toggleConfirm = ref(false);
     const forceSend = ref(false);
-    const effectiveFee = ref( '0.037750');
+    const effectiveFee = ref( 0.037750);
     const cosignAddress = ref('');
     const disableAllInput = ref(false);
     const disableRecipient = computed(() => disableAllInput.value);
@@ -243,7 +243,7 @@ export default {
 
     // enable and disable inputs based on cosign balance
     if(isMultiSigBool.value){
-      let cosign = multiSign.fetchWalletCosigner(selectedAccAdd.value);
+      let cosign = multiSign.fetchWalletCosigner(selectedAccAdd.value); 
       if(cosign.list.length > 0){
         if(cosign.list[0].balance < lockFundTotalFee.value){
           disableAllInput.value = true;
@@ -262,7 +262,7 @@ export default {
       showBalanceErr.value = true;
     }
 
-    const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
+    const accounts = computed( () => walletState.currentLoggedInWallet.accounts); 
    /*  appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts */
     const moreThanOneAccount = computed(()=> {
      /*  if(appStore.state.currentLoggedInWallet!=undefined){
@@ -283,7 +283,7 @@ export default {
       isMultiSigBool.value = isMultiSig(i.address);
       // set default of cosinger if multiple return
       if(isMultiSigBool.value){
-        let cosign = multiSign.fetchWalletCosigner(i.address);
+        let cosign = multiSign.fetchWalletCosigner(i.address); 
         if(cosign.list.length > 0){
           cosignAddress.value = cosign.list[0].address;
           // console.log('cosign.list[0].balance');
@@ -377,7 +377,7 @@ export default {
         let selectedCosign;
         if(isMultiSigBool.value){
           // if this is a multisig, get cosigner name along
-          let selectedCosignList = getWalletCosigner().list;
+          let selectedCosignList = getWalletCosigner().list; 
           if(selectedCosignList.length > 1){
             selectedCosign = cosignAddress.value;
           }else{
@@ -479,7 +479,7 @@ export default {
     }
 
 
-    watch(cosignAddress, (n, o) => {
+    watch(cosignAddress,( n, o) => {
       if(n != o){
         
         let cosign = multiSign.fetchMultiSigCosigners(selectedAccAdd.value);
