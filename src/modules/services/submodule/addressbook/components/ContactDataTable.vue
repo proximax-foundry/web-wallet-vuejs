@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import { inject, ref } from "vue";
+import { ref } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {FilterMatchMode} from 'primevue/api';
@@ -79,7 +79,7 @@ export default{
     const dt = ref();
 
     return {
-      dt,      
+      dt,
       borderColor,
       filters,
       clickInputText,
