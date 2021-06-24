@@ -45,7 +45,7 @@ export default defineComponent({
   },
   setup() {
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
+    const emitter = internalInstance!.appContext.config.globalProperties.emitter;
 
     // chainNetwork.updateAvailableNetworks();
 

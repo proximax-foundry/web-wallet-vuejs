@@ -28,7 +28,7 @@ import { useToast } from "primevue/usetoast";
 import { ChainUtils } from '@/util/chainUtils';
 import { networkState } from "@/state/networkState";
 import { WalletUtils } from '@/util/walletUtils';
-import { WalletStateUtils } from '@/state/utils/walletStateUtils';
+import { walletState } from '@/state/walletState';
 
 export default defineComponent({
   name: 'ViewWalletCreateSelection',
@@ -73,33 +73,44 @@ export default defineComponent({
     };
 
     const importBackup = (dataDecryp) =>{
-      const returnMsg = WalletUtils.importWalletNewFormat(dataDecryp, selectedNetworkName.value, selectedNetworkType.value);
+
       let status = "success";
-      switch (returnMsg){
-        case 'wallet_added':
-          msg.value = 'Wallet is added successfully.';
-          WalletStateUtils.refreshWallets();
-          break;
-        case 'invalid_network':
-          msg.value = 'Network is invalid';
-          status = "error";
-          break;
-        case 'existed_wallet':
-          msg.value = 'Wallet already exist';
-          status = "warn";
-          break;
-        case 'invalid_wallet':
-          msg.value = 'Wallet is invalid';
-          status = "error";
-          break;
-        default:
-          msg.value = 'Unable to add wallet';
-          status = "error";
+
+      if(WalletUtils.checkIsNewFormat(dataDecryp)){
+          try {
+            WalletUtils.importWalletNewFormat(walletState.wallets, dataDecryp, selectedNetworkName.value, selectedNetworkType.value);
+
+          } catch (error) {
+            status = "error";
+
+            if(error.name === "SAME_NAME"){
+              msg.value = error.message;
+            }
+            else{
+              msg.value = "Unable to import wallet";
+            }
+          }
       }
+      else{
+        try {
+          WalletUtils.importWltOldFormat(walletState.wallets, dataDecryp, selectedNetworkName.value, selectedNetworkType.value);
+        } catch (error) {
+          status = "error";
+
+          if(error.name === "SAME_NAME"){
+            msg.value = error.message;
+          }
+          else{
+            msg.value = "Unable to import wallet";
+          }
+        }
+      }
+
       return {
         msg: msg.value,
         status: status
       };
+      
     };
 
     return {

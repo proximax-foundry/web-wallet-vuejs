@@ -23,11 +23,11 @@ export class NamespaceAPI {
         return this.namespaceHttp.getNamespace(namespaceId).toPromise();
     }
 
-    getNamespacesFromAccount(address: Address, queryParams: QueryParams): Promise<NamespaceInfo[]>{
+    getNamespacesFromAccount(address: Address, queryParams?: QueryParams): Promise<NamespaceInfo[]>{
         return this.namespaceHttp.getNamespacesFromAccount(address, queryParams).toPromise();
     }
 
-    getNamespacesFromAccounts(addresses: Address[], queryParams: QueryParams): Promise<NamespaceInfo[]>{
+    getNamespacesFromAccounts(addresses: Address[], queryParams?: QueryParams): Promise<NamespaceInfo[]>{
         return this.namespaceHttp.getNamespacesFromAccounts(addresses, queryParams).toPromise();
     }
 
