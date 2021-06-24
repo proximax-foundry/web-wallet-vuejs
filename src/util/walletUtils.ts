@@ -24,7 +24,7 @@ import { Namespace } from "@/models/namespace";
 
 const config = require("@/../config/config.json");
 
-const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
+const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile!.network.type));
 
 export class WalletUtils {
 
@@ -563,9 +563,16 @@ export class WalletUtils {
         //WalletUtils.updateMultisigsDetails(wallet.accounts);
 
         for(let i = 0; i < wallet.accounts.length; ++i ){
-            let multisigInfo: MultisigInfo[] = await WalletUtils.getMultisigDetails(wallet.accounts[i].address);
 
-            wallet.accounts[i].multisigInfo = multisigInfo;
+            try {
+                let multisigInfo: MultisigInfo[] = await WalletUtils.getMultisigDetails(wallet.accounts[i].address);
+
+                wallet.accounts[i].multisigInfo = multisigInfo;
+            } catch (error) {
+                let multisigInfo: MultisigInfo[] = [];
+                multisigInfo.push(new MultisigInfo(wallet.accounts[i].publicKey, 0, [], [], 0, 0));
+                wallet.accounts[i].multisigInfo = multisigInfo;
+            }
         }
     }
 
@@ -581,9 +588,16 @@ export class WalletUtils {
         //WalletUtils.updateOtherAccountMultisigsDetails(wallet.others);
 
         for(let i = 0; i < wallet.others.length; ++i ){
-            let multisigInfo: MultisigInfo[] = await WalletUtils.getMultisigDetails(wallet.others[i].address);
 
-            wallet.others[i].multisigInfo = multisigInfo;
+            try {
+                let multisigInfo: MultisigInfo[] = await WalletUtils.getMultisigDetails(wallet.others[i].address);
+
+                wallet.others[i].multisigInfo = multisigInfo;
+            } catch (error) {
+                let multisigInfo: MultisigInfo[] = [];
+                multisigInfo.push(new MultisigInfo(wallet.others[i].publicKey, 0, [], [], 0, 0));
+                wallet.others[i].multisigInfo = multisigInfo;
+            }
         }
     }
 
@@ -671,12 +685,15 @@ export class WalletUtils {
                 if(wallet.others.find((other)=> other.publicKey === publicKeys[i])){
                     continue;
                 }
+                else if(wallet.accounts.find((account)=> account.publicKey === publicKeys[i])){
+                    continue;
+                }
 
                 let publicAccount = Helper.createPublicAccount(publicKeys[i], localNetworkType.value) 
 
                 let address = publicAccount.address.plain();
 
-                let stripedAddress = address.substr(0, -4);
+                let stripedAddress = address.substr(-4);
 
                 let newOtherAccount = new OtherAccount("MULTISIG-" + stripedAddress, publicKeys[i], address, Helper.getOtherWalletAccountType().MULTISIG_CHILD);
             
@@ -913,7 +930,7 @@ export class WalletUtils {
             console.log(error);   
         }
 
-        walletState.wallets.savetoLocalStorage();
+        walletState.wallets.saveMyWalletOnlytoLocalStorage(wallet);
     }
 
     static updateAllAccountBalance(wallet: Wallet, assetId: string): void{
