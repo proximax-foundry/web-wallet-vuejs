@@ -12,7 +12,7 @@
           <div class="mb-5">
             <div v-if="showNoBalance" class="border-2 rounded-3xl border-red-700 w-full h-24 text-center p-4">
               <div class="h-5 text-center">
-                <div class="rounded-full w-8 h-8 border border-gray-500 inline-block relative"><font-awesome-icon icon="times" class="text-gray-500 h-5 w-5 absolute" style="top: 5px; left:4px"></font-awesome-icon></div><br>
+                <div class="rounded-full w-8 h-8 border border-gray-500 inline-block relative"><font-awesome-icon icon="times" class="text-gray-500 h-5 w-5 absolute" style="top: 5px; left:8px"></font-awesome-icon></div><br>
                 <div class="inline-block text-tsm">Insufficient Balance</div>
               </div>
             </div>
@@ -34,18 +34,18 @@
           </div>
           <div class="text-left p-3 pb-0 border-l-8 border-gray-100 mb-5">
             <div class="bg-gray-100 rounded-2xl p-3">
-              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ appStore.getBalanceByAddress(selectedAccAdd) }} XPX</span></div>
+              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} XPX</span></div>
             </div>
           </div>
           <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" v-model="selectNamespace" :options="namespaceOption()"  />
-          <DurationInput :disabled="disabledDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired=true icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
+          <DurationInput :disabled="disabledDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: 0.<span class="text-txs">062750</span> XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFeeCurrency }} {{currencyName}}</div>
+            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFee }} {{currencyName}}</div>
           </div>
-          <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800" v-if="isMultiSig(selectedAccAdd)">
+          <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800 mb-5" v-if="isMultiSig(selectedAccAdd)">
             <div class="text-center">
               <div class="inline-block">
                 <div class="flex">
@@ -85,11 +85,19 @@
   </div>
 </template>
 <script>
-import { computed, ref, inject, getCurrentInstance, watch } from 'vue';
+import { computed, ref, getCurrentInstance, watch } from 'vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import DurationInput from '@/modules/services/submodule/namespaces/components/DurationInput.vue';
-import { convertToCurrency, convertToExact } from '@/util/transfer.js';
+import { TransactionUtils } from '@/util/transactionUtils';
+import { ChainProfileConfig } from "@/models/stores/";
+import { Wallet } from "@/models/wallet";
+import { walletState } from "@/state/walletState";
+import { networkState } from "@/state/networkState";
+import { Currency } from "@/models/currency";
+import { Helper } from '@/util/typeHelper';
+import { ChainUtils } from '@/util/chainUtils';
+import { NamespacesUtils } from '@/util/namespacesUtils';
 
 export default {
   name: 'ViewServicesNamespaceCreate',
@@ -99,13 +107,10 @@ export default {
     SelectInputPlugin,
   },
   setup(){
-    const appStore = inject("appStore");
-    const chainNetwork = inject("chainNetwork");
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showDurationErr = ref(false);
     const duration = ref("0");
-    const messageText = ref('');
     const walletPassword = ref('');
     const err = ref('');
     const showMenu = ref(false);
@@ -115,52 +120,51 @@ export default {
     const disabledClear = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
-    
     const selectNamespace = ref('');
 
     const namespaceOption = () => {
       let namespace = [];
+      // namespace.push({
+      //   value: '1',
+      //   label: 'New Root Namespace',
+      // })//disabled: true
       return namespace;
     };
 
-    const currencyName = computed(() => chainNetwork.getCurrencyName());
-    const rentalFee = computed(()=> convertToExact(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
-    const rentalFeeCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().mosaicRentalFee, chainNetwork.getCurrencyDivisibility()));
+    const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
+    const rentalFee = computed(()=> {
+      if(duration.value > 0){
+        return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock * NamespacesUtils.calculateDuration(duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      }else{
+        return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock, networkState.currentNetworkProfile.network.currency.divisibility);
+      }
+    });
 
-    const lockFund = computed(()=> convertToExact(chainNetwork.getProfileConfig().lockedFundsPerAggregate, chainNetwork.getCurrencyDivisibility()))
-    const lockFundCurrency = computed(()=> convertToCurrency(chainNetwork.getProfileConfig().lockedFundsPerAggregate, chainNetwork.getCurrencyDivisibility()))
+    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
+    const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
 
     const lockFundTxFee = ref(0.0445);
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
-
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && (supply.value > 0) && (!showDurationErr.value)
+      walletPassword.value.match(passwdPattern) && (!showDurationErr.value)
     ));
 
     const isMultiSig = (address) => {
-      const account = appStore.getAccDetailsByAddress(address);
+      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
       let isMulti = false;
-      if(account.isMultisign != undefined){
-        if(account.isMultisign != '' || account.isMultisign != null){
-          if(account.isMultisign.cosignatories != undefined){
-            if(account.isMultisign.cosignatories.length > 0){
-              isMulti = true;
-            }
-          }
+      if(account.multisigInfo != undefined){
+        if(account.multisigInfo[0].cosignaturies.length > 0){
+          isMulti = true;
         }
       }
       return isMulti;
     };
 
-    const selectedAccName = ref(appStore.getFirstAccName());
-    const selectedAccAdd = ref(appStore.getFirstAccAdd());
-    const balance = computed( () => {
-      return appStore.getBalanceByAddress(selectedAccAdd.value)
-    });
-
-    const isMultiSigBool = ref(isMultiSig(appStore.getFirstAccAdd()));
-    // balance.value = appStore.getFirstAccBalance();
+    const selectedAccName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
+    const selectedAccAdd = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
+    const balance = ref(Helper.toCurrencyFormat(walletState.currentLoggedInWallet.selectDefaultAccount().balance, networkState.currentNetworkProfile.network.currency.divisibility));
+    const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
 
     const showNoBalance = ref(false);
     if(balance.value < rentalFee.value){
@@ -174,16 +178,15 @@ export default {
       disabledDuration.value = false;
     }
 
-    const supply = ref(0);
-    const accounts = computed( () => appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts);
-    const sendXPX = ref(0);
-    const moreThanOneAccount = computed(()=> (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false);
+    const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
+    const moreThanOneAccount = computed(()=> (walletState.currentLoggedInWallet.accounts.length > 1)?true:false);
+    const transactionFee = ref('0.000000');
 
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
       isMultiSigBool.value = isMultiSig(i.address);
-      // balance.value = i.balance;
+      balance.value = i.balance;
       (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
@@ -208,8 +211,20 @@ export default {
       }
     });
 
+    watch(duration, (n) => {
+      if(n > 365){
+        duration.value = '365';
+      }
+      if(balance.value < rentalFee.value){
+        showNoBalance.value = true;
+        disabledPassword.value = true;
+      }else{
+        showNoBalance.value =false;
+        disabledPassword.value = false;
+      }
+    })
+
     return {
-      appStore,
       accounts,
       moreThanOneAccount,
       showMenu,
@@ -219,8 +234,6 @@ export default {
       balance,
       showNoBalance,
       err,
-      sendXPX,
-      messageText,
       walletPassword,
       disableCreate,
       clearInput,
@@ -233,7 +246,7 @@ export default {
       showDurationErr,
       isMultiSig,
       isMultiSigBool,
-      rentalFeeCurrency,
+      rentalFee,
       lockFundCurrency,
       currencyName,
       lockFundTxFee,

@@ -44,7 +44,7 @@
             </div>
           </div>
           <div class="mt-5">
-            <TextInput placeholder="Enter Name" errorMessage="Required field, minlength 2, max length 16. Alphanumeric characters" :showError="showNamespaceNameError" v-model="namespaceName" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :disabled="disableNamespaceName" />
+            <TextInput placeholder="Enter Name" :disabled="disableNamespaceName" :showError="showNamespaceNameError" v-model="namespaceName" :imgRequired="true" errorMessage="Required field, minlength 2, max length 16. Alphanumeric characters" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" />
           </div>
           <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" v-model="selectNamespace" :options="namespaceOption()" selectDefault="1" />
           <DurationInput :disabled="disabledDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
@@ -54,7 +54,7 @@
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFee }} {{currencyName}}</div>
           </div>
-          <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800" v-if="false">
+          <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800 mb-5" v-if="isMultiSig(selectedAccAdd)">
             <div class="text-center">
               <div class="inline-block">
                 <div class="flex">
@@ -122,7 +122,6 @@ export default {
     const namespaceName = ref('');
     const showDurationErr = ref(false);
     const duration = ref("0");
-    const messageText = ref('');
     const walletPassword = ref('');
     const err = ref('');
     const showMenu = ref(false);
@@ -146,8 +145,14 @@ export default {
       return namespace;
     };
 
-    const currencyName = computed(() => Currency.name);
-    const rentalFee = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock, networkState.currentNetworkProfile.network.currency.divisibility));
+    const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
+    const rentalFee = computed(()=> {
+      if(duration.value > 0){
+        return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock * NamespacesUtils.calculateDuration(duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      }else{
+        return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock, networkState.currentNetworkProfile.network.currency.divisibility);
+      }
+    });
 
     const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
     const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
@@ -155,9 +160,8 @@ export default {
     const lockFundTxFee = ref(0.0445);
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
-
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && (supply.value > 0) && (!showDurationErr.value)
+      walletPassword.value.match(passwdPattern) && namespaceName.value.match(namespacePattern) && (!showDurationErr.value)
     ));
 
     const isMultiSig = (address) => {
@@ -190,11 +194,8 @@ export default {
       disableNamespaceName.value = false;
     }
 
-    const supply = ref(0);
     const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
-    const sendXPX = ref(0);
     const moreThanOneAccount = computed(()=> (walletState.currentLoggedInWallet.accounts.length > 1)?true:false);
-
     const transactionFee = ref('0.000000');
 
     const changeSelection = (i) => {
@@ -237,21 +238,41 @@ export default {
       if(n > 365){
         duration.value = '365';
       }
-    })
+      if(balance.value < rentalFee.value){
+        showNoBalance.value = true;
+        disableNamespaceName.value = true;
+        disabledPassword.value = true;
+      }else{
+        showNoBalance.value =false;
+        disabledPassword.value = false;
+        disableNamespaceName.value = false;
+      }
+    });
 
     watch(namespaceName, (n) => {
       if(namespaceName.value.length > 0){
         if(namespaceName.value.match(namespacePattern)){
           transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
         }else{
-          transactionFee.value = '0.000000';  
+          transactionFee.value = '0.000000';
         }
       }else{
         transactionFee.value = '0.000000';
       }
+
+      if(balance.value < transactionFee.value){
+        showNoBalance.value = true;
+        disabledDuration.value = true;
+        disabledPassword.value = true;
+      }else{
+        showNoBalance.value =false;
+        disabledDuration.value = false;
+        disabledPassword.value = false;
+      }
     });
 
     return {
+      Helper,
       accounts,
       moreThanOneAccount,
       showMenu,
@@ -261,8 +282,6 @@ export default {
       balance,
       showNoBalance,
       err,
-      sendXPX,
-      messageText,
       showNamespaceNameError,
       namespaceName,
       disableNamespaceName,
