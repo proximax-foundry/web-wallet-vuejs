@@ -494,10 +494,14 @@ const fetchMultiSigCosigners = (multiSigAddress) => {
   let list = [];
   let numCosigner = account.getDirectParentMultisig().length;   //number of cosigners
   if (numCosigner > 0) {
-    const multisigAccount = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress) //select multisig account with address
-    const cosignAccount = multisigAccount.multisigInfo.find((element)=>element.level === 0)     
+    const cosignWalletAccount = account.multisigInfo.find((element)=>element.level === 0) 
     for (var i = 0; i < numCosigner; i++) {                                                     
-      list.push({ address: cosignAccount.getCosignaturiesAddress[i], name: walletState.currentLoggedInWallet.convertAddressToName(cosignAccount.getCosignaturiesAddress[i]) });
+      list.push({ address: cosignWalletAccount.getCosignaturiesAddress[i], name: walletState.currentLoggedInWallet.convertAddressToName(cosignWalletAccount.getCosignaturiesAddress[i]) });
+    }
+    const multisigAccount = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress) //others
+    const cosignOtherAccount = multisigAccount.multisigInfo.find((element)=>element.level === 0)     
+    for (var i = 0; i < numCosigner; i++) {                                                     
+      list.push({ address: cosignOtherAccount.getCosignaturiesAddress[i], name: walletState.currentLoggedInWallet.convertAddressToName(cosignOtherAccount.getCosignaturiesAddress[i]) });
     }
   }
   return { list: list, length: numCosigner };

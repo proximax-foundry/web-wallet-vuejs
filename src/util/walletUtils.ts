@@ -14,12 +14,11 @@ import {
     SimpleWallet, Password, RawAddress, Convert, Crypto,
     WalletAlgorithm, PublicAccount, Account, NetworkType, 
     AggregateTransaction, CosignatureTransaction, MosaicNonce,
-    NamespaceId, Address, AccountInfo, MosaicId, AliasType
+    NamespaceId, Address, AccountInfo, MosaicId, AliasType,
 } from "tsjs-xpx-chain-sdk"
 import { computed } from "vue";
 import { Helper, LooseObject } from "./typeHelper";
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
-import { AccountAPI } from "@/models/REST/account";
 import { OtherAccount } from "@/models/otherAccount";
 import { Namespace } from "@/models/namespace";
 
@@ -192,10 +191,24 @@ export class WalletUtils {
         });
     }
 
-    static getAccountHttp(){
-        
-       const accountAPI = new AccountAPI(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort))
-       return accountAPI.accountHttp
+    static  getAccountPublicKey(address ) {
+        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+
+        return new Promise((resolve, reject) => {
+            try {
+             chainAPICall.accountAPI.getAccountInfo(address).then(accountInfo => {
+                    resolve(accountInfo.publicKey);
+                }).catch((error) => {
+                    console.warn(error);
+                    reject(false);
+                });
+            } catch (err) {
+                console.warn(err);
+                reject(false);
+            }
+        });
+      /*  const accountAPI = new AccountAPI(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort))
+       return accountAPI */
     }
   
     /**

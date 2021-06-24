@@ -298,6 +298,7 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
       fee = '0.000000';
     else{
       fee = TransferTransaction.calculateSize(message, mosaicsToSend.length) * getFeeStrategy() / 1000000;
+      fee = fee.toString()
       //fee = '0.037250';
     }
   } else {
