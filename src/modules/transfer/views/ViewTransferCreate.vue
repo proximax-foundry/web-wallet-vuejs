@@ -350,7 +350,7 @@
     <ConfirmSendModal :toggleModal="toggleConfirm" />
   </div>
 </template>
-<script lang = 'ts'>
+<script >
 import { computed, ref, inject, getCurrentInstance, watch } from "vue";
 import TextInput from "@/components/TextInput.vue";
 import PasswordInput from "@/components/PasswordInput.vue";
@@ -484,13 +484,12 @@ export default {
       );
     });
 
-    const isMultiSig = (address: String): Boolean => {
-      const account = walletState.currentLoggedInWallet.accounts.find(
-        (account) => account.address === address
-      );
+    const isMultiSig = (address) => {
+      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address);
+      let isMulti = false;
       /*   appStore.getAccDetailsByAddress(address); */
       /*  let isMulti = false; */
-      let isMulti = account.getDirectParentMultisig().length ? true : false;
+       isMulti = account.getDirectParentMultisig() ? true : false;
       /* if(account.isMultisign != undefined){
         if(account.isMultisign != '' || account.isMultisign != null){
           if(account.isMultisign.cosignatories != undefined){
@@ -506,24 +505,24 @@ export default {
 
     // get balance
     const selectedAccName = ref(
-      walletState.currentLoggedInWallet.selectDefaultAccount().name
+      walletState.currentLoggedInWallet.selectDefaultAccount.name
     );
     /* appStore.getFirstAccName() */
     const selectedAccAdd = ref(
-      walletState.currentLoggedInWallet.selectDefaultAccount().address
+      walletState.currentLoggedInWallet.selectDefaultAccount.address
     );
     /* appStore.getFirstAccAdd() */
-    const balance = computed((): Number | null => {
+    const balance = computed(() => {
       if (walletState.currentLoggedInWallet) {
-        return walletState.currentLoggedInWallet.selectDefaultAccount().balance;
+        return walletState.currentLoggedInWallet.selectDefaultAccount.balance;
         /* appStore.getBalanceByAddress(selectedAccAdd.value); */
       } else {
-        return;
+        return 0;
       }
     });
     const isMultiSigBool = ref(
       isMultiSig(
-        walletState.currentLoggedInWallet.selectDefaultAccount().address
+        walletState.currentLoggedInWallet.selectDefaultAccount.address
       )
     );
     /*  appStore.getFirstAccAdd() */
@@ -551,7 +550,7 @@ export default {
 
     const accounts = computed(() => walletState.currentLoggedInWallet.accounts);
     /*  appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts */
-    const moreThanOneAccount = computed((): Boolean => {
+    const moreThanOneAccount = computed(() => {
       /*  if(appStore.state.currentLoggedInWallet!=undefined){
         return (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false;
       }else{
@@ -711,7 +710,7 @@ export default {
       }
     };
 
-    const getSelectedMosaicBalance = (index): Number => {
+    const getSelectedMosaicBalance = (index)=> {
       const account = walletState.currentLoggedInWallet.accounts.find(
         (account) => account.address === selectedAccAdd.value
       );
@@ -728,7 +727,7 @@ export default {
 
     // get mosaics of current selected account
     // getMosaicsAllAccounts(appStore, siriusStore);
-    const addMosaicsButton = computed((): Boolean => {
+    const addMosaicsButton = computed(() => {
       if (!disableSupply.value) {
         const mosaic = walletState.currentLoggedInWallet.accounts.find(
           (element) => element.name == selectedAccName.value
@@ -826,7 +825,7 @@ export default {
           recipient.value.match(addressPatternShort))
       ) {
         const verifyRecipientAddress = accountUtils.verifyAddress(
-          walletState.currentLoggedInWallet.selectDefaultAccount().address,
+          walletState.currentLoggedInWallet.selectDefaultAccount.address,
           recipient.value
         );
         /* appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name) */

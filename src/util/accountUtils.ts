@@ -7,7 +7,7 @@ import {WalletUtils} from '@/util/walletUtils'
 
 
 
-const verifyPublicKey = (add: String): boolean => {
+const verifyPublicKey = (add: string): boolean => {
   const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
   let address;
   address = Address.createFromRawAddress(add.toLocaleUpperCase());
