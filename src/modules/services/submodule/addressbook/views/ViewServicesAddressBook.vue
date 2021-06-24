@@ -15,7 +15,8 @@
 <script>
 import ContactDataTable from '@/modules/services/submodule/addressbook/components/ContactDataTable.vue'
 import DisplayImportContactModal from '@/modules/services/submodule/addressbook/components/DisplayImportContactModal.vue'
-import { inject, getCurrentInstance, ref } from "vue";
+import { getCurrentInstance, ref } from "vue";
+import { walletState } from '@/state/walletState';
 
 export default {
   name: 'ViewServicesAddressBook',
@@ -28,15 +29,13 @@ export default {
   setup() {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const appStore = inject("appStore");
-    const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
     const list = ref([]);
 
     const refreshList = () => {
       list.value = [];
-      if(wallet.contacts != undefined){
-        if(wallet.contacts.length > 0){
-          wallet.contacts.forEach((contact) => {
+      if(walletState.currentLoggedInWallet.contacts != undefined){
+        if(walletState.currentLoggedInWallet.contacts.length > 0){
+          walletState.currentLoggedInWallet.contacts.forEach((contact) => {
             list.value.push(contact);
           });
           list.value.sort((a, b) => {
@@ -58,9 +57,7 @@ export default {
       }
     })
 
-    return {
-      appStore,
-      wallet,
+    return {      
       list,
     };
   },

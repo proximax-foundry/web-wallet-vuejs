@@ -33,11 +33,16 @@
   </div>
 </template>
 
-<script>
-import { computed, getCurrentInstance, inject, ref, watch } from 'vue';
+<script lang="ts">
+import { computed, getCurrentInstance, ref, watch } from 'vue';
 import TextInput from '@/components/TextInput.vue';
-import { verifyAddress } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import { Helper } from "@/util/typeHelper";
+import { AddressBookUtils } from '@/util/addressBookUtils';
+import { Wallet } from "@/models/wallet";
+import { walletState } from '@/state/walletState';
+import { WalletStateUtils } from '@/state/utils/walletStateUtils';
+
 export default{
   name: 'EditContactModal',
   props:['data'],
@@ -46,14 +51,12 @@ export default{
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const appStore = inject("appStore");
     const contactName = ref(p.data.name);
-    const address = ref(appStore.pretty(p.data.address));
+    const address = ref(p.data.address);
     const err = ref('');
     const addMsg = ref('');
     const toggleModal = ref(false);
     const verifyAdd = ref(true);
-
     const disableSave = computed(
       () => !(
         verifyAdd.value && contactName.value != ''
@@ -76,28 +79,27 @@ export default{
     );
 
     watch(address, ()=>{
-      const verifyContactAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), address.value);
-      verifyAdd.value = verifyContactAddress.isPassed.value;
-      addMsg.value = verifyContactAddress.errMessage.value;
+      const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
+      const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address.value);
+      verifyAdd.value = verifyContactAddress.isPassed;
+      addMsg.value = verifyContactAddress.errMessage;
     });
 
     const openModal = () => {
       contactName.value = p.data.name;
-      address.value = appStore.pretty(p.data.address);
+      address.value = Helper.createAddress(p.data.address).pretty();
       toggleModal.value = !toggleModal.value;
     }
 
     const EditContact = () => {
-      let status = appStore.editContact(p.data, contactName.value, address.value);
-      if(status===true){
-        toggleModal.value = !toggleModal.value;
-        emitter.emit('REFRESH_CONTACT_LIST', true);
-        toast.add({severity:'info', summary: 'Address Book', detail: 'Contact info updated in Address Book', group: 'br', life: 5000});
-      }else if(status === -1){
-        err.value = 'Edit operation failed';
-      }else{
-        err.value = status;
-      }
+      // @param index, AddressBook
+      const contactIndex = walletState.currentLoggedInWallet.contacts.findIndex((contact) => contact.address == p.data.address);
+      // const walletInstance = new Wallet();
+      walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value, address: address.value });
+      walletState.wallets.savetoLocalStorage();
+      toggleModal.value = !toggleModal.value;
+      emitter.emit('REFRESH_CONTACT_LIST', true);
+      toast.add({severity:'info', summary: 'Address Book', detail: 'Contact info updated in Address Book', group: 'br', life: 5000});
     }
 
     return{
