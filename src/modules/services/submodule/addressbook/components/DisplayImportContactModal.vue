@@ -1,6 +1,9 @@
 <template>
   <div>
-    <a @click="toggleModal = !toggleModal" class="font-bold" active-class="accounts">Import Contact</a>
+    <a @click="toggleModal = !toggleModal" class="import-icon border-gray-300 border rounded-lg bg-gray-100 w-18 h-9 relative inline-block">
+      <div class="absolute inline-block text-tsm text-gray-500" style="right: 10px; top: 6px;">Import</div>
+      <font-awesome-icon icon="file-import" class="w-5 h-5 text-gray-400 cursor-pointer inline-block absolute" style="top: 5px; left: 8px;" title="Download CSV file"></font-awesome-icon>
+    </a>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -168,3 +171,14 @@ export default{
   },
 }
 </script>
+<style lang="scss" scoped>
+.import-icon:hover {
+  @apply border-blue-primary bg-blue-primary;
+  >div{
+    @apply text-white;
+  }
+  svg{
+    @apply text-white
+  }
+}
+</style>

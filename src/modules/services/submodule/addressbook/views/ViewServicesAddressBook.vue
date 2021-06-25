@@ -3,7 +3,6 @@
     <div><span class="text-gray-400">Address Book ></span> <span class="text-blue-primary font-bold">List</span></div>
     <div>
       <router-link :to="{name: 'ViewServicesAddressBookAddContacts'}" class="font-bold" active-class="accounts">Add New Contact</router-link> |
-      <DisplayImportContactModal class="inline-block" /> |
       <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">All Services</router-link>
     </div>
   </div>
@@ -14,7 +13,7 @@
 </template>
 <script>
 import ContactDataTable from '@/modules/services/submodule/addressbook/components/ContactDataTable.vue'
-import DisplayImportContactModal from '@/modules/services/submodule/addressbook/components/DisplayImportContactModal.vue'
+
 import { getCurrentInstance, ref } from "vue";
 import { walletState } from '@/state/walletState';
 
@@ -23,7 +22,6 @@ export default {
 
   components: {
     ContactDataTable,
-    DisplayImportContactModal,
   },
 
   setup() {

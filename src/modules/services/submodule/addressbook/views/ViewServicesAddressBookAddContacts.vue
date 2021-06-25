@@ -7,7 +7,7 @@
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>
-    <form @submit.prevent="create" class="mt-10">
+    <form @submit.prevent="SaveContact" class="mt-10">
       <fieldset class="w-full">
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <TextInput placeholder="Name" errorMessage="Name required" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
