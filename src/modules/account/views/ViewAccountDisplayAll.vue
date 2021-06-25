@@ -12,10 +12,11 @@
   </div>
 </template>
 <script>
-import { computed, inject, getCurrentInstance, ref } from "vue";
+import { computed, getCurrentInstance, ref } from "vue";
 import AccountTile from '@/modules/account/components/AccountTile.vue';
-import { multiSign } from '@/util/multiSignatory.js';
 import { useToast } from "primevue/usetoast";
+import { walletState } from '@/state/walletState';
+
 
 export default {
   name: 'ViewAccountDisplayAll',
@@ -30,25 +31,23 @@ export default {
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const appStore = inject("appStore");
     const currentMenu = ref('');
     const showMenu = ref([]);
 
-    (async()=> {
-      await multiSign.checkToCreateMultiSigAccount(appStore.state.currentLoggedInWallet.name);
-      // await multiSign.updateAccountsMultiSign(appStore.state.currentLoggedInWallet.name);
-      // clean wallet from removed multisig account of cosigners
-      await multiSign.removeUnrelatedMultiSig(appStore.state.currentLoggedInWallet.name);
-    })();
-
     // get num of accounts
-    var num_acc = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length;
+    var num_other_acc = walletState.currentLoggedInWallet.others.length;
+    var num_acc = walletState.currentLoggedInWallet.accounts.length;
     var i = 0;
     while(i < num_acc){
       showMenu.value[i] = false;
       i++;
     }
-
+    //console.log(walletState.currentLoggedInWallet.accounts);
+    while(i < num_other_acc){
+    showMenu.value[i] = false;
+     i++;
+    } 
+    
     emitter.on("SHOW_MENU_TRIGGER", payload => {
       showMenu.value[payload] = true;
       currentMenu.value = payload;
@@ -72,9 +71,7 @@ export default {
 
     const accounts = computed(
       () => {
-        // return appStore.state.currentLoggedInWallet.accounts;
-        // console.log(appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts)
-        return appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts;
+        return walletState.currentLoggedInWallet.accounts;
       }
     );
 
@@ -98,7 +95,7 @@ export default {
     });
 
     return {
-      appStore,
+     walletState,
       accounts,
       showMenu,
     };
