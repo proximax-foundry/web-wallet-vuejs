@@ -13,7 +13,7 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
           </div>
           <div class="w-104">
-            <form @submit.prevent="create" class="mt-10 text-gray-800">
+            <form @submit.prevent="EditContact" class="mt-10 text-gray-800">
               <fieldset class="w-full">
                 <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
                 <div class="mb-5 text-center"><span class="text-lg text-gray-700">Edit this contact</span></div>
@@ -33,15 +33,13 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { computed, getCurrentInstance, ref, watch } from 'vue';
 import TextInput from '@/components/TextInput.vue';
 import { useToast } from "primevue/usetoast";
 import { Helper } from "@/util/typeHelper";
 import { AddressBookUtils } from '@/util/addressBookUtils';
-import { Wallet } from "@/models/wallet";
 import { walletState } from '@/state/walletState';
-import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 
 export default{
   name: 'EditContactModal',
@@ -94,7 +92,6 @@ export default{
     const EditContact = () => {
       // @param index, AddressBook
       const contactIndex = walletState.currentLoggedInWallet.contacts.findIndex((contact) => contact.address == p.data.address);
-      // const walletInstance = new Wallet();
       walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value, address: address.value });
       walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
       toggleModal.value = !toggleModal.value;
