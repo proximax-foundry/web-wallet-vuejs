@@ -96,6 +96,7 @@ export default{
     
     const setAsDefaultAccount = (add) => {
         walletState.currentLoggedInWallet.setDefaultAccountByAddress(add);
+        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         emitter.emit("CLOSE_MENU_TRIGGER", p.i);
     };
 
