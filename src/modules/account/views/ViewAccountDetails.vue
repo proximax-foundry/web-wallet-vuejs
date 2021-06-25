@@ -29,12 +29,7 @@
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
           <div class="text-xs font-bold mb-1">Address:</div>
-          <input
-            id="address"
-            class="text-sm w-full outline-none bg-gray-100 z-10"
-            type="text"
-            :value="acc.pretty"
-          />
+          <div id="address" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="pettyaddress" copySubject="Address">{{pettyaddress}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
       </div>
@@ -42,12 +37,7 @@
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
           <div class="text-xs font-bold mb-1">Public Key:</div>
-          <input
-            id="public"
-            class="text-sm w-full outline-none bg-gray-100 z-10"
-            type="text"
-            :value="acc.publicAccount.publicKey"
-          />
+          <div id="public" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
       </div>
@@ -65,13 +55,7 @@
           <div class="text-left w-full relative">
             <div class="text-xs font-bold mr-2"><div class="mb-2 inline-block">Private Key:</div><div v-if="!showPwPK && !showPK">**************</div><PasswordInput v-if="showPwPK && !showPK" placeholder="Insert wallet password" errorMessage="Wallet password required." :showError="showPasswdError" icon="lock" v-model="walletPasswd" /></div>
             <div class="absolute z-20 w-full h-full" v-if="showPK"></div>
-            <input
-              id="private"
-              class="text-sm w-full outline-none bg-gray-100 z-10"
-              type="text"
-              :value="privateKey"
-              v-if="showPK"
-            />
+            <div id="private" class="text-sm w-full outline-none bg-gray-100 z-10" type="text" :copyValue="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
           </div>
           <font-awesome-icon icon="copy" @click="copy('private')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mr-2" v-if="showPK"></font-awesome-icon>
           <button class="default-btn w-36" @click="showPwPK = !showPwPK" v-if="!showPwPK && !showPK">Show</button>
@@ -96,70 +80,79 @@
     </div>
   </div>
 </div>
-
 </template>
 
 <script>
-import { ref, inject } from 'vue';
-import { useRouter } from "vue-router";
-import TextInput from '@/components/TextInput.vue';
-import PasswordInput from '@/components/PasswordInput.vue';
-import { copyKeyFunc } from '@/util/functions';
-import { useToast } from "primevue/usetoast";
+import {ref, computed} from "vue";
+import {useRouter} from "vue-router";
+import TextInput from "@/components/TextInput.vue";
+import PasswordInput from "@/components/PasswordInput.vue";
+import {copyToClipboard } from '@/util/functions';
+import {useToast} from "primevue/usetoast";
+import {walletState} from "@/state/walletState";
+import {Helper} from "@/util/typeHelper";
+import {networkState} from "@/state/networkState";
+import {WalletUtils} from "@/util/walletUtils";
 
 export default {
-  name: 'ViewAccountDetails',
+  name: "ViewAccountDetails",
   components: {
-    TextInput, PasswordInput
+    TextInput,
+    PasswordInput
   },
   props: {
-    address: String,
+    address: String
   },
 
-  setup(p){
+  setup(p) {
     const toast = useToast();
-    const appStore = inject("appStore");
     const router = useRouter();
 
     // get account details
-    const acc = appStore.getAccDetailsByAddress(p.address);
-    console.log(acc)
-    if(acc === -1){
-      router.push({ name: "ViewAccountDisplayAll"});
+    const acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
+    if (acc === -1) {
+      router.push({name: "ViewAccountDisplayAll"});
     }
-    acc.pretty = appStore.pretty(acc.address);
-
+    const pettyaddress = Helper.createAddress(acc.address).pretty();
     const err = ref(false);
     const accountName = ref(acc.name);
     const accountNameDisplay = ref(acc.name);
     const showName = ref(true);
     const showPwPK = ref(false);
     const showPK = ref(false);
-    const privateKey = ref('');
+    const privateKey = ref("");
     const showPasswdError = ref(false);
     const walletPasswd = ref("");
     const walletPasswdSwap = ref("");
     const showPwSwap = ref(false);
-    const copy = (id) => copyKeyFunc(id, toast);
+    const copy = (id) =>{
+      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
+      let copySubject = document.getElementById(id).getAttribute("copySubject");
+      copyToClipboard(stringToCopy);
+
+      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+    };
 
     const editName = () => {
       showName.value = !showName.value;
     };
 
     const changeName = () => {
-      if(accountName.value.trim()){
-        let status = appStore.updateAccountName(accountName.value, acc.address);
-        console.log(status);
-        if(status==1){
+      if (accountName.value.trim()) {
+        const exist_account = walletState.currentLoggedInWallet.accounts.find((accName) => accName.name == accountName.value.trim());
+        if (!exist_account) {
+          const acc_index = walletState.currentLoggedInWallet.accounts.findIndex((accAdd) => accAdd.address === p.address);
+          walletState.currentLoggedInWallet.accounts[acc_index].name = accountName.value;
+          walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
           showName.value = true;
           accountNameDisplay.value = accountName.value;
-          err.value = '';
-        }else if(status==2){
+          err.value = "";
+        } else if (exist_account) {
           err.value = "Account name is already taken";
-        }else{
+        } else {
           err.value = "Fail to change account name";
         }
-      }else{
+      } else {
         err.value = "Please insert account name";
       }
     };
@@ -171,35 +164,37 @@ export default {
     const hidePanel = () => {
       accountName.value = acc.name;
       showName.value = !showName.value;
-      err.value = '';
-    }
+      err.value = "";
+    };
 
     const verifyWalletPwPk = () => {
-      if(walletPasswd.value == ''){
+      if (walletPasswd.value == "") {
         err.value = "Please insert wallet password to show Private Key";
         showPK.value = false;
         showPwPK.value = false;
-      }else{
-        if(appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPasswd.value)){
+      } else{
+        if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPasswd.value)) {
           // pw is correct
-          privateKey.value = appStore.getAccountPassword(acc.name, walletPasswd.value);
+          const passwordInstance = WalletUtils.createPassword(walletPasswd.value);
+          const walletPrivateKey = WalletUtils.decryptPrivateKey(passwordInstance,acc.encrypted,acc.iv);
+          privateKey.value = walletPrivateKey.toUpperCase();
           showPK.value = true;
-          err.value = '';
-        }else{
+          err.value = "";
+        } else {
           showPK.value = false;
           err.value = "Wallet password is incorrect";
         }
       }
-    }
+    };
 
     const verifyWalletPwSwap = () => {
-      if(walletPasswdSwap.value == ''){
+      if (walletPasswdSwap.value == "") {
         err.value = "Please insert wallet password to show Private Key";
         showPwSwap.value = false;
-      }else{
-        err.value="";
+      } else {
+        err.value = "";
       }
-    }
+    };
 
     return {
       err,
@@ -221,7 +216,8 @@ export default {
       copy,
       privateKey,
       hidePanel,
+      pettyaddress
     };
-  },
-}
+  }
+};
 </script>

@@ -10,7 +10,7 @@
       <fieldset class="w-full">
         <div class="error error_box mb-2" v-if="err!=''">{{ err }}</div>
         <TextInput placeholder="Account Name" errorMessage="Account name is required" v-model="accountName" icon="wallet" />
-        <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter your wallet ' + appStore.state.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+        <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter your wallet ' + walletState.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
         <div class="mt-10">
           <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
           <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">Create</button>
@@ -20,10 +20,17 @@
   </div>
 </template>
 <script>
-import { computed, inject, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from "vue-router";
 import TextInput from '@/components/TextInput.vue'
 import PasswordInput from '@/components/PasswordInput.vue'
+import { networkState } from "@/state/networkState";
+import { walletState } from '@/state/walletState';
+import { WalletUtils } from '@/util/walletUtils';
+import { ChainUtils } from '@/util/chainUtils';
+import { Helper } from '@/util/typeHelper';
+import { WalletAccount } from "@/models/walletAccount"
+
 
 export default {
   name: 'ViewAccountCreate',
@@ -32,7 +39,6 @@ export default {
     PasswordInput
   },
   setup(){
-    const appStore = inject("appStore");
     const err = ref(false);
     const accountName = ref("");
     const walletPassword = ref("");
@@ -45,22 +51,32 @@ export default {
         accountName.value.length != ''
       )
     );
+    
     const create = () => {
-      if(!appStore.verifyExistingAccountName(appStore.state.currentLoggedInWallet.name, accountName.value)){
-        var result = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword.value);
+    const verifyExistingAccountName = walletState.currentLoggedInWallet.accounts.find((element) => element.name == accountName.value);
+      if(!verifyExistingAccountName){
+        var result = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPassword.value);
         if (result == -1) {
           err.value = "Fail to create new account";
         } else if (result == 0) {
-          err.value = "Password for wallet " + appStore.state.currentLoggedInWallet.name + " is invalid" ;
-        } else {
+          err.value = "Password for wallet " + walletState.currentLoggedInWallet.name + " is invalid" ;
+        } else { 
           // create account
-          const account = appStore.createNewAccount(appStore.state.currentLoggedInWallet.name, walletPassword.value);
-          // update to state
-          appStore.updateAccountState(account, accountName.value);
-          router.push({ name: "createdAccount", params: {publicKey: account.publicKey, privateKey: account.privateKey, address: appStore.pretty(account.address.address), name: accountName.value }});
+          let password = WalletUtils.createPassword(walletPassword.value);
+          const account = WalletUtils.generateNewAccount(ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+          const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, account.privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+          let walletAccount = new WalletAccount(accountName.value, account.publicKey, wallet.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
+          walletState.currentLoggedInWallet.accounts.push(walletAccount);
+
+          const address = Helper.createAddress(account.address.address).pretty();
+          walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+
+          router.push({ name: "ViewAccountCreated", params: {publicKey: account.publicKey, privateKey: account.privateKey, address: address, name: accountName.value }});
+
         }
       }else{
         err.value = "Account name is already taken.";
+        console.log(verifyExistingAccountName);
       }
     };
 
@@ -70,7 +86,7 @@ export default {
     };
 
     return{
-      appStore,
+      walletState,
       err,
       create,
       accountName,
