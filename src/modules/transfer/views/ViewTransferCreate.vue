@@ -351,7 +351,7 @@
   </div>
 </template>
 <script >
-import { computed, ref, inject, getCurrentInstance, watch } from "vue";
+import { computed, ref, getCurrentInstance, watch } from "vue";
 import TextInput from "@/components/TextInput.vue";
 import PasswordInput from "@/components/PasswordInput.vue";
 import SelectInputPlugin from "@/components/SelectInputPlugin.vue";
@@ -375,7 +375,7 @@ import { networkState } from "@/state/networkState";
 import { accountUtils } from "@/util/accountUtils";
 import { WalletUtils } from "@/util/walletUtils";
 
-export default {
+export default { 
   name: "ViewTransferCreate",
   components: {
     TextInput,
@@ -505,7 +505,7 @@ export default {
 
     // get balance
     const selectedAccName = ref(
-      walletState.currentLoggedInWallet.selectDefaultAccount.name
+      walletState.currentLoggedInWallet.selectDefaultAccount().name
     );
     /* appStore.getFirstAccName() */
     const selectedAccAdd = ref(
@@ -514,14 +514,14 @@ export default {
     /* appStore.getFirstAccAdd() */
     const balance = computed(() => {
       if (walletState.currentLoggedInWallet) {
-        return walletState.currentLoggedInWallet.selectDefaultAccount.balance;
+        return walletState.currentLoggedInWallet.selectDefaultAccount().balance;
         /* appStore.getBalanceByAddress(selectedAccAdd.value); */
       } else {
         return 0;
       }
     });
     const isMultiSigBool = ref(
-      isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount.address)
+      isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address)
     );
     /*  appStore.getFirstAccAdd() */
 
@@ -659,7 +659,6 @@ export default {
     const updateAdd = (e) => {
       recipient.value = e;
     };
-
     const makeTransfer = () => {
       if (sendXPX.value == 0 && !forceSend.value) {
         toggleConfirm.value = true;
@@ -826,7 +825,7 @@ export default {
           recipient.value.match(addressPatternShort))
       ) {
         const verifyRecipientAddress = accountUtils.verifyAddress(
-          walletState.currentLoggedInWallet.selectDefaultAccount.address,
+          walletState.currentLoggedInWallet.selectDefaultAccount().address,
           recipient.value
         );
         /* appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name) */
@@ -856,7 +855,7 @@ export default {
 
     watch(messageText, (n, o) => {
       if (n != o) {
-        effectiveFee.value = makeTransaction.calculateFee(
+        effectiveFee.value = makeTransaction.calculate_fee(
           n,
           sendXPX.value,
           selectedMosaic.value

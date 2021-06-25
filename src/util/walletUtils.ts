@@ -190,7 +190,7 @@ export class WalletUtils {
             }
         });
     }
-
+//subject to change 
     static  getAccountPublicKey(address ) {
         const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
 
@@ -198,6 +198,26 @@ export class WalletUtils {
             try {
              chainAPICall.accountAPI.getAccountInfo(address).then(accountInfo => {
                     resolve(accountInfo.publicKey);
+                }).catch((error) => {
+                    console.warn(error);
+                    reject(false);
+                });
+            } catch (err) {
+                console.warn(err);
+                reject(false);
+            }
+        });
+      /*  const accountAPI = new AccountAPI(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort))
+       return accountAPI */
+    }
+
+    static  getAccountInfo (address ):Promise<PublicAccount> {
+        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+
+        return new Promise((resolve, reject) => {
+            try {
+             chainAPICall.accountAPI.getAccountInfo(address).then(accountInfo => {
+                    resolve(accountInfo.publicAccount);
                 }).catch((error) => {
                     console.warn(error);
                     reject(false);

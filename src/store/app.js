@@ -76,7 +76,7 @@ function verifyExistingAccount(privateKey){
 
 function getWalletByName(walletName) {
   walletName =
-    walletName.includes(" ") === true
+    walletName.includes(" ") === true 
       ? walletName.split(" ").join("_")
       : walletName;
   return state.wallets.find((element) => element.name == walletName && element.networkName === siriusStore.state.chainNetworkName);
@@ -93,7 +93,7 @@ function getWalletByNameOnly(walletName) {
 function getWalletIndexByName(walletName) {
   walletName =
     walletName.includes(" ") === true
-      ? walletName.split(" ").join("_")
+      ? walletName.split(" ").join("_") 
       : walletName;
   return state.wallets.findIndex((element) => element.name == walletName && element.networkName === siriusStore.state.chainNetworkName);
 }
