@@ -25,7 +25,7 @@
           <div
             id="public"
             class="text-sm w-full outline-none bg-gray-100 z-10"
-            :copyValue="accountPublicKey" copySubject="public"
+            :copyValue="accountPublicKey" copySubject="Public Key"
           >{{accountPublicKey}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
@@ -37,7 +37,7 @@
           <div
             id="private"
             class="text-sm w-full outline-none bg-gray-100 z-10"
-            :copyvalue="accountPrivateKey" copySubject="private"
+            :copyvalue="accountPrivateKey" copySubject="Private Key"
           >{{accountPrivateKey}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('private')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>

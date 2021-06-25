@@ -10,7 +10,7 @@
               :id="account.address"
               class="text-sm w-full outline-none z-10"
               :class="account.default?'bg-white':'bg-gray-100'"
-              :copyValue="prettyAddress(account.address)" copySubject="account.address"
+              :copyValue="prettyAddress(account.address)" copySubject="Address"
             >{{prettyAddress(account.address)}}</div>
           </div>
           <font-awesome-icon icon="copy" @click="copy(account.address)" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
@@ -89,13 +89,11 @@ export default{
       return isMulti;
     });
 
-    const prettyAddress = (address) =>{
-      if(address){
-        var prettierAddress = Helper.createAddress(address).pretty();
-      }
-      return prettierAddress;
+    const prettyAddress = (address) => {
+      Helper.createAddress(address).pretty();
+      return prettierAddress;    
     }
-
+    
     const setAsDefaultAccount = (add) => {
         walletState.currentLoggedInWallet.setDefaultAccountByAddress(add);
         emitter.emit("CLOSE_MENU_TRIGGER", p.i);
@@ -117,7 +115,7 @@ export default{
       a.style.display = 'none';
       a.href = url;
       // the filename you want
-      let networkName = networkState.chainNetworkName.toString;
+      let networkName = networkState.chainNetworkName;
       networkName = (networkName.includes(' ')) ? networkName.split(' ').join('') : networkName;
       a.download = `${wallet.name}_${networkName}_${year}-${month}-${day}.wlt`;
       document.body.appendChild(a);

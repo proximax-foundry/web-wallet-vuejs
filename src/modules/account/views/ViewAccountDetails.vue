@@ -29,7 +29,7 @@
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
           <div class="text-xs font-bold mb-1">Address:</div>
-          <div id="address" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="acc.pretty" copySubject="address">{{acc.pretty}}</div>
+          <div id="address" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="pettyaddress" copySubject="Address">{{pettyaddress}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
       </div>
@@ -37,7 +37,7 @@
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
           <div class="text-xs font-bold mb-1">Public Key:</div>
-          <div id="public" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="acc.publicKey" copySubject="public">{{acc.publicKey}}</div>
+          <div id="public" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
       </div>
@@ -55,7 +55,7 @@
           <div class="text-left w-full relative">
             <div class="text-xs font-bold mr-2"><div class="mb-2 inline-block">Private Key:</div><div v-if="!showPwPK && !showPK">**************</div><PasswordInput v-if="showPwPK && !showPK" placeholder="Insert wallet password" errorMessage="Wallet password required." :showError="showPasswdError" icon="lock" v-model="walletPasswd" /></div>
             <div class="absolute z-20 w-full h-full" v-if="showPK"></div>
-            <div id="private" class="text-sm w-full outline-none bg-gray-100 z-10" type="text" :copyValue="privateKey" copySubject="private" v-if="showPK">{{privateKey}}</div>
+            <div id="private" class="text-sm w-full outline-none bg-gray-100 z-10" type="text" :copyValue="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
           </div>
           <font-awesome-icon icon="copy" @click="copy('private')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mr-2" v-if="showPK"></font-awesome-icon>
           <button class="default-btn w-36" @click="showPwPK = !showPwPK" v-if="!showPwPK && !showPK">Show</button>
@@ -113,8 +113,7 @@ export default {
     if (acc === -1) {
       router.push({name: "ViewAccountDisplayAll"});
     }
-    acc.pretty = Helper.createAddress(acc.address).pretty();
-
+    const pettyaddress = Helper.createAddress(acc.address).pretty();
     const err = ref(false);
     const accountName = ref(acc.name);
     const accountNameDisplay = ref(acc.name);
@@ -141,10 +140,9 @@ export default {
     const changeName = () => {
       if (accountName.value.trim()) {
         const exist_account = walletState.currentLoggedInWallet.accounts.find((accName) => accName.name == accountName.value.trim());
-        const acc_index = walletState.currentLoggedInWallet.accounts.findIndex((accAdd) => accAdd.address === p.address);
-        walletState.currentLoggedInWallet.accounts[acc_index].name = accountName.value;
-
         if (!exist_account) {
+          const acc_index = walletState.currentLoggedInWallet.accounts.findIndex((accAdd) => accAdd.address === p.address);
+          walletState.currentLoggedInWallet.accounts[acc_index].name = accountName.value;
           walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
           showName.value = true;
           accountNameDisplay.value = accountName.value;
@@ -217,7 +215,8 @@ export default {
       verifyWalletPwSwap,
       copy,
       privateKey,
-      hidePanel
+      hidePanel,
+      pettyaddress
     };
   }
 };
