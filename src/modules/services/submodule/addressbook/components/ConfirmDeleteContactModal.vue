@@ -59,7 +59,7 @@ export default{
     const deleteContact = (contact) => {
       const contactIndex = walletState.currentLoggedInWallet.contacts.findIndex((contact) => contact.address == p.data.address);
       walletState.currentLoggedInWallet.removeAddressBook(contactIndex);
-      walletState.wallets.savetoLocalStorage();
+      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
       toggleModal.value = !toggleModal.value;
       emitter.emit('REFRESH_CONTACT_LIST', true);
     };

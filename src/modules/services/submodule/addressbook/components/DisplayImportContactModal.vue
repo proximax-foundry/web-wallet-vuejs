@@ -147,7 +147,7 @@ export default{
               let addressBook = new AddressBook(element.label, element.address);
               walletState.currentLoggedInWallet.addAddressBook(addressBook);
             });
-            walletState.wallets.savetoLocalStorage();
+            walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
             contactAdded.value = addContact.length;
             emitter.emit('REFRESH_CONTACT_LIST', true);
             toast.add({severity:'info', summary: 'Address Book', detail: 'New contact' + ((contactAdded.value>1)?'s':'') + ' imported to Address Book', group: 'br', life: 5000});

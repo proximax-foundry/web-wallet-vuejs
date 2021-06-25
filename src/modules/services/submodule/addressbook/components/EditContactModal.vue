@@ -96,7 +96,7 @@ export default{
       const contactIndex = walletState.currentLoggedInWallet.contacts.findIndex((contact) => contact.address == p.data.address);
       // const walletInstance = new Wallet();
       walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value, address: address.value });
-      walletState.wallets.savetoLocalStorage();
+      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
       toggleModal.value = !toggleModal.value;
       emitter.emit('REFRESH_CONTACT_LIST', true);
       toast.add({severity:'info', summary: 'Address Book', detail: 'Contact info updated in Address Book', group: 'br', life: 5000});

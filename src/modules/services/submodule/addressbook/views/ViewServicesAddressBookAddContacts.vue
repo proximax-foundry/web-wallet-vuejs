@@ -93,7 +93,7 @@ export default {
         err.value = 'Name is already exists in account or address book.';
       }else{
         walletState.currentLoggedInWallet.addAddressBook(addressBook);
-        walletState.wallets.savetoLocalStorage();
+        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         err.value = '';
         contactName.value = '';
         address.value = '';
