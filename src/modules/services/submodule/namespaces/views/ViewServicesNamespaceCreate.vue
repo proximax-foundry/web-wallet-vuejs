@@ -33,7 +33,7 @@
             </div>
             <div v-else class="text-left mb-2">
               <div class="mb-1 z-20 border-b border-gray-200">
-                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="false" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
+                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
                 <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
               </div>
             </div>
@@ -97,14 +97,9 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import DurationInput from '@/modules/services/submodule/namespaces/components/DurationInput.vue';
 import TextInput from '@/components/TextInput.vue';
-import { TransactionUtils } from '@/util/transactionUtils';
-import { ChainProfileConfig } from "@/models/stores/";
-import { Wallet } from "@/models/wallet";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
-import { Currency } from "@/models/currency";
 import { Helper } from '@/util/typeHelper';
-import { ChainUtils } from '@/util/chainUtils';
 import { NamespacesUtils } from '@/util/namespacesUtils';
 
 export default {

@@ -7,7 +7,7 @@
   </div>
   <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-5'>
     <div class="md:col-span-3">
-      <form @submit.prevent="create">
+      <form @submit.prevent="createNamespace">
         <fieldset class="w-full">
           <div class="mb-5">
             <div v-if="showNoBalance" class="border-2 rounded-3xl border-red-700 w-full h-24 text-center p-4">
@@ -31,6 +31,12 @@
               </transition>
               <input type="hidden" v-model="currentSelectedName">
             </div>
+            <div v-else class="text-left mb-2">
+              <div class="mb-1 z-20 border-b border-gray-200">
+                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
+                <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
+              </div>
+            </div>
           </div>
           <div class="text-left p-3 pb-0 border-l-8 border-gray-100 mb-5">
             <div class="bg-gray-100 rounded-2xl p-3">
@@ -40,7 +46,7 @@
           <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" v-model="selectNamespace" :options="namespaceOption()"  />
           <DurationInput :disabled="disabledDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: 0.<span class="text-txs">062750</span> XPX</div>
+            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: 0.<span class="text-xs">062750</span> XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFee }} {{currencyName}}</div>
@@ -61,7 +67,7 @@
           <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
             <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">Clear</button>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">Create</button>
+            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createNamespace()">Create</button>
           </div>
         </fieldset>
       </form>
@@ -89,14 +95,9 @@ import { computed, ref, getCurrentInstance, watch } from 'vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import DurationInput from '@/modules/services/submodule/namespaces/components/DurationInput.vue';
-import { TransactionUtils } from '@/util/transactionUtils';
-import { ChainProfileConfig } from "@/models/stores/";
-import { Wallet } from "@/models/wallet";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
-import { Currency } from "@/models/currency";
 import { Helper } from '@/util/typeHelper';
-import { ChainUtils } from '@/util/chainUtils';
 import { NamespacesUtils } from '@/util/namespacesUtils';
 
 export default {
@@ -222,7 +223,11 @@ export default {
         showNoBalance.value =false;
         disabledPassword.value = false;
       }
-    })
+    });
+
+    const createNamespace = () => {
+      console.log('Create namespace');
+    };
 
     return {
       accounts,
@@ -253,6 +258,7 @@ export default {
       lockFundTotalFee,
       selectNamespace, 
       namespaceOption,
+      createNamespace,
     }
   },
 
