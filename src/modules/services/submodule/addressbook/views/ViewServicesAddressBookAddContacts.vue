@@ -7,7 +7,7 @@
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>
-    <form @submit.prevent="create" class="mt-10">
+    <form @submit.prevent="SaveContact" class="mt-10">
       <fieldset class="w-full">
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <TextInput placeholder="Name" errorMessage="Name required" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
@@ -21,11 +21,16 @@
   </div>
 </template>
 <script>
-import { computed, ref, inject, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import TextInput from '@/components/TextInput.vue';
-import { verifyAddress } from '@/util/functions';
 import { useRouter } from 'vue-router';
 import { useToast } from "primevue/usetoast";
+import { AddressBook } from '@/models/addressBook';
+import { AddressBookUtils } from '@/util/addressBookUtils';
+import { Wallet } from "@/models/wallet";
+import { Wallets } from "@/models/wallets";
+import { walletState } from '@/state/walletState';
+import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 
 export default {
   name: 'ViewCreateContacts',
@@ -34,7 +39,7 @@ export default {
   },
   setup(){
     const toast = useToast();
-    const appStore = inject("appStore");
+    // const appStore = inject("appStore");
     const contactName = ref('');
     const address = ref('');
     const err = ref('');
@@ -64,27 +69,43 @@ export default {
     );
 
     watch(address, ()=>{
-      const verifyContactAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), address.value);
-      verifyAdd.value = verifyContactAddress.isPassed.value;
-      addMsg.value = verifyContactAddress.errMessage.value;
+      const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
+      const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address.value);
+      verifyAdd.value = verifyContactAddress.isPassed;
+      addMsg.value = verifyContactAddress.errMessage;
     });
 
     const SaveContact = () => {
-      let added = appStore.saveContact(contactName.value, address.value);
-      if(added===true){
+      const formattedAddress = address.value.split('-').join('');
+      let addressBook = new AddressBook(contactName.value, formattedAddress);
+      const wallet = walletState.currentLoggedInWallet;
+
+      // check for existing account address in wallet
+      const accountAddIndex = wallet.accounts.findIndex((account) => account.address == formattedAddress);
+      // check for existing account name in wallet
+      const accountNameIndex = wallet.accounts.findIndex((account) => account.name.toLowerCase() == contactName.value.toLowerCase());
+      const contactAddIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.address == formattedAddress):(-1);
+      const contactNameIndex =(wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.name.toLowerCase() == contactName.value.toLowerCase()):(-1);
+
+      if(contactAddIndex >= 0 || accountAddIndex >= 0){
+        err.value = 'Address is already exists in account or address book.';
+      }else if( contactNameIndex >= 0 || accountNameIndex >= 0 ){
+        err.value = 'Name is already exists in account or address book.';
+      }else{
+        walletState.currentLoggedInWallet.addAddressBook(addressBook);
+        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         err.value = '';
         contactName.value = '';
         address.value = '';
         toast.add({severity:'info', summary: 'Address Book', detail: 'New contact added to Address Book', group: 'br', life: 5000});
         router.push({ name: 'ViewServicesAddressBook' });
-      }else{
-        err.value = added;
       }
     }
 
     const clearInput =() => {
       contactName.value = '';
       address.value = '';
+      err.value = '';
     };
 
     return {
