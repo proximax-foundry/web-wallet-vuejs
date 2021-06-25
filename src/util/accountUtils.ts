@@ -27,54 +27,34 @@ const verifyPublicKey = (add: string): boolean => {
     return valid
 
 }
-/* accountInfo.subscribe(
-  (acc) => {
-      if (acc.publicKey === invalidPublicKey) {
-          console.warn(`The receiver's public key is not valid for sending encrypted messages`);
-          resolve(true)
-      } 
-      resolve(false);
-  },
-  (error) => {
-      console.warn('Err: ' + error);
-      resolve(true);
-  }
-); */
-/* const verifyRecipientInfo = (recipient, accountHttp) => {
-  return new Promise((resolve, reject) => {
-    verifyPublicKey(recipient, accountHttp).then((res) => {
-      resolve(res);
-    }).catch(function (error) {
-      // handle error
-      reject("Error is: " + error);
-    })
-  });
-} */
 
-function verifyNetworkAddressEqualsNetwork(currentPrimaryAdd, add) {
-  if ((currentPrimaryAdd.length === 40 || currentPrimaryAdd.length === 46) && (add.length === 40 || add.length === 46)) {
-    if (currentPrimaryAdd.charAt(0) === 'S' && add.charAt(0) === 'S') {
-      // NetworkType.MIJIN_TEST
-      return true;
-    } else if (currentPrimaryAdd.charAt(0) === 'M' && add.charAt(0) === 'M') {
-      // NetworkType.MIJIN
-      return true;
-    } else if (currentPrimaryAdd.charAt(0) === 'V' && add.charAt(0) === 'V') {
-      // NetworkType.TEST_NET
-      return true;
-    } else if (currentPrimaryAdd.charAt(0) === 'X' && add.charAt(0) === 'X') {
-      // NetworkType.MAIN_NET
-      return true;
-    } else if (currentPrimaryAdd.charAt(0) === 'W' && add.charAt(0) === 'W') {
-      // NetworkType.PRIVATE_TEST
-      return true;
-    } else if (currentPrimaryAdd.charAt(0) === 'Z' && add.charAt(0) === 'Z') {
-      // NetworkType.PRIVATE
-      return true;
-    } else {
-      // Address Network unsupported
-      return false;
-    }
+
+const verifyNetworkAddressEqualsNetwork = (value: string, value2: string): boolean => {
+  if (value!== undefined )
+  if(value2!==undefined)
+  if ((value.length === 40 || value.length === 46) && (value2.length === 40 || value2.length === 46)) {
+      if (value.charAt(0) === 'S' && value2.charAt(0) === 'S') {
+          // NetworkType.MIJIN_TEST
+          return true;
+      } else if (value.charAt(0) === 'M' && value2.charAt(0) === 'M') {
+          // NetworkType.MIJIN
+          return true;
+      } else if (value.charAt(0) === 'V' && value2.charAt(0) === 'V') {
+          // NetworkType.TEST_NET
+          return true;
+      } else if (value.charAt(0) === 'X' && value2.charAt(0) === 'X') {
+          // NetworkType.MAIN_NET
+          return true;
+      } else if (value.charAt(0) === 'W' && value2.charAt(0) === 'W') {
+          // NetworkType.PRIVATE_TEST
+          return true;
+      } else if (value.charAt(0) === 'Z' && value2.charAt(0) === 'Z') {
+          // NetworkType.PRIVATE
+          return true;
+      } else {
+          // Address Network unsupported
+          return false;
+      }
   }
 }
 

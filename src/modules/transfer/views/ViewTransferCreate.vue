@@ -318,7 +318,7 @@
           placeholder="Enter Wallet Password"
           :errorMessage="
             'Please enter wallet ' +
-            walletState.currentLoggedInWallet.name +
+           /* walletState.currentLoggedInWallet.name + */
             '\'s password'
           "
           :showError="showPasswdError"
@@ -388,9 +388,6 @@ export default {
     ConfirmSendModal,
   },
   setup() {
-    /* const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
-    const chainNetwork = inject("chainNetwork"); */
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showContactSelection = ref(false);
@@ -485,11 +482,15 @@ export default {
     });
 
     const isMultiSig = (address) => {
-      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address);
+      const account = walletState.currentLoggedInWallet.accounts.find(
+        (account) => account.address === address
+      );
       let isMulti = false;
       /*   appStore.getAccDetailsByAddress(address); */
-      /*  let isMulti = false; */
-       isMulti = account.getDirectParentMultisig() ? true : false;
+      if (account != undefined) {
+        isMulti = account.getDirectParentMultisig().length ? true : false;
+      }
+
       /* if(account.isMultisign != undefined){
         if(account.isMultisign != '' || account.isMultisign != null){
           if(account.isMultisign.cosignatories != undefined){
@@ -499,7 +500,6 @@ export default {
           }
         }
       } */
-
       return isMulti;
     };
 
@@ -509,7 +509,7 @@ export default {
     );
     /* appStore.getFirstAccName() */
     const selectedAccAdd = ref(
-      walletState.currentLoggedInWallet.selectDefaultAccount.address
+      walletState.currentLoggedInWallet.selectDefaultAccount().address
     );
     /* appStore.getFirstAccAdd() */
     const balance = computed(() => {
@@ -521,9 +521,7 @@ export default {
       }
     });
     const isMultiSigBool = ref(
-      isMultiSig(
-        walletState.currentLoggedInWallet.selectDefaultAccount.address
-      )
+      isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount.address)
     );
     /*  appStore.getFirstAccAdd() */
 
@@ -710,7 +708,7 @@ export default {
       }
     };
 
-    const getSelectedMosaicBalance = (index)=> {
+    const getSelectedMosaicBalance = (index) => {
       const account = walletState.currentLoggedInWallet.accounts.find(
         (account) => account.address === selectedAccAdd.value
       );
@@ -729,20 +727,23 @@ export default {
     // getMosaicsAllAccounts(appStore, siriusStore);
     const addMosaicsButton = computed(() => {
       if (!disableSupply.value) {
-        const mosaic = walletState.currentLoggedInWallet.accounts.find(
+        const account = walletState.currentLoggedInWallet.accounts.find(
           (element) => element.name == selectedAccName.value
-        ).assets;
-        /* let mosaic = appStore.getAccDetails(selectedAccName.value).mosaic; */
-        if (mosaic != undefined) {
-          if (
-            mosaic.length == 0 ||
-            mosaicsCreated.value.length == mosaic.length
-          ) {
-            return true;
-          } else {
-            return false;
+        );
+        if (account != undefined) {
+          if (account.assets != undefined) {
+            if (
+              account.assets.length == 0 ||
+              mosaicsCreated.value.length == account.assets.length
+            ) {
+              return true;
+            } else {
+              return false;
+            }
           }
         }
+        /* let mosaic = appStore.getAccDetails(selectedAccName.value).mosaic; */
+
         return true;
       } else {
         return true;
