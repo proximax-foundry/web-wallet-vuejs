@@ -90,7 +90,7 @@ export default{
     });
 
     const prettyAddress = (address) => {
-      Helper.createAddress(address).pretty();
+      const prettierAddress = Helper.createAddress(address).pretty();
       return prettierAddress;    
     }
     
