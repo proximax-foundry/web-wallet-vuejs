@@ -37,7 +37,6 @@ export default{
 
   setup (props) {
     const formatMask = ref("'#*." + ('#')^props.decimal + "'");
-    console.log(formatMask.value)
     return {
       formatMask,
     }

@@ -39,9 +39,15 @@ export class AssetsUtils {
 
   static getTransactionFee =(networkType: NetworkType, generationHash: string, owner:PublicAccount, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number) :number => {
 
-    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    const buildTransactions = new BuildTransactions(networkType, generationHash);
     // owner: PublicAccount, supplyMutable: boolean, transferable: boolean, divisibility: number, duration?: UInt64
     const registerMosaicTransaction = buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(duration));
     return registerMosaicTransaction.maxFee.compact();
-  }
+  };
+
+  static getMosaicChangeTransaction = (networkType: NetworkType, generationHash: string, owner: PublicAccount, mosaicId: MosaicId, changeType: MosaicSupplyType, delta: UInt64) => {
+    const buildTransactions = new BuildTransactions(networkType, generationHash);
+    const registerMosaicSupplyChangeTransaction = buildTransactions.buildMosaicSupplyChange(mosaicId, changeType, delta);
+    return registerMosaicSupplyChangeTransaction.maxFee.compact();
+  };
 }

@@ -60,7 +60,7 @@
             </div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: 0.062750 XPX</div>
+            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: {{ transactionFee }} XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFeeCurrency }} {{currencyName}}</div>
@@ -103,7 +103,7 @@
   </div>
 </template>
 <script>
-import { computed, ref, inject, getCurrentInstance, watch } from 'vue';
+import { computed, ref, getCurrentInstance, watch } from 'vue';
 // import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
@@ -115,6 +115,8 @@ import { networkState } from "@/state/networkState";
 import { Currency } from "@/models/currency";
 import { Helper } from '@/util/typeHelper';
 import { ChainUtils } from '@/util/chainUtils';
+import { AssetsUtils } from '@/util/assetsUtils';
+import { WalletUtils } from '@/util/walletUtils';
 
 export default {
   name: 'ViewMosaicCreate',
@@ -212,7 +214,11 @@ export default {
 
     const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
     const moreThanOneAccount = computed(()=> (walletState.currentLoggedInWallet.accounts.length > 1)?true:false);
-    const transactionFee = ref('0.000000');
+
+    const defaultDuration = 10 * 365;
+
+    const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
+    const transactionFee = ref( Helper.amountFormatterSimple(AssetsUtils.getTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility));
 
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
@@ -222,6 +228,7 @@ export default {
       (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
+      ownerPublicAccount.value = WalletUtils.createPublicAccount(i.publicKey, networkState.currentNetworkProfile.network.type);
     }
 
     const clearInput = () => {
@@ -242,9 +249,17 @@ export default {
       }
     });
 
-    // watch(divisibility, (n) => {
-    //   supplyPrecision.value = parseInt(n);
-    // });
+    watch(divisibility, (n) => {
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, n, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+    });
+
+    watch(isMutable, (n) => {
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+    });
+
+    watch(isTransferable, (n) => {
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, n, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+    });
 
     watch(balance, (n) => {
       if(n < rentalFee.value){
@@ -328,6 +343,7 @@ export default {
       changeSelection,
       supply,
       divisibility,
+      transactionFee,
       disabledMutableCheck,
       disabledTransferableCheck,
       disabledPassword,

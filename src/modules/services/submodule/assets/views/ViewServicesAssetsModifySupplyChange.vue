@@ -31,6 +31,12 @@
               </transition>
               <input type="hidden" v-model="currentSelectedName">
             </div>
+            <div v-else class="text-left p-4">
+              <div class="mb-1 z-20 border-b border-gray-200">
+                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
+                <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
+              </div>
+            </div>
           </div>
           <div class="text-left p-3 pb-0 border-l-8 border-gray-100 mb-5">
             <div class="bg-gray-100 rounded-2xl p-3">
