@@ -29,7 +29,6 @@ export default{
   },
 
   emits:[
-    // 'update-divisibility'
     'update:modelValue'
   ],
 
@@ -60,7 +59,7 @@ export default{
     },
 
     validate: function(e) {
-      if(e.data > -1 && e.data <7){
+      if(e.data > -1 && e.data < 7){
         this.$emit('update:modelValue', e.data);
       }
     }

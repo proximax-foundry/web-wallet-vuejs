@@ -9,7 +9,7 @@
     <div class="md:col-span-3">
       <form @submit.prevent="createMosaic">
         <fieldset class="w-full">
-          <div class="mb-5 border-b border-gray-200">
+          <div class="mb-5">
             <div v-if="showNoBalance" class="border-2 rounded-3xl border-red-700 w-full h-24 text-center p-4">
               <div class="h-5 text-center">
                 <div class="rounded-full w-8 h-8 border border-gray-500 inline-block relative"><font-awesome-icon icon="times" class="text-gray-500 h-5 w-5 absolute" style="top: 5px; left:8px"></font-awesome-icon></div><br>
@@ -24,7 +24,7 @@
               </div>
               <transition name="slide">
               <div v-if="showMenu" class="z-10">
-                <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50 optionDiv'" @click="changeSelection(item)" :title="'Address is ' + item.address" @update-divisibility="updateDivisibility">
+                <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50 optionDiv'" @click="changeSelection(item)" :title="'Address is ' + item.address">
                   <div>{{ item.name }} <span v-if="isMultiSig(item.address)" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
                 </div>
               </div>
@@ -40,11 +40,11 @@
           </div>
           <div class="text-left p-3 pb-0 border-l-8 border-gray-100">
             <div class="bg-gray-100 rounded-2xl p-3">
-              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} XPX</span></div>
+              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} {{divisibility }} {{ balanceNumber }}XPX</span></div>
             </div>
           </div>
           <NumberInput :disabled="disabledDivisibility" v-model="divisibility" :max="6" placeholder="Divisibility" title="Divisibility" icon="coins" :showError="showDivisibilityErr" errorMessage="Required Field - Only Numbers (0 - 6)" class="mt-5" />
-          <SupplyInput :disabled="disabledSupply" v-model="supply" title="Supply" :balance="balance" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" :decimal="Number(supplyPrecision)" />
+          <SupplyInput :disabled="disabledSupply" v-model="supply" title="Supply" :balance="balanceNumber" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" :decimal="Number(divisibility)" />
           <!-- <div class="text-center p-3 pb-3 border-l-8 border-gray-100">
             <div class="rounded-2xl bg-gray-100 p-5">
               <input id="month" type="radio" value="month" name="durationOption" v-model="durationOption" :disabled="disabledDuration" /><label for="month" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Month</label>
@@ -60,7 +60,7 @@
             </div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: 0.<span class="text-txs">062750</span> XPX</div>
+            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: 0.062750 XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFeeCurrency }} {{currencyName}}</div>
@@ -134,7 +134,7 @@ export default {
     const err = ref('');
     const showMenu = ref(false);
     const currentSelectedName = ref('');
-    const divisibility = ref("0");
+    const divisibility = ref('0');
     const showDivisibilityErr = ref(false);
     const isTransferable = ref('');
     const isMutable = ref('');
@@ -144,7 +144,7 @@ export default {
     const disabledSupply = ref(false);
     const disabledDivisibility = ref(false);
     const disabledClear = ref(false);
-    const supplyPrecision = ref(divisibility.value);
+    // const supplyPrecision = computed( () => divisibility.value);
     const disabledDuration = ref(false);
     const durationOption =ref('month');
     const duration = ref('1');
@@ -183,9 +183,10 @@ export default {
     const selectedAccName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
     const selectedAccAdd = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
     const balance = ref(Helper.toCurrencyFormat(walletState.currentLoggedInWallet.selectDefaultAccount().balance, networkState.currentNetworkProfile.network.currency.divisibility));
+    const balanceNumber = ref(walletState.currentLoggedInWallet.selectDefaultAccount().balance);
     const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
 
-    const supply = ref(0);
+    const supply = ref('0');
 
     const showNoBalance = ref(false);
     if(balance.value < rentalFee.value){
@@ -241,9 +242,9 @@ export default {
       }
     });
 
-    watch(divisibility, (n) => {
-      supplyPrecision.value = parseInt(n);
-    });
+    // watch(divisibility, (n) => {
+    //   supplyPrecision.value = parseInt(n);
+    // });
 
     watch(balance, (n) => {
       if(n < rentalFee.value){
@@ -297,10 +298,10 @@ export default {
       }
     };
 
-    const updateDivisibility = (e) => {
-      console.log('e' + e)
-      divisibility.value = e;
-    }
+    // const updateDivisibility = (e) => {
+    //   console.log('e' + e)
+    //   divisibility.value = e;
+    // }
 
     return {
       accounts,
@@ -312,6 +313,7 @@ export default {
       isTransferable,
       isMutable,
       balance,
+      balanceNumber,
       showNoBalance,
       showSupplyErr,
       showDivisibilityErr,
@@ -332,7 +334,7 @@ export default {
       disabledSupply,
       disabledDivisibility,
       disabledClear,
-      supplyPrecision,
+      // supplyPrecision,
       createMosaic,
       disabledDuration,
       durationOption,
@@ -346,7 +348,7 @@ export default {
       currencyName,
       lockFundTxFee,
       lockFundTotalFee,
-      updateDivisibility,
+      // updateDivisibility,
     }
   },
 
