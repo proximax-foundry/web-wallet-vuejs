@@ -43,7 +43,7 @@
               <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} {{divisibility }} {{ balanceNumber }}XPX</span></div>
             </div>
           </div>
-          <NumberInput :disabled="disabledDivisibility" v-model="divisibility" :max="6" placeholder="Divisibility" title="Divisibility" icon="coins" :showError="showDivisibilityErr" errorMessage="Required Field - Only Numbers (0 - 6)" class="mt-5" />
+          <NumberInput :disabled="disabledDivisibility" v-model="divisibility" :max="6" placeholder="Divisibility (0-6)" title="Divisibility (0-6)" icon="coins" :showError="showDivisibilityErr" errorMessage="Required Field - Only Numbers (0 - 6)" class="mt-5" />
           <SupplyInput :disabled="disabledSupply" v-model="supply" title="Supply" :balance="balanceNumber" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" :decimal="Number(divisibility)" />
           <!-- <div class="text-center p-3 pb-3 border-l-8 border-gray-100">
             <div class="rounded-2xl bg-gray-100 p-5">
