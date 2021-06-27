@@ -35,6 +35,7 @@ import { WalletUtils } from "../util/walletUtils";
 import { ChainAPICall } from "../models/REST/chainAPICall";
 import { BuildTransactions } from "../util/buildTransactions";
 import { Helper } from "./typeHelper";
+import { AssetSupplyType } from "nem-library";
 
 interface assetSelectionInterface {
   label: string,
@@ -52,9 +53,11 @@ export class AssetsUtils {
     return registerMosaicTransaction.maxFee.compact();
   };
 
-  static getMosaicSupplyChangeTransaction = (networkType: NetworkType, generationHash: string, owner: PublicAccount, mosaicId: MosaicId, changeType: MosaicSupplyType, delta: UInt64) => {
+  static getMosaicSupplyChangeTransaction = (networkType: NetworkType, generationHash: string, owner: PublicAccount, mosaicId: MosaicId, changeType: number, delta: UInt64) => {
     const buildTransactions = new BuildTransactions(networkType, generationHash);
-    const registerMosaicSupplyChangeTransaction = buildTransactions.buildMosaicSupplyChange(mosaicId, changeType, delta);
+    let supplyChangeType: MosaicSupplyType;
+    supplyChangeType = (changeType==1)?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
+    const registerMosaicSupplyChangeTransaction = buildTransactions.buildMosaicSupplyChange(mosaicId, supplyChangeType, delta);
     return registerMosaicSupplyChangeTransaction.maxFee.compact();
   };
 

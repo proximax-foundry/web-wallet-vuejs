@@ -89,7 +89,7 @@
   </div>
 </template>
 <script>
-import { computed, ref, inject, getCurrentInstance } from 'vue';
+import { computed, ref, getCurrentInstance, watch } from 'vue';
 // import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
@@ -101,6 +101,8 @@ import { networkState } from "@/state/networkState";
 import { Currency } from "@/models/currency";
 import { Helper } from '@/util/typeHelper';
 import { ChainUtils } from '@/util/chainUtils';
+import { AssetsUtils } from '@/util/assetsUtils';
+import { WalletUtils } from '@/util/walletUtils';
 
 export default {
   name: 'ViewMosaicLinkToNamespace',
@@ -173,6 +175,8 @@ export default {
     const moreThanOneAccount = computed(()=> (walletState.currentLoggedInWallet.accounts.length > 1)?true:false);
     const transactionFee = ref('0.000000');
 
+    const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
+
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
@@ -181,6 +185,7 @@ export default {
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
       isMultiSigBool.value = isMultiSig(i.address);
+      ownerPublicAccount.value = WalletUtils.createPublicAccount(i.publicKey, networkState.currentNetworkProfile.network.type);
     }
 
     const assetSupply = ref(0);
@@ -200,6 +205,7 @@ export default {
       assetDivisibility.value = selectedAsset.divisibility;
       assetTransferable.value = selectedAsset.transferable;
       assetMutable.value = selectedAsset.supplyMutable;
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransaction(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, assetId, selectIncreaseDecrease.value, supply.value), networkState.currentNetworkProfile.network.currency.divisibility);
     };
 
     const assetOptions = () => {
@@ -235,6 +241,18 @@ export default {
     const modifyMosaic = () => {
       console.log('Modify mosaic');
     };
+
+    watch(selectIncreaseDecrease, (n) => {
+      if(selectAsset.value){
+        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransaction(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, selectAsset.value, n, supply.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      }
+    });
+
+    watch(supply, (n) => {
+      if(selectAsset.value){
+        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransaction(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, selectAsset.value, selectIncreaseDecrease.value, n), networkState.currentNetworkProfile.network.currency.divisibility);
+      }
+    });
 
     // watch(balance, (n) => {
     //   if(n < rentalFee.value){
