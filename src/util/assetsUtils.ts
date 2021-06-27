@@ -28,12 +28,19 @@ import {
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { walletState } from "../state/walletState";
+import { WalletAccount } from "@/models/walletAccount";
 import { networkState } from "../state/networkState";
 import { ChainUtils } from "../util/chainUtils";
 import { WalletUtils } from "../util/walletUtils";
 import { ChainAPICall } from "../models/REST/chainAPICall";
 import { BuildTransactions } from "../util/buildTransactions";
 import { Helper } from "./typeHelper";
+
+interface assetSelectionInterface {
+  label: string,
+  value: string,
+}
+
 
 export class AssetsUtils {
 
@@ -45,9 +52,25 @@ export class AssetsUtils {
     return registerMosaicTransaction.maxFee.compact();
   };
 
-  static getMosaicChangeTransaction = (networkType: NetworkType, generationHash: string, owner: PublicAccount, mosaicId: MosaicId, changeType: MosaicSupplyType, delta: UInt64) => {
+  static getMosaicSupplyChangeTransaction = (networkType: NetworkType, generationHash: string, owner: PublicAccount, mosaicId: MosaicId, changeType: MosaicSupplyType, delta: UInt64) => {
     const buildTransactions = new BuildTransactions(networkType, generationHash);
     const registerMosaicSupplyChangeTransaction = buildTransactions.buildMosaicSupplyChange(mosaicId, changeType, delta);
     return registerMosaicSupplyChangeTransaction.maxFee.compact();
   };
+
+  static getAssets = (account: WalletAccount, owner: string) => {
+    const assetSelection: Array<assetSelectionInterface> = [];
+    // walletState.currentLoggedInWallet.selectDefaultAccount().publicKey
+    const filterAsset = account.assets.filter((asset) => asset.owner === owner);
+    if(filterAsset.length > 0){
+      filterAsset.forEach((asset) => {
+        assetSelection.push({
+          label: asset.idHex + ' > ' + Helper.amountFormatterSimple(asset.amount, asset.divisibility) + ' XPX',
+          value: asset.idHex,
+        });
+      });
+    }
+    return assetSelection;
+  }
 }
+

@@ -5,8 +5,8 @@
       <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
     </div>
   </div>
-  <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-4'>
-    <div class="md:col-span-3">
+  <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-8 lg:grid-cols-6'>
+    <div class="md:col-span-5 lg:col-span-4">
       <form @submit.prevent="modifyMosaic">
         <fieldset class="w-full">
           <div class="mb-5">
@@ -43,11 +43,11 @@
               <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} XPX</span></div>
             </div>
           </div>
-          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select asset" errorMessage="" v-model="selectAsset" :options="assetOptions()"  />
+          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select asset" errorMessage="" v-model="selectAsset" :options="assetOptions()" @show-selection="changeAsset" />
           <SelectInputPlugin selectDefault="0" showSelectTitleProp="true" placeholder="Increase or decrease" errorMessage="" v-model="selectIncreaseDecrease" :options="increaseDecreaseOption()"  />
-          <SupplyInput :disabled="disabledSupply" v-model="supply" title="Quantity of Increase/Decrease" :balance="balance" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" />
+          <SupplyInput :disabled="disabledSupply" v-model="supply" title="Quantity of Increase/Decrease" :balance="balanceNumber" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span class="text-txs"></span> XPX</div>
+            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: {{ transactionFee }} XPX</div>
           </div>
           <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
@@ -57,32 +57,32 @@
         </fieldset>
       </form>
     </div>
-    <div class="px-10 text-left text-tsm mt-5 md:mt-0 property-table">
+    <div class="md:col-span-3 lg:col-span-2 pl-10 text-left text-tsm mt-5 md:mt-0 property-table">
       <div class="mb-2 border-b border-gray-300 pb-2 italic">Properties</div>
       <div>
-        <div class="italic text-right">Supply:</div>
-        <div>0</div>
+        <div class="italic text-right text-xs">Supply:</div>
+        <div>{{ assetSupply }} XPX</div>
       </div>
       <div>
-        <div class="italic text-right">Duration:</div>
-        <div>0 day</div>
+        <div class="italic text-right text-xs">Duration:</div>
+        <div>{{ assetDuration }}</div>
       </div>
       <div>
-        <div class="italic text-right">Divisibility:</div>
-        <div>0</div>
+        <div class="italic text-right text-xs">Divisibility:</div>
+        <div>{{ assetDivisibility }}</div>
       </div>
       <div>
-        <div class="italic text-right">Transferable:</div>
+        <div class="italic text-right text-xs">Transferable:</div>
         <div>
-          <!-- <font-awesome-icon icon="check-circle" class="h-4 w-4 text-green-600"></font-awesome-icon> -->
-          <font-awesome-icon icon="times-circle" class="h-4 w-d text-red-600"></font-awesome-icon>
+          <font-awesome-icon v-if="assetTransferable" icon="check-circle" class="h-4 w-4 text-green-600"></font-awesome-icon>
+          <font-awesome-icon v-else icon="times-circle" class="h-4 w-d text-red-600"></font-awesome-icon>
         </div>
       </div>
       <div>
-        <div class="italic text-right">Supply Mutable:</div>
+        <div class="italic text-right text-xs">Supply Mutable:</div>
         <div>
-          <font-awesome-icon icon="check-circle" class="h-4 w-4 text-green-600"></font-awesome-icon>
-          <!-- <font-awesome-icon icon="times-circle" class="h-4 w-d text-red-600"></font-awesome-icon> -->
+          <font-awesome-icon v-if="assetMutable" icon="check-circle" class="h-4 w-4 text-green-600"></font-awesome-icon>
+          <font-awesome-icon v-else icon="times-circle" class="h-4 w-d text-red-600"></font-awesome-icon>
         </div>
       </div>
     </div>
@@ -153,6 +153,7 @@ export default {
     const selectedAccName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
     const selectedAccAdd = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
     const balance = ref(Helper.toCurrencyFormat(walletState.currentLoggedInWallet.selectDefaultAccount().balance, networkState.currentNetworkProfile.network.currency.divisibility));
+    const balanceNumber = walletState.currentLoggedInWallet.selectDefaultAccount().balance;
     const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
 
     const showNoBalance = ref(false);
@@ -167,7 +168,7 @@ export default {
     //   disabledClear.value = false;
     // }
 
-    const supply = ref(0);
+    const supply = ref('0');
     const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
     const moreThanOneAccount = computed(()=> (walletState.currentLoggedInWallet.accounts.length > 1)?true:false);
     const transactionFee = ref('0.000000');
@@ -182,9 +183,37 @@ export default {
       isMultiSigBool.value = isMultiSig(i.address);
     }
 
+    const assetSupply = ref(0);
+    const assetDuration = ref('0 Day');
+    const assetDivisibility = ref(0);
+    const assetTransferable = ref(false);
+    const assetMutable = ref(false);
+
+    const changeAsset = (assetId) => {
+      const selectedAsset = walletState.currentLoggedInWallet.selectDefaultAccount().assets.find((asset) => asset.idHex === assetId);
+      assetSupply.value =Helper.amountFormatterSimple(selectedAsset.amount, selectedAsset.divisibility);
+      if(selectedAsset.duration){
+        assetDuration.value = selectedAsset.duration = ' Day' + ((selectedAsset.duration>1)?'s':'');
+      }else{
+        assetDuration.value = 'No expiration date';
+      }
+      assetDivisibility.value = selectedAsset.divisibility;
+      assetTransferable.value = selectedAsset.transferable;
+      assetMutable.value = selectedAsset.supplyMutable;
+    };
+
     const assetOptions = () => {
-      let asset = [];
-      return asset;
+      let assetSelection = [];
+      const filterAsset = walletState.currentLoggedInWallet.selectDefaultAccount().assets.filter((asset) => asset.owner === walletState.currentLoggedInWallet.selectDefaultAccount().publicKey);
+      if(filterAsset.length > 0){
+        filterAsset.forEach((asset) => {
+          assetSelection.push({
+            label: asset.idHex + ' > ' + Helper.amountFormatterSimple(asset.amount, asset.divisibility) + ' XPX',
+            value: asset.idHex,
+          });
+        });
+      }
+      return assetSelection;
     };
 
     const increaseDecreaseOption = () => {
@@ -228,6 +257,7 @@ export default {
       selectedAccName,
       selectedAccAdd,
       balance,
+      balanceNumber,
       showNoBalance,
       showSupplyErr,
       err,
@@ -248,6 +278,13 @@ export default {
       selectAsset,
       selectIncreaseDecrease,
       modifyMosaic,
+      transactionFee,
+      changeAsset,
+      assetSupply,
+      assetDuration,
+      assetDivisibility,
+      assetTransferable,
+      assetMutable,
     }
   },
 
@@ -298,8 +335,18 @@ export default {
       display: inline-block;
     }
     > div:first-child{
-      width: 120px;
+      width: 75px;
       margin-right: 15px;
+    }
+  }
+}
+
+@media(min-width: 1024px){
+  .property-table{
+    > div {
+      > div:first-child{
+        width: 90px;
+      }
     }
   }
 }

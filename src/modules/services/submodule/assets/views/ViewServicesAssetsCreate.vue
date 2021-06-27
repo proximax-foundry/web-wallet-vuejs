@@ -40,7 +40,7 @@
           </div>
           <div class="text-left p-3 pb-0 border-l-8 border-gray-100">
             <div class="bg-gray-100 rounded-2xl p-3">
-              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} {{divisibility }} {{ balanceNumber }}XPX</span></div>
+              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-tsm">{{ balance }} XPX</span></div>
             </div>
           </div>
           <NumberInput :disabled="disabledDivisibility" v-model="divisibility" :max="6" placeholder="Divisibility (0-6)" title="Divisibility (0-6)" icon="coins" :showError="showDivisibilityErr" errorMessage="Required Field - Only Numbers (0 - 6)" class="mt-5" />
