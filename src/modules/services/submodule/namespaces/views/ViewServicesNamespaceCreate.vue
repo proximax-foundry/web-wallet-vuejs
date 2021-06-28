@@ -16,6 +16,12 @@
                 <div class="inline-block text-tsm">Insufficient Balance</div>
               </div>
             </div>
+            <div v-if="isNotCosigner" class="border-2 rounded-3xl border-yellow-400 w-full h-24 text-center p-4">
+              <div class="h-5 text-center">
+                <div class="rounded-full w-8 h-8 border border-yellow-500 inline-block relative"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-5 w-5 absolute" style="top: 5px; left:11px"></font-awesome-icon></div><br>
+                <div class="inline-block text-tsm">You are not a cosigner to this account</div>
+              </div>
+            </div>
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
             <div v-if="moreThanOneAccount" class="text-left p-4">
               <div class="mb-1 cursor-pointer z-20 border-b border-gray-200" @click="showMenu = !showMenu">
@@ -35,6 +41,13 @@
               <div class="mb-1 z-20 border-b border-gray-200">
                 <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
                 <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
+              </div>
+            </div>
+            <div v-if="getMultiSigCosigner.list.length > 0">
+              <div class="text-tsm">Cosigner:
+                <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} (Balance: {{ getMultiSigCosigner.list[0].balance }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- Insufficient balance</span></span>
+                <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} XPX)</option></select></span>
+                <div v-if="cosignerBalanceInsufficient" class="error">- Insufficient balance</div>
               </div>
             </div>
           </div>
@@ -129,8 +142,9 @@ export default {
     const showPasswdError = ref(false);
     const namespacePattern = "^[0-9a-zA-Z]{2,16}$";
     const showNamespaceNameError = computed(() => !((namespaceName.value.length > 0)?namespaceName.value.match(namespacePattern):true) );
-
     const selectNamespace = ref('');
+    const cosignerBalanceInsufficient = ref(false);
+    const cosignerAddress = ref('');
 
     const namespaceOption = computed(() => {
       let namespace = [];
@@ -181,8 +195,12 @@ export default {
     const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
 
     const showNoBalance = ref(false);
+    const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
+
     if(balance.value < rentalFee.value){
-      showNoBalance.value = true;
+      if(!isNotCosigner.value){
+        showNoBalance.value = true;
+      }
       disabledPassword.value = true;
       disabledClear.value = true;
       disabledDuration.value = true;
@@ -198,13 +216,18 @@ export default {
     const moreThanOneAccount = computed(()=> (walletState.currentLoggedInWallet.accounts.length > 1)?true:false);
 
     const transactionFee = ref('0.000000');
+    const transactionFeeExact = ref(0);
+
+    const getMultiSigCosigner = computed(() => {
+      return NamespacesUtils.getCosignerList(selectedAccAdd.value);
+    });
 
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
       isMultiSigBool.value = false;
       balance.value = i.balance;
-      (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
+      showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value)?true:false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
       emitter.emit('CLEAR_SELECT', 0);
@@ -216,6 +239,7 @@ export default {
         //root
         if(namespaceName.value.length > 0){
           transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFeeExact.value = Helper.convertToExact(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
         }
       }else{
         duration.value = '0';
@@ -223,6 +247,7 @@ export default {
         //subnamespace
         if(namespaceName.value.length > 0){
           transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected.value, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFeeExact.value = Helper.convertToExact(NamespacesUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected.value, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
         }
       }
     };
@@ -243,35 +268,9 @@ export default {
       console.log('Add namespace');
     };
 
-    watch(balance, (n) => {
-      if(n < rentalFee.value || isMultiSig(selectedAccAdd.value)){
-        showNoBalance.value = true;
-        disabledPassword.value = true;
-        disabledClear.value = true;
-        if(isMultiSig(selectedAccAdd.value)){
-          disabledDuration.value = true;
-        }
-        disableNamespaceName.value = true;
-      }else{
-        disabledPassword.value = false;
-        disabledClear.value = false;
-        disabledDuration.value = false;
-        disableNamespaceName.value = false;
-      }
-    });
-
     watch(duration, (n) => {
       if(n > 365){
         duration.value = '365';
-      }
-      if(balance.value < rentalFee.value){
-        showNoBalance.value = true;
-        disableNamespaceName.value = true;
-        disabledPassword.value = true;
-      }else{
-        showNoBalance.value =false;
-        disabledPassword.value = false;
-        disableNamespaceName.value = false;
       }
     });
 
@@ -279,21 +278,46 @@ export default {
       if(namespaceName.value.length > 0){
         if(namespaceName.value.match(namespacePattern)){
           transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFeeExact.value = Helper.convertToExact(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
         }else{
           transactionFee.value = '0.000000';
+          transactionFeeExact.value = 0;
         }
       }else{
         transactionFee.value = '0.000000';
+        transactionFeeExact.value = 0;
       }
+    });
 
-      if(balance.value < transactionFee.value){
+    // calculate fees
+    const totalFee = computed(() => {
+      // if multisig
+      if(isMultiSig(selectedAccAdd.value)){
+        return parseFloat(lockFundTotalFee.value) + rentalFee.value + transactionFeeExact.value;
+      }else{
+        return rentalFee.value + transactionFeeExact.value;
+      }
+    });
+
+    watch(totalFee, (n) => {
+      if(balance.value < n && !isNotCosigner.value){
         showNoBalance.value = true;
-        disabledDuration.value = true;
         disabledPassword.value = true;
       }else{
-        showNoBalance.value =false;
-        disabledDuration.value = false;
+        showNoBalance.value = false;
         disabledPassword.value = false;
+      }
+    });
+
+    watch(isNotCosigner, (n) => {
+      if(n){
+        disabledPassword.value = true;
+        disabledDuration.value = true;
+        disableNamespaceName.value = true;
+      }else{
+        disabledPassword.value = false;
+        disabledDuration.value = false;
+        disableNamespaceName.value = false;
       }
     });
 
@@ -335,6 +359,10 @@ export default {
       transactionFee,
       updateNamespaceSelection,
       clearNamespaceSelection,
+      getMultiSigCosigner,
+      cosignerBalanceInsufficient,
+      cosignerAddress,
+      isNotCosigner,
     }
   },
 

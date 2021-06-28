@@ -7,13 +7,19 @@
   </div>
   <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-5'>
     <div class="md:col-span-3">
-      <form @submit.prevent="createNamespace">
+      <form @submit.prevent="extendNamespace">
         <fieldset class="w-full">
           <div class="mb-5">
             <div v-if="showNoBalance" class="border-2 rounded-3xl border-red-700 w-full h-24 text-center p-4">
               <div class="h-5 text-center">
                 <div class="rounded-full w-8 h-8 border border-gray-500 inline-block relative"><font-awesome-icon icon="times" class="text-gray-500 h-5 w-5 absolute" style="top: 5px; left:8px"></font-awesome-icon></div><br>
                 <div class="inline-block text-tsm">Insufficient Balance</div>
+              </div>
+            </div>
+            <div v-if="isNotCosigner" class="border-2 rounded-3xl border-yellow-400 w-full h-24 text-center p-4">
+              <div class="h-5 text-center">
+                <div class="rounded-full w-8 h-8 border border-yellow-500 inline-block relative"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-5 w-5 absolute" style="top: 5px; left:11px"></font-awesome-icon></div><br>
+                <div class="inline-block text-tsm">You are not a cosigner to this account</div>
               </div>
             </div>
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
@@ -35,6 +41,13 @@
               <div class="mb-1 z-20 border-b border-gray-200">
                 <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
                 <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
+              </div>
+            </div>
+            <div v-if="getMultiSigCosigner.list.length > 0">
+              <div class="text-tsm">Cosigner:
+                <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} (Balance: {{ getMultiSigCosigner.list[0].balance }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- Insufficient balance</span></span>
+                <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} XPX)</option></select></span>
+                <div v-if="cosignerBalanceInsufficient" class="error">- Insufficient balance</div>
               </div>
             </div>
           </div>
@@ -67,7 +80,7 @@
           <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
             <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">Clear</button>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createNamespace()">Create</button>
+            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="extendNamespace()">Create</button>
           </div>
         </fieldset>
       </form>
@@ -123,6 +136,8 @@ export default {
     const showPasswdError = ref(false);
     const selectNamespace = ref('');
     const showDuration = ref(false);
+    const cosignerBalanceInsufficient = ref(false);
+    const cosignerAddress = ref('');
 
     const namespaceOption = computed(() => {
       let namespace = [];
@@ -165,8 +180,12 @@ export default {
     const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
 
     const showNoBalance = ref(false);
+    const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
+
     if(balance.value < rentalFee.value){
-      showNoBalance.value = true;
+      if(!isNotCosigner.value){
+        showNoBalance.value = true;
+      }
       disabledPassword.value = true;
       disabledClear.value = true;
       disabledDuration.value = true;
@@ -178,7 +197,13 @@ export default {
 
     const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
     const moreThanOneAccount = computed(()=> (walletState.currentLoggedInWallet.accounts.length > 1)?true:false);
+
     const transactionFee = ref('0.000000');
+    const transactionFeeExact = ref(0);
+
+    const getMultiSigCosigner = computed(() => {
+      return NamespacesUtils.getCosignerList(selectedAccAdd.value);
+    });
 
     const changeSelection = (i) => {
       selectNamespace.value = '';
@@ -186,7 +211,7 @@ export default {
       selectedAccAdd.value = i.address;
       isMultiSigBool.value = isMultiSig(i.address);
       balance.value = i.balance;
-      (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
+      showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value)?true:false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
       emitter.emit('CLEAR_SELECT', 0);
@@ -195,12 +220,14 @@ export default {
     const updateNamespaceSelection = (namespaceNameSelected) => {
       showDuration.value = true;
       transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
     };
 
     const clearNamespaceSelection = () => {
       duration.value = '0';
       showDuration.value = false;
-      transactionFee = '0.000000';
+      transactionFee.value = '0.000000';
+      transactionFeeExact.value = 0;
     };
 
     const clearInput = () => {
@@ -209,38 +236,64 @@ export default {
       emitter.emit("CLEAR_SELECT", 0);
     };
 
-    watch(balance, (n) => {
-      if(n < rentalFee.value){
-        showNoBalance.value = true;
-        disabledPassword.value = true;
-        disabledClear.value = true;
-        disabledDuration.value = true;
-      }else{
-        disabledPassword.value = false;
-        disabledClear.value = false;
-        disabledDuration.value = false;
-      }
-    });
+    // watch(balance, (n) => {
+    //   if(n < rentalFee.value){
+    //     showNoBalance.value = true;
+    //     disabledPassword.value = true;
+    //     disabledClear.value = true;
+    //     disabledDuration.value = true;
+    //   }else{
+    //     disabledPassword.value = false;
+    //     disabledClear.value = false;
+    //     disabledDuration.value = false;
+    //   }
+    // });
 
     watch(duration, (n) => {
       if(n > 365){
         duration.value = '365';
       }
-      if(balance.value < rentalFee.value){
+      // if(balance.value < rentalFee.value){
+      //   showNoBalance.value = true;
+      //   disabledPassword.value = true;
+      // }else{
+      //   showNoBalance.value =false;
+      //   disabledPassword.value = false;
+      // }
+    });
+
+    // calculate fees
+    const totalFee = computed(() => {
+      // if multisig
+      if(isMultiSig(selectedAccAdd.value)){
+        return parseFloat(lockFundTotalFee.value) + rentalFee.value + transactionFeeExact.value;
+      }else{
+        return rentalFee.value + transactionFeeExact.value;
+      }
+    });
+
+    watch(totalFee, (n) => {
+      if(balance.value < n && !isNotCosigner.value){
         showNoBalance.value = true;
         disabledPassword.value = true;
       }else{
-        showNoBalance.value =false;
+        showNoBalance.value = false;
         disabledPassword.value = false;
       }
     });
 
-    watch(selectNamespace, (n) => {
-      // transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+    watch(isNotCosigner, (n) => {
+      if(n){
+        disabledPassword.value = true;
+        disabledDuration.value = true;
+      }else{
+        disabledPassword.value = false;
+        disabledDuration.value = false;
+      }
     });
 
-    const createNamespace = () => {
-      console.log('Create namespace');
+    const extendNamespace = () => {
+      console.log('Extend namespace');
     };
 
     return {
@@ -273,10 +326,14 @@ export default {
       lockFundTotalFee,
       selectNamespace, 
       namespaceOption,
-      createNamespace,
+      extendNamespace,
       transactionFee,
       clearNamespaceSelection,
       updateNamespaceSelection,
+      getMultiSigCosigner,
+      cosignerBalanceInsufficient,
+      cosignerAddress,
+      isNotCosigner,
     }
   },
 
