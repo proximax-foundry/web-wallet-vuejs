@@ -104,8 +104,6 @@ export default {
   },
 
   setup(p) {
-    const appStore = inject("appStore");
-    // const siriusStore = inject("siriusStore");
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const contactName = ref("");
