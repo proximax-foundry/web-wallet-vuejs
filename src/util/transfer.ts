@@ -19,14 +19,14 @@ import {
   TransactionBuilderFactory,
   PublicAccount,
   NetworkType,
-  calculateFee
+  calculateFee,
+  TransactionBuilder
 } from "tsjs-xpx-chain-sdk";
-
+import { BuildTransactions } from '@/util/buildTransactions';
 import { announceAggregateBonded, announceLockfundAndWaitForConfirmation } from '../util/listener.js';
+//line246
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { environment } from '../environment/environment.js';
-import { appStore } from "@/store/app";
-import { siriusStore } from "@/store/sirius";
 import { networkState } from "@/state/networkState";
 import { NetworkStateUtils } from "@/state/utils/networkStateUtils";
 import { walletState } from "@/state/walletState";
@@ -40,7 +40,7 @@ async function getAccInfo(address) {
 
 
 
-  let accountInfo = await WalletUtils.getAccountInfo(address);
+  let accountInfo = await WalletUtils.getAccInfo(address).then(accountinfo => accountinfo.publicAccount);
   return accountInfo;
 }
 
@@ -105,16 +105,16 @@ export const createTransaction = async (recipient, sendXPX, messageText, mosaics
       }
     });
   }
-
-  let transactionBuilder = new TransactionBuilderFactory();
+  let transactionBuilder = new BuildTransactions(networkType,undefined,FeeCalculationStrategy.ZeroFeeCalculationStrategy )
+  /* let transactionBuilder = new TransactionBuilderFactory(); */
   // calculate fee strategy
 
   if (ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE || ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE_TEST) {
-    transactionBuilder.feeCalculationStrategy = FeeCalculationStrategy.ZeroFeeCalculationStrategy;
+    transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
     //FeeCalculationStrategy.ZeroFeeCalculationStrategy
   }
   else {
-    transactionBuilder.feeCalculationStrategy = FeeCalculationStrategy.MiddleFeeCalculationStrategy;
+    transactionBuilder.setFeeStrategy(FeeCalculationStrategy.MiddleFeeCalculationStrategy);
   }
 
   // to get sender's private key
@@ -143,13 +143,7 @@ export const createTransaction = async (recipient, sendXPX, messageText, mosaics
     msg = PlainMessage.create(messageText);
   }
 
-  let transferTransaction = transactionBuilder.transfer()
-    .deadline(Deadline.create(environment.deadlineTransfer.deadline, environment.deadlineTransfer.chronoUnit))
-    .mosaics(mosaics)
-    .message(msg)
-    .networkType(networkType)
-    .recipient(recipientAddress)
-    .build();
+  let transferTransaction = transactionBuilder.transfer(recipientAddress,msg,mosaics)
 
   const account = Account.createFromPrivateKey(privateKey, networkType);
   const transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
@@ -166,11 +160,7 @@ export const createTransaction = async (recipient, sendXPX, messageText, mosaics
     console.log(multisigPublicAccount);
     const innerTxn = [transferTransaction.toAggregate(multisigPublicAccount)];
 
-    const aggregateBondedTransaction = transactionBuilder.aggregateBonded()
-      .deadline(Deadline.create(environment.deadlineTransfer.deadline, environment.deadlineTransfer.chronoUnit))
-      .innerTransactions(innerTxn)
-      .networkType(networkType)
-      .build();
+    const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn)
     console.log('aggregateBondedTransaction');
     console.log(aggregateBondedTransaction);
     // if (otherCosigners.length > 0) {
@@ -179,13 +169,7 @@ export const createTransaction = async (recipient, sendXPX, messageText, mosaics
     const aggregateBondedTransactionSigned = account.sign(aggregateBondedTransaction, hash);
     console.log('aggregateBondedTransactionSigned');
     console.log(aggregateBondedTransactionSigned);
-    const hashLockTransaction = transactionBuilder.hashLock()
-      .deadline(Deadline.create())
-      .duration(UInt64.fromUint(environment.lockFundDuration))
-      .mosaic(new Mosaic(new MosaicId(environment.mosaicXpxInfo.id), UInt64.fromUint(Number(10000000))))
-      .signedTransaction(aggregateBondedTransactionSigned)
-      .networkType(networkType)
-      .build();
+    const hashLockTransaction = transactionBuilder.hashLock(new Mosaic(new MosaicId(environment.mosaicXpxInfo.id), UInt64.fromUint(Number(10000000))),UInt64.fromUint(environment.lockFundDuration),aggregateBondedTransactionSigned)
     const hashLockTransactionSigned = account.sign(hashLockTransaction, hash);
 
     (async () => {
@@ -209,15 +193,18 @@ export const createTransaction = async (recipient, sendXPX, messageText, mosaics
 export const mosaicTransaction = (divisibility, supply, duration, durationType, mutable, transferable, walletPassword, accountName, appStore, siriusStore) => {
 
   // verify password
-  let verify = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword);
-  if (verify < 1) {
+
+  let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword)
+  /*let verify = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword); 
+ */
+  if (!verify) {
     return verify;
   }
-  const add = fetch(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode) + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash });
+  
 
-  return add.then((hash) => {
+  const hash = networkState.currentNetworkProfile.generationHash
 
-    let accountDetails = appStore.getAccDetails(accountName);
+    let accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.name = accountName)
     // var mosaicDuration = (1 * 365 * 24 * 60 * 4 ); // 1 year - 15 sec per block
     // var mosaicDuration;
     // if(durationType == 'month'){
@@ -225,31 +212,18 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
     // }else{
     //   mosaicDuration = parseInt(duration) * 365 * 24 * 60 * 4;
     // }
-
-    let privateKey = appStore.decryptPrivateKey(walletPassword, accountDetails.encrypted, accountDetails.iv);
-    let networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
+    let publicKey = accountDetails.publicKey
+    let privateKey = WalletUtils.decryptPrivateKey(walletPassword, accountDetails.encrypted, accountDetails.iv);
+    let networkType = networkState.currentNetworkProfile.network.type
+    const publicAccount = PublicAccount.createFromPublicKey(publicKey, networkType)
     const account = Account.createFromPrivateKey(privateKey, networkType);
-
-    let transactionBuilder = new TransactionBuilderFactory();
-    const nonce = MosaicNonce.createRandom();
-    let mosaicDefinitionTransaction = transactionBuilder.mosaicDefinition()
-      .deadline(Deadline.create(environment.deadlineTransfer.deadline, environment.deadlineTransfer.chronoUnit))
-      .mosaicNonce(nonce)
-      .mosaicId(MosaicId.createFromNonce(nonce, account))
-      .mosaicProperties(
-        MosaicProperties.create({
-          supplyMutable: (mutable) ? true : false,
-          transferable: (transferable) ? true : false,
-          divisibility: divisibility,
-          // duration: (duration) ? UInt64.fromUint(mosaicDuration) : undefined
-          duration: undefined
-        })
-      )
-      .networkType(networkType)
-      .build();
+    let transactionBuilder = new BuildTransactions(networkType)
+   
+    let mosaicDefinitionTransaction = transactionBuilder.mosaicDefinition(publicAccount,mutable,transferable,divisibility)
+    
 
     let supp = parseFloat(supply) * Math.pow(10, divisibility);
-    const mosaicSupplyChangeTransaction = transactionBuilder.mosaicSupplyChange()
+    const mosaicSupplyChangeTransaction = transactionBuilder. buildMosaicSupplyChangeBuilder()
       .deadline(Deadline.create(environment.deadlineTransfer.deadline, environment.deadlineTransfer.chronoUnit))
       .mosaicId(mosaicDefinitionTransaction.mosaicId)
       .direction(MosaicSupplyType.Increase)
@@ -258,20 +232,20 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
       .build();
 
     let innerTxn = [
-      mosaicDefinitionTransaction.toAggregate(account.publicAccount),
-      mosaicSupplyChangeTransaction.toAggregate(account.publicAccount)
+      mosaicDefinitionTransaction.toAggregate(publicAccount),
+      mosaicSupplyChangeTransaction.toAggregate(publicAccount)
     ]
 
-    const aggregateTransaction = transactionBuilder.aggregateComplete()
-      .deadline(Deadline.create(environment.deadlineTransfer.deadline, environment.deadlineTransfer.chronoUnit))
+    const aggregateTransaction = transactionBuilder.aggregateComplete(innerTxn)
+      /* .deadline(Deadline.create(environment.deadlineTransfer.deadline, environment.deadlineTransfer.chronoUnit))
       .innerTransactions(innerTxn)
       .networkType(networkType)
-      .build();
+      .build(); */
 
-    transactionBuilder.fee = amountFormatterSimple(aggregateTransaction.maxFee.compact());
+   /*  transactionBuilder.fee = amountFormatterSimple(aggregateTransaction.maxFee.compact()); */
     // console.log('TF: '+transactionBuilder.fee);
     const signedTransaction = account.sign(aggregateTransaction, hash);
-    const transactionHttp = new TransactionHttp(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
+    const transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
 
     transactionHttp
       .announce(signedTransaction)
@@ -280,7 +254,7 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
         // console.log('annoucement is made here');
         return true;
       }, err => console.error(err));
-  });
+
 }
 
 /**
@@ -377,15 +351,18 @@ const addZeros = (cant, amount = '0') => {
 
 const getFeeStrategy = () => {
 
-  let transactionBuilder = new TransactionBuilderFactory();
+  let transactionBuilder = new BuildTransactions(networkState.currentNetworkProfile.network.type,undefined,FeeCalculationStrategy.ZeroFeeCalculationStrategy )
+  /* let transactionBuilder = new TransactionBuilderFactory(); */
+  // calculate fee strategy
 
   if (ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE || ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE_TEST) {
-    transactionBuilder.feeCalculationStrategy = FeeCalculationStrategy.ZeroFeeCalculationStrategy;
+    transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
+    //FeeCalculationStrategy.ZeroFeeCalculationStrategy
   }
   else {
-    transactionBuilder.feeCalculationStrategy = FeeCalculationStrategy.MiddleFeeCalculationStrategy;
+    transactionBuilder.setFeeStrategy(FeeCalculationStrategy.MiddleFeeCalculationStrategy);
   }
-  return transactionBuilder.feeCalculationStrategy;
+  return transactionBuilder.getFeeStrategy();
 }
 
 export const makeTransaction = readonly({
@@ -393,7 +370,8 @@ export const makeTransaction = readonly({
 })
 
 export const getFakeEncryptedMessageSize =(message)=>{
-  return EncryptedMessage.create(message,  PublicAccount.createFromPublicKey("0".repeat(64)), "0".repeat(64)).size();
+  let networkType = networkState.currentNetworkProfile.network.type
+  return EncryptedMessage.create(message,  PublicAccount.createFromPublicKey("0".repeat(64),networkType), "0".repeat(64)).size();
 }
 
 export const getPlainMessageSize =(message)=>{
