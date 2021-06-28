@@ -46,8 +46,8 @@
           <div class="mt-5">
             <TextInput placeholder="Enter Name" :disabled="disableNamespaceName" :showError="showNamespaceNameError" v-model="namespaceName" :imgRequired="true" errorMessage="Required field, minlength 2, max length 16. Alphanumeric characters" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" />
           </div>
-          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" v-model="selectNamespace" :options="namespaceOption()" selectDefault="1" />
-          <DurationInput :disabled="disabledDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
+          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" v-model="selectNamespace" :options="namespaceOption" selectDefault="1" @show-selection="updateNamespaceSelection" @clear-selection="clearNamespaceSelection" />
+          <DurationInput :disabled="disabledDuration" v-if="showDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span class="text-xs">{{ transactionFee }}</span> XPX</div>
           </div>
@@ -92,7 +92,7 @@
   </div>
 </template>
 <script>
-import { computed, ref, getCurrentInstance, watch } from 'vue';
+import { computed, ref, getCurrentInstance, watch, nextTick } from 'vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import DurationInput from '@/modules/services/submodule/namespaces/components/DurationInput.vue';
@@ -115,8 +115,9 @@ export default {
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const disableNamespaceName = ref(false);
     const namespaceName = ref('');
+    const showDuration = ref(true);
     const showDurationErr = ref(false);
-    const duration = ref("0");
+    const duration = ref("1");
     const walletPassword = ref('');
     const err = ref('');
     const showMenu = ref(false);
@@ -131,14 +132,20 @@ export default {
 
     const selectNamespace = ref('');
 
-    const namespaceOption = () => {
+    const namespaceOption = computed(() => {
       let namespace = [];
       namespace.push({
         value: '1',
         label: 'New Root Namespace',
-      })//disabled: true
+        level: 0,
+        disabled: false,
+      });
+      const namespacesList = NamespacesUtils.listNamespaces(selectedAccAdd.value);
+      if(namespacesList.length > 0){
+        namespace.push.apply(namespace, namespacesList);
+      }
       return namespace;
-    };
+    });
 
     const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
     const rentalFee = computed(()=> {
@@ -189,6 +196,7 @@ export default {
 
     const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
     const moreThanOneAccount = computed(()=> (walletState.currentLoggedInWallet.accounts.length > 1)?true:false);
+
     const transactionFee = ref('0.000000');
 
     const changeSelection = (i) => {
@@ -199,7 +207,30 @@ export default {
       (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
+      emitter.emit('CLEAR_SELECT', 0);
     }
+
+    const updateNamespaceSelection = (namespaceNameSelected) => {
+      if(namespaceNameSelected == '1'){
+        showDuration.value = true;
+        //root
+        if(namespaceName.value.length > 0){
+          transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        }
+      }else{
+        duration.value = '0';
+        showDuration.value = false;
+        //subnamespace
+        if(namespaceName.value.length > 0){
+          transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected.value, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        }
+      }
+    };
+
+    const clearNamespaceSelection = () => {
+      duration.value = '0';
+      showDuration.value = false;
+    };
 
     const clearInput = () => {
       walletPassword.value = '';
@@ -213,11 +244,13 @@ export default {
     };
 
     watch(balance, (n) => {
-      if(n < rentalFee.value){
+      if(n < rentalFee.value || isMultiSig(selectedAccAdd.value)){
         showNoBalance.value = true;
         disabledPassword.value = true;
         disabledClear.value = true;
-        disabledDuration.value = true;
+        if(isMultiSig(selectedAccAdd.value)){
+          disabledDuration.value = true;
+        }
         disableNamespaceName.value = true;
       }else{
         disabledPassword.value = false;
@@ -245,7 +278,7 @@ export default {
     watch(namespaceName, (n) => {
       if(namespaceName.value.length > 0){
         if(namespaceName.value.match(namespacePattern)){
-          transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
         }else{
           transactionFee.value = '0.000000';
         }
@@ -286,6 +319,7 @@ export default {
       disabledPassword,
       disabledClear,
       disabledDuration,
+      showDuration,
       duration,
       showDurationErr,
       isMultiSig,
@@ -299,6 +333,8 @@ export default {
       namespaceOption,
       createNamespace,
       transactionFee,
+      updateNamespaceSelection,
+      clearNamespaceSelection,
     }
   },
 

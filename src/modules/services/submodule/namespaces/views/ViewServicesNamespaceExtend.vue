@@ -43,10 +43,10 @@
               <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} XPX</span></div>
             </div>
           </div>
-          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" v-model="selectNamespace" :options="namespaceOption()"  />
-          <DurationInput :disabled="disabledDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
+          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" v-model="selectNamespace" :options="namespaceOption" @show-selection="updateNamespaceSelection" @clear-selection="clearNamespaceSelection" />
+          <DurationInput :disabled="disabledDuration" v-if="showDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: 0.<span class="text-xs">062750</span> XPX</div>
+            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: {{ transactionFee }} XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFee }} {{currencyName}}</div>
@@ -122,15 +122,14 @@ export default {
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
     const selectNamespace = ref('');
+    const showDuration = ref(false);
 
-    const namespaceOption = () => {
+    const namespaceOption = computed(() => {
       let namespace = [];
-      // namespace.push({
-      //   value: '1',
-      //   label: 'New Root Namespace',
-      // })//disabled: true
+      const namespacesList = NamespacesUtils.listRootNamespaces(selectedAccAdd.value);
+      namespace.push.apply(namespace, namespacesList);
       return namespace;
-    };
+    });
 
     const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
     const rentalFee = computed(()=> {
@@ -182,6 +181,7 @@ export default {
     const transactionFee = ref('0.000000');
 
     const changeSelection = (i) => {
+      selectNamespace.value = '';
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
       isMultiSigBool.value = isMultiSig(i.address);
@@ -189,7 +189,19 @@ export default {
       (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
-    }
+      emitter.emit('CLEAR_SELECT', 0);
+    };
+
+    const updateNamespaceSelection = (namespaceNameSelected) => {
+      showDuration.value = true;
+      transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+    };
+
+    const clearNamespaceSelection = () => {
+      duration.value = '0';
+      showDuration.value = false;
+      transactionFee = '0.000000';
+    };
 
     const clearInput = () => {
       walletPassword.value = '';
@@ -223,6 +235,10 @@ export default {
       }
     });
 
+    watch(selectNamespace, (n) => {
+      // transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+    });
+
     const createNamespace = () => {
       console.log('Create namespace');
     };
@@ -244,6 +260,7 @@ export default {
       changeSelection,
       disabledPassword,
       disabledClear,
+      showDuration,
       disabledDuration,
       duration,
       showDurationErr,
@@ -257,6 +274,9 @@ export default {
       selectNamespace, 
       namespaceOption,
       createNamespace,
+      transactionFee,
+      clearNamespaceSelection,
+      updateNamespaceSelection,
     }
   },
 
