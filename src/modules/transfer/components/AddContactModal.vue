@@ -131,7 +131,8 @@ export default {
     // });
 
     const SaveContact = () => {
-      let added = walletState.currentLoggedInWallet.addAddressBook(
+      if (contactName.value !== ''&& address.value !== ''){
+      walletState.currentLoggedInWallet.addAddressBook(
         new AddressBook(contactName.value, address.value)
       );
 
@@ -143,6 +144,7 @@ export default {
         isAddContactQues.value = true;
         isSuccessAdded.value = false;
       }, 2500);
+    }
     };
 
     const clearInput = () => (contactName.value = "");
