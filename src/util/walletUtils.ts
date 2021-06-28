@@ -12,9 +12,9 @@ import { SecretKeyPair } from "../models/interface/secretKeyPair"
 import { MultisigInfo } from "../models/multisigInfo"
 import {
     SimpleWallet, Password, RawAddress, Convert, Crypto,
-    WalletAlgorithm, PublicAccount, Account, NetworkType, 
-    AggregateTransaction, CosignatureTransaction, MosaicNonce,
-    NamespaceId, Address, AccountInfo, MosaicId, AliasType,
+    WalletAlgorithm, PublicAccount, Account, NetworkType, MultisigAccountGraphInfo,
+    AggregateTransaction, CosignatureTransaction, MosaicNonce,MultisigAccountInfo,
+    NamespaceId, Address, AccountInfo, MosaicId, AliasType, QueryParams, AggregateBondedTransactionBuilder
 } from "tsjs-xpx-chain-sdk"
 import { computed } from "vue";
 import { Helper, LooseObject } from "./typeHelper";
@@ -190,14 +190,12 @@ export class WalletUtils {
             }
         });
     }
-//subject to change 
-    static  getAccountPublicKey(address ) {
+    static getAggregateBondedTransactions = (publicKey) :Promise<AggregateTransaction[]> =>{
         const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
-
         return new Promise((resolve, reject) => {
             try {
-             chainAPICall.accountAPI.getAccountInfo(address).then(accountInfo => {
-                    resolve(accountInfo.publicKey);
+                chainAPICall.accountAPI.aggregateBondedTransactions(publicKey,new QueryParams(100)).then(transactions => {
+                    resolve(transactions);
                 }).catch((error) => {
                     console.warn(error);
                     reject(false);
@@ -207,17 +205,15 @@ export class WalletUtils {
                 reject(false);
             }
         });
-      /*  const accountAPI = new AccountAPI(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort))
-       return accountAPI */
     }
 
-    static  getAccountInfo (address ):Promise<PublicAccount> {
-        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
 
+    static getMultisigAccInfo(address): Promise<MultisigAccountInfo> {
+        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
         return new Promise((resolve, reject) => {
             try {
-             chainAPICall.accountAPI.getAccountInfo(address).then(accountInfo => {
-                    resolve(accountInfo.publicAccount);
+             chainAPICall.accountAPI.getMultisigAccountInfo(address).then(accountInfo => {
+                    resolve(accountInfo);
                 }).catch((error) => {
                     console.warn(error);
                     reject(false);
@@ -227,9 +223,43 @@ export class WalletUtils {
                 reject(false);
             }
         });
-      /*  const accountAPI = new AccountAPI(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort))
-       return accountAPI */
     }
+
+    static getMultisigAccGraphInfo(address): Promise<MultisigAccountGraphInfo> {
+        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+        return new Promise((resolve, reject) => {
+            try {
+             chainAPICall.accountAPI.getMultisigAccountGraphInfo(address).then(accountInfo => {
+                    resolve(accountInfo);
+                }).catch((error) => {
+                    console.warn(error);
+                    reject(false);
+                });
+            } catch (err) {
+                console.warn(err);
+                reject(false);
+            }
+        });
+    }
+
+    static getAccInfo(address):Promise<AccountInfo> {
+        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+
+        return new Promise((resolve, reject) => {
+            try {
+             chainAPICall.accountAPI.getAccountInfo(address).then(accountInfo => {
+                    resolve(accountInfo);
+                }).catch((error) => {
+                    console.warn(error);
+                    reject(false);
+                });
+            } catch (err) {
+                console.warn(err);
+                reject(false);
+            }
+        });
+    }
+
   
     /**
    *
