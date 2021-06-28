@@ -6,13 +6,12 @@
         <div class="flex justify-between pr-4 rounded-xl mb-4 items-center" :class="account.default?'bg-white':'bg-gray-100'">
           <div class="text-left w-full relative">
             <div class="absolute z-20 w-full h-full"></div>
-            <input
+            <div
               :id="account.address"
               class="text-sm w-full outline-none z-10"
               :class="account.default?'bg-white':'bg-gray-100'"
-              type="text"
-              :value="appStore.pretty(account.address)"
-            />
+              :copyValue="prettyAddress(account.address)" copySubject="Address"
+            >{{prettyAddress(account.address)}}</div>
           </div>
           <font-awesome-icon icon="copy" @click="copy(account.address)" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
         </div>
@@ -49,10 +48,13 @@
 </template>
 
 <script>
-import { computed, inject, getCurrentInstance } from "vue";
+import { computed, getCurrentInstance } from "vue";
 import CryptoJS from 'crypto-js';
-import { copyKeyFunc } from '@/util/functions';
+import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import { networkState } from "@/state/networkState";
+import { walletState } from '@/state/walletState';
+import { Helper } from '@/util/typeHelper';
 
 export default{
   name: 'AccountTile',
@@ -60,10 +62,15 @@ export default{
   setup(p){
     const toast = useToast();
     const internalInstance = getCurrentInstance();
-    const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const copy = (id) => copyKeyFunc(id, toast);
+    const copy = (id) =>{
+      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
+      let copySubject = document.getElementById(id).getAttribute("copySubject");
+      copyToClipboard(stringToCopy);
+
+      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+    };   
+    
     const mosaicNum = computed(() => {
       return (p.account.mosaic!=undefined)?p.account.mosaic.length:0;
     });
@@ -82,14 +89,19 @@ export default{
       return isMulti;
     });
 
+    const prettyAddress = (address) => {
+      const prettierAddress = Helper.createAddress(address).pretty();
+      return prettierAddress;    
+    }
+    
     const setAsDefaultAccount = (add) => {
-      if(appStore.setAccountDefault(add)){
+        walletState.currentLoggedInWallet.setDefaultAccountByAddress(add);
+        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         emitter.emit("CLOSE_MENU_TRIGGER", p.i);
-      }
     };
 
     const exportWallet = () => {
-      const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
+      const wallet = walletState.currentLoggedInWallet.name;
       let wordArray = CryptoJS.enc.Utf8.parse(JSON.stringify(wallet));
       let file = CryptoJS.enc.Base64.stringify(wordArray);
       const now = Date.now()
@@ -104,9 +116,9 @@ export default{
       a.style.display = 'none';
       a.href = url;
       // the filename you want
-      let networkTypeName = siriusStore.getNetworkByType(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network).name;
-      networkTypeName = (networkTypeName.includes(' ')) ? networkTypeName.split(' ').join('') : networkTypeName;
-      a.download = `${wallet.name}_${networkTypeName}_${year}-${month}-${day}.wlt`;
+      let networkName = networkState.chainNetworkName;
+      networkName = (networkName.includes(' ')) ? networkName.split(' ').join('') : networkName;
+      a.download = `${wallet.name}_${networkName}_${year}-${month}-${day}.wlt`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -131,8 +143,8 @@ export default{
     };
 
     return {
+      prettyAddress,
       copy,
-      appStore,
       showHideMenu,
       hoverOverMenu,
       hoverOutMenu,
