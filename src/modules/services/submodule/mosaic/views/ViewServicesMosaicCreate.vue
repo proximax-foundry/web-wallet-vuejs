@@ -102,7 +102,7 @@ import { computed, ref, inject, getCurrentInstance, watch } from 'vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
 import NumberInput from '@/modules/services/submodule/mosaic/components/NumberInput.vue';
-import { mosaicTransaction, convertToCurrency, convertToExact } from '@/util/transfer.js';
+import { mosaicTransaction, convertToCurrency, convertToExact } from '@/util/transfer';
 
 export default {
   name: 'ViewMosaicCreate',

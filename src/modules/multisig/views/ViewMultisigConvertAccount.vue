@@ -95,7 +95,7 @@ import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import AddCosignModal from '../components/AddCosignModal.vue';
-import { multiSign } from '@/util/multiSignatory.js';
+import { multiSign } from '@/util/multiSignatory';
 import { transferEmitter } from '@/util/listener.js';
 export default {
   name: 'ViewConvertAccountMultisig',

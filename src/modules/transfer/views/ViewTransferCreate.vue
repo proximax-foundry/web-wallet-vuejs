@@ -365,7 +365,7 @@ import {
   getPlainMessageSize,
   convertToExact,
   convertToCurrency,
-} from "@/util/transfer.js"; //getMosaicsAllAccounts
+} from "@/util/transfer"; //getMosaicsAllAccounts
 import AddContactModal from "@/modules/transfer/components/AddContactModal.vue";
 import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
 

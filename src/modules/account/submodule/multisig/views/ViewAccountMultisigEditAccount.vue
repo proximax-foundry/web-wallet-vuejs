@@ -138,7 +138,7 @@ import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import AddCosignModal from '@/modules/account/submodule/multisig/components/AddCosignModal.vue';
-import { multiSign } from '@/util/multiSignatory.js';
+import { multiSign } from '@/util/multiSignatory';
 import MultisigSchemeModal from '@/modules/account/submodule/multisig/components/MultisigSchemeModal.vue';
 import { transferEmitter } from '@/util/listener.js';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';

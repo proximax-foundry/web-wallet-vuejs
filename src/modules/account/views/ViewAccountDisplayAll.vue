@@ -14,7 +14,7 @@
 <script>
 import { computed, inject, getCurrentInstance, ref } from "vue";
 import AccountTile from '@/modules/account/components/AccountTile.vue';
-import { multiSign } from '@/util/multiSignatory.js';
+import { multiSign } from '@/util/multiSignatory';
 import { useToast } from "primevue/usetoast";
 
 export default {

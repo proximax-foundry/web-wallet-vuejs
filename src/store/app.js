@@ -10,7 +10,7 @@ import {
 } from "tsjs-xpx-chain-sdk";
 
 import { startListening, stopListening, addListenerstoAccount } from '../util/listener.js';
-import { multiSign } from '../util/multiSignatory.js';
+import { multiSign } from '../util/multiSignatory';
 import { siriusStore, chainNetwork } from '@/store/sirius';
 
 const sdk = require('tsjs-xpx-chain-sdk');
