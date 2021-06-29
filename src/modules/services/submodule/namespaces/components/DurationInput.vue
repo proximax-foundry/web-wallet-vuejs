@@ -7,7 +7,7 @@
         <div class="ml-6 text-xs mt-1 text-gray-500 absolute" style="width:150px; top: 0px;">{{ title }}</div>
       </div>
       <!-- @keydown="validate" -->
-      <input :disabled="disabled" @input="$emit('update:modelValue', $event.target.value)" :value="modelValue" @keypress="validateKey" type="text" min=0 :max="max"  :maxlength="max" :placeholder="placeholder" class="text-placeholder bg-white text-right" @click="clickInputText()">
+      <input :disabled="disabled" @input="$emit('update:modelValue', $event.target.value)" :value="modelValue" @keypress="validateKey" type="text" min=0 :max="max"  :maxlength="max" :placeholder="placeholder" class="text-placeholder bg-white text-right" @focus="$event.target.select()" @click="clickInputText()">
       <div class="w-5"></div>
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
