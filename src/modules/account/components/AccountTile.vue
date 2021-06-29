@@ -101,7 +101,7 @@ export default{
     };
 
     const exportWallet = () => {
-      const wallet = walletState.currentLoggedInWallet.name;
+      const wallet = walletState.currentLoggedInWallet;
       let wordArray = CryptoJS.enc.Utf8.parse(JSON.stringify(wallet));
       let file = CryptoJS.enc.Base64.stringify(wordArray);
       const now = Date.now()
@@ -118,6 +118,8 @@ export default{
       // the filename you want
       let networkName = networkState.chainNetworkName;
       networkName = (networkName.includes(' ')) ? networkName.split(' ').join('') : networkName;
+      console.log(networkName)
+
       a.download = `${wallet.name}_${networkName}_${year}-${month}-${day}.wlt`;
       document.body.appendChild(a);
       a.click();
