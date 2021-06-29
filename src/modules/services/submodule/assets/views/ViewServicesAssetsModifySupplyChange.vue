@@ -16,6 +16,12 @@
                 <div class="inline-block text-tsm">Insufficient Balance</div>
               </div>
             </div>
+            <div v-if="isNotCosigner" class="border-2 rounded-3xl border-yellow-400 w-full h-24 text-center p-4">
+              <div class="h-5 text-center">
+                <div class="rounded-full w-8 h-8 border border-yellow-500 inline-block relative"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-5 w-5 absolute" style="top: 5px; left:11px"></font-awesome-icon></div><br>
+                <div class="inline-block text-tsm">You are not a cosigner to this account</div>
+              </div>
+            </div>
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
             <div v-if="moreThanOneAccount" class="text-left p-4">
               <div class="mb-1 cursor-pointer z-20 border-b border-gray-200" @click="showMenu = !showMenu">
@@ -35,6 +41,13 @@
               <div class="mb-1 z-20 border-b border-gray-200">
                 <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
                 <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
+              </div>
+            </div>
+            <div v-if="getMultiSigCosigner.list.length > 0">
+              <div class="text-tsm">Cosigner:
+                <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} (Balance: {{ getMultiSigCosigner.list[0].balance }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- Insufficient balance</span></span>
+                <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} XPX)</option></select></span>
+                <div v-if="cosignerBalanceInsufficient" class="error">- Insufficient balance</div>
               </div>
             </div>
           </div>
@@ -105,7 +118,7 @@ import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
 
 export default {
-  name: 'ViewMosaicLinkToNamespace',
+  name: 'ViewServicesAssetsModifySupplyChange',
   components: {
     PasswordInput,
     SupplyInput,
@@ -125,6 +138,9 @@ export default {
 
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
+
+    const cosignerBalanceInsufficient = ref(false);
+    const cosignerAddress = ref('');
 
     const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
     const rentalFee = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.mosaicRentalFee, networkState.currentNetworkProfile.network.currency.divisibility) );
@@ -159,23 +175,30 @@ export default {
     const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
 
     const showNoBalance = ref(false);
+    const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
 
     const supply = ref('0');
     const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
     const moreThanOneAccount = computed(()=> (walletState.currentLoggedInWallet.accounts.length > 1)?true:false);
     const transactionFee = ref('0.000000');
+    const transactionFeeExact = ref(0);
 
     const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
+
+    const getMultiSigCosigner = computed(() => {
+      return AssetsUtils.getCosignerList(selectedAccAdd.value);
+    });
 
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
       balance.value = i.balance;
-      (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
+      showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value)?true:false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
       isMultiSigBool.value = isMultiSig(i.address);
       ownerPublicAccount.value = WalletUtils.createPublicAccount(i.publicKey, networkState.currentNetworkProfile.network.type);
+      emitter.emit('CLEAR_SELECT', 0);
     }
 
     const assetSupply = ref(0);
@@ -196,6 +219,7 @@ export default {
       assetTransferable.value = selectedAsset.transferable;
       assetMutable.value = selectedAsset.supplyMutable;
       transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, assetId, selectIncreaseDecrease.value, supply.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, assetId, selectIncreaseDecrease.value, supply.value), networkState.currentNetworkProfile.network.currency.divisibility);
     };
 
     const assetOptions = computed(() => {
@@ -226,12 +250,14 @@ export default {
     watch(selectIncreaseDecrease, (n) => {
       if(selectAsset.value){
         transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, selectAsset.value, n, supply.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, selectAsset.value, n, supply.value), networkState.currentNetworkProfile.network.currency.divisibility);
       }
     });
 
     watch(supply, (n) => {
       if(selectAsset.value){
         transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, selectAsset.value, selectIncreaseDecrease.value, n), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, selectAsset.value, selectIncreaseDecrease.value, n), networkState.currentNetworkProfile.network.currency.divisibility);
       }
     });
 
@@ -247,6 +273,37 @@ export default {
     //     disabledClear.value = false;
     //   }
     // });
+
+    const totalFee = computed(() => {
+      // if multisig
+      if(isMultiSig(selectedAccAdd.value)){
+        return parseFloat(lockFundTotalFee.value) + rentalFee.value + transactionFeeExact.value;
+      }else{
+        return rentalFee.value + transactionFeeExact.value;
+      }
+    });
+
+    watch(totalFee, (n) => {
+      if(balance.value < n && !isNotCosigner.value){
+        showNoBalance.value = true;
+        disabledPassword.value = true;
+        disabledSupply.value = true;
+      }else{
+        showNoBalance.value = false;
+        disabledPassword.value = false;
+        disabledSupply.value = false;
+      }
+    });
+
+    watch(isNotCosigner, (n) => {
+      if(n){
+        disabledPassword.value = true;
+        disabledSupply.value = true;
+      }else{
+        disabledPassword.value = false;
+        disabledSupply.value = false;
+      }
+    });
 
     return {
       accounts,
@@ -278,12 +335,17 @@ export default {
       selectIncreaseDecrease,
       modifyMosaic,
       transactionFee,
+      transactionFeeExact,
       changeAsset,
       assetSupply,
       assetDuration,
       assetDivisibility,
       assetTransferable,
       assetMutable,
+      getMultiSigCosigner,
+      cosignerBalanceInsufficient,
+      cosignerAddress,
+      isNotCosigner,
     }
   },
 

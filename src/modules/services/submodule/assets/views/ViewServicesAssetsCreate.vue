@@ -16,6 +16,12 @@
                 <div class="inline-block text-tsm">Insufficient Balance</div>
               </div>
             </div>
+            <div v-if="isNotCosigner" class="border-2 rounded-3xl border-yellow-400 w-full h-24 text-center p-4">
+              <div class="h-5 text-center">
+                <div class="rounded-full w-8 h-8 border border-yellow-500 inline-block relative"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-5 w-5 absolute" style="top: 5px; left:11px"></font-awesome-icon></div><br>
+                <div class="inline-block text-tsm">You are not a cosigner to this account</div>
+              </div>
+            </div>
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
             <div v-if="moreThanOneAccount" class="text-left p-4">
               <div class="mb-1 cursor-pointer z-20 border-b border-gray-200" @click="showMenu = !showMenu">
@@ -35,6 +41,13 @@
               <div class="mb-1 z-20 border-b border-gray-200">
                 <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
                 <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
+              </div>
+            </div>
+            <div v-if="getMultiSigCosigner.list.length > 0">
+              <div class="text-tsm">Cosigner:
+                <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} (Balance: {{ getMultiSigCosigner.list[0].balance }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- Insufficient balance</span></span>
+                <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} XPX)</option></select></span>
+                <div v-if="cosignerBalanceInsufficient" class="error">- Insufficient balance</div>
               </div>
             </div>
           </div>
@@ -125,6 +138,7 @@ export default {
     SupplyInput,
     NumberInput,
   },
+
   setup(){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -146,7 +160,6 @@ export default {
     const disabledSupply = ref(false);
     const disabledDivisibility = ref(false);
     const disabledClear = ref(false);
-    // const supplyPrecision = computed( () => divisibility.value);
     const disabledDuration = ref(false);
     const durationOption =ref('month');
     const duration = ref('1');
@@ -155,6 +168,8 @@ export default {
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
     const durationCheckDisabled = ref(false);
+    const cosignerBalanceInsufficient = ref(false);
+    const cosignerAddress = ref('');
 
     const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
     const rentalFee = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.mosaicRentalFee, networkState.currentNetworkProfile.network.currency.divisibility) );
@@ -166,7 +181,6 @@ export default {
     const lockFundTxFee = ref(0.0445);
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
-
     const disableCreate = computed(() => !(
       walletPassword.value.match(passwdPattern) && !disabledMutableCheck.value && (divisibility.value != '') && (supply.value > 0) && (!showDurationErr.value)
     ));
@@ -174,10 +188,8 @@ export default {
     const isMultiSig = (address) => {
       const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
       let isMulti = false;
-      if(account.multisigInfo != undefined){
-        if(account.multisigInfo[0].cosignaturies.length > 0){
-          isMulti = true;
-        }
+      if(account.getDirectParentMultisig().length > 0){
+        isMulti = true;
       }
       return isMulti;
     };
@@ -191,8 +203,12 @@ export default {
     const supply = ref('0');
 
     const showNoBalance = ref(false);
+    const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
+
     if(balance.value < rentalFee.value){
-      showNoBalance.value = true;
+      if(!isNotCosigner.value){
+        showNoBalance.value = true;
+      }
       disabledMutableCheck.value = true;
       disabledTransferableCheck.value = true;
       disabledPassword.value = true;
@@ -219,13 +235,18 @@ export default {
 
     const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
     const transactionFee = ref( Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility));
+    const transactionFeeExact = ref(Helper.convertToExact(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility));
+
+    const getMultiSigCosigner = computed(() => {
+      return AssetsUtils.getCosignerList(selectedAccAdd.value);
+    });
 
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
       isMultiSigBool.value = isMultiSig(i.address);
       balance.value = i.balance;
-      (balance.value < rentalFee.value)?showNoBalance.value = true:showNoBalance.value = false;
+      showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value)?true:false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
       ownerPublicAccount.value = WalletUtils.createPublicAccount(i.publicKey, networkState.currentNetworkProfile.network.type);
@@ -251,38 +272,41 @@ export default {
 
     watch(divisibility, (n) => {
       transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, n, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, n, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
     watch(isMutable, (n) => {
       transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
     watch(isTransferable, (n) => {
       transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, n, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, n, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
-    watch(balance, (n) => {
-      if(n < rentalFee.value){
-        showNoBalance.value = true;
-        disabledMutableCheck.value = true;
-        disabledTransferableCheck.value = true;
-        disabledPassword.value = true;
-        disabledSupply.value = true;
-        disabledDivisibility.value = true;
-        disabledClear.value = true;
-        disabledDuration.value = true;
-        durationCheckDisabled.value = true;
-      }else{
-        disabledMutableCheck.value = false;
-        disabledTransferableCheck.value = false;
-        disabledPassword.value = false;
-        disabledSupply.value = false;
-        disabledDivisibility.value = false;
-        disabledClear.value = false;
-        disabledDuration.value = false;
-        durationCheckDisabled.value = false;
-      }
-    });
+    // watch(balance, (n) => {
+    //   if(n < rentalFee.value){
+    //     showNoBalance.value = true;
+    //     disabledMutableCheck.value = true;
+    //     disabledTransferableCheck.value = true;
+    //     disabledPassword.value = true;
+    //     disabledSupply.value = true;
+    //     disabledDivisibility.value = true;
+    //     disabledClear.value = true;
+    //     disabledDuration.value = true;
+    //     durationCheckDisabled.value = true;
+    //   }else{
+    //     disabledMutableCheck.value = false;
+    //     disabledTransferableCheck.value = false;
+    //     disabledPassword.value = false;
+    //     disabledSupply.value = false;
+    //     disabledDivisibility.value = false;
+    //     disabledClear.value = false;
+    //     disabledDuration.value = false;
+    //     durationCheckDisabled.value = false;
+    //   }
+    // });
 
     watch(durationOption, () => {
       duration.value = '1';
@@ -302,6 +326,50 @@ export default {
       }
     });
 
+    // calculate fees
+    const totalFee = computed(() => {
+      // if multisig
+      if(isMultiSig(selectedAccAdd.value)){
+        return parseFloat(lockFundTotalFee.value) + rentalFee.value + transactionFeeExact.value;
+      }else{
+        return rentalFee.value + transactionFeeExact.value;
+      }
+    });
+
+    watch(totalFee, (n) => {
+      if(balance.value < n && !isNotCosigner.value){
+        showNoBalance.value = true;
+        disabledMutableCheck.value = true;
+        disabledTransferableCheck.value = true;
+        disabledPassword.value = true;
+        disabledSupply.value = true;
+        disabledDivisibility.value = true;
+      }else{
+        showNoBalance.value = false;
+        disabledMutableCheck.value = false;
+        disabledTransferableCheck.value = false;
+        disabledPassword.value = false;
+        disabledSupply.value = false;
+        disabledDivisibility.value = false;
+      }
+    });
+
+    watch(isNotCosigner, (n) => {
+      if(n){
+        disabledMutableCheck.value = true;
+        disabledTransferableCheck.value = true;
+        disabledPassword.value = true;
+        disabledSupply.value = true;
+        disabledDivisibility.value = true;
+      }else{
+        disabledMutableCheck.value = false;
+        disabledTransferableCheck.value = false;
+        disabledPassword.value = false;
+        disabledSupply.value = false;
+        disabledDivisibility.value = false;
+      }
+    });
+
     const createMosaic = () => {
       let createStatus = mosaicTransaction(divisibility.value, supply.value, duration.value, durationOption.value, isMutable.value, isTransferable.value, walletPassword.value, selectedAccName.value, appStore, siriusStore);
       if(!createStatus){
@@ -312,11 +380,6 @@ export default {
         clearInput();
       }
     };
-
-    // const updateDivisibility = (e) => {
-    //   console.log('e' + e)
-    //   divisibility.value = e;
-    // }
 
     return {
       accounts,
@@ -350,7 +413,6 @@ export default {
       disabledSupply,
       disabledDivisibility,
       disabledClear,
-      // supplyPrecision,
       createMosaic,
       disabledDuration,
       durationOption,
@@ -364,7 +426,10 @@ export default {
       currencyName,
       lockFundTxFee,
       lockFundTotalFee,
-      // updateDivisibility,
+      getMultiSigCosigner,
+      cosignerBalanceInsufficient,
+      cosignerAddress,
+      isNotCosigner,
     }
   },
 

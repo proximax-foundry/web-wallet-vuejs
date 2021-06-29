@@ -353,7 +353,7 @@ export default {
       currencyName,
       lockFundTxFee,
       lockFundTotalFee,
-      selectNamespace, 
+      selectNamespace,
       namespaceOption,
       createNamespace,
       transactionFee,
