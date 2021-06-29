@@ -16,6 +16,12 @@
                 <div class="inline-block text-tsm">Insufficient Balance</div>
               </div>
             </div>
+            <div v-if="showNoAsset" class="border-2 rounded-3xl border-red-700 w-full h-24 text-center p-4">
+              <div class="h-5 text-center">
+                <div class="rounded-full w-8 h-8 border border-gray-500 inline-block relative"><font-awesome-icon icon="times" class="text-gray-500 h-5 w-5 absolute" style="top: 5px; left:9px"></font-awesome-icon></div><br>
+                <div class="inline-block text-tsm">This account do not have any asset that can modify supply.</div>
+              </div>
+            </div>
             <div v-if="isNotCosigner" class="border-2 rounded-3xl border-yellow-400 w-full h-24 text-center p-4">
               <div class="h-5 text-center">
                 <div class="rounded-full w-8 h-8 border border-yellow-500 inline-block relative"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-5 w-5 absolute" style="top: 5px; left:11px"></font-awesome-icon></div><br>
@@ -56,8 +62,8 @@
               <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} XPX</span></div>
             </div>
           </div>
-          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select asset" errorMessage="" v-model="selectAsset" :options="assetOptions" @show-selection="changeAsset" />
-          <SelectInputPlugin selectDefault="0" showSelectTitleProp="true" placeholder="Increase or decrease" errorMessage="" v-model="selectIncreaseDecrease" :options="increaseDecreaseOption()"  />
+          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select asset" errorMessage="" ref="assetOption" noOptionsText="No asset for this account" v-model="selectAsset" :options="assetOptions" @show-selection="changeAsset" :disabled="disabledSelectAsset" />
+          <SelectInputPlugin selectDefault="0" showSelectTitleProp="true" placeholder="Increase or decrease" errorMessage="" v-model="selectIncreaseDecrease" :options="increaseDecreaseOption()" :disabled="disabledSelectIncreaseDecrease" />
           <SupplyInput :disabled="disabledSupply" v-model="supply" title="Quantity of Increase/Decrease" :balance="balanceNumber" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: {{ transactionFee }} XPX</div>
@@ -75,6 +81,10 @@
       <div>
         <div class="italic text-right text-xs">Supply:</div>
         <div>{{ assetSupply }}</div>
+      </div>
+      <div>
+        <div class="italic text-right text-xs">Amount:</div>
+        <div>{{ assetAmount }}</div>
       </div>
       <div>
         <div class="italic text-right text-xs">Duration:</div>
@@ -127,6 +137,7 @@ export default {
   setup(){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const assetOption = ref(null);
     const showSupplyErr = ref(false);
     const walletPassword = ref('');
     const err = ref('');
@@ -135,6 +146,8 @@ export default {
     const disabledPassword = ref(false);
     const disabledSupply = ref(false);
     const disabledClear = ref(false);
+    const disabledSelectAsset = ref(false);
+    const disabledSelectIncreaseDecrease = ref(false);
 
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
@@ -173,7 +186,8 @@ export default {
     const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
 
     const showNoBalance = ref(false);
-    const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
+    const showNoAsset = ref(false);
+    const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value) && !showNoAsset.value);
 
     const supply = ref('0');
     const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
@@ -188,18 +202,20 @@ export default {
     });
 
     const changeSelection = (i) => {
+      assetOption.value.clear();
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
       balance.value = i.balance;
-      showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value)?true:false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
       isMultiSigBool.value = isMultiSig(i.address);
       ownerPublicAccount.value = WalletUtils.createPublicAccount(i.publicKey, networkState.currentNetworkProfile.network.type);
-      emitter.emit('CLEAR_SELECT', 0);
+      showNoAsset.value = (assetOptions.value.length == 0)?true:false;
+      showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value && !showNoAsset.value)?true:false;
     }
 
     const assetSupply = ref(0);
+    const assetAmount = ref(0);
     const assetDuration = ref('0 Day');
     const assetDivisibility = ref(0);
     const assetTransferable = ref(false);
@@ -213,6 +229,7 @@ export default {
       }else{
         assetDuration.value = 'No expiration date';
       }
+      assetAmount.value = selectedAsset.amount;
       assetDivisibility.value = selectedAsset.divisibility;
       assetTransferable.value = selectedAsset.transferable;
       assetMutable.value = selectedAsset.supplyMutable;
@@ -221,7 +238,6 @@ export default {
     };
 
     const assetOptions = computed(() => {
-      // let assetSelection = [];
       return AssetsUtils.getOwnedAssets(selectedAccAdd.value);
     });
 
@@ -238,7 +254,7 @@ export default {
     const clearInput = () => {
       walletPassword.value = '';
       supply.value = '0';
-      emitter.emit("CLEAR_SELECT", 0);
+      assetOption.value.clear();
     };
 
     const modifyMosaic = () => {
@@ -259,19 +275,6 @@ export default {
       }
     });
 
-    // watch(balance, (n) => {
-    //   if(n < rentalFee.value){
-    //     showNoBalance.value = true;
-    //     disabledPassword.value = true;
-    //     disabledSupply.value = true;
-    //     disabledClear.value = true;
-    //   }else{
-    //     disabledPassword.value = false;
-    //     disabledSupply.value = false;
-    //     disabledClear.value = false;
-    //   }
-    // });
-
     const totalFee = computed(() => {
       // if multisig
       if(isMultiSig(selectedAccAdd.value)){
@@ -281,29 +284,53 @@ export default {
       }
     });
 
+    const setFormInput = (isValidate) => {
+      disabledPassword.value = isValidate;
+      disabledSupply.value = isValidate;
+      disabledSelectAsset.value = isValidate;
+      disabledSelectIncreaseDecrease.value = isValidate;
+    };
+
     watch(totalFee, (n) => {
-      if(balance.value < n && !isNotCosigner.value){
-        showNoBalance.value = true;
-        disabledPassword.value = true;
-        disabledSupply.value = true;
+      if(balance.value < n){
+        if(!showNoAsset.value){
+          if(!isNotCosigner.value){
+            showNoBalance.value = true;
+          }
+        }
+        setFormInput(true);
       }else{
         showNoBalance.value = false;
-        disabledPassword.value = false;
-        disabledSupply.value = false;
+        setFormInput(false);
+      }
+    });
+
+    watch(showNoAsset, (n) => {
+      if(n){
+        setFormInput(true);
+      }else{
+        setFormInput(false);
+      }
+    });
+
+    watch(showNoBalance, (n) => {
+      if(n){
+        setFormInput(true);
+      }else{
+        setFormInput(false);
       }
     });
 
     watch(isNotCosigner, (n) => {
       if(n){
-        disabledPassword.value = true;
-        disabledSupply.value = true;
+        setFormInput(true)
       }else{
-        disabledPassword.value = false;
-        disabledSupply.value = false;
+        setFormInput(false);
       }
     });
 
     return {
+      assetOption,
       accounts,
       moreThanOneAccount,
       showMenu,
@@ -313,6 +340,8 @@ export default {
       balance,
       balanceNumber,
       showNoBalance,
+      lockFundTotalFee,
+      showNoAsset,
       showSupplyErr,
       err,
       walletPassword,
@@ -336,6 +365,7 @@ export default {
       transactionFeeExact,
       changeAsset,
       assetSupply,
+      assetAmount,
       assetDuration,
       assetDivisibility,
       assetTransferable,
@@ -344,6 +374,8 @@ export default {
       cosignerBalanceInsufficient,
       cosignerAddress,
       isNotCosigner,
+      disabledSelectAsset,
+      disabledSelectIncreaseDecrease,
     }
   },
 
