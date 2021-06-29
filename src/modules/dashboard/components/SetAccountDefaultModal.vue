@@ -111,9 +111,8 @@ export default{
         type: type
       };
 
-      if(this.$emit("dashboardSelectAccount", data)){
-        this.closeModal();
-      }
+      this.$emit("dashboardSelectAccount", data);
+      this.closeModal();
     }
   }
 }

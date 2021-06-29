@@ -10,6 +10,7 @@ import {
     MosaicNonce,
     WalletAlgorithm,
     AliasActionType,
+    QueryParams,
 } from "tsjs-xpx-chain-sdk";
 import Base64 from 'crypto-js/enc-base64';
 import { WalletAcountType } from "../models/const/otherAccountType";
@@ -111,7 +112,10 @@ export class Helper{
       static convertDisplayDateTimeFormat(dateTimeJSON: string): string {
         const date = new Date(dateTimeJSON);
     
-        return new Intl.DateTimeFormat('default').format(date);
+        return new Intl.DateTimeFormat('default', {
+            year: 'numeric', month: 'numeric', day: 'numeric',
+            hour: 'numeric', minute: 'numeric', second: 'numeric'
+          }).format(date);
       }
     
       static formatFixedDateTime(dateTimeJSON: string): string  {
@@ -153,6 +157,10 @@ export class Helper{
       static convertToAbsolute = (value: number, divisibility: number): number => {
     
         return value * Math.pow(10, divisibility);
+      }
+
+      static createQueryParams(pageSize: number, idToStartFrom?: string | undefined){
+          return new QueryParams(pageSize, idToStartFrom);
       }
 }
 
