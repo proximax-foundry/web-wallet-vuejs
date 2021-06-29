@@ -36,32 +36,14 @@ export class NamespacesUtils {
   }
 
   static listNamespaces = (address:string) => {
-    const account:WalletAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address);
-    const namespacesAccount = account.namespaces.filter(namespace => namespace.active === true);
-    const namespacesList:number = namespacesAccount.length;
+    const accountNamespaces = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address).namespaces.filter(namespace => namespace.active === true);
+    const namespacesNum = accountNamespaces.length;
     let namespacesArr = [];
-    if(namespacesList > 0){
-      namespacesAccount.forEach((namespaceElement) => {
-        let level:number = 0;
-        // check for level 2
-        if(namespaceElement.parentId){
-          const parentNamespace = account.namespaces.find(namespace => namespace.idHex == namespaceElement.parentId);
-          if(parentNamespace){
-            // check for level 3
-            const grandparentNamespace = account.namespaces.find(namespace => namespace.idHex == parentNamespace.parentId);
-            if(grandparentNamespace){
-              level = 3;
-            }else{
-              level = 2;
-            }
-          }else{
-            level = 1;
-          }
-        }else{
-          level = 1;
-        }
+    if(namespacesNum > 0){
+      accountNamespaces.forEach((namespaceElement) => {
+        const level = namespaceElement.name.split('.');
         let isDisabled: boolean;
-        if(level > 2){
+        if(level.length > 2){
           isDisabled = true;
         }else{
           isDisabled = false;
@@ -89,37 +71,14 @@ export class NamespacesUtils {
   }
 
   static listRootNamespaces = (address:string) => {
-    const account:WalletAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address);
-    const namespacesAccount = account.namespaces.filter(namespace => namespace.active === true);
-    const namespacesList:number = namespacesAccount.length;
+    const accountNamespaces = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address).namespaces.filter(namespace => namespace.active === true);
+    const namespacesNum = accountNamespaces.length;
     let namespacesArr = [];
-    if(namespacesList > 0){
-      namespacesAccount.forEach((namespaceElement) => {
-        let level:number = 0;
-        // check for level 2
-        if(namespaceElement.parentId){
-          const parentNamespace = account.namespaces.find(namespace => namespace.idHex == namespaceElement.parentId);
-          if(parentNamespace){
-            // check for level 3
-            const grandparentNamespace = account.namespaces.find(namespace => namespace.idHex == parentNamespace.parentId);
-            if(grandparentNamespace){
-              level = 3;
-            }else{
-              level = 2;
-            }
-          }else{
-            level = 1;
-          }
-        }else{
-          level = 1;
-        }
-        let isDisabled: boolean;
-        if(level > 2){
-          isDisabled = true;
-        }else{
-          isDisabled = false;
-        }
-        if(level == 1){
+    if(namespacesNum > 0){
+      accountNamespaces.forEach((namespaceElement) => {
+        const level = namespaceElement.name.split('.');
+        let isDisabled: boolean = false;
+        if(level.length == 1){
           namespacesArr.push({
             value: namespaceElement.name,
             label: namespaceElement.name,
