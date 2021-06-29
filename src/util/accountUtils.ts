@@ -29,41 +29,12 @@ const verifyPublicKey = (add: string): boolean => {
 }
 
 
-const verifyNetworkAddressEqualsNetwork = (value: string, value2: string): boolean => {
-  if (value!== undefined )
-  if(value2!==undefined)
-  if ((value.length === 40 || value.length === 46) && (value2.length === 40 || value2.length === 46)) {
-      if (value.charAt(0) === 'S' && value2.charAt(0) === 'S') {
-          // NetworkType.MIJIN_TEST
-          return true;
-      } else if (value.charAt(0) === 'M' && value2.charAt(0) === 'M') {
-          // NetworkType.MIJIN
-          return true;
-      } else if (value.charAt(0) === 'V' && value2.charAt(0) === 'V') {
-          // NetworkType.TEST_NET
-          return true;
-      } else if (value.charAt(0) === 'X' && value2.charAt(0) === 'X') {
-          // NetworkType.MAIN_NET
-          return true;
-      } else if (value.charAt(0) === 'W' && value2.charAt(0) === 'W') {
-          // NetworkType.PRIVATE_TEST
-          return true;
-      } else if (value.charAt(0) === 'Z' && value2.charAt(0) === 'Z') {
-          // NetworkType.PRIVATE
-          return true;
-      } else {
-          // Address Network unsupported
-          return false;
-      }
-  }
-}
-
 const verifyAddress = (currentAdd, add) => {
   const address = (add !== undefined && add !== null && add !== '') ? add.split('-').join('') : '';
   const isPassed = ref(false);
   const errMessage = ref('');
   if (address !== null && address !== undefined && address.length === 40) {
-    if (verifyNetworkAddressEqualsNetwork(currentAdd, add.toUpperCase())) {
+    if (WalletUtils.verifyNetworkAddressEqualsNetwork(currentAdd, add.toUpperCase())) {
       isPassed.value = true;
     } else {
       isPassed.value = false;
