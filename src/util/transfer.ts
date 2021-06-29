@@ -20,7 +20,8 @@ import {
   PublicAccount,
   NetworkType,
   calculateFee,
-  TransactionBuilder
+  TransactionBuilder,
+  Password
 } from "tsjs-xpx-chain-sdk";
 import { BuildTransactions } from '@/util/buildTransactions';
 import { announceAggregateBonded, announceLockfundAndWaitForConfirmation } from '../util/listener.js';
@@ -37,8 +38,6 @@ const config = require("@/../config/config.json");
 
 async function getAccInfo(address) {
   // return await getPublicKey(recipientAddress, siriusStore.accountHttp);
-
-
 
   let accountInfo = await WalletUtils.getAccInfo(address).then(accountinfo => accountinfo.publicAccount);
   return accountInfo;
@@ -105,7 +104,7 @@ export const createTransaction = async (recipient, sendXPX, messageText, mosaics
       }
     });
   }
-  let transactionBuilder = new BuildTransactions(networkType,undefined,FeeCalculationStrategy.ZeroFeeCalculationStrategy )
+  let transactionBuilder = new BuildTransactions(networkType,networkState.currentNetworkProfile.generationHash,FeeCalculationStrategy.ZeroFeeCalculationStrategy )
   /* let transactionBuilder = new TransactionBuilderFactory(); */
   // calculate fee strategy
 
@@ -120,17 +119,18 @@ export const createTransaction = async (recipient, sendXPX, messageText, mosaics
   // to get sender's private key
   let accountDetails, multisigAccountDetails, multisigPublicAccount;
   if (!cosigner) { // no cosigner, get private key from sender acc name
-    accountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.name == senderAccName);
+    accountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.name === senderAccName);
   } else {
     // a multisig, get cosigner's private key
-    accountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.address == cosigner);
+    accountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.address === cosigner);
     // get multisig account info
-    multisigAccountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.name == senderAccName).publicKey;
+    multisigAccountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.name === senderAccName).publicKey;
     multisigPublicAccount = PublicAccount.createFromPublicKey(multisigAccountDetails, networkType);
   }
 
   /* console.log('Getting acc details from: ' + accountDetails.address); */
-  let privateKey = WalletUtils.decryptPrivateKey(walletPassword, accountDetails.encrypted, accountDetails.iv)
+  
+  let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv)
 
 
   // sending encrypted message
