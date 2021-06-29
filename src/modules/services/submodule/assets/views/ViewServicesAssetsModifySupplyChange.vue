@@ -160,10 +160,8 @@ export default {
     const isMultiSig = (address) => {
       const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
       let isMulti = false;
-      if(account.multisigInfo != undefined){
-        if(account.multisigInfo[0].cosignaturies.length > 0){
-          isMulti = true;
-        }
+      if(account.getDirectParentMultisig().length > 0){
+        isMulti = true;
       }
       return isMulti;
     };
