@@ -12,7 +12,7 @@
           <div class="mb-5">
             <div v-if="showNoBalance" class="border-2 rounded-3xl border-red-700 w-full h-24 text-center p-4">
               <div class="h-5 text-center">
-                <div class="rounded-full w-8 h-8 border border-gray-500 inline-block relative"><font-awesome-icon icon="times" class="text-gray-500 h-5 w-5 absolute" style="top: 5px; left:4px"></font-awesome-icon></div><br>
+                <div class="rounded-full w-8 h-8 border border-gray-500 inline-block relative"><font-awesome-icon icon="times" class="text-gray-500 h-5 w-5 absolute" style="top: 5px; left:8px"></font-awesome-icon></div><br>
                 <div class="inline-block text-tsm">Insufficient Balance</div>
               </div>
             </div>
@@ -43,7 +43,7 @@
               <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} XPX</span></div>
             </div>
           </div>
-          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select asset" errorMessage="" v-model="selectAsset" :options="assetOptions()" @show-selection="changeAsset" />
+          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select asset" errorMessage="" v-model="selectAsset" :options="assetOptions" @show-selection="changeAsset" />
           <SelectInputPlugin selectDefault="0" showSelectTitleProp="true" placeholder="Increase or decrease" errorMessage="" v-model="selectIncreaseDecrease" :options="increaseDecreaseOption()"  />
           <SupplyInput :disabled="disabledSupply" v-model="supply" title="Quantity of Increase/Decrease" :balance="balanceNumber" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
@@ -61,7 +61,7 @@
       <div class="mb-2 border-b border-gray-300 pb-2 italic">Properties</div>
       <div>
         <div class="italic text-right text-xs">Supply:</div>
-        <div>{{ assetSupply }} XPX</div>
+        <div>{{ assetSupply }}</div>
       </div>
       <div>
         <div class="italic text-right text-xs">Duration:</div>
@@ -159,16 +159,6 @@ export default {
     const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
 
     const showNoBalance = ref(false);
-    // if(balance.value < rentalFee.value){
-    //   showNoBalance.value = true;
-    //   disabledPassword.value = true;
-    //   disabledSupply.value = true;
-    //   disabledClear.value = true;
-    // }else{
-    //   disabledPassword.value = false;
-    //   disabledSupply.value = false;
-    //   disabledClear.value = false;
-    // }
 
     const supply = ref('0');
     const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
@@ -205,22 +195,13 @@ export default {
       assetDivisibility.value = selectedAsset.divisibility;
       assetTransferable.value = selectedAsset.transferable;
       assetMutable.value = selectedAsset.supplyMutable;
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransaction(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, assetId, selectIncreaseDecrease.value, supply.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, assetId, selectIncreaseDecrease.value, supply.value), networkState.currentNetworkProfile.network.currency.divisibility);
     };
 
-    const assetOptions = () => {
-      let assetSelection = [];
-      const filterAsset = walletState.currentLoggedInWallet.selectDefaultAccount().assets.filter((asset) => asset.owner === walletState.currentLoggedInWallet.selectDefaultAccount().publicKey);
-      if(filterAsset.length > 0){
-        filterAsset.forEach((asset) => {
-          assetSelection.push({
-            label: asset.idHex + ' > ' + Helper.amountFormatterSimple(asset.amount, asset.divisibility) + ' XPX',
-            value: asset.idHex,
-          });
-        });
-      }
-      return assetSelection;
-    };
+    const assetOptions = computed(() => {
+      // let assetSelection = [];
+      return AssetsUtils.getOwnedAssets(selectedAccAdd.value);
+    });
 
     const increaseDecreaseOption = () => {
       let action = [];
@@ -244,13 +225,13 @@ export default {
 
     watch(selectIncreaseDecrease, (n) => {
       if(selectAsset.value){
-        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransaction(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, selectAsset.value, n, supply.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, selectAsset.value, n, supply.value), networkState.currentNetworkProfile.network.currency.divisibility);
       }
     });
 
     watch(supply, (n) => {
       if(selectAsset.value){
-        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransaction(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, selectAsset.value, selectIncreaseDecrease.value, n), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, selectAsset.value, selectIncreaseDecrease.value, n), networkState.currentNetworkProfile.network.currency.divisibility);
       }
     });
 

@@ -218,7 +218,7 @@ export default {
     const defaultDuration = 10 * 365;
 
     const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
-    const transactionFee = ref( Helper.amountFormatterSimple(AssetsUtils.getTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility));
+    const transactionFee = ref( Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility));
 
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
@@ -250,15 +250,15 @@ export default {
     });
 
     watch(divisibility, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, n, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, n, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
     watch(isMutable, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
     watch(isTransferable, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, n, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, n, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
     watch(balance, (n) => {

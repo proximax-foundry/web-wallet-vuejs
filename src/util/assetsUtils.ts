@@ -45,29 +45,30 @@ interface assetSelectionInterface {
 
 export class AssetsUtils {
 
-  static getTransactionFee =(networkType: NetworkType, generationHash: string, owner:PublicAccount, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number) :number => {
+  static getMosaicDefinitionTransactionFee =(networkType: NetworkType, generationHash: string, owner:PublicAccount, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number) :number => {
 
     const buildTransactions = new BuildTransactions(networkType, generationHash);
     // owner: PublicAccount, supplyMutable: boolean, transferable: boolean, divisibility: number, duration?: UInt64
-    const registerMosaicTransactionFee = buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(duration));
-    return registerMosaicTransactionFee.maxFee.compact();
+    const registerMosaicTransaction = buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(duration));
+    return registerMosaicTransaction.maxFee.compact();
   };
 
-  static getMosaicSupplyChangeTransaction = (networkType: NetworkType, generationHash: string, owner: PublicAccount, mosaicId: MosaicId, changeType: number, delta: UInt64) => {
+  static getMosaicSupplyChangeTransactionFee = (networkType: NetworkType, generationHash: string, owner: PublicAccount, mosaicId: MosaicId, changeType: number, delta: UInt64) => {
     const buildTransactions = new BuildTransactions(networkType, generationHash);
     let supplyChangeType: MosaicSupplyType;
     supplyChangeType = (changeType==1)?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
-    const getMosaicSupplyChangeTransactionFee = buildTransactions.buildMosaicSupplyChange(mosaicId, supplyChangeType, delta);
-    return getMosaicSupplyChangeTransactionFee.maxFee.compact();
+    const mosaicSupplyChangeTransaction = buildTransactions.buildMosaicSupplyChange(mosaicId, supplyChangeType, delta);
+    return mosaicSupplyChangeTransaction.maxFee.compact();
   };
 
-  static getAssets = (account: WalletAccount, owner: string) => {
+  static getOwnedAssets = (address: string) => {
     const assetSelection: Array<assetSelectionInterface> = [];
-    const filterAsset = account.assets.filter((asset) => asset.owner === owner);
+    const account = walletState.currentLoggedInWallet.accounts.find(account => account.address === address);
+    const filterAsset = account.assets.filter((asset) => asset.owner === account.publicKey);
     if(filterAsset.length > 0){
       filterAsset.forEach((asset) => {
         assetSelection.push({
-          label: asset.idHex + ' > ' + Helper.amountFormatterSimple(asset.amount, asset.divisibility) + ' XPX',
+          label: asset.idHex + ' > ' + Helper.amountFormatterSimple(asset.amount, asset.divisibility),
           value: asset.idHex,
         });
       });
