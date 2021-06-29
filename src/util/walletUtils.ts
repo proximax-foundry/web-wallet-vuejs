@@ -242,9 +242,9 @@ export class WalletUtils {
         });
     }
 
-    static getAccInfo(address):Promise<AccountInfo> {
+    static getAccInfo(add :string):Promise<AccountInfo> {
         const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
-
+        let address = Address.createFromRawAddress(add.toLocaleUpperCase());
         return new Promise((resolve, reject) => {
             try {
              chainAPICall.accountAPI.getAccountInfo(address).then(accountInfo => {

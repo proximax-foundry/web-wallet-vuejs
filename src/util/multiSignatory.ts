@@ -25,10 +25,8 @@ import { networkState } from "@/state/networkState"; // chainNetwork
 import { announceAggregateBonded, announceLockfundAndWaitForConfirmation, modifyMultisigAnnounceLockfundAndWaitForConfirmation, modifyMultisigAnnounceAggregateBonded } from '../util/listener.js';
 const walletKey = "sw";
 
-function verifyContactPublicKey(add) {
+function verifyContactPublicKey(address :string) {
   const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
-  let address;
-  address = Address.createFromRawAddress(add.toLocaleUpperCase());
   return new Promise((resolve) => {
     const accountInfo = WalletUtils.getAccInfo(address);
     accountInfo.then(

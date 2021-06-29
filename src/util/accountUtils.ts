@@ -9,10 +9,10 @@ import {WalletUtils} from '@/util/walletUtils'
 
 const verifyPublicKey = (add: string): boolean => {
   const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
-  let address;
-  address = Address.createFromRawAddress(add.toLocaleUpperCase());
+ /*  let address;
+  address = Address.createFromRawAddress(add.toLocaleUpperCase()); */
   let valid = true
-  const accountPublicKey = WalletUtils.getAccInfo(address);
+  const accountPublicKey = WalletUtils.getAccInfo(add);
   accountPublicKey.then(accountinfo => {
     if (accountinfo.publicKey === invalidPublicKey) {
       console.warn(`The receiver's public key is not valid for sending encrypted messages`);
