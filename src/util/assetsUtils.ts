@@ -49,21 +49,20 @@ export class AssetsUtils {
 
     const buildTransactions = new BuildTransactions(networkType, generationHash);
     // owner: PublicAccount, supplyMutable: boolean, transferable: boolean, divisibility: number, duration?: UInt64
-    const registerMosaicTransaction = buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(duration));
-    return registerMosaicTransaction.maxFee.compact();
+    const registerMosaicTransactionFee = buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(duration));
+    return registerMosaicTransactionFee.maxFee.compact();
   };
 
   static getMosaicSupplyChangeTransaction = (networkType: NetworkType, generationHash: string, owner: PublicAccount, mosaicId: MosaicId, changeType: number, delta: UInt64) => {
     const buildTransactions = new BuildTransactions(networkType, generationHash);
     let supplyChangeType: MosaicSupplyType;
     supplyChangeType = (changeType==1)?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
-    const registerMosaicSupplyChangeTransaction = buildTransactions.buildMosaicSupplyChange(mosaicId, supplyChangeType, delta);
-    return registerMosaicSupplyChangeTransaction.maxFee.compact();
+    const getMosaicSupplyChangeTransactionFee = buildTransactions.buildMosaicSupplyChange(mosaicId, supplyChangeType, delta);
+    return getMosaicSupplyChangeTransactionFee.maxFee.compact();
   };
 
   static getAssets = (account: WalletAccount, owner: string) => {
     const assetSelection: Array<assetSelectionInterface> = [];
-    // walletState.currentLoggedInWallet.selectDefaultAccount().publicKey
     const filterAsset = account.assets.filter((asset) => asset.owner === owner);
     if(filterAsset.length > 0){
       filterAsset.forEach((asset) => {
