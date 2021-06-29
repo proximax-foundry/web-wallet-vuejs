@@ -71,13 +71,12 @@ export default {
           err.value = "Password for wallet " + walletState.currentLoggedInWallet.name + " is invalid" ;
         } else {    
           // create account
-          const pubkey = Account.createFromPrivateKey(privKey.value,ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
-          const verifyExistingAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.publicKey == pubkey.publicKey);
+          const account = Account.createFromPrivateKey(privKey.value,ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+          const verifyExistingAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.publicKey == account.publicKey);
           if (verifyExistingAccount) {
             err.value = "Account with this Private Key is already in the wallet";
           } else {          
             let password = WalletUtils.createPassword(walletPassword.value);
-            const account = WalletUtils.generateNewAccount(ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
             const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, privKey.value, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
             let walletAccount = new WalletAccount(accountName.value, account.publicKey, wallet.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
             if(nis1Swap.value == true){
@@ -86,7 +85,7 @@ export default {
             } 
             walletState.currentLoggedInWallet.accounts.push(walletAccount);
             walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
-            router.push({ name: "ViewAccountCreated", params: {publicKey: account.publicKey, privateKey: account.privateKey, address: account.address, name: accountName.value }});
+            router.push({ name: "ViewAccountCreated", params: {publicKey: account.publicKey, privateKey: privKey.value, address: wallet.address.plain(), name: accountName.value }});
           }
         } 
       } else {
