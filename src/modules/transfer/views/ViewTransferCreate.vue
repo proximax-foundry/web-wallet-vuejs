@@ -409,7 +409,7 @@ export default {
     const selectedMosaicAmount = ref([]);
     const mosaicSupplyDivisibility = ref([]);
     const currentlySelectedMosaic = ref([]);
-    const sendXPX = ref(0);
+    const sendXPX = ref('0');
     const encryptedMsgDisable = ref(true);
     const toggleConfirm = ref(false);
     const forceSend = ref(false);
@@ -515,8 +515,7 @@ export default {
     /* appStore.getFirstAccAdd() */
     const balance = computed(() => {
       if (walletState.currentLoggedInWallet) {
-        return walletState.currentLoggedInWallet.selectDefaultAccount().balance;
-        /* appStore.getBalanceByAddress(selectedAccAdd.value); */
+        return walletState.currentLoggedInWallet.accounts.find(element => element.address === selectedAccAdd.value).balance;
       } else {
         return 0;
       }
@@ -719,7 +718,7 @@ export default {
       if (mosaic != undefined) {
         return mosaic.amount;
       } else {
-        return 0;
+        return '0';
       }
     };
 
