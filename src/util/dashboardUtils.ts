@@ -11,7 +11,7 @@ import { namespaces } from '../util/namespaces.js';
 import { environment } from '../environment/environment.js';
 import { transactionTypeName } from '@/util/transactionUtils';
 import { walletState } from '@/state/walletState';
-import { DashboardTransaction, PartialTransaction, TransactionDetailList } from '@/models/interface/transaction';
+//import { DashboardTransaction, PartialTransaction } from '@/models/interface/transaction';
 
 // let provider =  proximaxProvider;
 

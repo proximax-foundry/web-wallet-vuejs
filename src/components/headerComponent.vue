@@ -62,6 +62,7 @@ import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 // import { useToast } from "primevue/usetoast";
+import packageData from "../../package.json"
 
 export default defineComponent({
   components: {
@@ -171,6 +172,8 @@ export default defineComponent({
     // });
 
     const versioning = ref('0.0.1');
+
+    versioning.value = packageData.version;
 
     return {
       versioning,

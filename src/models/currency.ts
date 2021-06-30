@@ -6,16 +6,16 @@ export class Currency{
     namespaceId: string;
     divisibility: number;
 
-    constructor(name: string, namespace: string, assetId: string, namespaceId: string, divisibility: number){
+    constructor(name: string, namespace: string, namespaceId: string, divisibility: number, assetId?: string ){
         this.name = name;
         this.namespace = namespace;
-        this.namespaceId = assetId;
+        this.assetId = assetId ? assetId : null;
         this.namespaceId = namespaceId;
         this.divisibility = divisibility;
     }
 
     static createDefault(): Currency{
-        return new Currency("XPX", "prx.xpx", "", "bffb42a19116bdf6", 6);
+        return new Currency("XPX", "prx.xpx", "bffb42a19116bdf6", 6, "");
     }
 
     serialize(){

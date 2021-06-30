@@ -1,7 +1,7 @@
 export class Asset{
 
     idHex: string;
-    amount: number = 0;
+    amount: number = 0; // store absolute amount
     supply: number = 0;
     divisibility: number;
     duration: number | null = null;
@@ -20,7 +20,7 @@ export class Asset{
         this.transferable = transferable;
     }
 
-    duplicateNewInstance(){
+    duplicateNewInstance(): Asset{
         let newAsset = new Asset(this.idHex, this.divisibility, this.supplyMutable, this.transferable, this.owner);
 
         newAsset.duration = this.duration;
@@ -29,5 +29,9 @@ export class Asset{
         newAsset.supply = this.supply;
         newAsset.amount = this.amount;
         return newAsset;
+    }
+
+    getExactAmount(): number{
+        return this.amount / Math.pow(10, this.divisibility);
     }
 }
