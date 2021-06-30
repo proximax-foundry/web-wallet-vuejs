@@ -96,7 +96,7 @@ export default defineComponent({
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
-    const showAddressQRModal = ref('false');
+    const showAddressQRModal = ref(false);
 
     const displayConvertion = ref(false);
     const openSetDefaultModal = ref(false);
