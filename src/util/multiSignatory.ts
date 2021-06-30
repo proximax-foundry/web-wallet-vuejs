@@ -15,6 +15,7 @@ import {
   TransactionHttp,
   UInt64,
   Wallet,
+  AccountInfo,
 } from "tsjs-xpx-chain-sdk";
 //line 489,491
 // import { environment } from '../environment/environment.js';
@@ -25,7 +26,11 @@ import { networkState } from "@/state/networkState"; // chainNetwork
 import { announceAggregateBonded, announceLockfundAndWaitForConfirmation, modifyMultisigAnnounceLockfundAndWaitForConfirmation, modifyMultisigAnnounceAggregateBonded } from '../util/listener.js';
 const walletKey = "sw";
 
-function verifyContactPublicKey(address :string) {
+interface status {
+  status: boolean,
+  publicKey: string
+  }
+function verifyContactPublicKey(address :string) :Promise<status>{
   const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
   return new Promise((resolve) => {
     const accountInfo = WalletUtils.getAccInfo(address);
@@ -33,15 +38,13 @@ function verifyContactPublicKey(address :string) {
       (account) => {
         if (account.publicKey == invalidPublicKey) {
           console.warn(`The receiver's public key is not valid for sending encrypted messages`);
-          resolve({ status: false });
+          resolve({ status: false, publicKey: account.publicKey});
         } else {
-          let payload = { status: true, publicKey: account.publicKey };
-          resolve(payload);
+          resolve({ status: true, publicKey: account.publicKey });
         }
       },
       (error) => {
         console.warn('Err: ' + error);
-        resolve(true);
       }
     );
   });
@@ -173,10 +176,10 @@ function getAggregateBondedTransactions(publicAccount) {
   return WalletUtils.getAggregateBondedTransactions(publicAccount)
 }
 
-function onPartial(publicAccount) {
-  return new Promise((resolve) => {
+function onPartial(publicAccount) :boolean{
+  let isPartial = false;
     getAggregateBondedTransactions(publicAccount).then((txOnpartial) => {
-      let isPartial = false;
+      
       if (txOnpartial !== null && txOnpartial.length > 0) {
         for (const tx of txOnpartial) {
           for (let i = 0; i < tx.innerTransactions.length; i++) {
@@ -190,9 +193,10 @@ function onPartial(publicAccount) {
           }
         }
       }
-      resolve(isPartial);
-    });
+     
+    
   });
+  return isPartial;
 }
 
 function multisigAccountInfo(address) {
@@ -242,35 +246,35 @@ function getMultisigAccountGraphInfo(address) {
 } */
 
 function checkIsMultiSig(accountAddress) {
-  return new Promise((resolve) => {
+
     const address = Address.createFromRawAddress(accountAddress);
+    let verify = false;
     multisigAccountInfo(address).then(info => {
-      const wallet = walletState.currentLoggedInWallet
-      const account = wallet.accounts.find((element) => element.address == accountAddress);
+      /* const wallet = walletState.currentLoggedInWallet
+      const account = wallet.accounts.find((element) => element.address == accountAddress); */
       
-      let verify = false;
-      
-      if (account != undefined) {
+      verify = info.cosignatories.length? true: false
+    })
+    .catch(error => console.log(error))
+    try {
+      sessionStorage.setItem(
+        'currentWalletSession',
+        JSON.stringify(walletState.currentLoggedInWallet)
+      );
+      localStorage.setItem(
+        walletKey,
+        JSON.stringify(walletState)
+      );
+    } catch (err) {
+      console.error("checkIsMultiSig error caught", err);
+    }
+     /*  if (account != undefined) {
         verify = account.getDirectParentMultisig().length ? true : false;
-      }
-      resolve(verify);
-      try {
-        sessionStorage.setItem(
-          'currentWalletSession',
-          JSON.stringify(wallet)
-        );
-        localStorage.setItem(
-          walletKey,
-          JSON.stringify(walletState)
-        );
-      } catch (err) {
-        console.error("checkIsMultiSig error caught", err);
-      }
+      } */
+      return verify;
+      
       // eslint-disable-next-line no-unused-vars
-    }, error => {
-      resolve(false);
-    });
-  });
+  
 }
 
 /* function updateAccountsMultiSign() {

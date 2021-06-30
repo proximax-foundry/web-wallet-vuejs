@@ -97,6 +97,11 @@ import TextInput from '@/components/TextInput.vue'
 import AddCosignModal from '../components/AddCosignModal.vue';
 import { multiSign } from '@/util/multiSignatory';
 import { transferEmitter } from '@/util/listener.js';
+import { walletState } from '@/state/walletState';
+import {
+    PublicAccount
+} from "tsjs-xpx-chain-sdk"
+import { networkState } from '@/state/networkState';
 export default {
   name: 'ViewConvertAccountMultisig',
   components: {
@@ -111,9 +116,7 @@ export default {
     const router = useRouter();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
-    const err = ref(false);
+    const err = ref('');
     const fundStatus = ref(false);
     const accountName = ref(p.name);
     const accountNameDisplay = ref(p.name);
@@ -199,8 +202,8 @@ export default {
       }
     }, {deep:true});
     const accountBalance = () => {
-      if(appStore.state.currentLoggedInWallet){
-        return appStore.getAccDetails(p.name).balance;
+      if(walletState.currentLoggedInWallet){
+        return  walletState.currentLoggedInWallet.accounts.find(element => element.name === p.name).balance;
       }
     };
     const addCoSig = () => {
@@ -269,8 +272,8 @@ export default {
     });
     const disabledPassword = computed(() => (onPartial.value || isMultisig.value ));
     // get account details
-    const acc =  appStore.getAccDetails(p.name);
-    if(acc==-1){
+    const acc =  walletState.currentLoggedInWallet.accounts.find(element =>element.name ===p.name) ;
+    if(acc== undefined){
       router.push({ name: "ViewAccountDisplayAll"});
     }
     setTimeout(()=> {
@@ -288,19 +291,18 @@ export default {
       }
     });
     // check if onPartial
-    multiSign.onPartial(acc.publicAccount).then((onPartialBoolean) => {
+    let onPartialBoolean = multiSign.onPartial(PublicAccount.createFromPublicKey(acc.publicKey,networkState.currentNetworkProfile.network.type))
       onPartial.value = onPartialBoolean;
-    });
     // check if this address has cosigner
     try{
-      multiSign.checkIsMultiSig(acc.address).then((isMultiSigBoolean) => {
-        isMultisig.value = isMultiSigBoolean;
-      });
+      let verify = multiSign.checkIsMultiSig(acc.address)
+        isMultisig.value = verify;
+      
     }catch(err) {
       isMultisig.value = false;
     }
     emitter.on('ADD_CONTACT_COSIGN', payload => {
-      multiSign.verifyContactPublicKey(payload.address, siriusStore.accountHttp).then((res)=>{
+      multiSign.verifyContactPublicKey(payload.address).then((res)=>{
         if(res.status){
           // add into cosig
           coSign.value[payload.index] = res.publicKey;
