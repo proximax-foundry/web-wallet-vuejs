@@ -1,45 +1,48 @@
 <template>
   <div>
     <div class="transition ease-in duration-300 w-full rounded-full px-5 py-1 mb-5" :class="borderColor">
-      <input v-model="filters['global'].value" type="text" class="w-full outline-none text-sm" placeholder="Search" @click="clickInputText()" @blur="blurInputText()">
+      <input v-model="filterText" type="text" class="w-full outline-none text-sm" placeholder="Search" @click="clickInputText()" @blur="blurInputText()">
     </div>
     <DataTable
       :value="transactions"
-      v-model:filters="filters"
-      @row-click="rowClick"
       :paginator="true"
       :rows="10"
       responsiveLayout="scroll"
       scrollDirection="horizontal"
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
-      :globalFilterFields="['typeName','transferType','senderAddress', 'senderAddressRaw', 'senderName','recipientAddress', 'recipientAddressRaw', 'recipientName', 'block']">
+      >
       <Column field="typeName" header="Type" headerStyle="width:110px">
         <template #body="{data}">
           {{data.typeName}}
         </template>
       </Column>
-      <Column field="transferType" header="In/Out" headerStyle="width:10px">
+      <Column header="Details" >
         <template #body="{data}">
-          <img src="@/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg" class="w-5 h-5 inline-block" v-if="data.transferType=='in'">
-          <img src="@/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg" class="w-5 h-5 inline-block" v-else>
+            <div v-for="innerTx in data.innerTransactions" :key="innerTx">
+              <div> {{ innerTx.typeName }}</div>
+              <div v-if="innerTx.displayList.size > 0"> {{ innerTx.displayList }}</div>
+              <div v-if="innerTx.transferList.length > 0"> {{ innerTx.transferList }}</div>
+            </div>
+            <div v-if="data.displayList.size > 0"> {{ data.displayList }}</div>
+            <div v-if="data.transferList.length > 0"> {{ data.transferList }}</div>
         </template>
       </Column>
-      <Column field="senderName" header="Sender" headerStyle="width:300px">
+      <Column v-if="showBlock" field="block" header="Block" :sortable="true" >
         <template #body="{data}">
-          <span :title="data.senderAddress" v-if="data.senderName">{{data.senderName}}</span>
-          <span v-else>{{data.senderAddress}}</span>
+          <div>{{ data.block }}</div>
+          <div v-if="data.timestamp">{{ data.timestamp }}</div>
+          <div v-if="data.fee">Fee: {{ data.fee}}</div>
         </template>
       </Column>
-      <Column field="recipient" header="Recipient" headerStyle="width:300px">
-        <template #body="{data}">
-          <span :title="data.recipientAddress" v-if="data.recipientName">{{data.recipientName}}</span>
-          <span v-else>{{data.recipientAddress}}</span>
-        </template>
+      <Column v-if="showAction" header="Action" >
+
       </Column>
-      <Column field="block" header="Block" headerStyle="width:100px"></Column>
       <template #empty>
         No records found
+      </template>
+      <template #loading>
+          Loading transactions data. Please wait.
       </template>
     </DataTable>
     <DynamicModelComponent :modelName="dynamicModelComponentDisplay" :showModal="showTransactionModel" :transaction="modalData" />
@@ -47,29 +50,45 @@
 </template>
 
 <script>
-import { getCurrentInstance, ref } from "vue";
+import { getCurrentInstance, ref, computed, watch  } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {FilterMatchMode} from 'primevue/api';
 import DynamicModelComponent from '@/modules/dashboard/components/DynamicModelComponent.vue'
-
+import { networkState } from "@/state/networkState";
 
 export default{
   components: { DataTable, Column, DynamicModelComponent }, //DynamicModelComponent
   name: 'DashboardDataTable',
   props: {
     transactions: Array,
+    showBlock: Boolean
   },
 
-  setup(){
+  setup(p, context){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const borderColor = ref('border border-gray-400');
     const showTransactionModel = ref(false);
     const modalData = ref(null);
+    const filterText = ref("");
+    /*
     const filters = ref({
       'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
     });
+    */
+    watch(
+     ()=> filterText.value, (newValue)=>{
+       context.emit('confirmedFilter', newValue);
+    });
+
+    const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
+    const blockExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.blockRoute);
+    const publicKeyExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.publicKeyRoute);
+    const addressExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.addressRoute);
+    const hashExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.hashRoute);
+    const namespaceExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute);
+    const assetExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.assetInfoRoute);
 
     const dynamicModelComponentDisplay = ref('TransferTransactionModal');
 
@@ -111,15 +130,22 @@ export default{
 
     return {
       borderColor,
-      filters,
+      filterText,
       clickInputText,
       blurInputText,
       modalData,
       rowClick,
       showTransactionModel,
       dynamicModelComponentDisplay,
+      blockExplorerURL,
+      addressExplorerURL,
+      assetExplorerURL,
+      namespaceExplorerURL,
+      hashExplorerURL,
+      publicKeyExplorerURL,
+      explorerBaseURL
     }
-  },
+  }
 }
 </script>
 

@@ -42,7 +42,7 @@
 import { ref } from 'vue';
 import { useRouter } from "vue-router";
 import ConfirmDeleteAccountModal from '@/modules/account/components/ConfirmDeleteAccountModal.vue';
-import {copyToClipboard } from '@/util/functions';
+import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { walletState } from '@/state/walletState';
 import { Helper } from '@/util/typeHelper';

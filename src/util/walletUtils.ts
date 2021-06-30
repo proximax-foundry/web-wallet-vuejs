@@ -14,13 +14,16 @@ import {
     SimpleWallet, Password, RawAddress, Convert, Crypto,
     WalletAlgorithm, PublicAccount, Account, NetworkType, 
     AggregateTransaction, CosignatureTransaction, MosaicNonce,
-    NamespaceId, Address, AccountInfo, MosaicId, AliasType
+    NamespaceId, Address, AccountInfo, MosaicId, AliasType, Transaction
 } from "tsjs-xpx-chain-sdk"
 import { computed } from "vue";
 import { Helper, LooseObject } from "./typeHelper";
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { OtherAccount } from "@/models/otherAccount";
 import { Namespace } from "@/models/namespace";
+import { Account as myAccount } from "@/models/account";
+import { TransactionUtils } from "./transactionUtils"
+import { Account as NEM_Account, NetworkTypes, NEMLibrary } from "nem-library";
 
 const config = require("@/../config/config.json");
 
@@ -112,12 +115,12 @@ export class WalletUtils {
                     account.assets = [];
                     const mosaicList: MosaicId[] = [];
                     const mosaicAmount: LooseObject = {};
-                    const address = accInfo.find((element) => element.address['address'] == account.address);
-                    if (address != undefined) {
+                    const singleAccInfo = accInfo.find((element) => element.address['address'] == account.address);
+                    if (singleAccInfo != undefined) {
 
-                        for (const mosaic of address.mosaics) {
+                        for (const mosaic of singleAccInfo.mosaics) {
                             if (mosaic.id.toHex() === nativeNetworkMosaicId.toHex()) {
-                                amount = mosaic.amount.compact() / Math.pow(10, currentNetworkProfile.network.currency.divisibility);
+                                amount = mosaic.amount.compact();
                                 const newAsset = new Asset(mosaic.id.toHex(), currentNetworkProfile.network.currency.divisibility, false, true);
                                 newAsset.amount = amount;
                                 account.assets.push(newAsset);
@@ -132,7 +135,7 @@ export class WalletUtils {
                             mosaicInfo.forEach((asset) => {
                                 const newAsset = new Asset(asset.mosaicId.toHex(), asset.divisibility, asset.isSupplyMutable(), asset.isTransferable(), asset.owner.publicKey);
                                 newAsset.supply = asset.supply.compact();
-                                newAsset.amount = mosaicAmount[newAsset.idHex] / Math.pow(10, asset.divisibility)
+                                newAsset.amount = mosaicAmount[newAsset.idHex]
                                 newAsset.duration = asset.duration ? asset.duration.compact() : null;
                                 account.assets.push(newAsset);
                             })
@@ -491,6 +494,7 @@ export class WalletUtils {
         wallets.savetoLocalStorage();
     }
 
+
     static createNewWalletAccountFromOldFormat(jsonString: string): WalletAccount{
         const wltAccount: oldAccountStructure = JSON.parse(jsonString);
 
@@ -694,7 +698,13 @@ export class WalletUtils {
 
             let publicAccount = Helper.createPublicAccount(account.publicKey, localNetworkType.value) 
 
-            let accountInfo = await chainAPICall.accountAPI.getAccountInfo(publicAccount.address);
+            let accountInfo;
+
+            try {
+                accountInfo = await chainAPICall.accountAPI.getAccountInfo(publicAccount.address);
+            } catch (error) {
+                continue;
+            }
 
             if(accountInfo.linkedAccountKey !== "0".repeat(64) && addInLinkedAccount){
 
@@ -888,6 +898,23 @@ export class WalletUtils {
                 }
             }
         }
+    }
+
+    
+    static createNis1AccountWithPrivateKey(privateKey: string, isTestnet: boolean = false) {
+        NEMLibrary.reset();
+        let networkType: NetworkTypes;
+        if (isTestnet) {
+            networkType = NetworkTypes.TEST_NET;
+        }
+        else {
+            networkType = NetworkTypes.MAIN_NET;
+        }
+        NEMLibrary.bootstrap(networkType);
+        let tempAccount = NEM_Account.createWithPrivateKey(privateKey);
+        let publicKey = tempAccount.publicKey;
+        let new_nis1Account = new nis1Account(tempAccount.address.plain(), publicKey)
+        return new_nis1Account;
     }
 
     static async refreshAllAccountDetails(wallet: Wallet, networkProfile: ChainProfile): Promise<void>{
