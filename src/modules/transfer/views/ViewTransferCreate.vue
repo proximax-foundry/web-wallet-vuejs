@@ -351,6 +351,7 @@
   </div>
 </template>
 <script >
+import { Helper } from '@/util/typeHelper';
 import { computed, ref, getCurrentInstance, watch } from "vue";
 import TextInput from "@/components/TextInput.vue";
 import PasswordInput from "@/components/PasswordInput.vue";
@@ -762,9 +763,10 @@ export default {
           mosaicOption.push({
             val: i.idHex,
             /*  i.id */
-            text: i.idHex + " > Balance: " + i.amount.toFixed(i.divisibility),
+            text: i.idHex + " > Balance: " + Helper.amountFormatterSimple(i.amount,i.divisibility),
             id: index + 1,
           });
+          
         });
       }
       return mosaicOption;
