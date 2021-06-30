@@ -56,7 +56,7 @@
               <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} XPX</span></div>
             </div>
           </div>
-          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" v-model="selectNamespace" :options="namespaceOption" @show-selection="updateNamespaceSelection" @clear-selection="clearNamespaceSelection" />
+          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" ref="namespaceSelect" :disabled="disableNamespaceSelect" noOptionsText="No namespace created for this account" v-model="selectNamespace" :options="namespaceOption" @show-selection="updateNamespaceSelection" @clear-selection="clearNamespaceSelection" />
           <DurationInput :disabled="disabledDuration" v-if="showDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: {{ transactionFee }} XPX</div>
@@ -104,7 +104,7 @@
   </div>
 </template>
 <script>
-import { computed, ref, getCurrentInstance, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import DurationInput from '@/modules/services/submodule/namespaces/components/DurationInput.vue';
@@ -121,8 +121,7 @@ export default {
     SelectInputPlugin,
   },
   setup(){
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const namespaceSelect = ref(null);
     const showDurationErr = ref(false);
     const duration = ref("0");
     const walletPassword = ref('');
@@ -131,6 +130,7 @@ export default {
     const currentSelectedName = ref('');
     const disabledPassword = ref(false);
     const disabledDuration = ref(false);
+    const disableNamespaceSelect = ref(false);
     const disabledClear = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
@@ -189,10 +189,12 @@ export default {
       disabledPassword.value = true;
       disabledClear.value = true;
       disabledDuration.value = true;
+      disableNamespaceSelect.value = true;
     }else{
       disabledPassword.value = false;
       disabledClear.value = false;
       disabledDuration.value = false;
+      disableNamespaceSelect.value = false;
     }
 
     const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
@@ -206,6 +208,7 @@ export default {
     });
 
     const changeSelection = (i) => {
+      namespaceSelect.value.clear();
       selectNamespace.value = '';
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
@@ -214,7 +217,6 @@ export default {
       showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value)?true:false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
-      emitter.emit('CLEAR_SELECT', 0);
     };
 
     const updateNamespaceSelection = (namespaceNameSelected) => {
@@ -233,33 +235,13 @@ export default {
     const clearInput = () => {
       walletPassword.value = '';
       duration.value = '0';
-      emitter.emit("CLEAR_SELECT", 0);
+      namespaceSelect.value.clear();
     };
-
-    // watch(balance, (n) => {
-    //   if(n < rentalFee.value){
-    //     showNoBalance.value = true;
-    //     disabledPassword.value = true;
-    //     disabledClear.value = true;
-    //     disabledDuration.value = true;
-    //   }else{
-    //     disabledPassword.value = false;
-    //     disabledClear.value = false;
-    //     disabledDuration.value = false;
-    //   }
-    // });
 
     watch(duration, (n) => {
       if(n > 365){
         duration.value = '365';
       }
-      // if(balance.value < rentalFee.value){
-      //   showNoBalance.value = true;
-      //   disabledPassword.value = true;
-      // }else{
-      //   showNoBalance.value =false;
-      //   disabledPassword.value = false;
-      // }
     });
 
     // calculate fees
@@ -276,9 +258,11 @@ export default {
       if(balance.value < n && !isNotCosigner.value){
         showNoBalance.value = true;
         disabledPassword.value = true;
+        disableNamespaceSelect.value = true;
       }else{
         showNoBalance.value = false;
         disabledPassword.value = false;
+        disableNamespaceSelect.value = false;
       }
     });
 
@@ -286,9 +270,11 @@ export default {
       if(n){
         disabledPassword.value = true;
         disabledDuration.value = true;
+        disableNamespaceSelect.value = true;
       }else{
         disabledPassword.value = false;
         disabledDuration.value = false;
+        disableNamespaceSelect.value = false;
       }
     });
 
@@ -297,6 +283,7 @@ export default {
     };
 
     return {
+      namespaceSelect,
       accounts,
       moreThanOneAccount,
       showMenu,
@@ -315,6 +302,7 @@ export default {
       disabledClear,
       showDuration,
       disabledDuration,
+      disableNamespaceSelect,
       duration,
       showDurationErr,
       isMultiSig,
@@ -324,7 +312,7 @@ export default {
       currencyName,
       lockFundTxFee,
       lockFundTotalFee,
-      selectNamespace, 
+      selectNamespace,
       namespaceOption,
       extendNamespace,
       transactionFee,
