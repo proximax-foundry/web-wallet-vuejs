@@ -33,6 +33,7 @@
     "postcss-nested": "^4.2.3",
     "primeicons": "^4.1.0",
     "primevue": "^3.3.4",
+    "qrcode-generator": "^1.4.4",
     "rxjs": "^6.6.6",
     "sass-loader": "^7.3.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.3",

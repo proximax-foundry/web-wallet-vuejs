@@ -15,7 +15,8 @@
           >{{ selectedAccountAddress }}</div>
         </div>
         <div class="mt-2 sm:inline-block relative">
-          <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 text-md cursor-pointer inline mx-2" style="top: 3px;"></font-awesome-icon><img src="@/modules/dashboard/img/icon-qr-code.svg" class="w-5 inline absolute">
+          <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 text-md cursor-pointer inline mx-2" style="top: 3px;"></font-awesome-icon>
+          <img src="@/modules/dashboard/img/icon-qr-code.svg" @click="showAddressQRModal = true" class="w-5 inline absolute">
         </div>
       </div>
       <div class="text-center md:text-left">
@@ -54,6 +55,7 @@
     <DashboardDataTable :showBlock="false" :transactions="unconfirmedTransactions" v-if="isShowUnconfirmed"></DashboardDataTable>
     <PartialDashboardDataTable :transactions="partialTransactions.sort((a, b) => b.deadline - a.deadline)" v-if="isShowPartial"></PartialDashboardDataTable>
     <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
+    <AddressQRModal :showModal="showAddressQRModal" :qrDataString="addressQR" :addressName="selectedAccountName" />
   </div>
 </template>
 
@@ -62,6 +64,7 @@ import { computed, defineComponent, ref, getCurrentInstance, watch, reactive } f
 import DashboardDataTable from '@/modules/dashboard/components/DashboardDataTable.vue';
 import PartialDashboardDataTable from '@/components/PartialDashboardDataTable.vue';
 import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
+import AddressQRModal from '@/modules/dashboard/components/AddressQRModal.vue';
 import { copyToClipboard, getXPXcurrencyPrice } from '@/util/functions';
 import { Helper } from '@/util/typeHelper';
 import { transactions } from '@/util/transactions.js';
@@ -76,6 +79,7 @@ import { networkState } from "@/state/networkState";
 import { AccountAPI } from '@/models/REST/account';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { DashboardService } from '../service/dashboardService';
+import * as qrcode from 'qrcode-generator';
 // import { dashboardUtils } from '@/util/dashboardUtils';
 
 export default defineComponent({
@@ -84,12 +88,15 @@ export default defineComponent({
     DashboardDataTable,
     PartialDashboardDataTable,
     SetAccountDefaultModal,
+    AddressQRModal
   },
 
   setup(){
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
+
+    const showAddressQRModal = ref('false');
 
     const displayConvertion = ref(false);
     const openSetDefaultModal = ref(false);
@@ -127,6 +134,15 @@ export default defineComponent({
         return selectedAccount.value.name;
       }
     );
+
+    const addressQR = computed(
+      () => {
+        let qr = qrcode(10, 'H');
+        qr.addData(selectedAccountAddress.value);
+        qr.make();
+        return qr.createDataURL();
+      }
+    )
 
     const isDefault = computed(()=> selectedAccount.value.default ? true : false );
     let isMultisig = computed(()=> selectedAccount.value.multisigInfo.find((multisigInfo)=> multisigInfo.level == 1) ? true : false);
@@ -506,10 +522,15 @@ export default defineComponent({
     });
     */
 
+
     emitter.on('CLOSE_SET_DEFAULT_ACCOUNT_MODAL', payload => {
       if(payload){
         openSetDefaultModal.value = false;
       }
+    });
+
+    emitter.on('CLOSE_MODAL', () => {
+      showAddressQRModal.value = false;
     });
 
     return {
@@ -536,7 +557,9 @@ export default defineComponent({
       isMultisig,
       finalConfirmedTransaction,
       doFilterConfirmed,
-      filteredConfirmedTransactions
+      filteredConfirmedTransactions,
+      addressQR,
+      showAddressQRModal
     };
   }
 });
