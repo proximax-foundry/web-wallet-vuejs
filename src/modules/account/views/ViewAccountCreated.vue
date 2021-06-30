@@ -11,12 +11,10 @@
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
           <div class="text-xs font-bold mb-1">Address:</div>
-          <input
-            id="address"
-            class="text-sm w-full outline-none bg-gray-100 z-10"
-            type="text"
-            :value="accountAddress"
-          />
+          <div 
+            id="address" class="text-sm w-full outline-none bg-gray-100 z-10"
+            :copyValue="accountAddress" copySubject="Address"
+          >{{accountAddress}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
       </div>
@@ -24,12 +22,11 @@
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
           <div class="text-xs font-bold mb-1">Public:</div>
-          <input
+          <div
             id="public"
             class="text-sm w-full outline-none bg-gray-100 z-10"
-            type="text"
-            :value="accountPublicKey"
-          />
+            :copyValue="accountPublicKey" copySubject="Public Key"
+          >{{accountPublicKey}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
       </div>
@@ -37,12 +34,11 @@
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
           <div class="text-xs font-bold mb-1">Private:</div>
-          <input
+          <div
             id="private"
             class="text-sm w-full outline-none bg-gray-100 z-10"
-            type="text"
-            :value="accountPrivateKey"
-          />
+            :copyvalue="accountPrivateKey" copySubject="Private Key"
+          >{{accountPrivateKey}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('private')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
       </div>
@@ -68,12 +64,11 @@
       </div>
     </div>
   </div>
-
 </template>
 
 <script>
 import { ref } from 'vue';
-import { copyKeyFunc } from '@/util/functions';
+import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 
 export default {
@@ -95,14 +90,20 @@ export default {
     const accountPublicKey = ref(p.publicKey);
     const accountPrivateKey = ref(p.privateKey);
     const accountAddress = ref(p.address);
-    const copy = (id) => copyKeyFunc(id, toast);
+    const copy = (id) =>{
+      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
+      let copySubject = document.getElementById(id).getAttribute("copySubject");
+      copyToClipboard(stringToCopy);
+
+      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+    };
 
     return {
       copy,
       accountName,
       accountPublicKey,
       accountPrivateKey,
-      accountAddress,
+      accountAddress
     };
   },
 

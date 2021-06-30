@@ -38,7 +38,7 @@
             <div class="text-xs font-bold mb-1">Address:</div>
             <div
               id="address"
-              class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="newWallet.address" copySubject="Address"
+              class="text-sm w-full outline-none bg-gray-100 z-10 break-all" :copyValue="newWallet.address" copySubject="Address"
             >{{ newWallet.address }}</div>
           </div>
           <font-awesome-icon icon="copy" @click="copy('address', addressLabel)" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
@@ -49,7 +49,7 @@
             <div class="text-xs font-bold mb-1">Public Key:</div>
             <div
               id="public"
-              class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="newWallet.publicKey" copySubject="Public Key"
+              class="text-sm w-full outline-none bg-gray-100 z-10 break-all" :copyValue="newWallet.publicKey" copySubject="Public Key"
             >{{ newWallet.publicKey }}</div>
           </div>
           <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
@@ -60,15 +60,15 @@
             <div class="text-xs font-bold mb-1">Private Key:</div>
             <div
               id="private"
-              class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="privateKey" copySubject="Private Key"
+              class="text-sm w-full outline-none bg-gray-100 z-10 break-all" :copyValue="privateKey" copySubject="Private Key"
             >{{ privateKey }}</div>
           </div>
           <font-awesome-icon icon="copy" @click="copy('private')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
         </div>
         <div class="flex justify-between p-4 rounded-xl bg-yellow-100 mb-4">
           <div class="text-center w-full">
-            <div class="border border-yellow-600 rounded-full w-8 h-8 inline-block mb-4">
-              <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-600 inline-block"></font-awesome-icon>
+            <div class="border border-yellow-600 rounded-full w-8 h-8 inline-block mb-4 relative">
+              <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-600 inline-block absolute" style="left: 12px; top: 6px;"></font-awesome-icon>
             </div>
             <p>Make sure you store your private key in a safe place.</p>
             <p>Access to your digital assets cannot be recovered without it.</p>

@@ -4,9 +4,11 @@
       <div class="flex-grow transition ease-in duration-300 w-full rounded-full px-5 py-1 mb-5" :class="borderColor">
         <input v-model="filters['global'].value" type="text" class="w-full outline-none text-sm" placeholder="Search" @click="clickInputText()" @blur="blurInputText()">
       </div>
-      <a @click="exportCSV($event)" class="export-icon border-gray-300 border rounded-lg bg-gray-100 w-9 h-9 ml-3 relative">
-        <font-awesome-icon icon="download" class="w-5 h-5 text-gray-400 cursor-pointer inline-block absolute" style="top: 5px; left: 8px;" title="Download CSV file"></font-awesome-icon>
+      <a @click="exportCSV($event)" class="export-icon border-gray-300 border rounded-lg bg-gray-100 w-18 h-9 ml-3 relative flex-none">
+        <div class="absolute inline-block text-tsm text-gray-500" style="right: 10px; top: 6px;">Export</div>
+        <font-awesome-icon icon="file-export" class="w-5 h-5 text-gray-400 cursor-pointer inline-block absolute" style="top: 5px; left: 8px;" title="Download CSV file"></font-awesome-icon>
       </a>
+      <DisplayImportContactModal class="inline-block w-24 ml-1 flex-none" />
     </div>
     <DataTable
       :value="contacts"
@@ -19,17 +21,17 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       :globalFilterFields="['name','address']">
-      <Column field="name" header="Label" headerStyle="width:40%">
+      <Column field="name" header="Label" headerStyle="width:30%">
         <template #body="{data}">
           {{data.name}}
         </template>
       </Column>
-      <Column field="address" header="Account Address" headerStyle="width:50%">
+      <Column field="address" header="Account Address" headerStyle="width:55%">
         <template #body="{data}">
-          {{appStore.pretty(data.address)}}
+          {{ Helper.createAddress(data.address).pretty() }}
         </template>
       </Column>
-      <Column header="Action" headerStyle="width:10%">
+      <Column header="Action" headerStyle="width:15%">
         <template #body="{data}">
           <EditContactModal :data="data" class="inline-block" :key="data.address" />
           <ConfirmDeleteContactModal :data="data" />
@@ -43,22 +45,29 @@
 </template>
 
 <script>
-import { inject, ref } from "vue";
+import { ref } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {FilterMatchMode} from 'primevue/api';
 import ConfirmDeleteContactModal from '@/modules/services/submodule/addressbook/components/ConfirmDeleteContactModal.vue';
 import EditContactModal from '@/modules/services/submodule/addressbook/components/EditContactModal.vue';
+import { Helper } from "@/util/typeHelper";
+import DisplayImportContactModal from '@/modules/services/submodule/addressbook/components/DisplayImportContactModal.vue'
 
 export default{
-  components: { DataTable, Column, ConfirmDeleteContactModal, EditContactModal },
+  components: {
+    DataTable,
+    Column,
+    ConfirmDeleteContactModal,
+    EditContactModal,
+    DisplayImportContactModal,
+  },
   name: 'ContactDataTable',
   props: {
     contacts: Array,
   },
 
   setup(){
-    const appStore = inject("appStore");
     const borderColor = ref('border border-gray-400');
     const filters = ref({
       'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
@@ -80,12 +89,12 @@ export default{
 
     return {
       dt,
-      appStore,
       borderColor,
       filters,
       clickInputText,
       blurInputText,
       exportCSV,
+      Helper,
     }
   },
 }
@@ -112,6 +121,9 @@ export default{
 
 .export-icon:hover {
   @apply border-blue-primary bg-blue-primary;
+  >div{
+    @apply text-white;
+  }
   svg{
     @apply text-white
   }

@@ -23,6 +23,7 @@ import { OtherAccount } from "@/models/otherAccount";
 import { Namespace } from "@/models/namespace";
 import { Account as myAccount } from "@/models/account";
 import { TransactionUtils } from "./transactionUtils"
+import { Account as NEM_Account, NetworkTypes, NEMLibrary } from "nem-library";
 
 const config = require("@/../config/config.json");
 
@@ -493,6 +494,7 @@ export class WalletUtils {
         wallets.savetoLocalStorage();
     }
 
+
     static createNewWalletAccountFromOldFormat(jsonString: string): WalletAccount{
         const wltAccount: oldAccountStructure = JSON.parse(jsonString);
 
@@ -896,6 +898,23 @@ export class WalletUtils {
                 }
             }
         }
+    }
+
+    
+    static createNis1AccountWithPrivateKey(privateKey: string, isTestnet: boolean = false) {
+        NEMLibrary.reset();
+        let networkType: NetworkTypes;
+        if (isTestnet) {
+            networkType = NetworkTypes.TEST_NET;
+        }
+        else {
+            networkType = NetworkTypes.MAIN_NET;
+        }
+        NEMLibrary.bootstrap(networkType);
+        let tempAccount = NEM_Account.createWithPrivateKey(privateKey);
+        let publicKey = tempAccount.publicKey;
+        let new_nis1Account = new nis1Account(tempAccount.address.plain(), publicKey)
+        return new_nis1Account;
     }
 
     static async refreshAllAccountDetails(wallet: Wallet, networkProfile: ChainProfile): Promise<void>{
