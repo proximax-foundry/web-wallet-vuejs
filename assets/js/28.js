@@ -1,16 +1,5 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([[28],{
 
-/***/ "./package.json":
-/*!**********************!*\
-  !*** ./package.json ***!
-  \**********************/
-/*! exports provided: name, version, private, scripts, dependencies, devDependencies, optionalDependencies, default */
-/***/ (function(module) {
-
-eval("module.exports = JSON.parse(\"{\\\"name\\\":\\\"web-wallet-vuejs\\\",\\\"version\\\":\\\"0.0.2\\\",\\\"private\\\":true,\\\"scripts\\\":{\\\"serve\\\":\\\"vue-cli-service serve\\\",\\\"build\\\":\\\"cross-env NODE_ENV=production vue-cli-service build\\\",\\\"lint\\\":\\\"vue-cli-service lint\\\",\\\"build-development\\\":\\\"cross-env NODE_ENV=development vue-cli-service build\\\",\\\"build-staging\\\":\\\"cross-env NODE_ENV=staging vue-cli-service build\\\",\\\"test\\\":\\\"npx nightwatch --config tests/config/nightwatch.conf.js --headless --no-sandbox tests\\\"},\\\"dependencies\\\":{\\\"@fortawesome/fontawesome-svg-core\\\":\\\"^1.2.34\\\",\\\"@fortawesome/free-solid-svg-icons\\\":\\\"^5.15.2\\\",\\\"@fortawesome/vue-fontawesome\\\":\\\"^3.0.0-3\\\",\\\"@tailwindcss/postcss7-compat\\\":\\\"^2.0.3\\\",\\\"@vueform/multiselect\\\":\\\"^1.5.0\\\",\\\"animate.css\\\":\\\"^4.1.1\\\",\\\"chart.js\\\":\\\"^2.9.4\\\",\\\"cross-env\\\":\\\"^7.0.3\\\",\\\"crypto-js\\\":\\\"^3.3.0\\\",\\\"crypto-random-string\\\":\\\"^4.0.0\\\",\\\"js-joda\\\":\\\"^1.11.0\\\",\\\"js-sha3\\\":\\\"^0.8.0\\\",\\\"jsonwebtoken\\\":\\\"^8.5.1\\\",\\\"maska\\\":\\\"^1.4.1\\\",\\\"mitt\\\":\\\"^2.1.0\\\",\\\"nem-library\\\":\\\"^2.0.0-RC4\\\",\\\"node-sass\\\":\\\"^4.14.1\\\",\\\"postcss\\\":\\\"^7.0.35\\\",\\\"postcss-custom-properties\\\":\\\"^10.0.0\\\",\\\"postcss-nested\\\":\\\"^4.2.3\\\",\\\"primeicons\\\":\\\"^4.1.0\\\",\\\"primevue\\\":\\\"^3.3.4\\\",\\\"rxjs\\\":\\\"^6.6.6\\\",\\\"sass-loader\\\":\\\"^7.3.1\\\",\\\"tailwindcss\\\":\\\"npm:@tailwindcss/postcss7-compat@^2.0.3\\\",\\\"tsjs-xpx-chain-sdk\\\":\\\"^0.8.1\\\",\\\"tslib\\\":\\\"^2.2.0\\\",\\\"v-tooltip\\\":\\\"^4.0.0-alpha.1\\\",\\\"v-wave\\\":\\\"^1.2.8\\\",\\\"vue\\\":\\\"^3.0.0\\\",\\\"vue-currency-input\\\":\\\"^2.0.0-rc.2\\\",\\\"vue-i18n\\\":\\\"^9.1.6\\\",\\\"vue-password\\\":\\\"^3.0.0\\\",\\\"vue-router\\\":\\\"^4.0.0-0\\\",\\\"vue-tippy\\\":\\\"^6.0.0-alpha.29\\\",\\\"vue3-loading-overlay\\\":\\\"0.0.0\\\",\\\"vue3-simple-file-input\\\":\\\"^1.0.3\\\"},\\\"devDependencies\\\":{\\\"@typescript-eslint/eslint-plugin\\\":\\\"^4.18.0\\\",\\\"@typescript-eslint/parser\\\":\\\"^4.18.0\\\",\\\"@vue/cli-plugin-eslint\\\":\\\"~4.5.0\\\",\\\"@vue/cli-plugin-router\\\":\\\"~4.5.0\\\",\\\"@vue/cli-plugin-typescript\\\":\\\"~4.5.0\\\",\\\"@vue/cli-service\\\":\\\"~4.5.0\\\",\\\"@vue/compiler-sfc\\\":\\\"^3.0.0\\\",\\\"@vue/eslint-config-typescript\\\":\\\"^7.0.0\\\",\\\"babel-eslint\\\":\\\"^10.1.0\\\",\\\"chromedriver\\\":\\\"^91.0.1\\\",\\\"eslint\\\":\\\"^7.28.0\\\",\\\"eslint-plugin-vue\\\":\\\"^7.11.1\\\",\\\"geckodriver\\\":\\\"^2.0.0\\\",\\\"nightwatch\\\":\\\"^1.7.3\\\",\\\"typescript\\\":\\\"~4.1.5\\\"},\\\"optionalDependencies\\\":{\\\"fsevents\\\":\\\">=1.0.0 <2.3.2\\\"}}\");\n\n//# sourceURL=webpack:///./package.json?");
-
-/***/ }),
-
 /***/ "./src/environment/environment.js":
 /*!****************************************!*\
   !*** ./src/environment/environment.js ***!
