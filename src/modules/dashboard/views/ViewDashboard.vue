@@ -24,6 +24,7 @@
         <div class="inline-block" v-if="displayConvertion"><img src="@/assets/img/icon-usd-blue.svg" class="w-5 inline mr-1"><span class="text-xs" >USD {{ currencyConvert }}</span></div>
       </div>
     </div>
+
     <div class="w-full mt-5 md:mt-0">
       <div class="text-md text-center sm:text-right lg:text-left">Transactions: <span>{{ confirmedTransactions.length + unconfirmedTransactions.length }}</span></div>
       <div class="xs:text-center sm:text-right lg:text-left">
@@ -50,6 +51,28 @@
       </div>
     </div>
   </div>
+
+  <div class="grid grid-cols-12">
+    <div class="col-start-2 col-span-10">
+      <div class="grid grid-cols-12">
+          <div class="text-md col-start-5 col-span-2 rounded font-thick " 
+          :class="namespaceAssetView == 0 ? 'bg-blue-500 text-white' : 'bg-gray-400 text-black'" @click="namespaceAssetView = 0">
+            Namespaces
+          </div>
+          <div class="text-md col-span-2 rounded" 
+            :class="namespaceAssetView == 1 ? 'bg-blue-500 text-white' : 'bg-gray-400 text-black'" @click="namespaceAssetView = 1">
+            Other Assets
+          </div>
+      </div>
+      <div class="grid grid-cols-12">
+        <div class="col-span-12 py-2">
+          <NamespaceDataTable v-if="namespaceAssetView == 0" :namespaces="selectedAccountNamespaces" />
+          <AssetDataTable v-if="namespaceAssetView == 1" :assets="selectedAccountAssets" />
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div>
     <DashboardDataTable :showBlock="true" @confirmedFilter="doFilterConfirmed" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed"></DashboardDataTable>
     <DashboardDataTable :showBlock="false" :transactions="unconfirmedTransactions" v-if="isShowUnconfirmed"></DashboardDataTable>
@@ -62,6 +85,8 @@
 <script>
 import { computed, defineComponent, ref, getCurrentInstance, watch, reactive } from 'vue';
 import DashboardDataTable from '@/modules/dashboard/components/DashboardDataTable.vue';
+import AssetDataTable from '@/modules/dashboard/components/AssetDataTable.vue';
+import NamespaceDataTable from '@/modules/dashboard/components/NamespaceDataTable.vue';
 import PartialDashboardDataTable from '@/components/PartialDashboardDataTable.vue';
 import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
 import AddressQRModal from '@/modules/dashboard/components/AddressQRModal.vue';
@@ -88,7 +113,9 @@ export default defineComponent({
     DashboardDataTable,
     PartialDashboardDataTable,
     SetAccountDefaultModal,
-    AddressQRModal
+    AddressQRModal,
+    AssetDataTable,
+    NamespaceDataTable
   },
 
   setup(){
@@ -97,6 +124,7 @@ export default defineComponent({
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
     const showAddressQRModal = ref(false);
+    const namespaceAssetView = ref(0);
 
     const displayConvertion = ref(false);
     const openSetDefaultModal = ref(false);
@@ -121,6 +149,81 @@ export default defineComponent({
       else{
         return [];
       }
+    });
+
+    const selectedAccountNamespaces = computed(()=>{
+      
+      let formattedNamespaces = [];
+      let namespaces = selectedAccount.value.namespaces;
+
+      for(let i=0; i < namespaces.length; ++i){
+        
+        let linkName = ""
+
+        switch (namespaces[i].linkType) {
+          case 1:
+            linkName = "Asset";
+            break;
+          case 2:
+            linkName = "Address";
+            break;
+        
+          default:
+            break;
+        }
+
+        let data = {
+          idHex: namespaces[i].idHex,
+          name: namespaces[i].idHex,
+          linkType: linkName,
+          linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
+          active: namespaces[i].active
+        };
+        
+        formattedNamespaces.push(data);
+      }
+
+      return formattedNamespaces;
+    });
+
+    const selectedAccountAssets = computed(()=>{
+
+      let formattedAssets = [];
+      let assets = selectedAccount.value.assets;
+
+      for(let i=0; i < assets.length; ++i){
+
+        let namespaceAlias = [];
+
+        let assetId = assets[i].idHex;
+
+        if(assetId === networkState.currentNetworkProfile.network.currency.assetId){
+          continue;
+        }
+
+        let namespaces = selectedAccount.value.findNamespaceNameByAsset(assetId);
+
+        for(let i =0; i < namespaces.length; ++i){
+          let aliasData = {
+            idHex: namespaces[i].idHex,
+            name: namespaces[i].name
+          };
+
+          namespaceAlias.push(aliasData);
+        }
+
+        let data = {
+          idHex: assetId,
+          owner: assets[i].owner,
+          amount: Helper.toCurrencyFormat(assets[i].getExactAmount(), assets[i].divisibility),
+          alias: namespaceAlias,
+          active: true
+        };
+        
+        formattedAssets.push(data);
+      }
+
+      return formattedAssets;
     });
 
     const selectedAccountBalance = computed(
@@ -559,7 +662,10 @@ export default defineComponent({
       doFilterConfirmed,
       filteredConfirmedTransactions,
       addressQR,
-      showAddressQRModal
+      showAddressQRModal,
+      namespaceAssetView,
+      selectedAccountNamespaces,
+      selectedAccountAssets
     };
   }
 });
