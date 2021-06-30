@@ -1,7 +1,9 @@
 import { ChainConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, Convert,
   NetworkType, 
   NamespaceId,
-  MosaicId} from "tsjs-xpx-chain-sdk";
+  MosaicId, Address, PublicAccount, 
+  AccountInfo, Transaction, QueryParams
+} from "tsjs-xpx-chain-sdk";
 import { NetworkConfig } from "../models/stores/chainProfileConfig";
 import { ChainAPICall } from "../models/REST/chainAPICall";
 import { networkState } from "../state/networkState";
@@ -162,5 +164,23 @@ export class ChainUtils{
       let mosaicId: MosaicId = await chainRESTCall.namespaceAPI.getLinkedMosaicId(namespaceId);
 
       return mosaicId;
+    }
+
+    static async getAccountInfo(address: Address): Promise<AccountInfo>{
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let accountInfo = await chainRESTCall.accountAPI.getAccountInfo(address);
+
+      return accountInfo;
+    }
+
+    static async getAccountTransactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<Transaction[]>{
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let transactions = await chainRESTCall.accountAPI.transactions(publicAccount, queryParams);
+
+      return transactions;
     }
 }

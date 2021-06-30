@@ -55,7 +55,7 @@ import { networkState } from "@/state/networkState";
 import { useRouter } from "vue-router";
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { ChainUtils } from '@/util/chainUtils';
-import { ChainProfile } from "@/models/stores/chainProfile";
+import { Helper } from '@/util/typeHelper';
 // import { transferEmitter } from '../util/listener.js';
 import Dropdown from 'primevue/dropdown';
 import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
@@ -81,8 +81,6 @@ export default defineComponent({
     // const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    //const emitter = internalInstance?.appContext.config.globalProperties.emitter;
-    // const chainNetwork = inject("chainNetwork");
     const router = useRouter();
     const notificationMessage = ref('');
     const notificationType = ref('noti');
@@ -90,11 +88,7 @@ export default defineComponent({
     const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort))
     const loginStatus = computed(() => walletState.isLogin);
     const chainsNetworks = computed(()=> {
-      /*interface optionInterface {
-        label: string,
-        value: number
-      }
-      let options : Array<optionInterface> = [];*/
+
       let options = [];
       networkState.availableNetworks.forEach((network, index) => {
         options.push({ label: network, value: index });
@@ -103,41 +97,20 @@ export default defineComponent({
     });
 
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
 
-/*
-    interface itemInterface{
-      label: string,
-      value: number
-    }
-
-    interface chainsNetworkOptionInterface {
-      label:string,
-      items: Array<itemInterface>
-    }
-
-    const chainsNetworkOption : Array<chainsNetworkOptionInterface> = [{
-      label: 'Networks',
-      items: chainsNetworks.value
-    }];
-  */
-  const chainsNetworkOption = [{
-      label: 'Networks',
-      items: chainsNetworks.value
-    }];
-    // , {
-    //   label: 'Setting',
-    //   items: [
-    //     {label: 'Customize', value: 'customize'}
-    //   ]
-    // }
+    const chainsNetworkOption = [{
+        label: 'Networks',
+        items: chainsNetworks.value
+      }];
+      // , {
+      //   label: 'Setting',
+      //   items: [
+      //     {label: 'Customize', value: 'customize'}
+      //   ]
+      // }
 
     const selectedNetwork = computed(()=>{ return {label: networkState.chainNetworkName, value: networkState.chainNetwork }});
-
-    //selectedNetwork.value= { label: networkState.chainNetworkName, value: networkState.chainNetwork };
-    // // set default for network selection if state.selectedNetwork is null
-    // if(networkState.chainNetworkNamee === ''){
-    //   selectedNetwork.value= { label: networkState.availableNetworks[0], value: 0 };
-    // }
 
     const selectNetwork= (e) =>{
       // if(e.value.value !== 'customize'){
@@ -153,10 +126,19 @@ export default defineComponent({
       console.log('logout')
     };
 
-    const totalBalance = ref('');
-    // const totalBalance = computed(()=>{
-    //   return appStore.getTotalBalance();
-    // });
+    //const totalBalance = ref(0);
+    const totalBalance = computed(()=>{
+
+      let accountsBalance = walletState.currentLoggedInWallet.accounts.map((account)=> account.balance);
+      let othersBalance = walletState.currentLoggedInWallet.others.map((otherAccount)=> otherAccount.balance);
+
+      let accountsTotalAmount = accountsBalance.reduce((prevAmount, newAmount)=> prevAmount + newAmount);
+      let totalAmount = othersBalance.reduce((prevAmount, newAmount)=> prevAmount + newAmount, accountsTotalAmount);
+
+      totalAmount = Helper.toCurrencyFormat(totalAmount, currentNativeTokenDivisibility.value);
+
+      return totalAmount;
+    });
 
     // transferEmitter.on("CONFIRMED_NOTIFICATION", payload => {
     //   if(payload.status){

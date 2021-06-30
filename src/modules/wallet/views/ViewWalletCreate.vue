@@ -31,7 +31,7 @@
             <div class="absolute z-20 w-full h-full"></div>
             <div class="text-xs font-bold mb-1">Address:</div>
             <div
-              id="address"
+              id="address" :copyValue="newWallet.address" copySubject="Address"
               class="text-sm w-full outline-none bg-gray-100 z-10"
             >{{ newWallet.address }}</div>
           </div>
@@ -42,22 +42,22 @@
             <div class="absolute z-20 w-full h-full"></div>
             <div class="text-xs font-bold mb-1">Public Key:</div>
             <div
-              id="public"
+              id="public" :copyValue="newWallet.publicKey" copySubject="Public Key"
               class="text-sm w-full outline-none bg-gray-100 z-10"
             >{{ newWallet.publicKey }}</div>
           </div>
-          <font-awesome-icon icon="copy" @click="copy('public', publicKeyLabel)" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
+          <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
         </div>
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center" v-if="showPK">
           <div class="text-left w-full relative">
             <div class="absolute z-20 w-full h-full"></div>
             <div class="text-xs font-bold mb-1">Private Key:</div>
             <div
-              id="private"
+              id="private" :copyValue="privateKey" copySubject="Private Key"
               class="text-sm w-full outline-none bg-gray-100 z-10"
             >{{ privateKey }}</div>
           </div>
-          <font-awesome-icon icon="copy" @click="copy('private', privateKeyLabel)" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
+          <font-awesome-icon icon="copy" @click="copy('private')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
         </div>
         <div class="flex justify-between p-4 rounded-xl bg-yellow-100 mb-4">
           <div class="text-center w-full">
@@ -98,7 +98,6 @@ import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 import { ChainUtils } from '@/util/chainUtils';
 import { networkState } from "@/state/networkState";
 import { walletState } from "@/state/walletState";
-import { StringToCopy } from "@/models/const/stringToCopy";
 
 
 export default defineComponent({
@@ -125,13 +124,11 @@ export default defineComponent({
     const privateKey = ref<string>("");
     const showPasswdError = ref<boolean>(false);
     const passwdPattern: string  = "^[^ ]{8,}$";
-    const publicKeyLabel: string  = StringToCopy.PUBLIC_KEY;
-    const privateKeyLabel: string  = StringToCopy.PRIVATE_KEY;
-    const addressLabel: string = StringToCopy.ADDRESS;
-    const copy = (id :string, type: string) =>{ 
-      let copyText: string  = document.getElementById(id).innerText;
-      copyToClipboard(copyText);
-      toast.add({severity:'info', detail: type + ' copied', group: 'br', life: 5000});
+    const copy = (id :string) =>{ 
+      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
+      let copySubject = document.getElementById(id).getAttribute("copySubject");
+      copyToClipboard(stringToCopy);
+      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
     };
     const disableCreate = computed(
       () => !(
@@ -183,10 +180,7 @@ export default defineComponent({
       createWallet,
       disableCreate,
       clearInput,
-      copy,
-      publicKeyLabel,
-      privateKeyLabel,
-      addressLabel
+      copy
     };
   },
 

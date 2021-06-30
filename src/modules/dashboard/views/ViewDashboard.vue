@@ -1,24 +1,26 @@
 <template>
   <div class="md:grid md:grid-cols-2 mb-8">
     <div class="w-full text-center md:text-left mx-0 lg:mx-5">
-      <div class="font-bold hover:bg-gray-100 cursor-pointer inline-block py-1 px-2 pl-0 rounded-lg" @click="openSetDefaultModal = !openSetDefaultModal"><font-awesome-icon icon="caret-down" class="h-5 w-5 text-gray-600 inline-block"></font-awesome-icon>&nbsp;{{ primaryAccountName }} <div class="text-xs font-normal ml-1 inline-block px-2 py-1 rounded bg-yellow-200">Default</div></div>
+      <div class="font-bold hover:bg-gray-100 cursor-pointer inline-block py-1 px-2 pl-0 rounded-lg" @click="openSetDefaultModal = !openSetDefaultModal">
+        <font-awesome-icon icon="caret-down" class="h-5 w-5 text-gray-600 inline-block"></font-awesome-icon>&nbsp;{{ selectedAccountName }} 
+        <div v-if="isMultisig" class="text-xs font-normal ml-1 inline-block px-2 py-1 rounded bg-blue-200" >MultiSig</div>
+        <div v-if="isDefault" class="text-xs font-normal ml-1 inline-block px-2 py-1 rounded bg-yellow-200">Default</div>
+      </div>
       <div class="text-xs mb-2">
         <div class="relative inline-block overflow-x-hidden address_div">
           <div class="absolute z-20 h-full"></div>
-          <input
+          <div
             id="address"
-            class=" outline-none z-10 break-all"
-            type="text"
-            :value="primaryAccount"
-          />
+            class=" outline-none z-10 break-all" :copyValue="selectedAccountAddressPlain" copySubject="Address"
+          >{{ selectedAccountAddress }}</div>
         </div>
         <div class="mt-2 sm:inline-block relative">
           <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 text-md cursor-pointer inline mx-2" style="top: 3px;"></font-awesome-icon><img src="@/modules/dashboard/img/icon-qr-code.svg" class="w-5 inline absolute">
         </div>
       </div>
       <div class="text-center md:text-left">
-        <div class="inline-block mr-4"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 h-5 inline mr-1"><span class="text-xs">{{ primaryAccountBalance }} XPX</span></div>
-        <div class="inline-block"><img src="@/assets/img/icon-usd-blue.svg" class="w-5 inline mr-1"><span class="text-xs">USD {{ currencyConvert }}</span></div>
+        <div class="inline-block mr-4"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 h-5 inline mr-1"><span class="text-xs">{{ selectedAccountBalance }} {{ currentNativeTokenName }}</span></div>
+        <div class="inline-block" v-if="displayConvertion"><img src="@/assets/img/icon-usd-blue.svg" class="w-5 inline mr-1"><span class="text-xs" >USD {{ currencyConvert }}</span></div>
       </div>
     </div>
     <div class="w-full mt-5 md:mt-0">
@@ -28,7 +30,7 @@
           <div class="rounded-full bg-blue-primary text-white w-24 h-15 px-2 py-1 mr-3 inline-block" :class="confirmedTransactions.length>0?'cursor-pointer':''" @click="clickConfirmedTransaction()">
             <div class="flex justify-between">
               <div class="rounded-full text-white border pt-1 pl-1 w-6 h-6 relative"><font-awesome-icon icon="check" class="w-4 h-3 absolute" style="top: 6px;"></font-awesome-icon></div>
-              <div class="text-xs font-bold flex items-center">{{ confirmedTransactions.length }}</div>
+              <div class="text-xs font-bold flex items-center">{{ filteredConfirmedTransactions.length }}</div>
             </div>
           </div>
           <div class="rounded-full bg-blue-300 text-white w-24 h-15 px-2 py-1 mr-3 inline-block" :class="unconfirmedTransactions.length>0?'cursor-pointer':''" @click="clickUnconfirmedTransaction()">
@@ -37,10 +39,10 @@
               <div class="text-xs font-bold flex items-center">{{ unconfirmedTransactions.length }}</div>
             </div>
           </div>
-          <div class="rounded-full bg-yellow-500 text-white w-24 h-15 px-2 py-1 inline-block" :class="aggregateBondedTransactions.length>0?'cursor-pointer':''" @click="clickAggregateBondedTransactions()">
+          <div class="rounded-full bg-yellow-500 text-white w-24 h-15 px-2 py-1 inline-block" :class="partialTransactions.length>0?'cursor-pointer':''" @click="clickPartialTransactions()">
             <div class="flex justify-between">
               <img src="@/modules/dashboard/img/icon-transaction-partial-white.svg" class="w-6 h-6" />
-              <div class="text-xs font-bold flex items-center">{{ aggregateBondedTransactions.length }}</div>
+              <div class="text-xs font-bold flex items-center">{{ partialTransactions.length }}</div>
             </div>
           </div>
         </div>
@@ -48,19 +50,20 @@
     </div>
   </div>
   <div>
-    <DashboardDataTable :transactions="confirmedTransactions.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed"></DashboardDataTable>
-    <DashboardDataTable :transactions="unconfirmedTransactions.sort((a, b) => b.block - a.block)" v-if="isShowUnconfirmed"></DashboardDataTable>
-    <PartialDashboardDataTable :transactions="aggregateBondedTransactions.sort((a, b) => b.deadline - a.deadline)" v-if="isShowAggregateBonded"></PartialDashboardDataTable>
-    <SetAccountDefaultModal :toggleModal="openSetDefaultModal" />
+    <DashboardDataTable :showBlock="true" @confirmedFilter="doFilterConfirmed" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed"></DashboardDataTable>
+    <DashboardDataTable :showBlock="false" :transactions="unconfirmedTransactions" v-if="isShowUnconfirmed"></DashboardDataTable>
+    <PartialDashboardDataTable :transactions="partialTransactions.sort((a, b) => b.deadline - a.deadline)" v-if="isShowPartial"></PartialDashboardDataTable>
+    <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, ref, getCurrentInstance, watch } from 'vue';
+<script>
+import { computed, defineComponent, ref, getCurrentInstance, watch, reactive } from 'vue';
 import DashboardDataTable from '@/modules/dashboard/components/DashboardDataTable.vue';
 import PartialDashboardDataTable from '@/components/PartialDashboardDataTable.vue';
 import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
-import { copyKeyFunc, currencyconverter } from '@/util/functions';
+import { copyToClipboard, getXPXcurrencyPrice } from '@/util/functions';
+import { Helper } from '@/util/typeHelper';
 import { transactions } from '@/util/transactions.js';
 // eslint-disable-next-line no-unused-vars
 import { PublicAccount, Order, QueryParams } from "tsjs-xpx-chain-sdk";
@@ -72,9 +75,8 @@ import { ChainUtils } from '@/util/chainUtils';
 import { networkState } from "@/state/networkState";
 import { AccountAPI } from '@/models/REST/account';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
+import { DashboardService } from '../service/dashboardService';
 // import { dashboardUtils } from '@/util/dashboardUtils';
-// import { ConfirmedTransaction, UnconfirmedTransaction, AggregateBondedTransaction, contactInterface } from '@/models/interface/transaction';
-
 
 export default defineComponent({
   name: 'ViewDashboard',
@@ -86,87 +88,246 @@ export default defineComponent({
 
   setup(){
     const toast = useToast();
-    // const appStore = inject("appStore");
-    // const siriusStore = inject("siriusStore");
-    // const chainNetwork = inject("chainNetwork");
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
+    const displayConvertion = ref(false);
     const openSetDefaultModal = ref(false);
 
-    const copy = (id) => copyKeyFunc(id);
-    const primaryAccount = computed(
-      () => {
-        // if (appStore.state.currentLoggedInWallet) {
-        //   return appStore.pretty(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).address);
-        // }else{
-        //   return 0;
-        // }
-        if (walletState.currentLoggedInWallet) {
-          let wallet = new Wallet(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletState.currentLoggedInWallet.accounts);
-          return wallet.selectDefaultAccount.name;
-        }else{
-          return '';
-        }
-      }
-    );
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
 
-    const primaryAccountBalance = computed(
+    let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
+    currentAccount.default = true;
+
+    let selectedAccount = ref(currentAccount);
+
+    const selectedAccountPublicKey = computed(()=> selectedAccount.value.publicKey);
+    const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty());
+    const selectedAccountAddressPlain = computed(()=> selectedAccount.value.address);
+    const selectedAccountDirectChilds = computed(()=> {
+      let multisigInfo = selectedAccount.value.multisigInfo.find((x)=> x.level === 0);
+
+      if(multisigInfo){
+        return multisigInfo.getMultisigAccountsAddress();
+      }
+      else{
+        return [];
+      }
+    });
+
+    const selectedAccountBalance = computed(
       () => {          
-        return '[balance]';
+        return Helper.toCurrencyFormat(selectedAccount.value.balance, currentNativeTokenDivisibility.value);
       }
     );
 
-    const primaryAccountName = computed(
+    const selectedAccountName = computed(
       () => {
-        return '[name]';
+        return selectedAccount.value.name;
       }
     );
 
-    // get USD conversion
-    const currencyConvert = ref('0');
-    const getCurrencyConvert = () => {
-      currencyConvert.value = '[total.toFixed(6)]';
+    const isDefault = computed(()=> selectedAccount.value.default ? true : false );
+    let isMultisig = computed(()=> selectedAccount.value.multisigInfo.find((multisigInfo)=> multisigInfo.level == 1) ? true : false);
+
+    const getCurrencyPrice = () => {
+      let balance = selectedAccount.value.balance;
+      getXPXcurrencyPrice(balance).then((total) => {
+        currencyConvert.value = Helper.toCurrencyFormat(total, 6);
+      });
     };
-    getCurrencyConvert();
-    // watch(primaryAccountBalance, () => {
-    //   let balance = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).balance;
-    //   currencyconverter(balance).then((total) => {
-    //     currencyConvert.value = total.toFixed(6);
-    //   });
-    // });
+
+    let confirmedTransactions = ref([]);
+    let unconfirmedTransactions = ref([]);
+    let partialTransactions = ref([]);
+
+    let finalConfirmedTransaction = ref([]);
+    
+    let allConfirmedTransactions = ref([]);
+    let allUnconfirmedTransactions = ref([]);
+    let allPartialTransactions = ref([]);
+    let filteredConfirmedTransactions = ref([]);
+
+    watch(allConfirmedTransactions, (newValue) => {
+        let addressToSearch = [selectedAccountAddressPlain.value];
+        addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
+        filteredConfirmedTransactions.value = newValue.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
+        finalConfirmedTransaction.value = filteredConfirmedTransactions.value;
+    });
+
+    DashboardService.fetchConfirmedTransactions(walletState.currentLoggedInWallet).then((txs)=>{
+      //console.log(txs);
+      allConfirmedTransactions.value = txs;
+    });
+
+    let filteredUnconfirmedTransactions = computed(()=> []);
+    let filteredPartialTransactions = computed(()=> []);
+
+    const copy = (id) =>{
+      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
+      let copySubject = document.getElementById(id).getAttribute("copySubject");
+      copyToClipboard(stringToCopy);
+
+      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+    };
 
     
+    // get USD conversion
+    const currencyConvert = ref('');
+
+    if(networkState.currentNetworkProfile.network.currency.name === "XPX"){
+      displayConvertion.value = true;
+      getCurrencyPrice();
+
+      watch(selectedAccountBalance, () => {
+        getCurrencyPrice();
+      });
+    }
 
     // const confirmedTransactions = ref<ConfirmedTransaction[]>([]);
     // const unconfirmedTransactions = ref<UnconfirmedTransaction[]>([]);
     // const aggregateBondedTransactions = ref<AggregateBondedTransaction[]>([]);
     // const pageSize:number = 10;
-    // const isShowConfirmed = ref(true);
-    // const isShowUnconfirmed = ref(false);
-    // const isShowAggregateBonded = ref(false);
+    const isShowConfirmed = ref(true);
+    const isShowUnconfirmed = ref(false);
+    const isShowPartial = ref(false);
 
-    // const clickConfirmedTransaction = () => {
-    //   isShowConfirmed.value = true;
-    //   isShowUnconfirmed.value = false;
-    //   isShowAggregateBonded.value = false;
-    // };
+    const clickConfirmedTransaction = () => {
+      isShowConfirmed.value = true;
+      isShowUnconfirmed.value = false;
+      isShowPartial.value = false;
+    };
 
-    // const clickUnconfirmedTransaction = () => {
-    //   if(unconfirmedTransactions.value.length > 0){
-    //     isShowUnconfirmed.value = true;
-    //     isShowConfirmed.value = false;
-    //     isShowAggregateBonded.value = false;
-    //   }
-    // };
+    const clickUnconfirmedTransaction = () => {
+      if(unconfirmedTransactions.value.length > 0){
+        isShowUnconfirmed.value = true;
+        isShowConfirmed.value = false;
+        isShowPartial.value = false;
+      }
+    };
 
-    // const clickAggregateBondedTransactions = () => {
-    //   if(aggregateBondedTransactions.value.length > 0){
-    //     isShowAggregateBonded.value = true;
-    //     isShowConfirmed.value = false;
-    //     isShowUnconfirmed.value = false;
-    //   }
-    // };
+    const clickPartialTransactions = () => {
+      if(partialTransactions.value.length > 0){
+        isShowPartial.value = true;
+        isShowConfirmed.value = false;
+        isShowUnconfirmed.value = false;
+      }
+    };
+
+    const doFilterConfirmed = (input)=>{
+      
+      if(input == ""){
+        finalConfirmedTransaction.value = filteredConfirmedTransactions.value;
+        return;
+      }
+
+      let indexOfType = input.indexOf(':');
+      let type = "none";
+      let value = "";
+
+      if(indexOfType > -1){
+        type = input.substr(0,input.indexOf(':'));
+        value = input.substr(input.indexOf(':')+1);
+      }
+
+      if(value){
+        switch (type) {
+          case "ns":
+          case 'namespace':
+            let nsToSearch = new RegExp(value.toUpperCase());
+            if(["'",'"', "-"].includes(value.substr(0, 1))){
+              let convertingValue = value.substr(1);
+              if(convertingValue == ""){
+                return;
+              }
+              try {
+                let nsHex = Helper.createNamespaceId(convertingValue.toLowerCase()).toHex().toUpperCase();
+                
+                if(value.substr(0, 1) === "-"){
+                  if(convertingValue === networkState.currentNetworkProfile.network.currency.namespace){
+                    let assetToSearch = new RegExp(networkState.currentNetworkProfile.network.currency.assetId.toUpperCase());
+                    finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.relatedAsset.some((asset)=> assetToSearch.test(asset)));
+                    return;
+                  }
+                  else{
+                    nsToSearch = new RegExp(nsHex);
+                    let mosaicAliasTx = filteredConfirmedTransactions.value.find(
+                      (tx)=> tx.typeName === "Mosaic Alias" && tx.relatedNamespace.some((ns)=> nsToSearch.test(ns))
+                    );
+
+                    if(mosaicAliasTx){
+                      let assetsToSearch = mosaicAliasTx.relatedAsset;
+                      finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.relatedAsset.some((asset)=> assetsToSearch.include(asset)));
+                      return;
+                    }
+                    else{
+                      let addressAliasTx = filteredConfirmedTransactions.value.find(
+                        (tx)=> tx.typeName === "Address Alias" && tx.relatedNamespace.some((ns)=> nsToSearch.test(ns))
+                      );
+
+                      if(addressAliasTx){
+                        let addressToSearch = addressAliasTx.relatedAddress;
+                        finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.include(address)));
+                        return;
+                      }
+                    }
+                    
+                    return;
+                  }
+                }
+                else{
+                  nsToSearch = new RegExp(nsHex);
+                }
+                
+              } catch (error) {
+                return;
+              }
+            }
+
+            finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.relatedNamespace.some((ns)=> nsToSearch.test(ns)));
+            break;
+          case 'address':
+          case 'add':
+            let addressToSearch = new RegExp(value.toUpperCase().split('-').join(""));
+            finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.test(address)));
+            break;
+          case 'pk':
+          case 'publicKey':
+          case 'publickey':
+            let pkToSearch = new RegExp(value.toUpperCase());
+            finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.relatedPublicKey.some((pk)=> pkToSearch.test(pk)));
+            break;
+          case 'asset':
+          case 'mosaic':
+            let assetToSearch = new RegExp(value.toUpperCase());
+            finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.relatedAsset.some((asset)=> assetToSearch.test(asset)));
+            break;
+          case 'hash':
+            let hashToSearch = new RegExp(value.toUpperCase());
+            finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> hashToSearch.test(tx.hash));
+            break;
+          case 'none':
+          default:
+            let searchString = new RegExp(value);
+            finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.searchString.some((searchStr)=> searchString.test(searchStr)));
+            break;
+        }
+      }
+      else{
+        let searchString = new RegExp(input);
+        finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.searchString.some((searchStr)=> searchString.test(searchStr)));
+      }
+    }
+
+    const updateSelectedAccount = (data)=>{     
+      if(data.type == 0){
+        selectedAccount.value = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === data.name);
+      }
+      else{
+        selectedAccount.value = walletState.currentLoggedInWallet.others.find((account)=> account.name === data.name);
+      }
+    }
 
     // const generateNames = () => {
     //   // let wallet = new Wallet(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletState.currentLoggedInWallet.accounts);
@@ -343,29 +504,39 @@ export default defineComponent({
         }
         // getConfirmedAllTransactions();
     });
+    */
 
     emitter.on('CLOSE_SET_DEFAULT_ACCOUNT_MODAL', payload => {
       if(payload){
         openSetDefaultModal.value = false;
       }
-    });*/
+    });
 
     return {
       copy,
-      primaryAccount,
-      primaryAccountBalance,
-      primaryAccountName,
-      // confirmedTransactions,
-      // unconfirmedTransactions,
-      // aggregateBondedTransactions,
-      // isShowConfirmed,
-      // isShowUnconfirmed,
-      // isShowAggregateBonded,
-      // clickConfirmedTransaction,
-      // clickUnconfirmedTransaction,
-      // clickAggregateBondedTransactions,
+      selectedAccountBalance,
+      selectedAccountName,
+      confirmedTransactions,
+      unconfirmedTransactions,
+      partialTransactions,
+      isShowConfirmed,
+      isShowUnconfirmed,
+      isShowPartial,
+      clickConfirmedTransaction,
+      clickUnconfirmedTransaction,
+      clickPartialTransactions,
       openSetDefaultModal,
       currencyConvert,
+      displayConvertion,
+      currentNativeTokenName,
+      selectedAccountAddress,
+      selectedAccountAddressPlain,
+      updateSelectedAccount,
+      isDefault,
+      isMultisig,
+      finalConfirmedTransaction,
+      doFilterConfirmed,
+      filteredConfirmedTransactions
     };
   }
 });
@@ -377,7 +548,7 @@ export default defineComponent({
 
 #address{
   width: 350px;
-  @apply text-xs;
+  @extend .text-xs !optional;
 }
 
 @media (min-width: 640px) {
@@ -393,7 +564,7 @@ export default defineComponent({
 
   #address{
     width: 480px;
-    @apply text-sm;
+    @extend .text-sm !optional;
   }
 }
 

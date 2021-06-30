@@ -22,10 +22,38 @@ import {
   AccountInfo,
   FeeCalculationStrategy,
   NetworkType,
+  NamespaceId,
   Transaction,
   TransactionType,
   AggregateTransaction,
-  CosignatureTransaction
+  CosignatureTransaction,
+  QueryParams,
+  AddressAliasTransaction,
+  AddExchangeOfferTransaction,
+  ChainConfigTransaction,
+  ChainUpgradeTransaction,
+  ExchangeOfferTransaction,
+  RemoveExchangeOfferTransaction,
+  AccountLinkTransaction,
+  LockFundsTransaction,
+  ModifyMetadataTransaction,
+  AccountMosaicRestrictionModificationTransaction,
+  AccountOperationRestrictionModificationTransaction,
+  AccountAddressRestrictionModificationTransaction,
+  ModifyMultisigAccountTransaction,
+  MosaicAliasTransaction,
+  MosaicDefinitionTransaction,
+  MosaicSupplyChangeTransaction,
+  RegisterNamespaceTransaction,
+  SecretLockTransaction,
+  SecretProofTransaction,
+  InnerTransaction,
+  ExchangeOfferType,
+  HashType,
+  RestrictionType,
+  AccountRestrictionModification,
+  SignedTransaction,
+  CosignatureSignedTransaction
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { walletState } from "../state/walletState";
@@ -35,10 +63,8 @@ import { WalletUtils } from "../util/walletUtils";
 import { ChainAPICall } from "../models/REST/chainAPICall";
 import { BuildTransactions } from "../util/buildTransactions";
 import { Helper } from "./typeHelper";
-
-const divisibility = 6;
-const xpxMosaicId = "";
-const lockFundDuration = 10000;
+import { Duration } from "js-joda";
+import { faBreadSlice } from "@fortawesome/free-solid-svg-icons";
 
 const networkAPIEndpoint = computed(() => ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
 const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
@@ -153,77 +179,137 @@ export class TransactionUtils {
     return accountInfo;
   }
 
-  static amountFormatterSimple(amount: number, d: number = 6) {
-    const amountDivisibility = Number(amount) / Math.pow(10, d);
-    return amountDivisibility.toLocaleString('en-us', {
-      minimumFractionDigits: d
-    });
+  static getTransactionTypeNameByEnum(transactionType: TransactionType): string{
+
+    let name = "";
+
+    for(let key in transactionTypeName){
+      if(transactionType === transactionTypeName[key].id){
+        name = transactionTypeName[key].name;
+        break;
+      }
+    }
+
+    return name;
   }
 
-  static getFee = (transaction: Transaction) => {
+  static getFee(transaction: Transaction): number{
 
     return transaction.maxFee.compact();
   }
 
-  static convertDisplayDateTimeFormat(dateTimeJSON: string): string {
-    const date = new Date(dateTimeJSON);
-
-    return new Intl.DateTimeFormat('default').format(date);
-  }
-
-  static formatFixedDateTime(dateTimeJSON: string) {
-
-    const newDate = new Date(dateTimeJSON);
-
-    return new Intl.DateTimeFormat('en-GB',
-      {
-        year: 'numeric', month: 'numeric', day: 'numeric',
-        hour: 'numeric', minute: 'numeric', second: 'numeric'
-      }).format(newDate);
-  }
-
-  static numberToJSONDate(dateNumber: number) {
-    const newDate = new Date(dateNumber);
-
-    return newDate.toISOString();
-  }
-
-  static getFakeEncryptedMessageSize = (message: string) => {
+  static getFakeEncryptedMessageSize(message: string): number{
     return EncryptedMessage.create(message, PublicAccount.createFromPublicKey("0".repeat(64), ChainUtils.getNetworkType(localNetworkType.value)), "0".repeat(64)).size();
   }
 
-  static getPlainMessageSize = (message: string) => {
+  static getPlainMessageSize(message: string): number{
     return PlainMessage.create(message).size();
   }
 
-  static convertToCurrency = (value: number, divisibility: number) => {
-
-    const exactValue = value / Math.pow(10, divisibility);
-
-    return new Intl.NumberFormat('en', { maximumFractionDigits: divisibility }).format(exactValue);
-  }
-
-  static convertToExact = (value: number, divisibility: number) => {
-
-    return value / Math.pow(10, divisibility);
-  }
-
-  static convertToAbsolute = (value: number, divisibility: number) => {
-
-    return value * Math.pow(10, divisibility);
-  }
-
-  static signTransaction(transaction: Transaction, account: Account, generationHash: string) {
+  static signTransaction(transaction: Transaction, account: Account, generationHash: string): SignedTransaction {
     return account.sign(transaction, generationHash);
   }
 
-  static aggregateToCosignatureTransaction(aggregateTransaction: AggregateTransaction) {
+  static aggregateToCosignatureTransaction(aggregateTransaction: AggregateTransaction): CosignatureTransaction {
     return CosignatureTransaction.create(aggregateTransaction);
   }
 
-  static cosignTransaction(transactionToCosign: AggregateTransaction, account: Account) {
+  static cosignTransaction(transactionToCosign: AggregateTransaction, account: Account): CosignatureSignedTransaction {
     const cosignatureTransaction = TransactionUtils.aggregateToCosignatureTransaction(transactionToCosign);
 
     return account.signCosignatureTransaction(cosignatureTransaction);
+  }
+
+  static async getTransactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<Transaction[]> {
+
+    let transactions = await ChainUtils.getAccountTransactions(publicAccount, queryParams);
+
+    return transactions;
+  }
+
+  static getTransactionTypeName(type: number): string | null {
+
+    let typeName = "";
+
+    switch (type) {
+      case TransactionType.ADDRESS_ALIAS:
+        typeName = transactionTypeName.addressAlias.name
+        break;
+      case TransactionType.ADD_EXCHANGE_OFFER:
+        typeName = transactionTypeName.addExchangeOffer.name
+        break;
+      case TransactionType.AGGREGATE_BONDED:
+        typeName = transactionTypeName.aggregateBonded.name
+        break;
+      case TransactionType.AGGREGATE_COMPLETE:
+        typeName = transactionTypeName.aggregateComplete.name
+        break;
+      case TransactionType.CHAIN_CONFIGURE:
+        typeName = transactionTypeName.chainConfigure.name
+        break;
+      case TransactionType.CHAIN_UPGRADE:
+        typeName = transactionTypeName.chainUpgrade.name
+        break;
+      case TransactionType.EXCHANGE_OFFER:
+        typeName = transactionTypeName.exchangeOffer.name
+        break;
+      case TransactionType.REMOVE_EXCHANGE_OFFER:
+        typeName = transactionTypeName.removeExchangeOffer.name
+        break;
+      case TransactionType.LINK_ACCOUNT:
+        typeName = transactionTypeName.accountLink.name
+        break;
+      case TransactionType.LOCK:
+        typeName = transactionTypeName.lock.name
+        break;
+      case TransactionType.MODIFY_ACCOUNT_METADATA:
+        typeName = transactionTypeName.modifyAccountMetadata.name
+        break;
+      case TransactionType.MODIFY_MOSAIC_METADATA:
+        typeName = transactionTypeName.modifyMosaicMetadata.name
+        break;
+      case TransactionType.MODIFY_NAMESPACE_METADATA:
+        typeName = transactionTypeName.modifyNamespaceMetadata.name
+        break;
+      case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS:
+        typeName = transactionTypeName.modifyAccountRestrictionAddress.name
+        break;
+      case TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC:
+        typeName = transactionTypeName.modifyAccountRestrictionMosaic.name
+        break;
+      case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:
+        typeName = transactionTypeName.modifyAccountRestrictionOperation.name
+        break;
+      case TransactionType.MODIFY_MULTISIG_ACCOUNT:
+        typeName = transactionTypeName.modifyMultisigAccount.name
+        break;
+      case TransactionType.MOSAIC_ALIAS:
+        typeName = transactionTypeName.mosaicAlias.name
+        break;
+      case TransactionType.MOSAIC_DEFINITION:
+        typeName = transactionTypeName.mosaicDefinition.name
+        break;
+      case TransactionType.MOSAIC_SUPPLY_CHANGE:
+        typeName = transactionTypeName.mosaicSupplyChange.name
+        break;
+      case TransactionType.REGISTER_NAMESPACE:
+        typeName = transactionTypeName.registerNameSpace.name
+        break;
+      case TransactionType.SECRET_LOCK:
+        typeName = transactionTypeName.secretLock.name
+        break;
+      case TransactionType.SECRET_PROOF:
+        typeName = transactionTypeName.secretProof.name
+        break;
+      case TransactionType.TRANSFER:
+        typeName = transactionTypeName.transfer.name
+        break;
+
+      default:
+        typeName = null;
+        break;
+    }
+
+    return typeName;
   }
 }

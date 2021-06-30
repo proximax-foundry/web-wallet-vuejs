@@ -14,17 +14,19 @@ import {
     SimpleWallet, Password, RawAddress, Convert, Crypto,
     WalletAlgorithm, PublicAccount, Account, NetworkType, 
     AggregateTransaction, CosignatureTransaction, MosaicNonce,
-    NamespaceId, Address, AccountInfo, MosaicId, AliasType
+    NamespaceId, Address, AccountInfo, MosaicId, AliasType, Transaction
 } from "tsjs-xpx-chain-sdk"
 import { computed } from "vue";
 import { Helper, LooseObject } from "./typeHelper";
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { OtherAccount } from "@/models/otherAccount";
 import { Namespace } from "@/models/namespace";
+import { Account as myAccount } from "@/models/account";
+import { TransactionUtils } from "./transactionUtils"
 
 const config = require("@/../config/config.json");
 
-const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
+const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile!.network.type));
 
 export class WalletUtils {
 
@@ -112,12 +114,12 @@ export class WalletUtils {
                     account.assets = [];
                     const mosaicList: MosaicId[] = [];
                     const mosaicAmount: LooseObject = {};
-                    const address = accInfo.find((element) => element.address['address'] == account.address);
-                    if (address != undefined) {
+                    const singleAccInfo = accInfo.find((element) => element.address['address'] == account.address);
+                    if (singleAccInfo != undefined) {
 
-                        for (const mosaic of address.mosaics) {
+                        for (const mosaic of singleAccInfo.mosaics) {
                             if (mosaic.id.toHex() === nativeNetworkMosaicId.toHex()) {
-                                amount = mosaic.amount.compact() / Math.pow(10, currentNetworkProfile.network.currency.divisibility);
+                                amount = mosaic.amount.compact();
                                 const newAsset = new Asset(mosaic.id.toHex(), currentNetworkProfile.network.currency.divisibility, false, true);
                                 newAsset.amount = amount;
                                 account.assets.push(newAsset);
@@ -132,7 +134,7 @@ export class WalletUtils {
                             mosaicInfo.forEach((asset) => {
                                 const newAsset = new Asset(asset.mosaicId.toHex(), asset.divisibility, asset.isSupplyMutable(), asset.isTransferable(), asset.owner.publicKey);
                                 newAsset.supply = asset.supply.compact();
-                                newAsset.amount = mosaicAmount[newAsset.idHex] / Math.pow(10, asset.divisibility)
+                                newAsset.amount = mosaicAmount[newAsset.idHex]
                                 newAsset.duration = asset.duration ? asset.duration.compact() : null;
                                 account.assets.push(newAsset);
                             })
@@ -543,9 +545,16 @@ export class WalletUtils {
         //WalletUtils.updateMultisigsDetails(wallet.accounts);
 
         for(let i = 0; i < wallet.accounts.length; ++i ){
-            let multisigInfo: MultisigInfo[] = await WalletUtils.getMultisigDetails(wallet.accounts[i].address);
 
-            wallet.accounts[i].multisigInfo = multisigInfo;
+            try {
+                let multisigInfo: MultisigInfo[] = await WalletUtils.getMultisigDetails(wallet.accounts[i].address);
+
+                wallet.accounts[i].multisigInfo = multisigInfo;
+            } catch (error) {
+                let multisigInfo: MultisigInfo[] = [];
+                multisigInfo.push(new MultisigInfo(wallet.accounts[i].publicKey, 0, [], [], 0, 0));
+                wallet.accounts[i].multisigInfo = multisigInfo;
+            }
         }
     }
 
@@ -561,9 +570,16 @@ export class WalletUtils {
         //WalletUtils.updateOtherAccountMultisigsDetails(wallet.others);
 
         for(let i = 0; i < wallet.others.length; ++i ){
-            let multisigInfo: MultisigInfo[] = await WalletUtils.getMultisigDetails(wallet.others[i].address);
 
-            wallet.others[i].multisigInfo = multisigInfo;
+            try {
+                let multisigInfo: MultisigInfo[] = await WalletUtils.getMultisigDetails(wallet.others[i].address);
+
+                wallet.others[i].multisigInfo = multisigInfo;
+            } catch (error) {
+                let multisigInfo: MultisigInfo[] = [];
+                multisigInfo.push(new MultisigInfo(wallet.others[i].publicKey, 0, [], [], 0, 0));
+                wallet.others[i].multisigInfo = multisigInfo;
+            }
         }
     }
 
@@ -651,12 +667,15 @@ export class WalletUtils {
                 if(wallet.others.find((other)=> other.publicKey === publicKeys[i])){
                     continue;
                 }
+                else if(wallet.accounts.find((account)=> account.publicKey === publicKeys[i])){
+                    continue;
+                }
 
                 let publicAccount = Helper.createPublicAccount(publicKeys[i], localNetworkType.value) 
 
                 let address = publicAccount.address.plain();
 
-                let stripedAddress = address.substr(0, -4);
+                let stripedAddress = address.substr(-4);
 
                 let newOtherAccount = new OtherAccount("MULTISIG-" + stripedAddress, publicKeys[i], address, Helper.getOtherWalletAccountType().MULTISIG_CHILD);
             
@@ -677,7 +696,13 @@ export class WalletUtils {
 
             let publicAccount = Helper.createPublicAccount(account.publicKey, localNetworkType.value) 
 
-            let accountInfo = await chainAPICall.accountAPI.getAccountInfo(publicAccount.address);
+            let accountInfo;
+
+            try {
+                accountInfo = await chainAPICall.accountAPI.getAccountInfo(publicAccount.address);
+            } catch (error) {
+                continue;
+            }
 
             if(accountInfo.linkedAccountKey !== "0".repeat(64) && addInLinkedAccount){
 
@@ -893,7 +918,7 @@ export class WalletUtils {
             console.log(error);   
         }
 
-        walletState.wallets.savetoLocalStorage();
+        walletState.wallets.saveMyWalletOnlytoLocalStorage(wallet);
     }
 
     static updateAllAccountBalance(wallet: Wallet, assetId: string): void{

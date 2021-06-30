@@ -59,6 +59,19 @@ export class Wallets {
         localStorage.setItem(walletUpdateTimeKey, this.updateTime.toString());
     }
 
+    saveMyWalletOnlytoLocalStorage(myWallet: Wallet): void{
+
+        let newWalletsInstance = new Wallets();
+
+        let walletIndex = newWalletsInstance.wallets.findIndex((wallet)=> wallet.name === myWallet.name && wallet.networkName === myWallet.networkName)
+
+        newWalletsInstance.wallets[walletIndex] = myWallet;
+
+        localStorage.setItem(walletKey, JSON.stringify(newWalletsInstance.wallets));
+        this.updateTime = new Date().getTime();
+        localStorage.setItem(walletUpdateTimeKey, this.updateTime.toString());
+    }
+
     removeWallet(index: number): void{
         try {
             this.wallets.splice(index, 1);
