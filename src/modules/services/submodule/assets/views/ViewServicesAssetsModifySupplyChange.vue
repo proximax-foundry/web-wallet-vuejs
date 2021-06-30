@@ -223,7 +223,7 @@ export default {
 
     const changeAsset = (assetId) => {
       const selectedAsset = walletState.currentLoggedInWallet.selectDefaultAccount().assets.find((asset) => asset.idHex === assetId);
-      assetSupply.value =Helper.amountFormatterSimple(selectedAsset.amount, selectedAsset.divisibility);
+      assetSupply.value =Helper.amountFormatterSimple(selectedAsset.supply, selectedAsset.divisibility);
       if(selectedAsset.duration){
         assetDuration.value = selectedAsset.duration = ' Day' + ((selectedAsset.duration>1)?'s':'');
       }else{

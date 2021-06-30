@@ -371,14 +371,14 @@ export default {
     });
 
     const createMosaic = () => {
-      let createStatus = mosaicTransaction(divisibility.value, supply.value, duration.value, durationOption.value, isMutable.value, isTransferable.value, walletPassword.value, selectedAccName.value, appStore, siriusStore);
-      if(!createStatus){
-        err.value = 'Invalid wallet password';
-      }else{
-        // transaction made
-        err.value = '';
-        clearInput();
-      }
+      // let createStatus = mosaicTransaction(divisibility.value, supply.value, duration.value, durationOption.value, isMutable.value, isTransferable.value, walletPassword.value, selectedAccName.value, appStore, siriusStore);
+      // if(!createStatus){
+      //   err.value = 'Invalid wallet password';
+      // }else{
+      //   // transaction made
+      //   err.value = '';
+      //   clearInput();
+      // }
     };
 
     return {
