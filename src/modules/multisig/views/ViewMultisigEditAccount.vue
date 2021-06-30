@@ -132,7 +132,7 @@
 </div>
 </template>
 
-<script>
+<script lang = 'ts'>
 import { computed, ref, inject, watch, getCurrentInstance } from 'vue';
 import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue'
