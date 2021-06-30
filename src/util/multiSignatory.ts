@@ -310,19 +310,15 @@ function checkIsMultiSig(accountAddress) {
   });
 } */
 
-/* const removeUnrelatedMultiSig = () => {
+const removeUnrelatedMultiSig = () => {
   const wallet = walletState.currentLoggedInWallet
   let multiSigAccounts = wallet.accounts.filter((element) => element.encrypted === undefined);
   let removeMultiSig = [];
   multiSigAccounts.forEach((element) => {
     let validMultiSig = false;
     
-    if (element.isMultisign) {
-      element.isMultisign.cosignatories.forEach((account) => {
-        if (wallet.accounts.find(element => element.address == account.address.address)) {
+    if (element.getDirectParentMultisig().length) {
           validMultiSig = true;
-        }
-      });
     }
     if (!validMultiSig) {
       removeMultiSig.push(element.address);
@@ -336,14 +332,14 @@ function checkIsMultiSig(accountAddress) {
       // console.log('Remove index: ' + accountIndex + ' ' + multisig.address);
       wallet.accounts.splice(accountIndex, 1);
     });
-    ;
+    
     sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
     localStorage.setItem(
       walletKey,
       JSON.stringify(walletState)
     );
   }
-}; */
+};
 
 const cosignMiltisigTransaction = (signedAggregateBoundedTransaction, walletPassword) => {
   // console.log('signedAggregateBoundedTransaction')
@@ -546,6 +542,6 @@ export const multiSign = readonly({
   modifyMultisigAccount,
   fetchMultiSigCosigners,
   fetchWalletCosigner,
-  /* removeUnrelatedMultiSig, */
+  removeUnrelatedMultiSig,
  /*  createMultiSigAccount, */
 });
