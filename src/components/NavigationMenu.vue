@@ -20,7 +20,7 @@
       <router-link class="col" class-active="active" :to="{ name : 'ViewServices'}" :class="{'router-link-active': subIsActive([
         '/export-wallet',
         '/wallets',
-        '/create-mosaic',
+        '/create-asset',
         '/address-book',
         '/add-contacts',
         '/delete-wallet-confirmed' ,
@@ -28,7 +28,7 @@
         '/multisig-multi-level',
         '/create-namespace',
         '/extend-namespace',
-        '/mosaic-supply-change',
+        '/asset-supply-change',
         '/swap-account-list',
         '/create-attestation',
         '/audit-attestation',

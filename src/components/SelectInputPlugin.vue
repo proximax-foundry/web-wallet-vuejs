@@ -13,12 +13,14 @@
         :canDeselect="canDeselect"
         @change="makeSelection"
         v-model="selected"
+        :noOptionsText="noOptionsText"
         @close="closeSelection"
         :maxHeight="maxHeight"
         @deselect="$emit('update:modelValue', selected)"
         @select="makeSelection;$emit('update:modelValue', selected);$emit('show-selection', selected)"
         @clear="$emit('clear-selection')"
         ref="selectRef"
+        :disabled="disabled"
       />
       <div class="h-3 mb-2"><div class="error text-left" v-if="selectErr">{{ errorMessage }}</div></div>
     </div>
@@ -37,6 +39,8 @@ export default defineComponent({
     'modelValue',
     'showSelectTitleProp',
     'selectDefault',
+    'disabled',
+    'noOptionsText',
   ],
   emits:[
     'update:modelValue', 'show-selection', 'clear-selection'
@@ -89,9 +93,13 @@ export default defineComponent({
     Multiselect,
   },
 
+  methods: {
+    clear: function() {
+      this.$refs.selectRef.clear();
+    }
+  },
+
   mounted() {
-    // console.log('this.$refs.selectRef');
-    // console.log(this.$refs.selectRef);
     if(this.selectDefault){
       this.$refs.selectRef.select(this.selectDefault, this.options);
     }
@@ -100,8 +108,6 @@ export default defineComponent({
   created() {
     // eslint-disable-next-line no-unused-vars
     this.emitter.on('CLEAR_SELECT', payload => {
-      // console.log('this.$refs.selectRef');
-      // console.log(this.$refs.selectRef);
       if(!payload){
         this.$refs.selectRef.clear();
       }
