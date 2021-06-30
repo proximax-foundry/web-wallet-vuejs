@@ -42,24 +42,26 @@
 </template>
 
 <script>
-import { inject, getCurrentInstance, ref } from 'vue';
+import { getCurrentInstance, ref } from 'vue';
+import { Wallet } from "@/models/wallet";
+import { walletState } from '@/state/walletState';
+import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 
 export default{
   name: 'ConfirmDeleteContactModal',
   props:['data'],
 
-  setup(){
-    const appStore = inject("appStore");
+  setup(p){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref(false);
     const toggleModal = ref(false);
     const deleteContact = (contact) => {
-      var deleteStatus = appStore.deleteContact(contact);
-      if(deleteStatus){
-        toggleModal.value = !toggleModal.value;
-        emitter.emit('REFRESH_CONTACT_LIST', true);
-      }
+      const contactIndex = walletState.currentLoggedInWallet.contacts.findIndex((contact) => contact.address == p.data.address);
+      walletState.currentLoggedInWallet.removeAddressBook(contactIndex);
+      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+      toggleModal.value = !toggleModal.value;
+      emitter.emit('REFRESH_CONTACT_LIST', true);
     };
     return {
       err,

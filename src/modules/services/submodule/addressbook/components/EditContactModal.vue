@@ -13,7 +13,7 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
           </div>
           <div class="w-104">
-            <form @submit.prevent="create" class="mt-10 text-gray-800">
+            <form @submit.prevent="EditContact" class="mt-10 text-gray-800">
               <fieldset class="w-full">
                 <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
                 <div class="mb-5 text-center"><span class="text-lg text-gray-700">Edit this contact</span></div>
@@ -34,10 +34,13 @@
 </template>
 
 <script>
-import { computed, getCurrentInstance, inject, ref, watch } from 'vue';
+import { computed, getCurrentInstance, ref, watch } from 'vue';
 import TextInput from '@/components/TextInput.vue';
-import { verifyAddress } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import { Helper } from "@/util/typeHelper";
+import { AddressBookUtils } from '@/util/addressBookUtils';
+import { walletState } from '@/state/walletState';
+
 export default{
   name: 'EditContactModal',
   props:['data'],
@@ -46,14 +49,12 @@ export default{
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const appStore = inject("appStore");
     const contactName = ref(p.data.name);
-    const address = ref(appStore.pretty(p.data.address));
+    const address = ref(p.data.address);
     const err = ref('');
     const addMsg = ref('');
     const toggleModal = ref(false);
     const verifyAdd = ref(true);
-
     const disableSave = computed(
       () => !(
         verifyAdd.value && contactName.value != ''
@@ -76,28 +77,26 @@ export default{
     );
 
     watch(address, ()=>{
-      const verifyContactAddress = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), address.value);
-      verifyAdd.value = verifyContactAddress.isPassed.value;
-      addMsg.value = verifyContactAddress.errMessage.value;
+      const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
+      const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address.value);
+      verifyAdd.value = verifyContactAddress.isPassed;
+      addMsg.value = verifyContactAddress.errMessage;
     });
 
     const openModal = () => {
       contactName.value = p.data.name;
-      address.value = appStore.pretty(p.data.address);
+      address.value = Helper.createAddress(p.data.address).pretty();
       toggleModal.value = !toggleModal.value;
     }
 
     const EditContact = () => {
-      let status = appStore.editContact(p.data, contactName.value, address.value);
-      if(status===true){
-        toggleModal.value = !toggleModal.value;
-        emitter.emit('REFRESH_CONTACT_LIST', true);
-        toast.add({severity:'info', summary: 'Address Book', detail: 'Contact info updated in Address Book', group: 'br', life: 5000});
-      }else if(status === -1){
-        err.value = 'Edit operation failed';
-      }else{
-        err.value = status;
-      }
+      // @param index, AddressBook
+      const contactIndex = walletState.currentLoggedInWallet.contacts.findIndex((contact) => contact.address == p.data.address);
+      walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value, address: address.value });
+      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+      toggleModal.value = !toggleModal.value;
+      emitter.emit('REFRESH_CONTACT_LIST', true);
+      toast.add({severity:'info', summary: 'Address Book', detail: 'Contact info updated in Address Book', group: 'br', life: 5000});
     }
 
     return{

@@ -38,7 +38,6 @@ export default defineComponent({
     // comparing with default networktype 168 till multiple network selection interface is added
     const selectedNetworkType = computed(()=> ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
     const selectedNetworkName = computed(()=> networkState.chainNetworkName);
-    const msg = ref('');
     const walletFile = ref('');
 
     const readWalletBackup = (e) => {
@@ -56,17 +55,17 @@ export default defineComponent({
               icon: 'pi pi-exclamation-triangle',
               accept: () => {
                 var importResult = importBackup(dataDecryp);
-                toast.add({severity: importResult.status, summary: importResult.msg, group: 'br', life: 3000});
+                toast.add({severity: importResult.status, detail: importResult.msg, group: 'br', life: 3000});
               },
             });
           }
           else{
             var importResult = importBackup(dataDecryp);
-            toast.add({severity: importResult.status, summary: importResult.msg, group: 'br', life: 3000});
+            toast.add({severity: importResult.status, detail: importResult.msg, group: 'br', life: 3000});
           }
         } catch (error) {
-          msg.value = 'Unable to add wallet. Invalid file.';
-          toast.add({severity:'error', summary:'Import Failed', detail: msg.value, group: 'br', life: 5000});
+          let failMsg = 'Unable to add wallet. Invalid file.';
+          toast.add({severity:'error', summary:'Import Failed', detail: failMsg, group: 'br', life: 5000});
         }
       }
       reader.readAsText(file);
@@ -75,6 +74,7 @@ export default defineComponent({
     const importBackup = (dataDecryp) =>{
 
       let status = "success";
+      let message = "Import Successful";
 
       if(WalletUtils.checkIsNewFormat(dataDecryp)){
           try {
@@ -84,10 +84,10 @@ export default defineComponent({
             status = "error";
 
             if(error.name === "SAME_NAME"){
-              msg.value = error.message;
+              message = error.message;
             }
             else{
-              msg.value = "Unable to import wallet";
+              message = "Unable to import wallet";
             }
           }
       }
@@ -98,16 +98,16 @@ export default defineComponent({
           status = "error";
 
           if(error.name === "SAME_NAME"){
-            msg.value = error.message;
+            message = error.message;
           }
           else{
-            msg.value = "Unable to import wallet";
+            message = "Unable to import wallet";
           }
         }
       }
 
       return {
-        msg: msg.value,
+        msg: message,
         status: status
       };
       
@@ -115,8 +115,7 @@ export default defineComponent({
 
     return {
       walletFile,
-      readWalletBackup,
-      msg,
+      readWalletBackup
     };
   },
 });

@@ -41,8 +41,9 @@
 </template>
 
 <script>
-import { computed, ref, inject } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { walletState } from '@/state/walletState';
 
 export default{
   name: 'ConfirmDeleteAccountModal',
@@ -54,7 +55,6 @@ export default{
   },
 
   setup(p){
-    const appStore = inject("appStore");
     const router = useRouter();
     const err = ref("");
     const readCheck = ref(false);
@@ -63,17 +63,18 @@ export default{
         readCheck.value
       )
     );
+
     const deleteAccount = () => {
-      var deleteStatus = appStore.deleteAccount(p.address);
-      if( deleteStatus > 0){
-        // this.emitter.emit("DELETE_WALLET", true);
+      const accountIndex = walletState.currentLoggedInWallet.accounts.findIndex((element) => element.name == p.name);
+      if(accountIndex > -1){
+        walletState.currentLoggedInWallet.removeAccount(p.name);
+        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         router.push({ name: 'ViewAccountDisplayAll', params: {deleteAccount: 'success' } });
-      }else if(deleteStatus == 0){
-        err.value = "Password is incorrect.";
       }else{
         err.value = "Unable to remove account";
       }
     };
+
     return {
       err,
       readCheck,

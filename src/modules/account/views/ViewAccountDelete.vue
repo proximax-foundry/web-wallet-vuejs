@@ -18,12 +18,11 @@
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
           <div class="text-xs font-bold mb-1">Address:</div>
-          <input
+          <div
             id="address"
             class="text-sm w-full outline-none bg-gray-100 z-10"
-            type="text"
-            :value="acc.pretty"
-          />
+            :copyValue="prettyAddress" copySubject="Address"
+          >{{prettyAddress}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
       </div>
@@ -40,11 +39,13 @@
 </template>
 
 <script>
-import { ref, inject } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from "vue-router";
 import ConfirmDeleteAccountModal from '@/modules/account/components/ConfirmDeleteAccountModal.vue';
-import { copyKeyFunc } from '@/util/functions';
+import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import { walletState } from '@/state/walletState';
+import { Helper } from '@/util/typeHelper';
 
 export default {
   name: 'ViewAccountDelete',
@@ -56,20 +57,26 @@ export default {
   },
   setup(p){
     const toast = useToast();
-    const appStore = inject("appStore");
     const err = ref(false);
     const accountName = ref(p.name);
     const accountNameDisplay = ref(p.name);
     const router = useRouter();
-    const copy = (id) => copyKeyFunc(id, toast);
+    const copy = (id) =>{
+      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
+      let copySubject = document.getElementById(id).getAttribute("copySubject");
+      copyToClipboard(stringToCopy);
 
+      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+    };
     const getAcccountDetails = () => {
-      return appStore.getAccDetails(p.name);
+      const account = walletState.currentLoggedInWallet.accounts.find((element) => element.name == (p.name));
+      return account;
     };
 
     // get account details
     const acc = getAcccountDetails();
-    acc.pretty = appStore.pretty(acc.address);
+    const prettyAddress = Helper.createAddress(acc.address).pretty();
+
     if(acc==-1 && acc.default){
       router.push({ name: "ViewAccountDisplayAll"});
     }
@@ -78,6 +85,7 @@ export default {
       err,
       accountNameDisplay,
       accountName,
+      prettyAddress,
       acc,
       copy
     };

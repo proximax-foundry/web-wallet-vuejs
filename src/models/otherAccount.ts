@@ -48,4 +48,26 @@ export class OtherAccount extends Account{
     updateBalance(assetId: string): void{
         this.balance = this.getAssetBalance(assetId) | 0;
     }
+
+    getDirectChildMultisig(): string[]{
+
+        let temp: MultisigInfo[] = this.multisigInfo.filter(( multiInfo)=> multiInfo.level === -1);
+
+        return temp.length ? OtherAccount.getMultisigInfoPublicKey(temp) : [];
+    }
+
+    getDirectParentMultisig(): string[]{
+
+        let temp: MultisigInfo[] = this.multisigInfo.filter(( multiInfo)=> multiInfo.level === 1);
+
+        return OtherAccount.getMultisigInfoPublicKey(temp);
+    }
+
+    static getMultisigInfoPublicKey(multisigInfo: MultisigInfo[]): string[]{
+        let publicKeyArray: string[] = [];
+
+        publicKeyArray = multisigInfo.map((multiInfo)=> multiInfo.publicKey)
+
+        return publicKeyArray;
+    }
 }
