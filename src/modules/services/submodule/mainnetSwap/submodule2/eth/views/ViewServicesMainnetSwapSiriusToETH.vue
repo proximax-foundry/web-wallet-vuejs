@@ -9,22 +9,22 @@
     <div class="flex">
       <div class="flex-none">
         <div class="flex hover:bg-gray-200 p-3 rounded-2xl cursor-pointer">
-          <div class="rounded-full flex w-10 h-10" :class="`${ currentPage>=1?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white">1</div></div>
-          <div class="inline-block self-center ml-3">Transaction</div>
+          <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">1</div></div>
+          <div class="inline-block self-center ml-3 text-xs sm:text-sm">Account</div>
         </div>
       </div>
       <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
       <div class="flex-none">
         <div class="flex hover:bg-gray-200 p-3 rounded-2xl cursor-pointer">
-          <div class="rounded-full flex w-10 h-10" :class="`${ currentPage>=2?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white">2</div></div>
-          <div class="inline-block self-center ml-3">Validation</div>
+          <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">2</div></div>
+          <div class="inline-block self-center ml-3 text-xs sm:text-sm">Transaction</div>
         </div>
       </div>
       <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
       <div class="flex-none">
         <div class="flex hover:bg-gray-200 p-3 rounded-2xl cursor-pointer">
-          <div class="rounded-full flex w-10 h-10" :class="`${ currentPage==3?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white">3</div></div>
-          <div class="inline-block self-center ml-3">Certificate</div>
+          <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage==3?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">3</div></div>
+          <div class="inline-block self-center ml-3 text-xs sm:text-sm">Certificate</div>
         </div>
       </div>
     </div>

@@ -9,22 +9,22 @@
     <div class="flex">
       <div class="flex-none">
         <div class="flex hover:bg-gray-200 p-3 rounded-2xl cursor-pointer">
-          <div class="rounded-full flex w-10 h-10" :class="`${ currentPage>=1?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white">1</div></div>
-          <div class="inline-block self-center ml-3">Transaction</div>
+          <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">1</div></div>
+          <div class="inline-block self-center ml-3 text-xs sm:text-sm">Transaction</div>
         </div>
       </div>
       <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
       <div class="flex-none">
         <div class="flex hover:bg-gray-200 p-3 rounded-2xl cursor-pointer">
-          <div class="rounded-full flex w-10 h-10" :class="`${ currentPage>=2?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white">2</div></div>
-          <div class="inline-block self-center ml-3">Validation</div>
+          <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">2</div></div>
+          <div class="inline-block self-center ml-3 text-xs sm:text-sm">Validation</div>
         </div>
       </div>
       <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
       <div class="flex-none">
         <div class="flex hover:bg-gray-200 p-3 rounded-2xl cursor-pointer">
-          <div class="rounded-full flex w-10 h-10" :class="`${ currentPage==3?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white">3</div></div>
-          <div class="inline-block self-center ml-3">Certificate</div>
+          <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage==3?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">3</div></div>
+          <div class="inline-block self-center ml-3 text-xs sm:text-sm">Certificate</div>
         </div>
       </div>
     </div>
@@ -42,7 +42,7 @@
       <p class="font-bold text-tsm text-left">To: Sirius address</p>
       <SelectSiriusAccountInputPlugin v-model="siriusAddress" icon="card-alt" :showError="showSiriusAddressErr" errorMessage="Sirius Address required" :options="siriusAddressOption" :disabled="disableSiriusAddress" />
       <p class="font-bold text-tsm text-left mb-1">Amount</p>
-      <SupplyInput :disabled="disableAmount" v-model="amount" title="WXPX" placeholder="WXPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':'Insufficient balance'" :decimal="6" />
+      <SupplyInput :disabled="disableAmount" v-model="amount" title="eXPX" placeholder="eXPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':'Insufficient balance'" :decimal="6" />
       <div class="mt-10">
         <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
         <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="sendRequest()">Send request</button>
@@ -52,73 +52,89 @@
       <div class="text-lg my-7">
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-9 h-9 relative">
-              <font-awesome-icon icon="check" class="text-blue-primary self-center mt-2"></font-awesome-icon>
+            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+              <div class="flex h-full justify-center">
+                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+              </div>
             </div>
           </div>
-          <div class="flex-grow text-left ml-3 mt-1 text-gray-700">Sending transfer to Metamask.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-700 self-center">Sending transfer to Metamask.</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-9 h-9 relative">
-              <font-awesome-icon icon="check" class="text-blue-primary self-center mt-2"></font-awesome-icon>
+            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+              <div class="flex h-full justify-center">
+                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+              </div>
             </div>
           </div>
-          <div class="flex-grow text-left ml-3 mt-1 text-gray-700">Waiting for your approval on Metamask.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-700 self-center">Waiting for your approval on Metamask.</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-9 h-9 relative">
-              <font-awesome-icon icon="check" class="text-blue-primary self-center mt-2"></font-awesome-icon>
+            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+              <div class="flex h-full justify-center">
+                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+              </div>
             </div>
           </div>
-          <div class="flex-grow text-left ml-3 mt-1 text-gray-700">Transfer validated. <a href="#" class="text-blue-primary" id="validateTransfer" copyValue="wfwefwefw2345tg3y34y34dfwfew3465fe345wfewvrew" copySubject="Transfer Validation">(wfwefwefw2345tg3y34y34dfwfew3465fe345wfewvrew)</a></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-700 self-center">Transfer validated. <a href="#" class="text-blue-primary" id="validateTransfer" copyValue="wfwefwefw2345tg3y34y34dfwfew3465fe345wfewvrew" copySubject="Transfer Validation">(wfwefwefw2345tg3y34y34dfwfew3465fe345wfewvrew)</a></div>
           <div class="flex-none">
-            <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer mt-2"></font-awesome-icon>
-          </div>
-        </div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-9 h-9 relative">
-              <font-awesome-icon icon="check" class="text-blue-primary self-center mt-2"></font-awesome-icon>
-            </div>
-          </div>
-          <div class="flex-grow text-left ml-3 mt-1 text-gray-700">Sending transaction ID message to Metamask.</div>
-        </div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border border-gray-300 w-9 h-9 relative">
-              <font-awesome-icon icon="check" class="text-gray-300 self-center mt-2"></font-awesome-icon>
-            </div>
-          </div>
-          <div class="flex-grow text-left ml-3 mt-1 text-gray-300">Waiting for your approval on Metamask.</div>
-        </div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border border-gray-300 w-9 h-9 relative">
-              <font-awesome-icon icon="check" class="text-gray-300 self-center mt-2"></font-awesome-icon>
-            </div>
-          </div>
-          <div class="flex-grow text-left ml-3 mt-1 text-gray-300">Message validated.</div>
-          <div class="flex-none">
-            <font-awesome-icon icon="copy" class="w-5 h-5 text-gray-300 mt-2"></font-awesome-icon>
+            <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center"></font-awesome-icon>
           </div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-gray-300 w-9 h-9 relative">
-              <font-awesome-icon icon="check" class="text-gray-300 self-center mt-2"></font-awesome-icon>
+            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+              <div class="flex h-full justify-center">
+                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+              </div>
             </div>
           </div>
-          <div class="flex-grow text-left ml-3 mt-1 text-gray-300">Claiming your XPX.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-700 self-center">Sending transaction ID message to Metamask.</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-gray-300 w-9 h-9 relative">
-              <font-awesome-icon icon="check" class="text-gray-300 self-center mt-2"></font-awesome-icon>
+            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+              <div class="flex h-full justify-center">
+                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+              </div>
             </div>
           </div>
-          <div class="flex-grow text-left ml-3 mt-1 text-gray-300">Swap in progress.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-300 self-center">Waiting for your approval on Metamask.</div>
+        </div>
+        <div class="flex border-b border-gray-300 p-3">
+          <div class="flex-none">
+            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+              <div class="flex h-full justify-center">
+                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+              </div>
+            </div>
+          </div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-300 self-center">Message validated.</div>
+          <div class="flex-none">
+            <font-awesome-icon icon="copy" class="w-5 h-5 text-gray-300"></font-awesome-icon>
+          </div>
+        </div>
+        <div class="flex border-b border-gray-300 p-3">
+          <div class="flex-none">
+            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+              <div class="flex h-full justify-center">
+                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+              </div>
+            </div>
+          </div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-300 self-center">Claiming your XPX.</div>
+        </div>
+        <div class="flex border-b border-gray-300 p-3">
+          <div class="flex-none">
+            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+              <div class="flex h-full justify-center">
+                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+              </div>
+            </div>
+          </div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-300 self-center">Swap in progress.</div>
         </div>
       </div>
       <div class="mt-10">

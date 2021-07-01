@@ -60,7 +60,7 @@ export default {
       {name: 'Notifications', desc: 'Check alerts and information about your accounts', img: 'icon-notifications-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: 'Notifications', link: 'ViewServicesNotifications'},
       ]},
-      {name: 'Voting', desc: 'Create, vote, and view results', img: 'icon-voting-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+      {name: 'Voting', desc: 'Create, vote, and view results', img: 'icon-voting-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
         {name: 'Create Poll', link: 'ViewServicesVotingCreatePoll'},
         {name: 'Vote', link: 'ViewServicesVotingPoll'},
         {name: 'View Results', link: ''},
