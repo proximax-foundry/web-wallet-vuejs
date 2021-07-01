@@ -285,29 +285,6 @@ export default {
       transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, n, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
-    // watch(balance, (n) => {
-    //   if(n < rentalFee.value){
-    //     showNoBalance.value = true;
-    //     disabledMutableCheck.value = true;
-    //     disabledTransferableCheck.value = true;
-    //     disabledPassword.value = true;
-    //     disabledSupply.value = true;
-    //     disabledDivisibility.value = true;
-    //     disabledClear.value = true;
-    //     disabledDuration.value = true;
-    //     durationCheckDisabled.value = true;
-    //   }else{
-    //     disabledMutableCheck.value = false;
-    //     disabledTransferableCheck.value = false;
-    //     disabledPassword.value = false;
-    //     disabledSupply.value = false;
-    //     disabledDivisibility.value = false;
-    //     disabledClear.value = false;
-    //     disabledDuration.value = false;
-    //     durationCheckDisabled.value = false;
-    //   }
-    // });
-
     watch(durationOption, () => {
       duration.value = '1';
     });
