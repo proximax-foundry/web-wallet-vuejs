@@ -31,7 +31,7 @@
     <div v-if="currentPage==1">
       <p class="text-tsm my-5 text-gray-400">This is a list of your imported NIS1 accounts available in this wallet.</p>
       <div class="text-lg my-7 font-bold">Please select a NIS1 account</div>
-      <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100" @click="selectAccount">
+      <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100 transition" @click="selectAccount">
         <div class="text-tsm ml-3 text-gray-700">
           <div><b>Account Name:</b> [[accountName]]</div>
           <div><b>NIS1 Address:</b> [[account address]]</div>
@@ -41,7 +41,7 @@
           <img src="@/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg" class="w-10 inline mr-3">
         </div>
       </div>
-      <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100" @click="selectAccount">
+      <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100 transition" @click="selectAccount">
         <div class="text-tsm ml-3 text-gray-700">
           <div><b>Account Name:</b> [[accountName]]</div>
           <div><b>NIS1 Address:</b> [[account address]]</div>
@@ -51,7 +51,7 @@
           <img src="@/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg" class="w-10 inline mr-3">
         </div>
       </div>
-      <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100" @click="selectAccount">
+      <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100 transition" @click="selectAccount">
         <div class="text-tsm ml-3 text-gray-700">
           <div><b>Account Name:</b> [[accountName]]</div>
           <div><b>NIS1 Address:</b> [[account address]]</div>

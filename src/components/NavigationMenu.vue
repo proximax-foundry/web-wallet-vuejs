@@ -45,6 +45,8 @@
         '/swap-nis1',
         '/swap-eth',
         '/swap-bsc',
+        '/swap-bsc-sirius',
+        '/swap-sirius-bsc',
         '/swap-sirius-eth',
         '/swap-eth-sirus',
       ])}">Services</router-link>
