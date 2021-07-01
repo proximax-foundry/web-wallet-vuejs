@@ -200,9 +200,6 @@ function onPartial(publicAccount) :boolean{
   return isPartial;
 }
 
-function multisigAccountInfo(address) {
-  return WalletUtils.getMultisigAccInfo(address);
-}
 
 function getMultisigAccountGraphInfo(address) {
   return WalletUtils.getMultisigAccGraphInfo(address);
@@ -247,17 +244,15 @@ function getMultisigAccountGraphInfo(address) {
 } */
 
 function checkIsMultiSig(accountAddress) {
-
-    const address = Address.createFromRawAddress(accountAddress);
+    let account = walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress)
+    
+    
     let verify = false;
-    multisigAccountInfo(address).then(info => {
-      /* const wallet = walletState.currentLoggedInWallet
-      const account = wallet.accounts.find((element) => element.address == accountAddress); */
       
-      verify = info.cosignatories.length? true: false
-    })
-    .catch(error => console.log(error))
-    try {
+    verify = account.getDirectParentMultisig().length? true: false
+    
+    
+  /*   try {
       sessionStorage.setItem(
         'currentWalletSession',
         JSON.stringify(walletState.currentLoggedInWallet)
@@ -268,7 +263,7 @@ function checkIsMultiSig(accountAddress) {
       );
     } catch (err) {
       console.error("checkIsMultiSig error caught", err);
-    }
+    } */
      /*  if (account != undefined) {
         verify = account.getDirectParentMultisig().length ? true : false;
       } */
@@ -338,11 +333,11 @@ const removeUnrelatedMultiSig = () => {
       wallet.accounts.splice(accountIndex, 1);
     });
     
-    sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
+    /* sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
     localStorage.setItem(
       walletKey,
       JSON.stringify(walletState)
-    );
+    ); */
   }
 };
 

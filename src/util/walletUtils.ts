@@ -212,23 +212,6 @@ export class WalletUtils {
     }
 
 
-    static getMultisigAccInfo(address): Promise<MultisigAccountInfo> {
-        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
-        return new Promise((resolve, reject) => {
-            try {
-             chainAPICall.accountAPI.getMultisigAccountInfo(address).then(accountInfo => {
-                    resolve(accountInfo);
-                }).catch((error) => {
-                    console.warn(error);
-                    reject(false);
-                });
-            } catch (err) {
-                console.warn(err);
-                reject(false);
-            }
-        });
-    }
-
     static getMultisigAccGraphInfo(address): Promise<MultisigAccountGraphInfo> {
         const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
         return new Promise((resolve, reject) => {
