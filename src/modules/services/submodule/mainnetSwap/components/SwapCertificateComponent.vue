@@ -4,7 +4,7 @@
     <div class="md:mx-10 lg:mx-20 border-8 border-solid border-gray-300 mt-4 sm:grid sm:grid-cols-4">
       <div class="sm:col-span-3 p-4">
         <div class="text-left text-tsm">
-          <div class="font-bold">Sirius Account {{ swapType=="Income"?'(Recipient)': '' }}:</div>
+          <div class="font-bold">Sirius Account:</div>
           <div>[[ Address ]]</div>
         </div>
         <div class="text-left text-tsm mt-2">
