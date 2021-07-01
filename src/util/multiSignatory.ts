@@ -15,7 +15,8 @@ import {
   TransactionHttp,
   UInt64,
   Wallet,
-  AccountInfo,
+  AccountInfo, 
+  Password
 } from "tsjs-xpx-chain-sdk";
 //line 489,491
 // import { environment } from '../environment/environment.js';
@@ -91,7 +92,7 @@ const getPublicKey = (address) => {
 }
 
 /* coSign: array() */
-function convertAccount(coSign, numApproveTransaction, numDeleteUser, accountToConvertName, walletPassword) {
+function convertAccount(coSign :string[], numApproveTransaction, numDeleteUser, accountToConvertName, walletPassword) {
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword)
   if (!verify) {
     return verify;
@@ -103,7 +104,7 @@ function convertAccount(coSign, numApproveTransaction, numDeleteUser, accountToC
     const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.name ===accountToConvertName)
    /*  appStore.getAccDetails(accountToConvertName); */
     const networkType = networkState.currentNetworkProfile.network.type
-    let privateKey = WalletUtils.decryptPrivateKey(walletPassword, accountDetails.encrypted, accountDetails.iv);
+    let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
     const accountToConvert = Account.createFromPrivateKey(privateKey, networkType);
 
     const cosignatory = [];
