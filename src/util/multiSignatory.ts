@@ -25,6 +25,7 @@ import { WalletUtils } from "@/util/walletUtils";
 import { walletState } from '@/state/walletState'
 import { networkState } from "@/state/networkState"; // chainNetwork
 import { announceAggregateBonded, announceLockfundAndWaitForConfirmation, modifyMultisigAnnounceLockfundAndWaitForConfirmation, modifyMultisigAnnounceAggregateBonded } from '../util/listener.js';
+import { TransactionUtils } from "@/util/transactionUtils";
 const walletKey = "sw";
 
 interface status {
@@ -78,7 +79,7 @@ function generateContact(selected) {
 const getPublicKey = (address) => {
   return new Promise((resolve, reject) => {
     try {
-      WalletUtils.getAccInfo(address).then(accountInfo => {
+      TransactionUtils.getAccInfo(address).then(accountInfo => {
         resolve(accountInfo.publicKey)
       }).catch(error => {
         console.log(error)
@@ -92,7 +93,7 @@ const getPublicKey = (address) => {
 }
 
 /* coSign: array() */
-function convertAccount(coSign :string[], numApproveTransaction, numDeleteUser, accountToConvertName, walletPassword) {
+function convertAccount(coSign , numApproveTransaction, numDeleteUser, accountToConvertName, walletPassword) {
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword)
   if (!verify) {
     return verify;

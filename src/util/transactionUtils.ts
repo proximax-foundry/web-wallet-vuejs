@@ -170,7 +170,7 @@ export const transactionTypeName = {
 
 export class TransactionUtils {
 
-  static async getAccInfo(address: Address, accountHttp: AccountHttp): Promise<AccountInfo> {
+  static async getAccInfo(address: Address): Promise<AccountInfo> {
 
     const chainAPICall = new ChainAPICall(networkAPIEndpoint.value);
 
