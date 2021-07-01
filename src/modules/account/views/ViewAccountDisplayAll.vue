@@ -35,7 +35,7 @@ export default {
     const showMenu = ref([]);
 
     // get num of accounts
-    var num_other_acc = walletState.currentLoggedInWallet.others.length;
+    /* var num_other_acc = walletState.currentLoggedInWallet.others.length; */
     var num_acc = walletState.currentLoggedInWallet.accounts.length;
     var i = 0;
     while(i < num_acc){
@@ -43,10 +43,10 @@ export default {
       i++;
     }
     //console.log(walletState.currentLoggedInWallet.accounts);
-    while(i < num_other_acc){
+    /* while(i < num_other_acc){
     showMenu.value[i] = false;
      i++;
-    } 
+    }  */
     
     emitter.on("SHOW_MENU_TRIGGER", payload => {
       showMenu.value[payload] = true;
