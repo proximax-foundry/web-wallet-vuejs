@@ -1,18 +1,17 @@
 <template>
   <div>
-    <div class="text-md font-bold">{{ networkTerm }} Swap Certificate:</div>
+    <div class="text-md font-bold">{{ networkTerm }} Swap - {{ swapType }} - Certificate:</div>
     <div class="md:mx-10 lg:mx-20 border-8 border-solid border-gray-300 mt-4 sm:grid sm:grid-cols-4">
       <div class="sm:col-span-3 p-4">
         <div class="text-left text-tsm">
-          <div class="font-bold">Sirius Account:</div>
+          <div class="font-bold">Sirius Account ({{ swapType=="Income"?'Recipient': '' }}):</div>
           <div>[[ Address ]]</div>
         </div>
         <div class="text-left text-tsm mt-2">
-          <div><b>{{ networkTerm }} Timestamp:</b> [[ date and time ]]</div>
+          <div><b>Swap Timestamp:</b> [[ date and time ]]</div>
         </div>
         <div class="text-left text-tsm mt-2">
-          <div class="font-bold">{{ networkTerm }} Public Key:</div>
-          <div class="break-all">AD7B610271C4F830BC9EB840029D03CF1C80E0F3A9A68F72A6AC01EEDFDA8ED2</div>
+          <div class="font-bold inline-block">Swap ID:</div> <div class=" inline-block break-all">AD7B610271C4</div>
         </div>
         <div class="grid grid-cols-4 mt-3">
           <div class="col-span-1">
@@ -47,6 +46,7 @@ export default{
   name: 'SwapCertificateComponent',
   props: {
     networkTerm: String,
+    swapType: String,
   }
 }
 </script>

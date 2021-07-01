@@ -31,9 +31,9 @@ export default {
         {name: 'Link to Namespace', link: 'ViewServicesAssetsLinkToNamespace'}
       ]},
       {name: 'Mainnet Swap', desc: 'Swap from NEM to Sirius', img: 'icon-swap-process-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        { name: 'NIS1 to Sirius', link: 'ViewServicesMainnetSwapNIS1ToSirius'},
-        { name: 'Sirius to ETH', link: 'ViewServicesMainnetSwapSiriusToETH'},
-        { name: 'Sirius to BSC', link: 'ViewServicesMainnetSwapSiriusToBSC'},
+        { name: 'NIS1', link: 'ViewServicesMainnetSwapNIS1ToSirius'},
+        { name: 'ETH', link: 'ViewServicesMainnetSwapEthOptions'},
+        { name: 'BSC', link: 'ViewServicesMainnetSwapBscOptions'},
       ]},
       {name: 'Address Book', desc: 'Assign labels to addresses', img: 'icon-address-book-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: 'List', link: 'ViewServicesAddressBook'},

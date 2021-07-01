@@ -42,9 +42,11 @@
         '/redeem-gift-card',
         '/explorer',
         '/partial',
-        '/swap-nis1-sirius',
+        '/swap-nis1',
+        '/swap-eth',
+        '/swap-bsc',
         '/swap-sirius-eth',
-        '/swap-sirius-bsc',
+        '/swap-eth-sirus',
       ])}">Services</router-link>
     </nav>
     <nav class="navbar h-9" v-else>
