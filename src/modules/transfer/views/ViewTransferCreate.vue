@@ -517,7 +517,7 @@ export default {
       if (walletState.currentLoggedInWallet) {
         return walletState.currentLoggedInWallet.accounts.find(element => element.address === selectedAccAdd.value).balance;
       } else {
-        return 0;
+        return "0";
       }
     });
     const isMultiSigBool = ref(
