@@ -19,7 +19,7 @@ import {
   Password,
   MultisigAccountGraphInfo
 } from "tsjs-xpx-chain-sdk";
-//line 486,488
+//line 483,485
 // import { environment } from '../environment/environment.js';
 import { NetworkStateUtils } from "@/state/utils/networkStateUtils";
 import { WalletUtils } from "@/util/walletUtils";
@@ -30,11 +30,8 @@ import { TransactionUtils } from "@/util/transactionUtils";
 import { WalletAccount } from "@/models/walletAccount.js";
 const walletKey = "sw";
 
-interface status {
-  status: boolean,
-  publicKey: string
-  }
-function verifyContactPublicKey(address :string) :Promise<status>{
+
+function verifyContactPublicKey(address :string) :Promise<{status: boolean, publicKey: string}>{
   const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
   return new Promise((resolve) => {
     const accountInfo = WalletUtils.getAccInfo(address);
