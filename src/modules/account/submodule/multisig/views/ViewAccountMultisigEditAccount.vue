@@ -195,7 +195,7 @@ export default {
     // get account details initialization
     const acc =  walletState.currentLoggedInWallet.accounts.find(element => element.name ===p.name);
 
-    if(acc == undefined && acc.default){
+    if(acc == undefined){
       router.push({ name: "ViewAccountDisplayAll"});
     }
 
@@ -204,7 +204,7 @@ export default {
       const cosigner = [];
       if(list.length > 1){
         list.forEach((element) => {
-          const accountDetails = walletState.currentLoggedInWallet.accounts.find( this_element => this_element.address ===element.address);
+          const accountDetails = walletState.currentLoggedInWallet.accounts.find( account => account.address ===element.address);
           if(accountDetails.balance > 10.0445){
             cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX' });
           }else{
@@ -221,7 +221,7 @@ export default {
       if(list.length > 1){
         let filtered_list = list.filter(element => element.address != selectMainCosign.value);
         filtered_list.forEach((element) => {
-          const accountDetails = walletState.currentLoggedInWallet.accounts.find( this_element => this_element.address ===element.address);
+          const accountDetails = walletState.currentLoggedInWallet.accounts.find( account => account.address ===element.address);
           if(accountDetails.balance > 10.0445){
             cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX' });
           }else{
@@ -260,8 +260,8 @@ export default {
       const currentAccount = getAcccountDetails();
       let isCoSig = false;
        currentAccount.getDirectChildMultisig().forEach(publicKey => {
-          let verify = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === publicKey)
-          if (verify = undefined){
+          let verifyIsCosig = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === publicKey)
+          if (verifyIsCosig == undefined){
               isCoSig = false
           }else{
             isCoSig = true

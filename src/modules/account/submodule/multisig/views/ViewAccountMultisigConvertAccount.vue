@@ -295,8 +295,8 @@ export default {
       onPartial.value = onPartialBoolean;
     // check if this address has cosigner
     try{
-      let verify = multiSign.checkIsMultiSig(acc.address)
-        isMultisig.value = verify;
+      let verifyMultisig = multiSign.checkIsMultiSig(acc.address)
+        isMultisig.value = verifyMultisig;
       
     }catch(err) {
       isMultisig.value = false;
