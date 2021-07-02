@@ -1,8 +1,8 @@
 <template>
   <div class="flex justify-between text-sm">
-    <div><span class="text-gray-400">Swap > ETH > Income ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
+    <div><span class="text-gray-400">Swap > ETH > Incoming ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">Home</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
@@ -31,14 +31,22 @@
     <div v-if="currentPage==1">
       <div class="text-lg my-7 font-bold">Transaction Details</div>
       <p class="font-bold text-tsm text-left mb-1">From: Metamask address</p>
-      <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left">
+      <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left" v-if="isInstallMetamask">
         <div class="text-tsm text-gray-700 self-center relative">
-          <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block">Not connected</div></div>
+          <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block break-all">{{ isMetamaskConnected?(currentAccount?currentAccount:'Metamask is not completely linked yet. Please check your Metamask again.'):'Not connected' }}</div></div>
         </div>
         <div class="self-center">
-          <button class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none">Connect to Metamask</button>
+          <button @click="connectMetamask()" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none" v-if="!isMetamaskConnected">Connect to Metamask</button>
         </div>
       </div>
+      <di class="mb-5 flex justify-between bg-yellow-200 rounded-2xl p-3 text-left" v-else>
+        <div class="text-tsm text-gray-700 self-center relative">
+          <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block">Metamask is not installed</div></div>
+        </div>
+        <div class="self-center">
+          <a href="https://metamask.io/" target=_new class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none">Download Metamask</a>
+        </div>
+      </di>
       <p class="font-bold text-tsm text-left">To: Sirius address</p>
       <SelectSiriusAccountInputPlugin v-model="siriusAddress" icon="card-alt" :showError="showSiriusAddressErr" errorMessage="Sirius Address required" :options="siriusAddressOption" :disabled="disableSiriusAddress" />
       <p class="font-bold text-tsm text-left mb-1">Amount</p>
@@ -145,7 +153,7 @@
       <div>
         <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
         <div class="text-sm mb-7">The swap process has already started!</div>
-        <swap-certificate-component networkTerm="ETH" swapType="Income" />
+        <swap-certificate-component networkTerm="ETH" swapType="Incoming" />
         <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
           <div class="text-center w-full">
             <div class="w-8 h-8 inline-block relative">
@@ -187,6 +195,57 @@ export default {
   },
 
   setup() {
+
+    /* metamask integration */
+    const isInstallMetamask = ref(false);
+    const isMetamaskConnected = ref(false);
+    const currentAccount = ref(null);
+
+    if (typeof window.ethereum !== 'undefined') {
+      console.log('MetaMask is installed!');
+      isInstallMetamask.value = true;
+      isMetamaskConnected.value = ethereum.isConnected()?true:false;
+    }
+
+    ethereum
+      .request({ method: 'eth_accounts' })
+      .then(handleAccountsChanged)
+      .catch((err) => {
+        // Some unexpected error.
+        // For backwards compatibility reasons, if no accounts are available,
+        // eth_accounts will return an empty array.
+        console.error(err);
+      });
+
+    ethereum.on('accountsChanged', handleAccountsChanged);
+
+    // For now, 'eth_accounts' will continue to always return an array
+    function handleAccountsChanged(accounts) {
+      if (accounts.length === 0) {
+        // MetaMask is locked or the user has not connected any accounts
+        console.log('Please connect to MetaMask.');
+      } else if (accounts[0] !== currentAccount.value) {
+        currentAccount.value = accounts[0];
+        // Do any other work!
+      }
+    }
+
+    const connectMetamask = () => {
+      ethereum
+      .request({ method: 'eth_requestAccounts' })
+      .then(handleAccountsChanged)
+      .catch((err) => {
+        if (err.code === 4001) {
+          // EIP-1193 userRejectedRequest error
+          // If this happens, the user rejected the connection request.
+          console.log('Please connect to MetaMask.');
+        } else {
+          console.error(err);
+        }
+      });
+    };
+
+
     const toast = useToast();
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
@@ -224,11 +283,15 @@ export default {
 
     const validated = () => {
       currentPage.value = 3;
-    }
+    };
 
     const savedCheck = ref(false);
 
     return {
+      isInstallMetamask,
+      connectMetamask,
+      isMetamaskConnected,
+      currentAccount,
       copy,
       currentPage,
       isDisabledValidate,
