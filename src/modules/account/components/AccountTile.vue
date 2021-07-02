@@ -18,7 +18,6 @@
         <div class="flex justify-between">
           <div class="inline-block mr-4"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"><span class="text-xs">{{ account.balance }} XPX</span></div>
           <div class="inline-block mr-4" v-if="mosaicNum>0" :title="`Other mosaic${(mosaicNum>1)?'s':''}: ${mosaicNum}`"><img src="@/modules/account/img/icon-mosaics-green-16h.svg" class="w-5 inline mr-1"><span class="text-xs">{{ mosaicNum }}</span></div>
-
           <div class="relative inline-block text-left" @mouseover="hoverOverMenu" @mouseout="hoverOutMenu">
             <div>
               <button type="button" @click="showHideMenu();" class="justify-center px-4 py-2 text-gray-700 focus:outline-none" id="options-menu" aria-expanded="true" aria-haspopup="true">
@@ -27,17 +26,23 @@
             </div>
             <div :class="showMenuCall?'':'hidden'" class="absolute right-0 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div class="py-1" role="none">
-                <router-link :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Details</router-link>
-                <a v-if="!account.default" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="setAsDefaultAccount(account.address)">Make Default</a>
+                <router-link :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Details</router-link>
+                <router-link :to="{ name: 'ViewOtherAccountDetails', params: { address: account.address }}" v-else class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Details</router-link>
+                <a v-if="!account.default && !otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="setAsDefaultAccount(account.address)">Make Default</a>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300">Make Default</div>
-                <a class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="exportWallet()">Export</a>
-                <router-link :to="{ name: 'ViewAccountDelete', params: { name: account.name}}" v-if="!account.default" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Delete</router-link>
+                <a v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="exportWallet()">Export</a>
+                <a v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" @click="exportWallet()">Export</a>
+                <router-link :to="{ name: 'ViewAccountDelete', params: { name: account.name}}" v-if="!account.default && !otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Delete</router-link>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300">Delete</div>
-                <router-link :to="{ name: isMultiSig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: account.name}}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">MultiSig</router-link>
+                <router-link :to="{ name: isMultiSig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: account.name}}" v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">MultiSig</router-link>
+                <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >MultiSig</div>
                 <div class="block px-2 py-1 text-xs text-gray-300">Restrictions</div>
                 <div class="block px-2 py-1 text-xs text-gray-300">Metadata</div>
-                <router-link :to="{ name: 'ViewAccountDelegate'}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Delegate</router-link>
-                <router-link :to="{ name: 'ViewAccountAliasAddressToNamespace'}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Link to Namespace</router-link>
+                <router-link :to="{ name: 'ViewAccountDelegate'}" v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Delegate</router-link>
+                <div v-if="otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >Delegate</div>
+                <router-link :to="{ name: 'ViewAccountAliasAddressToNamespace',params: { address: account.address }}" v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Link to Namespace</router-link>
+                <div v-if="otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >Link to Namespace</div>
+
               </div>
             </div>
           </div>
@@ -58,7 +63,7 @@ import { Helper } from '@/util/typeHelper';
 
 export default{
   name: 'AccountTile',
-  props: ['account', 'showMenuCall', 'i'],
+  props: ['account','other','showMenuCall', 'i'],
   setup(p){
     const toast = useToast();
     const internalInstance = getCurrentInstance();
@@ -89,11 +94,15 @@ export default{
       return isMulti;
     });
 
+    const otheraccount = (address) => {
+      const other_account = walletState.currentLoggedInWallet.others.find(element => element.address == address);
+      return other_account;
+    };
+
     const prettyAddress = (address) => {
       const prettierAddress = Helper.createAddress(address).pretty();
       return prettierAddress;    
-    }
-    
+    };
     const setAsDefaultAccount = (add) => {
         walletState.currentLoggedInWallet.setDefaultAccountByAddress(add);
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
@@ -145,6 +154,7 @@ export default{
     };
 
     return {
+      otheraccount,
       prettyAddress,
       copy,
       showHideMenu,
