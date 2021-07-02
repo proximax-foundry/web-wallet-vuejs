@@ -12,7 +12,7 @@
       <div class="md:col-span-1">
         <router-link :to="{ name: 'ViewServicesMainnetSwapSiriusToBSC' }">
           <div class="m-5 lg:mx-10 rounded-2xl border border-blue-primary option-div">
-            <div class="mt-10 text-blue-primary font-bold text-xl mb-1">Outcome</div>
+            <div class="mt-10 text-blue-primary font-bold text-xl mb-1">Outgoing</div>
             <div class="mb-10 text-gray-500">From Sirius to BSC</div>
           </div>
         </router-link>
@@ -20,7 +20,7 @@
       <div class="md:col-span-1">
         <router-link :to="{ name: 'ViewServicesMainnetSwapBSCToSirius' }">
           <div class="m-5 lg:mx-10 rounded-2xl border border-blue-primary option-div">
-            <div class="mt-10 text-blue-primary font-bold text-xl mb-1">Income</div>
+            <div class="mt-10 text-blue-primary font-bold text-xl mb-1">Incoming</div>
             <div class="mb-10 text-gray-500">From BSC to Sirius</div>
           </div>
         </router-link>
