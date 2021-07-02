@@ -84,7 +84,7 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
 
   let mosaics = [];
   if (xpxAmount > 0) {
-    mosaics.push(new Mosaic(new MosaicId(environment.mosaicXpxInfo.id), UInt64.fromUint(Number(xpxAmount))));
+    mosaics.push(new Mosaic(new MosaicId(networkState.currentNetworkProfile.network.currency.assetId), UInt64.fromUint(Number(xpxAmount))));
   }
   if (mosaicsSent.length > 0) {
     mosaicsSent.forEach((mosaicSentInfo, index) => {
@@ -98,16 +98,13 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
       }
     });
   }
-  let transactionBuilder = new BuildTransactions(networkType,networkState.currentNetworkProfile.generationHash,FeeCalculationStrategy.ZeroFeeCalculationStrategy )
+  let transactionBuilder = new BuildTransactions(networkType)
   /* let transactionBuilder = new TransactionBuilderFactory(); */
   // calculate fee strategy
 
   if (ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE || ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE_TEST) {
     transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
     //FeeCalculationStrategy.ZeroFeeCalculationStrategy
-  }
-  else {
-    transactionBuilder.setFeeStrategy(FeeCalculationStrategy.MiddleFeeCalculationStrategy);
   }
 
   // to get sender's private key
@@ -260,16 +257,21 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
 
 const calculate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[]) :string=> {
   let mosaicsToSend = validateMosaicsToSend(amount, mosaic);
+  let transactionBuilder = new BuildTransactions(networkState.currentNetworkProfile.network.type)
+  if (ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE || ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE_TEST) {
+    transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
+    //FeeCalculationStrategy.ZeroFeeCalculationStrategy
+  }
   const x = TransferTransaction.calculateSize(PlainMessage.create(message).size(), mosaicsToSend.length);
-  const b = calculateFee(x, getFeeStrategy());
+  const b = calculateFee(x, transactionBuilder.getFeeStrategy());
   let fee;
   if (parseInt(message, 10) > 0) {
     fee = Helper.amountFormatterSimple(b.compact());
   } else if (parseInt(message, 10) === 0 && mosaicsToSend.length === 0) {
-    if (getFeeStrategy() === FeeCalculationStrategy.ZeroFeeCalculationStrategy)
+    if (transactionBuilder.getFeeStrategy() === FeeCalculationStrategy.ZeroFeeCalculationStrategy)
       fee = '0.000000';
     else {
-      fee = TransferTransaction.calculateSize(parseInt(message, 10), mosaicsToSend.length) * getFeeStrategy() / 1000000;
+      fee = TransferTransaction.calculateSize(parseInt(message, 10), mosaicsToSend.length) * transactionBuilder.getFeeStrategy() / 1000000;
       fee = fee.toString()
       //fee = '0.037250';
     }
@@ -343,21 +345,6 @@ const addZeros = (cant : number, amount :string = '0' ):string => {
   return amount;
 }
 
-const getFeeStrategy = ():FeeCalculationStrategy => {
-
-  let transactionBuilder = new BuildTransactions(networkState.currentNetworkProfile.network.type,undefined,FeeCalculationStrategy.ZeroFeeCalculationStrategy )
-  /* let transactionBuilder = new TransactionBuilderFactory(); */
-  // calculate fee strategy
-
-  if (ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE || ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE_TEST) {
-    transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
-    //FeeCalculationStrategy.ZeroFeeCalculationStrategy
-  }
-  else {
-    transactionBuilder.setFeeStrategy(FeeCalculationStrategy.MiddleFeeCalculationStrategy);
-  }
-  return transactionBuilder.getFeeStrategy();
-}
 
 export const makeTransaction = readonly({
   calculate_fee
