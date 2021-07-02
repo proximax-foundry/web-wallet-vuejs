@@ -1,6 +1,6 @@
 <template>
   <div class="flex-none self-center flex items-end logo">
-    <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">v{{ versioning }}</span>
+    <router-link :to="loginStatus? {name : 'ViewServices'}: {name: 'Home'}"><img src="@/modules/services/submodule/mainnetSwap/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link>
   </div>
   <div class="flex-grow h-16"></div>
   <div class="flex-none header-menu mt-3" v-if="loginStatus">
