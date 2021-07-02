@@ -369,23 +369,3 @@ export const makeTransaction = readonly({
   calculate_fee
 })
 
-export const getFakeEncryptedMessageSize =(message :string) :number =>{
-  let networkType = networkState.currentNetworkProfile.network.type
-  return EncryptedMessage.create(message,  PublicAccount.createFromPublicKey("0".repeat(64),networkType), "0".repeat(64)).size();
-}
-
-export const getPlainMessageSize =(message :string) :number=>{
-  return PlainMessage.create(message).size( ); 
-}
-
-export const convertToCurrency =(value :number, divisibility :number) :string=>{
-   
-  const exactValue = value/Math.pow(10, divisibility);
-  
-  return new Intl.NumberFormat('en', {maximumFractionDigits: divisibility}).format(exactValue);
-}  
-
-export const convertToExact =(value :number, divisibility :number) :number=>{
-   
-  return value/Math.pow(10, divisibility);
-}

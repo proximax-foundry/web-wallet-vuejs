@@ -364,8 +364,6 @@ import {
   makeTransaction,
   getFakeEncryptedMessageSize,
   getPlainMessageSize,
-  convertToExact,
-  convertToCurrency,
 } from "@/util/transfer"; //getMosaicsAllAccounts
 import AddContactModal from "@/modules/transfer/components/AddContactModal.vue";
 import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
@@ -374,6 +372,7 @@ import { multiSign } from "@/util/multiSignatory";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { accountUtils } from "@/util/accountUtils";
+import {TransactionUtils} from '@/util/transactionUtils'
 import { WalletUtils } from "@/util/walletUtils";
 
 export default { 
@@ -434,7 +433,7 @@ export default {
     // console.log(chainNetwork.getProfileConfig().lockedFundsPerAggregate)
     // console.log(siriusStore.state.currentNetworkProfileConfig.maxMessageSize)
     const lockFund = computed(() =>
-      convertToExact(
+      Helper.convertToExact(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
         networkState.currentNetworkProfile.network.currency.divisibility
       )
@@ -442,7 +441,7 @@ export default {
     /*  chainNetwork.getProfileConfig().lockedFundsPerAggregate */
     /*  chainNetwork.getCurrencyDivisibility() */
     const lockFundCurrency = computed(() =>
-      convertToCurrency(
+      Helper.convertToCurrency(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
         networkState.currentNetworkProfile.network.currency.divisibility
       )
@@ -862,9 +861,9 @@ export default {
           selectedMosaic.value
         );
         if (encryptedMsg.value && messageText.value) {
-          remainingChar.value = getFakeEncryptedMessageSize(messageText.value);
+          remainingChar.value = TransactionUtils.getFakeEncryptedMessageSize(messageText.value);
         } else {
-          remainingChar.value = getPlainMessageSize(messageText.value);
+          remainingChar.value = TransactionUtils.getPlainMessageSize(messageText.value);
         }
       }
     });
