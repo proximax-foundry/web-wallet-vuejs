@@ -194,11 +194,11 @@ export class WalletUtils {
             }
         });
     }
-    static getAggregateBondedTransactions = (publicKey) :Promise<AggregateTransaction[]> =>{
+    static getAggregateBondedTransactions = (publicKey :string) :Promise<AggregateTransaction[]> =>{
         const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
         return new Promise((resolve, reject) => {
             try {
-                chainAPICall.accountAPI.aggregateBondedTransactions(publicKey,new QueryParams(100)).then(transactions => {
+                chainAPICall.accountAPI.aggregateBondedTransactions(PublicAccount.createFromPublicKey(publicKey,networkState.currentNetworkProfile.network.type),new QueryParams(100)).then(transactions => {
                     resolve(transactions);
                 }).catch((error) => {
                     console.warn(error);
@@ -212,7 +212,7 @@ export class WalletUtils {
     }
 
 
-    static getMultisigAccGraphInfo(address): Promise<MultisigAccountGraphInfo> {
+    static getMultisigAccGraphInfo(address :Address): Promise<MultisigAccountGraphInfo> {
         const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
         return new Promise((resolve, reject) => {
             try {

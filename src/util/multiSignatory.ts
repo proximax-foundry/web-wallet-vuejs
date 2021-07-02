@@ -16,9 +16,10 @@ import {
   UInt64,
   Wallet,
   AccountInfo, 
-  Password
+  Password,
+  MultisigAccountGraphInfo
 } from "tsjs-xpx-chain-sdk";
-//line 489,491
+//line 486,488
 // import { environment } from '../environment/environment.js';
 import { NetworkStateUtils } from "@/state/utils/networkStateUtils";
 import { WalletUtils } from "@/util/walletUtils";
@@ -26,6 +27,7 @@ import { walletState } from '@/state/walletState'
 import { networkState } from "@/state/networkState"; // chainNetwork
 import { announceAggregateBonded, announceLockfundAndWaitForConfirmation, modifyMultisigAnnounceLockfundAndWaitForConfirmation, modifyMultisigAnnounceAggregateBonded } from '../util/listener.js';
 import { TransactionUtils } from "@/util/transactionUtils";
+import { WalletAccount } from "@/models/walletAccount.js";
 const walletKey = "sw";
 
 interface status {
@@ -52,7 +54,7 @@ function verifyContactPublicKey(address :string) :Promise<status>{
   });
 }
 
-function generateContact(selected) {
+function generateContact(selected :string) :string[]{
   const wallet = walletState.currentLoggedInWallet
   let contact = [];
   wallet.accounts.forEach((element) => {
@@ -76,7 +78,7 @@ function generateContact(selected) {
   return contact;
 }
 
-const getPublicKey = (address) => {
+const getPublicKey = (address :Address) :Promise<AccountInfo['publicKey']>=> {
   return new Promise((resolve, reject) => {
     try {
       TransactionUtils.getAccInfo(address).then(accountInfo => {
@@ -93,7 +95,7 @@ const getPublicKey = (address) => {
 }
 
 /* coSign: array() */
-function convertAccount(coSign , numApproveTransaction, numDeleteUser, accountToConvertName, walletPassword) {
+function convertAccount(coSign :string[], numApproveTransaction :number, numDeleteUser :number, accountToConvertName :string, walletPassword :string) :Promise<announceAggregateBonded> | boolean{
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword)
   if (!verify) {
     return verify;
@@ -174,11 +176,11 @@ function convertAccount(coSign , numApproveTransaction, numDeleteUser, accountTo
   
 }
 
-function getAggregateBondedTransactions(publicAccount) {
+function getAggregateBondedTransactions(publicAccount) :Promise<AggregateTransaction[]>{
   return WalletUtils.getAggregateBondedTransactions(publicAccount)
 }
 
-function onPartial(publicAccount) :boolean{
+function onPartial(publicAccount :PublicAccount) :boolean{
   let isPartial = false;
     getAggregateBondedTransactions(publicAccount).then((txOnpartial) => {
       
@@ -202,8 +204,8 @@ function onPartial(publicAccount) :boolean{
 }
 
 
-function getMultisigAccountGraphInfo(address) {
-  return WalletUtils.getMultisigAccGraphInfo(address);
+function getMultisigAccountGraphInfo(address :string) :Promise<MultisigAccountGraphInfo>{
+  return WalletUtils.getMultisigAccGraphInfo( Address.createFromRawAddress(address ));
 }
 
 /* function updateAccountMultisigGraphInfo(accountAddress) {
@@ -244,7 +246,7 @@ function getMultisigAccountGraphInfo(address) {
   });
 } */
 
-function checkIsMultiSig(accountAddress) {
+function checkIsMultiSig(accountAddress :string) :boolean{
     let account = walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress)
     
     
@@ -311,7 +313,7 @@ function checkIsMultiSig(accountAddress) {
   });
 } */
 
-const removeUnrelatedMultiSig = () => {
+const removeUnrelatedMultiSig = () :void=> {
   const wallet = walletState.currentLoggedInWallet
   let multiSigAccounts = wallet.accounts.filter((element) => element.encrypted === undefined);
   let removeMultiSig = [];
@@ -342,10 +344,10 @@ const removeUnrelatedMultiSig = () => {
   }
 };
 
-const cosignMiltisigTransaction = (signedAggregateBoundedTransaction, walletPassword) => {
+/* const cosignMultisigTransaction = (signedAggregateBoundedTransaction , walletPassword) => {
   // console.log('signedAggregateBoundedTransaction')
   // console.log(signedAggregateBoundedTransaction)
-  let coSignAddress = signedAggregateBoundedTransaction.account;
+  let coSignAddress = signedAggregateBoundedTransaction.cosignatures.signer;
   // console.log('co: ' + coSignAddress)
   const accountDetails =  walletState.currentLoggedInWallet.accounts.find(element => element.address === coSignAddress)
   const networkType = networkState.currentNetworkProfile.network.type
@@ -370,7 +372,7 @@ const cosignMiltisigTransaction = (signedAggregateBoundedTransaction, walletPass
     }
   });
 };
-
+ */
 /* const createNewMultiSigAccount = (publicKey, address) => {
   // const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
   // check if multiSig is already in wallet
@@ -384,7 +386,7 @@ const cosignMiltisigTransaction = (signedAggregateBoundedTransaction, walletPass
 } */
 
 // modify multisig
-function modifyMultisigAccount(coSign, removeCosign, numApproveTransaction, numDeleteUser, cosigners, multisigAccount, walletPassword) {
+function modifyMultisigAccount(coSign :string[], removeCosign :string[], numApproveTransaction :number, numDeleteUser :number, cosigners :{address :string}[] , multisigAccount :WalletAccount, walletPassword :string) :boolean | Promise<modifyMultisigAnnounceAggregateBonded>{
 
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPassword);
   if (! verify) {
@@ -400,7 +402,7 @@ function modifyMultisigAccount(coSign, removeCosign, numApproveTransaction, numD
     if (cosigners.length > 0) {
       cosigners.forEach((signer) => {
         const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.address === signer.address)
-        let privateKey = WalletUtils.decryptPrivateKey(walletPassword, accountDetails.encrypted, accountDetails.iv);
+        let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
         coSigner.push(Account.createFromPrivateKey(privateKey, networkType));
       });
     }
@@ -436,8 +438,8 @@ function modifyMultisigAccount(coSign, removeCosign, numApproveTransaction, numD
       ));
     });
 
-    let relativeNumApproveTransaction = numApproveTransaction - multisigAccount.isMultisign.minApproval;
-    let relativeNumDeleteUser = numDeleteUser - multisigAccount.isMultisign.minRemoval
+    let relativeNumApproveTransaction = numApproveTransaction - multisigAccount.multisigInfo.find(element => element.level === 0).minApproval;
+    let relativeNumDeleteUser = numDeleteUser - multisigAccount.multisigInfo.find(element => element.level === 0).minRemoval
 
     const convertIntoMultisigTransaction = ModifyMultisigAccountTransaction.create(
       Deadline.create(),
@@ -449,7 +451,7 @@ function modifyMultisigAccount(coSign, removeCosign, numApproveTransaction, numD
 
     const aggregateTransaction = AggregateTransaction.createBonded(
       Deadline.create(),
-      [convertIntoMultisigTransaction.toAggregate(multisigAccount.publicAccount)],
+      [convertIntoMultisigTransaction.toAggregate(PublicAccount.createFromPublicKey(multisigAccount.publicKey,networkState.currentNetworkProfile.network.type))],
       networkType
     );
 
@@ -495,7 +497,7 @@ function modifyMultisigAccount(coSign, removeCosign, numApproveTransaction, numD
  
 }
 
-const fetchMultiSigCosigners = (multiSigAddress) => {
+function fetchMultiSigCosigners(multiSigAddress :string) :{list :{address :string, name :string }[],length :number}{
 
   const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === multiSigAddress);
   let list = [];
@@ -516,7 +518,7 @@ const fetchMultiSigCosigners = (multiSigAddress) => {
 
 
 
-function fetchWalletCosigner(address) {
+function fetchWalletCosigner(address :string) :{list :{balance :string, address :string, name :string }[], numCosigner :number}{
   let cosign = multiSign.fetchMultiSigCosigners(address);
   let list = [];
   cosign.list.forEach((element) => {
@@ -536,7 +538,7 @@ export const multiSign = readonly({
   onPartial,
   checkIsMultiSig,
   /* updateAccountsMultiSign, */
-  cosignMiltisigTransaction,
+  /* cosignMultisigTransaction, */
   /* createNewMultiSigAccount, */
   /* updateAccountMultisigGraphInfo, */
   getMultisigAccountGraphInfo,

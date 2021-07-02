@@ -21,7 +21,7 @@ import {
   NetworkType,
   calculateFee,
   TransactionBuilder,
-  Password
+  Password,
 } from "tsjs-xpx-chain-sdk";
 import { BuildTransactions } from '@/util/buildTransactions';
 import { announceAggregateBonded, announceLockfundAndWaitForConfirmation } from '../util/listener.js';
@@ -36,14 +36,14 @@ import { WalletUtils } from '@/util/walletUtils'
 const config = require("@/../config/config.json");
 
 
-async function getAccInfo(address) {
+async function getAccInfo(address :string) :Promise<PublicAccount> {
   // return await getPublicKey(recipientAddress, siriusStore.accountHttp);
 
   let accountInfo = await WalletUtils.getAccInfo(address).then(accountinfo => accountinfo.publicAccount);
   return accountInfo;
 }
 
-function amountFormatterSimple(amount, d = 6) {
+function amountFormatterSimple(amount :number, d :number= 6) :string{
   const amountDivisibility = Number(amount) / Math.pow(10, d);
   return amountDivisibility.toLocaleString('en-us', {
     minimumFractionDigits: d
@@ -69,7 +69,7 @@ function amountFormatterSimple(amount, d = 6) {
 //   });
 // };
 
-export const createTransaction = async (recipient, sendXPX, messageText, mosaicsSent, mosaicDivisibility, walletPassword, senderAccName, cosigner = '', encryptedMsg) => {
+export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number, walletPassword :string, senderAccName :string, cosigner :string, encryptedMsg :string) : Promise<announceAggregateBonded> => {
   // verify password
   // console.log('Pw after createTransaction: ' + walletPassword);
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword)
@@ -84,7 +84,7 @@ export const createTransaction = async (recipient, sendXPX, messageText, mosaics
 
 
   let networkType = networkState.currentNetworkProfile.network.type
-  const recipientAddress = Address.createFromRawAddress(recipient);
+  const recipientAddress = recipient;
 
   let xpxAmount = parseFloat(sendXPX) * Math.pow(10, 6);
 
@@ -143,7 +143,7 @@ export const createTransaction = async (recipient, sendXPX, messageText, mosaics
     msg = PlainMessage.create(messageText);
   }
 
-  let transferTransaction = transactionBuilder.transfer(recipientAddress,msg,mosaics)
+  let transferTransaction = transactionBuilder.transfer(Address.createFromRawAddress(recipientAddress),msg,mosaics)
 
   const account = Account.createFromPrivateKey(privateKey, networkType);
   const transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
@@ -190,13 +190,13 @@ export const createTransaction = async (recipient, sendXPX, messageText, mosaics
 
 }
 
-export const mosaicTransaction = (divisibility, supply, duration, durationType, mutable, transferable, walletPassword, accountName, appStore, siriusStore) => {
+/* export const mosaicTransaction = (divisibility, supply, duration, durationType, mutable, transferable, walletPassword, accountName, appStore, siriusStore) => {
 
   // verify password
 
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword)
-  /*let verify = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword); 
- */
+  
+ 
   if (!verify) {
     return verify;
   }
@@ -237,12 +237,12 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
     ]
 
     const aggregateTransaction = transactionBuilder.aggregateComplete(innerTxn)
-      /* .deadline(Deadline.create(environment.deadlineTransfer.deadline, environment.deadlineTransfer.chronoUnit))
-      .innerTransactions(innerTxn)
-      .networkType(networkType)
-      .build(); */
+      //.deadline(Deadline.create(environment.deadlineTransfer.deadline, environment.deadlineTransfer.chronoUnit))
+      //.innerTransactions(innerTxn)
+      //.networkType(networkType)
+      //.build(); 
 
-   /*  transactionBuilder.fee = amountFormatterSimple(aggregateTransaction.maxFee.compact()); */
+   //  transactionBuilder.fee = amountFormatterSimple(aggregateTransaction.maxFee.compact()); 
     // console.log('TF: '+transactionBuilder.fee);
     const signedTransaction = account.sign(aggregateTransaction, hash);
     const transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
@@ -255,7 +255,7 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
         return true;
       }, err => console.error(err));
 
-}
+}  */
 
 /**
  *
@@ -264,18 +264,18 @@ export const mosaicTransaction = (divisibility, supply, duration, durationType, 
  * @memberof ViewTransferComponent
  */
 
-const calculate_fee = (message, amount, mosaic) => {
+const calculate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[]) :string=> {
   let mosaicsToSend = validateMosaicsToSend(amount, mosaic);
   const x = TransferTransaction.calculateSize(PlainMessage.create(message).size(), mosaicsToSend.length);
   const b = calculateFee(x, getFeeStrategy());
   let fee;
-  if (message > 0) {
+  if (parseInt(message, 10) > 0) {
     fee = amountFormatterSimple(b.compact());
-  } else if (message === 0 && mosaicsToSend.length === 0) {
+  } else if (parseInt(message, 10) === 0 && mosaicsToSend.length === 0) {
     if (getFeeStrategy() === FeeCalculationStrategy.ZeroFeeCalculationStrategy)
       fee = '0.000000';
     else {
-      fee = TransferTransaction.calculateSize(message, mosaicsToSend.length) * getFeeStrategy() / 1000000;
+      fee = TransferTransaction.calculateSize(parseInt(message, 10), mosaicsToSend.length) * getFeeStrategy() / 1000000;
       fee = fee.toString()
       //fee = '0.037250';
     }
@@ -291,7 +291,7 @@ const calculate_fee = (message, amount, mosaic) => {
  * @returns
  * @memberof CreateTransferComponent
  */
-const validateMosaicsToSend = (amountXpx, boxOtherMosaics) => {
+const validateMosaicsToSend = (amountXpx :string, boxOtherMosaics :{id :string,amount :string}[]) :string[] | {id :string,amount :string}[]=> {
   const mosaics = [];
 
   if (amountXpx !== '' && amountXpx !== null && Number(amountXpx) !== 0) {
@@ -335,7 +335,7 @@ const validateMosaicsToSend = (amountXpx, boxOtherMosaics) => {
    * @returns
    * @memberof CreateTransferComponent
    */
-const addZeros = (cant, amount = '0') => {
+const addZeros = (cant : number, amount :string = '0' ):string => {
   const x = '0';
   if (amount === '0') {
     for (let index = 0; index < cant - 1; index++) {
@@ -349,7 +349,7 @@ const addZeros = (cant, amount = '0') => {
   return amount;
 }
 
-const getFeeStrategy = () => {
+const getFeeStrategy = ():FeeCalculationStrategy => {
 
   let transactionBuilder = new BuildTransactions(networkState.currentNetworkProfile.network.type,undefined,FeeCalculationStrategy.ZeroFeeCalculationStrategy )
   /* let transactionBuilder = new TransactionBuilderFactory(); */
@@ -369,23 +369,23 @@ export const makeTransaction = readonly({
   calculate_fee
 })
 
-export const getFakeEncryptedMessageSize =(message)=>{
+export const getFakeEncryptedMessageSize =(message :string) :number =>{
   let networkType = networkState.currentNetworkProfile.network.type
   return EncryptedMessage.create(message,  PublicAccount.createFromPublicKey("0".repeat(64),networkType), "0".repeat(64)).size();
 }
 
-export const getPlainMessageSize =(message)=>{
+export const getPlainMessageSize =(message :string) :number=>{
   return PlainMessage.create(message).size( ); 
 }
 
-export const convertToCurrency =(value, divisibility)=>{
+export const convertToCurrency =(value :number, divisibility :number) :string=>{
    
   const exactValue = value/Math.pow(10, divisibility);
   
   return new Intl.NumberFormat('en', {maximumFractionDigits: divisibility}).format(exactValue);
 }  
 
-export const convertToExact =(value, divisibility)=>{
+export const convertToExact =(value :number, divisibility :number) :number=>{
    
   return value/Math.pow(10, divisibility);
 }
