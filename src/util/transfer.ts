@@ -33,6 +33,7 @@ import { NetworkStateUtils } from "@/state/utils/networkStateUtils";
 import { walletState } from "@/state/walletState";
 import { ChainUtils } from '@/util/chainUtils';
 import { WalletUtils } from '@/util/walletUtils'
+import { Helper } from "@/util/typeHelper";
 const config = require("@/../config/config.json");
 
 
@@ -41,13 +42,6 @@ async function getAccInfo(address :string) :Promise<PublicAccount> {
 
   let accountInfo = await WalletUtils.getAccInfo(address).then(accountinfo => accountinfo.publicAccount);
   return accountInfo;
-}
-
-function amountFormatterSimple(amount :number, d :number= 6) :string{
-  const amountDivisibility = Number(amount) / Math.pow(10, d);
-  return amountDivisibility.toLocaleString('en-us', {
-    minimumFractionDigits: d
-  });
 }
 
 
@@ -270,7 +264,7 @@ const calculate_fee = (message :string , amount :string, mosaic :{id :string ,am
   const b = calculateFee(x, getFeeStrategy());
   let fee;
   if (parseInt(message, 10) > 0) {
-    fee = amountFormatterSimple(b.compact());
+    fee = Helper.amountFormatterSimple(b.compact());
   } else if (parseInt(message, 10) === 0 && mosaicsToSend.length === 0) {
     if (getFeeStrategy() === FeeCalculationStrategy.ZeroFeeCalculationStrategy)
       fee = '0.000000';
@@ -280,7 +274,7 @@ const calculate_fee = (message :string , amount :string, mosaic :{id :string ,am
       //fee = '0.037250';
     }
   } else {
-    fee = amountFormatterSimple(b.compact());
+    fee = Helper.amountFormatterSimple(b.compact());
   }
   return fee;
 }
