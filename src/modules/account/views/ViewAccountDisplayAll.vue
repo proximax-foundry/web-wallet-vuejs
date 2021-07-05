@@ -9,7 +9,7 @@
     <div class="grid xs-grid-cols-1 sm:grid-cols-2">
       <AccountTile :key="index" :account="item" :showMenuCall="showMenu[index]" :i="index" v-for="(item, index) in accounts" />
     </div>
-  </div>
+  </div>         
 </template>
 <script>
 import { computed, getCurrentInstance, ref } from "vue";
@@ -35,23 +35,20 @@ export default {
     const showMenu = ref([]);
 
     // get num of accounts
-    /* var num_other_acc = walletState.currentLoggedInWallet.others.length; */
-    var num_acc = walletState.currentLoggedInWallet.accounts.length;
+    const totalAcc = [].concat(walletState.currentLoggedInWallet.accounts,walletState.currentLoggedInWallet.others)
+    var num_acc = totalAcc.length;
     var i = 0;
+
     while(i < num_acc){
       showMenu.value[i] = false;
       i++;
     }
-    //console.log(walletState.currentLoggedInWallet.accounts);
-    /* while(i < num_other_acc){
-    showMenu.value[i] = false;
-     i++;
-    }  */
     
     emitter.on("SHOW_MENU_TRIGGER", payload => {
       showMenu.value[payload] = true;
       currentMenu.value = payload;
     });
+    
     emitter.on("CLOSE_MENU_TRIGGER", payload => {
       showMenu.value[payload] = false;
       currentMenu.value = payload;
@@ -68,12 +65,23 @@ export default {
     if(p.deleteAccount == 'success'){
       toast.add({severity:'success', summary: 'Notification', detail: 'Account has been removed successfully', group: 'br', life: 5000});
     }
-
+    console.log(walletState.currentLoggedInWallet.others)
+    //console.log(walletState.currentLoggedInWallet.others[0].multisigInfo)
     const accounts = computed(
       () => {
-        return walletState.currentLoggedInWallet.accounts;
+        if(walletState.currentLoggedInWallet.accounts){
+          if(walletState.currentLoggedInWallet.others){
+            const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+            return concatOther;
+          } else{
+            return walletState.currentLoggedInWallet.accounts;
+          }
+        } else{
+          return null;
+        }
       }
     );
+    
 
     // emitted from App.vue when click on any part of the page
     emitter.on('PAGE_CLICK', () => {
@@ -95,9 +103,9 @@ export default {
     });
 
     return {
-     walletState,
+      walletState,
       accounts,
-      showMenu,
+      showMenu
     };
   },
 }
