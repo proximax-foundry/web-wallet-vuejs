@@ -41,7 +41,7 @@
       </div>
       <div class="mb-5 flex justify-between bg-yellow-200 rounded-2xl p-3 text-left" v-else>
         <div class="text-tsm text-gray-700 self-center relative">
-          <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block">Metamask is not installed</div></div>
+          <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block text-gray-800">Metamask is not installed</div></div>
         </div>
         <div class="self-center">
           <a href="https://metamask.io/" target=_new class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none">Download Metamask</a>
@@ -205,9 +205,8 @@ export default {
       console.log('MetaMask is installed!');
       isInstallMetamask.value = true;
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
-    }
 
-    ethereum
+      ethereum
       .request({ method: 'eth_accounts' })
       .then(handleAccountsChanged)
       .catch((err) => {
@@ -217,8 +216,11 @@ export default {
         console.error(err);
       });
 
-    ethereum.on('accountsChanged', handleAccountsChanged);
+      ethereum.on('accountsChanged', handleAccountsChanged);
 
+    }
+
+    
     // For now, 'eth_accounts' will continue to always return an array
     function handleAccountsChanged(accounts) {
       if (accounts.length === 0) {
