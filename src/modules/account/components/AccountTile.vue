@@ -2,7 +2,7 @@
   <div class='p-3'>
     <div class="rounded-2xl flex justify-between py-3 border border-gray-200" :class="account.default?'bg-white':'bg-gray-100'">
       <div class="ml-5 text-left text-sm w-full">
-        <div class="font-bold mb-1">{{ account.name }} <span v-if="account.default" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-yellow-200">Default</span> <span v-if="isMultiSig" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200">Multisig</span></div>
+        <div class="font-bold mb-1">{{ account.name }} <span v-if="account.type =='MULTISIG'" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-yellow-200">Multisig</span> <span v-if="account.type =='DELEGATE'" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-yellow-200">Delegate</span> <span v-if="account.default" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-yellow-200">Default</span> <span v-if="isMultiSig" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200">Multisig</span></div>
         <div class="flex justify-between pr-4 rounded-xl mb-4 items-center" :class="account.default?'bg-white':'bg-gray-100'">
           <div class="text-left w-full relative">
             <div class="absolute z-20 w-full h-full"></div>
@@ -26,22 +26,22 @@
             </div>
             <div :class="showMenuCall?'':'hidden'" class="absolute right-0 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div class="py-1" role="none">
-                <router-link :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Details</router-link>
-                <router-link :to="{ name: 'ViewOtherAccountDetails', params: { address: account.address }}" v-else class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Details</router-link>
+                <router-link :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Details</router-link>
+                <!-- <router-link :to="{ name: 'ViewOtherAccountDetails', params: { address: account.address }}" v-else class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Details</router-link> -->
                 <a v-if="!account.default && !otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="setAsDefaultAccount(account.address)">Make Default</a>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300">Make Default</div>
                 <a v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="exportWallet()">Export</a>
                 <a v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" @click="exportWallet()">Export</a>
-                <router-link :to="{ name: 'ViewAccountDelete', params: { name: account.name}}" v-if="!account.default && !otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Delete</router-link>
+                <router-link :to="{ name: 'ViewAccountDelete', params: { name: account.name}}" v-if="!account.default && !otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Delete</router-link>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300">Delete</div>
-                <router-link :to="{ name: isMultiSig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: account.name}}" v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">MultiSig</router-link>
+                <router-link :to="{ name: isMultiSig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: account.name}}" v-if="!otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">MultiSig</router-link>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >MultiSig</div>
                 <div class="block px-2 py-1 text-xs text-gray-300">Restrictions</div>
                 <div class="block px-2 py-1 text-xs text-gray-300">Metadata</div>
                 <router-link :to="{ name: 'ViewAccountDelegate'}" v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Delegate</router-link>
-                <div v-if="otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >Delegate</div>
-                <router-link :to="{ name: 'ViewAccountAliasAddressToNamespace',params: { address: account.address }}" v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Link to Namespace</router-link>
-                <div v-if="otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >Link to Namespace</div>
+                <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >Delegate</div>
+                <router-link :to="{ name: 'ViewAccountAliasAddressToNamespace',params: { address: account.address }}" v-if="!otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Link to Namespace</router-link>
+                <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >Link to Namespace</div>
 
               </div>
             </div>
@@ -103,6 +103,7 @@ export default{
       const prettierAddress = Helper.createAddress(address).pretty();
       return prettierAddress;    
     };
+
     const setAsDefaultAccount = (add) => {
         walletState.currentLoggedInWallet.setDefaultAccountByAddress(add);
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
