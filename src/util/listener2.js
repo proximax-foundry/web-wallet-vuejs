@@ -9,7 +9,7 @@ import mitt from 'mitt';
 const transferEmitter = mitt();
 import { appStore } from "@/store/app";
 import { siriusStore } from "@/store/sirius";
-import { multiSign } from './multiSignatory.js';
+import { multiSign } from './multiSignatory';
 import { transactions } from './transactions.js';
 
 export class ListenerStore{

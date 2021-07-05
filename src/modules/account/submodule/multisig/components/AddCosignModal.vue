@@ -22,7 +22,7 @@
 <script>
 import { computed, ref, getCurrentInstance } from 'vue'; 
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
-import { multiSign } from '@/util/multiSignatory.js';
+import { multiSign } from '@/util/multiSignatory';
 
 export default{
   name: 'AddCoSignModal',
