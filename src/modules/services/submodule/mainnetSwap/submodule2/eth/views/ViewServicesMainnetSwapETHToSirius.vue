@@ -36,7 +36,7 @@
           <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block break-all">{{ isMetamaskConnected?(currentAccount?currentAccount:'Metamask is not completely linked yet. Please check your Metamask again.'):'Not connected' }}</div></div>
         </div>
         <div class="self-center">
-          <button @click="connectMetamask()" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none" v-if="!isMetamaskConnected">Connect to Metamask</button>
+          <button @click="connectMetamask()" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none" v-if="!currentAccount">Connect to Metamask</button>
         </div>
       </div>
       <div class="mb-5 flex justify-between bg-yellow-200 rounded-2xl p-3 text-left" v-else>
@@ -204,7 +204,9 @@ export default {
     if (typeof window.ethereum !== 'undefined') {
       console.log('MetaMask is installed!');
       isInstallMetamask.value = true;
+      console.log(ethereum.isConnected());
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
+      // isMetamaskConnected.value = false;
     }
 
     ethereum
@@ -226,6 +228,7 @@ export default {
         console.log('Please connect to MetaMask.');
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
+
         // Do any other work!
       }
     }
