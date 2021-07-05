@@ -10,7 +10,7 @@ import {
 } from "tsjs-xpx-chain-sdk";
 
 import { startListening, stopListening, addListenerstoAccount } from '../util/listener.js';
-import { multiSign } from '../util/multiSignatory.js';
+import { multiSign } from '../util/multiSignatory';
 import { siriusStore, chainNetwork } from '@/store/sirius';
 
 const sdk = require('tsjs-xpx-chain-sdk');
@@ -76,7 +76,7 @@ function verifyExistingAccount(privateKey){
 
 function getWalletByName(walletName) {
   walletName =
-    walletName.includes(" ") === true
+    walletName.includes(" ") === true 
       ? walletName.split(" ").join("_")
       : walletName;
   return state.wallets.find((element) => element.name == walletName && element.networkName === siriusStore.state.chainNetworkName);
@@ -93,7 +93,7 @@ function getWalletByNameOnly(walletName) {
 function getWalletIndexByName(walletName) {
   walletName =
     walletName.includes(" ") === true
-      ? walletName.split(" ").join("_")
+      ? walletName.split(" ").join("_") 
       : walletName;
   return state.wallets.findIndex((element) => element.name == walletName && element.networkName === siriusStore.state.chainNetworkName);
 }

@@ -48,6 +48,7 @@ export default {
       showMenu.value[payload] = true;
       currentMenu.value = payload;
     });
+    
     emitter.on("CLOSE_MENU_TRIGGER", payload => {
       showMenu.value[payload] = false;
       currentMenu.value = payload;

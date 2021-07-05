@@ -78,7 +78,7 @@
 <script>
 import { computed, getCurrentInstance, inject, ref, watch } from "vue";
 import { transactions } from '@/util/transactions.js';
-import { multiSign } from '@/util/multiSignatory.js';
+import { multiSign } from '@/util/multiSignatory';
 import Transfer from '@/modules/dashboard/components/DashboardModels/SubTransfer.vue';
 import ModifyMultisigAccountType from '@/modules/dashboard/components/DashboardModels/SubModifyMultisigAccountType.vue';
 import MosaicDefinition from '@/modules/dashboard/components/DashboardModels/SubMosaicDefinition.vue';
