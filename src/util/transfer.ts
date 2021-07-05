@@ -63,7 +63,7 @@ async function getAccInfo(address :string) :Promise<PublicAccount> {
 //   });
 // };
 
-export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number, walletPassword :string, senderAccName :string, cosigner :string, encryptedMsg :string) : Promise<announceAggregateBonded> => {
+export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[], walletPassword :string, senderAccName :string, cosigner :string, encryptedMsg :string) : Promise<announceAggregateBonded> => {
   // verify password
   // console.log('Pw after createTransaction: ' + walletPassword);
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword)

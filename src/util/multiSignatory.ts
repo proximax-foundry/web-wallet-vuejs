@@ -173,7 +173,7 @@ function convertAccount(coSign :string[], numApproveTransaction :number, numDele
   
 }
 
-function getAggregateBondedTransactions(publicAccount) :Promise<AggregateTransaction[]>{
+function getAggregateBondedTransactions(publicAccount :PublicAccount) :Promise<AggregateTransaction[]>{
   return WalletUtils.getAggregateBondedTransactions(publicAccount)
 }
 
@@ -515,7 +515,7 @@ function fetchMultiSigCosigners(multiSigAddress :string) :{list :{address :strin
 
 
 
-function fetchWalletCosigner(address :string) :{list :{balance :string, address :string, name :string }[], numCosigner :number}{
+function fetchWalletCosigner(address :string) :{list :{balance :number, address :string, name :string }[], numCosigner :number}{
   let cosign = multiSign.fetchMultiSigCosigners(address);
   let list = [];
   cosign.list.forEach((element) => {

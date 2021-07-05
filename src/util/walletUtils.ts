@@ -194,11 +194,11 @@ export class WalletUtils {
             }
         });
     }
-    static getAggregateBondedTransactions = (publicKey :string) :Promise<AggregateTransaction[]> =>{
+    static getAggregateBondedTransactions = (publicAccount :PublicAccount) :Promise<AggregateTransaction[]> =>{
         const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
         return new Promise((resolve, reject) => {
             try {
-                chainAPICall.accountAPI.aggregateBondedTransactions(PublicAccount.createFromPublicKey(publicKey,networkState.currentNetworkProfile.network.type),new QueryParams(100)).then(transactions => {
+                chainAPICall.accountAPI.aggregateBondedTransactions(publicAccount,new QueryParams(100)).then(transactions => {
                     resolve(transactions);
                 }).catch((error) => {
                     console.warn(error);
@@ -231,7 +231,7 @@ export class WalletUtils {
 
     static getAccInfo(add :string):Promise<AccountInfo> {
         const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
-        let address = Address.createFromRawAddress(add.toLocaleUpperCase());
+        let address = Address.createFromRawAddress(add);
         return new Promise((resolve, reject) => {
             try {
              chainAPICall.accountAPI.getAccountInfo(address).then(accountInfo => {
