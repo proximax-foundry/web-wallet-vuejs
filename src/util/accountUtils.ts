@@ -6,30 +6,31 @@ import {
 import {WalletUtils} from '@/util/walletUtils'
 
 
-
-const verifyPublicKey = (add: string): boolean => {
+const verifyPublicKey = async(add: string):Promise<boolean> => {
   const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
- /*  let address;
-  address = Address.createFromRawAddress(add.toLocaleUpperCase()); */
-  let valid = true
-  const accountPublicKey = WalletUtils.getAccInfo(add);
-  accountPublicKey.then(accountinfo => {
-    if (accountinfo.publicKey === invalidPublicKey) {
-      console.warn(`The receiver's public key is not valid for sending encrypted messages`);
-      valid = true
-    }
-    else
-      valid = false
-  })
-    .catch(error => {
-      console.warn('Err: ' + error)
+   let verify = new Promise<boolean>((resolve,reject)=>{
+    const accountPublicKey = WalletUtils.getAccInfo(add);
+    accountPublicKey.then(accountinfo => {
+      if (accountinfo.publicKey === invalidPublicKey) {
+        console.warn(`The receiver's public key is not valid for sending encrypted messages`);
+        resolve(true)
+      }
+      else
+        resolve(false)
     })
-    return valid
+      .catch(error => {
+        reject('Err: ' + error)
+      })
+      
+  })
+    let result = await verify
+    return Boolean(result)
+  
 
 }
 
 
-const verifyAddress = (currentAdd, add) => {
+const verifyAddress = (currentAdd :string, add :string) => {
   const address = (add !== undefined && add !== null && add !== '') ? add.split('-').join('') : '';
   const isPassed = ref(false);
   const errMessage = ref('');
@@ -48,7 +49,7 @@ const verifyAddress = (currentAdd, add) => {
   }
 }
 
-const checkAvailableContact = (recipient) => {
+const checkAvailableContact = (recipient :string) :boolean=> {
   const wallet = walletState.currentLoggedInWallet;
   let isInContacts = true;
   if (wallet.contacts != undefined) {

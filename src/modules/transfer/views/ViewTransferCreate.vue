@@ -167,8 +167,6 @@ import TransferTextareaInput from "@/modules/transfer/components/TransferTextare
 import {
   createTransaction,
   makeTransaction,
-  getFakeEncryptedMessageSize,
-  getPlainMessageSize,
 } from "@/util/transfer"; //getMosaicsAllAccounts
 import AddContactModal from "@/modules/transfer/components/AddContactModal.vue";
 import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
@@ -417,7 +415,7 @@ export default {
         });
       });
       list.sort((a, b) => (a.balance < b.balance ? 1 : -1));
-      return { list: list, numCosigner: cosign.numCosigner };
+      return { list: list, numCosigner: cosign.length };
     };
 
     const contact = computed(() => {
@@ -447,7 +445,7 @@ export default {
       recipient.value = "";
       encryptedMsgDisable.value = true;
       messageText.value = "";
-      sendXPX.value = 0;
+      sendXPX.value = "0";
       emitter.emit("CLEAR_SELECT", 0);
       selectedMosaic.value = [];
       mosaicsCreated.value = [];
@@ -466,7 +464,7 @@ export default {
       recipient.value = e;
     };
     const makeTransfer = () => {
-      if (sendXPX.value == 0 && !forceSend.value) {
+      if (sendXPX.value == "0" && !forceSend.value) {
         toggleConfirm.value = true;
       } else {
         // console.log(recipient.value.toUpperCase() + ' : ' + walletPassword.value + ' : ' + selectedAccName.value + ' : ' + encryptedMsg.value + ' : ' + walletPassword.value)
@@ -645,9 +643,9 @@ export default {
 
       // show and hide encrypted message option
       if (add.match(addressPatternLong) || add.match(addressPatternShort)) {
-        encryptedMsgDisable.value = accountUtils.verifyPublicKey(
-          recipient.value
-        );
+         accountUtils.verifyPublicKey(recipient.value).then(verify =>
+          encryptedMsgDisable.value = verify
+         )
       } else {
         encryptedMsgDisable.value = true;
       }
@@ -683,10 +681,10 @@ export default {
     watch(encryptedMsg, (n) => {
       if (n) {
         if (messageText.value) {
-          remainingChar.value = getFakeEncryptedMessageSize(messageText.value);
+          remainingChar.value = TransactionUtils.getFakeEncryptedMessageSize(messageText.value);
         }
       } else {
-        remainingChar.value = getPlainMessageSize(messageText.value);
+        remainingChar.value = TransactionUtils.getPlainMessageSize(messageText.value);
       }
     });
 
