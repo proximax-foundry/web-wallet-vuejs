@@ -30,6 +30,7 @@
     </div>
     <div v-if="currentPage==1">
       <div class="text-lg my-7 font-bold">Transaction Details</div>
+      <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
       <p class="font-bold text-tsm text-left mb-1">From: Metamask address</p>
       <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left" v-if="isInstallMetamask">
         <div class="text-tsm text-gray-700 self-center relative">
@@ -50,7 +51,7 @@
       <p class="font-bold text-tsm text-left">To: Sirius address</p>
       <SelectSiriusAccountInputPlugin v-model="siriusAddress" icon="card-alt" :showError="showSiriusAddressErr" errorMessage="Sirius Address required" :options="siriusAddressOption" :disabled="disableSiriusAddress" />
       <p class="font-bold text-tsm text-left mb-1">Amount</p>
-      <SupplyInput :disabled="disableAmount" v-model="amount" title="bXPX" placeholder="bXPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':'Insufficient balance'" :decimal="6" />
+      <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" title="bXPX" placeholder="bXPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':'Insufficient balance'" :decimal="6" />
       <div class="mt-10">
         <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
         <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="sendRequest()">Send request</button>
@@ -200,6 +201,7 @@ export default {
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
+    const balance = ref(0);
 
     if (typeof window.ethereum !== 'undefined') {
       console.log('MetaMask is installed!');
@@ -210,17 +212,42 @@ export default {
       .request({ method: 'eth_accounts' })
       .then(handleAccountsChanged)
       .catch((err) => {
-        // Some unexpected error.
-        // For backwards compatibility reasons, if no accounts are available,
-        // eth_accounts will return an empty array.
+        console.error(err);
+      });
+
+
+      ethereum
+      .request({ method: 'eth_chainId' })
+      .then((metaChainId) => {
+        verifyChain(metaChainId);
+      })
+      .catch((err) => {
         console.error(err);
       });
 
       ethereum.on('accountsChanged', handleAccountsChanged);
 
+      ethereum.on('chainChanged', (metaChainId) => {
+        verifyChain(metaChainId)
+      });
+
+      ethereum.on('connect', (connectInfo) => {
+        console.log(connectInfo)
+      });
+
+    }else{
+      console.log('metamask not installed')
     }
 
-    
+    function verifyChain(chainId){
+      let bscChainId = [56, 97];
+      if(bscChainId.find(bscChain => bscChain === parseInt(chainId)) == undefined){
+        err.value = 'Please select BSC network on Metamark to swap BSC';
+      }else{
+        err.value = '';
+      }
+    }
+
     // For now, 'eth_accounts' will continue to always return an array
     function handleAccountsChanged(accounts) {
       if (accounts.length === 0) {
@@ -228,7 +255,18 @@ export default {
         console.log('Please connect to MetaMask.');
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
-        // Do any other work!
+
+        // get metamask balance
+        ethereum
+        .request({ method: 'eth_getBalance', params: [
+          currentAccount.value, 'latest'
+        ] })
+        .then(hexDecimalBalance => {
+          balance.value = parseInt(hexDecimalBalance)/Math.pow(10, 18)
+        })
+        .catch((err) => {
+          console.error(err);
+        });
       }
     }
 
@@ -247,7 +285,6 @@ export default {
       });
     };
 
-
     const toast = useToast();
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
@@ -262,9 +299,10 @@ export default {
     const showAmountErr = ref(false);
     const disableAmount = ref(false);
     const siriusAddress = ref('');
+    const err = ref('');
     const isDisabledSwap = computed(() =>
       // verify it has been connected to metamask too
-      !(amount.value > 0 && siriusAddress.value != '' )
+      !(amount.value > 0 && siriusAddress.value != '' && !err.value)
     );
     const amount = ref('0');
 
@@ -290,6 +328,8 @@ export default {
     const savedCheck = ref(false);
 
     return {
+      err,
+      balance,
       isInstallMetamask,
       connectMetamask,
       isMetamaskConnected,
