@@ -203,7 +203,7 @@ export default {
     }, {deep:true});
     const accountBalance = () => {
       if(walletState.currentLoggedInWallet){
-        return  walletState.currentLoggedInWallet.accounts.find(element => element.name === p.name).balance;
+        return  walletState.currentLoggedInWallet.accounts.find(acc=> acc.name === p.name).balance;
       }
     };
     const addCoSig = () => {
@@ -272,7 +272,7 @@ export default {
     });
     const disabledPassword = computed(() => (onPartial.value || isMultisig.value ));
     // get account details
-    const acc =  walletState.currentLoggedInWallet.accounts.find(element =>element.name ===p.name) ;
+    const acc =  walletState.currentLoggedInWallet.accounts.find(acc =>acc.name ===p.name) ;
     if(acc== undefined){
       router.push({ name: "ViewAccountDisplayAll"});
     }

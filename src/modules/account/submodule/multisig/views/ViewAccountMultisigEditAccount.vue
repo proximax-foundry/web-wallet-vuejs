@@ -29,7 +29,7 @@
               <div class="text-center text-md mb-5">Cosignatory for this account</div>
               <div v-for="(cosigner, index) in acc.isMultisign.cosignatories" :key="index" class="mb-2 rounded-2xl px-5 py-3 flex justify-between" :class="`${(checkRemoval(cosigner.publicKey))?'bg-yellow-100':'bg-white'}`">
                 <div>
-                  <div class="font-bold" v-if="wallet.accounts.find((element) => element.publicAccount.publicKey == cosigner.publicKey)">{{ wallet.accounts.find((element) => element.publicAccount.publicKey == cosigner.publicKey).name }} <span v-if="checkRemoval(cosigner.publicKey)" class="font-normal text-xs text-gray-500">(Removing)</span></div>
+                  <div class="font-bold" v-if="wallet.accounts.find((acc) => acc.publicAccount.publicKey == cosigner.publicKey)">{{ wallet.accounts.find((acc) => acc.publicAccount.publicKey == cosigner.publicKey).name }} <span v-if="checkRemoval(cosigner.publicKey)" class="font-normal text-xs text-gray-500">(Removing)</span></div>
                   <div class="font-bold" v-else>Cosigner-{{ cosigner.address.address.substr(-4) }} <span v-if="checkRemoval(cosigner.publicKey)" class="font-normal text-xs text-gray-500">(Removing)</span></div>
                   <div class="text-tsm">{{ pretty(cosigner.address.address) }}</div>
                 </div>
@@ -260,8 +260,8 @@ export default {
       const currentAccount = getAcccountDetails();
       let isCoSig = false;
        currentAccount.getDirectChildMultisig().forEach(publicKey => {
-          let verifyIsCosig = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === publicKey)
-          if (verifyIsCosig == undefined){
+          let verifyIsCosig = walletState.currentLoggedInWallet.accounts.find(acc=> acc.publicKey === publicKey)
+          if (verifyIsCosig === undefined){
               isCoSig = false
           }else{
             isCoSig = true
@@ -277,8 +277,8 @@ export default {
       selectedAddresses.value = [];
       showAddressError.value = [];
       passwd.value = '';
-      numApproveTransaction.value = acc.multisigInfo.find(element => element.level === 0).minApproval;
-      numDeleteUser.value = acc.multisigInfo.find(element => element.level === 0).minRemoval;
+      numApproveTransaction.value = acc.multisigInfo.find(acc=> acc.level === 0).minApproval;
+      numDeleteUser.value = acc.multisigInfo.find(acc=> acc.level === 0).minRemoval;
       selectMainCosign.value = '';
       selectOtherCosign.value = [];
       err.value = '';
@@ -354,13 +354,13 @@ export default {
 
     const getAcccountDetails = () => {
       if(walletState.currentLoggedInWallet){
-        return walletState.currentLoggedInWallet.accounts.find(element => element.name ===p.name);
+        return walletState.currentLoggedInWallet.accounts.find(acc => acc.name ===p.name);
       }
     };
 
     const accountBalance = () => {
       if(walletState.currentLoggedInWallet){
-        return walletState.currentLoggedInWallet.accounts.find(element => element.name ===p.name).balance;
+        return walletState.currentLoggedInWallet.accounts.find(acc => acc.name ===p.name).balance;
       }
     };
 
@@ -384,15 +384,15 @@ export default {
     };
 
     const checkRemoval = (publicKey) => {
-      let verify = false;
+      let verifyRemoval = false;
       if(removeCosign.value.length > 0){
         removeCosign.value.forEach((element) => {
           if(element == publicKey){
-            verify = true;
+            verifyRemoval = true;
           }
         });
       }
-      return verify;
+      return verifyRemoval;
     };
 
     const restoreFromRemovalList = (publicKey) => {
@@ -419,16 +419,16 @@ export default {
       return account.getDirectParentMultisig().length
     }
 
-    numApproveTransaction.value = acc.multisigInfo.find(element => element.level === 0).minApproval;
-    numDeleteUser.value = acc.multisigInfo.find(element => element.level === 0).minRemoval;
+    numApproveTransaction.value = acc.multisigInfo.find(acc=> acc.level === 0).minApproval;
+    numDeleteUser.value = acc.multisigInfo.find(acc => acc.level === 0).minRemoval;
 
     // refecth min number for both scheme if there is changes in max num for both approval and deletion
     watch(maxNumApproveTransaction, () => {
       if(walletState.currentLoggedInWallet){
         const account = getAcccountDetails();
         if(getCosigns){
-          numApproveTransaction.value = account.multisigInfo.find(element => element.level === 0).minApproval;
-          numDeleteUser.value = account.multisigInfo.find(element => element.level === 0).minRemoval;
+          numApproveTransaction.value = account.multisigInfo.find(acc => acc.level === 0).minApproval;
+          numDeleteUser.value = account.multisigInfo.find(acc => acc.level === 0).minRemoval;
         }
       }
     });
