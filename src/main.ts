@@ -75,6 +75,7 @@ const chainProfileIntegration = async () => {
     }
     else{
       chainProfileNamesStore.names = chainProfileNames;
+      namesUpdate = 1;
     }
     
     chainProfileNamesStore.saveToLocalStorage();
@@ -128,6 +129,7 @@ const chainProfileIntegration = async () => {
 
     if(namesUpdate){
       NetworkStateUtils.refreshAvailableNetwork();
+      NetworkStateUtils.checkDefaultNetwork();
     }
 
   } catch (e) {
