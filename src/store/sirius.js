@@ -4,7 +4,7 @@ import {
   AccountHttp,
   BlockHttp,
   ChainHttp,
-  ChainConfigHttp,
+  ChainConfigHttp, 
   Listener,
   NetworkHttp,
   NamespaceHttp,

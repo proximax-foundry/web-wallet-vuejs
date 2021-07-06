@@ -15,7 +15,7 @@
   </div>
 </template>
 
-<script>
+<script >
 export default{
   props: [
     'placeholder',
@@ -54,7 +54,7 @@ export default{
     },
   },
   mounted() {
-    this.emitter.on("CLEAR_SELECT", payload => {
+    this.emitter.on( "CLEAR_SELECT", payload => {
       this.selectModel = payload;
       this.showSelectTitle = false;
       this.selectErr = false;

@@ -285,4 +285,8 @@ export class BuildTransactions {
     getFeeStrategy(): FeeCalculationStrategy {
         return this.transactionBuilderFactory.feeCalculationStrategy;
     }
+
+    setFeeStrategy(feeStrategy :FeeCalculationStrategy) :void{
+        this.transactionBuilderFactory.feeCalculationStrategy = feeStrategy; 
+    }
 }

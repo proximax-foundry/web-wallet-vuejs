@@ -3,7 +3,7 @@ import { walletState } from "../state/walletState"
 import { ChainUtils } from "../util/chainUtils"
 import { Wallet } from "../models/wallet"
 import { Wallets } from "../models/wallets"
-import { WalletAccount } from "../models/walletAccount"
+import { WalletAccount } from "../models/walletAccount" 
 import { nis1Account } from "../models/nis1Account"
 import { ChainProfile } from "../models/stores/chainProfile"
 import { Asset } from "../models/asset";
@@ -14,7 +14,8 @@ import {
     SimpleWallet, Password, RawAddress, Convert, Crypto,
     WalletAlgorithm, PublicAccount, Account, NetworkType, 
     AggregateTransaction, CosignatureTransaction, MosaicNonce,
-    NamespaceId, Address, AccountInfo, MosaicId, AliasType, Transaction
+    NamespaceId, Address, AccountInfo, MosaicId, AliasType, Transaction,
+    MultisigAccountGraphInfo,MultisigAccountInfo,QueryParams
 } from "tsjs-xpx-chain-sdk"
 import { computed } from "vue";
 import { Helper, LooseObject } from "./typeHelper";
@@ -83,7 +84,7 @@ export class WalletUtils {
         return false;
         
     }
-
+    
     static async getTotalBalanceWithCurrentNetwork(): Promise<Wallet> {
 
         const wallet = walletState.currentLoggedInWallet as Wallet;
@@ -193,7 +194,60 @@ export class WalletUtils {
             }
         });
     }
+    static getAggregateBondedTransactions = (publicAccount :PublicAccount) :Promise<AggregateTransaction[]> =>{
+        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+        return new Promise((resolve, reject) => {
+            try {
+                chainAPICall.accountAPI.aggregateBondedTransactions(publicAccount,new QueryParams(100)).then(transactions => {
+                    resolve(transactions);
+                }).catch((error) => {
+                    console.warn(error);
+                    reject(false);
+                });
+            } catch (err) {
+                console.warn(err);
+                reject(false);
+            }
+        });
+    }
 
+
+    static getMultisigAccGraphInfo(address :Address): Promise<MultisigAccountGraphInfo> {
+        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+        return new Promise((resolve, reject) => {
+            try {
+             chainAPICall.accountAPI.getMultisigAccountGraphInfo(address).then(accountInfo => {
+                    resolve(accountInfo);
+                }).catch((error) => {
+                    console.warn(error);
+                    reject(false);
+                });
+            } catch (err) {
+                console.warn(err);
+                reject(false);
+            }
+        });
+    }
+
+    static getAccInfo(add :string):Promise<AccountInfo> {
+        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+        let address = Address.createFromRawAddress(add);
+        return new Promise((resolve, reject) => {
+            try {
+             chainAPICall.accountAPI.getAccountInfo(address).then(accountInfo => {
+                    resolve(accountInfo);
+                }).catch((error) => {
+                    console.warn(error);
+                    reject(false);
+                });
+            } catch (err) {
+                console.warn(err);
+                reject(false);
+            }
+        });
+    }
+
+  
     /**
    *
    *
