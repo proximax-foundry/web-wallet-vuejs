@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { computed, defineComponent, getCurrentInstance, ref } from "vue"; //getCurrentInstance
+import { computed, defineComponent, getCurrentInstance, ref, watch } from "vue";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { useRouter } from "vue-router";
@@ -61,8 +61,11 @@ import Dropdown from 'primevue/dropdown';
 import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
-// import { useToast } from "primevue/usetoast";
+import { useToast } from "primevue/usetoast";
+import { Connector } from '../models/connector';
+import { listenerState} from "@/state/listenerState";
 import packageData from "../../package.json"
+import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 
 export default defineComponent({
   components: {
@@ -79,7 +82,7 @@ export default defineComponent({
     };
   },
   setup() {
-    // const toast = useToast();
+    const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const router = useRouter();
@@ -120,6 +123,8 @@ export default defineComponent({
       // console.log(e.value.value);
     }
 
+    const currentNetworkType = computed(()=> networkState.currentNetworkProfile ? networkState.currentNetworkProfile.network.type : null);
+
     const logout = () => {
       WalletStateUtils.doLogout();
 
@@ -141,35 +146,189 @@ export default defineComponent({
       return totalAmount;
     });
 
-    // transferEmitter.on("CONFIRMED_NOTIFICATION", payload => {
-    //   if(payload.status){
-    //     toast.add({severity:'success', summary: 'Notification', detail: payload.message, group: 'br', life: 5000});
-    //     var audio = new Audio(require('@/assets/audio/ding2.ogg'));
-    //     audio.play();
-    //   }
-    // });
+    let listener = ref(new Connector("", []));
 
-    // transferEmitter.on("UNCONFIRMED_NOTIFICATION", payload => {
-    //   if(payload.status){
-    //     toast.add({severity:'info', summary: 'Notification', detail: payload.message, group: 'br', life: 5000});
-    //     var audio = new Audio(require('@/assets/audio/ding.ogg'));
-    //     audio.play();
-    //   }
-    // });
+    const connectListener = (skipIfEndpointHaveValue = true)=>{
 
-    // transferEmitter.on("STATUS_NOTIFICATION", payload => {
-    //   if(payload.status){
-    //     toast.add({severity:'error', summary: 'Error status', detail: payload.message, group: 'br', life: 5000});
-    //     var audio = new Audio(require('@/assets/audio/ding.ogg'));
-    //     audio.play();
-    //   }
-    // });
+      if(skipIfEndpointHaveValue && listener.value.endpoint !== ""){
+        return;
+      }
+      //listener.connectNewEndpoint(ChainUtils.buildWSEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+      if(listener.value.endpoint){
+        ListenerStateUtils.lightReset();
+      }
+      else{
+        ListenerStateUtils.reset();
+      }
+      listener.value.terminate();
 
-    // emitter.on("NOTIFICATION", payload => {
-    //   if(payload.status){
-    //     toast.add({severity:'warn', summary: 'Alert', detail: payload.message, group: 'br', life: 5000});
-    //   }
-    // });
+      let accountsAddress = walletState.currentLoggedInWallet.accounts.map((acc)=> acc.address);
+      let othersAddress = walletState.currentLoggedInWallet.others.map((acc)=> acc.address);
+
+      let allAddress = Array.from(new Set(accountsAddress.concat(othersAddress)));
+
+      //listener.addresses = allAddress;
+      //console.log(allAddress);
+
+      listener.value = new Connector(ChainUtils.buildWSEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort), allAddress);
+
+      listener.value.startListen();
+    }
+
+    const terminateListener = () =>{
+      listener.value.terminate();
+    }
+
+    if(loginStatus.value){
+      connectListener();
+    }
+
+    watch(()=> loginStatus.value, (newValue)=>{
+      if(newValue){
+        connectListener();
+      }
+      else{
+        terminateListener();
+      }
+    })
+
+    //const newBlockLength = computed(()=> listenerState.blockLength);
+    const currentBlockHeight = computed(()=> listenerState.currentBlock);
+    const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
+    const unconfirmedTxLength = computed(()=> listenerState.unconfirmedTxLength);
+    const transactionStatusLength = computed(()=> listenerState.transactionStatusLength);
+    const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
+    const cosignatureAddedTxLength = computed(()=> listenerState.cosignatureAddedTxLength);
+    const totalPendingNum = ref(0);
+
+    watch(()=> listenerState.autoAnnounceSignedTransaction, (newValue)=>{
+      
+      let newLength = newValue.length;
+
+      if(newLength !== totalPendingNum.value){
+        toast.removeGroup("tr");
+
+        if(newLength){
+          let singularPluralText =  newLength > 1 ? "s" : "";
+          toast.add(
+              {
+                severity:'info', 
+                summary: `${newLength} Transaction${singularPluralText} in waiting queue`, 
+                detail: `Please do not refresh or logout`, 
+                group: 'tr'
+              }
+          );
+        }
+      }
+
+      totalPendingNum.value = newLength;
+      
+    }, true);
+
+    watch(()=> currentBlockHeight.value, ()=>{
+
+      listener.value.refreshTimer();
+    });
+    
+
+     watch(()=> unconfirmedTxLength.value, (newValue, oldValue)=>{
+
+      if(newValue > oldValue){
+        let txLength = newValue - oldValue;
+        let singularPluralText =  txLength > 1 ? "s" : "";
+        toast.add(
+          {
+            severity:'warn', 
+            summary: `Transaction${singularPluralText} Added`, 
+            detail: `${txLength} transaction${singularPluralText} in unconfirmed state`, 
+            group: 'br', 
+            life: 5000
+          }
+        );
+      }
+     });
+
+     watch(()=> confirmedTxLength.value, (newValue, oldValue)=>{
+
+      if(newValue > oldValue){
+        let txLength = newValue - oldValue;
+        let singularPluralText =  txLength > 1 ? "s" : "";
+        toast.add(
+          {
+            severity:'success', 
+            summary: `Transaction${singularPluralText} Confirmed`, 
+            detail: `${txLength} transaction${singularPluralText} confirmed`, 
+            group: 'br', 
+            life: 5000
+          }
+        );
+      }
+     });
+
+     watch(()=> transactionStatusLength.value, (newValue, oldValue)=>{
+
+       console.log(newValue + ":" + oldValue);
+
+      if(newValue > oldValue){
+        let txLength = newValue - oldValue;
+        let totalTxLength = listenerState.allTransactionStatus.length;
+        let lastIndex = totalTxLength - 1;
+
+        for(let i= 0; i < txLength; ++i){
+          let status = listenerState.allTransactionStatus[lastIndex - i].status;
+          let hash = listenerState.allTransactionStatus[lastIndex - i].hash;
+          toast.add({
+            severity:'error', 
+            summary: `Transaction Error`, 
+            detail: `Status: ${status} - Hash: ${hash} `, 
+            group: 'br', 
+            life: 10000
+          });
+        }
+      }
+     });
+
+     watch(()=> cosignatureAddedTxLength.value, (newValue, oldValue)=>{
+
+      if(newValue > oldValue){
+        let txLength = newValue - oldValue;
+        let singularPluralText =  txLength > 1 ? "s" : "";
+        toast.add(
+          {
+            severity:'info', 
+            summary: `Transaction${singularPluralText} Cosignature Added`, 
+            detail: `${txLength} cosignature transaction${singularPluralText} added`, 
+            group: 'br', 
+            life: 5000
+          }
+        );
+      }
+     });
+
+     watch(()=> aggregateBondedTxLength.value, (newValue, oldValue)=>{
+
+      if(newValue > oldValue){
+        let txLength = newValue - oldValue;
+        let singularPluralText =  txLength > 1 ? "s" : "";
+        toast.add(
+          {
+            severity:'warn', 
+            summary: `Partial Transaction${singularPluralText} Added`, 
+            detail: `${txLength} partial transaction${singularPluralText} added`, 
+            group: 'br', 
+            life: 5000
+          }
+        );
+      }
+     });
+
+     emitter.on("listener:reconnect", ()=>{
+       connectListener(false);
+     });
+
+     emitter.on("listener:setEndpoint", endpoint =>{
+       listener.value.endpoint = endpoint;
+     });
 
     const versioning = ref('0.0.1');
 
@@ -189,12 +348,16 @@ export default defineComponent({
       selectNetwork,
       chainAPIEndpoint,
       chainsNetworkOption,
-      currentNativeTokenName
+      currentNativeTokenName,
+      listener
     };
   },
   created() {
     this.headerMenuHandler();
     window.addEventListener("resize", this.headerMenuHandler);
+  },
+  beforeUnmount(){
+    this.listener.terminate();
   },
   unmounted() {
     window.removeEventListener("resize", this.headerMenuHandler);

@@ -286,16 +286,13 @@ export class WalletUtils {
     }
 
     /**
-     * Create account simple
-     *
-     * @param {string} nameWallet
-     * @param {Password} password
+     * Create account
      * @param {string} privateKey
      * @param {NetworkType} network
-     * @returns {SimpleWallet}
+     * @returns {Account}
      */
-     static createAccountFromPrivateKey(nameWallet: string, password: Password, privateKey: string, network: NetworkType): SimpleWallet {
-        return SimpleWallet.createFromPrivateKey(nameWallet, password, privateKey, network);
+     static createAccountFromPrivateKey(privateKey: string, network: NetworkType): Account {
+        return Account.createFromPrivateKey(privateKey, network);
     }
 
     /**
