@@ -22,6 +22,19 @@ export class ChainProfileNames extends StoreProperties {
         this.init();
     }
 
+    replaceFirstNames(names: string[]): number {
+
+        let count = 0;
+
+        for(let i = 0; i < 1; i++){
+            const updated = this.replaceAndUpdateWallet(this.names[i], names[i], i);
+
+            count += updated ? 1 : 0;
+        }
+
+       return count;
+    }
+
     replaceFirst2Names(names: string[]): number {
 
         let count = 0;

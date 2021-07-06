@@ -227,6 +227,16 @@ export class TransactionUtils {
     return transactions;
   }
 
+  static announceTransaction(signedTx: SignedTransaction): void {
+
+    ChainUtils.announceTransaction(signedTx);
+  }
+
+  static announceBondedTransaction(signedTx: SignedTransaction): void {
+
+    ChainUtils.announceBondedTransaction(signedTx);
+  }
+
   static getTransactionTypeName(type: number): string | null {
 
     let typeName = "";

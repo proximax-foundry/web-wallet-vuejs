@@ -57,16 +57,26 @@ const chainProfileIntegration = async () => {
 
     let namesUpdate = 0;
 
-    switch (chainProfileNames.length) {
-      case 2:
-        namesUpdate = chainProfileNamesStore.replaceFirst2Names(chainProfileNames);
-        break;
-      case 3:
-        namesUpdate = chainProfileNamesStore.replaceFirst3Names(chainProfileNames);
-        break;
-      default:
-        break;
+    if(chainProfileNamesStore.names.length !== 0){
+      
+      switch (chainProfileNames.length) {
+        case 1:
+          namesUpdate = chainProfileNamesStore.replaceFirstNames(chainProfileNames);
+          break;
+        case 2:
+          namesUpdate = chainProfileNamesStore.replaceFirst2Names(chainProfileNames);
+          break;
+        case 3:
+          namesUpdate = chainProfileNamesStore.replaceFirst3Names(chainProfileNames);
+          break;
+        default:
+          break;
+      }
     }
+    else{
+      chainProfileNamesStore.names = chainProfileNames;
+    }
+    
     chainProfileNamesStore.saveToLocalStorage();
 
     for(const chainProfileName of chainProfileNames){
