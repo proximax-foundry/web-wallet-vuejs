@@ -19,7 +19,7 @@
       <div class="w-52 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
         <div>
           <div class="text-xs inline-block">{{ walletState.currentLoggedInWallet.name }}</div>
-          <div class="text-xs">Total Balance: <span>{{ totalBalance }}</span> {{ currentNativeTokenName}}</div>
+          <div class="text-xs">{{$t('Header.totalbalance')}}: <span>{{ totalBalance }}</span> {{ currentNativeTokenName}}</div>
         </div>
       </div>
       <div class="w-17 text-center h-10 items-center gray-line-left">
