@@ -762,7 +762,7 @@ export class WalletUtils {
                 let linkedPublicAccount = Helper.createPublicAccount(accountInfo.linkedAccountKey, localNetworkType.value);
 
                 let newAddress = linkedPublicAccount.address.plain();
-                let stripedAddress = newAddress.substr(0, -4);
+                let stripedAddress = newAddress.substr(-4);
 
                 let newOtherAccount = new OtherAccount("ACCOUNT-LINK-" + stripedAddress, accountInfo.linkedAccountKey, newAddress, Helper.getOtherWalletAccountType().DELEGATE_VALIDATE);
             

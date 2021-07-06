@@ -100,13 +100,28 @@ export default defineComponent({
       return options;
     });
 
+    watch(()=> networkState.availableNetworks, (availableNetworks)=>{
+      let options = [];
+
+      console.log("Updated");
+      console.log(availableNetworks);
+
+      for(let i=0; i < availableNetworks.length; ++i){
+        options.push({ label: availableNetworks[i], value: i });
+      }
+      chainsNetworks.value = options;
+    }, true);
+
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
 
-    const chainsNetworkOption = [{
+    const chainsNetworkOption = computed(()=>{
+
+      return [{
         label: 'Networks',
         items: chainsNetworks.value
       }];
+    });
       // , {
       //   label: 'Setting',
       //   items: [
