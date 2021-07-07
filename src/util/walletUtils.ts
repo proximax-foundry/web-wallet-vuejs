@@ -286,16 +286,13 @@ export class WalletUtils {
     }
 
     /**
-     * Create account simple
-     *
-     * @param {string} nameWallet
-     * @param {Password} password
+     * Create account
      * @param {string} privateKey
      * @param {NetworkType} network
-     * @returns {SimpleWallet}
+     * @returns {Account}
      */
-     static createAccountFromPrivateKey(nameWallet: string, password: Password, privateKey: string, network: NetworkType): SimpleWallet {
-        return SimpleWallet.createFromPrivateKey(nameWallet, password, privateKey, network);
+     static createAccountFromPrivateKey(privateKey: string, network: NetworkType): Account {
+        return Account.createFromPrivateKey(privateKey, network);
     }
 
     /**
@@ -765,7 +762,7 @@ export class WalletUtils {
                 let linkedPublicAccount = Helper.createPublicAccount(accountInfo.linkedAccountKey, localNetworkType.value);
 
                 let newAddress = linkedPublicAccount.address.plain();
-                let stripedAddress = newAddress.substr(0, -4);
+                let stripedAddress = newAddress.substr(-4);
 
                 let newOtherAccount = new OtherAccount("ACCOUNT-LINK-" + stripedAddress, accountInfo.linkedAccountKey, newAddress, Helper.getOtherWalletAccountType().DELEGATE_VALIDATE);
             

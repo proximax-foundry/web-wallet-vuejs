@@ -2,7 +2,7 @@ import { ChainConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, Con
   NetworkType, 
   NamespaceId,
   MosaicId, Address, PublicAccount, 
-  AccountInfo, Transaction, QueryParams
+  AccountInfo, Transaction, QueryParams, SignedTransaction, TransactionType
 } from "tsjs-xpx-chain-sdk";
 import { NetworkConfig } from "../models/stores/chainProfileConfig";
 import { ChainAPICall } from "../models/REST/chainAPICall";
@@ -182,5 +182,27 @@ export class ChainUtils{
       let transactions = await chainRESTCall.accountAPI.transactions(publicAccount, queryParams);
 
       return transactions;
+    }
+
+    static announceTransaction(signedTx: SignedTransaction): void{
+
+      if(signedTx.type === TransactionType.AGGREGATE_BONDED){
+        throw new Error("Invalid, cannot be aggregate bonded transaction");
+      }
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      chainRESTCall.transactionAPI.announce(signedTx);
+    }
+
+    static announceBondedTransaction(signedTx: SignedTransaction): void{
+
+      if(signedTx.type !== TransactionType.AGGREGATE_BONDED){
+        throw new Error("Invalid, not aggregate bonded transaction");
+      }
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      chainRESTCall.transactionAPI.announceAggregateBonded(signedTx);
     }
 }

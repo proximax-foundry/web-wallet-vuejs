@@ -59,7 +59,7 @@
           <div class="mt-5">
             <TextInput placeholder="Enter Name" :disabled="disableNamespaceName" :showError="showNamespaceNameError" v-model="namespaceName" :imgRequired="true" errorMessage="Required field, minlength 2, max length 16. Alphanumeric characters" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" />
           </div>
-          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" v-model="selectNamespace" :options="namespaceOption" selectDefault="1" @show-selection="updateNamespaceSelection" @clear-selection="clearNamespaceSelection" />
+          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" :disabled="disableSelectNamespace" ref="namespaceSelect" errorMessage="" v-model="selectNamespace" :options="namespaceOption" selectDefault="1" @show-selection="updateNamespaceSelection" @clear-selection="clearNamespaceSelection" />
           <DurationInput :disabled="disabledDuration" v-if="showDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span class="text-xs">{{ transactionFee }}</span> XPX</div>
@@ -105,7 +105,7 @@
   </div>
 </template>
 <script>
-import { computed, ref, getCurrentInstance, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import DurationInput from '@/modules/services/submodule/namespaces/components/DurationInput.vue';
@@ -124,9 +124,9 @@ export default {
     SelectInputPlugin,
   },
   setup(){
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const namespaceSelect = ref(null);
     const disableNamespaceName = ref(false);
+    const disableSelectNamespace = ref(false);
     const namespaceName = ref('');
     const showDuration = ref(true);
     const showDurationErr = ref(false);
@@ -205,11 +205,13 @@ export default {
       disabledClear.value = true;
       disabledDuration.value = true;
       disableNamespaceName.value = true;
+      disableSelectNamespace.value = true;
     }else{
       disabledPassword.value = false;
       disabledClear.value = false;
       disabledDuration.value = false;
       disableNamespaceName.value = false;
+      disableSelectNamespace.value = false;
     }
 
     const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
@@ -223,6 +225,7 @@ export default {
     });
 
     const changeSelection = (i) => {
+      namespaceSelect.value.clear();
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
       isMultiSigBool.value = false;
@@ -230,7 +233,6 @@ export default {
       showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value)?true:false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
-      emitter.emit('CLEAR_SELECT', 0);
     }
 
     const updateNamespaceSelection = (namespaceNameSelected) => {
@@ -261,7 +263,7 @@ export default {
       walletPassword.value = '';
       duration.value = '0';
       namespaceName.value = '';
-      emitter.emit("CLEAR_SELECT", 0);
+      namespaceSelect.value.clear();
     };
 
     const createNamespace = () => {
@@ -303,9 +305,11 @@ export default {
       if(balance.value < n && !isNotCosigner.value){
         showNoBalance.value = true;
         disabledPassword.value = true;
+        disableSelectNamespace.value = true;
       }else{
         showNoBalance.value = false;
         disabledPassword.value = false;
+        disableSelectNamespace.value = false;
       }
     });
 
@@ -314,15 +318,18 @@ export default {
         disabledPassword.value = true;
         disabledDuration.value = true;
         disableNamespaceName.value = true;
+        disableSelectNamespace.value = true;
       }else{
         disabledPassword.value = false;
         disabledDuration.value = false;
         disableNamespaceName.value = false;
+        disableSelectNamespace.value = false;
       }
     });
 
     return {
       Helper,
+      namespaceSelect,
       accounts,
       moreThanOneAccount,
       showMenu,
@@ -340,6 +347,7 @@ export default {
       clearInput,
       showPasswdError,
       changeSelection,
+      disableSelectNamespace,
       disabledPassword,
       disabledClear,
       disabledDuration,
