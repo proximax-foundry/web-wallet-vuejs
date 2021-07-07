@@ -236,6 +236,28 @@ export default {
         console.log(connectInfo)
       });
 
+      // ethereum
+      //   .request({
+      //     method: 'wallet_watchAsset',
+      //     params: {
+      //       type: 'ERC20',
+      //       options: {
+      //         address: '0x2fE636d897A2a52bBc75Dc2BdE6B2FabC2359DEF',
+      //         symbol: 'bXPX',
+      //         decimals: 6,
+      //         image: 'https://foo.io/token-image.svg',
+      //       },
+      //     },
+      //   })
+      //   .then((success) => {
+      //     if (success) {
+      //       console.log('bXPX successfully added to wallet!')
+      //     } else {
+      //       throw new Error('Something went wrong.')
+      //     }
+      //   })
+      //   .catch(console.error)
+
     }else{
       console.log('metamask not installed')
     }
@@ -263,7 +285,7 @@ export default {
           currentAccount.value, 'latest'
         ] })
         .then(hexDecimalBalance => {
-          balance.value = parseInt(hexDecimalBalance)/Math.pow(10, 18)
+          balance.value = parseInt(hexDecimalBalance)/Math.pow(10, 18);
         })
         .catch((err) => {
           console.error(err);

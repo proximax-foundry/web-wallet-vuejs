@@ -211,17 +211,17 @@ export default {
       // isMetamaskConnected.value = false;
 
       ethereum
-      .request({ method: 'eth_accounts' })
-      .then(handleAccountsChanged)
-      .catch((err) => {
-        console.error(err);
+        .request({ method: 'eth_accounts' })
+        .then(handleAccountsChanged)
+        .catch((err) => {
+          console.error(err);
       });
 
 
       ethereum
-      .request({ method: 'eth_chainId' })
-      .then((metaChainId) => {
-        verifyChain(metaChainId);
+        .request({ method: 'eth_chainId' })
+        .then((metaChainId) => {
+          verifyChain(metaChainId);
       })
       .catch((err) => {
         console.error(err);
@@ -274,17 +274,17 @@ export default {
 
     const connectMetamask = () => {
       ethereum
-      .request({ method: 'eth_requestAccounts' })
-      .then(handleAccountsChanged)
-      .catch((err) => {
-        if (err.code === 4001) {
-          // EIP-1193 userRejectedRequest error
-          // If this happens, the user rejected the connection request.
-          console.log('Please connect to MetaMask.');
-        } else {
-          console.error(err);
-        }
-      });
+        .request({ method: 'eth_requestAccounts' })
+        .then(handleAccountsChanged)
+        .catch((err) => {
+          if (err.code === 4001) {
+            // EIP-1193 userRejectedRequest error
+            // If this happens, the user rejected the connection request.
+            console.log('Please connect to MetaMask.');
+          } else {
+            console.error(err);
+          }
+        });
     };
 
     const toast = useToast();
