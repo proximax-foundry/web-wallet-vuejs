@@ -186,6 +186,8 @@ import SelectSiriusAccountInputPlugin from '@/modules/services/submodule/mainnet
 import { walletState } from '@/state/walletState';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import { ethers } from 'ethers';
+import { abi } from '@/util/swapUtils';
 
 export default {
   name: 'ViewServicesMainnetSwapBSCToSirius',
@@ -203,8 +205,13 @@ export default {
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
     const balance = ref(0);
+    const coinBalance = ref(0);
+    const tokenAddress = '0x2fE636d897A2a52bBc75Dc2BdE6B2FabC2359DEF';
 
     if (typeof window.ethereum !== 'undefined') {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+
       console.log('MetaMask is installed!');
       isInstallMetamask.value = true;
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
@@ -258,6 +265,34 @@ export default {
       //   })
       //   .catch(console.error)
 
+      // For now, 'eth_accounts' will continue to always return an array
+      function handleAccountsChanged(accounts) {
+        if (accounts.length === 0) {
+          // MetaMask is locked or the user has not connected any accounts
+          console.log('Please connect to MetaMask.');
+        } else if (accounts[0] !== currentAccount.value) {
+          currentAccount.value = accounts[0];
+
+          // get metamask balance
+          ethereum
+          .request({ method: 'eth_getBalance', params: [
+            currentAccount.value, 'latest'
+          ] })
+          .then(hexDecimalBalance => {
+            coinBalance.value = parseInt(hexDecimalBalance)/Math.pow(10, 18);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+
+          (async () => {
+            const contract = new ethers.Contract(tokenAddress, abi, signer);
+            const tokenBalance = await contract.balanceOf(currentAccount.value);
+            balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
+          })();
+        }
+      }
+
     }else{
       console.log('metamask not installed')
     }
@@ -268,28 +303,6 @@ export default {
         err.value = 'Please select BSC network on Metamark to swap BSC';
       }else{
         err.value = '';
-      }
-    }
-
-    // For now, 'eth_accounts' will continue to always return an array
-    function handleAccountsChanged(accounts) {
-      if (accounts.length === 0) {
-        // MetaMask is locked or the user has not connected any accounts
-        console.log('Please connect to MetaMask.');
-      } else if (accounts[0] !== currentAccount.value) {
-        currentAccount.value = accounts[0];
-
-        // get metamask balance
-        ethereum
-        .request({ method: 'eth_getBalance', params: [
-          currentAccount.value, 'latest'
-        ] })
-        .then(hexDecimalBalance => {
-          balance.value = parseInt(hexDecimalBalance)/Math.pow(10, 18);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
       }
     }
 
@@ -307,6 +320,7 @@ export default {
         }
       });
     };
+
 
     const toast = useToast();
     const copy = (id) =>{
