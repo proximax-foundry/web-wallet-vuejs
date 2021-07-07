@@ -38,6 +38,7 @@
         </div>
         <div class="self-center">
           <button @click="connectMetamask()" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none" v-if="!currentAccount">Connect to Metamask</button>
+          <button class=" bg-green-50 rounded-3xl border font-bold px-6 py-1 border-green-500 text-green-500 text-tsm outline-none focus:outline-none cursor-auto" v-else>Connected</button>
         </div>
       </div>
       <div class="mb-5 flex justify-between bg-yellow-200 rounded-2xl p-3 text-left" v-else>
