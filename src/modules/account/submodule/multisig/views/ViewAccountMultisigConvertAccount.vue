@@ -291,8 +291,11 @@ export default {
       }
     });
     // check if onPartial
-    let onPartialBoolean = multiSign.onPartial(PublicAccount.createFromPublicKey(acc.publicKey,networkState.currentNetworkProfile.network.type))
-      onPartial.value = onPartialBoolean;
+    multiSign.onPartial(PublicAccount.createFromPublicKey(acc.publicKey,networkState.currentNetworkProfile.network.type)).then(verify=>
+      onPartial.value = verify
+    )
+    
+     ;
     // check if this address has cosigner
     try{
       let verifyMultisig = multiSign.checkIsMultiSig(acc.address)
