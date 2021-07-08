@@ -38,21 +38,52 @@
 
 <script>
 import { inject, ref } from 'vue';
-
+import {walletState} from '@/state/walletState'
+import { WalletUtils } from '@/util/walletUtils';
+import {Address, MultisigAccountGraphInfo} from  "tsjs-xpx-chain-sdk"
+import {Helper} from '@/util/typeHelper'
+import { networkState } from '@/state/networkState';
 export default{
   name: 'MultisigSchemeModal',
   props: ['multiSigAccount'],
 
   setup(p){
     const toggleModal = ref(false);
-    const appStore = inject("appStore");
+    
     // console.log(p.multiSigAccount.multisigAccountGraphInfo)
     let graph = [];
     let layer = [];
-    let newlayer = [];
-    const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
-
-    p.multiSigAccount.multisigAccountGraphInfo.forEach( (multiSig, i) => {
+    const wallet = walletState.currentLoggedInWallet
+    
+      WalletUtils.getMultisigDetails(p.multiSigAccount.address).then(multisiginfo=>{
+        
+        multisiginfo.forEach((multisig)=>{
+          let label;
+          let accountName;
+          let account = wallet.accounts.find((element) => element.publicKey === multisig.publicKey);
+          label = (multisig.cosignaturies.length>0)?'MULTISIG-':'Cosigner-';
+          let convertedAddress = Helper.createPublicAccount(multisig.publicKey,networkState.currentNetworkProfile.network.type).address.plain()
+          accountName = (account) ? account.name : (label + convertedAddress.substr(-4));
+          
+            layer.push({ address: convertedAddress, name: accountName, label: label, cosign: multisig.cosignaturies });
+            
+           
+          
+        })
+      })
+    graph.push(layer);
+    console.log(graph)
+ 
+    
+    return {
+      graph,
+      toggleModal,
+    }
+  }
+}     
+   
+  
+/*     p.multiSigAccount.multisigAccountGraphInfo.forEach( (multiSig, i) => {
       let label;
       let accountName;
       let account = wallet.accounts.find((element) => element.address === multiSig.account.address.address);
@@ -77,16 +108,8 @@ export default{
         });
       }
       // console.log(graph)
-    });
-    layer = newlayer;
-    graph.push(layer);
-
-    return {
-      graph,
-      toggleModal,
-    }
-  }
-}
+    }); */
+    
 </script>
 <style lang="scss" scoped>
 
