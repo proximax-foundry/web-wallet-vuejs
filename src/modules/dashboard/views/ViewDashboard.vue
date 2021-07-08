@@ -55,12 +55,12 @@
   <div class="grid grid-cols-12">
     <div class="col-start-2 col-span-10">
       <div class="grid grid-cols-12">
-          <div class="text-md col-start-5 col-span-2 rounded font-thick " 
-          :class="namespaceAssetView == 0 ? 'bg-blue-500 text-white' : 'bg-gray-400 text-black'" @click="namespaceAssetView = 0">
+          <div class="py-2 text-md col-start-5 col-span-2 rounded-lg rounded-r-none font-bold" 
+          :class="namespaceAssetView == 0 ? 'bg-blue-500 text-white' : 'bg-gray-400 text-gray-100'" @click="namespaceAssetView = 0">
             Namespaces
           </div>
-          <div class="text-md col-span-2 rounded" 
-            :class="namespaceAssetView == 1 ? 'bg-blue-500 text-white' : 'bg-gray-400 text-black'" @click="namespaceAssetView = 1">
+          <div class="py-2 text-md col-span-2 rounded-lg rounded-l-none font-bold" 
+            :class="namespaceAssetView == 1 ? 'bg-blue-500 text-white' : 'bg-gray-400 text-gray-100'" @click="namespaceAssetView = 1">
             Other Assets
           </div>
       </div>
@@ -74,8 +74,8 @@
   </div>
 
   <div>
-    <DashboardDataTable :showBlock="true" @confirmedFilter="doFilterConfirmed" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed"></DashboardDataTable>
-    <DashboardDataTable :showBlock="false" :transactions="unconfirmedTransactions" v-if="isShowUnconfirmed"></DashboardDataTable>
+    <DashboardDataTable :showBlock="true" :showAction="true" @confirmedFilter="doFilterConfirmed" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed"></DashboardDataTable>
+    <DashboardDataTable :showBlock="false" :showAction="false" :transactions="unconfirmedTransactions" v-if="isShowUnconfirmed"></DashboardDataTable>
     <PartialDashboardDataTable :transactions="partialTransactions.sort((a, b) => b.deadline - a.deadline)" v-if="isShowPartial"></PartialDashboardDataTable>
     <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
     <AddressQRModal :showModal="showAddressQRModal" :qrDataString="addressQR" :addressName="selectedAccountName" />
@@ -266,18 +266,29 @@ export default defineComponent({
     let allConfirmedTransactions = ref([]);
     let allUnconfirmedTransactions = ref([]);
     let allPartialTransactions = ref([]);
-    let filteredConfirmedTransactions = ref([]);
+    let filteredConfirmedTransactions = computed(()=>{
 
-    watch(allConfirmedTransactions, (newValue) => {
-        let addressToSearch = [selectedAccountAddressPlain.value];
-        addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
-        filteredConfirmedTransactions.value = newValue.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
-        finalConfirmedTransaction.value = filteredConfirmedTransactions.value;
+      if(allConfirmedTransactions.value.length === 0){
+        return [];
+      }
+
+      let addressToSearch = [selectedAccountAddressPlain.value];
+      addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
+      return allConfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
+    })
+
+    watch(filteredConfirmedTransactions, (newValue) => {
+        finalConfirmedTransaction.value = newValue;
     });
 
     DashboardService.fetchConfirmedTransactions(walletState.currentLoggedInWallet).then((txs)=>{
       //console.log(txs);
       allConfirmedTransactions.value = txs;
+
+      let addressToSearch = [selectedAccountAddressPlain.value];
+      addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
+      filteredConfirmedTransactions.value = allConfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
+      //finalConfirmedTransaction.value = filteredConfirmedTransactions.value;
     });
 
     let filteredUnconfirmedTransactions = computed(()=> []);
