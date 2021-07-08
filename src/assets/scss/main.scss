@@ -131,8 +131,26 @@ body{
   top: 20px; left: 0; right: 0; margin-left: auto; margin-right: auto; max-width: 800px;
 }
 
+.popup-outer-center{
+  position: absolute;
+  max-width: 800px;
+  top: 20px;
+  right: 50%;
+  transform: translate(50%);
+}
+
 .modal-popup-box{
   @apply transition ease-in duration-300 w-popup px-10 py-7 bg-white rounded-3xl shadow-xl;
+}
+
+.modal-popup-box-sm{
+  @apply transition ease-in duration-300 px-10 py-7 bg-white rounded-3xl shadow-xl;
+}
+
+.img-center{
+  display:block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .page-title-gray-line{
