@@ -32,13 +32,13 @@
                 <div v-else class="block px-2 py-1 text-xs text-gray-300">Make Default</div>
                 <a v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="exportWallet()">Export</a>
                 <a v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" @click="exportWallet()">Export</a>
-                <router-link :to="{ name: 'ViewAccountDelete', params: { name: account.name}}" v-if="!account.default && !otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Delete</router-link>
+                <router-link :to="{ name: 'ViewAccountDelete', params: { name: account.name }}" v-if="!account.default && !otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Delete</router-link>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300">Delete</div>
                 <router-link :to="{ name: isMultiSig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: account.name}}" v-if="!otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">MultiSig</router-link>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >MultiSig</div>
                 <div class="block px-2 py-1 text-xs text-gray-300">Restrictions</div>
                 <div class="block px-2 py-1 text-xs text-gray-300">Metadata</div>
-                <router-link :to="{ name: 'ViewAccountDelegate'}" v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Delegate</router-link>
+                <router-link :to="{ name: 'ViewAccountDelegate', params: { address: account.address }}" v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Delegate</router-link>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >Delegate</div>
                 <router-link :to="{ name: 'ViewAccountAliasAddressToNamespace',params: { address: account.address }}" v-if="!otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Link to Namespace</router-link>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >Link to Namespace</div>
@@ -63,7 +63,7 @@ import { Helper } from '@/util/typeHelper';
 
 export default{
   name: 'AccountTile',
-  props: ['account','other','showMenuCall', 'i'],
+  props: ['account','showMenuCall', 'i'],
   setup(p){
     const toast = useToast();
     const internalInstance = getCurrentInstance();
