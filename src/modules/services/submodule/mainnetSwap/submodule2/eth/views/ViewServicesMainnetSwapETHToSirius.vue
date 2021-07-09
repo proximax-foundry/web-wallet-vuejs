@@ -52,7 +52,7 @@
       <p class="font-bold text-tsm text-left">To: Sirius address</p>
       <SelectSiriusAccountInputPlugin v-model="siriusAddress" icon="card-alt" :showError="showSiriusAddressErr" errorMessage="Sirius Address required" :options="siriusAddressOption" :disabled="disableSiriusAddress" />
       <p class="font-bold text-tsm text-left mb-1">Amount</p>
-      <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" title="eXPX" placeholder="eXPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':'Insufficient balance'" :decimal="6" />
+      <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" title="eXPX" placeholder="eXPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':'Insufficient token balance'" :decimal="6" />
       <div class="mt-10">
         <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
         <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="sendRequest()">Send request</button>
@@ -68,7 +68,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-700 self-center">Sending transfer to Metamask.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center" :class="step1?'text-gray-700':'text-gray-300'">Sending transfer to Metamask.</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -78,7 +78,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-700 self-center">Waiting for your approval on Metamask.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">Waiting for your approval on Metamask.</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -88,9 +88,9 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-700 self-center">Transfer validated. <a href="#" class="text-blue-primary" id="validateTransfer" copyValue="wfwefwefw2345tg3y34y34dfwfew3465fe345wfewvrew" copySubject="Transfer Validation">(wfwefwefw2345tg3y34y34dfwfew3465fe345wfewvrew)</a></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transfer validated. <a :href="validationLink" target=_new v-if="validationHash" class="text-blue-primary" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer Validation">({{ validationHash }})</a></div>
           <div class="flex-none">
-            <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center"></font-awesome-icon>
+            <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step3"></font-awesome-icon>
           </div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
@@ -101,7 +101,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-700 self-center">Sending transaction ID message to Metamask.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">Sending transaction ID message to Metamask.</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -111,7 +111,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-300 self-center">Waiting for your approval on Metamask.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">Waiting for your approval on Metamask.</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -121,7 +121,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-300 self-center">Message validated.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message validated.</div>
           <div class="flex-none">
             <font-awesome-icon icon="copy" class="w-5 h-5 text-gray-300"></font-awesome-icon>
           </div>
@@ -134,7 +134,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-300 self-center">Claiming your XPX.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step7?'text-gray-700':'text-gray-300'">Claiming your XPX.</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -144,7 +144,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-300 self-center">Swap in progress.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step8?'text-gray-700':'text-gray-300'">Swap in progress.</div>
         </div>
       </div>
       <div class="mt-10">
@@ -186,6 +186,8 @@ import SelectSiriusAccountInputPlugin from '@/modules/services/submodule/mainnet
 import { walletState } from '@/state/walletState';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import { ethers } from 'ethers';
+import { abi } from '@/util/swapUtils';
 
 export default {
   name: 'ViewServicesMainnetSwapETHToSirius',
@@ -199,12 +201,24 @@ export default {
   setup() {
 
     /* metamask integration */
+    let ethereumChainId = [5]; // 1, 3, 4, 42
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
     const balance = ref(0);
+    const coinBalance = ref(0);
+    const tokenAddress = '0xd7d58712fe1bd6ffef8b518d4d28923e419da525';
+    const custodian = '0xd1C7BD89165f4c82e95720574e327fa2248F9cf2';
+    const bscScanUrl = 'https://goerli.etherscan.io/tx/';
+    const swapServerUrl = 'https://bctestnet-swap-gateway.xpxsirius.io/xpx/transfer';
+
+    let provider;
+    let signer;
 
     if (typeof window.ethereum !== 'undefined') {
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      signer = provider.getSigner();
+
       console.log('MetaMask is installed!');
       isInstallMetamask.value = true;
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
@@ -237,38 +251,43 @@ export default {
         console.log(connectInfo)
       });
 
+      // For now, 'eth_accounts' will continue to always return an array
+      function handleAccountsChanged(accounts) {
+        if (accounts.length === 0) {
+          // MetaMask is locked or the user has not connected any accounts
+          console.log('Please connect to MetaMask.');
+        } else if (accounts[0] !== currentAccount.value) {
+          currentAccount.value = accounts[0];
+
+          // get metamask balance
+          ethereum
+          .request({ method: 'eth_getBalance', params: [
+            currentAccount.value, 'latest'
+          ] })
+          .then(hexDecimalBalance => {
+            coinBalance.value = parseInt(hexDecimalBalance)/Math.pow(10, 18);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+
+          (async () => {
+            const contract = new ethers.Contract(tokenAddress, abi, signer);
+            const tokenBalance = await contract.balanceOf(currentAccount.value);
+            balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
+          })();
+        }
+      }
+
     }else{
       console.log('metamask not installed')
     }
 
     function verifyChain(chainId){
-      let ethereumChainId = [1, 3, 4, 5, 42];
       if(ethereumChainId.find(ethChain => ethChain === parseInt(chainId)) == undefined){
-        err.value = 'Please select an Ethereum network on Metamark to swap ETH';
+        err.value = 'Please select Goerli Test Network on Metamark to swap ETH';
       }else{
         err.value = '';
-      }
-    }
-
-    // For now, 'eth_accounts' will continue to always return an array
-    function handleAccountsChanged(accounts) {
-      if (accounts.length === 0) {
-        // MetaMask is locked or the user has not connected any accounts
-        console.log('Please connect to MetaMask.');
-      } else if (accounts[0] !== currentAccount.value) {
-        currentAccount.value = accounts[0];
-
-        // get metamask balance
-        ethereum
-        .request({ method: 'eth_getBalance', params: [
-          currentAccount.value, 'latest'
-        ] })
-        .then(hexDecimalBalance => {
-          balance.value = parseInt(hexDecimalBalance)/Math.pow(10, 18)
-        })
-        .catch((err) => {
-          console.error(err);
-        });
       }
     }
 
@@ -287,6 +306,17 @@ export default {
         });
     };
 
+    const step1 = ref(false);
+    const step2 = ref(false);
+    const step3 = ref(false);
+    const step4 = ref(false);
+    const step5 = ref(false);
+    const step6 = ref(false);
+    const step7 = ref(false);
+    const step8 = ref(false);
+    const validationHash = ref('');
+    const validationLink = ref('');
+
     const toast = useToast();
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
@@ -304,9 +334,9 @@ export default {
     const err = ref('');
     const isDisabledSwap = computed(() =>
       // verify it has been connected to metamask too
-      !(amount.value > 0 && siriusAddress.value != '' && !err.value)
+      !(amount.value > 0 && siriusAddress.value != '' && !err.value && (balance.value >= amount.value))
     );
-    const amount = ref(0);
+    const amount = ref('0');
 
     const siriusAddressOption = computed(() => {
       let siriusAddress = [];
@@ -321,6 +351,54 @@ export default {
 
     const sendRequest = () => {
       currentPage.value = 2;
+      setTimeout(() => step1.value = true, 1000);
+      setTimeout(() => {
+        step2.value = true;
+
+        (async() => {
+          const Contract = new ethers.Contract(tokenAddress, abi, signer);
+          console.log(amount.value);
+          const receipt = await Contract.transfer(
+            custodian,
+            ethers.utils.parseUnits(amount.value, 6),
+          );
+          validationHash.value = receipt.hash;
+          validationLink.value = bscScanUrl + receipt.hash;
+
+          step3.value = true;
+          setTimeout( ()=> step4.value = true, 1000);
+          setTimeout( ()=> {
+            step5.value = true;
+            (async() => {
+              const messageSignature = await signer.signMessage(siriusAddress.value);
+              console.log('message signature: ' + messageSignature);
+              const data = {
+                signer: ethereum.selectedAddress,
+                address: siriusAddress.value,
+                hash: validationHash.value,
+                signature: messageSignature,
+              };
+              step6.value = true;
+
+              let stringifyData = JSON.stringify(data, undefined, 2,);
+
+              const response = await fetch(swapServerUrl + 'verify-message', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: stringifyData, // body data type must match "Content-Type" header
+              });
+              if(response.status == 200){
+                step7.value = true;
+                setTimeout( ()=> step8.value = true, 1000);
+                setTimeout( ()=> isDisabledValidate = false, 2000);
+              }
+            })();
+          }, 2000);
+
+        })();
+      }, 2000);
     };
 
     const validated = () => {
@@ -350,6 +428,16 @@ export default {
       disableAmount,
       isDisabledSwap,
       savedCheck,
+      step1,
+      step2,
+      step3,
+      step4,
+      step5,
+      step6,
+      step7,
+      step8,
+      validationLink,
+      validationHash,
     };
   },
 }
