@@ -5,7 +5,7 @@
       <div class="sm:col-span-3 p-4">
         <div class="text-left text-tsm">
           <div class="font-bold">Sirius Account:</div>
-          <div>{{ siriusAddress }}</div>
+          <div class="break-all">{{ siriusAddress }}</div>
         </div>
         <div class="text-left text-tsm mt-2">
           <div><b>Swap Timestamp:</b> {{ swapTimestamp }}</div>

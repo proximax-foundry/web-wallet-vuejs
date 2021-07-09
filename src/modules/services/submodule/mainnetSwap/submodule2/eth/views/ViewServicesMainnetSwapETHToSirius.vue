@@ -171,8 +171,8 @@
           <span class="ml-2 cursor-pointer text-tsm">I confirm that i have saved a copy of my certificate.</span>
         </label>
         <div class="mt-10">
-          <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none mr-4 w-32">Save</button>
-          <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50 w-32" :disabled="!savedCheck" >Done</button>
+          <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32" @click="saveCertificate">Save</button>
+          <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-32" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
         </div>
       </div>
     </div>
@@ -322,6 +322,10 @@ export default {
     const swapId = ref('');
     const transactionHash = ref('');
     const swapQr = ref('');
+    
+    const saveCertificate = () => {
+      SwapUtils.generatePdf(0, swapTimestamp.value, siriusAddress.value, swapId.value, transactionHash.value, swapQr.value);
+    };
 
     const toast = useToast();
     const copy = (id) =>{
@@ -457,6 +461,7 @@ export default {
       swapTimestamp,
       swapId,
       swapQr,
+      saveCertificate,
     };
   },
 }
