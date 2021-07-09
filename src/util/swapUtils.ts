@@ -1,3 +1,5 @@
+import qrcode from 'qrcode-generator';
+
 export const abi = [
   {
     inputs: [
@@ -636,3 +638,11 @@ export const abi = [
 ];
 
 
+export class SwapUtils {
+  static generateQRCode = (url: string) :string => {
+    const qr = qrcode(0, 'H');
+    qr.addData(url);
+    qr.make();
+    return qr.createDataURL();
+  }
+}

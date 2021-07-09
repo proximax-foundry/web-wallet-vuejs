@@ -155,7 +155,7 @@
       <div>
         <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
         <div class="text-sm mb-7">The swap process has already started!</div>
-        <swap-certificate-component networkTerm="ETH" swapType="Incoming" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="transactionHash" :siriusAddress="siriusAddress" />
+        <swap-certificate-component networkTerm="ETH" swapType="Incoming" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="transactionHash" :siriusAddress="siriusAddress" :swapQr="swapQr" />
         <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
           <div class="text-center w-full">
             <div class="w-8 h-8 inline-block relative">
@@ -187,7 +187,7 @@ import { walletState } from '@/state/walletState';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { ethers } from 'ethers';
-import { abi } from '@/util/swapUtils';
+import { abi, SwapUtils } from '@/util/swapUtils';
 
 export default {
   name: 'ViewServicesMainnetSwapETHToSirius',
@@ -321,6 +321,7 @@ export default {
     const swapTimestamp = ref('');
     const swapId = ref('');
     const transactionHash = ref('');
+    const swapQr = ref('');
 
     const toast = useToast();
     const copy = (id) =>{
@@ -384,12 +385,7 @@ export default {
                   txnHash: receipt.hash
                 }
               }
-              // const data = {
-              //   signer: ethereum.selectedAddress,
-              //   address: siriusAddress.value,
-              //   hash: validationHash.value,
-              //   signature: messageSignature,
-              // };
+
               step6.value = true;
 
               let stringifyData = JSON.stringify(data);
@@ -408,6 +404,7 @@ export default {
                   transactionHash.value = data.ethTransactionId;
                   swapTimestamp.value = data.timestamp;
                   swapId.value = data.ctxId;
+                  swapQr.value = SwapUtils.generateQRCode(validationLink.value);
                 })
               });
 
@@ -458,7 +455,8 @@ export default {
       messageHash,
       transactionHash,
       swapTimestamp,
-      swapId
+      swapId,
+      swapQr,
     };
   },
 }
