@@ -322,7 +322,7 @@ export default {
     const swapId = ref('');
     const transactionHash = ref('');
     const swapQr = ref('');
-    
+
     const saveCertificate = () => {
       SwapUtils.generatePdf(0, swapTimestamp.value, siriusAddress.value, swapId.value, transactionHash.value, swapQr.value);
     };
@@ -394,24 +394,24 @@ export default {
 
               let stringifyData = JSON.stringify(data);
 
-              await fetch(swapServerUrl, {
+              const response = await fetch(swapServerUrl, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
                 },
                 body: stringifyData, // body data type must match "Content-Type" header
-              }).then(res => {
-                res.json().then(data=>{
-                  step7.value = true;
-                  setTimeout( ()=> step8.value = true, 1000);
-                  setTimeout( ()=> isDisabledValidate.value = false, 2000);
-                  transactionHash.value = data.ethTransactionId;
-                  swapTimestamp.value = data.timestamp;
-                  swapId.value = data.ctxId;
-                  swapQr.value = SwapUtils.generateQRCode(validationLink.value);
-                })
               });
 
+              if(response.status == 200){
+                const data = await response.json();
+                step7.value = true;
+                transactionHash.value = data.ethTransactionId;
+                swapTimestamp.value = data.timestamp;
+                swapId.value = data.ctxId;
+                swapQr.value = SwapUtils.generateQRCode(validationLink.value);
+                setTimeout( ()=> step8.value = true, 1000);
+                setTimeout( ()=> isDisabledValidate.value = false, 2000);
+              }
             })();
           }, 2000);
 
