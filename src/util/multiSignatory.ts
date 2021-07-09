@@ -30,6 +30,7 @@ import { TransactionUtils } from "@/util/transactionUtils";
 import { WalletAccount } from "@/models/walletAccount.js";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { listenerState, AutoAnnounceSignedTransaction, HashAnnounceBlock, AnnounceType } from "@/state/listenerState";
+import {Helper} from '@/util/typeHelper'
 const walletKey = "sw";
 
 
@@ -508,36 +509,46 @@ function modifyMultisigAccount(coSign :string[], removeCosign :string[], numAppr
  
 }
 
-function fetchMultiSigCosigners(multiSigAddress :string) :{list :{address :string, name :string }[],length :number}{
-
-  const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === multiSigAddress);
-  let list = [];
-  let numCosigner = account.getDirectParentMultisig().length;   //number of cosigners
-  if (numCosigner > 0) {
-    const cosignWalletAccount = account.multisigInfo.find((element) => element.level === 0)
-    for (let i = 0; i < numCosigner; i++) {
-      list.push({ address: cosignWalletAccount.getCosignaturiesAddress[i], name: walletState.currentLoggedInWallet.convertAddressToName(cosignWalletAccount.getCosignaturiesAddress[i]) });
-    }
-   /*  const multisigAccount = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress) //others
-    const cosignOtherAccount = multisigAccount.multisigInfo.find((element) => element.level === 0)
-    for (let i = 0; i < numCosigner; i++) {
-      list.push({ address: cosignOtherAccount.getCosignaturiesAddress[i], name: walletState.currentLoggedInWallet.convertAddressToName(cosignOtherAccount.getCosignaturiesAddress[i]) });
-    } */
-  }
-  return { list: list, length: numCosigner };
+ async function fetchMultiSigCosigners(multiSigAddress :string) :Promise<{list :{address :string, name :string }[],length :number}>{
+  let promise = new Promise<{list :{address :string, name :string }[],length :number}>((resolve,reject)=>{ 
+    WalletUtils.getMultisigDetails(multiSigAddress).then(multisigDetails =>{
+      let accInfo = multisigDetails.find(element => element.level === 0)
+      let account = walletState.currentLoggedInWallet.accounts.find((element) => element.publicKey === accInfo.publicKey)
+      let numCosigner = accInfo.cosignaturies.length;
+      let list = [];
+      let convertedAddress = Helper.createPublicAccount(accInfo.publicKey,networkState.currentNetworkProfile.network.type).address.plain()
+        for (let i = 0; i < numCosigner; i++) {
+          list.push({ address: accInfo.cosignaturies[i], name: (account) ? account.name :  convertedAddress.substr(-4)})
+      }
+     
+      resolve({ list: list, length: numCosigner })
+    }).catch(error => reject(error))
+  })
+  
+ await promise
+ console.log(promise)
+ return promise
+ 
 }
 
 
 
-function fetchWalletCosigner(address :string) :{list :{balance :number, address :string, name :string }[], numCosigner :number}{
+async function fetchWalletCosigner(address :string) :Promise<{list :{balance :number, address :string, name :string }[], numCosigner :number}>{
   let cosign = multiSign.fetchMultiSigCosigners(address);
   let list = [];
-  cosign.list.forEach((element) => {
-    const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address);
-    list.push({ balance: account.balance, address: element.address, name: element.name });
-  });
-  list.sort((a, b) => (a.balance < b.balance) ? 1 : -1);
-  return { list: list, numCosigner: cosign.length };
+  let promise = new Promise<{list :{balance :number, address :string, name :string }[],numCosigner :number}>((resolve,reject)=>{
+    cosign.then(cosign=>{
+      cosign.list.forEach((element) => {
+        const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address);
+        list.push({ balance: account.balance, address: element.address, name: element.name });
+      });
+      list.sort((a, b) => (a.balance < b.balance) ? 1 : -1);
+      resolve({ list: list, numCosigner: cosign.length })
+    }).catch(error=>reject(error)) 
+  })
+  await promise
+ console.log(promise)
+ return promise
 }
 
 export const multiSign = readonly({

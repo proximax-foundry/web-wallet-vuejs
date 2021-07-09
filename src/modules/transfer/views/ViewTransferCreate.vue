@@ -401,21 +401,22 @@ export default {
 
     // get cosigner if available
     const getWalletCosigner = () => {
-      let cosign = multiSign.fetchMultiSigCosigners(selectedAccAdd.value);
+      multiSign.fetchMultiSigCosigners(selectedAccAdd.value).then(cosign=>{
       let list = [];
       cosign.list.forEach((element) => {
-        const account = walletState.currentLoggedInWallet.accounts.find(
-          (account) => account.address === element.address
-        );
-        /*  appStore.getAccDetailsByAddress(element.address) */
+        console.log(walletState.currentLoggedInWallet.others)
+        const account = walletState.currentLoggedInWallet.others.find((account) => account.address === element.address);
         list.push({
           balance: account.balance,
           address: element.address,
           name: element.name,
         });
-      });
-      list.sort((a, b) => (a.balance < b.balance ? 1 : -1));
-      return { list: list, numCosigner: cosign.length };
+        list.sort((a, b) => (a.balance < b.balance ? 1 : -1));
+       return { list: list, numCosigner: cosign.length };
+      })
+        /*  appStore.getAccDetailsByAddress(element.address) */
+    });
+      
     };
 
     const contact = computed(() => {
