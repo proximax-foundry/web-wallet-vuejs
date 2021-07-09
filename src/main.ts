@@ -74,6 +74,7 @@ const chainProfileIntegration = async () => {
         default:
           break;
       }
+<<<<<<< HEAD
 
       if(enforceProvidedChainProfileOnly){
         chainProfileNamesStore.names = chainProfileNames;
@@ -84,6 +85,13 @@ const chainProfileIntegration = async () => {
       chainProfileNamesStore.names = chainProfileNames;
       namesUpdate = 1;
     }
+=======
+    }
+    else{
+      chainProfileNamesStore.names = chainProfileNames;
+      namesUpdate = 1;
+    }
+>>>>>>> c6e10aa... fix initial network loading
     
     chainProfileNamesStore.saveToLocalStorage();
 
