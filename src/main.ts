@@ -16,7 +16,7 @@ import { WalletStateUtils } from './state/utils/walletStateUtils';
 import { NetworkStateUtils } from './state/utils/networkStateUtils';
 import { ChainUtils } from './util/chainUtils';
 import { ChainAPICall } from './models/REST/chainAPICall';
-import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainSwapConfig } from "./models/stores/"
+import { ChainProfile, ChainProfileConfig, ChainProfileNames } from "./models/stores/"
 
 // Import Font Awesome Icons
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -40,8 +40,6 @@ app.component('ConfirmDialog', ConfirmDialog);
 app.component('Toast', Toast);
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.component(VuePassword);
-
-const enforceProvidedChainProfileOnly = true; 
 
 const chainProfileIntegration = async () => {
   try {
@@ -74,27 +72,11 @@ const chainProfileIntegration = async () => {
         default:
           break;
       }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> b7e457b... add in version, enforce network provided
-
-      if(enforceProvidedChainProfileOnly){
-        chainProfileNamesStore.names = chainProfileNames;
-        namesUpdate = 1;
-      }
     }
     else{
       chainProfileNamesStore.names = chainProfileNames;
       namesUpdate = 1;
     }
-=======
-    }
-    else{
-      chainProfileNamesStore.names = chainProfileNames;
-      namesUpdate = 1;
-    }
->>>>>>> c6e10aa... fix initial network loading
     
     chainProfileNamesStore.saveToLocalStorage();
 
@@ -114,13 +96,6 @@ const chainProfileIntegration = async () => {
         chainProfileStore.network = chainProfileData['network'];
 
         chainProfileStore.saveToLocalStorage();
-
-        if(chainProfileData['swapData']){
-          let chainSwapConfig = new ChainSwapConfig(chainProfileName);
-          chainSwapConfig.updateConfig(chainProfileData['swapData']);
-
-          chainSwapConfig.saveToLocalStorage();
-        }
 
         const endpoint = ChainUtils.buildAPIEndpoint(chainProfileStore.apiNodes[0], chainProfileStore.httpPort);
 
@@ -174,3 +149,4 @@ if (!walletState.currentLoggedInWallet) {
 
 NetworkStateUtils.checkDefaultNetwork();
 
+{"mode":"full","isActive":false}
