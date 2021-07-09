@@ -88,7 +88,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transfer validated. <a :href="validationLink" target=_new v-if="validationHash" class="text-blue-primary" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer Validation">({{ validationHash }})</a></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transfer validated. <a :href="validationLink" target=_new v-if="validationHash" class="text-blue-primary break-all text-sm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer Validation">({{ validationHash }})</a></div>
           <div class="flex-none">
             <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step3"></font-awesome-icon>
           </div>
@@ -121,9 +121,9 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message validated.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message validated.  <div v-if="messageHash" class="text-blue-primary break-all text-sm" id="validateMessage" :copyValue="messageHash" copySubject="Message Validation">({{ messageHash }})</div></div>
           <div class="flex-none">
-            <font-awesome-icon icon="copy" class="w-5 h-5 text-gray-300"></font-awesome-icon>
+            <font-awesome-icon icon="copy" @click="copy('validateMessage')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step6"></font-awesome-icon>
           </div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
@@ -201,6 +201,7 @@ export default {
   setup() {
 
     /* metamask integration */
+    let bscChainId = [97]; // 5
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
@@ -304,9 +305,8 @@ export default {
     }
 
     function verifyChain(chainId){
-      let bscChainId = [56, 97];
       if(bscChainId.find(bscChain => bscChain === parseInt(chainId)) == undefined){
-        err.value = 'Please select BSC network on Metamark to swap BSC';
+        err.value = 'Please select BSC testnet network on Metamark to swap BSC';
       }else{
         err.value = '';
       }
@@ -337,6 +337,7 @@ export default {
     const step8 = ref(false);
     const validationHash = ref('');
     const validationLink = ref('');
+    const messageHash = ref('');
 
     const toast = useToast();
     const copy = (id) =>{
@@ -348,7 +349,7 @@ export default {
     const currentPage = ref(1);
     const showSiriusAddressErr = ref(false);
     const disableSiriusAddress = ref(false);
-    const isDisabledValidate = ref(false);
+    const isDisabledValidate = ref(true);
     const showAmountErr = ref(false);
     const disableAmount = ref(false);
     const siriusAddress = ref('');
@@ -392,6 +393,7 @@ export default {
             step5.value = true;
             (async() => {
               const messageSignature = await signer.signMessage(siriusAddress.value);
+              messageHash.value = messageSignature;
               const data = {
                 signer: ethereum.selectedAddress,
                 address: siriusAddress.value,
@@ -458,6 +460,7 @@ export default {
       step8,
       validationLink,
       validationHash,
+      messageHash,
     };
   },
 }
