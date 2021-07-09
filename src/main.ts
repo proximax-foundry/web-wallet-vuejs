@@ -20,12 +20,12 @@ import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainSwapConfig } 
 
 // Import Font Awesome Icons
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload, faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore, faFileExport, faFileImport } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload, faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore, faFileExport, faFileImport, faArrowRight, faAt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
 
-library.add(faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload, faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore, faFileExport, faFileImport );
+library.add(faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload, faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore, faFileExport, faFileImport, faArrowRight, faAt );
 const app = createApp(App);
 const emitter = mitt();
 
@@ -57,16 +57,27 @@ const chainProfileIntegration = async () => {
 
     let namesUpdate = 0;
 
-    switch (chainProfileNames.length) {
-      case 2:
-        namesUpdate = chainProfileNamesStore.replaceFirst2Names(chainProfileNames);
-        break;
-      case 3:
-        namesUpdate = chainProfileNamesStore.replaceFirst3Names(chainProfileNames);
-        break;
-      default:
-        break;
+    if(chainProfileNamesStore.names.length !== 0){
+      
+      switch (chainProfileNames.length) {
+        case 1:
+          namesUpdate = chainProfileNamesStore.replaceFirstNames(chainProfileNames);
+          break;
+        case 2:
+          namesUpdate = chainProfileNamesStore.replaceFirst2Names(chainProfileNames);
+          break;
+        case 3:
+          namesUpdate = chainProfileNamesStore.replaceFirst3Names(chainProfileNames);
+          break;
+        default:
+          break;
+      }
     }
+    else{
+      chainProfileNamesStore.names = chainProfileNames;
+      namesUpdate = 1;
+    }
+    
     chainProfileNamesStore.saveToLocalStorage();
 
     for(const chainProfileName of chainProfileNames){
@@ -125,6 +136,7 @@ const chainProfileIntegration = async () => {
 
     if(namesUpdate){
       NetworkStateUtils.refreshAvailableNetwork();
+      NetworkStateUtils.checkDefaultNetwork();
     }
 
   } catch (e) {
