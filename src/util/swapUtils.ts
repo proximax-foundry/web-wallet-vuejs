@@ -1,4 +1,6 @@
+import jsPDF from 'jspdf';
 import qrcode from 'qrcode-generator';
+import { pdfImg } from '@/modules/services/submodule/mainnetSwap/pdfBackground';
 
 export const abi = [
   {
@@ -645,4 +647,49 @@ export class SwapUtils {
     qr.make();
     return qr.createDataURL();
   }
+
+  static generatePdf = (type:number = 0, swapTimestamp: string, siriusAddress: string, swapId: string, transactionHash: string, qrImage: string) => {
+    const imgData = pdfImg;
+    let doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'b1'
+    })
+
+    doc.addImage(imgData, 'JPEG', 1, 1, 1000, 707, '', 'NONE')
+    doc.setFontSize(50)
+
+    let leftCol = 45, secCol = 190, dateCol = 380;
+    let dateRow = 255, addressRow = 315, swapIDRow = 385, 
+    hashRow = 445, hashValueRow = 485, qrRpw = 515;//, signatureRow = 425
+
+    doc.text(swapTimestamp, dateCol, dateRow)
+
+    doc.text('Sirius Address:', leftCol, addressRow);
+    doc.text(siriusAddress, secCol, addressRow );
+
+    doc.text('Swap ID:', leftCol, swapIDRow);
+    doc.text(swapId, secCol, swapIDRow);
+
+    doc.text('ETH Transaction Hash:', leftCol, hashRow);
+    doc.text(transactionHash, leftCol, hashValueRow);
+
+    let img = new Image();
+    img.src = qrImage;
+    doc.addImage(img, 'png', leftCol, qrRpw, 120, 120)
+
+    doc.setProperties({ title: 'Swap Certificate'});
+
+    switch (type) {
+      case 0:
+        doc.save('swap_certificate.pdf');
+        break;
+
+      // case 1:
+      //   window.open(doc.output("dataurlstring", {filename: 'swap_certificate.pdf'}), '_blank');
+      //   break;
+    }
+  }
 }
+
+
