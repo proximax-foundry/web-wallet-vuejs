@@ -155,7 +155,7 @@
       <div>
         <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
         <div class="text-sm mb-7">The swap process has already started!</div>
-        <swap-certificate-component networkTerm="ETH" swapType="Incoming" />
+        <swap-certificate-component networkTerm="ETH" swapType="Incoming" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="transactionHash" :siriusAddress="siriusAddress" />
         <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
           <div class="text-center w-full">
             <div class="w-8 h-8 inline-block relative">
@@ -318,6 +318,9 @@ export default {
     const validationHash = ref('');
     const validationLink = ref('');
     const messageHash = ref('');
+    const swapTimestamp = ref('');
+    const swapId = ref('');
+    const transactionHash = ref('');
 
     const toast = useToast();
     const copy = (id) =>{
@@ -359,7 +362,6 @@ export default {
 
         (async() => {
           const Contract = new ethers.Contract(tokenAddress, abi, signer);
-          console.log(amount.value);
           const receipt = await Contract.transfer(
             custodian,
             ethers.utils.parseUnits(amount.value, 6),
@@ -392,19 +394,23 @@ export default {
 
               let stringifyData = JSON.stringify(data);
 
-              const response = await fetch(swapServerUrl, {
+              await fetch(swapServerUrl, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
                 },
                 body: stringifyData, // body data type must match "Content-Type" header
+              }).then(res => {
+                res.json().then(data=>{
+                  step7.value = true;
+                  setTimeout( ()=> step8.value = true, 1000);
+                  setTimeout( ()=> isDisabledValidate.value = false, 2000);
+                  transactionHash.value = data.ethTransactionId;
+                  swapTimestamp.value = data.timestamp;
+                  swapId.value = data.ctxId;
+                })
               });
-              console.log(response);
-              if(response.status == 200){
-                step7.value = true;
-                setTimeout( ()=> step8.value = true, 1000);
-                setTimeout( ()=> isDisabledValidate.value = false, 2000);
-              }
+
             })();
           }, 2000);
 
@@ -450,6 +456,9 @@ export default {
       validationLink,
       validationHash,
       messageHash,
+      transactionHash,
+      swapTimestamp,
+      swapId
     };
   },
 }
