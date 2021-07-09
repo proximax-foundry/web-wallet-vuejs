@@ -47,6 +47,9 @@ import { Helper } from "@/util/typeHelper";
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
+import { BuildTransactions } from '@/util/buildTransactions';
+import { AccountLinkTransaction, PublicAccount, AccountInfo, LinkAction } from "tsjs-xpx-chain-sdk";
+//import { ChainNetwork, chainNetwork } from '@/store/sirius';
 
 export default {
   name: 'ViewAccountDelegate',
@@ -98,13 +101,17 @@ export default {
 
     const verifyWalletPw = async() => {
       if (!walletPassword.value == "") {
+      const networkType = networkState.currentNetworkProfile.network.type;
         if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)) {
           if(!otherAccValue.value == '') {
             const indexOtherAcc = walletState.currentLoggedInWallet.others.findIndex((other)=> other.publicKey === otherAccValue.value)
             if(indexOtherAcc > -1) {
-              walletPassword.value = "";
-              walletState.currentLoggedInWallet.others.splice(indexOtherAcc,1);
-              walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet); 
+          //     walletPassword.value = "";
+          //     const accountAddress = walletState.currentLoggedInWallet.accounts.find(element => element.address === p.address)
+          //     let transactionBuilder = new BuildTransactions(networkState.currentNetworkProfile.network.type,networkState.currentNetworkProfile.generationHash);
+          //     transactionBuilder.accountLink(accountAddress.publicKey,LinkAction.Unlink);
+          //  console.log(transactionBuilder.accountLink(accountAddress.publicKey,LinkAction.Unlink));
+
               toast.add({severity:'success', summary: 'Notification', detail: 'Unlink Successfully', group: 'br', life: 5000});            
               err.value = "";
               } else {
