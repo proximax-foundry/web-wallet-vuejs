@@ -403,7 +403,7 @@ export default {
               if(response.status == 200){
                 step7.value = true;
                 setTimeout( ()=> step8.value = true, 1000);
-                setTimeout( ()=> isDisabledValidate = false, 2000);
+                setTimeout( ()=> isDisabledValidate.value = false, 2000);
               }
             })();
           }, 2000);
