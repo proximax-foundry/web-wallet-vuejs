@@ -1,0 +1,80 @@
+<template>
+  <div>
+    <DataTable
+      :value="assets"
+      :paginator="true"
+      :rows="5"
+      responsiveLayout="scroll"
+      scrollDirection="horizontal"
+      :alwaysShowPaginator="false"
+      paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+      currentPageReportTemplate=""
+      >
+      <Column field="owner" header="Owner" >
+        <template #body="{data}">
+          <span class="uppercase">{{data.owner}}</span>
+        </template>
+      </Column>
+      <Column field="assetId" header="Asset ID" >
+        <template #body="{data}">
+          <span class="uppercase">{{data.idHex}}</span>
+        </template>
+      </Column>
+      <Column field="alias" header="Alias" >
+        <template #body="{data}">
+          <diV v-for="value in data.alias" :key="value.idHex">
+            <div>{{value.name}} - <span class="uppercase"> {{ value.idHex }} </span></div>
+          </div>
+        </template>
+      </Column>
+      <Column field="quantity" header="Quantity" >
+        <template #body="{data}">
+          <span class="uppercase ">{{data.amount}}</span>
+        </template>
+      </Column>
+      <Column field="Active" header="Active" >
+        <template #body="{data}">
+          <span class="uppercase" :class="data.active ? 'text-green-500' : 'text-red-500'">{{ data.active ? 'true': 'false'}}</span>
+        </template>
+      </Column>
+      <template #empty>
+        No records found
+      </template>
+      <template #loading>
+          Loading transactions data. Please wait.
+      </template>
+    </DataTable>
+  </div>
+</template>
+
+<script>
+import { getCurrentInstance, ref } from "vue";
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+
+export default{
+  components: { DataTable, Column },
+  name: 'AssetDataTable',
+  props: {
+    assets: Array
+  },
+
+  setup(p, context){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const borderColor = ref('border border-gray-400');
+
+    return {
+      borderColor
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.p-datatable-tbody{
+  td{
+    font-size: 11px;
+  }
+}
+</style>
