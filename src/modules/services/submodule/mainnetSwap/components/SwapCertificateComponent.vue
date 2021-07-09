@@ -17,7 +17,7 @@
           <div class="col-span-1">
             <div class="inline-block h-full">
               <div class="h-full flex">
-                <img src="@/modules/services/submodule/mainnetSwap/img/barCode.jpg" class="self-center h-20 w-20">
+                <img :src="swapQr" class="self-center h-20 w-20">
               </div>
             </div>
           </div>
@@ -51,6 +51,7 @@ export default{
     swapTimestamp: String,
     transactionHash: String,
     siriusAddress: String,
+    swapQr: String,
   }
 }
 </script>
