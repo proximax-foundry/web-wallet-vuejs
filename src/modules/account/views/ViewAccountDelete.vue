@@ -1,8 +1,8 @@
 <template>
 <div class="flex justify-between text-sm">
-  <div><span class="text-gray-400">Accounts ></span> <span class="text-blue-primary font-bold">Delete</span></div>
+  <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.delete')}}</span></div>
   <div>
-    <router-link :to="{name: 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">View All Accounts</router-link>
+    <router-link :to="{name: 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('accounts.viewall')}}</router-link>
   </div>
 </div>
 <div class='mt-2 py-3 gray-line'>
@@ -10,14 +10,14 @@
     <div class="mx-auto pt-5 lg:px-20">
       <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-8 items-center">
         <div class="text-left w-full relative">
-          <div class="text-xs font-bold mb-1">Account Name:</div>
+          <div class="text-xs font-bold mb-1">{{$t('accounts.name')}}:</div>
           <div>{{ accountNameDisplay }}</div>
         </div>
       </div>
       <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
-          <div class="text-xs font-bold mb-1">Address:</div>
+          <div class="text-xs font-bold mb-1">{{$t('createsuccessful.address')}}:</div>
           <div
             id="address"
             class="text-sm w-full outline-none bg-gray-100 z-10"
@@ -26,10 +26,10 @@
         </div>
         <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
       </div>
-      <div class="text-xl mt-10">Would you like to permanently delete this account?</div>
+      <div class="text-xl mt-10">{{$t('accounts.question')}}</div>
       <div class="xs:w-full inline-block lg:w-4/12 text-center mt-5">
         <div class="w-full flex justify-around">
-          <router-link :to="{name: 'ViewAccountDisplayAll'}" class="default-btn w-38 mr-2">Go Back</router-link>
+          <router-link :to="{name: 'ViewAccountDisplayAll'}" class="default-btn w-38 mr-2">{{$t('deletewallet.goback')}}</router-link>
           <ConfirmDeleteAccountModal :name="name" :address="acc.address" />
         </div>
       </div>

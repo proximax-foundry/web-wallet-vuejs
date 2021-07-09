@@ -3,14 +3,14 @@
     <div class="mx-auto pt-5 lg:px-20">
       <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-8 items-center">
         <div class="text-left w-full relative">
-          <div class="text-xs font-bold mb-1">Name:</div>
+          <div class="text-xs font-bold mb-1">{{$t('services.name')}}:</div>
           <div>{{ accountName }}</div>
         </div>
       </div>
       <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
-          <div class="text-xs font-bold mb-1">Address:</div>
+          <div class="text-xs font-bold mb-1">{{$t('createsuccessful.address')}}:</div>
           <div 
             id="address" class="text-sm w-full outline-none bg-gray-100 z-10"
             :copyValue="accountAddress" copySubject="Address"
@@ -21,7 +21,7 @@
       <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
-          <div class="text-xs font-bold mb-1">Public:</div>
+          <div class="text-xs font-bold mb-1">{{$t('createsuccessful.public')}}:</div>
           <div
             id="public"
             class="text-sm w-full outline-none bg-gray-100 z-10"
@@ -33,7 +33,7 @@
       <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center" v-if="showPK">
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
-          <div class="text-xs font-bold mb-1">Private:</div>
+          <div class="text-xs font-bold mb-1">{{$t('createsuccessful.private')}}:</div>
           <div
             id="private"
             class="text-sm w-full outline-none bg-gray-100 z-10"
@@ -47,19 +47,19 @@
           <div class="border border-yellow-600 rounded-full w-8 h-8 inline-block mb-4">
             <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-600 inline-block"></font-awesome-icon>
           </div>
-          <p>Make sure you store your private key in a safe place.</p>
-          <p>Access to your digital assets cannot be recovered without it.</p>
+          <p>{{$t('createsuccessful.warningtext1')}}.</p>
+          <p>{{$t('createsuccessful.warningtext2')}}.</p>
         </div>
       </div>
       <div class="inline-block mt-10 w-full">
         <div class="grid xs:grid-cols-1 md:grid-cols-3">
           <div class="px-5 self-center">
-            <a class="block big-default-btn my-3 self-center w-full" @click="showPK = !showPK">{{ showPK?'Hide':'Show' }} Private Key</a>
+            <a class="block big-default-btn my-3 self-center w-full" @click="showPK = !showPK">{{ showPK?'Hide':'Show' }} {{$t('createprivatekeywallet.privatekey')}}</a>
           </div>
           <div class="px-5">
-            <a class="block big-default-btn my-3 self-center w-full">Save Paper Wallet</a>
+            <a class="block big-default-btn my-3 self-center w-full">{{$t('createsuccessful.savewalletpaper')}}</a>
           </div>
-          <div class="px-5 self-center"><router-link :to="{name: 'ViewAccountDisplayAll'}" class="block big-default-btn my-3 self-center">Continue</router-link></div>
+          <div class="px-5 self-center"><router-link :to="{name: 'ViewAccountDisplayAll'}" class="block big-default-btn my-3 self-center">{{$t('createsuccessful.continue')}}</router-link></div>
         </div>
       </div>
     </div>

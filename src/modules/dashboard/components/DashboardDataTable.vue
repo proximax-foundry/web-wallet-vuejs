@@ -81,7 +81,7 @@
         <template #body="{data}">
           <div>{{ data.block }}</div>
           <div v-if="data.timestamp">{{ data.timestamp }}</div>
-          <div v-if="data.fee">Fee: {{ data.fee}}</div>
+          <div v-if="data.fee">{{$t('dashboard.fee')}}: {{ data.fee}}</div>
         </template>
       </Column>
       <Column headerStyle="width: 12%" v-if="showAction" header="Action" >
@@ -90,10 +90,10 @@
         </template>
       </Column>
       <template #empty>
-        No records found
+        {{$t('services.norecord')}}
       </template>
       <template #loading>
-          Loading transactions data. Please wait.
+          {{$t('dashboard.loadingmessage')}}
       </template>
     </DataTable>
     <DynamicModelComponent :modelName="dynamicModelComponentDisplay" :showModal="showTransactionModel" :transaction="modalData" />
