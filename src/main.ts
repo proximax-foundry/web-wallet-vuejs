@@ -75,6 +75,9 @@ const chainProfileIntegration = async () => {
           break;
       }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> b7e457b... add in version, enforce network provided
 
       if(enforceProvidedChainProfileOnly){
         chainProfileNamesStore.names = chainProfileNames;
