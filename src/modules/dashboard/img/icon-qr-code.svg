@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 23.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 60 60" style="enable-background:new 0 0 60 60;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#666666;}
+</style>
+<title>icon-qr-code</title>
+<g>
+	<g>
+		<path class="st0" d="M0,60h27.3V32.7H0V60z M5.5,38.2h16.4v16.3H5.5V38.2z"/>
+		<rect x="10.9" y="43.6" class="st0" width="5.5" height="5.5"/>
+		<rect x="43.6" y="54.5" class="st0" width="5.5" height="5.5"/>
+		<rect x="54.5" y="54.5" class="st0" width="5.5" height="5.5"/>
+		<polygon class="st0" points="54.5,38.2 49.1,38.2 49.1,32.7 32.7,32.7 32.7,60 38.2,60 38.2,43.6 43.6,43.6 43.6,49.1 60,49.1 
+			60,32.7 60,32.7 54.5,32.7 		"/>
+		<path class="st0" d="M0,27.3h27.3V0H0V27.3z M5.5,5.5h16.4v16.4H5.5V5.5z"/>
+		<rect x="10.9" y="10.9" class="st0" width="5.5" height="5.5"/>
+		<path class="st0" d="M32.7,0v27.3H60V0H32.7z M54.5,21.8H38.2V5.5h16.4V21.8z"/>
+		<rect x="43.6" y="10.9" class="st0" width="5.5" height="5.5"/>
+	</g>
+</g>
+</svg>
