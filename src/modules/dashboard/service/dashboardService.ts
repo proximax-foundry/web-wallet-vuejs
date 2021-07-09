@@ -56,7 +56,7 @@ import {
 } from "tsjs-xpx-chain-sdk";
 import { TransactionUtils } from "../../../util/transactionUtils";
 import { Helper } from "../../../util/typeHelper";
-import { DashboardTransaction, DataList, 
+import { DashboardTransaction, Tip,
     TransferList, DashboardInnerTransaction
   } from "./transaction";
 import { Wallet } from "@/models/wallet"
@@ -64,9 +64,11 @@ import { Account as myAccount } from "@/models/account";
 import { networkState } from "@/state/networkState";
 import { computed } from "vue";
 import { ChainUtils } from "@/util/chainUtils"
+import { DashboardTip, DashboardTipList, RowDashboardTip, TipType } from "../model/dashboardClasses"
 
 const networkAPIEndpoint = computed(() => ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
 const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
+const namespaceIdFirstCharacterString = "89ABCDEF";
 
 export class DashboardService {
 
@@ -137,9 +139,10 @@ export class DashboardService {
                 relatedNamespace: [],
                 relatedPublicKey: [],
                 searchString: [],
-                dataList: new Map<string, any>(),
+                extractedData: {},
                 displayList: new Map<string, string>(),
-                transferList: []
+                transferList: [],
+                displayTips: []
             };
 
             dashboardTransaction.searchString.push(dashboardTransaction.block.toString());
@@ -174,9 +177,10 @@ export class DashboardService {
                         relatedAddress: [],
                         typeName: TransactionUtils.getTransactionTypeName(aggregateBondedTx.type),
                         searchString: [],
-                        dataList: new Map<string, any>(),
+                        extractedData: {},
                         displayList: new Map<string, string>(),
-                        transferList: []
+                        transferList: [],
+                        displayTips: []
                     };
 
                     for (let y = 0; y < totalLength; ++y) {
@@ -206,8 +210,9 @@ export class DashboardService {
                         relatedAddress: [],
                         typeName: TransactionUtils.getTransactionTypeName(aggregateCompleteTx.type),
                         searchString: [],
-                        dataList: new Map<string, any>(),
-                        displayList: new Map<string, string>()
+                        extractedData: {},
+                        displayList: new Map<string, string>(),
+                        displayTips: []
                     };
 
                     for (let x = 0; x < totalLength; ++x) {
@@ -311,9 +316,10 @@ export class DashboardService {
             dashboardTransaction.relatedNamespace = dashboardTransaction.relatedNamespace.concat(tempData.relatedNamespace);
             dashboardTransaction.relatedPublicKey = dashboardTransaction.relatedPublicKey.concat(tempData.relatedPublicKey);
             dashboardTransaction.searchString = dashboardTransaction.searchString.concat(tempData.searchString);
-            dashboardTransaction.dataList = tempData.dataList;
+            dashboardTransaction.extractedData = tempData.extractedData;
             dashboardTransaction.displayList = tempData.displayList;
             dashboardTransaction.transferList = tempData.transferList ? tempData.transferList: [];
+            dashboardTransaction.displayTips = tempData.displayTips;
 
             dashboardTransaction.relatedAddress = Array.from(new Set(dashboardTransaction.relatedAddress));
             dashboardTransaction.relatedAsset = Array.from(new Set(dashboardTransaction.relatedAsset));
@@ -339,8 +345,9 @@ export class DashboardService {
             typeName: TransactionUtils.getTransactionTypeName(transferTx.type),
             searchString: [],
             transferList: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let sendTo = "";
@@ -359,55 +366,98 @@ export class DashboardService {
             toType = "address";
         }
 
+        let transfer: TransferList[] = [];
+
         if (transferTx.mosaics.length) {
             for (let i = 0; i < transferTx.mosaics.length; ++i) {
+
+                let valueType = "asset"; 
                 let mosaicIdHex = transferTx.mosaics[i].id.toHex().toUpperCase();
-                transactionDetails.relatedAsset.push(mosaicIdHex);
+                if(Array.from(namespaceIdFirstCharacterString).includes(mosaicIdHex.substr(0, 1)) ){
+                    valueType = "namespace";
+                    transactionDetails.relatedNamespace.push(mosaicIdHex);
+                }
+                else{
+                    transactionDetails.relatedAsset.push(mosaicIdHex);
+                }
+                
                 let newTransfer: TransferList = {
                     from: transactionDetails.signerAddress,
                     to: sendTo,
                     toType: toType,
-                    valueType: "asset",
+                    sendingType: valueType,
                     value: mosaicIdHex,
                     amount: transferTx.mosaics[i].amount.compact()
                 };
+
+                transfer.push(newTransfer);
                 transactionDetails.transferList.push(newTransfer);
+
+                let newRowTip = new RowDashboardTip();
+
+                // sender
+                let senderTip: DashboardTip = DashboardService.createAddressTip(Address.createFromRawAddress(transactionDetails.signerAddress).pretty(), transactionDetails.signerAddress);
+                
+                let sendingAmountTip: DashboardTip = DashboardService.createAbsoluteAmountTip(newTransfer.amount);
+                // send what
+                let sendingTip: DashboardTip = valueType === "asset" ? DashboardService.createAssetTip(newTransfer.value, newTransfer.value) : DashboardService.createNamespaceIDTip(newTransfer.value);
+
+                // to who
+                let recipientTip: DashboardTip = toType === "namespace" ? DashboardService.createNamespaceIDTip(sendTo): DashboardService.createAddressTip(Address.createFromRawAddress(sendTo).pretty(), sendTo);
+
+                newRowTip.rowTips.push(senderTip);
+                newRowTip.rowTips.push(DashboardService.createToRightArrowTip());
+
+                newRowTip.rowTips.push(sendingAmountTip);
+                newRowTip.rowTips.push(sendingTip);
+
+                newRowTip.rowTips.push(DashboardService.createToRightArrowTip());
+                newRowTip.rowTips.push(recipientTip);                
+                
+                transactionDetails.displayTips.push(newRowTip);
             }
         }
 
+        let messageTypeString: string;
         let messageType: string;
 
         if (transferTx.message.payload.length === 0) {
-            messageType = "Empty message";
+            messageTypeString = "Empty message";
+            messageType = "empty";
         }
         else if (transferTx.message.type === 0) {
-            messageType = "Plain message"
+            messageTypeString = "Plain message";
+            messageType = "plain";
         } else if (transferTx.message.type === 1) {
-            messageType = "Encrypted Message"
+            messageTypeString = "Encrypted Message";
+            messageType = "encrypted ";
         }
         else {
-            messageType = "Other"
+            messageTypeString = "Other";
+            messageType = "other";
         }
 
         let data = {
-            messageType: messageType
+            transferList: transfer,
+            messageTypeString: messageTypeString,
+            messageType: messageType,
+            messagePayload: transferTx.message.payload,
         };
 
-        transactionDetails.dataList.set("Data", data);
+        let messageTip = new DashboardTip(TipType.MESSAGE);
+        messageTip.displayValue = messageTypeString;
+        messageTip.valueType = messageType;
+        messageTip.value = data.messagePayload;
+
+        let newRowTip = new RowDashboardTip();
+        newRowTip.rowTips.push(messageTip);
+        transactionDetails.displayTips.push(newRowTip);
+
+        transactionDetails.extractedData = data;
 
         //transactionDetails.displayList.set("Address", data.address);
         //transactionDetails.displayList.set("Namespace ID", data.namespaceId);
 
-        if (transferTx.message.payload.length) {
-            let newTransfer: TransferList = {
-                from: transactionDetails.signerAddress,
-                to: sendTo,
-                toType: toType,
-                valueType: "message",
-                value: transferTx.message.payload,
-            };
-            transactionDetails.transferList.push(newTransfer);
-        }
 
         transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
         transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
@@ -427,8 +477,9 @@ export class DashboardService {
             relatedAddress: [addressAliasTransaction.signer.address.plain(), addressAliasTransaction.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(addressAliasTransaction.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let data = {
@@ -437,7 +488,7 @@ export class DashboardService {
             namespaceId: addressAliasTransaction.namespaceId.toHex().toUpperCase(),
         }
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Address", data.address);
         transactionDetails.displayList.set("Namespace ID", data.namespaceId);
@@ -460,8 +511,9 @@ export class DashboardService {
             relatedAddress: [addExchangeOfferTransaction.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(addExchangeOfferTransaction.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let offerArray = [];
@@ -486,7 +538,7 @@ export class DashboardService {
             offers: offerArray
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Offers Added", data.offers.map(
             (offer)=> `${offer.type}: ${offer.assetAmount} ${offer.assetId} for ${offer.cost} per unit (Duration: ${offer.duration} blocks)`).join('<br>')
@@ -510,8 +562,9 @@ export class DashboardService {
             relatedAddress: [chainConfigTransaction.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(chainConfigTransaction.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let data = {
@@ -520,7 +573,7 @@ export class DashboardService {
             supportedEntityVersions: chainConfigTransaction.supportedEntityVersions
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Apply after", `${data.applyHeightDelta} blocks`);
 
@@ -542,8 +595,9 @@ export class DashboardService {
             relatedAddress: [chainUpgradeTransaction.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(chainUpgradeTransaction.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let data = {
@@ -551,7 +605,7 @@ export class DashboardService {
             upgradePeriod: chainUpgradeTransaction.upgradePeriod.compact()
         }
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("New Version", `${data.newVersion}`);
         transactionDetails.displayList.set("Upgrade Period", `${data.upgradePeriod} blocks`);
@@ -574,8 +628,9 @@ export class DashboardService {
             relatedAddress: [exchangeOfferTransaction.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(exchangeOfferTransaction.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let exchangeOfferArray = [];
@@ -600,7 +655,7 @@ export class DashboardService {
             exchangeOffers: exchangeOfferArray
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Offer Exchanges", data.exchangeOffers.map(
             (arr)=> `${arr.type}: Offer ${arr.assetAmount} ${arr.assetId} from ${arr.owner} for ${arr.cost} per unit`).join("<br>")
@@ -624,8 +679,9 @@ export class DashboardService {
             relatedAddress: [removeExchangeOfferTransaction.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(removeExchangeOfferTransaction.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let offerRemoveArray = [];
@@ -645,7 +701,7 @@ export class DashboardService {
             offersRemove: offerRemoveArray
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Removed Offers", data.offersRemove.map((arr)=> `${arr.type}: ${arr.assetId}`).join("<br>"));
 
@@ -667,8 +723,9 @@ export class DashboardService {
             relatedAddress: [accountLinkTransaction.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(accountLinkTransaction.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let publicKey = accountLinkTransaction.remoteAccountKey;
@@ -678,7 +735,7 @@ export class DashboardService {
             linkAction: accountLinkTransaction.linkAction === 0 ? "Link" : "Unlink"
         }
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Action", `${data.linkAction}`);
         transactionDetails.displayList.set("Linked Account", `${data.remoteAccountKey}`);   
@@ -703,8 +760,9 @@ export class DashboardService {
             relatedAddress: [lockFundsTransaction.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(lockFundsTransaction.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let lockedHash = lockFundsTransaction.hash;
@@ -717,7 +775,7 @@ export class DashboardService {
             mosaicAmount: lockFundsTransaction.mosaic.amount.compact()
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Locked Hash", `${data.lockedHash}`);
         transactionDetails.displayList.set("Duration", `${data.duration} blocks`);
@@ -744,8 +802,9 @@ export class DashboardService {
             relatedAddress: [modifyAccountMetadataTx.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(modifyAccountMetadataTx.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let metadataId = modifyAccountMetadataTx.metadataId;
@@ -771,7 +830,7 @@ export class DashboardService {
             modifications: modifications
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Type", `${data.metadataType}`);
         transactionDetails.displayList.set("Address", `${data.metadataId}`);
@@ -797,8 +856,9 @@ export class DashboardService {
             relatedAddress: [modifyMosaicMetadataTx.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(modifyMosaicMetadataTx.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let metadataId = modifyMosaicMetadataTx.metadataId;
@@ -824,7 +884,7 @@ export class DashboardService {
             modifications: modifications
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Type", `${data.metadataType}`);
         transactionDetails.displayList.set("Asset ID", `${data.metadataId}`);
@@ -850,8 +910,9 @@ export class DashboardService {
             relatedAddress: [modifyNamespaceMetadataTx.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(modifyNamespaceMetadataTx.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let metadataId = modifyNamespaceMetadataTx.metadataId;
@@ -877,7 +938,7 @@ export class DashboardService {
             modifications: modifications
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Type", `${data.metadataType}`);
         transactionDetails.displayList.set("Namespace ID", `${data.metadataId}`);
@@ -903,8 +964,9 @@ export class DashboardService {
             relatedAddress: [accAddressRestrictModification.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(accAddressRestrictModification.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let restrictionType = accAddressRestrictModification.restrictionType == RestrictionType.AllowAddress ? "Allow Address" : "Block Address";
@@ -928,7 +990,7 @@ export class DashboardService {
             modifications: modifications
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Type", `${data.restrictionType}`);
         transactionDetails.displayList.set("Modifications", data.modifications.map((modi)=> `${modi.modificationType} ${modi.address}`).join("<br>"));
@@ -951,8 +1013,9 @@ export class DashboardService {
             relatedAddress: [accMosaicRestrictModification.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(accMosaicRestrictModification.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let restrictionType = accMosaicRestrictModification.restrictionType == RestrictionType.AllowMosaic ? "Allow Asset" : "Block Asset";
@@ -977,7 +1040,7 @@ export class DashboardService {
             modifications: modifications
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Type", `${data.restrictionType}`);
         transactionDetails.displayList.set("Modifications", data.modifications.map((modi)=> `${modi.modificationType} - ${modi.assetIdHex}`).join("<br>"));
@@ -1000,8 +1063,9 @@ export class DashboardService {
             relatedAddress: [accOperationRestrictModification.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(accOperationRestrictModification.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let restrictionType = accOperationRestrictModification.restrictionType == RestrictionType.AllowTransaction ? "Allow Transaction" : "Block Transaction";
@@ -1024,7 +1088,7 @@ export class DashboardService {
             modifications: modifications
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Type", `${data.restrictionType}`);
         transactionDetails.displayList.set("Modifications", data.modifications.map((modi)=> `${modi.modificationType} - ${modi.transactionName}`).join("<br>"));
@@ -1047,8 +1111,9 @@ export class DashboardService {
             relatedAddress: [modifyMultisigAccountTransaction.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(modifyMultisigAccountTransaction.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let modificationArray = [];
@@ -1072,7 +1137,7 @@ export class DashboardService {
             modifications: modificationArray
         }
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Minimum Approval", `${data.minApproval}`);
         transactionDetails.displayList.set("Minimum Removal", `${data.minRemoval}`);
@@ -1096,8 +1161,9 @@ export class DashboardService {
             relatedAddress: [mosaicAliasTx.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(mosaicAliasTx.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let mosaicIdHex = mosaicAliasTx.mosaicId.toHex().toUpperCase();
@@ -1110,7 +1176,7 @@ export class DashboardService {
             linkType: linkType,
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Action", linkType);
         transactionDetails.displayList.set("Asset ID", mosaicIdHex);
@@ -1137,12 +1203,13 @@ export class DashboardService {
             relatedAddress: [mosaicDefinitionTransaction.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(mosaicDefinitionTransaction.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let mosaicIdHex = mosaicDefinitionTransaction.mosaicId.toHex().toUpperCase();
-        let nonceString = mosaicDefinitionTransaction.nonce.nonce.toString();
+        let nonceString = ""; //mosaicDefinitionTransaction.nonce.toString();
         let properties = mosaicDefinitionTransaction.mosaicProperties;
 
         let data = {
@@ -1156,7 +1223,7 @@ export class DashboardService {
             }
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Asset ID", mosaicIdHex);
         transactionDetails.displayList.set("Nonce", nonceString);
@@ -1185,8 +1252,9 @@ export class DashboardService {
             relatedAddress: [mosaicSupplyChangeTransaction.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(mosaicSupplyChangeTransaction.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let mosaicIdHex = mosaicSupplyChangeTransaction.mosaicId.toHex().toUpperCase();
@@ -1199,7 +1267,7 @@ export class DashboardService {
             direction: direction,
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Asset ID", mosaicIdHex);
         transactionDetails.displayList.set("Type", direction);
@@ -1225,8 +1293,9 @@ export class DashboardService {
             relatedAddress: [registerNamespaceTx.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(registerNamespaceTx.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let namespaceIdHex = registerNamespaceTx.namespaceId.toHex().toUpperCase();
@@ -1243,7 +1312,7 @@ export class DashboardService {
             type: type
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Type", type);
         transactionDetails.displayList.set("Namespace ID", namespaceIdHex);
@@ -1276,8 +1345,9 @@ export class DashboardService {
             relatedAddress: [secretLockTx.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(secretLockTx.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let assetIdHex = secretLockTx.mosaic.id.toHex().toUpperCase();
@@ -1313,7 +1383,7 @@ export class DashboardService {
             addressPlain: addressPlain
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Hash Type", hashType);
         transactionDetails.displayList.set("Secret", secret);
@@ -1343,8 +1413,9 @@ export class DashboardService {
             relatedAddress: [secretProofTx.signer.address.plain()],
             typeName: TransactionUtils.getTransactionTypeName(secretProofTx.type),
             searchString: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let proof = secretProofTx.proof;
@@ -1376,7 +1447,7 @@ export class DashboardService {
             hashType: hashType
         };
 
-        transactionDetails.dataList.set("Data", data);
+        transactionDetails.extractedData = data;
 
         transactionDetails.displayList.set("Hash Type", hashType);
         transactionDetails.displayList.set("Secret", secret);
@@ -1405,8 +1476,9 @@ export class DashboardService {
             typeName: TransactionUtils.getTransactionTypeName(innerTransaction.type),
             searchString: [],
             transferList: [],
-            dataList: new Map<string, any>(),
-            displayList: new Map<string, string>()
+            extractedData: {},
+            displayList: new Map<string, string>(),
+            displayTips: []
         };
 
         let tempData: DashboardInnerTransaction;
@@ -1509,11 +1581,59 @@ export class DashboardService {
         transactionDetails.relatedNamespace = tempData.relatedNamespace;
         transactionDetails.relatedPublicKey = tempData.relatedPublicKey;
         transactionDetails.searchString = tempData.searchString;
-        transactionDetails.dataList = tempData.dataList;
+        transactionDetails.extractedData = tempData.extractedData;
         transactionDetails.displayList = tempData.displayList;
         transactionDetails.transferList = tempData.transferList ? tempData.transferList: [];
+        transactionDetails.displayTips = tempData.displayTips; 
 
         return transactionDetails;
+    }
+
+    static createNamespaceIDTip(displayValue: string, value?: string): DashboardTip{
+        let newTip = new DashboardTip(TipType.NAMESPACE_ID);
+        newTip.displayValue = displayValue;
+        newTip.value = value ? value: displayValue;
+        return newTip;
+    }
+
+    static createNamespaceStringTip(displayValue: string, value?: string): DashboardTip{
+        let newTip = new DashboardTip(TipType.NAMESPACE_STR);
+        newTip.displayValue = displayValue;
+        newTip.value = value ? value: displayValue;
+        return newTip;
+    }
+
+    static createAssetTip(displayValue: string, value?: string): DashboardTip{
+        let newTip = new DashboardTip(TipType.ASSET);
+        newTip.displayValue = displayValue;
+        newTip.value = value ? value: displayValue;
+        return newTip;
+    }
+
+    static createAddressTip(displayValue: string, value?: string): DashboardTip{
+        let newTip = new DashboardTip(TipType.ADDRESS);
+        newTip.displayValue = displayValue;
+        newTip.value = value ? value: displayValue;
+        return newTip;
+    }
+
+    static createToRightArrowTip(): DashboardTip{
+        let newTip = new DashboardTip(TipType.TO_RIGHT_ARROW);
+        return newTip;
+    }
+
+    static createAbsoluteAmountTip(amount: number): DashboardTip{
+        let newTip = new DashboardTip(TipType.ABSOLUTE_AMOUNT);
+        newTip.value = amount.toString();
+        newTip.displayValue = Helper.toCurrencyFormat(amount, 0); 
+        return newTip;
+    }
+
+    static createExactAmountTip(amount: number): DashboardTip{
+        let newTip = new DashboardTip(TipType.EXACT_AMOUNT);
+        newTip.value = amount.toString();
+        newTip.displayValue = Helper.toCurrencyFormat(amount, 0); 
+        return newTip;
     }
 }
 

@@ -1,4 +1,5 @@
 import { AggregateTransaction } from "tsjs-xpx-chain-sdk";
+import { DashboardTipList, RowDashboardTip } from "../model/dashboardClasses";
 
 export interface DashboardTransaction{
   id?: string,
@@ -21,8 +22,9 @@ export interface DashboardTransaction{
   size: number,
   searchString: string[],
   transferList?: TransferList[];
-  dataList: Map<string, any>;
+  extractedData: any;
   displayList?: Map<string, string>;
+  displayTips: RowDashboardTip[] | null
 }
 
 export interface DashboardInnerTransaction{
@@ -30,7 +32,6 @@ export interface DashboardInnerTransaction{
   signerName?: string | null,
   signerAddress: string,
   signer: string, // publicKey
-  dataList: Map<string, any>;
   transferList?: TransferList[];
   relatedAddress: string[],
   relatedAsset: string[],
@@ -38,7 +39,9 @@ export interface DashboardInnerTransaction{
   relatedPublicKey: string[],
   searchString: string[],
   spend? : number,
+  extractedData: any;
   displayList?: Map<string, string>;
+  displayTips: RowDashboardTip[] | null
 }
 
 /*
@@ -49,6 +52,17 @@ export interface MapValue{
 }
 */
 
+export interface Tip{
+  displayValue: string,
+  type: string,
+  event: string,
+  value: string
+}
+
+export interface CompleteTip{
+  tips: Tip[]
+}
+
 export interface DataList{
   key: string;
   value: string;
@@ -57,8 +71,8 @@ export interface DataList{
 export interface TransferList{
   from: string;
   to: string;
+  sendingType: string;
   toType: string;
-  valueType: string;
   value: string;
   amount?: number
 }
