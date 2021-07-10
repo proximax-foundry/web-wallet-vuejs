@@ -65,7 +65,7 @@ export default{
 
     blurInputText: function() {
       if(!this.disabled){
-        if(this.modelValue == ''){
+        if(this.modelValue == '' || this.modelValue > this.balance){
           this.borderColor = 'border-2 border-red-primary';
           this.textErr = true;
         }else{
