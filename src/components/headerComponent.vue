@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { computed, defineComponent, getCurrentInstance, ref } from "vue"; //getCurrentInstance
+import { computed, defineComponent, getCurrentInstance, ref, watch } from "vue"; //getCurrentInstance
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { useRouter } from "vue-router";
@@ -97,13 +97,25 @@ export default defineComponent({
       return options;
     });
 
+    watch(()=> networkState.availableNetworks, (availableNetworks)=>{
+      let options = [];
+
+      for(let i=0; i < availableNetworks.length; ++i){
+        options.push({ label: availableNetworks[i], value: i });
+      }
+      chainsNetworks.value = options;
+    }, true);
+
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
 
-    const chainsNetworkOption = [{
+    const chainsNetworkOption = computed(()=>{
+
+      return [{
         label: 'Networks',
         items: chainsNetworks.value
       }];
+    });
       // , {
       //   label: 'Setting',
       //   items: [
