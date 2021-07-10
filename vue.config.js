@@ -20,6 +20,5 @@ module.exports = {
   assetsDir: './assets/',
   devServer: {
     host: 'localhost',
-    // proxy: 'https://bctestnet-swap-gateway.xpxsirius.io/',
   },
 }
