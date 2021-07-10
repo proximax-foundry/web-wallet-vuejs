@@ -1,6 +1,6 @@
 <template>
   <div class="flex justify-between text-sm">
-    <div><span class="text-gray-400">Swap > ETH > Income ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
+    <div><span class="text-gray-400">Swap > ETH > Incoming ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
     <div>
       <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
     </div>
@@ -30,19 +30,29 @@
     </div>
     <div v-if="currentPage==1">
       <div class="text-lg my-7 font-bold">Transaction Details</div>
+      <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
       <p class="font-bold text-tsm text-left mb-1">From: Metamask address</p>
-      <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left">
+      <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left" v-if="isInstallMetamask">
         <div class="text-tsm text-gray-700 self-center relative">
-          <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block">Not connected</div></div>
+          <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block break-all">{{ isMetamaskConnected?(currentAccount?currentAccount:'Not connected'):'Not connected' }}</div></div>
         </div>
         <div class="self-center">
-          <button class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none">Connect to Metamask</button>
+          <button @click="connectMetamask()" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none" v-if="!currentAccount">Connect to Metamask</button>
+          <button class=" bg-green-50 rounded-3xl border font-bold px-6 py-1 border-green-500 text-green-500 text-tsm outline-none focus:outline-none cursor-auto" v-else>Connected</button>
+        </div>
+      </div>
+      <div class="mb-5 flex justify-between bg-yellow-200 rounded-2xl p-3 text-left" v-else>
+        <div class="text-tsm text-gray-700 self-center relative">
+          <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block text-gray-800">Metamask is not installed</div></div>
+        </div>
+        <div class="self-center">
+          <a href="https://metamask.io/" target=_new class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none">Download Metamask</a>
         </div>
       </div>
       <p class="font-bold text-tsm text-left">To: Sirius address</p>
       <SelectSiriusAccountInputPlugin v-model="siriusAddress" icon="card-alt" :showError="showSiriusAddressErr" errorMessage="Sirius Address required" :options="siriusAddressOption" :disabled="disableSiriusAddress" />
       <p class="font-bold text-tsm text-left mb-1">Amount</p>
-      <SupplyInput :disabled="disableAmount" v-model="amount" title="eXPX" placeholder="eXPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':'Insufficient balance'" :decimal="6" />
+      <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" title="eXPX" placeholder="eXPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':'Insufficient token balance'" :decimal="6" />
       <div class="mt-10">
         <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
         <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="sendRequest()">Send request</button>
@@ -58,7 +68,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-700 self-center">Sending transfer to Metamask.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center" :class="step1?'text-gray-700':'text-gray-300'">Sending transfer to Metamask.</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -68,7 +78,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-700 self-center">Waiting for your approval on Metamask.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">Waiting for your approval on Metamask.</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -78,42 +88,9 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-700 self-center">Transfer validated. <a href="#" class="text-blue-primary" id="validateTransfer" copyValue="wfwefwefw2345tg3y34y34dfwfew3465fe345wfewvrew" copySubject="Transfer Validation">(wfwefwefw2345tg3y34y34dfwfew3465fe345wfewvrew)</a></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transfer validated. <a :href="validationLink" target=_new v-if="validationHash" class="text-blue-primary break-all text-sm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer Validation">({{ validationHash }})</a></div>
           <div class="flex-none">
-            <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center"></font-awesome-icon>
-          </div>
-        </div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
-              <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
-              </div>
-            </div>
-          </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-700 self-center">Sending transaction ID message to Metamask.</div>
-        </div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
-              <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
-              </div>
-            </div>
-          </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-300 self-center">Waiting for your approval on Metamask.</div>
-        </div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
-              <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
-              </div>
-            </div>
-          </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-300 self-center">Message validated.</div>
-          <div class="flex-none">
-            <font-awesome-icon icon="copy" class="w-5 h-5 text-gray-300"></font-awesome-icon>
+            <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step3"></font-awesome-icon>
           </div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
@@ -124,7 +101,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-300 self-center">Claiming your XPX.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">Sending transaction ID message to Metamask.</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -134,7 +111,40 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-300 self-center">Swap in progress.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">Waiting for your approval on Metamask.</div>
+        </div>
+        <div class="flex border-b border-gray-300 p-3">
+          <div class="flex-none">
+            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+              <div class="flex h-full justify-center">
+                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+              </div>
+            </div>
+          </div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message validated.  <div v-if="messageHash" class="text-blue-primary break-all text-sm" id="validateMessage" :copyValue="messageHash" copySubject="Message Validation">({{ messageHash }})</div></div>
+          <div class="flex-none">
+            <font-awesome-icon icon="copy" @click="copy('validateMessage')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step6"></font-awesome-icon>
+          </div>
+        </div>
+        <div class="flex border-b border-gray-300 p-3">
+          <div class="flex-none">
+            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+              <div class="flex h-full justify-center">
+                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+              </div>
+            </div>
+          </div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step7?'text-gray-700':'text-gray-300'">Claiming your XPX.</div>
+        </div>
+        <div class="flex border-b border-gray-300 p-3">
+          <div class="flex-none">
+            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+              <div class="flex h-full justify-center">
+                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+              </div>
+            </div>
+          </div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step8?'text-gray-700':'text-gray-300'">Swap in progress.</div>
         </div>
       </div>
       <div class="mt-10">
@@ -145,7 +155,7 @@
       <div>
         <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
         <div class="text-sm mb-7">The swap process has already started!</div>
-        <swap-certificate-component networkTerm="ETH" swapType="Income" />
+        <swap-certificate-component networkTerm="ETH" swapType="Incoming" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="transactionHash" :siriusAddress="siriusAddress" :swapQr="swapQr" />
         <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
           <div class="text-center w-full">
             <div class="w-8 h-8 inline-block relative">
@@ -161,8 +171,8 @@
           <span class="ml-2 cursor-pointer text-tsm">I confirm that i have saved a copy of my certificate.</span>
         </label>
         <div class="mt-10">
-          <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none mr-4 w-32">Save</button>
-          <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50 w-32" :disabled="!savedCheck" >Done</button>
+          <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32" @click="saveCertificate">Save</button>
+          <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-32" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
         </div>
       </div>
     </div>
@@ -176,6 +186,8 @@ import SelectSiriusAccountInputPlugin from '@/modules/services/submodule/mainnet
 import { walletState } from '@/state/walletState';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import { ethers } from 'ethers';
+import { abi, SwapUtils } from '@/util/swapUtils';
 
 export default {
   name: 'ViewServicesMainnetSwapETHToSirius',
@@ -187,6 +199,134 @@ export default {
   },
 
   setup() {
+
+    /* metamask integration */
+    let ethereumChainId = [5]; // 1, 3, 4, 42
+    const isInstallMetamask = ref(false);
+    const isMetamaskConnected = ref(false);
+    const currentAccount = ref(null);
+    const balance = ref(0);
+    const coinBalance = ref(0);
+    const tokenAddress = '0xd7d58712fe1bd6ffef8b518d4d28923e419da525';
+    const custodian = '0xd1C7BD89165f4c82e95720574e327fa2248F9cf2';
+    const bscScanUrl = 'https://goerli.etherscan.io/tx/';
+    const swapServerUrl = 'https://bctestnet-swap-gateway.xpxsirius.io/xpx/transfer';
+    // const swapServerUrl = 'http://localhost:8080/xpx/transfer';
+
+    let provider;
+    let signer;
+
+    if (typeof window.ethereum !== 'undefined') {
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      signer = provider.getSigner();
+
+      console.log('MetaMask is installed!');
+      isInstallMetamask.value = true;
+      isMetamaskConnected.value = ethereum.isConnected()?true:false;
+      // isMetamaskConnected.value = false;
+
+      ethereum
+        .request({ method: 'eth_accounts' })
+        .then(handleAccountsChanged)
+        .catch((err) => {
+          console.error(err);
+      });
+
+
+      ethereum
+        .request({ method: 'eth_chainId' })
+        .then((metaChainId) => {
+          verifyChain(metaChainId);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+
+      ethereum.on('accountsChanged', handleAccountsChanged);
+
+      ethereum.on('chainChanged', (metaChainId) => {
+        verifyChain(metaChainId)
+      });
+
+      ethereum.on('connect', (connectInfo) => {
+        console.log(connectInfo)
+      });
+
+      // For now, 'eth_accounts' will continue to always return an array
+      function handleAccountsChanged(accounts) {
+        if (accounts.length === 0) {
+          // MetaMask is locked or the user has not connected any accounts
+          console.log('Please connect to MetaMask.');
+        } else if (accounts[0] !== currentAccount.value) {
+          currentAccount.value = accounts[0];
+
+          // get metamask balance
+          ethereum
+          .request({ method: 'eth_getBalance', params: [
+            currentAccount.value, 'latest'
+          ] })
+          .then(hexDecimalBalance => {
+            coinBalance.value = parseInt(hexDecimalBalance)/Math.pow(10, 18);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+
+          (async () => {
+            const contract = new ethers.Contract(tokenAddress, abi, signer);
+            const tokenBalance = await contract.balanceOf(currentAccount.value);
+            balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
+          })();
+        }
+      }
+
+    }else{
+      console.log('metamask not installed')
+    }
+
+    function verifyChain(chainId){
+      if(ethereumChainId.find(ethChain => ethChain === parseInt(chainId)) == undefined){
+        err.value = 'Please select Goerli Test Network on Metamark to swap ETH';
+      }else{
+        err.value = '';
+      }
+    }
+
+    const connectMetamask = () => {
+      ethereum
+        .request({ method: 'eth_requestAccounts' })
+        .then(handleAccountsChanged)
+        .catch((err) => {
+          if (err.code === 4001) {
+            // EIP-1193 userRejectedRequest error
+            // If this happens, the user rejected the connection request.
+            console.log('Please connect to MetaMask.');
+          } else {
+            console.error(err);
+          }
+        });
+    };
+
+    const step1 = ref(false);
+    const step2 = ref(false);
+    const step3 = ref(false);
+    const step4 = ref(false);
+    const step5 = ref(false);
+    const step6 = ref(false);
+    const step7 = ref(false);
+    const step8 = ref(false);
+    const validationHash = ref('');
+    const validationLink = ref('');
+    const messageHash = ref('');
+    const swapTimestamp = ref('');
+    const swapId = ref('');
+    const transactionHash = ref('');
+    const swapQr = ref('');
+
+    const saveCertificate = () => {
+      SwapUtils.generatePdf(0, swapTimestamp.value, siriusAddress.value, swapId.value, transactionHash.value, swapQr.value);
+    };
+
     const toast = useToast();
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
@@ -197,13 +337,14 @@ export default {
     const currentPage = ref(1);
     const showSiriusAddressErr = ref(false);
     const disableSiriusAddress = ref(false);
-    const isDisabledValidate = ref(false);
+    const isDisabledValidate = ref(true);
     const showAmountErr = ref(false);
     const disableAmount = ref(false);
     const siriusAddress = ref('');
+    const err = ref('');
     const isDisabledSwap = computed(() =>
       // verify it has been connected to metamask too
-      !(amount.value > 0 && siriusAddress.value != '' )
+      !(amount.value > 0 && siriusAddress.value != '' && !err.value && (balance.value >= amount.value))
     );
     const amount = ref('0');
 
@@ -220,15 +361,77 @@ export default {
 
     const sendRequest = () => {
       currentPage.value = 2;
+      setTimeout(() => step1.value = true, 1000);
+      setTimeout(() => {
+        step2.value = true;
+
+        (async() => {
+          const Contract = new ethers.Contract(tokenAddress, abi, signer);
+          const receipt = await Contract.transfer(
+            custodian,
+            ethers.utils.parseUnits(amount.value, 6),
+          );
+          validationHash.value = receipt.hash;
+          validationLink.value = bscScanUrl + receipt.hash;
+
+          step3.value = true;
+          setTimeout( ()=> step4.value = true, 1000);
+          setTimeout( ()=> {
+            step5.value = true;
+            (async() => {
+              const messageSignature = await signer.signMessage(siriusAddress.value);
+              messageHash.value = messageSignature;
+              const data = {
+                siriusRecipient: siriusAddress.value,
+                signature: messageSignature,
+                txnInfo: {
+                  network: "ETH",
+                  txnHash: receipt.hash
+                }
+              }
+
+              step6.value = true;
+
+              let stringifyData = JSON.stringify(data);
+
+              const response = await fetch(swapServerUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: stringifyData, // body data type must match "Content-Type" header
+              });
+
+              if(response.status == 200){
+                const data = await response.json();
+                step7.value = true;
+                transactionHash.value = data.ethTransactionId;
+                swapTimestamp.value = data.timestamp;
+                swapId.value = data.ctxId;
+                swapQr.value = SwapUtils.generateQRCode(validationLink.value);
+                setTimeout( ()=> step8.value = true, 1000);
+                setTimeout( ()=> isDisabledValidate.value = false, 2000);
+              }
+            })();
+          }, 2000);
+
+        })();
+      }, 2000);
     };
 
     const validated = () => {
       currentPage.value = 3;
-    }
+    };
 
     const savedCheck = ref(false);
 
     return {
+      err,
+      balance,
+      isInstallMetamask,
+      connectMetamask,
+      isMetamaskConnected,
+      currentAccount,
       copy,
       currentPage,
       isDisabledValidate,
@@ -243,6 +446,22 @@ export default {
       disableAmount,
       isDisabledSwap,
       savedCheck,
+      step1,
+      step2,
+      step3,
+      step4,
+      step5,
+      step6,
+      step7,
+      step8,
+      validationLink,
+      validationHash,
+      messageHash,
+      transactionHash,
+      swapTimestamp,
+      swapId,
+      swapQr,
+      saveCertificate,
     };
   },
 }
