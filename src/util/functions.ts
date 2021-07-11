@@ -45,6 +45,10 @@ const getCoingecko = (coinId: string): Promise<number>=> {
   return fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`).then((res) => res.json()).then((data) => { return data.market_data.current_price.usd });
 }
 
+export const getCoingeckoCoinPrice = (coinId: string): Promise<any>=> {
+  return fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`).then((res) => res.json()).then((data) => { return data.market_data.current_price });
+}
+
 export const getXPXcurrencyPrice = async (balance: number):Promise<number> => {
   let total:number;
   let coinId = 'proximax';
@@ -52,6 +56,18 @@ export const getXPXcurrencyPrice = async (balance: number):Promise<number> => {
   total = rate * balance;
   return total;
 }
+
+export const getETH_SafeGwei = async (baseUrl: string):Promise<any>=>{
+
+  return fetch(`${baseUrl}/gasprice/eth`).then(res => res.json());
+}
+
+export const getBSC_SafeGwei = async (baseUrl: string):Promise<any>=>{
+
+  return fetch(`${baseUrl}/gasprice/bsc`).then(res => res.json());
+}
+
+
 
 
 // export const getPrettyAddress = (address: string) => {
