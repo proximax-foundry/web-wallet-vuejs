@@ -28,7 +28,7 @@
         </div>
       </div>
     </div>
-    <div class="text-sm text-center">{{ timerMinutes }}:{{ timerSecondsDisplay > 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
+    <div class="text-sm text-center">{{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
     <div v-if="currentPage==1">
       <p class="text-tsm my-5 text-gray-400">This is a list of your Sirius Accounts available in this wallet.</p>
       <div class="text-lg my-7 font-bold">Please select a Sirius account</div>
