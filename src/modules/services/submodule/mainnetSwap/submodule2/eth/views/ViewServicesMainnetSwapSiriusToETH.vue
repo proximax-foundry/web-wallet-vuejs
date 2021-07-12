@@ -299,7 +299,14 @@ export default {
     });
 
     const rebuildTranction = ()=>{
-      const swapAmountXPX = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), Helper.convertToAbsolute(amount.value, 6));
+      let swapAmount;
+      if(amount.value < 0){
+        swapAmount = 0;
+      }
+      else{
+        swapAmount = amount.value;
+      }
+      const swapAmountXPX = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), Helper.convertToAbsolute(swapAmount, 6));
       const feeXpx = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), Helper.convertToAbsolute(gasPriceInXPX.value, 6));
       transferTx = transferBuilder.mosaics([swapAmountXPX])
                         .recipient(Helper.createAddress(sinkFundAddress))
@@ -436,6 +443,10 @@ export default {
       minBalanceAmount.value = Helper.convertNumberMinimumFormat(txFee.value + gasPriceInXPX.value, 6);
       if(amount.value > maxSwapAmount.value){
         amount.value = maxSwapAmount.value;
+      }
+      
+      if(selectedAccount.value.balance <= minBalanceAmount.value){
+        amount.value = 0;
       }
 
       if(selectedAccount.value.balance <= minBalanceAmount.value){
