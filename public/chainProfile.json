@@ -32,7 +32,7 @@
       }
     },
     "Sirius Testnet 1": {
-      "version": "0.0.2",
+      "version": "0.0.3",
       "apiNodes":[
           "bctestnet1.brimstone.xpxsirius.io",
           "bctestnet2.brimstone.xpxsirius.io"
@@ -65,7 +65,7 @@
         "swap_XPX_BSC_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
         "swap_ETH_XPX_URL": "https://bctestnet-swap-gateway.xpxsirius.io/eth",
         "swap_BSC_XPX_URL": "https://bctestnet-swap-gateway.xpxsirius.io/bsc",
-        "gasPriceConsultURL": "http://localhost:3000"
+        "gasPriceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io"
       }
     },
     "Sirius Testnet 2": {
