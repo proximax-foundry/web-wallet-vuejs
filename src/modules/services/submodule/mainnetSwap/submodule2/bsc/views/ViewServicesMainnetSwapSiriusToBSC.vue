@@ -143,7 +143,9 @@ import { networkState } from '@/state/networkState';
 import { Helper } from "@/util/typeHelper";
 import { getCoingeckoCoinPrice, getBSC_SafeGwei } from "@/util/functions";
 import { BuildTransactions } from "@/util/buildTransactions";
-import { ChainSwapConfig } from "@/models/stores/chainSwapConfig"
+import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
+import { ChainUtils } from "@/util/chainUtils";
+import { ChainAPICall } from "@/models/REST/chainAPICall";
 
 export default {
   name: 'ViewServicesMainnetSwapSiriusToBSC',
@@ -254,7 +256,7 @@ export default {
     const xpxNamespace = networkState.currentNetworkProfile.network.currency.namespace;
     const XpxAsset = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), 1);
 
-    const buildClass = new BuildTransactions(networkState);
+    const buildClass = new BuildTransactions(networkState.currentNetworkProfile.network.type);
     const transferBuilder = buildClass.transferBuilder();
     const aggregateBuilder = buildClass.aggregateCompleteBuilder();
     
@@ -299,6 +301,7 @@ export default {
     });
 
     const rebuildTranction = ()=>{
+      let swapAmount;
       if(amount.value < 0){
         swapAmount = 0;
       }
@@ -421,17 +424,17 @@ export default {
 
       if(feeStrategy === "instant"){
         selectedGasLimit.value = instantGasLimit.value;
-        selectedGasPriceInGwei.value = instantGasPrice.value;
+        selectedGasPriceInGwei.value = instantGasPriceInGwei.value;
         gasPriceInXPX.value = xpxAmountInInstantGasPrice.value;
       }
       else if(feeStrategy === "fast"){
         selectedGasLimit.value = fastGasLimit.value;
-        selectedGasPriceInGwei.value = fastGasPrice.value;
+        selectedGasPriceInGwei.value = fastGasPriceInGwei.value;
         gasPriceInXPX.value = xpxAmountInFastGasPrice.value;
       }
       else{
         selectedGasLimit.value = standardGasLimit.value;
-        selectedGasPriceInGwei.value = standardGasPrice.value;
+        selectedGasPriceInGwei.value = standardGasPriceInGwei.value;
         gasPriceInXPX.value = xpxAmountInStandardGasPrice.value;
       }
 
@@ -459,7 +462,13 @@ export default {
     }
 
     const swap = () => {
-      rebuildTranction();
+      changeGasStrategy(bscGasStrategy.value);
+      // console.log(aggreateCompleteTransaction);
+      // let signedTx = account.sign(aggreateCompleteTransaction, networkState.currentNetworkProfile.generationHash);
+      // let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+      // console.log(signedTx.hash);
+      // let chainAPICall = new ChainAPICall(apiEndpoint);
+      // chainAPICall.transactionAPI.announce(signedTx);
       currentPage.value = 3;
     };
 
