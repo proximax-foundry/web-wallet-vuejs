@@ -68,7 +68,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center" :class="step1?'text-gray-700':'text-gray-300'">Sending transfer to Metamask.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Sending transfer to Metamask.</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -179,7 +179,7 @@
   </div>
 </template>
 <script>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import SupplyInput from '@/components/SupplyInput.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
 import SelectSiriusAccountInputPlugin from '@/modules/services/submodule/mainnetSwap/components/SelectSiriusAccountInputPlugin.vue';
@@ -208,10 +208,10 @@ export default {
     const balance = ref(0);
     const coinBalance = ref(0);
     const tokenAddress = '0xd7d58712fe1bd6ffef8b518d4d28923e419da525';
-    const custodian = '0xd1C7BD89165f4c82e95720574e327fa2248F9cf2';
+    const custodian = '0x6A608260b6e25527AF82Be8cd12d4352145228E2';
     const bscScanUrl = 'https://goerli.etherscan.io/tx/';
-    const swapServerUrl = 'https://bctestnet-swap-gateway.xpxsirius.io/xpx/transfer';
-    // const swapServerUrl = 'http://localhost:8080/xpx/transfer';
+    const swapServerUrl = 'https://bctestnet-swap-gateway.xpxsirius.io/expx/transfer';
+    const currentNetwork = ref('');
 
     let provider;
     let signer;
@@ -220,82 +220,90 @@ export default {
       provider = new ethers.providers.Web3Provider(window.ethereum);
       signer = provider.getSigner();
 
-      console.log('MetaMask is installed!');
       isInstallMetamask.value = true;
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
-      // isMetamaskConnected.value = false;
 
       ethereum
         .request({ method: 'eth_accounts' })
-        .then(handleAccountsChanged)
+        .then(fetchMetaAccount)
         .catch((err) => {
           console.error(err);
-      });
-
+        });
 
       ethereum
         .request({ method: 'eth_chainId' })
         .then((metaChainId) => {
-          verifyChain(metaChainId);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+          verifyChain(metaChainId, false);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
 
       ethereum.on('accountsChanged', handleAccountsChanged);
 
       ethereum.on('chainChanged', (metaChainId) => {
-        verifyChain(metaChainId)
+        verifyChain(metaChainId, true);
       });
 
       ethereum.on('connect', (connectInfo) => {
         console.log(connectInfo)
       });
-
-      // For now, 'eth_accounts' will continue to always return an array
-      function handleAccountsChanged(accounts) {
-        if (accounts.length === 0) {
-          // MetaMask is locked or the user has not connected any accounts
-          console.log('Please connect to MetaMask.');
-        } else if (accounts[0] !== currentAccount.value) {
-          currentAccount.value = accounts[0];
-
-          // get metamask balance
-          ethereum
-          .request({ method: 'eth_getBalance', params: [
-            currentAccount.value, 'latest'
-          ] })
-          .then(hexDecimalBalance => {
-            coinBalance.value = parseInt(hexDecimalBalance)/Math.pow(10, 18);
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-
-          (async () => {
-            const contract = new ethers.Contract(tokenAddress, abi, signer);
-            const tokenBalance = await contract.balanceOf(currentAccount.value);
-            balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
-          })();
-        }
-      }
-
     }else{
       console.log('metamask not installed')
     }
 
-    function verifyChain(chainId){
+    function fetchMetaAccount(accounts) {
+      console.log('fetchMetaAccount');
+      if (accounts.length === 0) {
+        // MetaMask is locked or the user has not connected any accounts
+        // console.log('Please connect to MetaMask.');
+      } else if (accounts[0] !== currentAccount.value) {
+        currentAccount.value = accounts[0];
+        console.log('fetchmeta')
+        updateToken();
+      }
+    }
+
+    // For now, 'eth_accounts' will continue to always return an array
+    function handleAccountsChanged(accounts) {
+      if (accounts.length === 0) {
+        // MetaMask is locked or the user has not connected any accounts
+        // console.log('Please connect to MetaMask.');
+      } else if (accounts[0] !== currentAccount.value) {
+        currentAccount.value = accounts[0];
+      }
+    }
+
+    function verifyChain(chainId, updateTokenBol = false){
+      currentNetwork.value = chainId;
       if(ethereumChainId.find(ethChain => ethChain === parseInt(chainId)) == undefined){
         err.value = 'Please select Goerli Test Network on Metamark to swap ETH';
       }else{
         err.value = '';
+        if(updateTokenBol){
+          updateToken();
+        }
       }
+    }
+
+    function updateToken(){
+      // get metamask balance
+      ethereum
+      .request({ method: 'eth_getBalance', params: [
+        currentAccount.value, 'latest'
+      ] })
+      .then(hexDecimalBalance => {
+        coinBalance.value = parseInt(hexDecimalBalance)/Math.pow(10, 18);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
     }
 
     const connectMetamask = () => {
       ethereum
         .request({ method: 'eth_requestAccounts' })
-        .then(handleAccountsChanged)
+        .then(fetchMetaAccount)
         .catch((err) => {
           if (err.code === 4001) {
             // EIP-1193 userRejectedRequest error
@@ -306,6 +314,21 @@ export default {
           }
         });
     };
+
+    watch(currentNetwork, (n) => {
+      (async () => {
+        try{
+          provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+          signer = provider.getSigner();
+          const contract = new ethers.Contract(tokenAddress, abi, signer);
+          const tokenBalance = await contract.balanceOf(currentAccount.value);
+          balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
+        }catch(err) {
+          console.log('Error fetching token balance');
+          balance.value = 0;
+        }
+      })();
+    });
 
     const step1 = ref(false);
     const step2 = ref(false);
@@ -324,7 +347,7 @@ export default {
     const swapQr = ref('');
 
     const saveCertificate = () => {
-      SwapUtils.generatePdf(0, swapTimestamp.value, siriusAddress.value, swapId.value, transactionHash.value, swapQr.value);
+      SwapUtils.generatePdf('ETH', swapTimestamp.value, siriusAddress.value, swapId.value, transactionHash.value, swapQr.value);
     };
 
     const toast = useToast();
@@ -388,7 +411,7 @@ export default {
                   network: "ETH",
                   txnHash: receipt.hash
                 }
-              }
+              };
 
               step6.value = true;
 
