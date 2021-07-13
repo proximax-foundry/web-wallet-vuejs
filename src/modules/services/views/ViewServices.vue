@@ -3,16 +3,7 @@
     <!-- <div class="grid xs-grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6"> -->
       <!-- <ServiceTile :key="index" :service="item" :showMenuCall="showMenu[index]" :i="index" v-for="(item, index) in services" /> -->
     <div class="text-xl text-gray-600 font-bold mt-10">Swap:</div>
-    <div class="md:grid md:grid-cols-3 mx-5 lg:mx-5 2xl:mx-40 mt-5">
-      <div class="md:col-span-1">
-        <router-link :to="{ name: 'ViewServicesMainnetSwapNIS1ToSirius' }">
-          <div class="m-5 lg:mx-10 rounded-2xl border border-blue-primary option-div flex justify-center h-16">
-            <div class="self-center inline-block font-bold text-blue-primary">
-              NIS1
-            </div>
-          </div>
-        </router-link>
-      </div>
+    <div class="md:grid md:grid-cols-2 mx-5 lg:mx-5 2xl:mx-40 mt-5">
       <div class="md:col-span-1">
         <router-link :to="{ name: 'ViewServicesMainnetSwapEthOptions' }">
           <div class="m-5 lg:mx-10 rounded-2xl border border-blue-primary option-div flex justify-center h-16">
