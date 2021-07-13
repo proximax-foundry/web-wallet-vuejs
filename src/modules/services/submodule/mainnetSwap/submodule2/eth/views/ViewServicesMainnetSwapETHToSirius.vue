@@ -188,6 +188,8 @@ import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { ethers } from 'ethers';
 import { abi, SwapUtils } from '@/util/swapUtils';
+import { networkState } from '@/state/networkState';
+import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 
 export default {
   name: 'ViewServicesMainnetSwapETHToSirius',
@@ -200,17 +202,20 @@ export default {
 
   setup() {
 
+    let swapData = new ChainSwapConfig(networkState.chainNetworkName);
+    swapData.init();
+
     /* metamask integration */
-    let ethereumChainId = [5]; // 1, 3, 4, 42
+    let ethereumChainId = swapData.ETHChainId;
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
     const balance = ref(0);
     const coinBalance = ref(0);
-    const tokenAddress = '0xd7d58712fe1bd6ffef8b518d4d28923e419da525';
-    const custodian = '0x6A608260b6e25527AF82Be8cd12d4352145228E2';
-    const bscScanUrl = 'https://goerli.etherscan.io/tx/';
-    const swapServerUrl = 'https://bctestnet-swap-gateway.xpxsirius.io/expx/transfer';
+    const tokenAddress = swapData.EXPXContractAddress;
+    const custodian = swapData.sinkFundExpxSwap;
+    const ethScanUrl = swapData.ethScanUrl;
+    const swapServerUrl = swapData.swap_ETH_XPX_URL;
     const currentNetwork = ref('');
 
     let provider;
@@ -253,7 +258,6 @@ export default {
     }
 
     function fetchMetaAccount(accounts) {
-      console.log('fetchMetaAccount');
       if (accounts.length === 0) {
         // MetaMask is locked or the user has not connected any accounts
         // console.log('Please connect to MetaMask.');
@@ -277,6 +281,7 @@ export default {
     function verifyChain(chainId, updateTokenBol = false){
       currentNetwork.value = chainId;
       if(ethereumChainId.find(ethChain => ethChain === parseInt(chainId)) == undefined){
+        console.log('test')
         err.value = 'Please select Goerli Test Network on Metamark to swap ETH';
       }else{
         err.value = '';
@@ -395,7 +400,7 @@ export default {
             ethers.utils.parseUnits(amount.value, 6),
           );
           validationHash.value = receipt.hash;
-          validationLink.value = bscScanUrl + receipt.hash;
+          validationLink.value = ethScanUrl + receipt.hash;
 
           step3.value = true;
           setTimeout( ()=> step4.value = true, 1000);

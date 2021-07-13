@@ -32,7 +32,7 @@
       }
     },
     "Sirius Testnet 1": {
-      "version": "0.0.3",
+      "version": "0.0.4",
       "apiNodes":[
           "bctestnet1.brimstone.xpxsirius.io",
           "bctestnet2.brimstone.xpxsirius.io"
@@ -63,9 +63,17 @@
         "sinkFeeAddress": "VC2ABSJRJH5HZPHBP4PPSR5WG2YPSGLZZX5L55QU",
         "swap_XPX_ETH_URL": "https://bctestnet-swap-gateway.xpxsirius.io/eth",
         "swap_XPX_BSC_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
-        "swap_ETH_XPX_URL": "https://bctestnet-swap-gateway.xpxsirius.io/eth",
-        "swap_BSC_XPX_URL": "https://bctestnet-swap-gateway.xpxsirius.io/bsc",
-        "gasPriceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io"
+        "swap_ETH_XPX_URL": "https://bctestnet-swap-gateway.xpxsirius.io/expx/transfer",
+        "swap_BSC_XPX_URL": "https://bctestnet-swap-gateway.xpxsirius.io/bxpx/transfer",
+        "gasPriceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io",
+        "BSCChainId": [97],
+        "ETHChainId": [5],
+        "BSCScanUrl": "https://testnet.bscscan.com/tx/",
+        "ETHScanUrl": "https://goerli.etherscan.io/tx/",
+        "BXPXContractAddress": "0x2fE636d897A2a52bBc75Dc2BdE6B2FabC2359DEF",
+        "EXPXContractAddress": "0xd7d58712fe1bd6ffef8b518d4d28923e419da525",
+        "sinkFundExpxSwap": "0x6A608260b6e25527AF82Be8cd12d4352145228E2",
+        "sinkFundBxpxSwap": "0x6A608260b6e25527AF82Be8cd12d4352145228E2"
       }
     },
     "Sirius Testnet 2": {
