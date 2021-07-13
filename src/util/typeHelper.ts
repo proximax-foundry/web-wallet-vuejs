@@ -166,6 +166,15 @@ export class Helper{
       static createQueryParams(pageSize: number, idToStartFrom?: string | undefined){
           return new QueryParams(pageSize, idToStartFrom);
       }
+
+      static checkIsJSON(data: string): boolean{
+        try {
+            JSON.parse(data);
+            return true;
+        } catch (error) {
+            return false;
+        }
+      }
 }
 
 export interface LooseObject {

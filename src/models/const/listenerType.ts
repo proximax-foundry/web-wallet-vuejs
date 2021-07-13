@@ -1,7 +1,7 @@
 /**
  * Static class containing listener subscribe type constants.
  */
- export declare enum ListenerType {
+ export enum ListenerType {
     BLOCK = "block",
     CONFIRMED = "confirmed",
     UNCONFIRMED_ADDED = "unconfirmedAdded",

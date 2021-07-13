@@ -56,13 +56,17 @@ import { useRouter } from "vue-router";
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { ChainUtils } from '@/util/chainUtils';
 import { Helper } from '@/util/typeHelper';
-// import { transferEmitter } from '../util/listener.js';
 import Dropdown from 'primevue/dropdown';
 import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
-// import { useToast } from "primevue/usetoast";
+import { useToast } from "primevue/usetoast";
 import packageData from "../../package.json"
+import { Connector } from '../models/connector';
+import { listenerState} from "@/state/listenerState";
+import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
+import { TransactionType } from "tsjs-xpx-chain-sdk";
+import { WalletUtils } from "@/util/walletUtils";
 
 export default defineComponent({
   components: {
@@ -79,7 +83,7 @@ export default defineComponent({
     };
   },
   setup() {
-    // const toast = useToast();
+    const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const router = useRouter();
@@ -153,35 +157,119 @@ export default defineComponent({
       return totalAmount;
     });
 
-    // transferEmitter.on("CONFIRMED_NOTIFICATION", payload => {
-    //   if(payload.status){
-    //     toast.add({severity:'success', summary: 'Notification', detail: payload.message, group: 'br', life: 5000});
-    //     var audio = new Audio(require('@/assets/audio/ding2.ogg'));
-    //     audio.play();
-    //   }
-    // });
+    let listener = ref(new Connector("", []));
 
-    // transferEmitter.on("UNCONFIRMED_NOTIFICATION", payload => {
-    //   if(payload.status){
-    //     toast.add({severity:'info', summary: 'Notification', detail: payload.message, group: 'br', life: 5000});
-    //     var audio = new Audio(require('@/assets/audio/ding.ogg'));
-    //     audio.play();
-    //   }
-    // });
+    const connectListener = (skipIfEndpointHaveValue = true)=>{
+      
+      console.log("Connecting");
 
-    // transferEmitter.on("STATUS_NOTIFICATION", payload => {
-    //   if(payload.status){
-    //     toast.add({severity:'error', summary: 'Error status', detail: payload.message, group: 'br', life: 5000});
-    //     var audio = new Audio(require('@/assets/audio/ding.ogg'));
-    //     audio.play();
-    //   }
-    // });
+      if(skipIfEndpointHaveValue && listener.value.endpoint !== ""){
+        return;
+      }
+    
+      if(listener.value.endpoint){
+        ListenerStateUtils.lightReset();
+      }
+      else{
+        ListenerStateUtils.reset();
+      }
+      listener.value.terminate();
 
-    // emitter.on("NOTIFICATION", payload => {
-    //   if(payload.status){
-    //     toast.add({severity:'warn', summary: 'Alert', detail: payload.message, group: 'br', life: 5000});
-    //   }
-    // });
+      let accountsAddress = walletState.currentLoggedInWallet.accounts.map((acc)=> acc.address);
+      let othersAddress = walletState.currentLoggedInWallet.others.map((acc)=> acc.address);
+
+      let allAddress = Array.from(new Set(accountsAddress.concat(othersAddress)));
+
+      listener.value = new Connector(ChainUtils.buildWSEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort), allAddress);
+
+      listener.value.startListen();
+    }
+
+    const terminateListener = () =>{
+      listener.value.terminate();
+    }
+
+    if(loginStatus.value){
+      connectListener();
+    }
+
+    watch(()=> loginStatus.value, (newValue)=>{
+      if(newValue){
+        connectListener();
+      }
+      else{
+        terminateListener();
+      }
+    })
+
+    //const newBlockLength = computed(()=> listenerState.blockLength);
+    const currentBlockHeight = computed(()=> listenerState.currentBlock);
+    const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
+
+    watch(()=> currentBlockHeight.value, ()=>{
+
+      listener.value.refreshTimer();
+    });
+
+    watch(()=> confirmedTxLength.value, (newValue, oldValue)=>{
+
+      if(newValue > oldValue){
+        WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
+
+        let txLength = newValue - oldValue;
+
+        let transactionHashes = listenerState.allConfirmedTransactionsHash.slice(-txLength);
+
+        let swapTransactionsCount = 0;
+        let swapTransactionHash = [];
+
+
+        for(let i =0; i < listenerState.confirmedTransactions.length; ++i){
+          let txs = listenerState.confirmedTransactions[i].confirmedTransactions.filter((tx)=> transactionHashes.includes(tx.transactionInfo.hash));
+
+          for(let x=0; x < txs.length; ++x){
+            let tx = txs[x];
+            if(tx.type === TransactionType.TRANSFER && tx.message.payload && Helper.checkIsJSON(tx.message.payload)){
+              let parsedMessage = JSON.parse(tx.message.payload);
+
+              if(parsedMessage.type && parsedMessage.type.substr(0, 4) === "Swap"){
+                swapTransactionHash.push(tx.transactionInfo.hash);
+              }
+            }
+          }
+        }
+
+        swapTransactionsCount = new Set(swapTransactionHash).size;
+
+        let singularPluralText = swapTransactionsCount > 1 ? "s" : "";
+
+        if(swapTransactionsCount){
+          toast.add(
+          {
+            severity:'success', 
+            summary: `Swap Transaction${singularPluralText} Confirmed`, 
+            detail: `${swapTransactionsCount} swap transaction${singularPluralText} confirmed`, 
+            group: 'br', 
+            life: 5000
+          }
+          );
+        }
+
+        let remainingTxLength = txLength - swapTransactionsCount;
+        if(remainingTxLength){
+          singularPluralText =  newTxLength > 1 ? "s" : "";
+          toast.add(
+            {
+              severity:'success', 
+              summary: `Transaction${singularPluralText} Confirmed`, 
+              detail: `${txLength} transaction${singularPluralText} confirmed`, 
+              group: 'br', 
+              life: 5000
+          }
+        );
+        } 
+      }
+     });
 
     const versioning = ref('0.0.1');
 
