@@ -188,6 +188,8 @@ import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { ethers } from 'ethers';
 import { abi, SwapUtils } from '@/util/swapUtils';
+import { networkState } from '@/state/networkState';
+import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 
 export default {
   name: 'ViewServicesMainnetSwapBSCToSirius',
@@ -200,17 +202,20 @@ export default {
 
   setup() {
 
+    let swapData = new ChainSwapConfig(networkState.chainNetworkName);
+    swapData.init();
+
     /* metamask integration */
-    let bscChainId = [97]; // 5
+    let bscChainId = swapData.BSCChainId;
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
     const balance = ref(0);
     const coinBalance = ref(0);
-    const tokenAddress = '0x2fE636d897A2a52bBc75Dc2BdE6B2FabC2359DEF';
-    const custodian = '0x6A608260b6e25527AF82Be8cd12d4352145228E2';
-    const bscScanUrl = 'https://testnet.bscscan.com/tx/';
-    const swapServerUrl = 'https://bctestnet-swap-gateway.xpxsirius.io/bxpx/transfer';
+    const tokenAddress = swapData.BXPXContractAddress;
+    const custodian = swapData.sinkFundBxpxSwap;
+    const bscScanUrl = swapData.bscScanUrl;
+    const swapServerUrl = swapData.swap_BSC_XPX_URL;
     const currentNetwork = ref('');
 
     let provider;
@@ -253,7 +258,6 @@ export default {
     }
 
     function fetchMetaAccount(accounts) {
-      console.log('fetchMetaAccount');
       if (accounts.length === 0) {
         // MetaMask is locked or the user has not connected any accounts
         // console.log('Please connect to MetaMask.');
