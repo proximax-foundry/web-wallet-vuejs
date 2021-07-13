@@ -1,7 +1,6 @@
 <template>
   <div class="container mx-auto text-center md:px-20 lg:px-40 mt-10">
-    <h1 class="big-title">ProximaX Sirius Wallet</h1>
-    <h2>The secure interface that connects to the Proximax Sirius platform.</h2>
+    <h1 class="big-title">ProximaX Swap Service</h1>
     <div class="mt-10">
       <div class="text-center p-5">
         <img src="@/modules/services/img/icon-swap-process-color-80h-proximax-sirius-wallet.svg" class="w-36 md:w-28 lg:w-18 inline-block mb-3">
