@@ -405,7 +405,7 @@ export default {
               const messageSignature = await signer.signMessage(siriusAddress.value);
               messageHash.value = messageSignature;
               const data = {
-                siriusRecipient: siriusAddress.value,
+                recipient: siriusAddress.value,
                 signature: messageSignature,
                 txnInfo: {
                   network: "ETH",
