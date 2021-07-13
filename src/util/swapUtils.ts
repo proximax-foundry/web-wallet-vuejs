@@ -648,7 +648,7 @@ export class SwapUtils {
     return qr.createDataURL();
   }
 
-  static generatePdf = (type:number = 0, swapTimestamp: string, siriusAddress: string, swapId: string, transactionHash: string, qrImage: string) => {
+  static generatePdf = (networkName: string, swapTimestamp: string, siriusAddress: string, swapId: string, transactionHash: string, qrImage: string) => {
     const imgData = pdfImg;
     let doc = new jsPDF({
       orientation: 'landscape',
@@ -671,7 +671,7 @@ export class SwapUtils {
     doc.text('Swap ID:', leftCol, swapIDRow);
     doc.text(swapId, secCol, swapIDRow);
 
-    doc.text('ETH Transaction Hash:', leftCol, hashRow);
+    doc.text( networkName + ' Transaction Hash:', leftCol, hashRow);
     doc.text(transactionHash, leftCol, hashValueRow);
 
     let img = new Image();
@@ -679,16 +679,7 @@ export class SwapUtils {
     doc.addImage(img, 'png', leftCol, qrRpw, 120, 120)
 
     doc.setProperties({ title: 'Swap Certificate'});
-
-    switch (type) {
-      case 0:
-        doc.save('swap_certificate.pdf');
-        break;
-
-      // case 1:
-      //   window.open(doc.output("dataurlstring", {filename: 'swap_certificate.pdf'}), '_blank');
-      //   break;
-    }
+    doc.save('swap_certificate.pdf');
   }
 }
 
