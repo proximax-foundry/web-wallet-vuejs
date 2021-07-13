@@ -68,7 +68,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 text-gray-300 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Sending transfer to Metamask.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Sending transfer to Metamask.</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -172,14 +172,14 @@
         </label>
         <div class="mt-10">
           <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32" @click="saveCertificate">Save</button>
-          <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none disabled:opacity-50 w-32" :disabled="!savedCheck" >Done</router-link>
+          <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-32" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import SupplyInput from '@/components/SupplyInput.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
 import SelectSiriusAccountInputPlugin from '@/modules/services/submodule/mainnetSwap/components/SelectSiriusAccountInputPlugin.vue';
@@ -208,9 +208,10 @@ export default {
     const balance = ref(0);
     const coinBalance = ref(0);
     const tokenAddress = '0x2fE636d897A2a52bBc75Dc2BdE6B2FabC2359DEF';
-    const custodian = '0xd1C7BD89165f4c82e95720574e327fa2248F9cf2';
+    const custodian = '0x6A608260b6e25527AF82Be8cd12d4352145228E2';
     const bscScanUrl = 'https://testnet.bscscan.com/tx/';
     const swapServerUrl = 'https://bctestnet-swap-gateway.xpxsirius.io/bxpx/transfer';
+    const currentNetwork = ref('');
 
     let provider;
     let signer;
@@ -219,22 +220,20 @@ export default {
       provider = new ethers.providers.Web3Provider(window.ethereum);
       signer = provider.getSigner();
 
-      console.log('MetaMask is installed!');
       isInstallMetamask.value = true;
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
 
       ethereum
         .request({ method: 'eth_accounts' })
-        .then(handleAccountsChanged)
+        .then(fetchMetaAccount)
         .catch((err) => {
           console.error(err);
         });
 
-
       ethereum
         .request({ method: 'eth_chainId' })
         .then((metaChainId) => {
-          verifyChain(metaChainId);
+          verifyChain(metaChainId, false);
         })
         .catch((err) => {
           console.error(err);
@@ -243,74 +242,53 @@ export default {
       ethereum.on('accountsChanged', handleAccountsChanged);
 
       ethereum.on('chainChanged', (metaChainId) => {
-        verifyChain(metaChainId)
+        console.log('chainChanged');
+        verifyChain(metaChainId, true);
       });
 
       ethereum.on('connect', (connectInfo) => {
         console.log(connectInfo)
       });
-
-      // ethereum
-      //   .request({
-      //     method: 'wallet_watchAsset',
-      //     params: {
-      //       type: 'ERC20',
-      //       options: {
-      //         address: '0x2fE636d897A2a52bBc75Dc2BdE6B2FabC2359DEF',
-      //         symbol: 'bXPX',
-      //         decimals: 6,
-      //         image: 'https://foo.io/token-image.svg',
-      //       },
-      //     },
-      //   })
-      //   .then((success) => {
-      //     if (success) {
-      //       console.log('bXPX successfully added to wallet!')
-      //     } else {
-      //       throw new Error('Something went wrong.')
-      //     }
-      //   })
-      //   .catch(console.error)
-
-      // For now, 'eth_accounts' will continue to always return an array
-      function handleAccountsChanged(accounts) {
-        if (accounts.length === 0) {
-          // MetaMask is locked or the user has not connected any accounts
-          console.log('Please connect to MetaMask.');
-        } else if (accounts[0] !== currentAccount.value) {
-          currentAccount.value = accounts[0];
-
-          // get metamask balance
-          ethereum
-          .request({ method: 'eth_getBalance', params: [
-            currentAccount.value, 'latest'
-          ] })
-          .then(hexDecimalBalance => {
-            coinBalance.value = parseInt(hexDecimalBalance)/Math.pow(10, 18);
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-
-          (async () => {
-            const contract = new ethers.Contract(tokenAddress, abi, signer);
-            const tokenBalance = await contract.balanceOf(currentAccount.value);
-            balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
-          })();
-        }
-      }
-
     }else{
       console.log('metamask not installed')
     }
 
-    function verifyChain(chainId){
+    function fetchMetaAccount(accounts) {
+      console.log('fetchMetaAccount');
+      if (accounts.length === 0) {
+        // MetaMask is locked or the user has not connected any accounts
+        // console.log('Please connect to MetaMask.');
+      } else if (accounts[0] !== currentAccount.value) {
+        currentAccount.value = accounts[0];
+        console.log('fetchmeta')
+        updateToken();
+      }
+    }
+
+    // For now, 'eth_accounts' will continue to always return an array
+    function handleAccountsChanged(accounts) {
+      console.log('account changed');
+      if (accounts.length === 0) {
+        // MetaMask is locked or the user has not connected any accounts
+        // console.log('Please connect to MetaMask.');
+      } else if (accounts[0] !== currentAccount.value) {
+        currentAccount.value = accounts[0];
+      }
+    }
+
+    function verifyChain(chainId, updateTokenBol = false){
+      currentNetwork.value = chainId;
       if(bscChainId.find(bscChain => bscChain === parseInt(chainId)) == undefined){
         err.value = 'Please select BSC testnet network on Metamark to swap BSC';
       }else{
         err.value = '';
+        if(updateTokenBol){
+          updateToken();
+        }
       }
+    }
 
+    function updateToken(){
       // get metamask balance
       ethereum
       .request({ method: 'eth_getBalance', params: [
@@ -322,19 +300,12 @@ export default {
       .catch((err) => {
         console.error(err);
       });
-
-      (async () => {
-        const contract = new ethers.Contract(tokenAddress, abi, signer);
-        const tokenBalance = await contract.balanceOf(currentAccount.value);
-        balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
-        console.log(balance.value);
-      })();
     }
 
     const connectMetamask = () => {
       ethereum
       .request({ method: 'eth_requestAccounts' })
-      .then(handleAccountsChanged)
+      .then(fetchMetaAccount)
       .catch((err) => {
         if (err.code === 4001) {
           // EIP-1193 userRejectedRequest error
@@ -345,6 +316,21 @@ export default {
         }
       });
     };
+
+    watch(currentNetwork, (n) => {
+      (async () => {
+        try{
+          provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+          signer = provider.getSigner();
+          const contract = new ethers.Contract(tokenAddress, abi, signer);
+          const tokenBalance = await contract.balanceOf(currentAccount.value);
+          balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
+        }catch(err) {
+          console.log('Error fetching token balance');
+          balance.value = 0;
+        }
+      })();
+    });
 
     const step1 = ref(false);
     const step2 = ref(false);
@@ -424,7 +410,7 @@ export default {
                 siriusRecipient: siriusAddress.value,
                 signature: messageSignature,
                 txnInfo: {
-                  network: "ETH",
+                  network: "BSC",
                   txnHash: receipt.hash
                 }
               };
