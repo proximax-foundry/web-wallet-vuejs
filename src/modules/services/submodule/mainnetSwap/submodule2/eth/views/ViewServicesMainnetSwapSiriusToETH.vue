@@ -28,7 +28,7 @@
         </div>
       </div>
     </div>
-    <div class="text-sm text-center">{{ timerMinutes }}:{{ timerSecondsDisplay > 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
+    <div class="text-sm text-center">{{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
     <div v-if="currentPage==1">
       <p class="text-tsm my-5 text-gray-400">This is a list of your Sirius Accounts available in this wallet.</p>
       <div class="text-lg my-7 font-bold">Please select a Sirius account</div>
@@ -143,7 +143,9 @@ import { networkState } from '@/state/networkState';
 import { Helper } from "@/util/typeHelper";
 import { getCoingeckoCoinPrice, getETH_SafeGwei } from "@/util/functions";
 import { BuildTransactions } from "@/util/buildTransactions";
-import { ChainSwapConfig } from "@/models/stores/chainSwapConfig"
+import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
+import { ChainUtils } from "@/util/chainUtils";
+import { ChainAPICall } from "@/models/REST/chainAPICall";
 
 export default {
   name: 'ViewServicesMainnetSwapSiriusToETH',
@@ -254,7 +256,7 @@ export default {
     const xpxNamespace = networkState.currentNetworkProfile.network.currency.namespace;
     const XpxAsset = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), 1);
 
-    const buildClass = new BuildTransactions(networkState);
+    const buildClass = new BuildTransactions(networkState.currentNetworkProfile.network.type);
     const transferBuilder = buildClass.transferBuilder();
     const aggregateBuilder = buildClass.aggregateCompleteBuilder();
     
@@ -299,7 +301,14 @@ export default {
     });
 
     const rebuildTranction = ()=>{
-      const swapAmountXPX = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), Helper.convertToAbsolute(amount.value, 6));
+      let swapAmount;
+      if(amount.value < 0){
+        swapAmount = 0;
+      }
+      else{
+        swapAmount = amount.value;
+      }
+      const swapAmountXPX = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), Helper.convertToAbsolute(swapAmount, 6));
       const feeXpx = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), Helper.convertToAbsolute(gasPriceInXPX.value, 6));
       transferTx = transferBuilder.mosaics([swapAmountXPX])
                         .recipient(Helper.createAddress(sinkFundAddress))
@@ -415,17 +424,17 @@ export default {
 
       if(feeStrategy === "trader"){
         selectedGasLimit.value = fastGasLimit.value;
-        selectedGasPriceInGwei.value = fastGasPrice.value;
+        selectedGasPriceInGwei.value = fastGasPriceInGwei.value;
         gasPriceInXPX.value = xpxAmountInFastGasPrice.value;
       }
       else if(feeStrategy === "fast"){
         selectedGasLimit.value = proposedGasLimit.value;
-        selectedGasPriceInGwei.value = proposedGasPrice.value;
+        selectedGasPriceInGwei.value = proposedGasPriceInGwei.value;
         gasPriceInXPX.value = xpxAmountInProposedGasPrice.value;
       }
       else{
         selectedGasLimit.value = safeGasLimit.value;
-        selectedGasPriceInGwei.value = safeGasPrice.value;
+        selectedGasPriceInGwei.value = safeGasPriceInGwei.value;
         gasPriceInXPX.value = xpxAmountInSafeGasPrice.value;
       }
 
@@ -436,6 +445,10 @@ export default {
       minBalanceAmount.value = Helper.convertNumberMinimumFormat(txFee.value + gasPriceInXPX.value, 6);
       if(amount.value > maxSwapAmount.value){
         amount.value = maxSwapAmount.value;
+      }
+      
+      if(selectedAccount.value.balance <= minBalanceAmount.value){
+        amount.value = 0;
       }
 
       if(selectedAccount.value.balance <= minBalanceAmount.value){
@@ -449,7 +462,13 @@ export default {
     }
 
     const swap = () => {
-      rebuildTranction();
+      changeGasStrategy(ethGasStrategy.value)
+      // console.log(aggreateCompleteTransaction);
+      // let signedTx = account.sign(aggreateCompleteTransaction, networkState.currentNetworkProfile.generationHash);
+      // let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+      // console.log(signedTx.hash);
+      // let chainAPICall = new ChainAPICall(apiEndpoint);
+      // chainAPICall.transactionAPI.announce(signedTx);
       currentPage.value = 3;
     };
 
