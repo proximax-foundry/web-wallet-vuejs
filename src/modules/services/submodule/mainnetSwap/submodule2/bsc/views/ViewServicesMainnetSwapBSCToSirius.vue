@@ -242,7 +242,6 @@ export default {
       ethereum.on('accountsChanged', handleAccountsChanged);
 
       ethereum.on('chainChanged', (metaChainId) => {
-        console.log('chainChanged');
         verifyChain(metaChainId, true);
       });
 
@@ -267,7 +266,6 @@ export default {
 
     // For now, 'eth_accounts' will continue to always return an array
     function handleAccountsChanged(accounts) {
-      console.log('account changed');
       if (accounts.length === 0) {
         // MetaMask is locked or the user has not connected any accounts
         // console.log('Please connect to MetaMask.');
