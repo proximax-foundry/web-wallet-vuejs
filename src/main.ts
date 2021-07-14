@@ -41,6 +41,8 @@ app.component('Toast', Toast);
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.component(VuePassword);
 
+const enforceProvidedChainProfileOnly = true; 
+
 const chainProfileIntegration = async () => {
   try {
     const networksInfo = await fetch('./chainProfile.json', {
@@ -71,6 +73,11 @@ const chainProfileIntegration = async () => {
           break;
         default:
           break;
+      }
+
+      if(enforceProvidedChainProfileOnly){
+        chainProfileNamesStore.names = chainProfileNames;
+        namesUpdate = 1;
       }
     }
     else{
