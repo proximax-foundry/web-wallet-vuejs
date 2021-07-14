@@ -156,4 +156,3 @@ if (!walletState.currentLoggedInWallet) {
 
 NetworkStateUtils.checkDefaultNetwork();
 
-{"mode":"full","isActive":false}
