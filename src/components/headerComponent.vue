@@ -257,7 +257,7 @@ export default defineComponent({
 
         let remainingTxLength = txLength - swapTransactionsCount;
         if(remainingTxLength){
-          singularPluralText =  newTxLength > 1 ? "s" : "";
+          singularPluralText =  remainingTxLength > 1 ? "s" : "";
           toast.add(
             {
               severity:'success', 
