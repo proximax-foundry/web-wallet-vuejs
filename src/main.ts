@@ -16,7 +16,7 @@ import { WalletStateUtils } from './state/utils/walletStateUtils';
 import { NetworkStateUtils } from './state/utils/networkStateUtils';
 import { ChainUtils } from './util/chainUtils';
 import { ChainAPICall } from './models/REST/chainAPICall';
-import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainSwapConfig } from "./models/stores/"
+import { ChainProfile, ChainProfileConfig, ChainProfileNames } from "./models/stores/"
 
 // Import Font Awesome Icons
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -103,13 +103,6 @@ const chainProfileIntegration = async () => {
         chainProfileStore.network = chainProfileData['network'];
 
         chainProfileStore.saveToLocalStorage();
-
-        if(chainProfileData['swapData']){
-          let chainSwapConfig = new ChainSwapConfig(chainProfileName);
-          chainSwapConfig.updateConfig(chainProfileData['swapData']);
-
-          chainSwapConfig.saveToLocalStorage();
-        }
 
         const endpoint = ChainUtils.buildAPIEndpoint(chainProfileStore.apiNodes[0], chainProfileStore.httpPort);
 
