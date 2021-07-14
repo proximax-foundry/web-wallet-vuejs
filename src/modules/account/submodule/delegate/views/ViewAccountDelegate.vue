@@ -5,48 +5,52 @@
       <router-link :to="{name: 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">View all accounts</router-link>
     </div>
   </div>
-
   <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>    
     <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
     <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 mb-8 mt-3">
     <div class="text-center w-full">
-        <p class="text-sm" v-if="verifyDelegateAcc() && !otherAccValue==''">Your account is linked to a delegated account </p>
-        <p class="text-sm" v-else>Your account is not linked to a delegated account</p>
+        <p v-cloak class="text-sm" v-if="verifyDelegateAcc() && !delegateAcc==''">Your account is linked to a delegated account </p>
+        <p v-cloak class="text-sm" v-else>Your account is not linked to a delegated account</p>
     </div>
     </div>
     <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-7 items-center">
       <div class="text-left w-full relative">
-        <div v-if="verifyDelegateAcc() && !otherAccValue==''" class="text-xs font-bold mb-1">Public key of the delegated account</div>
-        <div v-else class="text-xs font-bold mb-1">Linking Account:</div>
-        <div id="delegatePublicKey" v-if="verifyDelegateAcc() && !otherAccValue==''" :copyValue="otherAccValue" copySubject="Delegate Public Key" class="text-xs w-full outline-none bg-gray-100 z-10" >{{otherAccValue}}</div>
+        <div v-cloak v-if="verifyDelegateAcc() && !delegateAcc==''" class="text-xs font-bold mb-1">Public key of the delegated account</div>
+        <div v-cloak v-else class="text-xs font-bold mb-1">Linking Account:</div>
+        <div v-cloak v-if="verifyDelegateAcc() && !delegateAcc==''" id="delegatePublicKey" :copyValue="delegateAcc" copySubject="Delegate Public Key" class="text-xs w-full outline-none bg-gray-100 z-10" >{{delegateAcc}}</div>
+        <div v-else-if="newAcc != ''">New Account</div>
+        <div v-else-if="newAccPK != ''">From Private Key</div>
         <div v-else>None selected</div>
       </div>
-      <font-awesome-icon icon="copy" @click="copy('delegatePublicKey')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mr-2" v-if="verifyDelegateAcc() && !otherAccValue==''"></font-awesome-icon>
-      <div v-else class="inline-block ml-2">
-        <SelectAccountTypeModal/>
+      <font-awesome-icon icon="copy" @click="copy('delegatePublicKey')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mr-2" v-if="verifyDelegateAcc() && !delegateAcc==''"></font-awesome-icon>
+      <div v-cloak v-else class="inline-block ml-2">
+        <SelectAccountTypeModal />
       </div>
     </div>
     <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet ' + walletState.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
     <div class="mt-10">
-       <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw()" v-if="verifyDelegateAcc() && !otherAccValue==''" :disabled="disableLinkBtn">Unlink Linked Account</button>
-        <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw()" v-else :disabled="disableLinkBtn">Link New Account</button>
+      <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw" v-if="verifyDelegateAcc() && !delegateAcc==''" :disabled="disableLinkBtn">Unlink Linked Account</button>
+      <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw" v-else :disabled="disableLinkBtn">Link New Account</button>
     </div>
   </div>
 </template>
 <script>
 
-import { ref,computed } from "vue";
+import { ref, computed, getCurrentInstance } from "vue";
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectAccountTypeModal from '@/modules/account/submodule/delegate/components/SelectAccountTypeModal.vue';
 import { walletState } from '@/state/walletState';
 import { WalletUtils } from "@/util/walletUtils";
 import { networkState } from "@/state/networkState";
+import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { ChainAPICall } from "@/models/REST/chainAPICall"
 import { ChainUtils } from "@/util/chainUtils"
 import { Helper } from "@/util/typeHelper";
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
+import { BuildTransactions } from '@/util/buildTransactions';
+import { Account, LinkAction, TransactionHttp} from "tsjs-xpx-chain-sdk";
 
 export default {
   name: 'ViewAccountDelegate',
@@ -62,67 +66,122 @@ export default {
     const walletPassword = ref('');
     const showPasswdError = ref(false);
     const err = ref(false);
-    const otherAccValue = ref('');
+    const newAcc = ref('');
+    const newAccPK = ref('');
+    const delegateAcc = ref('');
+    const AccPublicKey = ref('');
+    const AccPrivateKey = ref('')
     const router = useRouter();
     const toast = useToast();
-    const copy = (id) =>{
-      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
-      let copySubject = document.getElementById(id).getAttribute("copySubject");
-      copyToClipboard(stringToCopy);
-      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
-    };
+    const address = ref(p.address);
     const passwdPattern = "^[^ ]{8,}$";
+    const internalInstance = getCurrentInstance();
+    const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+    const networkType = networkState.currentNetworkProfile.network.type;
+    const hash = networkState.currentNetworkProfile.generationHash;    
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const disableLinkBtn = computed(
       () => !(
         walletPassword.value.match(passwdPattern)
       )
     );
 
-    const verifyDelegateAcc = async() => {
-      let chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
-      const accountAddress = walletState.currentLoggedInWallet.accounts.find(element => element.address === p.address)
-      if(accountAddress) {
-        let publicAccount = Helper.createPublicAccount(accountAddress.publicKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type)) 
-        const accountInfo = await chainAPICall.accountAPI.getAccountInfo(publicAccount.address);
-        const indexOtherAcc = walletState.currentLoggedInWallet.others.findIndex((other)=> other.publicKey === accountInfo.linkedAccountKey)
-        if(indexOtherAcc > -1) {
-          otherAccValue.value = walletState.currentLoggedInWallet.others[indexOtherAcc].publicKey; 
-        } else {
-          otherAccValue.value = "";
-        }
-      } else {
-        otherAccValue.value = "";
-      }
+    const copy = (id) =>{
+      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
+      let copySubject = document.getElementById(id).getAttribute("copySubject");
+      copyToClipboard(stringToCopy);
+      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
     };
 
+    const verifyDelegateAcc = async() => {
 
-    const verifyWalletPw = async() => {
+      const accountDetail = walletState.currentLoggedInWallet.accounts.find(element => element.address == address.value);
+      if (accountDetail) {
+        const publicAccount = Helper.createPublicAccount(accountDetail.publicKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type)); 
+        const accountInfo = await chainAPICall.accountAPI.getAccountInfo(publicAccount.address);
+        console.log(accountInfo)
+        const indexOtherAcc = walletState.currentLoggedInWallet.others.findIndex((other)=> other.publicKey === accountInfo.linkedAccountKey);
+        if (indexOtherAcc > -1) {
+          delegateAcc.value = walletState.currentLoggedInWallet.others[indexOtherAcc].publicKey; 
+        } else {
+          delegateAcc.value = "";
+        }
+      } else if(!accountDetail) {
+        delegateAcc.value = "";
+      }
+    };
+    const createTransaction = (accPublicKey, delegateAction) =>{
+      const accountDetail = walletState.currentLoggedInWallet.accounts.find(element => element.address == address.value);
+      const transactionBuilder = new BuildTransactions(networkType, hash);
+      const passwordInstance = WalletUtils.createPassword(walletPassword.value);
+      const privateKey = WalletUtils.decryptPrivateKey(passwordInstance, accountDetail.encrypted, accountDetail.iv)
+      const accountPrivateKey = Account.createFromPrivateKey(privateKey, networkType);
+      const transferTransaction = transactionBuilder.accountLink(accPublicKey, delegateAction);              
+      const signedTransaction = accountPrivateKey.sign(transferTransaction, hash);
+      const transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
+      transactionHttp
+        .announce(signedTransaction)
+        .subscribe(() => {
+          return true;
+      }, err => console.error(err));  
+    };
+
+    const verifyWalletPw = () => {
       if (!walletPassword.value == "") {
         if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)) {
-          if(!otherAccValue.value == '') {
-            const indexOtherAcc = walletState.currentLoggedInWallet.others.findIndex((other)=> other.publicKey === otherAccValue.value)
-            if(indexOtherAcc > -1) {
-              walletPassword.value = "";
-              walletState.currentLoggedInWallet.others.splice(indexOtherAcc,1);
-              walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet); 
-              toast.add({severity:'success', summary: 'Notification', detail: 'Unlink Successfully', group: 'br', life: 5000});            
+          if (!delegateAcc.value == "") {
+            const indexOtherAcc = walletState.currentLoggedInWallet.others.findIndex((other)=> other.publicKey === delegateAcc.value)
+            if (indexOtherAcc > -1) {
+              createTransaction(delegateAcc.value, LinkAction.Unlink);
+              WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
               err.value = "";
-              } else {
+              walletPassword.value = "";
 
-              }
+              toast.add({severity:'success', summary: 'Notification', detail: 'Unlink Successfully', group: 'br', life: 5000});            
+              router.push({ name: "ViewAccountDisplayAll" });
+            } else {
+              err.value = "Unlink Failed";
             }
-          } else {
-            err.value = "Wallet password is incorrect";
+          } else if (!AccPublicKey.value == "" && !AccPrivateKey.value =="") {
+              createTransaction(AccPublicKey.value, LinkAction.Link);
+
+              router.push({ name: "ViewAccountCreated", params: { name: '' ,publicKey: AccPublicKey.value, privateKey: AccPrivateKey.value }});
+            } else {
+              err.value = "Unlink Failed";
           }
+        } else {
+          err.value = "Wallet password is incorrect";
+        }
       }
     };
+    
+    emitter.on('NEW ACCOUNT', newAccPublicKey => {
+      if(newAccPublicKey){
+        AccPublicKey.value = newAccPublicKey.publicKey;
+        AccPrivateKey.value = newAccPublicKey.privateKey;
+        newAcc.value = "true";
+      }
+    })
+
+    emitter.on('FROM PRIVATE KEY', existingPublicKey => {
+      if(existingPublicKey){
+        AccPublicKey.value = existingPublicKey.publicKey;
+        AccPrivateKey.value = existingPublicKey.privateKey;
+        newAccPK.value = "true";
+      }
+    })
+
     return {
       walletPassword,
       showPasswdError,
       walletState,
       verifyWalletPw,
       verifyDelegateAcc,
-      otherAccValue,
+      delegateAcc,
+      newAccPK,
+      newAcc,
+      AccPublicKey,
+      AccPrivateKey,
       disableLinkBtn,
       copy,
       err
@@ -130,3 +189,8 @@ export default {
   },
 }
 </script>
+<style> 
+    [v-cloak] {
+        display: none;
+    }
+</style>
