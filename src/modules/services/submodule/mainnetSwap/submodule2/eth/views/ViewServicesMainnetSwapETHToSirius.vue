@@ -206,7 +206,7 @@ export default {
     swapData.init();
 
     /* metamask integration */
-    let ethereumChainId = swapData.ETHChainId;
+    let ethereumChainId = [5];
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
