@@ -66,6 +66,7 @@ import { Connector } from '../models/connector';
 import { listenerState} from "@/state/listenerState";
 import packageData from "../../package.json"
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
+import { WalletUtils } from "@/util/walletUtils";
 
 export default defineComponent({
   components: {
