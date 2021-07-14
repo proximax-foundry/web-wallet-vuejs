@@ -62,10 +62,11 @@ import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { useToast } from "primevue/usetoast";
+import packageData from "../../package.json"
 import { Connector } from '../models/connector';
 import { listenerState} from "@/state/listenerState";
-import packageData from "../../package.json"
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
+import { TransactionType } from "tsjs-xpx-chain-sdk";
 import { WalletUtils } from "@/util/walletUtils";
 
 export default defineComponent({
