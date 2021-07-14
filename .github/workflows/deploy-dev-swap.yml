@@ -59,8 +59,4 @@ jobs:
         run: |
           aws s3 rm s3://${{secrets.S3_BUCKET}} --recursive
           aws s3 cp dist s3://${{secrets.S3_BUCKET}}/ --sse AES256 --recursive
-<<<<<<< HEAD
           aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --path /*
-=======
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --path "/*"
->>>>>>> cdba851... fix: missing cloud in path
