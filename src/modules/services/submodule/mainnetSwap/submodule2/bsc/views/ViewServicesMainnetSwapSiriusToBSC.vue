@@ -33,7 +33,7 @@
       <p class="text-tsm my-5 text-gray-400">This is a list of your Sirius Accounts available in this wallet.</p>
       <div class="text-lg my-7 font-bold">Please select a Sirius account</div>
       <div v-for="acc of allAvailableAccounts" :key="acc.name">
-        <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100 transition" @click="selectAccount(acc.name)">
+        <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100 transition" @click="selectAccount(acc.name, acc.address)">
           <div class="text-tsm ml-3 text-gray-700">
             <div><b>Account Name:</b> {{ acc.name }}</div>
             <div><b>Sirius Address:</b> {{ acc.address }}</div>
@@ -147,6 +147,7 @@ import { getCoingeckoCoinPrice, getBSC_SafeGwei } from "@/util/functions";
 import { BuildTransactions } from "@/util/buildTransactions";
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { ethers } from 'ethers';
+import { SwapUtils } from '@/util/swapUtils';
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 
@@ -195,9 +196,11 @@ export default {
     const includeMultisig = false;
 
     const selectedAccountName = ref("");
-    const selectAccount = (name) => {
+    const selectedAccountAddress = ref("");
+    const selectAccount = (name, address) => {
       currentPage.value = 2;
       selectedAccountName.value = name;
+      selectedAccountAddress.value = address;
 
       if(bscGasStrategy.value === ""){
         changeGasStrategy("standard");
@@ -471,7 +474,6 @@ export default {
         let validateAddress = ethers.utils.getAddress(bscAddress.value);
         if(validateAddress){
           showAddressErr.value = false;
-          console.log(validateAddress);
         }
       }catch(err){
         showAddressErr.value = true;
@@ -481,13 +483,8 @@ export default {
         if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPasswd.value)) {
           err.value = "";
           changeGasStrategy(bscGasStrategy.value);
-          // console.log(aggreateCompleteTransaction);
-          // let signedTx = account.sign(aggreateCompleteTransaction, networkState.currentNetworkProfile.generationHash);
-          // let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
-          // console.log(signedTx.hash);
-          // let chainAPICall = new ChainAPICall(apiEndpoint);
-          // chainAPICall.transactionAPI.announce(signedTx);
-          currentPage.value = 3;
+          SwapUtils.swapXPXtoBXPX(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
+          // currentPage.value = 3;
         } else {
           err.value = "Wallet password is incorrect";
         }
