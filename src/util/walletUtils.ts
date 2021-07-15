@@ -3,7 +3,7 @@ import { walletState } from "../state/walletState"
 import { ChainUtils } from "../util/chainUtils"
 import { Wallet } from "../models/wallet"
 import { Wallets } from "../models/wallets"
-import { WalletAccount } from "../models/walletAccount"
+import { WalletAccount } from "../models/walletAccount" 
 import { nis1Account } from "../models/nis1Account"
 import { ChainProfile } from "../models/stores/chainProfile"
 import { Asset } from "../models/asset";
@@ -14,18 +14,22 @@ import {
     SimpleWallet, Password, RawAddress, Convert, Crypto,
     WalletAlgorithm, PublicAccount, Account, NetworkType, 
     AggregateTransaction, CosignatureTransaction, MosaicNonce,
-    NamespaceId, Address, AccountInfo, MosaicId, AliasType
+    NamespaceId, Address, AccountInfo, MosaicId, AliasType, Transaction,
+    MultisigAccountGraphInfo,MultisigAccountInfo,QueryParams
 } from "tsjs-xpx-chain-sdk"
 import { computed } from "vue";
 import { Helper, LooseObject } from "./typeHelper";
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { OtherAccount } from "@/models/otherAccount";
 import { Namespace } from "@/models/namespace";
+import { Account as myAccount } from "@/models/account";
+import { TransactionUtils } from "./transactionUtils"
 import { Account as NEM_Account, NetworkTypes, NEMLibrary } from "nem-library";
 
 const config = require("@/../config/config.json");
 
 const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile!.network.type));
+const chainAPICall = computed(()=> new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort)));
 
 export class WalletUtils {
 
@@ -81,7 +85,7 @@ export class WalletUtils {
         return false;
         
     }
-
+    
     static async getTotalBalanceWithCurrentNetwork(): Promise<Wallet> {
 
         const wallet = walletState.currentLoggedInWallet as Wallet;
@@ -97,14 +101,12 @@ export class WalletUtils {
             return wallet;
         }
 
-        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
-
         const nativeTokenNamespace = new NamespaceId(namespace);
         let amount = 0;
         return new Promise(async (resolve) => {
             const accountsInfo = await WalletUtils.fetchAccountInfoCurrentWalletAccounts();
 
-            const nativeNetworkMosaicId = await chainAPICall.namespaceAPI.getLinkedMosaicId(nativeTokenNamespace);
+            const nativeNetworkMosaicId = await chainAPICall.value.namespaceAPI.getLinkedMosaicId(nativeTokenNamespace);
 
             if (accountsInfo) {
                 const accInfo: AccountInfo[] = accountsInfo as AccountInfo[];
@@ -113,12 +115,12 @@ export class WalletUtils {
                     account.assets = [];
                     const mosaicList: MosaicId[] = [];
                     const mosaicAmount: LooseObject = {};
-                    const address = accInfo.find((element) => element.address['address'] == account.address);
-                    if (address != undefined) {
+                    const singleAccInfo = accInfo.find((element) => element.address['address'] == account.address);
+                    if (singleAccInfo != undefined) {
 
-                        for (const mosaic of address.mosaics) {
+                        for (const mosaic of singleAccInfo.mosaics) {
                             if (mosaic.id.toHex() === nativeNetworkMosaicId.toHex()) {
-                                amount = mosaic.amount.compact() / Math.pow(10, currentNetworkProfile.network.currency.divisibility);
+                                amount = mosaic.amount.compact();
                                 const newAsset = new Asset(mosaic.id.toHex(), currentNetworkProfile.network.currency.divisibility, false, true);
                                 newAsset.amount = amount;
                                 account.assets.push(newAsset);
@@ -129,11 +131,11 @@ export class WalletUtils {
                             }
                         }
 
-                        chainAPICall.assetAPI.getMosaics(mosaicList).then((mosaicInfo) => {
+                        chainAPICall.value.assetAPI.getMosaics(mosaicList).then((mosaicInfo) => {
                             mosaicInfo.forEach((asset) => {
                                 const newAsset = new Asset(asset.mosaicId.toHex(), asset.divisibility, asset.isSupplyMutable(), asset.isTransferable(), asset.owner.publicKey);
                                 newAsset.supply = asset.supply.compact();
-                                newAsset.amount = mosaicAmount[newAsset.idHex] / Math.pow(10, asset.divisibility)
+                                newAsset.amount = mosaicAmount[newAsset.idHex]
                                 newAsset.duration = asset.duration ? asset.duration.compact() : null;
                                 account.assets.push(newAsset);
                             })
@@ -175,11 +177,43 @@ export class WalletUtils {
             return false;
         }
 
-        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, currentNetworkProfile.httpPort));
-
         return new Promise((resolve, reject) => {
             try {
-                chainAPICall.accountAPI.getAccountsInfo(addresses).then(accountInfo => {
+                chainAPICall.value.accountAPI.getAccountsInfo(addresses).then(accountInfo => {
+                    resolve(accountInfo);
+                }).catch((error) => {
+                    console.warn(error);
+                    reject(false);
+                });
+            } catch (err) {
+                console.warn(err);
+                reject(false);
+            }
+        });
+    }
+    static getAggregateBondedTransactions = (publicAccount :PublicAccount) :Promise<AggregateTransaction[]> =>{
+        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+        return new Promise((resolve, reject) => {
+            try {
+                chainAPICall.accountAPI.aggregateBondedTransactions(publicAccount,new QueryParams(100)).then(transactions => {
+                    resolve(transactions);
+                }).catch((error) => {
+                    console.warn(error);
+                    reject(false);
+                });
+            } catch (err) {
+                console.warn(err);
+                reject(false);
+            }
+        });
+    }
+
+
+    static getMultisigAccGraphInfo(address :Address): Promise<MultisigAccountGraphInfo> {
+        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+        return new Promise((resolve, reject) => {
+            try {
+             chainAPICall.accountAPI.getMultisigAccountGraphInfo(address).then(accountInfo => {
                     resolve(accountInfo);
                 }).catch((error) => {
                     console.warn(error);
@@ -192,6 +226,25 @@ export class WalletUtils {
         });
     }
 
+    static getAccInfo(add :string):Promise<AccountInfo> {
+        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+        let address = Address.createFromRawAddress(add);
+        return new Promise((resolve, reject) => {
+            try {
+             chainAPICall.accountAPI.getAccountInfo(address).then(accountInfo => {
+                    resolve(accountInfo);
+                }).catch((error) => {
+                    console.warn(error);
+                    reject(false);
+                });
+            } catch (err) {
+                console.warn(err);
+                reject(false);
+            }
+        });
+    }
+
+  
     /**
    *
    *
@@ -230,16 +283,13 @@ export class WalletUtils {
     }
 
     /**
-     * Create account simple
-     *
-     * @param {string} nameWallet
-     * @param {Password} password
+     * Create account
      * @param {string} privateKey
      * @param {NetworkType} network
-     * @returns {SimpleWallet}
+     * @returns {Account}
      */
-     static createAccountFromPrivateKey(nameWallet: string, password: Password, privateKey: string, network: NetworkType): SimpleWallet {
-        return SimpleWallet.createFromPrivateKey(nameWallet, password, privateKey, network);
+     static createAccountFromPrivateKey(privateKey: string, network: NetworkType): Account {
+        return Account.createFromPrivateKey(privateKey, network);
     }
 
     /**
@@ -296,7 +346,7 @@ export class WalletUtils {
 
         const endpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, chainProfile.httpPort);
 
-        return new ChainAPICall(endpoint).transactionAPI.announceAggregateBondedCosignature(
+        return chainAPICall.value.transactionAPI.announceAggregateBondedCosignature(
             account.signCosignatureTransaction(cosignatureTransaction)
         );
     }
@@ -592,11 +642,9 @@ export class WalletUtils {
 
     static async updateMultisigDetails(walletAccount: WalletAccount| OtherAccount): Promise<void>{
 
-        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
-
         const address = Helper.createAddress(walletAccount.address);
 
-        const graphInfo = await chainAPICall.accountAPI.getMultisigAccountGraphInfo(address);
+        const graphInfo = await chainAPICall.value.accountAPI.getMultisigAccountGraphInfo(address);
 
         let multisigInfos: MultisigInfo[] = [];
 
@@ -625,11 +673,9 @@ export class WalletUtils {
 
     static async getMultisigDetails(addressInString: string): Promise<MultisigInfo[]>{
 
-        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
-
         const address = Helper.createAddress(addressInString);
 
-        const graphInfo = await chainAPICall.accountAPI.getMultisigAccountGraphInfo(address);
+        const graphInfo = await chainAPICall.value.accountAPI.getMultisigAccountGraphInfo(address);
 
         let multisigInfos: MultisigInfo[] = [];
 
@@ -686,8 +732,6 @@ export class WalletUtils {
 
     static async updateWalletAccountDetails(wallet: Wallet, addInLinkedAccount: boolean = false): Promise<void>{
 
-        let chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
-
         let tempAssets: Asset[] = [];
 
         for(let i = 0; i < wallet.accounts.length; ++i ){
@@ -696,14 +740,20 @@ export class WalletUtils {
 
             let publicAccount = Helper.createPublicAccount(account.publicKey, localNetworkType.value) 
 
-            let accountInfo = await chainAPICall.accountAPI.getAccountInfo(publicAccount.address);
+            let accountInfo;
+
+            try {
+                accountInfo = await chainAPICall.value.accountAPI.getAccountInfo(publicAccount.address);
+            } catch (error) {
+                continue;
+            }
 
             if(accountInfo.linkedAccountKey !== "0".repeat(64) && addInLinkedAccount){
 
                 let linkedPublicAccount = Helper.createPublicAccount(accountInfo.linkedAccountKey, localNetworkType.value);
 
                 let newAddress = linkedPublicAccount.address.plain();
-                let stripedAddress = newAddress.substr(0, -4);
+                let stripedAddress = newAddress.substr(-4);
 
                 let newOtherAccount = new OtherAccount("ACCOUNT-LINK-" + stripedAddress, accountInfo.linkedAccountKey, newAddress, Helper.getOtherWalletAccountType().DELEGATE_VALIDATE);
             
@@ -712,7 +762,7 @@ export class WalletUtils {
                 }
             }
 
-            let namespaceInfos = await chainAPICall.namespaceAPI.getNamespacesFromAccount(publicAccount.address);
+            let namespaceInfos = await chainAPICall.value.namespaceAPI.getNamespacesFromAccount(publicAccount.address);
 
             let namespaces: Namespace[] = [];
             let tempNamespaceIds: NamespaceId[] = [];
@@ -752,7 +802,7 @@ export class WalletUtils {
                 namespaces.push(newNamespace);
             }
 
-            let namespaceNames = await chainAPICall.namespaceAPI.getNamespacesName(tempNamespaceIds);
+            let namespaceNames = await chainAPICall.value.namespaceAPI.getNamespacesName(tempNamespaceIds);
 
             for(let i = 0; i < namespaceNames.length; ++i){
                 let existingNamespace = namespaces.find((ns)=> ns.idHex === namespaceNames[i].namespaceId.toHex())
@@ -777,7 +827,7 @@ export class WalletUtils {
                     assets.push(newAsset);
                 }
                 else{
-                    let assetInfo = await chainAPICall.assetAPI.getMosaic(mosaic.id);
+                    let assetInfo = await chainAPICall.value.assetAPI.getMosaic(mosaic.id);
 
                     let newTempAsset = new Asset(mosaicIdHex, assetInfo.divisibility, assetInfo.isSupplyMutable(), assetInfo.isTransferable(), assetInfo.owner.publicKey);
                     newTempAsset.duration = assetInfo.duration.compact();
@@ -797,7 +847,7 @@ export class WalletUtils {
 
     static async updateOtherAccountDetails(wallet: Wallet): Promise<void>{
 
-        let chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+        
 
         let tempAssets: Asset[] = [];
 
@@ -807,9 +857,9 @@ export class WalletUtils {
 
             let publicAccount = Helper.createPublicAccount(otherAccount.publicKey, localNetworkType.value) 
 
-            let accountInfo = await chainAPICall.accountAPI.getAccountInfo(publicAccount.address);
+            let accountInfo = await chainAPICall.value.accountAPI.getAccountInfo(publicAccount.address);
 
-            let namespaceInfos = await chainAPICall.namespaceAPI.getNamespacesFromAccount(publicAccount.address);
+            let namespaceInfos = await chainAPICall.value.namespaceAPI.getNamespacesFromAccount(publicAccount.address);
 
             let namespaces: Namespace[] = [];
             let tempNamespaceIds: NamespaceId[] = [];
@@ -849,7 +899,7 @@ export class WalletUtils {
                 namespaces.push(newNamespace);
             }
 
-            let namespaceNames = await chainAPICall.namespaceAPI.getNamespacesName(tempNamespaceIds);
+            let namespaceNames = await chainAPICall.value.namespaceAPI.getNamespacesName(tempNamespaceIds);
 
             for(let i = 0; i < namespaceNames.length; ++i){
                 let existingNamespace = namespaces.find((ns)=> ns.idHex === namespaceNames[i].namespaceId.toHex())
@@ -875,7 +925,7 @@ export class WalletUtils {
                     otherAccount.addAsset(newAsset);
                 }
                 else{
-                    let assetInfo = await chainAPICall.assetAPI.getMosaic(mosaic.id);
+                    let assetInfo = await chainAPICall.value.assetAPI.getMosaic(mosaic.id);
 
                     let newTempAsset = new Asset(mosaicIdHex, assetInfo.divisibility, assetInfo.isSupplyMutable(), assetInfo.isTransferable(), assetInfo.owner.publicKey);
                     newTempAsset.duration = assetInfo.duration.compact();
@@ -907,6 +957,18 @@ export class WalletUtils {
         let publicKey = tempAccount.publicKey;
         let new_nis1Account = new nis1Account(tempAccount.address.plain(), publicKey)
         return new_nis1Account;
+    }
+
+    static async confirmedTransactionRefresh(wallet: Wallet, currencyMosaicId: string): Promise<void>{
+        wallet.others = [];
+
+        await WalletUtils.updateWalletMultisigInfo(wallet);
+        WalletUtils.populateOtherAccountTypeMultisig(wallet);
+        await WalletUtils.updateWalletAccountDetails(wallet, true);
+        await WalletUtils.updateWalletOtherAccountMultisigInfo(wallet);
+        await WalletUtils.updateOtherAccountDetails(wallet);
+
+        WalletUtils.updateAllAccountBalance(wallet, currencyMosaicId);
     }
 
     static async refreshAllAccountDetails(wallet: Wallet, networkProfile: ChainProfile): Promise<void>{

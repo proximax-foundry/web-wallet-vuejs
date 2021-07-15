@@ -4,7 +4,7 @@
   </keep-alive>
 </template>
 
-<script>
+<script >
 import {computed, defineAsyncComponent, ref, watch} from "vue";
 
 export default {

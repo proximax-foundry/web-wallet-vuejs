@@ -30,6 +30,13 @@ export class OtherAccount extends Account{
         this.namespaces.push(namespace);
     }
 
+    findNamespaceNameByAsset(assetId: string): Namespace[] | null{
+
+        let foundNamespaces = this.namespaces.filter((ns)=> ns.linkedId === assetId);
+
+        return foundNamespaces ? foundNamespaces: null;
+    }
+
     removeNamespace(id: string): void{
         const index = this.namespaces.findIndex((namespace)=> namespace.idHex === id);
 
@@ -47,5 +54,27 @@ export class OtherAccount extends Account{
 
     updateBalance(assetId: string): void{
         this.balance = this.getAssetBalance(assetId) | 0;
+    }
+
+    getDirectChildMultisig(): string[]{
+
+        let temp: MultisigInfo[] = this.multisigInfo.filter(( multiInfo)=> multiInfo.level === -1);
+
+        return temp.length ? OtherAccount.getMultisigInfoPublicKey(temp) : [];
+    }
+
+    getDirectParentMultisig(): string[]{
+
+        let temp: MultisigInfo[] = this.multisigInfo.filter(( multiInfo)=> multiInfo.level === 1);
+
+        return OtherAccount.getMultisigInfoPublicKey(temp);
+    }
+
+    static getMultisigInfoPublicKey(multisigInfo: MultisigInfo[]): string[]{
+        let publicKeyArray: string[] = [];
+
+        publicKeyArray = multisigInfo.map((multiInfo)=> multiInfo.publicKey)
+
+        return publicKeyArray;
     }
 }

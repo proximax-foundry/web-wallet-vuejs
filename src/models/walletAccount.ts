@@ -47,6 +47,13 @@ export class WalletAccount extends Account{
         this.namespaces.splice(index, 1);
     }
 
+    findNamespaceNameByAsset(assetId: string): Namespace[] | null{
+
+        let foundNamespaces = this.namespaces.filter((ns)=> ns.linkedId === assetId);
+
+        return foundNamespaces ? foundNamespaces: null;
+    }
+
     updateMultisigInfo(multisigInfo: MultisigInfo[]): void{
         this.multisigInfo = multisigInfo;
     }

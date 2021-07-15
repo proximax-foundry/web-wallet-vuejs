@@ -109,7 +109,16 @@ export default {
     const router = useRouter();
 
     // get account details
-    const acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
+    var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
+    const other_acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
+
+    if(!acc){
+      if(other_acc)
+      {
+        acc = other_acc;
+      }
+    }
+
     if (acc === -1) {
       router.push({name: "ViewAccountDisplayAll"});
     }
@@ -140,14 +149,22 @@ export default {
     const changeName = () => {
       if (accountName.value.trim()) {
         const exist_account = walletState.currentLoggedInWallet.accounts.find((accName) => accName.name == accountName.value.trim());
-        if (!exist_account) {
+        const exist_other_account = walletState.currentLoggedInWallet.others.find((accName) => accName.name == accountName.value.trim());
+
+        if (!exist_account && !exist_other_account) {
           const acc_index = walletState.currentLoggedInWallet.accounts.findIndex((accAdd) => accAdd.address === p.address);
-          walletState.currentLoggedInWallet.accounts[acc_index].name = accountName.value;
+          if(acc_index == -1){
+            const other_acc_index = walletState.currentLoggedInWallet.others.findIndex((accAdd) => accAdd.address === p.address);
+            walletState.currentLoggedInWallet.others[other_acc_index].name = accountName.value;
+          }
+          else{
+            walletState.currentLoggedInWallet.accounts[acc_index].name = accountName.value;
+          }
           walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
           showName.value = true;
           accountNameDisplay.value = accountName.value;
           err.value = "";
-        } else if (exist_account) {
+        } else if (exist_account || exist_other_account) {
           err.value = "Account name is already taken";
         } else {
           err.value = "Fail to change account name";
