@@ -62,10 +62,12 @@ import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { useToast } from "primevue/usetoast";
+import packageData from "../../package.json"
 import { Connector } from '../models/connector';
 import { listenerState} from "@/state/listenerState";
-import packageData from "../../package.json"
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
+import { TransactionType } from "tsjs-xpx-chain-sdk";
+import { WalletUtils } from "@/util/walletUtils";
 
 export default defineComponent({
   components: {
@@ -266,17 +268,60 @@ export default defineComponent({
      watch(()=> confirmedTxLength.value, (newValue, oldValue)=>{
 
       if(newValue > oldValue){
+        WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
+
         let txLength = newValue - oldValue;
-        let singularPluralText =  txLength > 1 ? "s" : "";
-        toast.add(
+
+        let transactionHashes = listenerState.allConfirmedTransactionsHash.slice(-txLength);
+
+        let swapTransactionsCount = 0;
+        let swapTransactionHash = [];
+
+
+        for(let i =0; i < listenerState.confirmedTransactions.length; ++i){
+          let txs = listenerState.confirmedTransactions[i].confirmedTransactions.filter((tx)=> transactionHashes.includes(tx.transactionInfo.hash));
+
+          for(let x=0; x < txs.length; ++x){
+            let tx = txs[x];
+            if(tx.type === TransactionType.TRANSFER && tx.message.payload && Helper.checkIsJSON(tx.message.payload)){
+              let parsedMessage = JSON.parse(tx.message.payload);
+
+              if(parsedMessage.type && parsedMessage.type.substr(0, 4) === "Swap"){
+                swapTransactionHash.push(tx.transactionInfo.hash);
+              }
+            }
+          }
+        }
+
+        swapTransactionsCount = new Set(swapTransactionHash).size;
+
+        let singularPluralText = swapTransactionsCount > 1 ? "s" : "";
+
+        if(swapTransactionsCount){
+          toast.add(
           {
             severity:'success', 
-            summary: `Transaction${singularPluralText} Confirmed`, 
-            detail: `${txLength} transaction${singularPluralText} confirmed`, 
+            summary: `Swap Transaction${singularPluralText} Confirmed`, 
+            detail: `${swapTransactionsCount} swap transaction${singularPluralText} confirmed`, 
             group: 'br', 
             life: 5000
           }
+          );
+        }
+
+        let remainingTxLength = txLength - swapTransactionsCount;
+        if(remainingTxLength){
+          singularPluralText =  remainingTxLength > 1 ? "s" : "";
+          toast.add(
+            {
+              severity:'success', 
+              summary: `Transaction${singularPluralText} Confirmed`, 
+              detail: `${txLength} transaction${singularPluralText} confirmed`, 
+              group: 'br', 
+              life: 5000
+          }
         );
+        } 
       }
      });
 

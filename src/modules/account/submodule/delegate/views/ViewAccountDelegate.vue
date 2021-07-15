@@ -6,32 +6,47 @@
     </div>
   </div>
 
-  <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>
+  <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>    
+    <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
     <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 mb-8 mt-3">
-      <div class="text-center w-full">
-        <p class="text-sm">{{$t('delegate.linkwarning')}}</p>
-      </div>
+    <div class="text-center w-full">
+        <p class="text-sm" v-if="verifyDelegateAcc() && !otherAccValue==''">{{$t('delegate.delegatemessage2')}} </p>
+        <p class="text-sm" v-else>{{$t('delegate.linkwarning')}}</p>
+    </div>
     </div>
     <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-7 items-center">
       <div class="text-left w-full relative">
-        <div class="text-xs font-bold mb-1">{{$t('delegate.linkingaccount')}}</div>
-        <div>{{$t('delegate.noneselected')}}</div>
+        <div v-if="verifyDelegateAcc() && !otherAccValue==''" class="text-xs font-bold mb-1">{{$t('delegate.delegatepublic')}}</div>
+        <div v-else class="text-xs font-bold mb-1">Linking Account:</div>
+        <div id="delegatePublicKey" v-if="verifyDelegateAcc() && !otherAccValue==''" :copyValue="otherAccValue" copySubject="Delegate Public Key" class="text-xs w-full outline-none bg-gray-100 z-10" >{{otherAccValue}}</div>
+        <div v-else>{{$t('delegate.noneselected')}}</div>
       </div>
-      <div class="inline-block ml-2">
-        <SelectAccountTypeModal />
+      <font-awesome-icon icon="copy" @click="copy('delegatePublicKey')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mr-2" v-if="verifyDelegateAcc() && !otherAccValue==''"></font-awesome-icon>
+      <div v-else class="inline-block ml-2">
+        <SelectAccountTypeModal/>
       </div>
     </div>
-    <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet ' + appStore.state.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+    <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet ' + walletState.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
     <div class="mt-10">
-      <button type="submit" class="default-btn py-1">{{$t('delegate.linkaccount')}}</button>
+       <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw()" v-if="verifyDelegateAcc() && !otherAccValue==''" :disabled="disableLinkBtn">{{$t('delegate.unlinkaccount')}}</button>
+        <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw()" v-else :disabled="disableLinkBtn">{{$t('delegate.linkaccount')}}</button>
     </div>
   </div>
 </template>
 <script>
-import { inject, ref } from "vue";
+
+import { ref,computed } from "vue";
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectAccountTypeModal from '@/modules/account/submodule/delegate/components/SelectAccountTypeModal.vue';
-// import { useToast } from "primevue/usetoast";
+import { walletState } from '@/state/walletState';
+import { WalletUtils } from "@/util/walletUtils";
+import { networkState } from "@/state/networkState";
+import { ChainAPICall } from "@/models/REST/chainAPICall"
+import { ChainUtils } from "@/util/chainUtils"
+import { Helper } from "@/util/typeHelper";
+import { copyToClipboard } from '@/util/functions';
+import { useToast } from "primevue/usetoast";
+import { useRouter } from "vue-router";
 
 export default {
   name: 'ViewAccountDelegate',
@@ -39,17 +54,78 @@ export default {
     PasswordInput,
     SelectAccountTypeModal,
   },
-
-  setup() {
-    // const toast = useToast();
-    const appStore = inject("appStore");
+  props: [
+    'address'
+  ],
+ 
+  setup(p) {
     const walletPassword = ref('');
     const showPasswdError = ref(false);
-    // const siriusStore = inject("siriusStore");
+    const err = ref(false);
+    const otherAccValue = ref('');
+    const router = useRouter();
+    const toast = useToast();
+    const copy = (id) =>{
+      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
+      let copySubject = document.getElementById(id).getAttribute("copySubject");
+      copyToClipboard(stringToCopy);
+      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+    };
+    const passwdPattern = "^[^ ]{8,}$";
+    const disableLinkBtn = computed(
+      () => !(
+        walletPassword.value.match(passwdPattern)
+      )
+    );
+
+    const verifyDelegateAcc = async() => {
+      let chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+      const accountAddress = walletState.currentLoggedInWallet.accounts.find(element => element.address === p.address)
+      if(accountAddress) {
+        let publicAccount = Helper.createPublicAccount(accountAddress.publicKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type)) 
+        const accountInfo = await chainAPICall.accountAPI.getAccountInfo(publicAccount.address);
+        const indexOtherAcc = walletState.currentLoggedInWallet.others.findIndex((other)=> other.publicKey === accountInfo.linkedAccountKey)
+        if(indexOtherAcc > -1) {
+          otherAccValue.value = walletState.currentLoggedInWallet.others[indexOtherAcc].publicKey; 
+        } else {
+          otherAccValue.value = "";
+        }
+      } else {
+        otherAccValue.value = "";
+      }
+    };
+
+
+    const verifyWalletPw = async() => {
+      if (!walletPassword.value == "") {
+        if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)) {
+          if(!otherAccValue.value == '') {
+            const indexOtherAcc = walletState.currentLoggedInWallet.others.findIndex((other)=> other.publicKey === otherAccValue.value)
+            if(indexOtherAcc > -1) {
+              walletPassword.value = "";
+              walletState.currentLoggedInWallet.others.splice(indexOtherAcc,1);
+              walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet); 
+              toast.add({severity:'success', summary: 'Notification', detail: 'Unlink Successfully', group: 'br', life: 5000});            
+              err.value = "";
+              } else {
+
+              }
+            }
+          } else {
+            err.value = "Wallet password is incorrect";
+          }
+      }
+    };
     return {
-      appStore,
       walletPassword,
       showPasswdError,
+      walletState,
+      verifyWalletPw,
+      verifyDelegateAcc,
+      otherAccValue,
+      disableLinkBtn,
+      copy,
+      err
     };
   },
 }

@@ -74,9 +74,10 @@ export default {
       const other_acc = walletState.currentLoggedInWallet.others.find((accname) => accname.name == p.name);
       if(!account){
         if(other_acc){
-         return other_acc;
+          return other_acc;
         }
-       return account;
+      }else{
+        return account;
       }
     };
 
