@@ -59,7 +59,7 @@
       </div>
       <SwapInput v-model="amount" :maxAmount="maxSwapAmount" placeholder="Amount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" type="text" icon="coins" :showError="showAmountErr" 
                 errorMessage="Insufficient balance" emptyErrorMessage="Amount is empty" :disabled="disableAmount" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" />
-      <TextInput placeholder="ETH address to receive your swap" errorMessage="Valid ETH address is required" v-model="ethAddress" icon="wallet" />
+      <TextInput placeholder="ETH address to receive your swap" errorMessage="Valid ETH address is required" :showError="showAddressErr" v-model="ethAddress" icon="wallet" />
       <div class="tex-center font-bold text-lg mb-2">Transaction Fee (ETH Network):</div>
       <div class="md:grid md:grid-cols-3 mb-10">
         <div class="md:col-span-1 mb-3">
@@ -144,6 +144,8 @@ import { Helper } from "@/util/typeHelper";
 import { getCoingeckoCoinPrice, getETH_SafeGwei } from "@/util/functions";
 import { BuildTransactions } from "@/util/buildTransactions";
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
+import { ethers } from 'ethers';
+import { SwapUtils } from '@/util/swapUtils';
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 
@@ -242,6 +244,7 @@ export default {
     const giga = 1000000000;
     const feeMultiply = 1.2;
 
+    const showAddressErr = ref(false);
     const showPasswdError = ref(false);
     const walletPasswd = ref('');
     const passwdPattern = "^[^ ]{8,}$";
@@ -462,14 +465,25 @@ export default {
     }
 
     const swap = () => {
-      changeGasStrategy(ethGasStrategy.value)
-      // console.log(aggreateCompleteTransaction);
-      // let signedTx = account.sign(aggreateCompleteTransaction, networkState.currentNetworkProfile.generationHash);
-      // let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
-      // console.log(signedTx.hash);
-      // let chainAPICall = new ChainAPICall(apiEndpoint);
-      // chainAPICall.transactionAPI.announce(signedTx);
-      currentPage.value = 3;
+      try{
+        let validateAddress = ethers.utils.getAddress(ethAddress.value);
+        if(validateAddress){
+          showAddressErr.value = false;
+        }
+      }catch(err){
+        showAddressErr.value = true;
+      }
+
+      if(!showAddressErr.value){
+        changeGasStrategy(ethGasStrategy.value)
+        // console.log(aggreateCompleteTransaction);
+        // let signedTx = account.sign(aggreateCompleteTransaction, networkState.currentNetworkProfile.generationHash);
+        // let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+        // console.log(signedTx.hash);
+        // let chainAPICall = new ChainAPICall(apiEndpoint);
+        // chainAPICall.transactionAPI.announce(signedTx);
+        currentPage.value = 3;
+      }
     };
 
     //page 3
@@ -480,6 +494,7 @@ export default {
       currentPage,
       selectAccount,
       ethAddress,
+      showAddressErr,
       showPasswdError,
       walletPasswd,
       passwdPattern,
