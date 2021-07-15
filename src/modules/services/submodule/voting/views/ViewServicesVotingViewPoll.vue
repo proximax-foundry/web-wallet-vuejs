@@ -1,9 +1,9 @@
 <template>
   <div class="flex justify-between text-sm">
-    <div><span class="text-gray-400">Vote ></span> <span class="text-blue-primary font-bold">Vote/Results</span></div>
+    <div><span class="text-gray-400">{{$t('vote.vote')}} ></span> <span class="text-blue-primary font-bold">{{$t('vote.voteresults')}}</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServicesVotingPoll'}" class="font-bold">View All</router-link> |
-      <router-link :to="{ name: 'ViewServices'}" class="font-bold">All Services</router-link>
+      <router-link :to="{ name: 'ViewServicesVotingPoll'}" class="font-bold">{{$t('accounts.viewall2')}}</router-link> |
+      <router-link :to="{ name: 'ViewServices'}" class="font-bold">{{$t('services.allservices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line'>
@@ -11,7 +11,7 @@
       <div class="text-xl font-bold">[[ Vote title ]]</div>
       <div class="text-sm my-2">[[ Vote description ]]</div>
       <div class=" border-t-4 border-b-4 border-solid border-gray-300 mt-5 py-2">
-        <div><b>[Status]</b> <div class="inline-block mx-2">></div> Finish <div class="inline-block mx-2">></div> [date] </div>
+        <div><b>[Status]</b> <div class="inline-block mx-2">></div> {{$t('vote.finish')}} <div class="inline-block mx-2">></div> [date] </div>
       </div>
       <div class="border-8 border-solid border-gray-300 mt-10 grid grid-cols-3 h-40 cursor-pointer" v-if="voted" @click="showCertificateModel = true">
         <div class="col-span-2">
@@ -25,7 +25,7 @@
             </div>
             <div class="col-span-3 text-left pl-2 flex">
               <div class="self-center">
-                <b class="text-sm">Hash:</b>
+                <b class="text-sm">{{$t('dashboard.hash')}}:</b>
                 <div class="break-all text-sm mt-2">AD7B610271C4F830BC9EB840029D03CF1C80E0F3A9A68F72A6AC01EEDFDA8ED2</div>
               </div>
             </div>
@@ -40,18 +40,18 @@
         </div>
       </div>
       <div v-else-if="!voted && voteEnded" class="mt-10 p-4 rounded-xl bg-yellow-100">
-        You did not vote in this poll
+        {{$t('vote.votemessage')}}
       </div>
       <div v-else-if="!voted && !voteEnded" class="mt-10">
-        <div><input id="o1" type="radio" value="opt1" name="pollOption" v-model="pollOption" /><label for="o1" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Option 1</label></div>
-        <div><input id="o2" type="radio" value="opt2" name="pollOption" v-model="pollOption" /><label for="o2"  class="cursor-pointer font-bold ml-4 mr-5 text-tsm">option 2</label></div>
-        <div><input id="o3" type="radio" value="opt3" name="pollOption" v-model="pollOption" /><label for="o3"  class="cursor-pointer font-bold ml-4 mr-5 text-tsm">option 3</label></div>
+        <div><input id="o1" type="radio" value="opt1" name="pollOption" v-model="pollOption" /><label for="o1" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">{{$t('vote.option1')}}</label></div>
+        <div><input id="o2" type="radio" value="opt2" name="pollOption" v-model="pollOption" /><label for="o2"  class="cursor-pointer font-bold ml-4 mr-5 text-tsm">{{$t('vote.option2')}}</label></div>
+        <div><input id="o3" type="radio" value="opt3" name="pollOption" v-model="pollOption" /><label for="o3"  class="cursor-pointer font-bold ml-4 mr-5 text-tsm">{{$t('vote.option3')}}</label></div>
       </div>
       <PasswordInput class="mt-10" placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
       <div class="mt-20">
-        <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="voted || voteEnded">Vote</button>
-        <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" @click="showCertificateModel=true" :disabled="!voted">Certificate</button>
-        <button type="submit" class="default-btn py-1 focus:outline-none disabled:opacity-50" @click="showResultModel=true" :disabled="!(voteEnded || (!voteEnded && voted))">Result</button>
+        <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="voted || voteEnded">{{$t('vote.vote')}}</button>
+        <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" @click="showCertificateModel=true" :disabled="!voted">{{$t('swap.certificate')}}</button>
+        <button type="submit" class="default-btn py-1 focus:outline-none disabled:opacity-50" @click="showResultModel=true" :disabled="!(voteEnded || (!voteEnded && voted))">{{$t('vote.result')}}</button>
       </div>
     </div>
     <CertificateModal :showModal="showCertificateModel" />

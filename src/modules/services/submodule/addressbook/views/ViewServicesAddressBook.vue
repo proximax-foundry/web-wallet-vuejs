@@ -1,9 +1,9 @@
 <template>
   <div class="flex justify-between text-sm">
-    <div><span class="text-gray-400">Address Book ></span> <span class="text-blue-primary font-bold">List</span></div>
+    <div><span class="text-gray-400">{{$t('services.addressbook')}} ></span> <span class="text-blue-primary font-bold">{{$t('services.list')}}</span></div>
     <div>
-      <router-link :to="{name: 'ViewServicesAddressBookAddContacts'}" class="font-bold" active-class="accounts">Add New Contact</router-link> |
-      <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">All Services</router-link>
+      <router-link :to="{name: 'ViewServicesAddressBookAddContacts'}" class="font-bold" active-class="accounts">{{$t('services.addnewcontact')}}</router-link> |
+      <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">{{$t('services.allservices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line'>

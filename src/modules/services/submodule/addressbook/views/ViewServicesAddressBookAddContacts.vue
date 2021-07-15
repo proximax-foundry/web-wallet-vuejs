@@ -1,9 +1,9 @@
 <template>
   <div class="flex justify-between text-sm">
-    <div><span class="text-gray-400">Address Book ></span> <span class="text-blue-primary font-bold">Add Contacts</span></div>
+    <div><span class="text-gray-400">{{$t('services.addressbook')}} ></span> <span class="text-blue-primary font-bold">{{$t('services.addcontacts')}}</span></div>
     <div>
-      <router-link :to="{name: 'ViewServicesAddressBook'}" class="font-bold" active-class="accounts">Address Book</router-link> | 
-      <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">All Services</router-link>
+      <router-link :to="{name: 'ViewServicesAddressBook'}" class="font-bold" active-class="accounts">{{$t('services.addressbook')}}</router-link> | 
+      <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">{{$t('services.allservices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>
@@ -13,8 +13,8 @@
         <TextInput placeholder="Name" errorMessage="Name required" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
         <TextInput placeholder="Address" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" />
         <div class="mt-10">
-          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
-          <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="SaveContact()">Save</button>
+          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
+          <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="SaveContact()">{{$t('accounts.save')}}</button>
         </div>
       </fieldset>
     </form>
