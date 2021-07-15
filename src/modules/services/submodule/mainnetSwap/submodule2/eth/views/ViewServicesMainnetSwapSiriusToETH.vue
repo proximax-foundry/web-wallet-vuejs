@@ -33,7 +33,7 @@
       <p class="text-tsm my-5 text-gray-400">This is a list of your Sirius Accounts available in this wallet.</p>
       <div class="text-lg my-7 font-bold">Please select a Sirius account</div>
       <div v-for="acc of allAvailableAccounts" :key="acc.name">
-        <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100 transition" @click="selectAccount(acc.name)">
+        <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100 transition" @click="selectAccount(acc.name, acc.address)">
           <div class="text-tsm ml-3 text-gray-700">
             <div><b>Account Name:</b> {{ acc.name }}</div>
             <div><b>Sirius Address:</b> {{ acc.address }}</div>
@@ -47,6 +47,7 @@
     </div>
     <div v-if="currentPage==2">
       <div class="text-lg my-7 font-bold">Transaction Details</div>
+      <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
       <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left">
         <div class="text-tsm ml-3 text-gray-700">
           <div><b>Account Name:</b> {{ selectedAccount.name }}</div>
@@ -59,7 +60,7 @@
       </div>
       <SwapInput v-model="amount" :maxAmount="maxSwapAmount" placeholder="Amount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" type="text" icon="coins" :showError="showAmountErr" 
                 errorMessage="Insufficient balance" emptyErrorMessage="Amount is empty" :disabled="disableAmount" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" />
-      <TextInput placeholder="ETH address to receive your swap" errorMessage="Valid ETH address is required" v-model="ethAddress" icon="wallet" />
+      <TextInput placeholder="ETH address to receive your swap" errorMessage="Valid ETH address is required" :showError="showAddressErr" v-model="ethAddress" icon="wallet" />
       <div class="tex-center font-bold text-lg mb-2">Transaction Fee (ETH Network):</div>
       <div class="md:grid md:grid-cols-3 mb-10">
         <div class="md:col-span-1 mb-3">
@@ -140,10 +141,13 @@ import SwapInput from '@/modules/services/submodule/mainnetSwap/components/SwapI
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
 import { walletState } from '@/state/walletState';
 import { networkState } from '@/state/networkState';
+import { WalletUtils } from "@/util/walletUtils";
 import { Helper } from "@/util/typeHelper";
 import { getCoingeckoCoinPrice, getETH_SafeGwei } from "@/util/functions";
 import { BuildTransactions } from "@/util/buildTransactions";
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
+import { ethers } from 'ethers';
+import { SwapUtils } from '@/util/swapUtils';
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 
@@ -191,9 +195,11 @@ export default {
     const includeMultisig = false;
 
     const selectedAccountName = ref("");
-    const selectAccount = (name) => {
+    const selectedAccountAddress = ref("");
+    const selectAccount = (name, address) => {
       currentPage.value = 2;
       selectedAccountName.value = name;
+      selectedAccountAddress.value = address;
 
       if(ethGasStrategy.value === ""){
         changeGasStrategy("standard");
@@ -242,11 +248,13 @@ export default {
     const giga = 1000000000;
     const feeMultiply = 1.2;
 
+    const showAddressErr = ref(false);
     const showPasswdError = ref(false);
     const walletPasswd = ref('');
     const passwdPattern = "^[^ ]{8,}$";
     const showAmountErr = ref(false);
     const disableAmount = ref(false);
+    const err = ref('');
     const ethAddress = ref('');
     const isDisabledSwap = computed(() => 
       !(amount.value > 0 && walletPasswd.value.match(passwdPattern) && ethAddress.value != '' )
@@ -462,14 +470,25 @@ export default {
     }
 
     const swap = () => {
-      changeGasStrategy(ethGasStrategy.value)
-      // console.log(aggreateCompleteTransaction);
-      // let signedTx = account.sign(aggreateCompleteTransaction, networkState.currentNetworkProfile.generationHash);
-      // let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
-      // console.log(signedTx.hash);
-      // let chainAPICall = new ChainAPICall(apiEndpoint);
-      // chainAPICall.transactionAPI.announce(signedTx);
-      currentPage.value = 3;
+      try{
+        let validateAddress = ethers.utils.getAddress(ethAddress.value);
+        if(validateAddress){
+          showAddressErr.value = false;
+        }
+      }catch(err){
+        showAddressErr.value = true;
+      }
+
+      if(!showAddressErr.value){
+        if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPasswd.value)) {
+          err.value = "";
+          changeGasStrategy(ethGasStrategy.value);
+          SwapUtils.swapXPXtoEXPX(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
+          // currentPage.value = 3;
+        } else {
+          err.value = "Wallet password is incorrect";
+        }
+      }
     };
 
     //page 3
@@ -480,6 +499,7 @@ export default {
       currentPage,
       selectAccount,
       ethAddress,
+      showAddressErr,
       showPasswdError,
       walletPasswd,
       passwdPattern,
@@ -489,6 +509,7 @@ export default {
       updateAmountToMax,
       ethGasStrategy,
       isDisabledSwap,
+      err,
       swap,
       savedCheck,
       allAvailableAccounts,
