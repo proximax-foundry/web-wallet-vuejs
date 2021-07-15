@@ -8,8 +8,8 @@
       <input v-maska="'#*.######'" :disabled="disabled == true"  class="text-placeholder bg-white text-right" :value="parseFloat(modelValue)" @input="$emit('update:modelValue', parseFloat($event.target.value))" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
       <div class="w-5"></div>
     </div>
-    <div class="h-3 mb-2 inline-block"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
-    <div class="float-right text-gray-600 text-xs mr-3" v-if="isShowRemark==true && remarkOption">Maximum amount after deducting transaction fee <b>[[transaction fee]] xpx</b> and gas fee <b>[[gas fee]]xpx</b></div>
+    <div class="h-3 mb-2 inline-block float-left my-2"><div class="error error-text" v-if="textErr || showError">{{ errorMessage }}</div></div>
+    <div class="float-right text-gray-600 text-xs mr-3 my-2" v-if="isShowRemark==true && remarkOption">Maximum amount after deducting transaction fee <b>[[transaction fee]] xpx</b> and gas fee <b>[[gas fee]]xpx</b></div>
   </div>
 </template>
 

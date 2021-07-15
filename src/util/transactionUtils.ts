@@ -170,7 +170,7 @@ export const transactionTypeName = {
 
 export class TransactionUtils {
 
-  static async getAccInfo(address: Address, accountHttp: AccountHttp): Promise<AccountInfo> {
+  static async getAccInfo(address: Address): Promise<AccountInfo> {
 
     const chainAPICall = new ChainAPICall(networkAPIEndpoint.value);
 
@@ -225,6 +225,16 @@ export class TransactionUtils {
     let transactions = await ChainUtils.getAccountTransactions(publicAccount, queryParams);
 
     return transactions;
+  }
+
+  static announceTransaction(signedTx: SignedTransaction): void {
+
+    ChainUtils.announceTransaction(signedTx);
+  }
+
+  static announceBondedTransaction(signedTx: SignedTransaction): void {
+
+    ChainUtils.announceBondedTransaction(signedTx);
   }
 
   static getTransactionTypeName(type: number): string | null {

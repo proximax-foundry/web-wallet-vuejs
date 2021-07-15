@@ -10,7 +10,7 @@ import {
     MosaicNonce,
     WalletAlgorithm,
     AliasActionType,
-    QueryParams,
+    QueryParams
 } from "tsjs-xpx-chain-sdk";
 import Base64 from 'crypto-js/enc-base64';
 import { WalletAcountType } from "../models/const/otherAccountType";
@@ -161,6 +161,15 @@ export class Helper{
 
       static createQueryParams(pageSize: number, idToStartFrom?: string | undefined){
           return new QueryParams(pageSize, idToStartFrom);
+      }
+
+      static checkIsJSON(data: string): boolean{
+        try {
+            JSON.parse(data);
+            return true;
+        } catch (error) {
+            return false;
+        }
       }
 }
 

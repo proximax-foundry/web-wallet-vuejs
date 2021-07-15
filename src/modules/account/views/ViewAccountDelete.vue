@@ -68,9 +68,17 @@ export default {
 
       toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
     };
+
     const getAcccountDetails = () => {
-      const account = walletState.currentLoggedInWallet.accounts.find((element) => element.name == (p.name));
-      return account;
+      const account = walletState.currentLoggedInWallet.accounts.find((accname) => accname.name == (p.name));
+      const other_acc = walletState.currentLoggedInWallet.others.find((accname) => accname.name == p.name);
+      if(!account){
+        if(other_acc){
+          return other_acc;
+        }
+      }else{
+        return account;
+      }
     };
 
     // get account details

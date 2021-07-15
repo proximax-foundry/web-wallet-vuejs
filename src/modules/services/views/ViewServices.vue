@@ -31,9 +31,9 @@ export default {
         {name: 'Link to Namespace', link: 'ViewServicesAssetsLinkToNamespace'}
       ]},
       {name: 'Mainnet Swap', desc: 'Swap from NEM to Sirius', img: 'icon-swap-process-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        { name: 'NIS1 to Sirius', link: 'ViewServicesMainnetSwapNIS1ToSirius'},
-        { name: 'Sirius to ETH', link: 'ViewServicesMainnetSwapSiriusToETH'},
-        { name: 'Sirius to BSC', link: 'ViewServicesMainnetSwapSiriusToBSC'},
+        { name: 'NIS1', link: 'ViewServicesMainnetSwapNIS1ToSirius'},
+        { name: 'ETH', link: 'ViewServicesMainnetSwapEthOptions'},
+        { name: 'BSC', link: 'ViewServicesMainnetSwapBscOptions'},
       ]},
       {name: 'Address Book', desc: 'Assign labels to addresses', img: 'icon-address-book-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: 'List', link: 'ViewServicesAddressBook'},
@@ -60,7 +60,7 @@ export default {
       {name: 'Notifications', desc: 'Check alerts and information about your accounts', img: 'icon-notifications-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: 'Notifications', link: 'ViewServicesNotifications'},
       ]},
-      {name: 'Voting', desc: 'Create, vote, and view results', img: 'icon-voting-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+      {name: 'Voting', desc: 'Create, vote, and view results', img: 'icon-voting-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
         {name: 'Create Poll', link: 'ViewServicesVotingCreatePoll'},
         {name: 'Vote', link: 'ViewServicesVotingPoll'},
         {name: 'View Results', link: ''},

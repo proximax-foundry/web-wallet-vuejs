@@ -30,6 +30,13 @@ export class OtherAccount extends Account{
         this.namespaces.push(namespace);
     }
 
+    findNamespaceNameByAsset(assetId: string): Namespace[] | null{
+
+        let foundNamespaces = this.namespaces.filter((ns)=> ns.linkedId === assetId);
+
+        return foundNamespaces ? foundNamespaces: null;
+    }
+
     removeNamespace(id: string): void{
         const index = this.namespaces.findIndex((namespace)=> namespace.idHex === id);
 
