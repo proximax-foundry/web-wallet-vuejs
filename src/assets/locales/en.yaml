@@ -336,10 +336,13 @@ delegate:
   confirm: "Confirm"
   linkmessage: "Please fill in the private key of the linking account."
   delegate: "Delegate"
+  linkmessage2: "Your account is linked to a delegated account"
   linkwarning: "Your account is not linked to a delegated account"
   linkingaccount: "Linking Account:"
   linkaccount: "Link New Account"
   noneselected: "None Selected"
+  unlinkaccount: "Unlink Account"
+  delegatepublic: "Public key of the delegated account"
 namespace:
   linknamespace: "Link to Namespace"
   namespacemessage: "You have not created a namespace"
