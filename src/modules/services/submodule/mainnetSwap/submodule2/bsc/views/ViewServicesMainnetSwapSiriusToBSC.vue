@@ -480,7 +480,7 @@ export default {
       }
 
       if(!showAddressErr.value){
-        if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPasswd.value)) {
+        if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPasswd.value)) {
           err.value = "";
           changeGasStrategy(bscGasStrategy.value);
           SwapUtils.swapXPXtoBXPX(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
