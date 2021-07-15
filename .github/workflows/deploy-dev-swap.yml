@@ -3,7 +3,7 @@ name: deploy-dev-swap
 on:
   push:
     branches: 
-      - swap-wallet
+      - swap-wallet-new
 
 jobs:
   # This workflow contains a single job called "build"
