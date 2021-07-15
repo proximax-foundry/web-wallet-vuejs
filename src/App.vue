@@ -1,7 +1,8 @@
 <template>
   <div class="flex flex-col h-screen justify-between" @click="clickEvent">
-    <Toast />
     <Toast position="top-left" group="tl" />
+    <Toast position="top-right" group="tr" />
+    <Toast position="center" group="center" />
     <Toast position="bottom-left" group="bl" />
     <Toast position="bottom-right" group="br" style="word-break: break-all;" />
     <ConfirmDialog></ConfirmDialog>
@@ -28,12 +29,16 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance } from "vue";
-import { walletState } from "@/state/walletState";
+import { computed, defineComponent, getCurrentInstance, watch } from "vue";
 import headerComponent from '@/components/headerComponent.vue'
 import NavigationMenu from '@/components/NavigationMenu.vue'
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
+import { Connector } from './models/connector';
+import { networkState } from './state/networkState';
+import { walletState } from "@/state/walletState";
+import { listenerState } from "@/state/listenerState";
+import { ChainUtils } from "@/util/chainUtils";
 
 export default defineComponent({
   name: 'App',
@@ -62,7 +67,7 @@ export default defineComponent({
       login,
       clickEvent,
     }
-  },
+  }
 });
 </script>
 

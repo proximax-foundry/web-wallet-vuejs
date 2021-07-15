@@ -39,6 +39,7 @@ import {
     MosaicAliasTransactionBuilder,
     LinkAction,
     Message,
+    EmptyMessage,
 } from 'tsjs-xpx-chain-sdk';
 import { WalletUtils } from "./walletUtils";
 import { Helper } from "./typeHelper";
@@ -66,12 +67,16 @@ export class BuildTransactions {
         this.transactionBuilderFactory.generationHash = generationHash;
     }
 
-    transfer(recipient: Address | NamespaceId, message: Message, sendingMosaics?: Mosaic[]): TransferTransaction {
+    transfer(recipient: Address | NamespaceId, message?: Message, sendingMosaics?: Mosaic[]): TransferTransaction {
         let mosaics: any = [];
 
         if (sendingMosaics) {
             if (sendingMosaics.length)
                 mosaics = sendingMosaics;
+        }
+
+        if(!message){
+            message = EmptyMessage;
         }
 
         return this.transactionBuilderFactory.transfer()
@@ -279,5 +284,9 @@ export class BuildTransactions {
 
     getFeeStrategy(): FeeCalculationStrategy {
         return this.transactionBuilderFactory.feeCalculationStrategy;
+    }
+
+    setFeeStrategy(feeStrategy :FeeCalculationStrategy) :void{
+        this.transactionBuilderFactory.feeCalculationStrategy = feeStrategy; 
     }
 }

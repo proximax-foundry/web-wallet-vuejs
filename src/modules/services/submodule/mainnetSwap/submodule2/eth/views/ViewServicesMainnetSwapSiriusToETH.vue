@@ -482,6 +482,8 @@ export default {
       if(!showAddressErr.value){
         if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPasswd.value)) {
           err.value = "";
+          
+          updateRemoteAddress();
           changeGasStrategy(ethGasStrategy.value);
           SwapUtils.swapXPXtoEXPX(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
           // currentPage.value = 3;

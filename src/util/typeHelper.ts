@@ -10,7 +10,7 @@ import {
     MosaicNonce,
     WalletAlgorithm,
     AliasActionType,
-    QueryParams,
+    QueryParams
 } from "tsjs-xpx-chain-sdk";
 import Base64 from 'crypto-js/enc-base64';
 import { WalletAcountType } from "../models/const/otherAccountType";

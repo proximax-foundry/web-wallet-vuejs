@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { computed, defineComponent, getCurrentInstance, ref, watch } from "vue"; //getCurrentInstance
+import { computed, defineComponent, getCurrentInstance, ref, watch } from "vue";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { useRouter } from "vue-router";
@@ -136,6 +136,8 @@ export default defineComponent({
       // console.log(e.value.value);
     }
 
+    const currentNetworkType = computed(()=> networkState.currentNetworkProfile ? networkState.currentNetworkProfile.network.type : null);
+
     const logout = () => {
       WalletStateUtils.doLogout();
 
@@ -160,13 +162,11 @@ export default defineComponent({
     let listener = ref(new Connector("", []));
 
     const connectListener = (skipIfEndpointHaveValue = true)=>{
-      
-      console.log("Connecting");
 
       if(skipIfEndpointHaveValue && listener.value.endpoint !== ""){
         return;
       }
-    
+
       if(listener.value.endpoint){
         ListenerStateUtils.lightReset();
       }
@@ -289,12 +289,16 @@ export default defineComponent({
       selectNetwork,
       chainAPIEndpoint,
       chainsNetworkOption,
-      currentNativeTokenName
+      currentNativeTokenName,
+      listener
     };
   },
   created() {
     this.headerMenuHandler();
     window.addEventListener("resize", this.headerMenuHandler);
+  },
+  beforeUnmount(){
+    this.listener.terminate();
   },
   unmounted() {
     window.removeEventListener("resize", this.headerMenuHandler);

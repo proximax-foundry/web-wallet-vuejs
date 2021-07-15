@@ -108,7 +108,7 @@ import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { Account, Address, EncryptedMessage, PublicAccount } from "tsjs-xpx-chain-sdk";
 import { dataBridge } from '@/util/dataBridge.js';
-import { multiSign } from '@/util/multiSignatory.js';
+import { multiSign } from '@/util/multiSignatory';
 import {
   UInt64,
 } from "tsjs-xpx-chain-sdk";
