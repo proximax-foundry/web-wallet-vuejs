@@ -482,6 +482,7 @@ export default {
       if(!showAddressErr.value){
         if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPasswd.value)) {
           err.value = "";
+          updateRemoteAddress();
           changeGasStrategy(ethGasStrategy.value);
           SwapUtils.swapXPXtoEXPX(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
           // currentPage.value = 3;
@@ -550,7 +551,8 @@ export default {
 }
 
 .ethGasStrategy.option{
-  transition: all 0.5s;
+
+transition: all 0.5s;
   @apply text-gray-600 bg-white border-gray-200 hover:bg-blue-100 hover:border-blue-100;
   p{
     @apply text-blue-primary;
