@@ -53,11 +53,16 @@
     </nav>
     <nav class="navbar h-9" v-else>
     </nav> -->
-    <nav class="navbar h-8 text-white font-bold">ProximaX Swap Service</nav>
+    <nav class="navbar h-8 text-white font-bold">ProximaX Swap Service
+      <a class="h-8 text-white font-bold" @click="getExplorerUrl">Explorer</a>
+    </nav>
   </div>
 </template>
 
 <script>
+import { computed } from "vue";
+import { walletState } from '@/state/walletState';
+import { networkState } from "@/state/networkState";
 export default{
   name: 'NavigationMenu',
   data() {
@@ -101,6 +106,19 @@ export default{
   },
   unmounted() {
     window.removeEventListener("resize", this.navMenuHandler);
+  },
+  setup(){
+    const publicKeyExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.publicKeyRoute);
+    const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
+    const wallet = walletState.currentLoggedInWallet.accounts[0];
+   
+    const getExplorerUrl = () =>{
+      const explorerurl = window.open(explorerBaseURL.value + publicKeyExplorerURL.value + "/" + wallet.publicKey);
+      return explorerurl;
+    }
+    return {
+      getExplorerUrl
+    }
   },
 }
 </script>
