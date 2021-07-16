@@ -10,7 +10,7 @@
           <div class="delete-position">
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
           </div>
-          <h1 class="default-title font-bold my-0">Contacts</h1>
+          <h1 class="default-title font-bold my-0">{{$t('accounts.contacts')}}</h1>
           <SelectInputPlugin placeholder="Contact" errorMessage="" v-model="selectContact" :options="contact" @default-selected="selectContact=0" @show-selection="selectCosign" />
         </div>
       </div>

@@ -5,7 +5,7 @@
         <input v-model="filters['global'].value" type="text" class="w-full outline-none text-sm" placeholder="Search" @click="clickInputText()" @blur="blurInputText()">
       </div>
       <a @click="exportCSV($event)" class="export-icon border-gray-300 border rounded-lg bg-gray-100 w-18 h-9 ml-3 relative flex-none">
-        <div class="absolute inline-block text-tsm text-gray-500" style="right: 10px; top: 6px;">Export</div>
+        <div class="absolute inline-block text-tsm text-gray-500" style="right: 10px; top: 6px;">{{$t('accounts.export')}}</div>
         <font-awesome-icon icon="file-export" class="w-5 h-5 text-gray-400 cursor-pointer inline-block absolute" style="top: 5px; left: 8px;" title="Download CSV file"></font-awesome-icon>
       </a>
       <DisplayImportContactModal class="inline-block w-24 ml-1 flex-none" />
@@ -38,7 +38,7 @@
         </template>
       </Column>
       <template #empty>
-        No records found
+        {{$t('services.norecord')}}
       </template>
     </DataTable>
   </div>

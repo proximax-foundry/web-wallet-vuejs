@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a @click="toggleModal = !toggleModal" class="block big-default-btn my-3 self-center">Sign In With SiriusID</a>
+    <a @click="toggleModal = !toggleModal" class="block big-default-btn my-3 self-center">{{$t('welcome.signinwithsiriusid')}}</a>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -10,10 +10,10 @@
           <div class="delete-position">
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
           </div>
-          <h1 class="default-title">Sign in your wallet by scanning this QR Code using your SiriusID app.</h1>
-          <p class="text-sm mt-5">This popup will close automatically when your sign in from the SiriusID app.</p>
+          <h1 class="default-title">{{$t('siriusid.qr')}}.</h1>
+          <p class="text-sm mt-5">{{$t('siriusid.close')}}.</p>
           <img src="@/modules/home/img/download.gif" class="inline-block w-40 mb-10 mt-6">
-          <p>Don't have app? Download it from your store</p>
+          <p>{{$t('siriusid.install')}}</p>
           <div class="flex justify-center my-3">
             <a href="https://apps.apple.com/us/app/proximax-siriusid/id1496615202" target=_new class="inline-block mr-2"><img src="@/modules/home/img/app-store.png" class="w-32"></a>
             <a href="https://play.google.com/store/apps/details?id=io.proximax.siriusID" target=_new class="inline-block ml-2"><img src="@/modules/home/img/google-play.png" class="w-32"></a>

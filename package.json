@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint",
     "build-development": "cross-env NODE_ENV=development vue-cli-service build",
     "build-staging": "cross-env NODE_ENV=staging vue-cli-service build",
+    "i18n:report": "vue-cli-service i18n:report --src \"./src/**/*.?(js|vue)\" --locales \"./src//assets/locales/**/*.json\"",
     "test": "npx nightwatch --config tests/config/nightwatch.conf.js --headless --no-sandbox tests"
   },
   "dependencies": {
@@ -51,6 +52,7 @@
     "vue3-simple-file-input": "^1.0.3"
   },
   "devDependencies": {
+    "@intlify/vue-i18n-loader": "^2.1.0",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "@vue/cli-plugin-eslint": "~4.5.0",
@@ -65,7 +67,8 @@
     "eslint-plugin-vue": "^7.11.1",
     "geckodriver": "^2.0.0",
     "nightwatch": "^1.7.3",
-    "typescript": "~4.1.5"
+    "typescript": "~4.1.5",
+    "vue-cli-plugin-i18n": "~2.1.1"
   },
   "optionalDependencies": {
     "fsevents": ">=1.0.0 <2.3.2"

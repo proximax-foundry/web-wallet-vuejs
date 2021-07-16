@@ -8,15 +8,15 @@
       <div style="width: 400px;" class="break-words p-2">
         <div class="subcontent">
           <div>
-            <div>Type:</div>
+            <div>{{$t('dashboard.type')}}:</div>
             <div>{{ typeTransactionHex }}</div>
           </div>
           <div>
-            <div>Mosaic Id:</div>
+            <div>{{$t('dashboard.mosaicid')}}:</div>
             <div>{{ mosaicId }}</div>
           </div>
           <div>
-            <div>Increase:</div>
+            <div>{{$t('dashboard.increase')}}:</div>
             <!-- <div>{{ appStore.pretty(innerTransaction.signer.address.address) }}</div> -->
             <div class="text-green-800" v-if="innerTransaction.direction === 1">+ {{ delta }}</div>
             <div class="text-red-600" v-else>- {{ delta }}</div>

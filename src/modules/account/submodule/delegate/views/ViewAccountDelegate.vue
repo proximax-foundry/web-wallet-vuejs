@@ -1,26 +1,26 @@
 <template>
   <div class="flex justify-between text-sm">
-    <div><span class="text-gray-400">Accounts ></span> <span class="text-blue-primary font-bold">Delegate</span></div>
+    <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('delegate.delegate')}}</span></div>
     <div>
-      <router-link :to="{name: 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">View all accounts</router-link>
+      <router-link :to="{name: 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('accounts.viewall')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>    
     <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
     <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 mb-8 mt-3">
     <div class="text-center w-full">
-        <p v-cloak class="text-sm" v-if="verifyDelegateAcc() && !delegateAcc==''">Your account is linked to a delegated account </p>
-        <p v-cloak class="text-sm" v-else>Your account is not linked to a delegated account</p>
+        <p v-cloak class="text-sm" v-if="verifyDelegateAcc() && !delegateAcc==''">{{$t('delegate.delegatemessage2')}}</p>
+        <p v-cloak class="text-sm" v-else>{{$t('delegate.linkwarning')}}</p>
     </div>
     </div>
     <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-7 items-center">
       <div class="text-left w-full relative">
-        <div v-cloak v-if="verifyDelegateAcc() && !delegateAcc==''" class="text-xs font-bold mb-1">Public key of the delegated account</div>
+        <div v-cloak v-if="verifyDelegateAcc() && !delegateAcc==''" class="text-xs font-bold mb-1">{{$t('delegate.delegatepublic')}}</div>
         <div v-cloak v-else class="text-xs font-bold mb-1">Linking Account:</div>
         <div v-cloak v-if="verifyDelegateAcc() && !delegateAcc==''" id="delegatePublicKey" :copyValue="delegateAcc" copySubject="Delegate Public Key" class="text-xs w-full outline-none bg-gray-100 z-10" >{{delegateAcc}}</div>
         <div v-else-if="newAcc != ''">New Account</div>
         <div v-else-if="newAccPK != ''">From Private Key</div>
-        <div v-else>None selected</div>
+        <div v-else>{{$t('delegate.noneselected')}}</div>
       </div>
       <font-awesome-icon icon="copy" @click="copy('delegatePublicKey')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mr-2" v-if="verifyDelegateAcc() && !delegateAcc==''"></font-awesome-icon>
       <div v-cloak v-else class="inline-block ml-2">
@@ -29,8 +29,8 @@
     </div>
     <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet ' + walletState.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
     <div class="mt-10">
-      <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw" v-if="verifyDelegateAcc() && !delegateAcc==''" :disabled="disableLinkBtn">Unlink Linked Account</button>
-      <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw" v-else :disabled="disableLinkBtn">Link New Account</button>
+      <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw" v-if="verifyDelegateAcc() && !delegateAcc==''" :disabled="disableLinkBtn">{{$t('delegate.unlinkaccount')}}</button>
+      <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw" v-else :disabled="disableLinkBtn">{{$t('delegate.linkaccount')}}</button>
     </div>
   </div>
 </template>
