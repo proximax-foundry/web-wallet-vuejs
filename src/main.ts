@@ -93,6 +93,13 @@ const chainProfileIntegration = async () => {
       chainProfileStore.init();
       const chainProfileData = chainProfilesData[chainProfileName];
 
+      if(chainProfileData['swapData']){
+        let chainSwapConfig = new ChainSwapConfig(chainProfileName);
+        chainSwapConfig.updateConfig(chainProfileData['swapData']);
+
+        chainSwapConfig.saveToLocalStorage();
+      }
+
       if(chainProfileStore.getVersion() !== chainProfileData['version']){
 
         chainProfileStore.version = chainProfileData['version'];
@@ -103,13 +110,6 @@ const chainProfileIntegration = async () => {
         chainProfileStore.network = chainProfileData['network'];
 
         chainProfileStore.saveToLocalStorage();
-
-        if(chainProfileData['swapData']){
-          let chainSwapConfig = new ChainSwapConfig(chainProfileName);
-          chainSwapConfig.updateConfig(chainProfileData['swapData']);
-
-          chainSwapConfig.saveToLocalStorage();
-        }
 
         const endpoint = ChainUtils.buildAPIEndpoint(chainProfileStore.apiNodes[0], chainProfileStore.httpPort);
 
