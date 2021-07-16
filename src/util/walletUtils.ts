@@ -959,6 +959,18 @@ export class WalletUtils {
         return new_nis1Account;
     }
 
+    static async confirmedTransactionRefresh(wallet: Wallet, currencyMosaicId: string): Promise<void>{
+        wallet.others = [];
+
+        await WalletUtils.updateWalletMultisigInfo(wallet);
+        WalletUtils.populateOtherAccountTypeMultisig(wallet);
+        await WalletUtils.updateWalletAccountDetails(wallet, true);
+        await WalletUtils.updateWalletOtherAccountMultisigInfo(wallet);
+        await WalletUtils.updateOtherAccountDetails(wallet);
+
+        WalletUtils.updateAllAccountBalance(wallet, currencyMosaicId);
+    }
+
     static async refreshAllAccountDetails(wallet: Wallet, networkProfile: ChainProfile): Promise<void>{
         wallet.others = [];
 

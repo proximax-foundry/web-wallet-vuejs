@@ -62,6 +62,9 @@ export class ChainProfileNames extends StoreProperties {
     }
 
     replaceAndUpdateWallet(oldName: string, newName: string, index: number): boolean{
+        if(this.names.includes(newName)){
+            return false;
+        }
         if(oldName !== newName){
             const allWallets = new Wallets();
             let newWallets: Wallet[];
