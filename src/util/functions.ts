@@ -57,16 +57,6 @@ export const getXPXcurrencyPrice = async (balance: number):Promise<number> => {
   return total;
 }
 
-export const getETH_SafeGwei = async (baseUrl: string):Promise<any>=>{
-
-  return fetch(`${baseUrl}/gasprice/eth`).then(res => res.json());
-}
-
-export const getBSC_SafeGwei = async (baseUrl: string):Promise<any>=>{
-
-  return fetch(`${baseUrl}/gasprice/bsc`).then(res => res.json());
-}
-
 
 
 

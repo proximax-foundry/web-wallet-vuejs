@@ -37,7 +37,7 @@
           <div class="text-tsm ml-3 text-gray-700">
             <div><b>Account Name:</b> {{ acc.name }}</div>
             <div><b>Sirius Address:</b> {{ acc.address }}</div>
-            <div><b>Sirius balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> {{ acc.balanceDisplay}} XPX</div>
+            <div><b>Sirius balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> {{ acc.balanceDisplay }} XPX</div>
           </div>
           <div class="self-center">
             <img src="@/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg" class="w-10 inline mr-3">
@@ -101,15 +101,15 @@
         </div>
       </div>
       <div class="mt-10">
-        <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Maybe Later</button>
-        <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="swap">Yes, Swap</button>
+        <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">Maybe Later</button>
+        <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?'Swap in progress. Please wait...':'Yes, Swap' }}</button>
       </div>
     </div>
     <div v-if="currentPage==3">
       <div>
         <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
         <div class="text-sm mb-7">The swap process has already started!</div>
-        <swap-certificate-component networkTerm="BSC" swapType="Outgoing" />
+        <swap-certificate-component networkTerm="BSC" swapType="Outgoing" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :siriusAddress="selectedAccountAddress" :swapQr="swapQr" />
         <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
           <div class="text-center w-full">
             <div class="w-8 h-8 inline-block relative">
@@ -125,8 +125,8 @@
           <span class="ml-2 cursor-pointer text-tsm">I confirm that i have saved a copy of my certificate.</span>
         </label>
         <div class="mt-10">
-          <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32">Save</button>
-          <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50 w-32" :disabled="!savedCheck" >Done</button>
+          <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none mr-4 w-32" @click="saveCertificate">Save</button>
+          <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-32" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
         </div>
       </div>
     </div>
@@ -136,20 +136,22 @@
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
-import TextInput from '@/components/TextInput.vue'
+import TextInput from '@/components/TextInput.vue';
 import SwapInput from '@/modules/services/submodule/mainnetSwap/components/SwapInput.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
 import { walletState } from '@/state/walletState';
 import { networkState } from '@/state/networkState';
 import { WalletUtils } from "@/util/walletUtils";
 import { Helper } from "@/util/typeHelper";
-import { getCoingeckoCoinPrice, getBSC_SafeGwei } from "@/util/functions";
+import { getCoingeckoCoinPrice } from "@/util/functions";
 import { BuildTransactions } from "@/util/buildTransactions";
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
+import { useToast } from "primevue/usetoast";
 import { ethers } from 'ethers';
 import { SwapUtils } from '@/util/swapUtils';
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
+import { listenerState} from "@/state/listenerState";
 
 export default {
   name: 'ViewServicesMainnetSwapSiriusToBSC',
@@ -162,7 +164,7 @@ export default {
   },
 
   setup() {
-
+    const toast = useToast();
     const router = useRouter();
     const displayTimer = ref(true);
     const timerSeconds = ref(180);
@@ -248,16 +250,19 @@ export default {
     // page 2
     const giga = 1000000000;
     const feeMultiply = 1.2;
+
     const showAddressErr = ref(false);
+    const isDisabledCancel = ref(false);
+    const swapInProgress = ref(false);
     const showPasswdError = ref(false);
     const walletPasswd = ref('');
     const passwdPattern = "^[^ ]{8,}$";
     const showAmountErr = ref(false);
     const disableAmount = ref(false);
-    const bscAddress = ref('');
     const err = ref('');
+    const bscAddress = ref('');
     const isDisabledSwap = computed(() => 
-      !(amount.value > 0 && walletPasswd.value.match(passwdPattern) && bscAddress.value != '' )
+      !(amount.value > 0 && walletPasswd.value.match(passwdPattern) && bscAddress.value != '' && !swapInProgress.value )
     );
     const amount = ref(0);
 
@@ -267,7 +272,7 @@ export default {
     const buildClass = new BuildTransactions(networkState.currentNetworkProfile.network.type);
     const transferBuilder = buildClass.transferBuilder();
     const aggregateBuilder = buildClass.aggregateCompleteBuilder();
-    
+
     let message1 = {
       type: "Swap-xpx-bsc",
       remoteAddress: "0".repeat(42) 
@@ -288,6 +293,8 @@ export default {
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
 
+    let swapServerUrl = swapData.swap_XPX_BSC_URL;
+    let bscScanUrl = swapData.BSCScanUrl;
     let sinkFundAddress = swapData.sinkFundAddress;
     let sinkFeeAddress = swapData.sinkFeeAddress;
 
@@ -377,21 +384,38 @@ export default {
     const fastGasLimit = ref(21000);
     const instantGasLimit = ref(21000);
 
+    const updateGasLimit = async ()=>{
+      let data = await SwapUtils.getBSC_GasLimit(swapData.gasPriceConsultURL);
+
+      if(data.status === 0){
+        console.log("Error, no data found. Please try again later");
+      }
+      else{
+        standardGasLimit.value = data.standardGasLimit;
+        fastGasLimit.value = data.fastGasLimit;
+        instantGasLimit.value = data.rapidGasLimit;
+      }
+      // console.log(instantGasLimit.value + ' ' + fastGasLimit.value + ' ' + standardGasLimit.value);
+    }
+    updateGasLimit();
+
     const updateGasPrice = async ()=>{
-      let data = await getBSC_SafeGwei(swapData.gasPriceConsultURL);
+      let data = await SwapUtils.getBSC_SafeGwei(swapData.gasPriceConsultURL);
 
       if(data.status === 0){
         console.log("Error, no data found. Please try again later");
       }
       else{
         let result = data.result;
-        
-        standardGasPriceInGwei.value = result.standard;
-        fastGasPriceInGwei.value = result.fast;
-        instantGasPriceInGwei.value = result.instant;
+        // standardGasPriceInGwei.value = result.standard;
+        standardGasPriceInGwei.value = 10;
+        // fastGasPriceInGwei.value = result.fast;
+        fastGasPriceInGwei.value = 10;
+        // instantGasPriceInGwei.value = result.instant;
+        instantGasPriceInGwei.value = 10;
       }
+      // console.log(standardGasPriceInGwei.value + ' ' + fastGasPriceInGwei.value + ' ' + instantGasPriceInGwei.value);
     }
-    
     updateGasPrice();
 
     const currentXPX_USD = ref(0);
@@ -469,7 +493,11 @@ export default {
       rebuildTranction();
     }
 
+    let transactionHash;
+
     const swap = () => {
+      swapInProgress.value = true;
+      isDisabledCancel.value = true;
       try{
         let validateAddress = ethers.utils.getAddress(bscAddress.value);
         if(validateAddress){
@@ -477,6 +505,8 @@ export default {
         }
       }catch(err){
         showAddressErr.value = true;
+        swapInProgress.value = false;
+        isDisabledCancel.value = false;
       }
 
       if(!showAddressErr.value){
@@ -484,15 +514,121 @@ export default {
           err.value = "";
           updateRemoteAddress();
           changeGasStrategy(bscGasStrategy.value);
-          SwapUtils.swapXPXtoBXPX(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
-          // currentPage.value = 3;
+          transactionHash = SwapUtils.swapXPXtoBXPX(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
         } else {
           err.value = "Wallet password is incorrect";
+          swapInProgress.value = false;
+          isDisabledCancel.value = false;
         }
       }
     };
 
+    // cert component
+    const swapTimestamp = ref('');
+    const swapId = ref('');
+    const certTransactionHash = ref('');
+    const swapQr = ref('');
+
+    const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
+    const transactionStatusLength = computed(()=> listenerState.transactionStatusLength);
+
+    watch(()=> confirmedTxLength.value, (newValue, oldValue)=>{
+
+      if(newValue > oldValue){
+        WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
+
+        // let txLength = newValue - oldValue;
+        // let transactionHashes = listenerState.allConfirmedTransactionsHash.slice(-txLength);
+
+        console.log(transactionHash);
+
+        for(let i =0; i < listenerState.confirmedTransactions.length; ++i){
+          console.log(listenerState.confirmedTransactions[i].confirmedTransactions)
+          let txs = listenerState.confirmedTransactions[i].confirmedTransactions.filter((tx)=> tx.transactionInfo.hash == transactionHash);
+          if(txs.length > 0){
+            toast.add({
+              severity:'info',
+              summary: 'Please wait.',
+              detail: 'Getting info to generate swap certificate',
+              group: 'br',
+              life: 5000
+            });
+            const data = {
+              txnInfo: {
+                network: "bsc",
+                txnHash: transactionHash
+              }
+            };
+            let stringifyData = JSON.stringify(data);
+            (async() => {
+              const response = await fetch(swapServerUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: stringifyData, // body data type must match "Content-Type" header
+              });
+
+              if(response.status==200){
+                const res = await response.json();
+                if(res.status){
+                  certTransactionHash.value = res.data.swapId;
+                  swapTimestamp.value = '';
+                  swapId.value = res.data.swapId;
+                  swapQr.value = SwapUtils.generateQRCode(bscScanUrl + res.data.swapId);
+                  currentPage.value = 3;
+                }else{
+                  toast.add({
+                    severity:'info',
+                    summary: 'Failed to fetch swapped info',
+                    detail: 'Unable to proceed to generate certificate.',
+                    group: 'br',
+                    life: 3000
+                  });
+                  swapInProgress.value = false;
+                  isDisabledCancel.value = false;
+                }
+              }else if(response.status==400){
+                toast.add({
+                  severity:'error',
+                  summary: 'Swap operation failed',
+                  detail: 'Error 400 returned. Please make sure there is sufficient balance for gas',
+                  group: 'br',
+                  life: 3000
+                });
+                swapInProgress.value = false;
+                isDisabledCancel.value = false;
+              }else if(response.status==504){
+                toast.add({
+                  severity:'error',
+                  summary: 'Swap operation failed',
+                  detail: 'Error 504 returned. Gateway time-out',
+                  group: 'br',
+                  life: 3000
+                });
+                swapInProgress.value = false;
+                isDisabledCancel.value = false;
+              }
+            })();
+          }
+        }
+      }
+    });
+
+    watch(()=> transactionStatusLength.value, (newValue, oldValue)=>{
+
+      if(newValue > oldValue){
+        let txLength = newValue - oldValue;
+        if(txLength){
+          swapInProgress.value = false;
+        }
+      }
+     });
+
     //page 3
+    const saveCertificate = () => {
+      SwapUtils.generatePdf('BSC', swapTimestamp.value, selectedAccountAddress.value, swapId.value, certTransactionHash.value, swapQr.value);
+    };
 
     return {
       timerSecondsDisplay,
@@ -510,8 +646,8 @@ export default {
       updateAmountToMax,
       bscGasStrategy,
       isDisabledSwap,
-      swap,
       err,
+      swap,
       savedCheck,
       allAvailableAccounts,
       selectedAccount,
@@ -529,7 +665,15 @@ export default {
       txFeeDisplay,
       gasPriceInXPX,
       maxSwapAmount,
-      changeGasStrategy
+      changeGasStrategy,
+      swapInProgress,
+      certTransactionHash,
+      swapTimestamp,
+      swapId,
+      swapQr,
+      saveCertificate,
+      selectedAccountAddress,
+      isDisabledCancel,
     };
   }
 }

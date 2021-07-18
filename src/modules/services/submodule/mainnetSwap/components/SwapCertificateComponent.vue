@@ -7,7 +7,7 @@
           <div class="font-bold">Sirius Account:</div>
           <div class="break-all">{{ siriusAddress }}</div>
         </div>
-        <div class="text-left text-tsm mt-2">
+        <div class="text-left text-tsm mt-2" v-if="swapTimestamp">
           <div><b>Swap Timestamp:</b> {{ swapTimestamp }}</div>
         </div>
         <div class="text-left text-tsm mt-2">
