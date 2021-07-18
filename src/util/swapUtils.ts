@@ -688,23 +688,7 @@ export class SwapUtils {
     doc.save('swap_certificate.pdf');
   }
 
-  static swapXPXtoBXPX = (selectedAddress: string, walletPassword: string, aggreateCompleteTransaction: AggregateTransaction) => {
-    const accAddress = Address.createFromRawAddress(selectedAddress);
-    // console.log(accAddress)
-    const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
-    const encryptedPassword = WalletUtils.createPassword(walletPassword);
-    let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
-    const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
-    // console.log(aggreateCompleteTransaction);
-    let signedTx = account.sign(aggreateCompleteTransaction, networkState.currentNetworkProfile.generationHash);
-    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
-    // console.log(signedTx.hash);
-    let chainAPICall = new ChainAPICall(apiEndpoint);
-    chainAPICall.transactionAPI.announce(signedTx);
-    return signedTx.hash;
-  }
-
-  static swapXPXtoEXPX = (selectedAddress: string, walletPassword: string, aggreateCompleteTransaction: AggregateTransaction) :string => {
+  static announceTx = (selectedAddress: string, walletPassword: string, aggreateCompleteTransaction: AggregateTransaction) :string => {
     const accAddress = Address.createFromRawAddress(selectedAddress);
     // console.log(accAddress)
     const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
