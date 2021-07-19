@@ -546,7 +546,7 @@ export default {
       };
       let stringifyData = JSON.stringify(data);
       (async() => {
-        const response = await fetch(swapServerUrl, {
+        const response = await fetch(SwapUtils.getOutgoing_SwapTransfer_URL(swapServerUrl), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -609,8 +609,7 @@ export default {
     }
 
     const callTocheckSwapStatus =  async() =>{
-      // to do
-      const response = await fetch(`/${transactionHash}` );
+      const response = await fetch(SwapUtils.getOutgoing_SwapCheckByTxID_URL(swapServerUrl, transactionHash) );
 
       if(response.status==200){
         const res = await response.json();

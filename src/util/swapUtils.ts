@@ -718,6 +718,18 @@ export class SwapUtils {
   static getBSC_SafeGwei = async (baseUrl: string):Promise<any> => {
     return fetch(`${baseUrl}/gas/gasprice/bsc`).then(res => res.json());
   }
+
+  static getOutgoing_SwapTransfer_URL = (baseUrl: string): string => {
+    return `${baseUrl}/transfer`;
+  }
+
+  static getOutgoing_SwapCheckByTxID_URL = (baseUrl: string, txID: string): string => {
+    return `${baseUrl}/swapByTx/${txID}`;
+  }
+
+  static getOutgoing_SwapCheckByID_URL = (baseUrl: string, swapId: string): string => {
+    return `${baseUrl}/swap/${swapId}`;
+  }
 }
 
 
