@@ -1,60 +1,8 @@
 <template>
   <div class="relative text-center">
-    <!-- <font-awesome-icon @click="showhideMenu();" icon="bars" :class="menuColorClass" class="menuBar absolute w-4 cursor-pointer" style="right: 7px; top: 9px;" v-if="showBar"></font-awesome-icon> -->
-    <!-- <nav class="navbar" ref="navbarRef" v-if="showMenu">
-      <router-link class="col" class-active="active" :to="{ name : 'ViewDashboard'}">Dashboard</router-link>
-      <router-link class="col" class-active="active" :to="{ name : 'ViewTransferCreate'}">Transfer</router-link>
-      <router-link class="col" class-active="active" :to="{ name : 'ViewAccountDisplayAll'}" :class="{'router-link-active': subIsActive([
-        '/view-all-accounts',
-        '/select-type-creation-account',
-        '/create-account',
-        '/import-account',
-        '/delete-account',
-        '/details-account',
-        '/created-account',
-        '/convert-account-multisign',
-        '/edit-account-multisign',
-        '/delegate',
-        '/alias-address-to-namespace',
-      ])}">Accounts</router-link>
-      <router-link class="col" class-active="active" :to="{ name : 'ViewServices'}" :class="{'router-link-active': subIsActive([
-        '/export-wallet',
-        '/wallets',
-        '/create-asset',
-        '/address-book',
-        '/add-contacts',
-        '/delete-wallet-confirmed' ,
-        '/nodes',
-        '/multisig-multi-level',
-        '/create-namespace',
-        '/extend-namespace',
-        '/asset-supply-change',
-        '/swap-account-list',
-        '/create-attestation',
-        '/audit-attestation',
-        '/notifications',
-        '/create-poll',
-        '/polls',
-        '/vote-poll',
-        '/my-file',
-        '/upload-file',
-        '/create-gift',
-        '/redeem-gift-card',
-        '/explorer',
-        '/partial',
-        '/swap-nis1',
-        '/swap-eth',
-        '/swap-bsc',
-        '/swap-bsc-sirius',
-        '/swap-sirius-bsc',
-        '/swap-sirius-eth',
-        '/swap-eth-sirus',
-      ])}">Services</router-link>
-    </nav>
-    <nav class="navbar h-9" v-else>
-    </nav> -->
-    <nav class="navbar h-8 text-white font-bold">ProximaX Swap Service
-      <a class="h-8 text-white font-bold" @click="getExplorerUrl">Explorer</a>
+    <nav class="navbar h-9 text-white font-bold">
+      <router-link class="col" :to="{ name : 'ViewServices'}">ProximaX Swap Service</router-link>
+      <a class="text-white font-bold" @click="getExplorerUrl">Explorer</a>
     </nav>
   </div>
 </template>
