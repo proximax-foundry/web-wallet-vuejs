@@ -214,7 +214,7 @@ export default {
     const coinBalance = ref(0);
     const tokenAddress = swapData.EXPXContractAddress;
     const custodian = swapData.sinkFundExpxSwap;
-    const ethScanUrl = swapData.ethScanUrl;
+    const ethScanUrl = swapData.ETHScanUrl;
     const swapServerUrl = swapData.swap_ETH_XPX_URL;
     const currentNetwork = ref('');
 

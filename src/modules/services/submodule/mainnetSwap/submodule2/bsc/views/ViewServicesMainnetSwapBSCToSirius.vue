@@ -214,7 +214,7 @@ export default {
     const coinBalance = ref(0);
     const tokenAddress = swapData.BXPXContractAddress;
     const custodian = swapData.sinkFundBxpxSwap;
-    const bscScanUrl = swapData.bscScanUrl;
+    const bscScanUrl = swapData.BSCScanUrl;
     const swapServerUrl = swapData.swap_BSC_XPX_URL;
     const currentNetwork = ref('');
 
