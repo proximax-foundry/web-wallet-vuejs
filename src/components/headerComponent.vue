@@ -5,9 +5,6 @@
   <div class="flex-grow h-16"></div>
   <div class="flex-none header-menu mt-3" v-if="loginStatus">
     <div class=" flex flex-row">
-      <div class="w-16 inline-block items-center relative">
-        <SelectLanguagePlugin style="position: absolute; top: 0px" />
-      </div>
       <div class="w-10 text-center flex flex-row h-10 items-center">
         <img src="../assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
       </div>
@@ -33,9 +30,6 @@
     </div>
   </div>
   <div class="flex-none self-center header-menu" v-else>
-    <div class="w-16 inline-block mr-3 self-center">
-      <SelectLanguagePlugin />
-    </div>
     <div class="select mb-3 inline-block">
       <Dropdown v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
     </div>
@@ -57,7 +51,7 @@ import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { ChainUtils } from '@/util/chainUtils';
 import { Helper } from '@/util/typeHelper';
 import Dropdown from 'primevue/dropdown';
-import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
+// import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { useToast } from "primevue/usetoast";
@@ -71,7 +65,7 @@ import { WalletUtils } from "@/util/walletUtils";
 export default defineComponent({
   components: {
     Dropdown,
-    SelectLanguagePlugin,
+    // SelectLanguagePlugin,
     FontAwesomeIcon,
   },
 
