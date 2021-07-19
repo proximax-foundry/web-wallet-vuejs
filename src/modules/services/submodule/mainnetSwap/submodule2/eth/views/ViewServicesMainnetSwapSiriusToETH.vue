@@ -485,9 +485,11 @@ export default {
 
       if(selectedAccount.value.balance <= minBalanceAmount.value){
         disableAmount.value = true;
+        showAmountErr.value = true;
       }
       else{
         disableAmount.value = false;
+        showAmountErr.value = false;
       }
 
       rebuildTranction();
