@@ -320,16 +320,15 @@ export default {
         });
     };
 
-    watch(currentNetwork, (n) => {
+    watch([currentNetwork, currentAccount], ([newNetwork, newCurrentAccount]) => {
       (async () => {
         try{
           provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
           signer = provider.getSigner();
           const contract = new ethers.Contract(tokenAddress, abi, signer);
-          const tokenBalance = await contract.balanceOf(currentAccount.value);
+          const tokenBalance = await contract.balanceOf(newCurrentAccount);
           balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
         }catch(err) {
-          console.log('Error fetching token balance');
           balance.value = 0;
         }
       })();
