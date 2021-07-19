@@ -1,6 +1,6 @@
 {
     "Sirius Testnet 1": {
-      "version": "0.0.5",
+      "version": "0.0.6",
       "apiNodes":[
           "bctestnet1.brimstone.xpxsirius.io",
           "bctestnet2.brimstone.xpxsirius.io",
@@ -30,8 +30,8 @@
       "swapData":{
         "sinkFundAddress": "VCCTSO3SYRBK7NPJA3BB7SPHEG24XQYXIFQCLIVQ",
         "sinkFeeAddress": "VC2ABSJRJH5HZPHBP4PPSR5WG2YPSGLZZX5L55QU",
-        "swap_XPX_ETH_URL": "https://bctestnet-swap-gateway.xpxsirius.io/eth",
-        "swap_XPX_BSC_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
+        "swap_XPX_ETH_URL": "https://bctestnet-swap-gateway.xpxsirius.io/eth/transfer",
+        "swap_XPX_BSC_URL": "https://bctestnet-swap-gateway.xpxsirius.io/bsc/transfer",
         "swap_ETH_XPX_URL": "https://bctestnet-swap-gateway.xpxsirius.io/expx/transfer",
         "swap_BSC_XPX_URL": "https://bctestnet-swap-gateway.xpxsirius.io/bxpx/transfer",
         "gasPriceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io",

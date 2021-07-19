@@ -33,7 +33,7 @@
       <p class="text-tsm my-5 text-gray-400">This is a list of your Sirius Accounts available in this wallet.</p>
       <div class="text-lg my-7 font-bold">Please select a Sirius account</div>
       <div v-for="acc of allAvailableAccounts" :key="acc.name">
-        <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100 transition" @click="selectAccount(acc.name, acc.address)">
+        <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100 transition" @click="(!acc.isMultisig || includeMultisig) && selectAccount(acc.name, acc.address)">
           <div class="text-tsm ml-3 text-gray-700">
             <div><b>Account Name:</b> {{ acc.name }}</div>
             <div><b>Sirius Address:</b> {{ acc.address }}</div>
@@ -65,23 +65,23 @@
       <div class="md:grid md:grid-cols-3 mb-10">
         <div class="md:col-span-1 mb-3">
           <div class="ethGasStrategy md:mr-6" :class="`${ (ethGasStrategy == 'standard')?'selected':'option' }`" @click="changeGasStrategy('standard')">
-            <p class="font-bold text-tsm">Standard (5 min.)</p>
-            <div>ETH {{ safeGasPrice }}</div>
-            <div>XPX {{ xpxAmountInSafeGasPrice }} = USD {{ safeGasPriceInUSD }}</div>
+            <p class="font-bold text-tsm">Standard</p>
+            <div>ETH {{ standardGasPrice }}</div>
+            <div>XPX {{ xpxAmountInStandardGasPrice }} = USD {{ standardGasPriceInUSD }}</div>
           </div>
         </div>
         <div class="md:col-span-1 mb-3">
           <div class="ethGasStrategy md:mx-3" :class="`${ (ethGasStrategy == 'fast')?'selected':'option' }`" @click="changeGasStrategy('fast')">
-            <p class="font-bold text-tsm">Fast (2 min.)</p>
-            <div>ETH {{ proposedGasPrice }}</div>
-            <div>XPX {{ xpxAmountInProposedGasPrice }} = USD {{ proposedGasPriceInUSD }}</div>
+            <p class="font-bold text-tsm">Fast</p>
+            <div>ETH {{ fastGasPrice }}</div>
+            <div>XPX {{ xpxAmountInFastGasPrice }} = USD {{ fastGasPriceInUSD }}</div>
           </div>
         </div>
         <div class="md:col-span-1 mb-3">
-          <div class="ethGasStrategy md:ml-6" :class="`${ (ethGasStrategy == 'trader')?'selected':'option' }`" @click="changeGasStrategy('trader')">
-            <p class="font-bold text-tsm">Trader (ASAP)</p>
-            <div>ETH {{ fastGasPrice }}</div>
-            <div>XPX {{ xpxAmountInFastGasPrice }} = USD {{ fastGasPriceInUSD }}</div>
+          <div class="ethGasStrategy md:ml-6" :class="`${ (ethGasStrategy == 'rapid')?'selected':'option' }`" @click="changeGasStrategy('rapid')">
+            <p class="font-bold text-tsm">Rapid</p>
+            <div>ETH {{ rapidGasPrice }}</div>
+            <div>XPX {{ xpxAmountInRapidGasPrice }} = USD {{ rapidGasPriceInUSD }}</div>
           </div>
         </div>
       </div>
@@ -101,15 +101,16 @@
         </div>
       </div>
       <div class="mt-10">
-        <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Maybe Later</button>
-        <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="swap">Yes, Swap</button>
+        <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">Maybe Later</button>
+        <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?'Swap in progress. Please wait...':'Yes, Swap' }}</button>
+        <button class="default-btn focus:outline-none disabled:opacity-50" v-if="canCheckStatus" @click="callTocheckSwapStatus">Check Swap Status</button>
       </div>
     </div>
     <div v-if="currentPage==3">
       <div>
         <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
         <div class="text-sm mb-7">The swap process has already started!</div>
-        <swap-certificate-component networkTerm="ETH" swapType="Outgoing" />
+        <swap-certificate-component networkTerm="ETH" swapType="Outgoing" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :siriusAddress="selectedAccountAddress" :swapQr="swapQr" />
         <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
           <div class="text-center w-full">
             <div class="w-8 h-8 inline-block relative">
@@ -125,8 +126,8 @@
           <span class="ml-2 cursor-pointer text-tsm">I confirm that i have saved a copy of my certificate.</span>
         </label>
         <div class="mt-10">
-          <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none mr-4 w-32">Save</button>
-          <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50 w-32" :disabled="!savedCheck" >Done</button>
+          <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none mr-4 w-32" @click="saveCertificate">Save</button>
+          <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-32" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
         </div>
       </div>
     </div>
@@ -136,20 +137,22 @@
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
-import TextInput from '@/components/TextInput.vue'
+import TextInput from '@/components/TextInput.vue';
 import SwapInput from '@/modules/services/submodule/mainnetSwap/components/SwapInput.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
 import { walletState } from '@/state/walletState';
 import { networkState } from '@/state/networkState';
 import { WalletUtils } from "@/util/walletUtils";
 import { Helper } from "@/util/typeHelper";
-import { getCoingeckoCoinPrice, getETH_SafeGwei } from "@/util/functions";
+import { getCoingeckoCoinPrice } from "@/util/functions";
 import { BuildTransactions } from "@/util/buildTransactions";
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
+import { useToast } from "primevue/usetoast";
 import { ethers } from 'ethers';
 import { SwapUtils } from '@/util/swapUtils';
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
+import { listenerState} from "@/state/listenerState";
 
 export default {
   name: 'ViewServicesMainnetSwapSiriusToETH',
@@ -162,6 +165,7 @@ export default {
   },
 
   setup() {
+    const toast = useToast();
     const router = useRouter();
     const displayTimer = ref(true);
     const timerSeconds = ref(180);
@@ -216,8 +220,9 @@ export default {
             balanceDisplay: Helper.toCurrencyFormat(acc.balance, 6),
             type: "",
             address: Helper.createAddress(acc.address).pretty(),
-            publicKey: acc.publicKey
-          }; 
+            publicKey: acc.publicKey,
+            isMultisig: acc.getDirectParentMultisig().length ? true: false
+          };  
         });
 
       if(includeMultisig){
@@ -229,7 +234,8 @@ export default {
             balanceDisplay: Helper.toCurrencyFormat(acc.balance, 6),
             type: "MULTISIG",
             address: Helper.createAddress(acc.address).pretty(),
-            publicKey: acc.publicKey
+            publicKey: acc.publicKey,
+            isMultisig: true
           }; 
         });
 
@@ -249,6 +255,8 @@ export default {
     const feeMultiply = 1.2;
 
     const showAddressErr = ref(false);
+    const isDisabledCancel = ref(false);
+    const swapInProgress = ref(false);
     const showPasswdError = ref(false);
     const walletPasswd = ref('');
     const passwdPattern = "^[^ ]{8,}$";
@@ -257,7 +265,7 @@ export default {
     const err = ref('');
     const ethAddress = ref('');
     const isDisabledSwap = computed(() => 
-      !(amount.value > 0 && walletPasswd.value.match(passwdPattern) && ethAddress.value != '' )
+      !(amount.value > 0 && walletPasswd.value.match(passwdPattern) && ethAddress.value != '' && !swapInProgress.value )
     );
     const amount = ref(0);
 
@@ -267,7 +275,7 @@ export default {
     const buildClass = new BuildTransactions(networkState.currentNetworkProfile.network.type);
     const transferBuilder = buildClass.transferBuilder();
     const aggregateBuilder = buildClass.aggregateCompleteBuilder();
-    
+
     let message1 = {
       type: "Swap-xpx-eth",
       remoteAddress: "0".repeat(42) 
@@ -282,12 +290,14 @@ export default {
     let message2 = {
       type: 'Swap-xpx-eth-fees',
       gasPrice: 20,
-      gasLimit: 21000
+      gasLimit: 57500
     };
 
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
 
+    let swapServerUrl = swapData.swap_XPX_ETH_URL;
+    let ethScanUrl = swapData.ETHScanUrl;
     let sinkFundAddress = swapData.sinkFundAddress;
     let sinkFeeAddress = swapData.sinkFeeAddress;
 
@@ -333,52 +343,52 @@ export default {
       txFee.value = Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(), 6);
     }
 
-    const safeGasPrice = computed(()=>{
-       return safeGasPriceInGwei.value * safeGasLimit.value / giga;
+    const standardGasPrice = computed(()=>{
+       return standardGasPriceInGwei.value * standardGasLimit.value / giga;
     });
 
-    const proposedGasPrice = computed(()=>{
-       return proposedGasPriceInGwei.value * proposedGasLimit.value / giga;
+    const rapidGasPrice = computed(()=>{
+       return rapidGasPriceInGwei.value * rapidGasLimit.value / giga;
     });
 
     const fastGasPrice = computed(()=>{
        return fastGasPriceInGwei.value * fastGasLimit.value / giga;
     });
 
-    const safeGasPriceInUSD = computed(()=>{
-       return Helper.convertNumberMinimumFormat(safeGasPrice.value * currentETH_USD.value, 2);
+    const standardGasPriceInUSD = computed(()=>{
+       return Helper.convertNumberMinimumFormat(standardGasPrice.value * currentETH_USD.value, 2);
     });
 
-    const proposedGasPriceInUSD = computed(()=>{
-       return Helper.convertNumberMinimumFormat(proposedGasPrice.value * currentETH_USD.value, 2);
+    const rapidGasPriceInUSD = computed(()=>{
+       return Helper.convertNumberMinimumFormat(rapidGasPrice.value * currentETH_USD.value, 2);
     });
 
     const fastGasPriceInUSD = computed(()=>{
        return Helper.convertNumberMinimumFormat(fastGasPrice.value * currentETH_USD.value, 2);
     });
 
-    const xpxAmountInSafeGasPrice = computed(()=>{
-      return Helper.convertNumberMinimumFormat((safeGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, 6);
+    const xpxAmountInStandardGasPrice = computed(()=>{
+      return Helper.convertNumberMinimumFormat((standardGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, 6);
     });
 
-    const xpxAmountInProposedGasPrice = computed(()=>{
-      return Helper.convertNumberMinimumFormat((proposedGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, 6);
+    const xpxAmountInRapidGasPrice = computed(()=>{
+      return Helper.convertNumberMinimumFormat((rapidGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, 6);
     });
 
     const xpxAmountInFastGasPrice = computed(()=>{
       return Helper.convertNumberMinimumFormat((fastGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, 6);
     });
 
-    const safeGasPriceInGwei = ref(0);
-    const proposedGasPriceInGwei = ref(0);
+    const standardGasPriceInGwei = ref(0);
+    const rapidGasPriceInGwei = ref(0);
     const fastGasPriceInGwei = ref(0);
 
-    const safeGasLimit = ref(21000);
-    const proposedGasLimit = ref(21000);
-    const fastGasLimit = ref(50000);
+    const standardGasLimit = ref(55000);
+    const rapidGasLimit = ref(55000);
+    const fastGasLimit = ref(55000);
 
     const updateGasPrice = async ()=>{
-      let data = await getETH_SafeGwei(swapData.gasPriceConsultURL);
+      let data = await SwapUtils.getETH_SafeGwei(swapData.gasPriceConsultURL);
 
       if(data.status === 0){
         console.log("Error, no data found. Please try again later");
@@ -386,13 +396,27 @@ export default {
       else{
         let result = data.result;
 
-        safeGasPriceInGwei.value = result.SafeGasPrice;
-        proposedGasPriceInGwei.value = result.ProposeGasPrice;
+        standardGasPriceInGwei.value = result.ProposeGasPrice;
         fastGasPriceInGwei.value = result.FastGasPrice;
+        rapidGasPriceInGwei.value = Math.ceil(fastGasPriceInGwei.value * 1.1);
       }
     }
-    
     updateGasPrice();
+
+    const updateGasLimit = async()=>{
+      const data = await SwapUtils.getETH_GasLimit(swapData.gasPriceConsultURL);
+
+      if(data.status === 0){
+        console.log("Error, no data found. Please try again later");
+      }
+      else{
+        standardGasLimit.value = data.standardGasLimit;
+        fastGasLimit.value = data.fastGasLimit;
+        rapidGasLimit.value = data.rapidGasLimit;
+      }
+    }
+
+    updateGasLimit();
 
     const currentXPX_USD = ref(0);
     const currentETH_USD = ref(0);
@@ -430,20 +454,20 @@ export default {
     const changeGasStrategy = (feeStrategy)=>{
       ethGasStrategy.value = feeStrategy;
 
-      if(feeStrategy === "trader"){
+      if(feeStrategy === "rapid"){
+        selectedGasLimit.value = rapidGasLimit.value;
+        selectedGasPriceInGwei.value = rapidGasPriceInGwei.value;
+        gasPriceInXPX.value = xpxAmountInRapidGasPrice.value;
+      }
+      else if(feeStrategy === "fast"){
         selectedGasLimit.value = fastGasLimit.value;
         selectedGasPriceInGwei.value = fastGasPriceInGwei.value;
         gasPriceInXPX.value = xpxAmountInFastGasPrice.value;
       }
-      else if(feeStrategy === "fast"){
-        selectedGasLimit.value = proposedGasLimit.value;
-        selectedGasPriceInGwei.value = proposedGasPriceInGwei.value;
-        gasPriceInXPX.value = xpxAmountInProposedGasPrice.value;
-      }
       else{
-        selectedGasLimit.value = safeGasLimit.value;
-        selectedGasPriceInGwei.value = safeGasPriceInGwei.value;
-        gasPriceInXPX.value = xpxAmountInSafeGasPrice.value;
+        selectedGasLimit.value = standardGasLimit.value;
+        selectedGasPriceInGwei.value = standardGasPriceInGwei.value;
+        gasPriceInXPX.value = xpxAmountInStandardGasPrice.value;
       }
 
       message2.gasPrice = selectedGasPriceInGwei.value;
@@ -454,7 +478,7 @@ export default {
       if(amount.value > maxSwapAmount.value){
         amount.value = maxSwapAmount.value;
       }
-      
+
       if(selectedAccount.value.balance <= minBalanceAmount.value){
         amount.value = 0;
       }
@@ -469,7 +493,11 @@ export default {
       rebuildTranction();
     }
 
+    let transactionHash;
+
     const swap = () => {
+      swapInProgress.value = true;
+      isDisabledCancel.value = true;
       try{
         let validateAddress = ethers.utils.getAddress(ethAddress.value);
         if(validateAddress){
@@ -477,6 +505,8 @@ export default {
         }
       }catch(err){
         showAddressErr.value = true;
+        swapInProgress.value = false;
+        isDisabledCancel.value = false;
       }
 
       if(!showAddressErr.value){
@@ -485,15 +515,162 @@ export default {
           
           updateRemoteAddress();
           changeGasStrategy(ethGasStrategy.value);
-          SwapUtils.swapXPXtoEXPX(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
-          // currentPage.value = 3;
+          disableTimer();
+          transactionHash = SwapUtils.announceTx(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
         } else {
           err.value = "Wallet password is incorrect";
+          swapInProgress.value = false;
+          isDisabledCancel.value = false;
         }
       }
     };
 
+    // call swap server function
+    const callSwapServer = async() =>{
+      const data = {
+        txnInfo: {
+          network: "eth",
+          txnHash: transactionHash
+        }
+      };
+      let stringifyData = JSON.stringify(data);
+
+      const response = await fetch(swapServerUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: stringifyData, // body data type must match "Content-Type" header
+      });
+
+      if(response.status==200){
+        const res = await response.json();
+        if(res.status){
+          certTransactionHash.value = res.data.txHash;
+          swapTimestamp.value = '';
+          swapId.value = res.data.swapId;
+          swapQr.value = SwapUtils.generateQRCode(ethScanUrl + res.data.txHash);
+          currentPage.value = 3;
+        }else{
+          toast.add({
+            severity:'info',
+            summary: 'Failed to fetch swapped info',
+            detail: 'Unable to proceed to generate certificate.',
+            group: 'br',
+            life: 3000
+          });
+          swapInProgress.value = false;
+          isDisabledCancel.value = false;
+        }
+      }else if(response.status==400){
+        toast.add({
+          severity:'error',
+          summary: 'Swap operation failed',
+          detail: 'Error 400 returned. Please make sure there is sufficient balance for gas',
+          group: 'br',
+          life: 3000
+        });
+        swapInProgress.value = false;
+        isDisabledCancel.value = false;
+      }
+      else if(response.status==425){
+          setTimeout(()=>{
+            callSwapServer();
+          }, 2000);
+      }
+      else if(response.status==409){
+        canCheckStatus.value = true;
+        swapInProgress.value = false;
+        isDisabledCancel.value = false;
+        callTocheckSwapStatus();
+      }
+      else if(response.status==504){
+        toast.add({
+          severity:'warn',
+          summary: 'Swap request timed-out',
+          detail: 'Please check the status again',
+          group: 'br',
+          life: 3000
+        });
+        swapInProgress.value = false;
+        isDisabledCancel.value = false;
+        canCheckStatus.value = true;
+      }
+    }
+
+    const callTocheckSwapStatus =  async() =>{
+      // to do
+      const response = await fetch(`/${transactionHash}` );
+
+      if(response.status==200){
+        const res = await response.json();
+        certTransactionHash.value = res.fulfillTransaction;
+        swapTimestamp.value = '';
+        swapId.value = res.data._id;
+        swapQr.value = SwapUtils.generateQRCode(ethScanUrl + res.fulfillTransaction);
+        currentPage.value = 3;
+      }
+      else{
+        toast.add({
+          severity:'error',
+          summary: 'Swap not found',
+          detail: 'Swap not found for the current transaction ID',
+          group: 'br',
+          life: 3000
+        });
+      }
+    }
+
+    // cert component
+    const swapTimestamp = ref('');
+    const swapId = ref('');
+    const certTransactionHash = ref('');
+    const swapQr = ref('');
+
+    const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
+    const transactionStatusLength = computed(()=> listenerState.transactionStatusLength);
+    const isConfirmed = ref(false);
+    const canCheckStatus = ref(false);
+
+    watch(()=> confirmedTxLength.value, (newValue, oldValue)=>{
+
+      if(newValue > oldValue){
+        //WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
+
+        // let txLength = newValue - oldValue;
+        // let transactionHashes = listenerState.allConfirmedTransactionsHash.slice(-txLength);
+
+        if(!isConfirmed.value && listenerState.allConfirmedTransactionsHash.includes(transactionHash)){
+          isConfirmed.value = true;
+          toast.add({
+            severity:'info',
+            summary: 'Please wait.',
+            detail: 'Getting info to generate swap certificate',
+            group: 'br',
+            life: 5000
+          });
+          setTimeout(()=>{
+            callSwapServer();  
+          }, 2000);
+        }     
+      }
+    });
+
+    watch(()=> transactionStatusLength.value, (newValue, oldValue)=>{
+
+      if(newValue > oldValue){
+        
+        if(listenerState.allTransactionStatus.find(txStatus=> txStatus.hash === transactionHash)){
+          swapInProgress.value = false;
+          isConfirmed.value = false;
+        }
+      }
+     });
+
     //page 3
+    const saveCertificate = () => {
+      SwapUtils.generatePdf('ETH', swapTimestamp.value, selectedAccountAddress.value, swapId.value, certTransactionHash.value, swapQr.value);
+    };
 
     return {
       timerSecondsDisplay,
@@ -518,19 +695,29 @@ export default {
       selectedAccount,
       selectedGasPriceInGwei,
       selectedGasLimit,
-      safeGasPrice,
-      proposedGasPrice,
+      standardGasPrice,
+      rapidGasPrice,
       fastGasPrice,
-      safeGasPriceInUSD,
-      proposedGasPriceInUSD,
+      standardGasPriceInUSD,
+      rapidGasPriceInUSD,
       fastGasPriceInUSD,
-      xpxAmountInSafeGasPrice,
-      xpxAmountInProposedGasPrice,
+      xpxAmountInStandardGasPrice,
+      xpxAmountInRapidGasPrice,
       xpxAmountInFastGasPrice,
       txFeeDisplay,
       gasPriceInXPX,
       maxSwapAmount,
-      changeGasStrategy
+      changeGasStrategy,
+      swapInProgress,
+      certTransactionHash,
+      swapTimestamp,
+      swapId,
+      swapQr,
+      saveCertificate,
+      selectedAccountAddress,
+      isDisabledCancel,
+      canCheckStatus,
+      callTocheckSwapStatus
     };
   }
 }
