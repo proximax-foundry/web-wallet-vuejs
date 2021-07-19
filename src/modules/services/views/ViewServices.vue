@@ -8,7 +8,7 @@
         <router-link :to="{ name: 'ViewServicesMainnetSwapEthOptions' }">
           <div class="m-5 lg:mx-10 rounded-2xl border border-blue-primary option-div flex justify-center h-16">
             <div class="self-center inline-block font-bold text-blue-primary">
-              Ethereum
+              Ethereum (ETH)
             </div>
           </div>
         </router-link>
@@ -17,7 +17,7 @@
         <router-link :to="{ name: 'ViewServicesMainnetSwapBscOptions' }">
           <div class="m-5 lg:mx-10 rounded-2xl border border-blue-primary option-div flex justify-center h-16">
             <div class="self-center inline-block font-bold text-blue-primary">
-              BSC
+              Binance Smart Chain (BSC)
             </div>
           </div>
         </router-link>
