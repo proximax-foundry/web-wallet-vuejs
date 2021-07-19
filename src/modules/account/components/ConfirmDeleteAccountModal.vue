@@ -1,6 +1,6 @@
 <template>
   <div class="inline-block">
-    <button @click="toggleModal = !toggleModal" class="default-btn w-50">Proceed</button>
+    <button @click="toggleModal = !toggleModal" class="default-btn w-50">{{$t('deletewallet.proceed')}}</button>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -44,6 +44,7 @@
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { walletState } from '@/state/walletState';
+import {useI18n} from 'vue-i18n'
 
 export default{
   name: 'ConfirmDeleteAccountModal',
@@ -55,6 +56,7 @@ export default{
   },
 
   setup(p){
+    const {t} = useI18n();
     const router = useRouter();
     const err = ref("");
     const readCheck = ref(false);
@@ -71,7 +73,7 @@ export default{
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         router.push({ name: 'ViewAccountDisplayAll', params: {deleteAccount: 'success' } });
       }else{
-        err.value = "Unable to remove account";
+        err.value = t('scriptvalues.removeaccount');
       }
     };
 

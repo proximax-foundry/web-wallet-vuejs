@@ -54,7 +54,7 @@
       <div class="inline-block mt-10 w-full">
         <div class="grid xs:grid-cols-1 md:grid-cols-3">
           <div class="px-5 self-center">
-            <a class="block big-default-btn my-3 self-center w-full" @click="showPK = !showPK">{{ showPK?'Hide':'Show' }} {{$t('createprivatekeywallet.privatekey')}}</a>
+            <a class="block big-default-btn my-3 self-center w-full" @click="showPK = !showPK">{{ showPK? $t('createsuccessful.hide'): $t('createsuccessful.show') }} {{$t('createprivatekeywallet.privatekey')}}</a>
           </div>
           <div class="px-5">
             <a class="block big-default-btn my-3 self-center w-full">{{$t('createsuccessful.savewalletpaper')}}</a>

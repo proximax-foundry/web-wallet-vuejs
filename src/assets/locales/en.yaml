@@ -9,7 +9,7 @@ Header:
   totalbalance: "Total balance"
   signout: "Sign Out"
   network: "Networks"
-  settings: "Settings"
+  settings: "Settings" 
   customize: "Customize"
   siriuswallet: "ProximaX Sirius Wallet"
 NavigationMenu: 
@@ -329,6 +329,8 @@ scriptvalues:
   walletimporttext3: "Wallet already exist"
   walletimporttext4: "Wallet is invalid"
   walletimporttext5: "Unable to add wallet"
+  removeaccount: "Unable to remove account"
+  enterwalletpassword: "Please enter your wallet password"
 delegate:
   selectacctype: "Select Account Type"
   newaccount: "New Account"
@@ -359,6 +361,8 @@ addressbook:
   addressbookmessage4: "not imported"
   editcontact: "Edit this contact"
 swap:
+  ethfull: "Ethereum (ETH)"
+  bscfull: "Binance Smart Chain (BSC)"
   siriusaccount: "Sirius Account"
   swap: "Swap"
   certificate: "Certificate"

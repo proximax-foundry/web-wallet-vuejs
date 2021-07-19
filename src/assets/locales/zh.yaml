@@ -12,7 +12,7 @@ Header:
   settings: "设置"
   customize: "自定义"
   siriuswallet: "ProximaX天狼星钱包"
-NavigationMenu: 
+NavigationMenu:  
   Dashboard: "主页面"
   Transfer: "转账"
   Accounts: "账号"
@@ -329,6 +329,8 @@ scriptvalues:
   walletimporttext3: "钱包已存在"
   walletimporttext4: "钱包无效"
   walletimporttext5: "无法添加钱包"
+  removeaccount: "Unable to remove account"
+  enterwalletpassword: "Please enter your wallet password"
 delegate:
   selectacctype: "Select Account Type"
   newaccount: "New Account"
@@ -359,6 +361,8 @@ addressbook:
   addressbookmessage4: "not imported"
   editcontact: "Edit this contact"
 swap:
+  ethfull: "Ethereum (ETH)"
+  bscfull: "Binance Smart Chain (BSC)"
   siriusaccount: "Sirius Account"
   swap: "Swap"
   certificate: "Certificate"

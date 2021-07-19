@@ -28,7 +28,7 @@
             </div>
           </div>
         </div>
-        <div class="text-tsm mt-5 text-left"><b>{{$t('swap.note')}}:</b> {{$t('swap.swapmessage')}}.</div>
+        <div class="text-tsm mt-5 text-left"><b>{{$t('swap.note')}}:</b> {{$t('swap.swapmessage')}}</div>
       </div>
       <div class="sm:col-span-1 text-center w-full" style="background: -webkit-linear-gradient(bottom,#306FB5,#5DA7DC)">
         <div class="inline-block h-full">

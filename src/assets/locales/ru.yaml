@@ -12,7 +12,7 @@ Header:
   settings: "Параметры"
   customize: "Настроить"
   siriuswallet: "Кошелек ProximaX Sirius"
-NavigationMenu: 
+NavigationMenu:  
   Dashboard: "Панель информации"
   Transfer: "Перевод"
   Accounts: "Аккаунты"
@@ -329,6 +329,8 @@ scriptvalues:
   walletimporttext3: "Кошелек уже существует"
   walletimporttext4: "Кошелек недействителен"
   walletimporttext5: "Невозможно добавить кошелек"
+  removeaccount: "Unable to remove account"
+  enterwalletpassword: "Please enter your wallet password"
 delegate:
   selectacctype: "Select Account Type"
   newaccount: "New Account"
@@ -359,6 +361,8 @@ addressbook:
   addressbookmessage4: "not imported"
   editcontact: "Edit this contact"
 swap:
+  ethfull: "Ethereum (ETH)"
+  bscfull: "Binance Smart Chain (BSC)"
   siriusaccount: "Sirius Account"
   swap: "Swap"
   certificate: "Certificate"
