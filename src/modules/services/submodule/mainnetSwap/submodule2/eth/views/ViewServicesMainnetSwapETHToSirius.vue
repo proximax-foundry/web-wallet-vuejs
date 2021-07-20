@@ -275,6 +275,7 @@ export default {
         // console.log('Please connect to MetaMask.');
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
+        updateToken();
       }
     }
 

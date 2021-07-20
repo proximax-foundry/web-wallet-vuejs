@@ -1,6 +1,6 @@
 <template>
   <div class="flex justify-between text-sm">
-    <div><span class="text-gray-400">Swap > BSC > Incoming ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
+    <div><span class="text-gray-400">Swap > BSC > In ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
     <div>
       <router-link :to="{ name: 'ViewServices' }" class="font-bold">Home</router-link>
     </div>
@@ -263,7 +263,6 @@ export default {
         // console.log('Please connect to MetaMask.');
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
-        console.log('fetchmeta')
         updateToken();
       }
     }
@@ -275,6 +274,7 @@ export default {
         // console.log('Please connect to MetaMask.');
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
+        updateToken();
       }
     }
 

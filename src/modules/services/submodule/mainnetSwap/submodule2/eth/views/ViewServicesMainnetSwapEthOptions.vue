@@ -2,7 +2,7 @@
   <div class="flex justify-between text-sm">
     <div><span class="text-gray-400">Swap > ETH > </span> <span class="text-blue-primary font-bold">Select option</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices'}" class="font-bold" active-class="accounts">All Services</router-link>
+      <router-link :to="{ name: 'ViewServices'}" class="font-bold" active-class="accounts">Home</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line'>
@@ -12,7 +12,7 @@
       <div class="md:col-span-1">
         <router-link :to="{ name: 'ViewServicesMainnetSwapSiriusToETH' }">
           <div class="m-5 lg:mx-10 rounded-2xl border border-blue-primary option-div">
-            <div class="mt-10 text-blue-primary font-bold text-xl mb-1">Outgoing</div>
+            <div class="mt-10 text-blue-primary font-bold text-xl mb-1">Out</div>
             <div class="mb-10 text-gray-500">From Sirius to ETH</div>
           </div>
         </router-link>
@@ -20,7 +20,7 @@
       <div class="md:col-span-1">
         <router-link :to="{ name: 'ViewServicesMainnetSwapETHToSirius' }">
           <div class="m-5 lg:mx-10 rounded-2xl border border-blue-primary option-div">
-            <div class="mt-10 text-blue-primary font-bold text-xl mb-1">Incoming</div>
+            <div class="mt-10 text-blue-primary font-bold text-xl mb-1">In</div>
             <div class="mb-10 text-gray-500">From ETH to Sirius</div>
           </div>
         </router-link>
