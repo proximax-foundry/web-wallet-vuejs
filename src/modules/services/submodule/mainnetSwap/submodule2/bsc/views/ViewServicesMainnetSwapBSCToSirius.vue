@@ -2,7 +2,7 @@
   <div class="flex justify-between text-sm">
     <div><span class="text-gray-400">Swap > BSC > In ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">Home</router-link>
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
@@ -261,10 +261,13 @@ export default {
       if (accounts.length === 0) {
         // MetaMask is locked or the user has not connected any accounts
         // console.log('Please connect to MetaMask.');
+        coinBalance.value = 0;
+        currentAccount.value = '';
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
         updateToken();
       }
+      isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
 
     // For now, 'eth_accounts' will continue to always return an array
@@ -272,10 +275,13 @@ export default {
       if (accounts.length === 0) {
         // MetaMask is locked or the user has not connected any accounts
         // console.log('Please connect to MetaMask.');
+        coinBalance.value = 0;
+        currentAccount.value = '';
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
         updateToken();
       }
+      isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
 
     function verifyChain(chainId, updateTokenBol = false){
