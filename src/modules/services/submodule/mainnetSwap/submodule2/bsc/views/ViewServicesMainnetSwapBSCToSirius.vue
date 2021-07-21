@@ -2,7 +2,7 @@
   <div class="flex justify-between text-sm">
     <div><span class="text-gray-400">Swap > BSC > In ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">Home</router-link>
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
@@ -263,7 +263,6 @@ export default {
         // console.log('Please connect to MetaMask.');
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
-        console.log('fetchmeta')
         updateToken();
       }
     }
@@ -275,6 +274,7 @@ export default {
         // console.log('Please connect to MetaMask.');
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
+        updateToken();
       }
     }
 
@@ -319,13 +319,13 @@ export default {
       });
     };
 
-    watch(currentNetwork, (n) => {
+    watch([currentNetwork, currentAccount], ([newNetwork, newCurrentAccount]) => {
       (async () => {
         try{
           provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
           signer = provider.getSigner();
           const contract = new ethers.Contract(tokenAddress, abi, signer);
-          const tokenBalance = await contract.balanceOf(currentAccount.value);
+          const tokenBalance = await contract.balanceOf(newCurrentAccount);
           balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
         }catch(err) {
           console.log('Error fetching token balance');
