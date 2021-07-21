@@ -107,7 +107,7 @@ export default defineComponent({
         WalletUtils.refreshAllAccountDetails(wallet, networkState.currentNetworkProfile);
         WalletStateUtils.updateLoggedIn(wallet);
         NetworkStateUtils.updateLastAccessNetworkName(networkState.chainNetworkName);
-        router.push({ name: "ViewDashboard"});
+        router.push({ name: "ViewServices"});
         // router.push({ path: "/create-transfer"});
       }
     };
