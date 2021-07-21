@@ -261,10 +261,13 @@ export default {
       if (accounts.length === 0) {
         // MetaMask is locked or the user has not connected any accounts
         // console.log('Please connect to MetaMask.');
+        coinBalance.value = 0;
+        currentAccount.value = '';
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
         updateToken();
       }
+      isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
 
     // For now, 'eth_accounts' will continue to always return an array
@@ -272,10 +275,13 @@ export default {
       if (accounts.length === 0) {
         // MetaMask is locked or the user has not connected any accounts
         // console.log('Please connect to MetaMask.');
+        coinBalance.value = 0;
+        currentAccount.value = '';
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
         updateToken();
       }
+      isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
 
     function verifyChain(chainId, updateTokenBol = false){
