@@ -155,7 +155,7 @@
       <div>
         <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
         <div class="text-sm mb-7">The swap process has already started!</div>
-        <swap-certificate-component networkTerm="BSC" swapType="Incoming" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="transactionHash" :siriusAddress="siriusAddress" :swapQr="swapQr" />
+        <swap-certificate-component networkTerm="BSC" swapType="In" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="transactionHash" :siriusAddress="siriusAddress" :swapQr="swapQr" />
         <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
           <div class="text-center w-full">
             <div class="w-8 h-8 inline-block relative">
