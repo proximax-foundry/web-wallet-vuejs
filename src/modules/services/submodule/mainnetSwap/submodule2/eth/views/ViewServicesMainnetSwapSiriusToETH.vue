@@ -2,7 +2,7 @@
   <div class="flex justify-between text-sm">
     <div><span class="text-gray-400">Swap > ETH > Out > </span> <span class="text-blue-primary font-bold">Transaction</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">Home</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
@@ -514,6 +514,7 @@ export default {
       if(!showAddressErr.value){
         if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPasswd.value)) {
           err.value = "";
+          
           updateRemoteAddress();
           changeGasStrategy(ethGasStrategy.value);
           disableTimer();
@@ -739,8 +740,7 @@ export default {
 }
 
 .ethGasStrategy.option{
-
-transition: all 0.5s;
+  transition: all 0.5s;
   @apply text-gray-600 bg-white border-gray-200 hover:bg-blue-100 hover:border-blue-100;
   p{
     @apply text-blue-primary;
