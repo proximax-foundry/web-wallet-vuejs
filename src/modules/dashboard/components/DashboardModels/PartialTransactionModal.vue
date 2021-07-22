@@ -84,6 +84,7 @@ import ModifyMultisigAccountType from '@/modules/dashboard/components/DashboardM
 import MosaicDefinition from '@/modules/dashboard/components/DashboardModels/SubMosaicDefinition.vue';
 import MosaicSupplyChange from '@/modules/dashboard/components/DashboardModels/SubMosaicSupplyChange.vue';
 import PasswordInput from '@/components/PasswordInput.vue'
+import {useI18n} from 'vue-i18n'
 // import {
 //   UInt64,
 // } from "tsjs-xpx-chain-sdk";
@@ -106,10 +107,11 @@ export default{
   },
 
   setup(p) {
+    const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const appStore = inject("appStore");
-    const signer = ref('');
+    const signer = ref(''); 
     const passwd = ref('');
     const err = ref("");
     const showPasswdError = ref(false);
@@ -123,7 +125,7 @@ export default{
     const approveTransaction = () =>{
       let verify = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, passwd.value);
       if(verify < 1){
-        err.value = 'Invalid wallet password';
+        err.value = t('scriptvalues.walletpasswordvalidation');
       }else{
         multiSign.cosignMultisigTransaction(p.transaction, passwd.value);
         err.value = '';

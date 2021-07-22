@@ -13,12 +13,12 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column field="typeName" header="Type" headerStyle="width:110px">
+      <Column field="typeName" :header="$t('dashboard.type')" headerStyle="width:110px">
         <template #body="{data}">
           <span class="font-semibold">{{data.typeName}}</span>
         </template>
       </Column>
-      <Column header="Details" >
+      <Column :header="$t('accounts.details')" >
         <template #body="{data}">
             <div v-for="innerTx in data.innerTransactions" :key="innerTx">
               <div class="font-bold"> {{ innerTx.typeName }}</div>
