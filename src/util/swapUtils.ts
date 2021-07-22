@@ -674,7 +674,7 @@ export class SwapUtils {
     doc.text('Sirius Address:', leftCol, addressRow);
     doc.text(siriusAddress, secCol, addressRow );
 
-    doc.text('Swap ID:', leftCol, swapIDRow);
+    doc.text('SwapID:', leftCol, swapIDRow);
     doc.text(swapId, secCol, swapIDRow);
 
     doc.text( networkName + ' Transaction Hash:', leftCol, hashRow);
