@@ -665,9 +665,9 @@ export class SwapUtils {
     doc.addImage(imgData, 'JPEG', 1, 1, 1000, 707, '', 'NONE')
     doc.setFontSize(50)
 
-    let leftCol = 45, secCol = 190, dateCol = 380;
-    let dateRow = 255, addressRow = 315, swapIDRow = 385, 
-    hashRow = 445, hashValueRow = 485, qrRpw = 515;//, signatureRow = 425
+    let leftCol = 45, secCol = 280, dateCol = 380;
+    let dateRow = 255, addressRow = 315, swapIDRow = 385,
+    hashRow = 455, hashValueRow = 485, qrRpw = 515;//, signatureRow = 425, hashValueRow = 485
 
     doc.text(swapTimestamp, dateCol, dateRow)
 
@@ -678,7 +678,7 @@ export class SwapUtils {
     doc.text(swapId, secCol, swapIDRow);
 
     doc.text( networkName + ' Transaction Hash:', leftCol, hashRow);
-    doc.text(transactionHash, leftCol, hashValueRow);
+    doc.text(transactionHash, secCol, hashRow);
 
     let img = new Image();
     img.src = qrImage;
