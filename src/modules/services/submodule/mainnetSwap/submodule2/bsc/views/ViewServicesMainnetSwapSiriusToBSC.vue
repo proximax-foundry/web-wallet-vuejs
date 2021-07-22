@@ -653,7 +653,7 @@ export default {
           toast.add({
             severity:'info',
             summary: 'Please wait.',
-            detail: 'Getting info to generate swap certificate',
+            detail: 'Generating swap certificate',
             group: 'br',
             life: 5000
           });
