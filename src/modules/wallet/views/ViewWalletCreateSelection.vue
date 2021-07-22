@@ -1,18 +1,18 @@
 <template>
   <div class="container mx-auto text-center">
-    <h1 class="font-bold default-title mt-20 mb-5">Select Wallet Creation Type</h1>
+    <h1 class="font-bold default-title mt-20 mb-5">{{$t('createwallet.creationtype')}}</h1>
     <div class="page-title-gray-line grid grid-cols-1 md:grid-cols-3 pt-20">
       <div class="px-5 self-center text-center my-10">
         <img src="@/modules/wallet/img/icon-add-new-blue.svg" class="w-12 inline-block">
-        <p class="mt-3">New Wallet</p>
-        <router-link :to="{ name: 'ViewWalletCreate'}" class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center">Create</router-link></div>
+        <p class="mt-3">{{$t('createwallet.newwallet')}}</p>
+        <router-link :to="{ name: 'ViewWalletCreate'}" class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center">{{$t('welcome.create')}}</router-link></div>
       <div class="px-5 self-center text-center my-10">
-        <img src="@/modules/wallet/img/icon-private-key-blue.svg" class="w-12 inline-block"><p class="mt-3">From a Private Key</p>
-        <router-link :to="{ name : 'ViewWalletCreatePrivateKey'}" class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center">Create</router-link>
+        <img src="@/modules/wallet/img/icon-private-key-blue.svg" class="w-12 inline-block"><p class="mt-3">{{$t('createwallet.fromprivatekey')}}</p>
+        <router-link :to="{ name : 'ViewWalletCreatePrivateKey'}" class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center">{{$t('welcome.create')}}</router-link>
       </div>
-      <div class="px-5 self-center text-center my-10"><img src="@/modules/wallet/img/icon-wallet-import-blue.svg" class="w-12 inline-block"><p class="mt-3">From a Wallet Backup</p>
+      <div class="px-5 self-center text-center my-10"><img src="@/modules/wallet/img/icon-wallet-import-blue.svg" class="w-12 inline-block"><p class="mt-3">{{$t('createwallet.fromwalletbackup')}}</p>
         <label class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center cursor-pointer">
-          <span>Import</span>
+          <span>{{$t('createwallet.import')}}</span>
           <input type="file" @change="readWalletBackup" ref="walletFile" hidden />
         </label>
       </div>

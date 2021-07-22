@@ -1,6 +1,6 @@
 <template>
   <div class="flex-none self-center flex items-end logo">
-    <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">v{{ versioning }}</span>
+    <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">{{$t('Header.version')}}{{ versioning }}</span>
   </div>
   <div class="flex-grow h-16"></div>
   <div class="flex-none header-menu mt-3" v-if="loginStatus">
@@ -19,12 +19,12 @@
       <div class="w-52 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
         <div>
           <div class="text-xs inline-block">{{ walletState.currentLoggedInWallet.name }}</div>
-          <div class="text-xs">Total Balance: <span>{{ totalBalance }}</span> {{ currentNativeTokenName}}</div>
+          <div class="text-xs">{{$t('Header.totalbalance')}}: <span>{{ totalBalance }}</span> {{ currentNativeTokenName}}</div>
         </div>
       </div>
       <div class="w-17 text-center h-10 items-center gray-line-left">
         <div class="text-xs inline-block mt-3" v-if="wideScreen">
-          <a @click="logout()">Sign out</a>
+          <a @click="logout()">{{$t('Header.signout')}}</a>
         </div>
         <div class="inline-block mt-2" v-else>
           <font-awesome-icon icon="sign-out-alt" @click="logout()" class="text-blue-400 w-6 h-6 cursor-pointer ml-3"></font-awesome-icon>
@@ -40,10 +40,10 @@
       <Dropdown v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
     </div>
     <div class="w-16 text-center inline-block">
-      <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">Home</router-link>
+      <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">{{$t('Header.home')}}</router-link>
     </div>
     <div class="w-16 text-center inline-block">
-      <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold">Wallets</router-link>
+      <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold">{{$t('Header.wallet')}}</router-link>
     </div>
   </div>
 </template>

@@ -1,15 +1,15 @@
 <template>
   <div class="flex justify-between text-sm">
-    <div><span class="text-gray-400">Accounts ></span> <span class="text-blue-primary font-bold">Link to Namespace</span></div>
+    <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('namespace.linknamespace')}}</span></div>
     <div>
-      <router-link :to="{name: 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">View all accounts</router-link>
+      <router-link :to="{name: 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('accounts.viewall')}}</router-link>
     </div>
   </div>
 
   <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-60'>
     <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 mb-8 mt-3">
       <div class="text-center w-full">
-        <p class="text-xs">You have not created a namespace</p>
+        <p class="text-xs">{{$t('namespace.namespacemessage')}}</p>
       </div>
     </div>
     <SelectInputPlugin selectDefault="0" showSelectTitleProp="true" placeholder="Select action" errorMessage="" v-model="selectAction" :options="actions()"  />
@@ -25,12 +25,12 @@
       </div>
     </div>
     <div class="rounded-2xl bg-gray-100 p-5 my-5">
-      <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee:   XPX</div>
+      <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">T{{$t('namespace.transactionfee')}}   XPX</div>
     </div>
     <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet ' + appStore.state.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
     <div class="mt-10">
-      <button type="button" class="default-btn mr-5 focus:outline-none">Clear</button>
-      <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" :disabled="disableCreate">Create</button>
+      <button type="button" class="default-btn mr-5 focus:outline-none">{{$t('signin.clear')}}</button>
+      <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" :disabled="disableCreate">{{$t('welcome.create')}}</button>
     </div>
   </div>
 </template>

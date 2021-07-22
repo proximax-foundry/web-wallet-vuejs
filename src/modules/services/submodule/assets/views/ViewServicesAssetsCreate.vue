@@ -1,8 +1,8 @@
 <template>
   <div class="flex justify-between text-md">
-    <div><span class="text-gray-300">Assets ></span> <span class="text-blue-primary font-bold">Create</span></div>
+    <div><span class="text-gray-300">{{$t('services.assets')}} ></span> <span class="text-blue-primary font-bold">{{$t('welcome.create')}}</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-4'>
@@ -13,25 +13,25 @@
             <div v-if="showNoBalance" class="border-2 rounded-3xl border-red-700 w-full h-24 text-center p-4">
               <div class="h-5 text-center">
                 <div class="rounded-full w-8 h-8 border border-gray-500 inline-block relative"><font-awesome-icon icon="times" class="text-gray-500 h-5 w-5 absolute" style="top: 5px; left:8px"></font-awesome-icon></div><br>
-                <div class="inline-block text-tsm">Insufficient Balance</div>
+                <div class="inline-block text-tsm">{{$t('accounts.insufficientbalance')}}</div>
               </div>
             </div>
             <div v-if="isNotCosigner" class="border-2 rounded-3xl border-yellow-400 w-full h-24 text-center p-4">
               <div class="h-5 text-center">
                 <div class="rounded-full w-8 h-8 border border-yellow-500 inline-block relative"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-5 w-5 absolute" style="top: 5px; left:11px"></font-awesome-icon></div><br>
-                <div class="inline-block text-tsm">You are not a cosigner to this account</div>
+                <div class="inline-block text-tsm">{{$t('accounts.cosigwarning2')}}</div>
               </div>
             </div>
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
             <div v-if="moreThanOneAccount" class="text-left p-4">
               <div class="mb-1 cursor-pointer z-20 border-b border-gray-200" @click="showMenu = !showMenu">
-                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
+                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">{{$t('accounts.multisig')}}</span></div>
                 <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
               </div>
               <transition name="slide">
               <div v-if="showMenu" class="z-10">
                 <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50 optionDiv'" @click="changeSelection(item)" :title="'Address is ' + item.address">
-                  <div>{{ item.name }} <span v-if="isMultiSig(item.address)" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
+                  <div>{{ item.name }} <span v-if="isMultiSig(item.address)" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">{{$t('accounts.multisig')}}</span></div>
                 </div>
               </div>
               </transition>
@@ -39,21 +39,21 @@
             </div>
             <div v-else class="text-left p-4">
               <div class="mb-1 z-20 border-b border-gray-200">
-                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
+                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">{{$t('accounts.multisig')}}</span></div>
                 <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
               </div>
             </div>
             <div v-if="getMultiSigCosigner.list.length > 0">
-              <div class="text-tsm">Cosigner:
-                <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} (Balance: {{ getMultiSigCosigner.list[0].balance }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- Insufficient balance</span></span>
-                <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} XPX)</option></select></span>
-                <div v-if="cosignerBalanceInsufficient" class="error">- Insufficient balance</div>
+              <div class="text-tsm">{{$t('transfer.cosigner')}}:
+                <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ getMultiSigCosigner.list[0].balance }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+                <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('services.balance')}}: {{ cosigner.balance }} XPX)</option></select></span>
+                <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
               </div>
             </div>
           </div>
           <div class="text-left p-3 pb-0 border-l-8 border-gray-100">
             <div class="bg-gray-100 rounded-2xl p-3">
-              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-tsm">{{ balance }} XPX</span></div>
+              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">{{$t('services.balance')}}: <span class="text-tsm">{{ balance }} XPX</span></div>
             </div>
           </div>
           <NumberInput :disabled="disabledDivisibility" v-model="divisibility" :max="6" placeholder="Divisibility (0-6)" title="Divisibility (0-6)" icon="coins" :showError="showDivisibilityErr" errorMessage="Required Field - Only Numbers (0 - 6)" class="mt-5" />
@@ -68,15 +68,15 @@
           </div> -->
           <div class="mb-5 border-t pt-4 border-gray-200">
             <div class="rounded-2xl bg-gray-100 p-5">
-              <input id="transferable" type="checkbox" value="transferable" v-model="isTransferable" :disabled="disabledTransferableCheck" /><label for="transferable" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Transferable</label>
-              <input id="mutable" type="checkbox" value="mutable" v-model="isMutable" :disabled="disabledMutableCheck" /><label for="mutable"  class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Supply Mutable</label>
+              <input id="transferable" type="checkbox" value="transferable" v-model="isTransferable" :disabled="disabledTransferableCheck" /><label for="transferable" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">{{$t('services.transferable')}}</label>
+              <input id="mutable" type="checkbox" value="mutable" v-model="isMutable" :disabled="disabledMutableCheck" /><label for="mutable"  class="cursor-pointer font-bold ml-4 mr-5 text-tsm">{{$t('services.supplymutable')}}</label>
             </div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: {{ transactionFee }} XPX</div>
+            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{ transactionFee }} XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Rental Fee: {{ rentalFeeCurrency }} {{currencyName}}</div>
+            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('services.rentalfee')}}: {{ rentalFeeCurrency }} {{currencyName}}</div>
           </div>
           <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800 mb-5" v-if="isMultiSig(selectedAccAdd)">
             <div class="text-center">
@@ -84,8 +84,8 @@
                 <div class="flex">
                   <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
                   <div class="inline-block self-center text-left">
-                    <div>LockFund: {{ lockFundCurrency }} {{ currencyName }}</div>
-                    <div>Unconfirmed/Recommended Fee: {{ lockFundTxFee }} {{ currencyName }}</div>
+                    <div>{{$t('accounts.lockfund')}}: {{ lockFundCurrency }} {{ currencyName }}</div>
+                    <div>{{$t('accounts.unconfirmed')}}: {{ lockFundTxFee }} {{ currencyName }}</div>
                   </div>
                 </div>
               </div>
@@ -93,24 +93,24 @@
           </div>
           <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
-            <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">Clear</button>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createMosaic()">Create</button>
+            <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">{{$t('signin.clear')}}</button>
+            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createMosaic()">{{$t('welcome.create')}}</button>
           </div>
         </fieldset>
       </form>
     </div>
     <div class="px-10 text-left text-tsm mt-5 md:mt-0">
       <div class="mb-2">
-        <i>Maximum divisibility is 6.</i><br>
-        <b>Example: 0.000000</b>
+        <i>{{$t('services.maximumdivisibility')}} 6.</i><br>
+        <b>{{$t('services.example')}}: 0.000000</b>
       </div>
       <div class="mb-2">
-        <i>Maximum supply is 900T.</i><br>
-        <b>Example: 900,000,000,000,000</b>
+        <i>{{$t('services.maximumsupply')}} 900T.</i><br>
+        <b>{{$t('services.example')}}: 900,000,000,000,000</b>
       </div>
       <div class="mb-2">
-        <div class="mb-3"><i>If you tick "Transferable", mosaic can be transferred.</i></div>
-        <div><i>If you tick "Supply Mutable", supply can be changed.</i></div>
+        <div class="mb-3"><i>{{$t('services.transferablemessage')}}</i></div>
+        <div><i>{{$t('services.supplymessage')}}</i></div>
       </div>
     </div>
   </div>

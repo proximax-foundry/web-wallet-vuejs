@@ -16,12 +16,12 @@
             <form @submit.prevent="EditContact" class="mt-10 text-gray-800">
               <fieldset class="w-full">
                 <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-                <div class="mb-5 text-center"><span class="text-lg text-gray-700">Edit this contact</span></div>
+                <div class="mb-5 text-center"><span class="text-lg text-gray-700">{{$t('addressbook.editcontact')}}</span></div>
                 <TextInput placeholder="Name" errorMessage="Name required" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
                 <TextInput placeholder="Address" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" />
                 <div class="mt-10 text-center">
-                  <button type="button" class="default-btn mr-5 focus:outline-none" @click="toggleModal = !toggleModal">Cancel</button>
-                  <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="EditContact()">Save</button>
+                  <button type="button" class="default-btn mr-5 focus:outline-none" @click="toggleModal = !toggleModal">{{$t('deletewallet.cancel')}}</button>
+                  <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="EditContact()">{{$t('accounts.save')}}</button>
                 </div>
               </fieldset>
             </form>

@@ -16,9 +16,22 @@ switch(process.env.NODE_ENV){
 
 
 module.exports = {
-  publicPath: publicPath,
-  assetsDir: './assets/',
-  devServer: {
-    host: 'localhost',
-  },
+    publicPath: publicPath,
+    assetsDir: './assets/',
+
+    devServer: {
+      host: 'localhost',
+    },
+
+    pluginOptions: {
+      i18n: {
+        locale: 'en',
+        fallbackLocale: 'en',
+        localeDir: '/assets/locales',
+        enableLegacy: false,
+        runtimeOnly: false,
+        compositionOnly: false,
+        fullInstall: true
+      }
+    }
 }

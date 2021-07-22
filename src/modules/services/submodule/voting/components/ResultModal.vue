@@ -13,46 +13,46 @@
             <h1 class="default-title font-bold my-5">[ Vote title ]</h1>
             <div class="text-left md:justify-start md:flex md:items-stretch">
               <div class="block md:w-7/12 md:inline-block">
-                <div class="font-bold text-center my-5">Result</div>
+                <div class="font-bold text-center my-5">{{$t('vote.result')}}</div>
                 <Chart type="pie" :data="chartData" />
               </div>
               <div class="block md:w-5/12 md:inline-block">
                 <div class="table w-full mt-5">
                   <div class="grid grid-cols-4 bg-blue-primary text-gray-50 text-tsm py-2 font-bold">
-                    <div class="col-span-3 px-3">Options</div>
-                    <div class="col-span-1 px-3">Total</div>
+                    <div class="col-span-3 px-3">{{$t('vote.options')}}</div>
+                    <div class="col-span-1 px-3">{{$t('vote.total')}}</div>
                   </div>
                   <div class="grid grid-cols-4 text-tsm py-2 bg-gray-200">
-                    <div class="col-span-3 px-3">Option 1</div>
+                    <div class="col-span-3 px-3">{{$t('vote.option1')}}</div>
                     <div class="col-span-1 px-3">1</div>
                   </div>
                   <div class="grid grid-cols-4 text-tsm py-2 bg-gray-50">
-                    <div class="col-span-3 px-3">Option 2</div>
+                    <div class="col-span-3 px-3">{{$t('vote.option2')}}</div>
                     <div class="col-span-1 px-3">5</div>
                   </div>
                   <div class="grid grid-cols-4 text-tsm py-2 bg-gray-200">
-                    <div class="col-span-3 px-3">Option 3</div>
+                    <div class="col-span-3 px-3">{{$t('vote.option3')}}</div>
                     <div class="col-span-1 px-3">3</div>
                   </div>
                 </div>
                 <div class="table w-full mt-10">
                   <div class="grid grid-cols-4 bg-blue-primary text-gray-50 text-tsm py-2 font-bold">
-                    <div class="col-span-3 px-3">Statistic</div>
+                    <div class="col-span-3 px-3">{{$t('vote.statistic')}}</div>
                     <div class="col-span-1 px-3">Total</div>
                   </div>
                   <div class="grid grid-cols-4 text-tsm py-2 bg-gray-200">
-                    <div class="col-span-3 px-3">Vote</div>
+                    <div class="col-span-3 px-3">{{$t('vote.vote')}}</div>
                     <div class="col-span-1 px-3">9</div>
                   </div>
                   <div class="grid grid-cols-4 text-tsm py-2 bg-gray-50">
-                    <div class="col-span-3 px-3">Unique Voter</div>
+                    <div class="col-span-3 px-3">{{$t('vote.uniquevoter')}}</div>
                     <div class="col-span-1 px-3">9</div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="mt-20">
-              <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Refresh</button>
+              <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50">{{$t('vote.refresh')}}</button>
             </div>
           </div>
         </div>

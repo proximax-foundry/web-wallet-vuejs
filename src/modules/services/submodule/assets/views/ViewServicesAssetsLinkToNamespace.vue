@@ -1,8 +1,8 @@
 <template>
   <div class="flex justify-between text-md">
-    <div><span class="text-gray-300">Assets ></span> <span class="text-blue-primary font-bold">Link to Namespace</span></div>
+    <div><span class="text-gray-300">{{$t('services.assets')}} ></span> <span class="text-blue-primary font-bold">{{$t('services.linktonamespace')}}</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>
@@ -13,19 +13,19 @@
             <div v-if="showNoBalance" class="border-2 rounded-3xl border-red-700 w-full h-24 text-center p-4">
               <div class="h-5 text-center">
                 <div class="rounded-full w-8 h-8 border border-gray-500 inline-block relative"><font-awesome-icon icon="times" class="text-gray-500 h-5 w-5 absolute" style="top: 5px; left:4px"></font-awesome-icon></div><br>
-                <div class="inline-block text-tsm">Insufficient Balance</div>
+                <div class="inline-block text-tsm">{{$t('accounts.insufficientbalance')}}</div>
               </div>
             </div>
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
             <div v-if="moreThanOneAccount" class="text-left p-4">
               <div class="mb-1 cursor-pointer z-20 border-b border-gray-200" @click="showMenu = !showMenu">
-                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
+                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">{{$t('accounts.multisig')}}</span></div>
                 <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
               </div>
               <transition name="slide">
               <div v-if="showMenu" class="z-10">
                 <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50 optionDiv'" @click="changeSelection(item)" :title="'Address is ' + item.address">
-                  <div>{{ item.name }} <span v-if="isMultiSig(item.address)" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
+                  <div>{{ item.name }} <span v-if="isMultiSig(item.address)" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">{{$t('accounts.multisig')}}</span></div>
                 </div>
               </div>
               </transition>
@@ -34,19 +34,19 @@
           </div>
           <div class="text-left p-3 pb-0 border-l-8 border-gray-100 mb-5">
             <div class="bg-gray-100 rounded-2xl p-3">
-              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ appStore.getBalanceByAddress(selectedAccAdd) }} XPX</span></div>
+              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">{{$t('services.balance')}}: <span class="text-xs">{{ appStore.getBalanceByAddress(selectedAccAdd) }} XPX</span></div>
             </div>
           </div>
           <SelectInputPlugin selectDefault="0" showSelectTitleProp="true" placeholder="Select action" errorMessage="" v-model="selectAction" :options="actions()"  />
           <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" v-model="selectNamespace" :options="namespaceOption()"  />
           <SelectInputPlugin showSelectTitleProp="true" placeholder="Select asset" errorMessage="" v-model="selectAsset" :options="assetOptions()"  />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span class="text-txs"></span> XPX</div>
+            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}}: <span class="text-txs"></span> XPX</div>
           </div>
           <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
-            <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">Clear</button>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createMosaic()">Create</button>
+            <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">{{$t('signin.clear')}}</button>
+            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createMosaic()">{{$t('welcome.create')}}</button>
           </div>
         </fieldset>
       </form>

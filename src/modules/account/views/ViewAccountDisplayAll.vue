@@ -1,8 +1,8 @@
 <template>
   <div class="flex justify-between text-sm">
-    <div><span class="text-gray-400">Accounts ></span> <span class="text-blue-primary font-bold">View All</span></div>
+    <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.viewall2')}}</span></div>
     <div>
-      <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="font-bold" active-class="accounts">Create a New Account</router-link>
+      <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="font-bold" active-class="accounts">{{$t('accounts.createaccount')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line'>
@@ -16,7 +16,8 @@ import { computed, getCurrentInstance, ref } from "vue";
 import AccountTile from '@/modules/account/components/AccountTile.vue';
 import { useToast } from "primevue/usetoast";
 import { walletState } from '@/state/walletState';
-
+import { WalletUtils } from '@/util/walletUtils';
+import { networkState } from "@/state/networkState";
 
 export default {
   name: 'ViewAccountDisplayAll',
@@ -33,7 +34,9 @@ export default {
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const currentMenu = ref('');
     const showMenu = ref([]);
-
+    
+    
+    WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
     // get num of accounts
     const totalAcc = [].concat(walletState.currentLoggedInWallet.accounts,walletState.currentLoggedInWallet.others)
     var num_acc = totalAcc.length;
@@ -65,8 +68,7 @@ export default {
     if(p.deleteAccount == 'success'){
       toast.add({severity:'success', summary: 'Notification', detail: 'Account has been removed successfully', group: 'br', life: 5000});
     }
-    console.log(walletState.currentLoggedInWallet.others)
-    //console.log(walletState.currentLoggedInWallet.others[0].multisigInfo)
+
     const accounts = computed(
       () => {
         if(walletState.currentLoggedInWallet.accounts){

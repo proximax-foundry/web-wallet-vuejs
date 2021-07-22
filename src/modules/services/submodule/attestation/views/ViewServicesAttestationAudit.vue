@@ -1,15 +1,15 @@
 <template>
   <div class="flex justify-between text-sm">
-    <div><span class="text-gray-400">Attestation ></span> <span class="text-blue-primary font-bold">Create</span></div>
+    <div><span class="text-gray-400">{{$t('services.attestation')}} ></span> <span class="text-blue-primary font-bold">{{$t('welcome.create')}}</span></div>
     <div>
-      <router-link :to="{name: 'ViewServicesAttestationCreate'}" class="font-bold" active-class="accounts">Create</router-link> |
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
+      <router-link :to="{name: 'ViewServicesAttestationCreate'}" class="font-bold" active-class="accounts">{{$t('welcome.create')}}</router-link> |
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>
     <div class="mt-5 mb-10 bg-gray-200 p-3 shadow-md hover:shadow-lg rounded-sm" v-wave="{ color: 'gray', initialOpacity: 0.1, duration: 0.6, easing: 'ease-in'}">
       <div class=" border-gray-400 border-2 border-dashed h-40 relative flex bg-white cursor-pointer text-center">
-        <div class="self-center text-center w-full"><div><font-awesome-icon icon="cloud-upload-alt" class="text-gray-400 mr-2"></font-awesome-icon> <span class="text-sm text-gray-400">Upload Files</span></div></div>
+        <div class="self-center text-center w-full"><div><font-awesome-icon icon="cloud-upload-alt" class="text-gray-400 mr-2"></font-awesome-icon> <span class="text-sm text-gray-400">{{$t('services.uploadfile')}}</span></div></div>
           <input type="file" class="opacity-0 w-full h-full cursor-pointer absolute" @change="uploadFile" />
       </div>
       <div class="text-left" v-for="(file, index) in files" :key="index">
@@ -23,12 +23,12 @@
             <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:3px; right: 10px;"></font-awesome-icon>
           </div>
         </div>
-        <div class="font-bold text-sm">Files must be in the attestation format to be audited.<br>Example:</div>
-        <p class="text-xs mt-3">Filename --Apostille TX 2c8b443e97b2636a4b9cce8de65aef6ad12cd360f54b7bac31c52cb04cddc753 --Date YYYY-MM-DD.pdf</p>
+        <div class="font-bold text-sm">{{$t('services.filemessage')}}<br>{{$t('services.example')}}:</div>
+        <p class="text-xs mt-3">{{$t('services.fileexample')}}</p>
       </div>
     </div>
     <div class="mt-10">
-      <button type="submit" class="default-btn py-1">Audit</button>
+      <button type="submit" class="default-btn py-1">{{$t('services.audit')}}</button>
     </div>
   </div>
 </template>

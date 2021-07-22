@@ -42,7 +42,6 @@
                 <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >Delegate</div>
                 <router-link :to="{ name: 'ViewAccountAliasAddressToNamespace',params: { address: account.address }}" v-if="!otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Link to Namespace</router-link>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >Link to Namespace</div>
-
               </div>
             </div>
           </div>
@@ -128,7 +127,6 @@ export default{
     };
 
     const showHideMenu = () => {
-      // show.value = !show.value;
       emitter.emit("CLOSE_ALL_MENU_TRIGGER");
       if(p.showMenuCall){
         emitter.emit("CLOSE_MENU_TRIGGER", p.i);

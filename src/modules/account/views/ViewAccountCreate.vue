@@ -1,8 +1,8 @@
 <template>
   <div class="flex justify-between text-md">
-    <div><span class="text-gray-300">Accounts ></span> <span class="text-blue-primary font-bold">Create Account</span></div>
+    <div><span class="text-gray-300">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.createaccount')}}</span></div>
     <div>
-      <router-link :to="{name: 'ViewAccountCreateSelectType'}" class="font-bold">Back</router-link>
+      <router-link :to="{name: 'ViewAccountCreateSelectType'}" class="font-bold">{{$t('accounts.back')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center'>
@@ -12,8 +12,8 @@
         <TextInput placeholder="Account Name" errorMessage="Account name is required" v-model="accountName" icon="wallet" />
         <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter your wallet ' + walletState.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
         <div class="mt-10">
-          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
-          <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">Create</button>
+          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
+          <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">{{$t('welcome.create')}}</button>
         </div>
       </fieldset>
     </form>
