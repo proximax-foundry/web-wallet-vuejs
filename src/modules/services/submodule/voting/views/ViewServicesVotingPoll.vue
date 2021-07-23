@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between text-sm">
+  <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">Vote ></span> <span class="text-blue-primary font-bold">View All</span></div>
     <div>
       <router-link :to="{ name: 'ViewServicesVotingCreatePoll'}" class="font-bold">New</router-link> |

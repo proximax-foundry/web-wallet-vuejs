@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between text-sm">
+  <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">Swap > BSC > Out ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
     <div>
       <router-link :to="{ name: 'ViewServices' }" class="font-bold">Home</router-link>
@@ -8,21 +8,21 @@
   <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
     <div class="flex">
       <div class="flex-none">
-        <div class="flex hover:bg-gray-200 p-3 rounded-2xl cursor-pointer">
+        <div class="flex hover:bg-gray-200 p-0 sm:p-3 rounded-2xl cursor-pointer">
           <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">1</div></div>
           <div class="inline-block self-center ml-3 text-xs sm:text-sm">Account</div>
         </div>
       </div>
       <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
       <div class="flex-none">
-        <div class="flex hover:bg-gray-200 p-3 rounded-2xl cursor-pointer">
+        <div class="flex hover:bg-gray-200 p-0 sm:p-3 rounded-2xl cursor-pointer">
           <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">2</div></div>
           <div class="inline-block self-center ml-3 text-xs sm:text-sm">Transaction</div>
         </div>
       </div>
       <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
       <div class="flex-none">
-        <div class="flex hover:bg-gray-200 p-3 rounded-2xl cursor-pointer">
+        <div class="flex hover:bg-gray-200 p-0 sm:p-3 rounded-2xl cursor-pointer">
           <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage==3?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">3</div></div>
           <div class="inline-block self-center ml-3 text-xs sm:text-sm">Certificate</div>
         </div>
@@ -34,10 +34,10 @@
       <div class="text-lg my-7 font-bold">Please select a Sirius account</div>
       <div v-for="acc of allAvailableAccounts" :key="acc.name">
         <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100 transition" @click="(!acc.isMultisig || includeMultisig) && selectAccount(acc.name, acc.address)">
-          <div class="text-tsm ml-3 text-gray-700">
-            <div><b>Account Name:</b> {{ acc.name }}</div>
-            <div><b>Sirius Address:</b> {{ acc.address }}</div>
-            <div><b>Sirius balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> {{ acc.balanceDisplay }} XPX</div>
+          <div class="text-xs sm:text-tsm ml-3 text-gray-700">
+            <div class="mb-1 sm:mb-0"><b>Account Name:</b> {{ acc.name }}</div>
+            <div class="mb-1 sm:mb-0"><b>Sirius Address:</b> {{ acc.address }}</div>
+            <div class="mb-1 sm:mb-0"><b>Sirius Balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> {{ acc.balanceDisplay }} XPX</div>
           </div>
           <div class="self-center">
             <img src="@/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg" class="w-10 inline mr-3">
@@ -49,10 +49,10 @@
       <div class="text-lg my-7 font-bold">Transaction Details</div>
       <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
       <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left">
-        <div class="text-tsm ml-3 text-gray-700">
-          <div><b>Account Name:</b> {{ selectedAccount.name }}</div>
-          <div><b>Sirius Address:</b> {{ selectedAccount.address }}</div>
-          <div><b>Sirius balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> {{ selectedAccount.balanceDisplay }} XPX</div>
+        <div class="text-xs sm:text-tsm ml-3 text-gray-700">
+          <div class="mb-1 sm:mb-0"><b>Account Name:</b> {{ selectedAccount.name }}</div>
+          <div class="mb-1 sm:mb-0"><b>Sirius Address:</b> {{ selectedAccount.address }}</div>
+          <div class="mb-1 sm:mb-0"><b>Sirius Balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> {{ selectedAccount.balanceDisplay }} XPX</div>
         </div>
         <div class="self-center">
           <button @click="currentPage=1" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none">Change</button>
@@ -101,9 +101,9 @@
         </div>
       </div>
       <div class="mt-10">
-        <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">Maybe Later</button>
-        <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?'Swap in progress. Please wait...':'Yes, Swap' }}</button>
-        <button class="default-btn focus:outline-none disabled:opacity-50" v-if="canCheckStatus" @click="callTocheckSwapStatus">Check Swap Status</button>
+        <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">Maybe Later</button>
+        <button type="submit" class="default-btn focus:outline-none disabled:opacity-50 mt-2" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?'Swap in progress. Please wait...':'Yes, Swap' }}</button>
+        <button class="default-btn focus:outline-none disabled:opacity-50 mt-2" v-if="canCheckStatus" @click="callTocheckSwapStatus">Check Swap Status</button>
       </div>
     </div>
     <div v-if="currentPage==3">

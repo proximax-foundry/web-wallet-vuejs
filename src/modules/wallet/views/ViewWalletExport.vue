@@ -1,5 +1,5 @@
 <template>
-<div class="flex justify-between text-sm">
+<div class="flex justify-between text-xs sm:text-sm">
   <div><span class="text-gray-400">Wallet ></span> <span class="text-blue-primary font-bold">Export Wallet</span></div>
   <div>
     <router-link :to="{ name: 'ViewWallets'}" class="font-bold" active-class="accounts">Delete Wallet</router-link>

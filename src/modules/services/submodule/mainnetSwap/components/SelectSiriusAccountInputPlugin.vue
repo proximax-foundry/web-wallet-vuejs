@@ -124,7 +124,7 @@ export default defineComponent({
   }
   .multiselect-single-label{
     font-size: 11px;
-    @apply text-gray-500;
+    @apply text-gray-500 text-left;
   }
   .multiselect-options{
     font-size: 12px;
