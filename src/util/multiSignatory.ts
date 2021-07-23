@@ -509,47 +509,59 @@ function modifyMultisigAccount(coSign :string[], removeCosign :string[], numAppr
  
 }
 
- async function fetchMultiSigCosigners(multiSigAddress :string) :Promise<{list :{address :string, name :string }[],length :number}>{
-  let promise = new Promise<{list :{address :string, name :string }[],length :number}>((resolve,reject)=>{ 
+async function getAccountBalance(address :string) :Promise<number>{
+  let promise = new Promise<number>((resolve,reject)=>{
+    WalletUtils.getAccInfo(address).then(accInfo=>{
+      let balance :number
+      accInfo.mosaics.forEach(mosaic =>{
+        
+        balance = mosaic.amount.compact()/Math.pow(10,6)
+      })
+      resolve(balance)
+    }).catch(error=>reject(error))
+  })
+  await promise
+  console.log(promise)
+  return (promise)
+}
+
+
+//level 1 = cosigner
+
+async function fetchMultiSigCosigners(multiSigAddress :string) :Promise<{list :{address :string, name :string, balance: number}[],length :number}>{
+  
+  let promise = new Promise<{list :{address :string, name :string, balance: number }[],length :number}>((resolve,reject)=>{ 
     WalletUtils.getMultisigDetails(multiSigAddress).then(multisigDetails =>{
-      let accInfo = multisigDetails.find(element => element.level === 0)
-      let account = walletState.currentLoggedInWallet.accounts.find((element) => element.publicKey === accInfo.publicKey)
-      let numCosigner = accInfo.cosignaturies.length;
+      console.log(multisigDetails)
+      let cosigners = multisigDetails.filter(element => element.level ===1 )
       let list = [];
-      let convertedAddress = Helper.createPublicAccount(accInfo.publicKey,networkState.currentNetworkProfile.network.type).address.plain()
-        for (let i = 0; i < numCosigner; i++) {
-          list.push({ address: accInfo.cosignaturies[i], name: (account) ? account.name :  convertedAddress.substr(-4)})
-      }
-     
+      
+      cosigners.forEach(cosigner=>{
+        let isInWallet = walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === cosigner.publicKey)? true: false
+        if(isInWallet){ //if cosigner in current wallet
+          let account = walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === cosigner.publicKey)
+          list.push({ address: account.address, name: account.name , balance: account.balance})
+        }else{ //cosigner not in this wallet
+          let convertedAddress = Helper.createPublicAccount(cosigner.publicKey,networkState.currentNetworkProfile.network.type).address.plain()
+           getAccountBalance(convertedAddress).then(value=>{
+            list.push({ address: convertedAddress, name: convertedAddress.substr(-4) , balance: value})
+          })
+        }
+      })
+      list.sort((a, b) => (a.balance < b.balance) ? 1 : -1);
+      let multisigAccountInfo = multisigDetails.find(element => element.level === 0);
+      let numCosigner = multisigAccountInfo.cosignaturies.length;
       resolve({ list: list, length: numCosigner })
     }).catch(error => reject(error))
   })
-  
  await promise
- console.log(promise)
+ console.log(await promise)
  return promise
  
 }
 
 
 
-async function fetchWalletCosigner(address :string) :Promise<{list :{balance :number, address :string, name :string }[], numCosigner :number}>{
-  let cosign = multiSign.fetchMultiSigCosigners(address);
-  let list = [];
-  let promise = new Promise<{list :{balance :number, address :string, name :string }[],numCosigner :number}>((resolve,reject)=>{
-    cosign.then(cosign=>{
-      cosign.list.forEach((element) => {
-        const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address);
-        list.push({ balance: account.balance, address: element.address, name: element.name });
-      });
-      list.sort((a, b) => (a.balance < b.balance) ? 1 : -1);
-      resolve({ list: list, numCosigner: cosign.length })
-    }).catch(error=>reject(error)) 
-  })
-  await promise
- console.log(promise)
- return promise
-}
 
 export const multiSign = readonly({
   // config,
@@ -566,7 +578,6 @@ export const multiSign = readonly({
   getMultisigAccountGraphInfo,
   modifyMultisigAccount,
   fetchMultiSigCosigners,
-  fetchWalletCosigner,
   removeUnrelatedMultiSig,
  /*  createMultiSigAccount, */
 });
