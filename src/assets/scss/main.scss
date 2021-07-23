@@ -67,7 +67,7 @@ body{
 }
 
 .error_box{
-  @apply bg-red-100 py-3 rounded-xl;
+  @apply bg-red-100 py-3 rounded-xl px-3;
 }
 
 .blue-btn{
@@ -191,7 +191,7 @@ body{
 
   a{
     font-weight: bold;
-    font-size: 16px;
+    font-size: 13px;
     display: block;
     padding: 2px 18px;
     padding-top: 5px;
@@ -219,6 +219,7 @@ body{
     a{
       display: inline-block;
       color: var(--white) #{!important};
+      font-size: 16px;
     }
   }
 }

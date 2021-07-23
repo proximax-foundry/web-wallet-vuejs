@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between text-sm">
+  <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">Address Book ></span> <span class="text-blue-primary font-bold">Add Contacts</span></div>
     <div>
       <router-link :to="{name: 'ViewServicesAddressBook'}" class="font-bold" active-class="accounts">Address Book</router-link> | 
