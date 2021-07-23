@@ -100,7 +100,13 @@ body{
 }
 
 .big-default-btn{
-  @apply blue-btn py-5 px-10 focus:outline-none;
+  @apply blue-btn py-3 px-10 focus:outline-none;
+}
+
+@screen md{
+  .big-default-btn{
+    @apply py-5;
+  }
 }
 
 .title{
@@ -108,8 +114,22 @@ body{
 }
 
 .big-title{
-  @apply title text-xxl mt-20 font-bold;
+  @apply title text-sm mt-10 font-bold mb-2;
 }
+
+  .big-para{
+    @apply text-xs mx-3;
+  }
+
+  @screen md {
+    .big-title{
+      @apply text-xxl mt-20;
+    }
+
+    .big-para{
+      @apply text-sm;
+    }
+  }
 
 .default-title{
   @apply title text-sm md:text-lg lg:text-txl;
