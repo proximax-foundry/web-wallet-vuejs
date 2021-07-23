@@ -2,10 +2,10 @@
   <header>
     <div class="header-height flex items-stretch">
       <div class="flex-none self-center flex items-end logo">
-        <router-link :to="loginStatus? {name : 'ViewServices'}: {name: 'Home'}"><img src="@/modules/services/submodule/mainnetSwap/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link>
+        <router-link :to="loginStatus? {name : 'ViewServices'}: {name: 'Home'}"><img src="@/modules/services/submodule/mainnetSwap/img/logo-proximax-sirius-wallet-beta.svg?v=2" class="w-32 tsm:w-44"></router-link>
       </div>
       <div class="flex-grow header-height"></div>
-      <div class="flex-none header-menu mt-1 sm:mt-3" v-if="loginStatus">
+      <div class="flex-none header-menu mt-1 tsm:mt-3" v-if="loginStatus">
         <div class=" flex flex-row">
           <div class="w-10 text-center flex flex-row h-10 items-center">
             <img src="../assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
