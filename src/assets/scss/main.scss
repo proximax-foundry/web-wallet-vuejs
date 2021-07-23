@@ -52,23 +52,6 @@ body{
   margin-left: 10px;
 }
 
-.version-text{
-  color: #616161;
-  font-size: .8rem;
-  position: relative;
-  top: 4px;
-  left: 5px;
-}
-
-.header-menu{
-  margin-right: 20px;
-}
-
-.header-menu a{
-  font-size: 15px;
-  margin-left: 10px;
-}
-
 .animate__animated.animate__fadeInDown{
   --animate-duration: 0.5s;
 }
@@ -95,12 +78,14 @@ body{
   @apply bg-blue-primary text-tsm py-1 px-5 text-white font-bold rounded-3xl transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
 }
 
-.default-btn{
-  @apply blue-btn py-3 px-10;
+.big-default-btn{
+  @apply blue-btn py-3 px-10 focus:outline-none;
 }
 
-.big-default-btn{
-  @apply blue-btn py-5 px-10 focus:outline-none;
+@screen md{
+  .big-default-btn{
+    @apply py-5;
+  }
 }
 
 .title{
@@ -108,7 +93,21 @@ body{
 }
 
 .big-title{
-  @apply title text-xxl mt-20 font-bold;
+  @apply title text-sm mt-10 font-bold mb-2;
+}
+
+.big-para{
+  @apply text-xs mx-3;
+}
+
+@screen md {
+  .big-title{
+    @apply text-xxl mt-20;
+  }
+
+  .big-para{
+    @apply text-sm;
+  }
 }
 
 .default-title{
