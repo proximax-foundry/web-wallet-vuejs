@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between text-sm">
+  <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">Voting ></span> <span class="text-blue-primary font-bold">Create Poll</span></div>
     <div>
       <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
@@ -8,28 +8,28 @@
   <div class='mt-2 py-3 gray-line text-center'>
     <div class="flex">
       <div class="flex-none">
-        <div class="flex hover:bg-gray-200 p-3 rounded-2xl cursor-pointer" @click="navigateTo(1)">
+        <div class="flex hover:bg-gray-200 p-0 sm:p-3 rounded-2xl cursor-pointer" @click="navigateTo(1)">
           <div class="rounded-full flex w-10 h-10" :class="`${ isCurrent(1)?'bg-blue-primary':(visitedPage(1)?(verifiedPage(1)?'bg-green-600':'bg-red-500'):'bg-gray-300') }`"><div class="self-center inline-block text-center w-full text-white">1</div></div>
           <div class="inline-block self-center ml-3">Details</div>
         </div>
       </div>
       <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
       <div class="flex-none">
-        <div class="flex hover:bg-gray-200 p-3 rounded-2xl cursor-pointer" @click="navigateTo(2)">
+        <div class="flex hover:bg-gray-200 p-0 sm:p-3 rounded-2xl cursor-pointer" @click="navigateTo(2)">
           <div class="rounded-full flex w-10 h-10" :class="`${ isCurrent(2)?'bg-blue-primary':(visitedPage(2)?(verifiedPage(2)?'bg-green-600':'bg-red-500'):'bg-gray-300') }`"><div class="self-center inline-block text-center w-full text-white">2</div></div>
           <div class="inline-block self-center ml-3">Vote options</div>
         </div>
       </div>
       <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
       <div class="flex-none">
-        <div class="flex hover:bg-gray-200 p-3 rounded-2xl cursor-pointer" @click="navigateTo(3)">
+        <div class="flex hover:bg-gray-200 p-0 sm:p-3 rounded-2xl cursor-pointer" @click="navigateTo(3)">
           <div class="rounded-full flex w-10 h-10" :class="`${ isCurrent(3)?'bg-blue-primary':(visitedPage(3)?(verifiedPage(3)?'bg-green-600':'bg-red-500'):'bg-gray-300') }`"><div class="self-center inline-block text-center w-full text-white">3</div></div>
           <div class="inline-block self-center ml-3">Type</div>
         </div>
       </div>
       <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
       <div class="flex-none">
-        <div class="flex hover:bg-gray-200 p-3 rounded-2xl cursor-pointer" @click="navigateTo(4)">
+        <div class="flex hover:bg-gray-200 p-0 sm:p-3 rounded-2xl cursor-pointer" @click="navigateTo(4)">
           <div class="rounded-full flex w-10 h-10" :class="`${ isCurrent(4)?'bg-blue-primary':(visitedPage(4)?(verifiedPage(4)?'bg-green-600':'bg-red-500'):'bg-gray-300') }`"><div class="self-center inline-block text-center w-full text-white">4</div></div>
           <div class="inline-block self-center ml-3">Activate</div>
         </div>

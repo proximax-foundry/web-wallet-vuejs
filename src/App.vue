@@ -6,13 +6,11 @@
     <Toast position="bottom-left" group="bl" />
     <Toast position="bottom-right" group="br" style="word-break: break-all;" />
     <ConfirmDialog></ConfirmDialog>
-    <header class="h-16 flex items-stretch">
-      <headerComponent></headerComponent>
-    </header>
+    <headerComponent></headerComponent>
     <div class="flex-grow">
       <div :class="login?`w-full mx-auto text-center`:``">
         <NavigationMenu v-if="login"></NavigationMenu>
-        <div :class="`${ login?'page container inline-block pt-5 px-10':''}`">
+        <div :class="`${ login?'page container inline-block pt-5 px-2 sm:px-10':''}`">
           <router-view></router-view>
         </div>
       </div>

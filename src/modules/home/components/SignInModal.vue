@@ -6,12 +6,12 @@
       leave-active-class="animate__animated animate__fadeOutUp"
     >
       <div v-show="toggleModal" class="popup-outer absolute flex z-50">
-        <div class="modal-popup-box">
-          <div class="delete-position">
-            <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
+        <div class="modal-popup-box m-2">
+          <div class="delete-position mt-2 mr-2" @click="toggleModal = false">
+            <font-awesome-icon icon="times" class="delete-icon-style"></font-awesome-icon>
           </div>
           <div class="w-104">
-            <h1 class="default-title font-bold my-10">Sign in to {{networkState.chainNetworkName}} Wallet</h1>
+            <h1 class="default-title font-bold my-3 sm:my-10">Sign in to {{networkState.chainNetworkName}} Wallet</h1>
             <form @submit.prevent="login">
               <fieldset class="w-full">
                 <div class="error error_box" v-if="err!=''">{{ err }}</div>

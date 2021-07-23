@@ -2,7 +2,7 @@
   <div class="container mx-auto text-center">
     <h1 class="font-bold big-title mt-20">Wallets</h1>
     <div class='mt-2 py-3 gray-line'>
-      <p>These are the {{ networkState.chainNetworkName }} Wallets available in the local storage of your device.</p>
+      <p class="text-tsm mx-3 sm:text-sm">These are the {{ networkState.chainNetworkName }} Wallets available in the local storage of your device.</p>
       <div v-if="wallets.length == 0" class="text-center h4 my-2">
         No wallets found
       </div>
@@ -10,7 +10,7 @@
         <WalletTile :key="item.name" v-for="item in wallets" :wallet="item" />
       </div>
     </div>
-    <div class="mt-32" v-if="!walletState.currentLoggedInWallet">
+    <div class="mt-16 sm:mt-32" v-if="!walletState.currentLoggedInWallet">
       <router-link :to="{ name : 'Home'}" class="blue-btn p-3 px-5">Home</router-link>
     </div>
   </div>

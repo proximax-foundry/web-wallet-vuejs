@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between text-sm">
+  <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">Transactions ></span> <span class="text-blue-primary font-bold">Partial</span></div>
     <div>
       <router-link :to="{ name: 'ViewServices'}" class="font-bold">All Services</router-link>
