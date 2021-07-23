@@ -1,27 +1,26 @@
 <template>
-  <div class="flex justify-between text-sm">
+  <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">{{$t('swap.swap')}} > {{$t('services.eth')}}> </span> <span class="text-blue-primary font-bold">{{$t('swap.selectoption')}}</span></div>
     <div>
       <router-link :to="{ name: 'ViewServices'}" class="font-bold" active-class="accounts">{{$t('services.allservices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line'>
-    <div class="text-xl text-gray-600 font-bold mt-10">{{$t('swap.optionmessage')}}</div>
-    <div class="text-sm text-gray-400 mt-3">Lorem ipsum dolor sit amet, consectetur adipi</div>
+    <div class="text-lg sm:text-xl text-gray-600 font-bold mt-10">{{$t('swap.optionmessage')}}</div>
     <div class="md:grid md:grid-cols-2 mx-5 lg:mx-5 2xl:mx-60 mt-5">
       <div class="md:col-span-1">
         <router-link :to="{ name: 'ViewServicesMainnetSwapSiriusToETH' }">
           <div class="m-5 lg:mx-10 rounded-2xl border border-blue-primary option-div">
-            <div class="mt-10 text-blue-primary font-bold text-xl mb-1">{{$t('swap.outcome')}}</div>
-            <div class="mb-10 text-gray-500">{{$t('swap.sirius2eth')}}</div>
+            <div class="mt-5 sm:mt-10 text-blue-primary font-bold text-xl mb-1">{{$t('swap.outcome')}} <img src="@/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg" class="h-8 w-8 inline-block ml-2"></div>
+            <div class="mt-3 mb-5 sm:mb-10 text-gray-500">{{$t('swap.sirius2eth')}}</div>
           </div>
         </router-link>
       </div>
       <div class="md:col-span-1">
         <router-link :to="{ name: 'ViewServicesMainnetSwapETHToSirius' }">
           <div class="m-5 lg:mx-10 rounded-2xl border border-blue-primary option-div">
-            <div class="mt-10 text-blue-primary font-bold text-xl mb-1">{{$t('swap.income')}}</div>
-            <div class="mb-10 text-gray-500">{{$t('swap.eth2sirius')}}</div>
+            <div class="mt-5 sm:mt-10 text-blue-primary font-bold text-xl mb-1">{{$t('swap.income')}} <img src="@/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg" class="h-8 w-8 inline-block ml-2"></div>
+            <div class="mt-3 mb-5 sm:mb-10 text-gray-500">{{$t('swap.eth2sirius')}}</div>
           </div>
         </router-link>
       </div>
