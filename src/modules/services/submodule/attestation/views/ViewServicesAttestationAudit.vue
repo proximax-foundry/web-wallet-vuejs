@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between text-sm">
+  <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">Attestation ></span> <span class="text-blue-primary font-bold">Create</span></div>
     <div>
       <router-link :to="{name: 'ViewServicesAttestationCreate'}" class="font-bold" active-class="accounts">Create</router-link> |

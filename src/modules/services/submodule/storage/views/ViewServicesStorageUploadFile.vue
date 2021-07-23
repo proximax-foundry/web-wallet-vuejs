@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between text-sm">
+  <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">Storage ></span> <span class="text-blue-primary font-bold">Upload File</span></div>
     <div>
       <router-link :to="{ name: 'ViewServicesStorageMyFile'}" class="font-bold">Files</router-link> |
