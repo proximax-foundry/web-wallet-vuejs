@@ -84,7 +84,7 @@
           </div>
         </div>
       </div>
-      <div class="text-sm text-center">Fees are valid for: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
+      <div class="text-sm text-center mb-2 sm:mb-4">Fees are valid for: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
       <div class="tex-center font-bold text-lg mb-2">Transaction Fee (Sirius Network):</div>
       <div class="rounded-2xl bg-gray-100 p-5 mb-5">
         <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span class="text-txs">{{ txFeeDisplay }}</span> XPX</div>
