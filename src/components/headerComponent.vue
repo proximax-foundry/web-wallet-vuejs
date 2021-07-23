@@ -5,10 +5,10 @@
         <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-24 sm:w-32"></router-link><span class="version-text">v{{ versioning }}</span>
       </div>
       <div class="flex-grow header-height"></div>
-      <div class="flex-none header-menu mt-3" v-if="loginStatus">
+      <div class="flex-none header-menu mt-1 sm:mt-3" v-if="loginStatus">
         <div class=" flex flex-row">
           <div class="w-5 sm:w-16 inline-block items-center relative">
-            <SelectLanguagePlugin style="position: absolute; top: 0px" />
+            <SelectLanguagePlugin class="lang-mobile-placement-postlogin" />
           </div>
           <div class="w-10 text-center flex flex-row h-10 items-center">
             <img src="../assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
@@ -24,7 +24,7 @@
               <div class="text-xs">Total Balance: <span>{{ totalBalance }}</span> {{ currentNativeTokenName}}</div>
             </div>
           </div>
-          <div class="w-17 text-center h-10 items-center gray-line-left">
+          <div class="w-17 text-center h-10 items-center gray-line-left mr-1">
             <div class="text-xs inline-block mt-3" v-if="wideScreen">
               <a @click="logout()">Sign out</a>
             </div>
@@ -49,7 +49,7 @@
         </div>
       </div>
     </div>
-    <div v-if="!wideScreen" class="bg-gray-100 py-1 text-center">
+    <div v-if="!wideScreen && !loginStatus" class="bg-gray-100 py-1 text-center">
       <div class="w-16 text-center inline-block">
         <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block text-xs sm:text-sm">Home</router-link>
       </div>
@@ -453,6 +453,10 @@ export default defineComponent({
   top: -30px; position: relative;
 }
 
+.lang-mobile-placement-postlogin{
+  position: relative; top: 0px !important; left: -35px;
+}
+
 .header-height{
   @apply h-12;
 }
@@ -479,6 +483,10 @@ export default defineComponent({
     font-size: 13px;
     top: 5px;
     left: 5px;
+  }
+
+  .lang-mobile-placement-postlogin{
+    left: 0px;
   }
 }
 
