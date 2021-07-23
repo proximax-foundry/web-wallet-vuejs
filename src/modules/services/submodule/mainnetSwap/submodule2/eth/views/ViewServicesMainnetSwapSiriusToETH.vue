@@ -28,9 +28,8 @@
         </div>
       </div>
     </div>
-    <div class="text-sm text-center">{{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
     <div v-if="currentPage==1">
-      <p class="text-tsm my-5 text-gray-400">This is a list of your Sirius Accounts available in this wallet.</p>
+      <p class="text-tsm my-5 text-gray-400">This is a list of your Sirius accounts available in this wallet.</p>
       <div class="text-lg my-7 font-bold">Please select a Sirius account</div>
       <div v-for="acc of allAvailableAccounts" :key="acc.name">
         <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100 transition" @click="(!acc.isMultisig || includeMultisig) && selectAccount(acc.name, acc.address)">
@@ -60,7 +59,7 @@
       </div>
       <SwapInput v-model="amount" :maxAmount="maxSwapAmount" placeholder="Amount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" type="text" icon="coins" :showError="showAmountErr" 
                 errorMessage="Insufficient balance" emptyErrorMessage="Amount is empty" :disabled="disableAmount" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" />
-      <TextInput placeholder="ETH address to receive your swap" errorMessage="Valid ETH address is required" :showError="showAddressErr" v-model="ethAddress" icon="wallet" />
+      <TextInput placeholder="ETH address receiving your swap" errorMessage="Valid ETH address is required" :showError="showAddressErr" v-model="ethAddress" icon="wallet" />
       <div class="tex-center font-bold text-lg mb-2">Transaction Fee (ETH Network):</div>
       <div class="md:grid md:grid-cols-3 mb-10">
         <div class="md:col-span-1 mb-3">
@@ -85,7 +84,8 @@
           </div>
         </div>
       </div>
-      <div class="tex-center font-bold text-lg mb-2">Transaction Fee:</div>
+      <div class="text-sm text-center">Fees are valid for: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
+      <div class="tex-center font-bold text-lg mb-2">Transaction Fee (Sirius Network):</div>
       <div class="rounded-2xl bg-gray-100 p-5 mb-5">
         <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span class="text-txs">{{ txFeeDisplay }}</span> XPX</div>
       </div>
@@ -97,7 +97,7 @@
               <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:3px; right: 10px;"></font-awesome-icon>
             </div>
           </div>
-          <div class="text-tsm mt-2">Swap may take a few hours to complete. If you wish to proceed, you will receive a certificate containing your transaction hash for your records.</div>
+          <div class="text-tsm mt-2">Swap completion times will vary depending on the performance of the ETH network. The more ETH transaction fees you pay, the faster your swap will occur. Displayed ETH fees are valid for only three minutes due to the ETH network’s fluctuating rates.</div>
         </div>
       </div>
       <div class="mt-10">
@@ -118,7 +118,7 @@
                 <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:3px; right: 10px;"></font-awesome-icon>
               </div>
             </div>
-            <div class="text-tsm mt-2">Save a copy of your certificate. It is needed in the event of an error.</div>
+            <div class="text-tsm mt-2">Please download the certificate. It is needed in the event of an error. You can search the status of your ETH transaction using the above ETH Transaction Hash.</div>
           </div>
         </div>
         <label class="inline-flex items-center mb-10">
@@ -126,7 +126,7 @@
           <span class="ml-2 cursor-pointer text-tsm">I confirm that i have saved a copy of my certificate.</span>
         </label>
         <div class="mt-10">
-          <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none mr-4 w-32" @click="saveCertificate">Save</button>
+          <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none mr-4 w-32" @click="saveCertificate">Download Certificate</button>
           <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-32" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
         </div>
       </div>
