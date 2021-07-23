@@ -2,7 +2,7 @@
   <header>
     <div class="header-height flex items-stretch">
       <div class="flex-none self-center flex items-end logo">
-        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-24 tsm:w-32"></router-link><span class="version-text">{{$t('Header.version')}}{{ versioning }}</span>
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-24 tsm:w-40"></router-link><span class="version-text">{{$t('Header.version')}}{{ versioning }}</span>
       </div>
       <div class="flex-grow header-height"></div>
       <div class="flex-none header-menu mt-1 tsm:mt-3" v-if="loginStatus">
