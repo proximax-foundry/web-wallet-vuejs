@@ -10,7 +10,7 @@
     <div class="md:grid md:grid-cols-2 mx-5 lg:mx-5 2xl:mx-60 mt-5">
       <div class="md:col-span-1">
         <router-link :to="{ name: 'ViewServicesMainnetSwapSiriusToETH' }">
-          <div class="m5 lg:mx-10 rounded-2xl border border-blue-primary option-div">
+          <div class="m-5 lg:mx-10 rounded-2xl border border-blue-primary option-div">
             <div class="mt-5 sm:mt-10 text-blue-primary font-bold text-xl mb-1">Out <img src="@/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg" class="h-8 w-8 inline-block ml-2"></div>
             <div class="mt-3 mb-5 sm:mb-10 text-gray-500">From Sirius to ETH</div>
           </div>

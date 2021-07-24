@@ -24,7 +24,7 @@
           <div class="col-span-3 text-left pl-2 flex">
             <div class="self-center">
               <b class="text-sm">{{ networkTerm }} Transaction Hash:</b>
-              <div class="break-all text-sm mt-1 text-blue-500">{{ transactionHash }}</div>
+              <div class="break-all text-sm mt-1 text-blue-500"><a :href="swapLink" target=_new>{{ transactionHash }}</a></div>
             </div>
           </div>
         </div>
@@ -52,6 +52,7 @@ export default{
     transactionHash: String,
     siriusAddress: String,
     swapQr: String,
+    swapLink: String,
   }
 }
 </script>
