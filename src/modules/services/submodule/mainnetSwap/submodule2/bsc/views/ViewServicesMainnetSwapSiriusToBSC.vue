@@ -2,7 +2,7 @@
   <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">Swap > BSC > Out ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">Home</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
@@ -558,7 +558,7 @@ export default {
         if(response.ok){
           const res = await response.json();
           certTransactionHash.value = res.data.txHash;
-          swapLink.value = ethScanUrl + res.data.txHash;
+          swapLink.value = bscScanUrl + res.data.txHash;
           swapTimestamp.value = '';
           swapId.value = res.data.swapId;
           swapQr.value = SwapUtils.generateQRCode(bscScanUrl + res.data.txHash);
@@ -606,7 +606,7 @@ export default {
         }
       } catch (error) {
           toast.add({
-            severity:'warn',
+            severity:'error',
             summary: 'Network error',
             detail: 'Swap Server not found',
             group: 'br',
