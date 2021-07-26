@@ -17,6 +17,7 @@
     </div>
     <!-- <PageComponent></PageComponent> -->
     <footer class="h-12 text-center mt-20">
+
       <div class="text-xs py-2">
         <div class="font-bold">version 0.4.2</div>
         <div class="font-bold">&copy; ProximaX 2021</div>

@@ -534,6 +534,7 @@ export default defineComponent({
   background-color: #ffffff;
 }
 
+
 @screen md {
   .header-height{
     @apply h-16;

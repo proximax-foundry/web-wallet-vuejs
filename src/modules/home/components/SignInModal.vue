@@ -18,8 +18,8 @@
                 <SelectInputPlugin placeholder="Select a Wallet" errorMessage="Select a Wallet" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
                 <PasswordInput placeholder="Enter Wallet Password" errorMessage="Password Required" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
                 <div class="mt-10">
-                  <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
-                  <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSignin">Sign In</button>
+                  <button type="button" class="big-default-btn mr-2 sm:mr-5 focus:outline-none" @click="clearInput();">Clear</button>
+                  <button type="submit" class="big-default-btn py-1 disabled:opacity-50" :disabled="disableSignin">Sign In</button>
                 </div>
               </fieldset>
             </form>
