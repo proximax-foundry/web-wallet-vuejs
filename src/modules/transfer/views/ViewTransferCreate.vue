@@ -39,19 +39,19 @@
             </transition>
             <input type="hidden" v-model="currentSelectedName" />
           </div>
-          <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4">
-            <div v-if="getWalletCosigner().list.length > 0">
+          <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4"> 
+            <div v-if="list.length > 0">
               <div class="text-tsm">
                 {{$t('transfer.cosigner')}}:
-                <span class="font-bold" v-if="getWalletCosigner().list.length == 1">
-                  {{ getWalletCosigner().list[0].name }} ({{$t('services.balance')}}:{{ getWalletCosigner().list[0].balance }} XPX)
-                    <span v-if="getWalletCosigner().list[0].balance <lockFundTotalFee.value" class="error">
+                <span class="font-bold" v-if="list.length == 1">
+                  {{ list[0].name }} ({{$t('services.balance')}}:{{  list[0].balance }} XPX)
+                    <span v-if="list[0].balance <lockFundTotalFee.value" class="error">
                       - {{$t('accounts.insufficientbalance')}}
                     </span>
                 </span>
                 <span class="font-bold" v-else>
                   <select v-model="cosignAddress">
-                    <option v-for="(element, item) in getWalletCosigner().list" :value="element.address" :key="item">
+                    <option v-for="(element, item) in  list" :value="element.address" :key="item">
                       {{ element.name }} ({{$t('services.balance')}}: {{ element.balance }} XPX)
                     </option>
                   </select>
@@ -155,7 +155,7 @@
     <ConfirmSendModal :toggleModal="toggleConfirm" />
   </div>
 </template>
-<script >
+<script>
 import { Helper } from "@/util/typeHelper";
 import { computed, ref, getCurrentInstance, watch } from "vue";
 import TextInput from "@/components/TextInput.vue";
@@ -189,6 +189,11 @@ export default {
     TransferTextareaInput,
     AddContactModal,
     ConfirmSendModal,
+  },
+  data(){
+    return{
+      list: []
+    }
   },
   setup() {
     const internalInstance = getCurrentInstance();
@@ -226,6 +231,7 @@ export default {
     const disableMsgInput = computed(() => disableAllInput.value);
     const disablePassword = computed(() => disableAllInput.value);
     const cosignerBalanceInsufficient = ref(false);
+    const list = ref([])
 
     const currencyName = computed(
       () => networkState.currentNetworkProfile.network.currency.name
@@ -333,7 +339,7 @@ export default {
 
     // enable and disable inputs based on cosign balance
     if (isMultiSigBool.value) {
-      let cosign = multiSign.fetchWalletCosigner(selectedAccAdd.value);
+      multiSign.fetchMultiSigCosigners(selectedAccAdd.value).then(cosign=>{
       if (cosign.list.length > 0) {
         if (cosign.list[0].balance < lockFundTotalFee.value) {
           disableAllInput.value = true;
@@ -345,6 +351,8 @@ export default {
       } else {
         disableAllInput.value = true;
       }
+      })
+      
     }
 
     // check account balance at first load
@@ -363,7 +371,7 @@ export default {
       return accounts.value.length > 1;
     });
 
-    const changeSelection = (i) => {
+    const changeSelection = async(i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
       // balance.value = i.balance;
@@ -373,8 +381,12 @@ export default {
       isMultiSigBool.value = isMultiSig(i.address);
       // set default of cosinger if multiple return
       if (isMultiSigBool.value) {
-        let cosign = multiSign.fetchWalletCosigner(i.address);
-        if (cosign.list.length > 0) {
+          
+          multiSign.fetchMultiSigCosigners(i.address).then(cosign =>{
+            console.log(cosign.list)
+            list.value = cosign.list
+            console.log(list.value)
+             if (cosign.list.length > 0) {
           cosignAddress.value = cosign.list[0].address;
           // console.log('cosign.list[0].balance');
           // console.log(cosign.list[0].balance);
@@ -388,6 +400,7 @@ export default {
         } else {
           disableAllInput.value = true;
         }
+          })
       } else {
         disableAllInput.value = false;
       }
@@ -398,27 +411,24 @@ export default {
       selectedMosaicAmount.value = [];
       mosaicSupplyDivisibility.value = [];
     };
-
     // get cosigner if available
-    const getWalletCosigner = () => {
-      multiSign.fetchMultiSigCosigners(selectedAccAdd.value).then(cosign=>{
-      let list = [];
-      cosign.list.forEach((element) => {
-        console.log(walletState.currentLoggedInWallet.others)
-        const account = walletState.currentLoggedInWallet.others.find((account) => account.address === element.address);
-        list.push({
-          balance: account.balance,
-          address: element.address,
-          name: element.name,
-        });
-        list.sort((a, b) => (a.balance < b.balance ? 1 : -1));
-       return { list: list, numCosigner: cosign.length };
-      })
-        /*  appStore.getAccDetailsByAddress(element.address) */
-    });
-      
-    };
+  /*   const getWalletCosigner = async() => {
+        return new Promise((resolve, reject) => {
+         multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
+        .then(response => {
+          
+          response.list.forEach(element=>{
+            list.push({address: element.address , name: element.name, balance: element.balance}) 
+          })
+          resolve(list)
+        })
+        .catch(() => reject)
+  })
+    }; */
 
+ 
+      
+ 
     const contact = computed(() => {
       const wallet = walletState.currentLoggedInWallet;
       var contact = [];
@@ -603,9 +613,8 @@ export default {
 
     watch(cosignAddress, (n, o) => {
       if (n != o) {
-        let cosign = multiSign.fetchWalletCosigner(selectedAccAdd.value);
-
-        if (
+        let cosign = multiSign.fetchMultiSigCosigners(selectedAccAdd.value).then(cosign=>{
+          if (
           cosign.list.find((element) => element.address == n).balance <
           lockFundTotalFee.value
         ) {
@@ -613,6 +622,7 @@ export default {
         } else {
           cosignerBalanceInsufficient.value = false;
         }
+        })
       }
     });
 
@@ -621,7 +631,7 @@ export default {
         showBalanceErr.value = true;
       }
     });
-
+  
     watch(recipient, (add) => {
       if (
         (recipient.value.length == 46 &&
@@ -756,7 +766,7 @@ export default {
       isMultiSigBool,
       effectiveFee,
       cosignAddress,
-      getWalletCosigner,
+      /* getWalletCosigner, */
       disableRecipient,
       disableSupply,
       disableRegularMsg,
@@ -771,7 +781,7 @@ export default {
       currencyName,
       lockFundTxFee,
       lockFundTotalFee,
-    };
+    }
   },
 };
 </script>
