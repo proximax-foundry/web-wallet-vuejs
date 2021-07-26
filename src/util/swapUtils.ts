@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import qrcode from 'qrcode-generator';
-import { Account, Address, AggregateTransaction } from "tsjs-xpx-chain-sdk";
+import { Account, Address, AggregateTransaction, SignedTransaction } from "tsjs-xpx-chain-sdk";
 import { pdfImg } from '@/modules/services/submodule/mainnetSwap/pdfBackground';
 import { walletState } from '@/state/walletState';
 import { networkState } from '@/state/networkState';
@@ -688,19 +688,14 @@ export class SwapUtils {
     doc.save('swap_certificate.pdf');
   }
 
-  static announceTx = (selectedAddress: string, walletPassword: string, aggreateCompleteTransaction: AggregateTransaction) :string => {
+  static signTransaction(selectedAddress: string, walletPassword: string, aggreateCompleteTransaction: AggregateTransaction) :SignedTransaction {
     const accAddress = Address.createFromRawAddress(selectedAddress);
-    // console.log(accAddress)
     const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
     const encryptedPassword = WalletUtils.createPassword(walletPassword);
     let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
     const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
-    // console.log(aggreateCompleteTransaction);
     let signedTx = account.sign(aggreateCompleteTransaction, networkState.currentNetworkProfile.generationHash);
-    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
-    let chainAPICall = new ChainAPICall(apiEndpoint);
-    chainAPICall.transactionAPI.announce(signedTx);
-    return signedTx.hash;
+    return signedTx;
   }
 
   static getETH_GasLimit = async (baseUrl: string):Promise<any> => {
@@ -729,6 +724,10 @@ export class SwapUtils {
 
   static getOutgoing_SwapCheckByID_URL = (baseUrl: string, swapId: string): string => {
     return `${baseUrl}/swap/${swapId}`;
+
+  static checkSwapService = (baseUrl: string): string => {
+    return `${baseUrl}/checkBalanceOk`;
+
   }
 }
 
