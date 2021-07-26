@@ -10,8 +10,8 @@
     <form @submit.prevent="SaveContact" class="mt-10">
       <fieldset class="w-full">
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <TextInput placeholder="Name" errorMessage="Name required" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
-        <TextInput placeholder="Address" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" />
+        <TextInput :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
+        <TextInput :placeholder="$t('createsuccessful.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" />
         <div class="mt-10">
           <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
           <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="SaveContact()">{{$t('accounts.save')}}</button>
@@ -31,13 +31,14 @@ import { Wallet } from "@/models/wallet";
 import { Wallets } from "@/models/wallets";
 import { walletState } from '@/state/walletState';
 import { WalletStateUtils } from '@/state/utils/walletStateUtils';
-
+import {useI18n} from 'vue-i18n'
 export default {
   name: 'ViewCreateContacts',
   components: {
     TextInput
   },
   setup(){
+    const {t} = useI18n();
     const toast = useToast();
     // const appStore = inject("appStore");
     const contactName = ref('');
@@ -63,7 +64,7 @@ export default {
 
     const addErr = computed(
       () => {
-        let addErrDefault = 'Address required';
+        let addErrDefault = t('services.addressvalidation');
         return addMsg.value?addMsg.value:addErrDefault;
       }
     );

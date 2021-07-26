@@ -17,8 +17,8 @@
               <fieldset class="w-full">
                 <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
                 <div class="mb-5 text-center"><span class="text-lg text-gray-700">{{$t('addressbook.editcontact')}}</span></div>
-                <TextInput placeholder="Name" errorMessage="Name required" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
-                <TextInput placeholder="Address" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" />
+                <TextInput :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
+                <TextInput :placeholder="$t('createsuccessful.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" />
                 <div class="mt-10 text-center">
                   <button type="button" class="default-btn mr-5 focus:outline-none" @click="toggleModal = !toggleModal">{{$t('deletewallet.cancel')}}</button>
                   <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="EditContact()">{{$t('accounts.save')}}</button>
@@ -40,12 +40,13 @@ import { useToast } from "primevue/usetoast";
 import { Helper } from "@/util/typeHelper";
 import { AddressBookUtils } from '@/util/addressBookUtils';
 import { walletState } from '@/state/walletState';
-
+import {useI18n} from 'vue-i18n'
 export default{
   name: 'EditContactModal',
   props:['data'],
 
   setup(p){
+    const {t} = useI18n();
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -71,7 +72,7 @@ export default{
 
     const addErr = computed(
       () => {
-        let addErrDefault = 'Address required';
+        let addErrDefault = t('services.addressvalidation');
         return addMsg.value?addMsg.value:addErrDefault;
       }
     );
