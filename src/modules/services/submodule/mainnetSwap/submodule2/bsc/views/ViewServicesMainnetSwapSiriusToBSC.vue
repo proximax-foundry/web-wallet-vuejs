@@ -102,7 +102,7 @@
       </div>
       <div class="mt-10">
         <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">Maybe Later</button>
-        <button type="submit" class="default-btn focus:outline-none disabled:opacity-50 mt-2" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?'Swap in progress. Please wait...':'Yes, Swap' }}</button>
+        <button type="button" class="default-btn focus:outline-none disabled:opacity-50 mt-2" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?'Swap in progress. Please wait...':'Yes, Swap' }}</button>
         <button class="default-btn focus:outline-none disabled:opacity-50 mt-2" v-if="canCheckStatus" @click="callTocheckSwapStatus">Check Swap Status</button>
       </div>
     </div>
@@ -525,9 +525,9 @@ export default {
           updateRemoteAddress();
           changeGasStrategy(bscGasStrategy.value);
           disableTimer();
-          transactionHash = SwapUtils.announceTx(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
-
-          // currentPage.value = 3;
+          let signedTransaction = SwapUtils.signTransaction(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
+          transactionHash = signedTransaction.hash;
+          callSwapServer(signedTransaction.payload);
         } else {
           err.value = "Wallet password is incorrect";
           swapInProgress.value = false;
@@ -537,15 +537,16 @@ export default {
     };
 
     // call swap server function
-    const callSwapServer = async() =>{
+    const callSwapServer = async(payload) =>{
       const data = {
         txnInfo: {
           network: "bsc",
-          txnHash: transactionHash
+          siriusTxnPayload: payload
         }
       };
       let stringifyData = JSON.stringify(data);
-      (async() => {
+
+      try {
         const response = await fetch(SwapUtils.getOutgoing_SwapTransfer_URL(swapServerUrl), {
           method: 'POST',
           headers: {
@@ -554,59 +555,66 @@ export default {
           body: stringifyData, // body data type must match "Content-Type" header
         });
 
-        if(response.status==200){
+        if(response.ok){
           const res = await response.json();
-          if(res.status){
-            certTransactionHash.value = res.data.txHash;
-            swapLink.value = ethScanUrl + res.data.txHash;
-            swapTimestamp.value = '';
-            swapId.value = res.data.swapId;
-            swapQr.value = SwapUtils.generateQRCode(bscScanUrl + res.data.txHash);
-            currentPage.value = 3;
-          }else{
-            toast.add({
-              severity:'info',
-              summary: 'Failed to fetch swapped info',
-              detail: 'Unable to proceed to generate certificate.',
-              group: 'br',
-              life: 5000
-            });
-            swapInProgress.value = false;
-            isDisabledCancel.value = false;
-          }
-        }else if(response.status==400){
+          certTransactionHash.value = res.data.txHash;
+          swapLink.value = ethScanUrl + res.data.txHash;
+          swapTimestamp.value = '';
+          swapId.value = res.data.swapId;
+          swapQr.value = SwapUtils.generateQRCode(bscScanUrl + res.data.txHash);
+          currentPage.value = 3;
+        }
+        else if(response.status==400){
+          const res = await response.json();
           toast.add({
             severity:'error',
             summary: 'Swap operation failed',
-            detail: 'Error 400 returned. Please make sure there is sufficient balance for gas',
+            detail: res.data.message,
             group: 'br',
             life: 5000
           });
           swapInProgress.value = false;
           isDisabledCancel.value = false;
-        }else if(response.status==425){
-          setTimeout(()=>{
-            callSwapServer();
-          }, 2000);
         }
         else if(response.status==409){
           canCheckStatus.value = true;
+          //swapInProgress.value = false;
+          isDisabledCancel.value = false;
+        }
+        else if(response.status==503){
+          toast.add({
+            severity:'warn',
+            summary: 'Service is unavailable',
+            detail: 'Please try again later',
+            group: 'br',
+            life: 3000
+          });
           swapInProgress.value = false;
           isDisabledCancel.value = false;
-          callTocheckSwapStatus();
-        }else if(response.status==504){
+        }
+        else if(response.status==504){
           toast.add({
             severity:'error',
             summary: 'Swap request timed-out',
             detail: 'Please check the status again',
             group: 'br',
-            life: 10000
+            life: 3000
           });
-          swapInProgress.value = false;
+          //swapInProgress.value = false;
           isDisabledCancel.value = false;
           canCheckStatus.value = true;
         }
-      })();
+      } catch (error) {
+          toast.add({
+            severity:'warn',
+            summary: 'Network error',
+            detail: 'Swap Server not found',
+            group: 'br',
+            life: 3000
+          });
+        swapInProgress.value = false;
+        isDisabledCancel.value = false;
+      }
     }
 
     const callTocheckSwapStatus =  async() =>{
@@ -638,45 +646,7 @@ export default {
     const certTransactionHash = ref('');
     const swapQr = ref('');
 
-    const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
-    const transactionStatusLength = computed(()=> listenerState.transactionStatusLength);
-    const isConfirmed = ref(false);
     const canCheckStatus = ref(false);
-
-    watch(()=> confirmedTxLength.value, (newValue, oldValue)=>{
-
-      if(newValue > oldValue){
-        // let txLength = newValue - oldValue;
-        // let transactionHashes = listenerState.allConfirmedTransactionsHash.slice(-txLength);
-
-        console.log(transactionHash);
-
-        if(!isConfirmed.value && listenerState.allConfirmedTransactionsHash.includes(transactionHash)){
-          toast.add({
-            severity:'info',
-            summary: 'Please wait.',
-            detail: 'Generating swap certificate',
-            group: 'br',
-            life: 5000
-          });
-          isConfirmed.value = true;
-          setTimeout(()=>{
-            callSwapServer();  
-          }, 2000);
-        }
-      }
-    });
-
-    watch(()=> transactionStatusLength.value, (newValue, oldValue)=>{
-
-      if(newValue > oldValue){
-        
-        if(listenerState.allTransactionStatus.find(txStatus=> txStatus.hash === transactionHash)){
-          swapInProgress.value = false;
-          isConfirmed.value = false;
-        }
-      }
-     });
 
     //page 3
     const saveCertificate = () => {
