@@ -2,7 +2,7 @@
   <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">Swap > ETH > Out > </span> <span class="text-blue-primary font-bold">Transaction</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">Home</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
@@ -34,9 +34,9 @@
       <div v-for="acc of allAvailableAccounts" :key="acc.name">
         <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100 transition" @click="(!acc.isMultisig || includeMultisig) && selectAccount(acc.name, acc.address)">
           <div class="text-xs sm:text-tsm ml-3 text-gray-700">
-            <div><b>Account Name:</b> {{ acc.name }}</div>
-            <div><b>Sirius Address:</b> <div class="block mt-1 sm:inline-block sm:mt-0">{{ acc.address }}</div></div>
-            <div><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ acc.balanceDisplay }} XPX</div></div>
+            <div class="mb-1 sm:mb-0"><b>Account Name:</b> {{ acc.name }}</div>
+            <div class="mb-1 sm:mb-0"><b>Sirius Address:</b> <div class="block mt-1 sm:inline-block sm:mt-0">{{ acc.address }}</div></div>
+            <div class="mb-1 sm:mb-0"><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ acc.balanceDisplay }} XPX</div></div>
           </div>
           <div class="self-center">
             <img src="@/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg" class="w-10 inline mr-3">
@@ -49,9 +49,9 @@
       <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
       <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left">
         <div class="text-xs sm:text-tsm ml-3 text-gray-700">
-          <div><b>Account Name:</b> {{ selectedAccount.name }}</div>
-          <div><b>Sirius Address:</b> <div class="block mt-1 sm:inline-block sm:mt-0">{{ selectedAccount.address }}</div></div>
-          <div><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ selectedAccount.balanceDisplay }} XPX</div></div>
+          <div class="mb-1 sm:mb-0"><b>Account Name:</b> {{ selectedAccount.name }}</div>
+          <div class="mb-1 sm:mb-0"><b>Sirius Address:</b> <div class="block mt-1 sm:inline-block sm:mt-0">{{ selectedAccount.address }}</div></div>
+          <div class="mb-1 sm:mb-0"><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ selectedAccount.balanceDisplay }} XPX</div></div>
         </div>
         <div class="self-center">
           <button @click="currentPage=1" class="text-xs sm:text-sm hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none">Change</button>
@@ -660,7 +660,7 @@ export default {
 
     watch(()=> transactionStatusLength.value, (newValue, oldValue)=>{
 
-      if(newValue > oldValue){
+      if(newValue > oldValue){        
         if(listenerState.allTransactionStatus.find(txStatus=> txStatus.hash === transactionHash)){
           swapInProgress.value = false;
           isConfirmed.value = false;
@@ -742,7 +742,7 @@ export default {
 
 .ethGasStrategy.option{
 
-transition: all 0.5s;
+  transition: all 0.5s;
   @apply text-gray-600 bg-white border-gray-200 hover:bg-blue-100 hover:border-blue-100;
   p{
     @apply text-blue-primary;
