@@ -82,7 +82,7 @@
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
             {{ isInvalidConfirmedMeta?'Approval on Metamask is rejected.':'Waiting for your approval on Metamask.' }}
             <div v-if="isInvalidConfirmedMeta" class="mt-5">
-              <button type="button" class="default-btn mr-5 focus:outline-none w-32 py-2 text-tsm" @click="getValidation(true)">Request again</button>
+              <button type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border-blue-primary px-8 text-white hover:shadow-lg" @click="getValidation(true)">Retry</button>
               <router-link :to="{ name: 'ViewServices' }" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32 text-tsm" tag="button">Cancel this swap</router-link>
             </div>
           </div>
@@ -121,9 +121,8 @@
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">
             {{ isInvalidSignedMeta?'Approval on Metamask is rejected.':'Waiting for your approval on Metamask.' }}
-            <div v-if="isInvalidSignedMeta" class="mt-10">
-              <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32" @click="getSigned">Request again</button>
-              <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-32" tag="button">Cancel this swap</router-link>
+            <div v-if="isInvalidSignedMeta" class="mt-5">
+              <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg w-24" @click="getSigned">Retry</button>
             </div>
           </div>
         </div>
@@ -177,12 +176,12 @@
                 <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:3px; right: 10px;"></font-awesome-icon>
               </div>
             </div>
-            <div class="text-tsm mt-2">Save a copy of your certificate. It is needed in the event of an error.</div>
+            <div class="text-tsm mt-2">Download your certificate. It is needed in the event of an error.</div>
           </div>
         </div>
         <label class="inline-flex items-center mb-10">
           <input type="checkbox" class="h-5 w-5 bg-blue-primary" value="true" v-model="savedCheck">
-          <span class="ml-2 cursor-pointer text-tsm">I confirm that i have saved a copy of my certificate.</span>
+          <span class="ml-2 cursor-pointer text-tsm">I confirm that I have downloaded a copy of my certificate.</span>
         </label>
         <div class="sm:mt-10">
           <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none mr-4 w-60 mt-6" @click="saveCertificate">Download Certificate</button>

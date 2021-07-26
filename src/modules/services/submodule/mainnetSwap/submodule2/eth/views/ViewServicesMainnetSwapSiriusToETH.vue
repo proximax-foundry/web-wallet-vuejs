@@ -607,6 +607,7 @@ export default {
         swapInProgress.value = false;
         isDisabledCancel.value = false;
       }
+      
     }
 
     const callTocheckSwapStatus =  async() =>{
@@ -639,7 +640,7 @@ export default {
     const swapQr = ref('');
 
     const canCheckStatus = ref(false);
-    
+
     //page 3
     const saveCertificate = () => {
       SwapUtils.generatePdf('ETH', swapTimestamp.value, selectedAccountAddress.value, swapId.value, certTransactionHash.value, swapQr.value);
