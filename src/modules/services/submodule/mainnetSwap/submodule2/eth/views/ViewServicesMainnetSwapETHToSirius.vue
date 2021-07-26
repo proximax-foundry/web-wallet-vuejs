@@ -13,9 +13,9 @@
           <div class="inline-block self-center ml-3 text-xs sm:text-sm">Transaction</div>
         </div>
       </div>
-      <div class="h-1bg-gray-200 flex-grow mx-2 self-center"></div>
+      <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
       <div class="flex-none">
-        <div class="flex  p-0 sm:p-3">
+        <div class="flex p-0 sm:p-3">
           <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">2</div></div>
           <div class="inline-block self-center ml-3 text-xs sm:text-sm">Validation</div>
         </div>
@@ -82,7 +82,7 @@
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
             {{ isInvalidConfirmedMeta?'Approval on Metamask is rejected.':'Waiting for your approval on Metamask.' }}
             <div v-if="isInvalidConfirmedMeta" class="mt-5">
-              <button type="button" class="default-btn mr-5 focus:outline-none w-32 py-2 text-tsm" @click="getValidation(true)">Fetch</button>
+              <button type="button" class="default-btn mr-5 focus:outline-none w-32 py-2 text-tsm" @click="getValidation(true)">Request again</button>
               <router-link :to="{ name: 'ViewServices' }" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32 text-tsm" tag="button">Cancel this swap</router-link>
             </div>
           </div>
@@ -122,7 +122,7 @@
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">
             {{ isInvalidSignedMeta?'Approval on Metamask is rejected.':'Waiting for your approval on Metamask.' }}
             <div v-if="isInvalidSignedMeta" class="mt-10">
-              <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32" @click="getSigned">Fetch</button>
+              <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32" @click="getSigned">Request again</button>
               <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-32" tag="button">Cancel this swap</router-link>
             </div>
           </div>
@@ -304,7 +304,6 @@ export default {
     function verifyChain(chainId, updateTokenBol = false){
       currentNetwork.value = chainId;
       if(ethereumChainId.find(ethChain => ethChain === parseInt(chainId)) == undefined){
-        console.log('test')
         err.value = 'Please select Goerli Test Network on Metamark to swap ETH';
       }else{
         err.value = '';
