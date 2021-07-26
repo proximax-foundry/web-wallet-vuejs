@@ -558,7 +558,7 @@ export default {
         if(response.ok){
           const res = await response.json();
           certTransactionHash.value = res.data.txHash;
-          swapLink.value = ethScanUrl + res.data.txHash;
+          swapLink.value = bscScanUrl + res.data.txHash;
           swapTimestamp.value = '';
           swapId.value = res.data.swapId;
           swapQr.value = SwapUtils.generateQRCode(bscScanUrl + res.data.txHash);
@@ -606,7 +606,7 @@ export default {
         }
       } catch (error) {
           toast.add({
-            severity:'warn',
+            severity:'error',
             summary: 'Network error',
             detail: 'Swap Server not found',
             group: 'br',
