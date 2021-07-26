@@ -319,6 +319,8 @@ transfer:
   regular: "Обычный"
   hexadecimal: "Шестнадцатеричный"
   encrypted: "Зашифрованный"
+  invalidrecipient: "Invalid Recipient"
+  owneraccount: "Owner account"
 scriptvalues: 
   walletnametaken: "Имя кошелька уже занято"
   walletstoragefull: "Невозможно создать кошелек. Память вашего устройства может быть заполнена"
@@ -338,6 +340,7 @@ scriptvalues:
   walletimporttext5: "Невозможно добавить кошелек"
   removeaccount: "Unable to remove account"
   enterwalletpassword: "Please enter your wallet password"
+  requiredfield: "Required field"
 delegate:
   selectacctype: "Select Account Type"
   newaccount: "New Account"

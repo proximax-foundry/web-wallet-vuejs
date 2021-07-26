@@ -16,7 +16,7 @@ NavigationMenu:
   Dashboard: "Dashboard" 
   Transfer: "Transfer"
   Accounts: "Accounts"
-  Services: "Services"
+  Services: "Services" 
 welcome: 
   titledescription: "The secure interface that connects to the Proximax Sirius platform"
   blockchain: "Blockchain"
@@ -101,7 +101,7 @@ accounts:
   name: "Account Name"
   namevalidation: "Account name is required"
   publickey: "Public Key"
-  inputpassword: "Insert wallet password"
+  inputpassword: "Enter wallet password"
   passwordvalidation: "Wallet password is required"
   submit: "Submit"
   swap: "Swap with this private key"
@@ -319,6 +319,8 @@ transfer:
   regular: "Regular"
   hexadecimal: "Hexadecimal"
   encrypted: "Encrypted"
+  invalidrecipient: "Invalid Recipient"
+  owneraccount: "Owner account"
 scriptvalues: 
   walletnametaken: "Wallet name is already taken"
   walletstoragefull: "Unable to create wallet. Your device storage might be full"
@@ -338,6 +340,7 @@ scriptvalues:
   walletimporttext5: "Unable to add wallet"
   removeaccount: "Unable to remove account"
   enterwalletpassword: "Please enter your wallet password"
+  requiredfield: "Required field"
 delegate:
   selectacctype: "Select Account Type"
   newaccount: "New Account"

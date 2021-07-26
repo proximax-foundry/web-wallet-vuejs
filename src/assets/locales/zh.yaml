@@ -319,6 +319,8 @@ transfer:
   regular: "普通"
   hexadecimal: "16进制"
   encrypted: "已解密"
+  invalidrecipient: "Invalid Recipient"
+  owneraccount: "Owner account"
 scriptvalues: 
   walletnametaken: "钱包名称已被占用"
   walletstoragefull: "无法创建钱包。你的设备存储可能已满"
@@ -338,6 +340,7 @@ scriptvalues:
   walletimporttext5: "无法添加钱包"
   removeaccount: "Unable to remove account"
   enterwalletpassword: "Please enter your wallet password"
+  requiredfield: "Required field"
 delegate:
   selectacctype: "Select Account Type"
   newaccount: "New Account"

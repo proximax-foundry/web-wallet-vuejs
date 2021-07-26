@@ -319,6 +319,8 @@ transfer:
   regular: "Regular"
   hexadecimal: "Hexadecimal"
   encrypted: "Encriptado"
+  invalidrecipient: "Invalid Recipient"
+  owneraccount: "Owner account"
 scriptvalues:
   walletnametaken: "Nombre de Billetera está siendo utilizado."
   walletstoragefull: "No se puede crear la Billetera. El espacio de almacenamiento en su dispositivo puede estar lleno."
@@ -338,6 +340,7 @@ scriptvalues:
   walletimporttext5: "No se pudo agregar la Billetera."
   removeaccount: "Unable to remove account"
   enterwalletpassword: "Please enter your wallet password"
+  requiredfield: "Required field"
 delegate:
   selectacctype: "Select Account Type"
   newaccount: "New Account"
