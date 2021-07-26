@@ -15,7 +15,7 @@
       </div>
       <div class="h-1bg-gray-200 flex-grow mx-2 self-center"></div>
       <div class="flex-none">
-        <div class="flex  p-0 sm:p-3">
+        <div class="flex p-0 sm:p-3">
           <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">2</div></div>
           <div class="inline-block self-center ml-3 text-xs sm:text-sm">Validation</div>
         </div>
@@ -72,13 +72,20 @@
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidConfirmedMeta?'border-red-primary':'border-blue-primary'">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidConfirmedMeta"></font-awesome-icon>
+                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">Waiting for your approval on Metamask.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
+            {{ isInvalidConfirmedMeta?'Approval on Metamask is rejected.':'Waiting for your approval on Metamask.' }}
+            <div v-if="isInvalidConfirmedMeta" class="mt-5">
+              <button type="button" class="default-btn mr-5 focus:outline-none w-32 py-2 text-tsm" @click="getValidation(true)">Request again</button>
+              <router-link :to="{ name: 'ViewServices' }" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32 text-tsm" tag="button">Cancel this swap</router-link>
+            </div>
+          </div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -105,13 +112,20 @@
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSignedMeta?'border-red-primary':'border-blue-primary'">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidSignedMeta"></font-awesome-icon>
+                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">Waiting for your approval on Metamask.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">
+            {{ isInvalidSignedMeta?'Approval on Metamask is rejected.':'Waiting for your approval on Metamask.' }}
+            <div v-if="isInvalidSignedMeta" class="mt-10">
+              <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32" @click="getSigned">Request again</button>
+              <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-32" tag="button">Cancel this swap</router-link>
+            </div>
+          </div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -217,6 +231,8 @@ export default {
     const ethScanUrl = swapData.ETHScanUrl;
     const swapServerUrl = swapData.swap_ETH_XPX_URL;
     const currentNetwork = ref('');
+    const isInvalidConfirmedMeta = ref(false);
+    const isInvalidSignedMeta = ref(false);
 
     let provider;
     let signer;
@@ -288,7 +304,6 @@ export default {
     function verifyChain(chainId, updateTokenBol = false){
       currentNetwork.value = chainId;
       if(ethereumChainId.find(ethChain => ethChain === parseInt(chainId)) == undefined){
-        console.log('test')
         err.value = 'Please select Goerli Test Network on Metamark to swap ETH';
       }else{
         err.value = '';
@@ -398,59 +413,86 @@ export default {
       setTimeout(() => step1.value = true, 1000);
       setTimeout(() => {
         step2.value = true;
-
         (async() => {
-          const Contract = new ethers.Contract(tokenAddress, abi, signer);
-          const receipt = await Contract.transfer(
-            custodian,
-            ethers.utils.parseUnits(amount.value, 6),
-          );
-          validationHash.value = receipt.hash;
-          validationLink.value = ethScanUrl + receipt.hash;
-
-          step3.value = true;
-          setTimeout( ()=> step4.value = true, 1000);
-          setTimeout( ()=> {
-            step5.value = true;
-            (async() => {
-              const messageSignature = await signer.signMessage(siriusAddress.value);
-              messageHash.value = messageSignature;
-              const data = {
-                recipient: siriusAddress.value,
-                signature: messageSignature,
-                txnInfo: {
-                  network: "ETH",
-                  txnHash: receipt.hash
-                }
-              };
-
-              step6.value = true;
-
-              let stringifyData = JSON.stringify(data);
-
-              const response = await fetch(swapServerUrl, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: stringifyData, // body data type must match "Content-Type" header
-              });
-
-              if(response.status == 200){
-                const data = await response.json();
-                step7.value = true;
-                transactionHash.value = data.ethTransactionId;
-                swapTimestamp.value = data.timestamp;
-                swapId.value = data.ctxId;
-                swapQr.value = SwapUtils.generateQRCode(validationLink.value);
-                setTimeout( ()=> step8.value = true, 1000);
-                setTimeout( ()=> isDisabledValidate.value = false, 2000);
-              }
-            })();
-          }, 2000);
-
+          await getValidation(false);
+          if(!isInvalidConfirmedMeta.value){
+            afterConfirmed();
+          }
         })();
       }, 2000);
+    };
+
+    const getValidation = async (initiated) => {
+      try{
+        const Contract = new ethers.Contract(tokenAddress, abi, signer);
+        const receipt = await Contract.transfer(
+          custodian,
+          ethers.utils.parseUnits(amount.value, 6),
+        );
+        validationHash.value = receipt.hash;
+        validationLink.value = ethScanUrl + receipt.hash;
+        isInvalidConfirmedMeta.value = false;
+        if(initiated){
+          afterConfirmed();
+        }
+      }catch(err){
+        isInvalidConfirmedMeta.value = true;
+      }
+    };
+
+    const afterConfirmed = () => {
+      step3.value = true;
+      setTimeout( ()=> step4.value = true, 1000);
+      setTimeout( ()=> {
+        step5.value = true;
+        (async() => {
+          await getSigned(false);
+        })();
+      }, 2000);
+    };
+
+    const getSigned = async () => {
+      try{
+        const messageSignature = await signer.signMessage(siriusAddress.value);
+        messageHash.value = messageSignature;
+        const data = {
+          recipient: siriusAddress.value,
+          signature: messageSignature,
+          txnInfo: {
+            network: "ETH",
+            txnHash: validationHash.value
+          }
+        };
+        isInvalidSignedMeta.value = false;
+        await afterSigned(data);
+      }catch(err){
+        isInvalidSignedMeta.value = true;
+      }
+    };
+
+    const afterSigned = async (data) => {
+      step6.value = true;
+
+      let stringifyData = JSON.stringify(data);
+
+      const response = await fetch(swapServerUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: stringifyData, // body data type must match "Content-Type" header
+      });
+
+      if(response.status == 200){
+        const data = await response.json();
+        step7.value = true;
+        transactionHash.value = data.ethTransactionId;
+        swapTimestamp.value = data.timestamp;
+        swapId.value = data.ctxId;
+        swapQr.value = SwapUtils.generateQRCode(validationLink.value);
+        setTimeout( ()=> step8.value = true, 1000);
+        setTimeout( ()=> isDisabledValidate.value = false, 2000);
+      }
     };
 
     const validated = () => {
@@ -496,6 +538,10 @@ export default {
       swapId,
       swapQr,
       saveCertificate,
+      isInvalidConfirmedMeta,
+      isInvalidSignedMeta,
+      getValidation,
+      getSigned,
     };
   },
 }
