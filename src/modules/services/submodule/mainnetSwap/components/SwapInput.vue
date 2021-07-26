@@ -5,7 +5,7 @@
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
         <div class="ml-6 text-xs text-gray-500 text-left" style="width: 170px"><button :disabled="disabled == true" class="border border-gray-200 bg-gray-50 py-1 px-3 rounded-md cursor-pointer relative hover:bg-gray-100 hover:shadow-sm focus:outline-none" style="top: -3px" @click="showRemark();$emit('clickedMaxAvailable', true);clearAllError()">Max. amount</button></div>
       </div>
-      <input v-maska="'#*.######'" :disabled="disabled == true"  class="text-placeholder bg-white text-right" :value="parseFloat(modelValue)" @change="checkBalance($event);console.log('c');" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+      <input v-maska="'#*.######'" :disabled="disabled == true"  class="text-placeholder bg-white text-right" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
       <div class="w-5"></div>
     </div>
     <div class="h-3 mb-5 inline-block float-left"><div class="error error-text" v-if="textErr || showError">{{ errorMessage }}</div></div>

@@ -724,7 +724,8 @@ export class SwapUtils {
 
   static getOutgoing_SwapCheckByID_URL = (baseUrl: string, swapId: string): string => {
     return `${baseUrl}/swap/${swapId}`;
-
+  }
+  
   static checkSwapService = (baseUrl: string): string => {
     return `${baseUrl}/checkBalanceOk`;
 

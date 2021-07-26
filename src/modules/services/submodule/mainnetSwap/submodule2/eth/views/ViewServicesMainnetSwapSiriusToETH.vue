@@ -598,7 +598,7 @@ export default {
         }
       } catch (error) {
         toast.add({
-            severity:'warn',
+            severity:'error',
             summary: 'Network error',
             detail: 'Swap Server not found',
             group: 'br',
