@@ -48,7 +48,7 @@
   </div>
 </template>
 
-<script>
+<script> 
 import { computed, defineComponent, getCurrentInstance, ref, watch } from "vue";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
