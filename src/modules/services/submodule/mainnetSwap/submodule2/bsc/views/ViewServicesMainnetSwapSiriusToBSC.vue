@@ -570,8 +570,7 @@ export default {
             severity:'error',
             summary: 'Swap operation failed',
             detail: res.data.message,
-            group: 'br',
-            life: 5000
+            group: 'br'
           });
           swapInProgress.value = false;
           isDisabledCancel.value = false;
@@ -586,8 +585,7 @@ export default {
             severity:'warn',
             summary: 'Service is unavailable',
             detail: 'Please try again later',
-            group: 'br',
-            life: 3000
+            group: 'br'
           });
           swapInProgress.value = false;
           isDisabledCancel.value = false;
@@ -597,8 +595,7 @@ export default {
             severity:'error',
             summary: 'Swap request timed-out',
             detail: 'Please check the status again',
-            group: 'br',
-            life: 3000
+            group: 'br'
           });
           //swapInProgress.value = false;
           isDisabledCancel.value = false;
@@ -609,8 +606,7 @@ export default {
             severity:'error',
             summary: 'Network error',
             detail: 'Swap Server not found',
-            group: 'br',
-            life: 3000
+            group: 'br'
           });
         swapInProgress.value = false;
         isDisabledCancel.value = false;
@@ -633,8 +629,7 @@ export default {
           severity:'error',
           summary: 'Swap not found',
           detail: 'Swap not found for the current transaction ID',
-          group: 'br',
-          life: 3000
+          group: 'br'
         });
       }
     }
