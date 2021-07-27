@@ -2,7 +2,7 @@
   <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">Swap > BSC > In ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">Home</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
@@ -52,7 +52,8 @@
       <p class="font-bold text-tsm text-left">To: Sirius Address</p>
       <SelectSiriusAccountInputPlugin v-model="siriusAddress" icon="card-alt" :showError="showSiriusAddressErr" errorMessage="Sirius Address required" :options="siriusAddressOption" :disabled="disableSiriusAddress" />
       <p class="font-bold text-tsm text-left mb-1">Amount</p>
-      <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" title="bXPX" placeholder="bXPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':'Insufficient token balance'" :decimal="6" />
+      <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" title="bXPX (Minimum 51 bXPX required)" placeholder="bXPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':'Insufficient token balance.'" :decimal="6" />
+      <div class="my-2 float-right text-xs text-gray-600">50 bXPX swap fee to be deducted from <b>Amount</b></div>
       <div class="mt-10">
         <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
         <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="sendRequest()">Send Request</button>
@@ -438,14 +439,14 @@ export default {
       }
     };
 
-  const afterConfirmed = () => {
-    step3.value = true;
-setTimeout( ()=> step4.value = true, 1000);
-setTimeout( ()=> {
-  step5.value = true;
-  (async() => {
-    await getSigned(false);
-        })();
+    const afterConfirmed = () => {
+      step3.value = true;
+      setTimeout( ()=> step4.value = true, 1000);
+      setTimeout( ()=> {
+        step5.value = true;
+        (async() => {
+          await getSigned(false);
+            })();
       }, 2000);
     };
 
@@ -498,6 +499,14 @@ setTimeout( ()=> {
     };
 
     const savedCheck = ref(false);
+
+    watch(amount, (n) => {
+      if(n<=50){
+        showAmountErr.value = true;
+      }else{
+        showAmountErr.value = false;
+      }
+    });
 
     return {
       err,

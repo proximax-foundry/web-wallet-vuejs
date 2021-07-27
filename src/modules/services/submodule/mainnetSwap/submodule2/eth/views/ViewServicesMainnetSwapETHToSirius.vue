@@ -52,7 +52,8 @@
       <p class="font-bold text-tsm text-left">To: Sirius Address</p>
       <SelectSiriusAccountInputPlugin v-model="siriusAddress" icon="card-alt" :showError="showSiriusAddressErr" errorMessage="Sirius Address required" :options="siriusAddressOption" :disabled="disableSiriusAddress" />
       <p class="font-bold text-tsm text-left mb-1">Amount</p>
-      <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" title="eXPX" placeholder="eXPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':'Insufficient token balance'" :decimal="6" />
+      <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" title="eXPX (Minimum 51 eXPX required)" placeholder="eXPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':'Insufficient token balance.'" :decimal="6" />
+      <div class="my-2 float-right text-xs text-gray-600">50 eXPX swap fee to be deducted from <b>Amount</b></div>
       <div class="mt-10">
         <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
         <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="sendRequest()">Send Request</button>
@@ -353,6 +354,14 @@ export default {
           balance.value = 0;
         }
       })();
+    });
+
+    watch(balance, (n) => {
+      if(n<=50){
+        showAmountErr.value = true;
+      }else{
+        showAmountErr.value = false;
+      }
     });
 
     const step1 = ref(false);
