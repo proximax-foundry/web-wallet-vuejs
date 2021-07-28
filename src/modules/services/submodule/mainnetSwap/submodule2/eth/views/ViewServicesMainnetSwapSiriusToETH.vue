@@ -34,9 +34,9 @@
       <div v-for="acc of allAvailableAccounts" :key="acc.name">
         <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100 transition" @click="(!acc.isMultisig || includeMultisig) && selectAccount(acc.name, acc.address)">
           <div class="text-xs sm:text-tsm ml-3 text-gray-700">
-            <div><b>Account Name:</b> {{ acc.name }}</div>
-            <div><b>Sirius Address:</b> <div class="block mt-1 sm:inline-block sm:mt-0">{{ acc.address }}</div></div>
-            <div><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ acc.balanceDisplay }} XPX</div></div>
+            <div class="mb-1 sm:mb-0"><b>Account Name:</b> {{ acc.name }}</div>
+            <div class="mb-1 sm:mb-0"><b>Sirius Address:</b> <div class="block mt-1 sm:inline-block sm:mt-0">{{ acc.address }}</div></div>
+            <div class="mb-1 sm:mb-0"><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ acc.balanceDisplay }} XPX</div></div>
           </div>
           <div class="self-center">
             <img src="@/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg" class="w-10 inline mr-3">
@@ -49,9 +49,9 @@
       <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
       <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left">
         <div class="text-xs sm:text-tsm ml-3 text-gray-700">
-          <div><b>Account Name:</b> {{ selectedAccount.name }}</div>
-          <div><b>Sirius Address:</b> <div class="block mt-1 sm:inline-block sm:mt-0">{{ selectedAccount.address }}</div></div>
-          <div><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ selectedAccount.balanceDisplay }} XPX</div></div>
+          <div class="mb-1 sm:mb-0"><b>Account Name:</b> {{ selectedAccount.name }}</div>
+          <div class="mb-1 sm:mb-0"><b>Sirius Address:</b> <div class="block mt-1 sm:inline-block sm:mt-0">{{ selectedAccount.address }}</div></div>
+          <div class="mb-1 sm:mb-0"><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ selectedAccount.balanceDisplay }} XPX</div></div>
         </div>
         <div class="self-center">
           <button @click="currentPage=1" class="text-xs sm:text-sm hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none">Change</button>
@@ -584,12 +584,12 @@ export default {
         }
         else if(response.status==504){
           toast.add({
-            severity:'warn',
+            severity:'error',
             summary: 'Swap request timed-out',
             detail: 'Please check the status again',
             group: 'br'
           });
-          swapInProgress.value = false;
+          // swapInProgress.value = false;
           isDisabledCancel.value = false;
           canCheckStatus.value = true;
         }
@@ -603,7 +603,6 @@ export default {
         swapInProgress.value = false;
         isDisabledCancel.value = false;
       }
-      
     }
 
     const callTocheckSwapStatus =  async() =>{
