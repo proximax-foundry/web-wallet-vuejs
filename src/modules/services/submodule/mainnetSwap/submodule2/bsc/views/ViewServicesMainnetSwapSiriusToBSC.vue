@@ -54,7 +54,7 @@
           <div class="mb-1 sm:mb-0"><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ selectedAccount.balanceDisplay }} XPX</div></div>
         </div>
         <div class="self-center">
-          <button @click="currentPage=1" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none">Change</button>
+          <button @click="currentPage=1" class="text-xs sm:text-sm hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none">Change</button>
         </div>
       </div>
       <SwapInput v-model="amount" :maxAmount="maxSwapAmount" placeholder="Amount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" type="text" icon="coins" :showError="showAmountErr" 
@@ -495,9 +495,11 @@ export default {
 
       if(selectedAccount.value.balance <= minBalanceAmount.value){
         disableAmount.value = true;
+        showAmountErr.value = true;
       }
       else{
         disableAmount.value = false;
+        showAmountErr.value = false;
       }
 
       rebuildTranction();
