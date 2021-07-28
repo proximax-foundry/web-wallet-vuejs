@@ -584,12 +584,12 @@ export default {
         }
         else if(response.status==504){
           toast.add({
-            severity:'warn',
+            severity:'error',
             summary: 'Swap request timed-out',
             detail: 'Please check the status again',
             group: 'br'
           });
-          swapInProgress.value = false;
+          // swapInProgress.value = false;
           isDisabledCancel.value = false;
           canCheckStatus.value = true;
         }
@@ -603,7 +603,6 @@ export default {
         swapInProgress.value = false;
         isDisabledCancel.value = false;
       }
-      
     }
 
     const callTocheckSwapStatus =  async() =>{
