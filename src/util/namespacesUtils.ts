@@ -132,7 +132,7 @@ export class NamespacesUtils {
     }
   }
 
-  static createRootNamespace(selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, namespaceName: string, duration: number){
+  static createRootNamespace = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, namespaceName: string, duration: number) => {
     let registerRootNamespaceTransaction = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
     const accAddress = Address.createFromRawAddress(selectedAddress);
     const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
@@ -146,7 +146,7 @@ export class NamespacesUtils {
     return signedTx.hash;
   }
 
-  static createSubNamespace(selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, subNamespace: string, rootNamespace: string){
+  static createSubNamespace = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, subNamespace: string, rootNamespace: string) => {
     console.log('Root: ' + rootNamespace + ' Sub: ' + subNamespace);
     let registerSubNamespaceTransaction = NamespacesUtils.subNamespaceTransaction(networkType, generationHash, rootNamespace, subNamespace);
     const accAddress = Address.createFromRawAddress(selectedAddress);
@@ -155,6 +155,20 @@ export class NamespacesUtils {
     let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
     const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
     let signedTx = account.sign(registerSubNamespaceTransaction, networkState.currentNetworkProfile.generationHash);
+    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+    let chainAPICall = new ChainAPICall(apiEndpoint);
+    chainAPICall.transactionAPI.announce(signedTx);
+    return signedTx.hash;
+  }
+
+  static extendNamespace = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, namespaceName: string, duration: number) => {
+    let registerRootNamespaceTransaction = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
+    const accAddress = Address.createFromRawAddress(selectedAddress);
+    const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
+    const encryptedPassword = WalletUtils.createPassword(walletPassword);
+    let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
+    const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+    let signedTx = account.sign(registerRootNamespaceTransaction, networkState.currentNetworkProfile.generationHash);
     let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
     let chainAPICall = new ChainAPICall(apiEndpoint);
     chainAPICall.transactionAPI.announce(signedTx);

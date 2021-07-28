@@ -171,6 +171,11 @@ export class Helper{
             return false;
         }
       }
+
+      static validateBuildSelectAccountBalance(balanceAccount: number, feeTransaction: number, rental: number): boolean {
+        const totalFee = feeTransaction + rental;
+        return balanceAccount >= totalFee;
+      }
 }
 
 export interface LooseObject {

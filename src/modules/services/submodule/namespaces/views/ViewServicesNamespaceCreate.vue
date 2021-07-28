@@ -2,7 +2,7 @@
   <div class="flex justify-between text-md">
     <div><span class="text-gray-300">Namespaces ></span> <span class="text-blue-primary font-bold">Register</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">Back to Services</router-link>
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-4'>
@@ -61,7 +61,7 @@
           </div>
           <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" :disabled="disableSelectNamespace" ref="namespaceSelect" errorMessage="" v-model="selectNamespace" :options="namespaceOption" selectDefault="1" @show-selection="updateNamespaceSelection" @clear-selection="clearNamespaceSelection" />
           <DurationInput :disabled="disabledDuration" v-if="showDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
-          <div class="rounded-2xl bg-gray-100 p-5 mb-5">
+          <div class="rounded-2xl bg-gray-100 p-5 mb-5 mt-10">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span class="text-xs">{{ transactionFee }}</span> XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
