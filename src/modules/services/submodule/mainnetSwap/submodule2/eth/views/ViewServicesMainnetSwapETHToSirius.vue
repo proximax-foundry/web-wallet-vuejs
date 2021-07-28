@@ -13,7 +13,7 @@
           <div class="inline-block self-center ml-3 text-xs sm:text-sm">Transaction</div>
         </div>
       </div>
-      <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
+      <div class="h-1bg-gray-200 flex-grow mx-2 self-center"></div>
       <div class="flex-none">
         <div class="flex p-0 sm:p-3">
           <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">2</div></div>
