@@ -83,7 +83,7 @@
           <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
             <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">Clear</button>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createNamespace">Create</button>
+            <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createNamespace">Create</button>
           </div>
         </fieldset>
       </form>
@@ -248,8 +248,8 @@ export default {
         showDuration.value = false;
         //subnamespace
         if(namespaceName.value.length > 0){
-          transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected.value, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
-          transactionFeeExact.value = Helper.convertToExact(NamespacesUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected.value, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFeeExact.value = Helper.convertToExact(NamespacesUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
         }
       }
     };
@@ -267,7 +267,13 @@ export default {
     };
 
     const createNamespace = () => {
-      console.log('Add namespace');
+      if(selectNamespace.value==='1'){
+        NamespacesUtils.createRootNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value);
+      }else{
+        console.log(selectNamespace.value);
+        NamespacesUtils.createSubNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value);
+      }
+      clearInput();
     };
 
     watch(duration, (n) => {

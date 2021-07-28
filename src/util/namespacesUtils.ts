@@ -1,8 +1,11 @@
-// import { readonly, computed } from "vue";
+import { readonly, computed } from "vue";
 import {
+  Account,
+  Address,
   NamespaceMosaicIdGenerator,
   NetworkType,
   RegisterNamespaceTransaction,
+  TransactionBuilderFactory,
   UInt64,
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
@@ -18,15 +21,23 @@ import { WalletAccount } from "@/models/walletAccount";
 
 export class NamespacesUtils {
 
-  static getRootNamespaceTransactionFee =(networkType: NetworkType, generationHash: string, namespaceName: string, duration: number) :number => {
+  static rootNamespaceTransaction = (networkType: NetworkType, generationHash: string, namespaceName: string, duration: number):RegisterNamespaceTransaction => {
     let buildTransactions = new BuildTransactions(networkType, generationHash);
-    const registerRootNamespaceTransaction = buildTransactions.registerRootNamespace(namespaceName, UInt64.fromUint(duration));
+    return buildTransactions.registerRootNamespace(namespaceName, UInt64.fromUint(duration));
+  }
+
+  static subNamespaceTransaction = (networkType: NetworkType, generationHash: string, rootNamespace: string, subNamespace: string):RegisterNamespaceTransaction => {
+    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    return buildTransactions.registersubNamespace(rootNamespace, subNamespace);
+  }
+
+  static getRootNamespaceTransactionFee = (networkType: NetworkType, generationHash: string, namespaceName: string, duration: number) :number => {
+    let registerRootNamespaceTransaction = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
     return registerRootNamespaceTransaction.maxFee.compact();
   }
 
-  static getSubNamespaceTransactionFee =(networkType: NetworkType, generationHash: string, namespaceName: string, subNamespace: string) :number => {
-    let buildTransactions = new BuildTransactions(networkType, generationHash);
-    const registerSubNamespaceTransaction = buildTransactions.registersubNamespace(namespaceName, subNamespace);
+  static getSubNamespaceTransactionFee = (networkType: NetworkType, generationHash: string, subNamespace: string, rootNamespace: string) :number => {
+    let registerSubNamespaceTransaction = NamespacesUtils.subNamespaceTransaction(networkType, generationHash, rootNamespace, subNamespace);
     return registerSubNamespaceTransaction.maxFee.compact();
   }
 
@@ -119,5 +130,33 @@ export class NamespacesUtils {
     }else{
       return { list: [] };
     }
+  }
+
+  static createRootNamespace(selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, namespaceName: string, duration: number){
+    let registerRootNamespaceTransaction = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
+    const accAddress = Address.createFromRawAddress(selectedAddress);
+    const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
+    const encryptedPassword = WalletUtils.createPassword(walletPassword);
+    let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
+    const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+    let signedTx = account.sign(registerRootNamespaceTransaction, networkState.currentNetworkProfile.generationHash);
+    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+    let chainAPICall = new ChainAPICall(apiEndpoint);
+    chainAPICall.transactionAPI.announce(signedTx);
+    return signedTx.hash;
+  }
+
+  static createSubNamespace(selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, subNamespace: string, rootNamespace: string){
+    let registerSubNamespaceTransaction = NamespacesUtils.subNamespaceTransaction(networkType, generationHash, rootNamespace, subNamespace);
+    const accAddress = Address.createFromRawAddress(selectedAddress);
+    const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
+    const encryptedPassword = WalletUtils.createPassword(walletPassword);
+    let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
+    const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+    let signedTx = account.sign(registerSubNamespaceTransaction, networkState.currentNetworkProfile.generationHash);
+    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+    let chainAPICall = new ChainAPICall(apiEndpoint);
+    chainAPICall.transactionAPI.announce(signedTx);
+    return signedTx.hash;
   }
 }
