@@ -1,6 +1,6 @@
 <template>
   <div class="flex justify-between text-md">
-    <div><span class="text-gray-300">Namespaces ></span> <span class="text-blue-primary font-bold">Create</span></div>
+    <div><span class="text-gray-300">Namespaces ></span> <span class="text-blue-primary font-bold">Register</span></div>
     <div>
       <router-link :to="{ name: 'ViewServices' }" class="font-bold">Back to Services</router-link>
     </div>
@@ -285,6 +285,7 @@ export default {
     watch(namespaceName, (n) => {
       if(namespaceName.value.length > 0){
         if(namespaceName.value.match(namespacePattern)){
+          console.log(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value));
           transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
           transactionFeeExact.value = Helper.convertToExact(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
         }else{

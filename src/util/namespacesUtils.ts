@@ -23,7 +23,7 @@ export class NamespacesUtils {
 
   static rootNamespaceTransaction = (networkType: NetworkType, generationHash: string, namespaceName: string, duration: number):RegisterNamespaceTransaction => {
     let buildTransactions = new BuildTransactions(networkType, generationHash);
-    return buildTransactions.registerRootNamespace(namespaceName, UInt64.fromUint(duration));
+    return buildTransactions.registerRootNamespace(namespaceName, UInt64.fromUint(NamespacesUtils.calculateDuration(duration)));
   }
 
   static subNamespaceTransaction = (networkType: NetworkType, generationHash: string, rootNamespace: string, subNamespace: string):RegisterNamespaceTransaction => {
