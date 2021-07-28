@@ -147,6 +147,7 @@ export class NamespacesUtils {
   }
 
   static createSubNamespace(selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, subNamespace: string, rootNamespace: string){
+    console.log('Root: ' + rootNamespace + ' Sub: ' + subNamespace);
     let registerSubNamespaceTransaction = NamespacesUtils.subNamespaceTransaction(networkType, generationHash, rootNamespace, subNamespace);
     const accAddress = Address.createFromRawAddress(selectedAddress);
     const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
