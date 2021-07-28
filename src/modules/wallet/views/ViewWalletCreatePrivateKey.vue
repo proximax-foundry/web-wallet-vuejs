@@ -11,10 +11,6 @@
           <div class="error error_box" v-if="err!=''">{{ err }}</div>
           <div class="text-left text-tsm my-4 ml-4 text-gray-600"><b>Network</b>: {{ selectedNetworkName }}</div>
           <PasswordInput placeholder="Private Key" errorMessage="Invalid private key" icon="key" v-model="privateKeyInput" class="ml-1" />
-          <label class="inline-flex items-center mb-5">
-              <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="nis1Swap">
-            <span class="ml-2 cursor-pointer">Check this box if you wish to swap with this private key.</span>
-          </label>
           <TextInput placeholder="Wallet Name" errorMessage="Insert wallet name" v-model="walletName" icon="wallet" />
           <div class="grid xs:grid-cols-1 md:grid-cols-2">
             <PasswordInput placeholder="Enter a New Password" errorMessage="Min. length 8, max. length 30." :showError="showPasswdError" icon="lock" v-model="passwd" class="mr-1" />
