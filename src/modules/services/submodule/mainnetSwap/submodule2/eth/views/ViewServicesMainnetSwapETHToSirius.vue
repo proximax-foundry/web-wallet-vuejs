@@ -2,7 +2,7 @@
   <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">Swap > ETH > In ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">Home</router-link>
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
