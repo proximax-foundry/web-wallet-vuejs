@@ -52,7 +52,7 @@
       <p class="font-bold text-tsm text-left">To: Sirius Address</p>
       <SelectSiriusAccountInputPlugin v-model="siriusAddress" icon="card-alt" :showError="showSiriusAddressErr" errorMessage="Sirius Address required" :options="siriusAddressOption" :disabled="disableSiriusAddress" />
       <p class="font-bold text-tsm text-left mb-1">Amount</p>
-      <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" title="eXPX (Minimum 51 eXPX required)" placeholder="eXPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':'Insufficient token balance.'" :decimal="6" />
+      <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" title="eXPX (Minimum 51 eXPX required)" placeholder="eXPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':((parseFloat(amount) <= defaultXPXTxFee)?'Insufficient amount':'Insufficient token balance.')" :decimal="6" />
       <div class="my-2 float-right text-xs text-blue-primary">* The fees for the transaction on Sirius Chain will be deducted from this amount, which is 50 XPX</div>
       <div class="mt-10">
         <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
@@ -219,6 +219,8 @@ export default {
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
 
+    const defaultXPXTxFee = ref(50);
+
     /* metamask integration */
     let ethereumChainId = [5];
     const isInstallMetamask = ref(false);
@@ -281,7 +283,6 @@ export default {
         currentAccount.value = '';
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
-        // console.log('fetchmeta')
         updateToken();
       }
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
@@ -401,9 +402,17 @@ export default {
     const err = ref('');
     const isDisabledSwap = computed(() =>
       // verify it has been connected to metamask too
-      !(amount.value > 0 && siriusAddress.value != '' && !err.value && (balance.value >= amount.value) && (amount.value > 50))
+      !(amount.value > 0 && siriusAddress.value != '' && !err.value && (balance.value >= amount.value) && (amount.value > defaultXPXTxFee.value))
     );
     const amount = ref('0');
+    
+    watch(amount, (n) => {
+      if(n <= defaultXPXTxFee.value){
+        showAmountErr.value = true;
+      }else{
+        showAmountErr.value = false;
+      }
+    });
 
     const siriusAddressOption = computed(() => {
       let siriusAddress = [];
@@ -509,6 +518,14 @@ export default {
 
     const savedCheck = ref(false);
 
+    watch(amount, (n) => {
+      if(n <= defaultXPXTxFee.value){
+        showAmountErr.value = true;
+      }else{
+        showAmountErr.value = false;
+      }
+    });
+
     return {
       err,
       balance,
@@ -550,6 +567,7 @@ export default {
       isInvalidSignedMeta,
       getValidation,
       getSigned,
+      defaultXPXTxFee,
     };
   },
 }
