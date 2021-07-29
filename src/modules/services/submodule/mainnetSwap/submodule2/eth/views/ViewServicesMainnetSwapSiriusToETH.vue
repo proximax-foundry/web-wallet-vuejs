@@ -495,6 +495,20 @@ export default {
       rebuildTranction();
     }
 
+    // watch to fix latency in updating gas price & xpx
+    watch(standardGasLimit, () => {
+      if(currentPage.value==2){
+        if(selectedAccount.value.balance <= minBalanceAmount.value){
+          disableAmount.value = true;
+          showAmountErr.value = true;
+        }
+        else{
+          disableAmount.value = false;
+          showAmountErr.value = false;
+        }
+      }
+    });
+
     let transactionHash;
 
     const swap = () => {
