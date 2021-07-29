@@ -205,9 +205,12 @@ export default {
       selectedAccountName.value = name;
       selectedAccountAddress.value = address;
 
-      // if(ethGasStrategy.value === ""){
-      changeGasStrategy("standard");
-      // }
+        if(ethGasStrategy.value === ""){
+          changeGasStrategy("standard");
+        }
+        else{
+          changeGasStrategy(ethGasStrategy.value);
+        }
     };
 
     const allAvailableAccounts = computed(()=>{
