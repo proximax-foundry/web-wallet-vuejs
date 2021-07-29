@@ -17,7 +17,8 @@ export class ChainSwapConfig extends StoreProperties{
     sinkFundExpxSwap: string = '';
     sinkFundBxpxSwap: string = '';
 
-    gasPriceConsultURL:string = "";
+    gasPriceConsultURL: string = "";
+    priceConsultURL: string = "";
 
     constructor(storeName: string){
         super(storeName + "_swapConfig");

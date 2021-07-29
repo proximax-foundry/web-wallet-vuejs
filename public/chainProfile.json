@@ -66,6 +66,7 @@
         "swap_ETH_XPX_URL": "https://bctestnet-swap-gateway.xpxsirius.io/expx/transfer",
         "swap_BSC_XPX_URL": "https://bctestnet-swap-gateway.xpxsirius.io/bxpx/transfer",
         "gasPriceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io",
+        "priceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io/price",
         "BSCChainId": [97],
         "ETHChainId": [5],
         "BSCScanUrl": "https://testnet.bscscan.com/tx/",

@@ -8,11 +8,13 @@
   <div class='mt-2 py-3 gray-line'>
     <div class="text-lg sm:text-xl text-gray-600 font-bold mt-10">Please select an option</div>
     <div class="md:grid md:grid-cols-2 mx-5 lg:mx-5 2xl:mx-60 mt-5">
-      <div class="md:col-span-1 clickable" @click="gotoOutgoingPage">
-        <div class="m-5 lg:mx-10 rounded-2xl border border-blue-primary option-div">
+      <div class="md:col-span-1">
+        <div class="m-5 lg:mx-10 rounded-2xl border border-blue-primary option-div clickable" @click="gotoOutgoingPage">
           <div class="mt-5 sm:mt-10 text-blue-primary font-bold text-xl mb-1">Out <img src="@/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg" class="h-8 w-8 inline-block ml-2"></div>
           <div class="mt-3 mb-5 sm:mb-10 text-gray-500">From Sirius to ETH</div>
         </div>
+        <InlineMessage v-if="displayWaitMessage" severity="info">Checking service, please wait.</InlineMessage>
+        <InlineMessage v-if="displaErrorMessage" severity="error">Service unavailable.</InlineMessage>
       </div>
       <div class="md:col-span-1">
         <router-link :to="{ name: 'ViewServicesMainnetSwapETHToSirius' }">
@@ -29,42 +31,60 @@
 import { useRouter } from "vue-router";
 import { SwapUtils } from "../../../../../../../util/swapUtils";
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
-import { useToast } from "primevue/usetoast";
 import { networkState } from "@/state/networkState";
+import InlineMessage from 'primevue/inlinemessage';
+import {ref} from "vue";
 
 export default {
   name: 'ViewServicesMainnetSwapEthOptions',
-
+  components: {
+    InlineMessage
+  },
   setup() {
-    const toast = useToast();
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
 
     const baseURL = swapData.swap_XPX_ETH_URL;
+    const priceURL = swapData.priceConsultURL;
     const router = useRouter();
+    const displayWaitMessage = ref(false);
+    const displaErrorMessage = ref(false);
+    const isChecking = ref(false);
 
     const gotoOutgoingPage = async()=> {
 
-      const response = await fetch(SwapUtils.checkSwapService(baseURL));
+      if(isChecking.value){
+        return;
+      }
 
-      if(response.status == 200){
+      isChecking.value = true;
+
+      displayWaitMessage.value = true;
+      const response = await fetch(SwapUtils.checkSwapService(baseURL));
+      const priceResponse = await fetch(SwapUtils.checkSwapPrice(priceURL));
+      const priceData = await priceResponse.json();
+
+      isChecking.value = false;
+
+      if(priceData.xpx === 0 || priceData.eth === 0){
+        displaErrorMessage.value = true;
+        return;
+      }
+
+      if(response.status == 200 && priceResponse.status == 200){
+        displaErrorMessage.value = false;
+        displayWaitMessage.value = false;
         router.push({ name: "ViewServicesMainnetSwapSiriusToETH"});
       }
       else{
-        toast.add(
-          {
-            severity:'error', 
-            summary: `Service unavailable`, 
-            detail: `Service unavailable right now`, 
-            group: 'br', 
-            life: 3000
-          }
-        );
+        displaErrorMessage.value = true;
       }
     };
 
     return {
-      gotoOutgoingPage
+      gotoOutgoingPage,
+      displayWaitMessage,
+      displaErrorMessage
     };
   },
 }
@@ -81,4 +101,6 @@ export default {
 .clickable{
   cursor: pointer;
 }
+
+
 </style>
