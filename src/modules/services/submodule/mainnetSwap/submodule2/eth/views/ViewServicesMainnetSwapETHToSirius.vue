@@ -61,6 +61,7 @@
     </div>
     <div v-if="currentPage==2">
       <div class="text-lg my-7">
+        <div class="font-bold text-left text-xs md:text-sm lg:text-lg" :class="step1?'text-gray-700':'text-gray-300'">Step 1: Send eXPX to the escrow account</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
             <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
@@ -69,7 +70,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Sending transfer to Metamask.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Sending transaction to Metamask</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -81,7 +82,7 @@
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
-            {{ isInvalidConfirmedMeta?'Approval on Metamask is rejected.':'Waiting for your approval on Metamask.' }}
+            {{ isInvalidConfirmedMeta?'Approval in Metamask is rejected':'Waiting for confirmation in Metamask' }}
             <div v-if="isInvalidConfirmedMeta" class="mt-5">
               <button type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border-blue-primary px-8 text-white hover:shadow-lg" @click="getValidation(true)">Retry</button>
               <router-link :to="{ name: 'ViewServices' }" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32 text-tsm" tag="button">Cancel this swap</router-link>
@@ -96,11 +97,12 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transfer validated. <a :href="validationLink" target=_new v-if="validationHash" class="text-blue-primary break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer Validation">({{ validationHash }})</a></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transaction hash: <a :href="validationLink" target=_new v-if="validationHash" class="text-blue-primary break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer Validation">{{ validationHash }}</a></div>
           <div class="flex-none">
             <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step3"></font-awesome-icon>
           </div>
         </div>
+        <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step4?'text-gray-700':'text-gray-300'">Step 2: Validate your Sirius address</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
             <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
@@ -109,7 +111,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">Sending transaction ID message to Metamask.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">Sending message to Metamask</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -121,7 +123,7 @@
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">
-            {{ isInvalidSignedMeta?'Approval on Metamask is rejected.':'Waiting for your approval on Metamask.' }}
+            {{ isInvalidSignedMeta?'Approval on Metamask is rejected':'Waiting for confirmation in Metamask' }}
             <div v-if="isInvalidSignedMeta" class="mt-5">
               <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg w-24" @click="getSigned">Retry</button>
             </div>
@@ -135,11 +137,12 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message validated.  <div v-if="messageHash" class="text-gray-400 break-all text-tsm" id="validateMessage" :copyValue="messageHash" copySubject="Message Validation">({{ messageHash }})</div></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message signed with signature: <div v-if="messageHash" class="text-gray-400 text-tsm break-all" id="validateMessage" :copyValue="messageHash" copySubject="Message Validation">{{ messageHash }}</div></div>
           <div class="flex-none">
             <font-awesome-icon icon="copy" @click="copy('validateMessage')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step6"></font-awesome-icon>
           </div>
         </div>
+        <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step7?'text-gray-700':'text-gray-300'">Step 3: Initiate swap</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
             <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
@@ -148,17 +151,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step7?'text-gray-700':'text-gray-300'">Claiming your XPX.</div>
-        </div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
-              <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
-              </div>
-            </div>
-          </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step8?'text-gray-700':'text-gray-300'">Swap in progress.</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step7?'text-gray-700':'text-gray-300'">Message sent to the swap service, swap initiated...</div>
         </div>
       </div>
       <div class="mt-10">
@@ -372,7 +365,6 @@ export default {
     const step5 = ref(false);
     const step6 = ref(false);
     const step7 = ref(false);
-    const step8 = ref(false);
     const validationHash = ref('');
     const validationLink = ref('');
     const messageHash = ref('');
@@ -507,8 +499,7 @@ export default {
         swapTimestamp.value = data.timestamp;
         swapId.value = data.ctxId;
         swapQr.value = SwapUtils.generateQRCode(validationLink.value);
-        setTimeout( ()=> step8.value = true, 1000);
-        setTimeout( ()=> isDisabledValidate.value = false, 2000);
+        setTimeout( ()=> isDisabledValidate.value = false, 1000);
       }
     };
 
@@ -554,7 +545,6 @@ export default {
       step5,
       step6,
       step7,
-      step8,
       validationLink,
       validationHash,
       messageHash,
