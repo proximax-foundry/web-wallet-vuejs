@@ -49,6 +49,10 @@ export const getCoingeckoCoinPrice = (coinId: string): Promise<any>=> {
   return fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`).then((res) => res.json()).then((data) => { return data.market_data.current_price });
 }
 
+export const getCurrentPriceUSD = (url: string): Promise<any>=> {
+  return fetch(url).then((res) => res.json()).then((data) => { return data });
+}
+
 export const getXPXcurrencyPrice = async (balance: number):Promise<number> => {
   let total:number;
   let coinId = 'proximax';
