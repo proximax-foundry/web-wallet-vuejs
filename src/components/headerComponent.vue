@@ -2,14 +2,11 @@
   <header>
     <div class="header-height flex items-stretch">
       <div class="flex-none self-center flex items-end logo">
-        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-24 tsm:w-40"></router-link><span class="version-text">v{{ versioning }}</span>
+        <router-link :to="loginStatus? {name : 'ViewServices'}: {name: 'Home'}"><img src="@/modules/services/submodule/mainnetSwap/img/logo-proximax-sirius-wallet-beta.svg?v=2" class="w-32 tsm:w-44"></router-link>
       </div>
       <div class="flex-grow header-height"></div>
       <div class="flex-none header-menu mt-1 tsm:mt-3" v-if="loginStatus">
         <div class=" flex flex-row">
-          <div class="w-5 sm:w-16 inline-block items-center relative">
-            <SelectLanguagePlugin class="lang-mobile-placement-postlogin" />
-          </div>
           <div class="w-10 text-center flex flex-row h-10 items-center">
             <img src="../assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
           </div>
@@ -35,9 +32,6 @@
         </div>
       </div>
       <div class="flex-none self-center header-menu" v-else>
-        <div class="w-5 sm:w-16 inline-block mr-10 sm:mr-3 lang-mobile-placement">
-          <SelectLanguagePlugin />
-        </div>
         <div class="select mb-3 inline-block">
           <Dropdown v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
         </div>
@@ -48,7 +42,7 @@
           <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold">Wallets</router-link>
         </div>
       </div>
-    </div>
+      </div>
     <div v-if="!wideScreen && !loginStatus" class="bg-gray-100 py-1 text-center">
       <div class="w-16 text-center inline-block">
         <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block text-xs sm:text-sm">Home</router-link>
@@ -68,9 +62,8 @@ import { useRouter } from "vue-router";
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { ChainUtils } from '@/util/chainUtils';
 import { Helper } from '@/util/typeHelper';
-// import { transferEmitter } from '../util/listener.js';
 import Dropdown from 'primevue/dropdown';
-import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
+// import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { useToast } from "primevue/usetoast";
@@ -84,7 +77,7 @@ import { WalletUtils } from "@/util/walletUtils";
 export default defineComponent({
   components: {
     Dropdown,
-    SelectLanguagePlugin,
+    // SelectLanguagePlugin,
     FontAwesomeIcon,
   },
 
@@ -116,9 +109,6 @@ export default defineComponent({
 
     watch(()=> networkState.availableNetworks, (availableNetworks)=>{
       let options = [];
-
-      console.log("Updated");
-      console.log(availableNetworks);
 
       for(let i=0; i < availableNetworks.length; ++i){
         options.push({ label: availableNetworks[i], value: i });
@@ -182,7 +172,7 @@ export default defineComponent({
       if(skipIfEndpointHaveValue && listener.value.endpoint !== ""){
         return;
       }
-      //listener.connectNewEndpoint(ChainUtils.buildWSEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+
       if(listener.value.endpoint){
         ListenerStateUtils.lightReset();
       }
@@ -195,9 +185,6 @@ export default defineComponent({
       let othersAddress = walletState.currentLoggedInWallet.others.map((acc)=> acc.address);
 
       let allAddress = Array.from(new Set(accountsAddress.concat(othersAddress)));
-
-      //listener.addresses = allAddress;
-      //console.log(allAddress);
 
       listener.value = new Connector(ChainUtils.buildWSEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort), allAddress);
 
@@ -224,60 +211,13 @@ export default defineComponent({
     //const newBlockLength = computed(()=> listenerState.blockLength);
     const currentBlockHeight = computed(()=> listenerState.currentBlock);
     const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
-    const unconfirmedTxLength = computed(()=> listenerState.unconfirmedTxLength);
-    const transactionStatusLength = computed(()=> listenerState.transactionStatusLength);
-    const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
-    const cosignatureAddedTxLength = computed(()=> listenerState.cosignatureAddedTxLength);
-    const totalPendingNum = ref(0);
-
-    watch(()=> listenerState.autoAnnounceSignedTransaction, (newValue)=>{
-      
-      let newLength = newValue.length;
-
-      if(newLength !== totalPendingNum.value){
-        toast.removeGroup("tr");
-
-        if(newLength){
-          let singularPluralText =  newLength > 1 ? "s" : "";
-          toast.add(
-              {
-                severity:'info', 
-                summary: `${newLength} Transaction${singularPluralText} in waiting queue`, 
-                detail: `Please do not refresh or logout`, 
-                group: 'tr'
-              }
-          );
-        }
-      }
-
-      totalPendingNum.value = newLength;
-      
-    }, true);
 
     watch(()=> currentBlockHeight.value, ()=>{
 
       listener.value.refreshTimer();
     });
-    
 
-     watch(()=> unconfirmedTxLength.value, (newValue, oldValue)=>{
-
-      if(newValue > oldValue){
-        let txLength = newValue - oldValue;
-        let singularPluralText =  txLength > 1 ? "s" : "";
-        toast.add(
-          {
-            severity:'warn', 
-            summary: `Transaction${singularPluralText} Added`, 
-            detail: `${txLength} transaction${singularPluralText} in unconfirmed state`, 
-            group: 'br', 
-            life: 5000
-          }
-        );
-      }
-     });
-
-     watch(()=> confirmedTxLength.value, (newValue, oldValue)=>{
+    watch(()=> confirmedTxLength.value, (newValue, oldValue)=>{
 
       if(newValue > oldValue){
         WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
@@ -335,71 +275,6 @@ export default defineComponent({
         );
         } 
       }
-     });
-
-     watch(()=> transactionStatusLength.value, (newValue, oldValue)=>{
-
-       console.log(newValue + ":" + oldValue);
-
-      if(newValue > oldValue){
-        let txLength = newValue - oldValue;
-        let totalTxLength = listenerState.allTransactionStatus.length;
-        let lastIndex = totalTxLength - 1;
-
-        for(let i= 0; i < txLength; ++i){
-          let status = listenerState.allTransactionStatus[lastIndex - i].status;
-          let hash = listenerState.allTransactionStatus[lastIndex - i].hash;
-          toast.add({
-            severity:'error', 
-            summary: `Transaction Error`, 
-            detail: `Status: ${status} - Hash: ${hash} `, 
-            group: 'br', 
-            life: 10000
-          });
-        }
-      }
-     });
-
-     watch(()=> cosignatureAddedTxLength.value, (newValue, oldValue)=>{
-
-      if(newValue > oldValue){
-        let txLength = newValue - oldValue;
-        let singularPluralText =  txLength > 1 ? "s" : "";
-        toast.add(
-          {
-            severity:'info', 
-            summary: `Transaction${singularPluralText} Cosignature Added`, 
-            detail: `${txLength} cosignature transaction${singularPluralText} added`, 
-            group: 'br', 
-            life: 5000
-          }
-        );
-      }
-     });
-
-     watch(()=> aggregateBondedTxLength.value, (newValue, oldValue)=>{
-
-      if(newValue > oldValue){
-        let txLength = newValue - oldValue;
-        let singularPluralText =  txLength > 1 ? "s" : "";
-        toast.add(
-          {
-            severity:'warn', 
-            summary: `Partial Transaction${singularPluralText} Added`, 
-            detail: `${txLength} partial transaction${singularPluralText} added`, 
-            group: 'br', 
-            life: 5000
-          }
-        );
-      }
-     });
-
-     emitter.on("listener:reconnect", ()=>{
-       connectListener(false);
-     });
-
-     emitter.on("listener:setEndpoint", endpoint =>{
-       listener.value.endpoint = endpoint;
      });
 
     const versioning = ref('0.0.1');
