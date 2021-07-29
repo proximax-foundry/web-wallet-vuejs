@@ -22,4 +22,12 @@ module.exports = {
     host: 'localhost',
     // proxy: 'https://bctestnet-swap-gateway.xpxsirius.io/',
   },
+  chainWebpack: config => {
+    config
+        .plugin('html')
+        .tap(args => {
+            args[0].title = "ProximaX Swap Service";
+            return args;
+        })
+  }
 }
