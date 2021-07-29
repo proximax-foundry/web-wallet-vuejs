@@ -96,7 +96,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transfer validated. <a :href="validationLink" target=_new v-if="validationHash" class="text-blue-primary break-all text-sm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer Validation">({{ validationHash }})</a></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transfer validated. <a :href="validationLink" target=_new v-if="validationHash" class="text-blue-primary break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer Validation">({{ validationHash }})</a></div>
           <div class="flex-none">
             <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step3"></font-awesome-icon>
           </div>
@@ -135,7 +135,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message validated.  <div v-if="messageHash" class="text-blue-primary break-all text-sm" id="validateMessage" :copyValue="messageHash" copySubject="Message Validation">({{ messageHash }})</div></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message validated.  <div v-if="messageHash" class="text-gray-400 break-all text-tsm" id="validateMessage" :copyValue="messageHash" copySubject="Message Validation">({{ messageHash }})</div></div>
           <div class="flex-none">
             <font-awesome-icon icon="copy" @click="copy('validateMessage')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step6"></font-awesome-icon>
           </div>
