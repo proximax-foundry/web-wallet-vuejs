@@ -746,6 +746,10 @@ export class SwapUtils {
   static checkSwapService = (baseUrl: string): string => {
     return `${baseUrl}/checkBalanceOk`;
   }
+
+  static checkSwapPrice = (baseUrl: string): string => {
+    return `${baseUrl}/latest`;
+  }
 }
 
 

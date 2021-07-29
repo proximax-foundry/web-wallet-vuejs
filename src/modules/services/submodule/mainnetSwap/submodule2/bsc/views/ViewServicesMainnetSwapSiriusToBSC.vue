@@ -144,16 +144,16 @@ import { walletState } from '@/state/walletState';
 import { networkState } from '@/state/networkState';
 import { WalletUtils } from "@/util/walletUtils";
 import { Helper } from "@/util/typeHelper";
-import { getCoingeckoCoinPrice } from "@/util/functions";
+import { getCurrentPriceUSD } from "@/util/functions";
 import { BuildTransactions } from "@/util/buildTransactions";
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { useToast } from "primevue/usetoast";
 import { ethers } from 'ethers';
 import { SwapUtils } from '@/util/swapUtils';
-import { ChainUtils } from "@/util/chainUtils";
-import { ChainAPICall } from "@/models/REST/chainAPICall";
+//import { ChainUtils } from "@/util/chainUtils";
+//import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { NetworkType } from "tsjs-xpx-chain-sdk";
-import { listenerState } from "@/state/listenerState";
+//import { listenerState } from "@/state/listenerState";
 
 export default {
   name: 'ViewServicesMainnetSwapSiriusToBSC',
@@ -433,13 +433,10 @@ export default {
 
     const getCurrentPrice = async ()=>{
 
-      let xpxPrices = await getCoingeckoCoinPrice("proximax");
+      let prices = await getCurrentPriceUSD(SwapUtils.checkSwapPrice(swapData.priceConsultURL));
 
-      currentXPX_USD.value = xpxPrices.usd;
-
-      let bscPrices = await getCoingeckoCoinPrice("binancecoin");
-
-      currentBSC_USD.value = bscPrices.usd;
+      currentXPX_USD.value = prices.xpx;
+      currentBSC_USD.value = prices.bnb;
     };
 
     getCurrentPrice();
@@ -539,6 +536,16 @@ export default {
           err.value = "";
           updateRemoteAddress();
           changeGasStrategy(bscGasStrategy.value);
+          if((amount.value + gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
+            toast.add({
+              severity:'error',
+              summary: 'Insufficient amount',
+              detail: 'Insufficient amount to perform swap',
+              group: 'br',
+              life: 5000
+            });
+            return;
+          }
           disableTimer();
           let signedTransaction = SwapUtils.signTransaction(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
           transactionHash = signedTransaction.hash;
