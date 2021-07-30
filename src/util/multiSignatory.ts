@@ -1,9 +1,8 @@
-import { nextTick, readonly } from "vue";
+import { readonly } from "vue";
 import {
   Account,
   Address,
   AggregateTransaction,
-  CosignatureTransaction,
   Deadline,
   PublicAccount,
   LockFundsTransaction,
@@ -14,7 +13,6 @@ import {
   NetworkCurrencyMosaic,
   TransactionHttp,
   UInt64,
-  Wallet,
   AccountInfo, 
   Password,
   MultisigAccountGraphInfo,
@@ -31,7 +29,6 @@ import { TransactionUtils } from "@/util/transactionUtils";
 import { WalletAccount } from "@/models/walletAccount.js";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { listenerState, AutoAnnounceSignedTransaction, HashAnnounceBlock, AnnounceType } from "@/state/listenerState";
-import {Helper} from '@/util/typeHelper'
 
 const walletKey = "sw";
 
