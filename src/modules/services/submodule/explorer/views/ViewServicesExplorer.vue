@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between text-sm">
+  <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">{{$t('services.txexplorer')}} ></span> <span class="text-blue-primary font-bold">{{$t('services.explorer')}}</span></div>
     <div>
       <router-link :to="{ name: 'ViewServices'}" class="font-bold">{{$t('services.allservices')}}</router-link>

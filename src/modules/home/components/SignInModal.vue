@@ -6,19 +6,19 @@
       leave-active-class="animate__animated animate__fadeOutUp"
     >
       <div v-show="toggleModal" class="popup-outer absolute flex z-50">
-        <div class="modal-popup-box">
-          <div class="delete-position">
-            <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
+        <div class="modal-popup-box m-2">
+          <div class="delete-position mt-2 mr-2" @click="toggleModal = false">
+            <font-awesome-icon icon="times" class="delete-icon-style"></font-awesome-icon>
           </div>
           <div class="w-104">
-            <h1 class="default-title font-bold my-10">{{$t('welcome.signin')}} {{$t('dashboard.to')}} {{networkState.chainNetworkName}} {{$t('services.wallet')}}</h1>
+            <h1 class="default-title font-bold my-3 sm:my-10">{{$t('welcome.signin')}} {{$t('dashboard.to')}} {{networkState.chainNetworkName}} {{$t('services.wallet')}}</h1>
             <form @submit.prevent="login">
               <fieldset class="w-full">
                 <div class="error error_box" v-if="err!=''">{{ err }}</div>
                 <SelectInputPlugin :placeholder="$t('signin.selectwallet')" :errorMessage="$t('signin.selectwallet')" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
                 <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
                 <div class="mt-10">
-                  <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
+                  <button type="button" class="default-btn mr-2 sm:mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
                   <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
                 </div>
               </fieldset>

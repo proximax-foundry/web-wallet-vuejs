@@ -52,23 +52,6 @@ body{
   margin-left: 10px;
 }
 
-.version-text{
-  color: #616161;
-  font-size: .8rem;
-  position: relative;
-  top: 4px;
-  left: 5px;
-}
-
-.header-menu{
-  margin-right: 20px;
-}
-
-.header-menu a{
-  font-size: 15px;
-  margin-left: 10px;
-}
-
 .animate__animated.animate__fadeInDown{
   --animate-duration: 0.5s;
 }
@@ -84,7 +67,7 @@ body{
 }
 
 .error_box{
-  @apply bg-red-100 py-3 rounded-xl;
+  @apply bg-red-100 py-3 rounded-xl px-3;
 }
 
 .blue-btn{
@@ -100,7 +83,13 @@ body{
 }
 
 .big-default-btn{
-  @apply blue-btn py-5 px-10 focus:outline-none;
+  @apply blue-btn py-3 px-10 focus:outline-none;
+}
+
+@screen md{
+  .big-default-btn{
+    @apply py-5;
+  }
 }
 
 .title{
@@ -108,8 +97,22 @@ body{
 }
 
 .big-title{
-  @apply title text-xxl mt-20 font-bold;
+  @apply title text-sm mt-10 font-bold mb-2;
 }
+
+  .big-para{
+    @apply text-xs mx-3;
+  }
+
+  @screen md {
+    .big-title{
+      @apply text-xxl mt-20;
+    }
+
+    .big-para{
+      @apply text-sm;
+    }
+  }
 
 .default-title{
   @apply title text-sm md:text-lg lg:text-txl;
@@ -188,7 +191,7 @@ body{
 
   a{
     font-weight: bold;
-    font-size: 16px;
+    font-size: 13px;
     display: block;
     padding: 2px 18px;
     padding-top: 5px;
@@ -216,6 +219,7 @@ body{
     a{
       display: inline-block;
       color: var(--white) #{!important};
+      font-size: 16px;
     }
   }
 }

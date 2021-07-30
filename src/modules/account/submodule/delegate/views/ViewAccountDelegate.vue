@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between text-sm">
+  <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('delegate.delegate')}}</span></div>
     <div>
       <router-link :to="{name: 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('accounts.viewall')}}</router-link>
