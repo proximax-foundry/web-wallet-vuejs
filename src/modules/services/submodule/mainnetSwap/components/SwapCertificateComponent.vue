@@ -7,6 +7,9 @@
           <div class="font-bold">Sirius Account:</div>
           <div class="break-all">{{ siriusAddress }}</div>
         </div>
+        <div class="text-left text-tsm mt-2" v-if="siriusTransactionHash">
+          <div class="font-bold inline-block">Sirius Transaction Hash:</div> <div class=" inline-block break-all text-blue-500"><a :href="xpxExplorer+siriusTransactionHash" target=_new>{{ siriusTransactionHash }}</a></div>
+        </div>
         <div class="text-left text-tsm mt-2" v-if="swapTimestamp">
           <div><b>Swap Timestamp:</b> {{ swapTimestamp }}</div>
         </div>
@@ -53,6 +56,8 @@ export default{
     siriusAddress: String,
     swapQr: String,
     swapLink: String,
+    siriusTransactionHash: String,
+    xpxExplorer: String,
   }
 }
 </script>

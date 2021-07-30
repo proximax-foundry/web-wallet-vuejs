@@ -212,7 +212,16 @@ export default {
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
 
-    const defaultXPXTxFee = ref(50);
+    const defaultXPXTxFee = ref(0);
+    const custodian = ref('');
+    const tokenAddress = ref('');
+
+    (async() => {
+      const data = await SwapUtils.fetchETHServiceInfo(swapData.swap_SERVICE_URL);
+      tokenAddress.value = data.ethInfo.scAddress;
+      custodian.value = data.ethInfo.sinkAddress;
+      defaultXPXTxFee.value = parseInt(data.siriusInfo.feeAmount);
+    })()
 
     /* metamask integration */
     let ethereumChainId = [5];
@@ -221,13 +230,11 @@ export default {
     const currentAccount = ref(null);
     const balance = ref(0);
     const coinBalance = ref(0);
-    const tokenAddress = swapData.EXPXContractAddress;
-    const custodian = swapData.sinkFundExpxSwap;
-    const ethScanUrl = swapData.ETHScanUrl;
-    const swapServerUrl = swapData.swap_ETH_XPX_URL;
     const currentNetwork = ref('');
     const isInvalidConfirmedMeta = ref(false);
     const isInvalidSignedMeta = ref(false);
+    const ethScanUrl = swapData.ETHScanUrl;
+    const swapServerUrl = swapData.swap_ETH_XPX_URL;
 
     let provider;
     let signer;
@@ -336,22 +343,24 @@ export default {
         });
     };
 
-    watch([currentNetwork, currentAccount], ([newNetwork, newCurrentAccount]) => {
-      (async () => {
-        try{
-          provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-          signer = provider.getSigner();
-          const contract = new ethers.Contract(tokenAddress, abi, signer);
-          const tokenBalance = await contract.balanceOf(newCurrentAccount);
-          balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
-        }catch(err) {
-          balance.value = 0;
-        }
-      })();
+    watch([currentNetwork, currentAccount, tokenAddress], ([newNetwork, newCurrentAccount, newTokenAddress]) => {
+      if(newTokenAddress != undefined){
+        (async () => {
+          try{
+            provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+            signer = provider.getSigner();
+            const contract = new ethers.Contract(tokenAddress.value, abi, signer);
+            const tokenBalance = await contract.balanceOf(newCurrentAccount);
+            balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
+          }catch(err) {
+            balance.value = 0;
+          }
+        })();
+      }
     });
 
     watch(balance, (n) => {
-      if(n<=50){
+      if(n <= defaultXPXTxFee.value){
         showAmountErr.value = true;
       }else{
         showAmountErr.value = false;
@@ -374,7 +383,7 @@ export default {
     const swapQr = ref('');
 
     const saveCertificate = () => {
-      SwapUtils.generatePdf('ETH', swapTimestamp.value, siriusAddress.value, swapId.value, transactionHash.value, swapQr.value);
+      SwapUtils.generateIncomingPdfCert('ETH', swapTimestamp.value, siriusAddress.value, swapId.value, transactionHash.value, swapQr.value);
     };
 
     const toast = useToast();
@@ -397,9 +406,9 @@ export default {
       !(amount.value > 0 && siriusAddress.value != '' && !err.value && (balance.value >= amount.value) && (amount.value > defaultXPXTxFee.value))
     );
     const amount = ref('0');
-    
+
     watch(amount, (n) => {
-      if(n <= defaultXPXTxFee.value){
+      if(parseFloat(n) <= defaultXPXTxFee.value){
         showAmountErr.value = true;
       }else{
         showAmountErr.value = false;
@@ -433,9 +442,9 @@ export default {
 
     const getValidation = async (initiated) => {
       try{
-        const Contract = new ethers.Contract(tokenAddress, abi, signer);
+        const Contract = new ethers.Contract(tokenAddress.value, abi, signer);
         const receipt = await Contract.transfer(
-          custodian,
+          custodian.value,
           ethers.utils.parseUnits(amount.value, 6),
         );
         validationHash.value = receipt.hash;
@@ -508,14 +517,6 @@ export default {
     };
 
     const savedCheck = ref(false);
-
-    watch(amount, (n) => {
-      if(n <= defaultXPXTxFee.value){
-        showAmountErr.value = true;
-      }else{
-        showAmountErr.value = false;
-      }
-    });
 
     return {
       err,
