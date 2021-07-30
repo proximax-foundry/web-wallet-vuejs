@@ -1,4 +1,4 @@
-import { readonly } from "vue";
+import { nextTick, readonly } from "vue";
 import {
   Account,
   Address,
@@ -17,7 +17,8 @@ import {
   Wallet,
   AccountInfo, 
   Password,
-  MultisigAccountGraphInfo
+  MultisigAccountGraphInfo,
+
 } from "tsjs-xpx-chain-sdk";
 //line 483,485
 // import { environment } from '../environment/environment.js';
@@ -31,6 +32,7 @@ import { WalletAccount } from "@/models/walletAccount.js";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { listenerState, AutoAnnounceSignedTransaction, HashAnnounceBlock, AnnounceType } from "@/state/listenerState";
 import {Helper} from '@/util/typeHelper'
+
 const walletKey = "sw";
 
 
@@ -509,54 +511,31 @@ function modifyMultisigAccount(coSign :string[], removeCosign :string[], numAppr
  
 }
 
-async function getAccountBalance(address :string) :Promise<number>{
-  let promise = new Promise<number>((resolve,reject)=>{
-    WalletUtils.getAccInfo(address).then(accInfo=>{
-      let balance :number
-      accInfo.mosaics.forEach(mosaic =>{
-        
-        balance = mosaic.amount.compact()/Math.pow(10,6)
-      })
-      resolve(balance)
-    }).catch(error=>reject(error))
-  })
-  await promise
-  console.log(promise)
-  return (promise)
-}
-
+ 
 
 //level 1 = cosigner
 
-async function fetchMultiSigCosigners(multiSigAddress :string) :Promise<{list :{address :string, name :string, balance: number}[],length :number}>{
-  
-  let promise = new Promise<{list :{address :string, name :string, balance: number }[],length :number}>((resolve,reject)=>{ 
-    WalletUtils.getMultisigDetails(multiSigAddress).then(multisigDetails =>{
-      console.log(multisigDetails)
-      let cosigners = multisigDetails.filter(element => element.level ===1 )
-      let list = [];
+
+ const fetchMultiSigCosigners = (multiSigAddress :string) :Array<{list :{address :string, name: string , balance: number}}> =>{
+  let account = walletState.currentLoggedInWallet.accounts.find(element => element.address === multiSigAddress)
+  let cosigners = account.multisigInfo.filter(element => element.level === 1)
+  let list = [];
+  cosigners.forEach(cosigner=>{
+    let isInWallet = walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === cosigner.publicKey)? true: false
+    if(isInWallet){ //if cosigner in current wallet
+      let account = walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === cosigner.publicKey)
+      list.push({ address: account.address, name: account.name , balance: account.balance})
+    }else{ //cosigner not in this wallet
+     /*  let convertedAddress = Helper.createPublicAccount(cosigner.publicKey,networkState.currentNetworkProfile.network.type).address.plain()
       
-      cosigners.forEach(cosigner=>{
-        let isInWallet = walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === cosigner.publicKey)? true: false
-        if(isInWallet){ //if cosigner in current wallet
-          let account = walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === cosigner.publicKey)
-          list.push({ address: account.address, name: account.name , balance: account.balance})
-        }else{ //cosigner not in this wallet
-          let convertedAddress = Helper.createPublicAccount(cosigner.publicKey,networkState.currentNetworkProfile.network.type).address.plain()
-           getAccountBalance(convertedAddress).then(value=>{
-            list.push({ address: convertedAddress, name: convertedAddress.substr(-4) , balance: value})
-          })
-        }
-      })
-      list.sort((a, b) => (a.balance < b.balance) ? 1 : -1);
-      let multisigAccountInfo = multisigDetails.find(element => element.level === 0);
-      let numCosigner = multisigAccountInfo.cosignaturies.length;
-      resolve({ list: list, length: numCosigner })
-    }).catch(error => reject(error))
+        list.push({ address: convertedAddress, name: convertedAddress.substr(-4) , balance: undefined})
+       */
+      
+    }
   })
- await promise
- console.log(await promise)
- return promise
+  list.sort((a, b) => (a.balance < b.balance) ? 1 : -1);
+  console.log(list)
+  return list
  
 }
 

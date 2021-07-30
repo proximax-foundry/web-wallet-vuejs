@@ -40,18 +40,18 @@
             <input type="hidden" v-model="currentSelectedName" />
           </div>
           <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4"> 
-            <div v-if="list.length > 0">
+            <div v-if="getWalletCosigner().length > 0">
               <div class="text-tsm">
                 {{$t('transfer.cosigner')}}:
-                <span class="font-bold" v-if="list.length == 1">
-                  {{ list[0].name }} ({{$t('services.balance')}}:{{  list[0].balance }} XPX)
-                    <span v-if="list[0].balance <lockFundTotalFee.value" class="error">
+                <span class="font-bold" v-if="getWalletCosigner().length == 1"> 
+                  {{ getWalletCosigner()[0].name }} ({{$t('services.balance')}}:{{  getWalletCosigner()[0].balance }} XPX)
+                    <span v-if="getWalletCosigner()[0].balance <lockFundTotalFee.value" class="error">
                       - {{$t('accounts.insufficientbalance')}}
                     </span>
                 </span>
                 <span class="font-bold" v-else>
                   <select v-model="cosignAddress">
-                    <option v-for="(element, item) in  list" :value="element.address" :key="item">
+                    <option v-for="(element, item) in  getWalletCosigner()" :value="element.address" :key="item">
                       {{ element.name }} ({{$t('services.balance')}}: {{ element.balance }} XPX)
                     </option>
                   </select>
@@ -62,7 +62,7 @@
               </div>
             </div>
             <div class="error" v-else>
-             {{$t('transfer.nocosigner')}}
+             {{$t('transfer.nocosigner')}} 
             </div>
           </div>
           <SelectInputPlugin v-if="showContactSelection" placeholder="Contact" errorMessage=""  v-model="selectContact" :options="contact" @default-selected="selectContact = 0"  @show-selection="updateAdd"/>
@@ -96,7 +96,7 @@
         </div>
         <div>
           <button class="mb-5 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50" :disabled="addMosaicsButton" @click="displayMosaicsOption">
-            (+) {{$t('transfer.addmosaics')}}
+            (+) {{$t('transfer.addmosaics')}} 
           </button>
         </div>
         <div class="mb-5 border-t pt-4 border-gray-200">
@@ -190,11 +190,6 @@ export default {
     AddContactModal,
     ConfirmSendModal,
   },
-  data(){
-    return{
-      list: []
-    }
-  },
   setup() {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -231,7 +226,7 @@ export default {
     const disableMsgInput = computed(() => disableAllInput.value);
     const disablePassword = computed(() => disableAllInput.value);
     const cosignerBalanceInsufficient = ref(false);
-    const list = ref([])
+    
 
     const currencyName = computed(
       () => networkState.currentNetworkProfile.network.currency.name
@@ -332,16 +327,17 @@ export default {
     });
     const isMultiSigBool = ref(
       isMultiSig(
-        walletState.currentLoggedInWallet.selectDefaultAccount().address
+        selectedAccAdd.value
       )
     );
     /*  appStore.getFirstAccAdd() */
 
     // enable and disable inputs based on cosign balance
+   
     if (isMultiSigBool.value) {
-      multiSign.fetchMultiSigCosigners(selectedAccAdd.value).then(cosign=>{
-      if (cosign.list.length > 0) {
-        if (cosign.list[0].balance < lockFundTotalFee.value) {
+      let cosigner = multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
+      if (cosigner.length > 0) {
+        if (cosigner[0].balance < lockFundTotalFee.value) {
           disableAllInput.value = true;
           cosignerBalanceInsufficient.value = true;
         } else {
@@ -351,10 +347,12 @@ export default {
       } else {
         disableAllInput.value = true;
       }
-      })
-      
     }
 
+    const getWalletCosigner = () =>{
+      return multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
+    }
+    
     // check account balance at first load
     if (balance.value < lockFundTotalFee.value) {
       showBalanceErr.value = true;
@@ -371,40 +369,13 @@ export default {
       return accounts.value.length > 1;
     });
 
-    const changeSelection = async(i) => {
+    const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
       // balance.value = i.balance;
       balance.value == 0? (showBalanceErr.value = true): (showBalanceErr.value = false);
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
-      isMultiSigBool.value = isMultiSig(i.address);
-      // set default of cosinger if multiple return
-      if (isMultiSigBool.value) {
-          
-          multiSign.fetchMultiSigCosigners(i.address).then(cosign =>{
-            console.log(cosign.list)
-            list.value = cosign.list
-            console.log(list.value)
-             if (cosign.list.length > 0) {
-          cosignAddress.value = cosign.list[0].address;
-          // console.log('cosign.list[0].balance');
-          // console.log(cosign.list[0].balance);
-          if (cosign.list[0].balance < lockFundTotalFee.value) {
-            disableAllInput.value = true;
-            // console.log('disableAllInput();')
-          } else {
-            disableAllInput.value = false;
-            // console.log('enableAllInput();')
-          }
-        } else {
-          disableAllInput.value = true;
-        }
-          })
-      } else {
-        disableAllInput.value = false;
-      }
-
       // reset mosaic selection
       selectedMosaic.value = [];
       mosaicsCreated.value = [];
@@ -426,8 +397,6 @@ export default {
   })
     }; */
 
- 
-      
  
     const contact = computed(() => {
       const wallet = walletState.currentLoggedInWallet;
@@ -482,11 +451,11 @@ export default {
         let selectedCosign;
         if (isMultiSigBool.value) {
           // if this is a multisig, get cosigner name along
-          let selectedCosignList = getWalletCosigner().list;
+          let selectedCosignList = getWalletCosigner();
           if (selectedCosignList.length > 1) {
             selectedCosign = cosignAddress.value;
           } else {
-            selectedCosign = getWalletCosigner().list[0].address;
+            selectedCosign = getWalletCosigner()[0].address;
           }
         }
         let transferStatus = createTransaction(
@@ -610,19 +579,43 @@ export default {
       selectedMosaic.value.splice(e.index, 1);
       mosaicSupplyDivisibility.value.splice(e.index, 1);
     };
+    
+    watch(selectedAccAdd, (n, o) => {
+      isMultiSigBool.value = isMultiSig(n);
+      if (isMultiSigBool.value) {
+        
+          let cosigner = multiSign.fetchMultiSigCosigners(n)
+          if (cosigner.length > 0) {
+            cosignAddress.value = cosigner[0].address;
+            if (cosigner[0].balance < lockFundTotalFee.value) {
+              disableAllInput.value = true;
+              // console.log('disableAllInput();')
+            } else {
+              disableAllInput.value = false;
+              // console.log('enableAllInput();')
+            }
+          } else {
+            disableAllInput.value = true;
+          }
+      }
+      else {
+        disableAllInput.value = false;
+      }   
+    })
+    
 
     watch(cosignAddress, (n, o) => {
       if (n != o) {
-        let cosign = multiSign.fetchMultiSigCosigners(selectedAccAdd.value).then(cosign=>{
+         let cosigners = multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
           if (
-          cosign.list.find((element) => element.address == n).balance <
+          cosigners.find((element) => element.address == n).balance <
           lockFundTotalFee.value
         ) {
           cosignerBalanceInsufficient.value = true;
         } else {
           cosignerBalanceInsufficient.value = false;
         }
-        })
+        
       }
     });
 
@@ -766,7 +759,7 @@ export default {
       isMultiSigBool,
       effectiveFee,
       cosignAddress,
-      /* getWalletCosigner, */
+      getWalletCosigner,
       disableRecipient,
       disableSupply,
       disableRegularMsg,

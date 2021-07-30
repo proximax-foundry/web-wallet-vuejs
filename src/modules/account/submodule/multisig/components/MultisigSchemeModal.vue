@@ -48,31 +48,37 @@ export default{
   props: ['multiSigAccount'],
 
   setup(p){
-    const toggleModal = ref(false);
+      const toggleModal = ref(false);
     
-    // console.log(p.multiSigAccount.multisigAccountGraphInfo)
+    //account
     let graph = [];
     let layer = [];
-    const wallet = walletState.currentLoggedInWallet
-    
-      WalletUtils.getMultisigDetails(p.multiSigAccount.address).then(multisiginfo=>{
-        
-        multisiginfo.forEach((multisig)=>{
-          let label;
-          let accountName;
-          let account = wallet.accounts.find((element) => element.publicKey === multisig.publicKey);
-          label = (multisig.cosignaturies.length>0)?'MULTISIG-':'Cosigner-';
-          let convertedAddress = Helper.createPublicAccount(multisig.publicKey,networkState.currentNetworkProfile.network.type).address.plain()
-          accountName = (account) ? account.name : (label + convertedAddress.substr(-4));
-          
-            layer.push({ address: convertedAddress, name: accountName, label: label, cosign: multisig.cosignaturies });
-            
-           
-          
-        })
-      })
+    let newlayer = [];
+    const wallet = walletState.currentLoggedInWallet 
+    p.multiSigAccount.multisigInfo.forEach( (multiSig, i) => {
+      let label;
+      let accountName;
+      let account = wallet.accounts.find((element) => element.address ===  Address.createFromPublicKey(multiSig.publicKey, networkState.currentNetworkProfile.network.type).plain());
+      label = (multiSig.cosignaturies.length>0)?'MULTISIG-':'Cosigner-';
+      accountName = (account) ? account.name : (label + Address.createFromPublicKey(multiSig.publicKey, networkState.currentNetworkProfile.network.type).plain().substr(-4));
+      if(i==0){
+        layer.push({ address: Address.createFromPublicKey(multiSig.publicKey, networkState.currentNetworkProfile.network.type).plain(), name: accountName, label: label, cosign: multiSig.cosignaturies });
+        graph.push(layer);
+      }else{
+        layer.forEach((layer) => {
+          if(layer.cosign.find((element) => Address.createFromPublicKey(element, networkState.currentNetworkProfile.network.type).plain() === Address.createFromPublicKey(multiSig.publicKey, networkState.currentNetworkProfile.network.type).plain())){
+            newlayer.push({address: Address.createFromPublicKey(multiSig.publicKey, networkState.currentNetworkProfile.network.type).plain(), name: accountName, label: label, cosign: multiSig.cosignaturies });
+          }else{
+            layer = newlayer;
+            graph.push(layer);
+            newlayer = [];
+            newlayer.push({address:Address.createFromPublicKey(multiSig.publicKey, networkState.currentNetworkProfile.network.type).plain(), name: accountName, label: label, cosign: multiSig.cosignaturies });
+          }
+        });
+      }
+    });
+    layer = newlayer;
     graph.push(layer);
-    console.log(graph)
  
     
     return {
@@ -82,33 +88,6 @@ export default{
   }
 }     
    
-  
-/*     p.multiSigAccount.multisigAccountGraphInfo.forEach( (multiSig, i) => {
-      let label;
-      let accountName;
-      let account = wallet.accounts.find((element) => element.address === multiSig.account.address.address);
-      label = (multiSig.cosignatories.length>0)?'MULTISIG-':'Cosigner-';
-      accountName = (account) ? account.name : (label + multiSig.account.address.address.substr(-4));
-
-      // console.log(i+': ' + multiSig.account.address.address);
-      // first element
-      if(i==0){
-        layer.push({ address: multiSig.account.address.address, name: accountName, label: label, cosign: multiSig.cosignatories });
-        graph.push(layer);
-      }else{
-        layer.forEach((layer) => {
-          if(layer.cosign.find((element) => element.address.address === multiSig.account.address.address)){
-            newlayer.push({address: multiSig.account.address.address, name: accountName, label: label, cosign: multiSig.cosignatories });
-          }else{
-            layer = newlayer;
-            graph.push(layer);
-            newlayer = [];
-            newlayer.push({address: multiSig.account.address.address, name: accountName, label: label, cosign: multiSig.cosignatories });
-          }
-        });
-      }
-      // console.log(graph)
-    }); */
     
 </script>
 <style lang="scss" scoped>
