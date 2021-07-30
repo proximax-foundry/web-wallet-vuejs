@@ -758,6 +758,14 @@ export class SwapUtils {
   static getOutgoingSwapServiceInfo = (url: string): Promise<any>=> {
     return fetch(url).then((res) => res.json()).then((data) => { return data });
   }
+
+  static fetchETHServiceInfo = (baseUrl: string) :Promise<any> => {
+    return fetch(`${baseUrl}/expx/service-info`).then(res => res.json());
+  }
+
+  static fetchBSCServiceInfo = (baseUrl: string) :Promise<any> => {
+    return fetch(`${baseUrl}/bxpx/service-info`).then(res => res.json());
+  }
 }
 
 
