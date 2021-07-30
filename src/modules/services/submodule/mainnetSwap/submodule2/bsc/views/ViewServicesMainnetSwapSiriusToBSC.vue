@@ -573,6 +573,7 @@ export default {
           disableTimer();
           let signedTransaction = SwapUtils.signTransaction(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
           transactionHash = signedTransaction.hash;
+          console.log(transactionHash);
           callSwapServer(signedTransaction.payload);
         } else {
           err.value = "Wallet password is incorrect";
