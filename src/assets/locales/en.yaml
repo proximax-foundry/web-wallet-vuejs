@@ -361,6 +361,7 @@ delegate:
   noneselected: "None Selected"
   unlinkaccount: "Unlink Account"
   delegatepublic: "Public key of the delegated account"
+  entervalidpk: "Please key in a valid private key"
 namespace:
   namespaceid: "Namespace ID"
   namespacemessage: "You have not created a namespace"

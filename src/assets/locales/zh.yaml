@@ -361,6 +361,7 @@ delegate:
   noneselected: "没有选择"
   unlinkaccount: "取消连接账户"
   delegatepublic: "被委托账号的公钥"
+  entervalidpk: "请输入有效的私钥"
 namespace:
   namespaceid: "命名空间ID"
   namespacemessage: "你没有创建一个命名空间"

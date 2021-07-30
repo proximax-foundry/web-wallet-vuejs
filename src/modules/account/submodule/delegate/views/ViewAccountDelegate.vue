@@ -16,10 +16,10 @@
     <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-7 items-center">
       <div class="text-left w-full relative">
         <div v-cloak v-if="verifyDelegateAcc() && !delegateAcc==''" class="text-xs font-bold mb-1">{{$t('delegate.delegatepublic')}}</div>
-        <div v-cloak v-else class="text-xs font-bold mb-1">Linking Account:</div>
+        <div v-cloak v-else class="text-xs font-bold mb-1">{{$t('delegate.linkingaccount')}}</div>
         <div v-cloak v-if="verifyDelegateAcc() && !delegateAcc==''" id="delegatePublicKey" :copyValue="delegateAcc" copySubject="Delegate Public Key" class="text-xs w-full outline-none bg-gray-100 z-10" >{{delegateAcc}}</div>
-        <div v-else-if="newAcc != ''">New Account</div>
-        <div v-else-if="newAccPK != ''">From Private Key</div>
+        <div v-else-if="newAcc != ''">{{$t('delegate.newaccount')}}</div>
+        <div v-else-if="newAccPK != ''">{{$t('createwallet.fromprivatekey')}}</div>
         <div v-else>{{$t('delegate.noneselected')}}</div>
       </div>
       <font-awesome-icon icon="copy" @click="copy('delegatePublicKey')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mr-2" v-if="verifyDelegateAcc() && !delegateAcc==''"></font-awesome-icon>
@@ -27,7 +27,7 @@
         <SelectAccountTypeModal />
       </div>
     </div>
-    <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet ' + walletState.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+    <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterwalletpassword')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
     <div class="mt-10">
       <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw" v-if="verifyDelegateAcc() && !delegateAcc==''" :disabled="disableLinkBtn">{{$t('delegate.unlinkaccount')}}</button>
       <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw" v-else :disabled="disableLinkBtn">{{$t('delegate.linkaccount')}}</button>
