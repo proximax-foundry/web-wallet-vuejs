@@ -654,7 +654,7 @@ export class SwapUtils {
     return qr.createDataURL();
   }
 
-  static generatePdf = (networkName: string, swapTimestamp: string, siriusAddress: string, swapId: string, transactionHash: string, qrImage: string) => {
+  static generateIncomingPdfCert = (networkName: string, swapTimestamp: string, siriusAddress: string, swapId: string, transactionHash: string, qrImage: string) => {
     const imgData = pdfImg;
     let doc = new jsPDF({
       orientation: 'landscape',
@@ -667,12 +667,49 @@ export class SwapUtils {
 
     let leftCol = 45, secCol = 280, dateCol = 380;
     let dateRow = 255, addressRow = 315, swapIDRow = 385,
-    hashRow = 455, hashValueRow = 485, qrRpw = 515;//, signatureRow = 425, hashValueRow = 485
+    hashRow = 455, qrRpw = 515;//, signatureRow = 425, hashValueRow = 485
 
     doc.text(swapTimestamp, dateCol, dateRow)
 
     doc.text('Sirius Address:', leftCol, addressRow);
     doc.text(siriusAddress, secCol, addressRow );
+
+    doc.text('SwapID:', leftCol, swapIDRow);
+    doc.text(swapId, secCol, swapIDRow);
+
+    doc.text( networkName + ' Transaction Hash:', leftCol, hashRow);
+    doc.text(transactionHash, secCol, hashRow);
+
+    let img = new Image();
+    img.src = qrImage;
+    doc.addImage(img, 'png', leftCol, qrRpw, 120, 120)
+
+    doc.setProperties({ title: 'Swap Certificate'});
+    doc.save('swap_certificate.pdf');
+  }
+
+  static generateoutgoingPdfCert = (networkName: string, swapTimestamp: string, siriusAddress: string, swapId: string, transactionHash: string, qrImage: string, siriusTxHash: string) => {
+    const imgData = pdfImg;
+    let doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'b1'
+    })
+
+    doc.addImage(imgData, 'JPEG', 1, 1, 1000, 707, '', 'NONE')
+    doc.setFontSize(50)
+
+    let leftCol = 45, secCol = 280, dateCol = 380;
+    let dateRow = 255, addressRow = 295, siriusHashRow = 365, swapIDRow = 435,
+    hashRow = 505, qrRpw = 565;//, signatureRow = 425, hashValueRow = 485
+
+    doc.text(swapTimestamp, dateCol, dateRow)
+
+    doc.text('Sirius Address:', leftCol, addressRow);
+    doc.text(siriusAddress, secCol, addressRow );
+
+    doc.text('Sirius Transaction Hash:', leftCol, siriusHashRow);
+    doc.text(siriusTxHash, secCol, siriusHashRow );
 
     doc.text('SwapID:', leftCol, swapIDRow);
     doc.text(swapId, secCol, swapIDRow);

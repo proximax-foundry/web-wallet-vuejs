@@ -383,7 +383,7 @@ export default {
     const swapQr = ref('');
 
     const saveCertificate = () => {
-      SwapUtils.generatePdf('BSC', swapTimestamp.value, siriusAddress.value, swapId.value, transactionHash.value, swapQr.value);
+      SwapUtils.generateIncomingPdfCert('BSC', swapTimestamp.value, siriusAddress.value, swapId.value, transactionHash.value, swapQr.value);
     };
 
     const toast = useToast();
