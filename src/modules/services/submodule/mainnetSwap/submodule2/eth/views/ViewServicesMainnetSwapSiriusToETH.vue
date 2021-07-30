@@ -110,7 +110,7 @@
       <div>
         <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
         <div class="text-sm mb-7">The swap process has already started!</div>
-        <swap-certificate-component networkTerm="ETH" swapType="Out" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :siriusAddress="selectedAccountAddress" :swapQr="swapQr" :swapLink="swapLink" />
+        <swap-certificate-component networkTerm="ETH" swapType="Out" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :siriusAddress="selectedAccountAddress" :swapQr="swapQr" :swapLink="swapLink" :siriusTransactionHash="siriusTransactionHash" :xpxExplorer="xpxExplorerUrl" />
         <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
           <div class="text-center w-full">
             <div class="w-8 h-8 inline-block relative">
@@ -301,6 +301,7 @@ export default {
 
     let swapServerUrl = swapData.swap_XPX_ETH_URL;
     let ethScanUrl = swapData.ETHScanUrl;
+    let xpxExplorerUrl = networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.hashRoute + '/';
     let sinkFundAddress;
     let sinkFeeAddress;
 
@@ -536,7 +537,7 @@ export default {
       }
     });
 
-    let transactionHash;
+    const siriusTransactionHash = ref('');
 
     const swap = () => {
       swapInProgress.value = true;
@@ -563,7 +564,7 @@ export default {
           }
           disableTimer();
           let signedTransaction = SwapUtils.signTransaction(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
-          transactionHash = signedTransaction.hash;
+          siriusTransactionHash.value = signedTransaction.hash;
           callSwapServer(signedTransaction.payload);
         } else {
           err.value = "Wallet password is incorrect";
@@ -636,7 +637,7 @@ export default {
     }
 
     const callTocheckSwapStatus =  async() =>{
-      const response = await fetch(SwapUtils.getOutgoing_SwapCheckByTxID_URL(swapServerUrl, transactionHash));
+      const response = await fetch(SwapUtils.getOutgoing_SwapCheckByTxID_URL(swapServerUrl, siriusTransactionHash.value));
 
       if(response.status==200){
         const res = await response.json();
@@ -672,7 +673,7 @@ export default {
 
     //page 3
     const saveCertificate = () => {
-      SwapUtils.generatePdf('ETH', swapTimestamp.value, selectedAccountAddress.value, swapId.value, certTransactionHash.value, swapQr.value);
+      SwapUtils.generateoutgoingPdfCert('ETH', swapTimestamp.value, selectedAccountAddress.value, swapId.value, certTransactionHash.value, swapQr.value, siriusTransactionHash.value);
     };
 
     return {
@@ -722,7 +723,9 @@ export default {
       selectedAccountAddress,
       isDisabledCancel,
       canCheckStatus,
-      callTocheckSwapStatus
+      callTocheckSwapStatus,
+      siriusTransactionHash,
+      xpxExplorerUrl,
     };
   }
 }
