@@ -57,7 +57,7 @@
       <div class="mt-16">
         <div v-for="(coSignAddress, index) in coSign" :key="index" class="flex">
           <font-awesome-icon icon="trash-alt" class="w-4 h-4 text-gray-500 hover:text-gray-400 cursor-pointer mr-3 mt-3" @click="deleteCoSigAddressInput(index)"></font-awesome-icon>
-          <TextInput placeholder="Cosignatory Account Address or Public Key" errorMessage="Valid Cosignatory Account Address or Public Key is required" :showError="showAddressError[index]" v-model="coSign[index]" icon="key" class="flex-grow" />
+          <TextInput :placeholder="$t('accounts.cosigplaceholder')" :errorMessage="$t('accounts.addressvalidation')" :showError="showAddressError[index]" v-model="coSign[index]" icon="key" class="flex-grow" />
           <AddCosignModal :cosignPublicKeyIndex="index" :selectedAddress="selectedAddresses" />
         </div>
         <div class="text-lg" v-if="!coSign.length">{{$t('accounts.cosigmessage')}}</div>
@@ -79,7 +79,7 @@
           </div>
         </div>
       </div>
-      <PasswordInput placeholder="Enter Wallet Password" errorMessage="Wallet password is required to convert to MultiSig Account" :showError="showPasswdError" v-model="passwd" icon="lock" :disabled="disabledPassword" />
+      <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" v-model="passwd" icon="lock" :disabled="disabledPassword" />
       <div class="mt-10">
         <button type="button" class="default-btn mr-5 focus:outline-none" @click="clear()">{{$t('signin.clear')}}</button>
         <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="convertAccount()" :disabled="disableSend">{{$t('accounts.send')}}</button>

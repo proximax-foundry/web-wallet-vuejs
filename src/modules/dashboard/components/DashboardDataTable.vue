@@ -2,7 +2,7 @@
   <div>
     <div class="px-5 py-2 text-left text-xs text-gray-500">{{hints}}</div>
     <div class="transition ease-in duration-300 w-full rounded-full px-5 py-1 mb-5" :class="borderColor">
-      <input v-model="filterText" type="text" class="w-full outline-none text-sm" placeholder="Search" @click="clickInputText()" @blur="blurInputText()" :title="hints" >
+      <input v-model="filterText" type="text" class="w-full outline-none text-sm" :placeholder="$t('services.search')" @click="clickInputText()" @blur="blurInputText()" :title="hints" >
     </div>
     <DataTable
       :value="transactions"

@@ -122,7 +122,7 @@
           <div class="grid grid-cols-1 md:grid-cols-7">
             <div class="col-span-1 md:col-span-4 px-5">
               <div class="rounded-2xl bg-gray-100 py-2 px-5 my-5 text-left">
-                <b>T{{$t('vote.title')}}:</b><br>
+                <b>{{$t('vote.title')}}:</b><br>
                 {{ pollTitle }}
               </div>
               <div class="flex justify-between py-2 px-5 rounded-2xl bg-gray-100 mb-4 items-left">
