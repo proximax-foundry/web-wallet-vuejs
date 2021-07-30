@@ -750,6 +750,14 @@ export class SwapUtils {
   static checkSwapPrice = (baseUrl: string): string => {
     return `${baseUrl}/latest`;
   }
+
+  static getServiceInfoURL(baseUrl: string){
+    return `${baseUrl}/service-info`;
+  }
+
+  static getOutgoingSwapServiceInfo = (url: string): Promise<any>=> {
+    return fetch(url).then((res) => res.json()).then((data) => { return data });
+  }
 }
 
 

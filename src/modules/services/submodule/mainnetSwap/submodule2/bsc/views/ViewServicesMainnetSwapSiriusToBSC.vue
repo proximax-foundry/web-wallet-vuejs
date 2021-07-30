@@ -302,24 +302,51 @@ export default {
 
     let swapServerUrl = swapData.swap_XPX_BSC_URL;
     let bscScanUrl = swapData.BSCScanUrl;
-    let sinkFundAddress = swapData.sinkFundAddress;
-    let sinkFeeAddress = swapData.sinkFeeAddress;
+    let sinkFundAddress;
+    let sinkFeeAddress;
 
-    let transferTx = transferBuilder.mosaics([XpxAsset])
+    const updateSinkAddress = async()=>{
+      try{
+        const swapServiceInfoURL = SwapUtils.getServiceInfoURL(swapServerUrl);
+
+        const serviceInfo = await SwapUtils.getOutgoingSwapServiceInfo(swapServiceInfoURL);
+
+        sinkFundAddress = serviceInfo.siriusInfo.sinkingFundAddress;
+        sinkFeeAddress = serviceInfo.siriusInfo.sinkingFeeAddress;
+
+        buildTransaction();
+      }
+      catch(error){
+        addErrorToast("Service unavailable", "Unable to get sink address");
+        redirectToSelection();
+      }
+    }
+
+    updateSinkAddress();
+
+    let aggreateCompleteTransaction;
+    let transferTx;
+    let feetransferTx;
+
+    const buildTransaction = ()=>{
+      transferTx = transferBuilder.mosaics([XpxAsset])
                         .recipient(Helper.createAddress(sinkFundAddress))
                         .message(Helper.createPlainMessage(JSON.stringify(message1)))
                         .build();
-    let feetransferTx = transferBuilder.mosaics([XpxAsset])
+      feetransferTx = transferBuilder.mosaics([XpxAsset])
                         .recipient(Helper.createAddress(sinkFeeAddress))
                         .message(Helper.createPlainMessage(JSON.stringify(message2)))
                         .build();
-    let aggreateCompleteTransaction = aggregateBuilder
+      aggreateCompleteTransaction = aggregateBuilder
                         .innerTransactions(Helper.createInnerTransaction([transferTx, feetransferTx], "0".repeat(64)))
                         .build();
 
-    let txFee = ref(Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(), 6));
+      txFee.value = Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(), 6);
+    }
+
+    let txFee = ref(0);
     const txFeeDisplay = computed(()=>{
-      return Helper.toCurrencyFormat(txFee.value, 6);
+        return Helper.toCurrencyFormat(txFee.value, 6);
     });
 
     const rebuildTranction = ()=>{
@@ -540,13 +567,7 @@ export default {
           updateRemoteAddress();
           changeGasStrategy(bscGasStrategy.value);
           if((amount.value + gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
-            toast.add({
-              severity:'error',
-              summary: 'Insufficient amount',
-              detail: 'Insufficient amount to perform swap',
-              group: 'br',
-              life: 5000
-            });
+            addErrorToast('Insufficient amount', 'Insufficient amount to perform swap', 5000);
             return;
           }
           disableTimer();
@@ -591,12 +612,7 @@ export default {
         }
         else if(response.status==400){
           const res = await response.json();
-          toast.add({
-            severity:'error',
-            summary: 'Swap operation failed',
-            detail: res.data.message,
-            group: 'br'
-          });
+          addErrorToast('Swap operation failed', res.data.message);
           swapInProgress.value = false;
           isDisabledCancel.value = false;
         }
@@ -616,23 +632,13 @@ export default {
           isDisabledCancel.value = false;
         }
         else if(response.status==504){
-          toast.add({
-            severity:'error',
-            summary: 'Swap request timed-out',
-            detail: 'Please check the status again',
-            group: 'br'
-          });
+          addErrorToast('Swap request timed-out', 'Please check the status again');
           //swapInProgress.value = false;
           isDisabledCancel.value = false;
           canCheckStatus.value = true;
         }
       } catch (error) {
-          toast.add({
-            severity:'error',
-            summary: 'Network error',
-            detail: 'Swap Server not found',
-            group: 'br'
-          });
+        addErrorToast('Network error', 'Swap Server not found');
         swapInProgress.value = false;
         isDisabledCancel.value = false;
       }
@@ -650,13 +656,18 @@ export default {
         currentPage.value = 3;
       }
       else{
-        toast.add({
-          severity:'error',
-          summary: 'Swap not found',
-          detail: 'Swap not found for the current transaction ID',
-          group: 'br'
-        });
+        addErrorToast("Swap not found", "Swap not found for the current transaction ID");
       }
+    }
+
+    const addErrorToast = (summary, detail, life=undefined)=>{
+      toast.add({
+          severity:'error',
+          summary: summary,
+          detail: detail,
+          group: 'br',
+          life: life
+      });
     }
 
     // cert component
