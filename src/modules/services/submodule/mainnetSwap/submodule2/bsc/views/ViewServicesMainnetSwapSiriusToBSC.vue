@@ -45,6 +45,7 @@
       </div>
     </div>
     <div v-if="currentPage==2">
+      <form>
       <div class="text-lg my-7 font-bold">Transaction Details</div>
       <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
       <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left">
@@ -105,12 +106,13 @@
         <button type="button" class="default-btn focus:outline-none disabled:opacity-50 mt-2" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?'Swap in progress. Please wait...':'Yes, Swap' }}</button>
         <button class="default-btn focus:outline-none disabled:opacity-50 mt-2" v-if="canCheckStatus" @click="callTocheckSwapStatus">Check Swap Status</button>
       </div>
+      </form>
     </div>
     <div v-if="currentPage==3">
       <div>
         <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
         <div class="text-sm mb-7">The swap process has already started!</div>
-        <swap-certificate-component networkTerm="BSC" swapType="Out" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :siriusAddress="selectedAccountAddress" :swapQr="swapQr" :swapLink="swapLink" />
+        <swap-certificate-component networkTerm="BSC" swapType="Out" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :siriusAddress="selectedAccountAddress" :swapQr="swapQr" :swapLink="swapLink" :siriusTransactionHash="siriusTransactionHash" :xpxExplorer="xpxExplorerUrl" />
         <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
           <div class="text-center w-full">
             <div class="w-8 h-8 inline-block relative">
@@ -302,6 +304,7 @@ export default {
 
     let swapServerUrl = swapData.swap_XPX_BSC_URL;
     let bscScanUrl = swapData.BSCScanUrl;
+    let xpxExplorerUrl = networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.hashRoute + '/';
     let sinkFundAddress;
     let sinkFeeAddress;
 
@@ -545,7 +548,7 @@ export default {
       }
     });
 
-    let transactionHash;
+    const siriusTransactionHash = ref('');
 
     const swap = () => {
       swapInProgress.value = true;
@@ -572,8 +575,7 @@ export default {
           }
           disableTimer();
           let signedTransaction = SwapUtils.signTransaction(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
-          transactionHash = signedTransaction.hash;
-          console.log(transactionHash);
+          siriusTransactionHash.value = signedTransaction.hash;
           callSwapServer(signedTransaction.payload);
         } else {
           err.value = "Wallet password is incorrect";
@@ -646,7 +648,7 @@ export default {
     }
 
     const callTocheckSwapStatus =  async() =>{
-      const response = await fetch(SwapUtils.getOutgoing_SwapCheckByTxID_URL(swapServerUrl, transactionHash) );
+      const response = await fetch(SwapUtils.getOutgoing_SwapCheckByTxID_URL(swapServerUrl, siriusTransactionHash.value));
 
       if(response.status==200){
         const res = await response.json();
@@ -682,7 +684,7 @@ export default {
 
     //page 3
     const saveCertificate = () => {
-      SwapUtils.generatePdf('BSC', swapTimestamp.value, selectedAccountAddress.value, swapId.value, certTransactionHash.value, swapQr.value);
+      SwapUtils.generateoutgoingPdfCert('BSC', swapTimestamp.value, selectedAccountAddress.value, swapId.value, certTransactionHash.value, swapQr.value, siriusTransactionHash.value);
     };
 
     return {
@@ -732,7 +734,9 @@ export default {
       selectedAccountAddress,
       isDisabledCancel,
       canCheckStatus,
-      callTocheckSwapStatus
+      callTocheckSwapStatus,
+      siriusTransactionHash,
+      xpxExplorerUrl,
     };
   }
 }
