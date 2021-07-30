@@ -116,7 +116,7 @@ accounts:
   convertmultisig: "转换为多重签名账号"
   editmultisig: "Edit Multisig Account"
   cosignerinwallet: "Cosigner in this wallet"
-  cosignaturyaccount: "Cosignatury for this account"
+  cosignaturyaccount: "Cosignaturies for this account"
   removing: "Removing"
   restore: "Restore"
   cosigwarning1: "This account no longer belongs to this wallet"
