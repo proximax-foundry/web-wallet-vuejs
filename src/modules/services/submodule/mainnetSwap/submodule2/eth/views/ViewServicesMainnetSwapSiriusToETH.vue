@@ -32,9 +32,9 @@
       <p class="text-tsm my-5 text-gray-400">This is a list of your Sirius accounts available in this wallet.</p>
       <div class="text-lg my-7 font-bold">Please select a Sirius account</div>
       <div v-for="acc of allAvailableAccounts" :key="acc.name">
-        <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left cursor-pointer hover:bg-blue-100 transition" @click="(!acc.isMultisig || includeMultisig) && selectAccount(acc.name, acc.address)">
-          <div class="text-xs sm:text-tsm ml-3 text-gray-700">
-            <div class="mb-1 sm:mb-0"><b>Account Name:</b> {{ acc.name }}</div>
+        <div class="mb-2 flex justify-between rounded-2xl p-3 text-left transition" :class="`${(!acc.isMultisig|| includeMultisig)?'cursor-pointer hover:bg-blue-100 bg-gray-100':'bg-gray-50'}`" @click="(!acc.isMultisig || includeMultisig) && selectAccount(acc.name, acc.address)">
+          <div class="text-xs sm:text-tsm ml-3" :class="`${(!acc.isMultisig || includeMultisig)?'text-gray-700':'text-gray-200'}`">
+            <div class="mb-1 sm:mb-0"><b>Account Name:</b> {{ acc.name }} <div v-if="acc.isMultisig" class="inline-block badge rounded bg-blue-200 p-1 text-white text-txs ml-2">Multisig</div></div>
             <div class="mb-1 sm:mb-0"><b>Sirius Address:</b> <div class="block mt-1 sm:inline-block sm:mt-0">{{ acc.address }}</div></div>
             <div class="mb-1 sm:mb-0"><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ acc.balanceDisplay }} XPX</div></div>
           </div>
@@ -196,7 +196,7 @@ export default {
 
     const currentPage = ref(1);
     // page 1
-    const includeMultisig = false;
+    const includeMultisig = ref(false);
 
     const selectedAccountName = ref("");
     const selectedAccountAddress = ref("");
@@ -228,7 +228,7 @@ export default {
           };  
         });
 
-      if(includeMultisig){
+      if(includeMultisig.value){
         let otherAccounts = walletState.currentLoggedInWallet.others.filter((acc)=> acc.type === "MULTISIG").map(
         (acc)=>{ 
           return { 
@@ -665,6 +665,7 @@ export default {
     };
 
     return {
+      includeMultisig,
       timerSecondsDisplay,
       timerMinutes,
       currentPage,
