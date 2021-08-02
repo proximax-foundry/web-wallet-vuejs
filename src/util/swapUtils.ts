@@ -796,13 +796,42 @@ export class SwapUtils {
     return fetch(url).then((res) => res.json()).then((data) => { return data });
   }
 
-  static fetchETHServiceInfo = (baseUrl: string) :Promise<any> => {
-    return fetch(`${baseUrl}/expx/service-info`).then(res => res.json());
+  // static fetchETHServiceInfo = (baseUrl: string) :Promise<any> => {
+  //   return fetch(`${baseUrl}/expx/service-info`).then(res => res.json());
+  // }
+
+  // static fetchBSCServiceInfo = (baseUrl: string) :Promise<any> => {
+  //   return fetch(`${baseUrl}/bxpx/service-info`).then(res => res.json());
+  // }
+
+  static fetchETHServiceInfo = async (baseUrl: string) :Promise<paramResponse> => {
+    const response = await fetch(`${baseUrl}/expx/service-info`);
+    let data = '';
+    if(response.status == 200){
+      data = await response.json();
+    }
+    let returnResponse:paramResponse = {
+      status: response.status,
+      data: data
+    }
+    return returnResponse;
   }
 
-  static fetchBSCServiceInfo = (baseUrl: string) :Promise<any> => {
-    return fetch(`${baseUrl}/bxpx/service-info`).then(res => res.json());
+  static fetchBSCServiceInfo = async (baseUrl: string) :Promise<paramResponse> => {
+    const response = await fetch(`${baseUrl}/bxpx/service-info`);
+    let data = '';
+    if(response.status == 200){
+      data = await response.json();
+    }
+    let returnResponse:paramResponse = {
+      status: response.status,
+      data: data
+    }
+    return returnResponse;
   }
 }
 
-
+interface paramResponse {
+  status: number,
+  data: any
+}
