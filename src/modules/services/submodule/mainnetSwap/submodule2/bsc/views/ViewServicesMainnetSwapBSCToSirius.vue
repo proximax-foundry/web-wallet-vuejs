@@ -146,13 +146,22 @@
         <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step7?'text-gray-700':'text-gray-300'">Step 3: Initiate swap</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSwapService?'border-red-primary':'border-blue-primary'">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidSwapService"></font-awesome-icon>
+                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step7?'text-gray-700':'text-gray-300'">Message sent to the swap service, swap initiated...</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step7?'text-gray-700':'text-gray-300'">
+            {{ isInvalidSwapService?'Unable to send message to swap service':'Message sent to the swap service, swap initiated...' }}
+            <div v-if="isInvalidSwapService && swapServerErrIndex <= 3" class="mt-5">
+              <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg disabled:opacity-50" @click="afterSigned" :disabled="disableRetrySwap">{{ retrySwapButtonText }}</button>
+            </div>
+            <div v-if="swapServerErrIndex>3" class="mt-5 text-tsm sm:text-sm">
+              Sorry. Please save the <b>transaction hash</b>, the <b>signature</b> and contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
+            </div>
+          </div>
         </div>
       </div>
       <div class="mt-10">
@@ -243,6 +252,9 @@ export default {
     const currentNetwork = ref('');
     const isInvalidConfirmedMeta = ref(false);
     const isInvalidSignedMeta = ref(false);
+    const isInvalidSwapService = ref(false);
+    const disableRetrySwap = ref(false);
+    const retrySwapButtonText = ref('Retry');
     const bscScanUrl = swapData.BSCScanUrl;
     const swapServerUrl = swapData.swap_BSC_XPX_URL;
 
@@ -480,6 +492,8 @@ export default {
       }, 2000);
     };
 
+    const swapServiceParam = ref('');
+
     const getSigned = async () => {
       try{
         const messageSignature = await signer.signMessage(siriusAddress.value);
@@ -492,34 +506,51 @@ export default {
             txnHash: validationHash.value
           }
         };
+        swapServiceParam.value = data;
         isInvalidSignedMeta.value = false;
-        await afterSigned(data);
+        await afterSigned();
       }catch(err){
         isInvalidSignedMeta.value = true;
       }
     };
 
-    const afterSigned = async (data) => {
+    const swapServerErrIndex = ref(0);
+
+    const afterSigned = async () => {
       step6.value = true;
+      step7.value = true;
+      retrySwapButtonText.value = 'Initiating swap...';
+      disableRetrySwap.value = true;
+      let stringifyData = JSON.stringify(swapServiceParam.value);
+      try {
+        const response = await fetch(swapServerUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: stringifyData, // body data type must match "Content-Type" header
+        });
 
-      let stringifyData = JSON.stringify(data);
-
-      const response = await fetch(swapServerUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: stringifyData, // body data type must match "Content-Type" header
-      });
-
-      if(response.status == 200){
-        const data = await response.json();
-        step7.value = true;
-        transactionHash.value = data.ethTransactionId;
-        swapTimestamp.value = data.timestamp;
-        swapId.value = data.ctxId;
-        swapQr.value = SwapUtils.generateQRCode(validationLink.value);
-        setTimeout( ()=> isDisabledValidate.value = false, 1000);
+        if(response.status == 200){
+          const data = await response.json();
+          isInvalidSwapService.value = false;
+          transactionHash.value = data.ethTransactionId;
+          swapTimestamp.value = data.timestamp;
+          swapId.value = data.ctxId;
+          swapQr.value = SwapUtils.generateQRCode(validationLink.value);
+          setTimeout( ()=> isDisabledValidate.value = false, 1000);
+          swapServerErrIndex.value = 0;
+        }else{
+          isInvalidSwapService.value = true;
+          ++swapServerErrIndex.value;
+          retrySwapButtonText.value = 'Retry';
+          disableRetrySwap.value = false;
+        }
+      } catch (error) {
+        isInvalidSwapService.value = true;
+        ++swapServerErrIndex.value;
+        retrySwapButtonText.value = 'Retry';
+        disableRetrySwap.value = false;
       }
     };
 
@@ -567,10 +598,15 @@ export default {
       saveCertificate,
       isInvalidConfirmedMeta,
       isInvalidSignedMeta,
+      isInvalidSwapService,
       getValidation,
       getSigned,
       defaultXPXTxFee,
       serviceErr,
+      swapServerErrIndex,
+      afterSigned,
+      disableRetrySwap,
+      retrySwapButtonText,
     };
   },
 }
