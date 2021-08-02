@@ -30,6 +30,7 @@
     </div>
     <div v-if="currentPage==1">
       <div class="text-lg my-7 font-bold">Transaction Details</div>
+      <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
       <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
       <p class="font-bold text-tsm text-left mb-1">From: Metamask Address</p>
       <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left" v-if="isInstallMetamask">
@@ -217,10 +218,19 @@ export default {
     const tokenAddress = ref('');
 
     (async() => {
-      const data = await SwapUtils.fetchBSCServiceInfo(swapData.swap_SERVICE_URL);
-      tokenAddress.value = data.bscInfo.scAddress;
-      custodian.value = data.bscInfo.sinkAddress;
-      defaultXPXTxFee.value = parseInt(data.siriusInfo.feeAmount);
+      try {
+        const fetchService = await SwapUtils.fetchBSCServiceInfo(swapData.swap_SERVICE_URL);
+        if(fetchService.status==200){
+          tokenAddress.value = fetchService.data.bscInfo.scAddress;
+          custodian.value = fetchService.data.bscInfo.sinkAddress;
+          defaultXPXTxFee.value = parseInt(fetchService.data.siriusInfo.feeAmount);
+          serviceErr.value = '';
+        }else{
+          serviceErr.value = 'Swapping service is temporary not available. Please try again later';
+        }
+      } catch (error) {
+        serviceErr.value = 'Swapping service is temporary not available. Please try again later';
+      }
     })()
 
     /* metamask integration */
@@ -401,6 +411,7 @@ export default {
     const disableAmount = ref(false);
     const siriusAddress = ref('');
     const err = ref('');
+    const serviceErr = ref('');
     const isDisabledSwap = computed(() =>
       // verify it has been connected to metamask too
       !(amount.value > 0 && siriusAddress.value != '' && !err.value && (balance.value >= amount.value) && (amount.value > defaultXPXTxFee.value))
@@ -559,6 +570,7 @@ export default {
       getValidation,
       getSigned,
       defaultXPXTxFee,
+      serviceErr,
     };
   },
 }
