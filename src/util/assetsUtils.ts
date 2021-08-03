@@ -1,6 +1,7 @@
 import {
   Account,
   Address,
+  AliasActionType,
   Deadline,
   EncryptedMessage,
   // NetworkCurrencyMosaic,
@@ -49,7 +50,7 @@ export class AssetsUtils {
   static mosaicDefinationTransaction = (networkType: NetworkType, generationHash: string, owner:PublicAccount, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number):MosaicDefinitionTransaction => {
     const buildTransactions = new BuildTransactions(networkType, generationHash);
     // owner: PublicAccount, supplyMutable: boolean, transferable: boolean, divisibility: number, duration?: UInt64
-    return buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(duration));
+    return buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(AssetsUtils.calculateDuration(duration)));
   }
 
   static getMosaicDefinitionTransactionFee = (networkType: NetworkType, generationHash: string, owner:PublicAccount, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number) :number => {
@@ -64,6 +65,19 @@ export class AssetsUtils {
     const mosaicSupplyChangeTransaction = buildTransactions.buildMosaicSupplyChange(mosaicId, supplyChangeType, delta);
     return mosaicSupplyChangeTransaction.maxFee.compact();
   };
+
+  static getLinkAssetToNamespaceTransactionFee = (networkType: NetworkType, generationHash: string, mosaicId: MosaicId, namespaceId: NamespaceId, linkType: string) => {
+    const buildTransactions = new BuildTransactions(networkType, generationHash);
+    let aliasActionType: AliasActionType;
+    aliasActionType = (linkType=='link')?AliasActionType.Link:AliasActionType.Unlink;
+    const linkAssetToNamespaceTransaction = buildTransactions.assetAlias( aliasActionType, namespaceId, mosaicId);
+    return linkAssetToNamespaceTransaction.maxFee.compact();
+  };
+
+  static calculateDuration = (durationInDay: number): number =>{
+    // 5760 = 4 * 60 * 24 -> 15sec per block
+    return durationInDay * 5760;
+  }
 
   static getOwnedAssets = (address: string) => {
     const assetSelection: Array<assetSelectionInterface> = [];
