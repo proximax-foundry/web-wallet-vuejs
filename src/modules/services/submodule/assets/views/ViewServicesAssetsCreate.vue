@@ -267,8 +267,8 @@ export default {
 
     const clearInput = () => {
       walletPassword.value = '';
-      divisibility.value = 0;
-      supply.value = 0;
+      divisibility.value = '0';
+      supply.value = '0';
       duration.value = '1';
       durationOption.value = 'month';
       disabledDuration.value = '';
@@ -361,6 +361,8 @@ export default {
     });
 
     const createMosaic = () => {
+      AssetsUtils.createAsset( selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value);
+      clearInput();
       // to be replaced by new method to create new asset
       // let createStatus = mosaicTransaction(divisibility.value, supply.value, duration.value, durationOption.value, isMutable.value, isTransferable.value, walletPassword.value, selectedAccName.value, appStore, siriusStore);
       // if(!createStatus){
