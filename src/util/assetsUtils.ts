@@ -24,7 +24,9 @@ import {
   Transaction,
   TransactionType,
   AggregateTransaction,
-  CosignatureTransaction
+  CosignatureTransaction,
+  NamespaceId,
+  MosaicDefinitionTransaction
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { walletState } from "../state/walletState";
@@ -35,7 +37,6 @@ import { WalletUtils } from "../util/walletUtils";
 import { ChainAPICall } from "../models/REST/chainAPICall";
 import { BuildTransactions } from "../util/buildTransactions";
 import { Helper } from "./typeHelper";
-import { AssetSupplyType } from "nem-library";
 
 interface assetSelectionInterface {
   label: string,
@@ -45,11 +46,14 @@ interface assetSelectionInterface {
 
 export class AssetsUtils {
 
-  static getMosaicDefinitionTransactionFee =(networkType: NetworkType, generationHash: string, owner:PublicAccount, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number) :number => {
-
+  static mosaicDefinationTransaction = (networkType: NetworkType, generationHash: string, owner:PublicAccount, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number):MosaicDefinitionTransaction => {
     const buildTransactions = new BuildTransactions(networkType, generationHash);
     // owner: PublicAccount, supplyMutable: boolean, transferable: boolean, divisibility: number, duration?: UInt64
-    const registerMosaicTransaction = buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(duration));
+    return buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(duration));
+  }
+
+  static getMosaicDefinitionTransactionFee = (networkType: NetworkType, generationHash: string, owner:PublicAccount, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number) :number => {
+    const registerMosaicTransaction = AssetsUtils.mosaicDefinationTransaction(networkType, generationHash, owner, supplyMutable, transferable, divisibility, duration);
     return registerMosaicTransaction.maxFee.compact();
   };
 
@@ -98,6 +102,20 @@ export class AssetsUtils {
     }else{
       return { list: [] };
     }
+  }
+
+  static createAsset = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, owner:PublicAccount, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number) => {
+    let mosaicDefinationTransaction = AssetsUtils.mosaicDefinationTransaction(networkType, generationHash, owner, supplyMutable, transferable, divisibility, duration);
+    const accAddress = Address.createFromRawAddress(selectedAddress);
+    const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
+    const encryptedPassword = WalletUtils.createPassword(walletPassword);
+    let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
+    const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+    let signedTx = account.sign(mosaicDefinationTransaction, networkState.currentNetworkProfile.generationHash);
+    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+    let chainAPICall = new ChainAPICall(apiEndpoint);
+    chainAPICall.transactionAPI.announce(signedTx);
+    return signedTx.hash;
   }
 }
 
