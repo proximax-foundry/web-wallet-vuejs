@@ -72,7 +72,7 @@
                   <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
                   <div class="inline-block self-center text-left">
                     <div>LockFund: {{ lockFundCurrency }} {{ currencyName }}</div>
-                    <div>Unconfirmed/Recommended Fee: {{ lockFundTxFee }} {{ currencyName }}</div>
+                    <div>Unconfirmed/Recommended Fee: {{ lockFundTxFeeCurrency }} {{ currencyName }}</div>
                   </div>
                 </div>
               </div>
@@ -173,9 +173,10 @@ export default {
     });
 
     const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
-    const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
+    const lockFundCurrency = computed(()=> Helper.amountFormatterSimple(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
 
     const lockFundTxFee = ref(0.0445);
+    const lockFundTxFeeCurrency = ref('0.044500');
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
@@ -350,7 +351,7 @@ export default {
       rentalFee,
       lockFundCurrency,
       currencyName,
-      lockFundTxFee,
+      lockFundTxFeeCurrency,
       lockFundTotalFee,
       selectNamespace,
       namespaceOption,
