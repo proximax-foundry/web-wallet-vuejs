@@ -231,7 +231,7 @@ export default {
     const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
     const moreThanOneAccount = computed(()=> (walletState.currentLoggedInWallet.accounts.length > 1)?true:false);
 
-    const defaultDuration = 10 * 365;
+    const defaultDuration = ref(10 * 365);
 
     const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
     const transactionFee = ref( Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility));
