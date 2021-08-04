@@ -35,7 +35,6 @@ export default {
     const currentMenu = ref('');
     const showMenu = ref([]);
     
-    
     WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
     // get num of accounts
     const totalAcc = [].concat(walletState.currentLoggedInWallet.accounts,walletState.currentLoggedInWallet.others)
@@ -69,22 +68,20 @@ export default {
       toast.add({severity:'success', summary: 'Notification', detail: 'Account has been removed successfully', group: 'br', life: 5000});
     }
 
-    const accounts = computed(
-      () => {
-        if(walletState.currentLoggedInWallet.accounts){
+    const accounts = computed(() => {
+        if(walletState.currentLoggedInWallet){
           if(walletState.currentLoggedInWallet.others){
             const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
             return concatOther;
-          } else{
+          } else {
             return walletState.currentLoggedInWallet.accounts;
           }
-        } else{
-          return null;
+        } else {
+          return walletState.currentLoggedInWallet;
         }
       }
     );
     
-
     // emitted from App.vue when click on any part of the page
     emitter.on('PAGE_CLICK', () => {
       if(currentMenu.value === ''){
