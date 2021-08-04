@@ -244,6 +244,7 @@ export default {
 
     /* metamask integration */
     let bscChainId = swapData.BSCChainId;
+    console.log(bscChainId)
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
@@ -326,13 +327,13 @@ export default {
 
     function verifyChain(chainId, updateTokenBol = false){
       currentNetwork.value = chainId;
-      if(bscChainId.find(bscChain => bscChain === parseInt(chainId)) == undefined){
-        err.value = 'Please select BSC Testnet Network on Metamark to swap BSC';
-      }else{
+      if(bscChainId === parseInt(chainId)){
         err.value = '';
         if(updateTokenBol){
           updateToken();
         }
+      }else{
+        err.value = 'Please select BSC Testnet Network on Metamark to swap BSC';
       }
     }
 

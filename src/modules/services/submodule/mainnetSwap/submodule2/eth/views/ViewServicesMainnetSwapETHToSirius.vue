@@ -244,6 +244,8 @@ export default {
 
     /* metamask integration */
     let ethereumChainId = swapData.ETHChainId;
+    let ethereumNetworkName = swapData.ETHNetworkName;
+    console.log(ethereumChainId)
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
@@ -326,13 +328,13 @@ export default {
 
     function verifyChain(chainId, updateTokenBol = false){
       currentNetwork.value = chainId;
-      if(ethereumChainId.find(ethChain => ethChain === parseInt(chainId)) == undefined){
-        err.value = 'Please select Ropsten Test Network on Metamark to swap ETH';
-      }else{
+      if(ethereumChainId === parseInt(chainId)){
         err.value = '';
         if(updateTokenBol){
           updateToken();
         }
+      }else{
+        err.value = 'Please select ' + ethereumNetworkName + ' Test Network on Metamark to swap ETH';
       }
     }
 

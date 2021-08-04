@@ -32,7 +32,7 @@
       }
     },
     "Sirius Testnet 1": {
-      "version": "0.0.8",
+      "version": "0.0.10",
       "apiNodes":[
           "bctestnet1.brimstone.xpxsirius.io",
           "bctestnet2.brimstone.xpxsirius.io"
