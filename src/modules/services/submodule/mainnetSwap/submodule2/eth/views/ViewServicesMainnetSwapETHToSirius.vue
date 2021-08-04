@@ -243,7 +243,7 @@ export default {
     })()
 
     /* metamask integration */
-    let ethereumChainId = [5];
+    let ethereumChainId = swapData.ETHChainId;
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
@@ -327,7 +327,7 @@ export default {
     function verifyChain(chainId, updateTokenBol = false){
       currentNetwork.value = chainId;
       if(ethereumChainId.find(ethChain => ethChain === parseInt(chainId)) == undefined){
-        err.value = 'Please select Goerli Test Network on Metamark to swap ETH';
+        err.value = 'Please select Ropsten Test Network on Metamark to swap ETH';
       }else{
         err.value = '';
         if(updateTokenBol){
