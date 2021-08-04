@@ -99,7 +99,7 @@
         </fieldset>
       </form>
     </div>
-    <div class="px-10 text-left text-tsm mt-5 md:mt-0">
+    <div class="md:col-span-1 px-10 text-left mt-10 text-tsm md:text-tsm md:mt-5">
       <div class="mb-2">
         <i>{{$t('services.maximumdivisibility')}} 6.</i><br>
         <b>{{$t('services.example')}}: 0.000000</b>
@@ -241,8 +241,8 @@ export default {
     const defaultDuration = ref(10 * 365);
 
     const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
-    const transactionFee = ref( Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility));
-    const transactionFeeExact = ref(Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility));
+    const transactionFee = ref( Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility));
+    const transactionFeeExact = ref(Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility));
 
     const getMultiSigCosigner = computed(() => {
       return AssetsUtils.getCosignerList(selectedAccAdd.value);
@@ -277,23 +277,23 @@ export default {
     });
 
     watch(divisibility, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, n, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, n, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, n, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, n, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
     watch(isMutable, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, n, isTransferable.value, divisibility.value, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, n, isTransferable.value, divisibility.value, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, n, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, n, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
     watch(isTransferable, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, n, divisibility.value, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, n, divisibility.value, defaultDuration.value,1 ), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, n, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, n, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
     watch(supply, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value,1 ), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
     watch(durationOption, () => {
