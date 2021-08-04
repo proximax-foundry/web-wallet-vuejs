@@ -30,6 +30,7 @@
     </div>
     <div v-if="currentPage==1">
       <div class="text-lg my-7 font-bold">Transaction Details</div>
+      <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
       <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
       <p class="font-bold text-tsm text-left mb-1">From: Metamask Address</p>
       <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left" v-if="isInstallMetamask">
@@ -145,13 +146,22 @@
         <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step7?'text-gray-700':'text-gray-300'">Step 3: Initiate swap</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSwapService?'border-red-primary':'border-blue-primary'">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidSwapService"></font-awesome-icon>
+                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step7?'text-gray-700':'text-gray-300'">Message sent to the swap service, swap initiated...</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step7?'text-gray-700':'text-gray-300'">
+            {{ isInvalidSwapService?'Unable to send message to swap service':'Message sent to the swap service, swap initiated...' }}
+            <div v-if="isInvalidSwapService && swapServerErrIndex <= 3" class="mt-5">
+              <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg disabled:opacity-50" @click="afterSigned" :disabled="disableRetrySwap">{{ retrySwapButtonText }}</button>
+            </div>
+            <div v-if="swapServerErrIndex>3" class="mt-5 text-tsm sm:text-sm">
+              Sorry. Please save the <b>transaction hash</b>, the <b>signature</b> and contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
+            </div>
+          </div>
         </div>
       </div>
       <div class="mt-10">
@@ -212,7 +222,25 @@ export default {
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
 
-    const defaultXPXTxFee = ref(50);
+    const defaultXPXTxFee = ref(0);
+    const custodian = ref('');
+    const tokenAddress = ref('');
+
+    (async() => {
+      try {
+        const fetchService = await SwapUtils.fetchBSCServiceInfo(swapData.swap_SERVICE_URL);
+        if(fetchService.status==200){
+          tokenAddress.value = fetchService.data.bscInfo.scAddress;
+          custodian.value = fetchService.data.bscInfo.sinkAddress;
+          defaultXPXTxFee.value = parseInt(fetchService.data.siriusInfo.feeAmount);
+          serviceErr.value = '';
+        }else{
+          serviceErr.value = 'Swapping service is temporary not available. Please try again later';
+        }
+      } catch (error) {
+        serviceErr.value = 'Swapping service is temporary not available. Please try again later';
+      }
+    })()
 
     /* metamask integration */
     let bscChainId = [97];
@@ -221,13 +249,14 @@ export default {
     const currentAccount = ref(null);
     const balance = ref(0);
     const coinBalance = ref(0);
-    const tokenAddress = swapData.BXPXContractAddress;
-    const custodian = swapData.sinkFundBxpxSwap;
-    const bscScanUrl = swapData.BSCScanUrl;
-    const swapServerUrl = swapData.swap_BSC_XPX_URL;
     const currentNetwork = ref('');
     const isInvalidConfirmedMeta = ref(false);
     const isInvalidSignedMeta = ref(false);
+    const isInvalidSwapService = ref(false);
+    const disableRetrySwap = ref(false);
+    const retrySwapButtonText = ref('Retry');
+    const bscScanUrl = swapData.BSCScanUrl;
+    const swapServerUrl = swapData.swap_BSC_XPX_URL;
 
     let provider;
     let signer;
@@ -298,7 +327,7 @@ export default {
     function verifyChain(chainId, updateTokenBol = false){
       currentNetwork.value = chainId;
       if(bscChainId.find(bscChain => bscChain === parseInt(chainId)) == undefined){
-        err.value = 'Please select BSC testnet network on Metamark to swap BSC';
+        err.value = 'Please select BSC Testnet Network on Metamark to swap BSC';
       }else{
         err.value = '';
         if(updateTokenBol){
@@ -336,22 +365,24 @@ export default {
       });
     };
 
-    watch([currentNetwork, currentAccount], ([newNetwork, newCurrentAccount]) => {
-      (async () => {
-        try{
-          provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-          signer = provider.getSigner();
-          const contract = new ethers.Contract(tokenAddress, abi, signer);
-          const tokenBalance = await contract.balanceOf(newCurrentAccount);
-          balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
-        }catch(err) {
-          balance.value = 0;
-        }
-      })();
+    watch([currentNetwork, currentAccount, tokenAddress], ([newNetwork, newCurrentAccount, newTokenAddress]) => {
+      if(newTokenAddress != undefined){
+        (async () => {
+          try{
+            provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+            signer = provider.getSigner();
+            const contract = new ethers.Contract(tokenAddress.value, abi, signer);
+            const tokenBalance = await contract.balanceOf(newCurrentAccount);
+            balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
+          }catch(err) {
+            balance.value = 0;
+          }
+        })();
+      }
     });
 
     watch(balance, (n) => {
-      if(n<=50){
+      if(n <= defaultXPXTxFee.value){
         showAmountErr.value = true;
       }else{
         showAmountErr.value = false;
@@ -374,7 +405,7 @@ export default {
     const swapQr = ref('');
 
     const saveCertificate = () => {
-      SwapUtils.generatePdf('BSC', swapTimestamp.value, siriusAddress.value, swapId.value, transactionHash.value, swapQr.value);
+      SwapUtils.generateIncomingPdfCert('BSC', swapTimestamp.value, siriusAddress.value, swapId.value, transactionHash.value, swapQr.value);
     };
 
     const toast = useToast();
@@ -392,6 +423,7 @@ export default {
     const disableAmount = ref(false);
     const siriusAddress = ref('');
     const err = ref('');
+    const serviceErr = ref('');
     const isDisabledSwap = computed(() =>
       // verify it has been connected to metamask too
       !(amount.value > 0 && siriusAddress.value != '' && !err.value && (balance.value >= amount.value) && (amount.value > defaultXPXTxFee.value))
@@ -433,9 +465,9 @@ export default {
 
     const getValidation = async (initiated) => {
       try{
-        const Contract = new ethers.Contract(tokenAddress, abi, signer);
+        const Contract = new ethers.Contract(tokenAddress.value, abi, signer);
         const receipt = await Contract.transfer(
-          custodian,
+          custodian.value,
           ethers.utils.parseUnits(amount.value, 6),
         );
         validationHash.value = receipt.hash;
@@ -460,6 +492,8 @@ export default {
       }, 2000);
     };
 
+    const swapServiceParam = ref('');
+
     const getSigned = async () => {
       try{
         const messageSignature = await signer.signMessage(siriusAddress.value);
@@ -472,34 +506,51 @@ export default {
             txnHash: validationHash.value
           }
         };
+        swapServiceParam.value = data;
         isInvalidSignedMeta.value = false;
-        await afterSigned(data);
+        await afterSigned();
       }catch(err){
         isInvalidSignedMeta.value = true;
       }
     };
 
-    const afterSigned = async (data) => {
+    const swapServerErrIndex = ref(0);
+
+    const afterSigned = async () => {
       step6.value = true;
+      step7.value = true;
+      retrySwapButtonText.value = 'Initiating swap...';
+      disableRetrySwap.value = true;
+      let stringifyData = JSON.stringify(swapServiceParam.value);
+      try {
+        const response = await fetch(swapServerUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: stringifyData, // body data type must match "Content-Type" header
+        });
 
-      let stringifyData = JSON.stringify(data);
-
-      const response = await fetch(swapServerUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: stringifyData, // body data type must match "Content-Type" header
-      });
-
-      if(response.status == 200){
-        const data = await response.json();
-        step7.value = true;
-        transactionHash.value = data.ethTransactionId;
-        swapTimestamp.value = data.timestamp;
-        swapId.value = data.ctxId;
-        swapQr.value = SwapUtils.generateQRCode(validationLink.value);
-        setTimeout( ()=> isDisabledValidate.value = false, 1000);
+        if(response.status == 200){
+          const data = await response.json();
+          isInvalidSwapService.value = false;
+          transactionHash.value = data.ethTransactionId;
+          swapTimestamp.value = data.timestamp;
+          swapId.value = data.ctxId;
+          swapQr.value = SwapUtils.generateQRCode(validationLink.value);
+          setTimeout( ()=> isDisabledValidate.value = false, 1000);
+          swapServerErrIndex.value = 0;
+        }else{
+          isInvalidSwapService.value = true;
+          ++swapServerErrIndex.value;
+          retrySwapButtonText.value = 'Retry';
+          disableRetrySwap.value = false;
+        }
+      } catch (error) {
+        isInvalidSwapService.value = true;
+        ++swapServerErrIndex.value;
+        retrySwapButtonText.value = 'Retry';
+        disableRetrySwap.value = false;
       }
     };
 
@@ -508,14 +559,6 @@ export default {
     };
 
     const savedCheck = ref(false);
-
-    watch(amount, (n) => {
-      if(n <= defaultXPXTxFee.value){
-        showAmountErr.value = true;
-      }else{
-        showAmountErr.value = false;
-      }
-    });
 
     return {
       err,
@@ -555,9 +598,15 @@ export default {
       saveCertificate,
       isInvalidConfirmedMeta,
       isInvalidSignedMeta,
+      isInvalidSwapService,
       getValidation,
       getSigned,
       defaultXPXTxFee,
+      serviceErr,
+      swapServerErrIndex,
+      afterSigned,
+      disableRetrySwap,
+      retrySwapButtonText,
     };
   },
 }

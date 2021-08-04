@@ -34,16 +34,13 @@
         "swap_XPX_BSC_URL": "https://bctestnet-swap-gateway.xpxsirius.io/bsc",
         "swap_ETH_XPX_URL": "https://bctestnet-swap-gateway.xpxsirius.io/expx/transfer",
         "swap_BSC_XPX_URL": "https://bctestnet-swap-gateway.xpxsirius.io/bxpx/transfer",
+        "swap_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
         "gasPriceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io",
         "priceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io/price",
         "BSCChainId": [97],
         "ETHChainId": [5],
         "BSCScanUrl": "https://testnet.bscscan.com/tx/",
-        "ETHScanUrl": "https://goerli.etherscan.io/tx/",
-        "BXPXContractAddress": "0x2fE636d897A2a52bBc75Dc2BdE6B2FabC2359DEF",
-        "EXPXContractAddress": "0xd7d58712fe1bd6ffef8b518d4d28923e419da525",
-        "sinkFundExpxSwap": "0x6A608260b6e25527AF82Be8cd12d4352145228E2",
-        "sinkFundBxpxSwap": "0x6A608260b6e25527AF82Be8cd12d4352145228E2"
+        "ETHScanUrl": "https://goerli.etherscan.io/tx/"
       }
     }
 }
