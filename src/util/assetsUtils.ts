@@ -27,7 +27,8 @@ import {
   AggregateTransaction,
   CosignatureTransaction,
   NamespaceId,
-  MosaicDefinitionTransaction
+  MosaicDefinitionTransaction,
+  MosaicSupplyChangeTransaction
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { walletState } from "../state/walletState";
@@ -47,32 +48,31 @@ interface assetSelectionInterface {
 
 export class AssetsUtils {
 
-  static createAssetTransaction = (networkType: NetworkType, generationHash: string, owner:PublicAccount, supply: number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number, changeType:number):AggregateTransaction => {
+  static createAssetTransaction = (networkType: NetworkType, generationHash: string, owner:PublicAccount, supply: number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number, changeType:boolean):AggregateTransaction => {
     const buildTransactions = new BuildTransactions(networkType, generationHash);
     const assetDefinition = buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(AssetsUtils.calculateDuration(duration)));
     const assetDefinitionTx = assetDefinition.toAggregate(owner);
     let supplyChangeType: MosaicSupplyType;
-    supplyChangeType = (changeType==1)?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
+    supplyChangeType = (changeType)?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
     const assetSupplyChangeTx = buildTransactions.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(divisibility, supply))).toAggregate(owner);
     return buildTransactions.aggregateComplete([assetDefinitionTx, assetSupplyChangeTx]);
   }
 
-  // static assetSupplyChangeTransaction = (networkType: NetworkType, generationHash: string, owner:PublicAccount, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number):MosaicDefinitionTransaction => {
-  //   const buildTransactions = new BuildTransactions(networkType, generationHash);
-  //   return buildTransactions.buildMosaicSupplyChange(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(AssetsUtils.calculateDuration(duration)));
-  // }
+  static assetSupplyChangeTransaction = (networkType: NetworkType, generationHash: string, mosaidStringId: string, changeType: boolean, supply: number, divisibility:number):MosaicSupplyChangeTransaction => {
+    const buildTransactions = new BuildTransactions(networkType, generationHash);
+    let supplyChangeType: MosaicSupplyType;
+    supplyChangeType = (changeType)?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
+    return buildTransactions.buildMosaicSupplyChange(new MosaicId(mosaidStringId), supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(divisibility, supply)));
+  }
 
-  static createAssetTransactionFee = (networkType: NetworkType, generationHash: string, owner:PublicAccount, supply: number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number, changeType: number) :number => {
+  static createAssetTransactionFee = (networkType: NetworkType, generationHash: string, owner:PublicAccount, supply: number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number, changeType: boolean) :number => {
     const createAssetTransaction = AssetsUtils.createAssetTransaction(networkType, generationHash, owner, supply, supplyMutable, transferable, divisibility, duration, changeType);
     return createAssetTransaction.maxFee.compact();
   };
 
-  static getMosaicSupplyChangeTransactionFee = (networkType: NetworkType, generationHash: string, owner: PublicAccount, mosaicId: MosaicId, changeType: number, delta: UInt64) => {
-    const buildTransactions = new BuildTransactions(networkType, generationHash);
-    let supplyChangeType: MosaicSupplyType;
-    supplyChangeType = (changeType==1)?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
-    const mosaicSupplyChangeTransaction = buildTransactions.buildMosaicSupplyChange(mosaicId, supplyChangeType, delta);
-    return mosaicSupplyChangeTransaction.maxFee.compact();
+  static getMosaicSupplyChangeTransactionFee = (networkType: NetworkType, generationHash: string, mosaicId: string, changeType: boolean, supply: number, divisibility: number) => {
+    const mosaicSupplyChangeTx = AssetsUtils.assetSupplyChangeTransaction(networkType, generationHash, mosaicId, changeType, supply, divisibility);
+    return mosaicSupplyChangeTx.maxFee.compact();
   };
 
   static getLinkAssetToNamespaceTransactionFee = (networkType: NetworkType, generationHash: string, mosaicId: MosaicId, namespaceId: NamespaceId, linkType: string) => {
@@ -92,6 +92,21 @@ export class AssetsUtils {
     const assetSelection: Array<assetSelectionInterface> = [];
     const account = walletState.currentLoggedInWallet.accounts.find(account => account.address === address);
     const filterAsset = account.assets.filter((asset) => asset.owner === account.publicKey);
+    if(filterAsset.length > 0){
+      filterAsset.forEach((asset) => {
+        assetSelection.push({
+          label: asset.idHex + ' > ' + Helper.amountFormatterSimple(asset.amount, asset.divisibility),
+          value: asset.idHex,
+        });
+      });
+    }
+    return assetSelection;
+  }
+
+  static getOwnedAssetsPermutable = (address: string) => {
+    const assetSelection: Array<assetSelectionInterface> = [];
+    const account = walletState.currentLoggedInWallet.accounts.find(account => account.address === address );
+    const filterAsset = account.assets.filter(asset => (asset.owner === account.publicKey && asset.supplyMutable === true));
     if(filterAsset.length > 0){
       filterAsset.forEach((asset) => {
         assetSelection.push({
@@ -184,7 +199,21 @@ export class AssetsUtils {
   }
 
   static createAsset = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, owner:PublicAccount, supply:number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number) => {
-    let createAssetAggregateTransaction = AssetsUtils.createAssetTransaction(networkType, generationHash, owner, supply, supplyMutable, transferable, divisibility, duration, 1);
+    let createAssetAggregateTransaction = AssetsUtils.createAssetTransaction(networkType, generationHash, owner, supply, supplyMutable, transferable, divisibility, duration, true);
+    const accAddress = Address.createFromRawAddress(selectedAddress);
+    const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
+    const encryptedPassword = WalletUtils.createPassword(walletPassword);
+    let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
+    const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+    let signedTx = account.sign(createAssetAggregateTransaction, networkState.currentNetworkProfile.generationHash);
+    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+    let chainAPICall = new ChainAPICall(apiEndpoint);
+    chainAPICall.transactionAPI.announce(signedTx);
+    return signedTx.hash;
+  }
+
+  static changeAssetSupply = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, mosaicId: string, changeType: boolean, supply: number, divisibility: number) => {
+    let createAssetAggregateTransaction = AssetsUtils.assetSupplyChangeTransaction(networkType, generationHash, mosaicId, changeType, supply, divisibility);
     const accAddress = Address.createFromRawAddress(selectedAddress);
     const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
     const encryptedPassword = WalletUtils.createPassword(walletPassword);
