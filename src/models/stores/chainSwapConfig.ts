@@ -13,6 +13,7 @@ export class ChainSwapConfig extends StoreProperties{
     BSCChainId: number = 0; //97, 5
     ETHChainId: number = 0; //5, 1, 3, 4, 42
     ETHNetworkName: string = '';
+    BSCNetworkName: string = '';
     BXPXContractAddress: string = '';
     EXPXContractAddress: string = '';
     sinkFundExpxSwap: string = '';

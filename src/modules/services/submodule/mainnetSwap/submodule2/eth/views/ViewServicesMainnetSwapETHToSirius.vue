@@ -333,7 +333,7 @@ export default {
           updateToken();
         }
       }else{
-        err.value = 'Please select ' + ethereumNetworkName + ' Test Network on Metamark to swap ETH';
+        err.value = 'Please select ' + ethereumNetworkName + ' on Metamark to swap ETH';
       }
     }
 
