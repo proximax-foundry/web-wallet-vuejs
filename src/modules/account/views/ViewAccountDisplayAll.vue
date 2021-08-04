@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between text-sm">
+  <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.viewall2')}}</span></div>
     <div>
       <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="font-bold" active-class="accounts">{{$t('accounts.createaccount')}}</router-link>
@@ -36,7 +36,7 @@ export default {
     const showMenu = ref([]);
     
     
-    WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
+    //WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
     // get num of accounts
     const totalAcc = [].concat(walletState.currentLoggedInWallet.accounts,walletState.currentLoggedInWallet.others)
     var num_acc = totalAcc.length;
@@ -71,7 +71,7 @@ export default {
 
     const accounts = computed(
       () => {
-        if(walletState.currentLoggedInWallet.accounts){
+        if(walletState.currentLoggedInWallet){
           if(walletState.currentLoggedInWallet.others){
             const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
             return concatOther;

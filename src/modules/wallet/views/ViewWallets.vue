@@ -2,7 +2,7 @@
   <div class="container mx-auto text-center">
     <h1 class="font-bold big-title mt-20">{{$t('Header.wallet')}}</h1>
     <div class='mt-2 py-3 gray-line'>
-      <p>{{$t('wallets.description', {network: networkState.chainNetworkName}) }}</p>
+      <p class="text-tsm mx-3 sm:text-sm">{{$t('wallets.description', {network: networkState.chainNetworkName}) }}</p>
       <div v-if="wallets.length == 0" class="text-center h4 my-2">
         {{$t('wallets.walletvalidation')}}
       </div>
@@ -10,7 +10,7 @@
         <WalletTile :key="item.name" v-for="item in wallets" :wallet="item" />
       </div>
     </div>
-    <div class="mt-32" v-if="!walletState.currentLoggedInWallet">
+    <div class="mt-16 sm:mt-32" v-if="!walletState.currentLoggedInWallet">
       <router-link :to="{ name : 'Home'}" class="blue-btn p-3 px-5">{{$t('Header.home')}}</router-link>
     </div>
   </div>

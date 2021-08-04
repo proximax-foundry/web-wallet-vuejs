@@ -1,51 +1,63 @@
 <template>
-  <div class="flex-none self-center flex items-end logo">
-    <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-32"></router-link><span class="version-text">{{$t('Header.version')}}{{ versioning }}</span>
-  </div>
-  <div class="flex-grow h-16"></div>
-  <div class="flex-none header-menu mt-3" v-if="loginStatus">
-    <div class=" flex flex-row">
-      <div class="w-16 inline-block items-center relative">
-        <SelectLanguagePlugin style="position: absolute; top: 0px" />
+  <header>
+    <div class="header-height flex items-stretch">
+      <div class="flex-none self-center flex items-end logo">
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-24 tsm:w-40"></router-link><span class="version-text">{{$t('Header.version')}}{{ versioning }}</span>
       </div>
-      <div class="w-10 text-center flex flex-row h-10 items-center">
-        <img src="../assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
-      </div>
-      <div class="w-14 md:w-44 pl-3 text-center flex gray-line-left h-10 items-center">
-        <div>
-          <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="chainAPIEndpoint"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkState.chainNetworkName }}</div>
+      <div class="flex-grow header-height"></div>
+      <div class="flex-none header-menu mt-1 tsm:mt-3" v-if="loginStatus">
+        <div class=" flex flex-row">
+          <div class="w-5 sm:w-16 inline-block items-center relative">
+            <SelectLanguagePlugin class="lang-mobile-placement-postlogin" />
+          </div>
+          <div class="w-10 text-center flex flex-row h-10 items-center">
+            <img src="../assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
+          </div>
+          <div class="w-14 md:w-44 pl-3 text-center flex gray-line-left h-10 items-center">
+            <div>
+              <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="chainAPIEndpoint"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkState.chainNetworkName }}</div>
+            </div>
+          </div>
+          <div class="w-52 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
+            <div>
+              <div class="text-xs inline-block">{{ walletState.currentLoggedInWallet.name }}</div>
+              <div class="text-xs">{{$t('Header.totalbalance')}}: <span>{{ totalBalance }}</span> {{ currentNativeTokenName}}</div>
+            </div>
+          </div>
+          <div class="w-17 text-center h-10 items-center gray-line-left mr-1">
+            <div class="text-xs inline-block mt-3" v-if="wideScreen">
+              <a @click="logout()">{{$t('Header.signout')}}</a>
+            </div>
+            <div class="inline-block mt-2" v-else>
+              <font-awesome-icon icon="sign-out-alt" @click="logout()" class="text-blue-400 w-6 h-6 cursor-pointer ml-3"></font-awesome-icon>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="w-52 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
-        <div>
-          <div class="text-xs inline-block">{{ walletState.currentLoggedInWallet.name }}</div>
-          <div class="text-xs">{{$t('Header.totalbalance')}}: <span>{{ totalBalance }}</span> {{ currentNativeTokenName}}</div>
+      <div class="flex-none self-center header-menu" v-else>
+        <div class="w-5 sm:w-16 inline-block mr-10 sm:mr-3 lang-mobile-placement">
+          <SelectLanguagePlugin />
+        </div>
+        <div class="select mb-3 inline-block">
+          <Dropdown v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
+        </div>
+        <div class="w-16 text-center inline-block" v-if="wideScreen">
+          <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">{{$t('Header.home')}}</router-link>
+        </div>
+        <div class="w-16 text-center inline-block" v-if="wideScreen">
+          <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold">{{$t('Header.wallet')}}</router-link>
         </div>
       </div>
-      <div class="w-17 text-center h-10 items-center gray-line-left">
-        <div class="text-xs inline-block mt-3" v-if="wideScreen">
-          <a @click="logout()">{{$t('Header.signout')}}</a>
-        </div>
-        <div class="inline-block mt-2" v-else>
-          <font-awesome-icon icon="sign-out-alt" @click="logout()" class="text-blue-400 w-6 h-6 cursor-pointer ml-3"></font-awesome-icon>
-        </div>
+    </div>
+    <div v-if="!wideScreen && !loginStatus" class="bg-gray-100 py-1 text-center">
+      <div class="w-16 text-center inline-block">
+        <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block text-xs sm:text-sm">{{$t('Header.home')}}</router-link>
+      </div>
+      <div class="w-16 text-center inline-block">
+        <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold text-xs sm:text-sm">{{$t('Header.wallet')}}</router-link>
       </div>
     </div>
-  </div>
-  <div class="flex-none self-center header-menu" v-else>
-    <div class="w-16 inline-block mr-3 self-center">
-      <SelectLanguagePlugin />
-    </div>
-    <div class="select mb-3 inline-block">
-      <Dropdown v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
-    </div>
-    <div class="w-16 text-center inline-block">
-      <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">{{$t('Header.home')}}</router-link>
-    </div>
-    <div class="w-16 text-center inline-block">
-      <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold">{{$t('Header.wallet')}}</router-link>
-    </div>
-  </div>
+  </header>
 </template>
 
 <script>
@@ -144,7 +156,6 @@ export default defineComponent({
 
     const logout = () => {
       WalletStateUtils.doLogout();
-
       router.push({ name: "Home"});
       console.log('logout')
     };
@@ -193,6 +204,7 @@ export default defineComponent({
     }
 
     const terminateListener = () =>{
+      listener.value.endpoint = "";
       listener.value.terminate();
     }
 
@@ -437,6 +449,47 @@ export default defineComponent({
 <style lang="scss">
 @import "../assets/scss/multiselect.scss";
 
+.lang-mobile-placement{
+  top: -30px; position: relative;
+}
+
+.lang-mobile-placement-postlogin{
+  position: relative; top: 0px !important; left: -35px;
+}
+
+.header-height{
+  @apply h-12;
+}
+
+.header-menu{
+  margin-right: 5px;
+}
+
+.header-menu a{
+  font-size: 15px;
+  margin-left: 10px;
+}
+
+.version-text{
+  @apply text-gray-400;
+  font-size: 10px;
+  position: relative;
+  top: 4px;
+  left: 5px;
+}
+
+@screen md {
+ .version-text{
+    font-size: 13px;
+    top: 5px;
+    left: 5px;
+  }
+
+  .lang-mobile-placement-postlogin{
+    left: 0px;
+  }
+}
+
 .gray-line-left{
   border-left: 1px solid #E4E7EB;
 }
@@ -465,13 +518,13 @@ export default defineComponent({
   width: 100%;
 }
 
-
 .p-inputtext {
   // font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  font-size: 1rem;
+  font-size: 12px;
   color: #495057;
   background: #ffffff;
   padding: 3px 5px;
+  padding-right: 0px;
   border: 1px solid #ced4da;
   transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
   appearance: none;
@@ -498,7 +551,6 @@ export default defineComponent({
   padding: 0.625rem 0.625rem;
 }
 
-
 .p-component {
   // font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   font-size: 1rem;
@@ -510,7 +562,8 @@ export default defineComponent({
   border-bottom: 1px solid #ced4da;
   transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
   border-radius: 3px;
-  width: 150px;
+  width: 110px;
+  margin-top: 10px;
 }
 .p-dropdown.p-dropdown-clearable .p-dropdown-label {
   padding-right: 1.5rem;
@@ -529,7 +582,7 @@ export default defineComponent({
 .p-dropdown .p-dropdown-trigger {
   background: transparent;
   color: #6c757d;
-  width: 30px;
+  width: 20px;
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
 }
@@ -604,6 +657,30 @@ export default defineComponent({
 }
 .p-input-filled .p-dropdown:not(.p-disabled).p-focus {
   background-color: #ffffff;
+}
+
+@screen md {
+  .header-height{
+    @apply h-16;
+  }
+
+  .header-menu{
+    margin-right: 20px;
+  }
+
+ .p-inputtext {
+    font-size: 16px;
+    padding-right: 5px;
+  }
+
+  .p-dropdown {
+    width: 150px;
+    margin-top: 0px;
+  }
+
+  .p-dropdown .p-dropdown-trigger {
+    width: 30px;
+  }
 }
 
 </style>
