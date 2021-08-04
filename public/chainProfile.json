@@ -38,7 +38,7 @@
         "gasPriceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io",
         "priceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io/price",
         "BSCChainId": 97,
-        "ETHChainId": 5,
+        "ETHChainId": 3,
         "BSCScanUrl": "https://testnet.bscscan.com/tx/",
         "ETHScanUrl": "https://ropsten.etherscan.io/tx/",
         "ETHNetworkName": "Ropsten"
