@@ -261,7 +261,8 @@ export default {
       const selectedAsset = walletState.currentLoggedInWallet.selectDefaultAccount().assets.find((asset) => asset.idHex === assetId);
       assetSupply.value =Helper.amountFormatterSimple(selectedAsset.supply, selectedAsset.divisibility);
       if(selectedAsset.duration){
-        assetDuration.value = selectedAsset.duration = ' Day' + ((selectedAsset.duration>1)?'s':'');
+        console.log(selectedAsset)
+        assetDuration.value = selectedAsset.duration + ' Day' + ((selectedAsset.duration>1)?'s':'');
       }else{
         assetDuration.value = 'No expiration date';
       }

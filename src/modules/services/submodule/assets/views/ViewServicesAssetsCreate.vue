@@ -247,8 +247,8 @@ export default {
     const defaultDuration = ref(10 * 365);
 
     const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
-    const transactionFee = ref( Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility));
-    const transactionFeeExact = ref(Helper.convertToExact(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility));
+    const transactionFee = ref( Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility));
+    const transactionFeeExact = ref(Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility));
 
     const getMultiSigCosigner = computed(() => {
       return AssetsUtils.getCosignerList(selectedAccAdd.value);
@@ -274,7 +274,6 @@ export default {
       disabledDuration.value = '';
       isTransferable.value = '';
       isMutable.value = '';
-      emitter.emit("CLEAR_SELECT", 0);
     };
 
     watch(currentSelectedName, (n, o) => {
@@ -284,18 +283,23 @@ export default {
     });
 
     watch(divisibility, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, n, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, n, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, n, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, n, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
     watch(isMutable, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, n, isTransferable.value, divisibility.value, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, n, isTransferable.value, divisibility.value, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
     watch(isTransferable, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, n, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, n, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, n, divisibility.value, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, n, divisibility.value, defaultDuration.value,1 ), networkState.currentNetworkProfile.network.currency.divisibility);
+    });
+
+    watch(supply, (n) => {
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, 1), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value,1 ), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
     watch(durationOption, () => {
@@ -361,7 +365,7 @@ export default {
     });
 
     const createMosaic = () => {
-      AssetsUtils.createAsset( selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value);
+      AssetsUtils.createAsset( selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value);
       clearInput();
       // to be replaced by new method to create new asset
       // let createStatus = mosaicTransaction(divisibility.value, supply.value, duration.value, durationOption.value, isMutable.value, isTransferable.value, walletPassword.value, selectedAccName.value, appStore, siriusStore);
