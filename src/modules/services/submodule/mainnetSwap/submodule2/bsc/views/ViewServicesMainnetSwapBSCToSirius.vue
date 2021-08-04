@@ -244,7 +244,6 @@ export default {
 
     /* metamask integration */
     let bscChainId = swapData.BSCChainId;
-    console.log(bscChainId)
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
