@@ -243,6 +243,7 @@ export default {
     })()
 
     /* metamask integration */
+    let bscNetworkName = swapData.BSCNetworkName;
     let bscChainId = swapData.BSCChainId;
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
@@ -332,7 +333,7 @@ export default {
           updateToken();
         }
       }else{
-        err.value = 'Please select BSC Testnet Network on Metamark to swap BSC';
+        err.value = 'Please select ' + bscNetworkName + ' on Metamark to swap BSC';
       }
     }
 
