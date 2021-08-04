@@ -37,9 +37,9 @@
               <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">{{$t('services.balance')}}: <span class="text-xs">{{ appStore.getBalanceByAddress(selectedAccAdd) }} XPX</span></div>
             </div>
           </div>
-          <SelectInputPlugin selectDefault="0" showSelectTitleProp="true" placeholder="Select action" errorMessage="" v-model="selectAction" :options="actions()"  />
-          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" v-model="selectNamespace" :options="namespaceOption()"  />
-          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select asset" errorMessage="" v-model="selectAsset" :options="assetOptions()"  />
+          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select action" errorMessage="" v-model="selectAction" :disabled="disabledAction" :options="actions"  />
+          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" ref="selectNamespaceRef" :disabled="disabledNamespaceSelection" noOptionsText="No namespace for this account" v-model="selectNamespace" :options="namespaceOptions" :selectedAddress="selectedAccAdd" :selectedAction="selectAction" @show-selection="namespaceSelected" @clear-selection="clearNamespaceSelection" />
+          <SelectInputPlugin v-show="selectAction=='link'" showSelectTitleProp="true" placeholder="Select asset" errorMessage="" ref="selectAssetRef" :disabled="disabledAssetSelection" noOptionsText="No asset for this account" v-model="selectAsset" :options="assetOptions" @show-selection="assetSelected" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}}: <span class="text-txs"></span> XPX</div>
           </div>
@@ -58,13 +58,19 @@ import { computed, ref, inject, getCurrentInstance } from 'vue';
 // import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
-// import {  convertToCurrency, convertToExact } from '@/util/transfer.js';
+// import SelectInputNamespaceAsyncOptionPlugin from '@/modules/services/submodule/assets/components/SelectInputNamespaceAsyncOptionPlugin.vue';
+import { walletState } from "@/state/walletState";
+import { networkState } from "@/state/networkState";
+import { Helper } from '@/util/typeHelper';
+import { AssetsUtils } from '@/util/assetsUtils';
+
 
 export default {
   name: 'ViewMosaicLinkToNamespace',
   components: {
     PasswordInput,
     SelectInputPlugin,
+    // SelectInputNamespaceAsyncOptionPlugin,
   },
   setup(){
     const appStore = inject("appStore");
@@ -150,9 +156,31 @@ export default {
       isMultiSigBool.value = isMultiSig(i.address);
     }
 
-    const assetOptions = () => {
-      let asset = [];
-      return asset;
+    const assetOptions = computed(() => {
+      return AssetsUtils.getOwnedAssets(selectedAccAdd.value);
+    });
+
+    const namespaceOptions = computed(() => {
+      return AssetsUtils.listActiveNamespacesToLink(selectedAccAdd.value, selectAction.value);
+    });
+
+    const selectAsset = ref('');
+
+    const clearInput = () => {
+      walletPassword.value = '';
+      selectNamespaceRef.value.clear();
+      selectAssetRef.value.clear()
+    };
+
+    const linkNamespace = () => {
+      console.log('Link namespace method here');
+      AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectNamespace.value, selectAction.value );
+      clearInput();
+    };
+
+    const clearNamespaceSelection = () => {
+      selectAssetRef.value.clear()
+      disabledAssetSelection.value = true;
     };
 
     const increaseDecreaseOption = () => {
@@ -162,26 +190,58 @@ export default {
       return action;
     };
 
-    const selectAsset = ref('');
-    const selectIncreaseDecrease = ref(0);
+    const assetSelected = () => {
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getLinkAssetToNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectNamespace.value, selectAction.value ), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getLinkAssetToNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectNamespace.value, selectAction.value), networkState.currentNetworkProfile.network.currency.divisibility);
+    };
 
     const clearInput = () => {
       walletPassword.value = '';
       emitter.emit("CLEAR_SELECT", 0);
     };
 
-    // watch(balance, (n) => {
-    //   if(n < rentalFee.value){
-    //     showNoBalance.value = true;
-    //     disabledPassword.value = true;
-    //     disabledSupply.value = true;
-    //     disabledClear.value = true;
-    //   }else{
-    //     disabledPassword.value = false;
-    //     disabledSupply.value = false;
-    //     disabledClear.value = false;
-    //   }
-    // });
+    const totalFee = computed(() => {
+      // if multisig
+      if(isMultiSig(selectedAccAdd.value)){
+        return parseFloat(lockFundTotalFee.value) + transactionFeeExact.value;
+      }else{
+        return transactionFeeExact.value;
+      }
+    });
+
+    watch(totalFee, (n) => {
+      if(balance.value < n){
+        if(!showNoAsset.value){
+          if(!isNotCosigner.value){
+            showNoBalance.value = true;
+          }
+        }
+        setFormInput(true);
+      }else{
+        showNoBalance.value = false;
+        setFormInput(false);
+      }
+    });
+
+    watch(selectAction, () => {
+      selectNamespaceRef.value.clear();
+    });
+
+    watch(showNoBalance, (n) => {
+      if(n){
+        setFormInput(true);
+      }else{
+        setFormInput(false);
+      }
+    });
+
+    watch(isNotCosigner, (n) => {
+      if(n){
+        setFormInput(true)
+      }else{
+        setFormInput(false);
+      }
+    });
 
     return {
       appStore,
@@ -205,7 +265,7 @@ export default {
       isMultiSig,
       isMultiSigBool,
       assetOptions,
-      increaseDecreaseOption,
+      namespaceOptions,
       selectAsset,
       selectIncreaseDecrease,
       actions,
