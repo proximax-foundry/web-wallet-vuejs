@@ -72,6 +72,7 @@
         "ETHChainId": 3,
         "BSCScanUrl": "https://testnet.bscscan.com/tx/",
         "ETHScanUrl": "https://ropsten.etherscan.io/tx/",
+        "BSCNetworkName": "BSC Testnet",
         "ETHNetworkName": "Ropsten"
       }
     },
