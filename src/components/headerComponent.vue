@@ -146,7 +146,6 @@ export default defineComponent({
 
     const logout = () => {
       WalletStateUtils.doLogout();
-
       router.push({ name: "Home"});
       console.log('logout')
     };
@@ -192,6 +191,7 @@ export default defineComponent({
     }
 
     const terminateListener = () =>{
+      listener.value.endpoint = "";
       listener.value.terminate();
     }
 
