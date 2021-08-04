@@ -8,7 +8,7 @@
     <div class="select mb-3 selectPlugin" style="position: relative">
       <Multiselect
         :placeholder="placeholder"
-        :options="getOptions()"
+        :options="getOptions"
         mode="single"
         :canDeselect="canDeselect"
         @change="makeSelection"
@@ -81,16 +81,15 @@ export default defineComponent({
       }
     };
 
-    const getOptions = () => {
-      (async() => {
+    const getOptions = async () => {
+      // (async() => {
         const namespacesList = await NamespacesUtils.listNamespacesToLink(p.selectedAddress, p.selectedAction);
         console.log(namespacesList)
         return namespacesList;
-      })();
+      // })();
     };
 
     return {
-      NamespacesUtils,
       showSelectTitle,
       selectErr,
       selectModel,

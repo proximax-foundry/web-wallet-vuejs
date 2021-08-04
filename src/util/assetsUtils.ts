@@ -8,6 +8,7 @@ import {
   // FeeCalculationStrategy,
   Mosaic,
   MosaicId,
+  MosaicAliasTransaction,
   UInt64,
   MosaicProperties,
   MosaicSupplyType,
@@ -65,6 +66,13 @@ export class AssetsUtils {
     return buildTransactions.buildMosaicSupplyChange(new MosaicId(mosaidStringId), supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(divisibility, supply)));
   }
 
+  static linkAssetToNamespaceTransaction = (networkType: NetworkType, generationHash: string, mosaicId: MosaicId, namespaceId: NamespaceId, linkType: string) :MosaicAliasTransaction => {
+    const buildTransactions = new BuildTransactions(networkType, generationHash);
+    let aliasActionType: AliasActionType;
+    aliasActionType = (linkType=='link')?AliasActionType.Link:AliasActionType.Unlink;
+    return buildTransactions.assetAlias( aliasActionType, namespaceId, mosaicId);
+  };
+
   static createAssetTransactionFee = (networkType: NetworkType, generationHash: string, owner:PublicAccount, supply: number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number, changeType: boolean) :number => {
     const createAssetTransaction = AssetsUtils.createAssetTransaction(networkType, generationHash, owner, supply, supplyMutable, transferable, divisibility, duration, changeType);
     return createAssetTransaction.maxFee.compact();
@@ -75,12 +83,9 @@ export class AssetsUtils {
     return mosaicSupplyChangeTx.maxFee.compact();
   };
 
-  static getLinkAssetToNamespaceTransactionFee = (networkType: NetworkType, generationHash: string, mosaicId: MosaicId, namespaceId: NamespaceId, linkType: string) => {
-    const buildTransactions = new BuildTransactions(networkType, generationHash);
-    let aliasActionType: AliasActionType;
-    aliasActionType = (linkType=='link')?AliasActionType.Link:AliasActionType.Unlink;
-    const linkAssetToNamespaceTransaction = buildTransactions.assetAlias( aliasActionType, namespaceId, mosaicId);
-    return linkAssetToNamespaceTransaction.maxFee.compact();
+  static getLinkAssetToNamespaceTransactionFee = (networkType: NetworkType, generationHash: string, mosaicId: MosaicId, namespaceId: NamespaceId, linkType: string) :number => {
+    const linkAssetToNamespaceTx = AssetsUtils.linkAssetToNamespaceTransaction(networkType, generationHash, mosaicId, namespaceId, linkType);
+    return linkAssetToNamespaceTx.maxFee.compact();
   };
 
   static calculateDuration = (durationInDay: number): number =>{
@@ -224,6 +229,76 @@ export class AssetsUtils {
     let chainAPICall = new ChainAPICall(apiEndpoint);
     chainAPICall.transactionAPI.announce(signedTx);
     return signedTx.hash;
+  }
+
+  static linkedNamespaceToAsset = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, mosaicId: MosaicId, namespaceId: NamespaceId, linkType: string) => {
+    const linkAssetToNamespaceTx = AssetsUtils.linkAssetToNamespaceTransaction(networkType, generationHash, mosaicId, namespaceId, linkType);
+    const accAddress = Address.createFromRawAddress(selectedAddress);
+    const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
+    const encryptedPassword = WalletUtils.createPassword(walletPassword);
+    let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
+    const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+    let signedTx = account.sign(linkAssetToNamespaceTx, networkState.currentNetworkProfile.generationHash);
+    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+    let chainAPICall = new ChainAPICall(apiEndpoint);
+    chainAPICall.transactionAPI.announce(signedTx);
+    return signedTx.hash;
+  }
+
+
+  static listActiveNamespacesToLink = (address:string, linkOption: string) => {
+    const accountNamespaces = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address).namespaces.filter(namespace => namespace.active === true);
+    console.log(accountNamespaces)
+    const namespacesNum = accountNamespaces.length;
+    let namespacesArr = [];
+    if(namespacesNum > 0){
+      accountNamespaces.forEach((namespaceElement) => {
+        const level = namespaceElement.name.split('.');
+        let isDisabled: boolean;
+        let label:string = '';
+        if(namespaceElement.linkedId != ''){
+          isDisabled = (linkOption=='link'?true:false);
+          let linkName:string;
+          let linkLabel:string;
+
+          switch (namespaceElement.linkType) {
+            case 1:
+              linkName = "Asset";
+              linkLabel = namespaceElement.linkedId;
+              break;
+            case 2:
+              linkName = "Address";
+              linkLabel = Helper.createAddress(namespaceElement.linkedId).pretty()
+              break;
+            default:
+              break;
+          }
+
+          label = namespaceElement.name + ' (Linked to ' + linkName + ') - ' + linkLabel;
+        }else{
+          isDisabled = (linkOption=='link'?false:true);
+          label = namespaceElement.name;
+        }
+        namespacesArr.push({
+          value: namespaceElement.idHex,
+          label: label,
+          disabled: isDisabled,
+          level: level
+        });
+      });
+
+      namespacesArr.sort((a, b) => {
+        if (a.label > b.label) return 1;
+        if (a.label < b.label) return -1;
+        return 0;
+      });
+      namespacesArr.sort((a, b) => {
+        if (a.level > b.level) return 1;
+        if (a.level < b.level) return -1;
+        return 0;
+      });
+    }
+    return namespacesArr;
   }
 }
 

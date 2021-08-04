@@ -57,7 +57,7 @@
             </div>
           </div>
           <SelectInputPlugin showSelectTitleProp="true" placeholder="Select action" errorMessage="" v-model="selectAction" :disabled="disabledAction" :options="actions"  />
-          <SelectInputNamespaceAsyncOptionPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" ref="selectNamespaceRef" :disabled="disabledNamespaceSelection" noOptionsText="No namespace for this account" v-model="selectNamespace" :selectedAddress="selectedAccAdd" :selectedAction="selectAction" @show-selection="namespaceSelected" @clear-selection="clearNamespaceSelection" />
+          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" ref="selectNamespaceRef" :disabled="disabledNamespaceSelection" noOptionsText="No namespace for this account" v-model="selectNamespace" :options="namespaceOptions" :selectedAddress="selectedAccAdd" :selectedAction="selectAction" @show-selection="namespaceSelected" @clear-selection="clearNamespaceSelection" />
           <SelectInputPlugin v-show="selectAction=='link'" showSelectTitleProp="true" placeholder="Select asset" errorMessage="" ref="selectAssetRef" :disabled="disabledAssetSelection" noOptionsText="No asset for this account" v-model="selectAsset" :options="assetOptions" @show-selection="assetSelected" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span class="text-txs">{{ transactionFee }}</span> XPX</div>
@@ -90,7 +90,7 @@ import { computed, ref, watch } from 'vue';
 // import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
-import SelectInputNamespaceAsyncOptionPlugin from '@/modules/services/submodule/assets/components/SelectInputNamespaceAsyncOptionPlugin.vue';
+// import SelectInputNamespaceAsyncOptionPlugin from '@/modules/services/submodule/assets/components/SelectInputNamespaceAsyncOptionPlugin.vue';
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { Helper } from '@/util/typeHelper';
@@ -102,7 +102,7 @@ export default {
   components: {
     PasswordInput,
     SelectInputPlugin,
-    SelectInputNamespaceAsyncOptionPlugin,
+    // SelectInputNamespaceAsyncOptionPlugin,
   },
   setup(){
     const selectNamespaceRef = ref(null);
@@ -207,6 +207,10 @@ export default {
       return AssetsUtils.getOwnedAssets(selectedAccAdd.value);
     });
 
+    const namespaceOptions = computed(() => {
+      return AssetsUtils.listActiveNamespacesToLink(selectedAccAdd.value, selectAction.value);
+    });
+
     const selectAsset = ref('');
 
     const clearInput = () => {
@@ -217,6 +221,8 @@ export default {
 
     const linkNamespace = () => {
       console.log('Link namespace method here');
+      AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectNamespace.value, selectAction.value );
+      clearInput();
     };
 
     const clearNamespaceSelection = () => {
@@ -229,8 +235,8 @@ export default {
     };
 
     const assetSelected = () => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getLinkAssetToNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAction.value, selectNamespace.value, selectAsset.value ), networkState.currentNetworkProfile.network.currency.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getLinkAssetToNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAction.value, selectNamespace.value, selectAsset.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getLinkAssetToNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectNamespace.value, selectAction.value ), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getLinkAssetToNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectNamespace.value, selectAction.value), networkState.currentNetworkProfile.network.currency.divisibility);
     };
 
     const setFormInput = (isValidate) => {
@@ -261,6 +267,10 @@ export default {
         showNoBalance.value = false;
         setFormInput(false);
       }
+    });
+
+    watch(selectAction, () => {
+      selectNamespaceRef.value.clear();
     });
 
     watch(showNoBalance, (n) => {
@@ -308,6 +318,7 @@ export default {
       isMultiSig,
       isMultiSigBool,
       assetOptions,
+      namespaceOptions,
       selectAsset,
       actions,
       selectAction,
