@@ -1,6 +1,6 @@
 <template>
   <div class="flex justify-between text-xs sm:text-sm">
-    <div><span class="text-gray-400">{{$t('swap.swap')}} > {{$t('services.nis1')}} > {{$t('swap.income')}} ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
+    <div><span class="text-gray-400">Swap > NIS1 > In ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
     <div>
       <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
     </div>
@@ -94,9 +94,9 @@
     </div>
     <div v-if="currentPage==3">
       <div>
-        <h1 class="default-title font-bold mt-5 mb-2">{{$t('createsuccessful.congratz')}}!</h1>
-        <div class="text-sm mb-7">{{$t('swap.metamaskmessage8')}}!</div>
-        <swap-certificate-component networkTerm="NIS1" swapType="Income" />
+        <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
+        <div class="text-sm mb-7">The swap process has already started!</div>
+        <swap-certificate-component networkTerm="NIS1" swapType="In" />
         <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
           <div class="text-center w-full">
             <div class="w-8 h-8 inline-block relative">
