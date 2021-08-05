@@ -333,7 +333,7 @@ export default {
           updateToken();
         }
       }else{
-        err.value = 'Please select ' + ethereumNetworkName + ' on Metamark to swap ETH';
+        err.value = 'Please select ' + ethereumNetworkName + ' on Metamask to swap';
       }
     }
 
@@ -535,7 +535,7 @@ export default {
         if(response.status == 200){
           const data = await response.json();
           isInvalidSwapService.value = false;
-          transactionHash.value = data.ethTransactionId;
+          transactionHash.value = data.remoteTxnTransaction;
           swapTimestamp.value = data.timestamp;
           swapId.value = data.ctxId;
           swapQr.value = SwapUtils.generateQRCode(validationLink.value);
