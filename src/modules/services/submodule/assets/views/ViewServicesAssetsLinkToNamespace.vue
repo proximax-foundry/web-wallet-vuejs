@@ -221,7 +221,13 @@ export default {
 
     const linkNamespace = () => {
       console.log('Link namespace method here');
-      AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectNamespace.value, selectAction.value );
+      let assetId;
+      if(selectAction.value=='link'){
+        assetId = selectAsset.value;
+      }else{
+        assetId = walletState.currentLoggedInWallet.accounts.find(account => account.address === selectedAccAdd.value).namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
+      }
+      AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value );
       clearInput();
     };
 
