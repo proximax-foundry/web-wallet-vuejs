@@ -2,7 +2,7 @@
   <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">Swap > BSC > In ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">Home</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
@@ -243,6 +243,7 @@ export default {
     })()
 
     /* metamask integration */
+    let bscNetworkName = swapData.BSCNetworkName;
     let bscChainId = swapData.BSCChainId;
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
@@ -326,13 +327,13 @@ export default {
 
     function verifyChain(chainId, updateTokenBol = false){
       currentNetwork.value = chainId;
-      if(bscChainId.find(bscChain => bscChain === parseInt(chainId)) == undefined){
-        err.value = 'Please select BSC Testnet Network on Metamark to swap BSC';
-      }else{
+      if(bscChainId === parseInt(chainId)){
         err.value = '';
         if(updateTokenBol){
           updateToken();
         }
+      }else{
+        err.value = 'Please select ' + bscNetworkName + ' on Metamark to swap BSC';
       }
     }
 
