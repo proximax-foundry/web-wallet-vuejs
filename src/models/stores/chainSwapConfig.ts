@@ -10,8 +10,10 @@ export class ChainSwapConfig extends StoreProperties{
     swap_BSC_XPX_URL: string = "";
     BSCScanUrl: string = '';
     ETHScanUrl: string = '';
-    BSCChainId: Array<number> = []; //97, 5
-    ETHChainId: Array<number> = []; //5, 1, 3, 4, 42
+    BSCChainId: number = 0; //97, 5
+    ETHChainId: number = 0; //5, 1, 3, 4, 42
+    ETHNetworkName: string = '';
+    BSCNetworkName: string = '';
     BXPXContractAddress: string = '';
     EXPXContractAddress: string = '';
     sinkFundExpxSwap: string = '';
