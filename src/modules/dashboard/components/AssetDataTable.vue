@@ -38,10 +38,10 @@
         </template>
       </Column>
       <template #empty>
-        No records found
+        {{$t('services.norecord')}}
       </template>
       <template #loading>
-          Loading transactions data. Please wait.
+         {{$t('dashboard.loadingmessage')}}
       </template>
     </DataTable>
   </div>

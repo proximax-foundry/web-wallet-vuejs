@@ -8,52 +8,52 @@
       <div style="max-height: 200px; overflow-y: scroll;" class="break-words p-2">
         <div class="subcontent">
           <div>
-            <div>Type:</div>
+            <div>{{$t('dashboard.type')}}:</div>
             <div>{{ innerTransaction.type }}</div>
           </div>
           <div v-if="innerTransaction.transactionInfo!=undefined">
-            <div>Aggregate Id:</div>
+            <div>{{$t('dashboard.aggregateid')}}:</div>
             <div>{{ innerTransaction.transactionInfo.aggregateId }}</div>
           </div>
           <div>
-            <div>Signer Address:</div>
+            <div>{{$t('dashboard.signeraddress')}}:</div>
             <div>{{ appStore.pretty(innerTransaction.signer.address.address) }}</div>
           </div>
           <div>
-            <div>Signer Public Key:</div><br>
+            <div>{{$t('dashboard.signerpublickey')}}:</div><br>
             <div>{{ innerTransaction.signer.publicKey }}</div>
           </div>
           <div>
-            <div>Signature:</div><br>
+            <div>{{$t('dashboard.signature')}}:</div><br>
             <div>{{ innerTransaction.signature }}</div>
           </div>
           <div>
-            <div>Minimum Approval Delta:</div>
+            <div>{{$t('dashboard.minimumapproval')}}:</div>
             <div>{{ innerTransaction.minApprovalDelta }}</div>
           </div>
           <div>
-            <div>Minimum Removal Delta:</div>
+            <div>{{$t('dashboard.minimumremoval')}}:</div>
             <div>{{ innerTransaction.minRemovalDelta }}</div>
           </div>
-          <div class="font-bold mt-5" style="font-size: 13px;">Multisig Cosignatory Modification</div>
+          <div class="font-bold mt-5" style="font-size: 13px;">{{$t('dashboard.cosigmodify')}}</div>
         </div>
         <div v-for="(modification, index ) in innerTransaction.modifications" :key="index">
-          <div class="cursor-pointer bg-white hover:bg-gray-100 p-1 flex justify-between" style="font-size: 13px" @click="showMiniPanel[index] = !showMiniPanel[index]">Cosignatory {{ index + 1 }}
+          <div class="cursor-pointer bg-white hover:bg-gray-100 p-1 flex justify-between" style="font-size: 13px" @click="showMiniPanel[index] = !showMiniPanel[index]">{{$t('dashboard.cosig')}}{{ index + 1 }}
             <font-awesome-icon icon="chevron-down" class="text-black w-3 h-3 mr-1 mt-1" v-if="!showMiniPanel[index]"></font-awesome-icon>
             <font-awesome-icon icon="chevron-up" class="text-black w-3 h-3 mr-1 mt-1" v-else></font-awesome-icon>
           </div>
           <transition name="slide">
             <div v-if="showMiniPanel[index]" class="break-words cosig-block">
               <div>
-                <div>Type:</div>
+                <div>{{$t('dashboard.type')}}:</div>
                 <div>{{ !modification.type?'Add':'Remove' }}</div>
               </div>
               <div>
-                <div>Address:</div>
+                <div>{{$t('createsuccessful.address')}}:</div>
                 <div>{{ appStore.pretty(modification.cosignatoryPublicAccount.address.address) }}</div>
               </div>
               <div>
-                <div>Public Key:</div>
+                <div>{{$t('accounts.publickey')}}:</div>
                 <div>{{ modification.cosignatoryPublicAccount.publicKey }}</div>
               </div>
             </div>

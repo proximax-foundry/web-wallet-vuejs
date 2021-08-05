@@ -114,6 +114,20 @@ body{
   }
 }
 
+  .big-para{
+    @apply text-xs mx-3;
+  }
+
+  @screen md {
+    .big-title{
+      @apply text-xxl mt-20;
+    }
+
+    .big-para{
+      @apply text-sm;
+    }
+  }
+
 .default-title{
   @apply title text-sm md:text-lg lg:text-txl;
 }

@@ -1,8 +1,8 @@
 <template>
   <div class="flex justify-between text-xs sm:text-sm">
-    <div><span class="text-gray-400">Notifications ></span> <span class="text-blue-primary font-bold">View All</span></div>
+    <div><span class="text-gray-400">{{$t('services.notifications')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.viewall')}}</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'></div>

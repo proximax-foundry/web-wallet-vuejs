@@ -16,10 +16,28 @@ switch(process.env.NODE_ENV){
 
 
 module.exports = {
-  publicPath: publicPath,
-  assetsDir: './assets/',
-  devServer: {
-    host: 'localhost',
-    // proxy: 'https://bctestnet-swap-gateway.xpxsirius.io/',
-  },
+    publicPath: publicPath,
+    assetsDir: './assets/',
+    devServer: {
+      host: 'localhost',
+    },
+    pluginOptions: {
+      i18n: {
+        locale: 'en',
+        fallbackLocale: 'en',
+        localeDir: '/assets/locales',
+        enableLegacy: false,
+        runtimeOnly: false,
+        compositionOnly: false,
+        fullInstall: true
+      }
+    },
+    chainWebpack: config => {
+      config
+          .plugin('html')
+          .tap(args => {
+              args[0].title = "ProximaX Web Wallet";
+              return args;
+          })
+    }
 }

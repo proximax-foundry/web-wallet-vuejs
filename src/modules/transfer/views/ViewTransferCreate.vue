@@ -1,8 +1,8 @@
 <template>
   <div class="flex justify-between text-md">
     <div>
-      <span class="text-gray-300">Transfer ></span>
-      <span class="text-blue-primary font-bold">Make a Transaction</span>
+      <span class="text-gray-300">{{$t('NavigationMenu.Transfer')}}></span>
+      <span class="text-blue-primary font-bold">{{$t('transfer.maketransaction')}}</span>
     </div>
     <div>
       <!-- <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link> -->
@@ -18,7 +18,7 @@
               <div class="font-bold text-xs">
                 {{ selectedAccName }}
                 <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">
-                  Multisig
+                  {{$t('accounts.multisig')}}
                 </span>
               </div>
               <div class="text-gray-400 mt-1 text-sm">{{ selectedAccAdd }}</div>
@@ -31,7 +31,7 @@
                     {{ item.name }}
                     <span
                       v-if="isMultiSig(item.address)" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">
-                        Multisig
+                        {{$t('accounts.multisig')}}
                     </span>
                   </div>
                 </div>
@@ -42,27 +42,27 @@
           <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4">
             <div v-if="getWalletCosigner().list.length > 0">
               <div class="text-tsm">
-                Cosigner:
+                {{$t('transfer.cosigner')}}:
                 <span class="font-bold" v-if="getWalletCosigner().list.length == 1">
-                  {{ getWalletCosigner().list[0].name }} (Balance:{{ getWalletCosigner().list[0].balance }} XPX)
+                  {{ getWalletCosigner().list[0].name }} ({{$t('services.balance')}}:{{ getWalletCosigner().list[0].balance }} XPX)
                     <span v-if="getWalletCosigner().list[0].balance <lockFundTotalFee.value" class="error">
-                      - Insufficient balance
+                      - {{$t('accounts.insufficientbalance')}}
                     </span>
                 </span>
                 <span class="font-bold" v-else>
                   <select v-model="cosignAddress">
                     <option v-for="(element, item) in getWalletCosigner().list" :value="element.address" :key="item">
-                      {{ element.name }} (Balance: {{ element.balance }} XPX)
+                      {{ element.name }} ({{$t('services.balance')}}: {{ element.balance }} XPX)
                     </option>
                   </select>
                 </span>
                 <div v-if="cosignerBalanceInsufficient" class="error">
-                  - Insufficient balance
+                  - {{$t('accounts.insufficientbalance')}}
                 </div>
               </div>
             </div>
             <div class="error" v-else>
-              No eligible cosigner in this wallet
+             {{$t('transfer.nocosigner')}}
             </div>
           </div>
           <SelectInputPlugin v-if="showContactSelection" placeholder="Contact" errorMessage=""  v-model="selectContact" :options="contact" @default-selected="selectContact = 0"  @show-selection="updateAdd"/>
@@ -82,7 +82,7 @@
           <div class="bg-gray-100 rounded-2xl p-3">
             <div class="inline-block mr-4 tfaddext-tsm">
               <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"/>
-                Balance: 
+                {{$t('services.balance')}}: 
               <span class="text-xs">
                 {{ balance }} XPX
               </span>
@@ -96,18 +96,18 @@
         </div>
         <div>
           <button class="mb-5 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50" :disabled="addMosaicsButton" @click="displayMosaicsOption">
-            (+) Add Mosaics
+            (+) {{$t('transfer.addmosaics')}}
           </button>
         </div>
         <div class="mb-5 border-t pt-4 border-gray-200">
           <div class="rounded-2xl bg-gray-100 p-5">
             <input id="regularMsg" type="radio" name="msgOption" value="regular" v-model="msgOption" @change="clearMsg()" :disabled="disableRegularMsg == 1"/>
             <label for="regularMsg" class="cursor-pointer font-bold ml-4 mr-5"> 
-              Regular
+              {{$t('transfer.regular')}}
             </label>
             <input id="hexMsg" type="radio" name="msgOption" value="hex" v-model="msgOption" @change="clearMsg()" :disabled="disableHexMsg == 1"/>
             <label for="hexMsg" class="cursor-pointer font-bold ml-4"
-              >Hexadecimal
+              >{{$t('transfer.hexadecimal')}}
               </label>
           </div>
         </div>
@@ -115,7 +115,7 @@
           <div class="rounded-2xl bg-gray-100 p-5">
             <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
             <label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">
-              Encrypted
+              {{$t('transfer.encrypted')}}
             </label>
           </div>
         </div>
@@ -123,7 +123,7 @@
         <div class="rounded-2xl bg-gray-100 p-5">
           <div class="inline-block mr-4 text-xs">
             <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500"/>
-            Unconfirmed/Recommended Fee: {{ effectiveFee }} XPX
+            {{$t('accounts.unconfirmed')}}: {{ effectiveFee }} XPX
           </div>
         </div>
         <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800 " v-if="isMultiSig(selectedAccAdd)">
@@ -132,8 +132,8 @@
               <div class="flex">
                 <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center"/>
                 <div class="inline-block self-center text-left">
-                  <div>LockFund: {{ lockFundCurrency }} {{ currencyName }}</div>
-                  <div> Unconfirmed/Recommended Fee: {{ lockFundTxFee }}{{ currencyName }}
+                  <div>{{$t('accounts.lockfund')}}: {{ lockFundCurrency }} {{ currencyName }}</div>
+                  <div> {{$t('accounts.unconfirmed')}}: {{ lockFundTxFee }}{{ currencyName }}
                   </div>
                 </div>
               </div>
@@ -143,10 +143,10 @@
         <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet ' + /* walletState.currentLoggedInWallet.name + */'\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5" :disabled="disablePassword"/>
         <div class="mt-10">
           <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput()">
-            Clear
+            {{$t('signin.clear')}}
           </button>
           <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="makeTransfer()">
-            Create
+            {{$t('welcome.create')}}
           </button>
         </div>
       </fieldset>

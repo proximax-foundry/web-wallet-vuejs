@@ -2,7 +2,7 @@
   <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">Swap > ETH > </span> <span class="text-blue-primary font-bold">Select option</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices'}" class="font-bold" active-class="accounts">All Services</router-link>
+      <router-link :to="{ name: 'ViewServices'}" class="font-bold" active-class="accounts">{{$t('services.allservices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line'>
