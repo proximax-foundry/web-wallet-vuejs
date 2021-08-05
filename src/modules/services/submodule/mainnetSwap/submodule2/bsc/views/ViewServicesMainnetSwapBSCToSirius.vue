@@ -243,7 +243,8 @@ export default {
     })()
 
     /* metamask integration */
-    let bscChainId = [97];
+    let bscNetworkName = swapData.BSCNetworkName;
+    let bscChainId = swapData.BSCChainId;
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
@@ -326,13 +327,13 @@ export default {
 
     function verifyChain(chainId, updateTokenBol = false){
       currentNetwork.value = chainId;
-      if(bscChainId.find(bscChain => bscChain === parseInt(chainId)) == undefined){
-        err.value = 'Please select BSC Testnet Network on Metamark to swap BSC';
-      }else{
+      if(bscChainId === parseInt(chainId)){
         err.value = '';
         if(updateTokenBol){
           updateToken();
         }
+      }else{
+        err.value = 'Please select ' + bscNetworkName + ' on Metamask to swap';
       }
     }
 
@@ -534,7 +535,7 @@ export default {
         if(response.status == 200){
           const data = await response.json();
           isInvalidSwapService.value = false;
-          transactionHash.value = data.ethTransactionId;
+          transactionHash.value = data.remoteTxnTransaction;
           swapTimestamp.value = data.timestamp;
           swapId.value = data.ctxId;
           swapQr.value = SwapUtils.generateQRCode(validationLink.value);

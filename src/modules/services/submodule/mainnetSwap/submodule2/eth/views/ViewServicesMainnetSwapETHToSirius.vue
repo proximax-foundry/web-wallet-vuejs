@@ -243,7 +243,8 @@ export default {
     })()
 
     /* metamask integration */
-    let ethereumChainId = [5];
+    let ethereumChainId = swapData.ETHChainId;
+    let ethereumNetworkName = swapData.ETHNetworkName;
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
@@ -326,13 +327,13 @@ export default {
 
     function verifyChain(chainId, updateTokenBol = false){
       currentNetwork.value = chainId;
-      if(ethereumChainId.find(ethChain => ethChain === parseInt(chainId)) == undefined){
-        err.value = 'Please select Goerli Test Network on Metamark to swap ETH';
-      }else{
+      if(ethereumChainId === parseInt(chainId)){
         err.value = '';
         if(updateTokenBol){
           updateToken();
         }
+      }else{
+        err.value = 'Please select ' + ethereumNetworkName + ' on Metamask to swap';
       }
     }
 
@@ -534,7 +535,7 @@ export default {
         if(response.status == 200){
           const data = await response.json();
           isInvalidSwapService.value = false;
-          transactionHash.value = data.ethTransactionId;
+          transactionHash.value = data.remoteTxnTransaction;
           swapTimestamp.value = data.timestamp;
           swapId.value = data.ctxId;
           swapQr.value = SwapUtils.generateQRCode(validationLink.value);

@@ -32,7 +32,7 @@
       }
     },
     "Sirius Testnet 1": {
-      "version": "0.0.7",
+      "version": "0.0.10",
       "apiNodes":[
           "bctestnet1.brimstone.xpxsirius.io",
           "bctestnet2.brimstone.xpxsirius.io"
@@ -68,10 +68,12 @@
         "swap_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
         "gasPriceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io",
         "priceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io/price",
-        "BSCChainId": [97],
-        "ETHChainId": [5],
+        "BSCChainId": 97,
+        "ETHChainId": 3,
         "BSCScanUrl": "https://testnet.bscscan.com/tx/",
-        "ETHScanUrl": "https://goerli.etherscan.io/tx/"
+        "ETHScanUrl": "https://ropsten.etherscan.io/tx/",
+        "BSCNetworkName": "BSC Testnet",
+        "ETHNetworkName": "Ropsten"
       }
     },
     "Sirius Testnet 2": {
