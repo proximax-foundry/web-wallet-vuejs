@@ -128,6 +128,7 @@ export default defineComponent({
   }
   .multiselect-options{
     font-size: 12px;
+    @apply text-gray-500;
   }
 }
 @media (min-width: 1024px) {
@@ -136,7 +137,7 @@ export default defineComponent({
       font-size: 16px;
     }
     .multiselect-options{
-      font-size: 16px;
+      font-size: 13px;
     }
   }
 }
