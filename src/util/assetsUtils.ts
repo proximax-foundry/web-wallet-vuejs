@@ -66,11 +66,11 @@ export class AssetsUtils {
     return buildTransactions.buildMosaicSupplyChange(new MosaicId(mosaidStringId), supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(divisibility, supply)));
   }
 
-  static linkAssetToNamespaceTransaction = (networkType: NetworkType, generationHash: string, mosaicId: MosaicId, namespaceId: NamespaceId, linkType: string) :MosaicAliasTransaction => {
+  static linkAssetToNamespaceTransaction = (networkType: NetworkType, generationHash: string, mosaicIdString: string, namespaceString: string, linkType: string) :MosaicAliasTransaction => {
     const buildTransactions = new BuildTransactions(networkType, generationHash);
     let aliasActionType: AliasActionType;
     aliasActionType = (linkType=='link')?AliasActionType.Link:AliasActionType.Unlink;
-    return buildTransactions.assetAlias( aliasActionType, namespaceId, mosaicId);
+    return buildTransactions.assetAlias( aliasActionType, new NamespaceId(namespaceString), new MosaicId(mosaicIdString));
   };
 
   static createAssetTransactionFee = (networkType: NetworkType, generationHash: string, owner:PublicAccount, supply: number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number, changeType: boolean) :number => {
@@ -83,7 +83,7 @@ export class AssetsUtils {
     return mosaicSupplyChangeTx.maxFee.compact();
   };
 
-  static getLinkAssetToNamespaceTransactionFee = (networkType: NetworkType, generationHash: string, mosaicId: MosaicId, namespaceId: NamespaceId, linkType: string) :number => {
+  static getLinkAssetToNamespaceTransactionFee = (networkType: NetworkType, generationHash: string, mosaicId: string, namespaceId: string, linkType: string) :number => {
     const linkAssetToNamespaceTx = AssetsUtils.linkAssetToNamespaceTransaction(networkType, generationHash, mosaicId, namespaceId, linkType);
     return linkAssetToNamespaceTx.maxFee.compact();
   };
@@ -231,8 +231,8 @@ export class AssetsUtils {
     return signedTx.hash;
   }
 
-  static linkedNamespaceToAsset = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, mosaicId: MosaicId, namespaceId: NamespaceId, linkType: string) => {
-    const linkAssetToNamespaceTx = AssetsUtils.linkAssetToNamespaceTransaction(networkType, generationHash, mosaicId, namespaceId, linkType);
+  static linkedNamespaceToAsset = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, mosaicIdString: string, namespaceString: string, linkType: string) => {
+    const linkAssetToNamespaceTx = AssetsUtils.linkAssetToNamespaceTransaction(networkType, generationHash, mosaicIdString, namespaceString, linkType);
     const accAddress = Address.createFromRawAddress(selectedAddress);
     const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
     const encryptedPassword = WalletUtils.createPassword(walletPassword);
@@ -245,10 +245,8 @@ export class AssetsUtils {
     return signedTx.hash;
   }
 
-
   static listActiveNamespacesToLink = (address:string, linkOption: string) => {
     const accountNamespaces = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address).namespaces.filter(namespace => namespace.active === true);
-    console.log(accountNamespaces)
     const namespacesNum = accountNamespaces.length;
     let namespacesArr = [];
     if(namespacesNum > 0){
@@ -256,6 +254,7 @@ export class AssetsUtils {
         const level = namespaceElement.name.split('.');
         let isDisabled: boolean;
         let label:string = '';
+        let namespaceName:string = '';
         if(namespaceElement.linkedId != ''){
           isDisabled = (linkOption=='link'?true:false);
           let linkName:string;
@@ -275,12 +274,15 @@ export class AssetsUtils {
           }
 
           label = namespaceElement.name + ' (Linked to ' + linkName + ') - ' + linkLabel;
+          namespaceName = namespaceElement.name;
         }else{
           isDisabled = (linkOption=='link'?false:true);
           label = namespaceElement.name;
+          namespaceName = namespaceElement.name;
         }
         namespacesArr.push({
-          value: namespaceElement.idHex,
+          // value: namespaceElement.idHex,
+          value: namespaceName,
           label: label,
           disabled: isDisabled,
           level: level
