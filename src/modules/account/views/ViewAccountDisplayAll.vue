@@ -69,7 +69,7 @@ export default {
     //console.log(walletState.currentLoggedInWallet.others[0].multisigInfo)
     const accounts = computed(
       () => {
-        if(walletState.currentLoggedInWallet.accounts){
+        if(walletState.currentLoggedInWallet){
           if(walletState.currentLoggedInWallet.others){
             const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
             return concatOther;

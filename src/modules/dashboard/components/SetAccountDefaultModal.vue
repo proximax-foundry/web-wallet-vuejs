@@ -60,12 +60,18 @@ export default{
 
     const accounts = computed(
       () =>{
+        if(!walletState.currentLoggedInWallet){
+          return [];
+        }
         return walletState.currentLoggedInWallet.accounts.filter((element) => element.default == false)
       }
     );
 
     const otherAccounts = computed(
       () =>{
+        if(!walletState.currentLoggedInWallet){
+          return [];
+        }
         return walletState.currentLoggedInWallet.others;
       }
     );

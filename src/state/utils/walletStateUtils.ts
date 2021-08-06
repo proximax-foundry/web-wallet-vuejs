@@ -47,9 +47,14 @@ export class WalletStateUtils{
 
       if(isValid){
         let wallet = walletState.wallets.wallets.find((wallet)=>wallet.name === verifiableToken.name && wallet.networkName === sessionNetworkName);
-        walletState.currentLoggedInWallet = wallet;
-        walletState.isLogin = true;
-        return true;
+        if(wallet){
+          walletState.currentLoggedInWallet = wallet;
+          walletState.isLogin = true;
+          return true;
+        }
+        else{
+          return false;
+        }
       }
       else{
         return false;

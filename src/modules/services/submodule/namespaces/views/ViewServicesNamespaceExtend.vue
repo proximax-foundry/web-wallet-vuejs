@@ -197,8 +197,14 @@ export default {
       disableNamespaceSelect.value = false;
     }
 
-    const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
-    const moreThanOneAccount = computed(()=> (walletState.currentLoggedInWallet.accounts.length > 1)?true:false);
+    const accounts = computed( () =>{
+      if(!walletState.currentLoggedInWallet)
+        return [];
+      return walletState.currentLoggedInWallet.accounts
+    });
+    const moreThanOneAccount = computed(()=> {
+      return accounts.value.length > 1;
+    });
 
     const transactionFee = ref('0.000000');
     const transactionFeeExact = ref(0);

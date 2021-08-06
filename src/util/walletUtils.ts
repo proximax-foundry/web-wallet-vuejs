@@ -960,6 +960,9 @@ export class WalletUtils {
     }
 
     static async confirmedTransactionRefresh(wallet: Wallet, currencyMosaicId: string): Promise<void>{
+        if(wallet === null){
+            return;
+        }
         wallet.others = [];
 
         await WalletUtils.updateWalletMultisigInfo(wallet);
@@ -969,9 +972,16 @@ export class WalletUtils {
         await WalletUtils.updateOtherAccountDetails(wallet);
 
         WalletUtils.updateAllAccountBalance(wallet, currencyMosaicId);
+
+        walletState.wallets.saveMyWalletOnlytoLocalStorage(wallet);
     }
 
     static async refreshAllAccountDetails(wallet: Wallet, networkProfile: ChainProfile): Promise<void>{
+
+        if(wallet === null){
+            return;
+        }
+
         wallet.others = [];
 
         await WalletUtils.updateWalletMultisigInfo(wallet);
