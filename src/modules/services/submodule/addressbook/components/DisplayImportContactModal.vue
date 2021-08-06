@@ -88,6 +88,9 @@ export default{
 
       promise.then(
         result => {
+          if(!walletState.currentLoggedInWallet){
+            return;
+          }
           const wallet = walletState.currentLoggedInWallet;
           /* handle a successful result */
           var array = result.match(/[^\r\n]+/g);
