@@ -44,7 +44,7 @@
               </div>
             </div>
             <div v-if="getMultiSigCosigner.list.length > 0">
-              <div class="text-tsm">Cosigner:
+              <div class="text-tsm text-left ml-4">Cosigner:
                 <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} (Balance: {{ getMultiSigCosigner.list[0].balance }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- Insufficient balance</span></span>
                 <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} XPX)</option></select></span>
                 <div v-if="cosignerBalanceInsufficient" class="error">- Insufficient balance</div>
@@ -319,9 +319,28 @@ export default {
     });
 
     const extendNamespace = () => {
-      NamespacesUtils.extendNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectNamespace.value, duration.value);
+      if(cosigner.value){
+        NamespacesUtils.extendNamespaceMultisig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectNamespace.value, duration.value, selectedAccAdd.value);
+      }else{
+        NamespacesUtils.extendNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectNamespace.value, duration.value);
+      }
       clearInput();
     };
+
+    const cosigner = ref('');
+    // get cosigner
+    watch(getMultiSigCosigner, (n) => {
+      // if it is a multisig
+      if(n.list.length > 0){
+        if(n.list.length > 1){
+          cosigner.value = cosignerAddress.value;
+        }else{
+          cosigner.value = n.list[0].address;
+        }
+      }else{
+        cosigner.value = '';
+      }
+    });
 
     return {
       namespaceSelect,

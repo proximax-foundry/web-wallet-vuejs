@@ -4,7 +4,9 @@ import {
   Address,
   NamespaceMosaicIdGenerator,
   NetworkType,
+  PublicAccount,
   RegisterNamespaceTransaction,
+  SignedTransaction,
   TransactionBuilderFactory,
   UInt64,
 } from "tsjs-xpx-chain-sdk";
@@ -17,6 +19,8 @@ import { ChainAPICall } from "../models/REST/chainAPICall";
 import { BuildTransactions } from "../util/buildTransactions";
 import { Helper } from "./typeHelper";
 import { WalletAccount } from "@/models/walletAccount";
+import { AutoAnnounceSignedTransaction, HashAnnounceBlock, AnnounceType, listenerState } from "@/state/listenerState";
+import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 
 
 export class NamespacesUtils {
@@ -133,46 +137,117 @@ export class NamespacesUtils {
     }
   }
 
-  static createRootNamespace = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, namespaceName: string, duration: number) => {
-    let registerRootNamespaceTransaction = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
+  static getSenderAccount = (selectedAddress:string, walletPassword:string) :Account => {
     const accAddress = Address.createFromRawAddress(selectedAddress);
     const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
     const encryptedPassword = WalletUtils.createPassword(walletPassword);
     let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
     const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+    return account;
+  }
+
+  static createRootNamespace = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, namespaceName: string, duration: number) => {
+    let registerRootNamespaceTransaction = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
+    const account = NamespacesUtils.getSenderAccount(selectedAddress, walletPassword);
     let signedTx = account.sign(registerRootNamespaceTransaction, networkState.currentNetworkProfile.generationHash);
-    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
-    let chainAPICall = new ChainAPICall(apiEndpoint);
-    chainAPICall.transactionAPI.announce(signedTx);
+    NamespacesUtils.annouce(signedTx);
     return signedTx.hash;
   }
 
   static createSubNamespace = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, subNamespace: string, rootNamespace: string) => {
-    // console.log('Root: ' + rootNamespace + ' Sub: ' + subNamespace);
     let registerSubNamespaceTransaction = NamespacesUtils.subNamespaceTransaction(networkType, generationHash, rootNamespace, subNamespace);
-    const accAddress = Address.createFromRawAddress(selectedAddress);
-    const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
-    const encryptedPassword = WalletUtils.createPassword(walletPassword);
-    let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
-    const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+    const account = NamespacesUtils.getSenderAccount(selectedAddress, walletPassword);
     let signedTx = account.sign(registerSubNamespaceTransaction, networkState.currentNetworkProfile.generationHash);
-    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
-    let chainAPICall = new ChainAPICall(apiEndpoint);
-    chainAPICall.transactionAPI.announce(signedTx);
-    return signedTx.hash;
+    NamespacesUtils.annouce(signedTx);
+  }
+
+  static createRootNamespaceMultisig = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, namespaceName: string, duration: number, multiSigAddress:string) => {
+    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    let registerRootNamespaceTransaction = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
+    const account = NamespacesUtils.getSenderAccount(selectedAddress, walletPassword);
+
+    const multisigPublicKey = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress).publicKey;
+    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, networkType);
+    const innerTxn = [registerRootNamespaceTransaction.toAggregate(multisigPublicAccount)];
+    const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
+    const aggregateBondedTxSigned = account.sign(aggregateBondedTx, generationHash);
+
+    let hashLockTx = buildTransactions.hashLock(
+      Helper.createAsset(networkState.currentNetworkProfile.network.currency.assetId, 10000000),
+      Helper.createUint64FromNumber(200),
+      aggregateBondedTxSigned
+    );
+
+    let signedHashlock = account.sign(hashLockTx, generationHash);
+    NamespacesUtils.multiSigAnnouce(aggregateBondedTxSigned, signedHashlock);
+  }
+
+  static createSubNamespaceMultisig = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, subNamespace: string, rootNamespace: string, multiSigAddress:string) => {
+    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    let registerSubNamespaceTransaction = NamespacesUtils.subNamespaceTransaction(networkType, generationHash, rootNamespace, subNamespace);
+    const account = NamespacesUtils.getSenderAccount(selectedAddress, walletPassword);
+
+    const multisigPublicKey = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress).publicKey;
+    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, networkType);
+    const innerTxn = [registerSubNamespaceTransaction.toAggregate(multisigPublicAccount)];
+    const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
+    const aggregateBondedTxSigned = account.sign(aggregateBondedTx, generationHash);
+
+    let hashLockTx = buildTransactions.hashLock(
+      Helper.createAsset(networkState.currentNetworkProfile.network.currency.assetId, 10000000),
+      Helper.createUint64FromNumber(200),
+      aggregateBondedTxSigned
+    );
+
+    let signedHashlock = account.sign(hashLockTx, generationHash);
+    NamespacesUtils.multiSigAnnouce(aggregateBondedTxSigned, signedHashlock);
   }
 
   static extendNamespace = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, namespaceName: string, duration: number) => {
-    let registerRootNamespaceTransaction = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
-    const accAddress = Address.createFromRawAddress(selectedAddress);
-    const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
-    const encryptedPassword = WalletUtils.createPassword(walletPassword);
-    let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
-    const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
-    let signedTx = account.sign(registerRootNamespaceTransaction, networkState.currentNetworkProfile.generationHash);
+    let extendNamespaceTx = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
+    const account = NamespacesUtils.getSenderAccount(selectedAddress, walletPassword);
+    let signedTx = account.sign(extendNamespaceTx, networkState.currentNetworkProfile.generationHash);
+    NamespacesUtils.annouce(signedTx);
+  }
+
+  static extendNamespaceMultisig = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, namespaceName: string, duration: number, multiSigAddress:string) => {
+    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    let extendNamespaceTx = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
+    const account = NamespacesUtils.getSenderAccount(selectedAddress, walletPassword);
+
+    const multisigPublicKey = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress).publicKey;
+    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, networkType);
+    const innerTxn = [extendNamespaceTx.toAggregate(multisigPublicAccount)];
+    const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
+    const aggregateBondedTxSigned = account.sign(aggregateBondedTx, generationHash);
+
+    let hashLockTx = buildTransactions.hashLock(
+      Helper.createAsset(networkState.currentNetworkProfile.network.currency.assetId, 10000000),
+      Helper.createUint64FromNumber(200),
+      aggregateBondedTxSigned
+    );
+
+    let signedHashlock = account.sign(hashLockTx, generationHash);
+    NamespacesUtils.multiSigAnnouce(aggregateBondedTxSigned, signedHashlock);
+  }
+
+  static annouce = (signedTransaction:SignedTransaction ) => {
     let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
     let chainAPICall = new ChainAPICall(apiEndpoint);
-    chainAPICall.transactionAPI.announce(signedTx);
-    return signedTx.hash;
+    chainAPICall.transactionAPI.announce(signedTransaction);
   }
+
+  static multiSigAnnouce = (aggregateTx:SignedTransaction, hashSigned:SignedTransaction) => {
+    let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(hashSigned);
+    hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock + 1;
+
+    let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(aggregateTx);
+    autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(hashSigned.hash);
+    autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
+    autoAnnounceSignedTx.type = AnnounceType.BONDED;
+
+    ListenerStateUtils.addAutoAnnounceSignedTransaction(hashLockAutoAnnounceSignedTx);
+    ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
+  }
+
 }

@@ -234,7 +234,6 @@ export default {
       showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value)?true:false;
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
-      // check getMultiSigCosigner
     }
 
     const updateNamespaceSelection = (namespaceNameSelected) => {
@@ -271,6 +270,11 @@ export default {
     const createNamespace = () => {
       if(cosigner.value){
         // for multisig
+        if(selectNamespace.value==='1'){
+          NamespacesUtils.createRootNamespaceMultisig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value, selectedAccAdd.value);
+        }else{
+          NamespacesUtils.createSubNamespaceMultisig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value, selectedAccAdd.value);
+        }
       }else{
         if(selectNamespace.value==='1'){
           NamespacesUtils.createRootNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value);
@@ -278,7 +282,7 @@ export default {
           NamespacesUtils.createSubNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value);
         }
       }
-      // clearInput();
+      clearInput();
     };
 
     watch(duration, (n) => {
