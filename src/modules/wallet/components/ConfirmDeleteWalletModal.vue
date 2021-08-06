@@ -48,7 +48,7 @@ import { walletState } from '@/state/walletState';
 
 export default{
   name: 'ConfirmDeleteWalletModal',
-  props:['name'],
+  props:['name', 'networkName'],
   data() {
     return {
       toggleModal: false,
@@ -65,7 +65,7 @@ export default{
       )
     );
     const deleteWallet = () => {
-      let removeWalletStatus = walletState.wallets.removeWalletByNetworkNameAndName(networkState.chainNetworkName, p.name)
+      let removeWalletStatus = walletState.wallets.removeWalletByNetworkNameAndName(p.networkName, p.name)
       if(removeWalletStatus){
         router.push({ name: 'ViewWallets', params: {deleteWallet: 'success' } });
       }else{
