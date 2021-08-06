@@ -376,6 +376,16 @@ body{
   margin-left: 1rem;
 }
 
+.p-button.p-component.p-confirm-dialog-accept{
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  --tw-bg-opacity: 1;
+  background-color: rgba(48, 110, 181, var(--tw-bg-opacity));
+  color: white;
+}
+
 .p-dialog-mask.p-component-overlay {
   background-color: rgba(0, 0, 0, 0.4);
 }
