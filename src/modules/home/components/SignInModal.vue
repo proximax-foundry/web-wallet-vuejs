@@ -104,7 +104,7 @@ export default defineComponent({
       } else {
         // let wallets = new Wallets();
         let wallet = walletState.wallets.filterByNetworkNameAndName(networkState.chainNetworkName, selectedWallet.value);
-        WalletUtils.refreshAllAccountDetails(wallet, networkState.currentNetworkProfile);
+        //WalletUtils.refreshAllAccountDetails(wallet, networkState.currentNetworkProfile);
         WalletStateUtils.updateLoggedIn(wallet);
         NetworkStateUtils.updateLastAccessNetworkName(networkState.chainNetworkName);
         router.push({ name: "ViewServices"});
