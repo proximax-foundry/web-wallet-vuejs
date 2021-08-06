@@ -110,20 +110,21 @@ export class NamespacesUtils {
 
   static getCosignerList(address: string){
     const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
-    const cosigners = account.multisigInfo.find(multi => multi.level == 1);
-    if(cosigners != undefined){
-      const cosignAddress = cosigners.getCosignaturiesAddress(networkState.currentNetworkProfile.network.type);
+    let multiSig = account.getDirectParentMultisig();
+    if(multiSig.length>0){
+      const cosigner = walletState.currentLoggedInWallet.accounts.filter(account => {
+        if(multiSig.indexOf(account.publicKey) >= 0 ){
+          return true;
+        }
+      });
       let cosignList = [];
-      if(cosignAddress.length > 0){
-        cosignAddress.forEach((cosign) => {
-          const cosignAcc = walletState.currentLoggedInWallet.accounts.find(account => account.address === cosign);
-          if(!cosignAcc){
-            cosignList.push({
-              name: cosignAcc.name,
-              address: cosignAcc.address,
-              balance: cosignAcc.balance,
-            });
-          }
+      if(cosigner.length > 0){
+        cosigner.forEach((cosign) => {
+          cosignList.push({
+            name: cosign.name,
+            address: cosign.address,
+            balance: cosign.balance,
+          });
         });
       }
       return { list: cosignList };
