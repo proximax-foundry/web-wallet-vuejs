@@ -76,6 +76,7 @@ wallets:
   walletvalidation: "Кошельки не найдены"
   removewallet: "Кошелек успешно удален"
   account: "Учетные записи"
+  failremovewallet: "Unable to remove wallet."
 deletewallet: 
   deletemessage: "будет удален с вашего устройства."
   warning: "Предупреждение!"
@@ -362,6 +363,8 @@ delegate:
   unlinkaccount: "Unlink Account"
   delegatepublic: "Public key of the delegated account"
   entervalidpk: "Please key in a valid private key"
+  linkerror: "Private key not fulfilled link account requirement"
+  linkerror2: "Unlink failed"
 namespace:
   namespaceid: "Namespace ID"
   namespacemessage: "You have not created a namespace"
@@ -377,6 +380,8 @@ addressbook:
   addressbookmessage3: "with invalid address"
   addressbookmessage4: "not imported"
   editcontact: "Edit this contact"
+  addressvalidation: "Address is already exists in account or address book."
+  namevalidation: "Name is already exists in account or address book."
 swap:
   ethfull: "Ethereum (ETH)"
   bscfull: "Binance Smart Chain (BSC)"

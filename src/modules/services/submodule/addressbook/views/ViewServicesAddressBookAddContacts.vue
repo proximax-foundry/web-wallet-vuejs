@@ -89,9 +89,9 @@ export default {
       const contactNameIndex =(wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.name.toLowerCase() == contactName.value.toLowerCase()):(-1);
 
       if(contactAddIndex >= 0 || accountAddIndex >= 0){
-        err.value = 'Address is already exists in account or address book.';
+        err.value = t('addressbook.addressvalidation');
       }else if( contactNameIndex >= 0 || accountNameIndex >= 0 ){
-        err.value = 'Name is already exists in account or address book.';
+        err.value = t('addressbook.namevalidation');
       }else{
         walletState.currentLoggedInWallet.addAddressBook(addressBook);
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);

@@ -52,11 +52,12 @@ import { ChainUtils } from "@/util/chainUtils"
 import { ChainAPICall } from "@/models/REST/chainAPICall"
 import { WalletUtils } from "@/util/walletUtils";
 import { walletState } from '@/state/walletState';
-
+import {useI18n} from 'vue-i18n'
 export default{
   name: 'SelectAccountTypeModal',
 
   setup(){
+    const {t} = useI18n();
     const privateKey = ref('');
     const toggleModal = ref(false);
     const err = ref(false);
@@ -93,7 +94,7 @@ export default{
           console.log(accountInfo.accountType)
           emitter.emit('FROM PRIVATE KEY', accountDetail);    
         } else {
-          err.value = "Private key not fulfilled link account requirement"
+          err.value = t('delegate.linkerror')
         }
       } catch(error) {
           if(error == "HttpError: HTTP request failed"){

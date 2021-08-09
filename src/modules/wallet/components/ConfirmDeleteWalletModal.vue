@@ -45,6 +45,8 @@ import { computed, ref } from 'vue';
 import { networkState } from "@/state/networkState";
 import { useRouter } from 'vue-router';
 import { walletState } from '@/state/walletState';
+import {useI18n} from 'vue-i18n'
+
 
 export default{
   name: 'ConfirmDeleteWalletModal',
@@ -56,6 +58,7 @@ export default{
   },
 
   setup(p){
+    const {t} = useI18n()
     const router = useRouter();
     const err = ref("");
     const readCheck = ref(false);
@@ -69,7 +72,7 @@ export default{
       if(removeWalletStatus){
         router.push({ name: 'ViewWallets', params: {deleteWallet: 'success' } });
       }else{
-        err.value = "Unable to remove wallet";
+        err.value = t('wallets.failremovewallet');
       }
     };
     return {

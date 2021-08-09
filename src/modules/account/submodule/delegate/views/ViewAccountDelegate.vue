@@ -51,7 +51,7 @@ import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
 import { BuildTransactions } from '@/util/buildTransactions';
 import { Account, LinkAction, TransactionHttp} from "tsjs-xpx-chain-sdk";
-
+import {useI18n} from 'vue-i18n'
 export default {
   name: 'ViewAccountDelegate',
   components: {
@@ -63,6 +63,7 @@ export default {
   ],
  
   setup(p) {
+    const {t} = useI18n();
     const walletPassword = ref('');
     const showPasswdError = ref(false);
     const err = ref(false);
@@ -140,17 +141,17 @@ export default {
               toast.add({severity:'success', summary: 'Notification', detail: 'Unlink Successfully', group: 'br', life: 5000});            
               router.push({ name: "ViewAccountDisplayAll" });
             } else {
-              err.value = "Unlink Failed";
+              err.value = t('delegate.linkerror2');
             }
           } else if (!AccPublicKey.value == "" && !AccPrivateKey.value =="") {
               createTransaction(AccPublicKey.value, LinkAction.Link);
 
               router.push({ name: "ViewAccountCreated", params: { name: '' ,publicKey: AccPublicKey.value, privateKey: AccPrivateKey.value }});
             } else {
-              err.value = "Unlink Failed";
+              err.value = t('delegate.linkerror2')
           }
         } else {
-          err.value = "Wallet password is incorrect";
+          err.value = t('scriptvalues.walletpasswordvalidation');
         }
       }
     };

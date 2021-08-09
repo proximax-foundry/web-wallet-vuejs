@@ -102,6 +102,7 @@ import {
     PublicAccount
 } from "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
+import {useI18n} from 'vue-i18n'
 export default {
   name: 'ViewConvertAccountMultisig',
   components: {
@@ -113,6 +114,7 @@ export default {
     name: String,
   },
   setup(p){
+    const {t} = useI18n();
     const router = useRouter();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -168,7 +170,7 @@ export default {
     const convertAccount = () => {
       let convertstatus = multiSign.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.name, passwd.value);
       if(!convertstatus){
-        err.value = 'Invalid wallet password';
+        err.value = t('scriptvalues.walletpasswordvalidation');
       }else{
         // transaction made
         err.value = '';
@@ -191,7 +193,7 @@ export default {
             showAddressError.value[i] = false;
             const unique = Array.from(new Set(n));
             if(unique.length != n.length){
-              err.value = "Cosigner already exist";
+              err.value = t('scriptvalues.cosignerexists');
             }else{
               err.value = '';
             }
@@ -312,7 +314,7 @@ export default {
           setTimeout(()=> {
             emitter.emit('NOTIFICATION', {
               status: true,
-              message: 'Public key is not available for this address.',
+              message: t('scriptvalues.publickeyvalidation'),
               notificationType: 'warn'
             });
           }, 500);
