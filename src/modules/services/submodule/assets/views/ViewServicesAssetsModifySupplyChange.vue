@@ -62,7 +62,7 @@
               <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} XPX</span></div>
             </div>
           </div>
-          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select asset" errorMessage="" ref="assetOption" noOptionsText="No asset for this account" v-model="selectAsset" :options="assetOptions" @show-selection="changeAsset" :disabled="disabledSelectAsset" />
+          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select asset" errorMessage="" ref="assetOption" noOptionsText="No asset for this account" v-model="selectAsset" :options="assetOptions" @show-selection="changeAsset" :disabled="disabledSelectAsset" @clear-selection="clearAsset" />
           <SelectInputPlugin selectDefault="0" showSelectTitleProp="true" placeholder="Increase or decrease" errorMessage="" v-model="selectIncreaseDecrease" :options="increaseDecreaseOption()" :disabled="disabledSelectIncreaseDecrease" />
           <SupplyInput :disabled="disabledSupply" v-model="supply" title="Quantity of Increase/Decrease" :balance="balanceNumber" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" :decimal="assetDivisibility" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
@@ -305,6 +305,15 @@ export default {
       disabledSelectIncreaseDecrease.value = isValidate;
     };
 
+    const clearAsset = () => {
+      assetSupply.value = 0;
+      assetAmount.value = 0;
+      assetDuration.value = '0 Day';
+      assetDivisibility.value = 0;
+      assetTransferable.value = false;
+      assetMutable.value = false;
+    };
+
     watch(totalFee, (n) => {
       if(balance.value < n){
         if(!showNoAsset.value){
@@ -392,6 +401,7 @@ export default {
       isNotCosigner,
       disabledSelectAsset,
       disabledSelectIncreaseDecrease,
+      clearAsset,
     }
   },
 
