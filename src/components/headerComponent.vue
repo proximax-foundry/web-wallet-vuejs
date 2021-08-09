@@ -13,12 +13,12 @@
           <div class="w-10 text-center flex flex-row h-10 items-center">
             <img src="../assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
           </div>
-          <div class="w-14 md:w-44 pl-3 text-center flex gray-line-left h-10 items-center">
+          <div class="w-14 md:w-40 pl-3 text-center flex gray-line-left h-10 items-center">
             <div>
               <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="chainAPIEndpoint"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkState.chainNetworkName }}</div>
             </div>
           </div>
-          <div class="w-52 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
+          <div class="w-60 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
             <div>
               <div class="text-xs inline-block">{{ walletState.currentLoggedInWallet.name }}</div>
               <div class="text-xs">{{$t('Header.totalbalance')}}: <span>{{ totalBalance }}</span> {{ currentNativeTokenName}}</div>
