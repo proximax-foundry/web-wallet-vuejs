@@ -353,7 +353,11 @@ export default {
       showBalanceErr.value = true;
     }
 
-    const accounts = computed(() => walletState.currentLoggedInWallet.accounts);
+    const accounts = computed(() =>{
+      if(!walletState.currentLoggedInWallet)
+        return [];
+      return walletState.currentLoggedInWallet.accounts;
+    });
     /*  appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts */
     const moreThanOneAccount = computed(() => {
       /*  if(appStore.state.currentLoggedInWallet!=undefined){
@@ -420,6 +424,9 @@ export default {
     };
 
     const contact = computed(() => {
+      if(!walletState.currentLoggedInWallet){
+        return [];
+      }
       const wallet = walletState.currentLoggedInWallet;
       var contact = [];
       wallet.accounts.forEach((element) => {
@@ -531,9 +538,15 @@ export default {
     // getMosaicsAllAccounts(appStore, siriusStore);
     const addMosaicsButton = computed(() => {
       if (!disableSupply.value) {
-        const account = walletState.currentLoggedInWallet.accounts.find(
-          (element) => element.name == selectedAccName.value
-        );
+        let account;
+        if(!walletState.currentLoggedInWallet){
+          account = undefined;
+        }else{
+          account = walletState.currentLoggedInWallet.accounts.find(
+            (element) => element.name == selectedAccName.value
+          );
+        }
+        
         if (account != undefined) {
           if (account.assets != undefined) {
             if (
@@ -557,6 +570,9 @@ export default {
     // generate mosaic selector
     const mosaics = computed(() => {
       var mosaicOption = [];
+      if(!walletState.currentLoggedInWallet){
+        return mosaicOption;
+      }
       const account = walletState.currentLoggedInWallet.accounts.find(
         (element) => element.name == selectedAccName.value
       );
@@ -629,6 +645,9 @@ export default {
         (recipient.value.length == 40 &&
           recipient.value.match(addressPatternShort))
       ) {
+        if(!walletState.currentLoggedInWallet){
+          return;
+        }
         const verifyRecipientAddress = accountUtils.verifyAddress(
           walletState.currentLoggedInWallet.selectDefaultAccount().address,
           recipient.value

@@ -78,6 +78,9 @@ export default{
     );
 
     watch(address, ()=>{
+      if(!walletState.currentLoggedInWallet){
+        return;
+      }
       const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
       const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address.value);
       verifyAdd.value = verifyContactAddress.isPassed;
@@ -92,6 +95,9 @@ export default{
 
     const EditContact = () => {
       // @param index, AddressBook
+      if(!walletState.currentLoggedInWallet){
+        return;
+      }
       const contactIndex = walletState.currentLoggedInWallet.contacts.findIndex((contact) => contact.address == p.data.address);
       walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value, address: address.value });
       walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);

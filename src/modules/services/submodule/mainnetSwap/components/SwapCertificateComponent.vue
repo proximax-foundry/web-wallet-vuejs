@@ -1,34 +1,37 @@
 <template>
   <div>
-    <div class="text-md font-bold">{{ networkTerm }} {{$t('swap.swap')}} - {{ swapType }} - {{$t('swap.certificate')}}:</div>
+    <div class="text-md font-bold">{{ networkTerm }} Swap - {{ swapType }} - Certificate:</div>
     <div class="md:mx-10 lg:mx-20 border-8 border-solid border-gray-300 mt-4 sm:grid sm:grid-cols-4">
       <div class="sm:col-span-3 p-4">
         <div class="text-left text-tsm">
-          <div class="font-bold">{{$t('swap.siriusaccount')}}:</div>
-          <div>[[ Address ]]</div>
+          <div class="font-bold">Sirius Account:</div>
+          <div class="break-all">{{ siriusAddress }}</div>
+        </div>
+        <div class="text-left text-tsm mt-2" v-if="siriusTransactionHash">
+          <div class="font-bold inline-block">Sirius Transaction Hash:</div> <div class=" inline-block break-all text-blue-500"><a :href="xpxExplorer+siriusTransactionHash" target=_new>{{ siriusTransactionHash }}</a></div>
+        </div>
+        <div class="text-left text-tsm mt-2" v-if="swapTimestamp">
+          <div><b>Swap Timestamp:</b> {{ swapTimestamp }}</div>
         </div>
         <div class="text-left text-tsm mt-2">
-          <div><b>{{$t('swap.swaptime')}}:</b> [[ date and time ]]</div>
-        </div>
-        <div class="text-left text-tsm mt-2">
-          <div class="font-bold inline-block">{{$t('swap.swapid')}}:</div> <div class=" inline-block break-all">AD7B610271C4</div>
+          <div class="font-bold inline-block">Swap ID:</div> <div class=" inline-block break-all">{{ swapId }}</div>
         </div>
         <div class="grid grid-cols-4 mt-3">
           <div class="col-span-1">
             <div class="inline-block h-full">
               <div class="h-full flex">
-                <img src="@/modules/services/submodule/mainnetSwap/img/barCode.jpg" class="self-center h-20 w-20">
+                <img :src="swapQr" class="self-center h-20 w-20">
               </div>
             </div>
           </div>
           <div class="col-span-3 text-left pl-2 flex">
             <div class="self-center">
-              <b class="text-sm">{{ networkTerm }} {{$t('dashboard.transactionhash')}}:</b>
-              <div class="break-all text-sm mt-1 text-blue-500">AD7B610271C4F830BC9EB840029D03CF1C80E0F3A9A68F72A6AC01EEDFDA8ED2</div>
+              <b class="text-sm">{{ networkTerm }} Transaction Hash:</b>
+              <div class="break-all text-sm mt-1 text-blue-500"><a :href="swapLink" target=_new>{{ transactionHash }}</a></div>
             </div>
           </div>
         </div>
-        <div class="text-tsm mt-5 text-left"><b>{{$t('swap.note')}}:</b> {{$t('swap.swapmessage')}}</div>
+        <div class="text-tsm mt-5 text-left"><b>Note:</b> Swap process may take a few hours to complete.</div>
       </div>
       <div class="sm:col-span-1 text-center w-full" style="background: -webkit-linear-gradient(bottom,#306FB5,#5DA7DC)">
         <div class="inline-block h-full">
@@ -47,6 +50,14 @@ export default{
   props: {
     networkTerm: String,
     swapType: String,
+    swapId: String,
+    swapTimestamp: String,
+    transactionHash: String,
+    siriusAddress: String,
+    swapQr: String,
+    swapLink: String,
+    siriusTransactionHash: String,
+    xpxExplorer: String,
   }
 }
 </script>

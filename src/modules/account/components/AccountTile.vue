@@ -2,7 +2,7 @@
   <div class='p-3'>
     <div class="rounded-2xl flex justify-between py-3 border border-gray-200" :class="account.default?'bg-white':'bg-gray-100'">
       <div class="ml-5 text-left text-sm w-full">
-        <div class="font-bold mb-1">{{ account.name }} <span v-if="account.type =='MULTISIG'" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-yellow-200">{{$t('accounts.multisig')}}</span> <span v-if="account.type =='DELEGATE'" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-yellow-200">{{$t('services.delegate')}}</span> <span v-if="account.default" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-yellow-200">{{$t('accounts.default')}}</span> <span v-if="isMultiSig" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200">{{$t('accounts.multisig')}}</span></div>
+        <div class="font-bold mb-1">{{ account.name }} <span v-if="account.type =='DELEGATE'" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200">{{$t('services.delegate')}}</span> <span v-if="account.default" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-yellow-200">{{$t('accounts.default')}}</span> <span v-if="isMultiSig || account.type =='MULTISIG'" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200">{{$t('accounts.multisig')}}</span></div>
         <div class="flex justify-between pr-4 rounded-xl mb-4 items-center" :class="account.default?'bg-white':'bg-gray-100'">
           <div class="text-left w-full relative">
             <div class="absolute z-20 w-full h-full"></div>

@@ -17,6 +17,7 @@
     </div>
     <!-- <PageComponent></PageComponent> -->
     <footer class="h-12 text-center mt-20">
+
       <div class="text-xs py-2">
         <div class="font-bold">&copy; ProximaX 2021</div>
         <div>{{$t('Footer.text')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold hover:underline">{{$t('Footer.link')}}</a>.</div>
