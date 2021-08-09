@@ -441,12 +441,16 @@ export default {
 
     const siriusAddressOption = computed(() => {
       let siriusAddress = [];
-      walletState.currentLoggedInWallet.accounts.forEach((account) => {
-        siriusAddress.push({
-          label: account.name + ' - ' + account.address,
-          value: account.address,
-        })
-      });
+
+      if(walletState.currentLoggedInWallet){
+        walletState.currentLoggedInWallet.accounts.forEach((account) => {
+          siriusAddress.push({
+            label: account.name + ' - ' + account.address,
+            value: account.address,
+          })
+        });
+      }
+      
       return siriusAddress;
     });
 

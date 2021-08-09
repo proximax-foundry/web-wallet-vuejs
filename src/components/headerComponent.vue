@@ -163,6 +163,10 @@ export default defineComponent({
     //const totalBalance = ref(0);
     const totalBalance = computed(()=>{
 
+      if(!walletState.currentLoggedInWallet){
+        return 0;
+      }
+
       let accountsBalance = walletState.currentLoggedInWallet.accounts.map((account)=> account.balance);
       let othersBalance = walletState.currentLoggedInWallet.others.map((otherAccount)=> otherAccount.balance);
 
@@ -209,12 +213,14 @@ export default defineComponent({
     }
 
     if(loginStatus.value){
+      WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
       connectListener();
     }
 
     watch(()=> loginStatus.value, (newValue)=>{
       if(newValue){
         connectListener();
+        WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
       }
       else{
         terminateListener();
@@ -310,15 +316,13 @@ export default defineComponent({
         let singularPluralText = swapTransactionsCount > 1 ? "s" : "";
 
         if(swapTransactionsCount){
-          toast.add(
-          {
-            severity:'success', 
-            summary: `Swap Transaction${singularPluralText} Confirmed`, 
-            detail: `${swapTransactionsCount} swap transaction${singularPluralText} confirmed`, 
-            group: 'br', 
-            life: 5000
-          }
-          );
+          toast.add({
+              severity:'success', 
+              summary: `Swap Transaction${singularPluralText} Confirmed`, 
+              detail: `${swapTransactionsCount} swap transaction${singularPluralText} confirmed`, 
+              group: 'br', 
+              life: 5000
+          });
         }
 
         let remainingTxLength = txLength - swapTransactionsCount;

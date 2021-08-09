@@ -69,6 +69,9 @@ export default {
     );
 
     watch(address, ()=>{
+      if(!walletState.currentLoggedInWallet){
+        return;
+      }
       const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
       const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address.value);
       verifyAdd.value = verifyContactAddress.isPassed;
