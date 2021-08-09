@@ -60,7 +60,7 @@
       </div>
       <SwapInput v-model="amount" :maxAmount="maxSwapAmount" placeholder="Amount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" type="text" icon="coins" :showError="showAmountErr" 
                 errorMessage="Insufficient balance" emptyErrorMessage="Amount is empty" :disabled="disableAmount" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" />
-      <TextInput placeholder="BSC address to receive your swap" errorMessage="Valid BSC address is required" :showError="showAddressErr" v-model="bscAddress" icon="wallet" />
+      <TextInput placeholder="BSC address receiving your swap" errorMessage="Valid BSC address is required" :showError="showAddressErr" v-model="bscAddress" icon="wallet" />
       <div class="tex-center font-bold text-lg mb-2">Transaction Fee (BSC BEP20 Network):</div>
       <div class="md:grid md:grid-cols-3 mb-10">
         <div class="md:col-span-1 mb-3">
