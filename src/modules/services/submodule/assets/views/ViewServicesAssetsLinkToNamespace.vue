@@ -31,6 +31,19 @@
               </transition>
               <input type="hidden" v-model="currentSelectedName">
             </div>
+            <div v-else class="text-left p-4">
+              <div class="mb-1 z-20 border-b border-gray-200">
+                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">Multisig</span></div>
+                <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
+              </div>
+            </div>
+            <div v-if="getMultiSigCosigner.list.length > 0">
+              <div class="text-tsm text-left ml-4">Cosigner:
+                <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} (Balance: {{ getMultiSigCosigner.list[0].balance }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- Insufficient balance</span></span>
+                <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} XPX)</option></select></span>
+                <div v-if="cosignerBalanceInsufficient" class="error">- Insufficient balance</div>
+              </div>
+            </div>
           </div>
           <div class="text-left p-3 pb-0 border-l-8 border-gray-100 mb-5">
             <div class="bg-gray-100 rounded-2xl p-3">
@@ -180,7 +193,11 @@ export default {
       }else{
         assetId = walletState.currentLoggedInWallet.accounts.find(account => account.address === selectedAccAdd.value).namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
       }
-      AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value );
+      if(cosigner.value){
+        AssetsUtils.linkedNamespaceToAssetMultiSig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value, selectedAccAdd.value);
+      }else{
+        AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value );
+      }
       clearInput();
     };
 
@@ -246,6 +263,21 @@ export default {
         setFormInput(true)
       }else{
         setFormInput(false);
+      }
+    });
+
+    const cosigner = ref('');
+    // get cosigner
+    watch(getMultiSigCosigner, (n) => {
+      // if it is a multisig
+      if(n.list.length > 0){
+        if(n.list.length > 1){
+          cosigner.value = cosignerAddress.value;
+        }else{
+          cosigner.value = n.list[0].address;
+        }
+      }else{
+        cosigner.value = '';
       }
     });
 
