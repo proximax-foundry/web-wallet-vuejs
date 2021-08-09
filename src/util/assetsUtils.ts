@@ -29,7 +29,8 @@ import {
   CosignatureTransaction,
   NamespaceId,
   MosaicDefinitionTransaction,
-  MosaicSupplyChangeTransaction
+  MosaicSupplyChangeTransaction,
+  SignedTransaction,
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { walletState } from "../state/walletState";
@@ -39,6 +40,8 @@ import { ChainUtils } from "../util/chainUtils";
 import { WalletUtils } from "../util/walletUtils";
 import { ChainAPICall } from "../models/REST/chainAPICall";
 import { BuildTransactions } from "../util/buildTransactions";
+import { AutoAnnounceSignedTransaction, HashAnnounceBlock, AnnounceType, listenerState } from "@/state/listenerState";
+import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { Helper } from "./typeHelper";
 
 interface assetSelectionInterface {
@@ -125,20 +128,21 @@ export class AssetsUtils {
 
   static getCosignerList(address: string){
     const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
-    const cosigners = account.multisigInfo.find(multi => multi.level == 1);
-    if(cosigners != undefined){
-      const cosignAddress = cosigners.getCosignaturiesAddress(networkState.currentNetworkProfile.network.type);
+    let multiSig = account.getDirectParentMultisig();
+    if(multiSig.length>0){
+      const cosigner = walletState.currentLoggedInWallet.accounts.filter(account => {
+        if(multiSig.indexOf(account.publicKey) >= 0 ){
+          return true;
+        }
+      });
       let cosignList = [];
-      if(cosignAddress.length > 0){
-        cosignAddress.forEach((cosign) => {
-          const cosignAcc = walletState.currentLoggedInWallet.accounts.find(account => account.address === cosign);
-          if(!cosignAcc){
-            cosignList.push({
-              name: cosignAcc.name,
-              address: cosignAcc.address,
-              balance: cosignAcc.balance,
-            });
-          }
+      if(cosigner.length > 0){
+        cosigner.forEach((cosign) => {
+          cosignList.push({
+            name: cosign.name,
+            address: cosign.address,
+            balance: cosign.balance,
+          });
         });
       }
       return { list: cosignList };
@@ -203,46 +207,98 @@ export class AssetsUtils {
     return amount;
   }
 
-  static createAsset = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, owner:PublicAccount, supply:number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number) => {
-    let createAssetAggregateTransaction = AssetsUtils.createAssetTransaction(networkType, generationHash, owner, supply, supplyMutable, transferable, divisibility, duration, true);
+  static getSenderAccount = (selectedAddress:string, walletPassword:string) :Account => {
     const accAddress = Address.createFromRawAddress(selectedAddress);
     const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
     const encryptedPassword = WalletUtils.createPassword(walletPassword);
     let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
     const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+    return account;
+  }
+
+  static createAsset = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, owner:PublicAccount, supply:number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number) => {
+    let createAssetAggregateTransaction = AssetsUtils.createAssetTransaction(networkType, generationHash, owner, supply, supplyMutable, transferable, divisibility, duration, true);
+    const account = AssetsUtils.getSenderAccount(selectedAddress, walletPassword);
     let signedTx = account.sign(createAssetAggregateTransaction, networkState.currentNetworkProfile.generationHash);
-    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
-    let chainAPICall = new ChainAPICall(apiEndpoint);
-    chainAPICall.transactionAPI.announce(signedTx);
-    return signedTx.hash;
+    AssetsUtils.annouce(signedTx);
+  }
+
+  static createAssetMultiSig = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, owner:PublicAccount, supply:number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number, multiSigAddress: string) => {
+    const buildTransactions = new BuildTransactions(networkType, generationHash);
+    const assetDefinition = buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(AssetsUtils.calculateDuration(duration)));
+    const assetDefinitionTx = assetDefinition.toAggregate(owner);
+    let supplyChangeType: MosaicSupplyType;
+    const changeType: boolean = true;
+    supplyChangeType = (changeType)?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
+    const assetSupplyChangeTx = buildTransactions.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(divisibility, supply))).toAggregate(owner);
+
+    const account = AssetsUtils.getSenderAccount(selectedAddress, walletPassword);
+    const multisigPublicKey = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress).publicKey;
+    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, networkType);
+    const innerTxn = [assetDefinitionTx.toAggregate(multisigPublicAccount),assetSupplyChangeTx.toAggregate(multisigPublicAccount)];
+    const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
+    const aggregateBondedTxSigned = account.sign(aggregateBondedTx, generationHash);
+    let hashLockTx = buildTransactions.hashLock(
+      Helper.createAsset(networkState.currentNetworkProfile.network.currency.assetId, 10000000),
+      Helper.createUint64FromNumber(200),
+      aggregateBondedTxSigned
+    );
+    let signedHashlock = account.sign(hashLockTx, generationHash);
+    AssetsUtils.multiSigAnnouce(aggregateBondedTxSigned, signedHashlock);
   }
 
   static changeAssetSupply = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, mosaicId: string, changeType: boolean, supply: number, divisibility: number) => {
     let createAssetAggregateTransaction = AssetsUtils.assetSupplyChangeTransaction(networkType, generationHash, mosaicId, changeType, supply, divisibility);
-    const accAddress = Address.createFromRawAddress(selectedAddress);
-    const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
-    const encryptedPassword = WalletUtils.createPassword(walletPassword);
-    let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
-    const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+    const account = AssetsUtils.getSenderAccount(selectedAddress, walletPassword);
     let signedTx = account.sign(createAssetAggregateTransaction, networkState.currentNetworkProfile.generationHash);
-    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
-    let chainAPICall = new ChainAPICall(apiEndpoint);
-    chainAPICall.transactionAPI.announce(signedTx);
-    return signedTx.hash;
+    AssetsUtils.annouce(signedTx);
+  }
+
+  static changeAssetSupplyMultiSig = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, mosaicId: string, changeType: boolean, supply: number, divisibility: number, multiSigAddress: string) => {
+    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    let createAssetAggregateTransaction = AssetsUtils.assetSupplyChangeTransaction(networkType, generationHash, mosaicId, changeType, supply, divisibility);
+    const account = AssetsUtils.getSenderAccount(selectedAddress, walletPassword);
+    const multisigPublicKey = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress).publicKey;
+    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, networkType);
+    const innerTxn = [createAssetAggregateTransaction.toAggregate(multisigPublicAccount)];
+    const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
+    const aggregateBondedTxSigned = account.sign(aggregateBondedTx, generationHash);
+
+    let hashLockTx = buildTransactions.hashLock(
+      Helper.createAsset(networkState.currentNetworkProfile.network.currency.assetId, 10000000),
+      Helper.createUint64FromNumber(200),
+      aggregateBondedTxSigned
+    );
+
+    let signedHashlock = account.sign(hashLockTx, generationHash);
+    AssetsUtils.multiSigAnnouce(aggregateBondedTxSigned, signedHashlock);
   }
 
   static linkedNamespaceToAsset = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, mosaicIdString: string, namespaceString: string, linkType: string) => {
     const linkAssetToNamespaceTx = AssetsUtils.linkAssetToNamespaceTransaction(networkType, generationHash, mosaicIdString, namespaceString, linkType);
-    const accAddress = Address.createFromRawAddress(selectedAddress);
-    const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
-    const encryptedPassword = WalletUtils.createPassword(walletPassword);
-    let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
-    const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+    const account = AssetsUtils.getSenderAccount(selectedAddress, walletPassword);
     let signedTx = account.sign(linkAssetToNamespaceTx, networkState.currentNetworkProfile.generationHash);
-    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
-    let chainAPICall = new ChainAPICall(apiEndpoint);
-    chainAPICall.transactionAPI.announce(signedTx);
-    return signedTx.hash;
+    AssetsUtils.annouce(signedTx);
+  }
+
+  static linkedNamespaceToAssetMultiSig = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, mosaicIdString: string, namespaceString: string, linkType: string, multiSigAddress: string) => {
+    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    const linkAssetToNamespaceTx = AssetsUtils.linkAssetToNamespaceTransaction(networkType, generationHash, mosaicIdString, namespaceString, linkType);
+    const account = AssetsUtils.getSenderAccount(selectedAddress, walletPassword);
+    const multisigPublicKey = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress).publicKey;
+    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, networkType);
+    const innerTxn = [linkAssetToNamespaceTx.toAggregate(multisigPublicAccount)];
+    const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
+    const aggregateBondedTxSigned = account.sign(aggregateBondedTx, generationHash);
+
+    let hashLockTx = buildTransactions.hashLock(
+      Helper.createAsset(networkState.currentNetworkProfile.network.currency.assetId, 10000000),
+      Helper.createUint64FromNumber(200),
+      aggregateBondedTxSigned
+    );
+
+    let signedHashlock = account.sign(hashLockTx, generationHash);
+    AssetsUtils.multiSigAnnouce(aggregateBondedTxSigned, signedHashlock);
   }
 
   static listActiveNamespacesToLink = (address:string, linkOption: string) => {
@@ -301,6 +357,25 @@ export class AssetsUtils {
       });
     }
     return namespacesArr;
+  }
+
+  static annouce = (signedTransaction:SignedTransaction ) => {
+    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+    let chainAPICall = new ChainAPICall(apiEndpoint);
+    chainAPICall.transactionAPI.announce(signedTransaction);
+  }
+
+  static multiSigAnnouce = (aggregateTx:SignedTransaction, hashSigned:SignedTransaction) => {
+    let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(hashSigned);
+    hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock + 1;
+
+    let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(aggregateTx);
+    autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(hashSigned.hash);
+    autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
+    autoAnnounceSignedTx.type = AnnounceType.BONDED;
+
+    ListenerStateUtils.addAutoAnnounceSignedTransaction(hashLockAutoAnnounceSignedTx);
+    ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
   }
 }
 
