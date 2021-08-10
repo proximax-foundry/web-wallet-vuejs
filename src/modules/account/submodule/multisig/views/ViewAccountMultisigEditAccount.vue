@@ -305,7 +305,7 @@ export default {
       let modifyStatus = multiSign.modifyMultisigAccount(coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value, signer, acc, passwd.value);
       // console.log(modifyStatus);
       if(!modifyStatus){
-        err.value = t('scriptvalues.walletpasswordvalidation');
+        err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
         err.value = '';

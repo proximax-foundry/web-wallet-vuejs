@@ -15,7 +15,7 @@
           <span class="ml-2 cursor-pointer">{{$t('createprivatekeywallet.swaptitle')}}</span>
         </label>
         <TextInput :placeholder="$t('swap.accountname')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
-        <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterwalletpassword')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+        <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
         <div class="mt-10">
           <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
           <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">{{$t('createwallet.import')}}</button>
@@ -63,6 +63,7 @@ export default {
         privKey.value.match(privKeyPattern)
       )
     );
+    const walletName = computed(()=>walletState.currentLoggedInWallet.name)
     const create = () => {
     const verifyExistingAccountName = walletState.currentLoggedInWallet.accounts.find((element) => element.name == accountName.value);
       if(!verifyExistingAccountName) {
@@ -70,7 +71,7 @@ export default {
         if (result == -1) {
           err.value = t('scriptvalues.createaccountfail');
         } else if (result == 0) {
-          err.value = t('scriptvalues.walletpasswordvalidation') ;
+          err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name}) ;
         } else {    
           // create account
           const account = Account.createFromPrivateKey(privKey.value,ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
@@ -103,7 +104,8 @@ export default {
       privKey,
       nis1Swap,
       showPasswdError,
-      disableCreate
+      disableCreate,
+      walletName
     }
   },
   methods: {

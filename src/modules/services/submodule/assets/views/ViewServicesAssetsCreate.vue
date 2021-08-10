@@ -91,7 +91,7 @@
               </div>
             </div>
           </div>
-          <PasswordInput :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterwalletpassword')" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
+          <PasswordInput :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
             <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">{{$t('signin.clear')}}</button>
             <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createMosaic()">{{$t('welcome.create')}}</button>
@@ -164,7 +164,7 @@ export default {
     const durationOption =ref('month');
     const duration = ref('1');
     const showDurationErr = ref(false);
-
+    const walletName = computed(()=>walletState.currentLoggedInWallet.name)
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
     const durationCheckDisabled = ref(false);
@@ -415,6 +415,7 @@ export default {
       cosignerBalanceInsufficient,
       cosignerAddress,
       isNotCosigner,
+      walletName
     }
   },
 

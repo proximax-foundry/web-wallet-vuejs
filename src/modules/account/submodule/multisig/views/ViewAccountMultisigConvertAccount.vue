@@ -79,7 +79,7 @@
           </div>
         </div>
       </div>
-      <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" v-model="passwd" icon="lock" :disabled="disabledPassword" />
+      <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.multisigpasswordvalidation')" :showError="showPasswdError" v-model="passwd" icon="lock" :disabled="disabledPassword" />
       <div class="mt-10">
         <button type="button" class="default-btn mr-5 focus:outline-none" @click="clear()">{{$t('signin.clear')}}</button>
         <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="convertAccount()" :disabled="disableSend">{{$t('accounts.send')}}</button>
@@ -170,7 +170,7 @@ export default {
     const convertAccount = () => {
       let convertstatus = multiSign.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.name, passwd.value);
       if(!convertstatus){
-        err.value = t('scriptvalues.walletpasswordvalidation');
+        err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
         err.value = '';

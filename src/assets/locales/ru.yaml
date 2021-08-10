@@ -331,7 +331,7 @@ transfer:
 scriptvalues: 
   walletnametaken: "Имя кошелька уже занято"
   walletstoragefull: "Невозможно создать кошелек. Память вашего устройства может быть заполнена"
-  walletpasswordvalidation: "Неверный пароль кошелька"
+  walletpasswordvalidation: "Password for wallet {name} is invalid"
   createaccountfail: "Не удалось создать новую учетную запись"
   privatekeyexists: "Учетная запись с этим закрытым ключом уже есть в кошельке"
   cosignerexists: "Соподписант уже существует"
@@ -346,8 +346,9 @@ scriptvalues:
   walletimporttext4: "Кошелек недействителен"
   walletimporttext5: "Невозможно добавить кошелек"
   removeaccount: "Unable to remove account"
-  enterwalletpassword: "Please enter your wallet password"
+  enterpassword: "Please enter wallet {name}'s password"
   requiredfield: "Required field"
+  multisigpasswordvalidation: "Wallet password is required to convert to MultiSig Account."
 delegate:
   selectacctype: "Select Account Type"
   newaccount: "New Account"

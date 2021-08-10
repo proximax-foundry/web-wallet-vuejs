@@ -140,7 +140,7 @@
             </div>
           </div>
         </div>
-        <PasswordInput :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterwalletpassword')" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5" :disabled="disablePassword"/>
+        <PasswordInput :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5" :disabled="disablePassword"/>
         <div class="mt-10">
           <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput()">
             {{$t('signin.clear')}}
@@ -228,6 +228,7 @@ export default {
     const disablePassword = computed(() => disableAllInput.value);
     const cosignerBalanceInsufficient = ref(false);
 
+    const walletName = computed(()=>walletState.currentLoggedInWallet.name) 
     const currencyName = computed(
       () => networkState.currentNetworkProfile.network.currency.name
     );
@@ -498,7 +499,7 @@ export default {
           encryptedMsg.value
         );
         if (!transferStatus) {
-          err.value = t('scriptvalues.walletpasswordvalidation');
+          err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
         } else {
           // transaction made
           err.value = "";
@@ -790,6 +791,7 @@ export default {
       currencyName,
       lockFundTxFee,
       lockFundTotalFee,
+      walletName
     };
   },
 };

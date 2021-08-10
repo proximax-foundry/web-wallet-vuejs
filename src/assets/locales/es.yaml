@@ -331,7 +331,7 @@ transfer:
 scriptvalues:
   walletnametaken: "Nombre de Billetera está siendo utilizado."
   walletstoragefull: "No se puede crear la Billetera. El espacio de almacenamiento en su dispositivo puede estar lleno."
-  walletpasswordvalidation: "Contraseña de la Billetera inválida"
+  walletpasswordvalidation: "Password for wallet {name} is invalid"
   createaccountfail: "Falló la creación de la nueva cuenta"
   privatekeyexists: "Cuenta con esta Llave Privada ya existe en esta Billetera"
   cosignerexists: "Cofirmante ya existe"
@@ -346,8 +346,9 @@ scriptvalues:
   walletimporttext4: "Billetera es inválida"
   walletimporttext5: "No se pudo agregar la Billetera."
   removeaccount: "Unable to remove account"
-  enterwalletpassword: "Please enter your wallet password"
+  enterpassword: "Please enter wallet {name}'s password"
   requiredfield: "Required field"
+  multisigpasswordvalidation: "Wallet password is required to convert to MultiSig Account."
 delegate:
   selectacctype: "Select Account Type"
   newaccount: "New Account"

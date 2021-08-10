@@ -1,7 +1,7 @@
 ---
 Footer: 
   text: "Please report any issues identified to our"
-  link: "helpdesk"
+  link: helpdesk
 Header: 
   version: "v"
   home: "Home"
@@ -331,7 +331,7 @@ transfer:
 scriptvalues: 
   walletnametaken: "Wallet name is already taken"
   walletstoragefull: "Unable to create wallet. Your device storage might be full"
-  walletpasswordvalidation: "Invalid wallet password"
+  walletpasswordvalidation: "Password for wallet {name} is invalid"
   createaccountfail: "Failed to create new account"
   privatekeyexists: "Account with this Private Key is already in the wallet"
   cosignerexists: "Cosigner already exist"
@@ -346,8 +346,9 @@ scriptvalues:
   walletimporttext4: "Wallet is invalid"
   walletimporttext5: "Unable to add wallet"
   removeaccount: "Unable to remove account"
-  enterwalletpassword: "Please enter your wallet password"
+  enterpassword: "Please enter wallet {name}'s password"
   requiredfield: "Required field"
+  multisigpasswordvalidation: "Wallet password is required to convert to MultiSig Account."
 delegate:
   selectacctype: "Select Account Type"
   newaccount: "New Account"

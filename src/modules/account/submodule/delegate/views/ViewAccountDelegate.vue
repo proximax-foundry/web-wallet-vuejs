@@ -9,7 +9,7 @@
     <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
     <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 mb-8 mt-3">
     <div class="text-center w-full">
-        <p v-cloak class="text-sm" v-if="verifyDelegateAcc() && !delegateAcc==''">{{$t('delegate.delegatemessage2')}}</p>
+        <p v-cloak class="text-sm" v-if="verifyDelegateAcc() && !delegateAcc==''">{{$t('delegate.linkmessage2')}}</p>
         <p v-cloak class="text-sm" v-else>{{$t('delegate.linkwarning')}}</p>
     </div>
     </div>
@@ -27,7 +27,7 @@
         <SelectAccountTypeModal />
       </div>
     </div>
-    <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterwalletpassword')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+    <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
     <div class="mt-10">
       <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw" v-if="verifyDelegateAcc() && !delegateAcc==''" :disabled="disableLinkBtn">{{$t('delegate.unlinkaccount')}}</button>
       <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw" v-else :disabled="disableLinkBtn">{{$t('delegate.linkaccount')}}</button>
@@ -86,7 +86,7 @@ export default {
         walletPassword.value.match(passwdPattern)
       )
     );
-
+    const walletName = computed(()=>walletState.currentLoggedInWallet.name)
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
@@ -151,7 +151,7 @@ export default {
               err.value = t('delegate.linkerror2')
           }
         } else {
-          err.value = t('scriptvalues.walletpasswordvalidation');
+          err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
         }
       }
     };
@@ -185,7 +185,8 @@ export default {
       AccPrivateKey,
       disableLinkBtn,
       copy,
-      err
+      err,
+      walletName
     };
   },
 }

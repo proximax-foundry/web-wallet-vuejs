@@ -331,7 +331,7 @@ transfer:
 scriptvalues: 
   walletnametaken: "钱包名称已被占用"
   walletstoragefull: "无法创建钱包。你的设备存储可能已满"
-  walletpasswordvalidation: "钱包密码错误"
+  walletpasswordvalidation: "钱包{name}的密码错误"
   createaccountfail: "创建帐号失败"
   privatekeyexists: "拥有次私密密钥的账号已在钱包里"
   cosignerexists: "已有共同签署人"
@@ -346,8 +346,9 @@ scriptvalues:
   walletimporttext4: "钱包无效"
   walletimporttext5: "无法添加钱包"
   removeaccount: "无法移除账号"
-  enterwalletpassword: "请你提供钱包密码"
+  enterpassword: "请输入钱包{name}的密码"
   requiredfield: "须填写此资料"
+  multisigpasswordvalidation: "转换为多重签名账号时需要钱包密码"
 delegate:
   selectacctype: "选择账号类型"
   newaccount: "新账号"

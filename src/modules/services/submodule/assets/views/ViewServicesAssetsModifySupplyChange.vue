@@ -68,7 +68,7 @@
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{ transactionFee }} XPX</div>
           </div>
-          <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterwalletpassword')" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
+          <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
             <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">{{$t('signin.clear')}}</button>
             <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="modifyMosaic()">{{$t('welcome.create')}}</button>
@@ -149,7 +149,7 @@ export default {
     const disabledClear = ref(false);
     const disabledSelectAsset = ref(false);
     const disabledSelectIncreaseDecrease = ref(false);
-
+    const walletName = computed(()=>walletState.currentLoggedInWallet.name)
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
 
@@ -383,6 +383,7 @@ export default {
       isNotCosigner,
       disabledSelectAsset,
       disabledSelectIncreaseDecrease,
+      walletName
     }
   },
 

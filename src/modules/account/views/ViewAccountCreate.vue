@@ -10,7 +10,7 @@
       <fieldset class="w-full">
         <div class="error error_box mb-2" v-if="err!=''">{{ err }}</div>
         <TextInput :placeholder="$t('accounts.name')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
-        <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterwalletpassword')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+        <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
         <div class="mt-10">
           <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
           <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">{{$t('welcome.create')}}</button>
@@ -52,7 +52,7 @@ export default {
         accountName.value.length != ''
       )
     );
-    
+    const walletName = computed(()=>walletState.currentLoggedInWallet.name)
     const create = () => {
     const verifyExistingAccountName = walletState.currentLoggedInWallet.accounts.find((element) => element.name == accountName.value);
       if(!verifyExistingAccountName){
@@ -60,7 +60,7 @@ export default {
         if (result == -1) {
           err.value = t('scriptvalues.createaccountfail');
         } else if (result == 0) {
-          err.value = t('signin.invalidpassword');
+          err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
         } else { 
           // create account
           let password = WalletUtils.createPassword(walletPassword.value);
@@ -94,7 +94,8 @@ export default {
       walletPassword,
       showPasswdError,
       disableCreate,
-      clearInput
+      clearInput,
+      walletName
     }
   },
 

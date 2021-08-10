@@ -125,7 +125,7 @@ export default{
     const approveTransaction = () =>{
       let verify = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, passwd.value);
       if(verify < 1){
-        err.value = t('scriptvalues.walletpasswordvalidation');
+        err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
       }else{
         multiSign.cosignMultisigTransaction(p.transaction, passwd.value);
         err.value = '';

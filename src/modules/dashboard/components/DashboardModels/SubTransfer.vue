@@ -204,7 +204,7 @@ export default{
         isShowMessage.value = true;
         encryptedMessage.value = plainMessage.payload;
       }else{
-        err.value = t('scriptvalues.walletpasswordvalidation');
+        err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
       }
     }
 
