@@ -9,17 +9,17 @@
     <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
     <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 mb-8 mt-3">
     <div class="text-center w-full">
-        <p v-cloak class="text-sm" v-if="verifyDelegateAcc() && !delegateAcc==''">{{$t('delegate.delegatemessage2')}}</p>
+        <p v-cloak class="text-sm" v-if="verifyDelegateAcc() && !delegateAcc==''">{{$t('delegate.linkmessage2')}}</p>
         <p v-cloak class="text-sm" v-else>{{$t('delegate.linkwarning')}}</p>
     </div>
     </div>
     <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-7 items-center">
       <div class="text-left w-full relative">
         <div v-cloak v-if="verifyDelegateAcc() && !delegateAcc==''" class="text-xs font-bold mb-1">{{$t('delegate.delegatepublic')}}</div>
-        <div v-cloak v-else class="text-xs font-bold mb-1">Linking Account:</div>
+        <div v-cloak v-else class="text-xs font-bold mb-1">{{$t('delegate.linkingaccount')}}</div>
         <div v-cloak v-if="verifyDelegateAcc() && !delegateAcc==''" id="delegatePublicKey" :copyValue="delegateAcc" copySubject="Delegate Public Key" class="text-xs w-full outline-none bg-gray-100 z-10" >{{delegateAcc}}</div>
-        <div v-else-if="newAcc != ''">New Account</div>
-        <div v-else-if="newAccPK != ''">From Private Key</div>
+        <div v-else-if="newAcc != ''">{{$t('delegate.newaccount')}}</div>
+        <div v-else-if="newAccPK != ''">{{$t('createwallet.fromprivatekey')}}</div>
         <div v-else>{{$t('delegate.noneselected')}}</div>
       </div>
       <font-awesome-icon icon="copy" @click="copy('delegatePublicKey')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mr-2" v-if="verifyDelegateAcc() && !delegateAcc==''"></font-awesome-icon>
@@ -27,7 +27,7 @@
         <SelectAccountTypeModal />
       </div>
     </div>
-    <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet ' + walletState.currentLoggedInWallet.name + '\'s password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+    <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
     <div class="mt-10">
       <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw" v-if="verifyDelegateAcc() && !delegateAcc==''" :disabled="disableLinkBtn">{{$t('delegate.unlinkaccount')}}</button>
       <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="verifyWalletPw" v-else :disabled="disableLinkBtn">{{$t('delegate.linkaccount')}}</button>
@@ -51,7 +51,7 @@ import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
 import { BuildTransactions } from '@/util/buildTransactions';
 import { Account, LinkAction, TransactionHttp} from "tsjs-xpx-chain-sdk";
-
+import {useI18n} from 'vue-i18n'
 export default {
   name: 'ViewAccountDelegate',
   components: {
@@ -63,6 +63,7 @@ export default {
   ],
  
   setup(p) {
+    const {t} = useI18n();
     const walletPassword = ref('');
     const showPasswdError = ref(false);
     const err = ref(false);
@@ -85,7 +86,7 @@ export default {
         walletPassword.value.match(passwdPattern)
       )
     );
-
+    const walletName = walletState.currentLoggedInWallet.name
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
@@ -140,17 +141,17 @@ export default {
               toast.add({severity:'success', summary: 'Notification', detail: 'Unlink Successfully', group: 'br', life: 5000});            
               router.push({ name: "ViewAccountDisplayAll" });
             } else {
-              err.value = "Unlink Failed";
+              err.value = t('delegate.linkerror2');
             }
           } else if (!AccPublicKey.value == "" && !AccPrivateKey.value =="") {
               createTransaction(AccPublicKey.value, LinkAction.Link);
 
               router.push({ name: "ViewAccountCreated", params: { name: '' ,publicKey: AccPublicKey.value, privateKey: AccPrivateKey.value }});
             } else {
-              err.value = "Unlink Failed";
+              err.value = t('delegate.linkerror2')
           }
         } else {
-          err.value = "Wallet password is incorrect";
+          err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
         }
       }
     };
@@ -184,7 +185,8 @@ export default {
       AccPrivateKey,
       disableLinkBtn,
       copy,
-      err
+      err,
+      walletName
     };
   },
 }

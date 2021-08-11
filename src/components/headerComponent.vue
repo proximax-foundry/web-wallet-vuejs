@@ -60,7 +60,7 @@
   </header>
 </template>
 
-<script>
+<script> 
 import { computed, defineComponent, getCurrentInstance, ref, watch } from "vue";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
@@ -80,6 +80,7 @@ import { listenerState} from "@/state/listenerState";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { TransactionType } from "tsjs-xpx-chain-sdk";
 import { WalletUtils } from "@/util/walletUtils";
+import {useI18n} from 'vue-i18n'
 
 export default defineComponent({
   components: {
@@ -96,6 +97,7 @@ export default defineComponent({
     };
   },
   setup() {
+    const {t} = useI18n();
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -132,7 +134,7 @@ export default defineComponent({
     const chainsNetworkOption = computed(()=>{
 
       return [{
-        label: 'Networks',
+        label: t('Header.network'),
         items: chainsNetworks.value
       }];
     });
@@ -162,6 +164,10 @@ export default defineComponent({
 
     //const totalBalance = ref(0);
     const totalBalance = computed(()=>{
+
+      if(!walletState.currentLoggedInWallet){
+        return 0;
+      }
 
       let accountsBalance = walletState.currentLoggedInWallet.accounts.map((account)=> account.balance);
       let othersBalance = walletState.currentLoggedInWallet.others.map((otherAccount)=> otherAccount.balance);
@@ -209,12 +215,14 @@ export default defineComponent({
     }
 
     if(loginStatus.value){
+      WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
       connectListener();
     }
 
     watch(()=> loginStatus.value, (newValue)=>{
       if(newValue){
         connectListener();
+        WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
       }
       else{
         terminateListener();
@@ -310,15 +318,13 @@ export default defineComponent({
         let singularPluralText = swapTransactionsCount > 1 ? "s" : "";
 
         if(swapTransactionsCount){
-          toast.add(
-          {
-            severity:'success', 
-            summary: `Swap Transaction${singularPluralText} Confirmed`, 
-            detail: `${swapTransactionsCount} swap transaction${singularPluralText} confirmed`, 
-            group: 'br', 
-            life: 5000
-          }
-          );
+          toast.add({
+              severity:'success', 
+              summary: `Swap Transaction${singularPluralText} Confirmed`, 
+              detail: `${swapTransactionsCount} swap transaction${singularPluralText} confirmed`, 
+              group: 'br', 
+              life: 5000
+          });
         }
 
         let remainingTxLength = txLength - swapTransactionsCount;

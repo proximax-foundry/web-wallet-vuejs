@@ -17,7 +17,7 @@
               <div class="px-5 self-center text-center my-10">
                 <img src="@/modules/wallet/img/icon-add-new-blue.svg" class="w-12 inline-block">
                 <p class="mt-3">{{$t('delegate.newaccount')}}</p>
-                <button class="max-w-xs sm:max-w-sm inline-block default-btn my-3 self-center" @click="linkNewAcc()">Select</button></div>
+                <button class="max-w-xs sm:max-w-sm inline-block default-btn my-3 self-center" @click="linkNewAcc()">{{$t('delegate.select')}}</button></div>
               <div class="px-5 self-center text-center my-10">
                 <img src="@/modules/wallet/img/icon-private-key-blue.svg" class="w-12 inline-block"><p class="mt-3">{{$t('createwallet.fromprivatekey')}}</p>
                 <button class="max-w-xs sm:max-w-sm inline-block default-btn my-3 self-center" @click="naviPrivateKey = !naviPrivateKey">{{$t('delegate.select')}}</button>
@@ -28,7 +28,7 @@
             <h1 class="default-title font-bold my-5">{{$t('createwallet.fromprivatekey')}}</h1>
             <div class="page-title-gray-line pt-20">
               <div class="my-5">{{$t('delegate.linkmessage')}}</div>
-              <PasswordInput placeholder="Private Key" errorMessage="Please key in a valid Private Key" :showError="showPrivateKeyError" v-model="privateKey" icon="lock" :disabled="disabledPrivateKey" />
+              <PasswordInput :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('delegate.entervalidpk')" :showError="showPrivateKeyError" v-model="privateKey" icon="lock" :disabled="disabledPrivateKey" />
               <div class="mt-10">
                 <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput">{{$t('signin.clear')}}</button>
                 <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" :disabled="disableConfirm" @click="linkPrivateKey()">{{$t('delegate.confirm')}}</button>
@@ -52,11 +52,12 @@ import { ChainUtils } from "@/util/chainUtils"
 import { ChainAPICall } from "@/models/REST/chainAPICall"
 import { WalletUtils } from "@/util/walletUtils";
 import { walletState } from '@/state/walletState';
-
+import {useI18n} from 'vue-i18n'
 export default{
   name: 'SelectAccountTypeModal',
 
   setup(){
+    const {t} = useI18n();
     const privateKey = ref('');
     const toggleModal = ref(false);
     const err = ref(false);
@@ -93,7 +94,7 @@ export default{
           console.log(accountInfo.accountType)
           emitter.emit('FROM PRIVATE KEY', accountDetail);    
         } else {
-          err.value = "Private key not fulfilled link account requirement"
+          err.value = t('delegate.linkerror')
         }
       } catch(error) {
           if(error == "HttpError: HTTP request failed"){

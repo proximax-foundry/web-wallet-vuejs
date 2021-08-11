@@ -4,7 +4,7 @@
       <h1 class="text-gray-800 font-normal text-txl mt-5">{{$t('deletewallet.wallettodelete')}}:</h1>
       <div class="mt-2 text-xl">{{ name }}</div>
       <h1 class="text-gray-800 font-normal text-txl mt-5">Network:</h1>
-      <div class="mt-2 text-xl">{{ networkState.chainNetworkName }}</div>
+      <div class="mt-2 text-xl">{{ networkName }}</div>
       <p class="mt-6">{{$t('deletewallet.accountsavailable')}}:</p>
       <div class="bg-gray-200 rounded-2xl text-left p-5 w-full lg:w-9/12 inline-block mt-5" v-if="accountsList.length > 0">
         <div v-for="i in accountsList" :key="i.address">
@@ -15,7 +15,7 @@
       <div class="my-5">{{$t('deletewallet.question')}}</div>
       <div class="mt-10">
         <router-link :to="{name: 'ViewWallets'}" class="default-btn mr-5 w-50 inline-block">{{$t('deletewallet.goback')}}</router-link>
-        <ConfirmDeleteWalletModal :name="name" />
+        <ConfirmDeleteWalletModal :name="name" :networkName="networkName" />
       </div>
     </div>
   </div>
@@ -25,12 +25,11 @@
 import { defineComponent, computed } from 'vue';
 import { Wallets } from "@/models/wallets";
 import { walletState } from "@/state/walletState"
-import { networkState } from "@/state/networkState";
 import ConfirmDeleteWalletModal from '@/modules/wallet/components/ConfirmDeleteWalletModal.vue';
 
 export default defineComponent({
   name: 'ViewWalletDeleteConfirmation',
-  props: ['name'],
+  props: ['name', 'networkName'],
   components: {
     ConfirmDeleteWalletModal
   },
@@ -42,7 +41,7 @@ export default defineComponent({
 
   setup(p){
     const accountsList = computed(() =>{
-      var w = walletState.wallets.filterByNetworkNameAndName( networkState.chainNetworkName, p.name);
+      var w = walletState.wallets.filterByNetworkNameAndName( p.networkName, p.name);
       if(w){
         return w.accounts;
       }else{
@@ -51,8 +50,7 @@ export default defineComponent({
     });
 
     return {
-      accountsList,
-      networkState,
+      accountsList
     };
   },
 });
