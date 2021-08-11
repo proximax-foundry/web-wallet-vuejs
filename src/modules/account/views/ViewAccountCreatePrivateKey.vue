@@ -63,7 +63,7 @@ export default {
         privKey.value.match(privKeyPattern)
       )
     );
-    const walletName = computed(()=>walletState.currentLoggedInWallet.name)
+    const walletName = walletState.currentLoggedInWallet.name
     const create = () => {
     const verifyExistingAccountName = walletState.currentLoggedInWallet.accounts.find((element) => element.name == accountName.value);
       if(!verifyExistingAccountName) {

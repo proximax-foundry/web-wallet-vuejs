@@ -149,7 +149,7 @@ export default {
     const disabledClear = ref(false);
     const disabledSelectAsset = ref(false);
     const disabledSelectIncreaseDecrease = ref(false);
-    const walletName = computed(()=>walletState.currentLoggedInWallet.name)
+    const walletName = walletState.currentLoggedInWallet.name
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
 

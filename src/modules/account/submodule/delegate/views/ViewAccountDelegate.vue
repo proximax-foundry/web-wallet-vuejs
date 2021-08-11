@@ -86,7 +86,7 @@ export default {
         walletPassword.value.match(passwdPattern)
       )
     );
-    const walletName = computed(()=>walletState.currentLoggedInWallet.name)
+    const walletName = walletState.currentLoggedInWallet.name
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");

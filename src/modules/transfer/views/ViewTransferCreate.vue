@@ -228,7 +228,7 @@ export default {
     const disablePassword = computed(() => disableAllInput.value);
     const cosignerBalanceInsufficient = ref(false);
 
-    const walletName = computed(()=>walletState.currentLoggedInWallet.name) 
+    const walletName = walletState.currentLoggedInWallet.name
     const currencyName = computed(
       () => networkState.currentNetworkProfile.network.currency.name
     );

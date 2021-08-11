@@ -164,7 +164,7 @@ export default {
     const durationOption =ref('month');
     const duration = ref('1');
     const showDurationErr = ref(false);
-    const walletName = computed(()=>walletState.currentLoggedInWallet.name)
+    const walletName = walletState.currentLoggedInWallet.name
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
     const durationCheckDisabled = ref(false);

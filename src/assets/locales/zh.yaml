@@ -251,7 +251,7 @@ services:
   assetmessage: "这个账户没有任何可以修改供应的资产."
   properties: "产权"
   filemessage: "文件必须是证明格式的，以便进行审计"
-  fileexample: "文件名 --Apostille TX 2c8b443e97b2636a4b9cce8de65aef6ad12cd360f54b7bac31c52cb04cddc753 --日期 YYYY-MM-DD.pdf"
+  fileexample: "Filename --Apostille TX 2c8b443e97b2636a4b9cce8de65aef6ad12cd360f54b7bac31c52cb04cddc753 --Date YYYY-MM-DD.pdf"
   fileforprocessing: "需要进行处理的文件"
   file: "文件"
   mycomputer: "我的电脑"
