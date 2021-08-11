@@ -123,7 +123,7 @@ accounts:
   cosigwarning1: "This account no longer belongs to this wallet"
   cosigwarning2: "You are not a cosigner of the account"
   cosigwarning3: "Requires a valid cosigner to edit this account"
-  cosignaturyaccount: "Cosignatury for this account"
+  cosignaturyaccount: "Cosignaturies for this account"
   balancedescription: "{value} требуется для покрытия блокировки средств"
   ismultisig: "Является мультиподписью"
   partial: "Частичный"

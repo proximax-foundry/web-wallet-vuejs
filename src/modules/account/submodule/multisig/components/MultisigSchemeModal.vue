@@ -38,55 +38,57 @@
 
 <script>
 import { inject, ref } from 'vue';
-
+import {walletState} from '@/state/walletState'
+import { WalletUtils } from '@/util/walletUtils';
+import {Address, MultisigAccountGraphInfo} from  "tsjs-xpx-chain-sdk"
+import {Helper} from '@/util/typeHelper'
+import { networkState } from '@/state/networkState';
 export default{
   name: 'MultisigSchemeModal',
   props: ['multiSigAccount'],
 
   setup(p){
-    const toggleModal = ref(false);
-    const appStore = inject("appStore");
-    // console.log(p.multiSigAccount.multisigAccountGraphInfo)
+      const toggleModal = ref(false);
+    
+    //account
     let graph = [];
     let layer = [];
     let newlayer = [];
-    const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
-
-    p.multiSigAccount.multisigAccountGraphInfo.forEach( (multiSig, i) => {
+    const wallet = walletState.currentLoggedInWallet 
+    p.multiSigAccount.multisigInfo.forEach( (multiSig, i) => {
       let label;
       let accountName;
-      let account = wallet.accounts.find((element) => element.address === multiSig.account.address.address);
-      label = (multiSig.cosignatories.length>0)?'MULTISIG-':'Cosigner-';
-      accountName = (account) ? account.name : (label + multiSig.account.address.address.substr(-4));
-
-      // console.log(i+': ' + multiSig.account.address.address);
-      // first element
+      let account = wallet.accounts.find((element) => element.address ===  Address.createFromPublicKey(multiSig.publicKey, networkState.currentNetworkProfile.network.type).plain());
+      label = (multiSig.cosignaturies.length>0)?'MULTISIG-':'Cosigner-';
+      accountName = (account) ? account.name : (label + Address.createFromPublicKey(multiSig.publicKey, networkState.currentNetworkProfile.network.type).plain().substr(-4));
       if(i==0){
-        layer.push({ address: multiSig.account.address.address, name: accountName, label: label, cosign: multiSig.cosignatories });
+        layer.push({ address: Address.createFromPublicKey(multiSig.publicKey, networkState.currentNetworkProfile.network.type).plain(), name: accountName, label: label, cosign: multiSig.cosignaturies });
         graph.push(layer);
       }else{
         layer.forEach((layer) => {
-          if(layer.cosign.find((element) => element.address.address === multiSig.account.address.address)){
-            newlayer.push({address: multiSig.account.address.address, name: accountName, label: label, cosign: multiSig.cosignatories });
+          if(layer.cosign.find((element) => Address.createFromPublicKey(element, networkState.currentNetworkProfile.network.type).plain() === Address.createFromPublicKey(multiSig.publicKey, networkState.currentNetworkProfile.network.type).plain())){
+            newlayer.push({address: Address.createFromPublicKey(multiSig.publicKey, networkState.currentNetworkProfile.network.type).plain(), name: accountName, label: label, cosign: multiSig.cosignaturies });
           }else{
             layer = newlayer;
             graph.push(layer);
             newlayer = [];
-            newlayer.push({address: multiSig.account.address.address, name: accountName, label: label, cosign: multiSig.cosignatories });
+            newlayer.push({address:Address.createFromPublicKey(multiSig.publicKey, networkState.currentNetworkProfile.network.type).plain(), name: accountName, label: label, cosign: multiSig.cosignaturies });
           }
         });
       }
-      // console.log(graph)
     });
     layer = newlayer;
     graph.push(layer);
-
+ 
+    
     return {
       graph,
       toggleModal,
     }
   }
-}
+}     
+   
+    
 </script>
 <style lang="scss" scoped>
 

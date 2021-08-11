@@ -61,6 +61,10 @@ import Multiselect from '@vueform/multiselect';
 import { computed, inject, ref } from "vue";
 import { startListening, stopListening } from '@/util/listener.js';
 import { useToast } from "primevue/usetoast";
+import { networkState } from '@/state/networkState';
+import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
+import { walletState } from '@/state/walletState';
+import {WalletUtils} from '@/util/walletUtils'
 // import { DataBridgeService } from '../util/dataBridge.js';
 
 export default {
@@ -72,7 +76,9 @@ export default {
 
   setup() {
     const toast = useToast();
-    const chainNetwork = inject("chainNetwork");
+   /*  const appStore = inject("appStore");
+    const siriusStore = inject("siriusStore");
+    const chainNetwork = inject("chainNetwork"); */
     const showSelectTitle = ref(false);
     // const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
     const borderColor = ref('border border-gray-300');
@@ -83,28 +89,32 @@ export default {
 
     const options = computed(() => {
       let nodeList = [];
-      chainNetwork.getChainNodes().forEach((node) => {
+      
+     networkState.currentNetworkProfile.apiNodes.forEach((node) => {
         // let link = (location.protocol == "http:" ? node.protocol : node.sslProtocol) + "://" + node.hostname + (location.protocol == "http:" ?(':' + node.port):'');
-        nodeList.push({ value: node, name: siriusStore._buildAPIEndpointURL(node) });
+        nodeList.push({ value: node, name: NetworkStateUtils.buildAPIEndpointURL(node) });
       });
       return nodeList;
     });
 
-    const currentNode = computed(() => siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
-    const blockHeight = computed(() => siriusStore.state.blockHeight);
+    const currentNode = computed(() =>  NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint))
+    const blockHeight = computed(() => networkState.currentNetworkProfileConfig.chainHeight);
 
     const makeNodeSelection = (e) => {
-      if(e != siriusStore.state.selectedChainNode){
+      if(e != networkState.selectedAPIEndpoint){
         showSelectTitle.value = true;
-        chainNetwork.updateChainNode(e);
-        stopListening();
-        const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
-        startListening(walletSession.accounts);
-        appStore.getXPXBalance(walletSession.name, siriusStore);
+        NetworkStateUtils.updateChainNode(e)
+        /* stopListening(); */
+       
+       /*  startListening(walletSession.accounts); */
+        WalletUtils.getTotalBalanceWithCurrentNetwork();
         toast.add({severity:'success', summary: 'Services', detail: 'Node updated', group: 'br', life: 5000});
+        console.log(networkState.currentNetworkProfile.network.type)
       }
     };
-
+   
+  
+    
     const closeSelection =() => {
       if(!selected.value){
         clearSelection();
@@ -119,7 +129,6 @@ export default {
     // dataBridgeInstance.connectBlockSocket();
 
     return {
-      appStore,
       // wallet,
       selected,
       showSelectTitle,

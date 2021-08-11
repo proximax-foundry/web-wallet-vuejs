@@ -80,16 +80,7 @@ export default{
     });
 
     const isMultiSig = computed(() => {
-      let isMulti = false;
-      if(p.account.isMultisign != undefined){
-        if(p.account.isMultisign != '' || p.account.isMultisign != null){
-          if(p.account.isMultisign.cosignatories != undefined){
-            if(p.account.isMultisign.cosignatories.length > 0){
-              isMulti = true;
-            }
-          }
-        }
-      }
+      let isMulti = p.account.getDirectParentMultisig().length? true: false
       return isMulti;
     });
 
