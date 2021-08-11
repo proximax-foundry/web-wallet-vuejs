@@ -77,7 +77,7 @@
         <div class="inline-block mt-10 w-full">
           <div class="grid xs:grid-cols-1 md:grid-cols-3">
             <div class="px-5 self-center">
-              <a class="block big-default-btn my-3 self-center w-full" @click="showPK = !showPK">{{ showPK?'Hide':'Show' }} {{$t('createprivatekeywallet.privatekey')}}</a>
+              <a class="block big-default-btn my-3 self-center w-full" @click="showPK = !showPK">{{ showPK? $t('createsuccessful.hide'):$t('createsuccessful.show') }} {{$t('createprivatekeywallet.privatekey')}}</a>
             </div>
             <div class="px-5">
               <a class="block big-default-btn my-3 self-center w-full">{{$t('createsuccessful.savewalletpaper')}}</a>
@@ -104,7 +104,7 @@ import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 import { ChainUtils } from '@/util/chainUtils';
 import { networkState } from "@/state/networkState";
 import { walletState } from "@/state/walletState";
-
+import {useI18n} from 'vue-i18n'
 export default defineComponent({
   name: 'ViewWalletCreatePrivateKey',
   components: {
@@ -118,6 +118,7 @@ export default defineComponent({
   },
 
   setup(){
+    const {t} = useI18n();
     const toast = useToast();
     const selectedNetwork = computed(()=> ChainUtils.getNetworkType(networkState.chainNetwork));
     const selectedNetworkType = computed(()=> ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
@@ -159,7 +160,7 @@ export default defineComponent({
       let wallets = new Wallets();
 
       if(wallets.filterByNetworkNameAndName(selectedNetworkName.value, walletName.value)){
-        err.value = "Wallet name is already taken";
+        err.value = t('scriptvalues.walletnametaken');
       }else{
         let password = WalletUtils.createPassword(passwd.value);
 

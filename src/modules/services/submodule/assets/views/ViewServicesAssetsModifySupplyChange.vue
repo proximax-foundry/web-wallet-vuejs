@@ -59,16 +59,16 @@
           </div>
           <div class="text-left p-3 pb-0 border-l-8 border-gray-100 mb-5">
             <div class="bg-gray-100 rounded-2xl p-3">
-              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">Balance: <span class="text-xs">{{ balance }} XPX</span></div>
+              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">{{$t('services.balance')}}: <span class="text-xs">{{ balance }} XPX</span></div>
             </div>
           </div>
-          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select asset" errorMessage="" ref="assetOption" noOptionsText="No asset for this account" v-model="selectAsset" :options="assetOptions" @show-selection="changeAsset" :disabled="disabledSelectAsset" />
-          <SelectInputPlugin selectDefault="0" showSelectTitleProp="true" placeholder="Increase or decrease" errorMessage="" v-model="selectIncreaseDecrease" :options="increaseDecreaseOption()" :disabled="disabledSelectIncreaseDecrease" />
-          <SupplyInput :disabled="disabledSupply" v-model="supply" title="Quantity of Increase/Decrease" :balance="balanceNumber" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" />
+          <SelectInputPlugin showSelectTitleProp="true" :placeholder="$t('services.selectasset')" errorMessage="" ref="assetOption" :noOptionsText="$t('services.noasset')" v-model="selectAsset" :options="assetOptions" @show-selection="changeAsset" :disabled="disabledSelectAsset" />
+          <SelectInputPlugin selectDefault="0" showSelectTitleProp="true" :placeholder="$t('services.addminus')" errorMessage="" v-model="selectIncreaseDecrease" :options="increaseDecreaseOption()" :disabled="disabledSelectIncreaseDecrease" />
+          <SupplyInput :disabled="disabledSupply" v-model="supply" :title="$t('services.quantityoption')" :balance="balanceNumber" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{ transactionFee }} XPX</div>
           </div>
-          <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
+          <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
             <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">{{$t('signin.clear')}}</button>
             <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="modifyMosaic()">{{$t('welcome.create')}}</button>
@@ -126,7 +126,7 @@ import { Helper } from '@/util/typeHelper';
 import { ChainUtils } from '@/util/chainUtils';
 import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
-
+import {useI18n} from 'vue-i18n' 
 export default {
   name: 'ViewServicesAssetsModifySupplyChange',
   components: {
@@ -135,6 +135,7 @@ export default {
     SelectInputPlugin,
   },
   setup(){
+    const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const assetOption = ref(null);
@@ -148,7 +149,7 @@ export default {
     const disabledClear = ref(false);
     const disabledSelectAsset = ref(false);
     const disabledSelectIncreaseDecrease = ref(false);
-
+    const walletName = walletState.currentLoggedInWallet.name
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
 
@@ -249,8 +250,8 @@ export default {
 
     const increaseDecreaseOption = () => {
       let action = [];
-      action.push({value: 0, label: 'Decrease'});
-      action.push({value: 1, label: 'Increase'});
+      action.push({value: 0, label: t('services.decrease')});
+      action.push({value: 1, label: t('services.increase')});
       return action;
     };
 
@@ -382,6 +383,7 @@ export default {
       isNotCosigner,
       disabledSelectAsset,
       disabledSelectIncreaseDecrease,
+      walletName
     }
   },
 

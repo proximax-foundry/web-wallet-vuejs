@@ -72,8 +72,6 @@ export default {
 
   setup() {
     const toast = useToast();
-    const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
     const chainNetwork = inject("chainNetwork");
     const showSelectTitle = ref(false);
     // const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);

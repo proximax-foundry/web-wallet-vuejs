@@ -60,7 +60,7 @@
   </header>
 </template>
 
-<script>
+<script> 
 import { computed, defineComponent, getCurrentInstance, ref, watch } from "vue";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
@@ -80,6 +80,7 @@ import { listenerState} from "@/state/listenerState";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { TransactionType } from "tsjs-xpx-chain-sdk";
 import { WalletUtils } from "@/util/walletUtils";
+import {useI18n} from 'vue-i18n'
 
 export default defineComponent({
   components: {
@@ -96,6 +97,7 @@ export default defineComponent({
     };
   },
   setup() {
+    const {t} = useI18n();
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -132,7 +134,7 @@ export default defineComponent({
     const chainsNetworkOption = computed(()=>{
 
       return [{
-        label: 'Networks',
+        label: t('Header.network'),
         items: chainsNetworks.value
       }];
     });

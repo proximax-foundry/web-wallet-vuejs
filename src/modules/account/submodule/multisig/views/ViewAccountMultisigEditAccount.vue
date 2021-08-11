@@ -148,7 +148,7 @@ import {
     PublicAccount
 } from "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
-
+import {useI18n} from 'vue-i18n'
 export default {
   name: 'ViewMultisigEditAccount',
   components: {
@@ -163,6 +163,7 @@ export default {
     name: String,
   },
   setup(p){
+    const {t} = useI18n();
     const router = useRouter();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -208,7 +209,7 @@ export default {
           if(accountDetails.balance > 10.0445){
             cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX' });
           }else{
-            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX - Insufficient balance', disabled: true });
+            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX -' + t('accounts.insufficientbalance'), disabled: true });
           }
         });
       }
@@ -225,7 +226,7 @@ export default {
           if(accountDetails.balance > 10.0445){
             cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX' });
           }else{
-            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX - Insufficient balance', disabled: true });
+            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX -' + t('accounts.insufficientbalance'), disabled: true });
           }
         });
       }
@@ -304,7 +305,7 @@ export default {
       let modifyStatus = multiSign.modifyMultisigAccount(coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value, signer, acc, passwd.value);
       // console.log(modifyStatus);
       if(!modifyStatus){
-        err.value = 'Invalid wallet password';
+        err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
         err.value = '';
@@ -332,7 +333,7 @@ export default {
 
             const unique = Array.from(new Set(n));
             if(unique.length != n.length){
-              err.value = "Cosigner already exist";
+              err.value = t('scriptvalues.cosignerexists');
             }else{
               err.value = '';
             }
@@ -516,7 +517,7 @@ export default {
           setTimeout(()=> {
             emitter.emit('NOTIFICATION', {
               status: true,
-              message: 'Public key is not available for this address.',
+              message: t('scriptvalues.publickeyvalidation'),
               notificationType: 'warn'
             });
           }, 500);
