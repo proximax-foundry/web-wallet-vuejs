@@ -57,7 +57,7 @@
       <div class="mt-16">
         <div v-for="(coSignAddress, index) in coSign" :key="index" class="flex">
           <font-awesome-icon icon="trash-alt" class="w-4 h-4 text-gray-500 hover:text-gray-400 cursor-pointer mr-3 mt-3" @click="deleteCoSigAddressInput(index)"></font-awesome-icon>
-          <TextInput placeholder="Cosignatory Account Address or Public Key" errorMessage="Valid Cosignatory Account Address or Public Key is required" :showError="showAddressError[index]" v-model="coSign[index]" icon="key" class="flex-grow" />
+          <TextInput :placeholder="$t('accounts.cosigplaceholder')" :errorMessage="$t('accounts.addressvalidation')" :showError="showAddressError[index]" v-model="coSign[index]" icon="key" class="flex-grow" />
           <AddCosignModal :cosignPublicKeyIndex="index" :selectedAddress="selectedAddresses" />
         </div>
         <div class="text-lg" v-if="!coSign.length">{{$t('accounts.cosigmessage')}}</div>
@@ -79,7 +79,7 @@
           </div>
         </div>
       </div>
-      <PasswordInput placeholder="Enter Wallet Password" errorMessage="Wallet password is required to convert to MultiSig Account" :showError="showPasswdError" v-model="passwd" icon="lock" :disabled="disabledPassword" />
+      <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.multisigpasswordvalidation')" :showError="showPasswdError" v-model="passwd" icon="lock" :disabled="disabledPassword" />
       <div class="mt-10">
         <button type="button" class="default-btn mr-5 focus:outline-none" @click="clear()">{{$t('signin.clear')}}</button>
         <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="convertAccount()" :disabled="disableSend">{{$t('accounts.send')}}</button>
@@ -102,6 +102,7 @@ import {
     PublicAccount
 } from "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
+import {useI18n} from 'vue-i18n'
 export default {
   name: 'ViewConvertAccountMultisig',
   components: {
@@ -113,6 +114,7 @@ export default {
     name: String,
   },
   setup(p){
+    const {t} = useI18n();
     const router = useRouter();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -168,7 +170,7 @@ export default {
     const convertAccount = () => {
       let convertstatus = multiSign.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.name, passwd.value);
       if(!convertstatus){
-        err.value = 'Invalid wallet password';
+        err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
         err.value = '';
@@ -191,7 +193,7 @@ export default {
             showAddressError.value[i] = false;
             const unique = Array.from(new Set(n));
             if(unique.length != n.length){
-              err.value = "Cosigner already exist";
+              err.value = t('scriptvalues.cosignerexists');
             }else{
               err.value = '';
             }
@@ -291,8 +293,11 @@ export default {
       }
     });
     // check if onPartial
-    let onPartialBoolean = multiSign.onPartial(PublicAccount.createFromPublicKey(acc.publicKey,networkState.currentNetworkProfile.network.type))
-      onPartial.value = onPartialBoolean;
+    multiSign.onPartial(PublicAccount.createFromPublicKey(acc.publicKey,networkState.currentNetworkProfile.network.type)).then(verify=>
+      onPartial.value = verify
+    )
+    
+     ;
     // check if this address has cosigner
     try{
       let verifyMultisig = multiSign.checkIsMultiSig(acc.address)
@@ -312,7 +317,7 @@ export default {
           setTimeout(()=> {
             emitter.emit('NOTIFICATION', {
               status: true,
-              message: 'Public key is not available for this address.',
+              message: t('scriptvalues.publickeyvalidation'),
               notificationType: 'warn'
             });
           }, 500);

@@ -22,7 +22,7 @@
                     <div class="mt-2">[title]</div>
                   </div>
                   <div class="mt-5">
-                    <div>{{$t('dashboard.receipient')}}:</div>
+                    <div>{{$t('dashboard.recipient')}}:</div>
                     <div class="mt-2">[address]</div>
                   </div>
                 </div>

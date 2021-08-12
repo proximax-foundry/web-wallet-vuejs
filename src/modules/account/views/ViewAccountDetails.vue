@@ -14,7 +14,7 @@
           <div class="text-xs font-bold mb-1">{{$t('accounts.name')}}:</div>
           <div v-if="showName">{{ accountNameDisplay }}</div>
           <div v-else>
-            <TextInput placeholder="Account Name" errorMessage="Account name is required" v-model="accountName" icon="wallet" />
+            <TextInput :placeholder="$t('swap.accountname')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
           </div>
         </div>
         <div class="inline-block ml-2">
@@ -53,7 +53,7 @@
         </div>
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
           <div class="text-left w-full relative">
-            <div class="text-xs font-bold mr-2"><div class="mb-2 inline-block">{{$t('createprivatekeywallet.privatekey')}}:</div><div v-if="!showPwPK && !showPK">**************</div><PasswordInput v-if="showPwPK && !showPK" placeholder="Insert wallet password" errorMessage="Wallet password required." :showError="showPasswdError" icon="lock" v-model="walletPasswd" /></div>
+            <div class="text-xs font-bold mr-2"><div class="mb-2 inline-block">{{$t('createprivatekeywallet.privatekey')}}:</div><div v-if="!showPwPK && !showPK">**************</div><PasswordInput v-if="showPwPK && !showPK" :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPasswd" /></div>
             <div class="absolute z-20 w-full h-full" v-if="showPK"></div>
             <div id="private" class="text-sm w-full outline-none bg-gray-100 z-10" type="text" :copyValue="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
           </div>
@@ -65,7 +65,7 @@
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
           <div class="text-left w-full relative">
             <div class="text-sm font-bold mb-1">{{$t('accounts.swap')}}</div>
-            <PasswordInput v-if="showPwSwap" placeholder="Insert wallet password" errorMessage="Wallet password required." :showError="showPasswdError" icon="lock" v-model="walletPasswdSwap" />
+            <PasswordInput v-if="showPwSwap" :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPasswdSwap" />
           </div>
           <button class="default-btn w-36" @click="showPwSwap = !showPwSwap" v-if="!showPwSwap">{{$t('accounts.enable')}}</button>
           <button class="default-btn w-36" @click="verifyWalletPwSwap()" v-if="showPwSwap">{{$t('accounts.submit')}}</button>
@@ -93,6 +93,7 @@ import {walletState} from "@/state/walletState";
 import {Helper} from "@/util/typeHelper";
 import {networkState} from "@/state/networkState";
 import {WalletUtils} from "@/util/walletUtils";
+import {useI18n} from 'vue-i18n'
 
 export default {
   name: "ViewAccountDetails",
@@ -105,6 +106,7 @@ export default {
   },
 
   setup(p) {
+    const {t} = useI18n();
     const toast = useToast();
     const router = useRouter();
 
@@ -165,12 +167,12 @@ export default {
           accountNameDisplay.value = accountName.value;
           err.value = "";
         } else if (exist_account || exist_other_account) {
-          err.value = "Account name is already taken";
+          err.value = t('scriptvalues.accountnametaken');
         } else {
-          err.value = "Fail to change account name";
+          err.value = t('scriptvalues.accountnamevalidation');
         }
       } else {
-        err.value = "Please insert account name";
+        err.value = t('scriptvalues.inputaccountname');
       }
     };
 

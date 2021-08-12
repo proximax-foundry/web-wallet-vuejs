@@ -8,7 +8,7 @@ import {WalletUtils} from '@/util/walletUtils'
 
 const verifyPublicKey = async(add: string):Promise<boolean> => {
   const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
-   let verify = new Promise<boolean>((resolve,reject)=>{
+   let verify = new Promise<boolean>((resolve,reject)=>{ 
     const accountPublicKey = WalletUtils.getAccInfo(add);
     accountPublicKey.then(accountinfo => {
       if (accountinfo.publicKey === invalidPublicKey) {

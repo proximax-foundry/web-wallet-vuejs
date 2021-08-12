@@ -14,8 +14,8 @@
             <div class="inline-block">
               <div class="text-xs font-bold mb-1">{{ accountNameDisplay }}</div>
               <div>{{ pretty(acc.address) }}</div>
-              <div class="text-tsm mt-5" v-if="getWalletCosigner().list.length==1">{{$t('accounts.cosignerinwallet')}}:
-                <span class="font-bold" v-if="getWalletCosigner().list.length == 1">{{ getWalletCosigner().list[0].name }}</span>
+              <div class="text-tsm mt-5" v-if="getWalletCosigner().length==1">{{$t('accounts.cosignerinwallet')}}:
+                <span class="font-bold" v-if="getWalletCosigner().length == 1">{{ getWalletCosigner()[0].name }}</span>
               </div>
             </div>
             <div class="inline-block">
@@ -27,14 +27,14 @@
           <transition name="slide">
             <div v-if="showCosigners">
               <div class="text-center text-md mb-5">{{$t('accounts.cosignaturyaccount')}}</div>
-              <div v-for="(cosigner, index) in acc.isMultisign.cosignatories" :key="index" class="mb-2 rounded-2xl px-5 py-3 flex justify-between" :class="`${(checkRemoval(cosigner.publicKey))?'bg-yellow-100':'bg-white'}`">
+              <div v-for="(cosigner, index) in cosignaturies" :key="index" class="mb-2 rounded-2xl px-5 py-3 flex justify-between" :class="`${(checkRemoval(cosigner))?'bg-yellow-100':'bg-white'}`">
                 <div>
-                  <div class="font-bold" v-if="wallet.accounts.find((acc) => acc.publicAccount.publicKey == cosigner.publicKey)">{{ wallet.accounts.find((acc) => acc.publicAccount.publicKey == cosigner.publicKey).name }} <span v-if="checkRemoval(cosigner.publicKey)" class="font-normal text-xs text-gray-500">({{$t('accounts.removing')}})</span></div>
-                  <div class="font-bold" v-else>Cosigner-{{ cosigner.address.address.substr(-4) }} <span v-if="checkRemoval(cosigner.publicKey)" class="font-normal text-xs text-gray-500">({{$t('accounts.removing')}})</span></div>
-                  <div class="text-tsm">{{ pretty(cosigner.address.address) }}</div>
+                  <div class="font-bold" v-if="wallet.accounts.find((acc) => acc.publicKey === cosigner)">{{ wallet.accounts.find(acc => acc.publicKey == cosigner).name }} <span v-if="checkRemoval(wallet.accounts.find((acc) => acc.address == cosigner).publicKey)" class="font-normal text-xs text-gray-500">({{$t('accounts.removing')}})</span></div>
+                  <div class="font-bold" v-else>Cosigner-{{ cosigneraddress(cosigner) }} <span v-if="checkRemoval(cosigner)" class="font-normal text-xs text-gray-500">({{$t('accounts.removing')}})</span></div>
+                  <div class="text-tsm">{{ pretty(cosigner) }}</div>
                 </div>
-                <font-awesome-icon v-if="(!checkRemoval(cosigner.publicKey))" icon="trash-alt" class="w-4 h-4 self-center" :class="`${(onPartial || fundStatus || !isCoSigner)?'text-gray-200 cursor-auto':'text-gray-400 hover:text-gray-600 cursor-pointer'}`" @click="addToRemovalList(cosigner.publicKey)"></font-awesome-icon>
-                <a v-else class="self-center text-gray-400 hover:text-gray-600" @click="restoreFromRemovalList(cosigner.publicKey)"><font-awesome-icon icon="trash-restore" class="inline-block w-4 h-4"></font-awesome-icon> <span class="text-xs">{{$t('accounts.restore')}}</span></a>
+                <font-awesome-icon v-if="(!checkRemoval(cosigner.publicKey))" icon="trash-alt" class="w-4 h-4 self-center" :class="`${(onPartial || fundStatus || !isCoSigner)?'text-gray-200 cursor-auto':'text-gray-400 hover:text-gray-600 cursor-pointer'}`" @click="addToRemovalList(cosigner)"></font-awesome-icon>
+                <a v-else class="self-center text-gray-400 hover:text-gray-600" @click="restoreFromRemovalList(cosigner)"><font-awesome-icon icon="trash-restore" class="inline-block w-4 h-4"></font-awesome-icon> <span class="text-xs">{{$t('accounts.restore')}}</span></a>
 
               </div>
             </div>
@@ -53,7 +53,7 @@
       <div class="flex justify-between p-4 rounded-xl border-red-800 border-2 bg-white mb-8" v-if="!isMultisig">
         <div class="text-center w-full">
           <div class="border border-gray-500 rounded-full w-8 h-8 inline-block relative">
-            <font-awesome-icon icon="times" class="w-5 h-5 text-gray-500 inline-block absolute" style="top:5px; right: 5px;"></font-awesome-icon>
+            <font-awesome-icon icon="times" class="w-5 h-5 text-gray-500 inline-block absolute" style="top:5px; right: 10px;"></font-awesome-icon>
           </div>
           <div class="font-bold text-sm">{{$t('accounts.cosigwarning1')}}</div>
         </div>
@@ -61,7 +61,7 @@
       <div class="flex justify-between p-4 rounded-xl bg-red-100 mb-8" v-if="!isCoSigner">
         <div class="text-center w-full">
           <div class="border border-gray-500 rounded-full w-8 h-8 inline-block relative">
-            <font-awesome-icon icon="times" class="w-5 h-5 text-gray-500 inline-block absolute" style="top:5px; right: 5px;"></font-awesome-icon>
+            <font-awesome-icon icon="times" class="w-5 h-5 text-gray-500 inline-block absolute" style="top:5px; right: 10px;"></font-awesome-icon>
           </div>
           <div class="font-bold text-sm">{{$t('accounts.cosigwarning2')}}</div>
           <p class="text-xs mt-3">{{$t('accounts.cosigwarning3')}}</p>
@@ -70,7 +70,7 @@
       <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 mb-8" v-if="onPartial && isCoSigner">
         <div class="text-center w-full">
           <div class="w-8 h-8 inline-block relative">
-            <font-awesome-icon icon="bell" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:5px; right: 5px;"></font-awesome-icon>
+            <font-awesome-icon icon="bell" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:5px; right: 10px;"></font-awesome-icon>
           </div>
           <div class="font-bold text-sm">{{$t('accounts.partial')}}</div>
           <p class="text-xs mt-3">{{$t('accounts.partialdescription')}}</p>
@@ -116,7 +116,7 @@
             </div>
           </div>
         </div>
-        <div v-if="getWalletCosigner().list.length > 1">
+        <div v-if="getWalletCosigner().length > 1">
           <SelectInputPlugin placeholder="Main cosignatory to sign" errorMessage="" v-model="selectMainCosign" :options="selectCosign" />
           <MultiSelectInputPlugin placeholder="Also I will sign with these cosignatories" errorMessage="" v-model="selectOtherCosign" :options="selectOtherCosignerOptions" />
         </div>
@@ -145,10 +145,10 @@ import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import MultiSelectInputPlugin from '@/components/MultiSelectInputPlugin.vue';
 import { walletState } from '@/state/walletState';
 import {
-    PublicAccount
+    PublicAccount,Address
 } from "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
-
+import {useI18n} from 'vue-i18n'
 export default {
   name: 'ViewMultisigEditAccount',
   components: {
@@ -163,6 +163,7 @@ export default {
     name: String,
   },
   setup(p){
+    const {t} = useI18n();
     const router = useRouter();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -194,13 +195,22 @@ export default {
 
     // get account details initialization
     const acc =  walletState.currentLoggedInWallet.accounts.find(element => element.name ===p.name);
+    const cosigneraddress = cosigner => Address.createFromPublicKey(cosigner, networkState.currentNetworkProfile.network.type).plain().substr(-4)
+    const cosignaturies = computed(()=>{
+      let cosignaturies = []
+      acc.multisigInfo.filter(element=>element.level === 1).forEach(cosigner=> {
+            cosignaturies.push(cosigner.publicKey) 
+          })
+          console.log(cosignaturies)
+          return cosignaturies     
+    })
 
     if(acc == undefined){
       router.push({ name: "ViewAccountDisplayAll"});
     }
 
     const selectCosign = computed(() => {
-      const list = getWalletCosigner().list;
+      const list = getWalletCosigner();
       const cosigner = [];
       if(list.length > 1){
         list.forEach((element) => {
@@ -208,7 +218,7 @@ export default {
           if(accountDetails.balance > 10.0445){
             cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX' });
           }else{
-            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX - Insufficient balance', disabled: true });
+            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX -' + t('accounts.insufficientbalance'), disabled: true });
           }
         });
       }
@@ -216,7 +226,7 @@ export default {
     });
 
     const selectOtherCosignerOptions = computed(() => {
-      const list = getWalletCosigner().list;
+      const list = getWalletCosigner();
       const cosigner = [];
       if(list.length > 1){
         let filtered_list = list.filter(element => element.address != selectMainCosign.value);
@@ -225,7 +235,7 @@ export default {
           if(accountDetails.balance > 10.0445){
             cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX' });
           }else{
-            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX - Insufficient balance', disabled: true });
+            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX -' + t('accounts.insufficientbalance'), disabled: true });
           }
         });
       }
@@ -304,7 +314,7 @@ export default {
       let modifyStatus = multiSign.modifyMultisigAccount(coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value, signer, acc, passwd.value);
       // console.log(modifyStatus);
       if(!modifyStatus){
-        err.value = 'Invalid wallet password';
+        err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
         err.value = '';
@@ -332,7 +342,7 @@ export default {
 
             const unique = Array.from(new Set(n));
             if(unique.length != n.length){
-              err.value = "Cosigner already exist";
+              err.value = t('scriptvalues.cosignerexists');
             }else{
               err.value = '';
             }
@@ -481,7 +491,7 @@ export default {
     // get cosigners in this wallet for this multisig;
     const cosigners = computed(() => {
       let cosigner = getWalletCosigner();
-      return cosigner.list;
+      return cosigner;
     });
 
     setTimeout(()=> {
@@ -516,7 +526,7 @@ export default {
           setTimeout(()=> {
             emitter.emit('NOTIFICATION', {
               status: true,
-              message: 'Public key is not available for this address.',
+              message: t('scriptvalues.publickeyvalidation'),
               notificationType: 'warn'
             });
           }, 500);
@@ -593,6 +603,8 @@ export default {
       selectOtherCosign,
       validateApproval,
       validateDelete,
+      cosignaturies,
+      cosigneraddress
     };
   },
 }

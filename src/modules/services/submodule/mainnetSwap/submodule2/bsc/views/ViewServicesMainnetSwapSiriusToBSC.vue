@@ -218,6 +218,9 @@ export default {
 
     const allAvailableAccounts = computed(()=>{
 
+      if(!walletState.currentLoggedInWallet){
+        return [];
+      }
       let accounts = walletState.currentLoggedInWallet.accounts.map(
         (acc)=>{ 
           return { 
