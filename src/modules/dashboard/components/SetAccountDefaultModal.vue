@@ -10,8 +10,8 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="closeModal()"></font-awesome-icon>
           </div>
           <div class="w-104">
-            <h1 class="default-title font-bold my-5">{{$t('NavigationMenu.Accounts')}}</h1>
-            <div class="mb-2">{{$t('deletewallet.accountsavailable')}}:</div>
+            <h1 class="default-title font-bold my-5">{{$t('common.account',2)}}</h1>
+            <div class="mb-2">{{$t('common.accountsAvailable')}}:</div>
             <div style="height: 400px; overflow-y: scroll">
               <div @click="selectAccount(defaultAccount.name, 0)" class="flex text-left p-2 py-2 text-gray-800 bg-blue-100 hover:bg-yellow-50 cursor-pointer">
                 <div>
@@ -19,8 +19,8 @@
                   <div class="text-sm mt-1">{{ defaultAccount.address }}</div>
                 </div>
                 <div class="self-center">
-                  <span class="text-xs font-normal ml-2 py-1 px-2 rounded bg-yellow-200">{{$t('accounts.default')}}</span> 
-                  <span class="text-xs font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(defaultAccount)">{{$t('accounts.multisig')}}</span>
+                  <span class="text-xs font-normal ml-2 py-1 px-2 rounded bg-yellow-200">{{$t('common.default')}}</span> 
+                  <span class="text-xs font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(defaultAccount)">{{$t('common.multisig')}}</span>
                 </div>
               </div>
               <div v-for="(account, index) in accounts" :key="index" @click="selectAccount(account.name, 0)" class="flex text-left p-2 py-2 text-gray-800 hover:bg-yellow-50 cursor-pointer" :class="`${ (index%2==0)?'bg-blue-50':'bg-blue-100' }`">
@@ -28,14 +28,14 @@
                   <div class="font-bold text-tsm">{{ account.name }}</div>
                   <div class="text-sm mt-1">{{ account.address }}</div>
                 </div>
-                <div class="self-center"><span class="text-xs font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(account)">{{$t('accounts.multisig')}}</span></div>
+                <div class="self-center"><span class="text-xs font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(account)">{{$t('common.multisig')}}</span></div>
               </div>
               <div v-for="(account, index) in otherAccounts" :key="index" @click="selectAccount(account.name, 1)" class="flex text-left p-2 py-2 text-gray-800 hover:bg-yellow-50 cursor-pointer" :class="`${ (index%2==0)?'bg-blue-50':'bg-blue-100' }`">
                 <div>
                   <div class="font-bold text-tsm">{{ account.name }}</div>
                   <div class="text-sm mt-1">{{ account.address }}</div>
                 </div>
-                <div class="self-center"><span class="text-xs font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(account)">{{$t('accounts.multisig')}}</span></div>
+                <div class="self-center"><span class="text-xs font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(account)">{{$t('common.multisig')}}</span></div>
               </div>
             </div>
           </div>

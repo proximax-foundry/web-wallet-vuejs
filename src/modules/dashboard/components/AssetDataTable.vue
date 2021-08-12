@@ -10,38 +10,38 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column field="owner" :header="$t('dashboard.owner')" >
+      <Column field="owner" :header="$t('common.owner')" >
         <template #body="{data}">
           <span class="uppercase">{{data.owner}}</span>
         </template>
       </Column>
-      <Column field="assetId" :header="$t('dashboard.assetid')" >
+      <Column field="assetId" :header="$t('dashboard.assetId')" >
         <template #body="{data}">
           <span class="uppercase">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="alias" :header="$t('dashboard.alias')" >
+      <Column field="alias" :header="$t('common.alias')" >
         <template #body="{data}">
           <diV v-for="value in data.alias" :key="value.idHex">
             <div>{{value.name}} - <span class="uppercase"> {{ value.idHex }} </span></div>
           </div>
         </template>
       </Column>
-      <Column field="quantity" :header="$t('dashboard.quantity')" >
+      <Column field="quantity" :header="$t('common.alias')" >
         <template #body="{data}">
           <span class="uppercase ">{{data.amount}}</span>
         </template>
       </Column>
-      <Column field="Active" :header="$t('dashboard.active')" >
+      <Column field="Active" :header="$t('common.active')" >
         <template #body="{data}">
           <span class="uppercase" :class="data.active ? 'text-green-500' : 'text-red-500'">{{ data.active ? 'true': 'false'}}</span>
         </template>
       </Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('common.noRecord')}}
       </template>
       <template #loading>
-         {{$t('dashboard.loadingmessage')}}
+         {{$t('dashboard.loadingMessage')}}
       </template>
     </DataTable>
   </div>

@@ -20,7 +20,7 @@
 
       <div class="text-xs py-2">
         <div class="font-bold">&copy; ProximaX 2021</div>
-        <div>{{$t('Footer.text')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold hover:underline">{{$t('Footer.link')}}</a>.</div>
+        <div>{{$t('common.helpdeskText')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold hover:underline">{{$t('common.helpdesk')}}</a>.</div>
       </div>
     </footer>
   </div>

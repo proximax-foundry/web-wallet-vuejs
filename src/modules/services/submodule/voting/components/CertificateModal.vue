@@ -10,19 +10,19 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="closeModal();"></font-awesome-icon>
           </div>
           <div>
-            <h1 class="default-title font-bold my-5">{{$t('vote.votingcertificate')}}</h1>
+            <h1 class="default-title font-bold my-5">{{$t('vote.votingCertificate')}}</h1>
             <div class="text-left md:justify-start md:flex md:items-stretch">
               <div class="block md:w-7/12 md:inline-block">
-                <div class="font-bold text-lg mb-5">{{$t('NavigationMenu.Transfer')}}&nbsp;&nbsp;<img src="@/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg" class="w-8 h-8 inline-block">&nbsp;&nbsp;<span class="text-red-500 ">{{$t('vote.sent')}}</span></div>
+                <div class="font-bold text-lg mb-5">{{$t('common.transfer')}}&nbsp;&nbsp;<img src="@/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg" class="w-8 h-8 inline-block">&nbsp;&nbsp;<span class="text-red-500 ">{{$t('common.sent')}}</span></div>
                 <div class="text-xs my-2">[ timestamp ]</div>
-                <div><span class="font-bold">{{$t('dashboard.effectivefee')}}:</span> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mx-2"><span class="text-xs">[ effectiveFee ]</span> <span class="text-sm">XPX</span></div>
+                <div><span class="font-bold">{{$t('common.effectiveFee')}}:</span> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mx-2"><span class="text-xs">[ effectiveFee ]</span> <span class="text-sm">XPX</span></div>
                 <div class="content">
                   <div>
-                    <div>{{$t('vote.polltitle')}}:</div>
+                    <div>{{$t('vote.pollTitle')}}:</div>
                     <div class="mt-2">[title]</div>
                   </div>
                   <div class="mt-5">
-                    <div>{{$t('dashboard.recipient')}}:</div>
+                    <div>{{$t('common.recipient')}}:</div>
                     <div class="mt-2">[address]</div>
                   </div>
                 </div>
@@ -36,18 +36,18 @@
                   </div>
                 </div>
                 <div class="p-4">
-                  <div class="font-bold text-xs mb-1 block">{{$t('dashboard.signer')}}:</div>
+                  <div class="font-bold text-xs mb-1 block">{{$t('common.signer')}}:</div>
                   <div class="w w-96 md:w-full">[ Signer ]</div>
-                  <div class="font-bold text-xs mb-1 block mt-3">{{$t('dashboard.signature')}}:</div>
+                  <div class="font-bold text-xs mb-1 block mt-3">{{$t('common.signature')}}:</div>
                   <div class="w w-96 md:w-full">[ Signature ]</div>
-                  <div class="font-bold text-xs mb-1 block mt-3">{{$t('dashboard.hash')}}:</div>
+                  <div class="font-bold text-xs mb-1 block mt-3">{{$t('common.hash')}}:</div>
                   <div class="w w-96 md:w-full">[ hash ]</div>
                 </div>
               </div>
             </div>
             <div class="mt-10">
-              <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50">{{$t('vote.view')}}</button>
-              <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50">{{$t('accounts.save')}}</button>
+              <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50">{{$t('common.view')}}</button>
+              <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50">{{$t('common.save')}}</button>
             </div>
           </div>
         </div>

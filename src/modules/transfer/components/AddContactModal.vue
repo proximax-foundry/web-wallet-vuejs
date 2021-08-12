@@ -8,33 +8,33 @@
             </font-awesome-icon>
           </div>
           <div class="w-104" v-if="isAddContactQues && !isSuccessAdded">
-            <h1 class="text-md my-5">{{$t('services.addcontact')}}</h1>
+            <h1 class="text-md my-5">{{$t('services.addContacts')}}</h1>
             <div>
               <button type="button" class="default-btn mr-5 focus:outline-none" @click="closeModal()">
-                {{$t('services.no')}}
+                {{$t('addressBook.false')}}
               </button>
               <button type="button" class="default-btn py-1" @click="proceed()">
-                {{$t('services.yes')}}
+                {{$t('addressBook.true')}}
               </button>
             </div>
           </div>
           <div class="w-104" v-if="!isAddContactQues && !isSuccessAdded">
             <h1 class="default-title font-bold my-10">
-              {{$t('services.addcontacts')}}
+              {{$t('services.addContacts')}}
             </h1>
             <form @submit.prevent="create" class="mt-10">
               <fieldset class="w-full">
                 <div class="error error_box mb-5" v-if="err != ''">
                   {{ err }}
                 </div>
-                <TextInput :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr"/>
-                <TextInput :placeholder="$t('createsuccessful.address')" v-model="address" icon="wallet" :showError="showAddErr" :disabled="true"/>
+                <TextInput :placeholder="$t('common.name')" :errorMessage="$t('addressBook.nameRequired')" v-model="contactName" icon="id-card-alt" :showError="showNameErr"/>
+                <TextInput :placeholder="$t('common.address')" v-model="address" icon="wallet" :showError="showAddErr" :disabled="true"/>
                 <div class="mt-10">
                   <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput()">
-                    {{$t('signin.clear')}}
+                    {{$t('common.clear')}}
                   </button>
                   <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="SaveContact()">
-                    {{$t('accounts.save')}}
+                    {{$t('common.save')}}
                   </button>
                 </div>
               </fieldset>
@@ -42,7 +42,7 @@
           </div>
           <div class="w-104" v-if="isSuccessAdded">
             <h1 class="text-md my-5">
-             {{$t('services.contact')}} <b>{{ contactName }}</b> {{$t('services.successfullysaved')}}
+             {{$t('common.contact',1)}} <b>{{ contactName }}</b> {{$t('addressBook.successfullySaved')}}
             </h1>
           </div>
         </div>

@@ -32,7 +32,7 @@
       </Column>
       <Column field="hash" header="Hash" headerStyle="width:150px"></Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('common.noRecord')}}
       </template>
     </DataTable>
     <PartialTransactionModal :showModal="showTransactionModel" :transaction="modalData" />

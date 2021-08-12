@@ -1,9 +1,9 @@
 <template>
   <div class="flex justify-between text-xs sm:text-sm">
-    <div><span class="text-gray-400">{{$t('services.attestation')}} ></span> <span class="text-blue-primary font-bold">{{$t('welcome.create')}}</span></div>
+    <div><span class="text-gray-400">{{$t('common.attestation')}} ></span> <span class="text-blue-primary font-bold">{{$t('common.create')}}</span></div>
     <div>
-      <router-link :to="{name: 'ViewServicesAttestationAudit'}" class="font-bold" active-class="accounts">{{$t('services.audit')}}</router-link> |
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
+      <router-link :to="{name: 'ViewServicesAttestationAudit'}" class="font-bold" active-class="accounts">{{$t('common.audit')}}</router-link> |
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('common.allServices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>
@@ -11,14 +11,14 @@
       <div class="flex-none">
         <div class="flex hover:bg-gray-200 p-0 sm:p-3 rounded-2xl cursor-pointer" @click="naviToProcessing">
           <div class="rounded-full flex w-10 h-10" :class="`${ isNext?'bg-gray-300':'bg-blue-primary' }`"><div class="self-center inline-block text-center w-full text-white">1</div></div>
-          <div class="inline-block self-center ml-3">{{$t('services.fileforprocessing')}}</div>
+          <div class="inline-block self-center ml-3">{{$t('attestation.fileForProcessing')}}</div>
         </div>
       </div>
       <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
       <div class="flex-none">
         <div class="flex hover:bg-gray-200 p-0 sm:p-3 rounded-2xl cursor-pointer" @click="naviToAttestation">
           <div class="rounded-full flex w-10 h-10" :class="`${ isNext?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white">2</div></div>
-          <div class="inline-block self-center ml-3">{{$t('services.attestation')}}</div>
+          <div class="inline-block self-center ml-3">{{$t('common.attestation')}}</div>
         </div>
       </div>
     </div>
@@ -37,25 +37,25 @@
                   </div>
                 </div>
               </div>
-              <div v-else class="self-center text-center w-full"><div><font-awesome-icon icon="cloud-upload-alt" class="text-gray-400 mr-2"></font-awesome-icon> <span class="text-sm text-gray-400">{{$t('services.uploadfile')}}</span></div></div>
+              <div v-else class="self-center text-center w-full"><div><font-awesome-icon icon="cloud-upload-alt" class="text-gray-400 mr-2"></font-awesome-icon> <span class="text-sm text-gray-400">{{$t('services.uploadFile')}}</span></div></div>
                 <input type="file" v-if="!isUploaded" class="opacity-0 w-full h-full cursor-pointer absolute" @change="uploadFile" />
             </div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 my-5">
-            <div class="inline-block text-center self-centerk <div>mHellr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} XPX</div>
+            <div class="inline-block text-center self-centerk <div>mHellr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('common.transactionFee')}} XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5">
-            <input id="computer" type="radio" value="computer" name="uploadSource" v-model="uploadSource" /><label for="computer" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">{{$t('services.mycomputer')}}</label>
-            <input id="storage" type="radio" value="storage" name="uploadSource" v-model="uploadSource" :disabled="disabledStorage" /><label for="storage" class="cursor-pointer font-bold ml-4 mr-5 text-tsm" :class="`${ disabledStorage?'text-gray-400':'' }`">{{$t('services.siriusstorage')}}</label>
+            <input id="computer" type="radio" value="computer" name="uploadSource" v-model="uploadSource" /><label for="computer" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">{{$t('attestation.myComputer')}}</label>
+            <input id="storage" type="radio" value="storage" name="uploadSource" v-model="uploadSource" :disabled="disabledStorage" /><label for="storage" class="cursor-pointer font-bold ml-4 mr-5 text-tsm" :class="`${ disabledStorage?'text-gray-400':'' }`">{{$t('attestation.siriusStorage')}}</label>
           </div>
           <div class="mt-10">
             <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableNext" @click="clickNext()">{{$t('services.next')}}</button>
+            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableNext" @click="clickNext()">{{$t('common.next')}}</button>
           </div>
         </div>
         <div v-else key="2" class="page p2">
           <div class="rounded-2xl bg-gray-100 py-2 px-5 my-5 text-left">
-            <b>{{$t('services.file')}}:</b><br>
+            <b>{{$t('common.file',1)}}:</b><br>
             {{ fileName }}
           </div>
           <TextInput placeholder="+Tags" errorMessage="Please insert tags" v-model="tags" icon="" />
@@ -66,23 +66,23 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 mb-5">
             <div class="rounded-2xl bg-gray-100 p-5 mr-1 mb-3 flex">
               <div class="self-center text-center w-full">
-                <input id="public" type="radio" value="public" name="uploadType" v-model="uploadType" /><label for="public" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">{{$t('createsuccessful.public')}}</label>
-                <input id="private" type="radio" value="private" name="uploadType" v-model="uploadType" /><label for="private" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">{{$t('createsuccessful.private')}}</label>
+                <input id="public" type="radio" value="public" name="uploadType" v-model="uploadType" /><label for="public" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">{{$t('common.public')}}</label>
+                <input id="private" type="radio" value="private" name="uploadType" v-model="uploadType" /><label for="private" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">{{$t('common.private')}}</label>
               </div>
             </div>
             <div class="rounded-2xl bg-gray-100 p-5 ml-1 mb-3 flex text-center w-full">
               <div class="w-full">
                 <label class="inline-flex items-center">
                   <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="isSiriusStorage" disabled="disabledSiriusStorage">
-                  <span class="ml-2 cursor-pointer font-bold text-tsm">{{$t('services.saveinsirius')}}</span>
+                  <span class="ml-2 cursor-pointer font-bold text-tsm">{{$t('attestation.saveInSirius')}}</span>
                 </label>
               </div>
             </div>
           </div>
           <PasswordInput placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
           <div class="mt-10">
-            <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearPage2();">{{$t('signin.clear')}}</button>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">{{$t('welcome.create')}}</button>
+            <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearPage2();">{{$t('common.clear')}}</button>
+            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">{{$t('common.create')}}</button>
           </div>
         </div>
     </transition>

@@ -1,8 +1,8 @@
 <template>
 <div class="flex justify-between text-xs sm:text-sm">
-  <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} > {{$t('accounts.multisig')}}></span> <span class="text-blue-primary font-bold">{{$t('accounts.convertmultisig')}}</span></div>
+  <div><span class="text-gray-400">{{$t('common.account',2)}} > {{$t('common.multisig')}}></span> <span class="text-blue-primary font-bold">{{$t('multisig.convertMultisig')}}</span></div>
   <div>
-    <router-link :to="{name: 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('accounts.viewall')}}</router-link>
+    <router-link :to="{name: 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('common.viewAllAccounts')}}</router-link>
   </div>
 </div>
 <div class='mt-2 py-3 gray-line'>
@@ -19,8 +19,8 @@
           <div class="border border-gray-500 rounded-full w-8 h-8 inline-block relative">
             <font-awesome-icon icon="times" class="w-5 h-5 text-gray-500 inline-block absolute" style="top:5px; right: 5px;"></font-awesome-icon>
           </div>
-          <div class="font-bold text-sm">{{$t('accounts.insufficientbalance')}}</div>
-          <p class="text-xs mt-3">{{$t('accounts.balancedescription',{value: '10.044500 XPX'})}}</p>
+          <div class="font-bold text-sm">{{$t('common.insufficientBalance')}}</div>
+          <p class="text-xs mt-3">{{$t('multisig.balanceDescription',{value: '10.044500 XPX'})}}</p>
         </div>
       </div>
       <div class="flex justify-between p-4 rounded-xl border-red-800 border-2 bg-white mb-8" v-if="isMultisig">
@@ -28,7 +28,7 @@
           <div class="border border-gray-500 rounded-full w-8 h-8 inline-block relative">
             <font-awesome-icon icon="times" class="w-5 h-5 text-gray-500 inline-block absolute" style="top:5px; right: 5px;"></font-awesome-icon>
           </div>
-          <div class="font-bold text-sm">{{$t('accounts.ismultisig')}}</div>
+          <div class="font-bold text-sm">{{$t('multisig.isMultisig')}}</div>
         </div>
       </div>
       <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 mb-8" v-if="onPartial">
@@ -36,35 +36,35 @@
           <div class="w-8 h-8 inline-block relative">
             <font-awesome-icon icon="bell" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:5px; right: 5px;"></font-awesome-icon>
           </div>
-          <div class="font-bold text-sm">{{$t('accounts.partial')}}</div>
-          <p class="text-xs mt-3">{{$t('accounts.partialdescription')}}</p>
+          <div class="font-bold text-sm">{{$t('common.partial')}}</div>
+          <p class="text-xs mt-3">{{$t('multisig.partialDescription')}}</p>
         </div>
       </div>
       <div>
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <div class="block mt-2 font-bold text-md lg:inline-block lg:mr-20">{{$t('accounts.scheme')}} ></div>
+        <div class="block mt-2 font-bold text-md lg:inline-block lg:mr-20">{{$t('common.scheme')}} ></div>
         <div class="mt-2 lg:inline-block lg:mr-20">
-          <span class="font-bold">{{$t('accounts.approvetransactions')}}</span>
+          <span class="font-bold">{{$t('multisig.approveTransactions')}}</span>
           <div class="ml-2 border rounded-2xl p-2 py-2 inline-block">
             <input type="number" required min="0" :max="maxNumApproveTransaction" v-model="numApproveTransaction" class="text-right outline-none" @keypress="validateApproval">
-          </div> {{$t('accounts.schemedescription',{value: maxNumApproveTransaction})}} </div>
+          </div> {{$t('multisig.schemeDescription',{value: maxNumApproveTransaction})}} </div>
         <div class="mt-2 lg:inline-block">
-          <span class="font-bold">{{$t('accounts.deleteusers')}}:</span>
+          <span class="font-bold">{{$t('multisig.deleteUsers')}}:</span>
           <div class="ml-2 border rounded-2xl p-2 py-2 inline-block">
             <input type="number" required min="0" :max="maxNumDeleteUser" v-model="numDeleteUser" class="text-right outline-none" @keypress="validateDelete">
-          </div> {{$t('accounts.schemedescription',{value: maxNumDeleteUser})}}</div>
+          </div> {{$t('multisig.schemeDescription',{value: maxNumDeleteUser})}}</div>
       </div>
       <div class="mt-16">
         <div v-for="(coSignAddress, index) in coSign" :key="index" class="flex">
           <font-awesome-icon icon="trash-alt" class="w-4 h-4 text-gray-500 hover:text-gray-400 cursor-pointer mr-3 mt-3" @click="deleteCoSigAddressInput(index)"></font-awesome-icon>
-          <TextInput :placeholder="$t('accounts.cosigplaceholder')" :errorMessage="$t('accounts.addressvalidation')" :showError="showAddressError[index]" v-model="coSign[index]" icon="key" class="flex-grow" />
+          <TextInput :placeholder="$t('multisig.cosigPlaceholder')" :errorMessage="$t('multisig.addressValidation')" :showError="showAddressError[index]" v-model="coSign[index]" icon="key" class="flex-grow" />
           <AddCosignModal :cosignPublicKeyIndex="index" :selectedAddress="selectedAddresses" />
         </div>
-        <div class="text-lg" v-if="!coSign.length">{{$t('accounts.cosigmessage')}}</div>
-        <button class="my-8 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">(+){{$t('accounts.addcosig')}}</button>
+        <div class="text-lg" v-if="!coSign.length">{{$t('multisig.cosigMessage')}}</div>
+        <button class="my-8 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">(+){{$t('multisig.addCosig')}}</button>
       </div>
       <div class="p-4 rounded-xl bg-gray-100 my-2 w-full text-xs text-gray-800">
-        <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"> {{$t('accounts.unconfirmed')}}: 0.042750 XPX
+        <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"> {{$t('common.unconfirmed')}}: 0.042750 XPX
       </div>
       <div class="p-4 rounded-xl bg-gray-100 mb-8 items-center w-full text-xs text-gray-800">
         <div class="text-center">
@@ -72,17 +72,17 @@
             <div class="flex">
               <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
               <div class="inline-block self-center text-left">
-                <div>{{$t('accounts.lockfund')}}: 10.000000 XPX</div>
-                <div>{{$t('accounts.unconfirmed')}}: 0.044500 XPX</div>
+                <div>{{$t('common.lockFund')}}: 10.000000 XPX</div>
+                <div>{{$t('common.unconfirmed')}}: 0.044500 XPX</div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.multisigpasswordvalidation')" :showError="showPasswdError" v-model="passwd" icon="lock" :disabled="disabledPassword" />
+      <PasswordInput :placeholder="$t('common.enterWalletPassword')" :errorMessage="$t('multisig.multisigPasswordValidation')" :showError="showPasswdError" v-model="passwd" icon="lock" :disabled="disabledPassword" />
       <div class="mt-10">
-        <button type="button" class="default-btn mr-5 focus:outline-none" @click="clear()">{{$t('signin.clear')}}</button>
-        <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="convertAccount()" :disabled="disableSend">{{$t('accounts.send')}}</button>
+        <button type="button" class="default-btn mr-5 focus:outline-none" @click="clear()">{{$t('common.clear')}}</button>
+        <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="convertAccount()" :disabled="disableSend">{{$t('common.send')}}</button>
       </div>
     </div>
   </div>
@@ -170,7 +170,7 @@ export default {
     const convertAccount = () => {
       let convertstatus = multiSign.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.name, passwd.value);
       if(!convertstatus){
-        err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
+        err.value = t('common.enterPassword',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
         err.value = '';
@@ -193,7 +193,7 @@ export default {
             showAddressError.value[i] = false;
             const unique = Array.from(new Set(n));
             if(unique.length != n.length){
-              err.value = t('scriptvalues.cosignerexists');
+              err.value = t('multisig.cosignerExists');
             }else{
               err.value = '';
             }
@@ -317,7 +317,7 @@ export default {
           setTimeout(()=> {
             emitter.emit('NOTIFICATION', {
               status: true,
-              message: t('scriptvalues.publickeyvalidation'),
+              message: t('multisig.publicKeyValidation'),
               notificationType: 'warn'
             });
           }, 500);

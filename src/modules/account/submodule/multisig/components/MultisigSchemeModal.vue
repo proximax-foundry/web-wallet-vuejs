@@ -11,7 +11,7 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
           </div>
           <div class="w-104 text-center pb-10">
-            <h1 class="default-title font-bold mt-10">{{$t('accounts.scheme')}}</h1>
+            <h1 class="default-title font-bold mt-10">{{$t('common.scheme')}}</h1>
             <div class="tree scroll">
               <ul>
                 <li v-for="(item, index) in graph" :key="index" style="block mb-10">

@@ -1,8 +1,8 @@
 <template>
   <div class="flex justify-between text-xs sm:text-sm">
-    <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.viewall2')}}</span></div>
+    <div><span class="text-gray-400">{{$t('common.account',2)}} ></span> <span class="text-blue-primary font-bold">{{$t('common.viewAllAccounts')}}</span></div>
     <div>
-      <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="font-bold" active-class="accounts">{{$t('accounts.createaccount')}}</router-link>
+      <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="font-bold" active-class="accounts">{{$t('accounts.createAccount')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line'>
@@ -18,6 +18,7 @@ import { useToast } from "primevue/usetoast";
 import { walletState } from '@/state/walletState';
 import { WalletUtils } from '@/util/walletUtils';
 import { networkState } from "@/state/networkState";
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: 'ViewAccountDisplayAll',
@@ -30,6 +31,7 @@ export default {
 
   setup(p) {
     const toast = useToast();
+    const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const currentMenu = ref('');
@@ -66,7 +68,7 @@ export default {
     });
 
     if(p.deleteAccount == 'success'){
-      toast.add({severity:'success', summary: 'Notification', detail: 'Account has been removed successfully', group: 'br', life: 5000});
+      toast.add({severity:'success', summary: t('common.notifications'), detail: t('accounts.accountRemoved'), group: 'br', life: 5000});
     }
 
     const accounts = computed(

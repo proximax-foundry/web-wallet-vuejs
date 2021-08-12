@@ -10,36 +10,36 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column field="namespaceId" :header="$t('namespace.namespaceid')" >
+      <Column field="namespaceId" :header="$t('namespace.namespaceId')" >
         <template #body="{data}">
           <span class="uppercase">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="name" :header="$t('services.name')" >
+      <Column field="name" :header="$t('common.name')" >
         <template #body="{data}">
           {{data.name}}
         </template>
       </Column>
-      <Column field="linkType" :header="$t('dashboard.linktype')" >
+      <Column field="linkType" :header="$t('dashboard.linkType')" >
         <template #body="{data}">
           {{data.linkType}}
         </template>
       </Column>
-      <Column field="linkedId" :header="$t('dashboard.assetidaddress')" >
+      <Column field="linkedId" :header="$t('dashboard.assetIdAddress')" >
         <template #body="{data}">
           <span class="uppercase">{{data.linkedId}}</span>
         </template>
       </Column>
-      <Column field="Active" :header="$t('dashboard.active')" >
+      <Column field="Active" :header="$t('common.active')" >
         <template #body="{data}">
           <span class="uppercase ">{{data.active}}</span>{
         </template>
       </Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('common.noRecord')}}
       </template>
       <template #loading>
-          {{$t('dashboard.loadingmessage')}}
+          {{$t('dashboard.loadingMessage')}}
       </template>
     </DataTable>
   </div>

@@ -14,23 +14,23 @@
           </div>
           <div class="w-104 font-normal">
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
-            <div class="mt-10 mb-5"><span class="text-lg text-gray-700">{{$t('services.removecontact')}}</span></div>
+            <div class="mt-10 mb-5"><span class="text-lg text-gray-700">{{$t('addressBook.removeFromAddressBook')}}</span></div>
             <div class="flex justify-between p-4 rounded-xl bg-yellow-100 mb-4 text-gray-900">
               <div class="w-full text-left">
                 <div class="text-sm mt-3">
-                  <div class="inline-block w-20 font-bold">{{$t('services.name')}}:</div>
+                  <div class="inline-block w-20 font-bold">{{$t('common.name')}}:</div>
                   <div class="inline-block">{{ data.name }}</div>
                 </div>
                 <div class="text-sm mt-3">
-                  <div class="inline-block w-20 font-bold">{{$t('createsuccessful.address')}}:</div>
+                  <div class="inline-block w-20 font-bold">{{$t('common.address')}}:</div>
                   <div class="inline-block">{{ data.address }}</div>
                 </div>
               </div>
             </div>
             <fieldset class="w-full">
               <div class="text-center mt-5">
-                <button type="button" class="default-btn mr-5 focus:outline-none" @click="toggleModal = !toggleModal">{{$t('deletewallet.cancel')}}</button>
-                <button type="submit" class="default-btn py-1" @click="deleteContact(data);">{{$t('services.removecontact2')}}</button>
+                <button type="button" class="default-btn mr-5 focus:outline-none" @click="toggleModal = !toggleModal">{{$t('common.cancel')}}</button>
+                <button type="submit" class="default-btn py-1" @click="deleteContact(data);">{{$t('addressBook.removeContact')}}</button>
               </div>
             </fieldset>
           </div>

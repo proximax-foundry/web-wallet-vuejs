@@ -2,7 +2,7 @@
   <div>
     <div class="px-5 py-2 text-left text-xs text-gray-500">{{hints}}</div>
     <div class="transition ease-in duration-300 w-full rounded-full px-5 py-1 mb-5" :class="borderColor">
-      <input v-model="filterText" type="text" class="w-full outline-none text-sm" :placeholder="$t('services.search')" @click="clickInputText()" @blur="blurInputText()" :title="hints" >
+      <input v-model="filterText" type="text" class="w-full outline-none text-sm" :placeholder="$t('common.search')" @click="clickInputText()" @blur="blurInputText()" :title="hints" >
     </div>
     <DataTable
       :value="transactions"
@@ -13,12 +13,12 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column field="typeName" :header="$t('dashboard.type')" headerStyle="width:110px">
+      <Column field="typeName" :header="$t('common.type')" headerStyle="width:110px">
         <template #body="{data}">
           <span class="font-semibold">{{data.typeName}}</span>
         </template>
       </Column>
-      <Column :header="$t('accounts.details')" >
+      <Column :header="$t('common.details')" >
         <template #body="{data}">
             <div v-for="innerTx in data.innerTransactions" :key="innerTx">
               <div class="font-bold"> {{ innerTx.typeName }}</div>
@@ -77,23 +77,23 @@
             </div>
         </template>
       </Column>
-      <Column headerStyle="width: 12%" v-if="showBlock" field="block" :header="$t('dashboard.block')" :sortable="true" >
+      <Column headerStyle="width: 12%" v-if="showBlock" field="block" :header="$t('common.blocks')" :sortable="true" >
         <template #body="{data}">
           <div>{{ data.block }}</div>
           <div v-if="data.timestamp">{{ data.timestamp }}</div>
-          <div v-if="data.fee">{{$t('dashboard.fee')}}: {{ data.fee}}</div>
+          <div v-if="data.fee">{{$t('common.fee')}}: {{ data.fee}}</div>
         </template>
       </Column>
-      <Column headerStyle="width: 12%" v-if="showAction" :header="$t('services.action')" >
+      <Column headerStyle="width: 12%" v-if="showAction" :header="$t('common.action')" >
         <template #body="{data}">
-          <SplitButton label="Explorer" @click="gotoHashExplorer(data.hash)" icon="pi pi-external-link" class="p-button-help p-mb-2" :model="setSplitButtonItems(data)"></SplitButton>
+          <SplitButton :label="$t('common.explorer')" @click="gotoHashExplorer(data.hash)" icon="pi pi-external-link" class="p-button-help p-mb-2" :model="setSplitButtonItems(data)"></SplitButton>
         </template>
       </Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('common.noRecord')}}
       </template>
       <template #loading>
-          {{$t('dashboard.loadingmessage')}}
+          {{$t('dashboard.loadingMessage')}}
       </template>
     </DataTable>
     <DynamicModelComponent :modelName="dynamicModelComponentDisplay" :showModal="showTransactionModel" :transaction="modalData" />
@@ -110,6 +110,7 @@ import { networkState } from "@/state/networkState";
 import Tooltip from 'primevue/tooltip';
 import { TipType } from '../model/dashboardClasses'
 import SplitButton from 'primevue/splitbutton';
+import { useI18n } from 'vue-i18n';
 
 export default{
   components: { DataTable, Column, DynamicModelComponent, SplitButton },
@@ -123,6 +124,7 @@ export default{
     'tooltip': Tooltip
   },
   setup(p, context){
+    const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const borderColor = ref('border border-gray-400');
@@ -199,7 +201,7 @@ export default{
 
       let items = [
             {
-                label: 'Sample',
+                label: t('common.sample'),
                 icon: 'pi pi-external-link',
                 command: () => {
                     window.open(explorerBaseURL.value + hashExplorerURL.value + "/" + data.hash, "_blank");

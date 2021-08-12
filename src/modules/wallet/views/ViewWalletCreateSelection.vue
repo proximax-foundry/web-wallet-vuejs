@@ -1,18 +1,18 @@
 <template>
   <div class="container mx-auto text-center">
-    <h1 class="font-bold default-title mt-20 mb-5">{{$t('createwallet.creationtype')}}</h1>
+    <h1 class="font-bold default-title mt-20 mb-5">{{$t('wallets.creationType')}}</h1>
     <div class="page-title-gray-line grid grid-cols-1 md:grid-cols-3 pt-20">
       <div class="px-5 self-center text-center my-10">
         <img src="@/modules/wallet/img/icon-add-new-blue.svg" class="w-12 inline-block">
-        <p class="mt-3">{{$t('createwallet.newwallet')}}</p>
-        <router-link :to="{ name: 'ViewWalletCreate'}" class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center">{{$t('welcome.create')}}</router-link></div>
+        <p class="mt-3">{{$t('wallets.newWallet')}}</p>
+        <router-link :to="{ name: 'ViewWalletCreate'}" class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center">{{$t('common.create')}}</router-link></div>
       <div class="px-5 self-center text-center my-10">
-        <img src="@/modules/wallet/img/icon-private-key-blue.svg" class="w-12 inline-block"><p class="mt-3">{{$t('createwallet.fromprivatekey')}}</p>
-        <router-link :to="{ name : 'ViewWalletCreatePrivateKey'}" class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center">{{$t('welcome.create')}}</router-link>
+        <img src="@/modules/wallet/img/icon-private-key-blue.svg" class="w-12 inline-block"><p class="mt-3">{{$t('common.fromPrivateKey')}}</p>
+        <router-link :to="{ name : 'ViewWalletCreatePrivateKey'}" class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center">{{$t('common.create')}}</router-link>
       </div>
-      <div class="px-5 self-center text-center my-10"><img src="@/modules/wallet/img/icon-wallet-import-blue.svg" class="w-12 inline-block"><p class="mt-3">{{$t('createwallet.fromwalletbackup')}}</p>
+      <div class="px-5 self-center text-center my-10"><img src="@/modules/wallet/img/icon-wallet-import-blue.svg" class="w-12 inline-block"><p class="mt-3">{{$t('wallets.fromWalletBackup')}}</p>
         <label class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center cursor-pointer">
-          <span>{{$t('createwallet.import')}}</span>
+          <span>{{$t('common.import')}}</span>
           <input type="file" @change="readWalletBackup" ref="walletFile" hidden />
         </label>
       </div>
@@ -29,11 +29,13 @@ import { ChainUtils } from '@/util/chainUtils';
 import { networkState } from "@/state/networkState";
 import { WalletUtils } from '@/util/walletUtils';
 import { walletState } from '@/state/walletState';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   name: 'ViewWalletCreateSelection',
   setup(){
     const confirm = useConfirm();
+    const {t} = useI18n();
     const toast = useToast();
     // comparing with default networktype 168 till multiple network selection interface is added
     const selectedNetworkType = computed(()=> ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
@@ -64,8 +66,8 @@ export default defineComponent({
             toast.add({severity: importResult.status, detail: importResult.msg, group: 'br', life: 3000});
           }
         } catch (error) {
-          let failMsg = 'Unable to add wallet. Invalid file.';
-          toast.add({severity:'error', summary:'Import Failed', detail: failMsg, group: 'br', life: 5000});
+          let failMsg = t('wallets.invalidImport');
+          toast.add({severity:'error', summary: t('wallets.importFailed'), detail: failMsg, group: 'br', life: 5000});
         }
       }
       reader.readAsText(file);
@@ -73,8 +75,8 @@ export default defineComponent({
 
     const importBackup = (dataDecryp) =>{
 
-      let status = "success";
-      let message = "Import Successful";
+      let status = t('common.success');
+      let message = t('wallets.importSuccess');
 
       if(WalletUtils.checkIsNewFormat(dataDecryp)){
           try {
@@ -87,7 +89,7 @@ export default defineComponent({
               message = error.message;
             }
             else{
-              message = "Unable to import wallet";
+              message = t('wallets.importUnable');
             }
           }
       }
@@ -101,7 +103,7 @@ export default defineComponent({
             message = error.message;
           }
           else{
-            message = "Unable to import wallet";
+            message = t('wallets.importUnable');
           }
         }
       }

@@ -2,7 +2,7 @@
   <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">Swap > ETH > Out > </span> <span class="text-blue-primary font-bold">Transaction</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('common.allServices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
@@ -10,21 +10,21 @@
       <div class="flex-none">
         <div class="flex p-0 sm:p-3">
           <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">1</div></div>
-          <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('wallets.account')}}</div>
+          <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('common.account',1)}}</div>
         </div>
       </div>
       <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
       <div class="flex-none">
         <div class="flex p-0 sm:p-3">
           <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">2</div></div>
-          <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('swap.transaction')}}</div>
+          <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('common.transaction')}}</div>
         </div>
       </div>
       <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
       <div class="flex-none">
         <div class="flex p-0 sm:p-3">
           <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage==3?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">3</div></div>
-          <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('swap.certificate')}}</div>
+          <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('common.certificate')}}</div>
         </div>
       </div>
     </div>
@@ -123,7 +123,7 @@
         </div>
         <label class="inline-flex items-center mb-10">
           <input type="checkbox" class="h-5 w-5 bg-blue-primary" value="true" v-model="savedCheck">
-          <span class="ml-2 cursor-pointer text-tsm">{{$t('certconsent')}}.</span>
+          <span class="ml-2 cursor-pointer text-tsm">{{$t('swap.certConsent')}}.</span>
         </label>
         <div class="sm:mt-10">
           <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none mr-4 w-60 mt-6" @click="saveCertificate">Download Certificate</button>
