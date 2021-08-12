@@ -142,7 +142,13 @@ export default {
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
 
-      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+       if (copySubject === "Private Key"){
+        toast.add({severity:'info', detail: t('common.privateKey') + ' ' + t('common.copied'), group: 'br', life: 3000});
+      }else if (copySubject === "Address"){
+        toast.add({severity:'info', detail:  t('common.address') + ' ' + t('common.copied'), group: 'br', life: 3000});
+      }else{
+        toast.add({severity:'info', detail:  t('common.publicKey') + ' ' + t('common.copied'), group: 'br', life: 3000});
+      }
     };
 
     const editName = () => {

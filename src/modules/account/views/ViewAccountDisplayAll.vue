@@ -18,6 +18,7 @@ import { useToast } from "primevue/usetoast";
 import { walletState } from '@/state/walletState';
 import { WalletUtils } from '@/util/walletUtils';
 import { networkState } from "@/state/networkState";
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: 'ViewAccountDisplayAll',
@@ -30,6 +31,7 @@ export default {
 
   setup(p) {
     const toast = useToast();
+    const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const currentMenu = ref('');
@@ -66,7 +68,7 @@ export default {
     });
 
     if(p.deleteAccount == 'success'){
-      toast.add({severity:'success', summary: 'Notification', detail: 'Account has been removed successfully', group: 'br', life: 5000});
+      toast.add({severity:'success', summary: t('common.notifications'), detail: t('accounts.accountRemoved'), group: 'br', life: 5000});
     }
 
     const accounts = computed(

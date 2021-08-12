@@ -89,9 +89,9 @@ export default {
     const walletName = walletState.currentLoggedInWallet.name
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
-      let copySubject = document.getElementById(id).getAttribute("copySubject");
+      let copySubject = /* document.getElementById(id).getAttribute("copySubject") */ t('common.address');
       copyToClipboard(stringToCopy);
-      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject + ' ' + t('common.copied'), group: 'br', life: 3000});
     };
 
     const verifyDelegateAcc = async() => {

@@ -101,7 +101,7 @@ export default {
         err.value = '';
         contactName.value = '';
         address.value = '';
-        toast.add({severity:'info', summary: 'Address Book', detail: 'New contact added to Address Book', group: 'br', life: 5000});
+        toast.add({severity:'info', summary: t('services.addressBook'), detail: t('addressBook.newContactAdded'), group: 'br', life: 5000});
         router.push({ name: 'ViewServicesAddressBook' });
       }
     }

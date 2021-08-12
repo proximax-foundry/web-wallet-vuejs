@@ -9,8 +9,8 @@
     <form @submit.prevent="create" class="mt-10">
       <fieldset class="w-full">
         <div class="error error_box mb-2" v-if="err!=''">{{ err }}</div>
-        <TextInput :placeholder="$t('common.name')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
-        <PasswordInput :placeholder="$t('common.enterWalletPassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+        <TextInput :placeholder="$t('common.name')" :errorMessage="$t('accounts.accountNameRequired')" v-model="accountName" icon="wallet" />
+        <PasswordInput :placeholder="$t('common.enterWalletPassword')" :errorMessage="$t('common.enterPassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
         <div class="mt-10">
           <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('common.clear')}}</button>
           <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">{{$t('common.create')}}</button>

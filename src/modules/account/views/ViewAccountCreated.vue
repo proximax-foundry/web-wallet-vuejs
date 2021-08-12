@@ -100,7 +100,7 @@
 import { ref } from 'vue';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
-
+import {useI18n} from 'vue-i18n'
 export default {
   name: 'ViewAccountCreated',
   props: [
@@ -115,6 +115,7 @@ export default {
     };
   },
   setup(p){
+    const {t} = useI18n();
     const toast = useToast();
     const accountName = ref(p.name);
     const accountPublicKey = ref(p.publicKey);
@@ -124,8 +125,12 @@ export default {
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-
-      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+      if (copySubject === "Private Key"){
+        toast.add({severity:'info', detail: t('common.privateKey') + ' ' + t('common.copied'), group: 'br', life: 3000});
+      }else{
+        toast.add({severity:'info', detail:  t('common.address') + ' ' + t('common.copied'), group: 'br', life: 3000});
+      }
+      
     };
 
     return {

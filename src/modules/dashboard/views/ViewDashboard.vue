@@ -106,7 +106,7 @@ import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { DashboardService } from '../service/dashboardService';
 import * as qrcode from 'qrcode-generator';
 // import { dashboardUtils } from '@/util/dashboardUtils';
-
+import {useI18n} from 'vue-i18n'
 export default defineComponent({
   name: 'ViewDashboard',
   components: {
@@ -122,7 +122,7 @@ export default defineComponent({
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-
+    const {t} = useI18n();
     const showAddressQRModal = ref(false);
     const namespaceAssetView = ref(0);
 
@@ -296,10 +296,10 @@ export default defineComponent({
 
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
-      let copySubject = document.getElementById(id).getAttribute("copySubject");
+      let copySubject = t('common.address');
       copyToClipboard(stringToCopy);
 
-      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject + ' '+ t('common.copied'), group: 'br', life: 3000});
     };
 
     

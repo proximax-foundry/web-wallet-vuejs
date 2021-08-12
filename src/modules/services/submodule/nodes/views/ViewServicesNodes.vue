@@ -110,7 +110,7 @@ export default {
        
        /*  startListening(walletSession.accounts); */
         WalletUtils.getTotalBalanceWithCurrentNetwork();
-        toast.add({severity:'success', summary: 'Services', detail: 'Node updated', group: 'br', life: 5000});
+        toast.add({severity:'success', summary: t('common.services'), detail: t('node.nodeUpdated'), group: 'br', life: 5000});
         console.log(networkState.currentNetworkProfile.network.type)
       }
     };

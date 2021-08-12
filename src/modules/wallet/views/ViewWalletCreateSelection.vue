@@ -29,11 +29,13 @@ import { ChainUtils } from '@/util/chainUtils';
 import { networkState } from "@/state/networkState";
 import { WalletUtils } from '@/util/walletUtils';
 import { walletState } from '@/state/walletState';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   name: 'ViewWalletCreateSelection',
   setup(){
     const confirm = useConfirm();
+    const {t} = useI18n();
     const toast = useToast();
     // comparing with default networktype 168 till multiple network selection interface is added
     const selectedNetworkType = computed(()=> ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
@@ -64,8 +66,8 @@ export default defineComponent({
             toast.add({severity: importResult.status, detail: importResult.msg, group: 'br', life: 3000});
           }
         } catch (error) {
-          let failMsg = 'Unable to add wallet. Invalid file.';
-          toast.add({severity:'error', summary:'Import Failed', detail: failMsg, group: 'br', life: 5000});
+          let failMsg = t('wallets.invalidImport');
+          toast.add({severity:'error', summary: t('wallets.importFailed'), detail: failMsg, group: 'br', life: 5000});
         }
       }
       reader.readAsText(file);
@@ -73,8 +75,8 @@ export default defineComponent({
 
     const importBackup = (dataDecryp) =>{
 
-      let status = "success";
-      let message = "Import Successful";
+      let status = t('common.success');
+      let message = t('wallets.importSuccess');
 
       if(WalletUtils.checkIsNewFormat(dataDecryp)){
           try {
@@ -87,7 +89,7 @@ export default defineComponent({
               message = error.message;
             }
             else{
-              message = "Unable to import wallet";
+              message = t('wallets.importUnable');
             }
           }
       }
@@ -101,7 +103,7 @@ export default defineComponent({
             message = error.message;
           }
           else{
-            message = "Unable to import wallet";
+            message = t('wallets.importUnable');
           }
         }
       }

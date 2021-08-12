@@ -2,6 +2,7 @@
 accounts: 
   accountNameRequired: 请填写账号名称。
   accountNameTaken: 帐号名称已被占用。
+  accountRemoved: 账号已成功被移除
   changeNameFail: 更改账号名称失败。
   createAccount: 创建新账号
   createAccountFail: 创建新账号失败。
@@ -17,18 +18,20 @@ addressBook:
   accountAddress: 账号地址
   addAddressQuestion: 你想保存这个地址吗?
   addNewContact: 添加新联系人
-  addressBookMessage1: 导入到通讯录
+  addressBookMessage1: 导入到地址簿
   addressBookMessage2: 已经存在于地址簿中
   addressBookMessage3: 有无效的地址
   addressBookMessage4: 未导入
   addressExists: 地址已经存在于账号或地址簿中。
   addressRequired: 请填写地址
+  contactUpdated: 地址簿中的联系信息已更新
   editContact: 编辑此联系人
   false: 否
-  nameExists: 名字已经存在于账号或通讯录中。
+  nameExists: 名字已经存在于账号或地址簿中。
   nameRequired: 请填写名称
+  newContactAdded: "地址簿已加入新的联系人"
   removeContact: 移除联系人
-  removeFromAddressBook: 从通讯录中删除此联系人？
+  removeFromAddressBook: 从地址簿中删除此联系人？
   successfullySaved: 已成功保存。
   true: 是
 assets: 
@@ -173,6 +176,7 @@ common:
   restore: 恢复
   restrictions: 限制条款
   result: 结果
+  sample: 样本
   save: 保存
   saveWalletPaper: 保存为钱包文件
   schedule: 时间表
@@ -194,6 +198,7 @@ common:
   storage: 存储
   streaming: 流媒体
   submit: 提交
+  success: 成功
   superContracts: 超级合同
   supply: 供应
   supplyMutable: 供给可变
@@ -309,6 +314,7 @@ node:
   blockHeight: 块高
   currentNode: 当前节点
   nodeList: 节点列表
+  nodeUpdated: 节点已更新
 services: 
   addContacts: 添加联系人
   addressBook: 地址簿
@@ -443,6 +449,10 @@ wallets:
   exportWallet: 导出钱包
   failRemoveWallet: 无法删除钱包
   fromWalletBackup: 从钱包备份
+  importFailed: 导入失败
+  importSuccess: 导入成功
+  importUnable: 无法导入钱包
+  invalidImport: 无法添加钱包，文件无效。
   newWallet: 新钱包
   noWalletsFound: 没有发现钱包
   passwordValidation: 最小长度8，最大长度30
@@ -451,5 +461,6 @@ wallets:
   walletDescription: "这些是你设备本地存储中可用的{network}钱包"
   walletName: 钱包名称
   walletNameTaken: 钱包的名字已经被占用了。
+  walletRemoved: 钱包已成功被移除
   walletToDelete: 要删除的钱包
   

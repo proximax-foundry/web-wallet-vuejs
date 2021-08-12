@@ -44,6 +44,7 @@ import { AddressBookUtils } from '@/util/addressBookUtils';
 import { AddressBook } from '@/models/addressBook';
 import { walletState } from '@/state/walletState';
 import { useToast } from "primevue/usetoast";
+import { useI18n } from 'vue-i18n';
 export default{
   name: 'DisplayImportContactModal',
   props: [
@@ -59,6 +60,7 @@ export default{
 
   setup(){
     const toast = useToast();
+    const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const csv = ref([]);
@@ -153,7 +155,7 @@ export default{
             walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
             contactAdded.value = addContact.length;
             emitter.emit('REFRESH_CONTACT_LIST', true);
-            toast.add({severity:'info', summary: 'Address Book', detail: 'New contact' + ((contactAdded.value>1)?'s':'') + ' imported to Address Book', group: 'br', life: 5000});
+            toast.add({severity:'info', summary: t('services.addressBook'), detail: t('common.new') + t('common.contact',(contactAdded.value>1)? 2: 1) +  t('addressBook.addressBookMessage1'), group: 'br', life: 5000});
           }
           contactInvalidAddress.value = errContact;
         },

@@ -103,7 +103,7 @@ export default{
       walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
       toggleModal.value = !toggleModal.value;
       emitter.emit('REFRESH_CONTACT_LIST', true);
-      toast.add({severity:'info', summary: 'Address Book', detail: 'Contact info updated in Address Book', group: 'br', life: 5000});
+      toast.add({severity:'info', summary: t('services.addressBook'), detail: t('addressBook.contactUpdated'), group: 'br', life: 5000});
     }
 
     return{

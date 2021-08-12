@@ -59,20 +59,22 @@ import { useToast } from "primevue/usetoast";
 import { networkState } from "@/state/networkState";
 import { walletState } from '@/state/walletState';
 import { Helper } from '@/util/typeHelper';
+import { useI18n } from 'vue-i18n';
 
 export default{
   name: 'AccountTile',
   props: ['account','showMenuCall', 'i'],
   setup(p){
+    const {t} = useI18n();
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
-      let copySubject = document.getElementById(id).getAttribute("copySubject");
+      let copySubject =/*  document.getElementById(id).getAttribute("copySubject") */ t('common.address');
       copyToClipboard(stringToCopy);
 
-      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject + ' '+ t('common.copied'), group: 'br', life: 3000});
     };   
     
     const mosaicNum = computed(() => {

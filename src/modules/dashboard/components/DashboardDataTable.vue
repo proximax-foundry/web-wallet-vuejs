@@ -110,6 +110,7 @@ import { networkState } from "@/state/networkState";
 import Tooltip from 'primevue/tooltip';
 import { TipType } from '../model/dashboardClasses'
 import SplitButton from 'primevue/splitbutton';
+import { useI18n } from 'vue-i18n';
 
 export default{
   components: { DataTable, Column, DynamicModelComponent, SplitButton },
@@ -123,6 +124,7 @@ export default{
     'tooltip': Tooltip
   },
   setup(p, context){
+    const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const borderColor = ref('border border-gray-400');
@@ -199,7 +201,7 @@ export default{
 
       let items = [
             {
-                label: 'Sample',
+                label: t('common.sample'),
                 icon: 'pi pi-external-link',
                 command: () => {
                     window.open(explorerBaseURL.value + hashExplorerURL.value + "/" + data.hash, "_blank");

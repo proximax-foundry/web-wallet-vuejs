@@ -23,6 +23,7 @@ import { networkState } from "@/state/networkState";
 import { walletState } from '@/state/walletState';
 import { useToast } from "primevue/usetoast";
 import { WalletUtils } from "../../../util/walletUtils"
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: 'ViewWallets',
@@ -33,6 +34,7 @@ export default {
     WalletTile
   },
   setup(p) {
+  const {t} = useI18n();
     const toast = useToast();
     const wallets = computed(
       () =>{
@@ -44,7 +46,7 @@ export default {
     WalletUtils.initFixOldFormat(walletState.wallets);
 
     if(p.deleteWallet=='success'){
-      toast.add({severity:'success', summary: 'Notification', detail: 'Wallet has been removed successfully', group: 'br', life: 5000});
+      toast.add({severity:'success', summary: t('common.notifications'), detail: t('wallets.walletRemoved'), group: 'br', life: 5000});
     }
 
     return {

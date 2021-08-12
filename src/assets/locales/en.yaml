@@ -2,6 +2,7 @@
 accounts: 
   accountNameRequired: "Account name is required."
   accountNameTaken: "Account name is already taken."
+  accountRemoved: "Account has been removed successfully"
   changeNameFail: "Failed to change account name."
   createAccount: "Create a New Account"
   createAccountFail: "Failed to create new account."
@@ -23,10 +24,12 @@ addressBook:
   addressBookMessage4: "not imported"
   addressExists: "Address is already exists in account or address book."
   addressRequired: "Address Required"
+  contactUpdated: "Contact info updated in Address Book"
   editContact: "Edit this contact"
   false: "No"
   nameExists: "Name is already exists in account or address book."
   nameRequired: "Name is required"
+  newContactAdded: "New contact added to Address Book"
   removeContact: "Remove contact"
   removeFromAddressBook: "Remove this contact from Address Book?"
   successfullySaved: "successfully saved"
@@ -173,6 +176,7 @@ common:
   restore: Restore
   restrictions: Restrictions
   result: Result
+  sample: Sample
   save: Save
   saveWalletPaper: "Save as wallet paper"
   schedule: Schedule
@@ -194,6 +198,7 @@ common:
   storage: Storage
   streaming: Streaming
   submit: Submit
+  success: Success
   superContracts: Supercontracts
   supply: Supply
   supplyMutable: "Supply Mutable"
@@ -309,6 +314,7 @@ node:
   blockHeight: "Block Height"
   currentNode: "Current Node"
   nodeList: "Node List"
+  nodeUpdated: "Node Updated"
 services: 
   addContacts: "Add Contacts"
   addressBook: "Address Book"
@@ -443,6 +449,10 @@ wallets:
   exportWallet: "Export Wallet"
   failRemoveWallet: "Unable to remove wallet."
   fromWalletBackup: "From a Wallet Backup"
+  importFailed: "Import Failed"
+  importSuccess: "Import Successful"
+  importUnable: "Unable to import wallet"
+  invalidImport: "'Unable to add wallet. Invalid file."
   newWallet: "New Wallet"
   noWalletsFound: "No wallets found"
   passwordValidation: "Min. length 8, max. length 30"
@@ -451,5 +461,6 @@ wallets:
   walletDescription: "These are the {network} Wallets available in the local storage of your device"
   walletName: "Wallet Name"
   walletNameTaken: "Wallet name is already taken."
+  walletRemoved: "Wallet has been removed successfully"
   walletToDelete: "Wallet to delete"
   
