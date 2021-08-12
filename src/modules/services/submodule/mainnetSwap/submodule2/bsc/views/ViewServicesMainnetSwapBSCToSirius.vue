@@ -367,12 +367,12 @@ export default {
     };
 
     watch([currentNetwork, currentAccount, tokenAddress], ([newNetwork, newCurrentAccount, newTokenAddress]) => {
-      if(newTokenAddress != undefined){
+      if(newTokenAddress != undefined && newTokenAddress != ''){
         (async () => {
           try{
             provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
             signer = provider.getSigner();
-            const contract = new ethers.Contract(tokenAddress.value, abi, signer);
+            const contract = new ethers.Contract(newTokenAddress, abi, signer);
             const tokenBalance = await contract.balanceOf(newCurrentAccount);
             balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
           }catch(err) {
