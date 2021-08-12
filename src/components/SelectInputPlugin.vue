@@ -95,7 +95,9 @@ export default defineComponent({
 
   methods: {
     clear: function() {
-      this.$refs.selectRef.clear();
+      if(this.$refs.selectRef){
+        this.$refs.selectRef.clear();
+      }
     }
   },
 
@@ -103,15 +105,21 @@ export default defineComponent({
     if(this.selectDefault){
       this.$refs.selectRef.select(this.selectDefault, this.options);
     }
+
+    this.emitter.on('CLEAR_SELECT', this.clear)
   },
 
+  beforeUnmount(){
+    this.emitter.off('CLEAR_SELECT', this.clear)
+  },
   created() {
     // eslint-disable-next-line no-unused-vars
-    this.emitter.on('CLEAR_SELECT', payload => {
-      if(!payload){
-        this.$refs.selectRef.clear();
-      }
-    });
+    // console.log(this.$refs);
+    // this.emitter.on('CLEAR_SELECT', payload => {
+    //   if(!payload){
+    //     this.$refs.selectRef.clear();
+    //   }
+    // });
   }
 });
 </script>
