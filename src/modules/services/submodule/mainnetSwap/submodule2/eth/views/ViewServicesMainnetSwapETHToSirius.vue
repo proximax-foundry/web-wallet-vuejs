@@ -541,7 +541,7 @@ export default {
         if(response.status == 200){
           const data = await response.json();
           isInvalidSwapService.value = false;
-          transactionHash.value = data.remoteTxnTransaction;
+          transactionHash.value = data.remoteTxnHash;
           swapTimestamp.value = data.timestamp;
           swapId.value = data.ctxId;
           swapQr.value = SwapUtils.generateQRCode(validationLink.value);
