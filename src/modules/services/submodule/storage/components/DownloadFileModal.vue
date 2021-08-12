@@ -10,10 +10,10 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="closeModal();"></font-awesome-icon>
           </div>
           <div>
-            <h1 class="default-title font-bold my-5">{{$t('download.download')}}</h1>
-            <div>{{$t('download.yourfile')}}<b>{{ fileName }}</b> {{$t('download.isready')}}.</div>
+            <h1 class="default-title font-bold my-5">{{$t('common.download')}}</h1>
+            <div>{{$t('storage.yourFile')}}<b>{{ fileName }}</b> {{$t('storage.isReady')}}.</div>
             <div class="mt-10">
-              <button type="button" class="default-btn mr-5 focus:outline-none">{{$t('download.download')}}</button>
+              <button type="button" class="default-btn mr-5 focus:outline-none">{{$t('common.download')}}</button>
             </div>
           </div>
         </div>

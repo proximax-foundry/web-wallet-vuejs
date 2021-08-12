@@ -1,8 +1,8 @@
 <template>
 <div class="flex justify-between text-xs sm:text-sm">
-  <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} > {{$t('accounts.multisig')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.editmultisig')}}</span></div> 
+  <div><span class="text-gray-400">{{$t('common.account',2)}} > {{$t('common.multisig')}} ></span> <span class="text-blue-primary font-bold">{{$t('multisig.editMultisig')}}</span></div> 
   <div>
-    <router-link :to="{name: 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('accounts.viewall')}}</router-link>
+    <router-link :to="{name: 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('common.viewAllAccounts')}}</router-link>
   </div>
 </div>
 <div class='mt-2 py-3 gray-line'>
@@ -14,7 +14,7 @@
             <div class="inline-block">
               <div class="text-xs font-bold mb-1">{{ accountNameDisplay }}</div>
               <div>{{ pretty(acc.address) }}</div>
-              <div class="text-tsm mt-5" v-if="getWalletCosigner().length==1">{{$t('accounts.cosignerinwallet')}}:
+              <div class="text-tsm mt-5" v-if="getWalletCosigner().length==1">{{$t('multisig.cosignerInWallet')}}:
                 <span class="font-bold" v-if="getWalletCosigner().length == 1">{{ getWalletCosigner()[0].name }}</span>
               </div>
             </div>
@@ -26,15 +26,15 @@
           </div>
           <transition name="slide">
             <div v-if="showCosigners">
-              <div class="text-center text-md mb-5">{{$t('accounts.cosignaturyaccount')}}</div>
+              <div class="text-center text-md mb-5">{{$t('multisig.cosignatoryAccount')}}</div>
               <div v-for="(cosigner, index) in cosignaturies" :key="index" class="mb-2 rounded-2xl px-5 py-3 flex justify-between" :class="`${(checkRemoval(cosigner))?'bg-yellow-100':'bg-white'}`">
                 <div>
-                  <div class="font-bold" v-if="wallet.accounts.find((acc) => acc.publicKey === cosigner)">{{ wallet.accounts.find(acc => acc.publicKey == cosigner).name }} <span v-if="checkRemoval(wallet.accounts.find((acc) => acc.address == cosigner).publicKey)" class="font-normal text-xs text-gray-500">({{$t('accounts.removing')}})</span></div>
-                  <div class="font-bold" v-else>Cosigner-{{ cosigneraddress(cosigner) }} <span v-if="checkRemoval(cosigner)" class="font-normal text-xs text-gray-500">({{$t('accounts.removing')}})</span></div>
+                  <div class="font-bold" v-if="wallet.accounts.find((acc) => acc.publicKey === cosigner)">{{ wallet.accounts.find(acc => acc.publicKey == cosigner).name }} <span v-if="checkRemoval(wallet.accounts.find((acc) => acc.address == cosigner).publicKey)" class="font-normal text-xs text-gray-500">({{$t('common.removing')}})</span></div>
+                  <div class="font-bold" v-else>Cosigner-{{ cosigneraddress(cosigner) }} <span v-if="checkRemoval(cosigner)" class="font-normal text-xs text-gray-500">({{$t('common.removing')}})</span></div>
                   <div class="text-tsm">{{ pretty(cosigner) }}</div>
                 </div>
                 <font-awesome-icon v-if="(!checkRemoval(cosigner.publicKey))" icon="trash-alt" class="w-4 h-4 self-center" :class="`${(onPartial || fundStatus || !isCoSigner)?'text-gray-200 cursor-auto':'text-gray-400 hover:text-gray-600 cursor-pointer'}`" @click="addToRemovalList(cosigner)"></font-awesome-icon>
-                <a v-else class="self-center text-gray-400 hover:text-gray-600" @click="restoreFromRemovalList(cosigner)"><font-awesome-icon icon="trash-restore" class="inline-block w-4 h-4"></font-awesome-icon> <span class="text-xs">{{$t('accounts.restore')}}</span></a>
+                <a v-else class="self-center text-gray-400 hover:text-gray-600" @click="restoreFromRemovalList(cosigner)"><font-awesome-icon icon="trash-restore" class="inline-block w-4 h-4"></font-awesome-icon> <span class="text-xs">{{$t('common.restore')}}</span></a>
 
               </div>
             </div>
@@ -46,8 +46,8 @@
           <div class="border border-gray-500 rounded-full w-8 h-8 inline-block relative">
             <font-awesome-icon icon="times" class="w-5 h-5 text-gray-500 inline-block absolute" style="top:5px; right: 5px;"></font-awesome-icon>
           </div>
-          <div class="font-bold text-sm">{{$t('accounts.insufficientbalance')}}</div>
-          <p class="text-xs mt-3">{{$t('accounts.balancedescription',{value: '10.044500 XPX'})}}</p>
+          <div class="font-bold text-sm">{{$t('common.insufficientBalance')}}</div>
+          <p class="text-xs mt-3">{{$t('multisig.balanceDescription',{value: '10.044500 XPX'})}}</p>
         </div>
       </div>
       <div class="flex justify-between p-4 rounded-xl border-red-800 border-2 bg-white mb-8" v-if="!isMultisig">
@@ -55,7 +55,7 @@
           <div class="border border-gray-500 rounded-full w-8 h-8 inline-block relative">
             <font-awesome-icon icon="times" class="w-5 h-5 text-gray-500 inline-block absolute" style="top:5px; right: 10px;"></font-awesome-icon>
           </div>
-          <div class="font-bold text-sm">{{$t('accounts.cosigwarning1')}}</div>
+          <div class="font-bold text-sm">{{$t('common.accNotInWallet')}}</div>
         </div>
       </div>
       <div class="flex justify-between p-4 rounded-xl bg-red-100 mb-8" v-if="!isCoSigner">
@@ -63,8 +63,8 @@
           <div class="border border-gray-500 rounded-full w-8 h-8 inline-block relative">
             <font-awesome-icon icon="times" class="w-5 h-5 text-gray-500 inline-block absolute" style="top:5px; right: 10px;"></font-awesome-icon>
           </div>
-          <div class="font-bold text-sm">{{$t('accounts.cosigwarning2')}}</div>
-          <p class="text-xs mt-3">{{$t('accounts.cosigwarning3')}}</p>
+          <div class="font-bold text-sm">{{$t('common.notCosigner')}}</div>
+          <p class="text-xs mt-3">{{$t('multisig.cosigWarning')}}</p>
         </div>
       </div>
       <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 mb-8" v-if="onPartial && isCoSigner">
@@ -72,8 +72,8 @@
           <div class="w-8 h-8 inline-block relative">
             <font-awesome-icon icon="bell" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:5px; right: 10px;"></font-awesome-icon>
           </div>
-          <div class="font-bold text-sm">{{$t('accounts.partial')}}</div>
-          <p class="text-xs mt-3">{{$t('accounts.partialdescription')}}</p>
+          <div class="font-bold text-sm">{{$t('common.partial')}}</div>
+          <p class="text-xs mt-3">{{$t('multisig.partialDescription')}}</p>
         </div>
       </div>
       <div v-if="isCoSigner">
@@ -85,23 +85,23 @@
             <add-cosign-modal :cosignPublicKeyIndex="index" :selectedAddress="selectedAddresses"></add-cosign-modal>
           </div>
           <div class="text-lg" v-if="!coSign.length">{{$t('accounts.cosigmessage')}}</div>
-          <button class="my-8 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50 disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">(+) {{$t('accounts.addcosig')}}</button>
+          <button class="my-8 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50 disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">(+) {{$t('multisig.addCosig')}}</button>
         </div>
         <div class="mb-10">
-          <div class="block mt-2 font-bold text-md lg:inline-block lg:mr-20">{{$t('accounts.scheme')}}></div>
+          <div class="block mt-2 font-bold text-md lg:inline-block lg:mr-20">{{$t('common.scheme')}}></div>
           <div class="mt-2 lg:inline-block lg:mr-20">
-            <span class="font-bold">{{$t('accounts.approvetransactions')}}:</span>
+            <span class="font-bold">{{$t('multisig.approveTransactions')}}:</span>
             <div class="ml-2 border rounded-2xl p-2 py-2 inline-block">
               <input type="number" required min="0" :max="maxNumApproveTransaction" v-model="numApproveTransaction" class="text-right outline-none" @keypress="validateApproval">
-            </div> {{$t('accounts.schemedescription',{value: maxNumApproveTransaction})}}</div>
+            </div> {{$t('multisig.schemeDescription',{value: maxNumApproveTransaction})}}</div>
           <div class="mt-2 lg:inline-block">
-            <span class="font-bold">{{$t('accounts.deleteusers')}}:</span>
+            <span class="font-bold">{{$t('multisig.deleteUsers')}}:</span>
             <div class="ml-2 border rounded-2xl p-2 py-2 inline-block">
               <input type="number" required min="0" :max="maxNumDeleteUser" v-model="numDeleteUser" class="text-right outline-none" @keypress="validateDelete">
-            </div> {{$t('accounts.schemedescription',{value: maxNumDeleteUser})}}</div>
+            </div> {{$t('multisig.schemeDescription',{value: maxNumDeleteUser})}}</div>
         </div>
         <div class="p-4 rounded-xl bg-gray-100 my-2 w-full text-xs text-gray-800">
-          <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"> {{$t('accounts.unconfirmed')}}: 0.042750 XPX
+          <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"> {{$t('common.unconfirmed')}}: 0.042750 XPX
         </div>
         <div class="p-4 rounded-xl bg-gray-100 mb-8 items-center w-full text-xs text-gray-800">
           <div class="text-center">
@@ -109,8 +109,8 @@
               <div class="flex">
                 <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
                 <div class="inline-block self-center text-left">
-                  <div>{{$t('accounts.lockfund')}}: 10.000000 XPX</div>
-                  <div>{{$t('accounts.unconfirmed')}}: 0.044500 XPX</div>
+                  <div>{{$t('common.lockFund')}}: 10.000000 XPX</div>
+                  <div>{{$t('common.unconfirmed')}}: 0.044500 XPX</div>
                 </div>
               </div>
             </div>
@@ -122,8 +122,8 @@
         </div>
         <PasswordInput placeholder="Enter Wallet Password" errorMessage="Wallet password is required to convert to MultiSig Account" :showError="showPasswdError" v-model="passwd" icon="lock" :disabled="disabledPassword" />
         <div class="mt-10">
-          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clear()">{{$t('signin.clear')}}</button>
-          <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="modifyAccount()" :disabled="disableSend">{{$t('accounts.send')}}</button>
+          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clear()">{{$t('common.clear')}}</button>
+          <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="modifyAccount()" :disabled="disableSend">{{$t('common.send')}}</button>
         </div>
       </div>
     </div>
@@ -218,7 +218,7 @@ export default {
           if(accountDetails.balance > 10.0445){
             cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX' });
           }else{
-            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX -' + t('accounts.insufficientbalance'), disabled: true });
+            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX -' + t('common.insufficientBalance'), disabled: true });
           }
         });
       }
@@ -235,7 +235,7 @@ export default {
           if(accountDetails.balance > 10.0445){
             cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX' });
           }else{
-            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX -' + t('accounts.insufficientbalance'), disabled: true });
+            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX -' + t('common.insufficientBalance'), disabled: true });
           }
         });
       }
@@ -314,7 +314,7 @@ export default {
       let modifyStatus = multiSign.modifyMultisigAccount(coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value, signer, acc, passwd.value);
       // console.log(modifyStatus);
       if(!modifyStatus){
-        err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
+        err.value = t('common.enterPassword',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
         err.value = '';
@@ -342,7 +342,7 @@ export default {
 
             const unique = Array.from(new Set(n));
             if(unique.length != n.length){
-              err.value = t('scriptvalues.cosignerexists');
+              err.value = t('multisig.cosignerExists');
             }else{
               err.value = '';
             }
@@ -526,7 +526,7 @@ export default {
           setTimeout(()=> {
             emitter.emit('NOTIFICATION', {
               status: true,
-              message: t('scriptvalues.publickeyvalidation'),
+              message: t('multisig.publicKeyValidation'),
               notificationType: 'warn'
             });
           }, 500);

@@ -1,19 +1,19 @@
 <template>
   <div class="flex justify-between text-md">
-    <div><span class="text-gray-300">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.createaccount')}}</span></div>
+    <div><span class="text-gray-300">{{$t('common.account',2)}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.createAccount')}}</span></div>
     <div>
-      <router-link :to="{name: 'ViewAccountCreateSelectType'}" class="font-bold">{{$t('accounts.back')}}</router-link>
+      <router-link :to="{name: 'ViewAccountCreateSelectType'}" class="font-bold">{{$t('common.back')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center'>
     <form @submit.prevent="create" class="mt-10">
       <fieldset class="w-full">
         <div class="error error_box mb-2" v-if="err!=''">{{ err }}</div>
-        <TextInput :placeholder="$t('accounts.name')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
-        <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+        <TextInput :placeholder="$t('common.name')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
+        <PasswordInput :placeholder="$t('common.enterWalletPassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
         <div class="mt-10">
-          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
-          <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">{{$t('welcome.create')}}</button>
+          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('common.clear')}}</button>
+          <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">{{$t('common.create')}}</button>
         </div>
       </fieldset>
     </form>
@@ -58,9 +58,9 @@ export default {
       if(!verifyExistingAccountName){
         var result = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPassword.value);
         if (result == -1) {
-          err.value = t('scriptvalues.createaccountfail');
+          err.value = t('accounts.createAccountFail');
         } else if (result == 0) {
-          err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
+          err.value = t('common.invalidPassword');
         } else { 
           // create account
           let password = WalletUtils.createPassword(walletPassword.value);
@@ -76,7 +76,7 @@ export default {
 
         }
       }else{
-        err.value =  t('scriptvalues.accountnametaken');
+        err.value =  t('accounts.accountNameTaken');
         console.log(verifyExistingAccountName);
       }
     };

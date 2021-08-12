@@ -1,8 +1,8 @@
 <template>
   <div class="flex justify-between text-xs sm:text-sm">
-    <div><span class="text-gray-400">{{$t('services.nodes')}} ></span> <span class="text-blue-primary font-bold">{{$t('welcome.blockchain')}}</span></div>
+    <div><span class="text-gray-400">{{$t('common.nodes')}} ></span> <span class="text-blue-primary font-bold">{{$t('common.blockchain')}}</span></div>
     <div>
-      <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">{{$t('services.allservices')}}</router-link>
+      <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">{{$t('common.allServices')}}</router-link>
     </div>
   </div>
 
@@ -10,7 +10,7 @@
     <div class="text-outline bg-white mt-5" :class="borderColor">
       <div class="w-40 text-left">
         <img src="@/modules/services/submodule/nodes/img/icon-block-height-blue-30h.svg" class="h-7 w-7 inline-block ml-4">
-        <div class="ml-2 text-tsm mt-1 text-gray-500 w-30 inline-block">{{$t('services.blockheight')}}</div>
+        <div class="ml-2 text-tsm mt-1 text-gray-500 w-30 inline-block">{{$t('node.blockHeight')}}</div>
       </div>
       <input disabled="disabled" v-model="blockHeight" class="text-placeholder bg-white text-right">
       <div class="w-5"></div>
@@ -19,7 +19,7 @@
     <div class="text-outline bg-white mt-5" :class="borderColor">
       <div class="w-40 text-left">
         <img src="@/modules/services/submodule/nodes/img/icon-nodes-blue-60h.svg" class="h-7 w-7 inline-block ml-4">
-        <div class="ml-2 text-tsm mt-1 text-gray-500 w-30 inline-block">{{$t('services.currentnode')}}</div>
+        <div class="ml-2 text-tsm mt-1 text-gray-500 w-30 inline-block">{{$t('node.currentNode')}}</div>
       </div>
       <input disabled="disabled" v-model="currentNode" class="text-placeholder bg-white text-right">
       <div class="w-5"></div>
@@ -65,6 +65,7 @@ import { networkState } from '@/state/networkState';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { walletState } from '@/state/walletState';
 import {WalletUtils} from '@/util/walletUtils'
+import { useI18n } from 'vue-i18n';
 // import { DataBridgeService } from '../util/dataBridge.js';
 
 export default {
@@ -76,13 +77,14 @@ export default {
 
   setup() {
     const toast = useToast();
+    const {t} = useI18n()
    /*  const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
     const chainNetwork = inject("chainNetwork"); */
     const showSelectTitle = ref(false);
     // const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
     const borderColor = ref('border border-gray-300');
-    const placeholder = ref('Node list');
+    const placeholder = ref(t('node.nodeList'));
     const canDeselect = ref(false);
     const maxHeight = ref(200);
     const selected = ref('');

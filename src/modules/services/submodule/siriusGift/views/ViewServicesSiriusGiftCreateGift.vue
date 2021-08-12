@@ -1,8 +1,8 @@
 <template>
   <div class="flex justify-between text-xs sm:text-sm">
-    <div><span class="text-gray-400">{{$t('gift.siriusgift')}} ></span> <span class="text-blue-primary font-bold">{{$t('gift.generategift')}}</span></div>
+    <div><span class="text-gray-400">{{$t('gift.siriusGift')}} ></span> <span class="text-blue-primary font-bold">{{$t('gift.generateGift')}}</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices'}" class="font-bold">{{$t('services.allservices')}}</router-link>
+      <router-link :to="{ name: 'ViewServices'}" class="font-bold">{{$t('common.allServices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line lg:px-40'>
@@ -18,17 +18,17 @@
       </div>
       <CardMessageInput class="mb-4" :disabled="disabledMessage" v-model="messageCards" :limit="10" placeholder="Message on Gift Cards" title="Message on Gift Cards" icon="comment" :showError="messageErr " errorMessage="Message required" />
       <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-        <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} <span class="text-txs"></span> XPX</div>
+        <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('common.transactionFee')}} <span class="text-txs"></span> XPX</div>
       </div>
       <PasswordInput placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
       <div class="mt-10">
-        <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput()">{{$t('signin.clear')}}</button>
-        <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableGenerate" @click="generateGift()">{{$t('gift.generate')}}</button>
+        <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput()">{{$t('common.clear')}}</button>
+        <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableGenerate" @click="generateGift()">{{$t('common.generate')}}</button>
       </div>
     </div>
     <div v-show="isGeneratedGift" class="lg:px-40">
-      <div class="text-xl font-bold text-blue-primary mt-5">{{$t('createsuccessful.congratz')}}!</div>
-      <div class="text-sm my-2">{{$t('gift.giftmessage')}}</div>
+      <div class="text-xl font-bold text-blue-primary mt-5">{{$t('common.congratz')}}!</div>
+      <div class="text-sm my-2">{{$t('gift.giftMessage')}}</div>
       <div class="border-t border-b border-solid border-gray-300 my-10 h-32 flex">
         <div class="self-center text-center w-full">
           <div class="text-md font-bold">[ Gift card name ]</div>
@@ -43,16 +43,16 @@
               <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:4px; right: 11px;"></font-awesome-icon>
             </div>
           </div>
-          <p class="text-xs mt-3">{{$t('gift.giftmessage2')}}</p>
+          <p class="text-xs mt-3">{{$t('gift.giftMessage2')}}</p>
         </div>
       </div>
       <label class="inline-flex items-center mb-10">
         <input type="checkbox" class="h-5 w-5 bg-blue-primary" value="true" v-model="readCheck">
-        <span class="ml-2 cursor-pointer text-sm">{{$t('gift.giftmessage3')}}.</span>
+        <span class="ml-2 cursor-pointer text-sm">{{$t('gift.giftMessage3')}}.</span>
       </label>
       <div class="mt-10">
-        <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50">{{$t('accounts.save')}}</button>
-        <button type="submit" class="default-btn py-1 focus:outline-none disabled:opacity-50" :disabled="!readCheck" @click="backtoPanel()">{{$t('createsuccessful.continue')}}</button>
+        <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50">{{$t('common.save')}}</button>
+        <button type="submit" class="default-btn py-1 focus:outline-none disabled:opacity-50" :disabled="!readCheck" @click="backtoPanel()">{{$t('common.continue')}}</button>
       </div>
     </div>
   </div>

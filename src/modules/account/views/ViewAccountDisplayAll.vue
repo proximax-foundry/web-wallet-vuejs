@@ -1,8 +1,8 @@
 <template>
   <div class="flex justify-between text-xs sm:text-sm">
-    <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.viewall2')}}</span></div>
+    <div><span class="text-gray-400">{{$t('common.account',2)}} ></span> <span class="text-blue-primary font-bold">{{$t('common.viewAllAccounts')}}</span></div>
     <div>
-      <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="font-bold" active-class="accounts">{{$t('accounts.createaccount')}}</router-link>
+      <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="font-bold" active-class="accounts">{{$t('accounts.createAccount')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line'>

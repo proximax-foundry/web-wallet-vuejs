@@ -2,8 +2,8 @@
   <div class="relative text-center">
     <font-awesome-icon @click="showhideMenu();" icon="bars" :class="menuColorClass" class="menuBar absolute w-4 cursor-pointer" style="right: 7px; top: 9px;" v-if="showBar"></font-awesome-icon>
     <nav class="navbar" ref="navbarRef" v-if="showMenu">
-      <router-link class="col" class-active="active" :to="{ name : 'ViewDashboard'}">{{$t('NavigationMenu.Dashboard')}}</router-link>
-      <router-link class="col" class-active="active" :to="{ name : 'ViewTransferCreate'}">{{$t('NavigationMenu.Transfer')}}</router-link>
+      <router-link class="col" class-active="active" :to="{ name : 'ViewDashboard'}">{{$t('common.dashboard')}}</router-link>
+      <router-link class="col" class-active="active" :to="{ name : 'ViewTransferCreate'}">{{$t('common.transfer')}}</router-link>
       <router-link class="col" class-active="active" :to="{ name : 'ViewAccountDisplayAll'}" :class="{'router-link-active': subIsActive([
         '/view-all-accounts',
         '/select-type-creation-account',
@@ -16,7 +16,7 @@
         '/edit-account-multisign',
         '/delegate',
         '/alias-address-to-namespace',
-      ])}">{{$t('NavigationMenu.Accounts')}}</router-link>
+      ])}">{{$t('common.account',2)}}</router-link>
       <router-link class="col" class-active="active" :to="{ name : 'ViewServices'}" :class="{'router-link-active': subIsActive([
         '/export-wallet',
         '/wallets',
@@ -49,7 +49,7 @@
         '/swap-sirius-bsc',
         '/swap-sirius-eth',
         '/swap-eth-sirus',
-      ])}">{{$t('NavigationMenu.Services')}}</router-link>
+      ])}">{{$t('common.services')}}</router-link>
     </nav>
     <nav class="navbar h-9" v-else>
     </nav>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a @click="toggleModal = !toggleModal" class="block big-default-btn my-3 self-center w-full">{{$t('welcome.signin')}}</a>
+    <a @click="toggleModal = !toggleModal" class="block big-default-btn my-3 self-center w-full">{{$t('home.signIn')}}</a>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -11,15 +11,15 @@
             <font-awesome-icon icon="times" class="delete-icon-style"></font-awesome-icon>
           </div>
           <div class="w-104">
-            <h1 class="default-title font-bold my-3 sm:my-10">{{$t('welcome.signin')}} {{$t('dashboard.to')}} {{networkState.chainNetworkName}} {{$t('services.wallet')}}</h1>
+            <h1 class="default-title font-bold my-3 sm:my-10">{{$t('signIn.signInTitle',{network: networkState.chainNetworkName})}}</h1>
             <form @submit.prevent="login">
               <fieldset class="w-full">
                 <div class="error error_box" v-if="err!=''">{{ err }}</div>
-                <SelectInputPlugin :placeholder="$t('signin.selectwallet')" :errorMessage="$t('signin.selectwallet')" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
-                <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+                <SelectInputPlugin :placeholder="$t('signIn.selectWallet')" :errorMessage="$t('signIn.selectWallet')" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
+                <PasswordInput :placeholder="$t('common.enterWalletPassword')" :errorMessage="$t('signIn.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
                 <div class="mt-10">
-                  <button type="button" class="default-btn mr-2 sm:mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
-                  <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
+                  <button type="button" class="default-btn mr-2 sm:mr-5 focus:outline-none" @click="clearInput();">{{$t('common.clear')}}</button>
+                  <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSignin">{{$t('home.signIn')}}</button>
                 </div>
               </fieldset>
             </form>
@@ -101,7 +101,7 @@ export default defineComponent({
       if (result == -1) {
         err.value = "Invalid wallet name";
       } else if (result == 0) {
-        err.value = t('signin.invalidpassword');
+        err.value = t('common.invalidPassword');
       } else {
         // let wallets = new Wallets();
         let wallet = walletState.wallets.filterByNetworkNameAndName(networkState.chainNetworkName, selectedWallet.value);

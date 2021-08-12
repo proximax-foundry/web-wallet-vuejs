@@ -10,36 +10,36 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="closeModal();"></font-awesome-icon>
           </div>
           <div>
-            <h1 class="default-title font-bold my-5">{{$t('dashboard.transactioninfo')}}</h1>
+            <h1 class="default-title font-bold my-5">{{$t('dashboard.transactionInfo')}}</h1>
             <div class="text-left md:justify-start md:flex md:items-stretch">
               <div class="block md:w-7/12 md:inline-block">
-                <div class="relative"><span class="font-bold text-md mr-3">{{$t('accounts.lockfund')}}</span></div>
+                <div class="relative"><span class="font-bold text-md mr-3">{{$t('common.lockFund')}}</span></div>
                 <div class="text-xs my-2">{{ timestamp }}</div>
-                <div><span class="font-bold">{{$t('dashboard.effectivefee')}}:</span> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mx-2"><span class="text-xs">{{ effectiveFee.part1 }}{{ effectiveFee.part2 }}</span> <span class="text-sm">XPX</span></div>
+                <div><span class="font-bold">{{$t('common.effectiveFee')}}:</span> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mx-2"><span class="text-xs">{{ effectiveFee.part1 }}{{ effectiveFee.part2 }}</span> <span class="text-sm">XPX</span></div>
                 <div class="content">
                   <div>
-                    <div>{{$t('dashboard.type')}}:</div>
+                    <div>{{$t('common.type')}}:</div>
                     <div>{{ transaction.type }}</div>
                   </div>
                   <div>
-                    <div>{{$t('dashboard.duration')}}:</div>
-                    <div>{{ duration }} {{$t('dashboard.block')}}</div>
+                    <div>{{$t('common.duration')}}:</div>
+                    <div>{{ duration }} {{$t('common.blocks')}}</div>
                   </div>
                 </div>
                 <div class="hash-div">
-                  <div>{{$t('dashboard.transactionhash')}}:</div>
+                  <div>{{$t('dashboard.transactionHash')}}:</div>
                   <div>{{ transaction.hash }}</div>
                 </div>
                 <div class="mt-5">
-                  <span class="font-bold text-md">{{$t('dashboard.amount')}}: </span> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-2"> <span>{{ amount }} XPX</span>
+                  <span class="font-bold text-md">{{$t('common.amount')}}: </span> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-2"> <span>{{ amount }} XPX</span>
                 </div>
               </div>
               <div class="block md:w-5/12 md:inline-block bg-gray-200 rounded-2xl p-2">
-                <div class="font-bold text-xs mb-1 block">{{$t('dashboard.signer')}}:</div>
+                <div class="font-bold text-xs mb-1 block">{{$t('common.signer')}}:</div>
                 <div class="w w-96 md:w-full">{{ transaction.signer.address.address }}</div>
-                <div class="font-bold text-xs mb-1 block mt-3">{{$t('dashboard.signature')}}:</div>
+                <div class="font-bold text-xs mb-1 block mt-3">{{$t('common.signature')}}:</div>
                 <div class="w w-96 md:w-full">{{ transaction.signature }}</div>
-                <div class="font-bold text-xs mb-1 block mt-3">{{$t('dashboard.hash')}}:</div>
+                <div class="font-bold text-xs mb-1 block mt-3">{{$t('common.hash')}}:</div>
                 <div class="w w-96 md:w-full">{{ transaction.transactionInfo.hash }}</div>
               </div>
             </div>

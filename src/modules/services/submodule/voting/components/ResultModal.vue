@@ -13,13 +13,13 @@
             <h1 class="default-title font-bold my-5">[ Vote title ]</h1>
             <div class="text-left md:justify-start md:flex md:items-stretch">
               <div class="block md:w-7/12 md:inline-block">
-                <div class="font-bold text-center my-5">{{$t('vote.result')}}</div>
+                <div class="font-bold text-center my-5">{{$t('common.result')}}</div>
                 <Chart type="pie" :data="chartData" />
               </div>
               <div class="block md:w-5/12 md:inline-block">
                 <div class="table w-full mt-5">
                   <div class="grid grid-cols-4 bg-blue-primary text-gray-50 text-tsm py-2 font-bold">
-                    <div class="col-span-3 px-3">{{$t('vote.options')}}</div>
+                    <div class="col-span-3 px-3">{{$t('common.options',2)}}</div>
                     <div class="col-span-1 px-3">{{$t('vote.total')}}</div>
                   </div>
                   <div class="grid grid-cols-4 text-tsm py-2 bg-gray-200">

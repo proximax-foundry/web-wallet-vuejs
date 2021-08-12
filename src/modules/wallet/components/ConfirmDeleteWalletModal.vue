@@ -1,6 +1,6 @@
 <template>
   <div class="inline-block">
-    <button @click="toggleModal = !toggleModal" class="default-btn w-50">{{$t('deletewallet.proceed')}}</button>
+    <button @click="toggleModal = !toggleModal" class="default-btn w-50">{{$t('common.proceed')}}</button>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -12,24 +12,24 @@
           </div>
           <div class="w-104">
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
-            <div class="mt-10 mb-5"><div class="font-bold text-xl text-gray-900">{{ name }}</div> <span class="text-lg text-gray-700">{{$t('deletewallet.deletemessage')}}.</span></div>
+            <div class="mt-10 mb-5"><div class="font-bold text-xl text-gray-900">{{ name }}</div> <span class="text-lg text-gray-700">{{$t('common.deleteMessage')}}</span></div>
             <div class="flex justify-between p-4 rounded-xl bg-yellow-100 mb-4">
               <div class="text-center w-full">
                 <div class="border border-gray-600 rounded-full w-8 h-8 inline-block relative">
                   <font-awesome-icon icon="exclamation" class="w-5 h-5 text-gray-600 inline-block absolute" style="top:5px; left: 12px"></font-awesome-icon>
                 </div>
-                <div class="font-bold text-sm">{{$t('deletewallet.warning')}}</div>
-                <p class="text-sm mt-3">{{$t('deletewallet.warningmessage')}}.</p>
+                <div class="font-bold text-sm">{{$t('common.warning')}}</div>
+                <p class="text-sm mt-3">{{$t('common.deleteWarning')}}</p>
               </div>
             </div>
             <fieldset class="w-full">
               <label class="inline-flex items-center mb-10">
                 <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="readCheck">
-                <span class="ml-2 cursor-pointer text-xs">{{$t('deletewallet.deleteconsent')}}.</span>
+                <span class="ml-2 cursor-pointer text-xs">{{$t('common.deleteConsent')}}.</span>
               </label>
               <div>
-                <button type="button" class="default-btn mr-5 focus:outline-none" @click="toggleModal = !toggleModal">{{$t('deletewallet.cancel')}}</button>
-                <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="deleteWallet();" :disabled="disableDelete">{{$t('deletewallet.delete')}}</button>
+                <button type="button" class="default-btn mr-5 focus:outline-none" @click="toggleModal = !toggleModal">{{$t('common.cancel')}}</button>
+                <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="deleteWallet();" :disabled="disableDelete">{{$t('common.delete')}}</button>
               </div>
             </fieldset>
           </div>
@@ -72,7 +72,7 @@ export default{
       if(removeWalletStatus){
         router.push({ name: 'ViewWallets', params: {deleteWallet: 'success' } });
       }else{
-        err.value = t('wallets.failremovewallet');
+        err.value = t('wallets.failRemoveWallet');
       }
     };
     return {

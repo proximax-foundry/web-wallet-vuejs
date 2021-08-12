@@ -1,8 +1,8 @@
 <template>
 <div class="flex justify-between text-xs sm:text-sm">
-  <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.details')}}</span></div>
+  <div><span class="text-gray-400">{{$t('common.account',2)}} ></span> <span class="text-blue-primary font-bold">{{$t('common.details')}}</span></div>
   <div>
-    <router-link :to="{name : 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('accounts.viewall')}}</router-link>
+    <router-link :to="{name : 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('common.viewAllAccounts')}}</router-link>
   </div>
 </div>
 <div class='mt-2 py-3 gray-line'>
@@ -11,10 +11,10 @@
       <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
       <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-8 items-center">
         <div class="text-left w-full relative">
-          <div class="text-xs font-bold mb-1">{{$t('accounts.name')}}:</div>
+          <div class="text-xs font-bold mb-1">{{$t('common.name')}}:</div>
           <div v-if="showName">{{ accountNameDisplay }}</div>
           <div v-else>
-            <TextInput :placeholder="$t('swap.accountname')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
+            <TextInput :placeholder="$t('common.accountName')" :errorMessage="$t('accounts.accountNameRequired')" v-model="accountName" icon="wallet" />
           </div>
         </div>
         <div class="inline-block ml-2">
@@ -28,7 +28,7 @@
       <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
-          <div class="text-xs font-bold mb-1">{{$t('createsuccessful.address')}}:</div>
+          <div class="text-xs font-bold mb-1">{{$t('common.address')}}:</div>
           <div id="address" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="pettyaddress" copySubject="Address">{{pettyaddress}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
@@ -36,7 +36,7 @@
       <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
-          <div class="text-xs font-bold mb-1">{{$t('accounts.publickey')}}:</div>
+          <div class="text-xs font-bold mb-1">{{$t('common.publicKey')}}:</div>
           <div id="public" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
@@ -47,34 +47,34 @@
             <div class="border border-yellow-600 rounded-full w-8 h-8 inline-block mb-4">
               <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-600 inline-block"></font-awesome-icon>
             </div>
-            <p>{{$t('createsuccessful.warningtext1')}}</p>
-            <p>{{$t('createsuccessful.warningtext2')}}</p>
+            <p>{{$t('common.warningText1')}}</p>
+            <p>{{$t('common.warningText2')}}</p>
           </div>
         </div>
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
           <div class="text-left w-full relative">
-            <div class="text-xs font-bold mr-2"><div class="mb-2 inline-block">{{$t('createprivatekeywallet.privatekey')}}:</div><div v-if="!showPwPK && !showPK">**************</div><PasswordInput v-if="showPwPK && !showPK" :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPasswd" /></div>
+            <div class="text-xs font-bold mr-2"><div class="mb-2 inline-block">{{$t('common.privateKey')}}:</div><div v-if="!showPwPK && !showPK">**************</div><PasswordInput v-if="showPwPK && !showPK" :placeholder="$t('common.enterWalletPassword')" :errorMessage="$t('common.enterPassword',{name: walletName})" :showError="showPasswdError" icon="lock" v-model="walletPasswd" /></div>
             <div class="absolute z-20 w-full h-full" v-if="showPK"></div>
             <div id="private" class="text-sm w-full outline-none bg-gray-100 z-10" type="text" :copyValue="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
           </div>
           <font-awesome-icon icon="copy" @click="copy('private')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mr-2" v-if="showPK"></font-awesome-icon>
-          <button class="default-btn w-36" @click="showPwPK = !showPwPK" v-if="!showPwPK && !showPK">{{$t('createsuccessful.show')}}</button>
-          <button class="default-btn w-36" @click="verifyWalletPwPk()" v-if="showPwPK && !showPK">{{$t('accounts.submit')}}</button>
-          <button class="default-btn w-36" @click="showPwPK = false; showPK = false" v-if="showPK">{{$t('createsuccessful.hide')}}</button>
+          <button class="default-btn w-36" @click="showPwPK = !showPwPK" v-if="!showPwPK && !showPK">{{$t('common.show')}}</button>
+          <button class="default-btn w-36" @click="verifyWalletPwPk()" v-if="showPwPK && !showPK">{{$t('common.submit')}}</button>
+          <button class="default-btn w-36" @click="showPwPK = false; showPK = false" v-if="showPK">{{$t('common.hide')}}</button>
         </div>
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
           <div class="text-left w-full relative">
-            <div class="text-sm font-bold mb-1">{{$t('accounts.swap')}}</div>
-            <PasswordInput v-if="showPwSwap" :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPasswdSwap" />
+            <div class="text-sm font-bold mb-1">{{$t('common.swap')}}</div>
+            <PasswordInput v-if="showPwSwap" :placeholder="$t('common.enterWalletPassword')" :errorMessage="$t('common.enterPassword',{name: walletName})" :showError="showPasswdError" icon="lock" v-model="walletPasswdSwap" />
           </div>
-          <button class="default-btn w-36" @click="showPwSwap = !showPwSwap" v-if="!showPwSwap">{{$t('accounts.enable')}}</button>
-          <button class="default-btn w-36" @click="verifyWalletPwSwap()" v-if="showPwSwap">{{$t('accounts.submit')}}</button>
+          <button class="default-btn w-36" @click="showPwSwap = !showPwSwap" v-if="!showPwSwap">{{$t('common.enable')}}</button>
+          <button class="default-btn w-36" @click="verifyWalletPwSwap()" v-if="showPwSwap">{{$t('common.submit')}}</button>
         </div>
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
           <div class="text-left w-full relative">
-            <div class="text-sm font-bold mb-1">{{$t('createsuccessful.savewalletpaper')}}</div>
+            <div class="text-sm font-bold mb-1">{{$t('common.saveWalletPaper')}}</div>
           </div>
-          <button class="default-btn w-36">{{$t('accounts.save')}}</button>
+          <button class="default-btn w-36">{{$t('common.save')}}</button>
         </div>
       </div>
     </div>
@@ -111,6 +111,7 @@ export default {
     const router = useRouter();
 
     // get account details
+    const walletName = walletState.currentLoggedInWallet.name
     var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
     const other_acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
 
@@ -167,12 +168,12 @@ export default {
           accountNameDisplay.value = accountName.value;
           err.value = "";
         } else if (exist_account || exist_other_account) {
-          err.value = t('scriptvalues.accountnametaken');
+          err.value = t('accounts.accountNameTaken');
         } else {
-          err.value = t('scriptvalues.accountnamevalidation');
+          err.value = t('accounts.changeNameFail');
         }
       } else {
-        err.value = t('scriptvalues.inputaccountname');
+        err.value = t('accounts.enterAccountName');
       }
     };
 
@@ -201,7 +202,7 @@ export default {
           err.value = "";
         } else {
           showPK.value = false;
-          err.value = "Wallet password is incorrect";
+          err.value = t('common.invalidPassword');
         }
       }
     };
@@ -235,7 +236,8 @@ export default {
       copy,
       privateKey,
       hidePanel,
-      pettyaddress
+      pettyaddress,
+      walletName
     };
   }
 };

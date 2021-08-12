@@ -1,8 +1,8 @@
 <template>
   <div class="flex justify-between text-xs sm:text-sm">
-    <div><span class="text-gray-400">{{$t('services.txexplorer')}} ></span> <span class="text-blue-primary font-bold">{{$t('services.explorer')}}</span></div>
+    <div><span class="text-gray-400">{{$t('transactions.txExplorer')}} ></span> <span class="text-blue-primary font-bold">{{$t('common.explorer')}}</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices'}" class="font-bold">{{$t('services.allservices')}}</router-link>
+      <router-link :to="{ name: 'ViewServices'}" class="font-bold">{{$t('common.allServices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line pt-10 px-20'>
@@ -16,7 +16,7 @@
         </div>
       </div>
       <div class=" col-span-1 sm:col-span-7 md:col-span-1 my-5 sm:my-0 md:my-5 flex">
-        <button class="default-btn py-1 flex-grow" @click="SearchTransaction()">{{$t('services.search')}}</button>
+        <button class="default-btn py-1 flex-grow" @click="SearchTransaction()">{{$t('common.search')}}</button>
       </div>
     </div>
     <DataTable
@@ -55,7 +55,7 @@
         </template>
       </Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('common.noRecord')}}
       </template>
     </DataTable>
     <DataTable
@@ -73,7 +73,7 @@
       <Column field="senderName" header="Sender" headerStyle="width:300px" />
       <Column field="recipient" header="Recipient" headerStyle="width:300px" />
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('common.noRecord')}}
       </template>
     </DataTable>
     <DynamicModelComponent :modelName="dynamicModelComponentDisplay" :showModal="showTransactionModel" :transaction="modalData" />

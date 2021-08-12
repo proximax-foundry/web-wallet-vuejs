@@ -1,24 +1,24 @@
 <template>
   <div class="flex justify-between text-md">
-    <div><span class="text-gray-300">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.importaccount')}}</span></div>
+    <div><span class="text-gray-300">{{$t('common.account',2)}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.importAccount')}}</span></div>
     <div>
-      <router-link :to="{name: 'ViewAccountCreateSelectType'}" class="font-bold">{{$t('accounts.back')}}</router-link>
+      <router-link :to="{name: 'ViewAccountCreateSelectType'}" class="font-bold">{{$t('common.back')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center'>
     <form @submit.prevent="create" class="mt-10">
       <fieldset class="w-full">
         <div class="error error_box mb-2" v-if="err!=''">{{ err }}</div>
-        <PasswordInput :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" v-model="privKey" class="ml-1" />
+        <PasswordInput :placeholder="$t('common.privateKey')" :errorMessage="$t('common.invalidPrivateKey')" icon="key" v-model="privKey" class="ml-1" />
         <label class="inline-flex items-center mb-5">
             <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="nis1Swap">
-          <span class="ml-2 cursor-pointer">{{$t('createprivatekeywallet.swaptitle')}}</span>
+          <span class="ml-2 cursor-pointer">{{$t('common.swapTitle')}}</span>
         </label>
-        <TextInput :placeholder="$t('swap.accountname')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
-        <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+        <TextInput :placeholder="$t('common.accountName')" :errorMessage="$t('accounts.accountNameRequired')" v-model="accountName" icon="wallet" />
+        <PasswordInput :placeholder="$t('common.enterWalletPassword')" :errorMessage="$t('common.enterPassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
         <div class="mt-10">
-          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
-          <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">{{$t('createwallet.import')}}</button>
+          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('common.clear')}}</button>
+          <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">{{$t('common.import')}}</button>
         </div>
       </fieldset>
     </form>
@@ -69,15 +69,15 @@ export default {
       if(!verifyExistingAccountName) {
         var result = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPassword.value);
         if (result == -1) {
-          err.value = t('scriptvalues.createaccountfail');
+          err.value = t('accounts.createAccountFail');
         } else if (result == 0) {
-          err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name}) ;
+          err.value = t('common.walletPasswordValidation',{name : walletState.currentLoggedInWallet.name}) ;
         } else {    
           // create account
           const account = Account.createFromPrivateKey(privKey.value,ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
           const verifyExistingAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.publicKey == account.publicKey);
           if (verifyExistingAccount) {
-            err.value = t('scriptvalues.privatekeyexists');
+            err.value = t('accounts.privateKeyExists');
           } else {          
             let password = WalletUtils.createPassword(walletPassword.value);
             const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, privKey.value, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
@@ -92,7 +92,7 @@ export default {
           }
         } 
       } else {
-        err.value = $t('scriptvalues.accountnametaken');
+        err.value = $t('accounts.accountNameTaken');
       }
     };
     return{

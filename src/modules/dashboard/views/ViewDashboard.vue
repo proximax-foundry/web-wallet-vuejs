@@ -3,8 +3,8 @@
     <div class="w-full text-center md:text-left mx-0 lg:mx-5">
       <div class="font-bold hover:bg-gray-100 cursor-pointer inline-block py-1 px-2 pl-0 rounded-lg" @click="openSetDefaultModal = !openSetDefaultModal">
         <font-awesome-icon icon="caret-down" class="h-5 w-5 text-gray-600 inline-block"></font-awesome-icon>&nbsp;{{ selectedAccountName }} 
-        <div v-if="isMultisig" class="text-xs font-normal ml-1 inline-block px-2 py-1 rounded bg-blue-200" >{{$t('accounts.multisig')}}</div>
-        <div v-if="isDefault" class="text-xs font-normal ml-1 inline-block px-2 py-1 rounded bg-yellow-200">{{$t('accounts.default')}}</div>
+        <div v-if="isMultisig" class="text-xs font-normal ml-1 inline-block px-2 py-1 rounded bg-blue-200" >{{$t('common.multisig')}}</div>
+        <div v-if="isDefault" class="text-xs font-normal ml-1 inline-block px-2 py-1 rounded bg-yellow-200">{{$t('common.default')}}</div>
       </div>
       <div class="text-xs mb-2">
         <div class="relative inline-block overflow-x-hidden address_div">
@@ -21,12 +21,12 @@
       </div>
       <div class="text-center md:text-left">
         <div class="inline-block mr-4"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 h-5 inline mr-1"><span class="text-xs">{{ selectedAccountBalance }} {{ currentNativeTokenName }}</span></div>
-        <div class="inline-block" v-if="displayConvertion"><img src="@/assets/img/icon-usd-blue.svg" class="w-5 inline mr-1"><span class="text-xs" >{{$t('dashboard.usd')}}{{ currencyConvert }}</span></div>
+        <div class="inline-block" v-if="displayConvertion"><img src="@/assets/img/icon-usd-blue.svg" class="w-5 inline mr-1"><span class="text-xs" >{{$t('common.usd')}}{{ currencyConvert }}</span></div>
       </div>
     </div>
 
     <div class="w-full mt-5 md:mt-0">
-      <div class="text-md text-center sm:text-right lg:text-left">{{$t('dashboard.transactions')}}: <span>{{ confirmedTransactions.length + unconfirmedTransactions.length }}</span></div>
+      <div class="text-md text-center sm:text-right lg:text-left">{{$t('common.transaction',2)}}: <span>{{ confirmedTransactions.length + unconfirmedTransactions.length }}</span></div>
       <div class="xs:text-center sm:text-right lg:text-left">
         <div class="mt-2">
           <div class="rounded-full bg-blue-primary text-white w-24 h-15 px-2 py-1 mr-3 inline-block" :class="confirmedTransactions.length>0?'cursor-pointer':''" @click="clickConfirmedTransaction()">
@@ -57,11 +57,11 @@
       <div class="grid grid-cols-12">
           <div class="py-2 text-md col-start-5 col-span-2 rounded-lg rounded-r-none font-bold" 
           :class="namespaceAssetView == 0 ? 'bg-blue-500 text-white' : 'bg-gray-400 text-gray-100'" @click="namespaceAssetView = 0">
-            {{$t('services.namespaces')}}
+            {{$t('common.namespaces')}}
           </div>
           <div class="py-2 text-md col-span-2 rounded-lg rounded-l-none font-bold" 
             :class="namespaceAssetView == 1 ? 'bg-blue-500 text-white' : 'bg-gray-400 text-gray-100'" @click="namespaceAssetView = 1">
-            {{$t('dashboard.otherassets')}}
+            {{$t('dashboard.otherAssets')}}
           </div>
       </div>
       <div class="grid grid-cols-12">

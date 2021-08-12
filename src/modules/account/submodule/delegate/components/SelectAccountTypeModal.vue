@@ -12,26 +12,26 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal; naviPrivateKey = !naviPrivateKey;"></font-awesome-icon>
           </div>
           <div class="w-104" v-if="!naviPrivateKey">
-            <h1 class="default-title font-bold my-5">{{$t('delegate.selectacctype')}}</h1>
+            <h1 class="default-title font-bold my-5">{{$t('delegate.selectAccType')}}</h1>
             <div class="page-title-gray-line grid grid-cols-1 md:grid-cols-2 pt-20">
               <div class="px-5 self-center text-center my-10">
                 <img src="@/modules/wallet/img/icon-add-new-blue.svg" class="w-12 inline-block">
-                <p class="mt-3">{{$t('delegate.newaccount')}}</p>
-                <button class="max-w-xs sm:max-w-sm inline-block default-btn my-3 self-center" @click="linkNewAcc()">{{$t('delegate.select')}}</button></div>
+                <p class="mt-3">{{$t('delegate.newAccount')}}</p>
+                <button class="max-w-xs sm:max-w-sm inline-block default-btn my-3 self-center" @click="linkNewAcc()">{{$t('common.select')}}</button></div>
               <div class="px-5 self-center text-center my-10">
-                <img src="@/modules/wallet/img/icon-private-key-blue.svg" class="w-12 inline-block"><p class="mt-3">{{$t('createwallet.fromprivatekey')}}</p>
-                <button class="max-w-xs sm:max-w-sm inline-block default-btn my-3 self-center" @click="naviPrivateKey = !naviPrivateKey">{{$t('delegate.select')}}</button>
+                <img src="@/modules/wallet/img/icon-private-key-blue.svg" class="w-12 inline-block"><p class="mt-3">{{$t('common.fromPrivateKey')}}</p>
+                <button class="max-w-xs sm:max-w-sm inline-block default-btn my-3 self-center" @click="naviPrivateKey = !naviPrivateKey">{{$t('common.select')}}</button>
               </div>
             </div>
           </div>
           <div class="w-104" v-else>
-            <h1 class="default-title font-bold my-5">{{$t('createwallet.fromprivatekey')}}</h1>
+            <h1 class="default-title font-bold my-5">{{$t('common.fromPrivateKey')}}</h1>
             <div class="page-title-gray-line pt-20">
-              <div class="my-5">{{$t('delegate.linkmessage')}}</div>
-              <PasswordInput :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('delegate.entervalidpk')" :showError="showPrivateKeyError" v-model="privateKey" icon="lock" :disabled="disabledPrivateKey" />
+              <div class="my-5">{{$t('delegate.fillInPrivateKey')}}</div>
+              <PasswordInput :placeholder="$t('common.privateKey')" :errorMessage="$t('common.invalidPrivateKey')" :showError="showPrivateKeyError" v-model="privateKey" icon="lock" :disabled="disabledPrivateKey" />
               <div class="mt-10">
-                <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput">{{$t('signin.clear')}}</button>
-                <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" :disabled="disableConfirm" @click="linkPrivateKey()">{{$t('delegate.confirm')}}</button>
+                <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput">{{$t('common.clear')}}</button>
+                <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" :disabled="disableConfirm" @click="linkPrivateKey()">{{$t('common.confirm')}}</button>
               </div>
             </div>
           </div>
@@ -94,7 +94,7 @@ export default{
           console.log(accountInfo.accountType)
           emitter.emit('FROM PRIVATE KEY', accountDetail);    
         } else {
-          err.value = t('delegate.linkerror')
+          err.value = t('delegate.privateKeyError')
         }
       } catch(error) {
           if(error == "HttpError: HTTP request failed"){

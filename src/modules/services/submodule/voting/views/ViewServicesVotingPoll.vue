@@ -1,9 +1,9 @@
 <template>
   <div class="flex justify-between text-xs sm:text-sm">
-    <div><span class="text-gray-400">{{$t('vote.vote')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.viewall2')}}</span></div>
+    <div><span class="text-gray-400">{{$t('common.vote')}} ></span> <span class="text-blue-primary font-bold">{{$t('common.viewAll')}}</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServicesVotingCreatePoll'}" class="font-bold">{{$t('accounts.new')}}</router-link> |
-      <router-link :to="{ name: 'ViewServices'}" class="font-bold">All Services</router-link>
+      <router-link :to="{ name: 'ViewServicesVotingCreatePoll'}" class="font-bold">{{$t('common.new')}}</router-link> |
+      <router-link :to="{ name: 'ViewServices'}" class="font-bold">{{$t('common.allServices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line'>
@@ -17,7 +17,7 @@
         </div>
       </div>
       <div class=" col-span-1 sm:col-span-7 md:col-span-1 my-5 sm:my-0 md:my-5 flex">
-        <button class="default-btn py-1 flex-grow">{{$t('vote.refresh')}}</button>
+        <button class="default-btn py-1 flex-grow">{{$t('common.refresh')}}</button>
       </div>
     </div>
     <DataTable
@@ -37,7 +37,7 @@
       <Column field="endDate" header="EndDate" headerStyle="width:200px"></Column>
       <Column field="status" header="Status" headerStyle="width:100px"></Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('services.noRecord')}}
       </template>
     </DataTable>
   </div>

@@ -10,24 +10,24 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="closeModal();"></font-awesome-icon>
           </div>
           <div>
-            <h1 class="default-title font-bold my-5">{{$t('dashboard.transactioninfo')}}</h1>
+            <h1 class="default-title font-bold my-5">{{$t('dashboard.transactionInfo')}}</h1>
             <div class="text-left md:justify-start md:flex md:items-stretch">
               <div class="block md:w-7/12 md:inline-block">
-                <div class="relative"><span class="font-bold text-md mr-3">{{$t('dashboard.aggregatebonded')}}</span></div>
+                <div class="relative"><span class="font-bold text-md mr-3">{{$t('dashboard.aggregateBonded')}}</span></div>
                 <div class="text-xs my-2">{{ timestamp }}</div>
-                <div><span class="font-bold">{{$t('dashboard.effectivefee')}}:</span> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mx-2"><span class="text-xs">{{ effectiveFee.part1 }}{{ effectiveFee.part2 }}</span> <span class="text-sm">XPX</span></div>
+                <div><span class="font-bold">{{$t('common.effectiveFee')}}:</span> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mx-2"><span class="text-xs">{{ effectiveFee.part1 }}{{ effectiveFee.part2 }}</span> <span class="text-sm">XPX</span></div>
                 <div class="content">
                   <div>
-                    <div>{{$t('dashboard.type')}}:</div>
+                    <div>{{$t('common.type')}}:</div>
                     <div>{{ transaction.type }}</div>
                   </div>
                   <div>
-                    <div>{{$t('dashboard.height')}}:</div>
+                    <div>{{$t('common.height')}}:</div>
                     <div>{{ transactionHeight }}</div>
                   </div>
                 </div>
                 <div style="width: 450px;">
-                  <div class="font-bold border-b border-gray-300 pb-1 mt-5">{{$t('dashboard.transactions')}} ({{ transaction.innerTransactions.length }})</div>
+                  <div class="font-bold border-b border-gray-300 pb-1 mt-5">{{$t('common.transaction',2)}} ({{ transaction.innerTransactions.length }})</div>
                   <div class="transactionDetailDiv" v-for="( innerTransaction, index ) in transaction.innerTransactions" :key="index">
                     <transfer :innerTransaction = "innerTransaction" :sender="transaction.signer" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.transfer.id" />
                     <modify-multisig-account-type :innerTransaction = "innerTransaction" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.modifyMultisigAccount.id" />
@@ -37,12 +37,12 @@
                 </div>
               </div>
               <div class="block md:w-5/12 md:inline-block bg-gray-200 rounded-2xl p-2">
-                <div class="font-bold text-xs mb-1 block">{{$t('dashboard.signer')}}:</div>
+                <div class="font-bold text-xs mb-1 block">{{$t('common.signer')}}:</div>
                 <div class="w w-96 md:w-full">{{ transaction.signer.address.address }}</div>
-                <div class="font-bold text-xs mb-1 block mt-3">{{$t('dashboard.signature')}}:</div>
+                <div class="font-bold text-xs mb-1 block mt-3">{{$t('common.signature')}}:</div>
                 <div class="w w-96 md:w-full">{{ transaction.signature }}</div>
                 <div v-if="transaction.cosignatures.length>0">
-                  <div class="font-bold text-xs mb-1 mt-3 flex justify-between cursor-pointer hover:bg-gray-300 p-2" @click="showPanel = !showPanel">{{$t('dashboard.othercosignaturies')}}:
+                  <div class="font-bold text-xs mb-1 mt-3 flex justify-between cursor-pointer hover:bg-gray-300 p-2" @click="showPanel = !showPanel">{{$t('dashboard.otherCosignatories')}}:
                     <font-awesome-icon icon="chevron-down" class="text-black w-4 h-4" v-if="!showPanel"></font-awesome-icon>
                     <font-awesome-icon icon="chevron-up" class="text-black w-4 h-4" v-else></font-awesome-icon>
                   </div>
@@ -52,7 +52,7 @@
                     </div>
                   </transition>
                 </div>
-                <div class="font-bold text-xs mb-1 block mt-3">{{$t('dashboard.hash')}}:</div>
+                <div class="font-bold text-xs mb-1 block mt-3">{{$t('common.hash')}}:</div>
                 <div class="w w-96 md:w-full">{{ transaction.transactionInfo.hash }}</div>
               </div>
             </div>

@@ -8,11 +8,11 @@
       <div style="width: 400px;" class="break-words p-2">
         <div class="subcontent">
           <div>
-            <div>{{$t('dashboard.type')}}:</div>
+            <div>{{$t('common.type')}}:</div>
             <div>{{ typeTransactionHex }}</div>
           </div>
           <div>
-            <div>{{$t('dashboard.mosaicid')}}:</div>
+            <div>{{$t('dashboard.assetId')}}:</div>
             <div>{{ mosaicId }}</div>
           </div>
           <!-- <div v-if="mosaicsStorage !== null && mosaicsStorage.mosaicNames.names.lenght > 0">
@@ -25,26 +25,26 @@
             <div>{{ innerTransaction.mosaicProperties.divisibility }}</div>
           </div> -->
           <div>
-            <div>{{$t('services.divisibility')}}:</div>
+            <div>{{$t('common.divisibility')}}:</div>
             <div>{{ innerTransaction.mosaicProperties.divisibility }}</div>
           </div>
           <div>
-            <div>{{$t('dashboard.version')}}:</div>
+            <div>{{$t('common.version')}}:</div>
             <div>{{ innerTransaction.version }}</div>
           </div>
           <div>
-            <div>{{$t('dashboard.duration')}}:</div>
+            <div>{{$t('common.duration')}}:</div>
             <div>{{ innerTransaction.mosaicProperties.duration == undefined ? 'Does not expire' : innerTransaction.mosaicProperties.duration }}</div>
           </div>
           <div>
-            <div>{{$t('services.supplymutable')}}:</div>
+            <div>{{$t('common.supplyMutable')}}:</div>
             <div>
               <font-awesome-icon icon="check-circle" class="h-4 w-4 text-green-600" v-if="innerTransaction.mosaicProperties.supplyMutable"></font-awesome-icon>
               <font-awesome-icon icon="times-circle" class="h-4 w-d text-red-600" v-else></font-awesome-icon>
             </div>
           </div>
           <div>
-            <div>{{$t('services.transferable')}}:</div>
+            <div>{{$t('common.transferable')}}:</div>
             <div>
               <font-awesome-icon icon="check-circle"  class="h-4 w-4 text-green-600" v-if="innerTransaction.mosaicProperties.transferable"></font-awesome-icon>
               <font-awesome-icon icon="times-circle" class="h-4 w-d text-red-600" v-else></font-awesome-icon>
