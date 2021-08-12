@@ -32,22 +32,22 @@
       <div class="text-lg my-7 font-bold">Transaction Details</div>
       <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
       <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-      <p class="font-bold text-tsm text-left mb-1">From: Metamask Address</p>
+      <p class="font-bold text-tsm text-left mb-1">From: MetaMask Address</p>
       <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left" v-if="isInstallMetamask">
         <div class="text-tsm text-gray-700 self-center relative">
           <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block break-all">{{ isMetamaskConnected?(currentAccount?currentAccount:'Not connected'):'Not connected' }}</div></div>
         </div>
         <div class="self-center">
-          <button @click="connectMetamask()" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none" v-if="!currentAccount">Connect to Metamask</button>
+          <button @click="connectMetamask()" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none" v-if="!currentAccount">Connect to MetaMask</button>
           <button class=" bg-green-50 rounded-3xl border font-bold px-6 py-1 border-green-500 text-green-500 text-tsm outline-none focus:outline-none cursor-auto" v-else>Connected</button>
         </div>
       </div>
       <div class="mb-5 flex justify-between bg-yellow-200 rounded-2xl p-3 text-left" v-else>
         <div class="text-tsm text-gray-700 self-center relative">
-          <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block text-gray-800">Metamask is not installed</div></div>
+          <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block text-gray-800">MetaMask is not installed</div></div>
         </div>
         <div class="self-center">
-          <a href="https://metamask.io/" target=_new class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none">Download Metamask</a>
+          <a href="https://metamask.io/" target=_new class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none">Download MetaMask</a>
         </div>
       </div>
       <p class="font-bold text-tsm text-left">To: Sirius Address</p>
@@ -71,7 +71,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Sending transaction to Metamask</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Sending transaction to MetaMask</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -83,7 +83,7 @@
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
-            {{ isInvalidConfirmedMeta?'Approval in Metamask is rejected':'Waiting for confirmation in Metamask' }}
+            {{ isInvalidConfirmedMeta?'Approval in MetaMask is rejected':'Waiting for confirmation in MetaMask' }}
             <div v-if="isInvalidConfirmedMeta" class="mt-5">
               <button type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border-blue-primary px-8 text-white hover:shadow-lg" @click="getValidation(true)">Retry</button>
               <router-link :to="{ name: 'ViewServices' }" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32 text-tsm" tag="button">Cancel this swap</router-link>
@@ -112,7 +112,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">Sending message to Metamask</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">Sending message to MetaMask</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -124,7 +124,7 @@
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">
-            {{ isInvalidSignedMeta?'Approval on Metamask is rejected':'Waiting for confirmation in Metamask' }}
+            {{ isInvalidSignedMeta?'Approval on MetaMask is rejected':'Waiting for confirmation in MetaMask' }}
             <div v-if="isInvalidSignedMeta" class="mt-5">
               <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg w-24" @click="getSigned">Retry</button>
             </div>
@@ -295,7 +295,7 @@ export default {
         console.log(connectInfo)
       });
     }else{
-      console.log('metamask not installed')
+      console.log('MetaMask not installed')
     }
 
     function fetchMetaAccount(accounts) {
@@ -320,6 +320,7 @@ export default {
         currentAccount.value = '';
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
+        serviceErr.value = '';
         updateToken();
       }
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
@@ -333,7 +334,7 @@ export default {
           updateToken();
         }
       }else{
-        err.value = 'Please select ' + bscNetworkName + ' on Metamask to swap';
+        err.value = 'Please select ' + bscNetworkName + ' on MetaMask to swap';
       }
     }
 
@@ -362,6 +363,9 @@ export default {
           console.log('Please connect to MetaMask.');
         } else {
           console.error(err);
+          if(err.code == '-32002'){
+            serviceErr.value = 'Please click on MetaMask extension to approve connection';
+          }
         }
       });
     };
@@ -450,7 +454,6 @@ export default {
           })
         });
       }
-      
       return siriusAddress;
     });
 
@@ -539,7 +542,7 @@ export default {
         if(response.status == 200){
           const data = await response.json();
           isInvalidSwapService.value = false;
-          transactionHash.value = data.remoteTxnTransaction;
+          transactionHash.value = data.remoteTxnHash;
           swapTimestamp.value = data.timestamp;
           swapId.value = data.ctxId;
           swapQr.value = SwapUtils.generateQRCode(validationLink.value);
