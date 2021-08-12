@@ -58,8 +58,8 @@
           <button @click="currentPage=1" class="text-xs sm:text-sm hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none">Change</button>
         </div>
       </div>
-      <SwapInput v-model="amount" :maxAmount="maxSwapAmount" placeholder="Amount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" type="text" icon="coins" :showError="showAmountErr" 
-                errorMessage="Insufficient balance" emptyErrorMessage="Amount is empty" :disabled="disableAmount" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" />
+      <SwapInput v-model="amount" :maxAmount="maxSwapAmount" placeholder="Amount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" type="text" icon="coins" :showError="showAmountErr"
+                :errorMessage="(selectedAccount.balance >= minBalanceAmount)?'Insufficient balance':'Balance is insufficient to cover transaction fee.'" emptyErrorMessage="Amount is empty" :disabled="disableAmount" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" />
       <TextInput placeholder="BSC address receiving your swap" errorMessage="Valid BSC address is required" :showError="showAddressErr" v-model="bscAddress" icon="wallet" />
       <div class="tex-center font-bold text-lg mb-2">Transaction Fee (BSC BEP20 Network):</div>
       <div class="md:grid md:grid-cols-3 mb-10">
@@ -88,7 +88,7 @@
       <div class="text-sm text-center mb-2 sm:mb-4">Fees are valid for: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
       <div class="tex-center font-bold text-lg mb-2">Transaction Fee (Sirius Network):</div>
       <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-        <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span class="text-txs">{{ txFeeDisplay }}</span> XPX</div>
+        <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span>{{ txFeeDisplay }}</span> XPX</div>
       </div>
       <PasswordInput placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
       <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
@@ -692,6 +692,7 @@ export default {
     };
 
     return {
+      minBalanceAmount,
       includeMultisig,
       timerSecondsDisplay,
       timerMinutes,
