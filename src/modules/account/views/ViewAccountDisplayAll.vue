@@ -68,7 +68,8 @@ export default {
     if(p.deleteAccount == 'success'){
       toast.add({severity:'success', summary: 'Notification', detail: 'Account has been removed successfully', group: 'br', life: 5000});
     }
-
+    console.log(walletState.currentLoggedInWallet.others)
+    //console.log(walletState.currentLoggedInWallet.others[0].multisigInfo)
     const accounts = computed(
       () => {
         if(walletState.currentLoggedInWallet){
