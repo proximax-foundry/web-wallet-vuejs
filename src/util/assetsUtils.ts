@@ -49,8 +49,8 @@ export class AssetsUtils {
 
     const buildTransactions = new BuildTransactions(networkType, generationHash);
     // owner: PublicAccount, supplyMutable: boolean, transferable: boolean, divisibility: number, duration?: UInt64
-    const registerMosaicTransaction = buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(duration));
-    return registerMosaicTransaction.maxFee.compact();
+    const registerMosaicTransactionFee = buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(duration));
+    return registerMosaicTransactionFee.maxFee.compact();
   };
 
   static getMosaicSupplyChangeTransactionFee = (networkType: NetworkType, generationHash: string, owner: PublicAccount, mosaicId: MosaicId, changeType: number, delta: UInt64) => {
