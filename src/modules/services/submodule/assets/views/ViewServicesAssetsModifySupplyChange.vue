@@ -28,6 +28,12 @@
                 <div class="inline-block text-tsm">{{$t('accounts.cosigwarning2')}}</div>
               </div>
             </div>
+            <div v-if="isNotCosigner" class="border-2 rounded-3xl border-yellow-400 w-full h-24 text-center p-4">
+              <div class="h-5 text-center">
+                <div class="rounded-full w-8 h-8 border border-yellow-500 inline-block relative"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-5 w-5 absolute" style="top: 5px; left:11px"></font-awesome-icon></div><br>
+                <div class="inline-block text-tsm">You are not a cosigner to this account</div>
+              </div>
+            </div>
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
             <div v-if="moreThanOneAccount" class="text-left p-4">
               <div class="mb-1 cursor-pointer z-20 border-b border-gray-200" @click="showMenu = !showMenu">
@@ -210,6 +216,10 @@ export default {
 
     const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
 
+    const getMultiSigCosigner = computed(() => {
+      return AssetsUtils.getCosignerList(selectedAccAdd.value);
+    });
+
     const changeSelection = (i) => {
       assetOption.value.clear();
       selectedAccName.value = i.name;
@@ -335,6 +345,37 @@ export default {
         setFormInput(true)
       }else{
         setFormInput(false);
+      }
+    });
+
+    const totalFee = computed(() => {
+      // if multisig
+      if(isMultiSig(selectedAccAdd.value)){
+        return parseFloat(lockFundTotalFee.value) + rentalFee.value + transactionFeeExact.value;
+      }else{
+        return rentalFee.value + transactionFeeExact.value;
+      }
+    });
+
+    watch(totalFee, (n) => {
+      if(balance.value < n && !isNotCosigner.value){
+        showNoBalance.value = true;
+        disabledPassword.value = true;
+        disabledSupply.value = true;
+      }else{
+        showNoBalance.value = false;
+        disabledPassword.value = false;
+        disabledSupply.value = false;
+      }
+    });
+
+    watch(isNotCosigner, (n) => {
+      if(n){
+        disabledPassword.value = true;
+        disabledSupply.value = true;
+      }else{
+        disabledPassword.value = false;
+        disabledSupply.value = false;
       }
     });
 
