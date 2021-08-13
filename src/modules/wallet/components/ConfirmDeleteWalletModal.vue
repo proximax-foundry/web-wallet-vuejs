@@ -1,6 +1,6 @@
 <template>
   <div class="inline-block">
-    <button @click="toggleModal = !toggleModal" class="default-btn w-50">Proceed</button>
+    <button @click="toggleModal = !toggleModal" class="default-btn w-50">{{$t('deletewallet.proceed')}}</button>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -12,24 +12,24 @@
           </div>
           <div class="w-104">
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
-            <div class="mt-10 mb-5"><div class="font-bold text-xl text-gray-900">{{ name }}</div> <span class="text-lg text-gray-700">will be deleted from your device.</span></div>
+            <div class="mt-10 mb-5"><div class="font-bold text-xl text-gray-900">{{ name }}</div> <span class="text-lg text-gray-700">{{$t('deletewallet.deletemessage')}}.</span></div>
             <div class="flex justify-between p-4 rounded-xl bg-yellow-100 mb-4">
               <div class="text-center w-full">
                 <div class="border border-gray-600 rounded-full w-8 h-8 inline-block relative">
                   <font-awesome-icon icon="exclamation" class="w-5 h-5 text-gray-600 inline-block absolute" style="top:5px; left: 12px"></font-awesome-icon>
                 </div>
-                <div class="font-bold text-sm">Warning!</div>
-                <p class="text-sm mt-3">This action will delete this wallet. It cannot be undone. If you have not saved your private keys, access to the accounts contained in this wallet will be permanently lost.</p>
+                <div class="font-bold text-sm">{{$t('deletewallet.warning')}}</div>
+                <p class="text-sm mt-3">{{$t('deletewallet.warningmessage')}}.</p>
               </div>
             </div>
             <fieldset class="w-full">
               <label class="inline-flex items-center mb-10">
                 <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="readCheck">
-                <span class="ml-2 cursor-pointer text-xs">I have read the warning, understand the consequences, and wish to proceed.</span>
+                <span class="ml-2 cursor-pointer text-xs">{{$t('deletewallet.deleteconsent')}}.</span>
               </label>
               <div>
-                <button type="button" class="default-btn mr-5 focus:outline-none" @click="toggleModal = !toggleModal">Cancel</button>
-                <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="deleteWallet();" :disabled="disableDelete">Delete Now</button>
+                <button type="button" class="default-btn mr-5 focus:outline-none" @click="toggleModal = !toggleModal">{{$t('deletewallet.cancel')}}</button>
+                <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="deleteWallet();" :disabled="disableDelete">{{$t('deletewallet.delete')}}</button>
               </div>
             </fieldset>
           </div>
@@ -45,10 +45,12 @@ import { computed, ref } from 'vue';
 import { networkState } from "@/state/networkState";
 import { useRouter } from 'vue-router';
 import { walletState } from '@/state/walletState';
+import {useI18n} from 'vue-i18n'
+
 
 export default{
   name: 'ConfirmDeleteWalletModal',
-  props:['name'],
+  props:['name', 'networkName'],
   data() {
     return {
       toggleModal: false,
@@ -56,6 +58,7 @@ export default{
   },
 
   setup(p){
+    const {t} = useI18n()
     const router = useRouter();
     const err = ref("");
     const readCheck = ref(false);
@@ -65,11 +68,11 @@ export default{
       )
     );
     const deleteWallet = () => {
-      let removeWalletStatus = walletState.wallets.removeWalletByNetworkNameAndName(networkState.chainNetworkName, p.name)
+      let removeWalletStatus = walletState.wallets.removeWalletByNetworkNameAndName(p.networkName, p.name)
       if(removeWalletStatus){
         router.push({ name: 'ViewWallets', params: {deleteWallet: 'success' } });
       }else{
-        err.value = "Unable to remove wallet";
+        err.value = t('wallets.failremovewallet');
       }
     };
     return {

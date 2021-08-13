@@ -6,8 +6,9 @@
   </div>
 </template>
 <script>
-import { getCurrentInstance, ref } from "vue";
+import { getCurrentInstance, ref, computed } from "vue";
 import ServiceTile from '@/modules/services/components/ServiceTile.vue';
+import {useI18n} from 'vue-i18n'
 
 export default {
   name: 'ViewServices',
@@ -16,85 +17,86 @@ export default {
   },
 
   setup() {
+    const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const currentMenu = ref('');
     const showMenu = ref([]);
     const services = ref([
-      {name: 'Namespaces', desc: 'Create namespaces and sub-namespaces', img: 'icon-namespace-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Register', link: 'ViewServicesNamespaceCreate'},
-        {name: 'Extend Duration', link: 'ViewServicesNamespaceExtend'}
+      {name: computed(() => t('services.namespaces')), desc: computed(() => t('services.namespacedescription')), img: 'icon-namespace-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+        {name: computed(() => t('services.register')), link: ''},
+        {name: computed(() => t('services.extendduration')), link: ''}
       ]},
-      {name: 'Assets', desc: 'Create digital representations with customized properties', img: 'icon-mosaics-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Create', link: 'ViewServicesAssetsCreate'},
-        {name: 'Modify Supply', link: 'ViewServicesAssetsModifySupplyChange'},
-        {name: 'Link to Namespace', link: 'ViewServicesAssetsLinkToNamespace'}
+      {name: computed(() => t('services.assets')), desc: computed(() => t('services.mosaicsdescription')), img: 'icon-mosaics-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+        {name: computed(() => t('welcome.create')), link: 'ViewServicesAssetsCreate'},
+        {name: computed(() => t('services.modifysupply')), link: 'ViewServicesAssetsModifySupplyChange'},
+        {name: computed(() => t('services.linktonamespace')), link: 'ViewServicesAssetsLinkToNamespace'}
       ]},
-      {name: 'Mainnet Swap', desc: 'Swap from NEM to Sirius', img: 'icon-swap-process-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        { name: 'NIS1', link: 'ViewServicesMainnetSwapNIS1ToSirius'},
-        { name: 'ETH', link: 'ViewServicesMainnetSwapEthOptions'},
-        { name: 'BSC', link: 'ViewServicesMainnetSwapBscOptions'},
+      {name: computed(() => t('services.mainnetswap')), desc: computed(() => t('services.swapdescription')), img: 'icon-swap-process-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+        { name: computed(() => t('services.nis1')), link: 'ViewServicesMainnetSwapNIS1ToSirius'},
+        { name: computed(() => t('services.eth')), link: 'ViewServicesMainnetSwapEthOptions'},
+        { name: computed(() => t('services.bsc')), link: 'ViewServicesMainnetSwapBscOptions'},
       ]},
-      {name: 'Address Book', desc: 'Assign labels to addresses', img: 'icon-address-book-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'List', link: 'ViewServicesAddressBook'},
-        {name: 'Add Contacts', link: 'ViewServicesAddressBookAddContacts'},
+      {name: computed(() => t('services.addressbook')), desc: computed(() => t('services.addressbookdescription')), img: 'icon-address-book-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+        {name: computed(() => t('services.list')), link: 'ViewServicesAddressBook'},
+        {name: computed(() => t('services.addcontacts')), link: 'ViewServicesAddressBookAddContacts'},
       ]},
-      {name: 'Wallets', desc: 'Manage your wallets', img: 'icon-address-book-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Change Password', link: ''},
-        {name: 'Export', link: 'ViewWalletExport'},
-        {name: 'Delete', link: 'ViewWallets'},
+      {name: computed(() => t('Header.wallet')), desc: computed(() => t('services.walletsdescription')), img: 'icon-address-book-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+        {name: computed(() => t('services.changepassword')), link: ''},
+        {name: computed(() => t('accounts.export')), link: 'ViewWalletExport'},
+        {name: computed(() => t('accounts.delete')), link: 'ViewWallets'},
       ]},
-      {name: 'Transactions', desc: 'Explorer all transactions', img: 'icon-transaction-explorer-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Explorer', link: 'ViewServicesExplorer'},
-        {name: 'Partial', link: 'ViewServicesExplorerPartial'},
+      {name: computed(() => t('dashboard.transactions')), desc: computed(() => t('services.transactiondescription')), img: 'icon-transaction-explorer-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+        {name: computed(() => t('services.explorer')), link: 'ViewServicesExplorer'},
+        {name: computed(() => t('accounts.partial')), link: 'ViewServicesExplorerPartial'},
       ]},
-      {name: 'Nodes', desc: 'Add and edit nodes', img: 'icon-nodes-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Blockchain', link: 'ViewServicesNodes'},
-        {name: 'Storage', link: ''},
-        {name: 'Streaming', link: ''},
+      {name: computed(() => t('services.nodes')), desc: computed(() => t('services.nodesdescription')), img: 'icon-nodes-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+        {name: computed(() => t('welcome.blockchain')), link: 'ViewServicesNodes'},
+        {name: computed(() => t('welcome.storage')), link: ''},
+        {name: computed(() => t('welcome.streaming')), link: ''},
       ]},
-      {name: 'Attestation', desc: 'Proof of existence and origination', img: 'icon-attestation-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Attest', link: 'ViewServicesAttestationCreate'},
-        {name: 'Audit', link: 'ViewServicesAttestationAudit'},
+      {name: computed(() => t('services.attestation')), desc: computed(() => t('services.attestdescription')), img: 'icon-attestation-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+        {name: computed(() => t('services.attest')), link: 'ViewServicesAttestationCreate'},
+        {name: computed(() => t('services.audit')), link: 'ViewServicesAttestationAudit'},
       ]},
-      {name: 'Notifications', desc: 'Check alerts and information about your accounts', img: 'icon-notifications-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Notifications', link: 'ViewServicesNotifications'},
+      {name: computed(() => t('services.notifications')), desc: computed(() => t('services.notificationdescription')), img: 'icon-notifications-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+        {name: computed(() => t('services.notifications')), link: 'ViewServicesNotifications'},
       ]},
-      {name: 'Voting', desc: 'Create, vote, and view results', img: 'icon-voting-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
-        {name: 'Create Poll', link: 'ViewServicesVotingCreatePoll'},
-        {name: 'Vote', link: 'ViewServicesVotingPoll'},
-        {name: 'View Results', link: ''},
+      {name: computed(() => t('services.voting')), desc: computed(() => t('services.votedescription')), img: 'icon-voting-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
+        {name: computed(() => t('services.createpoll')), link: 'ViewServicesVotingCreatePoll'},
+        {name: computed(() => t('services.vote')), link: 'ViewServicesVotingPoll'},
+        {name: computed(() => t('services.viewresults')), link: ''},
       ]},
-      {name: 'Storage', desc: 'Upload and download your files and encrypt them', img: 'icon-storage-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Files', link: 'ViewServicesStorageMyFile'},
-        {name: 'Upload File', link: 'ViewServicesStorageUploadFile'},
-        {name: 'Send / Share', link: ''},
+      {name: computed(() => t('welcome.storage')), desc: computed(() => t('services.storagedescription')), img: 'icon-storage-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+        {name: computed(() => t('services.files')), link: 'ViewServicesStorageMyFile'},
+        {name: computed(() => t('services.uploadfile')), link: 'ViewServicesStorageUploadFile'},
+        {name: computed(() => t('services.sendshare')), link: ''}
       ]},
-      {name: 'Sirius Gift', desc: 'Create a redeemable gift', img: 'icon-gift-sirius-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: 'Create', link: 'ViewServicesSiriusGiftCreateGift'},
-        {name: 'Redeem', link: 'ViewServicesSiriusGiftRedeem'},
+      {name: computed(() => t('services.siriusgift')), desc: computed(() => t('services.siriusgiftdescription')), img: 'icon-gift-sirius-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+        {name: computed(() => t('welcome.create')), link: 'ViewServicesSiriusGiftCreateGift'},
+        {name: computed(() => t('services.redeem')), link: 'ViewServicesSiriusGiftRedeem'},
       ]},
-      {name: 'Aggregate Transactions', desc: 'Merge multiple transactions into one', img: 'icon-aggregate-transactions-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
-        {name: 'Complete', link: ''},
-        {name: 'Bonded', link: ''},
+      {name: computed(() => t('services.aggregatetransactions')), desc: computed(() => t('services.aggregatetransactions')), img: 'icon-aggregate-transactions-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
+        {name: computed(() => t('services.complete')), link: ''},
+        {name: computed(() => t('services.bonded')), link: ''},
       ]},
-      {name: 'Cross-Chain Swaps', desc: 'Atomic Cross-Chain Swap between public and private networks', img: 'icon-cross-chain-swap-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
-        {name: 'Secred Lock', link: ''},
-        {name: 'Secred Proof', link: ''},
+      {name: computed(() => t('services.crosschainswap')), desc: computed(() => t('services.crosschaindescription')), img: 'icon-cross-chain-swap-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
+        {name: computed(() => t('services.secredlock')), link: ''},
+        {name: computed(() => t('services.secredproof')), link: ''},
       ]},
-      {name: 'Invoice', desc: 'Create and manage invoices', img: 'icon-invoice-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
-        {name: 'Create', link: ''},
+     {name: computed(() => t('services.invoice')), desc: computed(() => t('services.invoicedescription')), img: 'icon-invoice-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
+        {name: computed(() => t('welcome.create')), link: ''},
       ]},
-      {name: 'Supercontracts', desc: 'Create and execute logical flows for digital contract obligations', img: 'icon-supercontracts-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
-        {name: 'Create', link: ''},
-        {name: 'Status', link: ''},
+      {name: computed(() => t('welcome.supercontracts')), desc: computed(() => t('services.supercontractsdescription')), img: 'icon-supercontracts-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
+        {name: computed(() => t('welcome.create')), link: ''},
+        {name: computed(() => t('services.status')), link: ''},
       ]},
-      {name: 'Chat', desc: 'Encrypted live chat', img: 'icon-chat-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
-        {name: 'Start', link: ''},
+      {name: computed(() => t('services.chat')), desc: computed(() => t('services.chatdescription')), img: 'icon-chat-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
+        {name: computed(() => t('services.start')), link: ''},
       ]},
-      {name: 'Video Conferencing', desc: 'Encrypted live video streaming', img: 'icon-streaming-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
-        {name: 'Start', link: ''},
-        {name: 'Schedule', link: ''},
+      {name: computed(() => t('services.videoconferencing')), desc: computed(() => t('services.videoconferencingdescription')), img: 'icon-streaming-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
+        {name: computed(() => t('services.start')), link: ''},
+        {name: computed(() => t('services.schedule')), link: ''},
       ]},
     ]);
 

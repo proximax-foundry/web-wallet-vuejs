@@ -2,7 +2,7 @@
   <div>
     <div class="px-5 py-2 text-left text-xs text-gray-500">{{hints}}</div>
     <div class="transition ease-in duration-300 w-full rounded-full px-5 py-1 mb-5" :class="borderColor">
-      <input v-model="filterText" type="text" class="w-full outline-none text-sm" placeholder="Search" @click="clickInputText()" @blur="blurInputText()" :title="hints" >
+      <input v-model="filterText" type="text" class="w-full outline-none text-sm" :placeholder="$t('services.search')" @click="clickInputText()" @blur="blurInputText()" :title="hints" >
     </div>
     <DataTable
       :value="transactions"
@@ -13,12 +13,12 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column field="typeName" header="Type" headerStyle="width:110px">
+      <Column field="typeName" :header="$t('dashboard.type')" headerStyle="width:110px">
         <template #body="{data}">
           <span class="font-semibold">{{data.typeName}}</span>
         </template>
       </Column>
-      <Column header="Details" >
+      <Column :header="$t('accounts.details')" >
         <template #body="{data}">
             <div v-for="innerTx in data.innerTransactions" :key="innerTx">
               <div class="font-bold"> {{ innerTx.typeName }}</div>
@@ -77,23 +77,23 @@
             </div>
         </template>
       </Column>
-      <Column headerStyle="width: 12%" v-if="showBlock" field="block" header="Block" :sortable="true" >
+      <Column headerStyle="width: 12%" v-if="showBlock" field="block" :header="$t('dashboard.block')" :sortable="true" >
         <template #body="{data}">
           <div>{{ data.block }}</div>
           <div v-if="data.timestamp">{{ data.timestamp }}</div>
-          <div v-if="data.fee">Fee: {{ data.fee}}</div>
+          <div v-if="data.fee">{{$t('dashboard.fee')}}: {{ data.fee}}</div>
         </template>
       </Column>
-      <Column headerStyle="width: 12%" v-if="showAction" header="Action" >
+      <Column headerStyle="width: 12%" v-if="showAction" :header="$t('services.action')" >
         <template #body="{data}">
           <SplitButton label="Explorer" @click="gotoHashExplorer(data.hash)" icon="pi pi-external-link" class="p-button-help p-mb-2" :model="setSplitButtonItems(data)"></SplitButton>
         </template>
       </Column>
       <template #empty>
-        No records found
+        {{$t('services.norecord')}}
       </template>
       <template #loading>
-          Loading transactions data. Please wait.
+          {{$t('dashboard.loadingmessage')}}
       </template>
     </DataTable>
     <DynamicModelComponent :modelName="dynamicModelComponentDisplay" :showModal="showTransactionModel" :transaction="modalData" />

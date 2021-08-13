@@ -38,6 +38,9 @@ module.exports = {
           primary: '#dc3545'
         }
       },
+      screens: {
+        'tsm': '768px',
+      }
     },
   },
   variants: {

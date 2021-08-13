@@ -62,7 +62,7 @@ export class ChainProfileNames extends StoreProperties {
     }
 
     replaceAndUpdateWallet(oldName: string, newName: string, index: number): boolean{
-        if(this.names.includes(newName)){
+        if(this.names.includes(newName) || this.names.includes(oldName)){
             return false;
         }
         if(oldName !== newName){

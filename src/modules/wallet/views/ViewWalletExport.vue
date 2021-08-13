@@ -1,8 +1,8 @@
 <template>
-<div class="flex justify-between text-sm">
-  <div><span class="text-gray-400">Wallet ></span> <span class="text-blue-primary font-bold">Export Wallet</span></div>
+<div class="flex justify-between text-xs sm:text-sm">
+  <div><span class="text-gray-400">Wallet ></span> <span class="text-blue-primary font-bold">{{$t('services.exportwallet')}}</span></div>
   <div>
-    <router-link :to="{ name: 'ViewWallets'}" class="font-bold" active-class="accounts">Delete Wallet</router-link>
+    <router-link :to="{ name: 'ViewWallets'}" class="font-bold" active-class="accounts">{{$t('services.deletewallet')}}</router-link>
   </div>
 </div>
 <div class='mt-2 py-3 gray-line'>
@@ -12,7 +12,7 @@
       <div class="grid xs-grid-cols-1 sm:grid-cols-2 mt-10" v-else>
         <div class='p-3' :key="wallet.name" v-for="wallet in appStore.state.wallets">
           <div class="bg-gray-200 rounded-2xl flex justify-between py-3">
-            <div class="ml-5 text-left text-sm"><div class="font-bold mb-1">{{ wallet.name }}</div><div class="text-xs">Account{{ (wallet.accounts.length>1)?'s':'' }}: <span class="font-bold">{{ wallet.accounts.length }}</span></div></div>
+            <div class="ml-5 text-left text-sm"><div class="font-bold mb-1">{{ wallet.name }}</div><div class="text-xs">{{$t('wallets.account')}}{{ (wallet.accounts.length>1)?'s':'' }}: <span class="font-bold">{{ wallet.accounts.length }}</span></div></div>
             <div class="mr-5 self-center"><img src="@/assets/img/icon-wallet-export-blue.svg" class="w-7 cursor-pointer" @click="exportWallet(wallet.name)"></div>
           </div>
         </div>

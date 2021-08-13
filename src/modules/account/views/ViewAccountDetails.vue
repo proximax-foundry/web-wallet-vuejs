@@ -1,8 +1,8 @@
 <template>
-<div class="flex justify-between text-sm">
-  <div><span class="text-gray-400">Accounts ></span> <span class="text-blue-primary font-bold">Details</span></div>
+<div class="flex justify-between text-xs sm:text-sm">
+  <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.details')}}</span></div>
   <div>
-    <router-link :to="{name : 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">View All Accounts</router-link>
+    <router-link :to="{name : 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('accounts.viewall')}}</router-link>
   </div>
 </div>
 <div class='mt-2 py-3 gray-line'>
@@ -11,10 +11,10 @@
       <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
       <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-8 items-center">
         <div class="text-left w-full relative">
-          <div class="text-xs font-bold mb-1">Account Name:</div>
+          <div class="text-xs font-bold mb-1">{{$t('accounts.name')}}:</div>
           <div v-if="showName">{{ accountNameDisplay }}</div>
           <div v-else>
-            <TextInput placeholder="Account Name" errorMessage="Account name is required" v-model="accountName" icon="wallet" />
+            <TextInput :placeholder="$t('swap.accountname')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
           </div>
         </div>
         <div class="inline-block ml-2">
@@ -28,7 +28,7 @@
       <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
-          <div class="text-xs font-bold mb-1">Address:</div>
+          <div class="text-xs font-bold mb-1">{{$t('createsuccessful.address')}}:</div>
           <div id="address" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="pettyaddress" copySubject="Address">{{pettyaddress}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
@@ -36,7 +36,7 @@
       <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
-          <div class="text-xs font-bold mb-1">Public Key:</div>
+          <div class="text-xs font-bold mb-1">{{$t('accounts.publickey')}}:</div>
           <div id="public" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
@@ -47,34 +47,34 @@
             <div class="border border-yellow-600 rounded-full w-8 h-8 inline-block mb-4">
               <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-600 inline-block"></font-awesome-icon>
             </div>
-            <p>Make sure you store your private key in a safe place.</p>
-            <p>Access to your digital assets cannot be recovered without it.</p>
+            <p>{{$t('createsuccessful.warningtext1')}}</p>
+            <p>{{$t('createsuccessful.warningtext2')}}</p>
           </div>
         </div>
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
           <div class="text-left w-full relative">
-            <div class="text-xs font-bold mr-2"><div class="mb-2 inline-block">Private Key:</div><div v-if="!showPwPK && !showPK">**************</div><PasswordInput v-if="showPwPK && !showPK" placeholder="Insert wallet password" errorMessage="Wallet password required." :showError="showPasswdError" icon="lock" v-model="walletPasswd" /></div>
+            <div class="text-xs font-bold mr-2"><div class="mb-2 inline-block">{{$t('createprivatekeywallet.privatekey')}}:</div><div v-if="!showPwPK && !showPK">**************</div><PasswordInput v-if="showPwPK && !showPK" :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPasswd" /></div>
             <div class="absolute z-20 w-full h-full" v-if="showPK"></div>
             <div id="private" class="text-sm w-full outline-none bg-gray-100 z-10" type="text" :copyValue="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
           </div>
           <font-awesome-icon icon="copy" @click="copy('private')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mr-2" v-if="showPK"></font-awesome-icon>
-          <button class="default-btn w-36" @click="showPwPK = !showPwPK" v-if="!showPwPK && !showPK">Show</button>
-          <button class="default-btn w-36" @click="verifyWalletPwPk()" v-if="showPwPK && !showPK">Submit</button>
-          <button class="default-btn w-36" @click="showPwPK = false; showPK = false" v-if="showPK">Hide</button>
+          <button class="default-btn w-36" @click="showPwPK = !showPwPK" v-if="!showPwPK && !showPK">{{$t('createsuccessful.show')}}</button>
+          <button class="default-btn w-36" @click="verifyWalletPwPk()" v-if="showPwPK && !showPK">{{$t('accounts.submit')}}</button>
+          <button class="default-btn w-36" @click="showPwPK = false; showPK = false" v-if="showPK">{{$t('createsuccessful.hide')}}</button>
         </div>
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
           <div class="text-left w-full relative">
-            <div class="text-sm font-bold mb-1">Swap with this private key</div>
-            <PasswordInput v-if="showPwSwap" placeholder="Insert wallet password" errorMessage="Wallet password required." :showError="showPasswdError" icon="lock" v-model="walletPasswdSwap" />
+            <div class="text-sm font-bold mb-1">{{$t('accounts.swap')}}</div>
+            <PasswordInput v-if="showPwSwap" :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPasswdSwap" />
           </div>
-          <button class="default-btn w-36" @click="showPwSwap = !showPwSwap" v-if="!showPwSwap">Enable</button>
-          <button class="default-btn w-36" @click="verifyWalletPwSwap()" v-if="showPwSwap">Submit</button>
+          <button class="default-btn w-36" @click="showPwSwap = !showPwSwap" v-if="!showPwSwap">{{$t('accounts.enable')}}</button>
+          <button class="default-btn w-36" @click="verifyWalletPwSwap()" v-if="showPwSwap">{{$t('accounts.submit')}}</button>
         </div>
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
           <div class="text-left w-full relative">
-            <div class="text-sm font-bold mb-1">Save Paper Wallet</div>
+            <div class="text-sm font-bold mb-1">{{$t('createsuccessful.savewalletpaper')}}</div>
           </div>
-          <button class="default-btn w-36">Save</button>
+          <button class="default-btn w-36">{{$t('accounts.save')}}</button>
         </div>
       </div>
     </div>
@@ -93,6 +93,7 @@ import {walletState} from "@/state/walletState";
 import {Helper} from "@/util/typeHelper";
 import {networkState} from "@/state/networkState";
 import {WalletUtils} from "@/util/walletUtils";
+import {useI18n} from 'vue-i18n'
 
 export default {
   name: "ViewAccountDetails",
@@ -105,6 +106,7 @@ export default {
   },
 
   setup(p) {
+    const {t} = useI18n();
     const toast = useToast();
     const router = useRouter();
 
@@ -165,12 +167,12 @@ export default {
           accountNameDisplay.value = accountName.value;
           err.value = "";
         } else if (exist_account || exist_other_account) {
-          err.value = "Account name is already taken";
+          err.value = t('scriptvalues.accountnametaken');
         } else {
-          err.value = "Fail to change account name";
+          err.value = t('scriptvalues.accountnamevalidation');
         }
       } else {
-        err.value = "Please insert account name";
+        err.value = t('scriptvalues.inputaccountname');
       }
     };
 

@@ -1,25 +1,25 @@
 <template>
   <div>
-    <a @click="toggleModal = !toggleModal" class="block big-default-btn my-3 self-center w-full">Sign In</a>
+    <a @click="toggleModal = !toggleModal" class="block big-default-btn my-3 self-center w-full">{{$t('welcome.signin')}}</a>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
     >
       <div v-show="toggleModal" class="popup-outer absolute flex z-50">
-        <div class="modal-popup-box">
-          <div class="delete-position">
-            <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
+        <div class="modal-popup-box m-2">
+          <div class="delete-position mt-2 mr-2" @click="toggleModal = false">
+            <font-awesome-icon icon="times" class="delete-icon-style"></font-awesome-icon>
           </div>
           <div class="w-104">
-            <h1 class="default-title font-bold my-10">Sign in to {{networkState.chainNetworkName}} Wallet</h1>
+            <h1 class="default-title font-bold my-3 sm:my-10">{{$t('welcome.signin')}} {{$t('dashboard.to')}} {{networkState.chainNetworkName}} {{$t('services.wallet')}}</h1>
             <form @submit.prevent="login">
               <fieldset class="w-full">
                 <div class="error error_box" v-if="err!=''">{{ err }}</div>
-                <SelectInputPlugin placeholder="Select a Wallet" errorMessage="Select a Wallet" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
-                <PasswordInput placeholder="Enter Wallet Password" errorMessage="Password Required" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+                <SelectInputPlugin :placeholder="$t('signin.selectwallet')" :errorMessage="$t('signin.selectwallet')" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
+                <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
                 <div class="mt-10">
-                  <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
-                  <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSignin">Sign In</button>
+                  <button type="button" class="default-btn mr-2 sm:mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
+                  <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
                 </div>
               </fieldset>
             </form>
@@ -41,7 +41,7 @@ import { walletState } from '@/state/walletState';
 import { WalletUtils } from '@/util/walletUtils';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { WalletStateUtils } from '@/state/utils/walletStateUtils';
-
+import {useI18n} from 'vue-i18n'
 export default defineComponent({
   name: 'SignInModal',
   data() {
@@ -51,6 +51,7 @@ export default defineComponent({
   },
 
   setup(){
+    const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const router = useRouter();
@@ -100,11 +101,11 @@ export default defineComponent({
       if (result == -1) {
         err.value = "Invalid wallet name";
       } else if (result == 0) {
-        err.value = "Invalid password";
+        err.value = t('signin.invalidpassword');
       } else {
         // let wallets = new Wallets();
         let wallet = walletState.wallets.filterByNetworkNameAndName(networkState.chainNetworkName, selectedWallet.value);
-        WalletUtils.refreshAllAccountDetails(wallet, networkState.currentNetworkProfile);
+        //WalletUtils.refreshAllAccountDetails(wallet, networkState.currentNetworkProfile);
         WalletStateUtils.updateLoggedIn(wallet);
         NetworkStateUtils.updateLastAccessNetworkName(networkState.chainNetworkName);
         router.push({ name: "ViewDashboard"});

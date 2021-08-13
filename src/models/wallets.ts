@@ -84,11 +84,11 @@ export class Wallets {
     removeWalletByNetworkNameAndName(networkName: string, name: string): boolean{
         const index = this.getWalletIndex(networkName, name);
         
-        if(index){
+        if(index > -1){
             this.removeWallet(index);
         }
 
-        return index ? true: false;
+        return index > -1 ? true: false;
     }
 
     getWalletIndex(networkName: string, name: string): number{

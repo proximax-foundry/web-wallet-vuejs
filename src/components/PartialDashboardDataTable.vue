@@ -32,7 +32,7 @@
       </Column>
       <Column field="hash" header="Hash" headerStyle="width:150px"></Column>
       <template #empty>
-        No records found
+        {{$t('services.norecord')}}
       </template>
     </DataTable>
     <PartialTransactionModal :showModal="showTransactionModel" :transaction="modalData" />

@@ -5,7 +5,7 @@
         <div class="font-bold mb-1">{{ account.name }}</div>
         <div class="flex justify-between pr-4 rounded-xl mb-4 items-center bg-white">
           <div class="text-left w-full relative">
-            <div class="z-20 w-full h-full">{{ appStore.pretty(account.address) }}</div>
+            <div class="z-20 w-full h-full">{{ pretty(account.address) }}</div>
           </div>
           <div class="relative inline-block text-left" @mouseover="hoverOverMenu" @mouseout="hoverOutMenu">
             <router-link :to="{ name: 'ViewMultisigEditAccount', params: { name: account.name}}" class="block">
@@ -19,16 +19,17 @@
 </template>
 
 <script>
-import { inject } from "vue";
 
 export default{
 
   name: 'multiSigTile',
   props: ['account'],
   setup(){
-    const appStore = inject("appStore");
+    function pretty(address){
+      return address.replace(/([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{4})/, "$1-$2-$3-$4-$5-$6-$7");
+    }
     return {
-      appStore,
+      pretty,
     }
   },
 }

@@ -1,20 +1,20 @@
 <template>
-  <div class="flex justify-between text-sm">
-    <div><span class="text-gray-400">Address Book ></span> <span class="text-blue-primary font-bold">Add Contacts</span></div>
+  <div class="flex justify-between text-xs sm:text-sm">
+    <div><span class="text-gray-400">{{$t('services.addressbook')}} ></span> <span class="text-blue-primary font-bold">{{$t('services.addcontacts')}}</span></div>
     <div>
-      <router-link :to="{name: 'ViewServicesAddressBook'}" class="font-bold" active-class="accounts">Address Book</router-link> | 
-      <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">All Services</router-link>
+      <router-link :to="{name: 'ViewServicesAddressBook'}" class="font-bold" active-class="accounts">{{$t('services.addressbook')}}</router-link> | 
+      <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">{{$t('services.allservices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>
     <form @submit.prevent="SaveContact" class="mt-10">
       <fieldset class="w-full">
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <TextInput placeholder="Name" errorMessage="Name required" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
-        <TextInput placeholder="Address" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" />
+        <TextInput :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
+        <TextInput :placeholder="$t('createsuccessful.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" />
         <div class="mt-10">
-          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">Clear</button>
-          <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="SaveContact()">Save</button>
+          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
+          <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="SaveContact()">{{$t('accounts.save')}}</button>
         </div>
       </fieldset>
     </form>
@@ -31,13 +31,14 @@ import { Wallet } from "@/models/wallet";
 import { Wallets } from "@/models/wallets";
 import { walletState } from '@/state/walletState';
 import { WalletStateUtils } from '@/state/utils/walletStateUtils';
-
+import {useI18n} from 'vue-i18n'
 export default {
   name: 'ViewCreateContacts',
   components: {
     TextInput
   },
   setup(){
+    const {t} = useI18n();
     const toast = useToast();
     // const appStore = inject("appStore");
     const contactName = ref('');
@@ -63,12 +64,15 @@ export default {
 
     const addErr = computed(
       () => {
-        let addErrDefault = 'Address required';
+        let addErrDefault = t('services.addressvalidation');
         return addMsg.value?addMsg.value:addErrDefault;
       }
     );
 
     watch(address, ()=>{
+      if(!walletState.currentLoggedInWallet){
+        return;
+      }
       const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
       const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address.value);
       verifyAdd.value = verifyContactAddress.isPassed;
@@ -88,9 +92,9 @@ export default {
       const contactNameIndex =(wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.name.toLowerCase() == contactName.value.toLowerCase()):(-1);
 
       if(contactAddIndex >= 0 || accountAddIndex >= 0){
-        err.value = 'Address is already exists in account or address book.';
+        err.value = t('addressbook.addressvalidation');
       }else if( contactNameIndex >= 0 || accountNameIndex >= 0 ){
-        err.value = 'Name is already exists in account or address book.';
+        err.value = t('addressbook.namevalidation');
       }else{
         walletState.currentLoggedInWallet.addAddressBook(addressBook);
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);

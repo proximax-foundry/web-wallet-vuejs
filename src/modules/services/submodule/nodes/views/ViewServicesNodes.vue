@@ -1,8 +1,8 @@
 <template>
-  <div class="flex justify-between text-sm">
-    <div><span class="text-gray-400">Nodes ></span> <span class="text-blue-primary font-bold">Blockchain</span></div>
+  <div class="flex justify-between text-xs sm:text-sm">
+    <div><span class="text-gray-400">{{$t('services.nodes')}} ></span> <span class="text-blue-primary font-bold">{{$t('welcome.blockchain')}}</span></div>
     <div>
-      <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">All Services</router-link>
+      <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">{{$t('services.allservices')}}</router-link>
     </div>
   </div>
 
@@ -10,7 +10,7 @@
     <div class="text-outline bg-white mt-5" :class="borderColor">
       <div class="w-40 text-left">
         <img src="@/modules/services/submodule/nodes/img/icon-block-height-blue-30h.svg" class="h-7 w-7 inline-block ml-4">
-        <div class="ml-2 text-tsm mt-1 text-gray-500 w-30 inline-block">Block Height</div>
+        <div class="ml-2 text-tsm mt-1 text-gray-500 w-30 inline-block">{{$t('services.blockheight')}}</div>
       </div>
       <input disabled="disabled" v-model="blockHeight" class="text-placeholder bg-white text-right">
       <div class="w-5"></div>
@@ -19,7 +19,7 @@
     <div class="text-outline bg-white mt-5" :class="borderColor">
       <div class="w-40 text-left">
         <img src="@/modules/services/submodule/nodes/img/icon-nodes-blue-60h.svg" class="h-7 w-7 inline-block ml-4">
-        <div class="ml-2 text-tsm mt-1 text-gray-500 w-30 inline-block">Current Node</div>
+        <div class="ml-2 text-tsm mt-1 text-gray-500 w-30 inline-block">{{$t('services.currentnode')}}</div>
       </div>
       <input disabled="disabled" v-model="currentNode" class="text-placeholder bg-white text-right">
       <div class="w-5"></div>
@@ -61,6 +61,10 @@ import Multiselect from '@vueform/multiselect';
 import { computed, inject, ref } from "vue";
 import { startListening, stopListening } from '@/util/listener.js';
 import { useToast } from "primevue/usetoast";
+import { networkState } from '@/state/networkState';
+import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
+import { walletState } from '@/state/walletState';
+import {WalletUtils} from '@/util/walletUtils'
 // import { DataBridgeService } from '../util/dataBridge.js';
 
 export default {
@@ -72,9 +76,9 @@ export default {
 
   setup() {
     const toast = useToast();
-    const appStore = inject("appStore");
+   /*  const appStore = inject("appStore");
     const siriusStore = inject("siriusStore");
-    const chainNetwork = inject("chainNetwork");
+    const chainNetwork = inject("chainNetwork"); */
     const showSelectTitle = ref(false);
     // const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
     const borderColor = ref('border border-gray-300');
@@ -85,28 +89,32 @@ export default {
 
     const options = computed(() => {
       let nodeList = [];
-      chainNetwork.getChainNodes().forEach((node) => {
+      
+     networkState.currentNetworkProfile.apiNodes.forEach((node) => {
         // let link = (location.protocol == "http:" ? node.protocol : node.sslProtocol) + "://" + node.hostname + (location.protocol == "http:" ?(':' + node.port):'');
-        nodeList.push({ value: node, name: siriusStore._buildAPIEndpointURL(node) });
+        nodeList.push({ value: node, name: NetworkStateUtils.buildAPIEndpointURL(node) });
       });
       return nodeList;
     });
 
-    const currentNode = computed(() => siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode));
-    const blockHeight = computed(() => siriusStore.state.blockHeight);
+    const currentNode = computed(() =>  NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint))
+    const blockHeight = computed(() => networkState.currentNetworkProfileConfig.chainHeight);
 
     const makeNodeSelection = (e) => {
-      if(e != siriusStore.state.selectedChainNode){
+      if(e != networkState.selectedAPIEndpoint){
         showSelectTitle.value = true;
-        chainNetwork.updateChainNode(e);
-        stopListening();
-        const walletSession = JSON.parse(sessionStorage.getItem('currentWalletSession'));
-        startListening(walletSession.accounts);
-        appStore.getXPXBalance(walletSession.name, siriusStore);
+        NetworkStateUtils.updateChainNode(e)
+        /* stopListening(); */
+       
+       /*  startListening(walletSession.accounts); */
+        WalletUtils.getTotalBalanceWithCurrentNetwork();
         toast.add({severity:'success', summary: 'Services', detail: 'Node updated', group: 'br', life: 5000});
+        console.log(networkState.currentNetworkProfile.network.type)
       }
     };
-
+   
+  
+    
     const closeSelection =() => {
       if(!selected.value){
         clearSelection();
@@ -121,7 +129,6 @@ export default {
     // dataBridgeInstance.connectBlockSocket();
 
     return {
-      appStore,
       // wallet,
       selected,
       showSelectTitle,

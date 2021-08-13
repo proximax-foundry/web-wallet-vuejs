@@ -10,30 +10,30 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="closeModal();"></font-awesome-icon>
           </div>
           <div>
-            <h1 class="default-title font-bold my-5">Transaction Information</h1>
+            <h1 class="default-title font-bold my-5">{{$t('dashboard.transactioninfo')}}</h1>
             <div class="text-left md:justify-start md:flex md:items-stretch">
               <div class="block md:w-7/12 md:inline-block break-words">
-                <div class="relative"><span class="font-bold text-md mr-3">Aggregate Bonded</span></div>
+                <div class="relative"><span class="font-bold text-md mr-3">{{$t('dashboard.aggregatebonded')}}</span></div>
                 <div class="content">
                   <div>
-                    <div>Deadline:</div>
+                    <div>{{$t('dashboard.deadline')}}:</div>
                     <div>{{ transaction.formattedDeadline }} - UTC</div>
                   </div>
                   <div>
-                    <div>Type:</div>
+                    <div>{{$t('dashboard.type')}}:</div>
                     <div>{{ transaction.type }}</div>
                   </div>
                 </div>
                 <div class="hash-div">
-                  <div>Signer:</div>
+                  <div>{{$t('dashboard.signer')}}:</div>
                   <div>{{ signer }}</div>
                 </div>
                 <div class="hash-div">
-                  <div>Hash:</div>
+                  <div>{{$t('dashboard.hash')}}:</div>
                   <div class="break-words pr-3">{{ transaction.transactionInfo.hash }}</div>
                 </div>
                 <div style="width: 400px;">
-                  <div class="font-bold border-b border-gray-300 pb-1 mt-5">Transactions ({{ transaction.innerTransactions.length }})</div>
+                  <div class="font-bold border-b border-gray-300 pb-1 mt-5">{{$t('dashboard.transactions')}}({{ transaction.innerTransactions.length }})</div>
                   <div class="transactionDetailDiv" v-for="(innerTransaction, index ) in transaction.innerTransactions" :key="index">
                     <transfer :innerTransaction = "innerTransaction" :sender="transaction.signer" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.transfer.id" />
                     <modify-multisig-account-type :innerTransaction = "innerTransaction" v-if="transactions.arraTypeTransaction[transactions.getNameTypeTransaction(innerTransaction.type)].id === transactions.arraTypeTransaction.modifyMultisigAccount.id" />
@@ -44,24 +44,24 @@
               </div>
               <div class="block md:w-5/12 md:inline-block">
                 <div class="Notifytable">
-                  <div class="bg-yellow-500 text-white text-sm font-bold text-center py-3">Action Required</div>
+                  <div class="bg-yellow-500 text-white text-sm font-bold text-center py-3">{{$t('dashboard.actionrequired')}}</div>
                   <div class="bg-gray-200 py-4 px-4">
-                    <div class="text-xs mb-2 font-bold">Signer Cosignatory Account:</div>
+                    <div class="text-xs mb-2 font-bold">{{$t('dashboard.signeraccount')}}:</div>
                     <div class="text-txs">{{ appStore.pretty(transaction.signer.address.address) }}</div>
                   </div>
                   <div v-if="transaction.cosignatures.length > 0" class="bg-gray-200 py-4 px-4">
-                    <div class="text-xs mb-2 font-bold">Other cosigner{{ (transaction.cosignatures.length > 1)?'s':'' }}:</div>
+                    <div class="text-xs mb-2 font-bold">{{$t('dashboard.othercosigners')}}{{ (transaction.cosignatures.length > 1)?'s':'' }}:</div>
                     <div class="text-txs" v-for="(cosigner, i) in transaction.cosignatures" :key="i">{{ appStore.pretty(cosigner.signer.address.address) }}</div>
                   </div>
                   <div v-if="!transaction.isSigned">
                     <div class="py-4 px-4">
-                      <div class="text-xs mb-2 font-bold">Cosignatory account signing below:</div>
+                      <div class="text-xs mb-2 font-bold">{{$t('dashboard.signerbelow')}}:</div>
                       <div class="text-txs">{{ appStore.pretty(transaction.account) }}</div>
                     </div>
                     <div class="error error_box p-2 mb-3" v-if="err!=''">{{ err }}</div>
                     <PasswordInput placeholder="Enter Wallet Password" errorMessage="Password is required" :showError="showPasswdError" v-model="passwd" icon="lock" />
                     <div class="text-center">
-                      <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableApprove" @click="approveTransaction()">Approve to Continue</button>
+                      <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableApprove" @click="approveTransaction()">{{$t('dashboard.approvetocontinue')}}</button>
                     </div>
                   </div>
                 </div>
@@ -84,6 +84,7 @@ import ModifyMultisigAccountType from '@/modules/dashboard/components/DashboardM
 import MosaicDefinition from '@/modules/dashboard/components/DashboardModels/SubMosaicDefinition.vue';
 import MosaicSupplyChange from '@/modules/dashboard/components/DashboardModels/SubMosaicSupplyChange.vue';
 import PasswordInput from '@/components/PasswordInput.vue'
+import {useI18n} from 'vue-i18n'
 // import {
 //   UInt64,
 // } from "tsjs-xpx-chain-sdk";
@@ -106,10 +107,11 @@ export default{
   },
 
   setup(p) {
+    const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const appStore = inject("appStore");
-    const signer = ref('');
+    const signer = ref(''); 
     const passwd = ref('');
     const err = ref("");
     const showPasswdError = ref(false);
@@ -123,7 +125,7 @@ export default{
     const approveTransaction = () =>{
       let verify = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, passwd.value);
       if(verify < 1){
-        err.value = 'Invalid wallet password';
+        err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
       }else{
         multiSign.cosignMultisigTransaction(p.transaction, passwd.value);
         err.value = '';

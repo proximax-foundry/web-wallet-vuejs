@@ -10,10 +10,10 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="closeConfirmModal();"></font-awesome-icon>
           </div>
           <div class="w-104">
-            <div>Are you sure to proceed with 0.000000 amount?</div>
+            <div>{{$t('services.proceed')}}</div>
             <div class="mt-10">
-              <button type="button" class="default-btn mr-5 focus:outline-none" @click="closeConfirmModal();">Cancel</button>
-              <button type="button" class="default-btn py-1" @click="proceedSend()">Proceed</button>
+              <button type="button" class="default-btn mr-5 focus:outline-none" @click="closeConfirmModal();">{{$t('deletewallet.cancel')}}</button>
+              <button type="button" class="default-btn py-1" @click="proceedSend()">{{$t('deletewallet.proceed')}}</button>
             </div>
           </div>
         </div>

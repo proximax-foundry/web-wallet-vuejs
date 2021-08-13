@@ -159,6 +159,10 @@ export class Helper{
         return value * Math.pow(10, divisibility);
       }
 
+      static convertNumberMinimumFormat(value:number, decimalPoint: number){
+        return parseFloat(value.toFixed(decimalPoint));
+      }
+
       static createQueryParams(pageSize: number, idToStartFrom?: string | undefined){
           return new QueryParams(pageSize, idToStartFrom);
       }

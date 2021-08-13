@@ -4,32 +4,32 @@
       v-if="!newWallet"
       @submit.prevent="createWallet"
     >
-      <h1 class="font-bold big-title">Create Wallet</h1>
+      <h1 class="font-bold big-title">{{$t('createwallet.createwallet')}}</h1>
       <div class="mx-auto page-title-gray-line pt-5">
         <div class="w-10/12 lg:w-8/12 self-center inline-block">
           <div class="error error_box" v-if="err!=''">{{ err }}</div>
-          <div class="text-left text-tsm my-4 ml-4 text-gray-600"><b>Network</b>: {{ selectedNetworkName }}</div>
-          <TextInput placeholder="Wallet Name" errorMessage="Insert wallet name" v-model="walletName" icon="wallet" />
+          <div class="text-left text-tsm my-4 ml-4 text-gray-600"><b>{{$t('Header.network')}}</b>: {{ selectedNetworkName }}</div>
+          <TextInput :placeholder="$t('createwallet.walletname')" :errorMessage="$t('createwallet.inputwalletname')" v-model="walletName" icon="wallet" />
           <div class="grid xs:grid-cols-1 md:grid-cols-2">
-            <PasswordInput placeholder="Enter a New Password" errorMessage="Min. length 8, max. length 30." :showError="showPasswdError" icon="lock" v-model="passwd" class="mr-1" />
-            <PasswordInput placeholder="Confirm New Password" errorMessage="Password doesn't match." :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd" class="ml-1" />
+            <PasswordInput :placeholder="$t('createwallet.inputpassword')" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd" class="mr-1" />
+            <PasswordInput :placeholder="$t('createwallet.confirmpassword')" :errorMessage="$t('createwallet.doesntmatch')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd" class="ml-1" />
           </div>
           <div class="mt-10">
-            <button type="button" class="default-btn mr-5" @click="clearInput();">Clear</button>
-            <button type="submit" class="default-btn disabled:opacity-50" :disabled="disableCreate">Create</button>
+            <button type="button" class="default-btn mr-5" @click="clearInput();">{{$t('signin.clear')}}</button>
+            <button type="submit" class="default-btn disabled:opacity-50" :disabled="disableCreate">{{$t('welcome.create')}}</button>
           </div>
         </div>
       </div>
     </form>
     <div v-else>
-      <h1 class="font-bold big-title">Congratulations!</h1>
-      <p class="mt-2">Your wallet has been successfully created</p>
+      <h1 class="font-bold big-title">{{$t('createsuccessful.congratz')}}!</h1>
+      <p class="mt-2">{{$t('createsuccessful.congratztext')}}</p>
       <div class="mx-auto page-title-gray-line pt-5 lg:px-20">
         <div class="text-xl mb-5">{{ walletName }}</div>
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
           <div class="text-left w-full relative">
             <div class="absolute z-20 w-full h-full"></div>
-            <div class="text-xs font-bold mb-1">Address:</div>
+            <div class="text-xs font-bold mb-1">{{$t('createsuccessful.address')}}:</div>
             <div
               id="address" :copyValue="newWallet.address" copySubject="Address"
               class="text-sm w-full outline-none bg-gray-100 z-10 break-all"
@@ -40,7 +40,7 @@
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
           <div class="text-left w-full relative">
             <div class="absolute z-20 w-full h-full"></div>
-            <div class="text-xs font-bold mb-1">Public Key:</div>
+            <div class="text-xs font-bold mb-1">{{$t('accounts.publickey')}}:</div>
             <div
               id="public" :copyValue="newWallet.publicKey" copySubject="Public Key"
               class="text-sm w-full outline-none bg-gray-100 z-10 break-all"
@@ -51,7 +51,7 @@
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center" v-if="showPK">
           <div class="text-left w-full relative">
             <div class="absolute z-20 w-full h-full"></div>
-            <div class="text-xs font-bold mb-1">Private Key:</div>
+            <div class="text-xs font-bold mb-1">{{$t('createprivatekeywallet.privatekey')}}:</div>
             <div
               id="private" :copyValue="privateKey" copySubject="Private Key"
               class="text-sm w-full outline-none bg-gray-100 z-10 break-all" 
@@ -64,19 +64,19 @@
             <div class="border border-yellow-600 rounded-full w-8 h-8 inline-block mb-4 relative">
               <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-600 inline-block absolute" style="left: 12px; top: 6px;"></font-awesome-icon>
             </div>
-            <p>Make sure you store your private key in a safe place.</p>
-            <p>Access to your digital assets cannot be recovered without it.</p>
+            <p>{{$t('createsuccessful.warningtext1')}}.</p>
+            <p>{{$t('createsuccessful.warningtext2')}}.</p>
           </div>
         </div>
         <div class="inline-block mt-10 w-full">
           <div class="grid xs:grid-cols-1 md:grid-cols-3">
             <div class="px-5 self-center">
-              <a class="block big-default-btn my-3 self-center w-full" @click="showPK = !showPK">{{ showPK?'Hide':'Show' }} Private Key</a>
+              <a class="block big-default-btn my-3 self-center w-full" @click="showPK = !showPK">{{ showPK? $t('createsuccessful.hide'):$t('createsuccessful.show') }} {{$t('createprivatekeywallet.privatekey')}}</a>
             </div>
             <div class="px-5">
-              <a class="block big-default-btn my-3 self-center w-full">Save Paper Wallet</a>
+              <a class="block big-default-btn my-3 self-center w-full">{{$t('createsuccessful.savewalletpaper')}}</a>
             </div>
-            <div class="px-5 self-center"><router-link :to="{name: 'Home'}" class="block big-default-btn my-3 self-center">Continue</router-link></div>
+            <div class="px-5 self-center"><router-link :to="{name: 'Home'}" class="block big-default-btn my-3 self-center">{{$t('createsuccessful.continue')}}</router-link></div>
           </div>
         </div>
       </div>
@@ -98,7 +98,7 @@ import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 import { ChainUtils } from '@/util/chainUtils';
 import { networkState } from "@/state/networkState";
 import { walletState } from "@/state/walletState";
-
+import {useI18n} from 'vue-i18n'
 
 export default defineComponent({
   name: 'ViewWalletCreate',
@@ -112,6 +112,7 @@ export default defineComponent({
     };
   },
   setup(){
+    const {t} = useI18n();
     const toast = useToast();
     const selectedNetwork = computed(()=> networkState.chainNetwork);
     const selectedNetworkType = computed(()=> ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
@@ -148,7 +149,7 @@ export default defineComponent({
       let result = 0;
 
       if(walletState.wallets.filterByNetworkNameAndName(selectedNetworkName.value, walletName.value)){
-        err.value = "Wallet name is already taken";
+        err.value = t('scriptvalues.walletnametaken');
       }else{
         let password = WalletUtils.createPassword(passwd.value);
         

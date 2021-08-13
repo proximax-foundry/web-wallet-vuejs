@@ -6,22 +6,21 @@
     <Toast position="bottom-left" group="bl" />
     <Toast position="bottom-right" group="br" style="word-break: break-all;" />
     <ConfirmDialog></ConfirmDialog>
-    <header class="h-16 flex items-stretch">
-      <headerComponent></headerComponent>
-    </header>
+    <headerComponent></headerComponent>
     <div class="flex-grow">
       <div :class="login?`w-full mx-auto text-center`:``">
         <NavigationMenu v-if="login"></NavigationMenu>
-        <div :class="`${ login?'page container inline-block pt-5 px-10':''}`">
+        <div :class="`${ login?'page container inline-block pt-5 px-2 sm:px-10':''}`">
           <router-view></router-view>
         </div>
       </div>
     </div>
     <!-- <PageComponent></PageComponent> -->
     <footer class="h-12 text-center mt-20">
+
       <div class="text-xs py-2">
         <div class="font-bold">&copy; ProximaX 2021</div>
-        <div>Please report any issues identified to our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold hover:underline">helpdesk</a>.</div>
+        <div>{{$t('Footer.text')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold hover:underline">{{$t('Footer.link')}}</a>.</div>
       </div>
     </footer>
   </div>
