@@ -24,8 +24,8 @@ export default {
     const showMenu = ref([]);
     const services = ref([
       {name: computed(() => t('services.namespaces')), desc: computed(() => t('services.namespacedescription')), img: 'icon-namespace-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: computed(() => t('services.register')), link: ''},
-        {name: computed(() => t('services.extendduration')), link: ''}
+        {name: computed(() => t('services.register')), link: 'ViewServicesNamespaceCreate'},
+        {name: computed(() => t('services.extendduration')), link: 'ViewServicesNamespaceExtend'}
       ]},
       {name: computed(() => t('services.assets')), desc: computed(() => t('services.mosaicsdescription')), img: 'icon-mosaics-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: computed(() => t('welcome.create')), link: 'ViewServicesAssetsCreate'},
