@@ -100,7 +100,7 @@
           <PasswordInput :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
             <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">{{$t('signin.clear')}}</button>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createMosaic()">{{$t('welcome.create')}}</button>
+            <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createMosaic">{{$t('welcome.create')}}</button>
           </div>
         </fieldset>
       </form>
