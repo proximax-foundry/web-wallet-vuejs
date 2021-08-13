@@ -28,6 +28,12 @@
                 <div class="inline-block text-tsm">{{$t('accounts.cosigwarning2')}}</div>
               </div>
             </div>
+            <div v-if="showNoAsset" class="border-2 rounded-3xl border-red-700 w-full h-24 text-center p-4">
+              <div class="h-5 text-center">
+                <div class="rounded-full w-8 h-8 border border-gray-500 inline-block relative"><font-awesome-icon icon="times" class="text-gray-500 h-5 w-5 absolute" style="top: 5px; left:9px"></font-awesome-icon></div><br>
+                <div class="inline-block text-tsm">This account do not have any asset that can modify supply.</div>
+              </div>
+            </div>
             <div v-if="isNotCosigner" class="border-2 rounded-3xl border-yellow-400 w-full h-24 text-center p-4">
               <div class="h-5 text-center">
                 <div class="rounded-full w-8 h-8 border border-yellow-500 inline-block relative"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-5 w-5 absolute" style="top: 5px; left:11px"></font-awesome-icon></div><br>
@@ -357,25 +363,48 @@ export default {
       }
     });
 
+    const setFormInput = (isValidate) => {
+      disabledPassword.value = isValidate;
+      disabledSupply.value = isValidate;
+      disabledSelectAsset.value = isValidate;
+      disabledSelectIncreaseDecrease.value = isValidate;
+    };
+
     watch(totalFee, (n) => {
-      if(balance.value < n && !isNotCosigner.value){
-        showNoBalance.value = true;
-        disabledPassword.value = true;
-        disabledSupply.value = true;
+      if(balance.value < n){
+        if(!showNoAsset.value){
+          if(!isNotCosigner.value){
+            showNoBalance.value = true;
+          }
+        }
+        setFormInput(true);
       }else{
         showNoBalance.value = false;
-        disabledPassword.value = false;
-        disabledSupply.value = false;
+        setFormInput(false);
+      }
+    });
+
+    watch(showNoAsset, (n) => {
+      if(n){
+        setFormInput(true);
+      }else{
+        setFormInput(false);
+      }
+    });
+
+    watch(showNoBalance, (n) => {
+      if(n){
+        setFormInput(true);
+      }else{
+        setFormInput(false);
       }
     });
 
     watch(isNotCosigner, (n) => {
       if(n){
-        disabledPassword.value = true;
-        disabledSupply.value = true;
+        setFormInput(true)
       }else{
-        disabledPassword.value = false;
-        disabledSupply.value = false;
+        setFormInput(false);
       }
     });
 
