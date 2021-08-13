@@ -1,6 +1,7 @@
 import {
   Account,
   Address,
+  AliasActionType,
   Deadline,
   EncryptedMessage,
   // NetworkCurrencyMosaic,
@@ -24,7 +25,8 @@ import {
   Transaction,
   TransactionType,
   AggregateTransaction,
-  CosignatureTransaction
+  CosignatureTransaction,
+  NamespaceId
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { walletState } from "../state/walletState";
@@ -59,6 +61,14 @@ export class AssetsUtils {
     supplyChangeType = (changeType==1)?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
     const mosaicSupplyChangeTransaction = buildTransactions.buildMosaicSupplyChange(mosaicId, supplyChangeType, delta);
     return mosaicSupplyChangeTransaction.maxFee.compact();
+  };
+
+  static getLinkAssetToNamespaceTransactionFee = (networkType: NetworkType, generationHash: string, mosaicId: MosaicId, namespaceId: NamespaceId, linkType: string) => {
+    const buildTransactions = new BuildTransactions(networkType, generationHash);
+    let aliasActionType: AliasActionType;
+    aliasActionType = (linkType=='link')?AliasActionType.Link:AliasActionType.Unlink;
+    const linkAssetToNamespaceTransaction = buildTransactions.assetAlias( aliasActionType, namespaceId, mosaicId);
+    return linkAssetToNamespaceTransaction.maxFee.compact();
   };
 
   static getOwnedAssets = (address: string) => {

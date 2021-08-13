@@ -3,12 +3,14 @@ import {
   Account,
   Address,
   NamespaceMosaicIdGenerator,
+  NamespaceId,
   NetworkType,
   PublicAccount,
   RegisterNamespaceTransaction,
   SignedTransaction,
   TransactionBuilderFactory,
   UInt64,
+  MosaicId,
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { walletState } from "../state/walletState";
@@ -109,6 +111,7 @@ export class NamespacesUtils {
         return 0;
       });
     }
+    console.log(namespacesArr)
     return namespacesArr;
   }
 

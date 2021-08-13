@@ -29,6 +29,7 @@
         '/create-namespace',
         '/extend-namespace',
         '/asset-supply-change',
+        '/alias-namespace-to-asset',
         '/swap-account-list',
         '/create-attestation',
         '/audit-attestation',
