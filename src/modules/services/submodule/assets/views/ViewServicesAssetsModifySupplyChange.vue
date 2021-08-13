@@ -62,13 +62,26 @@
               <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">{{$t('services.balance')}}: <span class="text-xs">{{ balance }} XPX</span></div>
             </div>
           </div>
-          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select asset" errorMessage="" ref="assetOption" noOptionsText="No asset for this account" v-model="selectAsset" :options="assetOptions" @show-selection="changeAsset" :disabled="disabledSelectAsset" @clear-selection="clearAsset" />
-          <SelectInputPlugin :selectDefault="selectIncreaseDecrease" showSelectTitleProp="true" placeholder="Increase or decrease" errorMessage="" v-model="selectIncreaseDecrease" :options="increaseDecreaseOption()" :disabled="disabledSelectIncreaseDecrease" />
-          <SupplyInput :disabled="disabledSupply" v-model="supply" title="Quantity of Increase/Decrease" :balance="balanceNumber" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':(balanceNumber?'Max. amount to decrease is '+ balanceNumber:'Select asset')" :decimal="assetDivisibility" />
+          <SelectInputPlugin showSelectTitleProp="true" :placeholder="$t('services.selectasset')" errorMessage="" ref="assetOption" :noOptionsText="$t('services.noasset')" v-model="selectAsset" :options="assetOptions" @show-selection="changeAsset" :disabled="disabledSelectAsset" @clear-selection="clearAsset" />
+          <SelectInputPlugin :selectDefault="selectIncreaseDecrease" showSelectTitleProp="true" :placeholder="$t('services.addminus')" errorMessage="" v-model="selectIncreaseDecrease" :options="increaseDecreaseOption()" :disabled="disabledSelectIncreaseDecrease" />
+          <SupplyInput :disabled="disabledSupply" v-model="supply" :title="$t('services.quantityoption')" :balance="balanceNumber" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':(balanceNumber?'Max. amount to decrease is '+ balanceNumber:'Select asset')" :decimal="assetDivisibility" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{ transactionFee }} XPX</div>
           </div>
-          <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
+          <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800 mb-5" v-if="isMultiSig(selectedAccAdd)">
+            <div class="text-center">
+              <div class="inline-block">
+                <div class="flex">
+                  <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
+                  <div class="inline-block self-center text-left">
+                    <div>LockFund: {{ lockFundCurrency }} {{ currencyName }}</div>
+                    <div>Unconfirmed/Recommended Fee: {{ lockFundTxFee }} {{ currencyName }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <PasswordInput :placeholder="$t('signi.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
             <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput">{{$t('signin.clear')}}</button>
             <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="modifyMosaic">{{$t('welcome.create')}}</button>
@@ -156,9 +169,7 @@ export default {
     const cosignerAddress = ref('');
 
     const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
-    const rentalFee = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.mosaicRentalFee, networkState.currentNetworkProfile.network.currency.divisibility) );
-    const rentalFeeCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.mosaicRentalFee, networkState.currentNetworkProfile.network.currency.divisibility) );
-
+    
     const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
     const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
 
@@ -217,7 +228,7 @@ export default {
       isMultiSigBool.value = isMultiSig(i.address);
       ownerPublicAccount.value = WalletUtils.createPublicAccount(i.publicKey, networkState.currentNetworkProfile.network.type);
       showNoAsset.value = (assetOptions.value.length == 0)?true:false;
-      showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value && !showNoAsset.value)?true:false;
+      showNoBalance.value = ((balance.value < totalFee.value) && !isNotCosigner.value && !showNoAsset.value)?true:false;
     }
 
     const assetSupply = ref(0);
@@ -297,9 +308,9 @@ export default {
     const totalFee = computed(() => {
       // if multisig
       if(isMultiSig(selectedAccAdd.value)){
-        return parseFloat(lockFundTotalFee.value) + rentalFee.value + transactionFeeExact.value;
+        return parseFloat(lockFundTotalFee.value) + transactionFeeExact.value;
       }else{
-        return rentalFee.value + transactionFeeExact.value;
+        return transactionFeeExact.value;
       }
     });
 
@@ -386,6 +397,8 @@ export default {
       lockFundTotalFee,
       showNoAsset,
       showSupplyErr,
+      lockFundCurrency,
+      lockFundTxFee,
       err,
       walletPassword,
       disableCreate,
