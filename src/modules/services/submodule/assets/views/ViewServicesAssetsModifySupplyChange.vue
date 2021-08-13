@@ -50,7 +50,7 @@
               </div>
             </div>
             <div v-if="getMultiSigCosigner.list.length > 0">
-              <div class="text-tsm">{{$t('transfer.cosigner')}}:
+              <div class="text-tsm text-left ml-4">{{$t('transfer.cosigner')}}:
                 <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ getMultiSigCosigner.list[0].balance }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
                 <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('services.balance')}}: {{ cosigner.balance }} XPX)</option></select></span>
                 <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
@@ -62,16 +62,29 @@
               <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">{{$t('services.balance')}}: <span class="text-xs">{{ balance }} XPX</span></div>
             </div>
           </div>
-          <SelectInputPlugin showSelectTitleProp="true" :placeholder="$t('services.selectasset')" errorMessage="" ref="assetOption" :noOptionsText="$t('services.noasset')" v-model="selectAsset" :options="assetOptions" @show-selection="changeAsset" :disabled="disabledSelectAsset" />
-          <SelectInputPlugin selectDefault="0" showSelectTitleProp="true" :placeholder="$t('services.addminus')" errorMessage="" v-model="selectIncreaseDecrease" :options="increaseDecreaseOption()" :disabled="disabledSelectIncreaseDecrease" />
-          <SupplyInput :disabled="disabledSupply" v-model="supply" :title="$t('services.quantityoption')" :balance="balanceNumber" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" />
+          <SelectInputPlugin showSelectTitleProp="true" :placeholder="$t('services.selectasset')" errorMessage="" ref="assetOption" :noOptionsText="$t('services.noasset')" v-model="selectAsset" :options="assetOptions" @show-selection="changeAsset" :disabled="disabledSelectAsset" @clear-selection="clearAsset" />
+          <SelectInputPlugin :selectDefault="selectIncreaseDecrease" showSelectTitleProp="true" :placeholder="$t('services.addminus')" errorMessage="" v-model="selectIncreaseDecrease" :options="increaseDecreaseOption()" :disabled="disabledSelectIncreaseDecrease" />
+          <SupplyInput :disabled="disabledSupply" v-model="supply" :title="$t('services.quantityoption')" :balance="balanceNumber" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':(balanceNumber?'Max. amount to decrease is '+ balanceNumber:'Select asset')" :decimal="assetDivisibility" />
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{ transactionFee }} XPX</div>
           </div>
-          <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
+          <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800 mb-5" v-if="isMultiSig(selectedAccAdd)">
+            <div class="text-center">
+              <div class="inline-block">
+                <div class="flex">
+                  <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
+                  <div class="inline-block self-center text-left">
+                    <div>LockFund: {{ lockFundCurrency }} {{ currencyName }}</div>
+                    <div>Unconfirmed/Recommended Fee: {{ lockFundTxFee }} {{ currencyName }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <PasswordInput :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
-            <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">{{$t('signin.clear')}}</button>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="modifyMosaic()">{{$t('welcome.create')}}</button>
+            <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput">{{$t('signin.clear')}}</button>
+            <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="modifyMosaic">{{$t('welcome.create')}}</button>
           </div>
         </fieldset>
       </form>
@@ -112,7 +125,7 @@
   </div>
 </template>
 <script>
-import { computed, ref, getCurrentInstance, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 // import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
@@ -136,8 +149,7 @@ export default {
   },
   setup(){
     const {t} = useI18n();
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    let maxAmount = 9999999999.999999;
     const assetOption = ref(null);
     const showSupplyErr = ref(false);
     const walletPassword = ref('');
@@ -157,9 +169,7 @@ export default {
     const cosignerAddress = ref('');
 
     const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
-    const rentalFee = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.mosaicRentalFee, networkState.currentNetworkProfile.network.currency.divisibility) );
-    const rentalFeeCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.mosaicRentalFee, networkState.currentNetworkProfile.network.currency.divisibility) );
-
+    
     const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
     const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
 
@@ -183,7 +193,7 @@ export default {
     const selectedAccName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
     const selectedAccAdd = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
     const balance = ref(Helper.toCurrencyFormat(walletState.currentLoggedInWallet.selectDefaultAccount().balance, networkState.currentNetworkProfile.network.currency.divisibility));
-    const balanceNumber = walletState.currentLoggedInWallet.selectDefaultAccount().balance;
+    const balanceNumber = ref(maxAmount);
     const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
 
     const showNoBalance = ref(false);
@@ -218,7 +228,7 @@ export default {
       isMultiSigBool.value = isMultiSig(i.address);
       ownerPublicAccount.value = WalletUtils.createPublicAccount(i.publicKey, networkState.currentNetworkProfile.network.type);
       showNoAsset.value = (assetOptions.value.length == 0)?true:false;
-      showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value && !showNoAsset.value)?true:false;
+      showNoBalance.value = ((balance.value < totalFee.value) && !isNotCosigner.value && !showNoAsset.value)?true:false;
     }
 
     const assetSupply = ref(0);
@@ -227,12 +237,14 @@ export default {
     const assetDivisibility = ref(0);
     const assetTransferable = ref(false);
     const assetMutable = ref(false);
+    const assetIdString = ref('');
 
     const changeAsset = (assetId) => {
-      const selectedAsset = walletState.currentLoggedInWallet.selectDefaultAccount().assets.find((asset) => asset.idHex === assetId);
+      const selectedAsset = walletState.currentLoggedInWallet.accounts.find((account) => account.address === selectedAccAdd.value).assets.find((asset) => asset.idHex === assetId);
       assetSupply.value =Helper.amountFormatterSimple(selectedAsset.supply, selectedAsset.divisibility);
       if(selectedAsset.duration){
-        assetDuration.value = selectedAsset.duration = ' Day' + ((selectedAsset.duration>1)?'s':'');
+        let numDaysleft = Math.ceil(selectedAsset.duration/(24 * 60 * 4));
+        assetDuration.value = numDaysleft + ' Day' + ((numDaysleft>1)?'s':'');
       }else{
         assetDuration.value = 'No expiration date';
       }
@@ -240,23 +252,25 @@ export default {
       assetDivisibility.value = selectedAsset.divisibility;
       assetTransferable.value = selectedAsset.transferable;
       assetMutable.value = selectedAsset.supplyMutable;
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, assetId, selectIncreaseDecrease.value, supply.value), networkState.currentNetworkProfile.network.currency.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, assetId, selectIncreaseDecrease.value, supply.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetIdString, selectIncreaseDecrease.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetIdString, selectIncreaseDecrease.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      balanceNumber.value = selectIncreaseDecrease.value=='increase'?maxAmount:parseFloat(assetSupply.value);
+      showSupplyErr.value = supply.value>balanceNumber.value;
     };
 
     const assetOptions = computed(() => {
-      return AssetsUtils.getOwnedAssets(selectedAccAdd.value);
+      return AssetsUtils.getOwnedAssetsPermutable(selectedAccAdd.value);
     });
 
     const increaseDecreaseOption = () => {
       let action = [];
-      action.push({value: 0, label: t('services.decrease')});
-      action.push({value: 1, label: t('services.increase')});
+      action.push({value: 'decrease', label: t('services.decrease')});
+      action.push({value: 'increase', label: t('services.increase')});
       return action;
     };
 
     const selectAsset = ref('');
-    const selectIncreaseDecrease = ref(0);
+    const selectIncreaseDecrease = ref('increase');
 
     const clearInput = () => {
       walletPassword.value = '';
@@ -265,29 +279,38 @@ export default {
     };
 
     const modifyMosaic = () => {
-      console.log('Modify mosaic');
+       if(cosigner.value){
+         AssetsUtils.changeAssetSupplyMultiSig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value, selectedAccAdd.value);
+       }else{
+        AssetsUtils.changeAssetSupply(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value);
+       }
+      clearInput();
     };
 
     watch(selectIncreaseDecrease, (n) => {
       if(selectAsset.value){
-        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, selectAsset.value, n, supply.value), networkState.currentNetworkProfile.network.currency.divisibility);
-        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, selectAsset.value, n, supply.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        balanceNumber.value = (n=='increase'?maxAmount:parseFloat(assetSupply.value));
+      }else{
+        balanceNumber.value = (n=='increase'?maxAmount:0);
       }
+      showSupplyErr.value = supply.value>balanceNumber.value;
     });
 
     watch(supply, (n) => {
       if(selectAsset.value){
-        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, selectAsset.value, selectIncreaseDecrease.value, n), networkState.currentNetworkProfile.network.currency.divisibility);
-        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, selectAsset.value, selectIncreaseDecrease.value, n), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, n, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, n, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
       }
     });
 
     const totalFee = computed(() => {
       // if multisig
       if(isMultiSig(selectedAccAdd.value)){
-        return parseFloat(lockFundTotalFee.value) + rentalFee.value + transactionFeeExact.value;
+        return parseFloat(lockFundTotalFee.value) + transactionFeeExact.value;
       }else{
-        return rentalFee.value + transactionFeeExact.value;
+        return transactionFeeExact.value;
       }
     });
 
@@ -296,6 +319,15 @@ export default {
       disabledSupply.value = isValidate;
       disabledSelectAsset.value = isValidate;
       disabledSelectIncreaseDecrease.value = isValidate;
+    };
+
+    const clearAsset = () => {
+      assetSupply.value = 0;
+      assetAmount.value = 0;
+      assetDuration.value = '0 Day';
+      assetDivisibility.value = 0;
+      assetTransferable.value = false;
+      assetMutable.value = false;
     };
 
     watch(totalFee, (n) => {
@@ -336,6 +368,21 @@ export default {
       }
     });
 
+    const cosigner = ref('');
+    // get cosigner
+    watch(getMultiSigCosigner, (n) => {
+      // if it is a multisig
+      if(n.list.length > 0){
+        if(n.list.length > 1){
+          cosigner.value = cosignerAddress.value;
+        }else{
+          cosigner.value = n.list[0].address;
+        }
+      }else{
+        cosigner.value = '';
+      }
+    });
+
     return {
       assetOption,
       accounts,
@@ -350,6 +397,8 @@ export default {
       lockFundTotalFee,
       showNoAsset,
       showSupplyErr,
+      lockFundCurrency,
+      lockFundTxFee,
       err,
       walletPassword,
       disableCreate,
@@ -383,7 +432,8 @@ export default {
       isNotCosigner,
       disabledSelectAsset,
       disabledSelectIncreaseDecrease,
-      walletName
+      walletName,
+      clearAsset,
     }
   },
 
