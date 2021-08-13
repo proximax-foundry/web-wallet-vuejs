@@ -296,7 +296,11 @@ export default {
     };
 
     const modifyMosaic = () => {
-      AssetsUtils.changeAssetSupply(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value);
+       if(cosigner.value){
+         AssetsUtils.changeAssetSupplyMultiSig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value, selectedAccAdd.value);
+       }else{
+        AssetsUtils.changeAssetSupply(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value);
+       }
       clearInput();
     };
 
@@ -377,57 +381,18 @@ export default {
       }
     });
 
-    const totalFee = computed(() => {
-      // if multisig
-      if(isMultiSig(selectedAccAdd.value)){
-        return parseFloat(lockFundTotalFee.value) + rentalFee.value + transactionFeeExact.value;
-      }else{
-        return rentalFee.value + transactionFeeExact.value;
-      }
-    });
-
-    const setFormInput = (isValidate) => {
-      disabledPassword.value = isValidate;
-      disabledSupply.value = isValidate;
-      disabledSelectAsset.value = isValidate;
-      disabledSelectIncreaseDecrease.value = isValidate;
-    };
-
-    watch(totalFee, (n) => {
-      if(balance.value < n){
-        if(!showNoAsset.value){
-          if(!isNotCosigner.value){
-            showNoBalance.value = true;
-          }
+    const cosigner = ref('');
+    // get cosigner
+    watch(getMultiSigCosigner, (n) => {
+      // if it is a multisig
+      if(n.list.length > 0){
+        if(n.list.length > 1){
+          cosigner.value = cosignerAddress.value;
+        }else{
+          cosigner.value = n.list[0].address;
         }
-        setFormInput(true);
       }else{
-        showNoBalance.value = false;
-        setFormInput(false);
-      }
-    });
-
-    watch(showNoAsset, (n) => {
-      if(n){
-        setFormInput(true);
-      }else{
-        setFormInput(false);
-      }
-    });
-
-    watch(showNoBalance, (n) => {
-      if(n){
-        setFormInput(true);
-      }else{
-        setFormInput(false);
-      }
-    });
-
-    watch(isNotCosigner, (n) => {
-      if(n){
-        setFormInput(true)
-      }else{
-        setFormInput(false);
+        cosigner.value = '';
       }
     });
 

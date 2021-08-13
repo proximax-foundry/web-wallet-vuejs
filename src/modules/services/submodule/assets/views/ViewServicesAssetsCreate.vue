@@ -122,7 +122,7 @@
   </div>
 </template>
 <script>
-import { computed, ref, getCurrentInstance, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 // import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
@@ -146,8 +146,6 @@ export default {
   },
 
   setup(){
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showSupplyErr = ref(false);
     const recipient = ref('');
     const msgOption = ref('regular');
@@ -257,7 +255,6 @@ export default {
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
-      isMultiSigBool.value = isMultiSig(i.address);
       balance.value = i.balance;
       showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value)?true:false;
       showMenu.value = !showMenu.value;
@@ -365,7 +362,11 @@ export default {
     });
 
     const createMosaic = () => {
-      AssetsUtils.createAsset( selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value);
+      if(cosigner.value){
+        AssetsUtils.createAssetMultiSig( cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, selectedAccAdd.value); 
+      }else{
+        AssetsUtils.createAsset( selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value);
+      }
       clearInput();
       // to be replaced by new method to create new asset
       // let createStatus = mosaicTransaction(divisibility.value, supply.value, duration.value, durationOption.value, isMutable.value, isTransferable.value, walletPassword.value, selectedAccName.value, appStore, siriusStore);
@@ -377,6 +378,21 @@ export default {
       //   clearInput();
       // }
     };
+
+    const cosigner = ref('');
+    // get cosigner
+    watch(getMultiSigCosigner, (n) => {
+      // if it is a multisig
+      if(n.list.length > 0){
+        if(n.list.length > 1){
+          cosigner.value = cosignerAddress.value;
+        }else{
+          cosigner.value = n.list[0].address;
+        }
+      }else{
+        cosigner.value = '';
+      }
+    });
 
     return {
       accounts,
