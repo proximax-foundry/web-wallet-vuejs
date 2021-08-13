@@ -10,7 +10,7 @@
       <input :disabled="disabled" @input="$emit('update:modelValue', $event.target.value)" :value="modelValue" @keypress="validateKey" type="text" min=0 :max="max"  :maxlength="max" :placeholder="placeholder" class="text-placeholder bg-white text-right" @focus="$event.target.select()" @click="clickInputText()">
       <div class="w-5"></div>
     </div>
-    <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
+    <div class="h-3 mb-2 inline-block float-left"><div class="error error-text text-left inline-block" v-if="textErr || showError">{{ errorMessage }}</div></div>
   </div>
 </template>
 
