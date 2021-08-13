@@ -93,6 +93,19 @@
               </div>
             </div>
           </div>
+          <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800 mb-5" v-if="isMultiSig(selectedAccAdd)">
+            <div class="text-center">
+              <div class="inline-block">
+                <div class="flex">
+                  <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
+                  <div class="inline-block self-center text-left">
+                    <div>LockFund: {{ lockFundCurrency }} {{ currencyName }}</div>
+                    <div>Unconfirmed/Recommended Fee: {{ lockFundTxFee }} {{ currencyName }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <PasswordInput :placeholder="$t('signi.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
             <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">{{$t('signin.clear')}}</button>
