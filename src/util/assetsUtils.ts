@@ -74,29 +74,5 @@ export class AssetsUtils {
     }
     return assetSelection;
   }
-
-  static getCosignerList(address: string){
-    const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
-    const cosigners = account.multisigInfo.find(multi => multi.level == 1);
-    if(cosigners != undefined){
-      const cosignAddress = cosigners.getCosignaturiesAddress(networkState.currentNetworkProfile.network.type);
-      let cosignList = [];
-      if(cosignAddress.length > 0){
-        cosignAddress.forEach((cosign) => {
-          const cosignAcc = walletState.currentLoggedInWallet.accounts.find(account => account.address === cosign);
-          if(!cosignAcc){
-            cosignList.push({
-              name: cosignAcc.name,
-              address: cosignAcc.address,
-              balance: cosignAcc.balance,
-            });
-          }
-        });
-      }
-      return { list: cosignList };
-    }else{
-      return { list: [] };
-    }
-  }
 }
 
