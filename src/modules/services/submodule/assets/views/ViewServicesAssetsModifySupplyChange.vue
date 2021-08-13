@@ -208,6 +208,8 @@ export default {
       return AssetsUtils.getCosignerList(selectedAccAdd.value);
     });
 
+    const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
+
     const changeSelection = (i) => {
       assetOption.value.clear();
       selectedAccName.value = i.name;

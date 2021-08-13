@@ -35,6 +35,7 @@ import { WalletUtils } from "../util/walletUtils";
 import { ChainAPICall } from "../models/REST/chainAPICall";
 import { BuildTransactions } from "../util/buildTransactions";
 import { Helper } from "./typeHelper";
+import { AssetSupplyType } from "nem-library";
 
 interface assetSelectionInterface {
   label: string,
