@@ -58,15 +58,13 @@
 </template>
 <script>
 import Multiselect from '@vueform/multiselect';
-import { computed, inject, ref } from "vue";
-import { startListening, stopListening } from '@/util/listener.js';
+import { computed, ref } from "vue";
 import { useToast } from "primevue/usetoast";
 import { networkState } from '@/state/networkState';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { walletState } from '@/state/walletState';
 import {WalletUtils} from '@/util/walletUtils';
 import { NamespacesUtils } from '@/util/namespacesUtils';
-// import { DataBridgeService } from '../util/dataBridge.js';
 
 export default {
   name: 'ViewServicesNodes',
@@ -77,11 +75,7 @@ export default {
 
   setup() {
     const toast = useToast();
-   /*  const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
-    const chainNetwork = inject("chainNetwork"); */
     const showSelectTitle = ref(false);
-    // const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
     const borderColor = ref('border border-gray-300');
     const placeholder = ref('Node list');
     const canDeselect = ref(false);
@@ -92,7 +86,6 @@ export default {
       let nodeList = [];
 
      networkState.currentNetworkProfile.apiNodes.forEach((node) => {
-        // let link = (location.protocol == "http:" ? node.protocol : node.sslProtocol) + "://" + node.hostname + (location.protocol == "http:" ?(':' + node.port):'');
         nodeList.push({ value: node, name: NetworkStateUtils.buildAPIEndpointURL(node) });
       });
       return nodeList;
@@ -104,14 +97,11 @@ export default {
     const makeNodeSelection = (e) => {
       if(e != networkState.selectedAPIEndpoint){
         showSelectTitle.value = true;
-        NetworkStateUtils.updateChainNode(e)
-        /* stopListening(); */
+        NetworkStateUtils.updateChainNode(e);
 
-       /*  startListening(walletSession.accounts); */
         WalletUtils.getTotalBalanceWithCurrentNetwork();
         NamespacesUtils.updateAccountsNamespaces(walletState.currentLoggedInWallet.accounts);
         toast.add({severity:'success', summary: 'Services', detail: 'Node updated', group: 'br', life: 5000});
-        // console.log(networkState.currentNetworkProfile.network.type)
       }
     };
 
@@ -125,11 +115,7 @@ export default {
       showSelectTitle.value = false;
     };
 
-    // var dataBridgeInstance = new DataBridgeService();
-    // dataBridgeInstance.connectBlockSocket();
-
     return {
-      // wallet,
       selected,
       showSelectTitle,
       borderColor,
