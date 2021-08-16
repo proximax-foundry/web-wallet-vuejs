@@ -100,9 +100,7 @@ export default {
         showSelectTitle.value = true;
         NetworkStateUtils.updateChainNode(endpoint);
         WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
-        WalletUtils.getTotalBalanceWithCurrentNetwork();
         emitter.emit('listener:reconnect');
-        emitter.emit('listener:setEndpoint', NetworkStateUtils.buildAPIEndpointURL(endpoint));
         toast.add({severity:'success', summary: 'Services', detail: 'Node updated', group: 'br', life: 5000});
       }
     };
