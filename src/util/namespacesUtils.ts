@@ -2,7 +2,9 @@ import { readonly, computed } from "vue";
 import {
   Account,
   Address,
+  AliasType,
   NamespaceMosaicIdGenerator,
+  NamespaceId,
   NetworkType,
   PublicAccount,
   RegisterNamespaceTransaction,
@@ -16,6 +18,7 @@ import { networkState } from "../state/networkState";
 import { ChainUtils } from "../util/chainUtils";
 import { WalletUtils } from "../util/walletUtils";
 import { ChainAPICall } from "../models/REST/chainAPICall";
+import { Namespace } from "@/models/namespace";
 import { BuildTransactions } from "../util/buildTransactions";
 import { Helper } from "./typeHelper";
 import { WalletAccount } from "@/models/walletAccount";
