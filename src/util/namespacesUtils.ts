@@ -2,7 +2,9 @@ import { readonly, computed } from "vue";
 import {
   Account,
   Address,
+  AliasType,
   NamespaceMosaicIdGenerator,
+  NamespaceId,
   NetworkType,
   PublicAccount,
   RegisterNamespaceTransaction,
@@ -16,6 +18,7 @@ import { networkState } from "../state/networkState";
 import { ChainUtils } from "../util/chainUtils";
 import { WalletUtils } from "../util/walletUtils";
 import { ChainAPICall } from "../models/REST/chainAPICall";
+import { Namespace } from "@/models/namespace";
 import { BuildTransactions } from "../util/buildTransactions";
 import { Helper } from "./typeHelper";
 import { WalletAccount } from "@/models/walletAccount";
@@ -250,4 +253,53 @@ export class NamespacesUtils {
     ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
   }
 
+  static updateAccountsNamespaces = async (accounts: WalletAccount[]) => {
+    for(let i = 0; i < accounts.length; ++i ){
+      let account = accounts[i];
+      let publicAccount = Helper.createPublicAccount(account.publicKey, networkState.currentNetworkProfile.network.type);
+      let namespaceInfos = await new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort)).namespaceAPI.getNamespacesFromAccount(publicAccount.address);
+      let namespaces: Namespace[] = [];
+      let tempNamespaceIds: NamespaceId[] = [];
+
+      for(let i=0; i < namespaceInfos.length; ++i){
+
+        let namespaceId = namespaceInfos[i].id;
+        tempNamespaceIds.push(namespaceId);
+
+        let newNamespace = new Namespace(namespaceInfos[i].id.toHex());
+        newNamespace.active = namespaceInfos[i].active;
+
+        if(namespaceInfos[i].isSubnamespace()){
+          newNamespace.parentId = namespaceInfos[i].parentNamespaceId().toHex();
+        }
+
+        newNamespace.startHeight = namespaceInfos[i].startHeight.compact();
+        newNamespace.endHeight = namespaceInfos[i].endHeight.compact();
+
+        if(namespaceInfos[i].hasAlias()){
+          newNamespace.linkType = namespaceInfos[i].alias.type.valueOf();
+
+          switch (newNamespace.linkType) {
+            case AliasType.Mosaic:
+              newNamespace.linkedId = namespaceInfos[i].alias.mosaicId.toHex()
+              break;
+            case AliasType.Address:
+              newNamespace.linkedId = namespaceInfos[i].alias.address.plain();
+              break;
+            default:
+              break;
+          }
+        }
+        namespaces.push(newNamespace);
+      }
+
+      let namespaceNames = await new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort)).namespaceAPI.getNamespacesName(tempNamespaceIds);
+
+      for(let i = 0; i < namespaceNames.length; ++i){
+        let existingNamespace = namespaces.find((ns)=> ns.idHex === namespaceNames[i].namespaceId.toHex())
+        existingNamespace.name = namespaceNames[i].name;
+      }
+      account.namespaces = namespaces;
+    }
+  }
 }

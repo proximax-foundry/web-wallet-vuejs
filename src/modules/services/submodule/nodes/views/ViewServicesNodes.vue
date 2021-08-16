@@ -64,7 +64,8 @@ import { useToast } from "primevue/usetoast";
 import { networkState } from '@/state/networkState';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { walletState } from '@/state/walletState';
-import {WalletUtils} from '@/util/walletUtils'
+import {WalletUtils} from '@/util/walletUtils';
+import { NamespacesUtils } from '@/util/namespacesUtils';
 // import { DataBridgeService } from '../util/dataBridge.js';
 
 export default {
@@ -89,7 +90,7 @@ export default {
 
     const options = computed(() => {
       let nodeList = [];
-      
+
      networkState.currentNetworkProfile.apiNodes.forEach((node) => {
         // let link = (location.protocol == "http:" ? node.protocol : node.sslProtocol) + "://" + node.hostname + (location.protocol == "http:" ?(':' + node.port):'');
         nodeList.push({ value: node, name: NetworkStateUtils.buildAPIEndpointURL(node) });
@@ -105,16 +106,15 @@ export default {
         showSelectTitle.value = true;
         NetworkStateUtils.updateChainNode(e)
         /* stopListening(); */
-       
+
        /*  startListening(walletSession.accounts); */
         WalletUtils.getTotalBalanceWithCurrentNetwork();
+        NamespacesUtils.updateAccountsNamespaces(walletState.currentLoggedInWallet.accounts);
         toast.add({severity:'success', summary: 'Services', detail: 'Node updated', group: 'br', life: 5000});
-        console.log(networkState.currentNetworkProfile.network.type)
+        // console.log(networkState.currentNetworkProfile.network.type)
       }
     };
-   
-  
-    
+
     const closeSelection =() => {
       if(!selected.value){
         clearSelection();
