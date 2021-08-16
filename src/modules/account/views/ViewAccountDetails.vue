@@ -29,7 +29,7 @@
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
           <div class="text-xs font-bold mb-1">{{$t('createsuccessful.address')}}:</div>
-          <div id="address" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="pettyaddress" copySubject="Address">{{pettyaddress}}</div>
+          <div id="address" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="prettyAddress" copySubject="Address">{{prettyAddress}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
       </div>
@@ -45,7 +45,7 @@
         <div class="flex justify-between p-4 rounded-xl bg-yellow-100 mb-4">
           <div class="text-center w-full">
             <div class="border border-yellow-600 rounded-full w-8 h-8 inline-block mb-4">
-              <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-600 inline-block"></font-awesome-icon>
+              <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-600 inline-block mt-1"></font-awesome-icon>
             </div>
             <p>{{$t('createsuccessful.warningtext1')}}</p>
             <p>{{$t('createsuccessful.warningtext2')}}</p>
@@ -64,17 +64,24 @@
         </div>
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
           <div class="text-left w-full relative">
-            <div class="text-sm font-bold mb-1">{{$t('accounts.swap')}}</div>
-            <PasswordInput v-if="showPwSwap" :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPasswdSwap" />
+            <div class="text-xs font-bold mr-2">
+              <div class="text-sm font-bold mb-1">{{$t('accounts.swap')}}</div>
+              <PasswordInput v-if="showPwSwap" :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPasswdSwap" />
+            </div>
           </div>
           <button class="default-btn w-36" @click="showPwSwap = !showPwSwap" v-if="!showPwSwap">{{$t('accounts.enable')}}</button>
           <button class="default-btn w-36" @click="verifyWalletPwSwap()" v-if="showPwSwap">{{$t('accounts.submit')}}</button>
         </div>
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
           <div class="text-left w-full relative">
-            <div class="text-sm font-bold mb-1">{{$t('createsuccessful.savewalletpaper')}}</div>
+            <div class="text-xs font-bold mr-2">
+              <div class="text-sm font-bold mb-1">{{$t('createsuccessful.savewalletpaper')}}</div>
+              <PasswordInput v-if="showWalletPaperPw && !showSavePaperWallet" :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPasswdWalletPaper" />
+            </div>
           </div>
-          <button class="default-btn w-36">{{$t('accounts.save')}}</button>
+          <button class="default-btn w-36" @click="showWalletPaperPw = !showWalletPaperPw" v-if="!showWalletPaperPw">{{$t('accounts.save')}}</button>
+          <button class="default-btn w-36" @click="verifyWalletPwWalletPaper()" v-if="showWalletPaperPw && !showSavePaperWallet">{{$t('accounts.submit')}}</button>
+          <button class="default-btn w-36" @click="saveWalletPaper()" v-if="showSavePaperWallet">{{$t('accounts.save')}}</button>
         </div>
       </div>
     </div>
@@ -93,7 +100,10 @@ import {walletState} from "@/state/walletState";
 import {Helper} from "@/util/typeHelper";
 import {networkState} from "@/state/networkState";
 import {WalletUtils} from "@/util/walletUtils";
-import {useI18n} from 'vue-i18n'
+import {useI18n} from 'vue-i18n';
+import { pdfWalletPaperImg } from '@/modules/account/pdfPaperWalletBackground';
+import jsPDF from 'jspdf';
+import qrcode from 'qrcode-generator';
 
 export default {
   name: "ViewAccountDetails",
@@ -124,7 +134,7 @@ export default {
     if (acc === -1) {
       router.push({name: "ViewAccountDisplayAll"});
     }
-    const pettyaddress = Helper.createAddress(acc.address).pretty();
+    const prettyAddress = Helper.createAddress(acc.address).pretty();
     const err = ref(false);
     const accountName = ref(acc.name);
     const accountNameDisplay = ref(acc.name);
@@ -135,7 +145,10 @@ export default {
     const showPasswdError = ref(false);
     const walletPasswd = ref("");
     const walletPasswdSwap = ref("");
+    const walletPasswdWalletPaper  = ref("");
     const showPwSwap = ref(false);
+    const showWalletPaperPw = ref(false);
+    const showSavePaperWallet = ref(false);
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
@@ -208,12 +221,53 @@ export default {
 
     const verifyWalletPwSwap = () => {
       if (walletPasswdSwap.value == "") {
-        err.value = "Please insert wallet password to show Private Key";
+        err.value = "Please insert wallet password to swap";
         showPwSwap.value = false;
       } else {
         err.value = "";
       }
     };
+
+    const verifyWalletPwWalletPaper = () => {
+      if (walletPasswdWalletPaper.value == "") {
+        err.value = "Please insert wallet password to save paper wallet";
+        showWalletPaperPw.value = false;
+      } else{
+        if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPasswdWalletPaper.value)) {
+          // pw is correct
+          showSavePaperWallet.value = true;
+          // walletPasswdWalletPaper.value = false;
+        } else {
+          err.value = "Wallet password is incorrect";
+        }
+      }
+    };
+
+    const generateQR = (url, size = 2, margin = 0) => {
+      const qr = qrcode(10, 'H');
+      qr.addData(url);
+      qr.make();
+      return qr.createDataURL(size, margin);
+    }
+
+    const saveWalletPaper = () => {
+      const doc = new jsPDF({
+        unit: 'px'
+      });
+      doc.addImage(pdfWalletPaperImg, 'JPEG', 120, 60, 205, 132);
+
+      // QR Code Address
+      const passwordInstance = WalletUtils.createPassword(walletPasswdWalletPaper.value);
+      const walletPrivateKey = WalletUtils.decryptPrivateKey(passwordInstance,acc.encrypted,acc.iv);
+      let privateKey = walletPrivateKey.toUpperCase();
+      doc.addImage(generateQR(privateKey, 1, 0), 151.5, 105);
+
+      // Addres number
+      doc.setFontSize(8);
+      doc.setTextColor('#000000');
+      doc.text(prettyAddress, 146, 164, { maxWidth: 132 });
+      doc.save('Your_Paper_Wallet');
+    }
 
     return {
       err,
@@ -235,7 +289,12 @@ export default {
       copy,
       privateKey,
       hidePanel,
-      pettyaddress
+      prettyAddress,
+      showWalletPaperPw,
+      showSavePaperWallet,
+      walletPasswdWalletPaper,
+      verifyWalletPwWalletPaper,
+      saveWalletPaper,
     };
   }
 };
