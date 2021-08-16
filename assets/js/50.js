@@ -1,25 +1,24 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([[50],{
 
-/***/ "./src/assets/img/icon-prx-xpx-blue.svg":
-/*!**********************************************!*\
-  !*** ./src/assets/img/icon-prx-xpx-blue.svg ***!
-  \**********************************************/
+/***/ "./src/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg":
+/*!***************************************************************************************************!*\
+  !*** ./src/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg ***!
+  \***************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/icon-prx-xpx-blue.026c6b2b.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/icon-prx-xpx-blue.svg?");
+eval("module.exports = __webpack_require__.p + \"assets/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.73ce2a7d.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg?");
 
 /***/ }),
 
-/***/ "./src/util/assetsUtils.ts":
-/*!*********************************!*\
-  !*** ./src/util/assetsUtils.ts ***!
-  \*********************************/
-/*! exports provided: AssetsUtils */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ "./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg":
+/*!****************************************************************************************************!*\
+  !*** ./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg ***!
+  \****************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"AssetsUtils\", function() { return AssetsUtils; });\n/* harmony import */ var tsjs_xpx_chain_sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tsjs-xpx-chain-sdk */ \"./node_modules/tsjs-xpx-chain-sdk/dist/index.js\");\n/* harmony import */ var tsjs_xpx_chain_sdk__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(tsjs_xpx_chain_sdk__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _state_walletState__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../state/walletState */ \"./src/state/walletState.ts\");\n/* harmony import */ var _state_networkState__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../state/networkState */ \"./src/state/networkState.ts\");\n/* harmony import */ var _util_buildTransactions__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../util/buildTransactions */ \"./src/util/buildTransactions.ts\");\n/* harmony import */ var _typeHelper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./typeHelper */ \"./src/util/typeHelper.ts\");\n\n// import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';\n\n\n\n\nvar AssetsUtils = /** @class */ (function () {\n    function AssetsUtils() {\n    }\n    AssetsUtils.getCosignerList = function (address) {\n        var account = _state_walletState__WEBPACK_IMPORTED_MODULE_1__[\"walletState\"].currentLoggedInWallet.accounts.find(function (account) { return account.address == address; });\n        var cosigners = account.multisigInfo.find(function (multi) { return multi.level == 1; });\n        if (cosigners != undefined) {\n            var cosignAddress = cosigners.getCosignaturiesAddress(_state_networkState__WEBPACK_IMPORTED_MODULE_2__[\"networkState\"].currentNetworkProfile.network.type);\n            var cosignList_1 = [];\n            if (cosignAddress.length > 0) {\n                cosignAddress.forEach(function (cosign) {\n                    var cosignAcc = _state_walletState__WEBPACK_IMPORTED_MODULE_1__[\"walletState\"].currentLoggedInWallet.accounts.find(function (account) { return account.address === cosign; });\n                    if (!cosignAcc) {\n                        cosignList_1.push({\n                            name: cosignAcc.name,\n                            address: cosignAcc.address,\n                            balance: cosignAcc.balance,\n                        });\n                    }\n                });\n            }\n            return { list: cosignList_1 };\n        }\n        else {\n            return { list: [] };\n        }\n    };\n    AssetsUtils.getMosaicDefinitionTransactionFee = function (networkType, generationHash, owner, supplyMutable, transferable, divisibility, duration) {\n        var buildTransactions = new _util_buildTransactions__WEBPACK_IMPORTED_MODULE_3__[\"BuildTransactions\"](networkType, generationHash);\n        // owner: PublicAccount, supplyMutable: boolean, transferable: boolean, divisibility: number, duration?: UInt64\n        var registerMosaicTransaction = buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, tsjs_xpx_chain_sdk__WEBPACK_IMPORTED_MODULE_0__[\"UInt64\"].fromUint(duration));\n        return registerMosaicTransaction.maxFee.compact();\n    };\n    AssetsUtils.getMosaicSupplyChangeTransactionFee = function (networkType, generationHash, owner, mosaicId, changeType, delta) {\n        var buildTransactions = new _util_buildTransactions__WEBPACK_IMPORTED_MODULE_3__[\"BuildTransactions\"](networkType, generationHash);\n        var supplyChangeType;\n        supplyChangeType = (changeType == 1) ? tsjs_xpx_chain_sdk__WEBPACK_IMPORTED_MODULE_0__[\"MosaicSupplyType\"].Increase : tsjs_xpx_chain_sdk__WEBPACK_IMPORTED_MODULE_0__[\"MosaicSupplyType\"].Decrease;\n        var mosaicSupplyChangeTransaction = buildTransactions.buildMosaicSupplyChange(mosaicId, supplyChangeType, delta);\n        return mosaicSupplyChangeTransaction.maxFee.compact();\n    };\n    AssetsUtils.getOwnedAssets = function (address) {\n        var assetSelection = [];\n        var account = _state_walletState__WEBPACK_IMPORTED_MODULE_1__[\"walletState\"].currentLoggedInWallet.accounts.find(function (account) { return account.address === address; });\n        var filterAsset = account.assets.filter(function (asset) { return asset.owner === account.publicKey; });\n        if (filterAsset.length > 0) {\n            filterAsset.forEach(function (asset) {\n                assetSelection.push({\n                    label: asset.idHex + ' > ' + _typeHelper__WEBPACK_IMPORTED_MODULE_4__[\"Helper\"].amountFormatterSimple(asset.amount, asset.divisibility),\n                    value: asset.idHex,\n                });\n            });\n        }\n        return assetSelection;\n    };\n    return AssetsUtils;\n}());\n\n\n\n//# sourceURL=webpack:///./src/util/assetsUtils.ts?");
+eval("module.exports = __webpack_require__.p + \"assets/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.541d4c2b.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg?");
 
 /***/ })
 
