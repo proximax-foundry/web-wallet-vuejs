@@ -64,7 +64,7 @@ import { networkState } from '@/state/networkState';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { walletState } from '@/state/walletState';
 import {WalletUtils} from '@/util/walletUtils';
-import { NamespacesUtils } from '@/util/namespacesUtils';
+import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 
 export default {
   name: 'ViewServicesNodes',
@@ -98,9 +98,10 @@ export default {
       if(e != networkState.selectedAPIEndpoint){
         showSelectTitle.value = true;
         NetworkStateUtils.updateChainNode(e);
-
+        WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
         WalletUtils.getTotalBalanceWithCurrentNetwork();
-        NamespacesUtils.updateAccountsNamespaces(walletState.currentLoggedInWallet.accounts);
+        ListenerStateUtils.reset();
+        // NamespacesUtils.updateAccountsNamespaces(walletState.currentLoggedInWallet.accounts);
         toast.add({severity:'success', summary: 'Services', detail: 'Node updated', group: 'br', life: 5000});
       }
     };
