@@ -58,13 +58,12 @@
 </template>
 <script>
 import Multiselect from '@vueform/multiselect';
-import { computed, ref } from "vue";
+import { computed, getCurrentInstance, ref } from "vue";
 import { useToast } from "primevue/usetoast";
 import { networkState } from '@/state/networkState';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { walletState } from '@/state/walletState';
 import {WalletUtils} from '@/util/walletUtils';
-import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 
 export default {
   name: 'ViewServicesNodes',
@@ -75,6 +74,8 @@ export default {
 
   setup() {
     const toast = useToast();
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showSelectTitle = ref(false);
     const borderColor = ref('border border-gray-300');
     const placeholder = ref('Node list');
@@ -94,14 +95,14 @@ export default {
     const currentNode = computed(() =>  NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint))
     const blockHeight = computed(() => networkState.currentNetworkProfileConfig.chainHeight);
 
-    const makeNodeSelection = (e) => {
-      if(e != networkState.selectedAPIEndpoint){
+    const makeNodeSelection = (endpoint) => {
+      if(endpoint != networkState.selectedAPIEndpoint){
         showSelectTitle.value = true;
-        NetworkStateUtils.updateChainNode(e);
+        NetworkStateUtils.updateChainNode(endpoint);
         WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
         WalletUtils.getTotalBalanceWithCurrentNetwork();
-        ListenerStateUtils.reset();
-        // NamespacesUtils.updateAccountsNamespaces(walletState.currentLoggedInWallet.accounts);
+        emitter.emit('listener:reconnect');
+        emitter.emit('listener:setEndpoint', NetworkStateUtils.buildAPIEndpointURL(endpoint));
         toast.add({severity:'success', summary: 'Services', detail: 'Node updated', group: 'br', life: 5000});
       }
     };
