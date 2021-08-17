@@ -182,15 +182,12 @@ export default {
     ));
 
     const isMultiSig = (address) => {
-      let allAccounts = [];
-      if(walletState.currentLoggedInWallet.others){
-        allAccounts = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
-      } else{
-        allAccounts = walletState.currentLoggedInWallet.accounts;
-      }
-      const account = allAccounts.find((account) => account.address == address);
+      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
+      const other = walletState.currentLoggedInWallet.others.find((account) => account.address == address);
       let isMulti = false;
-      if(account.getDirectParentMultisig().length>0){
+      const accountDirectParent = account?account.getDirectParentMultisig():[];
+      const otherDirectParent = other?other.getDirectParentMultisig():[];
+      if((accountDirectParent.length + otherDirectParent.length) > 0){
         isMulti = true;
       }
       return isMulti;
@@ -255,7 +252,9 @@ export default {
     const assetIdString = ref('');
 
     const changeAsset = (assetId) => {
-      const selectedAsset = walletState.currentLoggedInWallet.accounts.find((account) => account.address === selectedAccAdd.value).assets.find((asset) => asset.idHex === assetId);
+      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === selectedAccAdd.value)
+      const other = walletState.currentLoggedInWallet.others.find((account) => account.address === selectedAccAdd.value)
+      const selectedAsset = account?account.assets.find((asset) => asset.idHex === assetId):other.assets.find((asset) => asset.idHex === assetId);
       assetSupply.value =Helper.amountFormatterSimple(selectedAsset.supply, selectedAsset.divisibility);
       if(selectedAsset.duration){
         let numDaysleft = Math.ceil(selectedAsset.duration/(24 * 60 * 4));

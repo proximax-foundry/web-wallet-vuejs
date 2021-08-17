@@ -216,7 +216,10 @@ export class NamespacesUtils {
     let registerRootNamespaceTransaction = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
     const account = NamespacesUtils.getSenderAccount(selectedAddress, walletPassword);
 
-    const multisigPublicKey = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress).publicKey;
+    const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
+    const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
+    const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
+
     const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, networkType);
     const innerTxn = [registerRootNamespaceTransaction.toAggregate(multisigPublicAccount)];
     const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
@@ -237,7 +240,10 @@ export class NamespacesUtils {
     let registerSubNamespaceTransaction = NamespacesUtils.subNamespaceTransaction(networkType, generationHash, rootNamespace, subNamespace);
     const account = NamespacesUtils.getSenderAccount(selectedAddress, walletPassword);
 
-    const multisigPublicKey = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress).publicKey;
+    const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
+    const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
+    const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
+
     const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, networkType);
     const innerTxn = [registerSubNamespaceTransaction.toAggregate(multisigPublicAccount)];
     const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
@@ -265,7 +271,10 @@ export class NamespacesUtils {
     let extendNamespaceTx = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
     const account = NamespacesUtils.getSenderAccount(selectedAddress, walletPassword);
 
-    const multisigPublicKey = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress).publicKey;
+    const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
+    const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
+    const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
+
     const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, networkType);
     const innerTxn = [extendNamespaceTx.toAggregate(multisigPublicAccount)];
     const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
