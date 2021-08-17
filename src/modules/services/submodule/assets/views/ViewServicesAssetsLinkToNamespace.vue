@@ -159,7 +159,13 @@ export default {
     ));
 
     const isMultiSig = (address) => {
-      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
+      let allAccounts = [];
+      if(walletState.currentLoggedInWallet.others){
+        allAccounts = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+      } else{
+        allAccounts = walletState.currentLoggedInWallet.accounts;
+      }
+      const account = allAccounts.find((account) => account.address == address);
       let isMulti = false;
       if(account.getDirectParentMultisig().length>0){
         isMulti = true;
@@ -175,7 +181,19 @@ export default {
     const showNoBalance = ref(false);
     const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
 
-    const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
+    const accounts = computed( () => {
+      if(walletState.currentLoggedInWallet){
+        if(walletState.currentLoggedInWallet.others){
+          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+          return concatOther;
+        } else{
+          return walletState.currentLoggedInWallet.accounts;
+        }
+      } else{
+        return [];
+      }
+    });
+
     const moreThanOneAccount = computed(()=> (walletState.currentLoggedInWallet.accounts.length > 1)?true:false);
 
     const transactionFee = ref('0.000000');
@@ -226,7 +244,7 @@ export default {
     };
 
     const linkNamespace = () => {
-      console.log('Link namespace method here');
+      // console.log('Link namespace method here');
       let assetId;
       if(selectAction.value=='link'){
         assetId = selectAsset.value;

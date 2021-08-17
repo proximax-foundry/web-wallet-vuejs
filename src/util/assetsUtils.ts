@@ -99,9 +99,19 @@ export class AssetsUtils {
   static getOwnedAssets = (address: string) => {
     const assetSelection: Array<assetSelectionInterface> = [];
     const account = walletState.currentLoggedInWallet.accounts.find(account => account.address === address);
-    const filterAsset = account.assets.filter((asset) => asset.owner === account.publicKey);
-    if(filterAsset.length > 0){
-      filterAsset.forEach((asset) => {
+    const other = walletState.currentLoggedInWallet.others.find(account => account.address === address);
+    const filterAccountAsset = account?account.assets.filter((asset) => asset.owner === account.publicKey):[];
+    const filterOtherAsset = other?other.assets.filter((asset) => asset.owner === account.publicKey):[];
+    if(filterAccountAsset.length > 0){
+      filterAccountAsset.forEach((asset) => {
+        assetSelection.push({
+          label: asset.idHex + ' > ' + Helper.amountFormatterSimple(asset.amount, asset.divisibility),
+          value: asset.idHex,
+        });
+      });
+    }
+    if(filterOtherAsset.length > 0){
+      filterOtherAsset.forEach((asset) => {
         assetSelection.push({
           label: asset.idHex + ' > ' + Helper.amountFormatterSimple(asset.amount, asset.divisibility),
           value: asset.idHex,
@@ -113,10 +123,21 @@ export class AssetsUtils {
 
   static getOwnedAssetsPermutable = (address: string) => {
     const assetSelection: Array<assetSelectionInterface> = [];
-    const account = walletState.currentLoggedInWallet.accounts.find(account => account.address === address );
-    const filterAsset = account.assets.filter(asset => (asset.owner === account.publicKey && asset.supplyMutable === true));
-    if(filterAsset.length > 0){
-      filterAsset.forEach((asset) => {
+    const account = walletState.currentLoggedInWallet.accounts.find(account => account.address === address);
+    const other = walletState.currentLoggedInWallet.others.find(account => account.address === address);
+    const filterAccountAsset = account?account.assets.filter(asset => (asset.owner === account.publicKey && asset.supplyMutable === true)):[];
+    const filterOtherAsset = other?other.assets.filter(asset => (asset.owner === account.publicKey && asset.supplyMutable === true)):[];
+    if(filterAccountAsset.length > 0){
+      filterAccountAsset.forEach((asset) => {
+        assetSelection.push({
+          label: asset.idHex + ' > ' + Helper.amountFormatterSimple(asset.amount, asset.divisibility),
+          value: asset.idHex,
+        });
+      });
+    }
+
+    if(filterOtherAsset.length > 0){
+      filterOtherAsset.forEach((asset) => {
         assetSelection.push({
           label: asset.idHex + ' > ' + Helper.amountFormatterSimple(asset.amount, asset.divisibility),
           value: asset.idHex,
@@ -128,10 +149,12 @@ export class AssetsUtils {
 
   static getCosignerList(address: string){
     const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
-    let multiSig = account.getDirectParentMultisig();
-    if(multiSig.length>0){
+    const other = walletState.currentLoggedInWallet.others.find((account) => account.address == address);
+    let multiSig = account?account.getDirectParentMultisig():[];
+    let multiSigOther = other?other.getDirectParentMultisig():[];
+    if(multiSig.length > 0 || multiSigOther.length > 0){
       const cosigner = walletState.currentLoggedInWallet.accounts.filter(account => {
-        if(multiSig.indexOf(account.publicKey) >= 0 ){
+        if(multiSig.indexOf(account.publicKey) >= 0 || multiSigOther.indexOf(account.publicKey) >= 0){
           return true;
         }
       });

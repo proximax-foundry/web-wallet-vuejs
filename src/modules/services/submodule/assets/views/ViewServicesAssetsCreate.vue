@@ -184,9 +184,15 @@ export default {
     ));
 
     const isMultiSig = (address) => {
-      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
+      let allAccounts = [];
+      if(walletState.currentLoggedInWallet.others){
+        allAccounts = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+      } else{
+        allAccounts = walletState.currentLoggedInWallet.accounts;
+      }
+      const account = allAccounts.find((account) => account.address == address);
       let isMulti = false;
-      if(account.getDirectParentMultisig().length > 0){
+      if(account.getDirectParentMultisig().length>0){
         isMulti = true;
       }
       return isMulti;
@@ -226,12 +232,19 @@ export default {
       durationCheckDisabled.value = false;
     }
 
-    const accounts = computed( () =>{
-      if(!walletState.currentLoggedInWallet){
+    const accounts = computed( () => {
+      if(walletState.currentLoggedInWallet){
+        if(walletState.currentLoggedInWallet.others){
+          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+          return concatOther;
+        } else{
+          return walletState.currentLoggedInWallet.accounts;
+        }
+      } else{
         return [];
       }
-      return walletState.currentLoggedInWallet.accounts;
     });
+
     const moreThanOneAccount = computed(()=>{
       return accounts.value.length > 1;
     });
