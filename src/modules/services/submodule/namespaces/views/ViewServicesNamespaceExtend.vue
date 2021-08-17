@@ -185,8 +185,11 @@ export default {
 
     const isMultiSig = (address) => {
       const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
+      const other = walletState.currentLoggedInWallet.others.find((account) => account.address == address);
       let isMulti = false;
-      if(account.getDirectParentMultisig().length>0){
+      const accountDirectParent = account?account.getDirectParentMultisig():[];
+      const otherDirectParent = other?other.getDirectParentMultisig():[];
+      if((accountDirectParent.length + otherDirectParent.length) > 0){
         isMulti = true;
       }
       return isMulti;
@@ -216,9 +219,16 @@ export default {
     }
 
     const accounts = computed( () =>{
-      if(!walletState.currentLoggedInWallet)
+      if(walletState.currentLoggedInWallet){
+        if(walletState.currentLoggedInWallet.others){
+          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+          return concatOther;
+        } else{
+          return walletState.currentLoggedInWallet.accounts;
+        }
+      } else{
         return [];
-      return walletState.currentLoggedInWallet.accounts
+      }
     });
     const moreThanOneAccount = computed(()=> {
       return accounts.value.length > 1;
@@ -247,7 +257,11 @@ export default {
       showDuration.value = true;
       transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
       transactionFeeExact.value = Helper.convertToExact(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
-      const namespaceInstance = walletState.currentLoggedInWallet.accounts.find((account) => account.address == selectedAccAdd.value).namespaces.find(namespace => namespace.name === namespaceNameSelected);
+
+      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == selectedAccAdd.value);
+      const other = walletState.currentLoggedInWallet.others.find((account) => account.address == selectedAccAdd.value);
+      const namespaceInstance = account?account.namespaces.find(namespace => namespace.name === namespaceNameSelected):other.namespaces.find(namespace => namespace.name === namespaceNameSelected);
+
       startBlock.value = namespaceInstance.startHeight;
       endBlock.value = namespaceInstance.endHeight;
     };
@@ -269,6 +283,7 @@ export default {
       endBlock.value = '0';
     };
 
+    let isMaxDuration = false;
     watch(duration, (n) => {
       if(n > 365){
         duration.value = '365';
@@ -276,12 +291,16 @@ export default {
         let remainingBlock = endBlock.value - block.value;
         let availableDays = 0;
         numDaysleft.value = Math.ceil(remainingBlock/(24 * 60 * 4));
-        if((n + numDaysleft.value) > 365){
+        if((parseInt(n) + numDaysleft.value) > 365){
           availableDays = 365 - numDaysleft.value;
           duration.value = availableDays.toString();
           showMaxDaysLabel.value = true;
+          isMaxDuration = true;
         }else{
-          showMaxDaysLabel.value = false;
+          if(!isMaxDuration){
+            showMaxDaysLabel.value = false;
+          }
+          isMaxDuration = false;
         }
       }
     });
@@ -374,6 +393,7 @@ export default {
       isMultiSig,
       isMultiSigBool,
       rentalFee,
+      lockFundTxFee,
       lockFundCurrency,
       currencyName,
       lockFundTxFeeCurrency,
