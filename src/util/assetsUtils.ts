@@ -304,7 +304,6 @@ export class AssetsUtils {
         let label:string = '';
         let namespaceName:string = '';
         if(namespaceElement.linkedId != ''){
-          isDisabled = (linkOption=='link'?true:false);
           let linkName:string;
           let linkLabel:string;
 
@@ -312,10 +311,12 @@ export class AssetsUtils {
             case 1:
               linkName = "Asset";
               linkLabel = namespaceElement.linkedId;
+              isDisabled = (linkOption=='link'?true:false);
               break;
             case 2:
               linkName = "Address";
               linkLabel = Helper.createAddress(namespaceElement.linkedId).pretty()
+              isDisabled = true;
               break;
             default:
               break;
