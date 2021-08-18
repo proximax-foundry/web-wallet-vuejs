@@ -74,6 +74,7 @@ export interface TransferList{
   sendingType: string;
   toType: string;
   value: string;
+  valueDisplay: string;
   amount?: number
 }
 

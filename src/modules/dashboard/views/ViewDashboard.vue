@@ -74,12 +74,15 @@
   </div>
 
   <div>
-    <DashboardDataTable :showBlock="true" :showAction="true" @confirmedFilter="doFilterConfirmed" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed"></DashboardDataTable>
+    <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed"></DashboardDataTable>
     <DashboardDataTable :showBlock="false" :showAction="false" :transactions="unconfirmedTransactions" v-if="isShowUnconfirmed"></DashboardDataTable>
     <PartialDashboardDataTable :transactions="partialTransactions.sort((a, b) => b.deadline - a.deadline)" v-if="isShowPartial"></PartialDashboardDataTable>
     <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
     <AddressQRModal :showModal="showAddressQRModal" :qrDataString="addressQR" :addressName="selectedAccountName" />
   </div>
+  <Dialog header="Transaction Message:" v-model:visible="displayMessageModal" :style="{width: '50vw'}" :modal="true">
+      <p class="p-m-0">{{ txMessage }}</p>
+  </Dialog>
 </template>
 
 <script>
@@ -106,6 +109,7 @@ import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { DashboardService } from '../service/dashboardService';
 import * as qrcode from 'qrcode-generator';
 // import { dashboardUtils } from '@/util/dashboardUtils';
+import Dialog from 'primevue/dialog';
 
 export default defineComponent({
   name: 'ViewDashboard',
@@ -115,7 +119,8 @@ export default defineComponent({
     SetAccountDefaultModal,
     AddressQRModal,
     AssetDataTable,
-    NamespaceDataTable
+    NamespaceDataTable,
+    Dialog
   },
 
   setup(){
@@ -128,6 +133,13 @@ export default defineComponent({
 
     const displayConvertion = ref(false);
     const openSetDefaultModal = ref(false);
+    const displayMessageModal = ref(false);
+    const txMessage = ref("");
+
+    const openMessageModal = (message)=>{
+      txMessage.value = message;
+      displayMessageModal.value = true;
+    }
 
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
@@ -281,7 +293,9 @@ export default defineComponent({
         finalConfirmedTransaction.value = newValue;
     });
 
-    DashboardService.fetchConfirmedTransactions(walletState.currentLoggedInWallet).then((txs)=>{
+    let dashboardService = new DashboardService(walletState.currentLoggedInWallet);
+
+    dashboardService.fetchConfirmedTransactions().then((txs)=>{
       //console.log(txs);
       allConfirmedTransactions.value = txs;
 
@@ -676,7 +690,10 @@ export default defineComponent({
       showAddressQRModal,
       namespaceAssetView,
       selectedAccountNamespaces,
-      selectedAccountAssets
+      selectedAccountAssets,
+      openMessageModal,
+      displayMessageModal,
+      txMessage
     };
   }
 });
@@ -684,6 +701,14 @@ export default defineComponent({
 <style lang="scss" scoped>
 .address_div{
     top: 4px;
+}
+
+.p-dialog .p-dialog-header{
+  padding: 1rem 1.25rem;
+}
+
+.p-dialog .p-dialog-header .p-dialog-title{
+  font-size: 1rem;
 }
 
 #address{
