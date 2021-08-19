@@ -9,6 +9,7 @@ import { SiriusGiftRoutes } from '@/modules/services/submodule/siriusGift/routin
 import { ExplorerRoutes } from '@/modules/services/submodule/explorer/routingExplorer';
 import { NodesRoutes } from '@/modules/services/submodule/nodes/routingNodes';
 import { AssetsRoutes } from '@/modules/services/submodule/assets/routingAssets';
+import { AggregateTransactions } from '@/modules/services/submodule/aggregateTransactions/routingAggregateTransactions';
 import { RouteRecordRaw } from 'vue-router'
 
 export const ServiceRoutes: RouteRecordRaw[] = [
@@ -31,4 +32,5 @@ export const ServiceRoutes: RouteRecordRaw[] = [
   ...ExplorerRoutes,
   ...NodesRoutes,
   ...AssetsRoutes,
+  ...AggregateTransactions,
 ];
