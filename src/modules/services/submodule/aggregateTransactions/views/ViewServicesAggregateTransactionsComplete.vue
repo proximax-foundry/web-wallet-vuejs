@@ -92,6 +92,7 @@ export default {
     const walletName = walletState.currentLoggedInWallet.name
     const cosignerBalanceInsufficient = ref(false);
     const cosignerAddress = ref('');
+    const recipient = ref('');
 
     const disableCreate = computed(() => !(
       false
@@ -180,6 +181,7 @@ export default {
     });
 
     return {
+      recipient,
       disabledClear,
       accounts,
       moreThanOneAccount,
