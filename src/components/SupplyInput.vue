@@ -3,7 +3,7 @@
     <div class="text-outline bg-white" :class="borderColor">
       <div class="text-icon-outline text-icon">
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
-        <div class="ml-6 text-xs mt-1 text-gray-500 text-left" style="width: 200px">{{ (title!=undefined)?title:'Send' }}</div>
+        <div class="ml-6 text-xs mt-1 text-gray-500 text-left" style="width: 260px">{{ (title!=undefined)?title:'Send' }}</div>
       </div>
       <input v-if="decimal==0" v-maska="'#*'" :disabled="disabled" class="text-placeholder bg-white text-right" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
       <input v-else-if="decimal==1" v-maska="'#*.#'" :disabled="disabled"  class="text-placeholder bg-white text-right" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
