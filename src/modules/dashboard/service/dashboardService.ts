@@ -1383,8 +1383,10 @@ export class DashboardService {
                 type: type
             });
 
-            let modifyTip = DashboardService.createPublicKeyTip(cosignerPublicKey)
-            modifyTip.displayValue = `${type} ${cosignerPublicKey}`;
+            let modify = type === "Add" ? "+" : "-";
+            let cosignerDisplay = this.publickKeyConvertToName(cosignerPublicKey);
+
+            let modifyTip = DashboardService.createPublicKeyStringTip(cosignerPublicKey, cosignerDisplay, modify)
 
             modificationsTip.push(modifyTip);
         }
@@ -1950,6 +1952,13 @@ export class DashboardService {
         return name === address ? Address.createFromRawAddress(name).pretty() : name;
     }
 
+    publickKeyConvertToName(publicKey: string){
+        let address = PublicAccount.createFromPublicKey(publicKey, localNetworkType.value).address.plain();
+        let name = this.wallet.convertAddressToName(address);
+        
+        return name === address ? publicKey : name;
+    }
+
     static createNamespaceIDTip(displayValue: string, value?: string): DashboardTip{
         let newTip = new DashboardTip(TipType.NAMESPACE_ID);
         newTip.displayValue = displayValue;
@@ -1984,6 +1993,14 @@ export class DashboardService {
         let newTip = new DashboardTip(TipType.PUBLIC_KEY);
         newTip.displayValue = displayValue;
         newTip.value = value ? value: displayValue;
+        return newTip;
+    }
+    static createPublicKeyStringTip(publicKey:string, displayValue: string, pre: string): DashboardTip{
+        let newTip = new DashboardTip(TipType.PUBLIC_KEY_STRING);
+        newTip.displayValue = pre;
+        newTip.displayValue2 = displayValue;
+        newTip.value = pre;
+        newTip.value2 = publicKey;
         return newTip;
     }
 

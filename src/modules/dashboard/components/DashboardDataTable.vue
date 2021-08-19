@@ -54,6 +54,11 @@
                       {{ displayTip.displayValue }}
                     </a>
                   </span>
+                  <span :title="displayTip.value2" v-else-if="displayTip.tipType === 'publicKeyString'" class="text-xs font-semibold bg-gray-300 inline-block truncate-lg px-2 py-2 rounded">
+                    <a :href="getPublicKeyExplorerUrl(displayTip.value2)" target="_blank">
+                      {{ displayTip.displayValue }} {{ displayTip.displayValue2 }}
+                    </a>
+                  </span>
                   <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'empty'" class="border border-black text-xs font-semibold bg-gray-50 inline-block px-2 py-2 rounded">
                     {{ displayTip.displayValue }}
                   </span>
@@ -224,6 +229,11 @@
                     {{ displayTip.displayValue }}
                   </a>
                 </span>
+                <span :title="displayTip.value2" v-else-if="displayTip.tipType === 'publicKeyString'" class="text-xs font-semibold bg-gray-300 inline-block truncate-lg px-2 py-2 rounded">
+                    <a :href="getPublicKeyExplorerUrl(displayTip.value2)" target="_blank">
+                      {{ displayTip.displayValue }} {{ displayTip.displayValue2 }}
+                    </a>
+                  </span>
                 <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'empty'" class="border border-black text-xs font-semibold bg-gray-50 inline-block px-2 py-2 rounded">
                   {{ displayTip.displayValue }}
                 </span>

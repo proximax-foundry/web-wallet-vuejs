@@ -31,6 +31,7 @@ export enum TipType{
   NAMESPACE_STR = "namespace",
   NAMESPACE_ID = "namespaceId",
   PUBLIC_KEY = "publicKey",
+  PUBLIC_KEY_STRING = "publicKeyString",
   TO_RIGHT_ARROW = "toRightArrow",
   MESSAGE = "message",
   TX_HASH = "txHash",
