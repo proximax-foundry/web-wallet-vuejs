@@ -141,6 +141,8 @@ export class DashboardService {
                 signer: transactions[i].signer.publicKey,
                 size: transactions[i].size,
                 signerAddress: transactions[i].signer.address.plain(),
+                signerAddressPretty: transactions[i].signer.address.pretty(),
+                signerDisplay: this.addressConvertToName(transactions[i].signer.address.plain()),
                 hash: transactions[i].transactionInfo.hash,
                 block: transactions[i].transactionInfo.height.compact(),
                 formattedDeadline: Helper.convertDisplayDateTimeFormat(transactions[i].deadline.value.toString()),
@@ -398,7 +400,38 @@ export class DashboardService {
         // fromToRowTip.rowTips.push(DashboardService.createToRightArrowTip());
         fromToRowTip.rowTips.push(transferTip);                
         
+        
+
+        let messageTypeString: string;
+        let messageType: string;
+
+        if (transferTx.message.payload.length === 0) {
+            messageTypeString = "Empty message";
+            messageType = "empty";
+        }
+        else if (transferTx.message.type === 0) {
+            messageTypeString = "Plain message";
+            messageType = "plain";
+        } else if (transferTx.message.type === 1) {
+            messageTypeString = "Encrypted Message";
+            messageType = "encrypted ";
+        }
+        else {
+            messageTypeString = "Other";
+            messageType = "other";
+        }
+
+        let messageTip = new DashboardTip(TipType.MESSAGE);
+        messageTip.displayValue = messageTypeString;
+        messageTip.valueType = messageType;
+        messageTip.value = transferTx.message.payload;
+
+        fromToRowTip.rowTips.push(messageTip);
+
         transactionDetails.displayTips.push(fromToRowTip);
+
+        let newRowTip = new RowDashboardTip();
+        newRowTip.rowTips.push(messageTip);
 
         let transfer: TransferList[] = [];
 
@@ -460,25 +493,6 @@ export class DashboardService {
             }
         }
 
-        let messageTypeString: string;
-        let messageType: string;
-
-        if (transferTx.message.payload.length === 0) {
-            messageTypeString = "Empty message";
-            messageType = "empty";
-        }
-        else if (transferTx.message.type === 0) {
-            messageTypeString = "Plain message";
-            messageType = "plain";
-        } else if (transferTx.message.type === 1) {
-            messageTypeString = "Encrypted Message";
-            messageType = "encrypted ";
-        }
-        else {
-            messageTypeString = "Other";
-            messageType = "other";
-        }
-
         let data = {
             transferList: transfer,
             messageTypeString: messageTypeString,
@@ -486,14 +500,7 @@ export class DashboardService {
             messagePayload: transferTx.message.payload,
         };
 
-        let messageTip = new DashboardTip(TipType.MESSAGE);
-        messageTip.displayValue = messageTypeString;
-        messageTip.valueType = messageType;
-        messageTip.value = data.messagePayload;
-
-        let newRowTip = new RowDashboardTip();
-        newRowTip.rowTips.push(messageTip);
-        transactionDetails.displayTips.push(newRowTip);
+        //transactionDetails.displayTips.push(newRowTip);
 
         transactionDetails.extractedData = data;
 

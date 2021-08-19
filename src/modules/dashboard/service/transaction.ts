@@ -7,7 +7,9 @@ export interface DashboardTransaction{
   inOutType?: string,
   signerName?: string | null,
   signerAddress: string,
+  signerAddressPretty: string,
   signer: string, // publicKey
+  signerDisplay: string,
   hash?: string | null,
   timestamp?: number | null,
   block?: number | null,

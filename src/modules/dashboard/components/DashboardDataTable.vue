@@ -18,6 +18,15 @@
           <span class="font-semibold">{{data.typeName}}</span>
         </template>
       </Column>
+      <Column field="signer" header="Signer" headerStyle="width:110px">
+        <template #body="{data}">
+          <span :title="data.signer" class="font-semibold truncate inline-block">
+            <a :href="getPublicKeyExplorerUrl(data.signer)" target="_blank">
+              {{ data.signerDisplay === data.signerAddressPretty ? data.signer : data.signerDisplay }}
+            </a>
+          </span>
+        </template>
+      </Column>
       <Column header="Details" >
         <template #body="{data}">
           <div v-if="data.innerTransactions">
@@ -28,7 +37,7 @@
                   <span v-if="displayTip.tipType === 'toRightArrow'">
                     <font-awesome-icon icon="arrow-right" class="text-gray-600 inline-block"></font-awesome-icon>
                   </span>
-                  <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'asset'" class="text-xs font-semibold bg-yellow-300 inline-block truncate px-2 py-2 rounded">
+                  <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'asset'" class="text-xs font-semibold bg-yellow-300 inline-block px-2 py-2 rounded">
                     <a :href="getAssetExplorerUrl(displayTip.displayValue)" target="_blank">
                       <img class="inline-block" src="@/modules/account/img/icon-mosaics-green-16h.svg" width="15" />
                       {{ displayTip.displayValue }}
@@ -45,24 +54,24 @@
                       {{ displayTip.displayValue }}
                     </a>
                   </span>
-                  <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'empty'" class="border border-black text-xs font-semibold bg-gray-50 inline-block truncate px-2 py-2 rounded">
+                  <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'empty'" class="border border-black text-xs font-semibold bg-gray-50 inline-block px-2 py-2 rounded">
                     {{ displayTip.displayValue }}
                   </span>
-                  <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'other'" class="text-xs font-semibold bg-green-50 inline-block truncate px-2 py-2 rounded">
+                  <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'other'" class="text-xs font-semibold bg-green-50 inline-block px-2 py-2 rounded">
                     {{ displayTip.displayValue }}
                   </span>
-                  <span :title="displayTip.value" v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'plain'" class="text-xs font-semibold bg-blue-200 inline-block truncate px-2 py-2 rounded">
+                  <span :title="displayTip.value" v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'plain'" class="text-xs font-semibold bg-blue-200 inline-block px-2 py-2 rounded">
                     <a @click="$emit('openMessage', displayTip.value)">
                       {{ displayTip.displayValue }}
                     </a>
                   </span>
-                  <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'encrypted'" class="text-xs font-semibold bg-blue-200 inline-block truncate px-2 py-2 rounded">
+                  <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'encrypted'" class="text-xs font-semibold bg-blue-200 inline-block px-2 py-2 rounded">
                     {{ displayTip.displayValue }}
                   </span>
-                  <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'absoluteAmount'" class="text-xs font-semibold bg-yellow-50 inline-block truncate px-2 py-2 rounded">
+                  <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'absoluteAmount'" class="text-xs font-semibold bg-yellow-50 inline-block px-2 py-2 rounded">
                     {{ displayTip.displayValue }}
                   </span>
-                  <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'exactAmount'" class="text-xs font-semibold bg-green-300 inline-block truncate px-2 py-2 rounded">
+                  <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'exactAmount'" class="text-xs font-semibold bg-green-300 inline-block px-2 py-2 rounded">
                     {{ displayTip.displayValue }} 
                   </span>
                   <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'address'" class="text-xs font-semibold bg-green-300 inline-block truncate px-2 py-2 rounded">
@@ -71,20 +80,20 @@
                     </a>
                   </span>
                   <span v-else-if="displayTip.tipType === 'transfer'" class="text-xs font-semibold bg-green-300 inline-block px-2 py-2 rounded">
-                    <a :href="getAddressExplorerUrl(displayTip.value)" target="_blank">
+                    <a :href="getAddressExplorerUrl(displayTip.value)" :title="displayTip.value" class="truncate-lg inline-block" target="_blank">
                       {{ displayTip.displayValue }}
                     </a>
                     <font-awesome-icon icon="arrow-right" class="ml-2 mr-2 text-gray-600 inline-block"></font-awesome-icon>
-                    <a :href="getAddressExplorerUrl(displayTip.value2)" target="_blank">
+                    <a :href="getAddressExplorerUrl(displayTip.value2)" :title="displayTip.value2" class="truncate-lg inline-block" target="_blank">
                       {{ displayTip.displayValue2 }}
                     </a>
                   </span>
                   <span v-else-if="displayTip.tipType === 'transferUnresolved'" class="text-xs font-semibold bg-green-300 inline-block px-2 py-2 rounded">
-                    <a :href="getAddressExplorerUrl(displayTip.value)" target="_blank">
+                    <a :href="getAddressExplorerUrl(displayTip.value)" :title="displayTip.value" class="truncate-lg inline-block" target="_blank">
                       {{ displayTip.displayValue }}
                     </a>
                     <font-awesome-icon icon="arrow-right" class="ml-2 mr-2 text-gray-600 inline-block"></font-awesome-icon>
-                    <a :href="getAddressExplorerUrl(displayTip.value2)" target="_blank">
+                    <a :href="getAddressExplorerUrl(displayTip.value2)" :title="displayTip.value2" class="truncate-lg inline-block" target="_blank">
                       {{ displayTip.displayValue2 }}
                     </a>
                   </span>
@@ -185,7 +194,7 @@
                       {{ displayTip.displayValue }} {{ displayTip.displayValue2 }}
                     </a>
                   </span>
-                  <span :title="displayTip.displayValue" v-else class="text-xs font-semibold bg-blue-300 inline-block truncate px-2 py-2 rounded">
+                  <span :title="displayTip.displayValue" v-else class="text-xs font-semibold bg-blue-300 inline-block px-2 py-2 rounded">
                     {{ displayTip.displayValue }}
                   </span>
                 </span>
@@ -198,13 +207,13 @@
                 <span v-if="displayTip.tipType === 'toRightArrow'">
                   <font-awesome-icon icon="arrow-right" class="text-gray-600 inline-block"></font-awesome-icon>
                 </span>
-                <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'asset'" class="text-xs font-semibold bg-yellow-300 inline-block truncate px-2 py-2 rounded">
+                <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'asset'" class="text-xs font-semibold bg-yellow-300 inline-block px-2 py-2 rounded">
                   <a :href="getAssetExplorerUrl(displayTip.displayValue)" target="_blank">
                     <img class="inline-block" src="@/modules/account/img/icon-mosaics-green-16h.svg" width="15" />
                     {{ displayTip.displayValue }}
                   </a>
                 </span>
-                <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'namespace' || displayTip.tipType === 'namespaceId'" class="text-xs font-semibold bg-yellow-400 inline-block truncate px-2 py-2 rounded">
+                <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'namespace' || displayTip.tipType === 'namespaceId'" class="text-xs font-semibold bg-yellow-400 inline-block px-2 py-2 rounded">
                   <a :href="getNamespaceExplorerUrl(displayTip.displayValue)" target="_blank">
                     <font-awesome-icon icon="at" class="text-gray-600 inline-block"></font-awesome-icon>
                     {{ displayTip.displayValue }}
@@ -215,24 +224,24 @@
                     {{ displayTip.displayValue }}
                   </a>
                 </span>
-                <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'empty'" class="border border-black text-xs font-semibold bg-gray-50 inline-block truncate px-2 py-2 rounded">
+                <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'empty'" class="border border-black text-xs font-semibold bg-gray-50 inline-block px-2 py-2 rounded">
                   {{ displayTip.displayValue }}
                 </span>
-                <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'other'" class="text-xs font-semibold bg-green-50 inline-block truncate px-2 py-2 rounded">
+                <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'other'" class="text-xs font-semibold bg-green-50 inline-block px-2 py-2 rounded">
                   {{ displayTip.displayValue }}
                 </span>
-                <span :title="displayTip.value" v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'plain'" class="text-xs font-semibold bg-blue-200 inline-block truncate px-2 py-2 rounded">
+                <span :title="displayTip.value" v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'plain'" class="text-xs font-semibold bg-blue-200 inline-block px-2 py-2 rounded">
                   <a @click="$emit('openMessage', displayTip.value)">
                     {{ displayTip.displayValue }}
                   </a>
                 </span>
-                <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'encrypted'" class="text-xs font-semibold bg-blue-200 inline-block truncate px-2 py-2 rounded">
+                <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'encrypted'" class="text-xs font-semibold bg-blue-200 inline-block px-2 py-2 rounded">
                   {{ displayTip.displayValue }}
                 </span>
-                <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'absoluteAmount'" class="text-xs font-semibold bg-yellow-50 inline-block truncate px-2 py-2 rounded">
+                <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'absoluteAmount'" class="text-xs font-semibold bg-yellow-50 inline-block px-2 py-2 rounded">
                   {{ displayTip.displayValue }}
                 </span>
-                <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'exactAmount'" class="text-xs font-semibold bg-green-300 inline-block truncate px-2 py-2 rounded">
+                <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'exactAmount'" class="text-xs font-semibold bg-green-300 inline-block px-2 py-2 rounded">
                   {{ displayTip.displayValue }} 
                 </span>
                 <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'address'" class="text-xs font-semibold bg-green-300 inline-block truncate px-2 py-2 rounded">
@@ -241,20 +250,20 @@
                   </a>
                 </span>
                 <span v-else-if="displayTip.tipType === 'transfer'" class="text-xs font-semibold bg-green-300 inline-block px-2 py-2 rounded">
-                  <a :href="getAddressExplorerUrl(displayTip.value)" target="_blank">
+                  <a :href="getAddressExplorerUrl(displayTip.value)" :title="displayTip.value" class="truncate-lg inline-block" target="_blank">
                     {{ displayTip.displayValue }}
                   </a>
                   <font-awesome-icon icon="arrow-right" class="ml-2 mr-2 text-gray-600 inline-block"></font-awesome-icon>
-                  <a :href="getAddressExplorerUrl(displayTip.value2)" target="_blank">
+                  <a :href="getAddressExplorerUrl(displayTip.value2)" :title="displayTip.value2" class="truncate-lg inline-block" target="_blank">
                     {{ displayTip.displayValue2 }}
                   </a>
                 </span>
                 <span v-else-if="displayTip.tipType === 'transferUnresolved'" class="text-xs font-semibold bg-green-300 inline-block px-2 py-2 rounded">
-                  <a :href="getAddressExplorerUrl(displayTip.value)" target="_blank">
+                  <a :href="getAddressExplorerUrl(displayTip.value)" :title="displayTip.value" class="truncate-lg inline-block" target="_blank">
                     {{ displayTip.displayValue }}
                   </a>
                   <font-awesome-icon icon="arrow-right" class="ml-2 mr-2 text-gray-600 inline-block"></font-awesome-icon>
-                  <a :href="getAddressExplorerUrl(displayTip.value2)" target="_blank">
+                  <a :href="getAddressExplorerUrl(displayTip.value2)" :title="displayTip.value2" class="truncate-lg inline-block" target="_blank">
                     {{ displayTip.displayValue2 }}
                   </a>
                 </span>
@@ -274,7 +283,7 @@
                     {{ displayTip.displayValue }} {{ displayTip.displayValue2 }}
                   </a>
                 </span>
-                <span v-else-if="displayTip.tipType === 'hash'" class="text-xs font-semibold truncate bg-blue-200 inline-block px-2 py-2 rounded">
+                <span v-else-if="displayTip.tipType === 'hash'" class="text-xs font-semibold truncate-lg bg-blue-200 inline-block px-2 py-2 rounded">
                   <a :href="getHashExplorerUrl(displayTip.value)" target="_blank">
                     {{ displayTip.displayValue }}
                   </a>
@@ -355,7 +364,7 @@
                     {{ displayTip.displayValue }} {{ displayTip.displayValue2 }}
                   </a>
                 </span>
-                <span :title="displayTip.displayValue" v-else class="text-xs font-semibold bg-blue-300 inline-block truncate px-2 py-2 rounded">
+                <span :title="displayTip.displayValue" v-else class="text-xs font-semibold bg-blue-300 inline-block px-2 py-2 rounded">
                   {{ displayTip.displayValue }}
                 </span>
               </span>
@@ -592,7 +601,14 @@ export default{
 }
 
 .truncate {
-  max-width: 300px;
+  max-width: 10em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.truncate-lg {
+  max-width: 15em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
