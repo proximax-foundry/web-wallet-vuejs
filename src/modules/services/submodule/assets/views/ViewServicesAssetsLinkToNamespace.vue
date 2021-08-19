@@ -160,8 +160,11 @@ export default {
 
     const isMultiSig = (address) => {
       const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
+      const other = walletState.currentLoggedInWallet.others.find((account) => account.address == address);
       let isMulti = false;
-      if(account.getDirectParentMultisig().length>0){
+      const accountDirectParent = account?account.getDirectParentMultisig():[];
+      const otherDirectParent = other?other.getDirectParentMultisig():[];
+      if((accountDirectParent.length + otherDirectParent.length) > 0){
         isMulti = true;
       }
       return isMulti;
@@ -175,8 +178,20 @@ export default {
     const showNoBalance = ref(false);
     const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
 
-    const accounts = computed( () => walletState.currentLoggedInWallet.accounts);
-    const moreThanOneAccount = computed(()=> (walletState.currentLoggedInWallet.accounts.length > 1)?true:false);
+    const accounts = computed( () => {
+      if(walletState.currentLoggedInWallet){
+        if(walletState.currentLoggedInWallet.others){
+          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+          return concatOther;
+        } else{
+          return walletState.currentLoggedInWallet.accounts;
+        }
+      } else{
+        return [];
+      }
+    });
+
+    const moreThanOneAccount = computed(()=> (accounts.value.length > 1)?true:false);
 
     const transactionFee = ref('0.000000');
     const transactionFeeExact = ref(0);
@@ -226,12 +241,14 @@ export default {
     };
 
     const linkNamespace = () => {
-      console.log('Link namespace method here');
+      // console.log('Link namespace method here');
       let assetId;
       if(selectAction.value=='link'){
         assetId = selectAsset.value;
       }else{
-        assetId = walletState.currentLoggedInWallet.accounts.find(account => account.address === selectedAccAdd.value).namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
+        const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == selectedAccAdd.value);
+        const other = walletState.currentLoggedInWallet.others.find((account) => account.address == selectedAccAdd.value);
+        assetId = account?account.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId:other.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
       }
       if(cosigner.value){
         AssetsUtils.linkedNamespaceToAssetMultiSig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value, selectedAccAdd.value);
