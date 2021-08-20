@@ -12,6 +12,10 @@
             </div>
           </div>
         </router-link>
+        <div class="contract_address_label">
+          <div>Contract address:</div>
+          <div>{{ ethContractAddress }}</div>
+        </div>
       </div>
       <div class="md:col-span-1">
         <router-link :to="{ name: 'ViewServicesMainnetSwapBscOptions' }">
@@ -21,14 +25,21 @@
             </div>
           </div>
         </router-link>
+        <div class="contract_address_label">
+          <div>Contract address:</div>
+          <div>{{ bscContractAddress }}</div>
+        </div>
       </div>
     </div>
     <!-- </div> -->
   </div>
 </template>
 <script>
-import { getCurrentInstance, ref } from "vue";
+import { ref } from "vue";
 // import ServiceTile from '@/modules/services/components/ServiceTile.vue';
+import { SwapUtils } from '@/util/swapUtils';
+import { networkState } from '@/state/networkState';
+import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 
 export default {
   name: 'ViewServices',
@@ -37,6 +48,31 @@ export default {
   },
 
   setup() {
+    const ethContractAddress = ref('');
+    const bscContractAddress = ref('');
+
+    let swapData = new ChainSwapConfig(networkState.chainNetworkName);
+    swapData.init();
+
+    (async() => {
+      try {
+        const fetchETHService = await SwapUtils.fetchETHServiceInfo(swapData.swap_SERVICE_URL);
+        const fetchBSCService = await SwapUtils.fetchBSCServiceInfo(swapData.swap_SERVICE_URL);
+        if(fetchETHService.status==200 && fetchBSCService.status==200){
+          ethContractAddress.value = fetchETHService.data.ethInfo.scAddress;
+          bscContractAddress.value = fetchBSCService.data.bscInfo.scAddress;
+        }else{
+          serviceErr.value = 'Swapping service is temporary not available. Please try again later';
+        }
+      } catch (error) {
+        serviceErr.value = 'Swapping service is temporary not available. Please try again later';
+      }
+    })()
+
+    return {
+      ethContractAddress,
+      bscContractAddress,
+    };
     // const internalInstance = getCurrentInstance();
     // const emitter = internalInstance.appContext.config.globalProperties.emitter;
     // const currentMenu = ref('');
@@ -175,6 +211,13 @@ export default {
   transition: all 0.5s;
   > div{
     @apply text-white;
+  }
+}
+
+.contract_address_label{
+  @apply text-xs text-gray-300 hover:text-gray-700 lg:text-tsm duration-500 transition-all;
+  div:nth-child(2){
+    @apply text-tsm lg:text-sm mt-1;
   }
 }
 </style>
