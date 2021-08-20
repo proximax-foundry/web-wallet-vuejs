@@ -5,7 +5,7 @@
       <div class="text-center p-5">
         <img src="@/modules/services/img/icon-swap-process-color-80h-proximax-sirius-wallet.svg" class="w-20 md:w-28 lg:w-18 inline-block mb-3">
         <div class="font-bold text-sm md:text-md lg:text-lg">Swap</div>
-        <div class="text-xs sm:text-tsm md:text-tmd lg:text-tlg">Swap from eXPX or bXPX to Sirius.</div>
+        <div class="mt-3 text-xs sm:text-tsm md:text-tmd lg:text-tlg text-gray-500">Swap between<br><span class="text-gray-900">Ethereum (ERC20)</span> / <span class="text-gray-900">Binance Smart Chain (BEP20)</span> <br>and<br><span class="text-gray-900">ProximaX Sirius Chain</span></div>
       </div>
     </div>
     <div class="inline-block mt-5">

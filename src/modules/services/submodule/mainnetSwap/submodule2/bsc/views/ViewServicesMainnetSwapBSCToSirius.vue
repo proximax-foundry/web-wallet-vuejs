@@ -53,7 +53,7 @@
       <p class="font-bold text-tsm text-left">To: Sirius Address</p>
       <SelectSiriusAccountInputPlugin v-model="siriusAddress" icon="card-alt" :showError="showSiriusAddressErr" errorMessage="Sirius Address required" :options="siriusAddressOption" :disabled="disableSiriusAddress" />
       <p class="font-bold text-tsm text-left mb-1">Amount</p>
-      <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" title="bXPX (Minimum 51 bXPX required)" placeholder="bXPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':((parseFloat(amount) <= defaultXPXTxFee)?'Insufficient amount':'Insufficient token balance.')" :decimal="6" />
+      <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" title="BEP20 XPX (minimum = 51)" placeholder="BEP20 XPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':((parseFloat(amount) <= defaultXPXTxFee)?'Insufficient amount':'Insufficient token balance.')" :decimal="6" />
       <div class="my-2 float-right text-xs text-blue-primary">* The fees for the transaction on Sirius Chain will be deducted from this amount, which is 50 XPX</div>
       <div class="mt-10">
         <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
@@ -62,7 +62,7 @@
     </div>
     <div v-if="currentPage==2">
       <div class="text-lg my-7">
-        <div class="font-bold text-left text-xs md:text-sm lg:text-lg" :class="step1?'text-gray-700':'text-gray-300'">Step 1: Send bXPX to the escrow account</div>
+        <div class="font-bold text-left text-xs md:text-sm lg:text-lg" :class="step1?'text-gray-700':'text-gray-300'">Step 1: Send BEP20 XPX to the escrow account</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
             <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
