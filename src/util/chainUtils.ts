@@ -184,6 +184,15 @@ export class ChainUtils{
       return transactions;
     }
 
+    static async getAccountUnconfirmedTransactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<Transaction[]>{
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let transactions = await chainRESTCall.accountAPI.unconfirmedTransactions(publicAccount, queryParams);
+
+      return transactions;
+    }
+
     static announceTransaction(signedTx: SignedTransaction): void{
 
       if(signedTx.type === TransactionType.AGGREGATE_BONDED){

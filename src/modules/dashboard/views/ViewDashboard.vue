@@ -35,10 +35,10 @@
               <div class="text-xs font-bold flex items-center">{{ filteredConfirmedTransactions.length }}</div>
             </div>
           </div>
-          <div class="rounded-full bg-blue-300 text-white w-24 h-15 px-2 py-1 mr-3 inline-block" :class="unconfirmedTransactions.length>0?'cursor-pointer':''" @click="clickUnconfirmedTransaction()">
+          <div class="rounded-full bg-blue-300 text-white w-24 h-15 px-2 py-1 mr-3 inline-block" :class="filteredUnconfirmedTransactions.length>0?'cursor-pointer':''" @click="clickUnconfirmedTransaction()">
             <div class="flex justify-between">
               <div class="rounded-full text-white border pt-1 pl-1 w-6 h-6 relative"><font-awesome-icon icon="exclamation" class="w-4 h-3 absolute" style="left: 8px; top: 6px;"></font-awesome-icon></div>
-              <div class="text-xs font-bold flex items-center">{{ unconfirmedTransactions.length }}</div>
+              <div class="text-xs font-bold flex items-center">{{ filteredUnconfirmedTransactions.length }}</div>
             </div>
           </div>
           <div class="rounded-full bg-yellow-500 text-white w-24 h-15 px-2 py-1 inline-block" :class="partialTransactions.length>0?'cursor-pointer':''" @click="clickPartialTransactions()">
@@ -75,7 +75,7 @@
 
   <div>
     <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed"></DashboardDataTable>
-    <DashboardDataTable :showBlock="false" :showAction="false" :transactions="unconfirmedTransactions" v-if="isShowUnconfirmed"></DashboardDataTable>
+    <DashboardDataTable :showBlock="false" :showAction="false" @openMessage="openMessageModal" :transactions="filteredUnconfirmedTransactions" v-if="isShowUnconfirmed"></DashboardDataTable>
     <PartialDashboardDataTable :transactions="partialTransactions.sort((a, b) => b.deadline - a.deadline)" v-if="isShowPartial"></PartialDashboardDataTable>
     <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
     <AddressQRModal :showModal="showAddressQRModal" :qrDataString="addressQR" :addressName="selectedAccountName" />
@@ -110,6 +110,7 @@ import { DashboardService } from '../service/dashboardService';
 import * as qrcode from 'qrcode-generator';
 // import { dashboardUtils } from '@/util/dashboardUtils';
 import Dialog from 'primevue/dialog';
+import { listenerState } from '@/state/listenerState';
 
 export default defineComponent({
   name: 'ViewDashboard',
@@ -289,6 +290,17 @@ export default defineComponent({
       return allConfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
     })
 
+    let filteredUnconfirmedTransactions = computed(()=>{
+
+      if(allUnconfirmedTransactions.value.length === 0){
+        return [];
+      }
+
+      let addressToSearch = [selectedAccountAddressPlain.value];
+      addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
+      return allUnconfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
+    })
+
     watch(filteredConfirmedTransactions, (newValue) => {
         finalConfirmedTransaction.value = newValue;
     });
@@ -305,8 +317,56 @@ export default defineComponent({
       //finalConfirmedTransaction.value = filteredConfirmedTransactions.value;
     });
 
-    let filteredUnconfirmedTransactions = computed(()=> []);
+    dashboardService.fetchUnconfirmedTransactions().then((txs)=>{
+      allUnconfirmedTransactions.value = txs;
+
+      let addressToSearch = [selectedAccountAddressPlain.value];
+      addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
+      filteredUnconfirmedTransactions.value = allUnconfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
+    });
+
     let filteredPartialTransactions = computed(()=> []);
+
+    const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
+    const unconfirmedTxLength = computed(()=> listenerState.unconfirmedTxLength);
+    const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
+    const cosignatureAddedTxLength = computed(()=> listenerState.cosignatureAddedTxLength);
+    const allConfirmedTransactionsHash = computed(()=> listenerState.allConfirmedTransactionsHash);
+
+    watch(confirmedTxLength.value, (newValue, oldValue) => {
+      if(newValue > oldValue ){
+        let newConfirmTxNum = newValue - oldValue;
+        let newTxs = [];
+        let confirmedTxHashes = listenerState.allConfirmedTransactionsHash.slice(-newConfirmTxNum);
+
+        txHashLoop:
+        for(let i = 0; i < confirmedTxHashes.length; ++i){
+
+          if(allConfirmedTransactions.value.find((tx)=> tx.hash === confirmedTxHashes[i])){
+            continue;
+          }
+
+          addressTransactionLoop:
+          for(let x = 0; x < listenerState.confirmedTransactions.length; ++x){
+            let foundTx = listenerState.confirmedTransactions[i].confirmedTransactions.find((tx)=> confirmedTxHashes.includes(tx.transactionInfo.hash));
+          
+            if(foundTx){
+              newTxs.push(foundTx);
+              break addressTransactionLoop;
+            }
+          }
+        }
+
+        if(newTxs.length > 0){
+          let formatedTxs = dashboardService.formatConfirmedWithTransaction(newTxs);
+          allConfirmedTransactions.value = formatedTxs.concat(allConfirmedTransactions.value);
+        }
+      }
+    });
+
+    watch(unconfirmedTxLength.value, (newValue, oldValue) => {
+      finalConfirmedTransaction.value = newValue;
+    });
 
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
@@ -344,7 +404,7 @@ export default defineComponent({
     };
 
     const clickUnconfirmedTransaction = () => {
-      if(unconfirmedTransactions.value.length > 0){
+      if(filteredUnconfirmedTransactions.value.length > 0){
         isShowUnconfirmed.value = true;
         isShowConfirmed.value = false;
         isShowPartial.value = false;
@@ -684,6 +744,7 @@ export default defineComponent({
       isDefault,
       isMultisig,
       finalConfirmedTransaction,
+      filteredUnconfirmedTransactions,
       doFilterConfirmed,
       filteredConfirmedTransactions,
       addressQR,

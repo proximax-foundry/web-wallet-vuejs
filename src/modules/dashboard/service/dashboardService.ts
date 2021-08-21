@@ -100,6 +100,24 @@ export class DashboardService {
             index === array.findIndex(foundTx => foundTx.transactionInfo.id === transaction.transactionInfo.id));
     }
 
+    async getAllAccountUnconfirmedTransactions(): Promise<Transaction[]>{
+
+        let transactions: Transaction[] = [];
+
+        for(let i = 0; i < this.wallet.accounts.length; ++i){
+            let accountTransactions = await DashboardService.getAccountAllUnconfirmedTransactions(this.wallet.accounts[i]);
+            transactions = transactions.concat(accountTransactions);
+        }
+
+        for(let i = 0; i < this.wallet.others.length; ++i){
+            let accountTransactions = await DashboardService.getAccountAllUnconfirmedTransactions(this.wallet.others[i]);
+            transactions = transactions.concat(accountTransactions);
+        }
+
+        return transactions.filter((transaction, index, array) =>
+            index === array.findIndex(foundTx => foundTx.transactionInfo.id === transaction.transactionInfo.id));
+    }
+
     static async getAccountAllTransactions(account: myAccount): Promise<Transaction[]>{
 
         let publicAccount = Helper.createPublicAccount(account.publicKey, localNetworkType.value);
@@ -121,11 +139,50 @@ export class DashboardService {
         return fullTransaction;
     }
 
+    static async getAccountAllUnconfirmedTransactions(account: myAccount): Promise<Transaction[]>{
+
+        let publicAccount = Helper.createPublicAccount(account.publicKey, localNetworkType.value);
+
+        let fullTransaction: Transaction[] = [];
+        let queryParams = Helper.createQueryParams(100);
+
+        let transactions: Transaction[] = await TransactionUtils.getUnconfirmedTransactions(publicAccount, queryParams);
+        
+        fullTransaction = fullTransaction.concat(transactions);
+
+        while (transactions.length === 100) {
+            let lastId = transactions[transactions.length - 1].transactionInfo.id;
+            queryParams = Helper.createQueryParams(100, lastId);
+            transactions = await TransactionUtils.getTransactions(publicAccount, queryParams);
+            fullTransaction = fullTransaction.concat(transactions);
+        }
+
+        return fullTransaction;
+    }
+
     async fetchConfirmedTransactions(){
 
         let transactions = await this.getAllAccountTransactions();
 
         let dashboardTransactions: DashboardTransaction[] = this.formatConfirmedTransaction(transactions);
+        return dashboardTransactions;
+    }
+
+    async fetchUnconfirmedTransactions(){
+
+        let transactions = await this.getAllAccountUnconfirmedTransactions();
+
+        let dashboardTransactions: DashboardTransaction[] = this.formatUnconfirmedTransaction(transactions);
+        return dashboardTransactions;
+    }
+
+    formatConfirmedWithTransaction(txs: Transaction[]){
+        let dashboardTransactions: DashboardTransaction[] = this.formatConfirmedTransaction(txs);
+        return dashboardTransactions;
+    }
+
+    formatUnconfirmedWithTransaction(txs: Transaction[]){
+        let dashboardTransactions: DashboardTransaction[] = this.formatUnconfirmedTransaction(txs);
         return dashboardTransactions;
     }
 
@@ -158,6 +215,220 @@ export class DashboardService {
             };
 
             dashboardTransaction.searchString.push(dashboardTransaction.block.toString());
+            dashboardTransaction.searchString.push(dashboardTransaction.hash);
+
+            // dashboardTransaction.relatedAddress.push(transactions[i].signer.address.plain());
+            // dashboardTransaction.relatedPublicKey.push(dashboardTransaction.signer);
+
+            let tempData: DashboardInnerTransaction;
+            let totalLength: number = 1;
+
+            switch (transactions[i].type) {
+                case TransactionType.ADDRESS_ALIAS:
+                    let addressAliasTx = transactions[i] as AddressAliasTransaction;
+                    tempData = this.extractTransactionAddressAlias(addressAliasTx);
+                    break;
+                case TransactionType.ADD_EXCHANGE_OFFER:
+                    let addExchangeOfferTx = transactions[i] as AddExchangeOfferTransaction;
+                    tempData = this.extractTransactionAddExchangeOffer(addExchangeOfferTx);
+                    break;
+                case TransactionType.AGGREGATE_BONDED:
+                    let aggregateBondedTx = transactions[i] as AggregateTransaction;
+
+                    totalLength = aggregateBondedTx.innerTransactions.length;
+                    dashboardTransaction.innerTransactions = [];
+                    tempData = {
+                        signer: aggregateBondedTx.signer.publicKey,
+                        relatedAsset: [],
+                        relatedNamespace: [],
+                        relatedPublicKey: [],
+                        signerAddress: aggregateBondedTx.signer.address.plain(),
+                        relatedAddress: [],
+                        typeName: TransactionUtils.getTransactionTypeName(aggregateBondedTx.type),
+                        searchString: [],
+                        extractedData: {},
+                        displayList: new Map<string, string>(),
+                        transferList: [],
+                        displayTips: []
+                    };
+
+                    for (let y = 0; y < totalLength; ++y) {
+                        let tempInnerData = this.extractInnerTransaction(aggregateBondedTx.innerTransactions[y]);
+
+                        tempData.relatedAddress = tempData.relatedAddress.concat(tempInnerData.relatedAddress);
+                        tempData.relatedAsset = tempData.relatedAsset.concat(tempInnerData.relatedAsset);
+                        tempData.relatedNamespace = tempData.relatedNamespace.concat(tempInnerData.relatedNamespace);
+                        tempData.relatedPublicKey = tempData.relatedPublicKey.concat(tempInnerData.relatedPublicKey);
+                        tempData.searchString = tempData.searchString.concat(tempInnerData.searchString);
+
+                        dashboardTransaction.innerTransactions.push(tempInnerData);
+                    }
+                    break;
+                case TransactionType.AGGREGATE_COMPLETE:
+                    let aggregateCompleteTx = transactions[i] as AggregateTransaction;
+
+                    totalLength = aggregateCompleteTx.innerTransactions.length;
+                    dashboardTransaction.innerTransactions = [];
+
+                    tempData = {
+                        signer: aggregateCompleteTx.signer.publicKey,
+                        relatedAsset: [],
+                        relatedNamespace: [],
+                        relatedPublicKey: [],
+                        signerAddress: aggregateCompleteTx.signer.address.plain(),
+                        relatedAddress: [],
+                        typeName: TransactionUtils.getTransactionTypeName(aggregateCompleteTx.type),
+                        searchString: [],
+                        extractedData: {},
+                        displayList: new Map<string, string>(),
+                        displayTips: []
+                    };
+
+                    for (let x = 0; x < totalLength; ++x) {
+                        let tempInnerData = this.extractInnerTransaction(aggregateCompleteTx.innerTransactions[x]);
+
+                        tempData.relatedAddress = tempData.relatedAddress.concat(tempInnerData.relatedAddress);
+                        tempData.relatedAsset = tempData.relatedAsset.concat(tempInnerData.relatedAsset);
+                        tempData.relatedNamespace = tempData.relatedNamespace.concat(tempInnerData.relatedNamespace);
+                        tempData.relatedPublicKey = tempData.relatedPublicKey.concat(tempInnerData.relatedPublicKey);
+                        tempData.searchString = tempData.searchString.concat(tempInnerData.searchString);
+
+                        dashboardTransaction.innerTransactions.push(tempInnerData);
+                    }
+                    break;
+                case TransactionType.CHAIN_CONFIGURE:
+                    let chainConfigureTx = transactions[i] as ChainConfigTransaction;
+                    tempData = this.extractTransactionChainConfig(chainConfigureTx);
+                    break;
+                case TransactionType.CHAIN_UPGRADE:
+                    let chainUpgradeTx = transactions[i] as ChainUpgradeTransaction;
+                    tempData = this.extractTransactionChainUpgrade(chainUpgradeTx);
+                    break;
+                case TransactionType.EXCHANGE_OFFER:
+                    let exchangeOfferTx = transactions[i] as ExchangeOfferTransaction;
+                    tempData = this.extractTransactionExchangeOffer(exchangeOfferTx);
+                    break;
+                case TransactionType.REMOVE_EXCHANGE_OFFER:
+                    let removeExchangeOfferTx = transactions[i] as RemoveExchangeOfferTransaction;
+                    tempData = this.extractTransactionRemoveExchangeOffer(removeExchangeOfferTx);
+                    break;
+                case TransactionType.LINK_ACCOUNT:
+                    let accountLinkTx = transactions[i] as AccountLinkTransaction;
+                    tempData = this.extractTransactionAccountLink(accountLinkTx);
+                    break;
+                case TransactionType.LOCK:
+                    let lockFundTx = transactions[i] as LockFundsTransaction;
+                    tempData = this.extractTransactionLockFunds(lockFundTx);
+                    break;
+                case TransactionType.MODIFY_ACCOUNT_METADATA:
+                    let modifyAccountMetadataTx = transactions[i] as ModifyMetadataTransaction;
+                    tempData = this.extractTransactionModifyAccountMetadata(modifyAccountMetadataTx);
+                    break;
+                case TransactionType.MODIFY_MOSAIC_METADATA:
+                    let modifyMosaicMetadataTx = transactions[i] as ModifyMetadataTransaction;
+                    tempData = this.extractTransactionModifyMosaicMetadata(modifyMosaicMetadataTx);
+                    break;
+                case TransactionType.MODIFY_NAMESPACE_METADATA:
+                    let modifyNamespaceMetadataTx = transactions[i] as ModifyMetadataTransaction;
+                    tempData = this.extractTransactionModifyNamespaceMetadata(modifyNamespaceMetadataTx);
+                    break;
+                case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS:
+                    let accAddressModifyTx = transactions[i] as AccountAddressRestrictionModificationTransaction;
+                    tempData = this.extractTransactionAccountAddressRestriction(accAddressModifyTx);
+                    break;
+                case TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC:
+                    let accMosaicModifyTx = transactions[i] as AccountMosaicRestrictionModificationTransaction;
+                    tempData = this.extractTransactionAccountMosaicRestriction(accMosaicModifyTx);
+                    break;
+                case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:
+                    let accOperationModifyTx = transactions[i] as AccountOperationRestrictionModificationTransaction;
+                    tempData = this.extractTransactionAccountOperationRestriction(accOperationModifyTx);
+                    break;
+                case TransactionType.MODIFY_MULTISIG_ACCOUNT:
+                    let modifyMultisigAccountTx = transactions[i] as ModifyMultisigAccountTransaction;
+                    tempData = this.extractTransactionModifyMultisigAccount(modifyMultisigAccountTx);
+                    break;
+                case TransactionType.MOSAIC_ALIAS:
+                    let mosaicAliasTx = transactions[i] as MosaicAliasTransaction;
+                    tempData = this.extractTransactionMosaicAlias(mosaicAliasTx);
+                    break;
+                case TransactionType.MOSAIC_DEFINITION:
+                    let mosaicDefinitionTx = transactions[i] as MosaicDefinitionTransaction;
+                    tempData = this.extractTransactionMosaicDefinition(mosaicDefinitionTx);
+                    break;
+                case TransactionType.MOSAIC_SUPPLY_CHANGE:
+                    let mosaicSupplyTx = transactions[i] as MosaicSupplyChangeTransaction;
+                    tempData = this.extractTransactionMosaicSupplyChange(mosaicSupplyTx);
+                    break;
+                case TransactionType.REGISTER_NAMESPACE:
+                    let registerNamespaceTx = transactions[i] as RegisterNamespaceTransaction;
+                    tempData = this.extractTransactionRegisterNamespace(registerNamespaceTx);
+                    break;
+                case TransactionType.SECRET_LOCK:
+                    let secretLockTx = transactions[i] as SecretLockTransaction;
+                    tempData = this.extractTransactionSecretLock(secretLockTx);
+                    break;
+                case TransactionType.SECRET_PROOF:
+                    let secretProofTx = transactions[i] as SecretProofTransaction;
+                    tempData = this.extractTransactionSecretProof(secretProofTx);
+                    break;
+                case TransactionType.TRANSFER:
+                    let transferTx = transactions[i] as TransferTransaction;
+                    tempData = this.extractTransactionTransfer(transferTx);
+                    break;
+                default:
+                    break;
+            }
+
+            dashboardTransaction.relatedAddress = dashboardTransaction.relatedAddress.concat(tempData.relatedAddress);
+            dashboardTransaction.relatedAsset = dashboardTransaction.relatedAsset.concat(tempData.relatedAsset);
+            dashboardTransaction.relatedNamespace = dashboardTransaction.relatedNamespace.concat(tempData.relatedNamespace);
+            dashboardTransaction.relatedPublicKey = dashboardTransaction.relatedPublicKey.concat(tempData.relatedPublicKey);
+            dashboardTransaction.searchString = dashboardTransaction.searchString.concat(tempData.searchString);
+            dashboardTransaction.extractedData = tempData.extractedData;
+            dashboardTransaction.displayList = tempData.displayList;
+            dashboardTransaction.transferList = tempData.transferList ? tempData.transferList: [];
+            dashboardTransaction.displayTips = tempData.displayTips;
+
+            dashboardTransaction.relatedAddress = Array.from(new Set(dashboardTransaction.relatedAddress));
+            dashboardTransaction.relatedAsset = Array.from(new Set(dashboardTransaction.relatedAsset));
+            dashboardTransaction.relatedNamespace = Array.from(new Set(dashboardTransaction.relatedNamespace));
+            dashboardTransaction.relatedPublicKey = Array.from(new Set(dashboardTransaction.relatedPublicKey));
+            dashboardTransaction.searchString = Array.from(new Set(dashboardTransaction.searchString));
+
+            formattedTransactions.push(dashboardTransaction);
+        }
+
+        return formattedTransactions;
+    }
+
+    formatUnconfirmedTransaction(transactions: Transaction[]): DashboardTransaction[] {
+
+        let formattedTransactions: DashboardTransaction[] = [];
+
+        for (let i = 0; i < transactions.length; ++i) {
+
+            let dashboardTransaction: DashboardTransaction = {
+                id: transactions[i].transactionInfo.id,
+                typeName: TransactionUtils.getTransactionTypeName(transactions[i].type),
+                signer: transactions[i].signer.publicKey,
+                size: transactions[i].size,
+                signerAddress: transactions[i].signer.address.plain(),
+                signerAddressPretty: transactions[i].signer.address.pretty(),
+                signerDisplay: this.addressConvertToName(transactions[i].signer.address.plain()),
+                hash: transactions[i].transactionInfo.hash,
+                formattedDeadline: Helper.convertDisplayDateTimeFormat(transactions[i].deadline.value.toString()),
+                relatedAddress: [],
+                relatedAsset: [],
+                relatedNamespace: [],
+                relatedPublicKey: [],
+                searchString: [],
+                extractedData: {},
+                displayList: new Map<string, string>(),
+                transferList: [],
+                displayTips: []
+            };
+
             dashboardTransaction.searchString.push(dashboardTransaction.hash);
 
             // dashboardTransaction.relatedAddress.push(transactions[i].signer.address.plain());
