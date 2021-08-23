@@ -124,7 +124,7 @@
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">
-            {{ isInvalidSignedMeta?'Approval on MetaMask is rejected':'Waiting for confirmation in MetaMask' }}
+            {{ isInvalidSignedMeta?'Approval on MetaMask is rejected':(longWaitNotification?'Confirmation from MetaMask is taking longer than expected, please wait till next step':'Waiting for confirmation in MetaMask') }}
             <div v-if="isInvalidSignedMeta" class="mt-5">
               <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg w-24" @click="getSigned">Retry</button>
             </div>
@@ -472,6 +472,8 @@ export default {
 
     const getValidation = async (initiated) => {
       try{
+        provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+        signer = provider.getSigner();
         const Contract = new ethers.Contract(tokenAddress.value, abi, signer);
         const receipt = await Contract.transfer(
           custodian.value,
@@ -480,7 +482,8 @@ export default {
         validationHash.value = receipt.hash;
         validationLink.value = ethScanUrl + receipt.hash;
         isInvalidConfirmedMeta.value = false;
-        if(initiated){
+        let getTransaction = await provider.getTransaction(receipt.hash);
+        if(initiated && getTransaction.hash === receipt.hash){
           afterConfirmed();
         }
       }catch(err){
@@ -500,9 +503,12 @@ export default {
     };
 
     const swapServiceParam = ref('');
+    const longWaitNotification = ref(false);
 
     const getSigned = async () => {
       try{
+        provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+        signer = provider.getSigner();
         const messageSignature = await signer.signMessage(siriusAddress.value);
         messageHash.value = messageSignature;
         const data = {
@@ -514,12 +520,54 @@ export default {
           }
         };
         swapServiceParam.value = data;
-        isInvalidSignedMeta.value = false;
-        await afterSigned();
+        // let getTransactionReceipt = await provider.getTransaction(validationHash.value);
+        // console.log(getTransactionReceipt)
+        let confirmations = 0;
+        // let receipt = await provider.waitForTransaction(validationHash.value, confirmations);
+        // console.log(receipt)
+        // if(receipt.hash === validationHash.value){
+        //   isInvalidSignedMeta.value = false;
+        //   await afterSigned();
+        // }
+        // provider.getTransactionReceipt(validationHash.value).then( (test) => {
+        //   // if(receipt.hash === validationHash.value){
+        //     isInvalidSignedMeta.value = false;
+        //     // await afterSigned();
+        //     console.log(test)
+        // });
+        let longWaitTimeeOut = setTimeout(() => {
+          longWaitNotification.value = true;
+        }, 7000);
+
+        let verifyingTxn = setInterval(async() => {
+          const status = await verifyTransaction();
+          // const status = false;
+          if(status){
+            clearInterval(verifyingTxn);
+            clearTimeout(longWaitTimeeOut);
+            isInvalidSignedMeta.value = false;
+            await afterSigned();
+          }
+        }, 1000);
       }catch(err){
         isInvalidSignedMeta.value = true;
       }
     };
+
+    const verifyTransaction = async () => {
+      try{
+        let getTransactionReceipt = await provider.getTransaction(validationHash.value);
+        console.log(getTransactionReceipt)
+        if(getTransactionReceipt.blockHash != null){
+          return true;
+        }else{
+          return false;
+        }
+      }catch(err){
+        console.log(err);
+        return false;
+      }
+    }
 
     const swapServerErrIndex = ref(0);
 
@@ -538,7 +586,7 @@ export default {
           body: stringifyData, // body data type must match "Content-Type" header
         });
 
-        if(response.status == 200){
+        if(response.status == 200 || response.status == 201){
           const data = await response.json();
           isInvalidSwapService.value = false;
           transactionHash.value = data.remoteTxnHash;
@@ -547,6 +595,8 @@ export default {
           swapQr.value = SwapUtils.generateQRCode(validationLink.value);
           setTimeout( ()=> isDisabledValidate.value = false, 1000);
           swapServerErrIndex.value = 0;
+        }else if(response.status == 208){
+          console.log('208');
         }else{
           isInvalidSwapService.value = true;
           ++swapServerErrIndex.value;
@@ -614,6 +664,7 @@ export default {
       afterSigned,
       disableRetrySwap,
       retrySwapButtonText,
+      longWaitNotification,
     };
   },
 }
