@@ -291,9 +291,9 @@ export default {
         verifyChain(metaChainId, true);
       });
 
-      ethereum.on('connect', (connectInfo) => {
-        console.log(connectInfo)
-      });
+      // ethereum.on('connect', (connectInfo) => {
+      //   console.log(connectInfo)
+      // });
     }else{
       console.log('MetaMask not installed')
     }
