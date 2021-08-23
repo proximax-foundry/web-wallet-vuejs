@@ -13,8 +13,8 @@
           </div>
         </router-link>
         <div class="contract_address_label">
-          <div>Contract address:</div>
-          <div>{{ ethContractAddress }}</div>
+          <div :id="ethContractAddress" :copyValue="ethContractAddress" copySubject="Contract Address" v-if="displayCopy">Contract address:</div>
+          <div>{{ ethContractAddress }} <font-awesome-icon icon="copy" @click="copy(ethContractAddress)" class="ml-2 w-5 h-5 cursor-pointer inline-block"></font-awesome-icon></div>
         </div>
       </div>
       <div class="md:col-span-1">
@@ -26,8 +26,8 @@
           </div>
         </router-link>
         <div class="contract_address_label">
-          <div>Contract address:</div>
-          <div>{{ bscContractAddress }}</div>
+          <div :id="bscContractAddress" :copyValue="bscContractAddress" copySubject="Contract Address" v-if="displayCopy">Contract address:</div>
+          <div>{{ bscContractAddress }} <font-awesome-icon icon="copy" @click="copy(bscContractAddress)" class="ml-2 w-5 h-5 cursor-pointer inline-block"></font-awesome-icon></div>
         </div>
       </div>
     </div>
@@ -38,7 +38,9 @@
 import { ref } from "vue";
 // import ServiceTile from '@/modules/services/components/ServiceTile.vue';
 import { SwapUtils } from '@/util/swapUtils';
+import { copyToClipboard } from '@/util/functions';
 import { networkState } from '@/state/networkState';
+import { useToast } from "primevue/usetoast";
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 
 export default {
@@ -48,11 +50,21 @@ export default {
   },
 
   setup() {
+    const toast = useToast();
+    const displayCopy = ref(false);
     const ethContractAddress = ref('');
     const bscContractAddress = ref('');
 
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
+
+    const copy = (id) =>{
+      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
+      let copySubject = document.getElementById(id).getAttribute("copySubject");
+      copyToClipboard(stringToCopy);
+
+      toast.add({severity:'info', summary: copySubject, detail: 'Address copied', group: 'br', life: 3000});
+    };
 
     (async() => {
       try {
@@ -61,6 +73,7 @@ export default {
         if(fetchETHService.status==200 && fetchBSCService.status==200){
           ethContractAddress.value = fetchETHService.data.ethInfo.scAddress;
           bscContractAddress.value = fetchBSCService.data.bscInfo.scAddress;
+          displayCopy.value = true;
         }else{
           serviceErr.value = 'Swapping service is temporary not available. Please try again later';
         }
@@ -72,6 +85,8 @@ export default {
     return {
       ethContractAddress,
       bscContractAddress,
+      copy,
+      displayCopy,
     };
     // const internalInstance = getCurrentInstance();
     // const emitter = internalInstance.appContext.config.globalProperties.emitter;
