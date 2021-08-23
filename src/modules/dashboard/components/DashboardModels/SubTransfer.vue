@@ -8,70 +8,70 @@
       <div style="max-height: 200px; overflow-y: scroll;" class="break-words p-2">
         <div class="subcontent">
           <div>
-            <div class="text-green-600 font-bold" v-if="isReceived">Transaction Received&nbsp;&nbsp;<img src="@/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg" class="w-4 h-4 inline-block"></div>
-            <div class="text-red-500 font-bold" v-else>Transaction Sent&nbsp;&nbsp;<img src="@/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg" class="w-4 h-4 inline-block"></div>
+            <div class="text-green-600 font-bold" v-if="isReceived">{{$t('dashboard.transactionreceived')}}&nbsp;&nbsp;<img src="@/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg" class="w-4 h-4 inline-block"></div>
+            <div class="text-red-500 font-bold" v-else>{{$t('dashboard.transactionsent')}}&nbsp;&nbsp;<img src="@/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg" class="w-4 h-4 inline-block"></div>
           </div>
           <div>
-            <div>Type:</div>
+            <div>{{$t('dashboard.type')}}:</div>
             <div>{{ innerTransaction.type }}</div>
           </div>
           <div v-if="amount > 0">
-            <div>Amount:</div>
+            <div>{{$t('dashboard.amount')}}:</div>
             <div>{{ amount }} XPX</div>
           </div>
           <div>
-            <div>From:</div><br>
+            <div>{{$t('dashboard.from')}}:</div><br>
             <div>{{ innerTransaction.signer.address.address }}</div>
           </div>
           <div>
-            <div>To:</div><br>
+            <div>{{$t('dashboard.to')}}:</div><br>
             <div>{{ innerTransaction.recipient.address }}</div>
           </div>
           <div v-if="!innerTransaction.message.type && innerTransaction.message.payload != ''">
-            <div>Message:</div><br>
+            <div>{{$t('dashboard.message')}}:</div><br>
             <div>{{ innerTransaction.message.payload }}</div>
           </div>
           <div v-if="innerTransaction.message.type && innerTransaction.message.payload != ''">
-            <div>Encrypted Message:</div><br>
+            <div>{{$t('dashboard.encryptedmessage')}}:</div><br>
             <div v-if="isShowLogin && !isShowMessage && isReceived" class="w-full mt-2 bg-gray-100 p-3 pt-4 rounded-xl">
               <div class="error error_box mb-2 w-full" style="text-align: center" v-if="err!=''">{{ err }}</div>
               <!-- <TextInput v-if="validPublicKey" placeholder="Recipient Public Key" errorMessage="Recipient Public key required" v-model="recipientPublicKey" icon="id-card-alt" :showError="showPublicKeyErr" class="w-full" /> -->
               <PasswordInput placeholder="Enter Wallet Password" errorMessage="Password Required" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="w-full" />
               <div class="text-center w-full">
-                <button type="button" class="small-default-btn mr-3 focus:outline-none" @click="isShowLogin = !isShowLogin">Cancel</button>
-                <button type="button" class="small-default-btn disabled:opacity-50" :disabled="disableDecrypt" @click="decryptMessage()">Decrypt</button>
+                <button type="button" class="small-default-btn mr-3 focus:outline-none" @click="isShowLogin = !isShowLogin">{{$t('deletewallet.cancel')}}</button>
+                <button type="button" class="small-default-btn disabled:opacity-50" :disabled="disableDecrypt" @click="decryptMessage()">{{$t('dashboard.decrypt')}}</button>
               </div>
             </div>
-            <div class="text-center py-4 bg-gray-100 mt-1" v-if="!isShowLogin && !isShowMessage && isReceived"><button class="small-default-btn" @click="isShowLogin = !isShowLogin">Decrypt Message</button></div>
+            <div class="text-center py-4 bg-gray-100 mt-1" v-if="!isShowLogin && !isShowMessage && isReceived"><button class="small-default-btn" @click="isShowLogin = !isShowLogin">{{$t('dashboard.decryptmessage')}}</button></div>
             <div v-if="isShowMessage && isReceived" class="p-2 bg-gray-100 rounded-r-2xl">
               <div style="text-align: center; display: block; margin: 0px; font-weight: normal">{{ encryptedMessage }}</div><br>
-              <div class="text-center"><button type="button" class="small-default-btn focus:outline-none inline-block" @click="isShowLogin = !isShowLogin; isShowMessage = !isShowMessage">Hide message</button></div>
+              <div class="text-center"><button type="button" class="small-default-btn focus:outline-none inline-block" @click="isShowLogin = !isShowLogin; isShowMessage = !isShowMessage">{{$t('dashboard.hidemessage')}}</button></div>
             </div>
             <div v-if="isShowLogin && !isShowMessage && !isReceived" class="w-full mt-2 bg-gray-100 p-3 pt-4 rounded-xl">
               <div class="error error_box mb-2 w-full" style="text-align: center" v-if="err!=''">{{ err }}</div>
               <TextInput v-if="validPublicKey" placeholder="Recipient Public Key" errorMessage="Recipient Public key required" v-model="recipientPublicKey" icon="id-card-alt" :showError="showPublicKeyErr" class="w-full" />
               <PasswordInput placeholder="Enter Wallet Password" errorMessage="Password Required" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="w-full" />
               <div class="text-center w-full">
-                <button type="button" class="small-default-btn mr-3 focus:outline-none" @click="isShowLogin = !isShowLogin">Cancel</button>
-                <button type="button" class="small-default-btn disabled:opacity-50" :disabled="disableDecrypt" @click="decryptMessage()">Decrypt</button>
+                <button type="button" class="small-default-btn mr-3 focus:outline-none" @click="isShowLogin = !isShowLogin">{{$t('deletewallet.cancel')}}</button>
+                <button type="button" class="small-default-btn disabled:opacity-50" :disabled="disableDecrypt" @click="decryptMessage()">{{$t('dashboard.decrypt')}}</button>
               </div>
             </div>
-            <div class="text-center py-4 bg-gray-100 mt-1" v-if="!isShowLogin && !isShowMessage && !isReceived"><button class="small-default-btn" @click="isShowLogin = !isShowLogin">Decrypt Message</button></div>
+            <div class="text-center py-4 bg-gray-100 mt-1" v-if="!isShowLogin && !isShowMessage && !isReceived"><button class="small-default-btn" @click="isShowLogin = !isShowLogin">{{$t('dashboard.decryptmessage')}}</button></div>
             <div v-if="isShowMessage && !isReceived" class="p-2 bg-gray-100 rounded-r-2xl">
               <div style="text-align: center; display: block; margin: 0px; font-weight: normal">{{ encryptedMessage }}</div><br>
-              <div class="text-center"><button type="button" class="small-default-btn focus:outline-none inline-block" @click="isShowLogin = !isShowLogin; isShowMessage = !isShowMessage">Hide message</button></div>
+              <div class="text-center"><button type="button" class="small-default-btn focus:outline-none inline-block" @click="isShowLogin = !isShowLogin; isShowMessage = !isShowMessage">{{$t('dashboard.hidemessage')}}</button></div>
             </div>
           </div>
           <div>
-            <div>Signer Address:</div><br>
+            <div>{{$t('dashboard.signeraddress')}}:</div><br>
             <div>{{ innerTransaction.signer.address.address }}</div>
           </div>
           <div>
-            <div>Signer Public Key:</div><br>
+            <div>{{$t('dashboard.signerpublickey')}}:</div><br>
             <div>{{ innerTransaction.signer.publicKey }}</div>
           </div>
           <div>
-            <div>Signature:</div><br>
+            <div>{{$t('dashboard.signature')}}:</div><br>
             <div>{{ innerTransaction.signature }}</div>
           </div>
         </div>
@@ -86,6 +86,7 @@ import { transactions } from '@/util/transactions.js';
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { Account, Address, EncryptedMessage, PublicAccount } from "tsjs-xpx-chain-sdk";
+import {useI18n} from 'vue-i18n'
 
 export default{
   name: 'SubTransfer',
@@ -100,6 +101,7 @@ export default{
   },
 
   setup(p){
+    const {t} = useI18n();
     const appStore = inject("appStore");
     // const siriusStore = inject("siriusStore");
     const nameType = ref('');
@@ -202,7 +204,7 @@ export default{
         isShowMessage.value = true;
         encryptedMessage.value = plainMessage.payload;
       }else{
-        err.value = "Wallet password is incorrect";
+        err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
       }
     }
 

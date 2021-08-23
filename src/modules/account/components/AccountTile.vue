@@ -2,7 +2,7 @@
   <div class='p-3'>
     <div class="rounded-2xl flex justify-between py-3 border border-gray-200" :class="account.default?'bg-white':'bg-gray-100'">
       <div class="ml-5 text-left text-sm w-full">
-        <div class="font-bold mb-1">{{ account.name }} <span v-if="account.type =='MULTISIG'" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-yellow-200">Multisig</span> <span v-if="account.type =='DELEGATE'" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-yellow-200">Delegate</span> <span v-if="account.default" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-yellow-200">Default</span> <span v-if="isMultiSig" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200">Multisig</span></div>
+        <div class="font-bold mb-1">{{ accountName }} <span v-if="account.type =='DELEGATE'" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200">{{$t('services.delegate')}}</span> <span v-if="account.default" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-yellow-200">{{$t('accounts.default')}}</span> <span v-if="isMultiSig || account.type =='MULTISIG'" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200">{{$t('accounts.multisig')}}</span></div>
         <div class="flex justify-between pr-4 rounded-xl mb-4 items-center" :class="account.default?'bg-white':'bg-gray-100'">
           <div class="text-left w-full relative">
             <div class="absolute z-20 w-full h-full"></div>
@@ -26,23 +26,23 @@
             </div>
             <div :class="showMenuCall?'':'hidden'" class="absolute right-0 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div class="py-1" role="none">
-                <router-link :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Details</router-link>
+                <router-link :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">{{$t('accounts.details')}}</router-link>
                 <!-- <router-link :to="{ name: 'ViewOtherAccountDetails', params: { address: account.address }}" v-else class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Details</router-link> -->
-                <a v-if="!account.default && !otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="setAsDefaultAccount(account.address)">Make Default</a>
-                <div v-else class="block px-2 py-1 text-xs text-gray-300">Make Default</div>
-                <a v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="exportWallet()">Export</a>
-                <a v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" @click="exportWallet()">Export</a>
-                <router-link :to="{ name: 'ViewAccountDelete', params: { name: account.name}}" v-if="!account.default && !otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">Delete</router-link>
-                <div v-else class="block px-2 py-1 text-xs text-gray-300">Delete</div>
-                <router-link :to="{ name: isMultiSig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: account.name}}" v-if="!otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">MultiSig</router-link>
-                <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >MultiSig</div>
-                <div class="block px-2 py-1 text-xs text-gray-300">Restrictions</div>
-                <div class="block px-2 py-1 text-xs text-gray-300">Metadata</div>
-                <router-link :to="{ name: 'ViewAccountDelegate'}" v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Delegate</router-link>
-                <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >Delegate</div>
-                <router-link :to="{ name: 'ViewAccountAliasAddressToNamespace',params: { address: account.address }}" v-if="!otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >Link to Namespace</router-link>
-                <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >Link to Namespace</div>
-
+                <a v-if="!account.default && !otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="setAsDefaultAccount(account.address)">{{$t('accounts.makedefault')}}</a>
+                <div v-else class="block px-2 py-1 text-xs text-gray-300">{{$t('accounts.makedefault')}}</div>
+                <a v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" @click="exportWallet()">{{$t('accounts.export')}}</a>
+                <a v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" @click="exportWallet()">{{$t('accounts.export')}}</a>
+                <router-link :to="{ name: 'ViewAccountDelete', params: { name: account.name }}" v-if="!account.default && !otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">{{$t('accounts.delete')}}</router-link>
+                <div v-else class="block px-2 py-1 text-xs text-gray-300">{{$t('accounts.delete')}}</div>
+                <router-link :to="{ name: isMultiSig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: account.name}}" v-if="!otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">{{$t('accounts.multisig')}}</router-link>
+                <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >{{$t('accounts.multisig')}}</div>
+                <div class="block px-2 py-1 text-xs text-gray-300">{{$t('services.restrictions')}}</div>
+                <div class="block px-2 py-1 text-xs text-gray-300">{{$t('services.metadata')}}</div>
+                <router-link :to="{ name: 'ViewAccountDelegate', params: { address: account.address }}" v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">{{$t('services.delegate')}}</router-link>
+                <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >{{$t('services.delegate')}}</div>
+                <router-link :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: account.address}}" v-if="!otheraccount(account.address)" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >{{$t('services.linktonamespace')}}</router-link>
+                <router-link :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: multsig_add }}" v-else-if="otheraccount(account.address) && account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem" >{{$t('services.linktonamespace')}}</router-link>
+                <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >{{$t('services.linktonamespace')}}</div>
               </div>
             </div>
           </div>
@@ -53,19 +53,22 @@
 </template>
 
 <script>
-import { computed, getCurrentInstance } from "vue";
+import { computed, getCurrentInstance, ref } from "vue";
 import CryptoJS from 'crypto-js';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { networkState } from "@/state/networkState";
 import { walletState } from '@/state/walletState';
 import { Helper } from '@/util/typeHelper';
+//import { OtherAccount } from '@/models/otherAccount';
 
 export default{
   name: 'AccountTile',
-  props: ['account','other','showMenuCall', 'i'],
+  props: ['account','showMenuCall', 'i'],
   setup(p){
     const toast = useToast();
+    const multsig_add = ref("");
+    const accountName = ref(p.account.name);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const copy = (id) =>{
@@ -81,21 +84,24 @@ export default{
     });
 
     const isMultiSig = computed(() => {
-      let isMulti = false;
-      if(p.account.isMultisign != undefined){
-        if(p.account.isMultisign != '' || p.account.isMultisign != null){
-          if(p.account.isMultisign.cosignatories != undefined){
-            if(p.account.isMultisign.cosignatories.length > 0){
-              isMulti = true;
-            }
-          }
-        }
-      }
+      let isMulti = p.account.getDirectParentMultisig().length? true: false
       return isMulti;
     });
 
     const otheraccount = (address) => {
-      const other_account = walletState.currentLoggedInWallet.others.find(element => element.address == address);
+      const other_account = walletState.currentLoggedInWallet.others.find(others => others.address == address);
+      if(other_account != null && other_account.type == 'MULTISIG'){
+        let otheraccountname = walletState.currentLoggedInWallet.convertAddressToName(address);
+        if(otheraccountname == address){
+          accountName.value = p.account.name;
+        }
+        else{
+          accountName.value = otheraccountname;
+        }
+        multsig_add.value = other_account.address;
+      } else {
+        accountName.value = p.account.name;
+      }
       return other_account;
     };
 
@@ -137,7 +143,6 @@ export default{
     };
 
     const showHideMenu = () => {
-      // show.value = !show.value;
       emitter.emit("CLOSE_ALL_MENU_TRIGGER");
       if(p.showMenuCall){
         emitter.emit("CLOSE_MENU_TRIGGER", p.i);
@@ -165,6 +170,8 @@ export default{
       exportWallet,
       mosaicNum,
       isMultiSig,
+      accountName,
+      multsig_add
     }
   },
 }

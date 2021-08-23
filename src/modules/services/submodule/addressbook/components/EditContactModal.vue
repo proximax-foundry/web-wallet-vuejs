@@ -16,12 +16,12 @@
             <form @submit.prevent="EditContact" class="mt-10 text-gray-800">
               <fieldset class="w-full">
                 <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-                <div class="mb-5 text-center"><span class="text-lg text-gray-700">Edit this contact</span></div>
-                <TextInput placeholder="Name" errorMessage="Name required" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
-                <TextInput placeholder="Address" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" />
+                <div class="mb-5 text-center"><span class="text-lg text-gray-700">{{$t('addressbook.editcontact')}}</span></div>
+                <TextInput :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
+                <TextInput :placeholder="$t('createsuccessful.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" />
                 <div class="mt-10 text-center">
-                  <button type="button" class="default-btn mr-5 focus:outline-none" @click="toggleModal = !toggleModal">Cancel</button>
-                  <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="EditContact()">Save</button>
+                  <button type="button" class="default-btn mr-5 focus:outline-none" @click="toggleModal = !toggleModal">{{$t('deletewallet.cancel')}}</button>
+                  <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="EditContact">{{$t('accounts.save')}}</button>
                 </div>
               </fieldset>
             </form>
@@ -40,12 +40,13 @@ import { useToast } from "primevue/usetoast";
 import { Helper } from "@/util/typeHelper";
 import { AddressBookUtils } from '@/util/addressBookUtils';
 import { walletState } from '@/state/walletState';
-
+import {useI18n} from 'vue-i18n'
 export default{
   name: 'EditContactModal',
   props:['data'],
 
   setup(p){
+    const {t} = useI18n();
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -71,12 +72,15 @@ export default{
 
     const addErr = computed(
       () => {
-        let addErrDefault = 'Address required';
+        let addErrDefault = t('services.addressvalidation');
         return addMsg.value?addMsg.value:addErrDefault;
       }
     );
 
     watch(address, ()=>{
+      if(!walletState.currentLoggedInWallet){
+        return;
+      }
       const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
       const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address.value);
       verifyAdd.value = verifyContactAddress.isPassed;
@@ -91,6 +95,9 @@ export default{
 
     const EditContact = () => {
       // @param index, AddressBook
+      if(!walletState.currentLoggedInWallet){
+        return;
+      }
       const contactIndex = walletState.currentLoggedInWallet.contacts.findIndex((contact) => contact.address == p.data.address);
       walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value, address: address.value });
       walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);

@@ -8,33 +8,33 @@
             </font-awesome-icon>
           </div>
           <div class="w-104" v-if="isAddContactQues && !isSuccessAdded">
-            <h1 class="text-md my-5">Do you want to save this address?</h1>
+            <h1 class="text-md my-5">{{$t('services.addcontact')}}</h1>
             <div>
               <button type="button" class="default-btn mr-5 focus:outline-none" @click="closeModal()">
-                No
+                {{$t('services.no')}}
               </button>
               <button type="button" class="default-btn py-1" @click="proceed()">
-                Yes
+                {{$t('services.yes')}}
               </button>
             </div>
           </div>
           <div class="w-104" v-if="!isAddContactQues && !isSuccessAdded">
             <h1 class="default-title font-bold my-10">
-              Add Contact
+              {{$t('services.addcontacts')}}
             </h1>
             <form @submit.prevent="create" class="mt-10">
               <fieldset class="w-full">
                 <div class="error error_box mb-5" v-if="err != ''">
                   {{ err }}
                 </div>
-                <TextInput placeholder="Name" errorMessage="Name required" v-model="contactName" icon="id-card-alt" :showError="showNameErr"/>
-                <TextInput placeholder="Address" v-model="address" icon="wallet" :showError="showAddErr" :disabled="true"/>
+                <TextInput :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr"/>
+                <TextInput :placeholder="$t('createsuccessful.address')" v-model="address" icon="wallet" :showError="showAddErr" :disabled="true"/>
                 <div class="mt-10">
                   <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput()">
-                    Clear
+                    {{$t('signin.clear')}}
                   </button>
                   <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="SaveContact()">
-                    Save
+                    {{$t('accounts.save')}}
                   </button>
                 </div>
               </fieldset>
@@ -42,7 +42,7 @@
           </div>
           <div class="w-104" v-if="isSuccessAdded">
             <h1 class="text-md my-5">
-              Contact <b>{{ contactName }}</b> successfully saved
+             {{$t('services.contact')}} <b>{{ contactName }}</b> {{$t('services.successfullysaved')}}
             </h1>
           </div>
         </div>

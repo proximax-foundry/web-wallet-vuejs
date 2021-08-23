@@ -10,38 +10,38 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column field="owner" header="Owner" >
+      <Column field="owner" :header="$t('dashboard.owner')" >
         <template #body="{data}">
           <span class="uppercase">{{data.owner}}</span>
         </template>
       </Column>
-      <Column field="assetId" header="Asset ID" >
+      <Column field="assetId" :header="$t('dashboard.assetid')" >
         <template #body="{data}">
           <span class="uppercase">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="alias" header="Alias" >
+      <Column field="alias" :header="$t('dashboard.alias')" >
         <template #body="{data}">
           <diV v-for="value in data.alias" :key="value.idHex">
             <div>{{value.name}} - <span class="uppercase"> {{ value.idHex }} </span></div>
           </div>
         </template>
       </Column>
-      <Column field="quantity" header="Quantity" >
+      <Column field="quantity" :header="$t('dashboard.quantity')" >
         <template #body="{data}">
           <span class="uppercase ">{{data.amount}}</span>
         </template>
       </Column>
-      <Column field="Active" header="Active" >
+      <Column field="Active" :header="$t('dashboard.active')" >
         <template #body="{data}">
           <span class="uppercase" :class="data.active ? 'text-green-500' : 'text-red-500'">{{ data.active ? 'true': 'false'}}</span>
         </template>
       </Column>
       <template #empty>
-        No records found
+        {{$t('services.norecord')}}
       </template>
       <template #loading>
-          Loading transactions data. Please wait.
+         {{$t('dashboard.loadingmessage')}}
       </template>
     </DataTable>
   </div>

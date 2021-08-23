@@ -1,9 +1,9 @@
 <template>
-  <div class="flex justify-between text-sm">
-    <div><span class="text-gray-400">Storage ></span> <span class="text-blue-primary font-bold">Files</span></div>
+  <div class="flex justify-between text-xs sm:text-sm">
+    <div><span class="text-gray-400">{{$t('welcome.storage')}} ></span> <span class="text-blue-primary font-bold">Files</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServicesStorageUploadFile'}" class="font-bold">Upload a New File</router-link> |
-      <router-link :to="{ name: 'ViewServices'}" class="font-bold">All Services</router-link>
+      <router-link :to="{ name: 'ViewServicesStorageUploadFile'}" class="font-bold">{{$t('services.uploadfile')}}</router-link> |
+      <router-link :to="{ name: 'ViewServices'}" class="font-bold">{{$t('services.allservices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line'>
@@ -17,7 +17,7 @@
         </div>
       </div>
       <div class=" col-span-1 sm:col-span-7 md:col-span-1 my-5 sm:my-0 md:my-5 flex">
-        <button class="default-btn py-1 flex-grow">Search</button>
+        <button class="default-btn py-1 flex-grow">{{$t('services.search')}}</button>
       </div>
     </div>
     <DataTable
@@ -43,7 +43,7 @@
         </template>
       </Column>
       <template #empty>
-        No records found
+       {{$t('services.norecord')}}
       </template>
     </DataTable>
     <DownloadFileModal :showModal="showDownloadFileModel" :fileName="fileName" />

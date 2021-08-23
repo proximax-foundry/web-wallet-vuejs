@@ -10,31 +10,31 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="closeModal();"></font-awesome-icon>
           </div>
           <div>
-            <h1 class="default-title font-bold my-5">Transaction Information</h1>
+            <h1 class="default-title font-bold my-5">{{$t('dashboard.transactioninfo')}}</h1>
             <div class="text-left md:justify-start md:flex md:items-stretch">
               <div class="block md:w-7/12 md:inline-block">
                 <!-- <div class="relative"><span class="font-bold text-md mr-3">Transfer</span><img :src="`../../assets/img/arrow-transaction-${transaction.transferType=='in'?'receive-in-green-proximax-sirius-explorer':'sender-out-orange-proximax-sirius-explorer'}.svg`" class="w-7 h-7 inline-block absolute" style="top:-2px;"> <span class="ml-8 font-bold text-md">{{ transaction.transferType=='in'?'Received':'Sent' }}</span></div> -->
-                <div class="relative"><span class="font-bold text-md mr-3">Transfer</span>
+                <div class="relative"><span class="font-bold text-md mr-3">{{$t('NavigationMenu.Transfer')}}</span>
                   <img src="@/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg" class="w-7 h-7 inline-block absolute" style="top:-2px;" v-if="transaction.transferType=='in'">
                   <img src="@/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg" class="w-7 h-7 inline-block absolute" style="top:-2px;" v-else>
                   &nbsp;<span class="ml-8 font-bold text-md">{{ transaction.transferType=='in'?'Received':'Sent' }}</span></div>
                 <div class="text-xs my-2">{{ timestamp }}</div>
-                <div v-if="effectiveFee"><span class="font-bold">Effective Fee:</span> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mx-2"><span class="text-xs">{{ effectiveFee.part1 }}{{ effectiveFee.part2 }}</span> <span class="text-sm">XPX</span></div>
+                <div v-if="effectiveFee"><span class="font-bold">{{$t('dashboard.effectivefee')}}:</span> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mx-2"><span class="text-xs">{{ effectiveFee.part1 }}{{ effectiveFee.part2 }}</span> <span class="text-sm">XPX</span></div>
                 <div class="content">
                   <div v-if="transaction.block">
-                    <div>Height:</div>
+                    <div>{{$t('dashboard.height')}}:</div>
                     <div>{{ transaction.block }}</div>
                   </div>
                   <div>
-                    <div>Type:</div>
+                    <div>{{$t('dashboard.type')}}:</div>
                     <div>{{ transaction.type }}</div>
                   </div>
                   <div>
-                    <div>From:</div>
+                    <div>{{$t('dashboard.from')}}:</div>
                     <div>{{ transaction.senderAddress }}</div>
                   </div>
                   <div>
-                    <div>To:</div>
+                    <div>{{$t('dashboard.to')}}:</div>
                     <div>{{ transaction.recipientAddress }}</div>
                   </div>
                 </div>
@@ -44,52 +44,52 @@
                 </div>
                  -->
                 <div v-if="!transaction.message.type && transaction.message.payload != ''">
-                  <div>Message:</div><br>
+                  <div>{{$t('dashboard.message')}}:</div><br>
                   <div>{{ transaction.message.payload }}</div>
                 </div>
                 <div v-if="transaction.message.type && transaction.message.payload != ''">
-                  <div class="font-semibold">Encrypted Message:</div>
+                  <div class="font-semibold">{{$t('dashboard.encryptedmessage')}}:</div>
                   <div v-if="isShowLogin && !isShowMessage && (transaction.transferType=='in')" class="mt-2 bg-gray-100 p-3 pt-4 rounded-xl mr-2">
                     <div class="error error_box mb-2 w-full" style="text-align: center" v-if="err!=''">{{ err }}</div>
                     <!-- <TextInput v-if="validPublicKey" placeholder="Recipient Public Key" errorMessage="Recipient Public key required" v-model="recipientPublicKey" icon="id-card-alt" :showError="showPublicKeyErr" class="w-full" /> -->
                     <PasswordInput placeholder="Enter Wallet Password to Decrypt" errorMessage="Password Required" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="w-full" />
                     <div class="text-center w-full">
-                      <button type="button" class="small-default-btn mr-3 focus:outline-none" @click="isShowLogin = !isShowLogin">Cancel</button>
-                      <button type="button" class="small-default-btn disabled:opacity-50" :disabled="disableDecrypt" @click="decryptMessage()">Decrypt</button>
+                      <button type="button" class="small-default-btn mr-3 focus:outline-none" @click="isShowLogin = !isShowLogin">{{$t('deletewallet.cancel')}}</button>
+                      <button type="button" class="small-default-btn disabled:opacity-50" :disabled="disableDecrypt" @click="decryptMessage()">{{$t('dashboard.decrypt')}}</button>
                     </div>
                   </div>
-                  <div class="text-center py-4 bg-gray-100 mt-1 mr-2" v-if="!isShowLogin && !isShowMessage && (transaction.transferType=='in')"><button class="small-default-btn" @click="isShowLogin = !isShowLogin">Decrypt Message</button></div>
+                  <div class="text-center py-4 bg-gray-100 mt-1 mr-2" v-if="!isShowLogin && !isShowMessage && (transaction.transferType=='in')"><button class="small-default-btn" @click="isShowLogin = !isShowLogin">{{$t('dashboard.decryptmessage')}}</button></div>
                   <div v-if="isShowMessage && (transaction.transferType=='in')" class="p-2 bg-gray-100 rounded-r-2xl">
                     <div style="text-align: center; display: block; margin: 0px; font-weight: normal">{{ encryptedMessage }}</div><br>
-                    <div class="text-center"><button type="button" class="small-default-btn focus:outline-none inline-block" @click="isShowLogin = !isShowLogin; isShowMessage = !isShowMessage">Hide message</button></div>
+                    <div class="text-center"><button type="button" class="small-default-btn focus:outline-none inline-block" @click="isShowLogin = !isShowLogin; isShowMessage = !isShowMessage">{{$t('dashboard.hidemessage')}}</button></div>
                   </div>
                   <div v-if="isShowLogin && !isShowMessage && !(transaction.transferType=='in')" class="mt-2 bg-gray-100 p-3 pt-4 rounded-xl mr-2">
                     <div class="error error_box mb-2 w-full" style="text-align: center" v-if="err!=''">{{ err }}</div>
                     <TextInput placeholder="Recipient Address or Public Key" errorMessage="Recipient Address or Public key required" v-model="recipientAddressPublicKey" icon="id-card-alt" :showError="showPublicKeyErr" class="w-full" />
                     <PasswordInput placeholder="Enter Wallet Password" errorMessage="Password Required" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="w-full" />
                     <div class="text-center w-full">
-                      <button type="button" class="small-default-btn mr-3 focus:outline-none" @click="isShowLogin = !isShowLogin">Cancel</button>
-                      <button type="button" class="small-default-btn disabled:opacity-50" :disabled="disableDecrypt" @click="decryptMessage()">Decrypt</button>
+                      <button type="button" class="small-default-btn mr-3 focus:outline-none" @click="isShowLogin = !isShowLogin">{{$t('deletewallet.cancel')}}</button>
+                      <button type="button" class="small-default-btn disabled:opacity-50" :disabled="disableDecrypt" @click="decryptMessage()">{{$t('dashboard.decrypt')}}</button>
                     </div>
                   </div>
-                  <div class="text-center py-4 bg-gray-100 mt-1 mr-2" v-if="!isShowLogin && !isShowMessage && !(transaction.transferType=='in')"><button class="small-default-btn" @click="isShowLogin = !isShowLogin">Show Message</button></div>
+                  <div class="text-center py-4 bg-gray-100 mt-1 mr-2" v-if="!isShowLogin && !isShowMessage && !(transaction.transferType=='in')"><button class="small-default-btn" @click="isShowLogin = !isShowLogin">{{$t('dashboard.showmessage')}}</button></div>
                   <div v-if="isShowMessage && !(transaction.transferType=='in')" class="p-2 bg-gray-100 rounded-r-2xl">
                     <div class="text-tsm text-gray-500">{{ encryptErr }}</div>
                     <div style="text-align: center; display: block; margin: 0px; font-weight: normal">{{ encryptedMessage }}</div><br>
-                    <div class="text-center"><button type="button" class="small-default-btn focus:outline-none inline-block" @click="isShowLogin = !isShowLogin; isShowMessage = !isShowMessage">Hide message</button></div>
+                    <div class="text-center"><button type="button" class="small-default-btn focus:outline-none inline-block" @click="isShowLogin = !isShowLogin; isShowMessage = !isShowMessage">{{$t('dashboard.hidemessage')}}</button></div>
                   </div>
                 </div>
 
                 <div class="mt-5" v-if="amount!='0.000000'">
-                  <span class="font-bold text-md">Amount: </span> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-2"> <span>{{ amount }} XPX</span>
+                  <span class="font-bold text-md">{{$t('dashboard.amount')}}: </span> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-2"> <span>{{ amount }} XPX</span>
                 </div>
               </div>
               <div class="block md:w-5/12 md:inline-block bg-gray-200 rounded-2xl p-2">
-                <div class="font-bold text-xs mb-1 block">Signer:</div>
+                <div class="font-bold text-xs mb-1 block">{{$t('dashboard.signer')}}:</div>
                 <div class="w w-96 md:w-full">{{ transaction.signer.address.address }}</div>
-                <div class="font-bold text-xs mb-1 block mt-3">Signature:</div>
+                <div class="font-bold text-xs mb-1 block mt-3">{{$t('dashboard.signature')}}:</div>
                 <div class="w w-96 md:w-full">{{ transaction.signature }}</div>
-                <div class="font-bold text-xs mb-1 block mt-3">Hash:</div>
+                <div class="font-bold text-xs mb-1 block mt-3">{{$t('dashboard.hash')}}:</div>
                 <div class="w w-96 md:w-full">{{ transaction.transactionInfo.hash }}</div>
               </div>
             </div>

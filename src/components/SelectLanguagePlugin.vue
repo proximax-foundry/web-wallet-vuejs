@@ -5,7 +5,7 @@
       mode="single"
       :canDeselect="canDeselect"
       @change="makeSelection"
-      v-model="selected"
+      v-model="$i18n.locale"
       :maxHeight="maxHeight"
       :caret="caretOption"
       ref="multiselect"
@@ -14,7 +14,7 @@
     >
       <template v-slot:singlelabel="{ value }">
         <div class="multiselect-single-label font-bold text-gray-600">
-          {{ value.value }}
+          {{ value.selected }}
         </div>
       </template>
 
@@ -39,9 +39,10 @@ export default{
     const canDeselect = ref(false);
     const caretOption = ref(false);
     const options = [
-      { value: 'EN', label: 'English', icon: 'gb' },
-      { value: 'CN', label: '中文', icon: 'cn' },
-      { value: 'RU', label: 'русский', icon: 'ru' },
+      { value: 'en', label: 'English',  selected: 'EN', icon: 'gb' },
+      { value: 'zh', label: '中文'   ,   selected: 'CH',icon: 'cn' },
+      { value: 'ru', label: 'русский',  selected: 'RU',icon: 'ru' },
+      { value: 'es', label: 'Español',  selected: 'ES',icon:'es'}
     ]
 
     const selected = ref('EN')

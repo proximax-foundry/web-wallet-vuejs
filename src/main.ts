@@ -16,7 +16,7 @@ import { WalletStateUtils } from './state/utils/walletStateUtils';
 import { NetworkStateUtils } from './state/utils/networkStateUtils';
 import { ChainUtils } from './util/chainUtils';
 import { ChainAPICall } from './models/REST/chainAPICall';
-import { ChainProfile, ChainProfileConfig, ChainProfileNames } from "./models/stores/"
+import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainSwapConfig } from "./models/stores/"
 
 // Import Font Awesome Icons
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -24,6 +24,7 @@ import { faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclama
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
+import i18n from './i18n'
 
 library.add(faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload, faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore, faFileExport, faFileImport, faArrowRight, faAt );
 const app = createApp(App);
@@ -34,6 +35,7 @@ app.use(router)
 app.use(PrimeVue);
 app.use(ConfirmationService);
 app.use(ToastService);
+app.use(i18n);
 app.mount('#app');
 // Use Components
 app.component('ConfirmDialog', ConfirmDialog);
@@ -85,6 +87,13 @@ const chainProfileIntegration = async () => {
 
       chainProfileStore.init();
       const chainProfileData = chainProfilesData[chainProfileName];
+
+      if(chainProfileData['swapData']){
+        let chainSwapConfig = new ChainSwapConfig(chainProfileName);
+        chainSwapConfig.updateConfig(chainProfileData['swapData']);
+
+        chainSwapConfig.saveToLocalStorage();
+      }
 
       if(chainProfileStore.getVersion() !== chainProfileData['version']){
 

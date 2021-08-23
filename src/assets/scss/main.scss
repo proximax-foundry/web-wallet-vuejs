@@ -52,23 +52,6 @@ body{
   margin-left: 10px;
 }
 
-.version-text{
-  color: #616161;
-  font-size: .8rem;
-  position: relative;
-  top: 4px;
-  left: 5px;
-}
-
-.header-menu{
-  margin-right: 20px;
-}
-
-.header-menu a{
-  font-size: 15px;
-  margin-left: 10px;
-}
-
 .animate__animated.animate__fadeInDown{
   --animate-duration: 0.5s;
 }
@@ -84,7 +67,7 @@ body{
 }
 
 .error_box{
-  @apply bg-red-100 py-3 rounded-xl;
+  @apply bg-red-100 py-3 rounded-xl px-3;
 }
 
 .blue-btn{
@@ -100,7 +83,13 @@ body{
 }
 
 .big-default-btn{
-  @apply blue-btn py-5 px-10 focus:outline-none;
+  @apply blue-btn py-3 px-10 focus:outline-none;
+}
+
+@screen md{
+  .big-default-btn{
+    @apply py-5;
+  }
 }
 
 .title{
@@ -108,8 +97,36 @@ body{
 }
 
 .big-title{
-  @apply title text-xxl mt-20 font-bold;
+  @apply title text-sm mt-10 font-bold mb-2;
 }
+
+.big-para{
+  @apply text-xs mx-3;
+}
+
+@screen md {
+  .big-title{
+    @apply text-xxl mt-20;
+  }
+
+  .big-para{
+    @apply text-sm;
+  }
+}
+
+  .big-para{
+    @apply text-xs mx-3;
+  }
+
+  @screen md {
+    .big-title{
+      @apply text-xxl mt-20;
+    }
+
+    .big-para{
+      @apply text-sm;
+    }
+  }
 
 .default-title{
   @apply title text-sm md:text-lg lg:text-txl;
@@ -188,9 +205,9 @@ body{
 
   a{
     font-weight: bold;
-    font-size: 16px;
+    font-size: 15px;
     display: block;
-    padding: 2px 18px;
+    padding: 4px 18px;
     padding-top: 5px;
     transition: all;
     transition-duration: 50ms;
@@ -216,6 +233,7 @@ body{
     a{
       display: inline-block;
       color: var(--white) #{!important};
+      font-size: 16px;
     }
   }
 }
@@ -372,6 +390,16 @@ body{
   margin-left: 1rem;
 }
 
+.p-button.p-component.p-confirm-dialog-accept{
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  --tw-bg-opacity: 1;
+  background-color: rgba(48, 110, 181, var(--tw-bg-opacity));
+  color: white;
+}
+
 .p-dialog-mask.p-component-overlay {
   background-color: rgba(0, 0, 0, 0.4);
 }
@@ -456,4 +484,56 @@ body{
 .p-toast .p-toast-message.p-toast-message-error .p-toast-message-icon,
 .p-toast .p-toast-message.p-toast-message-error .p-toast-icon-close {
   color: #73000c;
+}
+
+.p-inline-message {
+  padding: 0.5rem 0.5rem;
+  margin: 0;
+  border-radius: 3px;
+}
+.p-inline-message.p-inline-message-info {
+  background: #B3E5FC;
+  border: solid #0891cf;
+  border-width: 0px;
+  color: #044868;
+}
+.p-inline-message.p-inline-message-info .p-inline-message-icon {
+  color: #044868;
+}
+.p-inline-message.p-inline-message-success {
+  background: #C8E6C9;
+  border: solid #439446;
+  border-width: 0px;
+  color: #224a23;
+}
+.p-inline-message.p-inline-message-success .p-inline-message-icon {
+  color: #224a23;
+}
+.p-inline-message.p-inline-message-warn {
+  background: #FFECB3;
+  border: solid #d9a300;
+  border-width: 0px;
+  color: #6d5100;
+}
+.p-inline-message.p-inline-message-warn .p-inline-message-icon {
+  color: #6d5100;
+}
+.p-inline-message.p-inline-message-error {
+  background: #FFCDD2;
+  border: solid #e60017;
+  border-width: 0px;
+  color: #73000c;
+}
+.p-inline-message.p-inline-message-error .p-inline-message-icon {
+  color: #73000c;
+}
+.p-inline-message .p-inline-message-icon {
+  font-size: 1rem;
+  margin-right: 0.5rem;
+}
+.p-inline-message .p-inline-message-text {
+  font-size: 1rem;
+}
+.p-inline-message.p-inline-message-icon-only .p-inline-message-icon {
+  margin-right: 0;
 }

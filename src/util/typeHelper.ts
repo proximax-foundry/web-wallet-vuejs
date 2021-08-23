@@ -159,8 +159,26 @@ export class Helper{
         return value * Math.pow(10, divisibility);
       }
 
+      static convertNumberMinimumFormat(value:number, decimalPoint: number){
+        return parseFloat(value.toFixed(decimalPoint));
+      }
+
       static createQueryParams(pageSize: number, idToStartFrom?: string | undefined){
           return new QueryParams(pageSize, idToStartFrom);
+      }
+
+      static checkIsJSON(data: string): boolean{
+        try {
+            JSON.parse(data);
+            return true;
+        } catch (error) {
+            return false;
+        }
+      }
+
+      static validateBuildSelectAccountBalance(balanceAccount: number, feeTransaction: number, rental: number): boolean {
+        const totalFee = feeTransaction + rental;
+        return balanceAccount >= totalFee;
       }
 }
 

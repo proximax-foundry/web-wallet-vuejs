@@ -1,9 +1,9 @@
 <template>
-  <div class="flex justify-between text-sm">
-    <div><span class="text-gray-400">Storage ></span> <span class="text-blue-primary font-bold">Upload File</span></div>
+  <div class="flex justify-between text-xs sm:text-sm">
+    <div><span class="text-gray-400">{{$t('welcome.storage')}} ></span> <span class="text-blue-primary font-bold">{{$t('services.uploadfile')}}</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServicesStorageMyFile'}" class="font-bold">Files</router-link> |
-      <router-link :to="{ name: 'ViewServices'}" class="font-bold">All Services</router-link>
+      <router-link :to="{ name: 'ViewServicesStorageMyFile'}" class="font-bold">{{$t('services.files')}}</router-link> |
+      <router-link :to="{ name: 'ViewServices'}" class="font-bold">{{$t('services.allservices')}}</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line lg:px-80'>
@@ -20,7 +20,7 @@
               </div>
             </div>
           </div>
-          <div v-else class="self-center text-center w-full"><div><font-awesome-icon icon="cloud-upload-alt" class="text-gray-400 mr-2"></font-awesome-icon> <span class="text-sm text-gray-400">Upload file</span></div></div>
+          <div v-else class="self-center text-center w-full"><div><font-awesome-icon icon="cloud-upload-alt" class="text-gray-400 mr-2"></font-awesome-icon> <span class="text-sm text-gray-400">{{$t('services.uploadfile')}}</span></div></div>
             <input type="file" v-if="!isUploaded" class="opacity-0 w-full h-full cursor-pointer absolute" @change="uploadFile" />
         </div>
       </div>
@@ -30,12 +30,12 @@
         <PasswordInput content="At least 11 characters, must include UPPER CASE letters and numbers" v-tippy="{ arrow : true,  animation : 'shift-away', theme: 'light-border', trigger: 'click'}" placeholder="Confirm File Encryption Password" errorMessage="Confirm File Encryption Password required" :showError="showConfirmEncryptPasswdError" icon="lock" v-model="confirmEncryptPasswd" />
       </div>
       <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-        <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span class="text-txs"></span> XPX</div>
+        <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} <span class="text-txs"></span> XPX</div>
       </div>
       <PasswordInput placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
       <div class="mt-10">
-        <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput()">Clear</button>
-        <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">Upload</button>
+        <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput()">{{$t('signin.clear')}}</button>
+        <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">{{$t('services.upload')}}</button>
       </div>
     </div>
   </div>

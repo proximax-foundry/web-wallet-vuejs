@@ -1,10 +1,10 @@
-export const DelegateRoutes = [
-  {
-    path: '/delegate',
+export const DelegateRoutes = [{
+    path: '/delegate/:address',
     name: 'ViewAccountDelegate',
-    component: () => import('@/modules/account/submodule/delegate/views/ViewAccountDelegate.vue'),
+    props: true,
+    component: () =>
+        import ('@/modules/account/submodule/delegate/views/ViewAccountDelegate.vue'),
     meta: {
-      title: "Delegate",
+        title: "Delegate",
     }
-  },
-];
+}, ];
