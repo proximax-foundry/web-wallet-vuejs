@@ -86,7 +86,7 @@
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
             {{ isInvalidConfirmedMeta?'Approval in MetaMask is rejected':'Waiting for confirmation in MetaMask' }}
             <div v-if="isInvalidConfirmedMeta" class="mt-5">
-              <button type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border-blue-primary px-8 text-white hover:shadow-lg" @click="getValidation(true)">Retry</button>
+              <button type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border-blue-primary px-8 text-white hover:shadow-lg" @click="getValidation">Retry</button>
               <router-link :to="{ name: 'ViewServices' }" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32 text-tsm" tag="button">Cancel this swap</router-link>
             </div>
           </div>
@@ -462,7 +462,7 @@ export default {
       setTimeout(() => {
         step2.value = true;
         (async() => {
-          await getValidation(true);
+          await getValidation();
           // if(!isInvalidConfirmedMeta.value){
           //   afterConfirmed();
           // }
@@ -470,7 +470,7 @@ export default {
       }, 2000);
     };
 
-    const getValidation = async (initiated) => {
+    const getValidation = async () => {
       try{
         err.value = '';
         provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
@@ -489,7 +489,7 @@ export default {
         validationLink.value = bscScanUrl + receipt.hash;
         let getTransaction = await provider.getTransaction(receipt.hash);
 
-        if(initiated && getTransaction.hash === receipt.hash){
+        if(getTransaction.hash === receipt.hash){
           if(parseInt(getTransaction.gasLimit) >= data.standardGasLimit){
             isInvalidConfirmedMeta.value = false;
             afterConfirmed();
