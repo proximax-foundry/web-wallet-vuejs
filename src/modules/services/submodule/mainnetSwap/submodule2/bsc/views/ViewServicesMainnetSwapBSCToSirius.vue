@@ -99,7 +99,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transaction hash: <a :href="validationLink" target=_new v-if="validationHash" :class="isInvalidConfirmedMeta?'text-gray-300':'text-blue-primary'" class="break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer Validation">{{ validationHash }}</a></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transaction hash: <a :href="validationLink" target=_new v-if="validationHash" :class="isInvalidConfirmedMeta?'text-gray-300':'text-blue-primary bg-yellow-100 p-2 mt-1 rounded-xl'" class="block break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer hash">{{ validationHash }}</a></div>
           <div class="flex-none">
             <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step3"></font-awesome-icon>
           </div>
@@ -139,7 +139,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message signed with signature: <div v-if="messageHash" :class="step6?'text-gray-400':'text-gray-300'" class="text-tsm break-all" id="validateMessage" :copyValue="messageHash" copySubject="Message Validation">{{ messageHash }}</div></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message signed with signature: <div v-if="messageHash" :class="step6?'text-gray-500 bg-yellow-100 p-2 mt-1 rounded-xl':'text-gray-300'" class="text-tsm break-all" id="validateMessage" :copyValue="messageHash" copySubject="Signature hash">{{ messageHash }}</div></div>
           <div class="flex-none">
             <font-awesome-icon icon="copy" @click="copy('validateMessage')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step6"></font-awesome-icon>
           </div>
@@ -476,18 +476,21 @@ export default {
         provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
         signer = provider.getSigner();
         const Contract = new ethers.Contract(tokenAddress.value, abi, signer);
+        const data = await SwapUtils.getBSC_GasLimit(swapData.gasPriceConsultURL);
+        var options = {
+            gasLimit: data.standardGasLimit,
+        };
         const receipt = await Contract.transfer(
           custodian.value,
           ethers.utils.parseUnits(amount.value, 6),
+          options,
         );
         validationHash.value = receipt.hash;
         validationLink.value = bscScanUrl + receipt.hash;
-        // const data = await SwapUtils.getETH_GasLimit(swapData.gasPriceConsultURL);
         let getTransaction = await provider.getTransaction(receipt.hash);
 
         if(initiated && getTransaction.hash === receipt.hash){
-          // console.log(data.standardGasLimit)
-          if(parseInt(getTransaction.gasLimit) >= 37334){
+          if(parseInt(getTransaction.gasLimit) >= data.standardGasLimit){
             isInvalidConfirmedMeta.value = false;
             afterConfirmed();
           }else{
