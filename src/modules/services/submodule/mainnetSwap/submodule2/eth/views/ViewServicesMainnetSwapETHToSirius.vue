@@ -99,10 +99,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transaction hash: <a :href="validationLink" target=_new v-if="validationHash" :class="isInvalidConfirmedMeta?'text-gray-300':'text-blue-primary bg-yellow-100 p-2 mt-1 rounded-xl'" class="block break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer hash">{{ validationHash }}</a></div>
-          <div class="flex-none">
-            <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step3"></font-awesome-icon>
-          </div>
+          <div class="text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transaction hash: <div v-if="validationHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl inline-block flex"><a :href="validationLink" target=_new :class="isInvalidConfirmedMeta?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer hash">{{ validationHash }}</a><div class="flex-none"><font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step3"></font-awesome-icon></div></div></div>
         </div>
         <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step4?'text-gray-700':'text-gray-300'">Step 2: Validate your Sirius address</div>
         <div class="flex border-b border-gray-300 p-3">
@@ -125,7 +122,7 @@
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">
-            {{ isInvalidSignedMeta?'Approval on MetaMask is rejected':(longWaitNotification?'Confirmation from MetaMask is taking longer than expected, please wait till next step':'Waiting for confirmation in MetaMask') }}
+            {{ isInvalidSignedMeta?'Approval on MetaMask is rejected':(longWaitNotification?'Confirmation from MetaMask is taking longer than expected, please wait till next step':(messageHash?'Transaction is signed. Waiting for confirmation in MetaMask':'Waiting for confirmation in MetaMask')) }}
             <div v-if="isInvalidSignedMeta" class="mt-5">
               <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg w-24" @click="getSigned">Retry</button>
             </div>
@@ -139,10 +136,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message signed with signature: <div v-if="messageHash" :class="step6?'text-gray-500 bg-yellow-100 p-2 mt-1 rounded-xl':'text-gray-300'" class="text-tsm break-all" id="validateMessage" :copyValue="messageHash" copySubject="Signature hash">{{ messageHash }}</div></div>
-          <div class="flex-none">
-            <font-awesome-icon icon="copy" @click="copy('validateMessage')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step6"></font-awesome-icon>
-          </div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message signed with signature: <div class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex" v-if="messageHash && step6"><div :class="step6?'text-gray-500':'text-gray-300'" class="text-tsm break-all flex-grow" id="validateMessage" :copyValue="messageHash" copySubject="Signature hash">{{ messageHash }}</div><div class="flex-none"><font-awesome-icon icon="copy" @click="copy('validateMessage')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step6"></font-awesome-icon></div></div></div>
         </div>
         <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step7?'text-gray-700':'text-gray-300'">Step 3: Initiate swap</div>
         <div class="flex border-b border-gray-300 p-3">
@@ -520,6 +514,8 @@ export default {
     const swapServiceParam = ref('');
     const longWaitNotification = ref(false);
 
+    let longWaitTimeOut;
+
     const getSigned = async () => {
       try{
         provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
@@ -535,7 +531,7 @@ export default {
           }
         };
         swapServiceParam.value = data;
-        let longWaitTimeeOut = setTimeout(() => {
+        longWaitTimeOut = setTimeout(() => {
           longWaitNotification.value = true;
         }, 7000);
 
@@ -544,7 +540,6 @@ export default {
           // const status = false;
           if(status){
             clearInterval(verifyingTxn);
-            clearTimeout(longWaitTimeeOut);
             isInvalidSignedMeta.value = false;
             await afterSigned();
           }
@@ -572,6 +567,7 @@ export default {
     const swapServerErrIndex = ref(0);
 
     const afterSigned = async () => {
+      clearTimeout(longWaitTimeOut);
       step6.value = true;
       step7.value = true;
       retrySwapButtonText.value = 'Initiating swap...';
