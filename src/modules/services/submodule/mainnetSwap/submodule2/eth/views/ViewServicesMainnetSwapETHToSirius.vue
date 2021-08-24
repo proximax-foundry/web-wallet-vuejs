@@ -38,7 +38,7 @@
           <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block break-all">{{ isMetamaskConnected?(currentAccount?currentAccount:'Not connected'):'Not connected' }}</div></div>
         </div>
         <div class="self-center">
-          <button @click="connectMetamask()" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none" v-if="!currentAccount">Connect to Metamask</button>
+          <button @click="connectMetamask()" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none" v-if="!currentAccount">Connect to MetaMask</button>
           <button class=" bg-green-50 rounded-3xl border font-bold px-6 py-1 border-green-500 text-green-500 text-tsm outline-none focus:outline-none cursor-auto" v-else>Connected</button>
         </div>
       </div>
@@ -62,23 +62,24 @@
     </div>
     <div v-if="currentPage==2">
       <div class="text-lg my-7">
+        <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <div class="font-bold text-left text-xs md:text-sm lg:text-lg" :class="step1?'text-gray-700':'text-gray-300'">Step 1: Send eXPX to the escrow account</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="step1?'border-blue-primary':'border-gray-300'">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+                <font-awesome-icon icon="check" :class="step1?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500"></font-awesome-icon>
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Sending transaction to Metamask</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Sending transaction to MetaMask</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidConfirmedMeta?'border-red-primary':'border-blue-primary'">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="isInvalidConfirmedMeta?'border-red-primary':(step2?'border-blue-primary':'border-gray-300')">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidConfirmedMeta"></font-awesome-icon>
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
+                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-if="isInvalidConfirmedMeta"></font-awesome-icon>
+                <font-awesome-icon icon="check" :class="step2?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-else></font-awesome-icon>
               </div>
             </div>
           </div>
@@ -92,13 +93,13 @@
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step3?'border-blue-primary':'border-gray-300'">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+                <font-awesome-icon icon="check" :class="step3?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transaction hash: <a :href="validationLink" target=_new v-if="validationHash" class="text-blue-primary break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer Validation">{{ validationHash }}</a></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transaction hash: <a :href="validationLink" target=_new v-if="validationHash" :class="isInvalidConfirmedMeta?'text-gray-300':'text-blue-primary'" class="break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer Validation">{{ validationHash }}</a></div>
           <div class="flex-none">
             <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step3"></font-awesome-icon>
           </div>
@@ -106,9 +107,9 @@
         <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step4?'text-gray-700':'text-gray-300'">Step 2: Validate your Sirius address</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step4?'border-blue-primary':'border-gray-300'">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+                <font-awesome-icon icon="check" :class="step4?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
               </div>
             </div>
           </div>
@@ -116,10 +117,10 @@
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSignedMeta?'border-red-primary':'border-blue-primary'">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSignedMeta?'border-red-primary':(step5?'border-blue-primary':'border-gray-300')">
               <div class="flex h-full justify-center">
                 <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidSignedMeta"></font-awesome-icon>
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
+                <font-awesome-icon icon="check" :class="step5?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
               </div>
             </div>
           </div>
@@ -132,13 +133,13 @@
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step6?'border-blue-primary':'border-gray-300'">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+                <font-awesome-icon icon="check" :class="step6?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message signed with signature: <div v-if="messageHash" class="text-gray-400 text-tsm break-all" id="validateMessage" :copyValue="messageHash" copySubject="Message Validation">{{ messageHash }}</div></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message signed with signature: <div v-if="messageHash" :class="step6?'text-gray-400':'text-gray-300'" class="text-tsm break-all" id="validateMessage" :copyValue="messageHash" copySubject="Message Validation">{{ messageHash }}</div></div>
           <div class="flex-none">
             <font-awesome-icon icon="copy" @click="copy('validateMessage')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step6"></font-awesome-icon>
           </div>
@@ -146,10 +147,10 @@
         <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step7?'text-gray-700':'text-gray-300'">Step 3: Initiate swap</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSwapService?'border-red-primary':'border-blue-primary'">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSwapService?'border-red-primary':(step7?'border-blue-primary':'border-gray-300')">
               <div class="flex h-full justify-center">
                 <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidSwapService"></font-awesome-icon>
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
+                <font-awesome-icon icon="check" :class="step7?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
               </div>
             </div>
           </div>
@@ -291,9 +292,9 @@ export default {
         verifyChain(metaChainId, true);
       });
 
-      ethereum.on('connect', (connectInfo) => {
-        console.log(connectInfo)
-      });
+      // ethereum.on('connect', (connectInfo) => {
+      //   console.log(connectInfo)
+      // });
     }else{
       console.log('MetaMask not installed')
     }
@@ -362,7 +363,6 @@ export default {
             // If this happens, the user rejected the connection request.
             console.log('Please connect to MetaMask.');
           } else {
-            console.error(err);
             if(err.code == '-32002'){
               serviceErr.value = 'Please click on MetaMask extension to approve connection';
             }
@@ -462,16 +462,17 @@ export default {
       setTimeout(() => {
         step2.value = true;
         (async() => {
-          await getValidation(false);
-          if(!isInvalidConfirmedMeta.value){
-            afterConfirmed();
-          }
+          await getValidation(true);
+          // if(!isInvalidConfirmedMeta.value){
+          //   afterConfirmed();
+          // }
         })();
       }, 2000);
     };
 
     const getValidation = async (initiated) => {
       try{
+        err.value = '';
         provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
         signer = provider.getSigner();
         const Contract = new ethers.Contract(tokenAddress.value, abi, signer);
@@ -481,13 +482,25 @@ export default {
         );
         validationHash.value = receipt.hash;
         validationLink.value = ethScanUrl + receipt.hash;
-        isInvalidConfirmedMeta.value = false;
+        const data = await SwapUtils.getETH_GasLimit(swapData.gasPriceConsultURL);
         let getTransaction = await provider.getTransaction(receipt.hash);
+
         if(initiated && getTransaction.hash === receipt.hash){
-          afterConfirmed();
+          // console.log(data.standardGasLimit)
+          // if(parseInt(getTransaction.gasLimit) >= 37049){
+          if(parseInt(getTransaction.gasLimit) >= data.standardGasLimit){
+            isInvalidConfirmedMeta.value = false;
+            afterConfirmed();
+          }else{
+            err.value = 'Gas limit is too low';
+            isInvalidConfirmedMeta.value = true;
+          }
         }
       }catch(err){
         isInvalidConfirmedMeta.value = true;
+        if(err.code = '-32000'){
+          err.value = err.message;
+        }
       }
     };
 
@@ -520,21 +533,6 @@ export default {
           }
         };
         swapServiceParam.value = data;
-        // let getTransactionReceipt = await provider.getTransaction(validationHash.value);
-        // console.log(getTransactionReceipt)
-        let confirmations = 0;
-        // let receipt = await provider.waitForTransaction(validationHash.value, confirmations);
-        // console.log(receipt)
-        // if(receipt.hash === validationHash.value){
-        //   isInvalidSignedMeta.value = false;
-        //   await afterSigned();
-        // }
-        // provider.getTransactionReceipt(validationHash.value).then( (test) => {
-        //   // if(receipt.hash === validationHash.value){
-        //     isInvalidSignedMeta.value = false;
-        //     // await afterSigned();
-        //     console.log(test)
-        // });
         let longWaitTimeeOut = setTimeout(() => {
           longWaitNotification.value = true;
         }, 7000);
