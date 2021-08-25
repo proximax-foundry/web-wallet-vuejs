@@ -62,12 +62,13 @@
     </div>
     <div v-if="currentPage==2">
       <div class="text-lg my-7">
+        <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <div class="font-bold text-left text-xs md:text-sm lg:text-lg" :class="step1?'text-gray-700':'text-gray-300'">Step 1: Send BEP20 XPX to the escrow account</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="step1?'border-blue-primary':'border-gray-300'">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+                <font-awesome-icon icon="check" :class="step1?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500"></font-awesome-icon>
               </div>
             </div>
           </div>
@@ -75,40 +76,37 @@
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidConfirmedMeta?'border-red-primary':'border-blue-primary'">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="isInvalidConfirmedMeta?'border-red-primary':(step2?'border-blue-primary':'border-gray-300')">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidConfirmedMeta"></font-awesome-icon>
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
+                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-if="isInvalidConfirmedMeta"></font-awesome-icon>
+                <font-awesome-icon icon="check" :class="step2?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-else></font-awesome-icon>
               </div>
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
             {{ isInvalidConfirmedMeta?'Approval in MetaMask is rejected':'Waiting for confirmation in MetaMask' }}
             <div v-if="isInvalidConfirmedMeta" class="mt-5">
-              <button type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border-blue-primary px-8 text-white hover:shadow-lg" @click="getValidation(true)">Retry</button>
+              <button type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border-blue-primary px-8 text-white hover:shadow-lg" @click="getValidation">Retry</button>
               <router-link :to="{ name: 'ViewServices' }" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32 text-tsm" tag="button">Cancel this swap</router-link>
             </div>
           </div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step3?'border-blue-primary':'border-gray-300'">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+                <font-awesome-icon icon="check" :class="step3?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transaction hash: <a :href="validationLink" target=_new v-if="validationHash" class="text-blue-primary break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer Validation">{{ validationHash }}</a></div>
-          <div class="flex-none">
-            <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step3"></font-awesome-icon>
-          </div>
+          <div class="text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transaction hash: <div v-if="validationHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl inline-block flex"><a :href="validationLink" target=_new :class="isInvalidConfirmedMeta?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer hash">{{ validationHash }}</a><div class="flex-none"><font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step3"></font-awesome-icon></div></div></div>
         </div>
         <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step4?'text-gray-700':'text-gray-300'">Step 2: Validate your Sirius address</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step4?'border-blue-primary':'border-gray-300'">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+                <font-awesome-icon icon="check" :class="step4?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
               </div>
             </div>
           </div>
@@ -116,15 +114,15 @@
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSignedMeta?'border-red-primary':'border-blue-primary'">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSignedMeta?'border-red-primary':(step5?'border-blue-primary':'border-gray-300')">
               <div class="flex h-full justify-center">
                 <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidSignedMeta"></font-awesome-icon>
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
+                <font-awesome-icon icon="check" :class="step5?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
               </div>
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">
-            {{ isInvalidSignedMeta?'Approval on MetaMask is rejected':'Waiting for confirmation in MetaMask' }}
+            {{ signatureMessage }}
             <div v-if="isInvalidSignedMeta" class="mt-5">
               <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg w-24" @click="getSigned">Retry</button>
             </div>
@@ -132,24 +130,21 @@
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border border-blue-primary w-6 h-6 md:w-9 md:h-9">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step6?'border-blue-primary':'border-gray-300'">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+                <font-awesome-icon icon="check" :class="step6?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message signed with signature: <div v-if="messageHash" class="text-gray-400 text-tsm break-all" id="validateMessage" :copyValue="messageHash" copySubject="Message Validation">{{ messageHash }}</div></div>
-          <div class="flex-none">
-            <font-awesome-icon icon="copy" @click="copy('validateMessage')" class="w-5 h-5 text-blue-primary cursor-pointer self-center" v-if="step6"></font-awesome-icon>
-          </div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message signed with signature: <div class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex" v-if="messageHash && step6"><div :class="step6?'text-gray-500':'text-gray-300'" class="text-tsm break-all flex-grow" id="validateMessage" :copyValue="messageHash" copySubject="Signature hash">{{ messageHash }}</div><div class="flex-none"><font-awesome-icon icon="copy" @click="copy('validateMessage')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step6"></font-awesome-icon></div></div></div>
         </div>
         <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step7?'text-gray-700':'text-gray-300'">Step 3: Initiate swap</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSwapService?'border-red-primary':'border-blue-primary'">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSwapService?'border-red-primary':(step7?'border-blue-primary':'border-gray-300')">
               <div class="flex h-full justify-center">
                 <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidSwapService"></font-awesome-icon>
-                <font-awesome-icon icon="check" class="text-blue-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
+                <font-awesome-icon icon="check" :class="step7?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
               </div>
             </div>
           </div>
@@ -242,7 +237,7 @@ export default {
       }
     })()
 
-    /* metamask integration */
+    /* MetaMask integration */
     let bscNetworkName = swapData.BSCNetworkName;
     let bscChainId = swapData.BSCChainId;
     const isInstallMetamask = ref(false);
@@ -258,6 +253,22 @@ export default {
     const retrySwapButtonText = ref('Retry');
     const bscScanUrl = swapData.BSCScanUrl;
     const swapServerUrl = swapData.swap_BSC_XPX_URL;
+
+    const signatureMessage = computed(() => {
+      if(isInvalidSignedMeta.value){ // when user rejects signature on MetaMask
+        return 'Approval on MetaMask is rejected';
+      }else{
+        if(longWaitNotification.value){ // when confirmation from MetaMask is taking more than 7 sec after Sign button is click
+          return 'Confirmation from MetaMask is taking longer than expected, please wait till next step';
+        }else{
+          if(messageHash.value){ // when user clicks on the Sign button on MetaMask
+            return 'Transaction is signed. Waiting for confirmation in MetaMask';
+          }else{
+            return 'Waiting for confirmation in MetaMask';
+          }
+        }
+      }
+    });
 
     let provider;
     let signer;
@@ -291,9 +302,9 @@ export default {
         verifyChain(metaChainId, true);
       });
 
-      ethereum.on('connect', (connectInfo) => {
-        console.log(connectInfo)
-      });
+      // ethereum.on('connect', (connectInfo) => {
+      //   console.log(connectInfo)
+      // });
     }else{
       console.log('MetaMask not installed')
     }
@@ -339,7 +350,7 @@ export default {
     }
 
     function updateToken(){
-      // get metamask balance
+      // get MetaMask balance
       ethereum
       .request({ method: 'eth_getBalance', params: [
         currentAccount.value, 'latest'
@@ -354,20 +365,19 @@ export default {
 
     const connectMetamask = () => {
       ethereum
-      .request({ method: 'eth_requestAccounts' })
-      .then(fetchMetaAccount)
-      .catch((err) => {
-        if (err.code === 4001) {
-          // EIP-1193 userRejectedRequest error
-          // If this happens, the user rejected the connection request.
-          console.log('Please connect to MetaMask.');
-        } else {
-          console.error(err);
-          if(err.code == '-32002'){
-            serviceErr.value = 'Please click on MetaMask extension to approve connection';
+        .request({ method: 'eth_requestAccounts' })
+        .then(fetchMetaAccount)
+        .catch((err) => {
+          if (err.code === 4001) {
+            // EIP-1193 userRejectedRequest error
+            // If this happens, the user rejected the connection request.
+            console.log('Please connect to MetaMask.');
+          } else {
+            if(err.code == '-32002'){
+              serviceErr.value = 'Please click on MetaMask extension to approve connection';
+            }
           }
-        }
-      });
+        });
     };
 
     watch([currentNetwork, currentAccount, tokenAddress], ([newNetwork, newCurrentAccount, newTokenAddress]) => {
@@ -430,7 +440,7 @@ export default {
     const err = ref('');
     const serviceErr = ref('');
     const isDisabledSwap = computed(() =>
-      // verify it has been connected to metamask too
+      // verify it has been connected to MetaMask too
       !(amount.value > 0 && siriusAddress.value != '' && !err.value && (balance.value >= amount.value) && (amount.value > defaultXPXTxFee.value))
     );
     const amount = ref('0');
@@ -445,7 +455,6 @@ export default {
 
     const siriusAddressOption = computed(() => {
       let siriusAddress = [];
-
       if(walletState.currentLoggedInWallet){
         walletState.currentLoggedInWallet.accounts.forEach((account) => {
           siriusAddress.push({
@@ -463,29 +472,47 @@ export default {
       setTimeout(() => {
         step2.value = true;
         (async() => {
-          await getValidation(false);
-          if(!isInvalidConfirmedMeta.value){
-            afterConfirmed();
-          }
+          await getValidation();
+          // if(!isInvalidConfirmedMeta.value){
+          //   afterConfirmed();
+          // }
         })();
       }, 2000);
     };
 
-    const getValidation = async (initiated) => {
+    const getValidation = async () => {
       try{
+        err.value = '';
+        provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+        signer = provider.getSigner();
         const Contract = new ethers.Contract(tokenAddress.value, abi, signer);
+        const data = await SwapUtils.getBSC_GasLimit(swapData.gasPriceConsultURL);
+        var options = {
+            gasLimit: data.standardGasLimit,
+        };
         const receipt = await Contract.transfer(
           custodian.value,
           ethers.utils.parseUnits(amount.value, 6),
+          options,
         );
         validationHash.value = receipt.hash;
         validationLink.value = bscScanUrl + receipt.hash;
-        isInvalidConfirmedMeta.value = false;
-        if(initiated){
-          afterConfirmed();
+        let getTransaction = await provider.getTransaction(receipt.hash);
+
+        if(getTransaction.hash === receipt.hash){
+          if(parseInt(getTransaction.gasLimit) >= data.standardGasLimit){
+            isInvalidConfirmedMeta.value = false;
+            afterConfirmed();
+          }else{
+            err.value = 'Gas limit is too low';
+            isInvalidConfirmedMeta.value = true;
+          }
         }
       }catch(err){
         isInvalidConfirmedMeta.value = true;
+        if(err.code = '-32000'){
+          err.value = err.message;
+        }
       }
     };
 
@@ -496,14 +523,19 @@ export default {
         step5.value = true;
         (async() => {
           await getSigned(false);
-            })();
+        })();
       }, 2000);
     };
 
     const swapServiceParam = ref('');
+    const longWaitNotification = ref(false);
+
+    let longWaitTimeOut;
 
     const getSigned = async () => {
       try{
+        provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+        signer = provider.getSigner();
         const messageSignature = await signer.signMessage(siriusAddress.value);
         messageHash.value = messageSignature;
         const data = {
@@ -515,16 +547,43 @@ export default {
           }
         };
         swapServiceParam.value = data;
-        isInvalidSignedMeta.value = false;
-        await afterSigned();
+        longWaitTimeOut = setTimeout(() => {
+          longWaitNotification.value = true;
+        }, 7000);
+
+        let verifyingTxn = setInterval(async() => {
+          const status = await verifyTransaction();
+          // const status = false;
+          if(status){
+            clearInterval(verifyingTxn);
+            isInvalidSignedMeta.value = false;
+            await afterSigned();
+          }
+        }, 2000);
       }catch(err){
         isInvalidSignedMeta.value = true;
       }
     };
 
+    const verifyTransaction = async () => {
+      try{
+        let getTransactionReceipt = await provider.getTransaction(validationHash.value);
+        console.log(getTransactionReceipt)
+        if(getTransactionReceipt.blockHash != null){
+          return true;
+        }else{
+          return false;
+        }
+      }catch(err){
+        console.log(err);
+        return false;
+      }
+    }
+
     const swapServerErrIndex = ref(0);
 
     const afterSigned = async () => {
+      clearTimeout(longWaitTimeOut);
       step6.value = true;
       step7.value = true;
       retrySwapButtonText.value = 'Initiating swap...';
@@ -539,7 +598,7 @@ export default {
           body: stringifyData, // body data type must match "Content-Type" header
         });
 
-        if(response.status == 200){
+        if(response.status == 200 || response.status == 201){
           const data = await response.json();
           isInvalidSwapService.value = false;
           transactionHash.value = data.remoteTxnHash;
@@ -548,6 +607,8 @@ export default {
           swapQr.value = SwapUtils.generateQRCode(validationLink.value);
           setTimeout( ()=> isDisabledValidate.value = false, 1000);
           swapServerErrIndex.value = 0;
+        }else if(response.status == 208){
+          console.log('208');
         }else{
           isInvalidSwapService.value = true;
           ++swapServerErrIndex.value;
@@ -615,6 +676,7 @@ export default {
       afterSigned,
       disableRetrySwap,
       retrySwapButtonText,
+      signatureMessage,
     };
   },
 }
