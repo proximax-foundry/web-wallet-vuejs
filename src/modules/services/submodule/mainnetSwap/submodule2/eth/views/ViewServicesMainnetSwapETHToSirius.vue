@@ -122,7 +122,7 @@
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">
-            {{ isInvalidSignedMeta?'Approval on MetaMask is rejected':(longWaitNotification?'Confirmation from MetaMask is taking longer than expected, please wait till next step':(messageHash?'Transaction is signed. Waiting for confirmation in MetaMask':'Waiting for confirmation in MetaMask')) }}
+            {{ signatureMessage }}
             <div v-if="isInvalidSignedMeta" class="mt-5">
               <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg w-24" @click="getSigned">Retry</button>
             </div>
@@ -253,6 +253,22 @@ export default {
     const retrySwapButtonText = ref('Retry');
     const ethScanUrl = swapData.ETHScanUrl;
     const swapServerUrl = swapData.swap_ETH_XPX_URL;
+
+    const signatureMessage = computed(() => {
+      if(isInvalidSignedMeta.value){ // when user rejects signature on MetaMask
+        return 'Approval on MetaMask is rejected';
+      }else{
+        if(longWaitNotification.value){ // when confirmation from MetaMask is taking more than 7 sec after Sign button is click
+          return 'Confirmation from MetaMask is taking longer than expected, please wait till next step';
+        }else{
+          if(messageHash.value){ // when user clicks on the Sign button on MetaMask
+            return 'Transaction is signed. Waiting for confirmation in MetaMask';
+          }else{
+            return 'Waiting for confirmation in MetaMask';
+          }
+        }
+      }
+    });
 
     let provider;
     let signer;
@@ -543,7 +559,7 @@ export default {
             isInvalidSignedMeta.value = false;
             await afterSigned();
           }
-        }, 1000);
+        }, 2000);
       }catch(err){
         isInvalidSignedMeta.value = true;
       }
@@ -660,7 +676,7 @@ export default {
       afterSigned,
       disableRetrySwap,
       retrySwapButtonText,
-      longWaitNotification,
+      signatureMessage,
     };
   },
 }
