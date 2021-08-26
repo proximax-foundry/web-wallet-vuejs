@@ -500,13 +500,13 @@ export default {
         let getTransaction = await provider.getTransaction(receipt.hash);
 
         if(getTransaction.hash === receipt.hash){
-          if(parseInt(getTransaction.gasLimit) >= data.standardGasLimit){
-            isInvalidConfirmedMeta.value = false;
-            afterConfirmed();
-          }else{
-            err.value = 'Gas limit is too low';
-            isInvalidConfirmedMeta.value = true;
-          }
+          // if(parseInt(getTransaction.gasLimit) >= data.standardGasLimit){
+          isInvalidConfirmedMeta.value = false;
+          afterConfirmed();
+          // }else{
+          //   err.value = 'Gas limit is too low';
+          //   isInvalidConfirmedMeta.value = true;
+          // }
         }
       }catch(err){
         isInvalidConfirmedMeta.value = true;
