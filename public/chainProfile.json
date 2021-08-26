@@ -1,6 +1,6 @@
 {
     "Sirius Testnet 2": {
-      "version": "0.0.10",
+      "version": "0.0.8",
       "apiNodes":[
           "api-1.testnet2.xpxsirius.io"
       ],
