@@ -4,9 +4,7 @@ export class ChainSwapConfig extends StoreProperties{
 
     swap_XPX_ETH_URL: string = "";
     swap_XPX_BSC_URL: string = "";
-    swap_ETH_XPX_URL: string = "";
-    swap_BSC_XPX_URL: string = "";
-
+    swap_IN_SERVICE_URL: string = "";
     BSCScanUrl: string = '';
     ETHScanUrl: string = '';
 

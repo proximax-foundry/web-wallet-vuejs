@@ -223,7 +223,7 @@ export default {
 
     (async() => {
       try {
-        const fetchService = await SwapUtils.fetchETHServiceInfo(swapData.swap_SERVICE_URL);
+        const fetchService = await SwapUtils.fetchETHServiceInfo(swapData.swap_IN_SERVICE_URL);
         if(fetchService.status==200){
           tokenAddress.value = fetchService.data.ethInfo.scAddress;
           custodian.value = fetchService.data.ethInfo.sinkAddress;
@@ -252,7 +252,7 @@ export default {
     const disableRetrySwap = ref(false);
     const retrySwapButtonText = ref('Retry');
     const ethScanUrl = swapData.ETHScanUrl;
-    const swapServerUrl = swapData.swap_ETH_XPX_URL;
+    const swapServerUrl = SwapUtils.getIncoming_ETHSwapTransfer_URL(swapData.swap_IN_SERVICE_URL);
 
     const signatureMessage = computed(() => {
       if(isInvalidSignedMeta.value){ // when user rejects signature on MetaMask
@@ -500,13 +500,13 @@ export default {
         let getTransaction = await provider.getTransaction(receipt.hash);
 
         if(getTransaction.hash === receipt.hash){
-          if(parseInt(getTransaction.gasLimit) >= data.standardGasLimit){
-            isInvalidConfirmedMeta.value = false;
-            afterConfirmed();
-          }else{
-            err.value = 'Gas limit is too low';
-            isInvalidConfirmedMeta.value = true;
-          }
+          // if(parseInt(getTransaction.gasLimit) >= data.standardGasLimit){
+          isInvalidConfirmedMeta.value = false;
+          afterConfirmed();
+          // }else{
+          //   err.value = 'Gas limit is too low';
+          //   isInvalidConfirmedMeta.value = true;
+          // }
         }
       }catch(err){
         isInvalidConfirmedMeta.value = true;
@@ -568,7 +568,6 @@ export default {
     const verifyTransaction = async () => {
       try{
         let getTransactionReceipt = await provider.getTransaction(validationHash.value);
-        console.log(getTransactionReceipt)
         if(getTransactionReceipt.blockHash != null){
           return true;
         }else{

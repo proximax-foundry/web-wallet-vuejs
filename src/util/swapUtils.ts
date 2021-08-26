@@ -780,6 +780,14 @@ export class SwapUtils {
     return `${baseUrl}/swap/${swapId}`;
   }
 
+  static getIncoming_ETHSwapTransfer_URL = (baseUrl: string): string => {
+    return `${baseUrl}/expx/transfer`;
+  }
+
+  static getIncoming_BSCSwapTransfer_URL = (baseUrl: string): string => {
+    return `${baseUrl}/bxpx/transfer`;
+  }
+
   static checkSwapService = (baseUrl: string): string => {
     return `${baseUrl}/checkBalanceOk`;
   }
