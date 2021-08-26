@@ -6,6 +6,7 @@ export class ChainSwapConfig extends StoreProperties{
     sinkFundAddress: string = "";
     swap_XPX_ETH_URL: string = "";
     swap_XPX_BSC_URL: string = "";
+    swap_IN_SERVICE_URL: string = "";
     BSCScanUrl: string = '';
     ETHScanUrl: string = '';
     BSCChainId: number = 0; //97, 5
