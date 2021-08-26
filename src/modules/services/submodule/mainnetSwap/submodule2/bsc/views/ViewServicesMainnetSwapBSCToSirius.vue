@@ -568,7 +568,6 @@ export default {
     const verifyTransaction = async () => {
       try{
         let getTransactionReceipt = await provider.getTransaction(validationHash.value);
-        console.log(getTransactionReceipt)
         if(getTransactionReceipt.blockHash != null){
           return true;
         }else{

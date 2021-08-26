@@ -2,6 +2,7 @@
   <div class='mt-2 py-3'>
     <!-- <div class="grid xs-grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6"> -->
       <!-- <ServiceTile :key="index" :service="item" :showMenuCall="showMenu[index]" :i="index" v-for="(item, index) in services" /> -->
+    <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
     <div class="text-xl text-gray-600 font-bold mt-10">Swap:</div>
     <div class="md:grid md:grid-cols-2 mx-5 lg:mx-5 2xl:mx-40 mt-5">
       <div class="md:col-span-1">
@@ -13,7 +14,7 @@
           </div>
         </router-link>
         <div class="contract_address_label">
-          <div :id="ethContractAddress" :copyValue="ethContractAddress" copySubject="Contract Address" v-if="displayCopy">Contract address:</div>
+          <div :id="ethContractAddress" :copyValue="ethContractAddress" copySubject="ETH Contract Address copied" v-if="displayCopy">Contract address:</div>
           <div>{{ ethContractAddress }} <font-awesome-icon icon="copy" @click="copy(ethContractAddress)" class="ml-2 w-5 h-5 cursor-pointer inline-block"></font-awesome-icon></div>
         </div>
       </div>
@@ -26,7 +27,7 @@
           </div>
         </router-link>
         <div class="contract_address_label">
-          <div :id="bscContractAddress" :copyValue="bscContractAddress" copySubject="Contract Address" v-if="displayCopy">Contract address:</div>
+          <div :id="bscContractAddress" :copyValue="bscContractAddress" copySubject="BSC Contract Address copied" v-if="displayCopy">Contract address:</div>
           <div>{{ bscContractAddress }} <font-awesome-icon icon="copy" @click="copy(bscContractAddress)" class="ml-2 w-5 h-5 cursor-pointer inline-block"></font-awesome-icon></div>
         </div>
       </div>
@@ -54,6 +55,7 @@ export default {
     const displayCopy = ref(false);
     const ethContractAddress = ref('');
     const bscContractAddress = ref('');
+    const serviceErr = ref('');
 
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
@@ -63,7 +65,7 @@ export default {
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
 
-      toast.add({severity:'info', summary: copySubject, detail: 'Address copied', group: 'br', life: 3000});
+      toast.add({severity:'info', summary: copySubject, detail: stringToCopy, group: 'br', life: 3000});
     };
 
     (async() => {
@@ -74,6 +76,7 @@ export default {
           ethContractAddress.value = fetchETHService.data.ethInfo.scAddress;
           bscContractAddress.value = fetchBSCService.data.bscInfo.scAddress;
           displayCopy.value = true;
+          serviceErr.value = '';
         }else{
           serviceErr.value = 'Swapping service is temporary not available. Please try again later';
         }
@@ -87,6 +90,7 @@ export default {
       bscContractAddress,
       copy,
       displayCopy,
+      serviceErr,
     };
     // const internalInstance = getCurrentInstance();
     // const emitter = internalInstance.appContext.config.globalProperties.emitter;
