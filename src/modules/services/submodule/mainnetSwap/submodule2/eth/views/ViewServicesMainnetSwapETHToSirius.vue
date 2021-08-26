@@ -257,7 +257,7 @@ export default {
     const disableRetrySwap = ref(false);
     const retrySwapButtonText = ref('Retry');
     const ethScanUrl = swapData.ETHScanUrl;
-    const swapServerUrl = swapData.swap_ETH_XPX_URL;
+    const swapServerUrl = SwapUtils.getIncoming_ETHSwapTransfer_URL(swapData.swap_SERVICE_URL);
 
     let provider;
     let signer;
