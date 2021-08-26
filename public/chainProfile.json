@@ -63,7 +63,7 @@
         "sinkFeeAddress": "VC2ABSJRJH5HZPHBP4PPSR5WG2YPSGLZZX5L55QU",
         "swap_XPX_ETH_URL": "https://bctestnet-swap-gateway.xpxsirius.io/eth",
         "swap_XPX_BSC_URL": "https://bctestnet-swap-gateway.xpxsirius.io/bsc",
-        "swap_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
+        "swap_IN_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
         "gasPriceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io",
         "priceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io/price",
         "BSCChainId": 97,
