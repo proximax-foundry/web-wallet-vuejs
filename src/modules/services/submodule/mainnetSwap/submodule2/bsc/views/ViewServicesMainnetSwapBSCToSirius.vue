@@ -191,7 +191,7 @@
   </div>
 </template>
 <script>
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, onBeforeUnmount } from "vue";
 import SupplyInput from '@/components/SupplyInput.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
 import SelectSiriusAccountInputPlugin from '@/modules/services/submodule/mainnetSwap/components/SelectSiriusAccountInputPlugin.vue';
@@ -213,6 +213,13 @@ export default {
   },
 
   setup() {
+    let verifyingTxn;
+
+    onBeforeUnmount(() => {
+       if(verifyingTxn){
+         clearInterval(verifyingTxn);
+       }
+    })
 
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
@@ -253,18 +260,23 @@ export default {
     const retrySwapButtonText = ref('Retry');
     const bscScanUrl = swapData.BSCScanUrl;
     const swapServerUrl = SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL);
+    const transactionFailed = ref(false);
 
     const signatureMessage = computed(() => {
       if(isInvalidSignedMeta.value){ // when user rejects signature on MetaMask
         return 'Approval on MetaMask is rejected';
-      }else{
+      }
+      else if(transactionFailed.value){
+        return 'Transaction failed. Please try again with higher gas price and gas limit';
+      }
+      else{
         if(longWaitNotification.value){ // when confirmation from MetaMask is taking more than 7 sec after Sign button is click
-          return 'Confirmation from MetaMask is taking longer than expected, please wait till next step';
+          return 'Transaction confirmation is taking longer than expected, please wait till next step';
         }else{
           if(messageHash.value){ // when user clicks on the Sign button on MetaMask
-            return 'Transaction is signed. Waiting for confirmation in MetaMask';
+            return 'Sirius Address is signed. Waiting for transaction confirmation';
           }else{
-            return 'Waiting for confirmation in MetaMask';
+            return 'Waiting for transaction confirmation';
           }
         }
       }
@@ -551,13 +563,16 @@ export default {
           longWaitNotification.value = true;
         }, 7000);
 
-        let verifyingTxn = setInterval(async() => {
+        verifyingTxn = setInterval(async() => {
           const status = await verifyTransaction();
           // const status = false;
           if(status){
             clearInterval(verifyingTxn);
+            clearTimeout(longWaitTimeOut);
             isInvalidSignedMeta.value = false;
-            await afterSigned();
+            if(!transactionFailed.value){
+              await afterSigned();
+            }
           }
         }, 2000);
       }catch(err){
@@ -567,10 +582,16 @@ export default {
 
     const verifyTransaction = async () => {
       try{
-        let getTransactionReceipt = await provider.getTransaction(validationHash.value);
-        if(getTransactionReceipt.blockHash != null){
+        let transactionReceipt = await provider.getTransactionReceipt(validationHash.value);
+
+        if(transactionReceipt && transactionReceipt.status === 1){
           return true;
-        }else{
+        }
+        else if(transactionReceipt && transactionReceipt.status === 0){
+          transactionFailed.value = true;
+          return true;
+        }
+        else{
           return false;
         }
       }catch(err){
