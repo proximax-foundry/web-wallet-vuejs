@@ -223,7 +223,7 @@ export default {
 
     (async() => {
       try {
-        const fetchService = await SwapUtils.fetchBSCServiceInfo(swapData.swap_SERVICE_URL);
+        const fetchService = await SwapUtils.fetchBSCServiceInfo(swapData.swap_IN_SERVICE_URL);
         if(fetchService.status==200){
           tokenAddress.value = fetchService.data.bscInfo.scAddress;
           custodian.value = fetchService.data.bscInfo.sinkAddress;
@@ -252,7 +252,7 @@ export default {
     const disableRetrySwap = ref(false);
     const retrySwapButtonText = ref('Retry');
     const bscScanUrl = swapData.BSCScanUrl;
-    const swapServerUrl = SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_SERVICE_URL);
+    const swapServerUrl = SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL);
 
     const signatureMessage = computed(() => {
       if(isInvalidSignedMeta.value){ // when user rejects signature on MetaMask
