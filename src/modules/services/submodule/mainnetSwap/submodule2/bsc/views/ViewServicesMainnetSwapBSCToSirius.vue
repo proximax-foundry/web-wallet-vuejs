@@ -252,7 +252,7 @@ export default {
     const disableRetrySwap = ref(false);
     const retrySwapButtonText = ref('Retry');
     const bscScanUrl = swapData.BSCScanUrl;
-    const swapServerUrl = swapData.swap_BSC_XPX_URL;
+    const swapServerUrl = SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_SERVICE_URL);
 
     const signatureMessage = computed(() => {
       if(isInvalidSignedMeta.value){ // when user rejects signature on MetaMask
