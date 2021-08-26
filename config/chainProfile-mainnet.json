@@ -1,0 +1,45 @@
+{
+    "Sirius Testnet 2": {
+      "version": "0.0.8",
+      "apiNodes":[
+          "arcturus.xpxsirius.io",
+          "bigcalvin.xpxsirius.io"
+      ],
+      "httpPort": 3000,
+      "generationHash": "10540AD3A1BF46B1A05D8B1CF0252BC9FB2E0B53CFD748262B0CE341CEAFEB6B",
+      "network":{
+        "type": 168,
+        "currency":{
+            "name": "XPX",
+            "namespace": "prx.xpx",
+            "mosaicId": "402b2f579faebc59",
+            "namespaceId": "bffb42a19116bdf6",
+            "divisibility": 6
+        }
+      },
+      "chainExplorer": {
+        "url": "https://explorer.xpxsirius.io",
+        "blockRoute": "#/result/blockHeight",
+        "publicKeyRoute": "#/result/publicKey",
+        "addressRoute": "#/result/address",
+        "hashRoute": "#/result/hash",
+        "namespaceInfoRoute": "#/result/namespaceInfo",
+        "assetInfoRoute": "#/result/assetInfo"
+      },
+      "swapData":{
+        "swap_XPX_ETH_URL": "https://swap-gateway.xpxsirius.io/eth",
+        "swap_XPX_BSC_URL": "https://swap-gateway.xpxsirius.io/bsc",
+        "swap_ETH_XPX_URL": "https://swap-gateway.xpxsirius.io/expx/transfer",
+        "swap_BSC_XPX_URL": "https://swap-gateway.xpxsirius.io/bxpx/transfer",
+        "swap_SERVICE_URL": "https://swap-gateway.xpxsirius.io",
+        "gasPriceConsultURL": "https://swap-gateway.xpxsirius.io",
+        "priceConsultURL": "https://swap-gateway.xpxsirius.io/price",
+        "BSCChainId": 56,
+        "ETHChainId": 1,
+        "BSCScanUrl": "https://bscscan.com/tx/",
+        "ETHScanUrl": "https://etherscan.io/tx/",
+        "BSCNetworkName": "Binance Smart Chain",
+        "ETHNetworkName": "Ethereum"
+      }
+    }
+}
