@@ -99,7 +99,7 @@
               </div>
             </div>
           </div>
-          <div class="text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transaction hash: <div v-if="validationHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl inline-block flex"><a :href="validationLink" target=_new :class="isInvalidConfirmedMeta?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer hash">{{ validationHash }}</a><div class="flex-none"><font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step3"></font-awesome-icon></div></div></div>
+          <div class="text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transaction hash: <div v-if="validationHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex"><a :href="validationLink" target=_new :class="isInvalidConfirmedMeta?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer hash">{{ validationHash }}</a><div class="flex-none"><font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step3"></font-awesome-icon></div></div><button class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border-blue-primary px-8 text-white hover:shadow-lg mt-4 disabled:opacity-50" type="button" v-if="validationHash" :disabled="isDisabledCheckTxnConfirmed" @click="triggerTxnConfirmation">{{ isCheckingTxnConfirmation?'Checking confirmation...':'Check confirmation' }}</button><div class="text-tsm mt-2 bg-blue-100 px-4 py-2 rounded-xl inline-block" v-if="isTxnNotConfirmed">Transaction is not confirmed yet. Please check again in a moment</div></div>
         </div>
         <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step4?'text-gray-700':'text-gray-300'">Step 2: Validate your Sirius address</div>
         <div class="flex border-b border-gray-300 p-3">
@@ -530,14 +530,43 @@ export default {
 
     const afterConfirmed = () => {
       step3.value = true;
-      setTimeout( ()=> step4.value = true, 1000);
-      setTimeout( ()=> {
-        step5.value = true;
-        (async() => {
-          await getSigned(false);
-        })();
-      }, 2000);
     };
+
+    const isCheckingTxnConfirmation = ref(false);
+    const isDisabledCheckTxnConfirmed = ref(false);
+    const isTxnNotConfirmed = ref(false);
+
+    const triggerTxnConfirmation = () => {
+      isCheckingTxnConfirmation.value = true;
+      isDisabledCheckTxnConfirmed.value = true;
+      isTxnNotConfirmed.value = false;
+      setTimeout( async () => {
+        await checkTxnConfirmation();
+      }, 2000);
+    }
+
+    const checkTxnConfirmation = async () => {
+      const status = await verifyTransaction();
+      isCheckingTxnConfirmation.value = false;
+      if(status){
+        if(!transactionFailed.value){
+          isTxnNotConfirmed.value = false;
+          setTimeout( ()=> step4.value = true, 1000);
+          setTimeout( ()=> {
+            step5.value = true;
+            (async() => {
+              await getSigned(false);
+            })();
+          }, 2000);
+        }else{
+          isDisabledCheckTxnConfirmed.value = false;
+          isTxnNotConfirmed.value = true;
+        }
+      }else{
+        isDisabledCheckTxnConfirmed.value = false;
+        isTxnNotConfirmed.value = true;
+      }
+    }
 
     const swapServiceParam = ref('');
     const longWaitNotification = ref(false);
@@ -564,17 +593,18 @@ export default {
           longWaitNotification.value = true;
         }, 7000);
 
-        verifyingTxn = setInterval(async() => {
-          const status = await verifyTransaction();
-          // const status = false;
-          if(status){
-            clearInterval(verifyingTxn);
-            clearTimeout(longWaitTimeOut);
-            if(!transactionFailed.value){
-              await afterSigned();
-            }
-          }
-        }, 2000);
+        // verifyingTxn = setInterval(async() => {
+        //   const status = await verifyTransaction();
+        //   // const status = false;
+        //   if(status){
+        //     clearInterval(verifyingTxn);
+        //     clearTimeout(longWaitTimeOut);
+        //     if(!transactionFailed.value){
+        //       await afterSigned();
+        //     }
+        //   }
+        // }, 2000);
+        await afterSigned();
       }catch(err){
         isInvalidSignedMeta.value = true;
       }
@@ -583,7 +613,6 @@ export default {
     const verifyTransaction = async () => {
       try{
         let transactionReceipt = await provider.getTransactionReceipt(validationHash.value);
-
         if(transactionReceipt && transactionReceipt.status === 1){
           return true;
         }
@@ -697,6 +726,11 @@ export default {
       disableRetrySwap,
       retrySwapButtonText,
       signatureMessage,
+      checkTxnConfirmation,
+      triggerTxnConfirmation,
+      isCheckingTxnConfirmation,
+      isDisabledCheckTxnConfirmed,
+      isTxnNotConfirmed,
     };
   },
 }
