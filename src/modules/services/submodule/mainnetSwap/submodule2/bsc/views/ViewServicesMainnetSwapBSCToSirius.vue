@@ -99,7 +99,7 @@
               </div>
             </div>
           </div>
-          <div class="text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transaction hash: <div v-if="validationHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl inline-block flex"><a :href="validationLink" target=_new :class="isInvalidConfirmedMeta?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer hash">{{ validationHash }}</a><div class="flex-none"><font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step3"></font-awesome-icon></div></div></div>
+          <div class="text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transaction hash: <div v-if="validationHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl inline-block flex"><a :href="validationLink" target=_new :class="isInvalidConfirmedMeta?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer hash">{{ validationHash }}</a><div class="flex-none"><font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step3"></font-awesome-icon></div></div><button class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border-blue-primary px-8 text-white hover:shadow-lg" type="button">Click to proceed</button></div>
         </div>
         <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step4?'text-gray-700':'text-gray-300'">Step 2: Validate your Sirius address</div>
         <div class="flex border-b border-gray-300 p-3">
@@ -530,6 +530,8 @@ export default {
 
     const afterConfirmed = () => {
       step3.value = true;
+
+      // following would be after button is pressed
       setTimeout( ()=> step4.value = true, 1000);
       setTimeout( ()=> {
         step5.value = true;
@@ -546,6 +548,7 @@ export default {
 
     const getSigned = async () => {
       try{
+        isInvalidSignedMeta.value = false;
         provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
         signer = provider.getSigner();
         const messageSignature = await signer.signMessage(siriusAddress.value);
@@ -569,7 +572,6 @@ export default {
           if(status){
             clearInterval(verifyingTxn);
             clearTimeout(longWaitTimeOut);
-            isInvalidSignedMeta.value = false;
             if(!transactionFailed.value){
               await afterSigned();
             }
