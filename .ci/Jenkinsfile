@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         ARTIFACT = 'swap-wallet.tar.xz'
+        AWS_CREDENTIALS_ID  = '	ci_prod_swap'
     }
 
     stages {
@@ -23,7 +24,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'cloudfront_id', variable: 'CLOUDFRONT_ID'), 
                                     string(credentialsId: 's3_bucket', variable: 'S3_BUCKET'),
                                     string(credentialsId: 'aws_region', variable: 'AWS_REGION')]){
-                    withAWS(credentials: 'jenkins-ecr', region: "${AWS_REGION}") {
+                    withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${AWS_REGION}") {
                         echo 'Deleting old files'
                         s3Delete bucket: "${S3_BUCKET}", path: './'
 
