@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         ARTIFACT = 'swap-wallet.tar.xz'
-        AWS_CREDENTIALS_ID  = '	ci_prod_swap'
+        AWS_CREDENTIALS_ID = 'ci_prod_swap'
     }
 
     stages {
