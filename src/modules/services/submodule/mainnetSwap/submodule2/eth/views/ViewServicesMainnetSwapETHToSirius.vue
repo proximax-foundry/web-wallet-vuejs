@@ -495,6 +495,7 @@ export default {
     const getValidation = async () => {
       try{
         err.value = '';
+        isInvalidConfirmedMeta.value = false;
         provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
         signer = provider.getSigner();
         const Contract = new ethers.Contract(tokenAddress.value, abi, signer);
@@ -513,7 +514,6 @@ export default {
 
         if(getTransaction.hash === receipt.hash){
           // if(parseInt(getTransaction.gasLimit) >= data.standardGasLimit){
-          isInvalidConfirmedMeta.value = false;
           afterConfirmed();
           // }else{
           //   err.value = 'Gas limit is too low';
