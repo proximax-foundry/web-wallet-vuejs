@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    environment {
+        ARTIFACT = 'swap-wallet.tar.xz'
+        AWS_CREDENTIALS_ID = 'ci_prod_swap'
+    }
+
+    stages {
+        stage('Deploy'){
+            steps {
+                script {
+                    sh """
+                    wget https://github.com/proximax-foundry/web-wallet-vuejs/releases/download/${env.GIT_BRANCH}/${ARTIFACT}
+                    tar -xvf ${ARTIFACT}
+                    """
+                }
+
+                configFileProvider(
+                    [configFile(fileId: 'mainnet-chain-profile', variable: 'CHAIN_PROFILE')]) {
+                    sh 'cp $CHAIN_PROFILE dist/chainProfile.json'
+                }
+            
+                withCredentials([string(credentialsId: 'cloudfront_id', variable: 'CLOUDFRONT_ID'), 
+                                    string(credentialsId: 's3_bucket', variable: 'S3_BUCKET'),
+                                    string(credentialsId: 'aws_region', variable: 'AWS_REGION')]){
+                    withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${AWS_REGION}") {
+                        echo 'Deleting old files'
+                        s3Delete bucket: "${S3_BUCKET}", path: './'
+
+                        echo 'Uploading new files'
+                        s3Upload bucket: "${S3_BUCKET}", acl: 'Private', file: 'dist/', sseAlgorithm: 'AES256'
+                        
+                        echo 'Invalidating CloudFront'
+                        cfInvalidate distribution: "${CLOUDFRONT_ID}", paths: ['/*']
+                    }
+                }
+            }
+        }
+    }
+}
