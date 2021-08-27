@@ -8,6 +8,7 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/swap-wallet-new' }}
     steps:
       - uses: actions/checkout@v2
 
