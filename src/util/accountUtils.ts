@@ -53,9 +53,9 @@ const checkAvailableContact = (recipient :string) :boolean=> {
   const wallet = walletState.currentLoggedInWallet;
   let isInContacts = true;
   if (wallet.contacts != undefined) {
-    isInContacts = (wallet.contacts.findIndex((element) => element.address == recipient) == -1);
+    isInContacts = wallet.contacts.find((element) => element.address == recipient)? true: false;
   }
-  return (isInContacts && (wallet.accounts.findIndex((element) => element.address == recipient) == -1)) ? false : true;
+  return (isInContacts || (wallet.accounts.find((element) => element.address ===recipient))  || (wallet.others.find((element) => element.address === recipient))) ? true : false;
 }
 
 export const accountUtils = readonly({
