@@ -99,7 +99,20 @@
               </div>
             </div>
           </div>
-          <div class="text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Transaction hash: <div v-if="validationHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex"><a :href="validationLink" target=_new :class="isInvalidConfirmedMeta?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer hash">{{ validationHash }}</a><div class="flex-none"><font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step3"></font-awesome-icon></div></div><button class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border-blue-primary px-8 text-white hover:shadow-lg mt-4 disabled:opacity-50" type="button" v-if="validationHash" :disabled="isDisabledCheckTxnConfirmed" @click="triggerTxnConfirmation">{{ isCheckingTxnConfirmation?'Checking confirmation...':'Check confirmation' }}</button><div class="text-tsm mt-2 bg-blue-100 px-4 py-2 rounded-xl inline-block" v-if="isTxnNotConfirmed">Transaction is not confirmed yet. Please check again in a moment</div></div>
+          <div class="text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">
+            Transaction hash:
+            <div v-if="validationHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
+              <a :href="validationLink" target=_new :class="isInvalidConfirmedMeta?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ validationHash }}</a>
+              <div class="flex-none">
+                <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step3"></font-awesome-icon>
+              </div>
+            </div>
+            <div class="sm:flex">
+              <button class="sm:flex-none bg-blue-primary h-11 w-60 rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-4 disabled:opacity-50" type="button" v-if="validationHash" :disabled="isDisabledCheckTxnConfirmed" @click="triggerTxnConfirmation">{{ isCheckingTxnConfirmation?'Checking confirmation...':'Check confirmation' }}</button>
+              <div v-if="validationHash" class="py-2 sm:flex-grow text-tsm">One block confirmation needed to proceed. <b>Do not change Gas Limit, Max priority fee or Max fee</b>. Confirmation might take up to 30 minutes, 1 hour or more due to high volume of transactions. View confirmation status on <a :href="validationLink" target="_new" class="text-blue-primary inline-block hover:text-blue-900 hover:underline">BSCScan<font-awesome-icon icon="external-link-alt" class="ml-1 text-blue-primary w-3 h-3 self-center inline-block"></font-awesome-icon></a>.</div>
+            </div>
+            <div class="text-tsm mt-2 bg-blue-100 px-4 py-2 rounded-xl inline-block text-blue-900" v-if="isTxnNotConfirmed">Transaction is not confirmed yet. Please check again in a moment</div>
+          </div>
         </div>
         <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step4?'text-gray-700':'text-gray-300'">Step 2: Validate your Sirius address</div>
         <div class="flex border-b border-gray-300 p-3">
@@ -442,6 +455,7 @@ export default {
       copyToClipboard(stringToCopy);
       toast.add({severity:'info', summary: copySubject + ' copied', detail: stringToCopy , group: 'br', life: 3000});
     };
+
     const currentPage = ref(1);
     const showSiriusAddressErr = ref(false);
     const disableSiriusAddress = ref(false);
