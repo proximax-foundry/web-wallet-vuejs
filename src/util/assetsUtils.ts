@@ -99,9 +99,19 @@ export class AssetsUtils {
   static getOwnedAssets = (address: string) => {
     const assetSelection: Array<assetSelectionInterface> = [];
     const account = walletState.currentLoggedInWallet.accounts.find(account => account.address === address);
-    const filterAsset = account.assets.filter((asset) => asset.owner === account.publicKey);
-    if(filterAsset.length > 0){
-      filterAsset.forEach((asset) => {
+    const other = walletState.currentLoggedInWallet.others.find(account => account.address === address);
+    const filterAccountAsset = account?account.assets.filter((asset) => asset.owner === account.publicKey):[];
+    const filterOtherAsset = other?other.assets.filter((asset) => asset.owner === other.publicKey):[];
+    if(filterAccountAsset.length > 0){
+      filterAccountAsset.forEach((asset) => {
+        assetSelection.push({
+          label: asset.idHex + ' > ' + Helper.amountFormatterSimple(asset.amount, asset.divisibility),
+          value: asset.idHex,
+        });
+      });
+    }
+    if(filterOtherAsset.length > 0){
+      filterOtherAsset.forEach((asset) => {
         assetSelection.push({
           label: asset.idHex + ' > ' + Helper.amountFormatterSimple(asset.amount, asset.divisibility),
           value: asset.idHex,
@@ -113,10 +123,21 @@ export class AssetsUtils {
 
   static getOwnedAssetsPermutable = (address: string) => {
     const assetSelection: Array<assetSelectionInterface> = [];
-    const account = walletState.currentLoggedInWallet.accounts.find(account => account.address === address );
-    const filterAsset = account.assets.filter(asset => (asset.owner === account.publicKey && asset.supplyMutable === true));
-    if(filterAsset.length > 0){
-      filterAsset.forEach((asset) => {
+    const account = walletState.currentLoggedInWallet.accounts.find(account => account.address === address);
+    const other = walletState.currentLoggedInWallet.others.find(account => account.address === address);
+    const filterAccountAsset = account?account.assets.filter(asset => (asset.owner === account.publicKey && asset.supplyMutable === true)):[];
+    const filterOtherAsset = other?other.assets.filter(asset => (asset.owner === other.publicKey && asset.supplyMutable === true)):[];
+    if(filterAccountAsset.length > 0){
+      filterAccountAsset.forEach((asset) => {
+        assetSelection.push({
+          label: asset.idHex + ' > ' + Helper.amountFormatterSimple(asset.amount, asset.divisibility),
+          value: asset.idHex,
+        });
+      });
+    }
+
+    if(filterOtherAsset.length > 0){
+      filterOtherAsset.forEach((asset) => {
         assetSelection.push({
           label: asset.idHex + ' > ' + Helper.amountFormatterSimple(asset.amount, asset.divisibility),
           value: asset.idHex,
@@ -128,10 +149,12 @@ export class AssetsUtils {
 
   static getCosignerList(address: string){
     const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
-    let multiSig = account.getDirectParentMultisig();
-    if(multiSig.length>0){
+    const other = walletState.currentLoggedInWallet.others.find((account) => account.address == address);
+    let multiSig = account?account.getDirectParentMultisig():[];
+    let multiSigOther = other?other.getDirectParentMultisig():[];
+    if(multiSig.length > 0 || multiSigOther.length > 0){
       const cosigner = walletState.currentLoggedInWallet.accounts.filter(account => {
-        if(multiSig.indexOf(account.publicKey) >= 0 ){
+        if(multiSig.indexOf(account.publicKey) >= 0 || multiSigOther.indexOf(account.publicKey) >= 0){
           return true;
         }
       });
@@ -225,8 +248,13 @@ export class AssetsUtils {
     const assetSupplyChangeTx = buildTransactions.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(divisibility, supply))).toAggregate(owner);
 
     const account = AssetsUtils.getSenderAccount(selectedAddress, walletPassword);
-    const multisigPublicKey = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress).publicKey;
+
+    const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
+    const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
+    const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
+
     const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, networkType);
+
     const innerTxn = [assetDefinitionTx.toAggregate(multisigPublicAccount),assetSupplyChangeTx.toAggregate(multisigPublicAccount)];
     const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
     const aggregateBondedTxSigned = account.sign(aggregateBondedTx, generationHash);
@@ -250,7 +278,11 @@ export class AssetsUtils {
     let buildTransactions = new BuildTransactions(networkType, generationHash);
     let createAssetAggregateTransaction = AssetsUtils.assetSupplyChangeTransaction(networkType, generationHash, mosaicId, changeType, supply, divisibility);
     const account = AssetsUtils.getSenderAccount(selectedAddress, walletPassword);
-    const multisigPublicKey = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress).publicKey;
+
+    const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
+    const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
+    const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
+
     const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, networkType);
     const innerTxn = [createAssetAggregateTransaction.toAggregate(multisigPublicAccount)];
     const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
@@ -277,7 +309,11 @@ export class AssetsUtils {
     let buildTransactions = new BuildTransactions(networkType, generationHash);
     const linkAssetToNamespaceTx = AssetsUtils.linkAssetToNamespaceTransaction(networkType, generationHash, mosaicIdString, namespaceString, linkType);
     const account = AssetsUtils.getSenderAccount(selectedAddress, walletPassword);
-    const multisigPublicKey = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress).publicKey;
+
+    const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
+    const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
+    const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
+
     const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, networkType);
     const innerTxn = [linkAssetToNamespaceTx.toAggregate(multisigPublicAccount)];
     const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
@@ -294,17 +330,32 @@ export class AssetsUtils {
   }
 
   static listActiveNamespacesToLink = (address:string, linkOption: string) => {
-    const accountNamespaces = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address).namespaces.filter(namespace => namespace.active === true);
-    const namespacesNum = accountNamespaces.length;
+    // const accountNamespaces = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address).namespaces.filter(namespace => namespace.active === true);
+
+    const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address);
+    const accountNamespaces = account?account.namespaces.filter(namespace => namespace.active === true):[];
+    const other = walletState.currentLoggedInWallet.others.find((account) => account.address === address);
+    const otherNamespaces = other?other.namespaces.filter(namespace => namespace.active === true):[];
+
+    let namespacesNum:number;
+    let fetchedNamespace:Array<any>;
+
+    if(accountNamespaces.length > 0){
+      namespacesNum = accountNamespaces.length;
+      fetchedNamespace = accountNamespaces;
+    }else{
+      namespacesNum = otherNamespaces.length;
+      fetchedNamespace = otherNamespaces;
+    }
+
     let namespacesArr = [];
     if(namespacesNum > 0){
-      accountNamespaces.forEach((namespaceElement) => {
+      fetchedNamespace.forEach((namespaceElement) => {
         const level = namespaceElement.name.split('.');
         let isDisabled: boolean;
         let label:string = '';
         let namespaceName:string = '';
         if(namespaceElement.linkedId != ''){
-          isDisabled = (linkOption=='link'?true:false);
           let linkName:string;
           let linkLabel:string;
 
@@ -312,10 +363,12 @@ export class AssetsUtils {
             case 1:
               linkName = "Asset";
               linkLabel = namespaceElement.linkedId;
+              isDisabled = (linkOption=='link'?true:false);
               break;
             case 2:
               linkName = "Address";
               linkLabel = Helper.createAddress(namespaceElement.linkedId).pretty()
+              isDisabled = true;
               break;
             default:
               break;

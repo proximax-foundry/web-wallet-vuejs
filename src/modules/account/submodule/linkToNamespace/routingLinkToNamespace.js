@@ -1,10 +1,10 @@
-export const LinkToNamespaceRoutes = [
-  {
-    path: '/alias-address-to-namespace',
+export const LinkToNamespaceRoutes = [{
+    path: '/alias-address-to-namespace/:address',
     name: 'ViewAccountAliasAddressToNamespace',
-    component: () => import('@/modules/account/submodule/linkToNamespace/views/ViewAccountAliasAddressToNamespace.vue'),
+    props: true,
+    component: () =>
+        import ('@/modules/account/submodule/linkToNamespace/views/ViewAccountAliasAddressToNamespace.vue'),
     meta: {
-      title: "Link to Namespace",
+        title: "Link to Namespace",
     }
-  },
-];
+}, ];
