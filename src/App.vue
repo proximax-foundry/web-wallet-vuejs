@@ -19,7 +19,7 @@
     <footer class="h-12 text-center mt-20">
 
       <div class="text-xs py-2">
-        <div class="font-bold">version 0.5.0</div>
+        <div class="font-bold">version {{ versioning }}</div>
         <div class="font-bold">&copy; ProximaX 2021</div>
         <div>Please report any issues identified to our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold hover:underline">helpdesk</a>.</div>
       </div>
@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, watch } from "vue";
+import { computed, defineComponent, getCurrentInstance, watch, ref } from "vue";
 import headerComponent from '@/components/headerComponent.vue'
 import NavigationMenu from '@/components/NavigationMenu.vue'
 import ConfirmDialog from 'primevue/confirmdialog';
@@ -38,6 +38,7 @@ import { networkState } from './state/networkState';
 import { walletState } from "@/state/walletState";
 import { listenerState } from "@/state/listenerState";
 import { ChainUtils } from "@/util/chainUtils";
+import packageData from "../package.json"
 
 export default defineComponent({
   name: 'App',
@@ -62,9 +63,14 @@ export default defineComponent({
 
     const login = computed(() =>walletState.isLogin);
 
+    const versioning = ref('0.0.1');
+
+    versioning.value = packageData.version;
+
     return{
       login,
       clickEvent,
+      versioning
     }
   }
 });
