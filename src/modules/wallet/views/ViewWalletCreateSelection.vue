@@ -4,7 +4,7 @@
     <div class="page-title-gray-line md:grid md:grid-cols-2 pt-20">
       <div class="px-5 self-center text-center my-10 md:col-span-1">
         <img src="@/modules/wallet/img/icon-private-key-blue.svg" class="w-12 inline-block"><p class="mt-3">From a Private Key</p>
-        <router-link :to="{ name : 'ViewWalletCreatePrivateKey'}" class="max-w-xs sm:max-w-sm w-full inline-block default-btn my-3">Create</router-link>
+        <router-link :to="{ name : 'ViewWalletCreatePrivateKey'}" class="max-w-xs sm:max-w-sm w-full inline-block default-btn my-3">Import</router-link>
       </div>
       <div class="px-5 self-center text-center my-10 md:col-span-1"><img src="@/modules/wallet/img/icon-wallet-import-blue.svg" class="w-12 inline-block"><p class="mt-3">From a Wallet Backup</p>
         <label class="max-w-xs sm:max-w-sm w-full inline-block default-btn my-3 cursor-pointer">
