@@ -8,7 +8,7 @@
         <router-link :to="{ name: 'ViewWalletCreate'}" class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center">{{$t('welcome.create')}}</router-link></div>
       <div class="px-5 self-center text-center my-10">
         <img src="@/modules/wallet/img/icon-private-key-blue.svg" class="w-12 inline-block"><p class="mt-3">{{$t('createwallet.fromprivatekey')}}</p>
-        <router-link :to="{ name : 'ViewWalletCreatePrivateKey'}" class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center">{{$t('welcome.create')}}</router-link>
+        <router-link :to="{ name : 'ViewWalletCreatePrivateKey'}" class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center">{{$t('createwallet.import')}}</router-link>
       </div>
       <div class="px-5 self-center text-center my-10"><img src="@/modules/wallet/img/icon-wallet-import-blue.svg" class="w-12 inline-block"><p class="mt-3">{{$t('createwallet.fromwalletbackup')}}</p>
         <label class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center cursor-pointer">
