@@ -108,7 +108,7 @@
               </div>
             </div>
             <div class="sm:flex">
-              <button class="sm:flex-none bg-blue-primary h-11 w-60 rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-4 disabled:opacity-50" type="button" v-if="validationHash" :disabled="isDisabledCheckTxnConfirmed" @click="triggerTxnConfirmation">{{ isCheckingTxnConfirmation?'Checking confirmation...':'Check confirmation' }}</button>
+              <button class="sm:flex-none bg-blue-primary h-11 w-60 rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-3 sm:mt-0 disabled:opacity-50 self-center" type="button" v-if="validationHash" :disabled="isDisabledCheckTxnConfirmed" @click="triggerTxnConfirmation">{{ isCheckingTxnConfirmation?'Checking confirmation...':'Check confirmation' }}</button>
               <div v-if="validationHash" class="py-2 sm:flex-grow text-tsm">One block confirmation needed to proceed. <b>Do not change Gas Limit, Max priority fee or Max fee</b>. Confirmation might take up to 30 minutes, 1 hour or more due to high volume of transactions. View confirmation status on <a :href="validationLink" target="_new" class="text-blue-primary inline-block hover:text-blue-900 hover:underline">EtherScan<font-awesome-icon icon="external-link-alt" class="ml-1 text-blue-primary w-3 h-3 self-center inline-block"></font-awesome-icon></a>.</div>
             </div>
             <div class="text-tsm mt-2 bg-blue-100 px-4 py-2 rounded-xl inline-block text-blue-900" v-if="isTxnNotConfirmed">Transaction is not confirmed yet. Please check again in a moment</div>
