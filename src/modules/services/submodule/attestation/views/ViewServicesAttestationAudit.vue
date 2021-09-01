@@ -1,6 +1,6 @@
 <template>
   <div class="flex justify-between text-xs sm:text-sm">
-    <div><span class="text-gray-400">{{$t('services.attestation')}} ></span> <span class="text-blue-primary font-bold">{{$t('welcome.create')}}</span></div>
+    <div><span class="text-gray-400">{{$t('services.attestation')}} ></span> <span class="text-blue-primary font-bold">{{$t('services.audit')}}</span></div>
     <div>
       <router-link :to="{name: 'ViewServicesAttestationCreate'}" class="font-bold" active-class="accounts">{{$t('welcome.create')}}</router-link> |
       <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
