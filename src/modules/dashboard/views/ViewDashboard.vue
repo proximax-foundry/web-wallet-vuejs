@@ -29,7 +29,7 @@
       <div class="text-md text-center sm:text-right lg:text-left">{{$t('dashboard.transactions')}}: <span>{{ confirmedTransactions.length + unconfirmedTransactions.length }}</span></div>
       <div class="xs:text-center sm:text-right lg:text-left">
         <div class="mt-2">
-          <div class="rounded-full bg-blue-primary text-white w-24 h-15 px-2 py-1 mr-3 inline-block" :class="confirmedTransactions.length>0?'cursor-pointer':''" @click="clickConfirmedTransaction()">
+          <div class="rounded-full bg-blue-primary text-white w-24 h-15 px-2 py-1 mr-3 inline-block" :class="filteredConfirmedTransactions.length>0?'cursor-pointer':''" @click="clickConfirmedTransaction()">
             <div class="flex justify-between">
               <div class="rounded-full text-white border pt-1 pl-1 w-6 h-6 relative"><font-awesome-icon icon="check" class="w-4 h-3 absolute" style="top: 6px;"></font-awesome-icon></div>
               <div class="text-xs font-bold flex items-center">{{ filteredConfirmedTransactions.length }}</div>
@@ -41,10 +41,10 @@
               <div class="text-xs font-bold flex items-center">{{ filteredUnconfirmedTransactions.length }}</div>
             </div>
           </div>
-          <div class="rounded-full bg-yellow-500 text-white w-24 h-15 px-2 py-1 inline-block" :class="partialTransactions.length>0?'cursor-pointer':''" @click="clickPartialTransactions()">
+          <div class="rounded-full bg-yellow-500 text-white w-24 h-15 px-2 py-1 inline-block" :class="filteredPartialTransactions.length>0?'cursor-pointer':''" @click="clickPartialTransactions()">
             <div class="flex justify-between">
               <img src="@/modules/dashboard/img/icon-transaction-partial-white.svg" class="w-6 h-6" />
-              <div class="text-xs font-bold flex items-center">{{ partialTransactions.length }}</div>
+              <div class="text-xs font-bold flex items-center">{{ filteredPartialTransactions.length }}</div>
             </div>
           </div>
         </div>
@@ -74,25 +74,32 @@
   </div>
 
   <div>
-    <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed"></DashboardDataTable>
-    <DashboardDataTable :showBlock="false" :showAction="false" @openMessage="openMessageModal" :transactions="filteredUnconfirmedTransactions" v-if="isShowUnconfirmed"></DashboardDataTable>
-    <PartialDashboardDataTable :transactions="partialTransactions.sort((a, b) => b.deadline - a.deadline)" v-if="isShowPartial"></PartialDashboardDataTable>
+    <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed" type="confirmed"></DashboardDataTable>
+    <DashboardDataTable :showBlock="false" :showAction="false" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="filteredUnconfirmedTransactions" v-if="isShowUnconfirmed" type="unconfirmed"></DashboardDataTable>
+    <DashboardPartialDataTable :showBlock="false" :showAction="true" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" @openCosign="openCosignModal" :transactions="filteredPartialTransactions" v-if="isShowPartial" type="partial"></DashboardPartialDataTable>
+    <!--<PartialDashboardDataTable :transactions="partialTransactions.sort((a, b) => b.deadline - a.deadline)" v-if="isShowPartial"></PartialDashboardDataTable>-->
     <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
     <AddressQRModal :showModal="showAddressQRModal" :qrDataString="addressQR" :addressName="selectedAccountName" />
+    <MessageModal :showModal="showMessageModal" :message="messagePayload" />
+    <DecryptMessageModal :key="decryptMessageKey" :showModal="showDecryptMessageModal" :manualPublicKey="manualPublicKey" :message="messagePayload" :selectedAccountPublicKey="selectedAccountPublicKey" @decrypt="decryptMessage" :initialSignerPublicKey="initialSignerPublicKey" :isInitialSender="isInitialSender" :publicKeyToUse="publicKeyToUse"  />
+    <CosignModal :key="cosignModalKey" :showModal="showCosignModal" :txHash="txHash" @cosignTransaction="cosignTransaction" :signerPublicKey="signerPublicKey" :signedPublicKey="signedPublicKey" :selectedAccountPublicKey="selectedAccountPublicKey" />
   </div>
-  <Dialog header="Transaction Message:" v-model:visible="displayMessageModal" :style="{width: '50vw'}" :modal="true">
-      <p class="p-m-0">{{ txMessage }}</p>
-  </Dialog>
 </template>
 
 <script>
 import { computed, defineComponent, ref, getCurrentInstance, watch, reactive } from 'vue';
+import {ResolvedNamespace} from '@/modules/dashboard/model/resolvedNamespace';
+import {AmountType, TipType} from '@/modules/dashboard/model/dashboardClasses';
 import DashboardDataTable from '@/modules/dashboard/components/DashboardDataTable.vue';
+import DashboardPartialDataTable from '@/modules/dashboard/components/DashboardPartialDataTable.vue';
 import AssetDataTable from '@/modules/dashboard/components/AssetDataTable.vue';
 import NamespaceDataTable from '@/modules/dashboard/components/NamespaceDataTable.vue';
 import PartialDashboardDataTable from '@/components/PartialDashboardDataTable.vue';
 import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
 import AddressQRModal from '@/modules/dashboard/components/AddressQRModal.vue';
+import MessageModal from '@/modules/dashboard/components/MessageModal.vue';
+import DecryptMessageModal from '@/modules/dashboard/components/DecryptMessageModal.vue';
+import CosignModal from '@/modules/dashboard/components/CosignModal.vue';
 import { copyToClipboard, getXPXcurrencyPrice } from '@/util/functions';
 import { Helper } from '@/util/typeHelper';
 import { transactions } from '@/util/transactions.js';
@@ -109,19 +116,23 @@ import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { DashboardService } from '../service/dashboardService';
 import * as qrcode from 'qrcode-generator';
 // import { dashboardUtils } from '@/util/dashboardUtils';
-import Dialog from 'primevue/dialog';
+//import Dialog from 'primevue/dialog';
 import { listenerState } from '@/state/listenerState';
+import { WalletUtils } from '@/util/walletUtils';
 
 export default defineComponent({
   name: 'ViewDashboard',
   components: {
     DashboardDataTable,
-    PartialDashboardDataTable,
+    DashboardPartialDataTable,
+    //PartialDashboardDataTable,
     SetAccountDefaultModal,
     AddressQRModal,
     AssetDataTable,
     NamespaceDataTable,
-    Dialog
+    MessageModal,
+    DecryptMessageModal,
+    CosignModal
   },
 
   setup(){
@@ -130,16 +141,150 @@ export default defineComponent({
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
     const showAddressQRModal = ref(false);
+    const showMessageModal = ref(false);
+    const showDecryptMessageModal  = ref(false);
     const namespaceAssetView = ref(0);
 
     const displayConvertion = ref(false);
     const openSetDefaultModal = ref(false);
-    const displayMessageModal = ref(false);
+    const showCosignModal = ref(false);
     const txMessage = ref("");
+    const messagePayload = ref("");
+    const publicKeyToUse = ref('');
+    const recipientAddress = ref("");
+    const signedPublicKey = ref([]);
+    const signerPublicKey = ref([]);
+    const txHash = ref("");
+    //const decryptedMessage = ref('');
+    const manualPublicKey = ref(false);
+    const initialSignerPublicKey = ref('');
+    const isInitialSender = ref(false);
+    const tempResolvedNamespace = new ResolvedNamespace();
+    const cosignModalKey = ref(0);
+    const decryptMessageKey = ref(0);
 
     const openMessageModal = (message)=>{
-      txMessage.value = message;
-      displayMessageModal.value = true;
+      messagePayload.value = message;
+      showMessageModal.value = true;
+    }
+
+    const openDecryptMsgModal = async (data)=>{
+      let txType = data.txType;
+      let recipient = data.recipient;
+      let recipientType = data.recipientType;
+      let autoRecipientPublicKey = false;
+      isInitialSender.value = false;
+      let txSender = data.sender;
+      initialSignerPublicKey.value = data.initialSigner;
+      messagePayload.value = data.message;
+      publicKeyToUse.value = "";
+      manualPublicKey.value = false;
+      //recipientAddress.value = data.recipient;
+
+      if(txType === "Transfer" || txType === "Aggregate Complete"){
+        autoRecipientPublicKey = true;
+
+        let senderAccount = WalletUtils.findWalletAccountByPublicKey(walletState.currentLoggedInWallet, txSender);
+
+        if(senderAccount){
+          isInitialSender.value = true;
+        }
+      }
+      else{
+        let senderAccount = WalletUtils.findWalletAccountByPublicKey(walletState.currentLoggedInWallet, initialSignerPublicKey.value);
+
+        if(senderAccount){
+          isInitialSender.value = true;
+        }
+      }
+
+      if(recipientType === "address"){
+        let accountPublicKey = WalletUtils.findAccountPublicKeyByAddress(walletState.currentLoggedInWallet, recipient);
+
+        if(accountPublicKey){
+          publicKeyToUse.value = accountPublicKey;
+        }
+        else{
+          let accountInfo = await ChainUtils.getAccountInfo(Helper.createAddress(recipient));
+
+          if(accountInfo.publicKey === "0".repeat(64)){
+            manualPublicKey.value = true;
+          }
+          else{
+            publicKeyToUse.value = accountInfo.publicKey;
+          }
+        }
+      }
+      else{
+        let address = await ChainUtils.getNamespaceLinkedAddress(recipient);
+
+        if(address){
+          let accountPublicKey = WalletUtils.findAccountPublicKeyByAddress(walletState.currentLoggedInWallet, recipient);
+
+          if(accountPublicKey){
+            publicKeyToUse.value = accountPublicKey;
+          }
+          else{
+            let accountInfo = await ChainUtils.getAccountInfo(address);
+
+            if(accountInfo.publicKey === "0".repeat(64)){
+              manualPublicKey.value = true;
+            }
+            else{
+              publicKeyToUse.value = accountInfo.publicKey;
+            }
+          }
+        }
+        else{
+          manualPublicKey.value = true;
+        }
+      }
+
+      if(!autoRecipientPublicKey){
+        manualPublicKey.value = true;
+      }
+
+      decryptMessageKey.value++;
+      showDecryptMessageModal.value = true;
+    }
+
+    const selectedCosignHash = ref("");
+
+    const openCosignModal = (hash) =>{
+      
+      selectedCosignHash.value = hash;
+      txHash.value = hash;
+
+      let selectedPartialTx = allPartialTransactions.value.find((x)=> x.hash === hash);
+
+      if(selectedPartialTx){
+        let allSignerPublicKeys = selectedPartialTx.innerTransactions.map((x)=> x.signerPublicKeys);
+        let flatSignerPublicKeys = Array.from(new Set([].concat(...allSignerPublicKeys)));
+        // console.log(flatSignerPublicKeys);
+        // console.log(selectedPartialTx.signedPublicKeys);
+        signerPublicKey.value = flatSignerPublicKeys;
+        signedPublicKey.value = selectedPartialTx.signedPublicKeys;
+
+        cosignModalKey.value++;
+        showCosignModal.value = true;
+      }
+    }
+
+    const cosignAggregateBondedTransaction = (signedAggregateBoundedTransaction, account) => {
+      const cosignatureTransaction = Helper.createCosignatureTransaction(signedAggregateBoundedTransaction);
+      return account.signCosignatureTransaction(cosignatureTransaction);
+    };
+
+    const cosignTransaction = (account)=>{
+
+      let selectedPartialTx = rawPartialTransactions.value.find((x)=> x.transactionInfo.hash === selectedCosignHash.value);
+
+      if(selectedPartialTx){
+        let cosignatureSignedTransaction = cosignAggregateBondedTransaction(selectedPartialTx, account);
+        ChainUtils.announceCosignTransaction(cosignatureSignedTransaction);
+      }
+
+      showCosignModal.value = false;
     }
 
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
@@ -157,7 +302,7 @@ export default defineComponent({
       let multisigInfo = selectedAccount.value.multisigInfo.find((x)=> x.level === 0);
 
       if(multisigInfo){
-        return multisigInfo.getMultisigAccountsAddress();
+        return multisigInfo.getMultisigAccountsAddress(networkState.currentNetworkProfile.network.type);
       }
       else{
         return [];
@@ -286,7 +431,7 @@ export default defineComponent({
       }
 
       let addressToSearch = [selectedAccountAddressPlain.value];
-      addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
+      // addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
       return allConfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
     })
 
@@ -297,7 +442,7 @@ export default defineComponent({
       }
 
       let addressToSearch = [selectedAccountAddressPlain.value];
-      addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
+      // addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
       return allUnconfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
     })
 
@@ -305,67 +450,501 @@ export default defineComponent({
         finalConfirmedTransaction.value = newValue;
     });
 
+    let selfKnownNamespace = [];
+    let selfKnownAsset = [];
+    let assetIdToQuery = [];
+    let namespaceIdToQuery = [];
+    let namespaceList = [];
+    let assetList = [];
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet);
+    let blockResolvedData = [];
+
+    // const exactConfirmedTransactionUnresolvedInfo = () =>{
+      
+    //   for(let i =0; i < allConfirmedTransactions.value.length; ++i){
+        
+    //   }
+    // }
+
+    // const exactUnconfirmedTransactionUnresolvedInfo = () =>{
+
+    // }
 
     dashboardService.fetchConfirmedTransactions().then((txs)=>{
       //console.log(txs);
       allConfirmedTransactions.value = txs;
 
+      for(let i = 0; i < txs.length; ++i){
+        if(txs[i].typeName === "Register Namespace"){
+          selfKnownNamespace.push({
+            id: txs[i].extractedData.namespaceIdHex,
+            name: txs[i].extractedData.namespaceName,
+            parentId: txs[i].extractedData.parentId
+          });
+        }
+        else if(txs[i].typeName === "Mosaic Definition" ){
+          selfKnownAsset.push({ 
+            id: txs[i].extractedData.mosaicIdHex, 
+            divisibility:  txs[i].extractedData.divisibility
+          });
+        }
+
+        if(txs[i].innerTransactions){
+          for(let y = 0; y < txs[i].innerTransactions.length; ++y){
+            if(txs[i].innerTransactions[y].typeName === "Register Namespace"){
+              selfKnownNamespace.push({
+                id: txs[i].innerTransactions[y].extractedData.namespaceIdHex,
+                name: txs[i].innerTransactions[y].extractedData.namespaceName,
+                parentId: txs[i].innerTransactions[y].extractedData.parentId
+              });
+            }
+            else if(txs[i].innerTransactions[y].typeName === "Mosaic Definition" ){
+              selfKnownAsset.push({ 
+                id: txs[i].innerTransactions[y].extractedData.mosaicIdHex, 
+                divisibility: txs[i].innerTransactions[y].extractedData.properties.divisibility}
+              );
+            }
+          }
+        }
+      }
+
       let addressToSearch = [selectedAccountAddressPlain.value];
-      addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
+      // addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
       filteredConfirmedTransactions.value = allConfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
-      //finalConfirmedTransaction.value = filteredConfirmedTransactions.value;
+
+      updateAllConfirmedTransaction();
     });
+
+    const updateAllConfirmedTransaction = () =>{
+
+      for(let i = 0; i < allConfirmedTransactions.value.length; ++i){
+
+        for(let y=0; y < allConfirmedTransactions.value[i].displayTips.length; ++y){
+
+            // below are the namespace Id to name
+            let namespaceDisplayTip = allConfirmedTransactions.value[i].displayTips[y].rowTips.filter(x=> x.tipType === TipType.NAMESPACE_ID);
+
+            for(let tip=0; tip < namespaceDisplayTip.length; ++tip){
+              if(namespaceDisplayTip[tip].valueType === "fixed"){
+                continue;
+              }
+              namespaceDisplayTip[tip].displayValue = getCompleteName(namespaceDisplayTip[tip].value);
+            }
+
+            let aliasAssetDisplayTip = allConfirmedTransactions.value[i].displayTips[y].rowTips.filter(x=> x.tipType === TipType.ASSET_ALIAS);
+
+            for(let tip=0; tip < aliasAssetDisplayTip.length; ++tip){
+              aliasAssetDisplayTip[tip].displayValue = getCompleteName(aliasAssetDisplayTip[tip].value);
+            }
+
+            let aliasAddressDisplayTip = allConfirmedTransactions.value[i].displayTips[y].rowTips.filter(x=> x.tipType === TipType.ADDRESS_ALIAS);
+
+            for(let tip=0; tip < aliasAddressDisplayTip.length; ++tip){
+              aliasAddressDisplayTip[tip].displayValue = getCompleteName(aliasAddressDisplayTip[tip].value);
+            }
+
+            let msgNamespaceDisplayTip = allConfirmedTransactions.value[i].displayTips[y].rowTips.filter(x=> x.tipType === TipType.MSG_NAMESPACE);
+
+            for(let tip=0; tip < msgNamespaceDisplayTip.length; ++tip){
+              msgNamespaceDisplayTip[tip].displayValue2 = getCompleteName(msgNamespaceDisplayTip[tip].value2);
+            }
+
+            // below are the amount absolute to exact
+            let supplyAssetAmountDisplayTip = allConfirmedTransactions.value[i].displayTips[y].rowTips.filter(x=> x.tipType === TipType.SUPPLY_ASSET_AMOUNT && x.valueType === AmountType.RAW);
+
+            for(let tip=0; tip < supplyAssetAmountDisplayTip.length; ++tip){
+              let assetInfo = findSelfKnowAssetInfo(supplyAssetAmountDisplayTip[tip].value2); 
+
+              if(assetInfo){
+                let newAmount = Helper.convertToCurrency(parseFloat(supplyAssetAmountDisplayTip[tip].value), assetInfo.divisibility);
+                let oldAmount = supplyAssetAmountDisplayTip[tip].value;
+                supplyAssetAmountDisplayTip[tip].value = newAmount;
+                supplyAssetAmountDisplayTip[tip].displayValue = oldAmount > 0 ? "+" + newAmount: newAmount;
+                supplyAssetAmountDisplayTip[tip].valueType = AmountType.EXACT;
+              }
+            }
+
+            let assetAmountDisplayTip = allConfirmedTransactions.value[i].displayTips[y].rowTips.filter(x=> x.tipType === TipType.ASSET_AMOUNT && x.valueType === AmountType.RAW);
+
+            for(let tip=0; tip < assetAmountDisplayTip.length; ++tip){
+              let assetInfo = findSelfKnowAssetInfo(assetAmountDisplayTip[tip].value2); 
+
+              if(assetInfo){
+                let newAmount = Helper.convertToCurrency(parseFloat(assetAmountDisplayTip[tip].value), assetInfo.divisibility);
+                assetAmountDisplayTip[tip].value = newAmount;
+                assetAmountDisplayTip[tip].displayValue = newAmount;
+                assetAmountDisplayTip[tip].valueType = AmountType.EXACT;
+              }
+            }
+
+            let supplyAmountDisplayTip = allConfirmedTransactions.value[i].displayTips[y].rowTips.filter(x=> x.tipType === TipType.SUPPLY_AMOUNT && x.valueType === AmountType.RAW);
+
+            for(let tip=0; tip < supplyAmountDisplayTip.length; ++tip){
+              let assetInfo = findSelfKnowAssetInfo(supplyAmountDisplayTip[tip].value2); 
+
+              if(assetInfo){
+                let newAmount = Helper.convertToCurrency(parseFloat(supplyAmountDisplayTip[tip].value), assetInfo.divisibility);
+                let oldAmount = supplyAssetAmountDisplayTip[tip].value;
+                supplyAssetAmountDisplayTip[tip].value = newAmount;
+                supplyAssetAmountDisplayTip[tip].displayValue = oldAmount > 0 ? "+" + newAmount: newAmount;
+                supplyAssetAmountDisplayTip[tip].valueType = AmountType.EXACT;
+              }
+            }
+            // SUPPLY_AMOUNT NAMESPACE_AMOUNT
+        }
+
+        if(!allConfirmedTransactions.value[i].innerTransactions){
+          continue;
+        }
+        for(let y=0; y < allConfirmedTransactions.value[i].innerTransactions.length; ++y){
+          for(let z=0; z < allConfirmedTransactions.value[i].innerTransactions[y].displayTips.length; ++z){
+
+            // below are the namespace Id to name
+            let namespaceDisplayTip = allConfirmedTransactions.value[i].innerTransactions[y].displayTips[z].rowTips.filter(x=> x.tipType === TipType.NAMESPACE_ID);
+
+            for(let tip=0; tip < namespaceDisplayTip.length; ++tip){
+              if(namespaceDisplayTip[tip].valueType === "fixed"){
+                continue;
+              }
+              namespaceDisplayTip[tip].displayValue = getCompleteName(namespaceDisplayTip[tip].value);
+            }
+
+            let aliasAssetDisplayTip = allConfirmedTransactions.value[i].innerTransactions[y].displayTips[z].rowTips.filter(x=> x.tipType === TipType.ASSET_ALIAS);
+
+            for(let tip=0; tip < aliasAssetDisplayTip.length; ++tip){
+              aliasAssetDisplayTip[tip].displayValue = getCompleteName(aliasAssetDisplayTip[tip].value);
+            }
+
+            let aliasAddressDisplayTip = allConfirmedTransactions.value[i].innerTransactions[y].displayTips[z].rowTips.filter(x=> x.tipType === TipType.ADDRESS_ALIAS);
+
+            for(let tip=0; tip < aliasAddressDisplayTip.length; ++tip){
+              aliasAddressDisplayTip[tip].displayValue = getCompleteName(aliasAddressDisplayTip[tip].value);
+            }
+
+            let msgNamespaceDisplayTip = allConfirmedTransactions.value[i].innerTransactions[y].displayTips[z].rowTips.filter(x=> x.tipType === TipType.MSG_NAMESPACE);
+
+            for(let tip=0; tip < msgNamespaceDisplayTip.length; ++tip){
+              msgNamespaceDisplayTip[tip].displayValue2 = getCompleteName(msgNamespaceDisplayTip[tip].value2);
+            }
+
+            // below are the amount absolute to exact
+            let supplyAssetAmountDisplayTip = allConfirmedTransactions.value[i].innerTransactions[y].displayTips[z].rowTips.filter(x=> x.tipType === TipType.SUPPLY_ASSET_AMOUNT && x.valueType === AmountType.RAW);
+
+            for(let tip=0; tip < supplyAssetAmountDisplayTip.length; ++tip){
+              let assetInfo = findSelfKnowAssetInfo(supplyAssetAmountDisplayTip[tip].value2); 
+
+              if(assetInfo){
+                let newAmount = Helper.convertToCurrency(parseFloat(supplyAssetAmountDisplayTip[tip].value), assetInfo.divisibility);
+                let oldAmount = supplyAssetAmountDisplayTip[tip].value;
+                supplyAssetAmountDisplayTip[tip].value = newAmount;
+                supplyAssetAmountDisplayTip[tip].displayValue = oldAmount > 0 ? "+" + newAmount: newAmount;
+                supplyAssetAmountDisplayTip[tip].valueType = AmountType.EXACT;
+              }
+            }
+
+            let assetAmountDisplayTip = allConfirmedTransactions.value[i].innerTransactions[y].displayTips[z].rowTips.filter(x=> x.tipType === TipType.ASSET_AMOUNT && x.valueType === AmountType.RAW);
+
+            for(let tip=0; tip < assetAmountDisplayTip.length; ++tip){
+              let assetInfo = findSelfKnowAssetInfo(assetAmountDisplayTip[tip].value2); 
+
+              if(assetInfo){
+                let newAmount = Helper.convertToCurrency(parseFloat(assetAmountDisplayTip[tip].value), assetInfo.divisibility);
+                assetAmountDisplayTip[tip].value = newAmount;
+                assetAmountDisplayTip[tip].displayValue = newAmount;
+                assetAmountDisplayTip[tip].valueType = AmountType.EXACT;
+              }
+            }
+
+            let supplyAmountDisplayTip = allConfirmedTransactions.value[i].innerTransactions[y].displayTips[z].rowTips.filter(x=> x.tipType === TipType.SUPPLY_AMOUNT && x.valueType === AmountType.RAW);
+
+            for(let tip=0; tip < supplyAmountDisplayTip.length; ++tip){
+              let assetInfo = findSelfKnowAssetInfo(supplyAmountDisplayTip[tip].value2); 
+
+              if(assetInfo){
+                let newAmount = Helper.convertToCurrency(parseFloat(supplyAmountDisplayTip[tip].value), assetInfo.divisibility);
+                let oldAmount = supplyAssetAmountDisplayTip[tip].value;
+                supplyAssetAmountDisplayTip[tip].value = newAmount;
+                supplyAssetAmountDisplayTip[tip].displayValue = oldAmount > 0 ? "+" + newAmount: newAmount;
+                supplyAssetAmountDisplayTip[tip].valueType = AmountType.EXACT;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    const findSelfKnowAssetInfo = (id) =>{
+      let assetInfo = selfKnownAsset.find(x => x.id === id);
+
+      if(!assetInfo){
+        assetIdToQuery.push(id);
+      }
+
+      return assetInfo ? assetInfo : null;
+    }
+
+    const getCompleteName = (id)=>{
+      let namespace = selfKnownNamespace.find(x=> x.id === id);
+
+      if(!namespace){
+        namespaceIdToQuery.push(id);
+        return id;
+      }
+      let fullNameArray = [namespace.name];
+      let done = true;
+
+      if(namespace.parentId){
+        done = false;
+      }
+
+      while(!done){
+        let parentId = namespace.parentId;
+
+        if(!parentId){
+          done = true;
+          break;
+        }
+
+        namespace = selfKnownNamespace.find(x=> x.id === parentId);
+        fullNameArray.unshift(namespace.name);
+      }
+
+      return fullNameArray.join(".");
+    } 
 
     dashboardService.fetchUnconfirmedTransactions().then((txs)=>{
       allUnconfirmedTransactions.value = txs;
 
       let addressToSearch = [selectedAccountAddressPlain.value];
-      addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
+      // addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
       filteredUnconfirmedTransactions.value = allUnconfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
     });
 
-    let filteredPartialTransactions = computed(()=> []);
+    let rawPartialTransactions = ref([]);
+    //let filteredPartialTransactions = ref([]);
 
-    const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
-    const unconfirmedTxLength = computed(()=> listenerState.unconfirmedTxLength);
-    const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
-    const cosignatureAddedTxLength = computed(()=> listenerState.cosignatureAddedTxLength);
-    const allConfirmedTransactionsHash = computed(()=> listenerState.allConfirmedTransactionsHash);
+    let filteredPartialTransactions = computed(()=>{
 
-    watch(confirmedTxLength.value, (newValue, oldValue) => {
-      if(newValue > oldValue ){
-        let newConfirmTxNum = newValue - oldValue;
-        let newTxs = [];
-        let confirmedTxHashes = listenerState.allConfirmedTransactionsHash.slice(-newConfirmTxNum);
+      if(allPartialTransactions.value.length === 0){
+        return [];
+      }
 
-        txHashLoop:
-        for(let i = 0; i < confirmedTxHashes.length; ++i){
+      let addressToSearch = [selectedAccountAddressPlain.value];
+      addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
+      return allPartialTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
+    })
+    
+    /*
+    const refreshPartialTransaction = () =>{
+      let addressToSearch = [selectedAccountAddressPlain.value];
+      addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
+      filteredPartialTransactions.value = allPartialTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
+    }
+    */
 
-          if(allConfirmedTransactions.value.find((tx)=> tx.hash === confirmedTxHashes[i])){
-            continue;
-          }
+    let publicKeysMultisigInfo = [];
+    //  = computed(()=>{
+    //   if(walletState.isLogin){
+    //     return WalletUtils.getWalletMultisigInfo(walletState.currentLoggedInWallet);
+    //   }
+    //   else{
+    //     return [];
+    //   }
+    // });
+    let publicKeyToQuery = ref([]);
 
-          addressTransactionLoop:
-          for(let x = 0; x < listenerState.confirmedTransactions.length; ++x){
-            let foundTx = listenerState.confirmedTransactions[i].confirmedTransactions.find((tx)=> confirmedTxHashes.includes(tx.transactionInfo.hash));
+    // let count = 1;
+
+    // let tempInterval = setInterval(()=>{
+    //   if(count > 100){
+    //     clearInterval(tempInterval);
+    //   }
+    //   count++;
+    //   console.log(walletState.wallets.isReady);
+    //   console.log(walletState.currentLoggedInWallet.accounts[0].multisigInfo);
+    //   console.log(walletState.currentLoggedInWallet.others[0].multisigInfo);
+    //   console.log(WalletUtils.getWalletMultisigInfo(walletState.currentLoggedInWallet));
+    // }, 50);
+
+    const updatePartialTransaction = ()=>{
+
+      if(walletState.currentLoggedInWallet === null){
+        return;
+      }
+
+      if(!walletState.currentLoggedInWallet.isReady){
+        setTimeout(()=>{
+          updatePartialTransaction();
+        }, 1000)
+        return;
+      }
+      publicKeysMultisigInfo = WalletUtils.getWalletMultisigInfo(walletState.currentLoggedInWallet);
+
+      for(let i = 0; i < allPartialTransactions.value.length; ++i){
+        for(let x = 0; x < allPartialTransactions.value[i].innerTransactions.length; ++x){
           
-            if(foundTx){
-              newTxs.push(foundTx);
-              break addressTransactionLoop;
+          let newSignerPublicKeys = [];
+          let signerPublicKeys = allPartialTransactions.value[i].innerTransactions[x].signerPublicKeys;
+
+          //console.log(signerPublicKeys);
+
+          for(let y=0; y < signerPublicKeys.length; ++y){
+            // console.log(signerPublicKeys[y]);
+            let foundMultisigInfo = publicKeysMultisigInfo.find(pkMultisigInfo=> pkMultisigInfo.publicKey === signerPublicKeys[y]);
+            
+            //console.log(foundMultisigInfo);
+            if(foundMultisigInfo){
+              let allCosigners = WalletUtils.getFinalCosigner(foundMultisigInfo.multisigInfos);
+              let directCosigner = WalletUtils.getDirectParentCosigner(foundMultisigInfo.multisigInfos);
+              allPartialTransactions.value[i].innerTransactions[x].directParent = directCosigner;
+              allPartialTransactions.value[i].innerTransactions[x].numToApprove = directCosigner.length;
+              newSignerPublicKeys = newSignerPublicKeys.concat(allCosigners);
+            }
+            else{
+              let foundInWallet = WalletUtils.findAccountByPublicKey(walletState.currentLoggedInWallet, signerPublicKeys[y]);
+              
+              if(!foundInWallet){
+                publicKeyToQuery.value.push(signerPublicKeys[y]);
+              }
+              newSignerPublicKeys = newSignerPublicKeys.concat(signerPublicKeys[y]);
             }
           }
+          allPartialTransactions.value[i].innerTransactions[x].signerPublicKeys = Array.from(new Set(newSignerPublicKeys));
+        }
+      }
+
+      //refreshPartialTransaction();
+    };
+
+    dashboardService.fetchPartialTransactions().then((partialData)=>{
+      rawPartialTransactions.value = partialData.txns;
+      allPartialTransactions.value = partialData.formatted;
+
+      let addressToSearch = [selectedAccountAddressPlain.value];
+      addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
+      filteredPartialTransactions.value = allPartialTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
+    
+      updatePartialTransaction();
+    });
+
+    emitter.on("TXN_CONFIRMED", (num)=>{
+      let newConfirmTxNum = num;
+
+      let newTxs = [];
+      let confirmedTxHashes = listenerState.allConfirmedTransactionsHash.slice(-newConfirmTxNum);
+
+      txHashLoop:
+      for(let i = 0; i < confirmedTxHashes.length; ++i){
+
+        if(allConfirmedTransactions.value.find((tx)=> tx.hash === confirmedTxHashes[i])){
+          continue;
         }
 
-        if(newTxs.length > 0){
-          let formatedTxs = dashboardService.formatConfirmedWithTransaction(newTxs);
-          allConfirmedTransactions.value = formatedTxs.concat(allConfirmedTransactions.value);
+        addressTransactionLoop:
+        for(let x = 0; x < listenerState.confirmedTransactions.length; ++x){
+          let foundTx = listenerState.confirmedTransactions[i].confirmedTransactions.find((tx)=> confirmedTxHashes.includes(tx.transactionInfo.hash));
+        
+          if(foundTx){
+            newTxs.push(foundTx);
+            break addressTransactionLoop;
+          }
         }
+      }
+
+      if(newTxs.length > 0){
+        let formatedTxs = dashboardService.formatConfirmedWithTransaction(newTxs);
+        allConfirmedTransactions.value = formatedTxs.concat(allConfirmedTransactions.value);
+
+        allUnconfirmedTransactions.value = allUnconfirmedTransactions.value.filter((tx)=> !listenerState.allConfirmedTransactionsHash.includes(tx.hash));
+        allPartialTransactions.value = allPartialTransactions.value.filter((tx)=> !listenerState.allConfirmedTransactionsHash.includes(tx.hash));
+      }
+    })
+
+    emitter.on("TXN_UNCONFIRMED", (num)=>{
+
+      let newUnconfirmedTxnCount = num;
+      let newTxs = [];
+      let unconfirmedTxHashes = listenerState.allUnconfirmedTransactionsHash.slice(-newUnconfirmedTxnCount);
+
+      txHashLoop:
+      for(let i = 0; i < unconfirmedTxHashes.length; ++i){
+
+        if(allUnconfirmedTransactions.value.find((tx)=> tx.hash === unconfirmedTxHashes[i])){
+          continue;
+        }
+
+        addressTransactionLoop:
+        for(let x = 0; x < listenerState.unconfirmedTransactions.length; ++x){
+          let foundTx = listenerState.unconfirmedTransactions[i].unconfirmedTransactions.find((tx)=> unconfirmedTxHashes.includes(tx.transactionInfo.hash));
+        
+          if(foundTx){
+            newTxs.push(foundTx);
+            break addressTransactionLoop;
+          }
+        }
+      }
+
+      if(newTxs.length > 0){
+        let formatedTxs = dashboardService.formatUnconfirmedWithTransaction(newTxs);
+        allUnconfirmedTransactions.value = formatedTxs.concat(allUnconfirmedTransactions.value);
+
+        allPartialTransactions.value = allPartialTransactions.value.filter((tx)=> !listenerState.allUnconfirmedTransactionsHash.includes(tx.hash));
       }
     });
 
-    watch(unconfirmedTxLength.value, (newValue, oldValue) => {
-      finalConfirmedTransaction.value = newValue;
+    emitter.on("COSIGNER_SIGNED", (num)=>{
+
+      let newCosignTxnCount = num;
+      let cosignTxns = listenerState.allCosignatureAdded.slice(-newCosignTxnCount);
+
+      txHashLoop:
+      for(let i = 0; i < cosignTxns.length; ++i){
+
+        if(allPartialTransactions.value.find((tx)=> tx.hash === cosignTxns[i])){
+          let partialTransaction = allPartialTransactions.value.find((tx)=> tx.hash === cosignTxns[i]);
+
+          for(let x = 0; x < partialTransaction.innerTransactions.length; ++x){
+            partialTransaction.innerTransactions[x].signedPublicKeys = partialTransaction.innerTransactions[x].signedPublicKeys.concat(cosignTxns[i].signer);
+          }
+        }
+      }
+      //refreshPartialTransaction();
+    });
+
+    emitter.on("ABT_ADDED", (num)=>{
+      let newPartialTxnCount = num;
+      let newTxs = [];
+      let partialTxHashes = listenerState.allAggregateBondedTransactionHash.slice(-newPartialTxnCount);
+
+      txHashLoop:
+      for(let i = 0; i < partialTxHashes.length; ++i){
+
+        if(allPartialTransactions.value.find((tx)=> tx.hash === partialTxHashes[i])){
+          continue;
+        }
+
+        addressTransactionLoop:
+        for(let x = 0; x < listenerState.aggregateBondedTransaction.length; ++x){
+          let foundTx = listenerState.aggregateBondedTransaction[i].aggregateBonded.find((tx)=> partialTxHashes[i] === tx.transactionInfo.hash);
+        
+          if(foundTx){
+            newTxs.push(foundTx);
+            break addressTransactionLoop;
+          }
+        }
+      }
+
+      if(newTxs.length > 0){
+        rawPartialTransactions.value = rawPartialTransactions.value.concat(newTxs)
+        let formatedTxs = dashboardService.formatUnconfirmedWithTransaction(newTxs);
+        allPartialTransactions.value = formatedTxs.concat(allPartialTransactions.value);
+        updatePartialTransaction();
+      }
+    });
+
+    emitter.on("TXN_ERROR", (hash)=>{
+      allUnconfirmedTransactions.value = allUnconfirmedTransactions.value.filter((tx)=> ![hash].includes(tx.hash));
+      allPartialTransactions.value = allPartialTransactions.value.filter((tx)=> ![hash].includes(tx.hash));
     });
 
     const copy = (id) =>{
@@ -412,7 +991,7 @@ export default defineComponent({
     };
 
     const clickPartialTransactions = () => {
-      if(partialTransactions.value.length > 0){
+      if(filteredPartialTransactions.value.length > 0){
         isShowPartial.value = true;
         isShowConfirmed.value = false;
         isShowUnconfirmed.value = false;
@@ -533,184 +1112,6 @@ export default defineComponent({
       }
     }
 
-    // const generateNames = () => {
-    //   // let wallet = new Wallet(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletState.currentLoggedInWallet.accounts);
-    //   if (walletState.currentLoggedInWallet) {
-
-    //     let contact : Array<contactInterface> = [];
-    //     var accountCount = walletState.currentLoggedInWallet.accounts.length;
-    //     walletState.currentLoggedInWallet.accounts.forEach((element, index) => {
-    //       contact.push({
-    //         address: element.address,
-    //         name: element.name + ' - Owner\'s account',
-    //         id: (index + 1),
-    //       });
-    //     });
-    //     if(walletState.currentLoggedInWallet.contacts!=undefined){
-    //       walletState.currentLoggedInWallet.contacts.forEach((element, index) => {
-    //         contact.push({
-    //           address: element.address,
-    //           name: element.name + ' - Contact',
-    //           id: (accountCount + index + 1),
-    //         });
-    //       });
-    //     }
-    //     return contact;
-    //   }else{
-    //     return '';
-    //   }
-    // };
-    // let names = generateNames();
-
-    // let accountApiInstance = new AccountAPI(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
-
-    // const getTransaction = (publicAccount, item, pageSize:number, lastId:string = '') => {
-    //   let order = Order.ASC;
-    //   let qp = new QueryParams(pageSize, lastId, order);
-    //   let lastTransactionID = lastId;
-    //   // format names
-    //   accountApiInstance.transactions(publicAccount, qp).then(tx => {
-    //     if( tx.length > 0 ){
-    //       tx.forEach((t)=>{
-    //         let formattedTransaction = dashboardUtils.formatTransaction(t, names);
-    //         confirmedTransactions.value.push(formattedTransaction);
-    //         // lastTransactionID = t.transactionInfo.id;
-    //         lastTransactionID = null;
-    //       })
-    //     }
-    //     if(tx.length == pageSize){
-    //       // run again
-    //       getTransaction(publicAccount, item, pageSize, lastTransactionID);
-    //     }
-    //   }, error => {
-    //     console.error(error);
-    //   });
-    // };
-
-    // const getUnconfirmedTransaction = (publicAccount, item, pageSize, lastId = null) => {
-    //   let order = Order.ASC;
-    //   let qp = new QueryParams(pageSize, lastId, order);
-    //   let lastTransactionID = lastId;
-    //   accountApiInstance.unconfirmedTransactions(publicAccount, qp).then(tx => {
-    //     if( tx.length > 0 ){
-    //       tx.forEach((t)=>{
-    //         let formattedTransaction = dashboardUtils.formatTransaction(t, names);
-    //         unconfirmedTransactions.value.push(formattedTransaction);
-    //         // lastTransactionID = t.transactionInfo.id;
-    //         lastTransactionID = null;
-    //       })
-    //     }
-    //     if(tx.length == pageSize){
-    //       // run again
-    //       getUnconfirmedTransaction(publicAccount, item, pageSize, lastTransactionID);
-    //     }
-    //   }, error => {
-    //     console.error(error);
-    //   });
-    // };
-
-    // const getAggregateBondedTransaction = (publicAccount, item, pageSize, lastId = null) => {
-    //   let order = Order.ASC;
-    //   let qp = new QueryParams(pageSize, lastId, order);
-    //   let lastTransactionID = lastId;
-    //   accountApiInstance.aggregateBondedTransactions(publicAccount, qp).then(tx => {
-    //     // console.log('AggregateBonded - partial length: ' + tx.length);
-    //     if( tx.length > 0 ){
-    //       tx.forEach((t)=>{
-    //         // console.log(t)
-    //         let formattedTransaction = dashboardUtils.formatAggregateBondedTransaction(t, names);
-    //         aggregateBondedTransactions.value.push(formattedTransaction);
-    //         lastTransactionID = t.transactionInfo.id;
-    //       });
-    //     }
-    //     if(tx.length == pageSize){
-    //       // run again
-    //       getAggregateBondedTransaction(publicAccount, item, pageSize, lastTransactionID);
-    //     }
-    //   }, error => {
-    //     console.error(error);
-    //   });
-    // };
-
-    // // eslint-disable-next-line no-unused-vars
-    // const getConfirmedAllTransactions = () => {
-    //   walletState.currentLoggedInWallet.accounts.forEach((item) => {
-    //     const publicAccount = PublicAccount.createFromPublicKey(item.publicAccount.publicKey, ChainUtils.getNetworkType(networkState.chainNetwork));
-    //     getTransaction(publicAccount, item, pageSize);
-    //     getUnconfirmedTransaction(publicAccount, item, pageSize);
-    //     getAggregateBondedTransaction(publicAccount, item, pageSize);
-    //   });
-    // };
-
-    // getConfirmedAllTransactions();
-
-    /*transferEmitter.on("UPDATE_DASHBOARD", payload => {
-        switch(payload.from){
-          case 'confirmed':{
-            // console.log(payload.from)
-            // console.log(payload.transaction)
-            let formattedconfirmedListenerTransaction = transactions.formatTransaction(payload.transaction, names);
-            confirmedTransactions.value.push(formattedconfirmedListenerTransaction);
-            // console.log('Confirmed rows after addition: ' + confirmedTransactions.value.length)
-            break;
-          }
-          case 'unconfirmedAdded':{
-            // console.log(payload.from)
-            // console.log(payload.transaction)
-            let formattedUnconfirmedAddedTransaction = transactions.formatTransaction(payload.transaction, names);
-            unconfirmedTransactions.value.push(formattedUnconfirmedAddedTransaction);
-            break;
-          }
-          case 'aggregateBondedAdded':{
-            // console.log(payload.from);
-            // console.log(payload.transaction);
-            payload.transaction.innerTransactions.forEach( (innerTransaction) =>{
-              if(transactions.getNameTypeTransaction(innerTransaction.type) == 'modifyMultisigAccount'){
-                let formattedaggregateBondedAddedListenerTransaction = transactions.formatAggregateBondedTransaction(payload.transaction, names);
-                aggregateBondedTransactions.value.push(formattedaggregateBondedAddedListenerTransaction);
-              }else{
-                let formattedConfirmedListenerTransaction = transactions.formatTransaction(payload.transaction, names);
-                confirmedTransactions.value.push(formattedConfirmedListenerTransaction);
-              }
-            });
-            // console.log('Aggregate bonded rows after addition: ' + confirmedTransactions.value.length)
-            break;
-          }
-          case 'cosignatureAdded':{
-            console.log(payload.from)
-            console.log(payload.transaction)
-            // let formattedCosignatureAddedListenerTransaction = transactions.formatTransaction(payload.transaction, names);
-            // confirmedTransactions.value.push(formattedCosignatureAddedListenerTransaction);
-            break;
-          }
-          case 'unconfirmedRemoved':{
-            // console.log(payload.from)
-            // console.log('Hash to remove: ' + payload.hash)
-            let remaining = unconfirmedTransactions.value.filter((element) => element.hash != payload.hash);
-            // console.log('after unconfirmedRemoved: ' + remaining.length);
-            // unconfirmedTransactions.value = Object.assign({}, remaining);
-            unconfirmedTransactions.value = remaining;
-            break;
-          }
-          case 'aggregateBondedRemoved':{
-            // console.log(payload.from)
-            // console.log('Hash to remove: ' + payload.hash)
-            // check on dashboarddatatable
-            let remaining = unconfirmedTransactions.value.filter((element) => element.hash != payload.hash);
-            // console.log('after aggregateBondedRemoved: ' + remaining.length);
-            unconfirmedTransactions.value = remaining;
-            // check on partialdatatable
-            let partialRemaining = aggregateBondedTransactions.value.filter((element) => element.hash != payload.hash);
-            // console.log('after partialAggregateBondedRemoved: ' + partialRemaining.length);
-            aggregateBondedTransactions.value = partialRemaining;
-            break;
-          }
-        }
-        // getConfirmedAllTransactions();
-    });
-    */
-
-
     emitter.on('CLOSE_SET_DEFAULT_ACCOUNT_MODAL', payload => {
       if(payload){
         openSetDefaultModal.value = false;
@@ -719,12 +1120,16 @@ export default defineComponent({
 
     emitter.on('CLOSE_MODAL', () => {
       showAddressQRModal.value = false;
+      showMessageModal.value = false;
+      showCosignModal.value = false;
+      showDecryptMessageModal.value = false;
     });
 
     return {
       copy,
       selectedAccountBalance,
       selectedAccountName,
+      selectedAccountPublicKey,
       confirmedTransactions,
       unconfirmedTransactions,
       partialTransactions,
@@ -747,14 +1152,30 @@ export default defineComponent({
       filteredUnconfirmedTransactions,
       doFilterConfirmed,
       filteredConfirmedTransactions,
+      filteredPartialTransactions,
       addressQR,
       showAddressQRModal,
+      showMessageModal,
+      showDecryptMessageModal,
       namespaceAssetView,
       selectedAccountNamespaces,
       selectedAccountAssets,
       openMessageModal,
-      displayMessageModal,
-      txMessage
+      openDecryptMsgModal,
+      messagePayload,
+      recipientAddress,
+      showCosignModal,
+      openCosignModal,
+      signerPublicKey,
+      signedPublicKey,
+      cosignTransaction,
+      //decryptedMessage,
+      manualPublicKey,
+      publicKeyToUse,
+      initialSignerPublicKey,
+      isInitialSender,
+      cosignModalKey,
+      decryptMessageKey
     };
   }
 });

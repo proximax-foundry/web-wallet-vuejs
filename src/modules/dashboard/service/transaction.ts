@@ -23,10 +23,21 @@ export interface DashboardTransaction{
   relatedPublicKey: string[],
   size: number,
   searchString: string[],
-  transferList?: TransferList[];
-  extractedData: any;
-  displayList?: Map<string, string>;
-  displayTips: RowDashboardTip[] | null
+  transferList?: TransferList[],
+  extractedData: any,
+  displayList?: Map<string, string>,
+  displayTips: RowDashboardTip[] | null,
+  cosignatures?: TransactionCosigner | null,
+  signedPublicKeys: string[],
+}
+
+export interface TransactionCosigner{
+  cosigners: PublicAccountSimple[];
+}
+
+export interface PublicAccountSimple{
+  publicKey: string;
+  address: string;
 }
 
 export interface DashboardInnerTransaction{
@@ -34,16 +45,19 @@ export interface DashboardInnerTransaction{
   signerName?: string | null,
   signerAddress: string,
   signer: string, // publicKey
-  transferList?: TransferList[];
+  transferList?: TransferList[],
   relatedAddress: string[],
   relatedAsset: string[],
   relatedNamespace: string[],
   relatedPublicKey: string[],
   searchString: string[],
   spend? : number,
-  extractedData: any;
-  displayList?: Map<string, string>;
-  displayTips: RowDashboardTip[] | null
+  extractedData: any,
+  displayList?: Map<string, string>,
+  displayTips: RowDashboardTip[] | null,
+  signerPublicKeys: string[],
+  directParent?: string[],
+  numToApprove?: number,
 }
 
 /*

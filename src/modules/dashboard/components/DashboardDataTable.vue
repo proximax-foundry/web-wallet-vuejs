@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="px-5 py-2 text-left text-xs text-gray-500">{{hints}}</div>
-    <div class="transition ease-in duration-300 w-full rounded-full px-5 py-1 mb-5" :class="borderColor">
+    <div v-if="isShowConfirmed" class="px-5 py-2 text-left text-xs text-gray-500">{{hints}}</div>
+    <div v-if="isShowConfirmed" class="transition ease-in duration-300 w-full rounded-full px-5 py-1 mb-5" :class="borderColor">
       <input v-model="filterText" type="text" class="w-full outline-none text-sm" placeholder="Search" @click="clickInputText()" @blur="blurInputText()" :title="hints" >
     </div>
     <DataTable
@@ -31,7 +31,19 @@
         <template #body="{data}">
           <div v-if="data.innerTransactions">
             <div v-for="innerTx in data.innerTransactions" :key="innerTx">
-              <div class="font-bold"> {{ innerTx.typeName }}</div>
+              <div class="font-bold">
+                <span class="align-middle">{{ innerTx.typeName }} </span>
+                <span v-if="innerTx.signer && !isShowPartial" :title="innerTx.signer" class="ml-2 truncate-lg inline-block align-middle">
+                  - Signed By <a :href="getPublicKeyExplorerUrl(innerTx.signer)" target="_blank">
+                   {{ innerTx.signerDisplay === innerTx.signerAddressPretty ? innerTx.signer : innerTx.signerDisplay }}
+                  </a>
+                </span>
+                <span v-else-if="isShowPartial" :title="innerTx.signer" class="ml-2 truncate-lg inline-block align-middle">
+                  - Signed By <a :href="getPublicKeyExplorerUrl(innerTx.signer)" target="_blank">
+                   {{ innerTx.signerDisplay === innerTx.signerAddressPretty ? innerTx.signer : innerTx.signerDisplay }}
+                  </a>
+                </span>
+              </div>
               <div class="flex space-x-2 pt-1 pb-1" v-for="displayRow in innerTx.displayTips" :key="displayRow">
                 <span v-for="displayTip in displayRow.rowTips" :key="displayTip" >
                   <span v-if="displayTip.tipType === 'toRightArrow'">
@@ -71,7 +83,9 @@
                     </a>
                   </span>
                   <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'encrypted'" class="text-xs font-semibold bg-blue-200 inline-block px-2 py-2 rounded">
-                    {{ displayTip.displayValue }}
+                    <a @click="$emit('openDecryptMsg', {txType: data.typeName, sender: innerTx.signer, initialSigner: data.signer, message: displayTip.value, recipient: innerTx.extractedData.recipient, recipientType: innerTx.extractedData.recipientType})">
+                      {{ displayTip.displayValue }}
+                    </a>
                   </span>
                   <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'absoluteAmount'" class="text-xs font-semibold bg-yellow-50 inline-block px-2 py-2 rounded">
                     {{ displayTip.displayValue }}
@@ -123,30 +137,32 @@
                       {{ displayTip.displayValue }}
                     </a>
                   </span>
-                  <span v-else-if="displayTip.tipType === 'assetAlias'" class="text-xs font-semibold bg-yellow-300 inline-block px-2 py-2 rounded">
+                  <span v-else-if="displayTip.tipType === 'assetAlias'">
                     <span class="text-xs font-semibold bg-yellow-400 inline-block px-2 py-2 rounded">
-                      <font-awesome-icon icon="at" class="text-gray-600 inline-block"></font-awesome-icon>
+                      <font-awesome-icon icon="at" class="text-gray-600 inline-block mr-1"></font-awesome-icon>
                       <a :href="getNamespaceExplorerUrl(displayTip.value)" target="_blank">
                         {{ displayTip.displayValue }}
                       </a>
                     </span>
                     <font-awesome-icon icon="equals" class="ml-2 mr-2 text-gray-600 inline-block"></font-awesome-icon>
-                    <span class="text-xs font-semibold bg-green-300 inline-block px-2 py-2 rounded">
+                    <span class="text-xs font-semibold bg-yellow-300 inline-block px-2 py-2 rounded">
                       <a :href="getAddressExplorerUrl(displayTip.value2)" target="_blank">
+                        <img class="inline-block mr-1" src="@/modules/account/img/icon-mosaics-green-16h.svg" width="15" />
                         {{ displayTip.displayValue2 }}
                       </a>
                     </span>
                   </span>
-                  <span v-else-if="displayTip.tipType === 'removeAssetAlias'" class="text-xs font-semibold bg-yellow-300 inline-block px-2 py-2 rounded">
+                  <span v-else-if="displayTip.tipType === 'removeAssetAlias'">
                     <span class="text-xs font-semibold bg-yellow-400 inline-block px-2 py-2 rounded">
-                      <font-awesome-icon icon="at" class="text-gray-600 inline-block"></font-awesome-icon>
+                      <font-awesome-icon icon="at" class="text-gray-600 inline-block mr-1"></font-awesome-icon>
                       <a :href="getNamespaceExplorerUrl(displayTip.value)" target="_blank">
                         {{ displayTip.displayValue }}
                       </a>
                     </span>
                     <font-awesome-icon icon="equals" class="ml-2 mr-2 text-gray-600 inline-block"></font-awesome-icon>
-                    <span class="text-xs font-semibold bg-green-300 inline-block px-2 py-2 rounded">
+                    <span class="text-xs font-semibold bg-yellow-300 inline-block px-2 py-2 rounded">
                       <a :href="getAssetExplorerUrl(displayTip.value2)" target="_blank">
+                        <img class="inline-block mr-1" src="@/modules/account/img/icon-mosaics-green-16h.svg" width="15" />
                         {{ displayTip.displayValue2 }}
                       </a>
                     </span>
@@ -193,6 +209,12 @@
                   </span>
                   <span v-else-if="displayTip.tipType === 'supplyAmount'" class="text-xs font-semibold inline-block px-2 py-2 rounded">
                     {{ displayTip.displayValue }}{{ displayTip.displayValue2 }}
+                  </span>
+                  <span v-else-if="displayTip.tipType === 'supplyAssetAmount'" class="text-xs font-semibold bg-yellow-300 inline-block px-2 py-2 rounded">
+                    <a :href="getAssetExplorerUrl(displayTip.value2)" target="_blank">
+                      {{ displayTip.displayValue }}
+                      <img class="inline-block ml-1 mr-1" src="@/modules/account/img/icon-mosaics-green-16h.svg" width="15" />{{ displayTip.displayValue2 }}
+                    </a>
                   </span>
                   <span v-else-if="displayTip.tipType === 'msgNamespace'" class="text-xs font-semibold bg-yellow-400 inline-block px-2 py-2 rounded">
                     <a :href="getNamespaceExplorerUrl(displayTip.value2)" target="_blank">
@@ -246,7 +268,9 @@
                   </a>
                 </span>
                 <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'encrypted'" class="text-xs font-semibold bg-blue-200 inline-block px-2 py-2 rounded">
-                  {{ displayTip.displayValue }}
+                  <a @click="$emit('openDecryptMsg', {txType: data.typeName, sender: data.signer, initialSigner: data.signer, message: displayTip.value, recipient: data.extractedData.recipient, recipientType: data.extractedData.recipientType})">
+                    {{ displayTip.displayValue }} 
+                  </a>
                 </span>
                 <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'absoluteAmount'" class="text-xs font-semibold bg-yellow-50 inline-block px-2 py-2 rounded">
                   {{ displayTip.displayValue }}
@@ -298,30 +322,32 @@
                     {{ displayTip.displayValue }}
                   </a>
                 </span>
-                <span v-else-if="displayTip.tipType === 'assetAlias'" class="text-xs font-semibold bg-yellow-300 inline-block px-2 py-2 rounded">
+                <span v-else-if="displayTip.tipType === 'assetAlias'">
                   <span class="text-xs font-semibold bg-yellow-400 inline-block px-2 py-2 rounded">
-                    <font-awesome-icon icon="at" class="text-gray-600 inline-block"></font-awesome-icon>
+                    <font-awesome-icon icon="at" class="text-gray-600 inline-block mr-1"></font-awesome-icon>
                     <a :href="getNamespaceExplorerUrl(displayTip.value)" target="_blank">
                       {{ displayTip.displayValue }}
                     </a>
                   </span>
                   <font-awesome-icon icon="equals" class="ml-2 mr-2 text-gray-600 inline-block"></font-awesome-icon>
-                  <span class="text-xs font-semibold bg-green-300 inline-block px-2 py-2 rounded">
+                  <span class="text-xs font-semibold bg-yellow-300 inline-block px-2 py-2 rounded">
                     <a :href="getAddressExplorerUrl(displayTip.value2)" target="_blank">
+                      <img class="inline-block mr-1" src="@/modules/account/img/icon-mosaics-green-16h.svg" width="15" />
                       {{ displayTip.displayValue2 }}
                     </a>
                   </span>
                 </span>
-                <span v-else-if="displayTip.tipType === 'removeAssetAlias'" class="text-xs font-semibold bg-yellow-300 inline-block px-2 py-2 rounded">
+                <span v-else-if="displayTip.tipType === 'removeAssetAlias'">
                   <span class="text-xs font-semibold bg-yellow-400 inline-block px-2 py-2 rounded">
-                    <font-awesome-icon icon="at" class="text-gray-600 inline-block"></font-awesome-icon>
+                    <font-awesome-icon icon="at" class="text-gray-600 inline-block mr-1"></font-awesome-icon>
                     <a :href="getNamespaceExplorerUrl(displayTip.value)" target="_blank">
                       {{ displayTip.displayValue }}
                     </a>
                   </span>
                   <font-awesome-icon icon="equals" class="ml-2 mr-2 text-gray-600 inline-block"></font-awesome-icon>
-                  <span class="text-xs font-semibold bg-green-300 inline-block px-2 py-2 rounded">
+                  <span class="text-xs font-semibold bg-yellow-300 inline-block px-2 py-2 rounded">
                     <a :href="getAssetExplorerUrl(displayTip.value2)" target="_blank">
+                      <img class="inline-block mr-1" src="@/modules/account/img/icon-mosaics-green-16h.svg" width="15" />
                       {{ displayTip.displayValue2 }}
                     </a>
                   </span>
@@ -369,6 +395,12 @@
                 <span v-else-if="displayTip.tipType === 'supplyAmount'" class="text-xs font-semibold inline-block px-2 py-2 rounded">
                   {{ displayTip.displayValue }}{{ displayTip.displayValue2 }}
                 </span>
+                <span v-else-if="displayTip.tipType === 'supplyAssetAmount'" class="text-xs font-semibold bg-yellow-300 inline-block px-2 py-2 rounded">
+                  <a :href="getAssetExplorerUrl(displayTip.value2)" target="_blank">
+                    {{ displayTip.displayValue }}
+                    <img class="inline-block ml-1 mr-1" src="@/modules/account/img/icon-mosaics-green-16h.svg" width="15" />{{ displayTip.displayValue2 }}
+                  </a>
+                </span>
                 <span v-else-if="displayTip.tipType === 'msgNamespace'" class="text-xs font-semibold bg-yellow-400 inline-block px-2 py-2 rounded">
                   <a :href="getNamespaceExplorerUrl(displayTip.value2)" target="_blank">
                     {{ displayTip.displayValue }} {{ displayTip.displayValue2 }}
@@ -401,7 +433,6 @@
           {{$t('dashboard.loadingmessage')}}
       </template>
     </DataTable>
-    <DynamicModelComponent :modelName="dynamicModelComponentDisplay" :showModal="showTransactionModel" :transaction="modalData" />
   </div>
 </template>
 
@@ -410,21 +441,21 @@ import { getCurrentInstance, ref, computed, watch  } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {FilterMatchMode} from 'primevue/api';
-import DynamicModelComponent from '@/modules/dashboard/components/DynamicModelComponent.vue'
 import { networkState } from "@/state/networkState";
 import Tooltip from 'primevue/tooltip';
 import { TipType } from '../model/dashboardClasses'
 import SplitButton from 'primevue/splitbutton';
 
 export default{
-  components: { DataTable, Column, DynamicModelComponent, SplitButton },
+  components: { DataTable, Column, SplitButton },
   name: 'DashboardDataTable',
   props: {
     transactions: Array,
     showBlock: Boolean,
-    showAction: Boolean
+    showAction: Boolean,
+    type: String
   },
-  emits: ['openMessage'],
+  emits: ['openMessage', 'openDecryptMsg'],
   directives: {
     'tooltip': Tooltip
   },
@@ -435,6 +466,9 @@ export default{
     const showTransactionModel = ref(false);
     const modalData = ref(null);
     const filterText = ref("");
+    const isShowConfirmed = p.type === "confirmed" ? true : false;
+    const isShowUnconfirmed = p.type === "unconfirmed" ? true : false;
+    const isShowPartial = p.type === "partial" ? true : false;
     /*
     const filters = ref({
       'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
@@ -504,6 +538,7 @@ export default{
     const setSplitButtonItems = (data) =>{
 
       let items = [
+        /*
             {
                 label: 'Sample',
                 icon: 'pi pi-external-link',
@@ -511,7 +546,7 @@ export default{
                     window.open(explorerBaseURL.value + hashExplorerURL.value + "/" + data.hash, "_blank");
                 }
             },
-        /*
+        
             {
                 label: 'Update',
                 icon: 'pi pi-refresh',
@@ -597,7 +632,10 @@ export default{
       getAddressExplorerUrl,
       getHashExplorerUrl,
       setSplitButtonItems,
-      gotoHashExplorer
+      gotoHashExplorer,
+      isShowConfirmed,
+      isShowUnconfirmed,
+      isShowPartial
     }
   }
 }
@@ -622,6 +660,24 @@ export default{
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.truncate-lg.inline-block{
+  vertical-align: middle;
+}
+
+.truncate.inline-block{
+  vertical-align: middle;
+}
+
+.inline-block{
+  .truncate{
+    vertical-align: middle;
+  }
+
+  .truncate-lg{
+    vertical-align: middle;
+  }
 }
 
 .p-splitbutton-defaultbutton{

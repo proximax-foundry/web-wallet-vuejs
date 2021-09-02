@@ -57,7 +57,7 @@ import {
 import { TransactionUtils } from "../../../util/transactionUtils";
 import { Helper } from "../../../util/typeHelper";
 import { DashboardTransaction, Tip,
-    TransferList, DashboardInnerTransaction
+    TransferList, DashboardInnerTransaction, TransactionCosigner
   } from "./transaction";
 import { Wallet } from "@/models/wallet"
 import { Account as myAccount } from "@/models/account";
@@ -118,6 +118,24 @@ export class DashboardService {
             index === array.findIndex(foundTx => foundTx.transactionInfo.id === transaction.transactionInfo.id));
     }
 
+    async getAllAccountPartialTransactions(): Promise<Transaction[]>{
+
+        let transactions: Transaction[] = [];
+
+        for(let i = 0; i < this.wallet.accounts.length; ++i){
+            let accountTransactions = await DashboardService.getAccountAllPartialTransactions(this.wallet.accounts[i]);
+            transactions = transactions.concat(accountTransactions);
+        }
+
+        for(let i = 0; i < this.wallet.others.length; ++i){
+            let accountTransactions = await DashboardService.getAccountAllPartialTransactions(this.wallet.others[i]);
+            transactions = transactions.concat(accountTransactions);
+        }
+
+        return transactions.filter((transaction, index, array) =>
+            index === array.findIndex(foundTx => foundTx.transactionInfo.id === transaction.transactionInfo.id));
+    }
+
     static async getAccountAllTransactions(account: myAccount): Promise<Transaction[]>{
 
         let publicAccount = Helper.createPublicAccount(account.publicKey, localNetworkType.value);
@@ -153,7 +171,28 @@ export class DashboardService {
         while (transactions.length === 100) {
             let lastId = transactions[transactions.length - 1].transactionInfo.id;
             queryParams = Helper.createQueryParams(100, lastId);
-            transactions = await TransactionUtils.getTransactions(publicAccount, queryParams);
+            transactions = await TransactionUtils.getUnconfirmedTransactions(publicAccount, queryParams);
+            fullTransaction = fullTransaction.concat(transactions);
+        }
+
+        return fullTransaction;
+    }
+
+    static async getAccountAllPartialTransactions(account: myAccount): Promise<Transaction[]>{
+
+        let publicAccount = Helper.createPublicAccount(account.publicKey, localNetworkType.value);
+
+        let fullTransaction: Transaction[] = [];
+        let queryParams = Helper.createQueryParams(100);
+
+        let transactions: Transaction[] = await TransactionUtils.getPartialTransactions(publicAccount, queryParams);
+        
+        fullTransaction = fullTransaction.concat(transactions);
+
+        while (transactions.length === 100) {
+            let lastId = transactions[transactions.length - 1].transactionInfo.id;
+            queryParams = Helper.createQueryParams(100, lastId);
+            transactions = await TransactionUtils.getPartialTransactions(publicAccount, queryParams);
             fullTransaction = fullTransaction.concat(transactions);
         }
 
@@ -174,6 +213,14 @@ export class DashboardService {
 
         let dashboardTransactions: DashboardTransaction[] = this.formatUnconfirmedTransaction(transactions);
         return dashboardTransactions;
+    }
+
+    async fetchPartialTransactions(){
+
+        let transactions = await this.getAllAccountPartialTransactions();
+
+        let dashboardTransactions: DashboardTransaction[] = this.formatUnconfirmedTransaction(transactions);
+        return { txns: transactions, formatted: dashboardTransactions};
     }
 
     formatConfirmedWithTransaction(txs: Transaction[]){
@@ -211,7 +258,9 @@ export class DashboardService {
                 extractedData: {},
                 displayList: new Map<string, string>(),
                 transferList: [],
-                displayTips: []
+                displayTips: [],
+                cosignatures: null,
+                signedPublicKeys: [transactions[i].signer.publicKey]
             };
 
             dashboardTransaction.searchString.push(dashboardTransaction.block.toString());
@@ -234,7 +283,14 @@ export class DashboardService {
                     break;
                 case TransactionType.AGGREGATE_BONDED:
                     let aggregateBondedTx = transactions[i] as AggregateTransaction;
-
+                    if(aggregateBondedTx.cosignatures.length){
+                        dashboardTransaction.cosignatures = { 
+                            cosigners: aggregateBondedTx.cosignatures.map(
+                                (x)=> { return { publicKey: x.signer.publicKey, address: x.signer.address.plain()}}
+                            )
+                        };
+                        dashboardTransaction.signedPublicKeys = dashboardTransaction.signedPublicKeys.concat(dashboardTransaction.cosignatures.cosigners.map(x => x.publicKey));
+                    }   
                     totalLength = aggregateBondedTx.innerTransactions.length;
                     dashboardTransaction.innerTransactions = [];
                     tempData = {
@@ -249,7 +305,8 @@ export class DashboardService {
                         extractedData: {},
                         displayList: new Map<string, string>(),
                         transferList: [],
-                        displayTips: []
+                        displayTips: [],
+                        signerPublicKeys: [aggregateBondedTx.signer.publicKey]
                     };
 
                     for (let y = 0; y < totalLength; ++y) {
@@ -266,7 +323,14 @@ export class DashboardService {
                     break;
                 case TransactionType.AGGREGATE_COMPLETE:
                     let aggregateCompleteTx = transactions[i] as AggregateTransaction;
-
+                    if(aggregateCompleteTx.cosignatures.length){
+                        dashboardTransaction.cosignatures = { 
+                            cosigners: aggregateCompleteTx.cosignatures.map(
+                                (x)=> { return { publicKey: x.signer.publicKey, address: x.signer.address.plain()}}
+                            )
+                        };
+                        dashboardTransaction.signedPublicKeys = dashboardTransaction.signedPublicKeys.concat(dashboardTransaction.cosignatures.cosigners.map(x => x.publicKey));
+                    }     
                     totalLength = aggregateCompleteTx.innerTransactions.length;
                     dashboardTransaction.innerTransactions = [];
 
@@ -281,7 +345,8 @@ export class DashboardService {
                         searchString: [],
                         extractedData: {},
                         displayList: new Map<string, string>(),
-                        displayTips: []
+                        displayTips: [],
+                        signerPublicKeys: [aggregateCompleteTx.signer.publicKey]
                     };
 
                     for (let x = 0; x < totalLength; ++x) {
@@ -407,7 +472,6 @@ export class DashboardService {
         let formattedTransactions: DashboardTransaction[] = [];
 
         for (let i = 0; i < transactions.length; ++i) {
-
             let dashboardTransaction: DashboardTransaction = {
                 id: transactions[i].transactionInfo.id,
                 typeName: TransactionUtils.getTransactionTypeName(transactions[i].type),
@@ -426,7 +490,9 @@ export class DashboardService {
                 extractedData: {},
                 displayList: new Map<string, string>(),
                 transferList: [],
-                displayTips: []
+                displayTips: [],
+                cosignatures: null,
+                signedPublicKeys: [transactions[i].signer.publicKey]
             };
 
             dashboardTransaction.searchString.push(dashboardTransaction.hash);
@@ -448,7 +514,14 @@ export class DashboardService {
                     break;
                 case TransactionType.AGGREGATE_BONDED:
                     let aggregateBondedTx = transactions[i] as AggregateTransaction;
-
+                    if(aggregateBondedTx.cosignatures.length){
+                        dashboardTransaction.cosignatures = { 
+                            cosigners: aggregateBondedTx.cosignatures.map(
+                                (x)=> { return { publicKey: x.signer.publicKey, address: x.signer.address.plain()}}
+                            )
+                        };
+                        dashboardTransaction.signedPublicKeys = dashboardTransaction.signedPublicKeys.concat(dashboardTransaction.cosignatures.cosigners.map(x => x.publicKey));
+                    }
                     totalLength = aggregateBondedTx.innerTransactions.length;
                     dashboardTransaction.innerTransactions = [];
                     tempData = {
@@ -463,7 +536,8 @@ export class DashboardService {
                         extractedData: {},
                         displayList: new Map<string, string>(),
                         transferList: [],
-                        displayTips: []
+                        displayTips: [],
+                        signerPublicKeys: [aggregateBondedTx.signer.publicKey]
                     };
 
                     for (let y = 0; y < totalLength; ++y) {
@@ -480,7 +554,14 @@ export class DashboardService {
                     break;
                 case TransactionType.AGGREGATE_COMPLETE:
                     let aggregateCompleteTx = transactions[i] as AggregateTransaction;
-
+                    if(aggregateCompleteTx.cosignatures.length){
+                        dashboardTransaction.cosignatures = { 
+                            cosigners: aggregateCompleteTx.cosignatures.map(
+                                (x)=> { return { publicKey: x.signer.publicKey, address: x.signer.address.plain()}}
+                            )
+                        };
+                        dashboardTransaction.signedPublicKeys = dashboardTransaction.signedPublicKeys.concat(dashboardTransaction.cosignatures.cosigners.map(x => x.publicKey));
+                    }
                     totalLength = aggregateCompleteTx.innerTransactions.length;
                     dashboardTransaction.innerTransactions = [];
 
@@ -495,7 +576,8 @@ export class DashboardService {
                         searchString: [],
                         extractedData: {},
                         displayList: new Map<string, string>(),
-                        displayTips: []
+                        displayTips: [],
+                        signerPublicKeys: [aggregateCompleteTx.signer.publicKey]
                     };
 
                     for (let x = 0; x < totalLength; ++x) {
@@ -630,7 +712,8 @@ export class DashboardService {
             transferList: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [transferTx.signer.publicKey]
         };
 
         let sendTo = "";
@@ -684,11 +767,11 @@ export class DashboardService {
             messageTypeString = "Plain message";
             messageType = "plain";
         } else if (transferTx.message.type === 1) {
-            messageTypeString = "Encrypted Message";
-            messageType = "encrypted ";
+            messageTypeString = "Encrypted message";
+            messageType = "encrypted";
         }
         else {
-            messageTypeString = "Other";
+            messageTypeString = "Other message";
             messageType = "other";
         }
 
@@ -766,6 +849,8 @@ export class DashboardService {
 
         let data = {
             transferList: transfer,
+            recipient: sendTo,
+            recipientType: toType,
             messageTypeString: messageTypeString,
             messageType: messageType,
             messagePayload: transferTx.message.payload,
@@ -799,7 +884,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [addressAliasTransaction.signer.publicKey]
         };
 
         let linkType = addressAliasTransaction.actionType === 0 ? "Link" : "Unlink";
@@ -849,7 +935,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [addExchangeOfferTransaction.signer.publicKey]
         };
 
         let offerArray = [];
@@ -920,7 +1007,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [chainConfigTransaction.signer.publicKey]
         };
 
         let data = {
@@ -961,7 +1049,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [chainUpgradeTransaction.signer.publicKey]
         };
 
         let data = {
@@ -1004,7 +1093,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [exchangeOfferTransaction.signer.publicKey]
         };
 
         let exchangeOfferArray = [];
@@ -1073,7 +1163,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [removeExchangeOfferTransaction.signer.publicKey]
         };
 
         let offerRemoveArray = [];
@@ -1127,7 +1218,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [accountLinkTransaction.signer.publicKey]
         };
 
         let publicKey = accountLinkTransaction.remoteAccountKey;
@@ -1179,7 +1271,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [lockFundsTransaction.signer.publicKey]
         };
 
         let lockedHash = lockFundsTransaction.hash;
@@ -1239,7 +1332,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [modifyAccountMetadataTx.signer.publicKey]
         };
 
         let metadataId = modifyAccountMetadataTx.metadataId;
@@ -1309,7 +1403,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [modifyMosaicMetadataTx.signer.publicKey]
         };
 
         let metadataId = modifyMosaicMetadataTx.metadataId;
@@ -1379,7 +1474,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [modifyNamespaceMetadataTx.signer.publicKey]
         };
 
         let metadataId = modifyNamespaceMetadataTx.metadataId;
@@ -1449,7 +1545,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [accAddressRestrictModification.signer.publicKey]
         };
 
         let restrictionType = accAddressRestrictModification.restrictionType == RestrictionType.AllowAddress ? "Allow Address" : "Block Address";
@@ -1514,7 +1611,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [accMosaicRestrictModification.signer.publicKey]
         };
 
         let restrictionType = accMosaicRestrictModification.restrictionType == RestrictionType.AllowMosaic ? "Allow Asset" : "Block Asset";
@@ -1576,7 +1674,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [accOperationRestrictModification.signer.publicKey]
         };
 
         let restrictionType = accOperationRestrictModification.restrictionType == RestrictionType.AllowTransaction ? "Allow Transaction" : "Block Transaction";
@@ -1636,7 +1735,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [modifyMultisigAccountTransaction.signer.publicKey]
         };
 
         let modificationArray = [];
@@ -1655,6 +1755,11 @@ export class DashboardService {
             });
 
             let modify = type === "Add" ? "+" : "-";
+
+            if(type === "Add"){
+                transactionDetails.signerPublicKeys.push(cosignerPublicKey);
+            }
+
             let cosignerDisplay = this.publickKeyConvertToName(cosignerPublicKey);
 
             let modifyTip = DashboardService.createPublicKeyStringTip(cosignerPublicKey, cosignerDisplay, modify)
@@ -1704,7 +1809,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [mosaicAliasTx.signer.publicKey]
         };
 
         let mosaicIdHex = mosaicAliasTx.mosaicId.toHex().toUpperCase();
@@ -1758,7 +1864,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [mosaicDefinitionTransaction.signer.publicKey]
         };
 
         let mosaicIdHex = mosaicDefinitionTransaction.mosaicId.toHex().toUpperCase();
@@ -1821,7 +1928,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [mosaicSupplyChangeTransaction.signer.publicKey]
         };
 
         let mosaicIdHex = mosaicSupplyChangeTransaction.mosaicId.toHex().toUpperCase();
@@ -1838,8 +1946,10 @@ export class DashboardService {
 
         let newRowTip = new RowDashboardTip();
 
-        newRowTip.rowTips.push(DashboardService.createAssetTip(mosaicIdHex, mosaicIdHex));
-        newRowTip.rowTips.push(DashboardService.createSupplyAmountTip(deltaAmount, false, direction === "Increase"));
+        //newRowTip.rowTips.push(DashboardService.createAssetTip(mosaicIdHex, mosaicIdHex));
+
+        newRowTip.rowTips.push(DashboardService.createSupplyAssetAmountTip(deltaAmount, false, mosaicIdHex, mosaicIdHex, direction === "Increase"));
+        //newRowTip.rowTips.push(DashboardService.createSupplyAmountTip(deltaAmount, false, direction === "Increase"));
 
         transactionDetails.displayTips.push(newRowTip);
 
@@ -1869,7 +1979,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [registerNamespaceTx.signer.publicKey]
         };
 
         let namespaceIdHex = registerNamespaceTx.namespaceId.toHex().toUpperCase();
@@ -1889,7 +2000,9 @@ export class DashboardService {
         let newRowTip = new RowDashboardTip();
 
         newRowTip.rowTips.push(DashboardService.createStringTip(type, "Type: "));
-        newRowTip.rowTips.push(DashboardService.createNamespaceIDTip(namespaceName, namespaceIdHex));
+        let namespaceTip = DashboardService.createNamespaceIDTip(namespaceName, namespaceIdHex);
+        namespaceTip.valueType = "fixed";
+        newRowTip.rowTips.push(namespaceTip);
         
         if(parentId){
             newRowTip.rowTips.push(DashboardService.createMsgNamespaceTip(parentId, parentId, "Parent ID:"));
@@ -1937,7 +2050,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [secretLockTx.signer.publicKey]
         };
 
         let assetIdHex = secretLockTx.mosaic.id.toHex().toUpperCase();
@@ -2028,7 +2142,8 @@ export class DashboardService {
             searchString: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [secretProofTx.signer.publicKey]
         };
 
         let proof = secretProofTx.proof;
@@ -2106,7 +2221,8 @@ export class DashboardService {
             transferList: [],
             extractedData: {},
             displayList: new Map<string, string>(),
-            displayTips: []
+            displayTips: [],
+            signerPublicKeys: [innerTransaction.signer.publicKey]
         };
 
         let tempData: DashboardInnerTransaction;
@@ -2329,11 +2445,11 @@ export class DashboardService {
         return newTip;
     }
 
-    static createAssetAmountTip(amount: number, assetId: string, assetDisplay: string, amountExact: boolean): DashboardTip{
+    static createAssetAmountTip(amount: number, assetId: string, assetDisplay: string, amountExact: boolean, divisibility: number = 0): DashboardTip{
         let newTip = new DashboardTip(TipType.ASSET_AMOUNT);
         newTip.value = amount.toString();
         newTip.value2 = assetId;
-        newTip.displayValue = amount.toString();
+        newTip.displayValue = amountExact ? Helper.toCurrencyFormat(amount, divisibility) : amount.toString();
         newTip.displayValue2 = assetDisplay;
         newTip.valueType = amountExact ? AmountType.EXACT: AmountType.RAW;
 
@@ -2347,6 +2463,17 @@ export class DashboardService {
         newTip.displayValue = newTip.value;
         newTip.displayValue2 = amount.toString();
         newTip.valueType2= amountExact ? AmountType.EXACT: AmountType.RAW;
+
+        return newTip;
+    }
+
+    static createSupplyAssetAmountTip(amount: number, amountExact: boolean, assetDisplay: string, assetId: string, increase: boolean): DashboardTip{
+        let newTip = new DashboardTip(TipType.SUPPLY_ASSET_AMOUNT);
+        newTip.value = increase ? amount.toString(): "-" + amount.toString();
+        newTip.value2 = assetId;
+        newTip.displayValue = increase ? "+" + amount.toString() : newTip.value;
+        newTip.displayValue2 = assetDisplay;
+        newTip.valueType= amountExact ? AmountType.EXACT: AmountType.RAW;
 
         return newTip;
     }

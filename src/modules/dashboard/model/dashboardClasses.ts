@@ -1,12 +1,15 @@
 export class DashboardTip{
     
-  displayValue: string = "";
   tipType: string = "";
+  displayValue: string = "";
   value: string = "";
   valueType: string = "";
   displayValue2: string = "";
   value2: string = "";
   valueType2: string = "";
+  displayValue3: string = "";
+  value3: string = "";
+  valueType3: string = "";
 
   constructor(tipType: string){
     this.tipType = tipType;
@@ -51,9 +54,11 @@ export enum TipType{
   ADDRESS_ALIAS = "addressAlias",
   REMOVE_ADDRESS_ALIAS = "removeAddressAlias",
   SUPPLY_AMOUNT = "supplyAmount",
+  SUPPLY_ASSET_AMOUNT = "supplyAssetAmount",
   MSG_NAMESPACE = "msgNamespace",
   LINK_PUBLICKEY = "linkPublicKey",
-  UNLINK_PUBLICKEY = "unlinkPublicKey"
+  UNLINK_PUBLICKEY = "unlinkPublicKey",
+  AMOUNT_ASSET_VIA_NAMESPACE = "amountAssetViaNamespace"
 }
 
 export enum AmountType{
