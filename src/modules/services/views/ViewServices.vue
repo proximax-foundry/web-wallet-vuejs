@@ -6,13 +6,13 @@
     <div class="text-xl text-gray-600 font-bold mt-10">Swap:</div>
     <div class="md:grid md:grid-cols-2 mx-5 lg:mx-5 2xl:mx-40 mt-5">
       <div class="md:col-span-1">
-        <router-link :to="{ name: 'ViewServicesMainnetSwapEthOptions' }">
-          <div class="m-5 lg:mx-10 rounded-2xl border border-blue-primary option-div flex justify-center h-16">
-            <div class="self-center inline-block font-bold text-blue-primary">
-              Ethereum (ETH)
+        <!-- <router-link :to="{ name: 'ViewServicesMainnetSwapEthOptions' }"> -->
+          <div class="m-5 lg:mx-10 rounded-2xl border border-gray-100 bg-gray-100 flex justify-center h-16">
+            <div class="self-center inline-block font-bold text-gray-300">
+              Ethereum (ETH) - Coming soon
             </div>
           </div>
-        </router-link>
+        <!-- </router-link> -->
         <div class="contract_address_label">
           <div :id="ethContractAddress" :copyValue="ethContractAddress" copySubject="ETH Contract Address copied" v-if="displayCopy">Contract address:</div>
           <div>{{ ethContractAddress }} <font-awesome-icon icon="copy" @click="copy(ethContractAddress)" class="ml-2 w-5 h-5 cursor-pointer inline-block"></font-awesome-icon></div>
