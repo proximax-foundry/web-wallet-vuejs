@@ -205,6 +205,10 @@ export default defineComponent({
       }
       listener.value.terminate();
 
+      if(walletState.currentLoggedInWallet === null || walletState.currentLoggedInWallet === undefined){
+        return;
+      }
+
       let accountsAddress = walletState.currentLoggedInWallet.accounts.map((acc)=> acc.address);
       let othersAddress = walletState.currentLoggedInWallet.others.map((acc)=> acc.address);
 
@@ -223,15 +227,18 @@ export default defineComponent({
       listener.value.terminate();
     }
 
-    if(loginStatus.value){
-      WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
-      connectListener();
+    const doLogin = async () =>{
+      if(loginStatus.value){
+        await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
+        connectListener();
+      }
     }
+
+    doLogin();
 
     watch(()=> loginStatus.value, async (newValue)=>{
       if(newValue){
-        await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
-        connectListener();
+        doLogin();
         emitter.emit('LOGIN');
       }
       else{
