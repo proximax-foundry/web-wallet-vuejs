@@ -117,8 +117,7 @@ export default defineComponent({
     watch(()=> networkState.availableNetworks, (availableNetworks)=>{
       let options = [];
 
-      console.log("Updated");
-      console.log(availableNetworks);
+      console.log("Network List Updated");
 
       for(let i=0; i < availableNetworks.length; ++i){
         options.push({ label: availableNetworks[i], value: i });
@@ -151,6 +150,18 @@ export default defineComponent({
       //}
       // console.log(e.value.value);
     }
+
+    // setInterval(()=>{
+    //   toast.add(
+    //     {
+    //       severity:'info', 
+    //       summary: `Waiting queue`, 
+    //       detail: `Please do not`, 
+    //       detail2: "refresh or logout",
+    //       group: 'brt'
+    //     }
+    //   );
+    // }, 60000);
 
     const currentNetworkType = computed(()=> networkState.currentNetworkProfile ? networkState.currentNetworkProfile.network.type : null);
 
@@ -217,13 +228,15 @@ export default defineComponent({
       connectListener();
     }
 
-    watch(()=> loginStatus.value, (newValue)=>{
+    watch(()=> loginStatus.value, async (newValue)=>{
       if(newValue){
+        await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
         connectListener();
-        WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
+        emitter.emit('LOGIN');
       }
       else{
         terminateListener();
+        emitter.emit('LOGOUT');
       }
     })
 
@@ -270,6 +283,7 @@ export default defineComponent({
 
       if(newValue > oldValue){
         let txLength = newValue - oldValue;
+        emitter.emit("TXN_UNCONFIRMED", txLength);
         let singularPluralText =  txLength > 1 ? "s" : "";
         toast.add(
           {
@@ -284,17 +298,17 @@ export default defineComponent({
      });
 
      watch(()=> confirmedTxLength.value, (newValue, oldValue)=>{
-
       if(newValue > oldValue){
         WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
 
         let txLength = newValue - oldValue;
 
+        emitter.emit("TXN_CONFIRMED", txLength);
+
         let transactionHashes = listenerState.allConfirmedTransactionsHash.slice(-txLength);
 
         let swapTransactionsCount = 0;
         let swapTransactionHash = [];
-
 
         for(let i =0; i < listenerState.confirmedTransactions.length; ++i){
           let txs = listenerState.confirmedTransactions[i].confirmedTransactions.filter((tx)=> transactionHashes.includes(tx.transactionInfo.hash));
@@ -343,8 +357,6 @@ export default defineComponent({
 
      watch(()=> transactionStatusLength.value, (newValue, oldValue)=>{
 
-       console.log(newValue + ":" + oldValue);
-
       if(newValue > oldValue){
         let txLength = newValue - oldValue;
         let totalTxLength = listenerState.allTransactionStatus.length;
@@ -353,6 +365,7 @@ export default defineComponent({
         for(let i= 0; i < txLength; ++i){
           let status = listenerState.allTransactionStatus[lastIndex - i].status;
           let hash = listenerState.allTransactionStatus[lastIndex - i].hash;
+          emitter.emit("TXN_ERROR", hash);
           toast.add({
             severity:'error', 
             summary: `Transaction Error`, 
@@ -368,6 +381,7 @@ export default defineComponent({
 
       if(newValue > oldValue){
         let txLength = newValue - oldValue;
+        emitter.emit("COSIGNER_SIGNED", txLength);
         let singularPluralText =  txLength > 1 ? "s" : "";
         toast.add(
           {
@@ -385,6 +399,7 @@ export default defineComponent({
 
       if(newValue > oldValue){
         let txLength = newValue - oldValue;
+        emitter.emit("ABT_ADDED", txLength);
         let singularPluralText =  txLength > 1 ? "s" : "";
         toast.add(
           {
