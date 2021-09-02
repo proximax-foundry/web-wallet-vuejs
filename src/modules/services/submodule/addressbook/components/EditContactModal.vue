@@ -21,7 +21,7 @@
                 <TextInput :placeholder="$t('createsuccessful.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" />
                 <div class="mt-10 text-center">
                   <button type="button" class="default-btn mr-5 focus:outline-none" @click="toggleModal = !toggleModal">{{$t('deletewallet.cancel')}}</button>
-                  <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="EditContact()">{{$t('accounts.save')}}</button>
+                  <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="EditContact">{{$t('accounts.save')}}</button>
                 </div>
               </fieldset>
             </form>
