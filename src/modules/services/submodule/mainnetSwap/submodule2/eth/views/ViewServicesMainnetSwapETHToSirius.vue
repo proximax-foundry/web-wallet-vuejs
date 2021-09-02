@@ -108,10 +108,17 @@
               </div>
             </div>
             <div class="sm:flex">
-              <button class="sm:flex-none bg-blue-primary h-11 w-60 rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-3 sm:mt-0 disabled:opacity-50 self-center" type="button" v-if="validationHash" :disabled="isDisabledCheckTxnConfirmed" @click="triggerTxnConfirmation">{{ isCheckingTxnConfirmation?'Checking confirmation...':'Check confirmation' }}</button>
-              <div v-if="validationHash" class="py-2 sm:flex-grow text-tsm">One block confirmation needed to proceed. <b>Do not change Gas Limit, Max priority fee or Max fee</b>. Confirmation might take up to 30 minutes, 1 hour or more due to high volume of transactions. Please <b>do not close or refresh</b> this page until the swap process is complete and you have saved your certificate. View confirmation status on <a :href="validationLink" target="_new" class="text-blue-primary inline-block hover:text-blue-900 hover:underline">EtherScan<font-awesome-icon icon="external-link-alt" class="ml-1 text-blue-primary w-3 h-3 self-center inline-block"></font-awesome-icon></a>.</div>
+              <button class="sm:flex-none justify-start sm:justify-end bg-blue-primary h-15 w-60 rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-3 sm:mt-0 disabled:opacity-50 self-center" type="button" v-if="validationHash" :disabled="isDisabledCheckTxnConfirmed || transactionFailed" @click="triggerTxnConfirmation">{{ isCheckingTxnConfirmation?'Checking transaction confirmation...':'Check transaction confirmation to proceed' }}</button>
+              <div v-if="validationHash" class="py-2 sm:flex-grow text-tsm">
+                <div class="mb-1">One block confirmation needed to proceed.</div>
+                <div class="mb-1"><b>Do not change Gas Limit, Max Piority Fee or Max Fee</b>.</div>
+                <div class="mb-1">Confirmation might take up to 30 minutes, 1 hour or more due to high transaction volumes.</div>
+                <div class="mb-1">Please <b>do not close or refresh</b> this page until the swap process is complete and you have saved your certificate.</div>
+                <div class="mb-1">View confirmation status on <a :href="validationLink" target="_new" class="text-blue-primary inline-block hover:text-blue-900 hover:underline">EtherScan<font-awesome-icon icon="external-link-alt" class="ml-1 text-blue-primary w-3 h-3 self-center inline-block"></font-awesome-icon></a>.</div>
+              </div>
             </div>
-            <div class="text-tsm mt-2 bg-blue-100 px-4 py-2 rounded-xl inline-block text-blue-900" v-if="isTxnNotConfirmed">Transaction is not confirmed yet. Please check again in a moment</div>
+            <div class="text-tsm mt-2 bg-blue-100 px-4 py-2 rounded-xl inline-block text-blue-900" v-if="isTxnNotConfirmed && !transactionFailed">Transaction is not confirmed yet. Please check again in a moment</div>
+            <div class="text-tsm mt-2 bg-red-100 px-4 py-2 rounded-xl inline-block text-red-primary" v-if="transactionFailed">Transaction failed. Please try again with suggested gas price and gas limit</div>
           </div>
         </div>
         <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step4?'text-gray-700':'text-gray-300'">Step 2: Validate your Sirius address</div>
@@ -278,20 +285,8 @@ export default {
     const signatureMessage = computed(() => {
       if(isInvalidSignedMeta.value){ // when user rejects signature on MetaMask
         return 'Approval on MetaMask is rejected';
-      }
-      else if(transactionFailed.value){
-        return 'Transaction failed. Please try again with higher gas price and gas limit';
-      }
-      else{
-        if(longWaitNotification.value){ // when confirmation from MetaMask is taking more than 7 sec after Sign button is click
-          return 'Transaction confirmation is taking longer than expected, please wait till next step';
-        }else{
-          if(messageHash.value){ // when user clicks on the Sign button on MetaMask
-            return 'Sirius Address is signed. Waiting for transaction confirmation';
-          }else{
-            return 'Waiting for transaction confirmation';
-          }
-        }
+      }else{
+        return 'Please sign transaction confirmation in MetaMask';
       }
     });
 
@@ -583,9 +578,6 @@ export default {
     }
 
     const swapServiceParam = ref('');
-    const longWaitNotification = ref(false);
-
-    let longWaitTimeOut;
 
     const getSigned = async () => {
       try{
@@ -603,21 +595,6 @@ export default {
           }
         };
         swapServiceParam.value = data;
-        longWaitTimeOut = setTimeout(() => {
-          longWaitNotification.value = true;
-        }, 7000);
-
-        // verifyingTxn = setInterval(async() => {
-        //   const status = await verifyTransaction();
-        //   // const status = false;
-        //   if(status){
-        //     clearInterval(verifyingTxn);
-        //     clearTimeout(longWaitTimeOut);
-        //     if(!transactionFailed.value){
-        //       await afterSigned();
-        //     }
-        //   }
-        // }, 2000);
         await afterSigned();
       }catch(err){
         isInvalidSignedMeta.value = true;
@@ -646,7 +623,6 @@ export default {
     const swapServerErrIndex = ref(0);
 
     const afterSigned = async () => {
-      clearTimeout(longWaitTimeOut);
       step6.value = true;
       step7.value = true;
       retrySwapButtonText.value = 'Initiating swap...';
@@ -745,6 +721,7 @@ export default {
       isCheckingTxnConfirmation,
       isDisabledCheckTxnConfirmed,
       isTxnNotConfirmed,
+      transactionFailed,
     };
   },
 }
