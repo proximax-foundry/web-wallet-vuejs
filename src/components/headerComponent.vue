@@ -199,15 +199,18 @@ export default defineComponent({
       listener.value.terminate();
     }
 
-    if(loginStatus.value){
-      WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
-      connectListener();
+    const doLogin = async() =>{
+      if(loginStatus.value){
+        await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
+        connectListener();
+      }
     }
+
+    doLogin();
 
     watch(()=> loginStatus.value, (newValue)=>{
       if(newValue){
-        connectListener();
-        WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
+        doLogin();
       }
       else{
         terminateListener();
