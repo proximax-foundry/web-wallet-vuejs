@@ -234,6 +234,13 @@ export class TransactionUtils {
     return transactions;
   }
 
+  static async getPartialTransactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<Transaction[]> {
+
+    let transactions = await ChainUtils.getAccountPartialTransactions(publicAccount, queryParams);
+
+    return transactions;
+  }
+
   static announceTransaction(signedTx: SignedTransaction): void {
 
     ChainUtils.announceTransaction(signedTx);
