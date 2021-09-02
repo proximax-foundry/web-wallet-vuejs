@@ -9,6 +9,7 @@ export class Wallet{
     accounts: WalletAccount[];
     others: OtherAccount[] = [];
     contacts: AddressBook[] = [];
+    isReady: boolean = false;
 
     constructor(name: string, networkName: string, accounts: WalletAccount[]){
         this.name = name;
