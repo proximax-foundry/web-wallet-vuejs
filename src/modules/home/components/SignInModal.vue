@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a @click="toggleModal = !toggleModal" class="block big-default-btn my-3 self-center w-full">Sign In</a>
+    <a @click="toggleModalMethod" class="block my-3 self-center w-full" :class="`${!enableLink?'bg-gray-100 text-gray-300 px-10 py-3 md:py-5 text-sm font-bold rounded-3xl transition-all duration-500':'big-default-btn'}`">Sign In</a>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -44,13 +44,12 @@ import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 
 export default defineComponent({
   name: 'SignInModal',
-  data() {
-    return {
-      toggleModal: false,
-    };
+  props: {
+    'enableLink': Boolean
   },
 
-  setup(){
+  setup(p){
+    const toggleModal = ref(false);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const router = useRouter();
@@ -112,6 +111,12 @@ export default defineComponent({
       }
     };
 
+    const toggleModalMethod = () => {
+      if(p.enableLink){
+        toggleModal.value = !toggleModal.value;
+      }
+    }
+
     return{
       networkState,
       err,
@@ -123,6 +128,8 @@ export default defineComponent({
       login,
       clearWalletOption,
       clearInput,
+      toggleModalMethod,
+      toggleModal,
     };
   },
 
