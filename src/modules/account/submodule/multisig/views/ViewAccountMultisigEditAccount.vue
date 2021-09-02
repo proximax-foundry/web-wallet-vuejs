@@ -197,7 +197,7 @@ export default {
     const acc =  computed(()=>{
       let account
       if (wallet.accounts.find(element => element.name ===p.name) === undefined && wallet.others.find(element => element.name ===p.name) === undefined){
-        return new WalletAccount("a","b","c","d","e","f")
+        return null
       } else if (wallet.accounts.find(element => element.name ===p.name) === undefined){
         account = wallet.others.find(element => element.name ===p.name) 
       } else if (wallet.others.find(element => element.name ===p.name) === undefined){

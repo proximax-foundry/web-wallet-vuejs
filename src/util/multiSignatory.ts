@@ -226,7 +226,7 @@ function checkIsMultiSig(accountAddress :string) :boolean{
     let wallet = walletState.currentLoggedInWallet
     let account
       if (wallet.accounts.find(element => element.address ===accountAddress) === undefined && wallet.others.find(element => element.address ===accountAddress) === undefined){
-        account = new WalletAccount("a","b","c","d","e","f")
+        account = null
       } else if (wallet.accounts.find(element => element.address ===accountAddress) === undefined){
         account = wallet.others.find(element => element.address ===accountAddress) 
       } else if (wallet.others.find(element => element.address ===accountAddress) === undefined){
