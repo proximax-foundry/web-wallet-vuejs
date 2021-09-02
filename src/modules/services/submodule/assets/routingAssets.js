@@ -16,7 +16,7 @@ export const AssetsRoutes = [
     }
   },
   {
-    path: '/asset-supply-change',
+    path: '/alias-namespace-to-asset',
     name: 'ViewServicesAssetsLinkToNamespace',
     component: () => import('@/modules/services/submodule/assets/views/ViewServicesAssetsLinkToNamespace.vue'),
     meta: {

@@ -2,12 +2,12 @@
   <div class="flex justify-between text-md">
     <div><span class="text-gray-300">{{$t('services.namespaces')}} ></span> <span class="text-blue-primary font-bold">{{$t('namespace.extend')}}</span></div>
     <div>
-      <!-- <router-link :to="{ name: 'ViewServices' }" class="font-bold">Back to Services</router-link> -->
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-5'>
     <div class="md:col-span-3">
-      <form @submit.prevent="extendNamespace">
+      <form>
         <fieldset class="w-full">
           <div class="mb-5">
             <div v-if="showNoBalance" class="border-2 rounded-3xl border-red-700 w-full h-24 text-center p-4">
@@ -44,7 +44,7 @@
               </div>
             </div>
             <div v-if="getMultiSigCosigner.list.length > 0">
-              <div class="text-tsm">{{$t('transfer.cosigner')}}:
+              <div class="text-tsm text-left ml-4">{{$t('transfer.cosigner')}}:
                 <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ getMultiSigCosigner.list[0].balance }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
                 <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('services.balance')}}: {{ cosigner.balance }} XPX)</option></select></span>
                 <div v-if="cosignerBalanceInsufficient" class="error">-{{$t('accounts.insufficientbalance')}}</div>
@@ -58,7 +58,8 @@
           </div>
           <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" ref="namespaceSelect" :disabled="disableNamespaceSelect" noOptionsText="No namespace created for this account" v-model="selectNamespace" :options="namespaceOption" @show-selection="updateNamespaceSelection" @clear-selection="clearNamespaceSelection" />
           <DurationInput :disabled="disabledDuration" v-if="showDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
-          <div class="rounded-2xl bg-gray-100 p-5 mb-5">
+          <div v-if="showMaxDaysLabel" class="float-right text-tsm inline-block">Maximum number of days for the extension of this namespace is {{ 365-numDaysleft }} day{{ (365-numDaysleft)>1?'s':'' }}</div>
+          <div class="rounded-2xl bg-gray-100 p-5 mb-5 mt-10">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{ transactionFee }} XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
@@ -80,25 +81,25 @@
           <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
             <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">{{$t('signin.clear')}}</button>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="extendNamespace()">{{$t('welcome.create')}}</button>
+            <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="extendNamespace()">{{$t('welcome.create')}}</button>
           </div>
         </fieldset>
       </form>
     </div>
     <div class="px-10 text-left text-tsm mt-5 md:mt-0 md:col-span-2">
       <div class="flex justify-around">
-      <div class="text-center">
-        <img src="@/modules/services/submodule/namespaces/img/icon-namespace-mosaic-duration-01.svg" class="w-24 mb-2">
-        <div class="italic">Start block: <br></div>
-      </div>
-      <div class="text-center">
-        <img src="@/modules/services/submodule/namespaces/img/icon-namespace-mosaic-duration-02.svg" class="w-24 mb-2">
-        <div class="italic">Start block: <br></div>
-      </div>
-      <div class="text-center">
-        <img src="@/modules/services/submodule/namespaces/img/icon-namespace-mosaic-duration-03.svg" class="w-24 mb-2">
-        <div class="italic">Start block: <br></div>
-      </div>
+        <div class="text-center">
+          <img src="@/modules/services/submodule/namespaces/img/icon-namespace-mosaic-duration-01.svg" class="w-16 mb-2 inline-block">
+          <div class="italic">Start block: <br>{{ startBlock }}</div>
+        </div>
+        <div class="text-center">
+          <img src="@/modules/services/submodule/namespaces/img/icon-namespace-mosaic-duration-02.svg" class="w-16 mb-2 inline-block">
+          <div class="italic">Current block: <br>{{ block }}</div>
+        </div>
+        <div class="text-center">
+          <img src="@/modules/services/submodule/namespaces/img/icon-namespace-mosaic-duration-03.svg" class="w-16 mb-2 inline-block">
+          <div class="italic">End block: <br>{{ endBlock }}</div>
+        </div>
       </div>
     </div>
   </div>
@@ -112,6 +113,9 @@ import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { Helper } from '@/util/typeHelper';
 import { NamespacesUtils } from '@/util/namespacesUtils';
+import { ChainAPICall } from "@/models/REST/chainAPICall";
+import { ChainUtils } from "@/util/chainUtils";
+import { listenerState} from "@/state/listenerState";
 
 export default {
   name: 'ViewServicesNamespaceCreate',
@@ -138,6 +142,19 @@ export default {
     const showDuration = ref(false);
     const cosignerBalanceInsufficient = ref(false);
     const cosignerAddress = ref('');
+    const startBlock = ref(0);
+    const block = ref(0);
+    const endBlock = ref(0);
+    const numDaysleft = ref(0);
+    const showMaxDaysLabel = ref(false);
+
+    const blockListener = computed(()=> listenerState.currentBlock);
+
+    (async() => {
+      const endpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+      const chainAPICall = new ChainAPICall(endpoint);
+      block.value = await chainAPICall.chainAPI.getBlockchainHeight();
+    })();
 
     const namespaceOption = computed(() => {
       let namespace = [];
@@ -156,9 +173,10 @@ export default {
     });
 
     const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
-    const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
+    const lockFundCurrency = computed(()=> Helper.amountFormatterSimple(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
 
     const lockFundTxFee = ref(0.0445);
+    const lockFundTxFeeCurrency = ref('0.044500');
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
@@ -167,8 +185,11 @@ export default {
 
     const isMultiSig = (address) => {
       const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
+      const other = walletState.currentLoggedInWallet.others.find((account) => account.address == address);
       let isMulti = false;
-      if(account.getDirectParentMultisig().length>0){
+      const accountDirectParent = account?account.getDirectParentMultisig():[];
+      const otherDirectParent = other?other.getDirectParentMultisig():[];
+      if((accountDirectParent.length + otherDirectParent.length) > 0){
         isMulti = true;
       }
       return isMulti;
@@ -198,9 +219,16 @@ export default {
     }
 
     const accounts = computed( () =>{
-      if(!walletState.currentLoggedInWallet)
+      if(walletState.currentLoggedInWallet){
+        if(walletState.currentLoggedInWallet.others){
+          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+          return concatOther;
+        } else{
+          return walletState.currentLoggedInWallet.accounts;
+        }
+      } else{
         return [];
-      return walletState.currentLoggedInWallet.accounts
+      }
     });
     const moreThanOneAccount = computed(()=> {
       return accounts.value.length > 1;
@@ -229,6 +257,13 @@ export default {
       showDuration.value = true;
       transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
       transactionFeeExact.value = Helper.convertToExact(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+
+      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == selectedAccAdd.value);
+      const other = walletState.currentLoggedInWallet.others.find((account) => account.address == selectedAccAdd.value);
+      const namespaceInstance = account?account.namespaces.find(namespace => namespace.name === namespaceNameSelected):other.namespaces.find(namespace => namespace.name === namespaceNameSelected);
+
+      startBlock.value = namespaceInstance.startHeight;
+      endBlock.value = namespaceInstance.endHeight;
     };
 
     const clearNamespaceSelection = () => {
@@ -236,17 +271,37 @@ export default {
       showDuration.value = false;
       transactionFee.value = '0.000000';
       transactionFeeExact.value = 0;
+      startBlock.value = '0';
+      endBlock.value = '0';
     };
 
     const clearInput = () => {
       walletPassword.value = '';
       duration.value = '0';
       namespaceSelect.value.clear();
+      startBlock.value = '0';
+      endBlock.value = '0';
     };
 
+    let isMaxDuration = false;
     watch(duration, (n) => {
       if(n > 365){
         duration.value = '365';
+      }else{
+        let remainingBlock = endBlock.value - block.value;
+        let availableDays = 0;
+        numDaysleft.value = Math.ceil(remainingBlock/(24 * 60 * 4));
+        if((parseInt(n) + numDaysleft.value) > 365){
+          availableDays = 365 - numDaysleft.value;
+          duration.value = availableDays.toString();
+          showMaxDaysLabel.value = true;
+          isMaxDuration = true;
+        }else{
+          if(!isMaxDuration){
+            showMaxDaysLabel.value = false;
+          }
+          isMaxDuration = false;
+        }
       }
     });
 
@@ -284,9 +339,33 @@ export default {
       }
     });
 
+    watch(blockListener, (n) => {
+      block.value = n;
+    });
+
     const extendNamespace = () => {
-      console.log('Extend namespace');
+      if(cosigner.value){
+        NamespacesUtils.extendNamespaceMultisig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectNamespace.value, duration.value, selectedAccAdd.value);
+      }else{
+        NamespacesUtils.extendNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectNamespace.value, duration.value);
+      }
+      clearInput();
     };
+
+    const cosigner = ref('');
+    // get cosigner
+    watch(getMultiSigCosigner, (n) => {
+      // if it is a multisig
+      if(n.list.length > 0){
+        if(n.list.length > 1){
+          cosigner.value = cosignerAddress.value;
+        }else{
+          cosigner.value = n.list[0].address;
+        }
+      }else{
+        cosigner.value = '';
+      }
+    });
 
     return {
       namespaceSelect,
@@ -314,9 +393,10 @@ export default {
       isMultiSig,
       isMultiSigBool,
       rentalFee,
+      lockFundTxFee,
       lockFundCurrency,
       currencyName,
-      lockFundTxFee,
+      lockFundTxFeeCurrency,
       lockFundTotalFee,
       selectNamespace,
       namespaceOption,
@@ -328,6 +408,11 @@ export default {
       cosignerBalanceInsufficient,
       cosignerAddress,
       isNotCosigner,
+      startBlock,
+      block,
+      endBlock,
+      numDaysleft,
+      showMaxDaysLabel,
     }
   },
 

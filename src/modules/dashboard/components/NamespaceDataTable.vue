@@ -10,27 +10,27 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column field="namespaceId" header="Namespace ID" >
+      <Column field="namespaceId" :header="$t('namespace.namespaceid')" >
         <template #body="{data}">
           <span class="uppercase">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="name" header="Name" >
+      <Column field="name" :header="$t('services.name')" >
         <template #body="{data}">
           {{data.name}}
         </template>
       </Column>
-      <Column field="linkType" header="Link Type" >
+      <Column field="linkType" :header="$t('dashboard.linktype')" >
         <template #body="{data}">
           {{data.linkType}}
         </template>
       </Column>
-      <Column field="linkedId" header="Asset ID/Address" >
+      <Column field="linkedId" :header="$t('dashboard.assetidaddress')" >
         <template #body="{data}">
           <span class="uppercase">{{data.linkedId}}</span>
         </template>
       </Column>
-      <Column field="Active" header="Active" >
+      <Column field="Active" :header="$t('dashboard.active')" >
         <template #body="{data}">
           <span class="uppercase" :class="data.active ? 'text-green-500' : 'text-red-500'">{{data.active}}</span>
         </template>

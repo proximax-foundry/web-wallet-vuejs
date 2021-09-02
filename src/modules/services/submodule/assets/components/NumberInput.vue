@@ -60,7 +60,6 @@ export default{
 
     validate: function(e) {
       // if(e.data > -1 && e.data < 7){
-        console.log(e.key)
         this.$emit('update:modelValue', e.data);
       // }
     }

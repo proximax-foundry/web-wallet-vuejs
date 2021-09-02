@@ -44,7 +44,7 @@
               </div>
             </div>
             <div v-if="getMultiSigCosigner.list.length > 0">
-              <div class="text-tsm">{{$t('transfer.cosigner')}}:
+              <div class="text-tsm text-left ml-4">{{$t('transfer.cosigner')}}:
                 <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ getMultiSigCosigner.list[0].balance }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
                 <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('services.balance')}}: {{ cosigner.balance }} XPX)</option></select></span>
                 <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
@@ -56,8 +56,8 @@
               <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">{{$t('services.balance')}}: <span class="text-tsm">{{ balance }} XPX</span></div>
             </div>
           </div>
-          <NumberInput :disabled="disabledDivisibility" v-model="divisibility" :max="6" placeholder="Divisibility (0-6)" title="Divisibility (0-6)" icon="coins" :showError="showDivisibilityErr" errorMessage="Required Field - Only Numbers (0 - 6)" class="mt-5" />
-          <SupplyInput :disabled="disabledSupply" v-model="supply" title="Supply" :balance="balanceNumber" placeholder="Supply" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)?'Required Field':'Insufficient balance'" :decimal="Number(divisibility)" />
+          <NumberInput :disabled="disabledDivisibility" v-model="divisibility" :max="6" :placeholder="$t('services.divisibility')+ '(0-6)'" :title="$t('services.divisibility')+ '(0-6)'" icon="coins" :showError="showDivisibilityErr" errorMessage="Required Field - Only Numbers (0 - 6)" class="mt-5" />
+          <SupplyInput :disabled="disabledSupply" v-model="supply" :title="$t('services.supply')" :balance="balanceNumber" :placeholder="$t('services.supply')" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)? $t('scriptvalues.requiredfield'): $t('accounts.insufficientbalance')" :decimal="Number(divisibility)" />
           <!-- <div class="text-center p-3 pb-3 border-l-8 border-gray-100">
             <div class="rounded-2xl bg-gray-100 p-5">
               <input id="month" type="radio" value="month" name="durationOption" v-model="durationOption" :disabled="disabledDuration" /><label for="month" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Month</label>
@@ -91,15 +91,15 @@
               </div>
             </div>
           </div>
-          <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
+          <PasswordInput :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
-            <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">{{$t('signin.clear')}}</button>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createMosaic()">{{$t('welcome.create')}}</button>
+            <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput">{{$t('signin.clear')}}</button>
+            <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createMosaic">{{$t('welcome.create')}}</button>
           </div>
         </fieldset>
       </form>
     </div>
-    <div class="px-10 text-left text-tsm mt-5 md:mt-0">
+    <div class="md:col-span-1 px-10 text-left mt-10 text-tsm md:text-tsm md:mt-5">
       <div class="mb-2">
         <i>{{$t('services.maximumdivisibility')}} 6.</i><br>
         <b>{{$t('services.example')}}: 0.000000</b>
@@ -116,7 +116,7 @@
   </div>
 </template>
 <script>
-import { computed, ref, getCurrentInstance, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 // import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInput from '@/components/SupplyInput.vue';
@@ -140,8 +140,6 @@ export default {
   },
 
   setup(){
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showSupplyErr = ref(false);
     const recipient = ref('');
     const msgOption = ref('regular');
@@ -164,7 +162,7 @@ export default {
     const durationOption =ref('month');
     const duration = ref('1');
     const showDurationErr = ref(false);
-
+    const walletName = walletState.currentLoggedInWallet.name
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
     const durationCheckDisabled = ref(false);
@@ -187,8 +185,11 @@ export default {
 
     const isMultiSig = (address) => {
       const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
+      const other = walletState.currentLoggedInWallet.others.find((account) => account.address == address);
       let isMulti = false;
-      if(account.getDirectParentMultisig().length > 0){
+      const accountDirectParent = account?account.getDirectParentMultisig():[];
+      const otherDirectParent = other?other.getDirectParentMultisig():[];
+      if((accountDirectParent.length + otherDirectParent.length) > 0){
         isMulti = true;
       }
       return isMulti;
@@ -228,21 +229,28 @@ export default {
       durationCheckDisabled.value = false;
     }
 
-    const accounts = computed( () =>{
-      if(!walletState.currentLoggedInWallet){
+    const accounts = computed( () => {
+      if(walletState.currentLoggedInWallet){
+        if(walletState.currentLoggedInWallet.others){
+          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+          return concatOther;
+        } else{
+          return walletState.currentLoggedInWallet.accounts;
+        }
+      } else{
         return [];
       }
-      return walletState.currentLoggedInWallet.accounts;
     });
+
     const moreThanOneAccount = computed(()=>{
       return accounts.value.length > 1;
     });
 
-    const defaultDuration = 10 * 365;
+    const defaultDuration = ref(10 * 365);
 
     const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
-    const transactionFee = ref( Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility));
-    const transactionFeeExact = ref(Helper.convertToExact(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility));
+    const transactionFee = ref( Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility));
+    const transactionFeeExact = ref(Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility));
 
     const getMultiSigCosigner = computed(() => {
       return AssetsUtils.getCosignerList(selectedAccAdd.value);
@@ -251,7 +259,6 @@ export default {
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
-      isMultiSigBool.value = isMultiSig(i.address);
       balance.value = i.balance;
       showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value)?true:false;
       showMenu.value = !showMenu.value;
@@ -261,14 +268,13 @@ export default {
 
     const clearInput = () => {
       walletPassword.value = '';
-      divisibility.value = 0;
-      supply.value = 0;
+      divisibility.value = '0';
+      supply.value = '0';
       duration.value = '1';
       durationOption.value = 'month';
       disabledDuration.value = '';
       isTransferable.value = '';
       isMutable.value = '';
-      emitter.emit("CLEAR_SELECT", 0);
     };
 
     watch(currentSelectedName, (n, o) => {
@@ -278,18 +284,23 @@ export default {
     });
 
     watch(divisibility, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, n, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, n, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, n, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, n, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
     watch(isMutable, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isTransferable.value, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, n, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, n, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
     watch(isTransferable, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, n, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicDefinitionTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, n, divisibility.value, defaultDuration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, n, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, n, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
+    });
+
+    watch(supply, (n) => {
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility);
     });
 
     watch(durationOption, () => {
@@ -355,6 +366,12 @@ export default {
     });
 
     const createMosaic = () => {
+      if(cosigner.value){
+        AssetsUtils.createAssetMultiSig( cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, selectedAccAdd.value); 
+      }else{
+        AssetsUtils.createAsset( selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value);
+      }
+      clearInput();
       // to be replaced by new method to create new asset
       // let createStatus = mosaicTransaction(divisibility.value, supply.value, duration.value, durationOption.value, isMutable.value, isTransferable.value, walletPassword.value, selectedAccName.value, appStore, siriusStore);
       // if(!createStatus){
@@ -365,6 +382,21 @@ export default {
       //   clearInput();
       // }
     };
+
+    const cosigner = ref('');
+    // get cosigner
+    watch(getMultiSigCosigner, (n) => {
+      // if it is a multisig
+      if(n.list.length > 0){
+        if(n.list.length > 1){
+          cosigner.value = cosignerAddress.value;
+        }else{
+          cosigner.value = n.list[0].address;
+        }
+      }else{
+        cosigner.value = '';
+      }
+    });
 
     return {
       accounts,
@@ -415,6 +447,7 @@ export default {
       cosignerBalanceInsufficient,
       cosignerAddress,
       isNotCosigner,
+      walletName
     }
   },
 

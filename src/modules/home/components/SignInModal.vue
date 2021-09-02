@@ -15,8 +15,8 @@
             <form @submit.prevent="login">
               <fieldset class="w-full">
                 <div class="error error_box" v-if="err!=''">{{ err }}</div>
-                <SelectInputPlugin placeholder="Select a Wallet" errorMessage="Select a Wallet" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
-                <PasswordInput placeholder="Enter Wallet Password" errorMessage="Password Required" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+                <SelectInputPlugin :placeholder="$t('signin.selectwallet')" :errorMessage="$t('signin.selectwallet')" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
+                <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
                 <div class="mt-10">
                   <button type="button" class="default-btn mr-2 sm:mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
                   <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
@@ -41,7 +41,7 @@ import { walletState } from '@/state/walletState';
 import { WalletUtils } from '@/util/walletUtils';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { WalletStateUtils } from '@/state/utils/walletStateUtils';
-
+import {useI18n} from 'vue-i18n'
 export default defineComponent({
   name: 'SignInModal',
   data() {
@@ -51,6 +51,7 @@ export default defineComponent({
   },
 
   setup(){
+    const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const router = useRouter();
@@ -100,7 +101,7 @@ export default defineComponent({
       if (result == -1) {
         err.value = "Invalid wallet name";
       } else if (result == 0) {
-        err.value = "Invalid password";
+        err.value = t('signin.invalidpassword');
       } else {
         // let wallets = new Wallets();
         let wallet = walletState.wallets.filterByNetworkNameAndName(networkState.chainNetworkName, selectedWallet.value);

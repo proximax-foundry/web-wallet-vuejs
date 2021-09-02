@@ -44,7 +44,7 @@
               </div>
             </div>
             <div v-if="getMultiSigCosigner.list.length > 0">
-              <div class="text-tsm">{{$t('transfer.cosigner')}}:
+              <div class="text-tsm text-left ml-4">{{$t('transfer.cosigner')}}:
                 <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ getMultiSigCosigner.list[0].balance }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
                 <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('services.balance')}}: {{ cosigner.balance }} XPX)</option></select></span>
                 <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
@@ -61,20 +61,20 @@
           </div>
           <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" :disabled="disableSelectNamespace" ref="namespaceSelect" errorMessage="" v-model="selectNamespace" :options="namespaceOption" selectDefault="1" @show-selection="updateNamespaceSelection" @clear-selection="clearNamespaceSelection" />
           <DurationInput :disabled="disabledDuration" v-if="showDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
-          <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} <span class="text-xs">{{ transactionFee }}</span> XPX</div>
+          <div class="rounded-2xl bg-gray-100 p-5 mb-5 mt-10">
+            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-2 text-gray-500">{{$t('namespace.transactionfee')}} <span class="text-xs">{{ transactionFee }}</span> XPX</div>
           </div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('services.rentalfee')}}: {{ rentalFee }} {{currencyName}}</div>
+            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-2 text-gray-500">{{$t('services.rentalfee')}}: {{ rentalFee }} {{currencyName}}</div>
           </div>
           <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800 mb-5" v-if="isMultiSig(selectedAccAdd)">
             <div class="text-center">
               <div class="inline-block">
                 <div class="flex">
                   <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
-                  <div class="inline-block self-center text-left">
+                  <div class="inline-block self-center text-left ml-2">
                     <div>{{$t('accounts.lockfund')}}: {{ lockFundCurrency }} {{ currencyName }}</div>
-                    <div>{{$t('accounts.unconfirmed')}}: {{ lockFundTxFee }} {{ currencyName }}</div>
+                    <div class="mt-1">{{$t('accounts.unconfirmed')}}: {{ lockFundTxFee }} {{ currencyName }}</div>
                   </div>
                 </div>
               </div>
@@ -83,7 +83,7 @@
           <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
           <div class="mt-10">
             <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">{{$t('siginin.clear')}}</button>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createNamespace">{{$t('welcome.create')}}</button>
+            <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createNamespace">{{$t('welcome.create')}}</button>
           </div>
         </fieldset>
       </form>
@@ -171,9 +171,10 @@ export default {
     });
 
     const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
-    const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
+    const lockFundCurrency = computed(()=> Helper.amountFormatterSimple(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
 
     const lockFundTxFee = ref(0.0445);
+    const lockFundTxFeeCurrency = ref('0.044500');
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
@@ -182,8 +183,11 @@ export default {
 
     const isMultiSig = (address) => {
       const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
+      const other = walletState.currentLoggedInWallet.others.find((account) => account.address == address);
       let isMulti = false;
-      if(account.getDirectParentMultisig().length>0){
+      const accountDirectParent = account?account.getDirectParentMultisig():[];
+      const otherDirectParent = other?other.getDirectParentMultisig():[];
+      if((accountDirectParent.length + otherDirectParent.length) > 0){
         isMulti = true;
       }
       return isMulti;
@@ -192,11 +196,12 @@ export default {
     const selectedAccName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
     const selectedAccAdd = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
     const balance = ref(Helper.toCurrencyFormat(walletState.currentLoggedInWallet.selectDefaultAccount().balance, networkState.currentNetworkProfile.network.currency.divisibility));
-    const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
+    const isMultiSigBool = computed( () => isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
 
     const showNoBalance = ref(false);
     const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
 
+    // validate enough fee to create namespace
     if(balance.value < rentalFee.value){
       if(!isNotCosigner.value){
         showNoBalance.value = true;
@@ -215,10 +220,18 @@ export default {
     }
 
     const accounts = computed( () => {
-      if(!walletState.currentLoggedInWallet)
+      if(walletState.currentLoggedInWallet){
+        if(walletState.currentLoggedInWallet.others){
+          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+          return concatOther;
+        } else{
+          return walletState.currentLoggedInWallet.accounts;
+        }
+      } else{
         return [];
-      return walletState.currentLoggedInWallet.accounts
+      }
     });
+
     const moreThanOneAccount = computed(()=> {
       return accounts.value.length > 1;
     });
@@ -234,7 +247,6 @@ export default {
       namespaceSelect.value.clear();
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
-      isMultiSigBool.value = false;
       balance.value = i.balance;
       showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value)?true:false;
       showMenu.value = !showMenu.value;
@@ -254,8 +266,8 @@ export default {
         showDuration.value = false;
         //subnamespace
         if(namespaceName.value.length > 0){
-          transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected.value, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
-          transactionFeeExact.value = Helper.convertToExact(NamespacesUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected.value, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFeeExact.value = Helper.convertToExact(NamespacesUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
         }
       }
     };
@@ -273,7 +285,21 @@ export default {
     };
 
     const createNamespace = () => {
-      console.log('Add namespace');
+      if(cosigner.value){
+        // for multisig
+        if(selectNamespace.value==='1'){
+          NamespacesUtils.createRootNamespaceMultisig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value, selectedAccAdd.value);
+        }else{
+          NamespacesUtils.createSubNamespaceMultisig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value, selectedAccAdd.value);
+        }
+      }else{
+        if(selectNamespace.value==='1'){
+          NamespacesUtils.createRootNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value);
+        }else{
+          NamespacesUtils.createSubNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value);
+        }
+      }
+      clearInput();
     };
 
     watch(duration, (n) => {
@@ -333,6 +359,21 @@ export default {
       }
     });
 
+    const cosigner = ref('');
+    // get cosigner
+    watch(getMultiSigCosigner, (n) => {
+      // if it is a multisig
+      if(n.list.length > 0){
+        if(n.list.length > 1){
+          cosigner.value = cosignerAddress.value;
+        }else{
+          cosigner.value = n.list[0].address;
+        }
+      }else{
+        cosigner.value = '';
+      }
+    });
+
     return {
       Helper,
       namespaceSelect,
@@ -363,9 +404,10 @@ export default {
       isMultiSig,
       isMultiSigBool,
       rentalFee,
+      lockFundTxFee,
       lockFundCurrency,
       currencyName,
-      lockFundTxFee,
+      lockFundTxFeeCurrency,
       lockFundTotalFee,
       selectNamespace,
       namespaceOption,

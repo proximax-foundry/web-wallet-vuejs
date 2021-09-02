@@ -15,6 +15,7 @@
         </div>
         <InlineMessage v-if="displayWaitMessage" severity="info" class="rounded">Retrieving information, please wait...</InlineMessage>
         <InlineMessage v-if="displaErrorMessage" severity="error">Service unavailable.</InlineMessage>
+        <InlineMessage v-if="displaConnectionMessage" severity="error">Unable to connect.</InlineMessage>
       </div>
       <div class="md:col-span-1">
         <router-link :to="{ name: 'ViewServicesMainnetSwapETHToSirius' }">
@@ -50,6 +51,7 @@ export default {
     const outgoingText = ref('From Sirius to ETH');
     const isOutgoingOptionDisabled = ref(false);
     const displayWaitMessage = ref(false);
+    const displaConnectionMessage = ref(false);
     const displaErrorMessage = ref(false);
     const isChecking = ref(false);
 
@@ -64,33 +66,48 @@ export default {
       isChecking.value = true;
 
       displayWaitMessage.value = true;
-      const response = await fetch(SwapUtils.checkSwapService(baseURL));
-      const priceResponse = await fetch(SwapUtils.checkSwapPrice(priceURL));
-      const priceData = await priceResponse.json();
+      displaConnectionMessage.value = false;
+      displaErrorMessage.value = false;
 
-      isChecking.value = false;
+      try {
+        const response = await fetch(SwapUtils.checkSwapService(baseURL));
+        const priceResponse = await fetch(SwapUtils.checkSwapPrice(priceURL));
+        const priceData = await priceResponse.json();
 
-      if(priceData.xpx === 0 || priceData.eth === 0){
-        displaErrorMessage.value = true;
-        isOutgoingOptionDisabled.value = false;
-        return;
-      }
+        isChecking.value = false;
 
-      if(response.status == 200 && priceResponse.status == 200){
-        displaErrorMessage.value = false;
+        if(priceData.xpx === 0 || priceData.eth === 0){
+          displayWaitMessage.value = false;
+          displaErrorMessage.value = true;
+          isOutgoingOptionDisabled.value = false;
+          return;
+        }
+
+        if(response.status == 200 && priceResponse.status == 200){
+          displaErrorMessage.value = false;
+          displayWaitMessage.value = false;
+          router.push({ name: "ViewServicesMainnetSwapSiriusToETH"});
+        }
+        else{
+          displayWaitMessage.value = false;
+          displaErrorMessage.value = true;
+          isOutgoingOptionDisabled.value = false;
+        }
+      } catch (error) {
         displayWaitMessage.value = false;
-        router.push({ name: "ViewServicesMainnetSwapSiriusToETH"});
-      }
-      else{
-        displaErrorMessage.value = true;
+        displaErrorMessage.value = false;
+        displaConnectionMessage.value = true;
         isOutgoingOptionDisabled.value = false;
+        isChecking.value = false;
       }
+      
     };
 
     return {
       gotoOutgoingPage,
       displayWaitMessage,
       displaErrorMessage,
+      displaConnectionMessage,
       isOutgoingOptionDisabled,
       outgoingText,
     };

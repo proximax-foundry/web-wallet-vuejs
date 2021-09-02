@@ -86,6 +86,7 @@ import { transactions } from '@/util/transactions.js';
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { Account, Address, EncryptedMessage, PublicAccount } from "tsjs-xpx-chain-sdk";
+import {useI18n} from 'vue-i18n'
 
 export default{
   name: 'SubTransfer',
@@ -100,6 +101,7 @@ export default{
   },
 
   setup(p){
+    const {t} = useI18n();
     const appStore = inject("appStore");
     // const siriusStore = inject("siriusStore");
     const nameType = ref('');
@@ -202,7 +204,7 @@ export default{
         isShowMessage.value = true;
         encryptedMessage.value = plainMessage.payload;
       }else{
-        err.value = "Wallet password is incorrect";
+        err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
       }
     }
 

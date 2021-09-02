@@ -13,7 +13,7 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column field="typeName" header="Type" headerStyle="width:110px">
+      <Column field="typeName" :header="$t('dashboard.type')" headerStyle="width:110px">
         <template #body="{data}">
           <span class="font-semibold">{{data.typeName}}</span>
         </template>
@@ -414,14 +414,14 @@
           </div>
         </template>
       </Column>
-      <Column headerStyle="width: 12%" v-if="showBlock" field="block" header="Block" :sortable="true" >
+      <Column headerStyle="width: 12%" v-if="showBlock" field="block" :header="$t('dashboard.block')" :sortable="true" >
         <template #body="{data}">
           <div>{{ data.block }}</div>
           <div v-if="data.timestamp">{{ data.timestamp }}</div>
           <div v-if="data.fee">{{$t('dashboard.fee')}}: {{ data.fee}}</div>
         </template>
       </Column>
-      <Column headerStyle="width: 12%" v-if="showAction" header="Action" >
+      <Column headerStyle="width: 12%" v-if="showAction" :header="$t('services.action')" >
         <template #body="{data}">
           <SplitButton label="Explorer" @click="gotoHashExplorer(data.hash)" icon="pi pi-external-link" class="p-button-help p-mb-2" :model="setSplitButtonItems(data)"></SplitButton>
         </template>

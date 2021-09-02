@@ -8,7 +8,7 @@
     <div class="select mb-3 selectPlugin" style="position: relative">
       <Multiselect
         :placeholder="placeholder"
-        :options="options"
+        :options="getOptions"
         mode="single"
         :canDeselect="canDeselect"
         @change="makeSelection"
@@ -16,6 +16,8 @@
         :noOptionsText="noOptionsText"
         @close="closeSelection"
         :maxHeight="maxHeight"
+        :resolveOnLoad="false"
+        :clearOnSelect="true"
         @deselect="$emit('update:modelValue', selected)"
         @select="makeSelection;$emit('update:modelValue', selected);$emit('show-selection', selected)"
         @clear="$emit('clear-selection')"
@@ -30,6 +32,7 @@
 <script>
 import { defineComponent, ref } from 'vue';
 import Multiselect from '@vueform/multiselect';
+import { NamespacesUtils } from '@/util/namespacesUtils';
 
 export default defineComponent({
   props: [
@@ -40,12 +43,14 @@ export default defineComponent({
     'showSelectTitleProp',
     'selectDefault',
     'disabled',
+    'selectedAddress',
+    'selectedAction',
     'noOptionsText',
   ],
   emits:[
     'update:modelValue', 'show-selection', 'clear-selection'
   ],
-  name: 'SelectInputPlugin',
+  name: 'SelectInputNamespaceAsyncOptionPlugin',
 
   setup(p){
     const showSelectTitle = ref(false);
@@ -76,6 +81,14 @@ export default defineComponent({
       }
     };
 
+    const getOptions = async () => {
+      // (async() => {
+        const namespacesList = await NamespacesUtils.listNamespacesToLink(p.selectedAddress, p.selectedAction);
+        console.log(namespacesList)
+        return namespacesList;
+      // })();
+    };
+
     return {
       showSelectTitle,
       selectErr,
@@ -86,6 +99,7 @@ export default defineComponent({
       closeSelection,
       maxHeight,
       canDeselect,
+      getOptions,
     };
   },
 
@@ -95,9 +109,7 @@ export default defineComponent({
 
   methods: {
     clear: function() {
-      if(this.$refs.selectRef){
-        this.$refs.selectRef.clear();
-      }
+      this.$refs.selectRef.clear();
     }
   },
 
@@ -105,21 +117,15 @@ export default defineComponent({
     if(this.selectDefault){
       this.$refs.selectRef.select(this.selectDefault, this.options);
     }
-
-    this.emitter.on('CLEAR_SELECT', this.clear)
   },
 
-  beforeUnmount(){
-    this.emitter.off('CLEAR_SELECT', this.clear)
-  },
   created() {
     // eslint-disable-next-line no-unused-vars
-    // console.log(this.$refs);
-    // this.emitter.on('CLEAR_SELECT', payload => {
-    //   if(!payload){
-    //     this.$refs.selectRef.clear();
-    //   }
-    // });
+    this.emitter.on('CLEAR_SELECT', payload => {
+      if(!payload){
+        this.$refs.selectRef.clear();
+      }
+    });
   }
 });
 </script>
