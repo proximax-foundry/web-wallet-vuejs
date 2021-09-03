@@ -13,9 +13,9 @@
             </div>
           </div>
         <!-- </router-link> -->
-        <div class="contract_address_label">
+        <div class="contract_address_label-none">
           <div :id="ethContractAddress" :copyValue="ethContractAddress" copySubject="ETH Contract Address copied" v-if="displayCopy">Contract address:</div>
-          <div>{{ ethContractAddress }} <font-awesome-icon icon="copy" @click="copy(ethContractAddress)" class="ml-2 w-5 h-5 cursor-pointer inline-block"></font-awesome-icon></div>
+          <div>{{ ethContractAddress }} <font-awesome-icon icon="copy" class="ml-2 w-5 h-5 inline-block"></font-awesome-icon></div>
         </div>
       </div>
       <div class="md:col-span-1">
@@ -70,9 +70,10 @@ export default {
 
     (async() => {
       try {
-        const fetchETHService = await SwapUtils.fetchETHServiceInfo(swapData.swap_IN_SERVICE_URL);
+        // const fetchETHService = await SwapUtils.fetchETHServiceInfo(swapData.swap_IN_SERVICE_URL);
         const fetchBSCService = await SwapUtils.fetchBSCServiceInfo(swapData.swap_IN_SERVICE_URL);
-        if(fetchETHService.status==200 && fetchBSCService.status==200){
+        // if(fetchETHService.status==200 && fetchBSCService.status==200){
+        if(fetchBSCService.status==200){
           // ethContractAddress.value = fetchETHService.data.ethInfo.scAddress;
           ethContractAddress.value = '000000000000000000000000000000000000000000';
           bscContractAddress.value = fetchBSCService.data.bscInfo.scAddress;
@@ -236,6 +237,13 @@ export default {
 
 .contract_address_label{
   @apply text-xs text-gray-300 hover:text-gray-700 lg:text-tsm duration-500 transition-all;
+  div:nth-child(2){
+    @apply text-tsm lg:text-sm mt-1;
+  }
+}
+
+.contract_address_label-none{
+  @apply text-xs text-gray-300 lg:text-tsm;
   div:nth-child(2){
     @apply text-tsm lg:text-sm mt-1;
   }
