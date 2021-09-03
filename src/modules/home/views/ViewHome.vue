@@ -12,7 +12,7 @@
       <div class="gray-line py-5 sm:py-8 sm:mt-10">
         <label class="inline-flex items-center mb-2 sm:mb-5 px-5">
           <input type="checkbox" class="h-5 w-5 bg-blue-primary self-center" value="true" v-model="haveRead">
-          <span class="ml-2 cursor-pointer text-tsm self-center">I confirm that I have read and understand the <a href="https://bit.ly/3mVayCu" target=_new class="text-blue-500 hover:underline">FAQ<font-awesome-icon icon="external-link-alt" class="text-blue-500 w-3 h-3 self-center ml-1 relative" style="top: -1px"></font-awesome-icon></a>.</span>
+          <span class="ml-2 cursor-pointer text-tsm self-center">I confirm that I have read and understood the <a href="https://bit.ly/3mVayCu" target=_new class="text-blue-500 hover:underline">walkthrough<font-awesome-icon icon="external-link-alt" class="text-blue-500 w-3 h-3 self-center ml-1 relative" style="top: -1px"></font-awesome-icon></a>.</span>
         </label>
         <div class="grid xs:grid-cols-1 md:grid-cols-2">
           <div class="px-5 self-center w-full md:w-64">
