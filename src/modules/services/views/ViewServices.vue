@@ -73,7 +73,8 @@ export default {
         const fetchETHService = await SwapUtils.fetchETHServiceInfo(swapData.swap_IN_SERVICE_URL);
         const fetchBSCService = await SwapUtils.fetchBSCServiceInfo(swapData.swap_IN_SERVICE_URL);
         if(fetchETHService.status==200 && fetchBSCService.status==200){
-          ethContractAddress.value = fetchETHService.data.ethInfo.scAddress;
+          // ethContractAddress.value = fetchETHService.data.ethInfo.scAddress;
+          ethContractAddress.value = '000000000000000000000000000000000000000000';
           bscContractAddress.value = fetchBSCService.data.bscInfo.scAddress;
           displayCopy.value = true;
           serviceErr.value = '';
