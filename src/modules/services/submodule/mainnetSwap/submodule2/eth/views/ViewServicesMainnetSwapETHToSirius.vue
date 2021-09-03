@@ -30,6 +30,7 @@
     </div>
     <div v-if="currentPage==1">
       <div class="text-lg my-7 font-bold">Transaction Details</div>
+      <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">Please make sure there is no other crypto wallet extension currently being enabled except <b>MetaMask</b>.<div class="my-2">Refer to the <a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">walkthrough<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a> for more details.</div>Please refresh this page after disabling other wallet extensions.</div>
       <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
       <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
       <p class="font-bold text-tsm text-left mb-1">From: MetaMask Address</p>
@@ -235,6 +236,11 @@ export default {
   setup() {
     let verifyingTxn;
 
+    const verifyMetaMaskPlugin = ref(true);
+    if(!window.ethereum.isMetaMask){
+      verifyMetaMaskPlugin.value = false;
+    }
+
     onBeforeUnmount(() => {
        if(verifyingTxn){
          clearInterval(verifyingTxn);
@@ -344,15 +350,17 @@ export default {
 
     // For now, 'eth_accounts' will continue to always return an array
     function handleAccountsChanged(accounts) {
-      if (accounts.length === 0) {
-        // MetaMask is locked or the user has not connected any accounts
-        // console.log('Please connect to MetaMask.');
-        coinBalance.value = 0;
-        currentAccount.value = '';
-      } else if (accounts[0] !== currentAccount.value) {
-        currentAccount.value = accounts[0];
-        serviceErr.value = '';
-        updateToken();
+      if(window.ethereum.isMetaMask){
+        if (accounts.length === 0) {
+          // MetaMask is locked or the user has not connected any accounts
+          // console.log('Please connect to MetaMask.');
+          coinBalance.value = 0;
+          currentAccount.value = '';
+        } else if (accounts[0] !== currentAccount.value) {
+          currentAccount.value = accounts[0];
+          serviceErr.value = '';
+          updateToken();
+        }
       }
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
@@ -384,7 +392,11 @@ export default {
     }
 
     const connectMetamask = () => {
-      ethereum
+      if(window.ethereum.isMetaMask == undefined){
+        verifyMetaMaskPlugin.value = false;
+      }else{
+        verifyMetaMaskPlugin.value = true;
+        ethereum
         .request({ method: 'eth_requestAccounts' })
         .then(fetchMetaAccount)
         .catch((err) => {
@@ -398,6 +410,7 @@ export default {
             }
           }
         });
+      }
     };
 
     watch([currentNetwork, currentAccount, tokenAddress], ([newNetwork, newCurrentAccount, newTokenAddress]) => {
@@ -722,6 +735,7 @@ export default {
       isDisabledCheckTxnConfirmed,
       isTxnNotConfirmed,
       transactionFailed,
+      verifyMetaMaskPlugin,
     };
   },
 }
