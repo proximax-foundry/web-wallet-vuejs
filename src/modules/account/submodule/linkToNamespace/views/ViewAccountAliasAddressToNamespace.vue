@@ -1,6 +1,6 @@
 <template>
   <div class="flex justify-between text-sm">
-    <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('namespace.linknamespace')}}</span></div>
+    <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('services.linktonamespace')}}</span></div>
     <div>
       <router-link :to="{name: 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('accounts.viewall')}}</router-link>
     </div>
@@ -14,16 +14,16 @@
     </div>         
     <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 mb-8 mt-3" v-if="!isCosigner && !noNamespace">
       <div class="text-center w-full" > 
-        <p class="text-xs">You are not a cosigner to this account</p>
+        <p class="text-xs">{{$t('accounts.cosigwarning2')}}</p>
       </div>
     </div>     
     <div class="error error_box mb-2" v-if="err!=''">{{ err }}</div>
     <SelectInputPlugin placeholder="Select action" errorMessage="" v-model="selectAction" :options="actionsOptions" ref="selectActionRef" :disabled="disableNamespaces" selectDefault="Link" />
     <SelectInputPlugin placeholder="Select namespace" noOptionsText="No namespace created for this account" errorMessage="" ref="selectNamespaceRef" v-model="selectNamespace" :options="namespaceOptions" :disabled="disableNamespaces" />
-    <SelectInputPlugin v-if="showContactSelection" placeholder="Contact" errorMessage="" ref="selectContactRef" v-model="selectContact" :options="contact" @show-selection="updateAdd" :disabled="disableContactSelection"/>
+    <SelectInputPlugin v-if="showContactSelection" :placeholder="$t('accounts.contacts')" errorMessage="" ref="selectContactRef" v-model="selectContact" :options="contact" @show-selection="updateAdd" :disabled="disableContactSelection"/>
     <div class="flex">
       <div class="flex-grow mr-5">
-        <TextInput placeholder="Address" :errorMessage="addressErrorMsg" :showError="showAddressError" v-model="namespaceAddress" icon="wallet" :disabled="disableNamespaces"/>
+        <TextInput :placeholder="$t('createsuccessful.address')" :errorMessage="addressErrorMsg" :showError="showAddressError" v-model="namespaceAddress" icon="wallet" :disabled="disableNamespaces"/>
       </div>
       <div class="flex-none">
         <div class="rounded-full bg-gray-300 w-14 h-14 cursor-pointer relative" style="top: -5px" @click="showContactSelection = !showContactSelection && !disableContactSelection"  >
@@ -41,8 +41,8 @@
           <div class="flex">
             <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
               <div class="inline-block self-center text-left">
-                <div>LockFund: {{ lockFundCurrency }} {{ currencyName }}</div>
-                <div>Unconfirmed/Recommended Fee: {{ lockFundTxFee }} {{ currencyName }}</div>
+                <div>{{$t('accounts.lockfund')}}: {{ lockFundCurrency }} {{ currencyName }}</div>
+                <div>{{$t('accounts.unconfirmed')}}: {{ lockFundTxFee }} {{ currencyName }}</div>
               </div>
           </div>
         </div>
@@ -83,7 +83,7 @@ export default {
   },
   
   setup(p) {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const selectNamespaceRef = ref(null);
     const selectActionRef = ref(null);
     const currentAddress = ref(p.address);
@@ -144,10 +144,10 @@ export default {
     });
 
     const isMultiSig = computed(() => {
-     let isMultisig = false;
-     if(walletState.currentLoggedInWallet){
-       isMultisig = accountUtils.getMultisig(currentAddress.value);
-     }
+      let isMultisig = false;
+      if(walletState.currentLoggedInWallet){
+        isMultisig = accountUtils.getMultisig(currentAddress.value);
+      }
       return isMultisig;
      });
    
@@ -198,6 +198,13 @@ export default {
       } 
     });
 
+    watch(walletPassword,(currentPwdValue)=>{
+      if(currentPwdValue == null){
+        pwdErrorMsg.value = $t('scriptvalues.enterpassword',{name: walletName });
+        showPwdError.value = true;
+      } 
+    });
+
     const updateAdd = (e) => {
       addressErrorMsg.value = "";
       showAddressError.value = false;
@@ -211,8 +218,6 @@ export default {
     watch(namespaceAddress, (namespaceAddressValue) => {
       if((namespaceAddressValue.length == 46 && namespaceAddressValue.match(addressPatternLong)) || (namespaceAddressValue.length == 40 && namespaceAddressValue.match(addressPatternShort)) && namespaceAddressValue != null){
         const verifynamespaceAddress = accountUtils.verifyAddress(currentAddress.value, namespaceAddress.value);
-        //if(namespaceAddressValue !=null && selectNamespace.value != null && selectAction.value != null){
-        console.log(selectNamespace.value)
        if(verifynamespaceAddress.isPassed == false){
           addressErrorMsg.value = "Invalid Address";
           showAddressError.value = true;
@@ -224,8 +229,6 @@ export default {
           showAddressError.value = false;
         }
       } else {
-         //addressErrorMsg.value = "Invalid Address";
-         //showAddressError.value = true;
          trxFee.value = "0.000000";
       } 
     });

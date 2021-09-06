@@ -9,6 +9,7 @@ export class Wallet{
     accounts: WalletAccount[];
     others: OtherAccount[] = [];
     contacts: AddressBook[] = [];
+    isReady: boolean = false;
 
     constructor(name: string, networkName: string, accounts: WalletAccount[]){
         this.name = name;
@@ -26,7 +27,7 @@ export class Wallet{
         this.accounts.splice(index, 1);
     }
 
-    convertAddressToName(address: string): string{
+    convertAddressToName(address: string, includeOthers: boolean = false): string{
         let aliasName :string = "";
 
         const addressBook = this.contacts.find((addressBook)=> addressBook.address === address);
@@ -38,6 +39,14 @@ export class Wallet{
 
             if(walletAccount){
                 aliasName = walletAccount.name;
+            }
+
+            if(includeOthers){
+                const othersAccount = this.others.find((otherAccount)=> otherAccount.address === address);
+
+                if(othersAccount){
+                    aliasName = othersAccount.name;
+                }
             }
         }
 

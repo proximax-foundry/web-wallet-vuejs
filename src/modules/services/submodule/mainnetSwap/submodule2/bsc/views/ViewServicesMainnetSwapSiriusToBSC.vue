@@ -98,7 +98,7 @@
               <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:3px; right: 10px;"></font-awesome-icon>
             </div>
           </div>
-          <div class="text-tsm mt-2">Swap completion times will vary depending on the performance of the BSC network. The more BNB transaction fees you pay, the faster your swap will occur. Displayed BNB fees are valid for only three minutes due to the BSC network’s fluctuating rates.</div>
+          <div class="text-tsm mt-2">Swap completion time will vary depending on the performance of the BSC network. The more BNB transaction fees you pay, the faster your swap will occur. Displayed BNB fees are valid for only three minutes due to the BSC network’s fluctuating rates.</div>
         </div>
       </div>
       <div class="mt-10">
