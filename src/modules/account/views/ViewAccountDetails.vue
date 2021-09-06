@@ -70,7 +70,7 @@
             </div>
           </div>
           <button class="default-btn w-36" @click="showPwSwap = !showPwSwap" v-if="!showPwSwap">{{$t('accounts.enable')}}</button>
-          <button class="default-btn w-36" @click="verifyWalletPwSwap()" v-if="showPwSwap">{{$t('accounts.submit')}}</button>
+          <button class="default-btn w-36" @click="verifyWalletPwSwap()" v-if="showPwSwap" >{{$t('accounts.submit')}}</button>
         </div>
         <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
           <div class="text-left w-full relative">
@@ -90,17 +90,17 @@
 </template>
 
 <script>
-import {ref, computed} from "vue";
-import {useRouter} from "vue-router";
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 import TextInput from "@/components/TextInput.vue";
 import PasswordInput from "@/components/PasswordInput.vue";
-import {copyToClipboard } from '@/util/functions';
-import {useToast} from "primevue/usetoast";
-import {walletState} from "@/state/walletState";
-import {Helper} from "@/util/typeHelper";
-import {networkState} from "@/state/networkState";
-import {WalletUtils} from "@/util/walletUtils";
-import {useI18n} from 'vue-i18n';
+import { copyToClipboard } from '@/util/functions';
+import { useToast } from "primevue/usetoast";
+import { walletState } from "@/state/walletState";
+import { Helper } from "@/util/typeHelper";
+import { networkState } from "@/state/networkState";
+import { WalletUtils } from "@/util/walletUtils";
+import { useI18n } from 'vue-i18n';
 import { pdfWalletPaperImg } from '@/modules/account/pdfPaperWalletBackground';
 import jsPDF from 'jspdf';
 import qrcode from 'qrcode-generator';
@@ -227,6 +227,8 @@ export default {
         err.value = "";
       }
     };
+
+  
 
     const verifyWalletPwWalletPaper = () => {
       if (walletPasswdWalletPaper.value == "") {

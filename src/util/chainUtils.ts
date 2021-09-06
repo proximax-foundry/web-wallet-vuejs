@@ -1,8 +1,8 @@
 import { ChainConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, Convert,
   NetworkType, 
   NamespaceId,
-  MosaicId, Address, PublicAccount, 
-  AccountInfo, Transaction, QueryParams, SignedTransaction, TransactionType
+  MosaicId, Address, PublicAccount, CosignatureSignedTransaction, Statement,
+  AccountInfo, Transaction, QueryParams, SignedTransaction, TransactionType, NamespaceName, Mosaic, MosaicInfo
 } from "tsjs-xpx-chain-sdk";
 import { NetworkConfig } from "../models/stores/chainProfileConfig";
 import { ChainAPICall } from "../models/REST/chainAPICall";
@@ -11,6 +11,7 @@ import { computed } from "vue";
 
 const currentEndPoint = computed(() => networkState.selectedAPIEndpoint);
 const connectionPort = computed(() => networkState.currentNetworkProfile.httpPort);
+const currentNetworkType = computed(() => networkState.currentNetworkProfile.network.type);
 
 export class ChainUtils{
 
@@ -184,6 +185,24 @@ export class ChainUtils{
       return transactions;
     }
 
+    static async getAccountUnconfirmedTransactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<Transaction[]>{
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let transactions = await chainRESTCall.accountAPI.unconfirmedTransactions(publicAccount, queryParams);
+
+      return transactions;
+    }
+
+    static async getAccountPartialTransactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<Transaction[]>{
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let transactions = await chainRESTCall.accountAPI.aggregateBondedTransactions(publicAccount, queryParams);
+
+      return transactions;
+    }
+
     static announceTransaction(signedTx: SignedTransaction): void{
 
       if(signedTx.type === TransactionType.AGGREGATE_BONDED){
@@ -204,5 +223,95 @@ export class ChainUtils{
       let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
 
       chainRESTCall.transactionAPI.announceAggregateBonded(signedTx);
+    }
+
+    static announceCosignTransaction(signedTx: CosignatureSignedTransaction): void{
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      chainRESTCall.transactionAPI.announceAggregateBondedCosignature(signedTx);
+    }
+
+    static async getAccountInfoByAddress(address: string): Promise<AccountInfo>{
+
+      let addressInstance = Address.createFromRawAddress(address); 
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let accountInfo = await chainRESTCall.accountAPI.getAccountInfo(addressInstance);
+
+      return accountInfo;
+    }
+
+    static async getAccountInfoByPublicKey(publicKey: string): Promise<AccountInfo>{
+
+      let addressInstance = Address.createFromPublicKey(publicKey, currentNetworkType.value); 
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let accountInfo = await chainRESTCall.accountAPI.getAccountInfo(addressInstance);
+
+      return accountInfo;
+    }
+
+    static async getNamespaceLinkedAddress(namespaceIdHex: string): Promise<Address>{
+
+      let namespaceId = NamespaceId.createFromEncoded(namespaceIdHex);
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let address = await chainRESTCall.namespaceAPI.getLinkedAddress(namespaceId);
+
+      return address;
+    }
+
+    static async getNamespaceFullName(namespaceIdHex: string): Promise<NamespaceName>{
+
+      let namespaceId = NamespaceId.createFromEncoded(namespaceIdHex);
+      let namespaceIds = [namespaceId];
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let namespaceNames = await chainRESTCall.namespaceAPI.getNamespacesName(namespaceIds);
+
+      return namespaceNames[0];
+    }
+
+    static async getNamespacesFullName(namespaceIds: NamespaceId[]): Promise<NamespaceName[]>{
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let namespaceNames = await chainRESTCall.namespaceAPI.getNamespacesName(namespaceIds);
+
+      return namespaceNames;
+    }
+
+    static async getAssetProperties(assetIdHex: string): Promise<MosaicInfo>{
+
+      let assetId = new MosaicId(assetIdHex);
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let assetInfo = await chainRESTCall.assetAPI.getMosaic(assetId);
+
+      return assetInfo;
+    }
+
+    static async getAssetsProperties(assetIds: MosaicId[]): Promise<MosaicInfo[]>{
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let assetInfos = await chainRESTCall.assetAPI.getMosaics(assetIds);
+
+      return assetInfos;
+    }
+
+    static async getBlockReceipt(blockHeight: number): Promise<Statement>{
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let statement = await chainRESTCall.blockAPI.getBlockReceipts(blockHeight);
+
+      return statement;
     }
 }
