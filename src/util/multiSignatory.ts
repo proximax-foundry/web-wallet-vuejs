@@ -18,6 +18,7 @@ import {
   MultisigAccountGraphInfo,
 
 } from "tsjs-xpx-chain-sdk";
+
 //line 483,485
 // import { environment } from '../environment/environment.js';
 import { NetworkStateUtils } from "@/state/utils/networkStateUtils";
@@ -26,7 +27,7 @@ import { walletState } from '@/state/walletState'
 import { networkState } from "@/state/networkState"; // chainNetwork
 import { announceAggregateBonded, announceLockfundAndWaitForConfirmation, modifyMultisigAnnounceLockfundAndWaitForConfirmation, modifyMultisigAnnounceAggregateBonded } from '../util/listener.js';
 import { TransactionUtils } from "@/util/transactionUtils";
-import { WalletAccount } from "@/models/walletAccount.js";
+import { WalletAccount } from '@/models/walletAccount';
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { listenerState, AutoAnnounceSignedTransaction, HashAnnounceBlock, AnnounceType } from "@/state/listenerState";
 
@@ -219,182 +220,31 @@ function getMultisigAccountGraphInfo(address :string) :Promise<MultisigAccountGr
   return WalletUtils.getMultisigAccGraphInfo( Address.createFromRawAddress(address ));
 }
 
-/* function updateAccountMultisigGraphInfo(accountAddress) {
-  return new Promise((resolve) => {
-    const address = Address.createFromRawAddress(accountAddress);
-    getMultisigAccountGraphInfo(address).then(info => {
-      const wallet = walletState.currentLoggedInWallet;
-      const account = wallet.accounts.find((element) => element.address == accountAddress);
-      const multigraph = [];
-      // console.log('info.multisigAccounts');
-      // console.log(accountAddress + ' ' + account.name);
-      // console.log(info.multisigAccounts);
-      info.multisigAccounts.forEach((multi) => {
-        // console.log(multi);
-        multi.forEach((m) => {
-          // console.log(m)
-          // console.log(m.address)
-          multigraph.push(m);
-        })
-      });
-      account.multisigAccountGraphInfo = multigraph;
-      resolve(info);
-      try {
-        sessionStorage.setItem(
-          'currentWalletSession',
-          JSON.stringify(wallet)
-        );
-        localStorage.setItem(
-          walletKey,
-          JSON.stringify(walletState)
-        );
-      } catch (err) {
-        console.error("checkIsMultiSig error caught", err);
-      }
-    }, error => {
-      console.log(error);
-    });
-  });
-} */
 
 function checkIsMultiSig(accountAddress :string) :boolean{
-    let account = walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress)
-    
+    /* let account = walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress)?walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress):  walletState.currentLoggedInWallet.others.find(element=>element.address ===accountAddress) */
+    let wallet = walletState.currentLoggedInWallet
+    let account
+      if (wallet.accounts.find(element => element.address ===accountAddress) === undefined && wallet.others.find(element => element.address ===accountAddress) === undefined){
+        account = null
+      } else if (wallet.accounts.find(element => element.address ===accountAddress) === undefined){
+        account = wallet.others.find(element => element.address ===accountAddress) 
+      } else if (wallet.others.find(element => element.address ===accountAddress) === undefined){
+        account = wallet.accounts.find(element => element.address ===accountAddress)
+      }
     
     let verify = false;
       
     verify = account.getDirectParentMultisig().length? true: false
     
-    
-  /*   try {
-      sessionStorage.setItem(
-        'currentWalletSession',
-        JSON.stringify(walletState.currentLoggedInWallet)
-      );
-      localStorage.setItem(
-        walletKey,
-        JSON.stringify(walletState)
-      );
-    } catch (err) {
-      console.error("checkIsMultiSig error caught", err);
-    } */
-     /*  if (account != undefined) {
-        verify = account.getDirectParentMultisig().length ? true : false;
-      } */
-      return verify;
-      
-      // eslint-disable-next-line no-unused-vars
+      return Boolean(verify);
   
 }
 
-/* function updateAccountsMultiSign() {
-  const wallet = walletState.currentLoggedInWallet
-  wallet.accounts.forEach(async (element) => {
-    try {
-      await checkIsMultiSig(element.address);
-      await updateAccountMultisigGraphInfo(element.address);
-    } catch (err) {
-      console.log(err);
-      console.error("updateAccountsMultiSign error caught", err);
-    }
-  });
-  return 'invalid_wallet';
-} */
 
-/* function createMultiSigAccount(walletName) {
-  const wallet = appStore.getWalletByName(walletName);
-  wallet.accounts.forEach((element) => {
-    if (element.isMultisign) {
-      if (element.isMultisign.cosignatories.length == 0) {
-        console.log(element.address)
-        element.isMultisign.multisigAccounts.forEach((multisig) => {
-          let multisigStatus = wallet.accounts.find((element) => element.address === multisig.address.address);
-          if (!multisigStatus) {
-            console.log(multisig)
-            appStore.updateCreatedMultiSigToWallet(multisig.publicKey, multisig.address.address);
-          }
-        });
-        updateAccountsMultiSign(walletName);
-        // get latest xpx amount
-        appStore.getXPXBalance(walletName, siriusStore).then(() => {
-          appStore.updateWalletConfig(wallet);
-        });
-      }
-    }
-  });
-} */
 
-const removeUnrelatedMultiSig = () :void=> {
-  const wallet = walletState.currentLoggedInWallet
-  let multiSigAccounts = wallet.accounts.filter((element) => element.encrypted === undefined);
-  let removeMultiSig = [];
-  multiSigAccounts.forEach((element) => {
-    let validMultiSig = false;
-    
-    if (element.getDirectParentMultisig().length) {
-          validMultiSig = true;
-    }
-    if (!validMultiSig) {
-      removeMultiSig.push(element.address);
-    }
-  });
-  // remove multisig account
-  if(multiSigAccounts.length > 0){
-    const wallet = walletState.currentLoggedInWallet
-    multiSigAccounts.forEach((multisig) => {
-      const accountIndex = wallet.accounts.findIndex((element) => element.address === multisig.address );
-      // console.log('Remove index: ' + accountIndex + ' ' + multisig.address);
-      wallet.accounts.splice(accountIndex, 1);
-    });
-    
-    /* sessionStorage.setItem('currentWalletSession', JSON.stringify(wallet));
-    localStorage.setItem(
-      walletKey,
-      JSON.stringify(walletState)
-    ); */
-  }
-};
 
-/* const cosignMultisigTransaction = (signedAggregateBoundedTransaction , walletPassword) => {
-  // console.log('signedAggregateBoundedTransaction')
-  // console.log(signedAggregateBoundedTransaction)
-  let coSignAddress = signedAggregateBoundedTransaction.cosignatures.signer;
-  // console.log('co: ' + coSignAddress)
-  const accountDetails =  walletState.currentLoggedInWallet.accounts.find(element => element.address === coSignAddress)
-  const networkType = networkState.currentNetworkProfile.network.type
-  let privateKey = WalletUtils.decryptPrivateKey(walletPassword, accountDetails.encrypted, accountDetails.iv);
-  const account = Account.createFromPrivateKey(privateKey, networkType);
 
-  const cosignAggregateBondedTransaction = (signedAggregateBoundedTransaction, account) => {
-    const cosignatureTransaction = CosignatureTransaction.create(signedAggregateBoundedTransaction);
-    let signStatus = account.signCosignatureTransaction(cosignatureTransaction);
-    return signStatus;
-  };
-  getAggregateBondedTransactions(account.publicAccount).then((transactions) => {
-    console.log(transactions);
-    for (const aggregateTx of transactions) {
-      // view transaction details...
-      let cosigned = aggregateTx.signedByAccount(account.publicAccount);
-      if (!cosigned && aggregateTx.transactionInfo.hash === signedAggregateBoundedTransaction.transactionInfo.hash) {
-        let cosignatureSignedTransaction = cosignAggregateBondedTransaction(aggregateTx, account);
-        let transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint))
-        transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction);
-      }
-    }
-  });
-};
- */
-/* const createNewMultiSigAccount = (publicKey, address) => {
-  // const networkType = appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network;
-  // check if multiSig is already in wallet
-  // console.log('publicAccount');
-  // console.log(publicAccount);
-  const wallet = walletState.currentLoggedInWallet
-  let multiSig = wallet.accounts.find((element) => element.address === address);
-  if (!multiSig) {
-    appStore.updateCreatedMultiSigToWallet(publicKey, address);
-  }
-} */
 
 // modify multisig
 function modifyMultisigAccount(coSign :string[], removeCosign :string[], numApproveTransaction :number, numDeleteUser :number, cosigners :{address :string}[] , multisigAccount :WalletAccount, walletPassword :string) :boolean | Promise<modifyMultisigAnnounceAggregateBonded>{
@@ -451,7 +301,8 @@ function modifyMultisigAccount(coSign :string[], removeCosign :string[], numAppr
 
     let relativeNumApproveTransaction = numApproveTransaction - multisigAccount.multisigInfo.find(element => element.level === 0).minApproval;
     let relativeNumDeleteUser = numDeleteUser - multisigAccount.multisigInfo.find(element => element.level === 0).minRemoval
-
+    console.log(relativeNumApproveTransaction)
+    console.log(relativeNumDeleteUser)
     const convertIntoMultisigTransaction = ModifyMultisigAccountTransaction.create(
       Deadline.create(),
       relativeNumApproveTransaction,
@@ -487,23 +338,21 @@ function modifyMultisigAccount(coSign :string[], removeCosign :string[], numAppr
       const transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
       (async () => {
         try {
-          let lockFundListeners = [];
-          let aggregateBoundedListeners = [];
-          let confirmedTx = [];
-          let aggregateTx = [];
-          // transactions.forEach(async(transaction, item) =>{
-          let item = 0;
           for (const transaction of transactions) {
-            //lockFundListeners[item] = siriusStore.chainWSListener;
-            confirmedTx[item] = await modifyMultisigAnnounceLockfundAndWaitForConfirmation(lockFundListeners[item], transaction.coSignerAccount.address, transaction.lockFundsTransactionSigned, transaction.lockFundsTransactionSigned.hash, transactionHttp);
-            //aggregateBoundedListeners[item] = siriusStore.chainWSListener;
-            aggregateTx[item] = await modifyMultisigAnnounceAggregateBonded(aggregateBoundedListeners[item], transaction.coSignerAccount.address, transaction.signedAggregateBoundedTransaction, transaction.signedAggregateBoundedTransaction.hash, confirmedTx[item], transactionHttp);
-            ++item;
+            let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(transaction.lockFundsTransactionSigned);
+            hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock + 1;
+            let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(transaction.signedAggregateBoundedTransaction);
+            autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(transaction.lockFundsTransactionSigned.hash);
+            autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
+            autoAnnounceSignedTx.type = AnnounceType.BONDED;
+            ListenerStateUtils.addAutoAnnounceSignedTransaction(hashLockAutoAnnounceSignedTx);
+            ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
           }
         } catch (error) {
           console.log(error);
         }
       })();
+    return verify
     }
  
 }
@@ -514,24 +363,29 @@ function modifyMultisigAccount(coSign :string[], removeCosign :string[], numAppr
 
 
  const fetchMultiSigCosigners = (multiSigAddress :string) :Array<{list :{address :string, name: string , balance: number}}> =>{
-  let account = walletState.currentLoggedInWallet.accounts.find(element => element.address === multiSigAddress)
+  let account = walletState.currentLoggedInWallet.accounts.find(element => element.address === multiSigAddress)? walletState.currentLoggedInWallet.accounts.find(element => element.address === multiSigAddress) : walletState.currentLoggedInWallet.others.find(element => element.address === multiSigAddress)
+  if (account == undefined){
+    return []
+  }
   let cosigners = account.multisigInfo.filter(element => element.level === 1)
+  
   let list = [];
-  cosigners.forEach(cosigner=>{
-    let isInWallet = walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === cosigner.publicKey)? true: false
-    if(isInWallet){ //if cosigner in current wallet
-      let account = walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === cosigner.publicKey)
-      list.push({ address: account.address, name: account.name , balance: account.balance})
-    }else{ //cosigner not in this wallet
-     /*  let convertedAddress = Helper.createPublicAccount(cosigner.publicKey,networkState.currentNetworkProfile.network.type).address.plain()
-      
-        list.push({ address: convertedAddress, name: convertedAddress.substr(-4) , balance: undefined})
-       */
-      
-    }
-  })
+  
+    cosigners.forEach(cosigner=>{
+      let isInWallet = walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === cosigner.publicKey)? true: false
+      if(isInWallet){ //if cosigner in current wallet
+        let account = walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === cosigner.publicKey)
+        list.push({ address: account.address, name: account.name , balance: account.balance})
+      }else{ //cosigner not in this wallet
+      /*  let convertedAddress = Helper.createPublicAccount(cosigner.publicKey,networkState.currentNetworkProfile.network.type).address.plain()
+        
+          list.push({ address: convertedAddress, name: convertedAddress.substr(-4) , balance: undefined})
+        */
+        
+      }
+    })
+  
   list.sort((a, b) => (a.balance < b.balance) ? 1 : -1);
-  console.log(list)
   return list
  
 }
@@ -547,13 +401,7 @@ export const multiSign = readonly({
   convertAccount,
   onPartial,
   checkIsMultiSig,
-  /* updateAccountsMultiSign, */
-  /* cosignMultisigTransaction, */
-  /* createNewMultiSigAccount, */
-  /* updateAccountMultisigGraphInfo, */
   getMultisigAccountGraphInfo,
   modifyMultisigAccount,
   fetchMultiSigCosigners,
-  removeUnrelatedMultiSig,
- /*  createMultiSigAccount, */
 });
