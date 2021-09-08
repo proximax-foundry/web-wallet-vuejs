@@ -628,10 +628,12 @@ export default {
           isDisabledCancel.value = false;
         }
         else if(response.status==503){
+          const res = await response.json();
+          let errorMessage = res.data.message ? res.data.message : "";
           toast.add({
             severity:'warn',
             summary: 'Service is unavailable',
-            detail: 'Please try again later',
+            detail: errorMessage ? errorMessage : 'Please try again later',
             group: 'br'
           });
           swapInProgress.value = false;
