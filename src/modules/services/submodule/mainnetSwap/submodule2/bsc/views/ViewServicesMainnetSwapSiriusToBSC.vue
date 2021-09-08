@@ -439,10 +439,10 @@ export default {
         }
         else{
           let result = data.result;
-          
-          standardGasPriceInGwei.value = result.standard;
-          fastGasPriceInGwei.value = result.fast;
-          rapidGasPriceInGwei.value = result.instant;
+
+          standardGasPriceInGwei.value = result.ProposeGasPrice;
+          fastGasPriceInGwei.value = result.FastGasPrice;
+          rapidGasPriceInGwei.value = Math.ceil(fastGasPriceInGwei.value * 1.1);
         }
       }
     }
