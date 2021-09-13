@@ -800,6 +800,10 @@ export class SwapUtils {
     return `${baseUrl}/service-info`;
   }
 
+  static getIncoming_ETHCheckStatus_URL(baseUrl: string){
+    return `${baseUrl}/expx/swap-status`;
+  }
+
   static getOutgoingSwapServiceInfo = (url: string): Promise<any>=> {
     return fetch(url).then((res) => res.json()).then((data) => { return data });
   }
