@@ -79,7 +79,7 @@
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
-            {{ isInvalidRemoteTxnHash?'Transaction is rejected.':'Transaction is verified:' }}
+            {{ isInvalidRemoteTxnHash?'Transaction has failed.':'ETH Transaction is successful:' }}
             <div v-if="!isInvalidRemoteTxnHash && step2" class="mt-2">
               <div v-if="remoteTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
                 <a :href="remoteTxnLink" target=_new :class="isInvalidRemoteTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="validateTransfer" :copyValue="remoteTxnHash" copySubject="Transfer hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ remoteTxnHash }}</a>
@@ -90,7 +90,7 @@
             </div>
             <div v-if="isInvalidRemoteTxnHash && step2" class="mt-2 text-sm text-gray-700">
               {{ isDisplayFeeLowRemark?'Fees might be too low. Please do not change recommended fee in MetaMask.':'ETH transaction hash is invalid. Please initiate new swap from ETH to XPX' }}
-              <router-link :to="{ name: 'ViewServicesMainnetSwapETHToSirius' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">Swap</router-link>
+              <router-link :to="{ name: 'ViewServicesMainnetSwapEthOptions' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">Swap</router-link>
             </div>
           </div>
         </div>
@@ -115,7 +115,7 @@
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">
-            {{ (isInvalidSwapCheck && step4)?'Swap not verified:':'Swap verified:' }}
+            {{ (isInvalidSwapCheck && step4)?'Swap not verified:':'Swap is successful:' }}
             <div v-if="!isInvalidSwapCheck && step4" class="mt-2">
               <div v-if="siriusTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
                 <a :href="siriusTxnLink" target=_new class="text-blue-primary flex-grow break-all text-tsm self-center hover:underline" id="validateTransfer" :copyValue="remoteTxnHash" copySubject="Transfer hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ siriusTxnHash }}</a>
@@ -496,7 +496,6 @@ export default {
       setTimeout(() => {
         (async() => {
           let remoteTxnStatus = await verifyTransaction();
-          console.log('remoteTxnStatus: ' + remoteTxnStatus);
           if(!remoteTxnStatus && transactionFailed.value){
             isInvalidRemoteTxnHash.value = true;
           }else{
@@ -568,7 +567,7 @@ export default {
           }
         }
       }catch(err){
-        console.log(err);
+        // console.log(err);
         return false;
       }
     };

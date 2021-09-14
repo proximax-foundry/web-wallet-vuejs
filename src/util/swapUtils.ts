@@ -808,6 +808,14 @@ export class SwapUtils {
     return `${baseUrl}/bxpx/swap-status`;
   }
 
+  static getOutgoing_ETHCheckStatus_URL(baseUrl: string){
+    return `${baseUrl}/eth/swapByTx/`;
+  }
+
+  static getOutgoing_BSCCheckStatus_URL(baseUrl: string){
+    return `${baseUrl}/bsc/swapByTx/`;
+  }
+
   static getOutgoingSwapServiceInfo = (url: string): Promise<any>=> {
     return fetch(url).then((res) => res.json()).then((data) => { return data });
   }
