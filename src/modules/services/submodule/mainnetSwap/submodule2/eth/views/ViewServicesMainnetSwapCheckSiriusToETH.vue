@@ -49,7 +49,7 @@
         </div>
       </div>
       <p class="font-bold text-tsm text-left mb-1">Sirius Transaction Hash</p>
-      <TextInput placeholder="Sirius Transaction Hash" errorMessage="Please key in valid transaction hash" :showError="showTxnHashError" v-model="txnHash" icon="hashtag" class="w-full" />
+      <TextInput placeholder="Sirius Transaction Hash" errorMessage="Please key in valid transaction hash" :showError="showTxnHashError" v-model="siriusTxnHash" icon="hashtag" class="w-full" />
       <div class="mt-10">
         <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
         <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledCheck" @click="sendRequest()">Check Status</button>
@@ -58,7 +58,7 @@
     <div v-if="currentPage==2">
       <div class="text-lg my-7">
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <div class="font-bold text-left text-xs md:text-sm lg:text-lg" :class="step1?'text-gray-700':'text-gray-300'">Step 1: Send ERC20 XPX to the escrow account</div>
+        <div class="font-bold text-left text-xs md:text-sm lg:text-lg" :class="step1?'text-gray-700':'text-gray-300'">Step 1: Check Sirius transaction status</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
             <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="step1?'border-blue-primary':'border-gray-300'">
@@ -67,25 +67,34 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Sending transaction to MetaMask</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Checking Sirius transaction status</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="isInvalidConfirmedMeta?'border-red-primary':(step2?'border-blue-primary':'border-gray-300')">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="isInvalidSiriusTxnHash?'border-red-primary':(step2?'border-blue-primary':'border-gray-300')">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-if="isInvalidConfirmedMeta"></font-awesome-icon>
+                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-if="isInvalidSiriusTxnHash"></font-awesome-icon>
                 <font-awesome-icon icon="check" :class="step2?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-else></font-awesome-icon>
               </div>
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
-            {{ isInvalidConfirmedMeta?'Approval in MetaMask is rejected':'Waiting for confirmation in MetaMask' }}
-            <div v-if="isInvalidConfirmedMeta" class="mt-5">
-              <button type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border-blue-primary px-8 text-white hover:shadow-lg" @click="getValidation">Retry</button>
-              <router-link :to="{ name: 'ViewServices' }" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32 text-tsm" tag="button">Cancel this swap</router-link>
+            {{ isInvalidSiriusTxnHash?'Transaction has failed.':'Sirius transaction is successful:' }}
+            <div v-if="!isInvalidSiriusTxnHash && step2" class="mt-2">
+              <div v-if="siriusTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
+                <a :href="siriusTxnLink" target=_new :class="isInvalidSiriusTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="siriusTx" :copyValue="siriusTxnHash" copySubject="Sirius transaction hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ siriusTxnHash }}</a>
+                <div class="flex-none">
+                  <font-awesome-icon icon="copy" @click="copy('siriusTx')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step2"></font-awesome-icon>
+                </div>
+              </div>
+            </div>
+            <div v-if="isInvalidSiriusTxnHash && step2" class="mt-2 text-sm text-gray-700">
+              Sirius transaction hash is invalid. Please initiate new swap from XPX to ETH
+              <router-link :to="{ name: 'ViewServicesMainnetSwapEthOptions' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">Swap</router-link>
             </div>
           </div>
         </div>
+        <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step3?'text-gray-700':'text-gray-300'">Step 2: Check ETH transaction status</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
             <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step3?'border-blue-primary':'border-gray-300'">
@@ -94,113 +103,35 @@
               </div>
             </div>
           </div>
-          <div class="text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">
-            Transaction hash:
-            <div v-if="validationHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
-              <a :href="validationLink" target=_new :class="isInvalidConfirmedMeta?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ validationHash }}</a>
-              <div class="flex-none">
-                <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step3"></font-awesome-icon>
-              </div>
-            </div>
-            <div class="sm:flex">
-              <button class="sm:flex-none justify-start sm:justify-end bg-blue-primary h-15 w-60 rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-3 sm:mt-0 disabled:opacity-50 self-center" type="button" v-if="validationHash" :disabled="isDisabledCheckTxnConfirmed || transactionFailed" @click="triggerTxnConfirmation">{{ isCheckingTxnConfirmation?'Checking transaction confirmation...':'Check transaction confirmation to proceed' }}</button>
-              <div v-if="validationHash" class="py-2 sm:flex-grow text-tsm">
-                <div class="mb-1">One block confirmation needed to proceed.</div>
-                <div class="mb-1"><b>Do not change Gas Limit, Max Piority Fee or Max Fee</b>.</div>
-                <div class="mb-1">Confirmation might take up to 30 minutes, 1 hour or more due to high transaction volumes.</div>
-                <div class="mb-1">Please <b>do not close or refresh</b> this page until the swap process is complete and you have saved your certificate.</div>
-                <div class="mb-1">View confirmation status on <a :href="validationLink" target="_new" class="text-blue-primary inline-block hover:text-blue-900 hover:underline">EtherScan<font-awesome-icon icon="external-link-alt" class="ml-1 text-blue-primary w-3 h-3 self-center inline-block"></font-awesome-icon></a>.</div>
-              </div>
-            </div>
-            <div class="text-tsm mt-2 bg-blue-100 px-4 py-2 rounded-xl inline-block text-blue-900" v-if="isTxnNotConfirmed && !transactionFailed">Transaction is not confirmed yet. Please check again in a moment</div>
-            <div class="text-tsm mt-2 bg-red-100 px-4 py-2 rounded-xl inline-block text-red-primary" v-if="transactionFailed">Transaction failed. Please try again with suggested gas price and gas limit</div>
-          </div>
-        </div>
-        <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step4?'text-gray-700':'text-gray-300'">Step 2: Validate your Sirius address</div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step4?'border-blue-primary':'border-gray-300'">
-              <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" :class="step4?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
-              </div>
-            </div>
-          </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">Sending message to MetaMask</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Checking ETH transaction status<div class="text-tsm text-gray-500 my-3" v-if="transactionPending">Pending confirmation: {{ numConfirmation }} of 12 confirmations</div></div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSignedMeta?'border-red-primary':(step5?'border-blue-primary':'border-gray-300')">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="isInvalidRemoteTxnHash?'border-red-primary':(step4?'border-blue-primary':'border-gray-300')">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidSignedMeta"></font-awesome-icon>
-                <font-awesome-icon icon="check" :class="step5?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
+                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-if="isInvalidRemoteTxnHash"></font-awesome-icon>
+                <font-awesome-icon icon="check" :class="step4?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-else></font-awesome-icon>
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">
-            {{ signatureMessage }}
-            <div v-if="isInvalidSignedMeta" class="mt-5">
-              <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg w-24" @click="getSigned">Retry</button>
-            </div>
-          </div>
-        </div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step6?'border-blue-primary':'border-gray-300'">
-              <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" :class="step6?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">
+            {{ isInvalidRemoteTxnHash?'Transaction has failed.':'ETH transaction is successful:' }}
+            <div v-if="!isInvalidRemoteTxnHash && step4" class="mt-2">
+              <div v-if="remoteTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
+                <a :href="remoteTxnLink" target=_new :class="isInvalidRemoteTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="remoteTx" :copyValue="remoteTxnHash" copySubject="ETH transaction hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ remoteTxnHash }}</a>
+                <div class="flex-none">
+                  <font-awesome-icon icon="copy" @click="copy('remoteTx')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step4"></font-awesome-icon>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message signed with signature: <div class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex" v-if="messageHash && step6"><div :class="step6?'text-gray-500':'text-gray-300'" class="text-tsm break-all flex-grow" id="validateMessage" :copyValue="messageHash" copySubject="Signature hash">{{ messageHash }}</div><div class="flex-none"><font-awesome-icon icon="copy" @click="copy('validateMessage')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step6"></font-awesome-icon></div></div></div>
-        </div>
-        <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step7?'text-gray-700':'text-gray-300'">Step 3: Initiate swap</div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSwapService?'border-red-primary':(step7?'border-blue-primary':'border-gray-300')">
-              <div class="flex h-full justify-center">
-                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidSwapService"></font-awesome-icon>
-                <font-awesome-icon icon="check" :class="step7?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
-              </div>
-            </div>
-          </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step7?'text-gray-700':'text-gray-300'">
-            {{ isInvalidSwapService?'Unable to send message to swap service':'Message sent to the swap service, swap initiated...' }}
-            <div v-if="isInvalidSwapService && swapServerErrIndex <= 3" class="mt-5">
-              <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg disabled:opacity-50" @click="afterSigned" :disabled="disableRetrySwap">{{ retrySwapButtonText }}</button>
-            </div>
-            <div v-if="swapServerErrIndex>3" class="mt-5 text-tsm sm:text-sm">
-              Sorry. Please save the <b>transaction hash</b>, the <b>signature</b> and contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
+            <div v-if="isInvalidRemoteTxnHash && step4" class="mt-2 text-sm text-gray-700">
+              ETH transaction hash is invalid. Please contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
             </div>
           </div>
         </div>
       </div>
       <div class="mt-10">
-        <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()">{{$t('createsuccessful.continue')}}</button>
-      </div>
-    </div>
-    <div v-if="currentPage==3">
-      <div>
-        <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
-        <div class="text-sm mb-7">The swap process has already started!</div>
-        <swap-certificate-component networkTerm="ETH" swapType="In" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="transactionHash" :siriusAddress="siriusAddress" :swapQr="swapQr" :swapLink="validationLink" />
-        <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
-          <div class="text-center w-full">
-            <div class="w-8 h-8 inline-block relative">
-              <div class="rounded-full border border-yellow-500 w-7 h-7 relative">
-                <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:3px; right: 10px;"></font-awesome-icon>
-              </div>
-            </div>
-            <div class="text-tsm mt-2">Download your certificate. It is needed in the event of an error.</div>
-          </div>
-        </div>
-        <label class="inline-flex items-center mb-10">
-          <input type="checkbox" class="h-5 w-5 bg-blue-primary" value="true" v-model="savedCheck">
-          <span class="ml-2 cursor-pointer text-tsm">I confirm that I have downloaded a copy of my certificate.</span>
-        </label>
-        <div class="sm:mt-10">
-          <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none mr-4 w-60 mt-6" @click="saveCertificate">Download Certificate</button>
-          <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-60 inline-block mt-6" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
-        </div>
+        <router-link :to="{ name: 'ViewServices' }" class="default-btn focus:outline-none w-40 inline-block" :class="isDisabled?'opacity-50':''" :is="isDisabled?'span':'router-link'" tag="button">Done</router-link>
       </div>
     </div>
   </div>
@@ -208,8 +139,6 @@
 <script>
 import { computed, ref, watch, onBeforeUnmount } from "vue";
 import TextInput from '@/components/TextInput.vue';
-import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
-import SelectSiriusAccountInputPlugin from '@/modules/services/submodule/mainnetSwap/components/SelectSiriusAccountInputPlugin.vue';
 import { walletState } from '@/state/walletState';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
@@ -223,8 +152,6 @@ export default {
 
   components: {
     TextInput,
-    SwapCertificateComponent,
-    SelectSiriusAccountInputPlugin,
   },
 
   setup() {
@@ -264,10 +191,9 @@ export default {
       }
     })()
 
-    const txnHashPattern= "^[0-9A-Za-z]{66}$";
-    const txnHash = ref('');
-    const showTxnHashError = computed(()=> !txnHash.value.match(txnHashPattern) && txnHash.value.length > 0);
-  
+    const siriusTxnHashPattern= "^[0-9A-Za-z]{64}$";
+    const siriusTxnHash = ref('');
+    const showTxnHashError = computed(()=> !siriusTxnHash.value.match(siriusTxnHashPattern) && siriusTxnHash.value.length > 0);
 
     /* MetaMask integration */
     let ethereumChainId = swapData.ETHChainId;
@@ -278,22 +204,10 @@ export default {
     const balance = ref(0);
     const coinBalance = ref(0);
     const currentNetwork = ref('');
-    const isInvalidConfirmedMeta = ref(false);
-    const isInvalidSignedMeta = ref(false);
-    const isInvalidSwapService = ref(false);
-    const disableRetrySwap = ref(false);
-    const retrySwapButtonText = ref('Retry');
-    const ethScanUrl = swapData.ETHScanUrl;
-    const swapServerUrl = SwapUtils.getIncoming_ETHSwapTransfer_URL(swapData.swap_IN_SERVICE_URL);
-    const transactionFailed = ref(false);
 
-    const signatureMessage = computed(() => {
-      if(isInvalidSignedMeta.value){ // when user rejects signature on MetaMask
-        return 'Approval on MetaMask is rejected';
-      }else{
-        return 'Please sign transaction confirmation in MetaMask';
-      }
-    });
+    const checkSwapStatusUrl = SwapUtils.getOutgoing_ETHCheckStatus_URL(swapData.swap_IN_SERVICE_URL);
+    const ethScanUrl = swapData.ETHScanUrl;
+    const remoteTxnLink = computed( () => ethScanUrl + remoteTxnHash.value);
 
     let provider;
     let signer;
@@ -443,17 +357,6 @@ export default {
     const step5 = ref(false);
     const step6 = ref(false);
     const step7 = ref(false);
-    const validationHash = ref('');
-    const validationLink = ref('');
-    const messageHash = ref('');
-    const swapTimestamp = ref('');
-    const swapId = ref('');
-    const transactionHash = ref('');
-    const swapQr = ref('');
-
-    const saveCertificate = () => {
-      SwapUtils.generateIncomingPdfCert('ETH', swapTimestamp.value, siriusAddress.value, swapId.value, transactionHash.value, swapQr.value);
-    };
 
     const toast = useToast();
     const copy = (id) =>{
@@ -467,218 +370,131 @@ export default {
     const showSiriusAddressErr = ref(false);
     const disableSiriusAddress = ref(false);
     const isDisabledValidate = ref(true);
-    const showAmountErr = ref(false);
     const siriusAddress = ref('');
     const err = ref('');
     const serviceErr = ref('');
     const isDisabledCheck = computed(() =>
       // verify it has been connected to MetaMask too
-      // !(amount.value > 0 && siriusAddress.value != '' && !err.value && (balance.value >= amount.value) && (amount.value > defaultXPXTxFee.value))
-      !(!err.value && !(showTxnHashError.value && txnHash.value.length > 0) )
+      !(!err.value && !(showTxnHashError.value && siriusTxnHash.value.length > 0) )
     );
-    const amount = ref('0');
-
-    // watch(amount, (n) => {
-    //   if(n <= defaultXPXTxFee.value){
-    //     showAmountErr.value = true;
-    //   }else{
-    //     showAmountErr.value = false;
-    //   }
-    // });
-
-    const siriusAddressOption = computed(() => {
-      let siriusAddress = [];
-      if(walletState.currentLoggedInWallet){
-        walletState.currentLoggedInWallet.accounts.forEach((account) => {
-          siriusAddress.push({
-            label: account.name + ' - ' + account.address,
-            value: account.address,
-          })
-        });
-      }
-      return siriusAddress;
-    });
+    const isInvalidSiriusTxnHash = ref(false);
 
     const sendRequest = () => {
       currentPage.value = 2;
       setTimeout(() => step1.value = true, 1000);
       setTimeout(() => {
-        step2.value = true;
         (async() => {
-          await getValidation();
-          // if(!isInvalidConfirmedMeta.value){
-          //   afterConfirmed();
-          // }
+          await checkSiriusTxn();
         })();
       }, 2000);
     };
 
-    const getValidation = async () => {
-      try{
-        err.value = '';
-        isInvalidConfirmedMeta.value = false;
-        provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-        signer = provider.getSigner();
-        const Contract = new ethers.Contract(tokenAddress.value, abi, signer);
-        const data = await SwapUtils.getETH_GasLimit(swapData.gasPriceConsultURL);
-        var options = {
-          gasLimit: data.standardGasLimit,
-        };
-        const receipt = await Contract.transfer(
-          custodian.value,
-          ethers.utils.parseUnits(amount.value, 6),
-          options,
-        );
-        validationHash.value = receipt.hash;
-        validationLink.value = ethScanUrl + receipt.hash;
-        let getTransaction = await provider.getTransaction(receipt.hash);
+    let xpxExplorerUrl = networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.hashRoute + '/';
+    const siriusTxnLink = computed(() => xpxExplorerUrl + siriusTxnHash.value);
 
-        if(getTransaction.hash === receipt.hash){
-          // if(parseInt(getTransaction.gasLimit) >= data.standardGasLimit){
-          afterConfirmed();
-          // }else{
-          //   err.value = 'Gas limit is too low';
-          //   isInvalidConfirmedMeta.value = true;
-          // }
+    const transactionFailed = ref(false);
+    const isInvalidRemoteTxnHash = ref(false);
+    const remoteTxnHash = ref(false);
+    const transactionPending = ref(false);
+    const isDisabled = ref(true);
+    const numConfirmation = ref(0);
+
+    const checkSiriusTxn = async () => {
+      const data = {
+        network: 'eth',
+        txnHash: siriusTxnHash.value,
+      };
+      try {
+        const response = await fetch(checkSwapStatusUrl + siriusTxnHash.value, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        step2.value = true;
+        if(response.status == 200){ // data.status == 'fulfilled'
+          const data = await response.json();
+          remoteTxnHash.value = data.fulfillTransaction;
+          setTimeout( async() => {
+            let remoteTxnStatus = await validateRemoteTxn();
+            if(!remoteTxnStatus && transactionFailed.value){
+              isInvalidRemoteTxnHash.value = true;
+            }else{
+              setTimeout( () => {
+                step3.value = true;
+                setTimeout( async() => {
+                  setTimeout(() => step4.value = true, 1000);
+                  setTimeout(() => isDisabled.value = false, 1000);
+                }, 1000);
+              }, 1000);
+            }
+          }, 1000);
+        }else{
+          isInvalidSiriusTxnHash.value = true;
+        }
+      } catch (error) {
+        isInvalidSiriusTxnHash.value = true;
+      }
+    };
+
+    const validateRemoteTxn = async () => {
+      try{
+        let transactionReceipt = await provider.getTransactionReceipt(remoteTxnHash.value);
+        let transactionStatus = await provider.getTransaction(remoteTxnHash.value);
+        if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to == tokenAddress.value){ // when transaciton is confirmed but status is 1
+          if(transactionStatus.confirmations < 12){
+            return new Promise(function (resolve) {
+              verifyingTxn = setInterval(async () => {
+                let transactionStatusLoop = await provider.getTransaction(remoteTxnHash.value);
+                if(transactionStatusLoop.confirmations < 12){
+                  transactionPending.value = true;
+                  numConfirmation.value = transactionStatusLoop.confirmations;
+                }else {
+                  transactionPending.value = false;
+                  clearInterval(verifyingTxn);
+                  resolve(true);
+                }
+              }, 1000);
+            });
+          }else{
+            return true;
+          }
+        }else if(transactionReceipt && transactionReceipt.status === 0){ // transaction is confirmed but status is 0 - fee too low
+          transactionFailed.value = true;
+          return false;
+        }else if(!transactionReceipt && !transactionStatus){ // invalid transaction hash
+          transactionFailed.value = true;
+          return false;
+        }else{
+          if(transactionStatus && transactionStatus.to == tokenAddress.value){ // when transaction is not confirmed
+            // perform confirmation loop here
+            return new Promise(function (resolve) {
+              verifyingTxn = setInterval(async()=>{
+                let transactionStatusLoop = await provider.getTransaction(remoteTxnHash.value);
+                if(transactionStatusLoop.confirmations < 12){
+                  transactionPending.value = true;
+                  numConfirmation.value = transactionStatusLoop.confirmations;
+                }else {
+                  transactionPending.value = false;
+                  clearInterval(verifyingTxn);
+                  resolve(true);
+                }
+              }, 3000);
+            });
+          }else{
+            // invalid transaction
+            return false;
+          }
         }
       }catch(err){
-        isInvalidConfirmedMeta.value = true;
-        if(err.code = '-32000'){
-          err.value = err.message;
-        }
+        console.log(err);
+        return false;
       }
     };
 
     const afterConfirmed = () => {
       step3.value = true;
     };
-
-    const isCheckingTxnConfirmation = ref(false);
-    const isDisabledCheckTxnConfirmed = ref(false);
-    const isTxnNotConfirmed = ref(false);
-
-    const triggerTxnConfirmation = () => {
-      isCheckingTxnConfirmation.value = true;
-      isDisabledCheckTxnConfirmed.value = true;
-      isTxnNotConfirmed.value = false;
-      setTimeout( async () => {
-        await checkTxnConfirmation();
-      }, 2000);
-    }
-
-    const checkTxnConfirmation = async () => {
-      const status = await verifyTransaction();
-      isCheckingTxnConfirmation.value = false;
-      if(status){
-        if(!transactionFailed.value){
-          isTxnNotConfirmed.value = false;
-          setTimeout( ()=> step4.value = true, 1000);
-          setTimeout( ()=> {
-            step5.value = true;
-            (async() => {
-              await getSigned(false);
-            })();
-          }, 2000);
-        }else{
-          isDisabledCheckTxnConfirmed.value = false;
-          isTxnNotConfirmed.value = true;
-        }
-      }else{
-        isDisabledCheckTxnConfirmed.value = false;
-        isTxnNotConfirmed.value = true;
-      }
-    }
-
-    const swapServiceParam = ref('');
-
-    const getSigned = async () => {
-      try{
-        isInvalidSignedMeta.value = false;
-        provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-        signer = provider.getSigner();
-        const messageSignature = await signer.signMessage(siriusAddress.value);
-        messageHash.value = messageSignature;
-        const data = {
-          recipient: siriusAddress.value,
-          signature: messageSignature,
-          txnInfo: {
-            network: "ETH",
-            txnHash: validationHash.value
-          }
-        };
-        swapServiceParam.value = data;
-        await afterSigned();
-      }catch(err){
-        isInvalidSignedMeta.value = true;
-      }
-    };
-
-    const verifyTransaction = async () => {
-      try{
-        let transactionReceipt = await provider.getTransactionReceipt(validationHash.value);
-        if(transactionReceipt && transactionReceipt.status === 1){
-          return true;
-        }
-        else if(transactionReceipt && transactionReceipt.status === 0){
-          transactionFailed.value = true;
-          return true;
-        }
-        else{
-          return false;
-        }
-      }catch(err){
-        console.log(err);
-        return false;
-      }
-    }
-
-    const swapServerErrIndex = ref(0);
-
-    const afterSigned = async () => {
-      step6.value = true;
-      step7.value = true;
-      retrySwapButtonText.value = 'Initiating swap...';
-      disableRetrySwap.value = true;
-      let stringifyData = JSON.stringify(swapServiceParam.value);
-      try {
-        const response = await fetch(swapServerUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: stringifyData, // body data type must match "Content-Type" header
-        });
-
-        if(response.status == 200 || response.status == 201){
-          const data = await response.json();
-          isInvalidSwapService.value = false;
-          transactionHash.value = data.remoteTxnHash;
-          swapTimestamp.value = data.timestamp;
-          swapId.value = data.ctxId;
-          swapQr.value = SwapUtils.generateQRCode(validationLink.value);
-          setTimeout( ()=> isDisabledValidate.value = false, 1000);
-          swapServerErrIndex.value = 0;
-        }else if(response.status == 208){
-          console.log('208');
-        }else{
-          isInvalidSwapService.value = true;
-          ++swapServerErrIndex.value;
-          retrySwapButtonText.value = 'Retry';
-          disableRetrySwap.value = false;
-        }
-      } catch (error) {
-        isInvalidSwapService.value = true;
-        ++swapServerErrIndex.value;
-        retrySwapButtonText.value = 'Retry';
-        disableRetrySwap.value = false;
-      }
-    };
-
-    const validated = () => {
-      currentPage.value = 3;
-    };
-
-    const savedCheck = ref(false);
 
     return {
       err,
@@ -691,15 +507,10 @@ export default {
       currentPage,
       isDisabledValidate,
       siriusAddress,
-      siriusAddressOption,
       showSiriusAddressErr,
       disableSiriusAddress,
-      showAmountErr,
       sendRequest,
-      validated,
-      amount,
       isDisabledCheck,
-      savedCheck,
       step1,
       step2,
       step3,
@@ -707,35 +518,18 @@ export default {
       step5,
       step6,
       step7,
-      validationLink,
-      validationHash,
-      messageHash,
-      transactionHash,
-      swapTimestamp,
-      swapId,
-      swapQr,
-      saveCertificate,
-      isInvalidConfirmedMeta,
-      isInvalidSignedMeta,
-      isInvalidSwapService,
-      getValidation,
-      getSigned,
-      // defaultXPXTxFee,
+      siriusTxnLink,
       serviceErr,
-      swapServerErrIndex,
-      afterSigned,
-      disableRetrySwap,
-      retrySwapButtonText,
-      signatureMessage,
-      checkTxnConfirmation,
-      triggerTxnConfirmation,
-      isCheckingTxnConfirmation,
-      isDisabledCheckTxnConfirmed,
-      isTxnNotConfirmed,
-      transactionFailed,
       verifyMetaMaskPlugin,
       showTxnHashError,
-      txnHash,
+      siriusTxnHash,
+      isInvalidSiriusTxnHash,
+      isInvalidRemoteTxnHash,
+      remoteTxnLink,
+      remoteTxnHash,
+      transactionPending,
+      isDisabled,
+      numConfirmation,
     };
   },
 }
