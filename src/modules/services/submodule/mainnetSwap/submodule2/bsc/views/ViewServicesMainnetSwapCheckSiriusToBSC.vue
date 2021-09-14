@@ -1,6 +1,6 @@
 <template>
   <div class="flex justify-between text-xs sm:text-sm">
-    <div><span class="text-gray-400">Swap > ETH > Out ></span> <span class="text-blue-primary font-bold">Check Status</span></div>
+    <div><span class="text-gray-400">Swap > BSC > Out ></span> <span class="text-blue-primary font-bold">Check Status</span></div>
     <div>
       <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
     </div>
@@ -28,7 +28,7 @@
       <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
       <p class="font-bold text-tsm text-left mb-1">Type</p>
       <div class="mb-5 mt-3 text-left">
-        <button class="border px-3 py-2 w-20 text-blue-primary font-bold rounded-l-xl cursor-pointer hover:border-blue-primary hover:bg-blue-50 transition-all duration-200" @click="$router.push({name: 'ViewServicesMainnetSwapCheckETHToSirius'})">In</button><button class="bg-blue-primary px-3 py-2 w-20 text-white font-bold rounded-r-xl border border-blue-primary cursor-auto">Out</button> <span class="text-gray-500 ml-3 text-tsm">From Sirius to ETH</span>
+        <button class="border px-3 py-2 w-20 text-blue-primary font-bold rounded-l-xl cursor-pointer hover:border-blue-primary hover:bg-blue-50 transition-all duration-200" @click="$router.push({name: 'ViewServicesMainnetSwapCheckBSCToSirius'})">In</button><button class="bg-blue-primary px-3 py-2 w-20 text-white font-bold rounded-r-xl border border-blue-primary cursor-auto">Out</button> <span class="text-gray-500 ml-3 text-tsm">From Sirius to BSC</span>
       </div>
       <p class="font-bold text-tsm text-left mb-1">MetaMask Address</p>
       <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left" v-if="isInstallMetamask">
@@ -67,7 +67,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Checking Sirius transaction status</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Checking transaction status</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -89,12 +89,12 @@
               </div>
             </div>
             <div v-if="isInvalidSiriusTxnHash && step2" class="mt-2 text-sm text-gray-700">
-              Sirius transaction hash is invalid. Please initiate new swap from XPX to ETH
+              Sirius transaction hash is invalid. Please initiate new swap from XPX to BSC
               <router-link :to="{ name: 'ViewServicesMainnetSwapEthOptions' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">Swap</router-link>
             </div>
           </div>
         </div>
-        <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step3?'text-gray-700':'text-gray-300'">Step 2: Check ETH transaction status</div>
+        <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step3?'text-gray-700':'text-gray-300'">Step 2: Check BSC BEP20 transaction status</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
             <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step3?'border-blue-primary':'border-gray-300'">
@@ -103,7 +103,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Checking ETH transaction status<div class="text-tsm text-gray-500 my-3" v-if="transactionPending">Pending confirmation: {{ numConfirmation }} of 12 confirmations</div></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Checking transaction status<div class="text-tsm text-gray-500 my-3" v-if="transactionPending">Pending confirmation: {{ numConfirmation }} of 12 confirmations</div></div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -115,17 +115,17 @@
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">
-            {{ isInvalidRemoteTxnHash?'Transaction has failed.':'ETH transaction is successful:' }}
+            {{ isInvalidRemoteTxnHash?'Transaction has failed.':'BSC BEP20 transaction is successful:' }}
             <div v-if="!isInvalidRemoteTxnHash && step4" class="mt-2">
               <div v-if="remoteTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
-                <a :href="remoteTxnLink" target=_new :class="isInvalidRemoteTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="remoteTx" :copyValue="remoteTxnHash" copySubject="ETH transaction hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ remoteTxnHash }}</a>
+                <a :href="remoteTxnLink" target=_new :class="isInvalidRemoteTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="remoteTx" :copyValue="remoteTxnHash" copySubject="BSC BEP20 transaction hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ remoteTxnHash }}</a>
                 <div class="flex-none">
                   <font-awesome-icon icon="copy" @click="copy('remoteTx')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step4"></font-awesome-icon>
                 </div>
               </div>
             </div>
             <div v-if="isInvalidRemoteTxnHash && step4" class="mt-2 text-sm text-gray-700">
-              ETH transaction hash is invalid. Please contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
+              BSC BEP20 transaction hash is invalid. Please contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
             </div>
           </div>
         </div>
@@ -148,7 +148,7 @@ import { networkState } from '@/state/networkState';
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 
 export default {
-  name: 'ViewServicesMainnetSwapCheckSiriusToETH',
+  name: 'ViewServicesMainnetSwapCheckSiriusToBSC',
 
   components: {
     TextInput,
@@ -177,10 +177,10 @@ export default {
 
     (async() => {
       try {
-        const fetchService = await SwapUtils.fetchETHServiceInfo(swapData.swap_IN_SERVICE_URL);
+        const fetchService = await SwapUtils.fetchBSCServiceInfo(swapData.swap_IN_SERVICE_URL);
         if(fetchService.status==200){
-          tokenAddress.value = fetchService.data.ethInfo.scAddress;
-          custodian.value = fetchService.data.ethInfo.sinkAddress;
+          tokenAddress.value = fetchService.data.bscInfo.scAddress;
+          custodian.value = fetchService.data.bscInfo.sinkAddress;
           // defaultXPXTxFee.value = parseInt(fetchService.data.siriusInfo.feeAmount);
           serviceErr.value = '';
         }else{
@@ -196,8 +196,8 @@ export default {
     const showTxnHashError = computed(()=> !siriusTxnHash.value.match(siriusTxnHashPattern) && siriusTxnHash.value.length > 0);
 
     /* MetaMask integration */
-    let ethereumChainId = swapData.ETHChainId;
-    let ethereumNetworkName = swapData.ETHNetworkName;
+    let ethereumChainId = swapData.BSCChainId;
+    let ethereumNetworkName = swapData.BSCNetworkName;
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
@@ -205,9 +205,9 @@ export default {
     const coinBalance = ref(0);
     const currentNetwork = ref('');
 
-    const checkSwapStatusUrl = SwapUtils.getOutgoing_ETHCheckStatus_URL(swapData.swap_IN_SERVICE_URL);
-    const ethScanUrl = swapData.ETHScanUrl;
-    const remoteTxnLink = computed( () => ethScanUrl + remoteTxnHash.value);
+    const checkSwapStatusUrl = SwapUtils.getOutgoing_BSCCheckStatus_URL(swapData.swap_IN_SERVICE_URL);
+    const bscScanUrl = swapData.BSCScanUrl;
+    const remoteTxnLink = computed( () => bscScanUrl + remoteTxnHash.value);
 
     let provider;
     let signer;
@@ -401,7 +401,7 @@ export default {
 
     const checkSiriusTxn = async () => {
       const data = {
-        network: 'eth',
+        network: 'bsc',
         txnHash: siriusTxnHash.value,
       };
       try {
@@ -441,7 +441,7 @@ export default {
       try{
         let transactionReceipt = await provider.getTransactionReceipt(remoteTxnHash.value);
         let transactionStatus = await provider.getTransaction(remoteTxnHash.value);
-        if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to == tokenAddress.value){ // when transaciton is confirmed but status is 1
+        if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaciton is confirmed but status is 1
           if(transactionStatus.confirmations < 12){
             return new Promise(function (resolve) {
               verifyingTxn = setInterval(async () => {
