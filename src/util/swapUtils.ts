@@ -804,6 +804,10 @@ export class SwapUtils {
     return `${baseUrl}/expx/swap-status`;
   }
 
+  static getIncoming_BSCCheckStatus_URL(baseUrl: string){
+    return `${baseUrl}/bxpx/swap-status`;
+  }
+
   static getOutgoingSwapServiceInfo = (url: string): Promise<any>=> {
     return fetch(url).then((res) => res.json()).then((data) => { return data });
   }

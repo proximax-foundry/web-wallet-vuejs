@@ -67,6 +67,15 @@ export const MainnetSwapRoutes: RouteRecordRaw[] = [
   },
 
   {
+    path: '/check-swap-bsc-sirius',
+    name: 'ViewServicesMainnetSwapCheckBSCToSirius',
+    component: () => import('@/modules/services/submodule/mainnetSwap/submodule2/bsc/views/ViewServicesMainnetSwapCheckBSCToSirius.vue'),
+    meta: {
+      title: "Check Swap BSC to Sirius",
+    }
+  },
+
+  {
     path: '/check-swap-sirius-eth',
     name: 'ViewServicesMainnetSwapCheckSiriusToETH',
     component: () => import('@/modules/services/submodule/mainnetSwap/submodule2/eth/views/ViewServicesMainnetSwapCheckSiriusToETH.vue'),
