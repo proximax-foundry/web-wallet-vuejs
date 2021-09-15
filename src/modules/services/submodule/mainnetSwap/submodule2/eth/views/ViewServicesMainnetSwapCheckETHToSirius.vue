@@ -303,7 +303,6 @@ export default {
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
-    const coinBalance = ref(0);
     const currentNetwork = ref('');
 
     const isInvalidSignedMeta = ref(false);
@@ -354,9 +353,6 @@ export default {
         verifyChain(metaChainId, true);
       });
 
-      // ethereum.on('connect', (connectInfo) => {
-      //   console.log(connectInfo)
-      // });
     }else{
       console.log('MetaMask not installed')
     }
@@ -365,11 +361,9 @@ export default {
       if (accounts.length === 0) {
         // MetaMask is locked or the user has not connected any accounts
         // console.log('Please connect to MetaMask.');
-        coinBalance.value = 0;
         currentAccount.value = '';
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
-        updateToken();
       }
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
@@ -379,42 +373,22 @@ export default {
       if(window.ethereum.isMetaMask){
         if (accounts.length === 0) {
           // MetaMask is locked or the user has not connected any accounts
-          // console.log('Please connect to MetaMask.');
-          coinBalance.value = 0;
           currentAccount.value = '';
         } else if (accounts[0] !== currentAccount.value) {
           currentAccount.value = accounts[0];
           serviceErr.value = '';
-          updateToken();
         }
       }
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
 
-    function verifyChain(chainId, updateTokenBol = false){
+    function verifyChain(chainId){
       currentNetwork.value = chainId;
       if(ethereumChainId === parseInt(chainId)){
         err.value = '';
-        if(updateTokenBol){
-          updateToken();
-        }
       }else{
         err.value = 'Please select ' + ethereumNetworkName + ' on MetaMask to swap';
       }
-    }
-
-    function updateToken(){
-      // get MetaMask balance
-      ethereum
-      .request({ method: 'eth_getBalance', params: [
-        currentAccount.value, 'latest'
-      ] })
-      .then(hexDecimalBalance => {
-        coinBalance.value = parseInt(hexDecimalBalance)/Math.pow(10, 18);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
     }
 
     const connectMetamask = () => {
@@ -438,20 +412,6 @@ export default {
         });
       }
     };
-
-    watch([currentNetwork, currentAccount, tokenAddress], ([newNetwork, newCurrentAccount, newTokenAddress]) => {
-      if(newTokenAddress != undefined && newTokenAddress != ''){
-        (async () => {
-          // try{
-            provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-            signer = provider.getSigner();
-            const contract = new ethers.Contract(newTokenAddress, abi, signer);
-          /*}catch(err) {
-            balance.value = 0;
-          }*/
-        })();
-      }
-    });
 
     const isInvalidSwapCheck = ref(false);
 
@@ -742,7 +702,6 @@ export default {
       currentPage,
       isDisabledValidate,
       siriusAddress,
-      // siriusAddressOption,
       checkStatus,
       validated,
       isDisabledCheck,
