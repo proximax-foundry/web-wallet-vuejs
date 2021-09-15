@@ -427,7 +427,7 @@ export default {
     const swapQr = ref('');
 
     const saveCertificate = () => {
-      SwapUtils.generateIncomingPdfCert('BSC', swapTimestamp.value, siriusAddress.value, swapId.value, transactionHash.value, swapQr.value);
+      SwapUtils.generateIncomingPdfCert('BSC', swapTimestamp.value, siriusAddressSelected.value, swapId.value, transactionHash.value, swapQr.value);
     };
 
     const toast = useToast();
@@ -679,6 +679,7 @@ export default {
           disableRetrySwap.value = false;
         }
       } catch (error) {
+        console.log(error)
         isInvalidSwapService.value = true;
         ++swapServerErrIndex.value;
         retrySwapButtonText.value = 'Retry';
