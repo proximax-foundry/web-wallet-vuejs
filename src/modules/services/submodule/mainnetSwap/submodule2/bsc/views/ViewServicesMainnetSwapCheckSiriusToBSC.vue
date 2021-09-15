@@ -94,7 +94,7 @@
             </div>
           </div>
         </div>
-        <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step3?'text-gray-700':'text-gray-300'">Step 2: Check BSC BEP20 transaction status</div>
+        <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step3?'text-gray-700':'text-gray-300'">Step 2: Check BSC transaction status</div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
             <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step3?'border-blue-primary':'border-gray-300'">
@@ -115,17 +115,17 @@
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">
-            {{ isInvalidRemoteTxnHash?'Transaction has failed.':'BSC BEP20 transaction is successful:' }}
+            {{ isInvalidRemoteTxnHash?'Transaction has failed.':'BSC transaction is successful:' }}
             <div v-if="!isInvalidRemoteTxnHash && step4" class="mt-2">
               <div v-if="remoteTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
-                <a :href="remoteTxnLink" target=_new :class="isInvalidRemoteTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="remoteTx" :copyValue="remoteTxnHash" copySubject="BSC BEP20 transaction hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ remoteTxnHash }}</a>
+                <a :href="remoteTxnLink" target=_new :class="isInvalidRemoteTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="remoteTx" :copyValue="remoteTxnHash" copySubject="BSC transaction hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ remoteTxnHash }}</a>
                 <div class="flex-none">
                   <font-awesome-icon icon="copy" @click="copy('remoteTx')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step4"></font-awesome-icon>
                 </div>
               </div>
             </div>
             <div v-if="isInvalidRemoteTxnHash && step4" class="mt-2 text-sm text-gray-700">
-              BSC BEP20 transaction hash is invalid. Please contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
+              BSC transaction hash is invalid. Please contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
             </div>
           </div>
         </div>
