@@ -663,6 +663,8 @@ export default {
         if(response.status == 200 || response.status == 201){
           const data = await response.json();
           isInvalidSwapService.value = false;
+          siriusTxnHash.value = data.siriusSwapInfo.status.hash;
+          siriusAddress.value = data.siriusSwapInfo.recipient;
           transactionHash.value = data.remoteTxnHash;
           swapTimestamp.value = data.timestamp;
           swapId.value = data.ctxId;
