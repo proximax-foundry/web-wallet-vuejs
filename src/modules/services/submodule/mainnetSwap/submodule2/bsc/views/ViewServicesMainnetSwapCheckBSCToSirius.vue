@@ -48,7 +48,7 @@
           <a href="https://metamask.io/" target=_new class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none">Download MetaMask</a>
         </div>
       </div>
-      <p class="font-bold text-tsm text-left mb-1">BSC BEP20 Transaction Hash</p>
+      <p class="font-bold text-tsm text-left mb-1">BSC Transaction Hash</p>
       <TextInput placeholder="Transaction Hash" errorMessage="Please key in valid transaction hash" :showError="showTxnHashError" v-model="remoteTxnHash" icon="hashtag" class="w-full" />
       <div class="mt-10">
         <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
@@ -67,7 +67,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Checking BSC BEP20 transaction status<div class="text-tsm text-gray-500 my-3" v-if="transactionPending">Pending confirmation: {{ numConfirmation }} of 12 confirmations</div></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Checking BSC transaction status<div class="text-tsm text-gray-500 my-3" v-if="transactionPending">Pending confirmation: {{ numConfirmation }} of 12 confirmations</div></div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -89,7 +89,7 @@
               </div>
             </div>
             <div v-if="isInvalidRemoteTxnHash && step2" class="mt-2 text-sm text-gray-700">
-              {{ isDisplayFeeLowRemark?'Fees might be too low. Please do not change recommended fee in MetaMask.':'BSC BEP20 transaction hash is invalid. Please initiate new swap from BSC BEP20 to XPX' }}
+              {{ isDisplayFeeLowRemark?'Fees might be too low. Please do not change recommended fee in MetaMask.':'BSC transaction hash is invalid. Please initiate new swap from BSC to XPX' }}
               <router-link :to="{ name: 'ViewServicesMainnetSwapBSCToSirius' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">Swap</router-link>
             </div>
           </div>
@@ -129,7 +129,7 @@
               <div class="sm:flex my-4">
                 <button :disabled="isInitiateSwap" @click="displayInitiateSwapPanel" class="sm:flex-none justify-start sm:justify-end bg-blue-primary h-15 w-40 rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-3 sm:mt-0 disabled:opacity-50 self-center" type="button">Initiate swap</button>
                 <div class="py-2 sm:flex-grow text-tsm">
-                  <div class="mb-1">Initiative swap with this BSC BEP20 Transaction Hash</div>
+                  <div class="mb-1">Initiative swap with this BSC Transaction Hash</div>
                 </div>
               </div>
             </div>
