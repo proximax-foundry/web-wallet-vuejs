@@ -67,7 +67,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Checking Sirius transaction status</div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Checking transaction status</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -103,7 +103,7 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Checking ETH transaction status<div class="text-tsm text-gray-500 my-3" v-if="transactionPending">Pending confirmation: {{ numConfirmation }} of 12 confirmations</div></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Checking transaction status<div class="text-tsm text-gray-500 my-3" v-if="transactionPending">Pending confirmation: {{ numConfirmation }} of 12 confirmations</div></div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
@@ -137,13 +137,12 @@
   </div>
 </template>
 <script>
-import { computed, ref, watch, onBeforeUnmount } from "vue";
+import { computed, ref, onBeforeUnmount } from "vue";
 import TextInput from '@/components/TextInput.vue';
-import { walletState } from '@/state/walletState';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { ethers } from 'ethers';
-import { abi, SwapUtils } from '@/util/swapUtils';
+import { SwapUtils } from '@/util/swapUtils';
 import { networkState } from '@/state/networkState';
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 
@@ -171,7 +170,6 @@ export default {
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
 
-    // const defaultXPXTxFee = ref(0);
     const custodian = ref('');
     const tokenAddress = ref('');
 
@@ -181,7 +179,6 @@ export default {
         if(fetchService.status==200){
           tokenAddress.value = fetchService.data.ethInfo.scAddress;
           custodian.value = fetchService.data.ethInfo.sinkAddress;
-          // defaultXPXTxFee.value = parseInt(fetchService.data.siriusInfo.feeAmount);
           serviceErr.value = '';
         }else{
           serviceErr.value = 'Swapping service is temporary not available. Please try again later';
@@ -201,8 +198,6 @@ export default {
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
-    const balance = ref(0);
-    const coinBalance = ref(0);
     const currentNetwork = ref('');
 
     const checkSwapStatusUrl = SwapUtils.getOutgoing_ETHCheckStatus_URL(swapData.swap_IN_SERVICE_URL);
@@ -229,7 +224,7 @@ export default {
       ethereum
         .request({ method: 'eth_chainId' })
         .then((metaChainId) => {
-          verifyChain(metaChainId, false);
+          verifyChain(metaChainId);
         })
         .catch((err) => {
           console.error(err);
@@ -238,12 +233,9 @@ export default {
       ethereum.on('accountsChanged', handleAccountsChanged);
 
       ethereum.on('chainChanged', (metaChainId) => {
-        verifyChain(metaChainId, true);
+        verifyChain(metaChainId);
       });
 
-      // ethereum.on('connect', (connectInfo) => {
-      //   console.log(connectInfo)
-      // });
     }else{
       console.log('MetaMask not installed')
     }
@@ -251,12 +243,9 @@ export default {
     function fetchMetaAccount(accounts) {
       if (accounts.length === 0) {
         // MetaMask is locked or the user has not connected any accounts
-        // console.log('Please connect to MetaMask.');
-        coinBalance.value = 0;
         currentAccount.value = '';
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
-        updateToken();
       }
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
@@ -266,42 +255,22 @@ export default {
       if(window.ethereum.isMetaMask){
         if (accounts.length === 0) {
           // MetaMask is locked or the user has not connected any accounts
-          // console.log('Please connect to MetaMask.');
-          coinBalance.value = 0;
           currentAccount.value = '';
         } else if (accounts[0] !== currentAccount.value) {
           currentAccount.value = accounts[0];
           serviceErr.value = '';
-          updateToken();
         }
       }
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
 
-    function verifyChain(chainId, updateTokenBol = false){
+    function verifyChain(chainId){
       currentNetwork.value = chainId;
       if(ethereumChainId === parseInt(chainId)){
         err.value = '';
-        if(updateTokenBol){
-          updateToken();
-        }
       }else{
         err.value = 'Please select ' + ethereumNetworkName + ' on MetaMask to swap';
       }
-    }
-
-    function updateToken(){
-      // get MetaMask balance
-      ethereum
-      .request({ method: 'eth_getBalance', params: [
-        currentAccount.value, 'latest'
-      ] })
-      .then(hexDecimalBalance => {
-        coinBalance.value = parseInt(hexDecimalBalance)/Math.pow(10, 18);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
     }
 
     const connectMetamask = () => {
@@ -325,30 +294,6 @@ export default {
         });
       }
     };
-
-    watch([currentNetwork, currentAccount, tokenAddress], ([newNetwork, newCurrentAccount, newTokenAddress]) => {
-      if(newTokenAddress != undefined && newTokenAddress != ''){
-        (async () => {
-          try{
-            provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-            signer = provider.getSigner();
-            const contract = new ethers.Contract(newTokenAddress, abi, signer);
-            const tokenBalance = await contract.balanceOf(newCurrentAccount);
-            balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
-          }catch(err) {
-            balance.value = 0;
-          }
-        })();
-      }
-    });
-
-    // watch(balance, (n) => {
-    //   if(n <= defaultXPXTxFee.value){
-    //     showAmountErr.value = true;
-    //   }else{
-    //     showAmountErr.value = false;
-    //   }
-    // });
 
     const step1 = ref(false);
     const step2 = ref(false);
@@ -421,12 +366,10 @@ export default {
             if(!remoteTxnStatus && transactionFailed.value){
               isInvalidRemoteTxnHash.value = true;
             }else{
-              // setTimeout( () => {
-                setTimeout( async() => {
-                  setTimeout(() => step4.value = true, 1000);
-                  setTimeout(() => isDisabled.value = false, 1000);
-                }, 1000);
-              // }, 1000);
+              setTimeout( async() => {
+                setTimeout(() => step4.value = true, 1000);
+                setTimeout(() => isDisabled.value = false, 1000);
+              }, 1000);
             }
           }, 1000);
         }else{
@@ -441,7 +384,7 @@ export default {
       try{
         let transactionReceipt = await provider.getTransactionReceipt(remoteTxnHash.value);
         let transactionStatus = await provider.getTransaction(remoteTxnHash.value);
-        if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to == tokenAddress.value){ // when transaciton is confirmed but status is 1
+        if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaciton is confirmed but status is 1
           if(transactionStatus.confirmations < 12){
             return new Promise(function (resolve) {
               verifyingTxn = setInterval(async () => {
@@ -498,7 +441,6 @@ export default {
 
     return {
       err,
-      balance,
       isInstallMetamask,
       connectMetamask,
       isMetamaskConnected,
