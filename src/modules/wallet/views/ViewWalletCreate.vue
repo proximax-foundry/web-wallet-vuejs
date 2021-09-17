@@ -11,8 +11,8 @@
           <div class="text-left text-tsm my-4 ml-4 text-gray-600"><b>{{$t('Header.network')}}</b>: {{ selectedNetworkName }}</div>
           <TextInput :placeholder="$t('createwallet.walletname')" :errorMessage="$t('createwallet.inputwalletname')" v-model="walletName" icon="wallet" />
           <div class="grid xs:grid-cols-1 md:grid-cols-2">
-            <PasswordInput :placeholder="$t('createwallet.inputpassword')" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd" class="mr-1" />
-            <PasswordInput :placeholder="$t('createwallet.confirmpassword')" :errorMessage="$t('createwallet.doesntmatch')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd" class="ml-1" />
+            <PasswordInput :placeholder="$t('createwallet.inputpassword')" :errorMessage="$t('createwallet.passwordvalidation')"  icon="lock" v-model="passwd" class="mr-1" />
+            <PasswordInput :placeholder="$t('createwallet.confirmpassword')" :errorMessage="$t('createwallet.doesntmatch')" icon="lock" v-model="confirmPasswd" class="ml-1"/>
           </div>
           <div class="mt-10">
             <button type="button" class="default-btn mr-5" @click="clearInput();">{{$t('signin.clear')}}</button>
@@ -123,7 +123,6 @@ export default defineComponent({
     const passwd = ref<string>("");
     const confirmPasswd = ref<string>("");
     const privateKey = ref<string>("");
-    const showPasswdError = ref<boolean>(false);
     const passwdPattern: string  = "^[^ ]{8,}$";
     const copy = (id :string) =>{ 
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
@@ -137,6 +136,10 @@ export default defineComponent({
           passwd.value.match(passwdPattern) &&
           confirmPasswd.value === passwd.value
       )
+    );
+
+    const showPasswdError = computed(
+      () => (passwd.value != passwdPattern && passwd.value != '')
     );
 
     // true to show error
