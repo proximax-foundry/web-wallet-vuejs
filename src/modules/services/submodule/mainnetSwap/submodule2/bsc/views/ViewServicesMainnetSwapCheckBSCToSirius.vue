@@ -79,7 +79,7 @@
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
-            {{ isInvalidRemoteTxnHash?'Transaction is rejected.':'Transaction is verified:' }}
+            {{ isInvalidRemoteTxnHash?'Transaction has failed.':'BSC Transaction is successful:' }}
             <div v-if="!isInvalidRemoteTxnHash && step2" class="mt-2">
               <div v-if="remoteTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
                 <a :href="remoteTxnLink" target=_new :class="isInvalidRemoteTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="validateTransfer" :copyValue="remoteTxnHash" copySubject="Transfer hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ remoteTxnHash }}</a>
@@ -115,7 +115,7 @@
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">
-            {{ (isInvalidSwapCheck && step4)?'Swap not verified:':'Swap verified:' }}
+            {{ (isInvalidSwapCheck && step4)?'Swap not verified:':'Swap is successful:' }}
             <div v-if="!isInvalidSwapCheck && step4" class="mt-2">
               <div v-if="siriusTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
                 <a :href="siriusTxnLink" target=_new class="text-blue-primary flex-grow break-all text-tsm self-center hover:underline" id="validateTransfer" :copyValue="remoteTxnHash" copySubject="Transfer hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ siriusTxnHash }}</a>
@@ -203,7 +203,7 @@
         </div>
       </div>
       <div class="mt-10">
-        <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()" v-if="isInitiateSwap">{{$t('createsuccessful.continue')}}</button>
+        <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()" v-if="isInitiateSwap && !swapStatus208">{{$t('createsuccessful.continue')}}</button>
         <router-link :to="{ name: 'ViewServices' }" class="default-btn focus:outline-none w-40 inline-block" :class="isDisabledValidate?'opacity-50':''" :is="isDisabledValidate?'span':'router-link'" tag="button" v-else>Done</router-link>
       </div>
     </div>
@@ -672,6 +672,7 @@ export default {
         }else if(response.status == 208){
           // console.log('208');
           swapStatus208.value = true;
+          setTimeout( ()=> isDisabledValidate.value = false, 1000);
         }else{
           isInvalidSwapService.value = true;
           ++swapServerErrIndex.value;
@@ -679,7 +680,6 @@ export default {
           disableRetrySwap.value = false;
         }
       } catch (error) {
-        console.log(error)
         isInvalidSwapService.value = true;
         ++swapServerErrIndex.value;
         retrySwapButtonText.value = 'Retry';
