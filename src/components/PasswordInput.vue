@@ -66,7 +66,6 @@ export default defineComponent({
 
     blurInputPassword: function() :void {
       var passwdPattern = "^[^ ]{8,}$";
-      var sPass = this.modelValue.toString;
       if(this.modelValue == ''){
         this.borderColor = 'border-2 border-red-primary';
         this.pswdErr = true;
