@@ -2,7 +2,7 @@
   <div class="flex justify-between text-xs sm:text-sm">
     <div><span class="text-gray-400">Swap > ETH > Out ></span> <span class="text-blue-primary font-bold">Check Status</span></div>
     <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
+      <router-link :to="{ name: 'ViewServices' }" class="font-bold">Home</router-link>
     </div>
   </div>
   <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
@@ -17,7 +17,7 @@
       <div class="flex-none">
         <div class="flex p-0 sm:p-3">
           <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">2</div></div>
-          <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('swap.validation')}}</div>
+          <div class="inline-block self-center ml-3 text-xs sm:text-sm">Validate</div>
         </div>
       </div>
     </div>
