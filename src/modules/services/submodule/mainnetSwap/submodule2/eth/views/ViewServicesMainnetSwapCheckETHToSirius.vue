@@ -203,7 +203,7 @@
         </div>
       </div>
       <div class="mt-10">
-        <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()" v-if="isInitiateSwap">{{$t('createsuccessful.continue')}}</button>
+        <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()" v-if="isInitiateSwap && !swapStatus208">{{$t('createsuccessful.continue')}}</button>
         <router-link :to="{ name: 'ViewServices' }" class="default-btn focus:outline-none w-40 inline-block" :class="isDisabledValidate?'opacity-50':''" :is="isDisabledValidate?'span':'router-link'" tag="button" v-else>Done</router-link>
       </div>
     </div>
@@ -674,6 +674,7 @@ export default {
         }else if(response.status == 208){
           // console.log('208');
           swapStatus208.value = true;
+          setTimeout( ()=> isDisabledValidate.value = false, 1000);
         }else{
           isInvalidSwapService.value = true;
           ++swapServerErrIndex.value;
