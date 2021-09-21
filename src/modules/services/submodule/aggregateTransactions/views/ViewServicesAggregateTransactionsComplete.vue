@@ -153,7 +153,7 @@
     </div>
     <div class="md:col-span-2 px-10 text-left mt-10 text-tsm md:text-tsm md:mt-5 relative">
           <span class="text-black-300 font-bold">My Transactions</span>
-            <div class="rounded-lg border-2 border- ">
+            <div style="height: 500px" class="rounded-lg border-2 border-black-300">
               
             </div>
           <div class="text-center align-text-bottom inset-x-0 bottom-0 absolute ">
