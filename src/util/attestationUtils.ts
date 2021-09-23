@@ -15,7 +15,10 @@ import { saveAs } from 'file-saver'
 import qrcode from 'qrcode-generator';
 import { listenerState } from '@/state/listenerState';
 import { BlockAPI } from '@/models/REST/block';
-import { TransactionUtils } from './transactionUtils';
+import { transactionTypeName, TransactionUtils } from './transactionUtils';
+import { dashboardUtils } from './dashboardUtils';
+import { Helper } from '@/util/typeHelper';
+import moment from 'moment'
 export class Verifier {
     static Hash: any;
 
@@ -171,7 +174,7 @@ export const encryptData= (data: string) =>{
   }
 
 const getFileExtension = (filename: string) => {
-    return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename)[0] : undefined;
+    return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename): undefined;
   }
 export const buildApostille = (ntyData: NtyDataInterface, rawFileContent: string) => {
     const zip = new JSZip();
@@ -181,6 +184,10 @@ export const buildApostille = (ntyData: NtyDataInterface, rawFileContent: string
     const qr = qrcode(10, 'H');
     qr.addData(url);
     qr.make();
+    console.log(ntyData.extensionFile)
+    if (ntyData.extensionFile == '.undefined'){
+      ntyData.extensionFile = ''
+    }
     // Add Certificate PDF to zip
     const dateFull = `${date.getFullYear()}-${("00" + (date.getMonth() + 1)).slice(-2)}-${("00" + (date.getDate())).slice(-2)}`;
     //const nameCertificate = `Certificate of ${title} --Apostille TX ${ntyData.txHash} --Date ${dateFull.toString()}.pdf`;
@@ -194,7 +201,7 @@ export const buildApostille = (ntyData: NtyDataInterface, rawFileContent: string
     // Add Original File to zip
 
     //const nameFile = `${title} --Apostille TX ${ntyData.txHash} --Date ${dateFull.toString()}${ntyData.extensionFile}`;
-    const nameFile = `${title}_[${ntyData.txHash}]}${ntyData.extensionFile}`
+    const nameFile = `${title}_[${ntyData.txHash}]${ntyData.extensionFile}`
     zip.file(`${nameFile}`, (CryptoJS.enc.Base64.stringify(rawFileContent)), { base64: true, comment: ntyData.typeFile });
     return {
         zipFile: zip,
@@ -485,22 +492,23 @@ export interface SignedZipInterface {
     transaction?: TransactionsInterface;
   }
   const returnHexaNumber = (s: any) => {
-    let regExp = /^[-+]?[0-9A-Fa-f]+\.?[0-9A-Fa-f]*?$/;
+    let regExp = /[0-9A-Fa-f]{6}/g;
     return (typeof s === 'string' && regExp.test(s));
   }
   const getHashName= (name: string):GetHashName =>{
     let dataR: any = {
-      sussces: false,
+      success: false,
       hash: null
     }
-    let arrayName = name.split("TX")
-    let arrayNameV = arrayName.map(x => x.trim().slice(0, 64)).find(x => returnHexaNumber(x) && x.length == 64)
+    let arrayName = name.split("[")
+    let arrayNameV = arrayName.map(x => x.trim().slice(0, 64)).find(x => returnHexaNumber(x) == true && x.length == 64)
     if (arrayNameV) {
       dataR = {
-        sussces: true,
+        success: true,
         hash: arrayNameV
       }
     }
+    
     return dataR
   }
   const toBase64 = file => new Promise((resolve, reject) => {
@@ -511,11 +519,10 @@ export interface SignedZipInterface {
   });
 
   const convertDateTimeFormat = (dateTime: string): string =>{
-    let dateFormat = "MM-dd-yyyy";
+    let dateFormat = "L";
     let date = new Date(dateTime);
-    let timezone = - date.getTimezoneOffset();
-    return 'abc'
-    //return formatDate(date, dateFormat, 'en-us', timezone.toString());
+    
+    return moment(date).locale('en').format(dateFormat);
   }
   const validateBlock = (blockInfo: BlockInfo) => {
     if (blockInfo.numTransactions && blockInfo.numTransactions >= 1) {
@@ -538,7 +545,97 @@ export interface SignedZipInterface {
     } 
   }
   
-  /* export const verifyHash = async(transactionSearch: [{file :File,resultData :any,hash :string}],transactions: TransferTransaction[]) => {
+  const validateIsRecipient = (transaction: Transaction) => {
+    let recipient = null;
+    let recipientPretty = null;
+    let isReceive = false;
+    if (transaction['recipient'] !== undefined) {
+      recipient = transaction['recipient'];
+      recipientPretty = recipient.pretty();
+      const currentWallet = walletState.currentLoggedInWallet
+      if (currentWallet.accounts) {
+        if (currentWallet.accounts.find(element => Address.createFromRawAddress(element.address).pretty() === recipientPretty)) {
+          isReceive = true;
+        }
+      }
+    }
+
+    return {
+      recipient,
+      recipientPretty,
+      isReceive
+    };
+  }
+  const getDataPart = (data: string, cantPart: number) => {
+    return {
+      part1: data.slice(0, data.length - cantPart),
+      part2: data.slice(-cantPart)
+    };
+  }
+
+  const getRentalFeeSink = (transaction: Transaction) => {
+    let mosaicRentalFeeSink = {
+      public_key: '94A9BB9660037E622C8F626E061DB1557CBBED0338402E82E796168E80EF9765',
+      address_public_test: 'XC5ZZN-SYLOXO-EQIAAF-N6B5S6-QAQSFF-5TEVC4-XLTV'
+    }
+    let namespaceRentalFeeSink = {
+      public_key: '9FF38184F03950C09FFFF4A90C171E4C3C566985EEACA486A59CC8B607C10BF6',
+      address_public_test: 'XA7KWF-N5CMLV-G7W3OH-Z5CV3G-3VYH3N-5EQQTK-OVJH'
+    }
+    if (transaction['mosaics'] === undefined) {
+      if (transaction.type === transactionTypeName.registerNameSpace.id) {
+        return namespaceRentalFeeSink.address_public_test;
+      } else if (
+        transaction.type === transactionTypeName.mosaicDefinition.id ||
+        transaction.type === transactionTypeName.mosaicSupplyChange.id
+      ) {
+        return mosaicRentalFeeSink.address_public_test;
+      } else {
+        return '-';
+      }
+    }
+  }
+  const getStructureDashboard = (transaction: Transaction, othersTransactions?: TransactionsInterface[], group?: string): TransactionsInterface =>{
+    if (othersTransactions && othersTransactions.length > 0) {
+      try {
+        const existTransction = othersTransactions.filter(next => next.data.transactionInfo.hash === transaction.transactionInfo.hash);
+        if (existTransction && existTransction.length > 0) {
+          return null;
+        }
+      } catch (error) {
+        return null;
+      }
+    }
+
+    const keyType = dashboardUtils.getNameTypeTransaction(transaction.type); 
+    if (keyType !== undefined) {
+     /*  const dataTransaction = this.validateIsSwapTransaction(transaction, keyType, group); */
+      const feeFormatter =  Helper.amountFormatterSimple(transaction.maxFee.compact());
+      const rentalFeeSink = getRentalFeeSink(transaction);
+      const responseIsRecipient = validateIsRecipient(transaction);
+
+      let responseTransaction = {
+        data: transaction,
+        nameType: keyType,
+        fee: feeFormatter,
+        feePart: getDataPart(feeFormatter, 6),
+        sender: transaction.signer,
+        recipientRentalFeeSink: rentalFeeSink,
+        recipient: responseIsRecipient.recipient,
+        recipientAddress: responseIsRecipient.recipientPretty,
+        receive: responseIsRecipient.isReceive,
+        senderAddress: transaction['signer'].address.pretty(),
+      };
+
+      if(group === "confirmed" && transaction.transactionInfo.height){
+        responseTransaction['height'] = transaction.transactionInfo.height.compact();
+      }
+
+      return responseTransaction;
+    }
+    return null;
+  }
+  export const verifyHash = async(transactionSearch: {file :File,resultData :any,hash :string}[],transactions: TransferTransaction[], auditResults: ResultAuditInterface[]) :Promise<ResultAuditInterface[]> => {
     // console.log('\n\n\n\nValue of trasaction', transactions, '\n\n\n\nEnd value\n\n');
     //this.searching = false;
     transactionSearch.forEach(async element => {
@@ -564,21 +661,28 @@ export interface SignedZipInterface {
           } else if (prefixHash === apostillePrivatePrefix) {
             transaction.privateFile = true;
           }
-          
-    
-          addAuditResult({
-            filename: originalName,
-            owner: Address.createFromRawAddress(findHash.recipient['address']).pretty(),
-            fileHash: findHash.message.payload.replace(/['"]+/g, ''),
-            result: 'Document apostille',
-            hash: findHash.transactionInfo.hash,
-            date: String(dateFile) ,
-            method: method,
-            transaction: transaction,
-          }, findHash.transactionInfo.hash);
+
+          let find = []
+          if (findHash.transactionInfo.hash) {
+            find = auditResults.filter(el => el.hash === findHash.transactionInfo.hash);
+          } else {
+            find = auditResults.filter(el => el.filename === originalName);
+          }
+          if (find.length === 0) {
+            auditResults.push({
+              filename: originalName,
+              owner: Address.createFromRawAddress(transaction.senderAddress).pretty(),
+              fileHash: findHash.message.payload.replace(/['"]+/g, ''),
+              result: 'Document apostille',
+              hash: findHash.transactionInfo.hash,
+              date: String(dateFile) ,
+              method: method,
+              transaction: transaction,
+            } );
+          }
         } else {
 
-          addAuditResult({
+          auditResults.push({
             filename: element.file.name,
             owner: '',
             fileHash: '',
@@ -587,16 +691,21 @@ export interface SignedZipInterface {
           });
         }
       } else {
-        addAuditResult({
+        auditResults.push({
           filename: element.file.name,
           owner: '',
           fileHash: '',
           result: 'No result found',
           hash: ''
         });
+        
       }
     });
-  } */
+     return new Promise(resolve => {
+       console.log(auditResults)
+        resolve(auditResults);
+    });
+  }
   const getUTCDateTime = (transactionInfo: TransactionInfo) => new Promise((resolve, reject) => {
     const height = transactionInfo.height.compact();
     let UTCDateTime = "";
@@ -607,7 +716,7 @@ export interface SignedZipInterface {
         UTCDateTime = this.convertDateTimeFormat(UTCDateTime);
         resolve(UTCDateTime);
       }  */
-      const blockapi = new BlockAPI(networkState.selectedAPIEndpoint)
+      const blockapi = new BlockAPI(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint))
         blockapi.getBlockByHeight(height).then(
           next => {
             validateBlock(next);
@@ -619,24 +728,13 @@ export interface SignedZipInterface {
     }
   })
 
-  const addAuditResult = (result: ResultAuditInterface, hash?) => {
-    let find = [];
-    let auditResults = []
-    if (hash) {
-      find = auditResults.filter(el => el.hash === result.hash);
-    } else {
-      find = auditResults.filter(el => el.filename === result.filename);
-    }
-    if (find.length === 0) {
-      auditResults.push(result);
-    }
-    return auditResults
-  }
   export const fileTour = async(file: any [])=> {
     const hash = [];
-    let transactionsSearch = []
+    let transactionsSearch :{file :File,resultData :any,hash :string}[] = []
+    let auditResults: ResultAuditInterface[] = []
     for (let index = 0; index < file.length; index++) {
       const el = file[index];
+      console.log(el)
       if (el.type === 'application/zip') {
         const jszip = new JSZip();
         await jszip.loadAsync(el).then(async (zip) => {
@@ -656,7 +754,7 @@ export interface SignedZipInterface {
                     transactionsSearch.push({ file: file, resultData: uploadedFileContent, hash: hashName.hash });
                     hash.push(hashName.hash);
                   } else {
-                    addAuditResult({
+                    auditResults.push({
                       filename: el.name,
                       owner: '',
                       fileHash: '',
@@ -668,7 +766,7 @@ export interface SignedZipInterface {
               });
             }
           } else {
-            addAuditResult({
+            auditResults.push({
               filename: el.name,
               owner: '',
               fileHash: '',
@@ -684,7 +782,7 @@ export interface SignedZipInterface {
           transactionsSearch.push({ file: el, resultData: uploadedFileContent, hash: hashName.hash });
           hash.push(hashName.hash);
         } else {
-          addAuditResult({
+          auditResults.push({
             filename: el.name,
             owner: '',
             fileHash: '',
@@ -694,5 +792,5 @@ export interface SignedZipInterface {
         }
       }
     }
-    return{hash, transactionsSearch};
+    return{hash, transactionsSearch,auditResults};
   }

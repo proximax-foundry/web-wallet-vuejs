@@ -199,7 +199,7 @@ export default {
     }
     
     const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
-    const createAttestation = async() =>{
+    const createAttestation = () =>{
        if (uploadType.value =='public'){
         let verify = preparePublicApostille(rawFileContent.value,tags.value,fileName.value,fileType.value,file.value,walletPasswd.value)
         if (verify == false){
@@ -208,7 +208,7 @@ export default {
         }if(verify.result == true){
            checkInProgress.value = true
            apostilleTemp.value = verify
-           
+           console.log(verify)
         } 
       }else{
         let verify = preparePrivateApostille(rawFileContent.value,tags.value,fileName.value,fileType.value,file.value,walletPasswd.value)
@@ -218,17 +218,17 @@ export default {
         }if(verify.result == true){
           checkInProgress.value = true
           apostilleTemp.value = verify
+          
         } 
       }
     }
     const uploadFile = (e) => {
       fileType.value = e.target.files[0].type;
       fileName.value = e.target.files[0].name;
-      
-      if (fileType.value !== '') {
-        fileType.value = fileName.value.slice(0, fileName.value.lastIndexOf('.'));
-      }
-      console.log(fileType.value)
+      console.log(fileName.value)
+      /* if (fileType.value !== '') {
+        fileName.value = fileName.value.slice(0, fileName.value.lastIndexOf('.'));
+      }console.log(fileName.value) */
       const myReader = new FileReader();
       // Read and convert the file to base64
       myReader.readAsDataURL(e.target.files[0]);

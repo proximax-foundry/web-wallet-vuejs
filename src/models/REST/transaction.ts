@@ -37,7 +37,7 @@ export class TransactionAPI {
      * @param transactionIds - Array of transactions id and/or hash.
      *
      */
-    getTransactions(transactionIds: string[]): Promise<Transaction[]>{
+    getTransactions(transactionIds: string[]): Promise<any>{
         return this.transactionHttp.getTransactions(transactionIds).toPromise();
     }
 
