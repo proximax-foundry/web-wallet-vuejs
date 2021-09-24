@@ -49,7 +49,7 @@
         </div>
       </div>
       <p class="font-bold text-tsm text-left mb-1">BSC Transaction Hash</p>
-      <TextInput placeholder="Transaction Hash" errorMessage="Please key in valid transaction hash" :showError="showTxnHashError" v-model="remoteTxnHash" icon="hashtag" class="w-full" />
+      <TextInput placeholder="BSC Transaction Hash" errorMessage="Please key in valid transaction hash" :showError="showTxnHashError" v-model="remoteTxnHash" icon="hashtag" class="w-full" />
       <div class="mt-10">
         <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
         <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledCheck" @click="checkStatus">Check Status</button>
@@ -503,7 +503,7 @@ export default {
           transactionFailed.value = true;
           isDisplayFeeLowRemark.value = true;
           return false;
-        }else if(!transactionReceipt && !transactionStatus){ // invalid transaction hash
+        }else if(!transactionReceipt && !transactionStatus){ // transaction hash is not found
           transactionNotFound.value = true;
           return false;
         }else{
@@ -677,6 +677,8 @@ export default {
         if(response.status == 200 || response.status == 201){
           const data = await response.json();
           isInvalidSwapService.value = false;
+          siriusTxnHash.value = data.siriusSwapInfo.status.hash;
+          siriusAddress.value = data.siriusSwapInfo.recipient;
           transactionHash.value = data.remoteTxnHash;
           swapTimestamp.value = data.timestamp;
           swapId.value = data.ctxId;
