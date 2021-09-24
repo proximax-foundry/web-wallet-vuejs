@@ -7,8 +7,8 @@
   </div>
   <div class='mt-2 py-3 gray-line'>
     <div class="text-lg sm:text-xl text-gray-600 font-bold mt-10">Please select an option</div>
-    <div class="md:grid md:grid-cols-3 mx-5 lg:mx-5 2xl:mx-60 mt-5">
-      <div class="md:col-span-1" :class="`${!isOutgoingOptionDisabled?'cursor-pointer':'' }`" @click="gotoOutgoingPage">
+    <div class="md:grid lg:grid-cols-3 mx-5 lg:mx-5 2xl:mx-60 mt-5">
+      <div class="lg:col-span-1" :class="`${!isOutgoingOptionDisabled?'cursor-pointer':'' }`" @click="gotoOutgoingPage">
         <div class="m-5 lg:mx-3 rounded-2xl border option-div" :class="`${!isOutgoingOptionDisabled?'border-blue-primary hover:bg-blue-primary':'border-gray-200 bg-gray-300' }`">
           <div class="mt-5 sm:mt-10 font-bold text-xl mb-1" :class="`${!isOutgoingOptionDisabled?'text-blue-primary':'text-white' }`">Out <img src="@/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg" class="h-8 w-8 inline-block ml-2"></div>
           <div class="mt-3 mb-5 sm:mb-10" :class="`${!isOutgoingOptionDisabled?'text-gray-500':'text-white' }`">{{ outgoingText }}</div>
@@ -17,7 +17,7 @@
         <InlineMessage v-if="displaErrorMessage" severity="error">Service unavailable.</InlineMessage>
         <InlineMessage v-if="displaConnectionMessage" severity="error">Unable to connect.</InlineMessage>
       </div>
-      <div class="md:col-span-1">
+      <div class="lg:col-span-1">
         <router-link :to="{ name: 'ViewServicesMainnetSwapETHToSirius' }">
           <div class="m-5 lg:mx-3 rounded-2xl border border-blue-primary option-div hover:bg-blue-primary">
             <div class="mt-5 sm:mt-10 text-blue-primary font-bold text-xl mb-1">In <img src="@/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg" class="h-8 w-8 inline-block ml-2"></div>
@@ -25,7 +25,7 @@
           </div>
         </router-link>
       </div>
-      <div class="md:col-span-1">
+      <div class="lg:col-span-1">
         <router-link :to="{ name: 'ViewServicesMainnetSwapCheckETHToSirius' }">
           <div class="m-5 lg:mx-3 rounded-2xl border border-blue-primary option-div hover:bg-blue-primary">
             <div class="mt-5 sm:mt-10 text-blue-primary font-bold text-xl mb-1">Check status <img src="@/modules/services/submodule/mainnetSwap/img/check-status.svg" class="h-8 w-8 inline-block"></div>

@@ -89,7 +89,7 @@
               </div>
             </div>
             <div v-if="isInvalidRemoteTxnHash && step2" class="mt-2 text-sm text-gray-700">
-              {{ isDisplayFeeLowRemark?'Fees might be too low. Please do not change recommended fee in MetaMask.':'ETH transaction hash is invalid. Please initiate new swap from ETH to XPX' }}
+              {{ txtRemoteTransactionErrorMsg }}
               <router-link :to="{ name: 'ViewServicesMainnetSwapEthOptions' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">Swap</router-link>
             </div>
           </div>
@@ -312,6 +312,7 @@ export default {
 
     const isInvalidRemoteTxnHash = ref(false);
     const isPendingRemoteTxnHash = ref(false);
+    const transactionNotFound = ref(false);
     const transactionFailed = ref(false);
     const transactionPending = ref(false);
     // const transactionSuccess = ref(false);
@@ -456,7 +457,7 @@ export default {
       setTimeout(() => {
         (async() => {
           let remoteTxnStatus = await verifyTransaction();
-          if(!remoteTxnStatus && transactionFailed.value){
+          if(!remoteTxnStatus){
             isInvalidRemoteTxnHash.value = true;
           }else{
             setTimeout( () => {
@@ -480,7 +481,7 @@ export default {
       try{
         let transactionReceipt = await provider.getTransactionReceipt(remoteTxnHash.value);
         let transactionStatus = await provider.getTransaction(remoteTxnHash.value);
-        if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to == tokenAddress.value){ // when transaciton is confirmed but status is 1
+        if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaciton is confirmed but status is 1
           if(transactionStatus.confirmations < 12){
             return new Promise(function (resolve) {
               verifyingTxn = setInterval(async () => {
@@ -502,11 +503,11 @@ export default {
           transactionFailed.value = true;
           isDisplayFeeLowRemark.value = true;
           return false;
-        }else if(!transactionReceipt && !transactionStatus){ // invalid transaction hash
-          transactionFailed.value = true;
+        }else if(!transactionReceipt && !transactionStatus){ // transaction hash is not found
+          transactionNotFound.value = true;
           return false;
         }else{
-          if(transactionStatus && transactionStatus.to == tokenAddress.value){ // when transaction is not confirmed
+          if(transactionStatus && transactionStatus.to.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaction is not confirmed
             // perform confirmation loop here
             return new Promise(function (resolve) {
               verifyingTxn = setInterval(async()=>{
@@ -523,14 +524,27 @@ export default {
             });
           }else{
             // invalid transaction
+            transactionFailed.value = true;
             return false;
           }
         }
       }catch(err){
-        // console.log(err);
+        transactionNotFound.value = true;
         return false;
       }
     };
+
+    const txtRemoteTransactionErrorMsg = computed(() => {
+      if(isDisplayFeeLowRemark.value){
+        return 'Fees might be too low. Please do not change recommended fee in MetaMask.';
+      }else{
+        if(transactionNotFound.value){
+          return 'ETH transaction hash is not found. Please initiate new swap from ETH to XPX';
+        }else{
+          return 'ETH transaction hash is invalid. Please initiate new swap from ETH to XPX';
+        }
+      }
+    });
 
     const siriusTxnHash = ref('');
     let xpxExplorerUrl = networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.hashRoute + '/';
@@ -752,7 +766,8 @@ export default {
       savedCheck,
       numConfirmation,
       transactionPending,
-      isDisplayFeeLowRemark,
+      transactionNotFound,
+      txtRemoteTransactionErrorMsg,
     };
   },
 }
