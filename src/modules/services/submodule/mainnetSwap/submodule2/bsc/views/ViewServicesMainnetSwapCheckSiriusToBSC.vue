@@ -103,19 +103,19 @@
               </div>
             </div>
           </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Checking transaction status<div class="text-tsm text-gray-500 my-3" v-if="transactionPending">Pending confirmation: {{ numConfirmation }} of 12 confirmations</div></div>
+          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Checking transaction status</div>
         </div>
         <div class="flex border-b border-gray-300 p-3">
           <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="isInvalidRemoteTxnHash?'border-red-primary':(step4?'border-blue-primary':'border-gray-300')">
+            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="isInvalidRemoteTxnHash && step4?'border-red-primary':(step4?'border-blue-primary':'border-gray-300')">
               <div class="flex h-full justify-center">
-                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-if="isInvalidRemoteTxnHash"></font-awesome-icon>
+                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-if="isInvalidRemoteTxnHash && step4"></font-awesome-icon>
                 <font-awesome-icon icon="check" :class="step4?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-else></font-awesome-icon>
               </div>
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">
-            {{ isInvalidRemoteTxnHash?'Transaction has failed.':'BSC transaction is successful:' }}
+            {{ txtRemoteTxnSummary }}
             <div v-if="!isInvalidRemoteTxnHash && step4" class="mt-2">
               <div v-if="remoteTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
                 <a :href="remoteTxnLink" target=_new :class="isInvalidRemoteTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="remoteTx" :copyValue="remoteTxnHash" copySubject="BSC transaction hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ remoteTxnHash }}</a>
@@ -124,7 +124,7 @@
                 </div>
               </div>
             </div>
-            <div v-if="isInvalidRemoteTxnHash && step4" class="mt-2 text-sm text-gray-700">
+            <div v-if="isInvalidRemoteTxnHash && step4" class="mt-2 text-xs md:text-sm text-gray-700">
               BSC transaction hash is invalid. Please contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
             </div>
           </div>
@@ -154,18 +154,11 @@ export default {
   },
 
   setup() {
-    let verifyingTxn;
 
     const verifyMetaMaskPlugin = ref(true);
     if(!window.ethereum.isMetaMask){
       verifyMetaMaskPlugin.value = false;
     }
-
-    onBeforeUnmount(() => {
-       if(verifyingTxn){
-         clearInterval(verifyingTxn);
-       }
-    })
 
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
@@ -338,11 +331,11 @@ export default {
     const siriusTxnLink = computed(() => xpxExplorerUrl + siriusTxnHash.value);
 
     const transactionFailed = ref(false);
+    const transactionNotFound = ref(false);
     const isInvalidRemoteTxnHash = ref(false);
     const remoteTxnHash = ref(false);
     const transactionPending = ref(false);
     const isDisabled = ref(true);
-    const numConfirmation = ref(0);
 
     const checkSiriusTxn = async () => {
       const data = {
@@ -363,14 +356,13 @@ export default {
           setTimeout( async() => {
             step3.value = true;
             let remoteTxnStatus = await validateRemoteTxn();
-            if(!remoteTxnStatus && transactionFailed.value){
+            if(!remoteTxnStatus){
               isInvalidRemoteTxnHash.value = true;
-            }else{
-              setTimeout( async() => {
-                setTimeout(() => step4.value = true, 1000);
-                setTimeout(() => isDisabled.value = false, 1000);
-              }, 1000);
             }
+            setTimeout( async() => {
+              setTimeout(() => step4.value = true, 1000);
+              setTimeout(() => isDisabled.value = false, 1000);
+            }, 1000);
           }, 1000);
         }else{
           isInvalidSiriusTxnHash.value = true;
@@ -384,56 +376,48 @@ export default {
       try{
         let transactionReceipt = await provider.getTransactionReceipt(remoteTxnHash.value);
         let transactionStatus = await provider.getTransaction(remoteTxnHash.value);
-        if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaciton is confirmed but status is 1
-          if(transactionStatus.confirmations < 12){
-            return new Promise(function (resolve) {
-              verifyingTxn = setInterval(async () => {
-                let transactionStatusLoop = await provider.getTransaction(remoteTxnHash.value);
-                if(transactionStatusLoop.confirmations < 12){
-                  transactionPending.value = true;
-                  numConfirmation.value = transactionStatusLoop.confirmations;
-                }else {
-                  transactionPending.value = false;
-                  clearInterval(verifyingTxn);
-                  resolve(true);
-                }
-              }, 1000);
-            });
-          }else{
-            return true;
+
+        let isTxnPending = false;
+        provider.on("pending", (tx) => {
+          if(tx === remoteTxnHash.value){
+            isTxnPending = true;
           }
-        }else if(transactionReceipt && transactionReceipt.status === 0){ // transaction is confirmed but status is 0 - fee too low
-          transactionFailed.value = true;
-          return false;
-        }else if(!transactionReceipt && !transactionStatus){ // invalid transaction hash
-          transactionFailed.value = true;
+        });
+
+        if(isTxnPending){
+          transactionPending.value = true;
+          return true;
+        }else if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaciton is confirmed but status is 1
+          return true;
+        }else if(!transactionReceipt && !transactionStatus){ // invalid transaction hash - transaction not found
+          transactionNotFound.value = true;
           return false;
         }else{
-          if(transactionStatus && transactionStatus.to == tokenAddress.value){ // when transaction is not confirmed
-            // perform confirmation loop here
-            return new Promise(function (resolve) {
-              verifyingTxn = setInterval(async()=>{
-                let transactionStatusLoop = await provider.getTransaction(remoteTxnHash.value);
-                if(transactionStatusLoop.confirmations < 12){
-                  transactionPending.value = true;
-                  numConfirmation.value = transactionStatusLoop.confirmations;
-                }else {
-                  transactionPending.value = false;
-                  clearInterval(verifyingTxn);
-                  resolve(true);
-                }
-              }, 3000);
-            });
-          }else{
-            // invalid transaction
-            return false;
-          }
+          transactionFailed.value = true;
+          return false;
         }
       }catch(err){
-        console.log(err);
+        // console.log(err);
+        transactionNotFound.value = true;
         return false;
       }
     };
+
+    const txtRemoteTxnSummary  = computed(() => {
+      if(isInvalidRemoteTxnHash.value){
+        if(transactionNotFound.value){
+          return 'Transaction is not found';
+        }else{
+          return 'Transaction has failed';
+        }
+      }else{
+        if(transactionPending.value){
+          return 'ETH transaction is still pending. Please wait a few more moment';
+        }else{
+          return 'ETH transaction is successful';
+        }
+      }
+    });
 
     const afterConfirmed = () => {
       step3.value = true;
@@ -469,9 +453,8 @@ export default {
       isInvalidRemoteTxnHash,
       remoteTxnLink,
       remoteTxnHash,
-      transactionPending,
+      txtRemoteTxnSummary,
       isDisabled,
-      numConfirmation,
     };
   },
 }
