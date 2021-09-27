@@ -1,57 +1,30 @@
 <template>
   <div>
-    <div v-if='item.fileHash!=""' :title="'Click to show transaction details'"  @click="toggleModal = !toggleModal" class="md:mx-10 lg:mx-20 border-8 border-solid border-gray-300 mt-4 sm:grid sm:grid-cols-4">
-      <div class="sm:col-span-3 p-4">
+    <div  :title="item.fileHash?'Click to show transaction details': 'This card has no information to show'"  @click="toggleModal = !toggleModal" class=" md:mt-4 lg:mt-10 border-8 border-solid border-gray-300 mt-4 sm:grid sm:grid-cols-4 transform hover:scale-105 cursor-pointer ">
+      <div class="sm:col-span-3 p-2 ">
         <div class="grid grid-cols-4 mt-3">
-          <div class="col-span-3 text-left pl-2 flex">
-              <div class="self-center">
-                <p class="audit-title">{{ item.filename }}</p>
+          <div class="col-span-3 text-left pl-2 ">
+                <b class="break-all text-sm">{{ toOriginal(item.filename) }}</b>
                 <div v-if = "item.fileHash!=''">
                   <b class="text-sm">File Hash:</b>
-                  <div class="break-all text-sm mt-1 text-blue-500">{{item.fileHash}}</div>
+                  <div class="break-all text-sm mt-1 ">{{item.fileHash}}</div>
                 </div>
                 <div v-if = "item.fileHash!=''">
                   <b class="text-sm">Date:</b>
-                  <div class="break-all text-sm mt-1 text-blue-500">{{item.date}}</div>
-                </div>
-              </div>
-          </div>
-        </div>
-      </div>
-      <div class="sm:col-span-1 text-center w-full" style="background: -webkit-linear-gradient(bottom,#306FB5,#5DA7DC)">
-        <div class="inline-block h-full">
-        <div class="h-full flex">
-          <img src="@/modules/services/submodule/voting/img/badge-silver-proximax-sirius-wallet.svg" class="w-24 h-24 self-center my-4">
-        </div>
-        </div>
-      </div>
-    </div>
-    <div v-else :title="'This card has no information to show'" class="md:mx-10 lg:mx-20 border-8 border-solid border-gray-300 mt-4 sm:grid sm:grid-cols-4">
-      <div class="sm:col-span-3 p-4">
-        <div class="grid grid-cols-4 mt-3">
-          <div class="col-span-3 text-left pl-2 flex">
-              <div class="self-center">
-                <p class="audit-title">{{ item.filename }}</p>
-                <div v-if = "item.fileHash!=''">
-                  <b class="text-sm">File Hash:</b>
-                  <div class="break-all text-sm mt-1 text-blue-500">{{item.fileHash}}</div>
-                </div>
-                <div v-if = "item.fileHash!=''">
-                  <b class="text-sm">Date:</b>
-                  <div class="break-all text-sm mt-1 text-blue-500">{{item.date}}</div>
+                  <div class="break-all text-sm mt-1 ">{{item.date}}</div>
                 </div>
                 <div v-if = "item.fileHash==''">
-                  <div class="break-all text-sm mt-1 text-blue-500">{{item.result}}</div>
-                </div>
+                  <div class="break-all text-sm mt-1 +">{{item.result}}</div>
               </div>
           </div>
         </div>
       </div>
-      <div class="sm:col-span-1 text-center w-full" style="background: -webkit-linear-gradient(bottom,#D10000,#D10000)">
+      <div class="sm:col-span-1  text-center w-full" :style="item.fileHash ? 'background: -webkit-linear-gradient(bottom,#306FB5,#5DA7DC)' : 'background: -webkit-linear-gradient(bottom,#A30000,#D10000)'">
         <div class="inline-block h-full">
-        <div class="h-full flex">
-          <img src="@/assets/img/error.svg" class="w-24 h-24 self-center my-4">
-        </div>
+          <div class="h-full flex">
+            <img v-if = "item.fileHash!=''" src="@/modules/services/submodule/voting/img/badge-silver-proximax-sirius-wallet.svg" class="w-24 h-24 self-center my-4">
+            <img v-else src="@/assets/img/error.svg" class="w-24 h-24 self-center my-4">
+          </div>
         </div>
       </div>
     </div>
@@ -59,27 +32,79 @@
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
     >
-      <div v-if="toggleModal" class="popup-outer absolute flex z-50">
-        <div class="modal-popup-box">
-          <div class="delete-position">
-            <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
+    <div v-if="toggleModal && item.fileHash!=''" class="popup-outer absolute flex z-50">
+      <div class="transition ease-in duration-300 w-popup px-6 py-6 bg-white rounded-3xl shadow-xl">
+        <div class="delete-position">
+          <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
+        </div>
+        <p class="font-bold text-blue-500 text-lg border-b-2 mb-3">Attested File</p>
+        <div class = "grid grid-cols-2">
+          <div class= " col-span-1">
+            <div class = "flex">
+              <p class=" font-bold mt-1 text-txl text-left">{{item.transaction.nameType.toUpperCase()}}</p>
+              <img src="@/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg" class="w-12 h-12 ">
+              <p class="font-bold ml-2 mt-1 text-orange-primary text-txl ">SENT</p>
+            </div>
+            <div class = "flex mb-10 mt-4">
+              <p class="font-bold  mt-1 text-left text-lg ">Effective Fee: </p>
+              <img src="@/assets/img/icon-prx-xpx-blue.svg" class = "ml-6 mt-1 w-7 h-7">
+              <p class="ml-2 mt-1 text-left text-lg">{{item.transaction.fee}} XPX</p>
+            </div>
+            <div class = "flex ">
+              <p class = " font-bold text-left text-xs">Original File Name:  </p>
+              <p class = " ml-1 text-xs text-left break-all">{{toOriginal(item.filename)}} </p>
+            </div>
+            <div class = "flex mt-2 mb-8">
+              <p class = "font-bold text-left text-xs">Private: </p>
+              <p class = " ml-1  text-xs">{{item.transaction.privateFile? "Yes": "No"}}</p>
+            </div>
+            <div class = "flex mt-2">
+              <p class = "font-bold text-left text-xs">Height: </p>
+              <p class = " ml-1  text-xs">{{item.transaction.data.transactionInfo.height.lower}}</p>
+            </div>
+            <div class = "flex mt-2">
+              <p class = "font-bold text-left text-xs">Type : </p>
+              <p class = "  ml-1  text-xs">4154</p>
+            </div>
+            <div class = "flex mt-2">
+              <p class = "font-bold text-left text-xs">From: </p>
+              <p class = " ml-1  break-all text-xs"> {{item.transaction.senderAddress}}</p>
+            </div>
+            <div class = "flex mt-2">
+              <p class = "font-bold text-left text-xs">To: </p>
+              <p class = " ml-1  text-xs">{{item.transaction.recipientAddress}}</p>
+            </div>
           </div>
-          <h1 class="default-title">Attested File</h1>
-          <p class="text-sm mt-5">{{item.transaction.nameType.toUpperCase()}}</p>
-          <p>EffectiveFee : {{item.transaction.fee}}</p>
-          <p>File Name : {{item.filename}} </p>
-          <p>Private: {{item.transaction.privateFile? true : false}}</p>
-          <p>Height : {{item.transaction.data.transactionInfo.height.lower}}</p>
-          <p>Type : 4154</p>
-          <p>From: {{item.transaction.senderAddress}}</p>
-          <p>To: {{item.transaction.recipientAddress}}</p>
-          <p>Signer : {{item.transaction.sender.publicKey}}</p>
-          <p>Signature: {{item.transaction.data.signature}}</p>
-          <p>Hash: {{item.hash}}</p>
+          <div>
+            <div class="sm:col-span-1 block w-full md:inline-block bg-gray-200 rounded-2xl">
+              <div class="col-span-1 text-center w-full pt-2 rounded-2xl rounded-b-none" style="background: -webkit-linear-gradient(bottom,#C46200,#F27900)">
+                <div class="inline-block h-full">
+                  <div class="h-full flex">
+                    <img src="@/modules/services/submodule/voting/img/badge-silver-proximax-sirius-wallet.svg" class="w-24 h-24 self-center">
+                  </div>
+                </div>
+              </div>
+              <div class="p-4">
+                <div class = "mb-2">
+                  <div class="font-bold text-xs text-left block">Signer:</div>
+                  <div class=" text-xs text-left block break-all">{{item.transaction.sender.publicKey}}</div>
+                </div>
+                <div class = "mb-2">
+                  <div class="font-bold text-xs text-left block">Signature:</div>
+                  <div class=" text-xs text-left block break-all">{{item.transaction.data.signature}}</div>
+                </div>
+                <div class = "mb-2">
+                  <div class="font-bold text-xs text-left block">Hash:</div>
+                  <div class=" text-xs text-left block break-all">{{item.hash}}</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </transition>
-    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-90 bg-blue-primary"></div>
+    </div>
+  </transition>
+    <div @click="toggleModal = !toggleModal" v-if="toggleModal && item.fileHash!=''" class="fixed inset-0 bg-opacity-90 bg-blue-primary"></div>
   </div>
 </template>
 
@@ -94,7 +119,16 @@ export default defineComponent({
       toggleModal: false,
       item: this.auditResult as ResultAuditInterface
     };
-  },
+  },methods:{
+    toOriginal:(fullName: string) :string =>{
+    let x = fullName.split("_[")
+    const fileName = x[0]
+    x = x[1].split("]")
+    const fileExtension = x[1]
+   
+    return fileName+fileExtension
+  }
+  }
   
 });
 </script>

@@ -34,14 +34,14 @@
     </div>
   </div>
    <div v-if="currentPage==2">
-    <div>
+    <div class = "md:grid md:grid-cols-2 lg:grid lg:grid-cols-3 gap-4 ">
       <div v-for = 'item in auditResults' :key = 'item' > 
         <AuditResultModal v-bind:auditResult = 'item' />
     </div>
-      <div class="inline-flex items-center mb-10 sm:mt-5">
+    </div>
+    <div class="items-center mb-10 mt-5">
         <button type="button" class="default-btn mr-5 focus:outline-none" @click="onFinish()">Finish</button>
       </div>
-    </div>
   </div>
 </template>
 <script lang = 'ts' >
