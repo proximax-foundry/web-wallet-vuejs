@@ -261,6 +261,9 @@ export const preparePublicApostille = (rawFileContent :string,tag :string ,fileN
     const signedTransaction = myAccount.sign(transferTransaction, generationHash); // Update-sdk-dragon
     // console.log('TRANSACTION SIGNED ---> ', signedTransaction);
     const date = new Date();
+    if (getFileExtension(fileName)==undefined){
+      fileName = fileName+'.undefined'
+    }
     let ntyData = {
       fileName: fileName.slice(0, fileName.lastIndexOf('.')),
       extensionFile: `.${getFileExtension(fileName)}`,
@@ -340,6 +343,9 @@ export const preparePublicApostille = (rawFileContent :string,tag :string ,fileN
     const signedTransaction = ownerAccount.sign(transferTransaction, generationHash);  // Update-sdk-dragon
     // console.log('TRANSACTION SIGNED ---> ', signedTransaction);
     const date = new Date();
+    if (getFileExtension(fileName)==undefined){
+      fileName = fileName+'.undefined'
+    }
     let ntyData = {
       fileName: fileName.slice(0, fileName.lastIndexOf('.')),
       extensionFile: `.${getFileExtension(fileName)}`,
