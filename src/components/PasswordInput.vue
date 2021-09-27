@@ -69,15 +69,14 @@ export default defineComponent({
       if(this.modelValue == ''){
         this.borderColor = 'border-2 border-red-primary';
         this.pswdErr = true;
-      }else{
-        // if(this.modelValue != undefined){
-        //   if(this.modelValue.match(passwdPattern) == null){
-        //     this.borderColor = 'border-2 border-red-primary';
-        //     this.pswdErr = true;
-        //   }
-        // }else{
-          this.borderColor = 'border-2 border-gray-300';
-          this.pswdErr = false;
+      }
+      else if (Object.keys(this.modelValue).length < 8){
+        this.borderColor = 'border-2 border-red-primary';
+        this.pswdErr = true;
+      }
+      else{
+        this.borderColor = 'border-2 border-gray-300';
+        this.pswdErr = false;
         // }
       }
     },

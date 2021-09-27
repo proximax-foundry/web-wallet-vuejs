@@ -104,7 +104,7 @@ export default {
       isSuccessAdded.value = true;
       setTimeout(() => {
         contactName.value = "";
-        emitter.emit("CLOSE_MODAL", false);
+        emitter.emit("CLOSE_CONTACT_MODAL", false);
         isAddContactQues.value = true;
         isSuccessAdded.value = false;
       }, 2500);
@@ -114,7 +114,7 @@ export default {
     const clearInput = () => (contactName.value = "");
 
     const closeModal = () => {
-      emitter.emit("CLOSE_MODAL", false);
+      emitter.emit("CLOSE_CONTACT_MODAL", false);
     };
 
     const proceed = () => (isAddContactQues.value = false);

@@ -15,6 +15,7 @@ const walletUpdateTimeKey = "sw_updated"
 export class Wallets {
     wallets: Wallet[] = [];
     updateTime: number = 0;
+    isReady: boolean = false;
 
     constructor(){
         this.fetchFromLocalStorage();
@@ -38,6 +39,7 @@ export class Wallets {
         } catch (error) {
             this.wallets = [];
         }
+        this.isReady = true;
 
         const tempUpdateTime = localStorage.getItem(walletUpdateTimeKey);
 

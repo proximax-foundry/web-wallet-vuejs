@@ -32,7 +32,7 @@
       </Column>
       <Column field="Active" :header="$t('dashboard.active')" >
         <template #body="{data}">
-          <span class="uppercase ">{{data.active}}</span>{
+          <span class="uppercase" :class="data.active ? 'text-green-500' : 'text-red-500'">{{data.active}}</span>
         </template>
       </Column>
       <template #empty>
@@ -69,9 +69,9 @@ export default{
     const namespaceExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute);
     const assetExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.assetInfoRoute);
 
-    emitter.on("CLOSE_MODAL", payload => {
-      showTransactionModel.value = payload;
-    });
+    // emitter.on("CLOSE_MODAL", payload => {
+    //   showTransactionModel.value = payload;
+    // });
 
     return {
       borderColor,
