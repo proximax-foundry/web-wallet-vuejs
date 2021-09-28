@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div  :title="item.fileHash?'Click to show transaction details': 'This card has no information to show'"  @click="toggleModal = !toggleModal" class=" md:mt-4 lg:mt-10 border-8 border-solid border-gray-300 mt-4 sm:grid sm:grid-cols-4 transform hover:scale-105 cursor-pointer ">
+    <div  :title="item.fileHash?'Click to show transaction details': 'This card has no information to show'"  @click="toggleModal = !toggleModal" class=" md:mt-4 lg:mt-10 border-8 border-solid border-gray-300 mt-4 sm:grid sm:grid-cols-4 transform hover:scale-105 cursor-pointer z-10">
       <div class="sm:col-span-3 p-2 ">
         <div class="grid grid-cols-4 mt-3">
           <div class="col-span-3 text-left pl-2 ">
-                <b class="break-all text-sm">{{ toOriginal(item.filename) }}</b>
+                <b class="break-all text-sm">{{ item.filename }}</b>
                 <div v-if = "item.fileHash!=''">
                   <b class="text-sm">File Hash:</b>
                   <div class="break-all text-sm mt-1 ">{{item.fileHash}}</div>
@@ -45,28 +45,32 @@
               <img src="@/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg" class="w-12 h-12 ">
               <p class="font-bold ml-2 mt-1 text-orange-primary text-txl ">SENT</p>
             </div>
-            <div class = "flex mb-10 mt-4">
+            <div class = "flex mb-6 ">
               <p class="font-bold  mt-1 text-left text-lg ">Effective Fee: </p>
-              <img src="@/assets/img/icon-prx-xpx-blue.svg" class = "ml-6 mt-1 w-7 h-7">
+              <img src="@/assets/img/icon-prx-xpx-blue.svg" class = "ml-4 mt-1 w-7 h-7">
               <p class="ml-2 mt-1 text-left text-lg">{{item.transaction.fee}} XPX</p>
             </div>
-            <div class = "flex ">
+            <div class = "mb-3">
+              <p class = " font-bold text-left text-xs">File Name:  </p>
+              <p class = "  text-xs text-left break-all">{{item.filename}} </p>
+            </div>
+            <div class = "flex mb-3">
               <p class = " font-bold text-left text-xs">Original File Name:  </p>
               <p class = " ml-1 text-xs text-left break-all">{{toOriginal(item.filename)}} </p>
             </div>
-            <div class = "flex mt-2 mb-8">
+            <div class = "flex mt-2 mb-3">
               <p class = "font-bold text-left text-xs">Private: </p>
               <p class = " ml-1  text-xs">{{item.transaction.privateFile? "Yes": "No"}}</p>
             </div>
-            <div class = "flex mt-2">
+            <div class = "flex mt-2 mb-3">
               <p class = "font-bold text-left text-xs">Height: </p>
               <p class = " ml-1  text-xs">{{item.transaction.data.transactionInfo.height.lower}}</p>
             </div>
-            <div class = "flex mt-2">
+            <div class = "flex mt-2 mb-3">
               <p class = "font-bold text-left text-xs">Type : </p>
               <p class = "  ml-1  text-xs">4154</p>
             </div>
-            <div class = "flex mt-2">
+            <div class = "flex mt-2 mb-3">
               <p class = "font-bold text-left text-xs">From: </p>
               <p class = " ml-1  break-all text-xs"> {{item.transaction.senderAddress}}</p>
             </div>
@@ -76,7 +80,7 @@
             </div>
           </div>
           <div>
-            <div class="sm:col-span-1 block w-full md:inline-block bg-gray-200 rounded-2xl">
+            <div class="sm:col-span-1 block w-full md:inline-block bg-gray-200 rounded-2xl ml-2">
               <div class="col-span-1 text-center w-full pt-2 rounded-2xl rounded-b-none" style="background: -webkit-linear-gradient(bottom,#C46200,#F27900)">
                 <div class="inline-block h-full">
                   <div class="h-full flex">
@@ -104,7 +108,7 @@
       </div>
     </div>
   </transition>
-    <div @click="toggleModal = !toggleModal" v-if="toggleModal && item.fileHash!=''" class="fixed inset-0 bg-opacity-90 bg-blue-primary"></div>
+    <div @click="toggleModal = !toggleModal" v-if="toggleModal && item.fileHash!=''" class="fixed inset-0 bg-opacity-90 bg-blue-primary z-40"></div>
   </div>
 </template>
 
