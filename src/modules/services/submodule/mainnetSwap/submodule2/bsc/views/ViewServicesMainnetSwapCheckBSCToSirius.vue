@@ -79,7 +79,7 @@
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
-            {{ isInvalidRemoteTxnHash?'Transaction has failed.':'BSC Transaction is successful:' }}
+            {{ isInvalidRemoteTxnHash?(transactionNotFound?'Transaction is not found':'Transaction has failed.'):'BSC Transaction is successful:' }}
             <div v-if="!isInvalidRemoteTxnHash && step2" class="mt-2">
               <div v-if="remoteTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
                 <a :href="remoteTxnLink" target=_new :class="isInvalidRemoteTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="validateTransfer" :copyValue="remoteTxnHash" copySubject="Transfer hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ remoteTxnHash }}</a>
@@ -115,7 +115,7 @@
             </div>
           </div>
           <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">
-            {{ (isInvalidSwapCheck && step4)?'Swap not verified:':'Swap is successful:' }}
+            {{ (isInvalidSwapCheck && step4)?(isCheckSwapStatusNotFound?'Transaction is not found in swap service:':'Transaction is invalid in the swap service:'):'Swap is successful:' }}
             <div v-if="!isInvalidSwapCheck && step4" class="mt-2">
               <div v-if="siriusTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
                 <a :href="siriusTxnLink" target=_new class="text-blue-primary flex-grow break-all text-tsm self-center hover:underline" id="validateTransfer" :copyValue="remoteTxnHash" copySubject="Transfer hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ siriusTxnHash }}</a>
@@ -415,6 +415,7 @@ export default {
     };
 
     const isInvalidSwapCheck = ref(false);
+    const isCheckSwapStatusNotFound = ref(false);
 
     const step1 = ref(false);
     const step2 = ref(false);
@@ -575,6 +576,9 @@ export default {
           swapQr.value = SwapUtils.generateQRCode(remoteTxnLink.value);
           isInvalidSwapCheck.value = false;
           setTimeout( ()=> isDisabledValidate.value = false, 1000);
+        }else if(response.status == 404){
+          isInvalidSwapCheck.value = true;
+          isCheckSwapStatusNotFound.value = true;
         }else{
           isInvalidSwapCheck.value = true;
         }
@@ -768,6 +772,7 @@ export default {
       transactionPending,
       transactionNotFound,
       txtRemoteTransactionErrorMsg,
+      isCheckSwapStatusNotFound,
     };
   },
 }
