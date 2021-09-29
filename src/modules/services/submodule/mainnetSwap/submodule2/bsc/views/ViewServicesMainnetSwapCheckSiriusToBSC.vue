@@ -88,7 +88,7 @@
               </div>
             </div>
             <div v-if="isInvalidSiriusTxnHash && step2" class="mt-2 text-sm text-gray-700">
-              Sirius transaction hash is invalid. Please initiate new swap from XPX to BSC
+              Sirius transaction hash is not found in swap service. Please initiate new swap from XPX to BSC
               <router-link :to="{ name: 'ViewServicesMainnetSwapEthOptions' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">Swap</router-link>
             </div>
           </div>
@@ -124,7 +124,7 @@
               </div>
             </div>
             <div v-if="isInvalidRemoteTxnHash && step4" class="mt-2 text-xs md:text-sm text-gray-700">
-              BSC transaction hash is invalid. Please contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
+              ETH transaction hash is not found. Please contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
             </div>
           </div>
         </div>
