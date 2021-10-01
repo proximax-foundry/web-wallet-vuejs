@@ -7,6 +7,7 @@
   </div>
   <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-6'>
     <div class="md:col-span-4">
+      <span class = "text-black-300 font-bold"> Transactions </span>
       <form @submit.prevent="createMosaic">
         <fieldset class="w-full">
           <div class="mb-5 border-b border-gray-200">
@@ -142,7 +143,7 @@
           <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput()">
             {{$t('signin.clear')}}
           </button>
-          <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="makeTransfer()">
+          <button type="button" class="default-btn py-1 disabled:opacity-50" @click="saveTransaction()">
             Save
           </button>
         </div>
@@ -153,11 +154,18 @@
     </div>
     <div class="md:col-span-2 px-10 text-left mt-10 text-tsm md:text-tsm md:mt-5 relative">
           <span class="text-black-300 font-bold">My Transactions</span>
-            <div style="height: 500px" class="rounded-lg border-2 border-black-300">
+          <div id="transac" style="height:100%" class="rounded-lg border-2 border-gray-300 flex-auto text-size-120%">
+            <!--<button type="button" id="t1" style="width:97%" class="text-black text-left rounded-lg border-2 border-blue-primary bg-white-primary flex-auto p-4 pl-2 m-1">
+              <button type="button" id="delete" style="float:right"><img src="@/modules/wallet/img/icon-trash-can-gray-16h-proximax-sirius-wallet.svg" class="w-6 cursor-pointer"></button>
+              Transaction 1
+            </button>-->
+            <div>
               
             </div>
+          </div>
           <div class="text-center align-text-bottom inset-x-0 bottom-0 absolute ">
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="makeTransfer()">
+            <PasswordInput :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5" :disabled="disablePassword"/>
+            <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="makeTransfer()">
             Send aggregate
            </button>
           </div>
@@ -191,7 +199,7 @@ export default {
   name: "ViewTransferCreate",
   components: {
     TextInput,
-    //PasswordInput,
+    PasswordInput,
     MosaicInput,
     SelectInputPlugin,
     SupplyInput,
@@ -236,6 +244,8 @@ export default {
     const disableMsgInput = computed(() => disableAllInput.value);
     const disablePassword = computed(() => disableAllInput.value);
     const cosignerBalanceInsufficient = ref(false);
+    var numTransactions = 0;
+    const savedTransactions = [];
     
 
     const walletName = walletState.currentLoggedInWallet.name
@@ -462,51 +472,58 @@ export default {
       recipient.value = e;
     };
     const makeTransfer = () => {
-      if (sendXPX.value == "0" && !forceSend.value) {
-        toggleConfirm.value = true;
-      } else {
-        // console.log(recipient.value.toUpperCase() + ' : ' + walletPassword.value + ' : ' + selectedAccName.value + ' : ' + encryptedMsg.value + ' : ' + walletPassword.value)
-        let selectedCosign;
-        if (isMultiSigBool.value) {
-          // if this is a multisig, get cosigner name along
-          let selectedCosignList = getWalletCosigner();
-          if (selectedCosignList.length > 1) {
-            selectedCosign = cosignAddress.value;
-          } else {
-            selectedCosign = getWalletCosigner()[0].address;
+        if (sendXPX.value == "0" && !forceSend.value) {
+          toggleConfirm.value = true;
+        } 
+        else {
+          // console.log(recipient.value.toUpperCase() + ' : ' + walletPassword.value + ' : ' + selectedAccName.value + ' : ' + encryptedMsg.value + ' : ' + walletPassword.value)
+          let selectedCosign;
+          if (isMultiSigBool.value) {
+            // if this is a multisig, get cosigner name along
+            let selectedCosignList = getWalletCosigner();
+            if (selectedCosignList.length > 1) {
+              selectedCosign = cosignAddress.value;
+            } 
+            else {
+              selectedCosign = getWalletCosigner()[0].address;
+            }
+          }
+          let transferStatus = createTransaction(
+            recipient.value,
+            sendXPX.value,
+            messageText.value,
+            selectedMosaic.value,
+            mosaicSupplyDivisibility.value,
+            selectedAccName.value,
+            walletPassword.value,
+            selectedCosign,
+            encryptedMsg.value
+          );
+          
+          if (!transferStatus) {
+            err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
+          } 
+          else {
+            // transaction made
+            err.value = "";
+            // check if address is saved in the contact list
+            // if not display add contact model
+            /*if (!accountUtils.checkAvailableContact(recipient.value)) {
+              /* appStore.checkAvailableContact(recipient.value)/* 
+              // add new contact
+              togglaAddContact.value = true;
+            } 
+            else {
+              clearInput();
+            }*/
+            // show notification
+            // getMosaicsAllAccounts(appStore, siriusStore);
+            // play notification sound
+            forceSend.value = false;
+            savedTransactions.splice(index,n);
+            sessionStorage.setItem('savedTransaction', JSON.stringify(savedTransactions));
           }
         }
-        let transferStatus = createTransaction(
-          recipient.value.toUpperCase(),
-          sendXPX.value,
-          messageText.value,
-          selectedMosaic.value,
-          mosaicSupplyDivisibility.value,
-          walletPassword.value,
-          selectedAccName.value,
-          selectedCosign,
-          encryptedMsg.value
-        );
-        if (!transferStatus) {
-          err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
-        } else {
-          // transaction made
-          err.value = "";
-          // check if address is saved in the contact list
-          // if not display add contact model
-          if (!accountUtils.checkAvailableContact(recipient.value)) {
-            /* appStore.checkAvailableContact(recipient.value) */
-            // add new contact
-            togglaAddContact.value = true;
-          } else {
-            clearInput();
-          }
-          // show notification
-          // getMosaicsAllAccounts(appStore, siriusStore);
-          // play notification sound
-          forceSend.value = false;
-        }
-      }
     };
 
     const getSelectedMosaicBalance = (index) => {
@@ -606,7 +623,44 @@ export default {
       selectedMosaic.value.splice(e.index, 1);
       mosaicSupplyDivisibility.value.splice(e.index, 1);
     };
-    
+
+    const saveTransaction = () => {
+      var transactionDetails = new Object;
+      transactionDetails.recipient = recipient.value;
+      transactionDetails.sendXPX = sendXPX.value;
+      transactionDetails.messageText = messageText.value;
+      transactionDetails.selectedMosaic = selectedMosaic.value;
+      transactionDetails.selectedAccname = selectedAccName.value;
+      //transactionDetails.msgOption = msgOption.value;
+      //transactionDetails.transactionNumber = (numTransactions+= 1);
+
+      savedTransactions.push(transactionDetails);
+      sessionStorage.setItem('savedTransactions', JSON.stringify(savedTransactions));
+      numTransactions += 1;
+      console.log(savedTransactions);
+
+      clearInput();
+      createEditButton();
+    }
+
+    const createEditButton = () =>{
+      var btn = document.createElement("button");
+      //<button type="button" id="delete" style="float:right"><img src="@/modules/wallet/img/icon-trash-can-gray-16h-proximax-sirius-wallet.svg" class="w-6 cursor-pointer"></button> 
+      var transNum = "Transaction " + numTransactions;
+      btn.style.width = "97%";
+      btn.style.flex = "auto";
+      btn.style.margin = "5px";
+      btn.style.border = "2px solid royalblue";
+      btn.style.borderRadius = "8px";
+      btn.style.color = "black";
+      btn.style.textAlign = "left";
+      btn.style.padding = "17px";
+      btn.style.paddingLeft = "10px";
+      btn.innerHTML = transNum;
+
+      document.getElementById("transac").appendChild(btn);
+    }
+
     watch(selectedAccAdd, (n, o) => {
       isMultiSigBool.value = isMultiSig(n);
       if (isMultiSigBool.value) {
@@ -804,7 +858,8 @@ export default {
       currencyName,
       lockFundTxFee,
       lockFundTotalFee,
-      walletName
+      walletName,
+      saveTransaction,
     };
   },
 };
