@@ -68,7 +68,18 @@ export default{
   setup(p){
     const toast = useToast();
     const multsig_add = ref("");
-    const accountName = ref(p.account.name);
+    // const accountName = ref(p.account.name);
+
+    const accountName = computed(() => {
+      // check if address is in adress book
+      const contact = walletState.currentLoggedInWallet.contacts.find((contact) => contact.address == p.account.address);
+      if(contact){
+        return contact.name;
+      }else{
+        return p.account.name;
+      }
+    })
+
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const copy = (id) =>{
@@ -91,17 +102,18 @@ export default{
     const otheraccount = (address) => {
       const other_account = walletState.currentLoggedInWallet.others.find(others => others.address == address);
       if(other_account != null && other_account.type == 'MULTISIG'){
-        let otheraccountname = walletState.currentLoggedInWallet.convertAddressToName(address);
-        if(otheraccountname == address){
-          accountName.value = p.account.name;
-        }
-        else{
-          accountName.value = otheraccountname;
-        }
+        // let otheraccountname = walletState.currentLoggedInWallet.convertAddressToName(address);
+        // if(otheraccountname == address){
+        //   accountName.value = p.account.name;
+        // }
+        // else{
+        //   accountName.value = otheraccountname;
+        // }
         multsig_add.value = other_account.address;
-      } else {
-        accountName.value = p.account.name;
       }
+      // } else {
+      //   accountName.value = p.account.name;
+      // }
       return other_account;
     };
 

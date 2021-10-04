@@ -12,12 +12,12 @@
       <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-8 items-center">
         <div class="text-left w-full relative">
           <div class="text-xs font-bold mb-1">{{$t('accounts.name')}}:</div>
-          <div v-if="showName">{{ accountNameDisplay }}</div>
+          <div v-if="showName">{{ accountNameDisplay }}<div class="text-txs text-gray-400 mt-2" v-if="!isEnableEdit">This address is found in Address Book. Update label in Address Book</div></div>
           <div v-else>
             <TextInput :placeholder="$t('swap.accountname')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
           </div>
         </div>
-        <div class="inline-block ml-2">
+        <div class="inline-block ml-2" v-if="isEnableEdit">
           <font-awesome-icon icon="edit" @click="editName()" class="w-5 h-5 text-gray-500 cursor-pointer inline-block" v-if="showName"></font-awesome-icon>
           <div v-else>
             <font-awesome-icon icon="check-circle" @click="changeName()" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mb-1"></font-awesome-icon>
@@ -37,7 +37,7 @@
         <div class="text-left w-full relative">
           <div class="absolute z-20 w-full h-full"></div>
           <div class="text-xs font-bold mb-1">{{$t('accounts.publickey')}}:</div>
-          <div id="public" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
+          <div id="public" class="text-sm w-full outline-none bg-gray-100 z-10 break-all" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
         </div>
         <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
       </div>
@@ -271,6 +271,15 @@ export default {
       doc.save('Your_Paper_Wallet');
     }
 
+    const isEnableEdit = computed( () => {
+      const contact = walletState.currentLoggedInWallet.contacts.find((contact) => contact.address == acc.address);
+      if(contact){
+        return false;
+      }else{
+        return true;
+      }
+    });
+
     return {
       err,
       showPK,
@@ -297,6 +306,7 @@ export default {
       walletPasswdWalletPaper,
       verifyWalletPwWalletPaper,
       saveWalletPaper,
+      isEnableEdit,
     };
   }
 };

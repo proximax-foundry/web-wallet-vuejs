@@ -115,7 +115,7 @@ export default{
 
             // check if address or name is already in the contact book
             // check for existing account address in wallet
-            const accountAddIndex = wallet.accounts.findIndex((account) => account.address == address);
+            // const accountAddIndex = wallet.accounts.findIndex((account) => account.address == address);
             // check for existing account name in wallet
             const accountNameIndex = wallet.accounts.findIndex((account) => account.name.toLowerCase() == label.toLowerCase());
             const contactAddIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.address == address):(-1);
@@ -123,7 +123,7 @@ export default{
 
             const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
 
-            if(contactAddIndex >= 0 || accountAddIndex >= 0){
+            if(contactAddIndex >= 0){
               exist.push({label: label, address: address });
             }else if( contactNameIndex >= 0 || accountNameIndex >= 0 ){
               const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address);
