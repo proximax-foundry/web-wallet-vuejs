@@ -259,7 +259,6 @@ export default {
     const messageLimit = computed(
       () => networkState.currentNetworkProfileConfig.maxMessageSize - 1
     );
-   
 
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
