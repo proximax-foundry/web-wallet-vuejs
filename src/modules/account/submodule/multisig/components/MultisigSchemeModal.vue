@@ -12,8 +12,48 @@
           </div>
           <div class="w-104 text-center pb-10">
             <h1 class="default-title font-bold mt-10">{{$t('accounts.scheme')}}</h1>
-            <div class="tree scroll">
-              <ul>
+            <div class="tree overflow-auto ">
+              <ul >
+                <li class="multiple-wrapper">
+                  <div class="box-line single " >
+                    <div >
+                      <div class="font-bold">{{ graph.name}}</div>
+                      <div>{{ graph.cosign.length==0?'Account':'Multisig Account' }}</div>
+                    </div>
+                  </div>
+                <ul class = "flex ">
+                  <li v-for="(item, index) in graph.cosign" :key="index"  >
+                    <div :class="` ${(item.cosign.length>0)?'box-line': 'box'} single`" >
+                      <div>
+                        <div class="font-bold">{{ item.name}}</div>
+                        <div>{{item.cosign.length==0?'Account':'Multisig Account' }}</div>
+                      </div>
+                    </div>
+                  <ul class = "flex " >
+                    <li v-for="(childItem, childIndex) in item.cosign" :key="childIndex" >
+                        <div :class="` ${(childItem.cosign.length>0)?'box-line': 'box'} single`" >
+                          <div>{{childItem.cosign.length==0?'Account':'Multisig Account' }}</div>
+                           <div class="font-bold">{{ childItem.name}}</div>
+                        </div>
+                    <ul class = "flex " >
+                      <li v-for="(grandChildItem, grandChildIndex) in childItem.cosign" :key="grandChildIndex" >
+                      <div class="box" >
+                        <div>
+                          <div class="font-bold">{{ grandChildItem.name}}</div>
+                          <div>Account</div>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>        
+          </ul>
+        </li>
+      </ul>
+                
+                  
+              <!-- <ul>
                 <li v-for="(item, index) in graph" :key="index" style="block mb-10">
                   <ul :class="`${ ( item.length > 1)?'multiple-wrapper':''}`" >
                     <li v-for="(layerItem, acc) in item" :key="acc"  :ref="`${acc}class`">
@@ -26,7 +66,8 @@
                     </li>
                   </ul>
                 </li>
-              </ul>
+              </ul> -->
+
             </div>
           </div>
         </div>
@@ -37,12 +78,14 @@
 </template>
 
 <script>
-import { inject, ref } from 'vue';
+import { inject, ref, computed } from 'vue';
 import {walletState} from '@/state/walletState'
 import { WalletUtils } from '@/util/walletUtils';
-import {Address, MultisigAccountGraphInfo} from  "tsjs-xpx-chain-sdk"
+import {Address, MultisigAccountGraphInfo, PublicAccount} from  "tsjs-xpx-chain-sdk"
 import {Helper} from '@/util/typeHelper'
 import { networkState } from '@/state/networkState';
+import { AccountAPI } from '@/models/REST/account';
+import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 export default{
   name: 'MultisigSchemeModal',
   props: ['multiSigAccount'],
@@ -50,12 +93,73 @@ export default{
   setup(p){
       const toggleModal = ref(false);
     
-    //account
-    let graph = [];
-    let layer = [];
-    let newlayer = [];
+   
+    let levelOneGraph = []
     const wallet = walletState.currentLoggedInWallet 
-    p.multiSigAccount.multisigInfo.forEach( (multiSig, i) => {
+    
+    const currentAccount = wallet.accounts.find(account=> account.address == p.multiSigAccount.address) 
+    const multisigAccounts = currentAccount.multisigInfo.filter(accounts=>accounts.level>=0 | accounts.publicKey == p.multiSigAccount.publicKey)
+    const networkType = networkState.currentNetworkProfile.network.type
+    const convertAddress = publicKey =>{
+        return Address.createFromPublicKey(publicKey, networkType)
+    }
+    const label = length =>{
+      return length>0? 'MULTISIG-':'Cosigner-'
+    }
+    const findAccount = publicKey =>{
+      return wallet.accounts.find(account=>account.address == convertAddress(publicKey).plain())
+    }
+    const getAccountName = (publicKey,length) =>{
+      return findAccount(publicKey) ? findAccount(publicKey).name : label(length) + convertAddress(publicKey).plain().substr(-4)
+    }
+    const findCosignLength = publicKey =>{
+      return multisigAccounts.find(account=>account.publicKey == publicKey).cosignaturies.length
+    };
+
+    const findCosign = publicKey =>{
+      return multisigAccounts.find(account=>account.publicKey == publicKey).cosignaturies
+    }
+    
+    const getGrandChildObject = (cosignaturies)  =>{
+      let tempArray = [] 
+      for(let i =0; i < cosignaturies.length; i ++){
+        tempArray.push( {address: convertAddress(cosignaturies[i]).plain(), name: getAccountName(cosignaturies[i],findCosignLength(cosignaturies[i]))})
+      }
+    return tempArray
+    }
+
+    const getChildObject = (cosignaturies)  =>{
+      let tempArray = []
+      let cosigns = []
+      let tempArray2 = []
+      for(let i =0; i < cosignaturies.length; i ++){
+        cosigns = findCosign(cosignaturies[i])
+        tempArray2 = getGrandChildObject(cosigns)
+        tempArray.push( {address: convertAddress(cosignaturies[i]).plain(), name: getAccountName(cosignaturies[i],findCosignLength(cosignaturies[i])),cosign: tempArray2})
+      }
+     return tempArray
+    }
+    let graph = ({address: convertAddress(multisigAccounts[0].publicKey).plain(), name: getAccountName(multisigAccounts[0].publicKey,multisigAccounts[0].cosignaturies.length),cosign: multisigAccounts[0].cosignaturies})
+    
+    multisigAccounts[0].cosignaturies.forEach( (cosigner)=>{
+      let cosigns = []
+      let tempArray = []
+      cosigns = findCosign(cosigner)
+      tempArray =  getChildObject(cosigns)
+      levelOneGraph.push({address: convertAddress(cosigner).plain(), name: getAccountName(cosigner,findCosignLength(cosigner)),cosign: tempArray})
+     
+    })
+    
+    graph.cosign = levelOneGraph
+    console.log(graph)
+    
+     
+
+   
+    //account
+   
+    
+    /* p.multiSigAccount.multisigInfo.forEach( (multiSig, i) => {
       let label;
       let accountName;
       let account = wallet.accounts.find((element) => element.address ===  Address.createFromPublicKey(multiSig.publicKey, networkState.currentNetworkProfile.network.type).plain());
@@ -72,13 +176,14 @@ export default{
             layer = newlayer;
             graph.push(layer);
             newlayer = [];
+            //error
             newlayer.push({address:Address.createFromPublicKey(multiSig.publicKey, networkState.currentNetworkProfile.network.type).plain(), name: accountName, label: label, cosign: multiSig.cosignaturies });
           }
         });
       }
     });
     layer = newlayer;
-    graph.push(layer);
+    graph.push(layer); */
  
     
     return {
@@ -106,25 +211,42 @@ ul {
   position: relative;
   padding: 20px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-
   > div{
     transform: rotate(180deg);
   }
 }
-
-.single, .single-middle {
+.box-line {
+  display: inline-block;
+  border: 1px solid #DAE3ED;
+  position: relative;
+  padding: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  > div{
+    transform: rotate(180deg);
+  }
+}
+.box-line::after{
+  content: "";
+  position: absolute;
+  bottom: -11px;
+  left: 50%;
+  width: 2px;
+  height: 10px;
+  background: #dedede;
+}
+.single{
   margin: 0 auto 20px;
   background: #fff;
 }
 
-.single-middle::before{
+.single::before{
   content: "";
   position: absolute;
   top: -20px;
   left: 50%;
   width: 2px;
-  height: 20px;
-  background: #D6D6D6;
+  height: 0px;
+  background: #dedede;
 }
 
 .multiple-wrapper {
@@ -132,17 +254,11 @@ ul {
   display: inline-block;
 }
 
-.multiple-wrapper-connector{
-  height: 2px;
-  background: #dedede;
-  position: relative;
-}
-
-.multiple-wrapper::after {
+.multiple-wrapper li::after {
   content: "";
   position: absolute;
   left: 50%;
-  top: -20px;
+  top: -10px;
   width: 2px;
   height: 10px;
   background: #dedede;
@@ -152,22 +268,6 @@ ul {
   position: relative;
   display: inline-block;
   padding: 0 10px;
-}
-
-
-li{
-  .multiple {
-    margin: 0 auto 40px;
-  }
-
-  .multiple::before {
-    content: "";
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    height: 10px;
-    background: #dedede;
-  }
 }
 
 .multiple-wrapper{
@@ -180,17 +280,21 @@ li{
     width: 100%;
     left: -10px;
   }
-
+    
   li:first-child::before{
     left: 50%;
-    width: 50%;
-    border-left: 2px solid #dedede;
   }
-
+ 
+  
   li:last-child::before{
     right: 50%;
-    width: 50%;
-    border-right: 2px solid #dedede;
+    width: 57.9%
+    
+  }
+  li:only-child:last-child::before{
+    right: 50%;
+    width: 0%
+    
   }
 }
 
