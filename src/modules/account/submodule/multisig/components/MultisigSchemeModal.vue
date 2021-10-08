@@ -91,14 +91,18 @@ export default{
   props: ['multiSigAccount'],
 
   setup(p){
-      const toggleModal = ref(false);
-    
-   
+    const toggleModal = ref(false);
     let levelOneGraph = []
     const wallet = walletState.currentLoggedInWallet 
-    
-    const currentAccount = wallet.accounts.find(account=> account.address == p.multiSigAccount.address) 
-    const multisigAccounts = currentAccount.multisigInfo.filter(accounts=>accounts.level>=0 | accounts.publicKey == p.multiSigAccount.publicKey)
+    const currentAccount = computed(()=>{
+      let currentAccount=wallet.accounts.find(account=> account.address == p.multiSigAccount.address)
+      if (currentAccount!=undefined){
+        return currentAccount
+      }else{
+        return wallet.others.filter(accounts=>accounts.type === "MULTISIG").find(account=>account.address == p.multiSigAccount.address)
+      }
+    })
+    const multisigAccounts = currentAccount.value.multisigInfo.filter(accounts=>accounts.level>=0 | accounts.publicKey == p.multiSigAccount.publicKey)
     const networkType = networkState.currentNetworkProfile.network.type
     const convertAddress = publicKey =>{
         return Address.createFromPublicKey(publicKey, networkType)
@@ -119,7 +123,7 @@ export default{
     const findCosign = publicKey =>{
       return multisigAccounts.find(account=>account.publicKey == publicKey).cosignaturies
     }
-    
+    //level3
     const getGrandChildObject = (cosignaturies)  =>{
       let tempArray = [] 
       for(let i =0; i < cosignaturies.length; i ++){
@@ -127,7 +131,7 @@ export default{
       }
     return tempArray
     }
-
+    //level2
     const getChildObject = (cosignaturies)  =>{
       let tempArray = []
       let cosigns = []
@@ -139,8 +143,9 @@ export default{
       }
      return tempArray
     }
+    //level 0 (selected account)
     let graph = ({address: convertAddress(multisigAccounts[0].publicKey).plain(), name: getAccountName(multisigAccounts[0].publicKey,multisigAccounts[0].cosignaturies.length),cosign: multisigAccounts[0].cosignaturies})
-    
+    //level 1
     multisigAccounts[0].cosignaturies.forEach( (cosigner)=>{
       let cosigns = []
       let tempArray = []
@@ -149,7 +154,7 @@ export default{
       levelOneGraph.push({address: convertAddress(cosigner).plain(), name: getAccountName(cosigner,findCosignLength(cosigner)),cosign: tempArray})
      
     })
-    
+    //combine level 0,1,2,3
     graph.cosign = levelOneGraph
     console.log(graph)
     
