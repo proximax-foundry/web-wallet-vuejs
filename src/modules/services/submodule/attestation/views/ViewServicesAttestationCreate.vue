@@ -193,7 +193,7 @@ export default {
       walletPasswd.value = '' 
       currentPage.value = 2
       err.value = ''
-      fileHash.value = verify.whiteListTransaction[0].nty.fileHash
+      fileHash.value = verify.whiteListTransaction[0].attest.fileHash
       base64ImageString.value = verify.base64ImageString
       downloadSignedFiles(verify.whiteListTransaction[0])
     }
@@ -309,8 +309,11 @@ export default {
       }
     })
     watch(confirmedTxLength, (n, o) => {
-      if (n-o == 1){
-        proceedCertificate(apostilleTemp.value)
+      if (n != o){
+        if(listenerState.allConfirmedTransactionsHash.find(hash=> hash ==apostilleTemp.value.whiteListTransaction[0].signedTransaction.hash)){
+          proceedCertificate(apostilleTemp.value)
+        }
+        
       }
     })
     const balance = computed(()=>{
