@@ -18,7 +18,6 @@ import { BlockAPI } from '@/models/REST/block';
 import { transactionTypeName, TransactionUtils } from './transactionUtils';
 import { dashboardUtils } from './dashboardUtils';
 import { Helper } from '@/util/typeHelper';
-import moment from 'moment'
 export class Verifier {
     static Hash: any;
 
@@ -54,7 +53,7 @@ export class Verifier {
         }
         let a = [];
         for (let i = 0, len = str.length; i < len; i += 2) {
-            a.push(parseInt(str.substr(i, 2), 16));
+            a.push(parseInt(str.substring(i, i+1), 16));
         }
 
         return new Uint8Array(a);
@@ -102,32 +101,32 @@ export class Verifier {
 }
 
 
-export const pdfcertificatePublic = (base64ImageString: string, ntyData: NtyDataInterface) => {
+export const pdfcertificatePublic = (base64ImageString: string, attestData: AttestDataInterface) => {
     let date = new Date();
     const doc = new jsPDF();
     doc.addImage(publicImg, 'JPEG', 0, 0, 210, 298);
     doc.addImage(base64ImageString, 'gif', 52, 244, 51, 50);
     doc.setTextColor(0, 0, 0);
-    doc.text((`${ntyData.fileName}${ntyData.extensionFile}`),55, 89 );
+    doc.text((`${attestData.fileName}${attestData.extensionFile}`),55, 89 );
     doc.text(date.toUTCString(),55, 99 );
     doc.setFontSize(13);
-    doc.text( ntyData.owner.pretty(),55, 109);
-    doc.text( ntyData.tags,55, 120)
+    doc.text( attestData.owner.pretty(),55, 109);
+    doc.text( attestData.tags,55, 120)
     doc.setFontSize(12);
-    doc.text(ntyData.owner.plain(),20, 155 );
-    doc.text(ntyData.dedicatedAccount, 20, 174, );
+    doc.text(attestData.owner.plain(),20, 155 );
+    doc.text(attestData.dedicatedAccount, 20, 174, );
     doc.setFontSize(10.9);
-    doc.text(ntyData.txHash,20, 195 );
+    doc.text(attestData.txHash,20, 195 );
     doc.setFontSize(7);
-    if (ntyData.fileHash.length > 74) {
-      doc.text(ntyData.fileHash.slice(0, 74),20, 214 );
-      doc.text( ntyData.fileHash.slice(74), 20, 217,);
+    if (attestData.fileHash.length > 74) {
+      doc.text(attestData.fileHash.slice(0, 74),20, 214 );
+      doc.text( attestData.fileHash.slice(74), 20, 217,);
     } else {
-      doc.text(ntyData.fileHash,20, 214);
+      doc.text(attestData.fileHash,20, 214);
     }
     return doc.output('blob');
   }
-export const pdfcertificatePrivate = (base64ImageString: string, ntyData: NtyDataInterface) => {
+export const pdfcertificatePrivate = (base64ImageString: string, attestData: AttestDataInterface) => {
     // console.log('ntyData-----> ', ntyData);
 
     let date = new Date();
@@ -135,25 +134,25 @@ export const pdfcertificatePrivate = (base64ImageString: string, ntyData: NtyDat
     doc.addImage(privateImg, 'JPEG', 0, 0, 210, 298);
     doc.addImage(base64ImageString, 'gif', 52, 244, 51, 50);
     doc.setTextColor(0, 0, 0);
-    doc.text((`${ntyData.fileName}${ntyData.extensionFile}`),55, 89);
+    doc.text((`${attestData.fileName}${attestData.extensionFile}`),55, 89);
 
     doc.text(date.toUTCString(),55, 99 );
     doc.setFontSize(13);
-    doc.text( ntyData.owner.plain(),55, 109);
-    doc.text(ntyData.tags,55, 120 );
+    doc.text( attestData.owner.plain(),55, 109);
+    doc.text(attestData.tags,55, 120 );
     doc.setFontSize(12);
 
-    doc.text(ntyData.owner.plain(),20, 155);
-    doc.text(ntyData.dedicatedAccount,20, 174 );
+    doc.text(attestData.owner.plain(),20, 155);
+    doc.text(attestData.dedicatedAccount,20, 174 );
     doc.setFontSize(10.9);
-    doc.text(ntyData.dedicatedPrivateKey,20, 195 );
-    doc.text(ntyData.txHash,20, 214 );
+    doc.text(attestData.dedicatedPrivateKey,20, 195 );
+    doc.text(attestData.txHash,20, 214 );
     doc.setFontSize(7);
-    if (ntyData.fileHash.length > 74) {
-        doc.text( ntyData.fileHash.slice(0, 74),20, 233);
-        doc.text(ntyData.fileHash.slice(74),20, 236 );
+    if (attestData.fileHash.length > 74) {
+        doc.text( attestData.fileHash.slice(0, 74),20, 233);
+        doc.text(attestData.fileHash.slice(74),20, 236 );
     } else {
-        doc.text( ntyData.fileHash,20, 233);
+        doc.text( attestData.fileHash,20, 233);
     }
     return doc.output('blob');
 }
@@ -176,33 +175,33 @@ export const encryptData= (data: string) =>{
 const getFileExtension = (filename: string) => {
     return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename): undefined;
   }
-export const buildApostille = (ntyData: NtyDataInterface, rawFileContent: string) => {
+export const buildApostille = (attestData: AttestDataInterface, rawFileContent: string) => {
     const zip = new JSZip();
     const date = new Date();
-    const url = `http://bctestnetexplorer.xpxsirius.io/#/result/hash/${ntyData.txHash}`;
-    const title = ntyData.fileName;
+    const url = `http://bctestnetexplorer.xpxsirius.io/#/result/hash/${attestData.txHash}`;
+    const title = attestData.fileName;
     const qr = qrcode(10, 'H');
     qr.addData(url);
     qr.make();
-    console.log(ntyData.extensionFile)
-    if (ntyData.extensionFile == '.undefined'){
-      ntyData.extensionFile = ''
+    console.log(attestData.extensionFile)
+    if (attestData.extensionFile == '.undefined'){
+      attestData.extensionFile = ''
     }
     // Add Certificate PDF to zip
     const dateFull = `${date.getFullYear()}-${("00" + (date.getMonth() + 1)).slice(-2)}-${("00" + (date.getDate())).slice(-2)}`;
     //const nameCertificate = `Certificate of ${title} --Apostille TX ${ntyData.txHash} --Date ${dateFull.toString()}.pdf`;
     const nameCertificate = `${title}_[Certificate].pdf`;
-    if (Verifier.isPrivateApostille(ntyData.fileHash)) {
-        zip.file(nameCertificate, pdfcertificatePrivate(qr.createDataURL(), ntyData), { comment: 'application/pdf' });
-    } else if (Verifier.isPublicApostille(ntyData.fileHash)) {
-        zip.file(nameCertificate, pdfcertificatePublic(qr.createDataURL(), ntyData), { comment: 'application/pdf' });
+    if (Verifier.isPrivateApostille(attestData.fileHash)) {
+        zip.file(nameCertificate, pdfcertificatePrivate(qr.createDataURL(), attestData), { comment: 'application/pdf' });
+    } else if (Verifier.isPublicApostille(attestData.fileHash)) {
+        zip.file(nameCertificate, pdfcertificatePublic(qr.createDataURL(), attestData), { comment: 'application/pdf' });
     }
 
     // Add Original File to zip
 
     //const nameFile = `${title} --Apostille TX ${ntyData.txHash} --Date ${dateFull.toString()}${ntyData.extensionFile}`;
-    const nameFile = `${title}_[${ntyData.txHash}]${ntyData.extensionFile}`
-    zip.file(`${nameFile}`, (CryptoJS.enc.Base64.stringify(rawFileContent)), { base64: true, comment: ntyData.typeFile });
+    const nameFile = `${title}_[${attestData.txHash}]${attestData.extensionFile}`
+    zip.file(`${nameFile}`, (CryptoJS.enc.Base64.stringify(rawFileContent)), { base64: true, comment: attestData.typeFile });
     return {
         zipFile: zip,
         qrCode: qr.createDataURL()
@@ -220,7 +219,7 @@ export const hexStringToByte = (data: string) => {
   }
   let a = [];
   for (let i = 0, len = data.length; i < len; i += 2) {
-    a.push(parseInt(data.substr(i, 2), 16));
+    a.push(parseInt(data.substring(i, i+1), 16));
   }
   return new Uint8Array(a);
 }
@@ -264,7 +263,7 @@ export const preparePublicApostille = (rawFileContent :string,tag :string ,fileN
     if (getFileExtension(fileName)==undefined){
       fileName = fileName+'.undefined'
     }
-    let ntyData = {
+    let attestData = {
       fileName: fileName.slice(0, fileName.lastIndexOf('.')),
       extensionFile: `.${getFileExtension(fileName)}`,
       tags: tag,
@@ -280,13 +279,13 @@ export const preparePublicApostille = (rawFileContent :string,tag :string ,fileN
     };
     
     // console.log(this.ntyData);
-    const apostilleBuilder = buildApostille(ntyData, rawFileContent);
+    const apostilleBuilder = buildApostille(attestData, rawFileContent);
     let base64ImageString = apostilleBuilder.qrCode;
     let whiteListTransaction = setWhiteList({
       signedTransaction,
       storeInDfms: false,
       zip: apostilleBuilder.zipFile,
-      nty: ntyData
+      attest: attestData
     });
     const transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint))
     transactionHttp
@@ -346,7 +345,7 @@ export const preparePublicApostille = (rawFileContent :string,tag :string ,fileN
     if (getFileExtension(fileName)==undefined){
       fileName = fileName+'.undefined'
     }
-    let ntyData = {
+    let attestData = {
       fileName: fileName.slice(0, fileName.lastIndexOf('.')),
       extensionFile: `.${getFileExtension(fileName)}`,
       tags: tag,
@@ -361,14 +360,14 @@ export const preparePublicApostille = (rawFileContent :string,tag :string ,fileN
       typeFile: fileType
     };
 
-    const apostilleBuilder = buildApostille(ntyData, rawFileContent);
+    const apostilleBuilder = buildApostille(attestData, rawFileContent);
     let base64ImageString = apostilleBuilder.qrCode;
     // announce the transaction
     let  whiteListTransaction = setWhiteList({
       signedTransaction,
       storeInDfms: false,
       zip: apostilleBuilder.zipFile,
-      nty: ntyData
+      attest: attestData
     });
     const transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint))
     transactionHttp
@@ -379,19 +378,19 @@ export const preparePublicApostille = (rawFileContent :string,tag :string ,fileN
 
   }
 
-  const setAccountWalletStorage = (nty: NtyDataInterface) => {
-    let proxinty = JSON.parse(localStorage.getItem('proxi-nty'));
-    if (!proxinty) {
-      localStorage.setItem('proxi-nty', JSON.stringify([nty]));
+  const setAccountWalletStorage = (attest: AttestDataInterface) => {
+    let proxiAttest = JSON.parse(localStorage.getItem('proxi-attest'));
+    if (!proxiAttest) {
+      localStorage.setItem('proxi-attest', JSON.stringify([attest]));
     } else {
-      proxinty.push(nty);
-      localStorage.setItem('proxi-nty', JSON.stringify(proxinty));
+      proxiAttest.push(attest);
+      localStorage.setItem('proxi-attest', JSON.stringify(proxiAttest));
     }
   }
 
   
   export const downloadSignedFiles = (data: SignedZipInterface) =>{
-    setAccountWalletStorage(data.nty);
+    setAccountWalletStorage(data.attest);
     const date = new Date();
     if (Object.keys(data.zip.files).length > 1) {
       data.zip.generateAsync({
@@ -425,7 +424,7 @@ export const preparePublicApostille = (rawFileContent :string,tag :string ,fileN
         } */
           const dateFull = `${date.getFullYear()}-${("00" + (date.getMonth() + 1)).slice(-2)}-${("00" + (date.getDate())).slice(-2)}`;
           //const fileName = `PROXIsigned -- Do not Edit --"${dateFull}".zip`;
-          const fileName = `${data.nty.fileName}_[ProximaX_Attest_${dateFull}].zip`;
+          const fileName = `${data.attest.fileName}_[ProximaX_Attest_${dateFull}].zip`;
           saveAs(content, fileName);
         
       });
@@ -436,12 +435,12 @@ export interface SignedZipInterface {
     signedTransaction: SignedTransaction;
     storeInDfms: boolean;
     zip: JSZip;
-    nty: NtyDataInterface;
+    attest: AttestDataInterface;
     downloaded?: boolean;
   }
   
   
-  export interface NtyDataInterface {
+  export interface AttestDataInterface {
     fileName: string;
     extensionFile: string;
     tags?: string;
@@ -525,10 +524,7 @@ export interface SignedZipInterface {
   });
 
   const convertDateTimeFormat = (dateTime: string): string =>{
-    let dateFormat = "L";
-    let date = new Date(dateTime);
-    
-    return moment(date).locale('en').format(dateFormat);
+    return Helper.convertDisplayDateTimeFormat(dateTime);
   }
   const validateBlock = (blockInfo: BlockInfo) => {
     if (blockInfo.numTransactions && blockInfo.numTransactions >= 1) {
@@ -560,7 +556,7 @@ export interface SignedZipInterface {
       recipientPretty = recipient.pretty();
       const currentWallet = walletState.currentLoggedInWallet
       if (currentWallet.accounts) {
-        if (currentWallet.accounts.find(element => Address.createFromRawAddress(element.address).pretty() === recipientPretty)) {
+        if (currentWallet.accounts.find(account => Address.createFromRawAddress(account.address).pretty() === recipientPretty)) {
           isReceive = true;
         }
       }
@@ -655,7 +651,7 @@ export interface SignedZipInterface {
           originalName = arrayName
           const apostillePrivatePrefix = 'fe4e545983';
           const apostillePublicPrefix = 'fe4e545903';
-          const prefixHash = findHash.message.payload.replace(/['"]+/g, '').substr(0, 10);
+          const prefixHash = findHash.message.payload.replace(/['"]+/g, '').substring(0, 9);
 
 
           let transaction = getStructureDashboard(findHash);
@@ -750,7 +746,7 @@ export interface SignedZipInterface {
                 const blobClone = Object.assign({}, blobFile);
                 /* blobClone.type = await zip.files[filename].comment; */
                 const file = await new File([blobClone.type], zip.files[filename].name, { type: zip.files[filename].comment });
-                let verifyName = file.name.substr(0, 15);
+                let verifyName = file.name.substring(0, 14);
                 if (verifyName !== 'Certificate') {
                   const modifiedFile = await new File([blobFile], zip.files[filename].name, { type: zip.files[filename].comment });
                 const uploadedFileContent = await toBase64(file)
