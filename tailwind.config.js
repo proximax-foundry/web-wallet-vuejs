@@ -31,6 +31,9 @@ module.exports = {
         'popup' : '900px'
       },
       colors:{
+        gray:{
+          primary: '#444444'
+        },
         blue:{
           primary:'#306eb5'
         },
