@@ -49,6 +49,10 @@
         '/swap-sirius-bsc',
         '/swap-sirius-eth',
         '/swap-eth-sirus',
+        '/check-swap-eth-sirius',
+        '/check-swap-bsc-sirius',
+        '/check-swap-sirius-eth',
+        '/check-swap-sirius-bsc',
       ])}">{{$t('NavigationMenu.Services')}}</router-link>
     </nav>
     <nav class="navbar h-9" v-else>
