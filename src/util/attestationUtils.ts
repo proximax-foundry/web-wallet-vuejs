@@ -53,7 +53,7 @@ export class Verifier {
         }
         let a = [];
         for (let i = 0, len = str.length; i < len; i += 2) {
-            a.push(parseInt(str.substring(i, i+1), 16));
+            a.push(parseInt(str.substring(i, i+2), 16));
         }
 
         return new Uint8Array(a);
@@ -219,7 +219,7 @@ export const hexStringToByte = (data: string) => {
   }
   let a = [];
   for (let i = 0, len = data.length; i < len; i += 2) {
-    a.push(parseInt(data.substring(i, i+1), 16));
+    a.push(parseInt(data.substring(i, i+2), 16));
   }
   return new Uint8Array(a);
 }
