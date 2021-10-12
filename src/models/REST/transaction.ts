@@ -1,7 +1,7 @@
 import { 
     TransactionHttp,
     SignedTransaction, CosignatureSignedTransaction,
-    TransactionAnnounceResponse, Transaction, TransactionStatus
+    TransactionAnnounceResponse, Transaction, TransactionStatus, TransferTransaction
 } from "tsjs-xpx-chain-sdk";
 
 export class TransactionAPI {
@@ -37,7 +37,7 @@ export class TransactionAPI {
      * @param transactionIds - Array of transactions id and/or hash.
      *
      */
-    getTransactions(transactionIds: string[]): Promise<any>{
+    getTransactions(transactionIds: string[]): Promise<Transaction[]>{
         return this.transactionHttp.getTransactions(transactionIds).toPromise();
     }
 

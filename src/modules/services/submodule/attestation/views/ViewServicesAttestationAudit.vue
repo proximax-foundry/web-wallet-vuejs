@@ -44,7 +44,7 @@
       </div>
   </div>
 </template>
-<script lang = 'ts' >
+<script>
 import { ref , computed} from "vue";
 import {verifyHash, fileTour, ResultAuditInterface} from '@/util/attestationUtils'
 import { TransactionAPI } from '@/models/REST/transaction';
@@ -65,7 +65,7 @@ export default {
     const fileName = ref('');
     const currentPage = ref(1)
     const isAuditing = ref(false)
-    const auditResults  = ref([] as ResultAuditInterface[] )
+    const auditResults  = ref([])
     
     const uploadFile = (e) => {
       fileType.value = e.target.files[0].type;
