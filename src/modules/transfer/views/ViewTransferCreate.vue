@@ -99,7 +99,7 @@
             (+) {{$t('transfer.addmosaics')}} 
           </button>
         </div>
-        <div class="mb-5 border-t pt-4 border-gray-200">
+        <!-- <div class="mb-5 border-t pt-4 border-gray-200">
           <div class="rounded-2xl bg-gray-100 p-5">
             <input id="regularMsg" type="radio" name="msgOption" value="regular" v-model="msgOption" @change="clearMsg()" :disabled="disableRegularMsg == 1"/>
             <label for="regularMsg" class="cursor-pointer font-bold ml-4 mr-5"> 
@@ -110,7 +110,7 @@
               >{{$t('transfer.hexadecimal')}}
               </label>
           </div>
-        </div>
+        </div> -->
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <div class="rounded-2xl bg-gray-100 p-5">
             <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
@@ -119,10 +119,10 @@
             </label>
           </div>
         </div>
-        <div class = "mt-5" v-if = "msgOption == 'hex'">
+        <!-- <div class = "mt-5" v-if = "msgOption == 'hex'">
         <TransferTextareaInput v-on:keypress="hexOnly(event)" :placeholder="$t('dashboard.message')" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput"/>
-        </div>
-        <div class = "mt-5" v-else >
+        </div> -->
+        <div class = "mt-5" >
         <TransferTextareaInput :placeholder="$t('dashboard.message')" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput" />
         </div>
         <div class="rounded-2xl bg-gray-100 p-5">
@@ -259,7 +259,6 @@ export default {
     const messageLimit = computed(
       () => networkState.currentNetworkProfileConfig.maxMessageSize - 1
     );
-
 
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";

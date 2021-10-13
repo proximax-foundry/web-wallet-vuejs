@@ -54,16 +54,21 @@ function verifyContactPublicKey(address :string) :Promise<{status: boolean, publ
   });
 }
 
-function generateContact(selected :string) :string[]{
+function generateContact(selected :string,name: string) :string[]{
   const wallet = walletState.currentLoggedInWallet
   let contact = [];
-  wallet.accounts.forEach((element) => {
-    if (selected.indexOf(element.address) < 0) {
+  let accounts = wallet.accounts.filter(account => account.name!= name)
+  accounts.forEach((element) => {
+    if (element.address == selected)  {
+
+    }else{
       contact.push({
         value: element.address,
         label: element.name + ' - Owner account',
       });
     }
+      
+    
   });
   if (wallet.contacts != undefined) {
     wallet.contacts.forEach((element) => {
