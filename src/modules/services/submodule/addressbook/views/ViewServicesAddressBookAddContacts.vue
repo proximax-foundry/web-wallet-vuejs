@@ -82,12 +82,13 @@ export default {
 
     const SaveContact = () => {
       const rawAddress = Address.createFromRawAddress(address.value);
-      let addressBook = new AddressBook(contactName.value, rawAddress.plain()); 
+      // let addressBook = new AddressBook(contactName.value, rawAddress.address);
+      let addressBook = new AddressBook(contactName.value, rawAddress.plain());
       const wallet = walletState.currentLoggedInWallet;
 
       // check for existing account name in wallet
       const accountNameIndex = wallet.accounts.findIndex((account) => account.name.toLowerCase() == contactName.value.toLowerCase());
-      const contactAddIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.address == rawAddress.address):(-1);
+      const contactAddIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.address == rawAddress.plain()):(-1);
       const contactNameIndex =(wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.name.toLowerCase() == contactName.value.toLowerCase()):(-1);
 
       if(contactAddIndex >= 0){

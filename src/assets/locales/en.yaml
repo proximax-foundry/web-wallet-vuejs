@@ -381,7 +381,7 @@ addressbook:
   addressbookmessage3: "with invalid address"
   addressbookmessage4: "not imported"
   editcontact: "Edit this contact"
-  addressvalidation: "Address is already exists in this wallet or address book."
+  addressvalidation: "Address already exist in address book."
   namevalidation: "Name is already exists in account or address book."
 swap:
   ethfull: "Ethereum (ETH)"
