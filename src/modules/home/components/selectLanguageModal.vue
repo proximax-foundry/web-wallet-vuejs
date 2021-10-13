@@ -15,7 +15,7 @@
           </div>
           <div class="lang-option">
             <div v-for="(lang, item) in options" :key="item" class="flex justify-between border-gray-300 border-b py-3">
-              <div class="text-gray-800 text-xs">{{ lang.label }}</div><span v-if="lang.selected == selected" class="text-gray-400 text-txs items-center flex">CURRENT</span><a href="#" class="items-center flex text-blue-300" @click="changeLang(lang.value)" v-else>SELECT</a>
+              <div class="text-gray-800 text-xs">{{ lang.label }}</div><span v-if="lang.value == selected" class="text-gray-400 text-txs items-center flex">CURRENT</span><a href="#" class="items-center flex text-blue-300" @click="changeLang(lang.value)" v-else>SELECT</a>
             </div>
           </div>
         </div>
@@ -41,7 +41,7 @@ export default defineComponent({
     const toggleModal = ref(false);
     const {t, locale } = useI18n();
     const router = useRouter();
-    const selected = ref('EN');
+    const selected = ref(locale.value);
 
     // const i18n = VueI18n({
     //   legacy: false,
@@ -58,6 +58,7 @@ export default defineComponent({
 
     const changeLang = (lng) => {
       locale.value = lng;
+      selected.value = lng;
       toggleModal.value = !toggleModal.value;
 
     }

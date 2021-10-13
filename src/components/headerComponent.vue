@@ -35,7 +35,7 @@
         </div>
       </div>
       <div class="flex-none self-center header-menu" v-else>
-        <div class="w-16 text-center inline-block ml-2 sm:ml-0" v-if="wideScreen">
+        <div class="w-26 text-center inline-block ml-2 sm:ml-0" v-if="wideScreen">
           <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">{{$t('Header.home')}}</router-link>
         </div>
         <div class="w-16 text-center inline-block" v-if="wideScreen">
