@@ -1,15 +1,15 @@
 <template>
   <header>
-    <div class="header-height flex items-stretch">
-      <div class="flex-none self-center flex items-end logo">
-        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-24 tsm:w-40"></router-link><span class="version-text">{{$t('Header.version')}}{{ versioning }}</span>
+    <div class="container mx-auto header-height flex items-stretch">
+      <div class="flex-none self-center flex items-end">
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet.svg" class="w-24 tsm:w-40"></router-link>
       </div>
       <div class="flex-grow header-height"></div>
       <div class="flex-none header-menu mt-1 tsm:mt-3" v-if="loginStatus">
         <div class=" flex flex-row">
-          <div class="w-5 sm:w-16 inline-block items-center relative">
-            <SelectLanguagePlugin class="lang-mobile-placement-postlogin" />
-          </div>
+          <!-- <div class="w-5 sm:w-16 inline-block items-center relative">
+            <selectLanguageModal class="lang-mobile-placement-postlogin" />
+          </div> -->
           <div class="w-10 text-center flex flex-row h-10 items-center">
             <img src="../assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
           </div>
@@ -35,18 +35,18 @@
         </div>
       </div>
       <div class="flex-none self-center header-menu" v-else>
-        <div class="w-5 sm:w-16 inline-block mr-10 sm:mr-3 lang-mobile-placement">
-          <SelectLanguagePlugin />
-        </div>
-        <div class="select mb-3 inline-block">
-          <Dropdown v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
-        </div>
         <div class="w-16 text-center inline-block" v-if="wideScreen">
           <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">{{$t('Header.home')}}</router-link>
         </div>
         <div class="w-16 text-center inline-block" v-if="wideScreen">
           <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold">{{$t('Header.wallet')}}</router-link>
         </div>
+        <div class="w-16 text-center inline-block">
+          <selectLanguageModal />
+        </div>
+        <!-- <div class="select mb-3 inline-block">
+          <Dropdown v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
+        </div> -->
       </div>
     </div>
     <div v-if="!wideScreen && !loginStatus" class="bg-gray-100 py-1 text-center">
@@ -68,13 +68,12 @@ import { useRouter } from "vue-router";
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { ChainUtils } from '@/util/chainUtils';
 import { Helper } from '@/util/typeHelper';
-// import { transferEmitter } from '../util/listener.js';
-import Dropdown from 'primevue/dropdown';
-import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
+// import Dropdown from 'primevue/dropdown';
+// import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
+import selectLanguageModal from '@/modules/home/components/selectLanguageModal.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { useToast } from "primevue/usetoast";
-import packageData from "../../package.json"
 import { Connector } from '../models/connector';
 import { listenerState} from "@/state/listenerState";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
@@ -84,8 +83,8 @@ import {useI18n} from 'vue-i18n'
 
 export default defineComponent({
   components: {
-    Dropdown,
-    SelectLanguagePlugin,
+    // Dropdown,
+    selectLanguageModal,
     FontAwesomeIcon,
   },
 
@@ -429,13 +428,7 @@ export default defineComponent({
      emitter.on("listener:setEndpoint", endpoint =>{
        listener.value.endpoint = endpoint;
      });
-
-    const versioning = ref('0.0.1');
-
-    versioning.value = packageData.version;
-
     return {
-      versioning,
       networkState,
       walletState,
       loginStatus,

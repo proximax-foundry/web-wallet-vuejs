@@ -34,14 +34,15 @@
 
       <div class="text-xs py-2">
         <div class="font-bold">&copy; ProximaX 2021</div>
-        <div>{{$t('Footer.text')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold hover:underline">{{$t('Footer.link')}}</a>.</div>
+        <div>{{$t('Footer.text')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold hover:underline">{{$t('Footer.link')}}</a>.<span class="version-text">{{$t('Header.version')}}{{ versioning }}</span></div>
       </div>
     </footer>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, watch } from "vue";
+import { computed, defineComponent, getCurrentInstance, watch, ref } from "vue";
+import packageData from "../package.json";
 import headerComponent from '@/components/headerComponent.vue'
 import NavigationMenu from '@/components/NavigationMenu.vue'
 import ConfirmDialog from 'primevue/confirmdialog';
@@ -67,6 +68,10 @@ export default defineComponent({
 
     // chainNetwork.updateAvailableNetworks();
 
+    const versioning = ref('0.0.1');
+
+    versioning.value = packageData.version;
+
 
     // emitter for drop down menu in viewAllAccounts and Services page
     const clickEvent = () => {
@@ -78,6 +83,7 @@ export default defineComponent({
     return{
       login,
       clickEvent,
+      versioning,
     }
   }
 });
