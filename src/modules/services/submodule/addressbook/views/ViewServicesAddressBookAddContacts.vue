@@ -84,7 +84,7 @@ export default {
       // const formattedAddress = address.value.split('-').join('');
       // console.log(formattedAddress);
       const rawAddress = Address.createFromRawAddress(address.value);
-      let addressBook = new AddressBook(contactName.value, rawAddress.address);
+      let addressBook = new AddressBook(contactName.value, rawAddress.plain());
       const wallet = walletState.currentLoggedInWallet;
 
       // check for existing account address in wallet
