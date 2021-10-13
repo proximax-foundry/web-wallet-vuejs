@@ -30,12 +30,9 @@
       </div>
     </div>
     <!-- <PageComponent></PageComponent> -->
-    <footer class="h-12 text-center mt-20">
-
-      <div class="text-xs py-2">
-        <div class="font-bold">&copy; ProximaX 2021</div>
-        <div>{{$t('Footer.text')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold hover:underline">{{$t('Footer.link')}}</a>.<span class="version-text">{{$t('Header.version')}}{{ versioning }}</span></div>
-      </div>
+    <footer class="h-12 mt-20 text-center sm:text-justify sm:flex text-xs sm:justify-between container mx-auto text-gray-700">
+      <div class="ml-2 sm:ml-0">Copyright 2021 ProximaX®. All rights reserved. <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary hover:underline">{{$t('Footer.link')}}</a></div>
+      <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span>Version BETA {{$t('Header.version')}}{{ versioning }}</span></div>
     </footer>
   </div>
 </template>

@@ -137,7 +137,7 @@ body{
 }
 
 .delete-icon-style{
-  @apply text-gray-400 relative cursor-pointer;
+  @apply text-gray-400 relative cursor-pointer z-50;
 }
 
 .popup-outer{
