@@ -1,7 +1,7 @@
 <template>
   <header>
     <div class="container mx-auto header-height flex items-stretch">
-      <div class="flex-none self-center flex items-end">
+      <div class="flex-none self-center flex items-end ml-2 sm:ml-0">
         <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet.svg" class="w-24 tsm:w-40"></router-link>
       </div>
       <div class="flex-grow header-height"></div>
@@ -10,7 +10,7 @@
           <!-- <div class="w-5 sm:w-16 inline-block items-center relative">
             <selectLanguageModal class="lang-mobile-placement-postlogin" />
           </div> -->
-          <div class="w-10 text-center flex flex-row h-10 items-center">
+          <div class="w-10 text-center flex flex-row h-10 items-center xs:ml-2 sm:ml-0">
             <img src="../assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
           </div>
           <div class="w-14 md:w-40 pl-3 text-center flex gray-line-left h-10 items-center">
@@ -35,13 +35,13 @@
         </div>
       </div>
       <div class="flex-none self-center header-menu" v-else>
-        <div class="w-16 text-center inline-block" v-if="wideScreen">
+        <div class="w-16 text-center inline-block ml-2 sm:ml-0" v-if="wideScreen">
           <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">{{$t('Header.home')}}</router-link>
         </div>
         <div class="w-16 text-center inline-block" v-if="wideScreen">
           <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold">{{$t('Header.wallet')}}</router-link>
         </div>
-        <div class="w-16 text-center inline-block">
+        <div class="text-center inline-block">
           <selectLanguageModal />
         </div>
         <!-- <div class="select mb-3 inline-block">

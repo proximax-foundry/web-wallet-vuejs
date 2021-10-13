@@ -5,10 +5,10 @@
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
     >
-      <div v-show="toggleModal" class="popup-outer absolute flex z-50">
+      <div v-show="toggleModal" class="popup-outer absolute flex z-40">
         <div class="modal-popup-box m-2">
-          <div class="delete-position mt-2 mr-2" @click="toggleModal = false">
-            <font-awesome-icon icon="times" class="delete-icon-style"></font-awesome-icon>
+          <div class="delete-position mt-2 mr-1 cursor-pointer" @click="toggleModal = false">
+            <img src="../../../assets/img/delete.svg" class="w-5 inline-block">
           </div>
           <div class="w-104">
             <h1 class="default-title my-3 sm:my-5">Select language</h1>
