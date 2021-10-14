@@ -21,7 +21,7 @@
         </div>
       </div>
     </transition>
-    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-90 bg-white"></div>
+    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-90 bg-white z-10"></div>
   </div>
 </template>
 
