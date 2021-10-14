@@ -24,6 +24,10 @@ module.exports = {
       txl: ['23px', '26px'],
     },
     extend: {
+      margin: {
+        '18': '4.5rem',
+        '15':'3.75rem'
+       },
       width:{
         '18': '90px',
         '5/10' : '50%',

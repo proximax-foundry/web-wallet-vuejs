@@ -80,7 +80,7 @@ body{
 }
 
 .default-btn{
-  @apply gray-btn py-3 px-10;
+  @apply text-sm text-white transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
 }
 
 .big-default-btn{
