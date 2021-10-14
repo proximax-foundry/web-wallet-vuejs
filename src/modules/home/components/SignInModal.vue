@@ -7,9 +7,9 @@
           <div class= 'text-center'>
             <PasswordInput  class = 'w-8/12 block ml-auto mr-auto' placeholder="Password" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
           </div>
-          <div class = 'text-center'>
-            <Dropdown  v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
-          </div>
+          <!-- <div class = 'text-center'>
+            <Dropdown  selected v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
+          </div> -->
           <div class="mt-4 text-center">
             <button type="submit" class="default-btn bg-gray-primary py-2 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
           </div>
@@ -54,6 +54,7 @@ export default defineComponent({
         selectedWallet.value != ''
       )
     );
+     NetworkStateUtils.changeNetworkByIndex(2)
     const selectedNetwork = computed(()=>{ return {label: networkState.chainNetworkName, value: networkState.chainNetwork }});
      const chainsNetworks = computed(()=> {
 
@@ -156,7 +157,7 @@ export default defineComponent({
   components: {
     SelectInputPlugin,
     PasswordInput,
-    Dropdown
+   /*  Dropdown */
   }
 });
 </script>
