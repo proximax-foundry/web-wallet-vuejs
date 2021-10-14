@@ -47,6 +47,11 @@ h2 {
 
 h2 span { 
     background:#fff; 
-    padding:0 5px; 
+    padding
+    :0 5px; 
+}
+
+.sirius-id-button{
+  @apply text-sm text-black  transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none
 }
 </style>
