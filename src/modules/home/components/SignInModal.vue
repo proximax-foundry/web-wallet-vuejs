@@ -1,37 +1,20 @@
 <template>
   <div>
-    <!-- <a @click="toggleModal = !toggleModal" class="block big-default-btn my-3 self-center w-full">{{$t('welcome.signin')}}</a>
-    <transition
-      enter-active-class="animate__animated animate__fadeInDown"
-      leave-active-class="animate__animated animate__fadeOutUp"
-    >
-      <div v-show="toggleModal" class="popup-outer absolute flex z-50">
-        <div class="modal-popup-box m-2">
-          <div class="delete-position mt-2 mr-2" @click="toggleModal = false">
-            <font-awesome-icon icon="times" class="delete-icon-style"></font-awesome-icon>
-          </div> -->
-          <!-- <div class="w-104"> -->
-           <!--  <h1 class="default-title font-bold my-3 sm:my-10">{{$t('welcome.signin')}} {{$t('dashboard.to')}} {{networkState.chainNetworkName}} {{$t('services.wallet')}}</h1> -->
-            <form @submit.prevent="login">
-              <fieldset >
-                <div class="error error_box" v-if="err!=''">{{ err }}</div>
-                  <SelectInputPlugin placeholder="Select Wallet" :errorMessage="$t('signin.selectwallet')" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
-                  <div class= 'text-center'>
-                    <PasswordInput   placeholder="Password" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
-                  </div>
-                <div class = 'text-center'>
-                  <Dropdown  v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
-                </div>
-                <div class="mt-4 text-center">
-                  <button type="submit" class="default-btn bg-gray-primary py-2 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
-                </div>
-              </fieldset>
-            </form>
-          <!-- </div> -->
-        <!-- </div>
-      </div>
-    </transition> -->
-   <!--  <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-90 bg-blue-primary"></div> -->
+    <form @submit.prevent="login">
+      <fieldset >
+        <div class="error error_box" v-if="err!=''">{{ err }}</div>
+          <SelectInputPlugin placeholder="Select Wallet" :errorMessage="$t('signin.selectwallet')" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
+          <div class= 'text-center'>
+            <PasswordInput  class = 'w-8/12 block ml-auto mr-auto' placeholder="Password" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+          </div>
+          <div class = 'text-center'>
+            <Dropdown  v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
+          </div>
+          <div class="mt-4 text-center">
+            <button type="submit" class="default-btn bg-gray-primary py-2 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
+          </div>
+      </fieldset>
+    </form>
   </div>
 </template>
 
@@ -47,7 +30,6 @@ import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 import {useI18n} from 'vue-i18n'
 import Dropdown from 'primevue/dropdown';
-import { Network } from '@/models/network';
 export default defineComponent({
   name: 'SignInModal',
   data() {

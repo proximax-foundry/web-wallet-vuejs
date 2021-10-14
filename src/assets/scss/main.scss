@@ -82,10 +82,6 @@ body{
   @apply text-sm text-white font-bold transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
 }
 
-.siriusID-btn{
-  @apply text-sm text-black  transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
-}
-
 .big-default-btn{
   @apply blue-btn py-3 px-10 focus:outline-none;
 }

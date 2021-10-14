@@ -12,7 +12,7 @@
         <h2 class = 'my-10 ml-auto mr-auto'><span class = 'text-semibold'>or</span></h2>
         <div class="px-5 mt-4  text-center">
           <router-link :to="{ name: 'ViewHomeSignInSiriusID' }" >
-            <div class="siriusID-btn bg-gray-300 py-2 w-8/12 ml-auto mr-auto">
+            <div class="text-sm text-black  transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none bg-gray-300 py-2 w-8/12 ml-auto mr-auto">
             <img src="@/assets/img/sirius-id-icon.svg" class="h-6 w-6 inline-block">{{$t('welcome.signinwithsiriusid')}}
             </div>
             </router-link>
@@ -21,43 +21,6 @@
         <div  class="text-center  text-xs text-blue-link mb-16"><router-link :to="{ name: 'ViewWalletCreateSelection' }">Create Account Wallet ></router-link></div>
     </div>
   </div>
-
-   
-    <!-- <h1 class="big-title">{{$t('Header.siriuswallet')}}</h1>
-    <h2 class="big-para">{{$t('welcome.titledescription')}}.</h2>
-    <div class="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-4 mt-2 sm:mt-10">
-      <div class="text-center p-5">
-        <img src="@/modules/home/img/icon-blockchain-full-color-80h-proximax-sirius-wallet.svg" class="w-20 md:w-28 lg:w-18 inline-block mb-3">
-        <div class="font-bold text-sm md:text-md lg:text-lg">{{$t('welcome.blockchain')}}</div>
-        <div class="text-xs sm:text-tsm md:text-tmd lg:text-tlg">{{$t('welcome.blockchaindescription')}}.</div>
-      </div>
-      <div class="text-center p-5">
-        <img src="@/modules/home/img/icon-storage-full-color-80h-proximax-sirius-wallet.svg" class="w-20 md:w-28 lg:w-18 inline-block mb-3">
-        <div class="font-bold text-sm md:text-md lg:text-lg">{{$t('welcome.storage')}}</div>
-        <div class="text-xs sm:text-tsm md:text-tmd lg:text-tlg">{{$t('welcome.storagedescription')}}.</div>
-      </div>
-      <div class="text-center p-5">
-        <img src="@/modules/home/img/icon-streaming-full-color-80h-proximax-sirius-wallet.svg" class="w-20 md:w-28 lg:w-18 inline-block mb-3">
-        <div class="font-bold text-sm md:text-md lg:text-lg">{{$t('welcome.streaming')}}</div>
-        <div class="text-xs sm:text-tsm md:text-tmd lg:text-tlg">{{$t('welcome.streamingdescription')}}.</div>
-      </div>
-      <div class="text-center p-5">
-        <img src="@/modules/home/img/icon-supercontracts-full-color-80h-proximax-sirius-wallet.svg" class="w-20 md:w-28 lg:w-18 inline-block mb-3">
-        <div class="font-bold text-sm md:text-md lg:text-lg">{{$t('welcome.supercontracts')}}</div>
-        <div class="text-xs sm:text-tsm md:text-tmd lg:text-tlg">{{$t('welcome.supercontractdescription')}}.</div>
-      </div>
-    </div>
-    <div class="inline-block mt-5">
-      <div class="gray-line py-5 sm:py-16 grid xs:grid-cols-1 md:grid-cols-3">
-        <div class="px-5 self-center">
-          <SignInModal />
-        </div>
-        <div class="px-5">
-          <router-link :to="{ name: 'ViewHomeSignInSiriusID' }" class="block big-default-btn my-3 self-center">{{$t('welcome.signinwithsiriusid')}}</router-link>
-        </div>
-        <div class="px-5 self-center"><router-link :to="{ name: 'ViewWalletCreateSelection' }" class="block big-default-btn my-3 self-center">{{$t('welcome.create')}}</router-link></div>
-      </div>
-    </div> -->
   
 </template>
 

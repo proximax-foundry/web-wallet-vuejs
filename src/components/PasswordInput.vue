@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="block ml-auto mr-auto bg-white py-2 border w-8/12 flex" >
+    <div class="bg-white py-2 border flex" >
       <!-- <div class="text-icon-outline text-icon">
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
       </div> -->
