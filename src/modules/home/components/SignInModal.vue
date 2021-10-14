@@ -10,6 +10,8 @@
           <!-- <div class = 'text-center'>
             <Dropdown  selected v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
           </div> -->
+          <div class = 'text-center text-xs'>Current Network: </div>
+          <div class = 'text-center'>{{networkState.chainNetworkName}}</div>
           <div class="mt-4 text-center">
             <button type="submit" class="default-btn bg-gray-primary py-2 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
           </div>
@@ -54,6 +56,7 @@ export default defineComponent({
         selectedWallet.value != ''
       )
     );
+    
      NetworkStateUtils.changeNetworkByIndex(2)
     const selectedNetwork = computed(()=>{ return {label: networkState.chainNetworkName, value: networkState.chainNetwork }});
      const chainsNetworks = computed(()=> {
