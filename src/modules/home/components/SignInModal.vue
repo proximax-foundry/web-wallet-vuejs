@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a @click="toggleModal = !toggleModal" class="block big-default-btn my-3 self-center w-full">{{$t('welcome.signin')}}</a>
+    <!-- <a @click="toggleModal = !toggleModal" class="block big-default-btn my-3 self-center w-full">{{$t('welcome.signin')}}</a>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -9,30 +9,34 @@
         <div class="modal-popup-box m-2">
           <div class="delete-position mt-2 mr-2" @click="toggleModal = false">
             <font-awesome-icon icon="times" class="delete-icon-style"></font-awesome-icon>
-          </div>
-          <div class="w-104">
-            <h1 class="default-title font-bold my-3 sm:my-10">{{$t('welcome.signin')}} {{$t('dashboard.to')}} {{networkState.chainNetworkName}} {{$t('services.wallet')}}</h1>
+          </div> -->
+          <!-- <div class="w-104"> -->
+           <!--  <h1 class="default-title font-bold my-3 sm:my-10">{{$t('welcome.signin')}} {{$t('dashboard.to')}} {{networkState.chainNetworkName}} {{$t('services.wallet')}}</h1> -->
             <form @submit.prevent="login">
-              <fieldset class="w-full">
+              <fieldset >
                 <div class="error error_box" v-if="err!=''">{{ err }}</div>
-                <SelectInputPlugin :placeholder="$t('signin.selectwallet')" :errorMessage="$t('signin.selectwallet')" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
-                <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
-                <div class="mt-10">
-                  <button type="button" class="default-btn mr-2 sm:mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
-                  <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
+                  <SelectInputPlugin placeholder="Select Wallet" :errorMessage="$t('signin.selectwallet')" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
+                  <div class= 'text-center'>
+                    <PasswordInput   placeholder="Password" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+                  </div>
+                <div class = 'text-center'>
+                  <Dropdown  v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
+                </div>
+                <div class="mt-4 text-center">
+                  <button type="submit" class="default-btn bg-gray-primary py-2 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
                 </div>
               </fieldset>
             </form>
-          </div>
-        </div>
+          <!-- </div> -->
+        <!-- </div>
       </div>
-    </transition>
-    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-90 bg-blue-primary"></div>
+    </transition> -->
+   <!--  <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-90 bg-blue-primary"></div> -->
   </div>
 </template>
 
 <script>
-import { computed, defineComponent, getCurrentInstance, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
 import { useRouter } from "vue-router";
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
@@ -42,6 +46,8 @@ import { WalletUtils } from '@/util/walletUtils';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 import {useI18n} from 'vue-i18n'
+import Dropdown from 'primevue/dropdown';
+import { Network } from '@/models/network';
 export default defineComponent({
   name: 'SignInModal',
   data() {
@@ -66,10 +72,45 @@ export default defineComponent({
         selectedWallet.value != ''
       )
     );
+    const selectedNetwork = computed(()=>{ return {label: networkState.chainNetworkName, value: networkState.chainNetwork }});
+     const chainsNetworks = computed(()=> {
 
+      let options = [];
+      /* networkState.availableNetworks.forEach((network, index) => {
+        options.push({ label: network, value: index });
+      }); */
+       options.push({ label: 'Sirius Testnet 2', value: 2});
+      return options;
+    });
+    const chainsNetworkOption = computed(()=>{
+
+      return [{
+        label: t('Header.network'),
+        items: chainsNetworks.value
+      }];
+    });
+    const selectNetwork= (e) =>{
+      // if(e.value.value !== 'customize'){
+         selectedWallet.value = ''
+        wallets.value = []
+       
+        NetworkStateUtils.changeNetworkByIndex(parseInt(e.value.value));
+      //}
+    }
     const clearWalletOption = () => {
       selectedWallet.value = '';
     }
+
+    watch(()=> networkState.availableNetworks, (availableNetworks)=>{
+      let options = [];
+
+      console.log("Network List Updated");
+
+      for(let i=0; i < availableNetworks.length; ++i){
+        options.push({ label: availableNetworks[i], value: i });
+      }
+      chainsNetworks.value = options;
+    }, true);
 
     const clearInput = () => {
       selectedWallet.value = '';
@@ -124,12 +165,16 @@ export default defineComponent({
       login,
       clearWalletOption,
       clearInput,
+      chainsNetworkOption,
+      selectedNetwork,
+      selectNetwork
     };
   },
 
   components: {
     SelectInputPlugin,
-    PasswordInput
+    PasswordInput,
+    Dropdown
   }
 });
 </script>
