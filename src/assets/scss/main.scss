@@ -46,6 +46,7 @@ a{
 
 body{
   font-family: Lato,Arial,Helvetica,sans-serif !important;
+  @apply tracking-wide;
 }
 
 .animate__animated.animate__fadeInDown{
