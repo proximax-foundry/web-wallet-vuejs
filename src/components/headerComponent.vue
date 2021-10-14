@@ -483,7 +483,7 @@ export default defineComponent({
 }
 
 .header-menu{
-  margin-right: 5px;
+  margin-left: 5px;
 }
 
 .header-menu a{
@@ -686,7 +686,7 @@ export default defineComponent({
   }
 
   .header-menu{
-    margin-right: 20px;
+    margin-left: 20px;
   }
 
  .p-inputtext {

@@ -30,7 +30,7 @@
           <SignInModal />
         </div>
         <div class="px-5">
-          <SignInSiriusIDModal />
+          <router-link :to="{ name: 'ViewHomeSignInSiriusID' }" class="block big-default-btn my-3 self-center">{{$t('welcome.signinwithsiriusid')}}</router-link>
         </div>
         <div class="px-5 self-center"><router-link :to="{ name: 'ViewWalletCreateSelection' }" class="block big-default-btn my-3 self-center">{{$t('welcome.create')}}</router-link></div>
       </div>
@@ -39,12 +39,12 @@
 </template>
 
 <script>
-import SignInSiriusIDModal from '@/modules/home/components/SignInSiriusIDModal.vue'
+// import ViewHomeSignInSiriusID from '@/modules/home/views/ViewHomeSignInSiriusID.vue'
 import SignInModal from '@/modules/home/components/SignInModal.vue'
 export default {
   name: 'Home',
   components: {
-    SignInSiriusIDModal,
+    // ViewHomeSignInSiriusID,
     SignInModal,
   },
 }
