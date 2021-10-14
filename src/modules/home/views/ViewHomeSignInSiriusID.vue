@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto md:grid md:grid-cols-2 md:mt-10 lg:px-20 xl:px-40">
-    <div class="md:col-span-1 p-5 md:p-20 text-tsm md:text-sm text-gray-700">
+    <div class="md:col-span-1 p-5 md:px-5 md:py-18 lg:p-20 text-tsm md:text-sm text-gray-700">
       <div class="text-sm my-2 md:text-xl md:my-7">ProximaX Sirius Wallet</div>
       <div class="md:w-72">Build robust blockchain integrations that help you to get the most value out of ProximaX Sirius platform.</div>
     </div>

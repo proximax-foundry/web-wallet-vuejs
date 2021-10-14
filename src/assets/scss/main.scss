@@ -70,6 +70,10 @@ body{
   @apply bg-blue-primary text-sm text-white font-bold rounded-3xl transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
 }
 
+.gray-btn{
+  @apply bg-gray-primary text-xs text-white transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
+}
+
 .small-default-btn{
   @apply bg-blue-primary text-tsm py-1 px-5 text-white font-bold rounded-3xl transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
 }
@@ -79,7 +83,7 @@ body{
 }
 
 .siriusID-btn{
-  @apply text-sm text-black  transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
+  @apply text-sm  gray-btn text-black transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
 }
 
 .big-default-btn{

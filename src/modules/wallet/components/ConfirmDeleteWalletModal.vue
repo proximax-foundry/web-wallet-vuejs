@@ -8,18 +8,18 @@
       <div v-if="toggleModal" class="popup-outer absolute flex z-50">
         <div class="modal-popup-box">
           <div class="delete-position">
-            <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
+            <img src="@/assets/img/delete.svg" class="w-5 inline-block cursor-pointer" @click="toggleModal = !toggleModal">
           </div>
           <div class="w-104">
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
-            <div class="mt-10 mb-5"><div class="font-bold text-xl text-gray-900">{{ name }}</div> <span class="text-lg text-gray-700">{{$t('deletewallet.deletemessage')}}.</span></div>
-            <div class="flex justify-between p-4 rounded-xl bg-yellow-100 mb-4">
+            <div class="mt-10 mb-5"><div class="text-xl text-gray-900">{{ name }}</div> <span class="text-sm text-gray-700">{{$t('deletewallet.deletemessage')}}.</span></div>
+            <div class="flex justify-between p-4 rounded-md bg-yellow-100 mb-4">
               <div class="text-center w-full">
                 <div class="border border-gray-600 rounded-full w-8 h-8 inline-block relative">
                   <font-awesome-icon icon="exclamation" class="w-5 h-5 text-gray-600 inline-block absolute" style="top:5px; left: 12px"></font-awesome-icon>
                 </div>
-                <div class="font-bold text-sm">{{$t('deletewallet.warning')}}</div>
-                <p class="text-sm mt-3">{{$t('deletewallet.warningmessage')}}.</p>
+                <div class="font-bold text-xs">{{$t('deletewallet.warning')}}</div>
+                <p class="text-xs mt-3 tracking-wider leading-snug">{{$t('deletewallet.warningmessage')}}.</p>
               </div>
             </div>
             <fieldset class="w-full">
@@ -28,15 +28,17 @@
                 <span class="ml-2 cursor-pointer text-xs">{{$t('deletewallet.deleteconsent')}}.</span>
               </label>
               <div>
-                <button type="button" class="default-btn mr-5 focus:outline-none" @click="toggleModal = !toggleModal">{{$t('deletewallet.cancel')}}</button>
                 <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="deleteWallet();" :disabled="disableDelete">{{$t('deletewallet.delete')}}</button>
+                <div class="text-center">
+                  <a href="#" class="text-blue-link mt-3 text-xs inline-block" @click="toggleModal = !toggleModal">{{$t('deletewallet.cancel')}}</a>
+                </div>
               </div>
             </fieldset>
           </div>
         </div>
       </div>
     </transition>
-    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-90 bg-blue-primary"></div>
+    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-90 bg-white"></div>
   </div>
 </template>
 
