@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto text-center w-80">
+  <div class="container mx-auto text-center w-60 sm:w-80">
     <h1 class="big-title">{{$t('Header.walletTitle')}}</h1>
     <div class='my-3'>
       <p class="text-tsm mx-3 sm:text-tsm">{{$t('wallets.description', {network: networkState.chainNetworkName}) }}</p>
