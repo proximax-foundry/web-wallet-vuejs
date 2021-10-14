@@ -49,7 +49,7 @@
         </div> -->
       </div>
     </div>
-    <div v-if="!wideScreen && !loginStatus" class="bg-gray-100 py-1 text-center">
+    <div v-if="!wideScreen && !loginStatus" class="bg-gray-200 py-1 text-center">
       <div class="w-16 text-center inline-block">
         <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block text-xs sm:text-sm">{{$t('Header.home')}}</router-link>
       </div>
