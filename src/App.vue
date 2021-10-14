@@ -30,7 +30,7 @@
       </div>
     </div>
     <!-- <PageComponent></PageComponent> -->
-    <footer class="h-12 mt-20 text-center sm:text-justify sm:flex text-xs sm:justify-between container mx-auto text-gray-700">
+    <footer class="h-12 mt-20 text-center sm:text-justify sm:flex text-xs sm:justify-between container mx-auto text-gray-700 pb-5">
       <div class="ml-2 sm:ml-0">Copyright 2021 ProximaX®. All rights reserved. <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary hover:underline">{{$t('Footer.link')}}</a></div>
       <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span>Version BETA {{$t('Header.version')}}{{ versioning }}</span></div>
     </footer>
