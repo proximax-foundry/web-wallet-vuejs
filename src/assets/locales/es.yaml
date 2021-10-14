@@ -6,6 +6,7 @@ Header:
   version: "v"
   home: "Inicio"
   wallet: "Billeteras"
+  walletTitle: "Mi Billeteras]"
   totalbalance: "Balance total"
   signout: "Cerrar sesión"
   network: "Redes"

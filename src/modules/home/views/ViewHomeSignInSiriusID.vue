@@ -5,7 +5,7 @@
       <div class="md:w-72">Build robust blockchain integrations that help you to get the most value out of ProximaX Sirius platform.</div>
     </div>
     <div class="md:col-span-1 bg-white mx-5 md:mx-0 px-30 pt-1 md:pt-0 rounded-md">
-      <router-link :to="{ name: 'Home' }" class="text-xs m-2 text-blue-500 items-center flex"><img src="../../../assets/img/chevron_left.svg" class="w-5 inline-block">Back</router-link>
+      <router-link :to="{ name: 'Home' }" class="text-xs m-2 text-blue-link items-center flex"><img src="@/assets/img/chevron_left.svg" class="w-5 inline-block">Back</router-link>
       <div class="text-center p-5 md:p-10 text-gray-700 text-tsm">
         <div class="text-lg">Sign in with SiriusID</div>
         <div class="md:w-64 inline-block my-5">{{$t('siriusid.qr')}}</div>
