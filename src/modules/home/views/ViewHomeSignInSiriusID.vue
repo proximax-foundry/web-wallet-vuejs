@@ -1,9 +1,6 @@
 <template>
   <div class="container mx-auto md:grid md:grid-cols-2 md:mt-10 lg:px-20 xl:px-40">
-    <div class="md:col-span-1 p-5 md:px-5 md:py-18 lg:p-20 text-tsm md:text-sm text-gray-700">
-      <div class="text-sm my-2 md:text-xl md:my-7">ProximaX Sirius Wallet</div>
-      <div class="md:w-72">Build robust blockchain integrations that help you to get the most value out of ProximaX Sirius platform.</div>
-    </div>
+    <IntroTextComponent />
     <div class="md:col-span-1 bg-white mx-5 md:mx-0 px-30 pt-1 md:pt-0 rounded-md">
       <router-link :to="{ name: 'Home' }" class="text-xs m-2 text-blue-link items-center flex"><img src="@/assets/img/chevron_left.svg" class="w-5 inline-block">Back</router-link>
       <div class="text-center p-5 md:p-10 text-gray-700 text-tsm">
@@ -23,7 +20,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { computed, defineComponent, ref } from 'vue';
 import { useToast } from "primevue/usetoast";
 import { copyToClipboard } from '@/util/functions';
@@ -35,6 +32,7 @@ import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 import { ChainUtils } from '@/util/chainUtils';
 import { networkState } from "@/state/networkState";
 import { walletState } from "@/state/walletState";
+import IntroTextComponent from "@/components/IntroTextComponent";
 import {useI18n} from 'vue-i18n'
 
 export default defineComponent({
@@ -44,21 +42,24 @@ export default defineComponent({
       showPK: false,
     };
   },
+  components: {
+    IntroTextComponent
+  },
   setup(){
     const {t} = useI18n();
     const toast = useToast();
     const selectedNetwork = computed(()=> networkState.chainNetwork);
     const selectedNetworkType = computed(()=> ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
     const selectedNetworkName = computed(()=> networkState.chainNetworkName );
-    const err = ref<string>("");
-    const newWallet = ref<unknown>();
-    const walletName = ref<string>("");
-    const passwd = ref<string>("");
-    const confirmPasswd = ref<string>("");
-    const privateKey = ref<string>("");
-    const showPasswdError = ref<boolean>(false);
-    const passwdPattern: string  = "^[^ ]{8,}$";
-    const copy = (id :string) =>{ 
+    const err = ref("");
+    const newWallet = ref();
+    const walletName = ref("");
+    const passwd = ref("");
+    const confirmPasswd = ref("");
+    const privateKey = ref("");
+    const showPasswdError = ref(false);
+    const passwdPattern  = "^[^ ]{8,}$";
+    const copy = (id) =>{ 
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
