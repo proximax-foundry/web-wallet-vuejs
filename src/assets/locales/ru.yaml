@@ -6,6 +6,7 @@ Header:
   version: "v"
   home: "На главную"
   wallet: "Кошельки"
+  walletTitle: "Мой Кошельки"
   totalbalance: "Итоговый баланс"
   signout: "Выход"
   network: "Сети"

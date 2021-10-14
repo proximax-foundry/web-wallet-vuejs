@@ -35,7 +35,8 @@ module.exports = {
           primary: '#444444'
         },
         blue:{
-          primary:'#306eb5'
+          primary:'#306eb5',
+          link: '#3B82F6'
         },
         red:{
           primary: '#dc3545'
