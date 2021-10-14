@@ -93,7 +93,7 @@ body{
 }
 
 .big-title{
-  @apply title text-sm mt-10 font-bold mb-2;
+  @apply title text-sm my-5;
 }
 
 .big-para{
@@ -102,7 +102,7 @@ body{
 
 @screen md {
   .big-title{
-    @apply text-xxl mt-20;
+    @apply text-xxl my-10;
   }
 
   .big-para{
@@ -116,7 +116,7 @@ body{
 
   @screen md {
     .big-title{
-      @apply text-xxl mt-20;
+      @apply text-xxl my-10;
     }
 
     .big-para{

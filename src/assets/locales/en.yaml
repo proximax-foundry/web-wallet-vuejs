@@ -6,6 +6,7 @@ Header:
   version: "v"
   home: "Home"
   wallet: "Wallets"
+  walletTitle: "My Wallets"
   totalbalance: "Total balance"
   signout: "Sign Out"
   network: "Networks"
