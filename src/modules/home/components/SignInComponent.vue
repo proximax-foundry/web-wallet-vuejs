@@ -3,7 +3,7 @@
     <form @submit.prevent="login">
       <fieldset >
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
-          <SelectInputPlugin placeholder="Select Wallet" :errorMessage="$t('signin.selectwallet')" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
+          <SelectInputPlugin class = 'block ml-auto mr-auto' placeholder="Select Wallet" :errorMessage="$t('signin.selectwallet')" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
           <div class= 'text-center'>
             <PasswordInput  class = 'w-8/12 block ml-auto mr-auto' placeholder="Password" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
           </div>
@@ -33,7 +33,7 @@ import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 import {useI18n} from 'vue-i18n'
 import Dropdown from 'primevue/dropdown';
 export default defineComponent({
-  name: 'SignInModal',
+  name: 'SignInComponent',
   data() {
     return {
       toggleModal: false,
