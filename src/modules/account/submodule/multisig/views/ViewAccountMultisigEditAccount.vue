@@ -29,11 +29,11 @@
               <div class="text-center text-md mb-5">{{$t('accounts.cosignaturyaccount')}}</div>
               <div v-for="(cosigner, index) in cosignaturies" :key="index" class="mb-2 rounded-2xl px-5 py-3 flex justify-between" :class="`${(checkRemoval(cosigner))?'bg-yellow-100':'bg-white'}`">
                 <div>
-                  <div class="font-bold" v-if="wallet.accounts.find((acc) => acc.publicKey === cosigner)">{{ wallet.accounts.find(acc => acc.publicKey == cosigner).name }} <span v-if="checkRemoval(wallet.accounts.find((acc) => acc.address == cosigner).publicKey)" class="font-normal text-xs text-gray-500">({{$t('accounts.removing')}})</span></div>
-                  <div class="font-bold" v-else>Cosigner-{{ cosigneraddress(cosigner) }} <span v-if="checkRemoval(cosigner)" class="font-normal text-xs text-gray-500">({{$t('accounts.removing')}})</span></div>
+                  <div class="font-bold" v-if="otherAccount.find((acc) => acc.publicKey === cosigner)">{{ otherAccount.find(acc => acc.publicKey == cosigner).name }} <span v-if="checkRemoval(otherAccount.find((acc) => acc.address == cosigner).publicKey)" class="font-normal text-xs text-gray-500">({{$t('accounts.removing')}})</span></div>
+                  <div class="font-bold" v-else>Cosigner-{{ cosignerAddress(cosigner) }} <span v-if="checkRemoval(cosigner)" class="font-normal text-xs text-gray-500">({{$t('accounts.removing')}})</span></div>
                   <div class="text-tsm">{{ pretty(cosigner) }}</div>
                 </div>
-                <font-awesome-icon v-if="(!checkRemoval(cosigner.publicKey))" icon="trash-alt" class="w-4 h-4 self-center" :class="`${(onPartial || fundStatus || !isCoSigner)?'text-gray-200 cursor-auto':'text-gray-400 hover:text-gray-600 cursor-pointer'}`" @click="addToRemovalList(cosigner)"></font-awesome-icon>
+                <font-awesome-icon v-if="(!checkRemoval(cosigner))" icon="trash-alt" class="w-4 h-4 self-center" :class="`${(onPartial || fundStatus || !isCoSigner)?'text-gray-200 cursor-auto':'text-gray-400 hover:text-gray-600 cursor-pointer'}`" @click="addToRemovalList(cosigner)"></font-awesome-icon>
                 <a v-else class="self-center text-gray-400 hover:text-gray-600" @click="restoreFromRemovalList(cosigner)"><font-awesome-icon icon="trash-restore" class="inline-block w-4 h-4"></font-awesome-icon> <span class="text-xs">{{$t('accounts.restore')}}</span></a>
 
               </div>
@@ -116,7 +116,7 @@
             </div>
           </div>
         </div>
-        <div v-if="getWalletCosigner().length > 1">
+        <div v-if="getCosigns() > 1">
           <SelectInputPlugin placeholder="Main cosignatory to sign" errorMessage="" v-model="selectMainCosign" :options="selectCosign" />
           <MultiSelectInputPlugin placeholder="Also I will sign with these cosignatories" errorMessage="" v-model="selectOtherCosign" :options="selectOtherCosignerOptions" />
         </div>
@@ -149,6 +149,7 @@ import {
 } from "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
 import {useI18n} from 'vue-i18n'
+import { WalletAccount } from '@/models/walletAccount';
 export default {
   name: 'ViewMultisigEditAccount',
   components: {
@@ -184,7 +185,7 @@ export default {
     const selectedAddresses = ref([]);
     const showAddressError = ref([]);
     const onPartial = ref(false);
-    const isMultisig = ref(true);
+  
     const showCosigners = ref(false);
     const cosignAddress = ref('');
     const selectMainCosign = ref('');
@@ -192,27 +193,39 @@ export default {
 
     // current wallet
     const wallet = walletState.currentLoggedInWallet;
-
     // get account details initialization
-    const acc =  walletState.currentLoggedInWallet.accounts.find(element => element.name ===p.name);
-    const cosigneraddress = cosigner => Address.createFromPublicKey(cosigner, networkState.currentNetworkProfile.network.type).plain().substr(-4)
+    const acc =  computed(()=>{
+      let account
+      if (wallet.accounts.find(element => element.name ===p.name) === undefined && wallet.others.find(element => element.name ===p.name) === undefined){
+        return null
+      } else if (wallet.accounts.find(element => element.name ===p.name) === undefined){
+        account = wallet.others.find(element => element.name ===p.name) 
+      } else if (wallet.others.find(element => element.name ===p.name) === undefined){
+        account = wallet.accounts.find(element => element.name ===p.name)
+      }
+      return account
+    })
+    const cosignerAddress = cosigner => Address.createFromPublicKey(cosigner, networkState.currentNetworkProfile.network.type).plain().substr(-4)
     const cosignaturies = computed(()=>{
       let cosignaturies = []
-      acc.multisigInfo.filter(element=>element.level === 1).forEach(cosigner=> {
+      acc.value.multisigInfo.filter(element=>element.level === 1).forEach(cosigner=> {
             cosignaturies.push(cosigner.publicKey) 
           })
-          console.log(cosignaturies)
           return cosignaturies     
     })
-
-    if(acc == undefined){
+    const getWalletCosigner = () => {
+      return multiSign.fetchMultiSigCosigners(acc.value.address)
+    }
+    const otherAccount = wallet.accounts.find(element=>element.name ===p.name)? wallet.accounts : wallet.others
+    if(acc.value == undefined){
       router.push({ name: "ViewAccountDisplayAll"});
     }
-
+    const isMultisig =computed(()=> multiSign.checkIsMultiSig(acc.value.address))
     const selectCosign = computed(() => {
       const list = getWalletCosigner();
+      console.log(list)
       const cosigner = [];
-      if(list.length > 1){
+      if(list.length > 0){
         list.forEach((element) => {
           const accountDetails = walletState.currentLoggedInWallet.accounts.find( account => account.address ===element.address);
           if(accountDetails.balance > 10.0445){
@@ -224,11 +237,10 @@ export default {
       }
       return cosigner;
     });
-
     const selectOtherCosignerOptions = computed(() => {
       const list = getWalletCosigner();
       const cosigner = [];
-      if(list.length > 1){
+      if(list.length > 0){
         let filtered_list = list.filter(element => element.address != selectMainCosign.value);
         filtered_list.forEach((element) => {
           const accountDetails = walletState.currentLoggedInWallet.accounts.find( account => account.address ===element.address);
@@ -248,47 +260,46 @@ export default {
 
     const disabledPassword = computed(() => !(!onPartial.value && isMultisig.value && !fundStatus.value && isCoSigner.value));
 
-    const addCoSigButton = computed(() => {
-      var status = false;
-      if(accountBalance() >= 10.0445 && isCoSigner.value){
-        for(var i = 0; i < coSign.value.length; i++){
-          if(showAddressError.value[i] != ''){
-            status = true;
-            break;
-          }else if(coSign.value[i].length < 40){
-            status = true;
-            break;
-          }
-        }
-      }else{
-        status = true;
-      }
-      return status;
-    });
-
     const isCoSigner = computed(() => {
-      const currentAccount = getAcccountDetails();
+      const currentAccount = acc.value;
       let isCoSig = false;
-       currentAccount.getDirectChildMultisig().forEach(publicKey => {
-          let verifyIsCosig = walletState.currentLoggedInWallet.accounts.find(acc=> acc.publicKey === publicKey)
+       for (var i = 0 ; i<currentAccount.getDirectParentMultisig().length;i++){
+         let verifyIsCosig = walletState.currentLoggedInWallet.accounts.find (acc=> acc.publicKey === currentAccount.getDirectParentMultisig()[i])
           if (verifyIsCosig === undefined){
               isCoSig = false
           }else{
             isCoSig = true
+            break
           }
        }
-      )
+       
       return isCoSig;
     })
-
+    const addCoSigButton = computed(() => {
+          var status = false;
+          if(accountBalance.value >= 10.0445 && isCoSigner.value){
+            for(var i = 0; i < coSign.value.length; i++){
+              if(showAddressError.value[i] != ''){
+                status = true;
+                break;
+              }else if(coSign.value[i].length < 40){
+                status = true;
+                break;
+              }
+            }
+          }else{
+            status = true;
+          }
+          return status;
+        });
     const clear = () => {
       coSign.value = [];
       removeCosign.value = [];
       selectedAddresses.value = [];
       showAddressError.value = [];
       passwd.value = '';
-      numApproveTransaction.value = acc.multisigInfo.find(acc=> acc.level === 0).minApproval;
-      numDeleteUser.value = acc.multisigInfo.find(acc=> acc.level === 0).minRemoval;
+      numApproveTransaction.value = acc.value.multisigInfo.find(acc=> acc.level === 0).minApproval;
+      numDeleteUser.value = acc.value.multisigInfo.find(acc=> acc.level === 0).minRemoval;
       selectMainCosign.value = '';
       selectOtherCosign.value = [];
       err.value = '';
@@ -311,7 +322,7 @@ export default {
         }
       }
 
-      let modifyStatus = multiSign.modifyMultisigAccount(coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value, signer, acc, passwd.value);
+      let modifyStatus = multiSign.modifyMultisigAccount(coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value, signer, acc.value, passwd.value);
       // console.log(modifyStatus);
       if(!modifyStatus){
         err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
@@ -326,6 +337,7 @@ export default {
 
     watch(selectMainCosign, (n) => {
       selectOtherCosign.value.splice(selectOtherCosign.value.indexOf(n), 1);
+      console.log(n)
     });
 
     watch(() => [...coSign.value], (n) => {
@@ -354,25 +366,16 @@ export default {
     }, {deep:true});
 
     // check if this address is multisig
-    try{
-      let isMultiSigBoolean = multiSign.checkIsMultiSig(acc.address)
-        isMultisig.value = isMultiSigBoolean;
-      
-    }catch(err) {
-      isMultisig.value = false;
-    }
 
-    const getAcccountDetails = () => {
-      if(walletState.currentLoggedInWallet){
-        return walletState.currentLoggedInWallet.accounts.find(acc => acc.name ===p.name);
-      }
-    };
-
-    const accountBalance = () => {
-      if(walletState.currentLoggedInWallet){
-        return walletState.currentLoggedInWallet.accounts.find(acc => acc.name ===p.name).balance;
-      }
-    };
+    const accountBalance = computed(() => {
+       let accountBalance = 0
+       if (acc.value == undefined){
+         return 0
+       }
+        accountBalance = acc.value.balance
+       
+       return accountBalance
+    })
 
     const addCoSig = () => {
       coSign.value.push('');
@@ -412,9 +415,7 @@ export default {
       }
     }
 
-    const getWalletCosigner = () => {
-      return multiSign.fetchMultiSigCosigners(acc.address)
-    }
+    
 
     const maxNumApproveTransaction = computed( () => {
       return getCosigns();
@@ -425,18 +426,23 @@ export default {
     });
 
     function getCosigns(){
-      const account = getAcccountDetails();
-      return account.getDirectParentMultisig().length
+      const account = acc.value;
+      if (account != undefined){
+         return account.getDirectParentMultisig().length
+      }else{
+        return 0
+      }
+     
     }
 
-    numApproveTransaction.value = acc.multisigInfo.find(acc=> acc.level === 0).minApproval;
-    numDeleteUser.value = acc.multisigInfo.find(acc => acc.level === 0).minRemoval;
+    /* numApproveTransaction.value =  acc.multisigInfo.find(acc=> acc.level === 0).minApproval;
+    numDeleteUser.value = acc.multisigInfo.find(acc => acc.level === 0).minRemoval; */
 
     // refecth min number for both scheme if there is changes in max num for both approval and deletion
     watch(maxNumApproveTransaction, () => {
       if(walletState.currentLoggedInWallet){
-        const account = getAcccountDetails();
-        if(getCosigns){
+        const account = acc.value;
+        if(getCosigns()){
           numApproveTransaction.value = account.multisigInfo.find(acc => acc.level === 0).minApproval;
           numDeleteUser.value = account.multisigInfo.find(acc => acc.level === 0).minRemoval;
         }
@@ -495,7 +501,7 @@ export default {
     });
 
     setTimeout(()=> {
-      if(accountBalance() < 10.0445){
+      if(accountBalance.value < 10.0445){
         fundStatus.value = true;
       }else{
         fundStatus.value = false;
@@ -511,8 +517,13 @@ export default {
     });
 
     // check if onPartial
-    let onPartialBoolean = multiSign.onPartial(PublicAccount.createFromPublicKey(acc.publicKey,networkState.currentNetworkProfile.network.type))
-      onPartial.value = onPartialBoolean;
+    try {
+       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,networkState.currentNetworkProfile.network.type)).then(onPartialBoolean => onPartial.value = onPartialBoolean)
+    } catch (error) {
+      
+    }
+    
+      
    
 
     emitter.on('ADD_CONTACT_COSIGN', payload => {
@@ -536,7 +547,7 @@ export default {
 
     // detect partial transaction announcement from listener
     transferEmitter.on('ANNOUNCE_AGGREGATE_BONDED' , payload => {
-      if(payload.status && payload.address == acc.address){
+      if(payload.status && payload.address == acc.value.address){
         onPartial.value = true;
         clear();
       }
@@ -544,8 +555,8 @@ export default {
 
     // check co signiture added from listener
     transferEmitter.on('ANNOUNCE_COSIGNITURE_ADDED' , payload => {
-      if(payload.status && payload.address == acc.address){
-        if(acc.getDirectParentMultisig().length > 0){
+      if(payload.status && payload.address == acc.value.address){
+        if(acc.value.getDirectParentMultisig().length > 0){
           isMultisig.value = true;
           onPartial.value = false;
         }else{
@@ -555,7 +566,7 @@ export default {
     });
 
     transferEmitter.on("UPDATE_EDIT_MULTISIG", payload => {
-      if(payload.status == true && payload.from == 'confirmed' && payload.signerAddress == acc.address){
+      if(payload.status == true && payload.from == 'confirmed' && payload.signerAddress == acc.value.address){
         isMultisig.value = false;
         onPartial.value = false;
       }
@@ -604,7 +615,9 @@ export default {
       validateApproval,
       validateDelete,
       cosignaturies,
-      cosigneraddress
+      cosignerAddress,
+      otherAccount,
+      getCosigns
     };
   },
 }

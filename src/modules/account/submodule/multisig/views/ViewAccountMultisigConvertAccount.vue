@@ -58,7 +58,7 @@
         <div v-for="(coSignAddress, index) in coSign" :key="index" class="flex">
           <font-awesome-icon icon="trash-alt" class="w-4 h-4 text-gray-500 hover:text-gray-400 cursor-pointer mr-3 mt-3" @click="deleteCoSigAddressInput(index)"></font-awesome-icon>
           <TextInput :placeholder="$t('accounts.cosigplaceholder')" :errorMessage="$t('accounts.addressvalidation')" :showError="showAddressError[index]" v-model="coSign[index]" icon="key" class="flex-grow" />
-          <AddCosignModal :cosignPublicKeyIndex="index" :selectedAddress="selectedAddresses" />
+          <AddCosignModal :cosignPublicKeyIndex="index" :selectedAddress="selectedAddresses" :accountName="accountName" />
         </div>
         <div class="text-lg" v-if="!coSign.length">{{$t('accounts.cosigmessage')}}</div>
         <button class="my-8 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">(+){{$t('accounts.addcosig')}}</button>
@@ -138,7 +138,7 @@ export default {
     const onPartial = ref(false);
     const isMultisig = ref(false);
     const disableSend = computed(() => !(
-      !isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) && coSign.value.length > 0  &&  err.value == '' && (showAddressError.value.indexOf(true) == -1) && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
+      !isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) && coSign.value.length > 0  &&  err.value == '' && (showAddressError.value.every(value => value == false)) == true && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
     ));
     const addCoSigButton = computed(() => {
       var status = false;
@@ -230,7 +230,9 @@ export default {
         numApproveTransaction.value = maxNumApproveTransaction.value;
       }
       coSign.value.splice(i, 1);
+      console.log(coSign.value)
       selectedAddresses.value.splice(i, 1);
+      showAddressError.value.splice(i,1)
     }
     const validateApproval = (e) => {
       if((numApproveTransaction.value * 10*(~~(maxNumApproveTransaction.value/10)) + e.charCode - 48) > maxNumApproveTransaction.value){
