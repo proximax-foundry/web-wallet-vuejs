@@ -1,6 +1,6 @@
 <template>
   <div class="md:col-span-1 p-5 md:p-20 text-tsm md:text-sm text-gray-700 ">
-    <div class="text-sm my-2 md:text-xl md:my-7">ProximaX Sirius Wallet</div>
+    <div class="text-sm my-2 md:text-xl md:my-7 font-bold">ProximaX Sirius Wallet</div>
     <div class="md:w-72">Build robust blockchain integrations that help you to get the most value out of ProximaX Sirius platform.</div>
   </div>
 </template>

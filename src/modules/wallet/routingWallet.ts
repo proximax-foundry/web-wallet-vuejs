@@ -50,4 +50,12 @@ export const WalletRoutes: RouteRecordRaw[] = [
       title: "Export wallet",
     }
   },
+  {
+    path: '/backup-wallet',
+    name: 'ViewWalletImport',
+    component: () => import('@/modules/wallet/views/ViewWalletImport.vue'),
+    meta: {
+      title: "Import from wallet backup",
+    }
+  },
 ];
