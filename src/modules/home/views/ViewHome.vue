@@ -4,7 +4,7 @@
     <div class="md:col-span-1 bg-white mx-5 md:mx-0 px-30 pt-1 md:pt-0 rounded-md">
       <div class = 'text-center mt-16 text-gray-700 text-lg'>Sign In</div>
       <div class="px-5 text-gray-700 md:text-lg text-tsm">
-        <SignInModal />
+        <SignInComponent />
       </div>
       <h2 class = 'my-10 ml-auto mr-auto'><span class = 'text-semibold'>or</span></h2>
       <div class="px-5 mt-4  text-center">
@@ -14,21 +14,22 @@
           </div>
           </router-link>
       </div>
-      <div class = 'text-center text-xs mt-6 mb-1'>No Sirius Account wallet yet?</div>
-      <div  class="text-center  text-xs text-blue-link mb-16"><router-link :to="{ name: 'ViewWalletCreateSelection' }">Create Account Wallet ></router-link></div>
+      <div class ='text-center text-xs mt-6 mb-1'>No Sirius Account wallet yet?</div>
+      <div class ="text-center  text-xs text-blue-link"><router-link :to="{ name: 'ViewWalletCreateSelection' }">Create Account Wallet ></router-link></div>
+      <div class = 'h-16 '></div>
     </div>
   </div>
 </template>
 
 <script>
 //import SignInSiriusIDModal from '@/modules/home/views/ViewHomeSignInSiriusID.vue'
-import SignInModal from '@/modules/home/components/SignInModal.vue'
+import SignInComponent from '@/modules/home/components/SignInComponent.vue'
 import IntroTextComponent from '@/components/IntroTextComponent.vue'
 export default {
   name: 'Home',
   components: {
      //SignInSiriusIDModal,
-    SignInModal,
+    SignInComponent,
     IntroTextComponent,
   },
 }
@@ -44,9 +45,8 @@ h2 {
 } 
 
 h2 span { 
-    background:#fff; 
-    padding
-    :0 5px; 
+  background:#fff; 
+  padding: 0 5px; 
 }
 
 .sirius-id-button{
