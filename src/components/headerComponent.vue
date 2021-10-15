@@ -1,21 +1,21 @@
 <template>
   <header>
-    <div class="container mx-auto header-height flex items-stretch">
+    <div class="header-height flex items-stretch px-2 gray-bar" v-if="loginStatus">
       <div class="flex-none self-center flex items-end ml-2 sm:ml-0">
-        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet.svg" class="w-24 tsm:w-40"></router-link>
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40"></router-link>
       </div>
       <div class="flex-grow header-height"></div>
-      <div class="flex-none header-menu mt-1 tsm:mt-3" v-if="loginStatus">
+      <div class="flex-none header-menu mt-1 tsm:mt-3">
         <div class=" flex flex-row">
           <!-- <div class="w-5 sm:w-16 inline-block items-center relative">
             <selectLanguageModal class="lang-mobile-placement-postlogin" />
           </div> -->
           <div class="w-10 text-center flex flex-row h-10 items-center xs:ml-2 sm:ml-0">
-            <img src="../assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
+            <img src="@/assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
           </div>
           <div class="w-14 md:w-40 pl-3 text-center flex gray-line-left h-10 items-center">
             <div>
-              <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="chainAPIEndpoint"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkState.chainNetworkName }}</div>
+              <img src="@/assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="chainAPIEndpoint"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkState.chainNetworkName }}</div>
             </div>
           </div>
           <div class="w-60 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
@@ -34,7 +34,13 @@
           </div>
         </div>
       </div>
-      <div class="flex-none self-center header-menu" v-else>
+    </div>
+    <div class="container mx-auto header-height flex items-stretch" v-else>
+      <div class="flex-none self-center flex items-end ml-2 sm:ml-0">
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-proximax-sirius-wallet.svg" class="w-24 tsm:w-40"></router-link>
+      </div>
+      <div class="flex-grow header-height"></div>
+      <div class="flex-none self-center header-menu">
         <div class="w-26 text-center inline-block ml-2 sm:ml-0" v-if="wideScreen">
           <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">{{$t('Header.home')}}</router-link>
         </div>
@@ -469,6 +475,10 @@ export default defineComponent({
 
 <style lang="scss">
 @import "../assets/scss/multiselect.scss";
+
+.gray-bar{
+  background: #3F4058;
+}
 
 .lang-mobile-placement{
   top: -30px; position: relative;
