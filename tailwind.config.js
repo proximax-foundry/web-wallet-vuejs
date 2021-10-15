@@ -36,6 +36,9 @@ module.exports = {
         },
         red:{
           primary: '#dc3545'
+        },
+        orange:{
+          primary: '#E55B13'
         }
       },
       screens: {

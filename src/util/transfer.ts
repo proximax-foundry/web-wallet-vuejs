@@ -35,47 +35,24 @@ import { ChainUtils } from '@/util/chainUtils';
 import { WalletUtils } from '@/util/walletUtils'
 import { Helper } from "@/util/typeHelper";
 const config = require("@/../config/config.json");
+import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
+import { listenerState, AutoAnnounceSignedTransaction, HashAnnounceBlock, AnnounceType } from "@/state/listenerState";
 
 
 async function getAccInfo(address :string) :Promise<PublicAccount> {
-  // return await getPublicKey(recipientAddress, siriusStore.accountHttp);
-
   let accountInfo = await WalletUtils.getAccInfo(address).then(accountinfo => accountinfo.publicAccount);
   return accountInfo;
 }
 
-
-// export const getMosaicsAllAccounts = (appStore, siriusStore) => {
-//   const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
-//   wallet.accounts.forEach((account) => {
-//     const mosaicService = new MosaicService(siriusStore.accountHttp, siriusStore.mosaicHttp, siriusStore.namespaceHttp);
-//     const address = Address.createFromRawAddress(account.address);
-//     mosaicService
-//       .mosaicsAmountViewFromAddress(address)
-//       .pipe(
-//           mergeMap((_) => _)
-//       )
-//       .subscribe(mosaic => {
-//         console.warn(mosaic)
-//         // account.mosaic.push({ id: mosaic.fullName(), amount: mosaic.relativeAmount(), divisibility: mosaic.mosaicInfo.divisibility });
-//       },
-//         err => console.error(err));
-//   });
-// };
-
-export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[], walletPassword :string, senderAccName :string, cosigner :string, encryptedMsg :string) : Promise<announceAggregateBonded> => {
+export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[], walletPassword :string, senderAccName :string, cosigner :string, encryptedMsg :string) : Promise<boolean>  => {
   // verify password
-  // console.log('Pw after createTransaction: ' + walletPassword);
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword)
-  /*let verify = appStore.verifyWalletPassword(appStore.state.currentLoggedInWallet.name, walletPassword); 
- */
+  
   if (!verify) {
-    return verify;
+    return Promise.resolve(false);
   }
 
   const hash = networkState.currentNetworkProfile.generationHash
-  /* const add = fetch(siriusStore._buildAPIEndpointURL(siriusStore.state.selectedChainNode) + '/block/1').then((res) => res.json()).then((data) => { return data.meta.generationHash }); */
-
 
   let networkType = networkState.currentNetworkProfile.network.type
   const recipientAddress = recipient;
@@ -115,7 +92,7 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
     // a multisig, get cosigner's private key
     accountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.address === cosigner);
     // get multisig account info
-    multisigAccountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.name === senderAccName).publicKey;
+    multisigAccountDetails = walletState.currentLoggedInWallet.others.find((element) => element.name === senderAccName).publicKey;
     multisigPublicAccount = PublicAccount.createFromPublicKey(multisigAccountDetails, networkType);
   }
 
@@ -163,90 +140,26 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
     const hashLockTransaction = transactionBuilder.hashLock(new Mosaic(new MosaicId(environment.mosaicXpxInfo.id), UInt64.fromUint(Number(10000000))),UInt64.fromUint(environment.lockFundDuration),aggregateBondedTransactionSigned)
     const hashLockTransactionSigned = account.sign(hashLockTransaction, hash);
 
-    (async () => {
+   
       try {
-        const confirmedTx = await announceLockfundAndWaitForConfirmation(account.address, hashLockTransactionSigned, hashLockTransactionSigned.hash, transactionHttp);
-        console.log('confirmedTx');
-        console.log(confirmedTx);
-        // eslint-disable-next-line no-unused-vars
-        let aggregateTx = await announceAggregateBonded(account.address, aggregateBondedTransactionSigned, aggregateBondedTransactionSigned.hash, confirmedTx, transactionHttp)
-        console.log('aggregateTx');
-        console.log(aggregateTx);
-        console.log("Done");
+        let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(hashLockTransactionSigned);
+        hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock + 1;
+        let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(aggregateBondedTransactionSigned);
+        autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(hashLockTransactionSigned.hash);
+        autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
+        autoAnnounceSignedTx.type = AnnounceType.BONDED;
+        ListenerStateUtils.addAutoAnnounceSignedTransaction(hashLockAutoAnnounceSignedTx);
+        ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
       } catch (error) {
         console.log(error);
       }
-    })();
+      
+    
   }
-
+  return Promise.resolve(true)
 }
 
-/* export const mosaicTransaction = (divisibility, supply, duration, durationType, mutable, transferable, walletPassword, accountName, appStore, siriusStore) => {
 
-  // verify password
-
-  let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword)
-  
- 
-  if (!verify) {
-    return verify;
-  }
-  
-
-  const hash = networkState.currentNetworkProfile.generationHash
-
-    let accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.name = accountName)
-    // var mosaicDuration = (1 * 365 * 24 * 60 * 4 ); // 1 year - 15 sec per block
-    // var mosaicDuration;
-    // if(durationType == 'month'){
-    //   mosaicDuration = parseInt(duration) * 30 * 24 * 60 * 4;
-    // }else{
-    //   mosaicDuration = parseInt(duration) * 365 * 24 * 60 * 4;
-    // }
-    let publicKey = accountDetails.publicKey
-    let privateKey = WalletUtils.decryptPrivateKey(walletPassword, accountDetails.encrypted, accountDetails.iv);
-    let networkType = networkState.currentNetworkProfile.network.type
-    const publicAccount = PublicAccount.createFromPublicKey(publicKey, networkType)
-    const account = Account.createFromPrivateKey(privateKey, networkType);
-    let transactionBuilder = new BuildTransactions(networkType)
-   
-    let mosaicDefinitionTransaction = transactionBuilder.mosaicDefinition(publicAccount,mutable,transferable,divisibility)
-    
-
-    let supp = parseFloat(supply) * Math.pow(10, divisibility);
-    const mosaicSupplyChangeTransaction = transactionBuilder. buildMosaicSupplyChangeBuilder()
-      .deadline(Deadline.create(environment.deadlineTransfer.deadline, environment.deadlineTransfer.chronoUnit))
-      .mosaicId(mosaicDefinitionTransaction.mosaicId)
-      .direction(MosaicSupplyType.Increase)
-      .delta(UInt64.fromUint(supp))
-      .networkType(networkType)
-      .build();
-
-    let innerTxn = [
-      mosaicDefinitionTransaction.toAggregate(publicAccount),
-      mosaicSupplyChangeTransaction.toAggregate(publicAccount)
-    ]
-
-    const aggregateTransaction = transactionBuilder.aggregateComplete(innerTxn)
-      //.deadline(Deadline.create(environment.deadlineTransfer.deadline, environment.deadlineTransfer.chronoUnit))
-      //.innerTransactions(innerTxn)
-      //.networkType(networkType)
-      //.build(); 
-
-   //  transactionBuilder.fee = amountFormatterSimple(aggregateTransaction.maxFee.compact()); 
-    // console.log('TF: '+transactionBuilder.fee);
-    const signedTransaction = account.sign(aggregateTransaction, hash);
-    const transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
-
-    transactionHttp
-      .announce(signedTransaction)
-      .subscribe((x) => {
-        console.log(x);
-        // console.log('annoucement is made here');
-        return true;
-      }, err => console.error(err));
-
-}  */
 
 /**
  *
