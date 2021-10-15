@@ -11,10 +11,6 @@
           <div class="error error_box" v-if="err!=''">{{ err }}</div>
           <div class="text-left text-tsm my-4 ml-4 text-gray-600"><b>{{$t('createwallet.network')}}</b>: {{ selectedNetworkName }}</div>
           <PasswordInput :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" v-model="privateKeyInput" class="ml-1" />
-          <label class="inline-flex items-center mb-5">
-              <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="nis1Swap">
-            <span class="ml-2 cursor-pointer">{{$t('createprivatekeywallet.swaptitle')}}</span>
-          </label>
           <TextInput :placeholder="$t('createwallet.walletname')" :errorMessage="$t('createwallet.inputwalletname')"  v-model="walletName" icon="wallet" />
           <div class="grid xs:grid-cols-1 md:grid-cols-2">
             <PasswordInput :placeholder="$t('createwallet.inputpassword')" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd" class="mr-1" />
@@ -129,7 +125,6 @@ export default defineComponent({
     const passwd = ref("");
     const privateKey = ref("");
     const confirmPasswd = ref("");
-    const nis1Swap = ref(false);
     const privateKeyInput = ref("");
     const showPasswdError = ref(false);
     const privKeyPattern = "^(0x|0X)?[a-fA-F0-9].{63,65}$";
@@ -176,7 +171,6 @@ export default defineComponent({
       passwd.value = "";
       confirmPasswd.value = "";
       privateKeyInput.value = "";
-      nis1Swap.value = false;
     };
 
     return {
@@ -187,7 +181,6 @@ export default defineComponent({
       walletName,
       passwd,
       confirmPasswd,
-      nis1Swap,
       privateKeyInput,
       privateKey,
       showPasswdError,

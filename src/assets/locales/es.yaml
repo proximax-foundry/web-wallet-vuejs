@@ -58,7 +58,6 @@ createprivatekeywallet:
   title: "Restablecer su Billetera ProximaX Sirius existente, importar una llave privada desde otro servicio o crear un billetera nueva ahora mismo!"
   privatekey: "Llave Privada"
   invalidprivatekey: "Llave Privada inválida"
-  swaptitle: "Marque esta casilla si desea realizar un intercambio de activos usando esta llave privada."
 createsuccessful:
   congratz: "¡Felicidades!"
   congratztext: "Su Billetera ha sido creada satisfactoriamente."

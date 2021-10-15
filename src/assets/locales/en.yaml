@@ -58,7 +58,6 @@ createprivatekeywallet:
   title: "Restore your existing ProximaX Sirius Wallet, import a private key from another service or create a new wallet right now!"
   privatekey: "Private Key"
   invalidprivatekey: "Invalid private key"
-  swaptitle: "Check this box if you wish to swap with this private key."
 createsuccessful: 
   congratz: "Congratulations!"
   congratztext: "Your wallet has been successfully created"
