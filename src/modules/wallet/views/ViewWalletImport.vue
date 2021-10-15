@@ -126,17 +126,3 @@ export default defineComponent({
 });
 </script>
 
-<style>
-.radio-toolbar input[type="radio"] {
-  opacity: 0;
-  width: 0;
-  
-}
-.radio-toolbar label {
-    display: inline-block;
-    border: 1px solid #D3D3D3;
-    width: 59%
-}
-
-
-</style>
