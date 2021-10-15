@@ -4,6 +4,10 @@
       <div class="flex-none self-center flex items-end ml-2 sm:ml-0">
         <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40"></router-link>
       </div>
+      <div class="flex-none flex items-center md:ml-18">
+        <img src="@/assets/img/icon-home.svg" class="h-6 w-6 inline-block">
+      </div>
+
       <div class="flex-grow header-height"></div>
       <div class="flex-none header-menu mt-1 tsm:mt-3">
         <div class=" flex flex-row">
@@ -13,25 +17,19 @@
           <div class="w-10 text-center flex flex-row h-10 items-center xs:ml-2 sm:ml-0">
             <img src="@/assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
           </div>
-          <div class="w-14 md:w-40 pl-3 text-center flex gray-line-left h-10 items-center">
+          <div class="w-14 md:w-40 pl-3 text-center flex h-10 items-center">
             <div>
               <img src="@/assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="chainAPIEndpoint"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkState.chainNetworkName }}</div>
             </div>
           </div>
-          <div class="w-60 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
-            <div>
-              <div class="text-xs inline-block">{{ walletState.currentLoggedInWallet.name }}</div>
-              <div class="text-xs">{{$t('Header.totalbalance')}}: <span>{{ totalBalance }}</span> {{ currentNativeTokenName}}</div>
-            </div>
-          </div>
-          <div class="w-17 text-center h-10 items-center gray-line-left mr-1">
+          <!-- <div class="w-17 text-center h-10 items-center mr-1">
             <div class="text-xs inline-block mt-3" v-if="wideScreen">
               <a @click="logout()">{{$t('Header.signout')}}</a>
             </div>
             <div class="inline-block mt-2" v-else>
               <font-awesome-icon icon="sign-out-alt" @click="logout()" class="text-blue-400 w-6 h-6 cursor-pointer ml-3"></font-awesome-icon>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -77,7 +75,6 @@ import { Helper } from '@/util/typeHelper';
 // import Dropdown from 'primevue/dropdown';
 // import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
 import selectLanguageModal from '@/modules/home/components/selectLanguageModal.vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { useToast } from "primevue/usetoast";
 import { Connector } from '../models/connector';
@@ -91,7 +88,6 @@ export default defineComponent({
   components: {
     // Dropdown,
     selectLanguageModal,
-    FontAwesomeIcon,
   },
 
   name: 'headerComponent',
@@ -519,10 +515,6 @@ export default defineComponent({
   .lang-mobile-placement-postlogin{
     left: 0px;
   }
-}
-
-.gray-line-left{
-  border-left: 1px solid #E4E7EB;
 }
 
 .p-hidden-accessible {
