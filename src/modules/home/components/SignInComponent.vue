@@ -57,7 +57,7 @@ export default defineComponent({
       )
     );
     
-     NetworkStateUtils.changeNetworkByIndex(2)
+     NetworkStateUtils.changeNetworkByIndex(1)
     const selectedNetwork = computed(()=>{ return {label: networkState.chainNetworkName, value: networkState.chainNetwork }});
      const chainsNetworks = computed(()=> {
 
