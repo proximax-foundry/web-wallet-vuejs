@@ -1,27 +1,28 @@
 <template>
-  <div class="container mx-auto text-center">
-    <form
+<div class="container mx-auto md:grid md:grid-cols-2 md:mt-10 lg:px-20 xl:px-40 ">
+    <IntroTextComponent />
+    <div class="md:col-span-1 bg-white mx-5 md:mx-0 px-30 pt-1 md:pt-0 rounded-md">
+      <router-link :to="{ name: 'Home' }" class="text-xs m-2 text-blue-link items-center flex"><img src="@/assets/img/chevron_left.svg" class="w-5 inline-block">Back</router-link>
+       <form
       v-if="!newWallet"
       @submit.prevent="createWallet"
-    >
-      <h1 class="font-bold big-title">{{$t('createwallet.createwallet')}}</h1>
-      <div class="mx-auto page-title-gray-line pt-5">
-        <div class="w-10/12 lg:w-8/12 self-center inline-block">
-          <div class="error error_box" v-if="err!=''">{{ err }}</div>
-          <div class="text-left text-tsm my-4 ml-4 text-gray-600"><b>{{$t('Header.network')}}</b>: {{ selectedNetworkName }}</div>
-          <TextInput :placeholder="$t('createwallet.walletname')" :errorMessage="$t('createwallet.inputwalletname')" v-model="walletName" icon="wallet" />
-          <div class="grid xs:grid-cols-1 md:grid-cols-2">
-            <PasswordInput :placeholder="$t('createwallet.inputpassword')" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd" class="mr-1" />
-            <PasswordInput :placeholder="$t('createwallet.confirmpassword')" :errorMessage="$t('createwallet.doesntmatch')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd" class="ml-1" />
-          </div>
-          <div class="mt-10">
-            <button type="button" class="default-btn mr-5" @click="clearInput();">{{$t('signin.clear')}}</button>
-            <button type="submit" class="default-btn disabled:opacity-50" :disabled="disableCreate">{{$t('welcome.create')}}</button>
-          </div>
-        </div>
+      >
+      <div class="text-sm text-center mt-20 mb-6">Create Wallet</div>
+      <div class="w-7/12 ml-auto mr-auto">
+        <div class="error error_box" v-if="err!=''">{{ err }}</div>
+        <TextInput  placeholder="Name your wallet" :errorMessage="$t('createwallet.inputwalletname')" v-model="walletName" icon="wallet" />
+        <PasswordInput placeholder="Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
+        <PasswordInput placeholder="Confirm Password" :errorMessage="$t('createwallet.doesntmatch')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd"  />
+        <div class = 'mt-6 text-center text-xs'>Current Network: </div>
+        <div class = 'text-center'>{{networkState.chainNetworkName}}</div>
       </div>
-    </form>
-    <div v-else>
+      <button type="submit" class="text-center mt-5 font-bold default-btn block ml-auto mr-auto w-7/12 disabled:opacity-50" :disabled="disableCreate">{{$t('welcome.create')}}</button>
+       
+        <div class ='mt-12 text-center text-xs mt-6 mb-1'>Already have Sirius wallet account?</div>
+        <div class ="text-center  text-xs text-blue-link"><router-link :to="{ name: 'Home' }">Sign in here ></router-link></div>
+      <div class = 'h-20'></div>
+      </form>
+      <div v-else>
       <h1 class="font-bold big-title">{{$t('createsuccessful.congratz')}}!</h1>
       <p class="mt-2">{{$t('createsuccessful.congratztext')}}</p>
       <div class="mx-auto page-title-gray-line pt-5 lg:px-20">
@@ -64,8 +65,8 @@
             <div class="border border-yellow-600 rounded-full w-8 h-8 inline-block mb-4 relative">
               <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-600 inline-block absolute" style="left: 12px; top: 6px;"></font-awesome-icon>
             </div>
-            <p>{{$t('createsuccessful.warningtext1')}}.</p>
-            <p>{{$t('createsuccessful.warningtext2')}}.</p>
+            <p>{{$t('createsuccessful.warningtext1')}}</p>
+            <p>{{$t('createsuccessful.warningtext2')}}</p>
           </div>
         </div>
         <div class="inline-block mt-10 w-full">
@@ -81,7 +82,9 @@
         </div>
       </div>
     </div>
+    </div>
   </div>
+ 
 </template>
 
 <script lang="ts">
@@ -99,10 +102,12 @@ import { ChainUtils } from '@/util/chainUtils';
 import { networkState } from "@/state/networkState";
 import { walletState } from "@/state/walletState";
 import {useI18n} from 'vue-i18n'
+import IntroTextComponent from '@/components/IntroTextComponent.vue'
 
 export default defineComponent({
   name: 'ViewWalletCreate',
   components: {
+    IntroTextComponent,
     TextInput,
     PasswordInput
   },
@@ -167,6 +172,7 @@ export default defineComponent({
     };
 
     return {
+      networkState,
       err,
       newWallet,
       selectedNetwork,
