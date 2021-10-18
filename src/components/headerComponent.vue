@@ -1,44 +1,57 @@
 <template>
   <header>
-    <div class="container mx-auto header-height flex items-stretch">
+    <div class="header-height flex items-stretch px-2 gray-bar" v-if="loginStatus">
       <div class="flex-none self-center flex items-end ml-2 sm:ml-0">
-        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet.svg" class="w-24 tsm:w-40"></router-link>
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40"></router-link>
       </div>
+      <div class="flex-none flex items-center md:ml-18">
+        <img src="@/assets/img/icon-home.svg" class="h-6 w-6 inline-block">
+      </div>
+
       <div class="flex-grow header-height"></div>
-      <div class="flex-none header-menu mt-1 tsm:mt-3" v-if="loginStatus">
-        <div class=" flex flex-row">
+      <div class="flex-none">
+        <div class=" flex flex-row h-full">
           <!-- <div class="w-5 sm:w-16 inline-block items-center relative">
             <selectLanguageModal class="lang-mobile-placement-postlogin" />
           </div> -->
-          <div class="w-10 text-center flex flex-row h-10 items-center xs:ml-2 sm:ml-0">
-            <img src="../assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
-          </div>
-          <div class="w-14 md:w-40 pl-3 text-center flex gray-line-left h-10 items-center">
-            <div>
-              <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="chainAPIEndpoint"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkState.chainNetworkName }}</div>
+          <div class="w-16 flex flex-row items-center left-gray-line">
+            <div class="text-center w-full">
+              <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block">
             </div>
           </div>
-          <div class="w-60 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
-            <div>
-              <div class="text-xs inline-block">{{ walletState.currentLoggedInWallet.name }}</div>
-              <div class="text-xs">{{$t('Header.totalbalance')}}: <span>{{ totalBalance }}</span> {{ currentNativeTokenName}}</div>
+          <div class="w-16 flex flex-row items-center left-gray-line">
+            <div class="text-center w-full h-6">
+              <router-link :to="{name : 'ViewServices'}" class="h-6 w-6 inline-block">
+                <img src="@/assets/img/icon-setting.svg" class="opacity-80 hover:opacity-100 transition-all duration-300">
+              </router-link>
             </div>
           </div>
-          <div class="w-17 text-center h-10 items-center gray-line-left mr-1">
+          <div class="md:w-40 pl-3 text-center flex items-center left-gray-line">
+            <div class="flex items-center">
+              <img src="@/assets/img/icon-testnet-block.svg" class="w-7 inline-block" :title="chainAPIEndpoint"> <div class="inline-block text-txs text-white text-left ml-2" v-if="wideScreen"><div class="font-thin mb-1">CONNECTED TO</div><div class="text-tsm">{{ networkState.chainNetworkName }}</div></div>
+            </div>
+          </div>
+          <!-- <div class="w-17 text-center h-10 items-center mr-1">
             <div class="text-xs inline-block mt-3" v-if="wideScreen">
               <a @click="logout()">{{$t('Header.signout')}}</a>
             </div>
             <div class="inline-block mt-2" v-else>
               <font-awesome-icon icon="sign-out-alt" @click="logout()" class="text-blue-400 w-6 h-6 cursor-pointer ml-3"></font-awesome-icon>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
-      <div class="flex-none self-center header-menu" v-else>
-        <div class="w-26 text-center inline-block ml-2 sm:ml-0" v-if="wideScreen">
+    </div>
+    <div class="container mx-auto header-height flex items-stretch" v-else>
+      <div class="flex-none self-center flex items-end ml-2 sm:ml-0">
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-proximax-sirius-wallet.svg" class="w-24 tsm:w-40"></router-link>
+      </div>
+      <div class="flex-grow header-height"></div>
+      <div class="flex-none self-center header-menu">
+        <div class="w-20 inline-block ml-2 sm:ml-0" v-if="wideScreen">
           <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">{{$t('Header.home')}}</router-link>
         </div>
-        <div class="w-16 text-center inline-block" v-if="wideScreen">
+        <div class="w-20 inline-block" v-if="wideScreen">
           <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold">{{$t('Header.wallet')}}</router-link>
         </div>
         <div class="text-center inline-block">
@@ -71,7 +84,6 @@ import { Helper } from '@/util/typeHelper';
 // import Dropdown from 'primevue/dropdown';
 // import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
 import selectLanguageModal from '@/modules/home/components/selectLanguageModal.vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { useToast } from "primevue/usetoast";
 import { Connector } from '../models/connector';
@@ -85,7 +97,6 @@ export default defineComponent({
   components: {
     // Dropdown,
     selectLanguageModal,
-    FontAwesomeIcon,
   },
 
   name: 'headerComponent',
@@ -470,6 +481,14 @@ export default defineComponent({
 <style lang="scss">
 @import "../assets/scss/multiselect.scss";
 
+.left-gray-line{
+  border-left: 1px solid #58585F;
+}
+
+.gray-bar{
+  background: #3F4058;
+}
+
 .lang-mobile-placement{
   top: -30px; position: relative;
 }
@@ -509,10 +528,6 @@ export default defineComponent({
   .lang-mobile-placement-postlogin{
     left: 0px;
   }
-}
-
-.gray-line-left{
-  border-left: 1px solid #E4E7EB;
 }
 
 .p-hidden-accessible {

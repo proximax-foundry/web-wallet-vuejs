@@ -1,11 +1,12 @@
 <template>
   <div>
-    <div class="h-5 text-left mb-1">
-      <transition enter-active-class="animate__animated animate__fadeInUp">
-        <span v-if="showSelectTitle" class="ml-16 lg:ml-18 xl:ml-24 text-xs text-blue-400 ">{{ placeholder }}</span>
-      </transition>
-    </div>
+    
     <div class="select selectPlugin" style="position: relative">
+      <div class="h-5 text-left m-auto w-8/12 mb-1">
+        <transition enter-active-class="animate__animated animate__fadeInUp">
+          <span v-if="showSelectTitle" class="text-xs text-blue-400">{{ placeholder }}</span>
+        </transition>
+      </div>
       <Multiselect
         class = 'border w-8/12'
         :placeholder="placeholder"
