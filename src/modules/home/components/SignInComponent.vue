@@ -2,20 +2,18 @@
   <div>
     <form @submit.prevent="login">
       <fieldset >
-        <div class="error error_box" v-if="err!=''">{{ err }}</div>
-          <div class="text-center">
-            <SelectInputPlugin class = 'block ml-auto mr-auto' placeholder="Select Wallet" :errorMessage="$t('signin.selectwallet')" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
-          </div>
+        <div class="w-8/12 text-center mr-auto ml-auto error error_box" v-if="err!=''">{{ err }}</div>
+          <SelectInputPlugin class = 'block ml-auto mr-auto' placeholder="Select Wallet" :errorMessage="$t('signin.selectwallet')" v-model="selectedWallet" :options="wallets" @default-selected="selectedWallet=0" @clear-selection="clearWalletOption" />
           <div class= 'text-center'>
             <PasswordInput  class = 'w-8/12 block ml-auto mr-auto' placeholder="Password" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
           </div>
           <!-- <div class = 'text-center'>
             <Dropdown  selected v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
           </div> -->
-          <div class = 'text-center text-xs'>Current Network: </div>
+          <div class = 'text-center text-xs mt-3'>Current Network: </div>
           <div class = 'text-center'>{{networkState.chainNetworkName}}</div>
           <div class="mt-4 text-center">
-            <button type="submit" class="default-btn bg-gray-primary py-2 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
+            <button type="submit" class="default-btn bg-gray-primary py-2 my-1 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
           </div>
       </fieldset>
     </form>

@@ -14,7 +14,7 @@
           </div>
           </router-link>
       </div>
-      <div class ='text-center text-xs mt-6 mb-1'>No Sirius Account wallet yet?</div>
+      <div class ='text-center text-xs mt-6 mb-1'>No Sirius wallet account yet?</div>
       <div class ="text-center  text-xs text-blue-link"><router-link :to="{ name: 'ViewWalletCreateSelection' }">Create Account Wallet ></router-link></div>
       <div class = 'h-16 '></div>
     </div>
