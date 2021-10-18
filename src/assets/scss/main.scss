@@ -64,7 +64,7 @@ body{
 }
 
 .error_box{
-  @apply bg-red-100 py-3 rounded-xl px-3;
+  @apply bg-red-100 py-1 rounded-md px-1 my-3 ;
 }
 
 .blue-btn{
@@ -81,6 +81,10 @@ body{
 
 .default-btn{
   @apply gray-btn py-3 px-10;
+}
+
+.default-secondary-btn{
+  @apply  bg-gray-200 text-xs text-black transition-all duration-500 hover:bg-gray-primary hover:text-white hover:shadow-lg focus:outline-none py-3 px-10;
 }
 
 .big-default-btn{

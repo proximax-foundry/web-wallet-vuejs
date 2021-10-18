@@ -2,7 +2,7 @@
  <div class="container mx-auto md:grid md:grid-cols-2 md:mt-10 lg:px-20 xl:px-40 ">
     <IntroTextComponent />
     <div class="md:col-span-1 bg-white mx-5 md:mx-0 px-30 pt-1 md:pt-0 rounded-md">
-      <router-link :to="{ name: 'ViewWalletCreateSelection' }" class="text-xs m-2 text-blue-link items-center flex"><img src="@/assets/img/chevron_left.svg" class="w-5 inline-block">Back</router-link>
+      <router-link v-if="!newWallet" :to="{ name: 'ViewWalletCreateSelection' }" class="text-xs m-2 text-blue-link items-center flex"><img src="@/assets/img/chevron_left.svg" class="w-5 inline-block">Back</router-link>
        <form
       v-if="!newWallet"
       @submit.prevent="createWallet"
@@ -30,53 +30,56 @@
         <div class = 'h-20'></div>
     </form>
       <div v-else>
-      <h1 class="font-bold big-title">{{$t('createsuccessful.congratz')}}</h1>
-      <p class="mt-2">{{$t('createsuccessful.congratztext')}}</p>
-      <div class="mx-auto page-title-gray-line pt-5 lg:px-20">
-        <div class="text-xl mb-5">{{ newWallet.name }}</div>
-        <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
+      <h1 class="text-sm mb-2 mt-8 text-center">{{$t('createsuccessful.congratz')}}</h1>
+      <p class="text-xs text-center mb-1">{{$t('createsuccessful.congratztext')}}.</p>
+        <div class="text-base mb-5 text-center">{{ walletName }}</div>
+        <div class="flex w-9/12 mr-auto ml-auto justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
           <div class="text-left w-full relative">
             <div class="absolute z-20 w-full h-full"></div>
             <div class="text-xs font-bold mb-1">{{$t('createsuccessful.address')}}:</div>
             <div
               id="address"
-              class="text-sm w-full outline-none bg-gray-100 z-10 break-all" :copyValue="newWallet.address" copySubject="Address"
+              class="text-xs w-full outline-none bg-gray-100 z-10 break-all" :copyValue="newWallet.address" copySubject="Address"
             >{{ newWallet.address }}</div>
           </div>
-          <font-awesome-icon icon="copy" @click="copy('address', addressLabel)" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
+          <font-awesome-icon icon="copy" @click="copy('address', addressLabel)" class="pl-1 w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
         </div>
-        <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
+        <div class="flex w-9/12 mr-auto ml-auto justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
           <div class="text-left w-full relative">
             <div class="absolute z-20 w-full h-full"></div>
             <div class="text-xs font-bold mb-1">{{$t('accounts.publickey')}}:</div>
             <div
               id="public"
-              class="text-sm w-full outline-none bg-gray-100 z-10 break-all" :copyValue="newWallet.publicKey" copySubject="Public Key"
+              class="text-xs w-full outline-none bg-gray-100 z-10 break-all" :copyValue="newWallet.publicKey" copySubject="Public Key"
             >{{ newWallet.publicKey }}</div>
           </div>
-          <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
+          <font-awesome-icon icon="copy" @click="copy('public')" class="pl-1 w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
         </div>
-        <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center" v-if="showPK">
+        <div class="flex w-9/12 mr-auto ml-auto justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center" v-if="showPK">
           <div class="text-left w-full relative">
             <div class="absolute z-20 w-full h-full"></div>
             <div class="text-xs font-bold mb-1">{{$t('createprivatekeywallet.privatekey')}}:</div>
             <div
               id="private"
-              class="text-sm w-full outline-none bg-gray-100 z-10 break-all" :copyValue="privateKey" copySubject="Private Key"
+              class="text-xs w-full outline-none bg-gray-100 z-10 break-all" :copyValue="privateKey" copySubject="Private Key"
             >{{ privateKey }}</div>
           </div>
-          <font-awesome-icon icon="copy" @click="copy('private')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
+          <font-awesome-icon icon="copy" @click="copy('private')" class="pl-1 w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
         </div>
-        <div class="flex justify-between p-4 rounded-xl bg-yellow-100 mb-4">
+         <div class="flex w-9/12 mr-auto ml-auto justify-between p-4 rounded-xl bg-yellow-100 mb-4">
           <div class="text-center w-full">
-            <div class="border border-yellow-600 rounded-full w-8 h-8 inline-block mb-4 relative">
+            <!-- <div class="border border-yellow-600 rounded-full w-8 h-8 inline-block mb-4 relative">
               <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-600 inline-block absolute" style="left: 12px; top: 6px;"></font-awesome-icon>
-            </div>
-            <p>{{$t('createsuccessful.warningtext1')}}.</p>
-            <p>{{$t('createsuccessful.warningtext2')}}.</p>
+            </div> -->
+            <p class = 'text-xs'>{{$t('createsuccessful.warningtext1')}}</p>
+            <p class = 'text-xs'>{{$t('createsuccessful.warningtext2')}}</p>
           </div>
         </div>
-        <div class="inline-block mt-10 w-full">
+         <a class="mt-5 font-bold text-center default-secondary-btn block ml-auto mr-auto w-9/12" @click="showPK = !showPK">{{ showPK? $t('createsuccessful.hide'):$t('createsuccessful.show') }} {{$t('createprivatekeywallet.privatekey')}}</a>
+        <a class="mt-3 font-bold text-center default-secondary-btn block ml-auto mr-auto w-9/12">{{$t('createsuccessful.savewalletpaper')}}</a>
+        <router-link :to="{name: 'Home'}" class="mt-3 font-bold text-center default-btn block ml-auto mr-auto w-9/12">{{$t('createsuccessful.continue')}}</router-link>
+        <div class = 'h-10'></div>
+       <!--  <div class="inline-block mt-10 w-full">
           <div class="grid xs:grid-cols-1 md:grid-cols-3">
             <div class="px-5 self-center">
               <a class="block big-default-btn my-3 self-center w-full" @click="showPK = !showPK">{{ showPK? $t('createsuccessful.hide'):$t('createsuccessful.show') }} {{$t('createprivatekeywallet.privatekey')}}</a>
@@ -86,8 +89,7 @@
             </div>
             <div class="px-5 self-center"><router-link :to="{name: 'Home'}" class="block big-default-btn my-3 self-center">{{$t('createsuccessful.continue')}}</router-link></div>
           </div>
-        </div>
-      </div>
+        </div> -->
     </div>
     </div>
   </div>

@@ -9,19 +9,19 @@
         <label for = 'new-wallet' class = 'text-left py-3 text-xs pl-4'> 
           <img  src="@/modules/wallet/img/icon-add-new.svg" class=" h-6 w-6 inline-block mr-1"> 
           {{$t('createwallet.newwallet')}}
-          <font-awesome-icon  v-if = 'currentValue==0' class = 'mr-2 mt-1 float-right text-white bg-black rounded-full ' icon="check" ></font-awesome-icon>
+          <font-awesome-icon  v-if = 'currentValue==0' class = 'p-1 mr-2 mt-1 float-right text-gray-200 bg-black rounded-full text-sm' icon="check" ></font-awesome-icon>
         </label>
         <input name = 'create-type' type='radio' id='from-pk' value= '1'  v-model='currentValue'>   
         <label for = 'from-pk' class = 'ml-1 text-left py-3 text-xs pl-4 '> 
           <img src="@/modules/wallet/img/icon-private-key.svg" class=" h-6 w-6 inline-block mr-1"> 
           {{$t('createwallet.fromprivatekey')}}
-          <font-awesome-icon  v-if = 'currentValue==1' class = 'mr-2 mt-1 float-right text-white bg-black rounded-full ' icon="check" ></font-awesome-icon>
+          <font-awesome-icon  v-if = 'currentValue==1' class = 'p-1 mr-2 mt-1 float-right text-gray-200 bg-black rounded-full text-sm' icon="check" ></font-awesome-icon>
         </label>
         <input name = 'create-type' type='radio' id='import' value= '2'  v-model='currentValue' >   
         <label for = 'import' class = 'text-left py-3 text-xs pl-4'> 
           <img src="@/modules/wallet/img/icon-wallet-import.svg" class=" h-6 w-6 inline-block mr-1"> 
           {{$t('createwallet.fromwalletbackup')}}
-          <font-awesome-icon v-if = 'currentValue==2' class = 'mr-2 mt-1 float-right text-white bg-black rounded-full ' icon="check" ></font-awesome-icon>
+          <font-awesome-icon v-if = 'currentValue==2' class = 'p-1 mr-2 mt-1 float-right text-gray-200 bg-black rounded-full text-sm ' icon="check" ></font-awesome-icon>
         </label>
      </div>
       <router-link v-if='currentValue==0' :to="{ name: 'ViewWalletCreate' }" class = 'mt-5 font-bold text-center default-btn block ml-auto mr-auto w-7/12'>Next</router-link>
@@ -51,24 +51,24 @@ export default defineComponent({
 });
 </script>
 
-<style>
-.radio-toolbar input[type="radio"] {
-  opacity: 0;
-  width: 0;
-  
-}
-.radio-toolbar label {
-    display: inline-block;
-    border: 1px solid #D3D3D3;
-    width: 59%
-}
-
-.radio-toolbar label:nth-child(4) {
-    display: inline-block;
-    border-left: 1px solid #d3d3d3;
-    border-right: 1px solid #d3d3d3;
-    border-top: 0px solid #d3d3d3;
-    border-bottom: 0px solid #d3d3d3;
-    width: 59%
+<style lang = 'scss' scoped>
+.radio-toolbar {
+	input[type="radio"] {
+		opacity: 0;
+		width: 0;
+	}
+	label {
+		display: inline-block;
+		border: 1px solid #D3D3D3;
+		width: 59%;
+		&:nth-child(4) {
+			display: inline-block;
+			border-left: 1px solid #d3d3d3;
+			border-right: 1px solid #d3d3d3;
+			border-top: 0px solid #d3d3d3;
+			border-bottom: 0px solid #d3d3d3;
+			width: 59%;
+		}
+	}
 }
 </style>
