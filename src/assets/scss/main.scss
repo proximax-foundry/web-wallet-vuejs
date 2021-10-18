@@ -7,6 +7,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
 // @import '~tailwind-sass';
 
 :root {
@@ -45,7 +47,7 @@ a{
 }
 
 body{
-  font-family: Lato,Arial,Helvetica,sans-serif !important;
+  font-family: 'Inter', Lato, Arial, Helvetica, sans-serif !important;
   @apply tracking-wide;
 }
 

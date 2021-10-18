@@ -5,7 +5,7 @@
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
     >
-      <div v-show="toggleModal" class="popup-outer absolute flex z-40">
+      <div v-show="toggleModal" class="popup-outer fixed flex z-40">
         <div class="modal-popup-box m-2">
           <div class="delete-position mt-2 mr-1 cursor-pointer" @click="toggleModal = false">
             <img src="@/assets/img/delete.svg" class="w-5 inline-block">
@@ -15,7 +15,7 @@
           </div>
           <div class="lang-option">
             <div v-for="(lang, item) in options" :key="item" class="flex justify-between border-gray-300 border-b py-3">
-              <div class="text-gray-800 text-xs">{{ lang.label }}</div><span v-if="lang.value == selected" class="text-gray-400 text-txs items-center flex">CURRENT</span><a href="#" class="items-center flex text-blue-300" @click="changeLang(lang.value)" v-else>SELECT</a>
+              <div class="text-gray-800 text-xs">{{ lang.label }}</div><span v-if="lang.value == selected" class="text-gray-400 text-txs items-center flex">CURRENT</span><span class="cursor-pointer text-txs items-center flex text-blue-300" @click="changeLang(lang.value)" v-else>SELECT</span>
             </div>
           </div>
         </div>
@@ -78,7 +78,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../../../assets/scss/multiselect.scss";
+@import "@/assets/scss/multiselect.scss";
 #langSelector ::v-deep {
   top: 7px;
   position: absolute;

@@ -22,15 +22,19 @@
     <ConfirmDialog></ConfirmDialog>
     <headerComponent></headerComponent>
     <div class="flex-grow">
-      <div :class="login?`w-full mx-auto text-center`:``">
-        <NavigationMenu v-if="login"></NavigationMenu>
-        <div :class="`${ login?'page container inline-block pt-5 px-2 sm:px-10':''}`">
+      <div :class="login?`flex`:``">
+        <NavigationMenu v-if="login" class="flex-shrink-0 bg-gray-50 flex-1 text-left text-xs bg-navi"></NavigationMenu>
+        <div :class="`${ login?'inline-block pt-5 px-2 sm:px-10 flex-grow':''}`">
           <router-view></router-view>
+          <footer class="h-9 mt-20 text-center sm:text-justify sm:flex text-xs sm:justify-between container mx-auto text-gray-700" v-if="login">
+            <div class="ml-2 sm:ml-0">Copyright 2021 ProximaX®. All rights reserved. <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary hover:underline">{{$t('Footer.link')}}</a> <selectLanguageModal class="inline-block" /></div>
+            <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span>Version BETA {{$t('Header.version')}}{{ versioning }}</span></div>
+          </footer>
         </div>
       </div>
     </div>
     <!-- <PageComponent></PageComponent> -->
-    <footer class="h-12 mt-20 text-center sm:text-justify sm:flex text-xs sm:justify-between container mx-auto text-gray-700 pb-5">
+    <footer class="h-12 mt-20 text-center sm:text-justify sm:flex text-xs sm:justify-between container mx-auto text-gray-700 pb-5" v-if="!login">
       <div class="ml-2 sm:ml-0">Copyright 2021 ProximaX®. All rights reserved. <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary hover:underline">{{$t('Footer.link')}}</a></div>
       <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span>Version BETA {{$t('Header.version')}}{{ versioning }}</span></div>
     </footer>
@@ -39,6 +43,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, getCurrentInstance, watch, ref } from "vue";
+import selectLanguageModal from '@/modules/home/components/selectLanguageModal.vue';
 import packageData from "../package.json";
 import headerComponent from '@/components/headerComponent.vue'
 import NavigationMenu from '@/components/NavigationMenu.vue'
@@ -54,11 +59,12 @@ export default defineComponent({
   name: 'App',
   components: {
     headerComponent,
-    // PageComponent,
     NavigationMenu,
     ConfirmDialog,
     Toast,
+    selectLanguageModal,
   },
+
   setup() {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance!.appContext.config.globalProperties.emitter;
@@ -90,5 +96,13 @@ export default defineComponent({
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.h-screen{
+  height:calc(100vh - 4rem) !important;
+}
+
+.bg-navi{
+  background: #F2F2F5;
 }
 </style>
