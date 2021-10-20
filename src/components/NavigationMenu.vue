@@ -121,7 +121,13 @@ export default{
       () => {
         if(walletState.currentLoggedInWallet){
           let displayAccounts = [];
-          for(var a = 0; a < 5; ++a){
+          let accountCount;
+          if(walletState.currentLoggedInWallet.accounts.length < 6){
+            accountCount = walletState.currentLoggedInWallet.accounts.length;
+          }else{
+            accountCount = 5;
+          }
+          for(var a = 0; a < accountCount; ++a){
             displayAccounts.push(walletState.currentLoggedInWallet.accounts[a]);
           }
           return displayAccounts;
