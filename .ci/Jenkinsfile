@@ -75,6 +75,12 @@ pipeline {
                 
                 echo 'Extract Artifact'
                 sh "tar -xvf ${ARTIFACT}"
+
+                configFileProvider(
+                    [configFile(fileId: 'testnet-chain-profile', variable: 'CHAIN_PROFILE')]) {
+                    sh 'rm dist/chainProfile.json'
+                    sh 'cp $CHAIN_PROFILE dist/chainProfile.json'
+                }
                 
                 withCredentials([string(credentialsId: 'cloudfront_id', variable: 'CLOUDFRONT_ID'), 
                         string(credentialsId: 's3_bucket', variable: 'S3_BUCKET'),
