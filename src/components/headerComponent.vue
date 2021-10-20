@@ -5,7 +5,7 @@
         <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40"></router-link>
       </div>
       <div class="flex-none flex items-center md:ml-18">
-        <img src="@/assets/img/icon-home.svg" class="h-6 w-6 inline-block">
+        <router-link :to="{name : 'ViewDashboard'}"><img src="@/assets/img/icon-home.svg" class="h-6 w-6 inline-block"></router-link>
       </div>
 
       <div class="flex-grow header-height"></div>
