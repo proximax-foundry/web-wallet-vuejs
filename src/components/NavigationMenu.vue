@@ -21,8 +21,8 @@
       <router-link :to="{ name : 'ViewServicesAddressBook'}" class="link_block flex items-center"><img src="@/assets/img/navi/icon-address-book.svg" class="h-3 w-3 inline-block relative mr-2">Address Book</router-link>
     </div>
     <div class="flex-grow"></div>
-    <div class="flex-glow-0">
-      <a href="#" class="signout_block flex items-center"><img src="@/assets/img/navi/icon-sign-out.svg" class="h-3 w-3 inline-block relative mr-2" @click="logout()">{{$t('Header.signout')}}</a>
+    <div class="flex-glow-0 w-60">
+      <a @click="logout()" class="signout_block flex items-center cursor-pointer"><img src="@/assets/img/navi/icon-sign-out.svg" class="h-3 w-3 inline-block relative mr-2" @click="logout()">{{$t('Header.signout')}}</a>
     </div>
 
     <!-- <font-awesome-icon @click="showhideMenu();" icon="bars" :class="menuColorClass" class="menuBar absolute w-4 cursor-pointer" style="right: 7px; top: 9px;" v-if="showBar"></font-awesome-icon> -->
