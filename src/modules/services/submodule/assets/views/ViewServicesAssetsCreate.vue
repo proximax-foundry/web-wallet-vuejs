@@ -132,7 +132,7 @@ import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
 
 export default {
-  name: 'ViewMosaicCreate',
+  name: 'ViewServicesAssetsCreate',
   components: {
     PasswordInput,
     SupplyInput,

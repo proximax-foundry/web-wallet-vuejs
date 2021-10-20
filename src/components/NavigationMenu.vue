@@ -1,18 +1,18 @@
 <template>
   <div class="flex flex-col">
     <div class="border-b border-gray-200 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10 font-txs text-gray-400">ACCOUNTS ({{ allAccounts.length }})</div>
+      <div class="my-3 px-10 font-txs text-gray-400">ACCOUNTS ({{ allAccountsCount }})</div>
       <div>
-        <router-link :to="{ name: 'ViewAccountDetails', params: { address: item.address }}" v-for="(item, index) in accounts.splice(0,10)" :key="index" class="link_block flex items-center"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center"><div class="text-center w-full"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div></div>{{ item.name }}</router-link>
+        <router-link :to="{ name: 'ViewAccountDetails', params: { address: item.address }}" v-for="(item, index) in accounts" :key="index" class="link_block flex items-center"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center"><div class="text-center w-full"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div></div>{{ item.name }}</router-link>
       </div>
-      <router-link :to="{ name: 'ViewAccountDisplayAll'}" class="link_block flex items-center" v-if="allAccounts.length > 10"><img src="@/assets/img/navi/icon-accounts.svg" class="h-4 w-4 inline-block mr-1">View all accounts</router-link>
+      <router-link :to="{ name: 'ViewAccountDisplayAll'}" class="link_block flex items-center" v-if="allAccountsCount > 10"><img src="@/assets/img/navi/icon-accounts.svg" class="h-4 w-4 inline-block mr-1">View all accounts</router-link>
       <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="block font-bold link_block"><img src="@/assets/img/navi/icon-add.svg" class="h-4 w-4 inline-block relative mr-1">Create New Account</router-link>
     </div>
     <div class="border-b border-gray-200 py-5 w-60 flex-grow-0">
       <div class="my-3 px-10 text-gray-400">CREATE</div>
-      <a href="#" class="link_block flex items-center"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">Namespace</a>
-      <a href="#" class="link_block flex items-center"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">Asset</a>
-      <a href="#" class="link_block flex items-center"><img src="@/assets/img/navi/icon-services.svg" class="h-3 w-3 inline-block relative mr-2">Other Services</a>
+      <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="link_block flex items-center"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">Namespace</router-link>
+      <router-link :to="{ name : 'ViewServicesAssetsCreate'}"  class="link_block flex items-center"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">Asset</router-link>
+      <router-link :to="{ name : 'ViewServices'}"  class="link_block flex items-center"><img src="@/assets/img/navi/icon-services.svg" class="h-3 w-3 inline-block relative mr-2">Other Services</router-link>
     </div>
     <div class="border-b border-gray-200 py-5 w-60 flex-grow-0">
       <div class="my-3 px-10 text-gray-400">NAVIGATE</div>
@@ -102,14 +102,14 @@ export default{
   setup(){
     const {t} = useI18n();
     const router = useRouter();
-    const allAccounts = computed(
+    const allAccountsCount = computed(
       () => {
         if(walletState.currentLoggedInWallet){
           if(walletState.currentLoggedInWallet.others){
-            const concatOther = walletState.currentLoggedInWallet.accounts
+            const concatOther = walletState.currentLoggedInWallet.accounts.length
             return concatOther;
           } else{
-            return walletState.currentLoggedInWallet.accounts;
+            return walletState.currentLoggedInWallet.accounts.length;
           }
         } else{
           return null;
@@ -120,7 +120,11 @@ export default{
     const accounts = computed(
       () => {
         if(walletState.currentLoggedInWallet){
-          return walletState.currentLoggedInWallet.accounts;
+          let displayAccounts = [];
+          for(var a = 0; a < 5; ++a){
+            displayAccounts.push(walletState.currentLoggedInWallet.accounts[a]);
+          }
+          return displayAccounts;
         }else{
           return null;
         }
@@ -137,7 +141,7 @@ export default{
       logout,
       walletState,
       accounts,
-      allAccounts
+      allAccountsCount
     };
   }
 }

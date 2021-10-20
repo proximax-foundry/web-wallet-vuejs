@@ -22,9 +22,9 @@
     <ConfirmDialog></ConfirmDialog>
     <headerComponent></headerComponent>
     <div class="flex-grow">
-      <div :class="login?`flex full-screen`:``">
+      <div :class="login?`flex`:``">
         <NavigationMenu v-if="login" class="flex-shrink-0 bg-gray-50 text-left text-xs bg-navi"></NavigationMenu>
-        <div :class="`${ login?'inline-block pt-5 px-2 sm:px-10 flex-grow':''}`">
+        <div :class="`${ login?'inline-block pt-5 px-2 sm:px-10 flex-grow min-h-screen':''}`">
           <router-view></router-view>
           <footer class="h-9 mt-20 text-center sm:text-justify sm:flex text-xs sm:justify-between container mx-auto text-gray-700" v-if="login">
             <div class="ml-2 sm:ml-0">Copyright 2021 ProximaX®. All rights reserved. <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary hover:underline">{{$t('Footer.link')}}</a> <selectLanguageModal class="inline-block" /></div>
