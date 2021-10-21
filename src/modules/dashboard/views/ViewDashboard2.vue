@@ -1,18 +1,51 @@
 <template>
   <div class="md:grid md:grid-cols-2 mb-8">
     <div class="w-full text-center md:text-left mx-0 lg:mx-5">
+      <div class="font-bold hover:bg-gray-100 cursor-pointer inline-block py-1 px-2 pl-0 rounded-lg" @click="openSetDefaultModal = !openSetDefaultModal">
+        <font-awesome-icon icon="caret-down" class="h-5 w-5 text-gray-600 inline-block"></font-awesome-icon>&nbsp;{{ selectedAccountName }} 
+        <div v-if="isMultisig" class="text-xs font-normal ml-1 inline-block px-2 py-1 rounded bg-blue-200" >{{$t('accounts.multisig')}}</div>
+        <div v-if="isDefault" class="text-xs font-normal ml-1 inline-block px-2 py-1 rounded bg-yellow-200">{{$t('accounts.default')}}</div>
+      </div>
       <div class="text-xs mb-2">
-        <div class="relative inline-block overflow-x-hidden address_div bg-gray-50 px-2 py-4 rounded-lg default-div" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/default-account-image.png') + '); height: 30px' }">
-          <div class="absolute top-0 bg-gray-300 px-4 py-1">Default Account</div>
-          <div class="my-5">My Personal Account ></div>
-          <div class="text-gray-200 text-txs">WALLET ADDRESS</div>
-          <div class="flex items-center justify-between">
-            <div id="address" class="font-bold outline-none z-10 break-all text-sm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
-            <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 text-md cursor-pointer ml-4" style="top: 3px;"></font-awesome-icon>
+        <div class="relative inline-block overflow-x-hidden address_div">
+          <div class="absolute z-20 h-full"></div>
+          <div
+            id="address"
+            class=" outline-none z-10 break-all" :copyValue="selectedAccountAddressPlain" copySubject="Address"
+          >{{ selectedAccountAddress }}</div>
+        </div>
+        <div class="mt-2 sm:inline-block relative">
+          <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 text-md cursor-pointer inline mx-2" style="top: 3px;"></font-awesome-icon>
+          <img src="@/modules/dashboard/img/icon-qr-code.svg" @click="showAddressQRModal = true" class="w-5 inline absolute">
+        </div>
+      </div>
+      <div class="text-center md:text-left">
+        <div class="inline-block mr-4"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 h-5 inline mr-1"><span class="text-xs">{{ selectedAccountBalance }} {{ currentNativeTokenName }}</span></div>
+        <div class="inline-block" v-if="displayConvertion"><img src="@/assets/img/icon-usd-blue.svg" class="w-5 inline mr-1"><span class="text-xs" >{{$t('dashboard.usd')}}{{ currencyConvert }}</span></div>
+      </div>
+    </div>
+
+    <div class="w-full mt-5 md:mt-0">
+      <div class="text-md text-center sm:text-right lg:text-left">{{$t('dashboard.transactions')}}: <span>{{ confirmedTransactions.length + unconfirmedTransactions.length }}</span></div>
+      <div class="xs:text-center sm:text-right lg:text-left">
+        <div class="mt-2">
+          <div class="rounded-full bg-blue-primary text-white w-24 h-15 px-2 py-1 mr-3 inline-block" :class="filteredConfirmedTransactions.length>0?'cursor-pointer':''" @click="clickConfirmedTransaction()">
+            <div class="flex justify-between">
+              <div class="rounded-full text-white border pt-1 pl-1 w-6 h-6 relative"><font-awesome-icon icon="check" class="w-4 h-3 absolute" style="top: 6px;"></font-awesome-icon></div>
+              <div class="text-xs font-bold flex items-center">{{ filteredConfirmedTransactions.length }}</div>
+            </div>
           </div>
-          <div class="flex justify-around w-full">
-            <div class="inline-block">Request XPX</div>
-            <div class="inline-block">Convert to Multisig</div>
+          <div class="rounded-full bg-blue-300 text-white w-24 h-15 px-2 py-1 mr-3 inline-block" :class="filteredUnconfirmedTransactions.length>0?'cursor-pointer':''" @click="clickUnconfirmedTransaction()">
+            <div class="flex justify-between">
+              <div class="rounded-full text-white border pt-1 pl-1 w-6 h-6 relative"><font-awesome-icon icon="exclamation" class="w-4 h-3 absolute" style="left: 8px; top: 6px;"></font-awesome-icon></div>
+              <div class="text-xs font-bold flex items-center">{{ filteredUnconfirmedTransactions.length }}</div>
+            </div>
+          </div>
+          <div class="rounded-full bg-yellow-500 text-white w-24 h-15 px-2 py-1 inline-block" :class="filteredPartialTransactions.length>0?'cursor-pointer':''" @click="clickPartialTransactions()">
+            <div class="flex justify-between">
+              <img src="@/modules/dashboard/img/icon-transaction-partial-white.svg" class="w-6 h-6" />
+              <div class="text-xs font-bold flex items-center">{{ filteredPartialTransactions.length }}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -263,7 +296,7 @@ export default defineComponent({
     let selectedAccount = ref(currentAccount);
 
     const selectedAccountPublicKey = computed(()=> selectedAccount.value.publicKey);
-    const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty().substring(0, 13) + '....' + Helper.createAddress(selectedAccount.value.address).pretty().substring(Helper.createAddress(selectedAccount.value.address).pretty().length - 11));
+    const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty());
     const selectedAccountAddressPlain = computed(()=> selectedAccount.value.address);
     const selectedAccountDirectChilds = computed(()=> {
       let multisigInfo = selectedAccount.value.multisigInfo.find((x)=> x.level === 0);
@@ -1148,9 +1181,8 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-
 .address_div{
-  top: 4px;
+    top: 4px;
 }
 
 .p-dialog .p-dialog-header{
@@ -1162,14 +1194,9 @@ export default defineComponent({
 }
 
 #address{
+  width: 350px;
   @extend .text-xs !optional;
 }
-
-.default-div{
-  @apply text-gray-100;
-  background: #33344A;
-}
-
 
 @media (min-width: 640px) {
   .address_div{
@@ -1183,6 +1210,7 @@ export default defineComponent({
   }
 
   #address{
+    width: 480px;
     @extend .text-sm !optional;
   }
 }

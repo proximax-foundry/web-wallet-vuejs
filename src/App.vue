@@ -104,5 +104,6 @@ export default defineComponent({
 
 .bg-navi{
   background: #F2F2F5;
+  box-shadow: 7px 0px 10px -7px #dedede;
 }
 </style>
