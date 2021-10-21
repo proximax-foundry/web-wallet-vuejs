@@ -2,13 +2,13 @@
   <div class="md:grid md:grid-cols-2 mb-8">
     <div class="w-full text-center md:text-left mx-0 lg:mx-5">
       <div class="text-xs mb-2">
-        <div class="relative inline-block overflow-x-hidden address_div bg-gray-50 px-2 py-4 rounded-lg default-div" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/default-account-image.png') + '); height: 30px' }">
+        <div class="relative inline-block overflow-x-hidden address_div bg-gray-50 px-2 py-4 rounded-lg default-div" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/default-account-image.png') + ' )' }">
           <div class="absolute top-0 bg-gray-300 px-4 py-1">Default Account</div>
           <div class="my-5">My Personal Account ></div>
-          <div class="text-gray-200 text-txs">WALLET ADDRESS</div>
+          <div class="text-gray-200 text-xxs">WALLET ADDRESS</div>
           <div class="flex items-center justify-between">
-            <div id="address" class="font-bold outline-none z-10 break-all text-sm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
-            <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 text-md cursor-pointer ml-4" style="top: 3px;"></font-awesome-icon>
+            <div id="address" class="font-bold outline-none z-10 break-all text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
+            <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4" @click="copy('address')">
           </div>
           <div class="flex justify-around w-full">
             <div class="inline-block">Request XPX</div>
@@ -1168,6 +1168,9 @@ export default defineComponent({
 .default-div{
   @apply text-gray-100;
   background: #33344A;
+  background-position: right top;
+  background-repeat: no-repeat;
+  background-size: 250px;
 }
 
 

@@ -11,6 +11,7 @@ module.exports = {
       auto: 'auto',
     },
     fontSize: {
+      xxs: ['10px', '12px'],
       xs: ['12px', '14px'],
       sm: ['16px', '20px'],
       md: ['18px', '24px'],
