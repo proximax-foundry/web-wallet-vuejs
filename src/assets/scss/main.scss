@@ -257,33 +257,25 @@ body{
   overflow-x: auto;
 }
 
+.p-datatable-table{
+  border-collapse: separate !important;
+  border-spacing: 0px 10px;
+}
+
 .p-datatable-thead{
-  @apply bg-black text-white text-xs;
+  @apply text-gray-300 text-xxs font-light;
   th{
-    font-weight: normal; text-align: left; padding: 8px 20px;
+    text-align: left;
+    @apply py-4 border-gray-200 border-b;
   }
 }
+
 
 .p-datatable-tbody{
   td{
-    text-align: left; padding: 8px 20px; font-size: 13px; //cursor: pointer;
-    @apply text-gray-600;
-  }
-
-  tr:nth-child(2n+1){
-    td{
-      @apply bg-gray-100
-    }
-  }
-
-  tr:nth-child(2n){
-    td{
-      @apply bg-gray-200
-    }
+    @apply text-gray-600 py-5 text-left text-xs border-b border-t border-gray-200;
   }
 }
-
-
 
 
 .p-confirm-popup {

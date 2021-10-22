@@ -1,64 +1,70 @@
 <template>
-  <div class="md:grid md:grid-cols-4 mb-8">
-    <div class="pr-2">
-      <div class="w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/default-account-image.png') + ' )' }">
-        <div class="absolute top-0 px-2 py-1 default-account-header text-xxs text-gray-400 flex items-center rounded-b-sm"><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 mr-1 inline-block">DEFAULT ACCOUNT</div>
-        <div class="my-5 mt-6 flex items-center">My Personal Account <img src="@/modules/dashboard/img/icon-arrow-right.svg" class="w-2 h-2 ml-4 inline-block"></div>
-        <div class="text-gray-400 text-xxs">WALLET ADDRESS</div>
-        <div class="flex items-center justify-between mb-3">
-          <div id="address" class="font-bold outline-none z-10 break-all text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
-          <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4" @click="copy('address')">
-        </div>
-        <div class="flex justify-around w-full">
-          <div class="my-3 flex items-center"><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Request XPX</div></div>
-          <div class="my-3 flex items-center"><img src="@/modules/dashboard/img/icon-key.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Convert to Multisig</div></div>
+  <div class="pt-5 px-2 sm:px-10 bg-gray-200 pb-8">
+    <div class="md:grid md:grid-cols-4">
+      <div class="pr-2">
+        <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/default-account-image.png') + ' )' }">
+          <div class="absolute top-0 px-2 py-1 default-account-header text-xxs text-gray-400 flex items-center rounded-b-sm"><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 mr-1 inline-block">DEFAULT ACCOUNT</div>
+          <div class="my-5 mt-6 flex items-center text-xs xl:text-sm">My Personal Account <img src="@/modules/dashboard/img/icon-arrow-right.svg" class="w-2 h-2 ml-4 inline-block"></div>
+          <div class="text-gray-400 text-xxs">WALLET ADDRESS</div>
+          <div class="flex items-center justify-between mb-3">
+            <div id="address" class="font-bold outline-none z-10 break-all text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
+            <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4" @click="copy('address')">
+          </div>
+          <div class="flex justify-around w-full">
+            <div class="my-3 flex items-center"><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Request XPX</div></div>
+            <div class="my-3 flex items-center"><img src="@/modules/dashboard/img/icon-key.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Convert to Multisig</div></div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="px-2">
-      <div class="w-full relative overflow-x-hidden address_div bg-gray-50 px-7 py-4 rounded-lg balance-div flex flex-col justify-between" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/balance-bg.png') + ' )' }">
-        <div>
-          <div class="mt-5 flex items-center text-gray-300 text-txs">CURRENT BALANCE</div>
-          <div><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>.<span class="text-tsm">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div>
-          <div class="text-gray-300 text-txs mt-1">Estimate US$ {{ currencyConvert }}</div>
+      <div class="px-2">
+        <div class="shadow-md w-full relative overflow-x-hidden address_div bg-gray-50 px-7 py-4 rounded-lg balance-div flex flex-col justify-between" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/balance-bg.png') + ' )' }">
+          <div>
+            <div class="mt-5 text-gray-300 text-txs">CURRENT BALANCE</div>
+            <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>.<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
+            <div class="text-gray-300 text-txs mt-1">Estimate US$ {{ currencyConvert }}</div>
+          </div>
+          <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Send XPX</div></router-link>
         </div>
-        <div class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Send XPX</div></div>
       </div>
-    </div>
-    <div class="col-span-2 pl-2">
-      <div class="w-full relative overflow-x-hidden address_div bg-gray-50 px-7 py-4 rounded-lg transaction-div flex flex-row justify-evenly items-center" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/transaction-bg.png') + ' )' }">
-        <div class="text-center">
-          <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-successful-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredConfirmedTransactions.length }}</div></div>
-          <div class="text-xs mt-3">Succesful<br>Transactions</div>
-        </div>
-        <div class="text-center">
-          <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-unconfirmed-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredUnconfirmedTransactions.length }}</div></div>
-          <div class="text-xs mt-3">Unconfirmed<br>Transactions</div>
-        </div>
-        <div class="text-center">
-          <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-waiting-for-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredPartialTransactions.length }}</div></div>
-          <div class="text-xs mt-3">Waiting for<br>Signing</div>
+      <div class="col-span-2 pl-2">
+        <div class="shadow-md w-full relative overflow-x-hidden address_div bg-gray-50 px-7 py-4 rounded-lg transaction-div flex flex-row justify-evenly items-center" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/transaction-bg.png') + ' )' }">
+          <div class="text-center">
+            <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-successful-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredConfirmedTransactions.length }}</div></div>
+            <div class="text-xs mt-3">Succesful<br>Transactions</div>
+          </div>
+          <div class="text-center">
+            <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-unconfirmed-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredUnconfirmedTransactions.length }}</div></div>
+            <div class="text-xs mt-3">Unconfirmed<br>Transactions</div>
+          </div>
+          <div class="text-center">
+            <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-waiting-for-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredPartialTransactions.length }}</div></div>
+            <div class="text-xs mt-3">Waiting for<br>Signing</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <div class="text-left px-2 sm:px-10 bg-gray-200">
+    <div class="transition-all flex items-end">
+      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='overview'?'bg-white text-gray-primary':'cursor-pointer' }`">Overview</div>
+      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='asset'?'bg-white text-gray-primary':'cursor-pointer' }`">Assets</div>
+      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='namespaces'?'bg-white text-gray-primary':'cursor-pointer' }`">Namespaces</div>
+      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='transactions'?'bg-white text-gray-primary':'cursor-pointer' }`">All Transactions</div>
+    </div>
+  </div>
+  <div class="bg-white px-2 sm:px-10 pt-12">
+    <div class="text-xxs text-gray-400"><b class="text-gray-700">Assets</b> ({{ selectedAccountAssetsCount }} - View all)</div>
+    <AssetDataTable :assets="selectedAccountAssets" :currentPublicKey="selectedAccountPublicKey" />
+    <NamespaceDataTable :namespaces="selectedAccountNamespaces" />
+  </div>
+
   <div class="grid grid-cols-12">
     <div class="col-start-2 col-span-10">
       <div class="grid grid-cols-12">
-          <div class="py-2 text-md col-start-5 col-span-2 rounded-lg rounded-r-none font-bold" 
-          :class="namespaceAssetView == 0 ? 'bg-blue-500 text-white' : 'bg-gray-400 text-gray-100'" @click="namespaceAssetView = 0">
-            {{$t('services.namespaces')}}
-          </div>
-          <div class="py-2 text-md col-span-2 rounded-lg rounded-l-none font-bold" 
-            :class="namespaceAssetView == 1 ? 'bg-blue-500 text-white' : 'bg-gray-400 text-gray-100'" @click="namespaceAssetView = 1">
-            {{$t('dashboard.otherassets')}}
-          </div>
-      </div>
-      <div class="grid grid-cols-12">
         <div class="col-span-12 py-2">
-          <NamespaceDataTable v-if="namespaceAssetView == 0" :namespaces="selectedAccountNamespaces" />
-          <AssetDataTable v-if="namespaceAssetView == 1" :assets="selectedAccountAssets" />
+          
+          
         </div>
       </div>
     </div>
@@ -131,10 +137,11 @@ export default defineComponent({
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
+    const displayBoard = ref('overview');
+
     const showAddressQRModal = ref(false);
     const showMessageModal = ref(false);
     const showDecryptMessageModal  = ref(false);
-    const namespaceAssetView = ref(0);
 
     const displayConvertion = ref(false);
     const openSetDefaultModal = ref(false);
@@ -335,12 +342,22 @@ export default defineComponent({
       return formattedNamespaces;
     });
 
+    const selectedAccountAssetsCount = computed(()=>{
+      return selectedAccount.value.assets.length;
+    });
+
     const selectedAccountAssets = computed(()=>{
 
       let formattedAssets = [];
       let assets = selectedAccount.value.assets;
+      let assetCount;
+      if(assets.legnth <6){
+        assetCount = assets.length;
+      }else{
+        assetCount = 6;
+      }
 
-      for(let i=0; i < assets.length; ++i){
+      for(let i=0; i < assetCount; ++i){
 
         let namespaceAlias = [];
 
@@ -354,7 +371,6 @@ export default defineComponent({
 
         for(let i =0; i < namespaces.length; ++i){
           let aliasData = {
-            idHex: namespaces[i].idHex,
             name: namespaces[i].name
           };
 
@@ -365,7 +381,8 @@ export default defineComponent({
           idHex: assetId,
           owner: assets[i].owner,
           amount: Helper.toCurrencyFormat(assets[i].getExactAmount(), assets[i].divisibility),
-          alias: namespaceAlias,
+          supply: Helper.toCurrencyFormat(assets[i].getExactSupply(), assets[i].divisibility),
+          linkedNamespace: namespaceAlias,
           active: true
         };
         
@@ -1131,6 +1148,7 @@ export default defineComponent({
     });
 
     return {
+      displayBoard,
       copy,
       selectedAccountBalance,
       selectedAccountBalanceFront,
@@ -1164,9 +1182,9 @@ export default defineComponent({
       showAddressQRModal,
       showMessageModal,
       showDecryptMessageModal,
-      namespaceAssetView,
       selectedAccountNamespaces,
       selectedAccountAssets,
+      selectedAccountAssetsCount,
       openMessageModal,
       openDecryptMsgModal,
       messagePayload,
@@ -1215,21 +1233,21 @@ export default defineComponent({
   background-position: right top;
   background-repeat: no-repeat;
   background-size: 250px;
-  height: 183px;
+  height: 184px;
 }
 
 .balance-div{
   background: #fff;
   background-position: right bottom;
   background-repeat: no-repeat;
-  height: 183px;
+  height: 184px;
 }
 
 .transaction-div{
   background: #fff;
   background-position: contain;
   background-repeat: no-repeat;
-  height: 183px;
+  height: 184px;
 }
 
 

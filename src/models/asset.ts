@@ -34,4 +34,8 @@ export class Asset{
     getExactAmount(): number{
         return this.amount / Math.pow(10, this.divisibility);
     }
+
+    getExactSupply(): number{
+        return this.supply / Math.pow(10, this.divisibility);
+    }
 }

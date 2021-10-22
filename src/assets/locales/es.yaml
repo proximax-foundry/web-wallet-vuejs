@@ -314,7 +314,7 @@ dashboard:
   assetidaddress: "Asset ID/Address"
   active: "Active"
   owner: "Owner"
-  assetid: "Asset ID"
+  assetid: "ASSET ID"
   alias: "Alias"
   quantity: "Quantity"
 transfer:
