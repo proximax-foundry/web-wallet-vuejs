@@ -18,7 +18,7 @@
           <span class="uppercase font-bold text-txs">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedNamespace" header="NAMESPACE" :style="{ width: '200px' }">
+      <Column field="linkedNamespace" header="NAMESPACE" :style="{ width: '250px' }">
         <template #body="{data}">
           <diV v-for="namespace, item in data.linkedNamespace" :key="item">
             <div class="mb-1 text-txs">{{namespace.name}}</div>
@@ -35,12 +35,27 @@
           <span class="uppercase font-bold text-txs">{{data.amount}}</span>
         </template>
       </Column>
-      <Column field="creator" header="CREATOR" :style="{ width: '200px' }">
+      <Column field="creator" header="CREATOR" style="width: 200px;">
         <template #body="{data}">
           <span class="uppercase font-bold text-txs">{{ data.owner == currentPublicKey ? 'yes': 'no'}}</span>
         </template>
       </Column>
-      <Column field="block" header="BLOCK HEIGHT" >
+      <Column field="height" header="BLOCK HEIGHT">
+        <template #body="{data}">
+          <span class="text-txs">{{data.height}}</span>
+        </template>
+      </Column>
+      <Column style="width: 50px;">
+        <template #body="">
+          <div class="text-txs text-center lg:mr-2">
+            <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block">
+            <div  class="pop-option absolute right-0 w-32 rounded-sm p-2 shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-40 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+              <div class="py-1" role="none">
+                none
+              </div>
+            </div>
+          </div>
+        </template>
       </Column>
       <template #empty>
         {{$t('services.norecord')}}
@@ -81,5 +96,17 @@ export default{
   td{
     font-size: 11px;
   }
+}
+
+.pop-option:before{
+  content: "";
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid #dedede;
+  top: -20px;
+  right: 5px;
 }
 </style>

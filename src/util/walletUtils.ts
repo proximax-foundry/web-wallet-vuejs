@@ -837,10 +837,10 @@ export class WalletUtils {
                 }
                 else{
                     let assetInfo = await chainAPICall.value.assetAPI.getMosaic(mosaic.id);
-
                     let newTempAsset = new Asset(mosaicIdHex, assetInfo.divisibility, assetInfo.isSupplyMutable(), assetInfo.isTransferable(), assetInfo.owner.publicKey);
                     newTempAsset.duration = assetInfo.duration.compact();
                     newTempAsset.supply = assetInfo.supply.compact();
+                    newTempAsset.height = assetInfo.height.compact();
 
                     tempAssets.push(newTempAsset);
 

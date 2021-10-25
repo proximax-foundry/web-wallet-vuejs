@@ -311,6 +311,7 @@ export default defineComponent({
       
       let formattedNamespaces = [];
       let namespaces = selectedAccount.value.namespaces;
+      console.log(namespaces)
 
       for(let i=0; i < namespaces.length; ++i){
         
@@ -330,7 +331,7 @@ export default defineComponent({
 
         let data = {
           idHex: namespaces[i].idHex,
-          name: namespaces[i].idHex,
+          name: namespaces[i].name,
           linkType: linkName,
           linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
           active: namespaces[i].active
@@ -383,9 +384,9 @@ export default defineComponent({
           amount: Helper.toCurrencyFormat(assets[i].getExactAmount(), assets[i].divisibility),
           supply: Helper.toCurrencyFormat(assets[i].getExactSupply(), assets[i].divisibility),
           linkedNamespace: namespaceAlias,
-          active: true
+          height: assets[i].height,
         };
-        
+
         formattedAssets.push(data);
       }
 

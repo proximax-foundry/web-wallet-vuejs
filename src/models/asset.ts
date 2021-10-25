@@ -10,9 +10,9 @@ export class Asset{
     transferable: boolean;
     owner: string | null;
     namespaceId: string[] = []; 
+    height: number = 0;
 
     constructor(idHex: string, divisibility: number, supplyMutable: boolean, transferable: boolean, owner?: string){
-        
         this.idHex = idHex;
         this.divisibility = divisibility;
         this.owner = owner ? owner: null;
@@ -28,6 +28,7 @@ export class Asset{
         newAsset.namespaceId = this.namespaceId;
         newAsset.supply = this.supply;
         newAsset.amount = this.amount;
+        newAsset.height = this.height;
         return newAsset;
     }
 

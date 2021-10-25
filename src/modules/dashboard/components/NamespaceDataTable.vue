@@ -10,27 +10,29 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column field="namespaceId" :header="$t('namespace.namespaceid')" >
-        <template #body="{data}">
-          <span class="uppercase">{{data.idHex}}</span>
-        </template>
+      <Column  :style="{ width: '100px' }">
       </Column>
-      <Column field="name" :header="$t('services.name')" >
+      <Column field="name" :header="$t('services.name')" :style="{ width: '250px' }">
         <template #body="{data}">
           {{data.name}}
         </template>
       </Column>
-      <Column field="linkType" :header="$t('dashboard.linktype')" >
+      <Column field="namespaceId" :header="$t('namespace.namespaceid')" :style="{ width: '250px' }">
         <template #body="{data}">
-          {{data.linkType}}
+          <span class="uppercase">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedId" :header="$t('dashboard.assetidaddress')" >
+      <Column field="linkedId" header="LINKED ASSET / ADDRESS" style="width: 400px">
         <template #body="{data}">
           <span class="uppercase">{{data.linkedId}}</span>
         </template>
       </Column>
-      <Column field="Active" :header="$t('dashboard.active')" >
+      <Column field="linkType" header="BLOCK EXPIRES" style="width:200px;">
+        <template #body="{data}">
+          {{data.linkType}}
+        </template>
+      </Column>
+      <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" style="width: 200px">
         <template #body="{data}">
           <span class="uppercase" :class="data.active ? 'text-green-500' : 'text-red-500'">{{data.active}}</span>
         </template>
