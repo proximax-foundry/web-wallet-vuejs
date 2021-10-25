@@ -1,9 +1,5 @@
 <template>
   <div>
-    <div v-if="isShowConfirmed" class="px-5 py-2 text-left text-xs text-gray-500">{{hints}}</div>
-    <div v-if="isShowConfirmed" class="transition ease-in duration-300 w-full rounded-full px-5 py-1 mb-5" :class="borderColor">
-      <input v-model="filterText" type="text" class="w-full outline-none text-sm" placeholder="Search" @click="clickInputText()" @blur="blurInputText()" :title="hints" >
-    </div>
     <DataTable
       :value="transactions"
       :paginator="true"
@@ -479,15 +475,15 @@ export default{
        context.emit('confirmedFilter', newValue);
     });
 
-    const nsHint = "\`ns:\` - filter by Namespace (ID or name)";
-    const nsHint2 = "\`ns:-\` - filter with Namespace Name alias";
-    const nsHint3 = "\`ns:'\` - convert namespace name to Namespace ID, will ignore when invalid";
-    const hashHint = "\`hash:\` - filter Transaction Hash ";
-    const pkHint = "\`pk:\` - Public Key";
-    const assetHint = "\`asset:\` - filter by Asset ID";
-    const addressHint = "\`add:\` - filter by Address"; 
+    // const nsHint = "\`ns:\` - filter by Namespace (ID or name)";
+    // const nsHint2 = "\`ns:-\` - filter with Namespace Name alias";
+    // const nsHint3 = "\`ns:'\` - convert namespace name to Namespace ID, will ignore when invalid";
+    // const hashHint = "\`hash:\` - filter Transaction Hash ";
+    // const pkHint = "\`pk:\` - Public Key";
+    // const assetHint = "\`asset:\` - filter by Asset ID";
+    // const addressHint = "\`add:\` - filter by Address"; 
 
-    const hints = [hashHint, assetHint, pkHint, addressHint, nsHint, nsHint2, nsHint3].join('\n');
+    // const hints = [hashHint, assetHint, pkHint, addressHint, nsHint, nsHint2, nsHint3].join('\n');
 
     const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
     const blockExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.blockRoute);
@@ -625,7 +621,7 @@ export default{
       hashExplorerURL,
       publicKeyExplorerURL,
       explorerBaseURL,
-      hints,
+      // hints,
       getPublicKeyExplorerUrl,
       getNamespaceExplorerUrl,
       getAssetExplorerUrl,

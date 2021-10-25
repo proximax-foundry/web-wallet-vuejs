@@ -56,11 +56,9 @@
   <div class="bg-white px-2 sm:px-10 pt-12">
     <div class="text-xxs text-gray-400"><b class="text-gray-700">ASSETS</b> ({{ selectedAccountAssetsCount }} - View all)</div>
     <AssetDataTable :assets="selectedAccountAssets" :currentPublicKey="selectedAccountPublicKey" />
-    <div class="text-xxs text-gray-400"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
+    <div class="text-xxs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
     <NamespaceDataTable :namespaces="selectedAccountNamespaces" />
-  </div>
-
-  <div>
+    <div class="text-xxs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ filteredConfirmedTransactions.length }} - View all)</div>
     <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed" type="confirmed"></DashboardDataTable>
   </div>
 </template>
@@ -296,7 +294,6 @@ export default defineComponent({
       
       let formattedNamespaces = [];
       let namespaces = selectedAccount.value.namespaces;
-      console.log(namespaces)
 
       for(let i=0; i < namespaces.length; ++i){
         

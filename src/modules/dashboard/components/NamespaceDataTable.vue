@@ -12,8 +12,8 @@
       >
       <Column :style="{ width: '50px' }">
         <template #body="{data}">
-          <div class="flex items-center">
-            <div class="rounded-full w-2 h-2" :class="data.expiring?'bg-yellow-500':'bg-green-500'"></div>
+          <div class="text-center">
+            <div class="rounded-full w-2 h-2 inline-block" :class="data.expiring?'bg-yellow-500':'bg-green-500'"></div>
           </div>
         </template>
       </Column>

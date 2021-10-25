@@ -84,7 +84,6 @@ export default{
 
   setup(p, context){
     const borderColor = ref('border border-gray-400');
-    console.log(p.currentPublicKey);
 
     return {
       borderColor
