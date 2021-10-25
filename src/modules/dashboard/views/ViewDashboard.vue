@@ -97,6 +97,7 @@ import * as qrcode from 'qrcode-generator';
 import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
 import moment from 'moment';
+import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 
 export default defineComponent({
   name: 'ViewDashboard',
@@ -134,7 +135,6 @@ export default defineComponent({
     const manualPublicKey = ref(false);
     const initialSignerPublicKey = ref('');
     const isInitialSender = ref(false);
-    const tempResolvedNamespace = new ResolvedNamespace();
     const cosignModalKey = ref(0);
     const decryptMessageKey = ref(0);
 
@@ -290,6 +290,10 @@ export default defineComponent({
       return selectedAccount.value.namespaces.length;
     });
 
+    let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
+    chainConfig.init();
+    let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
+
     const selectedAccountNamespaces = computed(()=>{
       
       let formattedNamespaces = [];
@@ -312,9 +316,11 @@ export default defineComponent({
         }
 
         let blockDifference = namespaces[i].endHeight - blockListener.value;
-        let expiryDay = Math.floor(blockDifference / 5760);
-        let expiryHour = Math.floor((blockDifference % 5760 ) / 240);
-        let expiryMin = (blockDifference % 5760 ) % 240;
+        let blockTargetTimeByDay = (60 / blockTargetTime) * 60 * 24;
+        let blockTargetTimeByHour = (60 / blockTargetTime) * 60;
+        let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
+        let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
+        let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
         let expiryDate = moment().add(expiryDay, 'd').add(expiryHour, 'h').add(expiryMin, 'm').format('MM/D/YYYY hh:mm:ss');
 
         let data = {
