@@ -36,17 +36,17 @@ const verifyPublicKey = async(add: string):Promise<boolean> => {
 
 const verifyAddress = (currentAdd :string, add :string) => {
   const address = (add !== undefined && add !== null && add !== '') ? add.split('-').join('') : '';
-  const isPassed = ref(false);
-  const errMessage = ref('');
+  let isPassed = false;
+  let errMessage = '';
   if (address !== null && address !== undefined && address.length === 40) {
     if (WalletUtils.verifyNetworkAddressEqualsNetwork(currentAdd, add.toUpperCase())) {
-      isPassed.value = true;
+      isPassed = true;
     } else {
-      isPassed.value = false;
-      errMessage.value = 'Recipient Address Network unsupported';
+      isPassed = false;
+      errMessage = 'Recipient Address Network unsupported';
     }
   } else {
-    isPassed.value = false;
+    isPassed = false;
   }
   return {
     isPassed, errMessage

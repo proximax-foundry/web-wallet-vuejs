@@ -112,7 +112,7 @@ import DurationInput from '@/modules/services/submodule/namespaces/components/Du
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { Helper } from '@/util/typeHelper';
-import { NamespacesUtils } from '@/util/namespacesUtils';
+import { NamespaceUtils } from '@/util/namespaceUtils';
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { ChainUtils } from "@/util/chainUtils";
 import { listenerState} from "@/state/listenerState";
@@ -158,7 +158,7 @@ export default {
 
     const namespaceOption = computed(() => {
       let namespace = [];
-      const namespacesList = NamespacesUtils.listRootNamespaces(selectedAccAdd.value);
+      const namespacesList = NamespaceUtils.listRootNamespaces(selectedAccAdd.value);
       namespace.push.apply(namespace, namespacesList);
       return namespace;
     });
@@ -166,7 +166,7 @@ export default {
     const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
     const rentalFee = computed(()=> {
       if(duration.value > 0){
-        return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock * NamespacesUtils.calculateDuration(duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock * NamespaceUtils.calculateDuration(duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
       }else{
         return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock, networkState.currentNetworkProfile.network.currency.divisibility);
       }
@@ -238,7 +238,7 @@ export default {
     const transactionFeeExact = ref(0);
 
     const getMultiSigCosigner = computed(() => {
-      return NamespacesUtils.getCosignerList(selectedAccAdd.value);
+      return NamespaceUtils.getCosignerList(selectedAccAdd.value);
     });
 
     const changeSelection = (i) => {
@@ -255,8 +255,8 @@ export default {
 
     const updateNamespaceSelection = (namespaceNameSelected) => {
       showDuration.value = true;
-      transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(NamespaceUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(NamespaceUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
 
       const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == selectedAccAdd.value);
       const other = walletState.currentLoggedInWallet.others.find((account) => account.address == selectedAccAdd.value);
@@ -345,9 +345,9 @@ export default {
 
     const extendNamespace = () => {
       if(cosigner.value){
-        NamespacesUtils.extendNamespaceMultisig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectNamespace.value, duration.value, selectedAccAdd.value);
+        NamespaceUtils.extendNamespaceMultisig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectNamespace.value, duration.value, selectedAccAdd.value);
       }else{
-        NamespacesUtils.extendNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectNamespace.value, duration.value);
+        NamespaceUtils.extendNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectNamespace.value, duration.value);
       }
       clearInput();
     };

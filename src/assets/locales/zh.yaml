@@ -316,6 +316,7 @@ dashboard:
   alias: "别名"
   quantity: "数量"
 transfer: 
+  recipientPlaceholder: "Recipient / Namespace"
   maketransaction: "进行交易"
   cosigner: "共同签署人"
   nocosigner: "这个钱包里没有合格的共同签署人"

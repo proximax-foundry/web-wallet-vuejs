@@ -32,7 +32,7 @@
 <script>
 import { defineComponent, ref } from 'vue';
 import Multiselect from '@vueform/multiselect';
-import { NamespacesUtils } from '@/util/namespacesUtils';
+import { NamespaceUtils } from '@/util/namespaceUtils';
 
 export default defineComponent({
   props: [
@@ -83,7 +83,7 @@ export default defineComponent({
 
     const getOptions = async () => {
       // (async() => {
-        const namespacesList = await NamespacesUtils.listNamespacesToLink(p.selectedAddress, p.selectedAction);
+        const namespacesList = await NamespaceUtils.listNamespacesToLink(p.selectedAddress, p.selectedAction);
         console.log(namespacesList)
         return namespacesList;
       // })();
