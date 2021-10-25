@@ -54,32 +54,14 @@
     </div>
   </div>
   <div class="bg-white px-2 sm:px-10 pt-12">
-    <div class="text-xxs text-gray-400"><b class="text-gray-700">Assets</b> ({{ selectedAccountAssetsCount }} - View all)</div>
+    <div class="text-xxs text-gray-400"><b class="text-gray-700">ASSETS</b> ({{ selectedAccountAssetsCount }} - View all)</div>
     <AssetDataTable :assets="selectedAccountAssets" :currentPublicKey="selectedAccountPublicKey" />
+    <div class="text-xxs text-gray-400"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
     <NamespaceDataTable :namespaces="selectedAccountNamespaces" />
-  </div>
-
-  <div class="grid grid-cols-12">
-    <div class="col-start-2 col-span-10">
-      <div class="grid grid-cols-12">
-        <div class="col-span-12 py-2">
-          
-          
-        </div>
-      </div>
-    </div>
   </div>
 
   <div>
     <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed" type="confirmed"></DashboardDataTable>
-    <DashboardDataTable :showBlock="false" :showAction="false" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="filteredUnconfirmedTransactions" v-if="isShowUnconfirmed" type="unconfirmed"></DashboardDataTable>
-    <DashboardPartialDataTable :showBlock="false" :showAction="true" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" @openCosign="openCosignModal" :transactions="filteredPartialTransactions" v-if="isShowPartial" type="partial"></DashboardPartialDataTable>
-    <!--<PartialDashboardDataTable :transactions="partialTransactions.sort((a, b) => b.deadline - a.deadline)" v-if="isShowPartial"></PartialDashboardDataTable>-->
-    <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
-    <AddressQRModal :showModal="showAddressQRModal" :qrDataString="addressQR" :addressName="selectedAccountName" />
-    <MessageModal :showModal="showMessageModal" :message="messagePayload" />
-    <DecryptMessageModal :key="decryptMessageKey" :showModal="showDecryptMessageModal" :manualPublicKey="manualPublicKey" :message="messagePayload" :selectedAccountPublicKey="selectedAccountPublicKey" @decrypt="decryptMessage" :initialSignerPublicKey="initialSignerPublicKey" :isInitialSender="isInitialSender" :publicKeyToUse="publicKeyToUse"  />
-    <CosignModal :key="cosignModalKey" :showModal="showCosignModal" :txHash="txHash" @cosignTransaction="cosignTransaction" :signerPublicKey="signerPublicKey" :signedPublicKey="signedPublicKey" :selectedAccountPublicKey="selectedAccountPublicKey" />
   </div>
 </template>
 
@@ -116,20 +98,17 @@ import * as qrcode from 'qrcode-generator';
 //import Dialog from 'primevue/dialog';
 import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
+import moment from 'moment';
 
 export default defineComponent({
   name: 'ViewDashboard',
   components: {
     DashboardDataTable,
-    DashboardPartialDataTable,
+    
     //PartialDashboardDataTable,
-    SetAccountDefaultModal,
-    AddressQRModal,
     AssetDataTable,
     NamespaceDataTable,
-    MessageModal,
-    DecryptMessageModal,
-    CosignModal
+    
   },
 
   setup(){
@@ -307,6 +286,12 @@ export default defineComponent({
       }
     });
 
+    const blockListener = computed(()=> listenerState.currentBlock);
+
+    const selectedAccountNamespaceCount = computed(()=>{
+      return selectedAccount.value.namespaces.length;
+    });
+
     const selectedAccountNamespaces = computed(()=>{
       
       let formattedNamespaces = [];
@@ -329,14 +314,23 @@ export default defineComponent({
             break;
         }
 
+        let blockDifference = namespaces[i].endHeight - blockListener.value;
+        let expiryDay = Math.floor(blockDifference / 5760);
+        let expiryHour = Math.floor((blockDifference % 5760 ) / 240);
+        let expiryMin = (blockDifference % 5760 ) % 240;
+        let expiryDate = moment().add(expiryDay, 'd').add(expiryHour, 'h').add(expiryMin, 'm').format('MM/D/YYYY hh:mm:ss');
+
         let data = {
           idHex: namespaces[i].idHex,
           name: namespaces[i].name,
           linkType: linkName,
           linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
-          active: namespaces[i].active
+          endHeight: namespaces[i].endHeight,
+          expiring: (blockDifference < 80640),
+          expiryRelative: blockListener.value?moment().add(expiryDay, 'd').fromNow(true):'',
+          expiry: blockListener.value?expiryDate:'',
         };
-        
+
         formattedNamespaces.push(data);
       }
 
@@ -1183,6 +1177,7 @@ export default defineComponent({
       showAddressQRModal,
       showMessageModal,
       showDecryptMessageModal,
+      selectedAccountNamespaceCount,
       selectedAccountNamespaces,
       selectedAccountAssets,
       selectedAccountAssetsCount,
@@ -1201,7 +1196,8 @@ export default defineComponent({
       initialSignerPublicKey,
       isInitialSender,
       cosignModalKey,
-      decryptMessageKey
+      decryptMessageKey,
+      txHash,
     };
   }
 });
