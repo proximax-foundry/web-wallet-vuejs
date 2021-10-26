@@ -3,6 +3,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
 import 'animate.css';
+import vueDebounce from 'vue-debounce'
 import { VuePassword } from 'vue-password';
 import mitt from 'mitt';
 import PrimeVue from 'primevue/config';
@@ -44,6 +45,7 @@ app.use(ConfirmationService);
 app.use(ToastService);
 app.use(i18n);
 app.use(VWave);
+app.use(vueDebounce);
 app.mount('#app');
 // Use Components
 app.component('ConfirmDialog', ConfirmDialog);

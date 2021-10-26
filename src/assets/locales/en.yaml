@@ -316,6 +316,7 @@ dashboard:
   alias: "Alias"
   quantity: "Quantity"
 transfer: 
+  recipientPlaceholder: "Recipient / Namespace"
   maketransaction: "Make a transaction"
   cosigner: "Cosigner"
   nocosigner: "No eligible cosigner in this wallet"
