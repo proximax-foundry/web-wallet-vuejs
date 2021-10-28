@@ -1,5 +1,5 @@
 import { AggregateTransaction } from "tsjs-xpx-chain-sdk";
-import { DashboardTipList, RowDashboardTip } from "../model/dashboardClasses";
+import { DashboardTipList, RowDashboardTip, OtherAsset } from "../model/dashboardClasses";
 
 export interface DashboardTransaction{
   id?: string,
@@ -29,6 +29,10 @@ export interface DashboardTransaction{
   displayTips: RowDashboardTip[] | null,
   cosignatures?: TransactionCosigner | null,
   signedPublicKeys: string[],
+  recipient?: string,
+  amount?: number,
+  maxFee?: number,
+  otherAssets?: OtherAsset[],
 }
 
 export interface TransactionCosigner{
@@ -58,6 +62,7 @@ export interface DashboardInnerTransaction{
   signerPublicKeys: string[],
   directParent?: string[],
   numToApprove?: number,
+  otherAssets?: OtherAsset[],
 }
 
 /*

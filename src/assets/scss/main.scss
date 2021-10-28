@@ -536,3 +536,84 @@ body{
 .p-inline-message.p-inline-message-icon-only .p-inline-message-icon {
   margin-right: 0;
 }
+
+
+
+
+
+.p-tooltip {
+  position:absolute;
+  display:none;
+  padding: .25em .5rem;
+  max-width: 250px;
+  min-width: 100px;
+}
+
+.p-tooltip.p-tooltip-left {
+  padding: 0 3px;
+}
+
+.p-tooltip.p-tooltip-top,
+.p-tooltip.p-tooltip-bottom {
+  padding:3px 0;
+}
+
+.p-tooltip .p-tooltip-text {
+ white-space: pre-line;
+ word-break: break-word;
+}
+
+.p-tooltip-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+}
+
+.p-tooltip.p-tooltip-top {
+  padding: .25em 0;
+}
+
+.p-tooltip-left .p-tooltip-arrow {
+  top: 50%;
+  right: 0;
+  margin-top: -.25rem;
+  border-width: .25em 0 .25em .25rem;
+}
+
+.p-tooltip-bottom .p-tooltip-arrow {
+  top: 0;
+  left: 50%;
+  margin-left: -.25rem;
+  border-width: 0 .25em .25rem;
+}
+
+.p-tooltip .p-tooltip-text {
+  background: #383838;
+  color: rgba(255, 255, 255, 0.87);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+  border-radius: 3px;
+  padding: 2px 5px;
+  @apply text-txs;
+}
+
+.p-tooltip-text > tiptitle{
+  margin-bottom: 5px;
+  border-bottom: 1px solid #6B6B6B;
+  display: block;
+  padding: 4px 6px;
+}
+
+.p-tooltip-text > tiptext{
+  display: block;
+  padding: 4px 6px;
+}
+
+.p-tooltip.p-tooltip-left .p-tooltip-arrow {
+  border-left-color: #383838;
+}
+
+.p-tooltip.p-tooltip-bottom .p-tooltip-arrow {
+  border-bottom-color: #383838;
+}

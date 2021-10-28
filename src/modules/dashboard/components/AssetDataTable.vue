@@ -1,7 +1,7 @@
 <template>
   <div>
     <DataTable
-      :value="assets"
+      :value="accountAssets"
       :paginator="false"
       :rows="5"
       responsiveLayout="scroll"
@@ -20,7 +20,7 @@
       </Column>
       <Column field="linkedNamespace" header="NAMESPACE" :style="{ width: '180px' }">
         <template #body="{data}">
-          <diV v-for="namespace, item in data.linkedNamespace" :key="item">
+          <div v-for="namespace, item in data.linkedNamespace" :key="item">
             <div class="mb-1 text-txs">{{namespace.name}}</div>
           </div>
         </template>
@@ -46,14 +46,14 @@
         </template>
       </Column>
       <Column style="width: 50px;">
-        <template #body="">
-          <div class="text-txs text-center lg:mr-2">
-            <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block">
-            <div  class="mt-1 pop-option absolute right-0 w-32 rounded-sm p-2 shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-40 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-              <div class="py-1" role="none">
-                <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange' }" class="block my-1">Asset Details</router-link>
-                <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange' }" class="block my-1">Modify Supply</router-link>
-                <router-link :to="{ name: 'ViewServicesAssetsLinkToNamespace' }" class="block my-1">Linked to namespace</router-link>
+        <template #body="{data}">
+          <div class="text-txs text-center lg:mr-2" @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
+            <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
+            <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+              <div role="none" class="my-2">
+                <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Asset Details</router-link>
+                <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Modify Supply</router-link>
+                <router-link :to="{ name: 'ViewServicesAssetsLinkToNamespace' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Linked to namespace</router-link>
               </div>
             </div>
           </div>
@@ -70,23 +70,104 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, onMounted, getCurrentInstance } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import { Helper } from '@/util/typeHelper';
+import { networkState } from "@/state/networkState";
+import { WalletAccount } from '@/models/walletAccount';
 
 export default{
   components: { DataTable, Column },
   name: 'AssetDataTable',
   props: {
     assets: Array,
-    currentPublicKey: String
+    currentPublicKey: String,
+    account: WalletAccount
   },
 
   setup(p, context){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const accountAssets = ref();
+    const isMenuShow = ref([]);
+
+    onMounted(() => {
+      let formattedAssets = [];
+      let assets = p.assets;
+      let assetCount;
+      if(assets.length < 6){
+        assetCount = assets.length;
+      }else{
+        assetCount = 6;
+      }
+
+      for(let i=0; i < assetCount; ++i){
+        let namespaceAlias = [];
+        let assetId = assets[i].idHex;
+
+        if(assetId != networkState.currentNetworkProfile.network.currency.assetId){
+          let namespaces = p.account.findNamespaceNameByAsset(assetId);
+          for(let j = 0; j < namespaces.length; ++j){
+            let aliasData = {
+              name: namespaces[j].name
+            };
+
+            namespaceAlias.push(aliasData);
+          }
+
+          let data = {
+            i: i,
+            idHex: assetId,
+            owner: assets[i].owner,
+            amount: Helper.toCurrencyFormat(assets[i].getExactAmount(), assets[i].divisibility),
+            supply: Helper.toCurrencyFormat(assets[i].getExactSupply(), assets[i].divisibility),
+            linkedNamespace: namespaceAlias,
+            height: assets[i].height,
+          };
+          formattedAssets.push(data);
+          isMenuShow.value[i] = false;
+        }
+      }
+      accountAssets.value = formattedAssets;
+    });
+
+      // return formattedAssets;
     const borderColor = ref('border border-gray-400');
 
+    const showMenu = (i) => {
+      currentMenu.value = i;
+      isMenuShow.value[i] = !isMenuShow.value[i];
+    }
+
+    // emitted from App.vue when click on any part of the page
+    emitter.on('PAGE_CLICK', () => {
+      var k = 0;
+      while(k < isMenuShow.value.length){
+        if(k != currentMenu.value){
+          isMenuShow.value[k] = false;
+        }
+        k++;
+      }
+    });
+
+    const currentMenu = ref('empty');
+
+    const hoverOverMenu = (i) => {
+      currentMenu.value = i;
+    };
+
+    const hoverOutMenu = () => {
+      currentMenu.value = 'empty';
+    };
+
     return {
-      borderColor
+      borderColor,
+      showMenu,
+      isMenuShow,
+      accountAssets,
+      hoverOverMenu,
+      hoverOutMenu
     }
   }
 }
@@ -112,5 +193,6 @@ export default{
   border-top:1px solid #E4E4E4;
   -moz-transform:rotate(45deg);
   -webkit-transform:rotate(45deg);
+  z-index: 2;
 }
 </style>

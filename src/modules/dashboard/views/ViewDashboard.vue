@@ -55,11 +55,11 @@
   </div>
   <div class="bg-white px-2 sm:px-10 pt-12">
     <div class="text-xxs text-gray-400"><b class="text-gray-700">ASSETS</b> ({{ selectedAccountAssetsCount }} - View all)</div>
-    <AssetDataTable :assets="selectedAccountAssets" :currentPublicKey="selectedAccountPublicKey" />
+    <AssetDataTable :assets="selectedAccount.assets" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
     <div class="text-xxs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
-    <NamespaceDataTable :namespaces="selectedAccountNamespaces" />
+    <NamespaceDataTable :namespaces="selectedAccount.namespaces" />
     <div class="text-xxs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ filteredConfirmedTransactions.length }} - View all)</div>
-    <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed" type="confirmed"></DashboardDataTable>
+    <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
   </div>
 </template>
 
@@ -96,8 +96,8 @@ import * as qrcode from 'qrcode-generator';
 //import Dialog from 'primevue/dialog';
 import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
-import moment from 'moment';
-import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
+
+
 
 export default defineComponent({
   name: 'ViewDashboard',
@@ -268,7 +268,7 @@ export default defineComponent({
     let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
     currentAccount.default = true;
 
-    let selectedAccount = ref(currentAccount);
+    const selectedAccount = ref(currentAccount);
 
     const selectedAccountPublicKey = computed(()=> selectedAccount.value.publicKey);
     const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty().substring(0, 13) + '....' + Helper.createAddress(selectedAccount.value.address).pretty().substring(Helper.createAddress(selectedAccount.value.address).pretty().length - 11));
@@ -284,111 +284,106 @@ export default defineComponent({
       }
     });
 
-    const blockListener = computed(()=> listenerState.currentBlock);
-
     const selectedAccountNamespaceCount = computed(()=>{
       return selectedAccount.value.namespaces.length;
     });
 
-    let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
-    chainConfig.init();
-    let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
-
-    const selectedAccountNamespaces = computed(()=>{
+    // const selectedAccountNamespaces = computed(()=>{
       
-      let formattedNamespaces = [];
-      let namespaces = selectedAccount.value.namespaces;
+    //   let formattedNamespaces = [];
+    //   let namespaces = selectedAccount.value.namespaces;
 
-      for(let i=0; i < namespaces.length; ++i){
+    //   for(let i=0; i < namespaces.length; ++i){
         
-        let linkName = ""
+    //     let linkName = ""
 
-        switch (namespaces[i].linkType) {
-          case 1:
-            linkName = "Asset";
-            break;
-          case 2:
-            linkName = "Address";
-            break;
+    //     switch (namespaces[i].linkType) {
+    //       case 1:
+    //         linkName = "Asset";
+    //         break;
+    //       case 2:
+    //         linkName = "Address";
+    //         break;
         
-          default:
-            break;
-        }
+    //       default:
+    //         break;
+    //     }
 
-        let blockDifference = namespaces[i].endHeight - blockListener.value;
-        let blockTargetTimeByDay = (60 / blockTargetTime) * 60 * 24;
-        let blockTargetTimeByHour = (60 / blockTargetTime) * 60;
-        let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
-        let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
-        let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
-        let expiryDate = moment().add(expiryDay, 'd').add(expiryHour, 'h').add(expiryMin, 'm').format('MM/D/YYYY hh:mm:ss');
+    //     let blockDifference = namespaces[i].endHeight - blockListener.value;
+    //     let blockTargetTimeByDay = (60 / blockTargetTime) * 60 * 24;
+    //     let blockTargetTimeByHour = (60 / blockTargetTime) * 60;
+    //     let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
+    //     let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
+    //     let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
+    //     let expiryDate = moment().add(expiryDay, 'd').add(expiryHour, 'h').add(expiryMin, 'm').format('MM/D/YYYY hh:mm:ss');
 
-        let data = {
-          idHex: namespaces[i].idHex,
-          name: namespaces[i].name,
-          linkType: linkName,
-          linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
-          endHeight: namespaces[i].endHeight,
-          expiring: (blockDifference < 80640),
-          expiryRelative: blockListener.value?moment().add(expiryDay, 'd').fromNow(true):'',
-          expiry: blockListener.value?expiryDate:'',
-        };
+    //     let data = {
+    //       idHex: namespaces[i].idHex,
+    //       name: namespaces[i].name,
+    //       linkType: linkName,
+    //       linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
+    //       endHeight: namespaces[i].endHeight,
+    //       expiring: (blockDifference < 80640),
+    //       expiryRelative: blockListener.value?moment().add(expiryDay, 'd').fromNow(true):'',
+    //       expiry: blockListener.value?expiryDate:'',
+    //     };
 
-        formattedNamespaces.push(data);
-      }
+    //     formattedNamespaces.push(data);
+    //   }
 
-      return formattedNamespaces;
-    });
+    //   return formattedNamespaces;
+    // });
 
     const selectedAccountAssetsCount = computed(()=>{
       return selectedAccount.value.assets.length;
     });
 
-    const selectedAccountAssets = computed(()=>{
+    // const selectedAccountAssets = computed(()=>{
 
-      let formattedAssets = [];
-      let assets = selectedAccount.value.assets;
-      let assetCount;
-      if(assets.legnth <6){
-        assetCount = assets.length;
-      }else{
-        assetCount = 6;
-      }
+    //   let formattedAssets = [];
+    //   let assets = selectedAccount.value.assets;
+    //   let assetCount;
+    //   if(assets.length < 60){
+    //     assetCount = assets.length;
+    //   }else{
+    //     assetCount = 6;
+    //   }
 
-      for(let i=0; i < assetCount; ++i){
+    //   for(let i=0; i < assetCount; ++i){
 
-        let namespaceAlias = [];
+    //     let namespaceAlias = [];
 
-        let assetId = assets[i].idHex;
+    //     let assetId = assets[i].idHex;
 
-        if(assetId === networkState.currentNetworkProfile.network.currency.assetId){
-          continue;
-        }
+    //     if(assetId === networkState.currentNetworkProfile.network.currency.assetId){
+    //       continue;
+    //     }
 
-        let namespaces = selectedAccount.value.findNamespaceNameByAsset(assetId);
+    //     let namespaces = selectedAccount.value.findNamespaceNameByAsset(assetId);
+    //     for(let i =0; i < namespaces.length; ++i){
+    //       let aliasData = {
+    //         name: namespaces[i].name
+    //       };
 
-        for(let i =0; i < namespaces.length; ++i){
-          let aliasData = {
-            name: namespaces[i].name
-          };
+    //       namespaceAlias.push(aliasData);
+    //     }
 
-          namespaceAlias.push(aliasData);
-        }
+    //     let data = {
+    //       i: i,
+    //       munu: false,
+    //       idHex: assetId,
+    //       owner: assets[i].owner,
+    //       amount: Helper.toCurrencyFormat(assets[i].getExactAmount(), assets[i].divisibility),
+    //       supply: Helper.toCurrencyFormat(assets[i].getExactSupply(), assets[i].divisibility),
+    //       linkedNamespace: namespaceAlias,
+    //       height: assets[i].height,
+    //     };
 
-        let data = {
-          idHex: assetId,
-          owner: assets[i].owner,
-          amount: Helper.toCurrencyFormat(assets[i].getExactAmount(), assets[i].divisibility),
-          supply: Helper.toCurrencyFormat(assets[i].getExactSupply(), assets[i].divisibility),
-          linkedNamespace: namespaceAlias,
-          height: assets[i].height,
-        };
+    //     formattedAssets.push(data);
+    //   }
 
-        formattedAssets.push(data);
-      }
-
-      return formattedAssets;
-    });
+    //   return formattedAssets;
+    // });
 
     const selectedAccountBalance = computed(
       () => {
@@ -467,7 +462,7 @@ export default defineComponent({
     })
 
     watch(filteredConfirmedTransactions, (newValue) => {
-        finalConfirmedTransaction.value = newValue;
+      finalConfirmedTransaction.value = newValue;
     });
 
     let selfKnownNamespace = [];
@@ -1180,9 +1175,10 @@ export default defineComponent({
       showAddressQRModal,
       showMessageModal,
       showDecryptMessageModal,
+      selectedAccount,
       selectedAccountNamespaceCount,
-      selectedAccountNamespaces,
-      selectedAccountAssets,
+      // selectedAccountNamespaces,
+      // selectedAccountAssets,
       selectedAccountAssetsCount,
       openMessageModal,
       openDecryptMsgModal,

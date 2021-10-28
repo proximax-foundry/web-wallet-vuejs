@@ -1,3 +1,5 @@
+import { Mosaic, MosaicId } from "tsjs-xpx-chain-sdk";
+
 export class DashboardTip{
     
   tipType: string = "";
@@ -64,4 +66,16 @@ export enum TipType{
 export enum AmountType{
   RAW = "raw",
   EXACT = "exact"
+}
+
+export class OtherAsset{
+  asset: string = '';
+  amount: number = 0;
+  tipType: string = "";
+  assetid: MosaicId;
+  isLinked: boolean = false;
+
+  constructor(tipType: string){
+    this.tipType = tipType;
+  }
 }

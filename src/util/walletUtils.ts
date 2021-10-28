@@ -849,7 +849,6 @@ export class WalletUtils {
                     assets.push(newAsset);
                 }
             }
-
             account.assets= assets;
         }
 

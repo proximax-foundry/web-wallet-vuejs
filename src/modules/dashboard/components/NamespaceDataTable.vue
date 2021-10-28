@@ -1,7 +1,7 @@
 <template>
   <div>
     <DataTable
-      :value="namespaces"
+      :value="accountNamespaces"
       :paginator="true"
       :rows="5"
       responsiveLayout="scroll"
@@ -43,13 +43,13 @@
         </template>
       </Column>
       <Column style="width: 50px;">
-        <template #body="">
-          <div class="text-txs text-center lg:mr-2">
-            <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block">
-            <div  class="mt-1 pop-option absolute right-0 w-32 rounded-sm p-2 shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-40 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-              <div class="py-1" role="none">
-                <router-link :to="{ name: 'ViewServicesNamespaceCreate' }" class="block my-1">Namespace Details</router-link>
-                <router-link :to="{ name: 'ViewServicesNamespaceExtend' }" class="block my-1">Extend Duration</router-link>
+        <template #body="{data}">
+          <div class="text-txs text-center lg:mr-2" @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
+            <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
+            <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+              <div role="none" class="my-2">
+                <router-link :to="{ name: 'ViewServicesNamespaceCreate' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Namespace Details</router-link>
+                <router-link :to="{ name: 'ViewServicesNamespaceExtend' }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Extend Duration</router-link>
               </div>
             </div>
           </div>
@@ -66,22 +66,117 @@
 </template>
 
 <script>
-import { getCurrentInstance, ref, computed, watch  } from "vue";
+import { getCurrentInstance, ref, computed, watch, onMounted  } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import {Namespace} from '@/models/namespace';
+import { listenerState } from '@/state/listenerState';
+import { Helper } from '@/util/typeHelper';
 import { networkState } from "@/state/networkState";
+import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
+import { WalletAccount } from '@/models/walletAccount';
+import moment from 'moment';
 
 
 export default{
   components: { DataTable, Column },
   name: 'NamespaceDataTable',
   props: {
-    namespaces: Array
+    namespaces: Array,
+    account: WalletAccount
   },
 
   setup(p, context){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const accountNamespaces = ref();
+    const isMenuShow = ref([]);
+
+    const blockListener = listenerState.currentBlock;
+
+    let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
+    chainConfig.init();
+    let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
+
+    onMounted(() => {
+      let formattedNamespaces = [];
+      let namespaces = p.namespaces;
+      let namespaceCount;
+      if(namespaces.length < 6){
+        namespaceCount = namespaces.length;
+      }else{
+        namespaceCount = 6;
+      }
+
+      for(let i=0; i < namespaceCount; ++i){
+        let linkName = "";
+
+        switch (namespaces[i].linkType) {
+          case 1:
+            linkName = "Asset";
+            break;
+          case 2:
+            linkName = "Address";
+            break;
+        
+          default:
+            break;
+        }
+        
+        let blockDifference = namespaces[i].endHeight - blockListener;
+        let blockTargetTimeByDay = (60 / blockTargetTime) * 60 * 24;
+        let blockTargetTimeByHour = (60 / blockTargetTime) * 60;
+        let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
+        let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
+        let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
+        let expiryDate = moment().add(expiryDay, 'd').add(expiryHour, 'h').add(expiryMin, 'm').format('MM/D/YYYY hh:mm:ss');
+        console.log(i)
+        let data = {
+          i: i,
+          idHex: namespaces[i].idHex,
+          name: namespaces[i].name,
+          linkType: linkName,
+          linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
+          endHeight: namespaces[i].endHeight,
+          expiring: (blockDifference < (blockTargetTimeByDay * 14)),
+          expiryRelative: blockListener.value?moment().add(expiryDay, 'd').fromNow(true):'',
+          expiry: blockListener.value?expiryDate:'',
+        };
+
+        formattedNamespaces.push(data);
+        isMenuShow.value[i] = false;
+      }
+      accountNamespaces.value = formattedNamespaces;
+    });
+
+    const showMenu = (i) => {
+      currentMenu.value = i;
+      isMenuShow.value[i] = !isMenuShow.value[i];
+    }
+
+    const currentMenu = ref('');
+
+    // emitted from App.vue when click on any part of the page
+    emitter.on('PAGE_CLICK', () => {
+      var k = 0;
+      while(k < isMenuShow.value.length){
+        console.log('K: ' + k)
+        if(k != currentMenu.value){
+          console.log('K: ' + k)
+          isMenuShow.value[k] = false;
+        }
+        k++;
+      }
+    });
+
+    const hoverOverMenu = (i) => {
+      currentMenu.value = i;
+    };
+
+    const hoverOutMenu = () => {
+      currentMenu.value = 'e';
+    };
+
     const borderColor = ref('border border-gray-400');
 
     const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
@@ -100,7 +195,12 @@ export default{
       assetExplorerURL,
       namespaceExplorerURL,
       publicKeyExplorerURL,
-      explorerBaseURL
+      explorerBaseURL,
+      showMenu,
+      isMenuShow,
+      accountNamespaces,
+      hoverOverMenu,
+      hoverOutMenu
     }
   }
 }
