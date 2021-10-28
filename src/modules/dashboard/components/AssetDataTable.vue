@@ -70,7 +70,7 @@
 </template>
 
 <script>
-import { ref, onMounted, getCurrentInstance } from "vue";
+import { ref, onMounted, getCurrentInstance, watch, toRefs } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { Helper } from '@/util/typeHelper';
@@ -86,15 +86,23 @@ export default{
     account: WalletAccount
   },
 
-  setup(p, context){
+  setup(props, context){
+    const { assets, account } = toRefs(props);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const accountAssets = ref();
     const isMenuShow = ref([]);
 
+    watch(assets, (updatedAssets) => {
+      accountAssets.value = generateAssetDatatable(updatedAssets, account.value);
+    });
+
     onMounted(() => {
+      accountAssets.value = generateAssetDatatable(assets.value, account.value);
+    });
+
+    const generateAssetDatatable = (assets, account) => {
       let formattedAssets = [];
-      let assets = p.assets;
       let assetCount;
       if(assets.length < 6){
         assetCount = assets.length;
@@ -107,7 +115,7 @@ export default{
         let assetId = assets[i].idHex;
 
         if(assetId != networkState.currentNetworkProfile.network.currency.assetId){
-          let namespaces = p.account.findNamespaceNameByAsset(assetId);
+          let namespaces = account.findNamespaceNameByAsset(assetId);
           for(let j = 0; j < namespaces.length; ++j){
             let aliasData = {
               name: namespaces[j].name
@@ -129,8 +137,8 @@ export default{
           isMenuShow.value[i] = false;
         }
       }
-      accountAssets.value = formattedAssets;
-    });
+      return formattedAssets;
+    }
 
       // return formattedAssets;
     const borderColor = ref('border border-gray-400');

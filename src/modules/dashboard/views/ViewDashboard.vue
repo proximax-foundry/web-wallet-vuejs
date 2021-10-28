@@ -57,7 +57,7 @@
     <div class="text-xxs text-gray-400"><b class="text-gray-700">ASSETS</b> ({{ selectedAccountAssetsCount }} - View all)</div>
     <AssetDataTable :assets="selectedAccount.assets" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
     <div class="text-xxs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
-    <NamespaceDataTable :namespaces="selectedAccount.namespaces" />
+    <NamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" />
     <div class="text-xxs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ filteredConfirmedTransactions.length }} - View all)</div>
     <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
   </div>
@@ -269,6 +269,8 @@ export default defineComponent({
     currentAccount.default = true;
 
     const selectedAccount = ref(currentAccount);
+
+    const currentBlock = computed(() => listenerState.currentBlock);
 
     const selectedAccountPublicKey = computed(()=> selectedAccount.value.publicKey);
     const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty().substring(0, 13) + '....' + Helper.createAddress(selectedAccount.value.address).pretty().substring(Helper.createAddress(selectedAccount.value.address).pretty().length - 11));
@@ -1141,6 +1143,7 @@ export default defineComponent({
     });
 
     return {
+      currentBlock,
       displayBoard,
       copy,
       selectedAccountBalance,

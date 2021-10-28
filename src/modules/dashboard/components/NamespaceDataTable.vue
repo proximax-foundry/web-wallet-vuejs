@@ -66,7 +66,7 @@
 </template>
 
 <script>
-import { getCurrentInstance, ref, computed, watch, onMounted  } from "vue";
+import { getCurrentInstance, ref, computed, watch, onMounted, toRefs  } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {Namespace} from '@/models/namespace';
@@ -83,24 +83,31 @@ export default{
   name: 'NamespaceDataTable',
   props: {
     namespaces: Array,
+    currentBlockHeight: Number,
     account: WalletAccount
   },
 
-  setup(p, context){
+  setup(props, context){
+    const { namespaces, currentBlockHeight } = toRefs(props);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const accountNamespaces = ref();
     const isMenuShow = ref([]);
 
-    const blockListener = listenerState.currentBlock;
-
     let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
     chainConfig.init();
     let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
 
+    watch([currentBlockHeight, namespaces], ([newBlockHeight, namespaces]) => {
+      accountNamespaces.value = generateDatatable(namespaces, newBlockHeight);
+    });
+
     onMounted(() => {
+      accountNamespaces.value = generateDatatable(namespaces.value, currentBlockHeight.value);
+    });
+
+    const generateDatatable = (namespaces, currentBlockHeight) => {
       let formattedNamespaces = [];
-      let namespaces = p.namespaces;
       let namespaceCount;
       if(namespaces.length < 6){
         namespaceCount = namespaces.length;
@@ -118,19 +125,17 @@ export default{
           case 2:
             linkName = "Address";
             break;
-        
           default:
             break;
         }
-        
-        let blockDifference = namespaces[i].endHeight - blockListener;
+
+        let blockDifference = namespaces[i].endHeight - currentBlockHeight;
         let blockTargetTimeByDay = (60 / blockTargetTime) * 60 * 24;
         let blockTargetTimeByHour = (60 / blockTargetTime) * 60;
         let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
         let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
         let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
         let expiryDate = moment().add(expiryDay, 'd').add(expiryHour, 'h').add(expiryMin, 'm').format('MM/D/YYYY hh:mm:ss');
-        console.log(i)
         let data = {
           i: i,
           idHex: namespaces[i].idHex,
@@ -139,15 +144,18 @@ export default{
           linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
           endHeight: namespaces[i].endHeight,
           expiring: (blockDifference < (blockTargetTimeByDay * 14)),
-          expiryRelative: blockListener.value?moment().add(expiryDay, 'd').fromNow(true):'',
-          expiry: blockListener.value?expiryDate:'',
+          expiryRelative: currentBlockHeight?moment().add(expiryDay, 'd').fromNow(true):'',
+          expiry: currentBlockHeight?expiryDate:'',
         };
 
         formattedNamespaces.push(data);
         isMenuShow.value[i] = false;
       }
-      accountNamespaces.value = formattedNamespaces;
-    });
+      return formattedNamespaces;
+    }
+
+
+
 
     const showMenu = (i) => {
       currentMenu.value = i;
@@ -160,9 +168,7 @@ export default{
     emitter.on('PAGE_CLICK', () => {
       var k = 0;
       while(k < isMenuShow.value.length){
-        console.log('K: ' + k)
         if(k != currentMenu.value){
-          console.log('K: ' + k)
           isMenuShow.value[k] = false;
         }
         k++;
@@ -178,16 +184,11 @@ export default{
     };
 
     const borderColor = ref('border border-gray-400');
-
     const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
     const publicKeyExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.publicKeyRoute);
     const addressExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.addressRoute);
     const namespaceExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute);
     const assetExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.assetInfoRoute);
-
-    // emitter.on("CLOSE_MODAL", payload => {
-    //   showTransactionModel.value = payload;
-    // });
 
     return {
       borderColor,
