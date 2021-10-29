@@ -4,14 +4,14 @@
       <div class="pr-2">
         <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/default-account-image.png') + ' )' }">
           <div class="absolute top-0 px-2 py-1 default-account-header text-xxs text-gray-400 flex items-center rounded-b-sm"><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 mr-1 inline-block">DEFAULT ACCOUNT</div>
-          <div class="my-5 mt-6 flex items-center text-xs xl:text-sm">My Personal Account <img src="@/modules/dashboard/img/icon-arrow-right.svg" class="w-2 h-2 ml-4 inline-block"></div>
+          <div class="my-5 mt-6 flex items-center text-xs xl:text-sm cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">My Personal Account <img src="@/modules/dashboard/img/icon-arrow-right.svg" class="w-2 h-2 ml-4 inline-block"></div>
           <div class="text-gray-400 text-xxs">WALLET ADDRESS</div>
           <div class="flex items-center justify-between mb-3">
             <div id="address" class="font-bold outline-none z-10 break-all text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
             <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4" @click="copy('address')">
           </div>
           <div class="flex justify-around w-full">
-            <div class="my-3 flex items-center"><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Request XPX</div></div>
+            <div class="my-3 flex items-center"><a href="https://bctestnetfaucet.xpxsirius.io/#/" target=_new><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span class="text-xs" style="margin-top: 1px">Request XPX</span></a></div>
             <div class="my-3 flex items-center"><img src="@/modules/dashboard/img/icon-key.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Convert to Multisig</div></div>
           </div>
         </div>
@@ -109,6 +109,7 @@
   <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='transaction'">
     <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
   </div>
+  <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
 </template>
 
 <script>
@@ -150,8 +151,8 @@ import { WalletUtils } from '@/util/walletUtils';
 export default defineComponent({
   name: 'ViewDashboard',
   components: {
+    SetAccountDefaultModal,
     DashboardDataTable,
-    
     //PartialDashboardDataTable,
     AssetDataTable,
     NamespaceDataTable,
@@ -1168,13 +1169,14 @@ export default defineComponent({
       }
     }
 
-    const updateSelectedAccount = (data)=>{     
+    const updateSelectedAccount = (data)=>{
       if(data.type == 0){
         selectedAccount.value = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === data.name);
-      }
-      else{
+      }else{
         selectedAccount.value = walletState.currentLoggedInWallet.others.find((account)=> account.name === data.name);
       }
+      walletState.currentLoggedInWallet.setDefaultAccountByName(data.name);
+      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
     }
 
     emitter.on('CLOSE_SET_DEFAULT_ACCOUNT_MODAL', payload => {
