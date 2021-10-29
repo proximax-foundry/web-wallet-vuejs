@@ -262,7 +262,6 @@ export class DashboardService {
                 maxFee: Helper.convertToExact(transactions[i].maxFee.compact(), 6),
                 otherAssets: [],
             };
-
             dashboardTransaction.searchString.push(dashboardTransaction.block.toString());
             dashboardTransaction.searchString.push(dashboardTransaction.hash);
 
