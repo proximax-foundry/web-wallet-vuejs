@@ -71,11 +71,6 @@ export enum AmountType{
 export class OtherAsset{
   asset: string = '';
   amount: number = 0;
-  tipType: string = "";
   assetid: MosaicId;
   isLinked: boolean = false;
-
-  constructor(tipType: string){
-    this.tipType = tipType;
-  }
 }

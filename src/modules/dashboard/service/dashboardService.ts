@@ -2592,8 +2592,7 @@ export class DashboardService {
         // assetarray.push(mosaic_id);
         // let nsAsset = await chainAPICall.assetAPI.getMosaicsNames(assetarray);
 
-        let otherAsset = new OtherAsset(TipType.ASSET_AMOUNT);
-        otherAsset.tipType = TipType.ASSET_AMOUNT;
+        let otherAsset = new OtherAsset();
         otherAsset.amount = amount;
         otherAsset.asset = assetId;
         otherAsset.assetid = mosaic_id;
