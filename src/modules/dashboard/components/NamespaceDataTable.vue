@@ -3,7 +3,7 @@
     <DataTable
       :value="accountNamespaces"
       :paginator="true"
-      :rows="5"
+      :rows="20"
       responsiveLayout="scroll"
       :alwaysShowPaginator="false"
       scrollDirection="horizontal"
@@ -109,14 +109,8 @@ export default{
 
     const generateDatatable = (namespaces, currentBlockHeight) => {
       let formattedNamespaces = [];
-      let namespaceCount;
-      if(namespaces.length < rowLimit + 1){
-        namespaceCount = namespaces.length;
-      }else{
-        namespaceCount = rowLimit + 1;
-      }
 
-      for(let i=0; i < namespaceCount; ++i){
+      for(let i=0; i < namespaces.length; ++i){
         let linkName = "";
 
         switch (namespaces[i].linkType) {

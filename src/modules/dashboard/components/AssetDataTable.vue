@@ -2,8 +2,8 @@
   <div>
     <DataTable
       :value="accountAssets"
-      :paginator="false"
-      :rows="5"
+      :paginator="true"
+      :rows="20"
       responsiveLayout="scroll"
       scrollDirection="horizontal"
       :alwaysShowPaginator="false"
@@ -87,7 +87,6 @@ export default{
   },
 
   setup(props, context){
-    const rowLimit = 5;
     const { assets, account } = toRefs(props);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -104,14 +103,8 @@ export default{
 
     const generateAssetDatatable = (assets, account) => {
       let formattedAssets = [];
-      let assetCount;
-      if(assets.length < rowLimit + 1){
-        assetCount = assets.length;
-      }else{
-        assetCount = rowLimit + 1;
-      }
 
-      for(let i=0; i < assetCount; ++i){
+      for(let i=0; i < assets.length; ++i){
         let namespaceAlias = [];
         let assetId = assets[i].idHex;
 

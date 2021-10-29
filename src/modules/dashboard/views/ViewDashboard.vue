@@ -47,19 +47,67 @@
 
   <div class="text-left px-2 sm:px-10 bg-gray-200">
     <div class="transition-all flex items-end">
-      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='overview'?'bg-white text-gray-primary':'cursor-pointer' }`">Overview</div>
-      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='asset'?'bg-white text-gray-primary':'cursor-pointer' }`">Assets</div>
-      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='namespaces'?'bg-white text-gray-primary':'cursor-pointer' }`">Namespaces</div>
-      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='transactions'?'bg-white text-gray-primary':'cursor-pointer' }`">All Transactions</div>
+      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='overview'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='overview'">Overview</div>
+      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='asset'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='asset'">Assets</div>
+      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='namespace'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='namespace'">Namespaces</div>
+      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='transaction'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='transaction'">All Transactions</div>
     </div>
   </div>
-  <div class="bg-white px-2 sm:px-10 pt-12">
-    <div class="text-xxs text-gray-400"><b class="text-gray-700">ASSETS</b> ({{ selectedAccountAssetsCount }} - View all)</div>
-    <AssetDataTable :assets="selectedAccount.assets" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
-    <div class="text-xxs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
-    <NamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" />
-    <div class="text-xxs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ filteredConfirmedTransactions.length }} - View all)</div>
+  <div class="bg-white px-2 sm:px-10 pt-12" v-if="displayBoard=='overview'">
+    <div class="text-txs text-gray-400"><b class="text-gray-700">ASSETS</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">View all</span>)</div>
+    <AssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
+    <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
+    <NamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" />
+    <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ filteredConfirmedTransactions.length }} - View all)</div>
     <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block).slice(0, 5)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
+    <div class="mt-10 flex">
+      <div class=" md:w-1/2">
+        <div class="mb-8 font-bold uppercase text-txs">Create something new</div>
+        <div class="flex flex-wrap">
+          <div class="flex items-center w-80 mb-2">
+            <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
+            <div class="inline-block ml-2 dashboard-link">
+              <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create Namespace</router-link>
+              <p class="text-txs w-60">Create an on-chain unique place for your business and your assets.</p>
+            </div>
+          </div>
+          <div class="flex items-center w-80 mb-2">
+            <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
+            <div class="inline-block ml-2 dashboard-link">
+              <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create an Asset</router-link>
+              <p class="text-txs w-60">An asset could be a token that has a unique identifier and configurable properties.</p>
+            </div>
+          </div>
+          <div class="flex items-center w-80mb-2">
+            <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
+            <div class="inline-block ml-2 dashboard-link">
+              <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create New Account</router-link>
+              <p class="text-txs w-60">Create an on-chain unique place for your business and your assets.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="md:w-1/2">
+        <div class="mb-8 font-bold text-txs uppercase">Getting started guide</div>
+        <div class="text-tsm">
+          <div class="mb-2"><a href=#>Guide Overview <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+          <div class="mb-2"><a href=#>What is ProximaX Sirius Chain <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+          <div class="mb-2"><a href=#>What is Namespace <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+          <div class="mb-2"><a href=#>What is Asset <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='asset'">
+    <AssetDataTable :assets="selectedAccount.assets" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
+  </div>
+  <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='namespace'">
+    <NamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" />
+  </div>
+  <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='transaction'">
+    <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
   </div>
 </template>
 
@@ -1264,6 +1312,10 @@ export default defineComponent({
   #address{
     @extend .text-sm !optional;
   }
+}
+
+.dashboard-link{
+  position: relative; top: -4px;
 }
 
 </style>

@@ -2,9 +2,10 @@
   <div>
     <DataTable
       :value="transactions"
-      :paginator="false"
-      :rows="5"
+      :paginator="true"
+      :rows="20"
       scrollDirection="horizontal"
+      :alwaysShowPaginator="false"
       responsiveLayout="scroll"
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
