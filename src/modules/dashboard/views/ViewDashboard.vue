@@ -20,7 +20,7 @@
         <div class="shadow-md w-full relative overflow-x-hidden address_div bg-gray-50 px-7 py-4 rounded-lg balance-div flex flex-col justify-between" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/balance-bg.png') + ' )' }">
           <div>
             <div class="mt-5 text-gray-300 text-txs">CURRENT BALANCE</div>
-            <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>.<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
+            <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
             <div class="text-gray-300 text-txs mt-1">Estimate US$ {{ currencyConvert }}</div>
           </div>
           <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Send XPX</div></router-link>
