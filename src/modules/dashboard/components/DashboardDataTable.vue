@@ -135,7 +135,7 @@ export default defineComponent({
     */
     watch(
      ()=> filterText.value, (newValue)=>{
-       context.emit('confirmedFilter', newValue);
+       emitter.emit("confirmedFilter", newValue);
     });
 
     // const nsHint = "\`ns:\` - filter by Namespace (ID or name)";
