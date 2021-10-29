@@ -34,7 +34,7 @@
       </Column>
       <Column field="linkType" header="BLOCK EXPIRES" :style="{ width: '180px' }">
         <template #body="{data}">
-          in {{ data.expiryRelative }}
+          <div class="data.expiryRelative">in {{ data.expiryRelative }}</div>
         </template>
       </Column>
       <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" :style="{ width: '180px' }">
@@ -88,6 +88,7 @@ export default{
   },
 
   setup(props, context){
+    const rowLimit = 5;
     const { namespaces, currentBlockHeight } = toRefs(props);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -109,10 +110,10 @@ export default{
     const generateDatatable = (namespaces, currentBlockHeight) => {
       let formattedNamespaces = [];
       let namespaceCount;
-      if(namespaces.length < 6){
+      if(namespaces.length < rowLimit + 1){
         namespaceCount = namespaces.length;
       }else{
-        namespaceCount = 6;
+        namespaceCount = rowLimit + 1;
       }
 
       for(let i=0; i < namespaceCount; ++i){

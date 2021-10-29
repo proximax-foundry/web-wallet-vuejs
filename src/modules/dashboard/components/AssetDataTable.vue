@@ -87,6 +87,7 @@ export default{
   },
 
   setup(props, context){
+    const rowLimit = 5;
     const { assets, account } = toRefs(props);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -104,10 +105,10 @@ export default{
     const generateAssetDatatable = (assets, account) => {
       let formattedAssets = [];
       let assetCount;
-      if(assets.length < 6){
+      if(assets.length < rowLimit + 1){
         assetCount = assets.length;
       }else{
-        assetCount = 6;
+        assetCount = rowLimit + 1;
       }
 
       for(let i=0; i < assetCount; ++i){
