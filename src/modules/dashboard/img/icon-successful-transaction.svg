@@ -1,0 +1,8 @@
+<svg id="icon-successful-transaction" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+  <g id="Group_50" data-name="Group 50">
+    <path id="Path_755" data-name="Path 755" d="M0,0H20V20H0Z" fill="none"/>
+  </g>
+  <g id="Group_51" data-name="Group 51" transform="translate(3.333 1.778)">
+    <path id="Path_756" data-name="Path 756" d="M10.083,2.239l-5,1.875A1.678,1.678,0,0,0,4,5.681V9.606c0,4.208,2.842,8.133,6.667,9.092,3.825-.958,6.667-4.883,6.667-9.092V5.681A1.667,1.667,0,0,0,16.25,4.122l-5-1.875A1.61,1.61,0,0,0,10.083,2.239ZM9.192,12.714,7.425,10.947a.83.83,0,0,1,0-1.175h0a.83.83,0,0,1,1.175,0l1.175,1.175L12.725,8A.83.83,0,0,1,13.9,8h0a.83.83,0,0,1,0,1.175l-3.533,3.533A.822.822,0,0,1,9.192,12.714Z" transform="translate(-4 -2.134)" fill="#007cff"/>
+  </g>
+</svg>

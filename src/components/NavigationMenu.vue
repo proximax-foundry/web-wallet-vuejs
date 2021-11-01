@@ -3,9 +3,9 @@
     <div class="border-b border-gray-200 py-5 w-60 flex-grow-0">
       <div class="my-3 px-10 font-txs text-gray-400">ACCOUNTS ({{ allAccountsCount }})</div>
       <div>
-        <router-link :to="{ name: 'ViewAccountDetails', params: { address: item.address }}" v-for="(item, index) in accounts" :key="index" class="link_block flex items-center"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center"><div class="text-center w-full"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div></div>{{ item.name }}</router-link>
+        <router-link :to="{ name: 'ViewAccountDetails', params: { address: item.address }}" v-for="(item, index) in accounts" :key="index" class="link_block flex items-center"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center"><div class="text-center w-full"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div></div><span class="truncate overflow-hidden">{{ item.name }}</span></router-link>
       </div>
-      <router-link :to="{ name: 'ViewAccountDisplayAll'}" class="link_block flex items-center" v-if="allAccountsCount > 10"><img src="@/assets/img/navi/icon-accounts.svg" class="h-4 w-4 inline-block mr-1">View all accounts</router-link>
+      <router-link :to="{ name: 'ViewAccountDisplayAll'}" class="link_block flex items-center" v-if="allAccountsCount > 5"><img src="@/assets/img/navi/icon-accounts.svg" class="h-4 w-4 inline-block mr-1">View all accounts</router-link>
       <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="block font-bold link_block"><img src="@/assets/img/navi/icon-add.svg" class="h-4 w-4 inline-block relative mr-1">Create New Account</router-link>
     </div>
     <div class="border-b border-gray-200 py-5 w-60 flex-grow-0">

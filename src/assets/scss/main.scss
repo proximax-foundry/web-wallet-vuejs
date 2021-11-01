@@ -136,7 +136,7 @@ body{
   }
 
 .default-title{
-  @apply title text-sm md:text-sm;
+  @apply title text-sm
 }
 
 .gray-line{
@@ -152,6 +152,10 @@ body{
 }
 
 .popup-outer{
+  top: 20px; left: 0; right: 0; margin-left: auto; margin-right: auto; max-width: 500px;
+}
+
+.popup-outer-lang{
   top: 20px; left: 0; right: 0; margin-left: auto; margin-right: auto; max-width: 300px;
 }
 
@@ -257,33 +261,25 @@ body{
   overflow-x: auto;
 }
 
+.p-datatable-table{
+  border-collapse: separate !important;
+  border-spacing: 0px 10px;
+}
+
 .p-datatable-thead{
-  @apply bg-black text-white text-xs;
+  @apply text-gray-400 text-xxs font-light;
   th{
-    font-weight: normal; text-align: left; padding: 8px 20px;
+    text-align: left;
+    @apply py-4 border-gray-200 border-b;
   }
 }
+
 
 .p-datatable-tbody{
   td{
-    text-align: left; padding: 8px 20px; font-size: 13px; //cursor: pointer;
-    @apply text-gray-600;
-  }
-
-  tr:nth-child(2n+1){
-    td{
-      @apply bg-gray-100
-    }
-  }
-
-  tr:nth-child(2n){
-    td{
-      @apply bg-gray-200
-    }
+    @apply text-gray-600 py-5 text-left text-xs border-b border-t border-gray-200;
   }
 }
-
-
 
 
 .p-confirm-popup {
@@ -543,4 +539,85 @@ body{
 }
 .p-inline-message.p-inline-message-icon-only .p-inline-message-icon {
   margin-right: 0;
+}
+
+
+
+
+
+.p-tooltip {
+  position:absolute;
+  display:none;
+  padding: .25em .5rem;
+  max-width: 250px;
+  min-width: 100px;
+}
+
+.p-tooltip.p-tooltip-left {
+  padding: 0 3px;
+}
+
+.p-tooltip.p-tooltip-top,
+.p-tooltip.p-tooltip-bottom {
+  padding:3px 0;
+}
+
+.p-tooltip .p-tooltip-text {
+ white-space: pre-line;
+ word-break: break-word;
+}
+
+.p-tooltip-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+}
+
+.p-tooltip.p-tooltip-top {
+  padding: .25em 0;
+}
+
+.p-tooltip-left .p-tooltip-arrow {
+  top: 50%;
+  right: 0;
+  margin-top: -.25rem;
+  border-width: .25em 0 .25em .25rem;
+}
+
+.p-tooltip-bottom .p-tooltip-arrow {
+  top: 0;
+  left: 50%;
+  margin-left: -.25rem;
+  border-width: 0 .25em .25rem;
+}
+
+.p-tooltip .p-tooltip-text {
+  background: #383838;
+  color: rgba(255, 255, 255, 0.87);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+  border-radius: 3px;
+  padding: 2px 5px;
+  @apply text-txs;
+}
+
+.p-tooltip-text > tiptitle{
+  margin-bottom: 5px;
+  border-bottom: 1px solid #6B6B6B;
+  display: block;
+  padding: 4px 6px;
+}
+
+.p-tooltip-text > tiptext{
+  display: block;
+  padding: 4px 6px;
+}
+
+.p-tooltip.p-tooltip-left .p-tooltip-arrow {
+  border-left-color: #383838;
+}
+
+.p-tooltip.p-tooltip-bottom .p-tooltip-arrow {
+  border-bottom-color: #383838;
 }

@@ -11,7 +11,7 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal; naviPrivateKey = !naviPrivateKey;"></font-awesome-icon>
           </div>
           <div class="w-104" v-if="!naviPrivateKey">
-            <h1 class="default-title font-bold my-5">{{$t('delegate.selectacctype')}}</h1>
+            <h1 class="default-title my-5">{{$t('delegate.selectacctype')}}</h1>
             <div class="page-title-gray-line grid grid-cols-1 md:grid-cols-2 pt-20">
               <div class="px-5 self-center text-center my-10">
                 <img src="@/modules/wallet/img/icon-add-new.svg" class="w-12 inline-block">
