@@ -1,117 +1,115 @@
 <template>
-<div>
-  <div class="px-2 sm:px-10 bg-gray-200 pb-8">
-    <div class="md:grid md:grid-cols-4">
-      <div class="pr-2">
-        <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/default-account-image.png') + ' )' }">
-          <div class="absolute top-0 px-2 py-1 default-account-header text-xxs text-gray-400 pappflex items-center rounded-b-sm"><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 mr-1 inline-block">DEFAULT ACCOUNT</div>
-          <div class="my-5 mt-6 flex items-center text-xs xl:text-sm cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">My Personal Account <img src="@/modules/dashboard/img/icon-arrow-right.svg" class="w-2 h-2 ml-4 inline-block"></div>
-          <div class="text-gray-400 text-xxs">WALLET ADDRESS</div>
-          <div class="flex items-center justify-between mb-3">
-            <div id="address" class="font-bold outline-none break-all text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
-            <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4" @click="copy('address')">
-          </div>
-          <div class="flex justify-around w-full">
-            <div class="my-3 flex items-center"><a href="https://bctestnetfaucet.xpxsirius.io/#/" target=_new><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span class="text-xs" style="margin-top: 1px">Request XPX</span></a></div>
-            <div class="my-3 flex items-center"><img src="@/modules/dashboard/img/icon-key.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Convert to Multisig</div></div>
+  <div>
+    <div class="px-2 sm:px-10 bg-gray-200 pb-8 pt-5">
+      <div class="md:grid md:grid-cols-4">
+        <div class="pr-2">
+          <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/default-account-image.png') + ' )' }">
+            <div class="absolute top-0 px-2 py-1 default-account-header text-xxs text-gray-400 pappflex items-center rounded-b-sm"><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 mr-1 inline-block">DEFAULT ACCOUNT</div>
+            <div class="my-5 mt-6 flex items-center text-xs xl:text-sm cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">My Personal Account <img src="@/modules/dashboard/img/icon-arrow-right.svg" class="w-2 h-2 ml-4 inline-block"></div>
+            <div class="text-gray-400 text-xxs">WALLET ADDRESS</div>
+            <div class="flex items-center justify-between mb-3">
+              <div id="address" class="font-bold outline-none break-all text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
+              <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4" @click="copy('address')">
+            </div>
+            <div class="flex justify-around w-full">
+              <div class="my-3 flex items-center"><a href="https://bctestnetfaucet.xpxsirius.io/#/" target=_new><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span class="text-xs" style="margin-top: 1px">Request XPX</span></a></div>
+              <div class="my-3 flex items-center"><img src="@/modules/dashboard/img/icon-key.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Convert to Multisig</div></div>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="px-2">
-        <div class="shadow-md w-full relative overflow-x-hidden address_div bg-gray-50 px-7 py-4 rounded-lg balance-div flex flex-col justify-between" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/balance-bg.png') + ' )' }">
-          <div>
-            <div class="mt-5 text-gray-300 text-txs">CURRENT BALANCE</div>
-            <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
-            <div class="text-gray-300 text-txs mt-1">Estimate US$ {{ currencyConvert }}</div>
+        <div class="px-2">
+          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-gray-50 px-7 py-4 rounded-lg balance-div flex flex-col justify-between" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/balance-bg.png') + ' )' }">
+            <div>
+              <div class="mt-5 text-gray-300 text-txs">CURRENT BALANCE</div>
+              <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
+              <div class="text-gray-300 text-txs mt-1">Estimate US$ {{ currencyConvert }}</div>
+            </div>
+            <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Send XPX</div></router-link>
           </div>
-          <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Send XPX</div></router-link>
         </div>
-      </div>
-      <div class="col-span-2 pl-2">
-        <div class="shadow-md w-full relative overflow-x-hidden address_div bg-gray-50 px-7 py-4 rounded-lg transaction-div flex flex-row justify-evenly items-center" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/transaction-bg.png') + ' )' }">
-          <div class="text-center">
-            <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-successful-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredConfirmedTransactions.length }}</div></div>
-            <div class="text-xs mt-3">Succesful<br>Transactions</div>
-          </div>
-          <div class="text-center">
-            <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-unconfirmed-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredUnconfirmedTransactions.length }}</div></div>
-            <div class="text-xs mt-3">Unconfirmed<br>Transactions</div>
-          </div>
-          <div class="text-center">
-            <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-waiting-for-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredPartialTransactions.length }}</div></div>
-            <div class="text-xs mt-3">Waiting for<br>Signing</div>
+        <div class="col-span-2 pl-2">
+          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-gray-50 px-7 py-4 rounded-lg transaction-div flex flex-row justify-evenly items-center" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/transaction-bg.png') + ' )' }">
+            <div class="text-center">
+              <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-successful-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredConfirmedTransactions.length }}</div></div>
+              <div class="text-xs mt-3">Succesful<br>Transactions</div>
+            </div>
+            <div class="text-center">
+              <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-unconfirmed-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredUnconfirmedTransactions.length }}</div></div>
+              <div class="text-xs mt-3">Unconfirmed<br>Transactions</div>
+            </div>
+            <div class="text-center">
+              <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-waiting-for-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredPartialTransactions.length }}</div></div>
+              <div class="text-xs mt-3">Waiting for<br>Signing</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="text-left px-2 sm:px-10 bg-gray-200">
-    <div class="transition-all flex items-end">
-      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='overview'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='overview'">Overview</div>
-      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='asset'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='asset'">Assets</div>
-      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='namespace'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='namespace'">Namespaces</div>
-      <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='transaction'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='transaction'">All Transactions</div>
+    <div class="text-left px-2 sm:px-10 bg-gray-200">
+      <div class="transition-all flex items-end">
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='overview'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='overview'">Overview</div>
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='asset'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='asset'">Assets</div>
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='namespace'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='namespace'">Namespaces</div>
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='transaction'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='transaction'">All Transactions</div>
+      </div>
     </div>
-  </div>
-  <div class="bg-white px-2 sm:px-10 pt-12" v-if="displayBoard=='overview'">
-    <div class="text-txs text-gray-400"><b class="text-gray-700">ASSETS</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">View all</span>)</div>
-    <AssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
-    <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
-    <NamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" />
-    <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ filteredConfirmedTransactions.length }} - View all)</div>
-    <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block).slice(0, 5)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
-    <div class="mt-10 flex">
-      <div class=" md:w-1/2">
-        <div class="mb-8 font-bold uppercase text-txs">Create something new</div>
-        <div class="flex flex-wrap">
-          <div class="flex items-center w-80 mb-2">
-            <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
-            <div class="inline-block ml-2 dashboard-link">
-              <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create Namespace</router-link>
-              <p class="text-txs w-60">Create an on-chain unique place for your business and your assets.</p>
+    <div class="bg-white px-2 sm:px-10 pt-12" v-if="displayBoard=='overview'">
+      <div class="text-txs text-gray-400"><b class="text-gray-700">ASSETS</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">View all</span>)</div>
+      <AssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
+      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
+      <NamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" />
+      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ filteredConfirmedTransactions.length }} - View all)</div>
+      <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block).slice(0, 5)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
+      <div class="mt-10 flex">
+        <div class=" md:w-1/2">
+          <div class="mb-8 font-bold uppercase text-txs">Create something new</div>
+          <div class="flex flex-wrap">
+            <div class="flex items-center w-80 mb-2">
+              <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
+              <div class="inline-block ml-2 dashboard-link">
+                <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create Namespace</router-link>
+                <p class="text-txs w-60">Create an on-chain unique place for your business and your assets.</p>
+              </div>
             </div>
-          </div>
-          <div class="flex items-center w-80 mb-2">
-            <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
-            <div class="inline-block ml-2 dashboard-link">
-              <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create an Asset</router-link>
-              <p class="text-txs w-60">An asset could be a token that has a unique identifier and configurable properties.</p>
+            <div class="flex items-center w-80 mb-2">
+              <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
+              <div class="inline-block ml-2 dashboard-link">
+                <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create an Asset</router-link>
+                <p class="text-txs w-60">An asset could be a token that has a unique identifier and configurable properties.</p>
+              </div>
             </div>
-          </div>
-          <div class="flex items-center w-80mb-2">
-            <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
-            <div class="inline-block ml-2 dashboard-link">
-              <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create New Account</router-link>
-              <p class="text-txs w-60">Create an on-chain unique place for your business and your assets.</p>
+            <div class="flex items-center w-80mb-2">
+              <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
+              <div class="inline-block ml-2 dashboard-link">
+                <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create New Account</router-link>
+                <p class="text-txs w-60">Create an on-chain unique place for your business and your assets.</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      
-      <div class="md:w-1/2">
-        <div class="mb-8 font-bold text-txs uppercase">Getting started guide</div>
-        <div class="text-tsm">
-          <div class="mb-2"><a href=#>Guide Overview <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-          <div class="mb-2"><a href=#>What is ProximaX Sirius Chain <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-          <div class="mb-2"><a href=#>What is Namespace <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-          <div class="mb-2"><a href=#>What is Asset <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+        <div class="md:w-1/2">
+          <div class="mb-8 font-bold text-txs uppercase">Getting started guide</div>
+          <div class="text-tsm">
+            <div class="mb-2"><a href=#>Guide Overview <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href=#>What is ProximaX Sirius Chain <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href=#>What is Namespace <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href=#>What is Asset <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+          </div>
         </div>
       </div>
-
     </div>
+    <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='asset'">
+      <AssetDataTable :assets="selectedAccount.assets" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
+    </div>
+    <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='namespace'">
+      <NamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" />
+    </div>
+    <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='transaction'">
+      <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
+    </div>
+    <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
   </div>
-  <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='asset'">
-    <AssetDataTable :assets="selectedAccount.assets" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
-  </div>
-  <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='namespace'">
-    <NamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" />
-  </div>
-  <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='transaction'">
-    <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
-  </div>
-  <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
-</div>
 </template>
 
 <script>

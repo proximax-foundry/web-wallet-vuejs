@@ -1,211 +1,213 @@
 <template>
-  <div class="flex justify-between text-xs sm:text-sm">
-    <div><span class="text-gray-400">Swap > BSC > In ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
-    <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
-    </div>
-  </div>
-  <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
-    <div class="flex">
-      <div class="flex-none">
-        <div class="flex p-0 sm:p-3">
-          <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">1</div></div>
-          <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('swap.transaction')}}</div>
-        </div>
-      </div>
-      <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
-      <div class="flex-none">
-        <div class="flex p-0 sm:p-3">
-          <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">2</div></div>
-          <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('swap.validation')}}</div>
-        </div>
-      </div>
-      <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
-      <div class="flex-none">
-        <div class="flex p-0 sm:p-3">
-          <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage==3?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">3</div></div>
-          <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('swap.certificate')}}</div>
-        </div>
-      </div>
-    </div>
-    <div v-if="currentPage==1">
-      <div class="text-lg my-7 font-bold">Transaction Details</div>
-      <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">Please make sure there is no other crypto wallet extension currently being enabled except <b>MetaMask</b>.<div class="my-2">Refer to the <a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">walkthrough<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a> for more details.</div>Please refresh this page after disabling other wallet extensions.</div>
-      <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
-      <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-      <p class="font-bold text-tsm text-left mb-1">From: MetaMask Address</p>
-      <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left" v-if="isInstallMetamask">
-        <div class="text-tsm text-gray-700 self-center relative">
-          <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block break-all">{{ isMetamaskConnected?(currentAccount?currentAccount:'Not connected'):'Not connected' }}</div></div>
-        </div>
-        <div class="self-center">
-          <button @click="connectMetamask()" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none" v-if="!currentAccount">Connect to MetaMask</button>
-          <button class=" bg-green-50 rounded-3xl border font-bold px-6 py-1 border-green-500 text-green-500 text-tsm outline-none focus:outline-none cursor-auto" v-else>Connected</button>
-        </div>
-      </div>
-      <div class="mb-5 flex justify-between bg-yellow-200 rounded-2xl p-3 text-left" v-else>
-        <div class="text-tsm text-gray-700 self-center relative">
-          <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block text-gray-800">MetaMask is not installed</div></div>
-        </div>
-        <div class="self-center">
-          <a href="https://metamask.io/" target=_new class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none">Download MetaMask</a>
-        </div>
-      </div>
-      <p class="font-bold text-tsm text-left">To: Sirius Address</p>
-      <SelectSiriusAccountInputPlugin v-model="siriusAddress" icon="card-alt" :showError="showSiriusAddressErr" errorMessage="Sirius Address required" :options="siriusAddressOption" :disabled="disableSiriusAddress" />
-      <p class="font-bold text-tsm text-left mb-1">Amount</p>
-      <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" title="BEP20 XPX (minimum = 51)" placeholder="BEP20 XPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':((parseFloat(amount) <= defaultXPXTxFee)?'Insufficient amount':'Insufficient token balance.')" :decimal="6" />
-      <div class="my-2 float-right text-xs text-blue-primary">* The fees for the transaction on Sirius Chain will be deducted from this amount, which is 50 XPX</div>
-      <div class="mt-10">
-        <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
-        <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="sendRequest()">Send Request</button>
-      </div>
-    </div>
-    <div v-if="currentPage==2">
-      <div class="text-lg my-7">
-        <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <div class="font-bold text-left text-xs md:text-sm lg:text-lg" :class="step1?'text-gray-700':'text-gray-300'">Step 1: Send BEP20 XPX to the escrow account</div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="step1?'border-blue-primary':'border-gray-300'">
-              <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" :class="step1?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500"></font-awesome-icon>
-              </div>
-            </div>
-          </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Sending transaction to MetaMask</div>
-        </div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="isInvalidConfirmedMeta?'border-red-primary':(step2?'border-blue-primary':'border-gray-300')">
-              <div class="flex h-full justify-center">
-                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-if="isInvalidConfirmedMeta"></font-awesome-icon>
-                <font-awesome-icon icon="check" :class="step2?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-else></font-awesome-icon>
-              </div>
-            </div>
-          </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
-            {{ isInvalidConfirmedMeta?'Approval in MetaMask is rejected':'Waiting for confirmation in MetaMask' }}
-            <div v-if="isInvalidConfirmedMeta" class="mt-5">
-              <button type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border-blue-primary px-8 text-white hover:shadow-lg" @click="getValidation">Retry</button>
-              <router-link :to="{ name: 'ViewServices' }" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32 text-tsm" tag="button">Cancel this swap</router-link>
-            </div>
-          </div>
-        </div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step3?'border-blue-primary':'border-gray-300'">
-              <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" :class="step3?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
-              </div>
-            </div>
-          </div>
-          <div class="text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">
-            Transaction hash:
-            <div v-if="validationHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
-              <a :href="validationLink" target=_new :class="isInvalidConfirmedMeta?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ validationHash }}</a>
-              <div class="flex-none">
-                <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step3"></font-awesome-icon>
-              </div>
-            </div>
-            <div class="sm:flex">
-              <button class="sm:flex-none justify-start sm:justify-end bg-blue-primary h-15 w-60 rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-3 sm:mt-0 disabled:opacity-50 self-center" type="button" v-if="validationHash" :disabled="isDisabledCheckTxnConfirmed || transactionFailed" @click="triggerTxnConfirmation">{{ isCheckingTxnConfirmation?'Checking transaction confirmation...':'Check transaction confirmation to proceed' }}</button>
-              <div v-if="validationHash" class="py-2 sm:flex-grow text-tsm">
-                <div class="mb-1">One block confirmation needed to proceed.</div>
-                <div class="mb-1"><b>Do not change Gas Limit, Max Piority Fee or Max Fee</b>.</div>
-                <div class="mb-1">Confirmation might take up to 30 minutes, 1 hour or more due to high transaction volumes.</div>
-                <div class="mb-1">Please <b>do not close or refresh</b> this page until the swap process is complete and you have saved your certificate.</div>
-                <div class="mb-1">View confirmation status on <a :href="validationLink" target="_new" class="text-blue-primary inline-block hover:text-blue-900 hover:underline">BSCScan<font-awesome-icon icon="external-link-alt" class="ml-1 text-blue-primary w-3 h-3 self-center inline-block"></font-awesome-icon></a>.</div>
-              </div>
-            </div>
-            <div class="text-tsm mt-2 bg-blue-100 px-4 py-2 rounded-xl inline-block text-blue-900" v-if="isTxnNotConfirmed && !transactionFailed">Transaction is not confirmed yet. Please check again in a moment</div>
-            <div class="text-tsm mt-2 bg-red-100 px-4 py-2 rounded-xl inline-block text-red-primary" v-if="transactionFailed">Transaction failed. Please try again with suggested gas price and gas limit</div>
-          </div>
-        </div>
-        <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step4?'text-gray-700':'text-gray-300'">Step 2: Validate your Sirius address</div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step4?'border-blue-primary':'border-gray-300'">
-              <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" :class="step4?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
-              </div>
-            </div>
-          </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">Sending message to MetaMask</div>
-        </div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSignedMeta?'border-red-primary':(step5?'border-blue-primary':'border-gray-300')">
-              <div class="flex h-full justify-center">
-                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidSignedMeta"></font-awesome-icon>
-                <font-awesome-icon icon="check" :class="step5?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
-              </div>
-            </div>
-          </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">
-            {{ signatureMessage }}
-            <div v-if="isInvalidSignedMeta" class="mt-5">
-              <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg w-24" @click="getSigned">Retry</button>
-            </div>
-          </div>
-        </div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step6?'border-blue-primary':'border-gray-300'">
-              <div class="flex h-full justify-center">
-                <font-awesome-icon icon="check" :class="step6?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
-              </div>
-            </div>
-          </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message signed with signature: <div class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex" v-if="messageHash && step6"><div :class="step6?'text-gray-500':'text-gray-300'" class="text-tsm break-all flex-grow" id="validateMessage" :copyValue="messageHash" copySubject="Signature hash">{{ messageHash }}</div><div class="flex-none"><font-awesome-icon icon="copy" @click="copy('validateMessage')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step6"></font-awesome-icon></div></div></div>
-        </div>
-        <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step7?'text-gray-700':'text-gray-300'">Step 3: Initiate swap</div>
-        <div class="flex border-b border-gray-300 p-3">
-          <div class="flex-none">
-            <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSwapService?'border-red-primary':(step7?'border-blue-primary':'border-gray-300')">
-              <div class="flex h-full justify-center">
-                <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidSwapService"></font-awesome-icon>
-                <font-awesome-icon icon="check" :class="step7?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
-              </div>
-            </div>
-          </div>
-          <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step7?'text-gray-700':'text-gray-300'">
-            {{ isInvalidSwapService?'Unable to send message to swap service':'Message sent to the swap service, swap initiated...' }}
-            <div v-if="isInvalidSwapService && swapServerErrIndex <= 3" class="mt-5">
-              <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg disabled:opacity-50" @click="afterSigned" :disabled="disableRetrySwap">{{ retrySwapButtonText }}</button>
-            </div>
-            <div v-if="swapServerErrIndex>3" class="mt-5 text-tsm sm:text-sm">
-              Sorry. Please save the <b>transaction hash</b>, the <b>signature</b> and contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="mt-10">
-        <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()">{{$t('createsuccessful.continue')}}</button>
-      </div>
-    </div>
-    <div v-if="currentPage==3">
+  <div>
+    <div class="flex justify-between text-xs sm:text-sm">
+      <div><span class="text-gray-400">Swap > BSC > In ></span> <span class="text-blue-primary font-bold">Transaction</span></div>
       <div>
-        <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
-        <div class="text-sm mb-7">The swap process has already started!</div>
-        <swap-certificate-component networkTerm="BSC" swapType="In" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="transactionHash" :siriusAddress="siriusAddress" :swapQr="swapQr" :swapLink="validationLink" />
-        <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
-          <div class="text-center w-full">
-            <div class="w-8 h-8 inline-block relative">
-              <div class="rounded-full border border-yellow-500 w-7 h-7 relative">
-                <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:3px; right: 10px;"></font-awesome-icon>
-              </div>
-            </div>
-            <div class="text-tsm mt-2">Download your certificate. It is needed in the event of an error.</div>
+        <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
+      </div>
+    </div>
+    <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
+      <div class="flex">
+        <div class="flex-none">
+          <div class="flex p-0 sm:p-3">
+            <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">1</div></div>
+            <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('swap.transaction')}}</div>
           </div>
         </div>
-        <label class="inline-flex items-center mb-10">
-          <input type="checkbox" class="h-5 w-5 bg-blue-primary" value="true" v-model="savedCheck">
-          <span class="ml-2 cursor-pointer text-tsm">I confirm that I have downloaded a copy of my certificate.</span>
-        </label>
-        <div class="sm:mt-10">
-          <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none mr-4 w-60 mt-6" @click="saveCertificate">Download Certificate</button>
-          <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-60 inline-block mt-6" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
+        <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
+        <div class="flex-none">
+          <div class="flex p-0 sm:p-3">
+            <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">2</div></div>
+            <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('swap.validation')}}</div>
+          </div>
+        </div>
+        <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
+        <div class="flex-none">
+          <div class="flex p-0 sm:p-3">
+            <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage==3?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">3</div></div>
+            <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('swap.certificate')}}</div>
+          </div>
+        </div>
+      </div>
+      <div v-if="currentPage==1">
+        <div class="text-lg my-7 font-bold">Transaction Details</div>
+        <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">Please make sure there is no other crypto wallet extension currently being enabled except <b>MetaMask</b>.<div class="my-2">Refer to the <a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">walkthrough<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a> for more details.</div>Please refresh this page after disabling other wallet extensions.</div>
+        <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
+        <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
+        <p class="font-bold text-tsm text-left mb-1">From: MetaMask Address</p>
+        <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left" v-if="isInstallMetamask">
+          <div class="text-tsm text-gray-700 self-center relative">
+            <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block break-all">{{ isMetamaskConnected?(currentAccount?currentAccount:'Not connected'):'Not connected' }}</div></div>
+          </div>
+          <div class="self-center">
+            <button @click="connectMetamask()" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none" v-if="!currentAccount">Connect to MetaMask</button>
+            <button class=" bg-green-50 rounded-3xl border font-bold px-6 py-1 border-green-500 text-green-500 text-tsm outline-none focus:outline-none cursor-auto" v-else>Connected</button>
+          </div>
+        </div>
+        <div class="mb-5 flex justify-between bg-yellow-200 rounded-2xl p-3 text-left" v-else>
+          <div class="text-tsm text-gray-700 self-center relative">
+            <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block text-gray-800">MetaMask is not installed</div></div>
+          </div>
+          <div class="self-center">
+            <a href="https://metamask.io/" target=_new class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none">Download MetaMask</a>
+          </div>
+        </div>
+        <p class="font-bold text-tsm text-left">To: Sirius Address</p>
+        <SelectSiriusAccountInputPlugin v-model="siriusAddress" icon="card-alt" :showError="showSiriusAddressErr" errorMessage="Sirius Address required" :options="siriusAddressOption" :disabled="disableSiriusAddress" />
+        <p class="font-bold text-tsm text-left mb-1">Amount</p>
+        <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" title="BEP20 XPX (minimum = 51)" placeholder="BEP20 XPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':((parseFloat(amount) <= defaultXPXTxFee)?'Insufficient amount':'Insufficient token balance.')" :decimal="6" />
+        <div class="my-2 float-right text-xs text-blue-primary">* The fees for the transaction on Sirius Chain will be deducted from this amount, which is 50 XPX</div>
+        <div class="mt-10">
+          <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
+          <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="sendRequest()">Send Request</button>
+        </div>
+      </div>
+      <div v-if="currentPage==2">
+        <div class="text-lg my-7">
+          <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
+          <div class="font-bold text-left text-xs md:text-sm lg:text-lg" :class="step1?'text-gray-700':'text-gray-300'">Step 1: Send BEP20 XPX to the escrow account</div>
+          <div class="flex border-b border-gray-300 p-3">
+            <div class="flex-none">
+              <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="step1?'border-blue-primary':'border-gray-300'">
+                <div class="flex h-full justify-center">
+                  <font-awesome-icon icon="check" :class="step1?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500"></font-awesome-icon>
+                </div>
+              </div>
+            </div>
+            <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Sending transaction to MetaMask</div>
+          </div>
+          <div class="flex border-b border-gray-300 p-3">
+            <div class="flex-none">
+              <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="isInvalidConfirmedMeta?'border-red-primary':(step2?'border-blue-primary':'border-gray-300')">
+                <div class="flex h-full justify-center">
+                  <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-if="isInvalidConfirmedMeta"></font-awesome-icon>
+                  <font-awesome-icon icon="check" :class="step2?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-else></font-awesome-icon>
+                </div>
+              </div>
+            </div>
+            <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
+              {{ isInvalidConfirmedMeta?'Approval in MetaMask is rejected':'Waiting for confirmation in MetaMask' }}
+              <div v-if="isInvalidConfirmedMeta" class="mt-5">
+                <button type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border-blue-primary px-8 text-white hover:shadow-lg" @click="getValidation">Retry</button>
+                <router-link :to="{ name: 'ViewServices' }" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none mr-4 w-32 text-tsm" tag="button">Cancel this swap</router-link>
+              </div>
+            </div>
+          </div>
+          <div class="flex border-b border-gray-300 p-3">
+            <div class="flex-none">
+              <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step3?'border-blue-primary':'border-gray-300'">
+                <div class="flex h-full justify-center">
+                  <font-awesome-icon icon="check" :class="step3?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+                </div>
+              </div>
+            </div>
+            <div class="text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">
+              Transaction hash:
+              <div v-if="validationHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
+                <a :href="validationLink" target=_new :class="isInvalidConfirmedMeta?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="validateTransfer" :copyValue="validationHash" copySubject="Transfer hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ validationHash }}</a>
+                <div class="flex-none">
+                  <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step3"></font-awesome-icon>
+                </div>
+              </div>
+              <div class="sm:flex">
+                <button class="sm:flex-none justify-start sm:justify-end bg-blue-primary h-15 w-60 rounded-3xl mr-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-3 sm:mt-0 disabled:opacity-50 self-center" type="button" v-if="validationHash" :disabled="isDisabledCheckTxnConfirmed || transactionFailed" @click="triggerTxnConfirmation">{{ isCheckingTxnConfirmation?'Checking transaction confirmation...':'Check transaction confirmation to proceed' }}</button>
+                <div v-if="validationHash" class="py-2 sm:flex-grow text-tsm">
+                  <div class="mb-1">One block confirmation needed to proceed.</div>
+                  <div class="mb-1"><b>Do not change Gas Limit, Max Piority Fee or Max Fee</b>.</div>
+                  <div class="mb-1">Confirmation might take up to 30 minutes, 1 hour or more due to high transaction volumes.</div>
+                  <div class="mb-1">Please <b>do not close or refresh</b> this page until the swap process is complete and you have saved your certificate.</div>
+                  <div class="mb-1">View confirmation status on <a :href="validationLink" target="_new" class="text-blue-primary inline-block hover:text-blue-900 hover:underline">BSCScan<font-awesome-icon icon="external-link-alt" class="ml-1 text-blue-primary w-3 h-3 self-center inline-block"></font-awesome-icon></a>.</div>
+                </div>
+              </div>
+              <div class="text-tsm mt-2 bg-blue-100 px-4 py-2 rounded-xl inline-block text-blue-900" v-if="isTxnNotConfirmed && !transactionFailed">Transaction is not confirmed yet. Please check again in a moment</div>
+              <div class="text-tsm mt-2 bg-red-100 px-4 py-2 rounded-xl inline-block text-red-primary" v-if="transactionFailed">Transaction failed. Please try again with suggested gas price and gas limit</div>
+            </div>
+          </div>
+          <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step4?'text-gray-700':'text-gray-300'">Step 2: Validate your Sirius address</div>
+          <div class="flex border-b border-gray-300 p-3">
+            <div class="flex-none">
+              <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step4?'border-blue-primary':'border-gray-300'">
+                <div class="flex h-full justify-center">
+                  <font-awesome-icon icon="check" :class="step4?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+                </div>
+              </div>
+            </div>
+            <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">Sending message to MetaMask</div>
+          </div>
+          <div class="flex border-b border-gray-300 p-3">
+            <div class="flex-none">
+              <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSignedMeta?'border-red-primary':(step5?'border-blue-primary':'border-gray-300')">
+                <div class="flex h-full justify-center">
+                  <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidSignedMeta"></font-awesome-icon>
+                  <font-awesome-icon icon="check" :class="step5?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
+                </div>
+              </div>
+            </div>
+            <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">
+              {{ signatureMessage }}
+              <div v-if="isInvalidSignedMeta" class="mt-5">
+                <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg w-24" @click="getSigned">Retry</button>
+              </div>
+            </div>
+          </div>
+          <div class="flex border-b border-gray-300 p-3">
+            <div class="flex-none">
+              <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step6?'border-blue-primary':'border-gray-300'">
+                <div class="flex h-full justify-center">
+                  <font-awesome-icon icon="check" :class="step6?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
+                </div>
+              </div>
+            </div>
+            <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">Message signed with signature: <div class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex" v-if="messageHash && step6"><div :class="step6?'text-gray-500':'text-gray-300'" class="text-tsm break-all flex-grow" id="validateMessage" :copyValue="messageHash" copySubject="Signature hash">{{ messageHash }}</div><div class="flex-none"><font-awesome-icon icon="copy" @click="copy('validateMessage')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step6"></font-awesome-icon></div></div></div>
+          </div>
+          <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step7?'text-gray-700':'text-gray-300'">Step 3: Initiate swap</div>
+          <div class="flex border-b border-gray-300 p-3">
+            <div class="flex-none">
+              <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="isInvalidSwapService?'border-red-primary':(step7?'border-blue-primary':'border-gray-300')">
+                <div class="flex h-full justify-center">
+                  <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-if="isInvalidSwapService"></font-awesome-icon>
+                  <font-awesome-icon icon="check" :class="step7?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block" v-else></font-awesome-icon>
+                </div>
+              </div>
+            </div>
+            <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step7?'text-gray-700':'text-gray-300'">
+              {{ isInvalidSwapService?'Unable to send message to swap service':'Message sent to the swap service, swap initiated...' }}
+              <div v-if="isInvalidSwapService && swapServerErrIndex <= 3" class="mt-5">
+                <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg disabled:opacity-50" @click="afterSigned" :disabled="disableRetrySwap">{{ retrySwapButtonText }}</button>
+              </div>
+              <div v-if="swapServerErrIndex>3" class="mt-5 text-tsm sm:text-sm">
+                Sorry. Please save the <b>transaction hash</b>, the <b>signature</b> and contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-10">
+          <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()">{{$t('createsuccessful.continue')}}</button>
+        </div>
+      </div>
+      <div v-if="currentPage==3">
+        <div>
+          <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
+          <div class="text-sm mb-7">The swap process has already started!</div>
+          <swap-certificate-component networkTerm="BSC" swapType="In" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="transactionHash" :siriusAddress="siriusAddress" :swapQr="swapQr" :swapLink="validationLink" />
+          <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
+            <div class="text-center w-full">
+              <div class="w-8 h-8 inline-block relative">
+                <div class="rounded-full border border-yellow-500 w-7 h-7 relative">
+                  <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:3px; right: 10px;"></font-awesome-icon>
+                </div>
+              </div>
+              <div class="text-tsm mt-2">Download your certificate. It is needed in the event of an error.</div>
+            </div>
+          </div>
+          <label class="inline-flex items-center mb-10">
+            <input type="checkbox" class="h-5 w-5 bg-blue-primary" value="true" v-model="savedCheck">
+            <span class="ml-2 cursor-pointer text-tsm">I confirm that I have downloaded a copy of my certificate.</span>
+          </label>
+          <div class="sm:mt-10">
+            <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none mr-4 w-60 mt-6" @click="saveCertificate">Download Certificate</button>
+            <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-60 inline-block mt-6" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
+          </div>
         </div>
       </div>
     </div>

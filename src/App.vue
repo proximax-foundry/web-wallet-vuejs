@@ -25,7 +25,8 @@
       <NavigationMenu v-if="login" class="flex-shrink-0 bg-gray-50 text-left text-xs bg-navi z-10 absolute md:relative inset-y-0 left-0 transform md:-translate-x-0 transition duration-200 ease-in-out" :class="`${isShowNavi?'-translate-x-0':'-translate-x-full'}`"></NavigationMenu>
       <div :class="`${ login?'inline-block flex-grow':''}`">
         <div :class="`${ login?'flex flex-col min-full-screen bg-white':''}`">
-          <router-view class="flex-grow px-2 sm:px-10 pt-5"></router-view>
+          <router-view class="flex-grow" v-if="currentRouteName=='ViewDashboard'"></router-view>
+          <router-view class="flex-grow px-2 sm:px-10 pt-5" v-else></router-view>
           <footer class="h-9 mt-10 text-center sm:text-justify sm:flex text-xs sm:justify-between container mx-auto text-gray-700 px-10 flex-grow-0" v-if="login">
             <div class="ml-2 sm:ml-0">Copyright 2021 ProximaX®. All rights reserved. <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary hover:underline">{{$t('Footer.link')}}</a> <selectLanguageModal class="inline-block" /></div>
             <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span>Version BETA {{$t('Header.version')}}{{ versioning }}</span></div>
@@ -54,6 +55,7 @@ import { networkState } from './state/networkState';
 import { walletState } from "@/state/walletState";
 import { listenerState } from "@/state/listenerState";
 import { ChainUtils } from "@/util/chainUtils";
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: 'App',
@@ -69,8 +71,11 @@ export default defineComponent({
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance!.appContext.config.globalProperties.emitter;
     const isShowNavi = ref(false);
-
+    const router = useRouter();
     // chainNetwork.updateAvailableNetworks();
+    const currentRouteName = computed(() => {
+      return router.currentRoute.value.name;
+    });
 
     const versioning = ref('0.0.1');
 
@@ -97,6 +102,7 @@ export default defineComponent({
       clickEvent,
       versioning,
       isShowNavi,
+      currentRouteName,
     }
   }
 });
