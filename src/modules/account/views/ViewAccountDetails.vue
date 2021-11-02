@@ -339,7 +339,6 @@ export default {
       walletPasswdWalletPaper,
       verifyWalletPwWalletPaper,
       saveWalletPaper,
-      isEnableEdit,
     };
   }
 };
