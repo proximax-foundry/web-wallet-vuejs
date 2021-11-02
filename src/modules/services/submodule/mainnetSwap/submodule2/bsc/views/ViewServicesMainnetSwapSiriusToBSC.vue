@@ -102,7 +102,7 @@
             <div class="text-tsm mt-2">Swap completion time will vary depending on the performance of the BSC network. The more BNB transaction fees you pay, the faster your swap will occur. Displayed BNB fees are valid for only three minutes due to the BSC network’s fluctuating rates.</div>
           </div>
         </div>
-        <div class="mt-10">
+        <div class="mt-10 text-center">
           <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">Maybe Later</button>
           <button type="button" class="default-btn focus:outline-none disabled:opacity-50 mt-2" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?'Swap in progress. Please wait...':'Yes, Swap' }}</button>
           <button class="default-btn focus:outline-none disabled:opacity-50 mt-2" v-if="canCheckStatus" @click="callTocheckSwapStatus">Check Swap Status</button>
@@ -128,7 +128,7 @@
             <input type="checkbox" class="h-5 w-5 bg-blue-primary" value="true" v-model="savedCheck">
             <span class="ml-2 cursor-pointer text-tsm">{{$t('swap.certconsent')}}.</span>
           </label>
-          <div class="sm:mt-10">
+          <div class="sm:mt-10 text-center">
             <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none mr-4 w-60 mt-6" @click="saveCertificate">Download Certificate</button>
             <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-60 inline-block mt-6" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
           </div>

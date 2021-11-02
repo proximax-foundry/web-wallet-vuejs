@@ -51,7 +51,7 @@
         </div>
         <p class="font-bold text-tsm text-left mb-1">Sirius Transaction Hash</p>
         <TextInput placeholder="Sirius Transaction Hash" errorMessage="Please key in valid transaction hash" :showError="showTxnHashError" v-model="siriusTxnHash" icon="hashtag" class="w-full" />
-        <div class="mt-10">
+        <div class="mt-10 text-center">
           <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
           <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledCheck" @click="sendRequest()">Check Status</button>
         </div>
@@ -130,7 +130,7 @@
             </div>
           </div>
         </div>
-        <div class="mt-10">
+        <div class="mt-10 text-center">
           <router-link :to="{ name: 'ViewServices' }" class="default-btn focus:outline-none w-40 inline-block" :class="isDisabled?'opacity-50':''" :is="isDisabled?'span':'router-link'" tag="button">Done</router-link>
         </div>
       </div>

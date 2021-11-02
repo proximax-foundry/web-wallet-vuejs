@@ -6,7 +6,7 @@
         <router-link :to="{ name: 'ViewServices'}" class="font-bold" active-class="accounts">{{$t('services.allservices')}}</router-link>
       </div>
     </div>
-    <div class='mt-2 py-3 gray-line'>
+    <div class='mt-2 py-3 gray-line text-center'>
       <div class="text-lg sm:text-xl text-gray-600 font-bold mt-10">Please select an option</div>
       <div class="md:grid lg:grid-cols-3 mx-5 lg:mx-5 2xl:mx-60 mt-5">
         <div class="lg:col-span-1" :class="`${!isOutgoingOptionDisabled?'cursor-pointer':'' }`" @click="gotoOutgoingPage">

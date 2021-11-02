@@ -51,7 +51,7 @@
         </div>
         <p class="font-bold text-tsm text-left mb-1">ETH Transaction Hash</p>
         <TextInput placeholder="ETH Transaction Hash" errorMessage="Please key in valid transaction hash" :showError="showTxnHashError" v-model="remoteTxnHash" icon="hashtag" class="w-full" />
-        <div class="mt-10">
+        <div class="mt-10 text-center">
           <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
           <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledCheck" @click="checkStatus">Check Status</button>
         </div>
@@ -203,7 +203,7 @@
             </div>
           </div>
         </div>
-        <div class="mt-10">
+        <div class="mt-10 text-center">
           <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()" v-if="isInitiateSwap && !swapStatus208">{{$t('createsuccessful.continue')}}</button>
           <router-link :to="{ name: 'ViewServices' }" class="default-btn focus:outline-none w-40 inline-block" :class="isDisabledValidate?'opacity-50':''" :is="isDisabledValidate?'span':'router-link'" tag="button" v-else>Done</router-link>
         </div>
@@ -227,7 +227,7 @@
             <input type="checkbox" class="h-5 w-5 bg-blue-primary" value="true" v-model="savedCheck">
             <span class="ml-2 cursor-pointer text-tsm">I confirm that I have downloaded a copy of my certificate.</span>
           </label>
-          <div class="sm:mt-10">
+          <div class="sm:mt-10 text-center">
             <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none mr-4 w-60 mt-6" @click="saveCertificate">Download Certificate</button>
             <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-60 inline-block mt-6" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
           </div>
