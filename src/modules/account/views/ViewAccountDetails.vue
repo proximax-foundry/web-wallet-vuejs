@@ -1,99 +1,85 @@
 <template>
-<div class="flex justify-between text-xs sm:text-sm">
-  <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.details')}}</span></div>
-  <div>
-    <router-link :to="{name : 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('accounts.viewall')}}</router-link>
-  </div>
+<div class="px-2 sm:px-10">
+<div class = 'flex text-xs font-semibold'>
+  <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Details</div>
+  <router-link :to="{ name: isMultiSig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
+  <div class= 'w-18 text-center'>Backup</div>
 </div>
-<div class='mt-2 py-3 gray-line'>
-  <div class="container mx-auto text-center">
-    <div class="mx-auto pt-5 lg:px-20">
-      <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
-      <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-8 items-center">
-        <div class="text-left w-full relative">
-          <div class="text-xs font-bold mb-1">{{$t('accounts.name')}}:</div>
-          <div v-if="showName">{{ accountNameDisplay }}</div>
+<div class=' py-3 gray-line'>
+  <div class = 'mt-2 text-md font-semibold'>Account Details</div>
+  <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
+    <div class= 'flex'>
+      <div class = 'mt-5 h-12 w-12 bg-gray-300 rounded-lg '></div>
+      <div class= 'flex flex-col mt-4'>
+        <div class = 'flex'>
+          <img v-if='isDefault' src="@/modules/account/img/info-icon.svg" class = 'ml-3 h-4 w-4 bg-gray-200' title='This is your default account everytime you login'>
+          <p v-if='isDefault' class = 'text-txs pt-px bg-gray-200 text-blue-link cursor-default' title='This is your default account everytime you login' >DEFAULT ACCOUNT</p>
+          <img v-if='isMultiSig' src="@/modules/account/img/info-icon.svg" class = 'ml-3 h-4 w-4 bg-gray-200' title='This is your default account everytime you login'>
+          <p v-if='isMultiSig' class = 'text-txs pt-px bg-gray-200 text-blue-link cursor-default' title='This is a multisig account' >MULTISIG ACCOUNT</p>
+        </div>
+        <div class = 'flex'>
+          <div class = ' ml-4 font-semibold text-md' v-if="showName">{{ accountNameDisplay }}</div>
           <div v-else>
-            <TextInput :placeholder="$t('swap.accountname')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
+            <TextInput class = 'mt-1 ml-4' :placeholder="$t('swap.accountname')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
           </div>
-        </div>
-        <div class="inline-block ml-2">
-          <font-awesome-icon icon="edit" @click="editName()" class="w-5 h-5 text-gray-500 cursor-pointer inline-block" v-if="showName"></font-awesome-icon>
-          <div v-else>
-            <font-awesome-icon icon="check-circle" @click="changeName()" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mb-1"></font-awesome-icon>
-            <font-awesome-icon @click="hidePanel()" icon="times-circle" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
+          <img src="@/modules/account/img/edit-icon.svg" title='Edit Account Name' @click="editName()" class="w-5 h-5 text-black cursor-pointer mt-0.5 ml-1" v-if="showName">
+          <div v-else class = 'flex flex-col'>
+            <font-awesome-icon icon="check-circle" @click="changeName()" class="w-5 h-5 text-gray-500 cursor-pointer  mt-1.5 ml-3 mb-1"></font-awesome-icon>
+            <font-awesome-icon @click="hidePanel()" icon="times-circle" class="w-5 h-5 text-gray-500 cursor-pointer ml-3"></font-awesome-icon>
           </div>
-        </div>
-      </div>
-      <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-        <div class="text-left w-full relative">
-          <div class="absolute z-20 w-full h-full"></div>
-          <div class="text-xs font-bold mb-1">{{$t('createsuccessful.address')}}:</div>
-          <div id="address" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="prettyAddress" copySubject="Address">{{prettyAddress}}</div>
-        </div>
-        <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
-      </div>
-      <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-        <div class="text-left w-full relative">
-          <div class="absolute z-20 w-full h-full"></div>
-          <div class="text-xs font-bold mb-1">{{$t('accounts.publickey')}}:</div>
-          <div id="public" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
-        </div>
-        <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
-      </div>
-      <div v-if="acc.encrypted != undefined && acc.encrypted != ''">
-        <div class="flex justify-between p-4 rounded-xl bg-yellow-100 mb-4">
-          <div class="text-center w-full">
-            <div class="border border-yellow-600 rounded-full w-8 h-8 inline-block mb-4">
-              <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-600 inline-block mt-1"></font-awesome-icon>
-            </div>
-            <p>{{$t('createsuccessful.warningtext1')}}</p>
-            <p>{{$t('createsuccessful.warningtext2')}}</p>
-          </div>
-        </div>
-        <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-          <div class="text-left w-full relative">
-            <div class="text-xs font-bold mr-2"><div class="mb-2 inline-block">{{$t('createprivatekeywallet.privatekey')}}:</div><div v-if="!showPwPK && !showPK">**************</div><PasswordInput v-if="showPwPK && !showPK" :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPasswd" /></div>
-            <div class="absolute z-20 w-full h-full" v-if="showPK"></div>
-            <div id="private" class="text-sm w-full outline-none bg-gray-100 z-10" type="text" :copyValue="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
-          </div>
-          <font-awesome-icon icon="copy" @click="copy('private')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mr-2" v-if="showPK"></font-awesome-icon>
-          <button class="default-btn w-36" @click="showPwPK = !showPwPK" v-if="!showPwPK && !showPK">{{$t('createsuccessful.show')}}</button>
-          <button class="default-btn w-36" @click="verifyWalletPwPk()" v-if="showPwPK && !showPK">{{$t('accounts.submit')}}</button>
-          <button class="default-btn w-36" @click="showPwPK = false; showPK = false" v-if="showPK">{{$t('createsuccessful.hide')}}</button>
-        </div>
-        <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-          <div class="text-left w-full relative">
-            <div class="text-xs font-bold mr-2">
-              <div class="text-sm font-bold mb-1">{{$t('accounts.swap')}}</div>
-              <PasswordInput v-if="showPwSwap" :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPasswdSwap" />
-            </div>
-          </div>
-          <button class="default-btn w-36" @click="showPwSwap = !showPwSwap" v-if="!showPwSwap">{{$t('accounts.enable')}}</button>
-          <button class="default-btn w-36" @click="verifyWalletPwSwap()" v-if="showPwSwap" >{{$t('accounts.submit')}}</button>
-        </div>
-        <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-          <div class="text-left w-full relative">
-            <div class="text-xs font-bold mr-2">
-              <div class="text-sm font-bold mb-1">{{$t('createsuccessful.savewalletpaper')}}</div>
-              <PasswordInput v-if="showWalletPaperPw && !showSavePaperWallet" :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPasswdWalletPaper" />
-            </div>
-          </div>
-          <button class="default-btn w-36" @click="showWalletPaperPw = !showWalletPaperPw" v-if="!showWalletPaperPw">{{$t('accounts.save')}}</button>
-          <button class="default-btn w-36" @click="verifyWalletPwWalletPaper()" v-if="showWalletPaperPw && !showSavePaperWallet">{{$t('accounts.submit')}}</button>
-          <button class="default-btn w-36" @click="saveWalletPaper()" v-if="showSavePaperWallet">{{$t('accounts.save')}}</button>
         </div>
       </div>
     </div>
-  </div>
+    <div class = 'text-txs text-gray-400 mt-2 ml-16'>CURRENT BALANCE</div>
+    <div class= 'flex'>
+      <div class = 'text-md font-semibold ml-16'>{{splitBalance.left}} </div>
+      <div class = 'text-md font-semibold' v-if='splitBalance.right!=null'>.</div>
+      <div class='text-xs mt-1.5 font-light'>{{splitBalance.right}}</div>
+      <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
+      <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
+      <img src="@/modules/account/img/dots-icon.svg" class='h-4 w-5 mt-1'>
+    </div>
+    <div class = 'text-txs text-gray-400  ml-16'>Estimate US$ {{currencyConvert}}</div>
+    <div class = 'text-txs text-gray-400 mt-5 ml-16'>WALLET ADDRESS</div>
+    <div class= 'flex'>
+      <div id="address" :copyValue="prettyAddress" copySubject="Address" class = 'text-xs font-bold ml-16 mt-1'>{{prettyAddress}} </div>
+      <font-awesome-icon icon="copy" title='Copy' @click="copy('address')" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+      <PdfPasswordModal v-if='!other_acc' />
+    </div>
+    <div class = 'w-7/12  h-28 border rounded-xl ml-16 mt-5 pl-4 pt-3 pr-4'>
+      <div class= 'flex'>
+        <div class = 'text-xs font-semibold'>Public Key</div>
+         <font-awesome-icon icon="copy" @click="copy('public')" title='Copy' class="ml-2 pb-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+      </div>
+      <div id="public" class="text-xs text-gray-400 w-full break-all" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
+    </div>
+    <div v-if='!other_acc' class = 'w-7/12  h-28 border rounded-xl ml-16 mt-5 pl-4 pt-3 pr-4'>
+      <div class= 'flex'>
+        <div class = 'text-xs font-semibold'>Private Key</div>
+          <font-awesome-icon title='Copy' icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link cursor-pointer " v-if="showPK"></font-awesome-icon>
+           <PkPasswordModal v-if="!showPwPK && !showPK" :account = 'acc' />
+          <font-awesome-icon icon="eye-slash" title='Hide Private Key' class="text-blue-link relative cursor-pointer ml-1" @click="showPwPK = false; showPK = false" v-if="showPK"></font-awesome-icon>
+          <img src='@/modules/account/img/swap-icon.svg' title='Swap with this private key' class='w-5 h-4 ml-auto  '>
+          <!-- <button class="default-btn w-36" @click="showPwSwap = !showPwSwap" v-if="!showPwSwap">{{$t('accounts.enable')}}</button>
+          <button class="default-btn w-36" @click="verifyWalletPwSwap()" v-if="showPwSwap" >{{$t('accounts.submit')}}</button> -->
+      </div>
+      <div v-if="!showPwPK && !showPK">**************</div>
+      <div id="private" class="text-xs text-gray-400 w-full break-all" type="text" :copyValue="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
+      <p class = 'text-txs mt-2 text-gray-400'>{{$t('createsuccessful.warningtext1')}}</p>
+      <p class = 'text-txs text-gray-400'>{{$t('createsuccessful.warningtext2')}}</p>
+    </div>
+    <div v-if="!isDefault && !other_acc " class= 'border-b-2 mt-10'></div> 
+    <div v-if="!isDefault && !other_acc  " class= 'mt-7 text-sm font-semibold'>Delete Account</div>
+    <DeleteAccountModal v-if="!isDefault && !other_acc " :account ='acc'/>
+</div>
 </div>
 </template>
 
 <script>
-import { ref, computed } from "vue";
+import {getXPXcurrencyPrice } from '@/util/functions';
+import { watch, ref, computed, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import TextInput from "@/components/TextInput.vue";
-import PasswordInput from "@/components/PasswordInput.vue";
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { walletState } from "@/state/walletState";
@@ -104,17 +90,20 @@ import { useI18n } from 'vue-i18n';
 import { pdfWalletPaperImg } from '@/modules/account/pdfPaperWalletBackground';
 import jsPDF from 'jspdf';
 import qrcode from 'qrcode-generator';
-
+import PkPasswordModal from '@/modules/account/components/PkPasswordModal.vue'
+import PdfPasswordModal from '@/modules/account/components/PdfPasswordModal.vue'
+import DeleteAccountModal from '@/modules/account/components/DeleteAccountModal.vue'
 export default {
   name: "ViewAccountDetails",
   components: {
     TextInput,
-    PasswordInput
+    PkPasswordModal,
+    PdfPasswordModal,
+    DeleteAccountModal
   },
   props: {
     address: String
   },
-
   setup(p) {
     const {t} = useI18n();
     const toast = useToast();
@@ -123,17 +112,19 @@ export default {
     // get account details
     var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
     const other_acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
-
+   
     if(!acc){
       if(other_acc)
       {
         acc = other_acc;
       }
     }
-
+    const isDefault = (acc.default == true) ? true: false
     if (acc === -1) {
       router.push({name: "ViewAccountDisplayAll"});
     }
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const prettyAddress = Helper.createAddress(acc.address).pretty();
     const err = ref(false);
     const accountName = ref(acc.name);
@@ -160,6 +151,11 @@ export default {
     const editName = () => {
       showName.value = !showName.value;
     };
+
+    const isMultiSig = computed(() => {
+      let isMulti = acc.getDirectParentMultisig().length? true: false
+      return isMulti;
+    });  
 
     const changeName = () => {
       if (accountName.value.trim()) {
@@ -227,8 +223,40 @@ export default {
         err.value = "";
       }
     };
+    
+    const currencyConvert = ref('');
+     const getCurrencyPrice = () => {
+      let balance = acc.balance;
+      getXPXcurrencyPrice(balance).then((total) => {
+        currencyConvert.value = Helper.toCurrencyFormat(total, 6);
+      });
+    };
+     
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
 
-  
+    const accountBalance = computed(
+      () => {          
+        return Helper.toCurrencyFormat(acc.balance, currentNativeTokenDivisibility.value);
+      }
+    );
+
+    const splitBalance = computed(()=>{
+      let split = accountBalance.value.split(".")
+      if (split[1]!=undefined){
+        return {left:split[0],right:split[1]}
+      }else{
+        return {left:split[0], right:null}
+      }
+    })
+
+    if(networkState.currentNetworkProfile.network.currency.name === "XPX"){
+      getCurrencyPrice();
+
+      watch(accountBalance, () => {
+        getCurrencyPrice();
+      });
+    }
 
     const verifyWalletPwWalletPaper = () => {
       if (walletPasswdWalletPaper.value == "") {
@@ -252,14 +280,14 @@ export default {
       return qr.createDataURL(size, margin);
     }
 
-    const saveWalletPaper = () => {
+    const saveWalletPaper = (password) => {
       const doc = new jsPDF({
         unit: 'px'
       });
       doc.addImage(pdfWalletPaperImg, 'JPEG', 120, 60, 205, 132);
 
       // QR Code Address
-      const passwordInstance = WalletUtils.createPassword(walletPasswdWalletPaper.value);
+      const passwordInstance = WalletUtils.createPassword(password);
       const walletPrivateKey = WalletUtils.decryptPrivateKey(passwordInstance,acc.encrypted,acc.iv);
       let privateKey = walletPrivateKey.toUpperCase();
       doc.addImage(generateQR(privateKey, 1, 0), 151.5, 105);
@@ -270,8 +298,22 @@ export default {
       doc.text(prettyAddress, 146, 164, { maxWidth: 132 });
       doc.save('Your_Paper_Wallet');
     }
-
+    emitter.on("revealPK", (e) => {
+      showPK.value = e;
+    });
+    emitter.on("pkValue", (e) => {
+      privateKey.value = e
+    });
+    emitter.on("unlockWalletPaper", (e) => {
+      saveWalletPaper(e)
+    });
     return {
+      splitBalance,
+      other_acc,
+      currencyConvert,
+      isMultiSig,
+      currentNativeTokenName,
+      isDefault,
       err,
       showPK,
       showPwPK,
@@ -301,3 +343,17 @@ export default {
   }
 };
 </script>
+<style scoped>
+.circleAround {
+    border-radius: 50%;
+    width: 17px;
+    height: 17px;
+    margin-top: 1px;
+    margin-right: 2px;
+    padding: 1px;
+    border: 1px solid #3b82f6;
+    color: #3b82f6;
+    text-align: center;
+
+}
+</style>
