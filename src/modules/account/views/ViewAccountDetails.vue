@@ -343,17 +343,3 @@ export default {
   }
 };
 </script>
-<style scoped>
-.circleAround {
-    border-radius: 50%;
-    width: 17px;
-    height: 17px;
-    margin-top: 1px;
-    margin-right: 2px;
-    padding: 1px;
-    border: 1px solid #3b82f6;
-    color: #3b82f6;
-    text-align: center;
-
-}
-</style>
