@@ -30,6 +30,7 @@ export default{
   props: {
     cosignPublicKeyIndex: Number,
     selectedAddress: Array,
+    accountName: String
   },
 
   setup(p){
@@ -38,9 +39,8 @@ export default{
     // const appStore = inject("appStore");
     const toggleModal = ref(false);
     const selectContact = ref("0");
-
     const contact = computed(() => {
-      return multiSign.generateContact(p.selectedAddress);
+      return multiSign.generateContact(p.selectedAddress,p.accountName);
     });
 
     const selectCosign = (address) =>{

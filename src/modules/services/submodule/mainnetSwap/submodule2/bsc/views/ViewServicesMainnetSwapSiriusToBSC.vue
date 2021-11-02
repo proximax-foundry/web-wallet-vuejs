@@ -440,10 +440,10 @@ export default {
         }
         else{
           let result = data.result;
-          
-          standardGasPriceInGwei.value = result.standard;
-          fastGasPriceInGwei.value = result.fast;
-          rapidGasPriceInGwei.value = result.instant;
+
+          standardGasPriceInGwei.value = result.ProposeGasPrice;
+          fastGasPriceInGwei.value = result.FastGasPrice;
+          rapidGasPriceInGwei.value = Math.ceil(fastGasPriceInGwei.value * 1.1);
         }
       }
     }
@@ -630,10 +630,12 @@ export default {
           isDisabledCancel.value = false;
         }
         else if(response.status==503){
+          const res = await response.json();
+          let errorMessage = res.data.message ? res.data.message : "";
           toast.add({
             severity:'warn',
             summary: 'Service is unavailable',
-            detail: 'Please try again later',
+            detail: errorMessage ? errorMessage : 'Please try again later',
             group: 'br'
           });
           swapInProgress.value = false;

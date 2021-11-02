@@ -136,7 +136,6 @@ export default defineComponent({
     const passwd = ref("");
     const privateKey = ref("");
     const confirmPasswd = ref("");
-    const nis1Swap = ref(false);
     const privateKeyInput = ref("");
     const showPasswdError = ref(false);
     const privKeyPattern = "^(0x|0X)?[a-fA-F0-9].{63,65}$";
@@ -183,7 +182,6 @@ export default defineComponent({
       passwd.value = "";
       confirmPasswd.value = "";
       privateKeyInput.value = "";
-      nis1Swap.value = false;
     };
 
     return {
@@ -195,7 +193,6 @@ export default defineComponent({
       walletName,
       passwd,
       confirmPasswd,
-      nis1Swap,
       privateKeyInput,
       privateKey,
       showPasswdError,

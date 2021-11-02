@@ -68,7 +68,7 @@
           <SelectInputPlugin v-if="showContactSelection" :placeholder="$t('accounts.contacts')" errorMessage=""  v-model="selectContact" :options="contact" @default-selected="selectContact = 0"  @show-selection="updateAdd"/>
           <div class="flex">
             <div class="flex-grow mr-5">
-              <TextInput :placeholder="$t('dashboard.recipient')" :errorMessage="addressErrorMsg" :showError="showAddressError" v-model="recipient" icon="wallet" :disabled="disableRecipient"/>
+              <TextInput :placeholder="$t('transfer.recipientPlaceholder')" :errorMessage="addressErrorMsg" :showError="showAddressError" v-model="recipientInput" v-debounce:1000="checkRecipient" icon="wallet" :disabled="disableRecipient"/>
             </div>
             <div class="flex-none">
               <div class="rounded-full bg-gray-300 w-14 h-14 cursor-pointer relative" style="top: -5px" @click="showContactSelection = !showContactSelection">
@@ -99,7 +99,7 @@
             (+) {{$t('transfer.addmosaics')}} 
           </button>
         </div>
-        <div class="mb-5 border-t pt-4 border-gray-200">
+        <!-- <div class="mb-5 border-t pt-4 border-gray-200">
           <div class="rounded-2xl bg-gray-100 p-5">
             <input id="regularMsg" type="radio" name="msgOption" value="regular" v-model="msgOption" @change="clearMsg()" :disabled="disableRegularMsg == 1"/>
             <label for="regularMsg" class="cursor-pointer font-bold ml-4 mr-5"> 
@@ -110,7 +110,7 @@
               >{{$t('transfer.hexadecimal')}}
               </label>
           </div>
-        </div>
+        </div> -->
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <div class="rounded-2xl bg-gray-100 p-5">
             <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
@@ -119,10 +119,10 @@
             </label>
           </div>
         </div>
-        <div class = "mt-5" v-if = "msgOption == 'hex'">
+        <!-- <div class = "mt-5" v-if = "msgOption == 'hex'">
         <TransferTextareaInput v-on:keypress="hexOnly(event)" :placeholder="$t('dashboard.message')" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput"/>
-        </div>
-        <div class = "mt-5" v-else >
+        </div> -->
+        <div class = "mt-5" >
         <TransferTextareaInput :placeholder="$t('dashboard.message')" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput" />
         </div>
         <div class="rounded-2xl bg-gray-100 p-5">
@@ -182,6 +182,8 @@ import { networkState } from "@/state/networkState";
 import { accountUtils } from "@/util/accountUtils";
 import { TransactionUtils } from "@/util/transactionUtils";
 import { WalletUtils } from "@/util/walletUtils";
+import { ChainUtils } from '@/util/chainUtils';
+import { NamespaceUtils } from '@/util/namespaceUtils';
 
 export default { 
   name: "ViewTransferCreate",
@@ -203,6 +205,7 @@ export default {
     const showBalanceErr = ref(false);
     const selectContact = ref("0");
     const recipient = ref("");
+    const recipientInput = ref("");
     const msgOption = ref("regular");
     const messageText = ref("");
     const walletPassword = ref("");
@@ -232,7 +235,10 @@ export default {
     const disableMsgInput = computed(() => disableAllInput.value);
     const disablePassword = computed(() => disableAllInput.value);
     const cosignerBalanceInsufficient = ref(false);
-    
+    const isSearchNamespace = ref(false);
+    const namespace = ref('');
+    const networkType = networkState.currentNetworkProfile.network.type;
+    const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
 
     const walletName = walletState.currentLoggedInWallet.name
     const currencyName = computed(
@@ -259,7 +265,6 @@ export default {
     const messageLimit = computed(
       () => networkState.currentNetworkProfileConfig.maxMessageSize - 1
     );
-
 
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
@@ -660,28 +665,50 @@ export default {
     }
   });
 
-  watch(recipient, (add) => {
-    if (
-      (recipient.value.length == 46 &&
-        recipient.value.match(addressPatternLong)) ||
-      (recipient.value.length == 40 &&
-        recipient.value.match(addressPatternShort))
-    ) {
-      if(!walletState.currentLoggedInWallet){
+  const checkRecipient = () =>{
+
+    if(!walletState.currentLoggedInWallet){
         return;
-      }
-      const verifyRecipientAddress = accountUtils.verifyAddress(
-        walletState.currentLoggedInWallet.selectDefaultAccount().address,
-        recipient.value
-      );
-      showAddressError.value = !verifyRecipientAddress.isPassed.value;
-      addMsg.value = verifyRecipientAddress.errMessage.value;
-    } else {
-      recipient.value.length > 0
-        ? (showAddressError.value = true)
-        : (showAddressError.value = false);
     }
 
+    try {
+      let recipientAddress = Helper.createAddress(recipientInput.value);
+
+      let networkOk = Helper.checkAddressNetwork(recipientAddress, networkType);
+
+      if(!networkOk){
+        showAddressError.value = true;
+        addMsg.value = "Wrong network address";
+      }
+      else{
+        recipient.value = recipientInput.value;
+        checkEncryptable(recipientInput.value);
+        showAddressError.value = false;
+      }
+
+    } catch (error) {
+
+      try{
+        let namespaceId = Helper.createNamespaceId(recipientInput.value);
+
+        checkNamespace(namespaceId).then((address)=>{
+          recipient.value = address.plain();
+          showAddressError.value = false;
+          checkEncryptable(recipient.value);
+        }).catch((error)=>{
+          addMsg.value = "Invalid recipient";
+          showAddressError.value = true;
+        });
+      }
+      catch(error){
+        console.log(error);
+        addMsg.value = "Invalid recipient";
+        showAddressError.value = true;
+      }
+    }
+  }
+
+  const checkEncryptable = (add) =>{
     // show and hide encrypted message option
     if (add.match(addressPatternLong) || add.match(addressPatternShort)) {
         accountUtils.verifyPublicKey(recipient.value).then(verify =>
@@ -690,7 +717,11 @@ export default {
     } else {
       encryptedMsgDisable.value = true;
     }
-  });
+  }
+
+  const checkNamespace = async (nsId)=>{
+    return await NamespaceUtils.getLinkedAddress(nsId, chainAPIEndpoint.value);
+  }
 
   watch(currentSelectedName, (n, o) => {
     if (n != o) {
@@ -762,6 +793,8 @@ export default {
       err,
       contact,
       recipient,
+      recipientInput,
+      namespace,
       sendXPX,
       messageText,
       msgOption,
@@ -798,6 +831,7 @@ export default {
       cosignAddress,
       getWalletCosigner,
       disableRecipient,
+      checkRecipient,
       disableSupply,
       disableRegularMsg,
       disableHexMsg,
@@ -812,7 +846,8 @@ export default {
       lockFundTxFee,
       lockFundTotalFee,
       walletName,
-      hexOnly
+      hexOnly,
+      checkNamespace
     };
   },
 };

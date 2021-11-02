@@ -115,7 +115,7 @@ import TextInput from '@/components/TextInput.vue';
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { Helper } from '@/util/typeHelper';
-import { NamespacesUtils } from '@/util/namespacesUtils';
+import { NamespaceUtils } from '@/util/namespaceUtils';
 
 export default {
   name: 'ViewServicesNamespaceCreate',
@@ -156,7 +156,7 @@ export default {
         level: 0,
         disabled: false,
       });
-      const namespacesList = NamespacesUtils.listNamespaces(selectedAccAdd.value);
+      const namespacesList = NamespaceUtils.listNamespaces(selectedAccAdd.value);
       if(namespacesList.length > 0){
         namespace.push.apply(namespace, namespacesList);
       }
@@ -166,7 +166,7 @@ export default {
     const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
     const rentalFee = computed(()=> {
       if(duration.value > 0){
-        return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock * NamespacesUtils.calculateDuration(duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock * NamespaceUtils.calculateDuration(duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
       }else{
         return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock, networkState.currentNetworkProfile.network.currency.divisibility);
       }
@@ -242,7 +242,7 @@ export default {
     const transactionFeeExact = ref(0);
 
     const getMultiSigCosigner = computed(() => {
-      return NamespacesUtils.getCosignerList(selectedAccAdd.value);
+      return NamespaceUtils.getCosignerList(selectedAccAdd.value);
     });
 
     const changeSelection = (i) => {
@@ -260,16 +260,16 @@ export default {
         showDuration.value = true;
         //root
         if(namespaceName.value.length > 0){
-          transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
-          transactionFeeExact.value = Helper.convertToExact(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFee.value = Helper.amountFormatterSimple(NamespaceUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFeeExact.value = Helper.convertToExact(NamespaceUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
         }
       }else{
         duration.value = '0';
         showDuration.value = false;
         //subnamespace
         if(namespaceName.value.length > 0){
-          transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
-          transactionFeeExact.value = Helper.convertToExact(NamespacesUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFee.value = Helper.amountFormatterSimple(NamespaceUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFeeExact.value = Helper.convertToExact(NamespaceUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
         }
       }
     };
@@ -290,15 +290,15 @@ export default {
       if(cosigner.value){
         // for multisig
         if(selectNamespace.value==='1'){
-          NamespacesUtils.createRootNamespaceMultisig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value, selectedAccAdd.value);
+          NamespaceUtils.createRootNamespaceMultisig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value, selectedAccAdd.value);
         }else{
-          NamespacesUtils.createSubNamespaceMultisig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value, selectedAccAdd.value);
+          NamespaceUtils.createSubNamespaceMultisig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value, selectedAccAdd.value);
         }
       }else{
         if(selectNamespace.value==='1'){
-          NamespacesUtils.createRootNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value);
+          NamespaceUtils.createRootNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value);
         }else{
-          NamespacesUtils.createSubNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value);
+          NamespaceUtils.createSubNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value);
         }
       }
       clearInput();
@@ -313,8 +313,8 @@ export default {
     watch(namespaceName, (n) => {
       if(namespaceName.value.length > 0){
         if(namespaceName.value.match(namespacePattern)){
-          transactionFee.value = Helper.amountFormatterSimple(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
-          transactionFeeExact.value = Helper.convertToExact(NamespacesUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFee.value = Helper.amountFormatterSimple(NamespaceUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFeeExact.value = Helper.convertToExact(NamespaceUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
         }else{
           transactionFee.value = '0.000000';
           transactionFeeExact.value = 0;

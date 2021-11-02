@@ -79,6 +79,10 @@ export class Helper{
         return Address.createFromRawAddress(address);
     }
 
+    static checkAddressNetwork(address: Address, networkType: NetworkType){
+        return address.networkType === networkType;
+    }
+
     static getMosaicSupplyType(): typeof MosaicSupplyType{
         return MosaicSupplyType;
     }

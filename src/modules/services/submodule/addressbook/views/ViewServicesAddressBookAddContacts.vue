@@ -23,6 +23,7 @@
   </div>
 </template>
 <script>
+import { Address } from "tsjs-xpx-chain-sdk";
 import { computed, ref, watch } from 'vue';
 import TextInput from '@/components/TextInput.vue';
 import { useRouter } from 'vue-router';
@@ -82,18 +83,17 @@ export default {
     });
 
     const SaveContact = () => {
-      const formattedAddress = address.value.split('-').join('');
-      let addressBook = new AddressBook(contactName.value, formattedAddress);
+      const rawAddress = Address.createFromRawAddress(address.value);
+      // let addressBook = new AddressBook(contactName.value, rawAddress.address);
+      let addressBook = new AddressBook(contactName.value, rawAddress.plain());
       const wallet = walletState.currentLoggedInWallet;
 
-      // check for existing account address in wallet
-      const accountAddIndex = wallet.accounts.findIndex((account) => account.address == formattedAddress);
       // check for existing account name in wallet
       const accountNameIndex = wallet.accounts.findIndex((account) => account.name.toLowerCase() == contactName.value.toLowerCase());
-      const contactAddIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.address == formattedAddress):(-1);
+      const contactAddIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.address == rawAddress.plain()):(-1);
       const contactNameIndex =(wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.name.toLowerCase() == contactName.value.toLowerCase()):(-1);
 
-      if(contactAddIndex >= 0 || accountAddIndex >= 0){
+      if(contactAddIndex >= 0){
         err.value = t('addressbook.addressvalidation');
       }else if( contactNameIndex >= 0 || accountNameIndex >= 0 ){
         err.value = t('addressbook.namevalidation');
