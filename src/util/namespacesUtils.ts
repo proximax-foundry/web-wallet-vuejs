@@ -24,6 +24,7 @@ import { Helper } from "./typeHelper";
 import { WalletAccount } from "@/models/walletAccount";
 import { AutoAnnounceSignedTransaction, HashAnnounceBlock, AnnounceType, listenerState } from "@/state/listenerState";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
+import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 
 
 export class NamespacesUtils {
@@ -49,8 +50,12 @@ export class NamespacesUtils {
   }
 
   static calculateDuration = (durationInDay: number): number =>{
+    let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
+    chainConfig.init();
+    let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
+    let blockTargetTimeByDay = (60 / blockTargetTime) * 60 * 24;
     // 5760 = 4 * 60 * 24 -> 15sec per block
-    return durationInDay * 5760;
+    return durationInDay * blockTargetTimeByDay;
   }
 
   static listNamespaces = (address:string) => {
