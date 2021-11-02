@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between text-md">
+  <div class="flex justify-between text-sm">
     <div><span class="text-gray-300">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.importaccount')}}</span></div>
     <div>
       <router-link :to="{name: 'ViewAccountCreateSelectType'}" class="font-bold">{{$t('accounts.back')}}</router-link>

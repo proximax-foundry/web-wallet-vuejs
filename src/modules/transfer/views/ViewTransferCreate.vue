@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between text-md">
+  <div class="flex justify-between text-sm">
     <div>
       <span class="text-gray-300">{{$t('NavigationMenu.Transfer')}}></span>
       <span class="text-blue-primary font-bold">{{$t('transfer.maketransaction')}}</span>
