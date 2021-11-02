@@ -1,5 +1,5 @@
 <template>
-<div class="px-2 sm:px-10">
+<div>
 <div class = 'flex text-xs font-semibold'>
   <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Details</div>
   <router-link :to="{ name: isMultiSig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
