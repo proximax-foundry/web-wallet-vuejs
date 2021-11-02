@@ -1,34 +1,39 @@
 <template>
   <header>
-    <div class="header-height flex items-stretch px-2 gray-bar" v-if="loginStatus">
+    <div class="header-height flex items-stretch pl-2 md:pr-2 gray-bar" v-if="loginStatus">
       <div class="flex-none self-center flex items-end ml-2 sm:ml-0">
         <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40"></router-link>
       </div>
-      <div class="flex-none flex items-center md:ml-18">
+      <div class="flex-none md:flex items-center md:ml-10 hidden md:visible">
         <router-link :to="{name : 'ViewDashboard'}"><img src="@/assets/img/icon-home.svg" class="h-6 w-6 inline-block"></router-link>
       </div>
 
-      <div class="flex-grow header-height"></div>
+      <div class="flex-grow"></div>
       <div class="flex-none">
-        <div class=" flex flex-row h-full">
+        <div class="flex flex-row h-full">
           <!-- <div class="w-5 sm:w-16 inline-block items-center relative">
             <selectLanguageModal class="lang-mobile-placement-postlogin" />
           </div> -->
-          <div class="w-16 flex flex-row items-center left-gray-line">
-            <div class="text-center w-full">
-              <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block">
+          <div class="w-12 md:w-16 flex flex-row items-center left-gray-line">
+            <div class="text-center w-full h-6">
+              <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block h-4 w-3 md:h-5 md:w-5">
             </div>
           </div>
-          <div class="w-16 flex flex-row items-center left-gray-line">
-            <div class="text-center w-full h-6">
-              <router-link :to="{name : 'ViewServices'}" class="h-6 w-6 inline-block">
+          <div class="w-12 md:w-16 flex flex-row items-center left-gray-line">
+            <div class="text-center w-full h-4 md:h-6">
+              <router-link :to="{name : 'ViewServices'}" class="h-4 w-4 md:h-6 md:w-6 inline-block">
                 <img src="@/assets/img/icon-setting.svg" class="opacity-80 hover:opacity-100 transition-all duration-300">
               </router-link>
             </div>
           </div>
-          <div class="md:w-40 pl-3 text-center flex items-center left-gray-line">
-            <div class="flex items-center">
-              <img src="@/assets/img/icon-testnet-block.svg" class="w-7 inline-block" :title="chainAPIEndpoint"> <div class="inline-block text-txs text-white text-left ml-2" v-if="wideScreen"><div class="font-thin mb-1">CONNECTED TO</div><div class="text-tsm">{{ networkState.chainNetworkName }}</div></div>
+          <div class="w-16 md:w-40 pl-3 text-center flex items-center left-gray-line">
+            <div class="md:flex md:items-center">
+              <img src="@/assets/img/icon-testnet-block.svg" class="w-3 md:w-7 block md:inline-block" :title="chainAPIEndpoint" v-if="wideScreen"> <div class="block md:inline-block text-txs text-white text-left md:ml-2"><div class="font-thin mb-1" v-if="wideScreen">CONNECTED TO</div><div class="text-xxs md:text-tsm">{{ networkState.chainNetworkName }}</div></div>
+            </div>
+          </div>
+          <div class="w-12 md:w-16 flex flex-row items-center left-gray-line md:hidden">
+            <div class="text-center w-full h-6">
+              <img src="@/assets/img/icon-menu.svg" class="h-4 w-4 opacity-80 hover:opacity-100 inline-block cursor-pointer" @click="toggleSidebar">
             </div>
           </div>
           <!-- <div class="w-17 text-center h-10 items-center mr-1">
@@ -46,7 +51,7 @@
       <div class="flex-none self-center flex items-end ml-2 sm:ml-0">
         <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-proximax-sirius-wallet.svg" class="w-24 tsm:w-40"></router-link>
       </div>
-      <div class="flex-grow header-height"></div>
+      <div class="flex-grow"></div>
       <div class="flex-none self-center header-menu">
         <div class="w-20 inline-block ml-2 sm:ml-0" v-if="wideScreen">
           <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">{{$t('Header.home')}}</router-link>
@@ -246,6 +251,16 @@ export default defineComponent({
       }
     }
 
+    const isToggleSidebar = ref(false);
+    const toggleSidebar = () => {
+      isToggleSidebar.value = !isToggleSidebar.value;
+      if(isToggleSidebar.value){
+        emitter.emit('OPEN_NAVI_BAR');
+      }else{
+        emitter.emit('CLOSE_NAVI_BAR');
+      }
+    }
+
     doLogin();
 
     watch(()=> loginStatus.value, async (newValue)=>{
@@ -440,6 +455,7 @@ export default defineComponent({
        listener.value.endpoint = endpoint;
      });
     return {
+      toggleSidebar,
       networkState,
       walletState,
       loginStatus,

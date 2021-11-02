@@ -1,13 +1,14 @@
 <template>
-  <div class="pt-5 px-2 sm:px-10 bg-gray-200 pb-8">
+<div>
+  <div class="px-2 sm:px-10 bg-gray-200 pb-8">
     <div class="md:grid md:grid-cols-4">
       <div class="pr-2">
         <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/default-account-image.png') + ' )' }">
-          <div class="absolute top-0 px-2 py-1 default-account-header text-xxs text-gray-400 flex items-center rounded-b-sm"><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 mr-1 inline-block">DEFAULT ACCOUNT</div>
+          <div class="absolute top-0 px-2 py-1 default-account-header text-xxs text-gray-400 pappflex items-center rounded-b-sm"><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 mr-1 inline-block">DEFAULT ACCOUNT</div>
           <div class="my-5 mt-6 flex items-center text-xs xl:text-sm cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">My Personal Account <img src="@/modules/dashboard/img/icon-arrow-right.svg" class="w-2 h-2 ml-4 inline-block"></div>
           <div class="text-gray-400 text-xxs">WALLET ADDRESS</div>
           <div class="flex items-center justify-between mb-3">
-            <div id="address" class="font-bold outline-none z-10 break-all text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
+            <div id="address" class="font-bold outline-none break-all text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
             <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4" @click="copy('address')">
           </div>
           <div class="flex justify-around w-full">
@@ -110,6 +111,7 @@
     <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
   </div>
   <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
+</div>
 </template>
 
 <script>

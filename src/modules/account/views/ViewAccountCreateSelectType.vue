@@ -1,4 +1,5 @@
 <template>
+<div>
   <div class="flex justify-between text-md">
     <div><span class="text-gray-300">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.creationtype')}}</span></div>
   </div>
@@ -10,6 +11,7 @@
       </div>
     </div>
   </div>
+</div>
 </template>
 <script>
 

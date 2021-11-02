@@ -1,104 +1,106 @@
 <template>
-  <div class="flex justify-between text-md">
-    <div><span class="text-gray-300">{{$t('services.namespaces')}} ></span> <span class="text-blue-primary font-bold">{{$t('namespace.extend')}}</span></div>
-    <div>
-      <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
+  <div>
+    <div class="flex justify-between text-md">
+      <div><span class="text-gray-300">{{$t('services.namespaces')}} ></span> <span class="text-blue-primary font-bold">{{$t('namespace.extend')}}</span></div>
+      <div>
+        <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link>
+      </div>
     </div>
-  </div>
-  <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-5'>
-    <div class="md:col-span-3">
-      <form>
-        <fieldset class="w-full">
-          <div class="mb-5">
-            <div v-if="showNoBalance" class="border-2 rounded-3xl border-red-700 w-full h-24 text-center p-4">
-              <div class="h-5 text-center">
-                <div class="rounded-full w-8 h-8 border border-gray-500 inline-block relative"><font-awesome-icon icon="times" class="text-gray-500 h-5 w-5 absolute" style="top: 5px; left:8px"></font-awesome-icon></div><br>
-                <div class="inline-block text-tsm">{{$t('accounts.insufficientbalance')}}</div>
-              </div>
-            </div>
-            <div v-if="isNotCosigner" class="border-2 rounded-3xl border-yellow-400 w-full h-24 text-center p-4">
-              <div class="h-5 text-center">
-                <div class="rounded-full w-8 h-8 border border-yellow-500 inline-block relative"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-5 w-5 absolute" style="top: 5px; left:11px"></font-awesome-icon></div><br>
-                <div class="inline-block text-tsm">{{$t('accounts.cosigwarning2')}}</div>
-              </div>
-            </div>
-            <div class="error error_box" v-if="err!=''">{{ err }}</div>
-            <div v-if="moreThanOneAccount" class="text-left p-4">
-              <div class="mb-1 cursor-pointer z-20 border-b border-gray-200" @click="showMenu = !showMenu">
-                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">{{$t('accounts.multisig')}}</span></div>
-                <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
-              </div>
-              <transition name="slide">
-              <div v-if="showMenu" class="z-10">
-                <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50 optionDiv'" @click="changeSelection(item)" :title="'Address is ' + item.address">
-                  <div>{{ item.name }} <span v-if="isMultiSig(item.address)" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">{{$t('accounts.multisig')}}</span></div>
+    <div class='mt-2 py-3 gray-line text-center md:grid md:grid-cols-5'>
+      <div class="md:col-span-3">
+        <form>
+          <fieldset class="w-full">
+            <div class="mb-5">
+              <div v-if="showNoBalance" class="border-2 rounded-3xl border-red-700 w-full h-24 text-center p-4">
+                <div class="h-5 text-center">
+                  <div class="rounded-full w-8 h-8 border border-gray-500 inline-block relative"><font-awesome-icon icon="times" class="text-gray-500 h-5 w-5 absolute" style="top: 5px; left:8px"></font-awesome-icon></div><br>
+                  <div class="inline-block text-tsm">{{$t('accounts.insufficientbalance')}}</div>
                 </div>
               </div>
-              </transition>
-              <input type="hidden" v-model="currentSelectedName">
-            </div>
-            <div v-else class="text-left mb-2">
-              <div class="mb-1 z-20 border-b border-gray-200">
-                <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">{{$t('accounts.multisig')}}</span></div>
-                <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
+              <div v-if="isNotCosigner" class="border-2 rounded-3xl border-yellow-400 w-full h-24 text-center p-4">
+                <div class="h-5 text-center">
+                  <div class="rounded-full w-8 h-8 border border-yellow-500 inline-block relative"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-5 w-5 absolute" style="top: 5px; left:11px"></font-awesome-icon></div><br>
+                  <div class="inline-block text-tsm">{{$t('accounts.cosigwarning2')}}</div>
+                </div>
+              </div>
+              <div class="error error_box" v-if="err!=''">{{ err }}</div>
+              <div v-if="moreThanOneAccount" class="text-left p-4">
+                <div class="mb-1 cursor-pointer z-20 border-b border-gray-200" @click="showMenu = !showMenu">
+                  <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">{{$t('accounts.multisig')}}</span></div>
+                  <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
+                </div>
+                <transition name="slide">
+                <div v-if="showMenu" class="z-10">
+                  <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class="item.name==selectedAccName?'bg-blue-primary text-white font-bold':'text-gray-800 bg-gray-50 optionDiv'" @click="changeSelection(item)" :title="'Address is ' + item.address">
+                    <div>{{ item.name }} <span v-if="isMultiSig(item.address)" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">{{$t('accounts.multisig')}}</span></div>
+                  </div>
+                </div>
+                </transition>
+                <input type="hidden" v-model="currentSelectedName">
+              </div>
+              <div v-else class="text-left mb-2">
+                <div class="mb-1 z-20 border-b border-gray-200">
+                  <div class="font-bold text-xs">{{ selectedAccName }} <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">{{$t('accounts.multisig')}}</span></div>
+                  <div class="text-gray-400 mt-1 text-sm ">{{ selectedAccAdd }}</div>
+                </div>
+              </div>
+              <div v-if="getMultiSigCosigner.list.length > 0">
+                <div class="text-tsm text-left ml-4">{{$t('transfer.cosigner')}}:
+                  <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ getMultiSigCosigner.list[0].balance }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+                  <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('services.balance')}}: {{ cosigner.balance }} XPX)</option></select></span>
+                  <div v-if="cosignerBalanceInsufficient" class="error">-{{$t('accounts.insufficientbalance')}}</div>
+                </div>
               </div>
             </div>
-            <div v-if="getMultiSigCosigner.list.length > 0">
-              <div class="text-tsm text-left ml-4">{{$t('transfer.cosigner')}}:
-                <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ getMultiSigCosigner.list[0].balance }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
-                <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('services.balance')}}: {{ cosigner.balance }} XPX)</option></select></span>
-                <div v-if="cosignerBalanceInsufficient" class="error">-{{$t('accounts.insufficientbalance')}}</div>
+            <div class="text-left p-3 pb-0 border-l-8 border-gray-100 mb-5">
+              <div class="bg-gray-100 rounded-2xl p-3">
+                <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">{{$t('services.balance')}}: <span class="text-xs">{{ balance }} XPX</span></div>
               </div>
             </div>
-          </div>
-          <div class="text-left p-3 pb-0 border-l-8 border-gray-100 mb-5">
-            <div class="bg-gray-100 rounded-2xl p-3">
-              <div class="inline-block mr-4 text-tsm"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1">{{$t('services.balance')}}: <span class="text-xs">{{ balance }} XPX</span></div>
+            <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" ref="namespaceSelect" :disabled="disableNamespaceSelect" noOptionsText="No namespace created for this account" v-model="selectNamespace" :options="namespaceOption" @show-selection="updateNamespaceSelection" @clear-selection="clearNamespaceSelection" />
+            <DurationInput :disabled="disabledDuration" v-if="showDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
+            <div v-if="showMaxDaysLabel" class="float-right text-tsm inline-block">Maximum number of days for the extension of this namespace is {{ 365-numDaysleft }} day{{ (365-numDaysleft)>1?'s':'' }}</div>
+            <div class="rounded-2xl bg-gray-100 p-5 mb-5 mt-10">
+              <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{ transactionFee }} XPX</div>
             </div>
-          </div>
-          <SelectInputPlugin showSelectTitleProp="true" placeholder="Select namespace" errorMessage="" ref="namespaceSelect" :disabled="disableNamespaceSelect" noOptionsText="No namespace created for this account" v-model="selectNamespace" :options="namespaceOption" @show-selection="updateNamespaceSelection" @clear-selection="clearNamespaceSelection" />
-          <DurationInput :disabled="disabledDuration" v-if="showDuration" v-model="duration" :max="365" placeholder="Days" title="Duration (number of days)" :imgRequired="true" icon="modules/services/submodule/namespaces/img/icon-namespaces-green-16h-proximax-sirius-wallet.svg" :showError="showDurationErr" errorMessage="Maximum rental duration is 365" class="mt-5" />
-          <div v-if="showMaxDaysLabel" class="float-right text-tsm inline-block">Maximum number of days for the extension of this namespace is {{ 365-numDaysleft }} day{{ (365-numDaysleft)>1?'s':'' }}</div>
-          <div class="rounded-2xl bg-gray-100 p-5 mb-5 mt-10">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{ transactionFee }} XPX</div>
-          </div>
-          <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('services.rentalfee')}}: {{ rentalFee }} {{currencyName}}</div>
-          </div>
-          <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800 mb-5" v-if="isMultiSig(selectedAccAdd)">
-            <div class="text-center">
-              <div class="inline-block">
-                <div class="flex">
-                  <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
-                  <div class="inline-block self-center text-left">
-                    <div>{{$t('accounts.lockfund')}}: {{ lockFundCurrency }} {{ currencyName }}</div>
-                    <div>{{$t('accounts.unconfirmed')}}: {{ lockFundTxFee }} {{ currencyName }}</div>
+            <div class="rounded-2xl bg-gray-100 p-5 mb-5">
+              <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('services.rentalfee')}}: {{ rentalFee }} {{currencyName}}</div>
+            </div>
+            <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800 mb-5" v-if="isMultiSig(selectedAccAdd)">
+              <div class="text-center">
+                <div class="inline-block">
+                  <div class="flex">
+                    <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
+                    <div class="inline-block self-center text-left">
+                      <div>{{$t('accounts.lockfund')}}: {{ lockFundCurrency }} {{ currencyName }}</div>
+                      <div>{{$t('accounts.unconfirmed')}}: {{ lockFundTxFee }} {{ currencyName }}</div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+            <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
+            <div class="mt-10">
+              <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">{{$t('signin.clear')}}</button>
+              <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="extendNamespace()">{{$t('welcome.create')}}</button>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+      <div class="px-10 text-left text-tsm mt-5 md:mt-0 md:col-span-2">
+        <div class="flex justify-around">
+          <div class="text-center">
+            <img src="@/modules/services/submodule/namespaces/img/icon-namespace-mosaic-duration-01.svg" class="w-16 mb-2 inline-block">
+            <div class="italic">Start block: <br>{{ startBlock }}</div>
           </div>
-          <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
-          <div class="mt-10">
-            <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">{{$t('signin.clear')}}</button>
-            <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="extendNamespace()">{{$t('welcome.create')}}</button>
+          <div class="text-center">
+            <img src="@/modules/services/submodule/namespaces/img/icon-namespace-mosaic-duration-02.svg" class="w-16 mb-2 inline-block">
+            <div class="italic">Current block: <br>{{ block }}</div>
           </div>
-        </fieldset>
-      </form>
-    </div>
-    <div class="px-10 text-left text-tsm mt-5 md:mt-0 md:col-span-2">
-      <div class="flex justify-around">
-        <div class="text-center">
-          <img src="@/modules/services/submodule/namespaces/img/icon-namespace-mosaic-duration-01.svg" class="w-16 mb-2 inline-block">
-          <div class="italic">Start block: <br>{{ startBlock }}</div>
-        </div>
-        <div class="text-center">
-          <img src="@/modules/services/submodule/namespaces/img/icon-namespace-mosaic-duration-02.svg" class="w-16 mb-2 inline-block">
-          <div class="italic">Current block: <br>{{ block }}</div>
-        </div>
-        <div class="text-center">
-          <img src="@/modules/services/submodule/namespaces/img/icon-namespace-mosaic-duration-03.svg" class="w-16 mb-2 inline-block">
-          <div class="italic">End block: <br>{{ endBlock }}</div>
+          <div class="text-center">
+            <img src="@/modules/services/submodule/namespaces/img/icon-namespace-mosaic-duration-03.svg" class="w-16 mb-2 inline-block">
+            <div class="italic">End block: <br>{{ endBlock }}</div>
+          </div>
         </div>
       </div>
     </div>
