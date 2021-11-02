@@ -1,15 +1,17 @@
 <template>
-  <div class="flex justify-between text-xs sm:text-sm">
-    <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.viewall2')}}</span></div>
-    <div>
-      <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="font-bold" active-class="accounts">{{$t('accounts.createaccount')}}</router-link>
+  <div>
+    <div class="flex justify-between text-xs sm:text-sm">
+      <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.viewall2')}}</span></div>
+      <div>
+        <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="font-bold" active-class="accounts">{{$t('accounts.createaccount')}}</router-link>
+      </div>
+    </div>
+    <div class='mt-2 py-3 gray-line'>
+      <div class="grid xs-grid-cols-1 sm:grid-cols-2">
+        <AccountTile :key="index" :account="item" :showMenuCall="showMenu[index]" :i="index" v-for="(item, index) in accounts" />
+      </div>
     </div>
   </div>
-  <div class='mt-2 py-3 gray-line'>
-    <div class="grid xs-grid-cols-1 sm:grid-cols-2">
-      <AccountTile :key="index" :account="item" :showMenuCall="showMenu[index]" :i="index" v-for="(item, index) in accounts" />
-    </div>
-  </div>         
 </template>
 <script>
 import { computed, getCurrentInstance, ref } from "vue";

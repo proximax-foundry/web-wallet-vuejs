@@ -1,5 +1,6 @@
 <template>
-  <div class="flex justify-between text-md">
+<div>
+  <div class="flex justify-between text-sm">
     <div><span class="text-gray-300">{{$t('services.assets')}} ></span> <span class="text-blue-primary font-bold">{{$t('welcome.create')}}</span></div>
     <div>
       <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
@@ -114,6 +115,7 @@
       </div>
     </div>
   </div>
+</div>
 </template>
 <script>
 import { computed, ref, watch } from 'vue';
