@@ -136,7 +136,7 @@ export class Helper{
           }).format(date);
       }
 
-      static convertDisplayDateTimeFormatShort(dateTimeJSON: string): string {
+      static convertDisplayDateTimeFormat24(dateTimeJSON: string): string {
         const date = new Date(dateTimeJSON);
     
         return new Intl.DateTimeFormat('default', {

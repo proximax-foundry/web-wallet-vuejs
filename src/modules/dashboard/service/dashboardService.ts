@@ -247,7 +247,7 @@ export class DashboardService {
                 signerDisplay: this.addressConvertToName(transactions[i].signer.address.plain()),
                 hash: transactions[i].transactionInfo.hash,
                 block: transactions[i].transactionInfo.height.compact(),
-                formattedDeadline: Helper.convertDisplayDateTimeFormatShort(transactions[i].deadline.value.toString()),
+                formattedDeadline: Helper.convertDisplayDateTimeFormat24(transactions[i].deadline.value.toString()),
                 relatedAddress: [],
                 relatedAsset: [],
                 relatedNamespace: [],

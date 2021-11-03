@@ -128,7 +128,7 @@ export default{
         let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
         let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
         let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
-        let expiryDate = Helper.convertDisplayDateTimeFormatShort(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
+        let expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
         let data = {
           i: i,
           idHex: namespaces[i].idHex,
