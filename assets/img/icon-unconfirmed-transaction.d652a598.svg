@@ -1,0 +1,9 @@
+<svg id="icon-unconfirmed-transaction" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+  <g id="Group_48" data-name="Group 48">
+    <rect id="Rectangle_231" data-name="Rectangle 231" width="20" height="20" fill="none"/>
+    <rect id="Rectangle_232" data-name="Rectangle 232" width="20" height="20" fill="none"/>
+  </g>
+  <g id="Group_49" data-name="Group 49" transform="translate(1.667 1.667)">
+    <path id="Path_754" data-name="Path 754" d="M10.333,2a8.333,8.333,0,1,0,8.333,8.333A8.336,8.336,0,0,0,10.333,2ZM6.167,11.583a1.25,1.25,0,1,1,1.25-1.25A1.248,1.248,0,0,1,6.167,11.583Zm4.167,0a1.25,1.25,0,1,1,1.25-1.25A1.248,1.248,0,0,1,10.333,11.583Zm4.167,0a1.25,1.25,0,1,1,1.25-1.25A1.248,1.248,0,0,1,14.5,11.583Z" transform="translate(-2 -2)" fill="#f3a91d"/>
+  </g>
+</svg>

@@ -1,13 +1,24 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([[59],{
 
-/***/ "./src/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg":
-/*!************************************************************************************!*\
-  !*** ./src/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg ***!
-  \************************************************************************************/
+/***/ "./src/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg":
+/*!***************************************************************************************************!*\
+  !*** ./src/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg ***!
+  \***************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/icon-account-green-16h-proximax-sirius-wallet.f8fb8a8a.svg\";\n\n//# sourceURL=webpack:///./src/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg?");
+eval("module.exports = __webpack_require__.p + \"assets/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.73ce2a7d.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg?");
+
+/***/ }),
+
+/***/ "./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg":
+/*!****************************************************************************************************!*\
+  !*** ./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg ***!
+  \****************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("module.exports = __webpack_require__.p + \"assets/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.541d4c2b.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg?");
 
 /***/ })
 
