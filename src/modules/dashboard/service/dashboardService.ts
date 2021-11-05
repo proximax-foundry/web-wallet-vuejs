@@ -63,8 +63,8 @@ import { Wallet } from "@/models/wallet"
 import { Account as myAccount } from "@/models/account";
 import { networkState } from "@/state/networkState";
 import { computed } from "vue";
-import { ChainUtils } from "@/util/chainUtils"
-import { DashboardTip, DashboardTipList, RowDashboardTip, TipType, AmountType } from "../model/dashboardClasses"
+import { ChainUtils } from "@/util/chainUtils";
+import { DashboardTip, DashboardTipList, RowDashboardTip, TipType, AmountType, OtherAsset } from "../model/dashboardClasses"
 
 const networkAPIEndpoint = computed(() => ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
 const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
@@ -202,7 +202,6 @@ export class DashboardService {
     async fetchConfirmedTransactions(){
 
         let transactions = await this.getAllAccountTransactions();
-
         let dashboardTransactions: DashboardTransaction[] = this.formatConfirmedTransaction(transactions);
         return dashboardTransactions;
     }
@@ -234,7 +233,6 @@ export class DashboardService {
     }
 
     formatConfirmedTransaction(transactions: Transaction[]): DashboardTransaction[] {
-
         let formattedTransactions: DashboardTransaction[] = [];
 
         for (let i = 0; i < transactions.length; ++i) {
@@ -249,7 +247,7 @@ export class DashboardService {
                 signerDisplay: this.addressConvertToName(transactions[i].signer.address.plain()),
                 hash: transactions[i].transactionInfo.hash,
                 block: transactions[i].transactionInfo.height.compact(),
-                formattedDeadline: Helper.convertDisplayDateTimeFormat(transactions[i].deadline.value.toString()),
+                formattedDeadline: Helper.convertDisplayDateTimeFormat24(transactions[i].deadline.value.toString()),
                 relatedAddress: [],
                 relatedAsset: [],
                 relatedNamespace: [],
@@ -260,9 +258,10 @@ export class DashboardService {
                 transferList: [],
                 displayTips: [],
                 cosignatures: null,
-                signedPublicKeys: [transactions[i].signer.publicKey]
+                signedPublicKeys: [transactions[i].signer.publicKey],
+                maxFee: Helper.convertToExact(transactions[i].maxFee.compact(), 6),
+                otherAssets: [],
             };
-
             dashboardTransaction.searchString.push(dashboardTransaction.block.toString());
             dashboardTransaction.searchString.push(dashboardTransaction.hash);
 
@@ -454,6 +453,7 @@ export class DashboardService {
             dashboardTransaction.displayList = tempData.displayList;
             dashboardTransaction.transferList = tempData.transferList ? tempData.transferList: [];
             dashboardTransaction.displayTips = tempData.displayTips;
+            dashboardTransaction.otherAssets = tempData.otherAssets;
 
             dashboardTransaction.relatedAddress = Array.from(new Set(dashboardTransaction.relatedAddress));
             dashboardTransaction.relatedAsset = Array.from(new Set(dashboardTransaction.relatedAsset));
@@ -468,7 +468,6 @@ export class DashboardService {
     }
 
     formatUnconfirmedTransaction(transactions: Transaction[]): DashboardTransaction[] {
-
         let formattedTransactions: DashboardTransaction[] = [];
 
         for (let i = 0; i < transactions.length; ++i) {
@@ -492,7 +491,8 @@ export class DashboardService {
                 transferList: [],
                 displayTips: [],
                 cosignatures: null,
-                signedPublicKeys: [transactions[i].signer.publicKey]
+                signedPublicKeys: [transactions[i].signer.publicKey],
+                otherAssets: []
             };
 
             dashboardTransaction.searchString.push(dashboardTransaction.hash);
@@ -699,7 +699,6 @@ export class DashboardService {
     }
 
     extractTransactionTransfer(transferTx: TransferTransaction): DashboardInnerTransaction {
-
         let transactionDetails: DashboardInnerTransaction = {
             signer: transferTx.signer.publicKey,
             relatedAsset: [],
@@ -713,7 +712,8 @@ export class DashboardService {
             extractedData: {},
             displayList: new Map<string, string>(),
             displayTips: [],
-            signerPublicKeys: [transferTx.signer.publicKey]
+            signerPublicKeys: [transferTx.signer.publicKey],
+            otherAssets: [],
         };
 
         let sendTo = "";
@@ -752,9 +752,7 @@ export class DashboardService {
 
         // fromToRowTip.rowTips.push(senderTip);
         // fromToRowTip.rowTips.push(DashboardService.createToRightArrowTip());
-        fromToRowTip.rowTips.push(transferTip);                
-        
-        
+        fromToRowTip.rowTips.push(transferTip);
 
         let messageTypeString: string;
         let messageType: string;
@@ -789,16 +787,17 @@ export class DashboardService {
 
         let transfer: TransferList[] = [];
 
+        let txnAmount: number;
+
         if (transferTx.mosaics.length) {
             for (let i = 0; i < transferTx.mosaics.length; ++i) {
-
                 let valueType = "asset"; 
                 let mosaicIdHex = transferTx.mosaics[i].id.toHex().toUpperCase();
+
                 if(Array.from(namespaceIdFirstCharacterString).includes(mosaicIdHex.substr(0, 1)) ){
                     valueType = "namespace";
                     transactionDetails.relatedNamespace.push(mosaicIdHex);
-                }
-                else{
+                }else{
                     transactionDetails.relatedAsset.push(mosaicIdHex);
                 }
                 
@@ -811,6 +810,10 @@ export class DashboardService {
                     valueDisplay: mosaicIdHex,
                     amount: transferTx.mosaics[i].amount.compact()
                 };
+
+                if(mosaicIdHex == networkState.currentNetworkProfile.network.currency.assetId.toUpperCase()){
+                    txnAmount = transferTx.mosaics[i].amount.compact();
+                }
 
                 let resolved = false;
 
@@ -835,8 +838,13 @@ export class DashboardService {
 
                 if(valueType === "asset"){
                     amountTip = DashboardService.createAssetAmountTip(newTransfer.amount, newTransfer.value, newTransfer.valueDisplay, true);
-                }
-                else{
+
+                    // get other assets
+                    if(mosaicIdHex.toUpperCase() != nativeTokenAssetId.value.toUpperCase() && mosaicIdHex.toUpperCase() != nativeTokenNamespaceId.value.toUpperCase()){
+                        let otherAsset = DashboardService.displayOtherAsset(newTransfer.amount, newTransfer.value, transferTx.mosaics[i].id);
+                        transactionDetails.otherAssets.push(otherAsset);
+                    }
+                }else{
                     amountTip = DashboardService.createNamespaceAmountTip(newTransfer.amount, newTransfer.value, newTransfer.valueDisplay, true);
                 }
 
@@ -845,15 +853,18 @@ export class DashboardService {
                 
                 transactionDetails.displayTips.push(newRowTip);
             }
+
         }
 
         let data = {
             transferList: transfer,
             recipient: sendTo,
             recipientType: toType,
+            recipientName: this.addressConvertToName(sendTo),
             messageTypeString: messageTypeString,
             messageType: messageType,
             messagePayload: transferTx.message.payload,
+            amount: txnAmount?Helper.convertToExact(txnAmount, 6):'',
         };
 
         //transactionDetails.displayTips.push(newRowTip);
@@ -2328,7 +2339,8 @@ export class DashboardService {
         transactionDetails.extractedData = tempData.extractedData;
         transactionDetails.displayList = tempData.displayList;
         transactionDetails.transferList = tempData.transferList ? tempData.transferList: [];
-        transactionDetails.displayTips = tempData.displayTips; 
+        transactionDetails.displayTips = tempData.displayTips;
+        transactionDetails.otherAssets = tempData.otherAssets ? tempData.otherAssets: [];
 
         return transactionDetails;
     }
@@ -2567,6 +2579,29 @@ export class DashboardService {
 
     static convertToExactNativeAmount(amount: number){
         return amount > 0 ? amount / Math.pow(10, nativeTokenDivisibility.value) : 0;
+    }
+
+    static displayOtherAsset = (amount: number, assetId: string, mosaic_id: MosaicId) => {
+        // let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+        // let chainAPICall = new ChainAPICall(apiEndpoint);
+        // let asset = await chainAPICall.assetAPI.getMosaic(mosaic_id);
+
+        // let assetarray = []
+        // assetarray.push(mosaic_id);
+        // let nsAsset = await chainAPICall.assetAPI.getMosaicsNames(assetarray);
+
+        let otherAsset = new OtherAsset();
+        otherAsset.amount = amount;
+        otherAsset.asset = assetId;
+        otherAsset.assetId = mosaic_id;
+        // if(nsAsset[0].names.length > 0){
+        //     otherAsset.isLinked = true;
+        //     otherAsset.asset = nsAsset[0].names[0].name;
+        // }else{
+        //     otherAsset.isLinked = false;
+        //     otherAsset.asset = assetId;
+        // }
+        return otherAsset;
     }
 }
 

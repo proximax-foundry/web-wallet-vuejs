@@ -1,55 +1,73 @@
 <template>
   <header>
-    <div class="header-height flex items-stretch">
-      <div class="flex-none self-center flex items-end logo">
-        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-24 tsm:w-40"></router-link><span class="version-text">{{$t('Header.version')}}{{ versioning }}</span>
+    <div class="header-height flex items-stretch pl-2 md:pr-2 gray-bar" v-if="loginStatus">
+      <div class="flex-none self-center flex items-end ml-2 sm:ml-0">
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40"></router-link>
       </div>
-      <div class="flex-grow header-height"></div>
-      <div class="flex-none header-menu mt-1 tsm:mt-3" v-if="loginStatus">
-        <div class=" flex flex-row">
-          <div class="w-5 sm:w-16 inline-block items-center relative">
-            <SelectLanguagePlugin class="lang-mobile-placement-postlogin" />
-          </div>
-          <div class="w-10 text-center flex flex-row h-10 items-center">
-            <img src="../assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
-          </div>
-          <div class="w-14 md:w-40 pl-3 text-center flex gray-line-left h-10 items-center">
-            <div>
-              <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="chainAPIEndpoint"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkState.chainNetworkName }}</div>
+      <div class="flex-none md:flex items-center md:ml-10 hidden md:visible">
+        <router-link :to="{name : 'ViewDashboard'}"><img src="@/assets/img/icon-home.svg" class="h-6 w-6 inline-block"></router-link>
+      </div>
+
+      <div class="flex-grow"></div>
+      <div class="flex-none">
+        <div class="flex flex-row h-full">
+          <!-- <div class="w-5 sm:w-16 inline-block items-center relative">
+            <selectLanguageModal class="lang-mobile-placement-postlogin" />
+          </div> -->
+          <div class="w-12 md:w-16 flex flex-row items-center left-gray-line">
+            <div class="text-center w-full h-6">
+              <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block h-4 w-3 md:h-5 md:w-5">
             </div>
           </div>
-          <div class="w-60 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
-            <div>
-              <div class="text-xs inline-block">{{ walletState.currentLoggedInWallet.name }}</div>
-              <div class="text-xs">{{$t('Header.totalbalance')}}: <span>{{ totalBalance }}</span> {{ currentNativeTokenName}}</div>
+          <div class="w-12 md:w-16 flex flex-row items-center left-gray-line">
+            <div class="text-center w-full h-4 md:h-6">
+              <router-link :to="{name : 'ViewServices'}" class="h-4 w-4 md:h-6 md:w-6 inline-block">
+                <img src="@/assets/img/icon-setting.svg" class="opacity-80 hover:opacity-100 transition-all duration-300">
+              </router-link>
             </div>
           </div>
-          <div class="w-17 text-center h-10 items-center gray-line-left mr-1">
+          <div class="w-16 md:w-40 pl-3 text-center flex items-center left-gray-line">
+            <div class="md:flex md:items-center">
+              <img src="@/assets/img/icon-testnet-block.svg" class="w-3 md:w-7 block md:inline-block" :title="chainAPIEndpoint" v-if="wideScreen"> <div class="block md:inline-block text-txs text-white text-left md:ml-2"><div class="font-thin mb-1" v-if="wideScreen">CONNECTED TO</div><div class="text-xxs md:text-tsm">{{ networkState.chainNetworkName }}</div></div>
+            </div>
+          </div>
+          <div class="w-12 md:w-16 flex flex-row items-center left-gray-line md:hidden">
+            <div class="text-center w-full h-6" @mouseover="hoverOverNavigation" @mouseout="hoverOutNavigation">
+              <img src="@/assets/img/icon-menu.svg" class="h-4 w-4 opacity-80 hover:opacity-100 inline-block cursor-pointer" @click="toggleSidebar">
+            </div>
+          </div>
+          <!-- <div class="w-17 text-center h-10 items-center mr-1">
             <div class="text-xs inline-block mt-3" v-if="wideScreen">
               <a @click="logout()">{{$t('Header.signout')}}</a>
             </div>
             <div class="inline-block mt-2" v-else>
               <font-awesome-icon icon="sign-out-alt" @click="logout()" class="text-blue-400 w-6 h-6 cursor-pointer ml-3"></font-awesome-icon>
             </div>
-          </div>
-        </div>
-      </div>
-      <div class="flex-none self-center header-menu" v-else>
-        <div class="w-5 sm:w-16 inline-block mr-10 sm:mr-3 lang-mobile-placement">
-          <SelectLanguagePlugin />
-        </div>
-        <div class="select mb-3 inline-block">
-          <Dropdown v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
-        </div>
-        <div class="w-16 text-center inline-block" v-if="wideScreen">
-          <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">{{$t('Header.home')}}</router-link>
-        </div>
-        <div class="w-16 text-center inline-block" v-if="wideScreen">
-          <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold">{{$t('Header.wallet')}}</router-link>
+          </div> -->
         </div>
       </div>
     </div>
-    <div v-if="!wideScreen && !loginStatus" class="bg-gray-100 py-1 text-center">
+    <div class="container mx-auto header-height flex items-stretch" v-else>
+      <div class="flex-none self-center flex items-end ml-2 sm:ml-0">
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-proximax-sirius-wallet.svg" class="w-24 tsm:w-40"></router-link>
+      </div>
+      <div class="flex-grow"></div>
+      <div class="flex-none self-center header-menu">
+        <div class="w-20 inline-block ml-2 sm:ml-0" v-if="wideScreen">
+          <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">{{$t('Header.home')}}</router-link>
+        </div>
+        <div class="w-20 inline-block" v-if="wideScreen">
+          <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold">{{$t('Header.wallet')}}</router-link>
+        </div>
+        <div class="text-center inline-block">
+          <selectLanguageModal />
+        </div>
+        <!-- <div class="select mb-3 inline-block">
+          <Dropdown v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
+        </div> -->
+      </div>
+    </div>
+    <div v-if="!wideScreen && !loginStatus" class="bg-gray-200 py-1 text-center">
       <div class="w-16 text-center inline-block">
         <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block text-xs sm:text-sm">{{$t('Header.home')}}</router-link>
       </div>
@@ -61,20 +79,18 @@
 </template>
 
 <script> 
-import { computed, defineComponent, getCurrentInstance, ref, watch } from "vue";
+import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { useRouter } from "vue-router";
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { ChainUtils } from '@/util/chainUtils';
 import { Helper } from '@/util/typeHelper';
-// import { transferEmitter } from '../util/listener.js';
-import Dropdown from 'primevue/dropdown';
-import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+// import Dropdown from 'primevue/dropdown';
+// import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
+import selectLanguageModal from '@/modules/home/components/selectLanguageModal.vue'
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { useToast } from "primevue/usetoast";
-import packageData from "../../package.json"
 import { Connector } from '../models/connector';
 import { listenerState} from "@/state/listenerState";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
@@ -84,9 +100,8 @@ import {useI18n} from 'vue-i18n'
 
 export default defineComponent({
   components: {
-    Dropdown,
-    SelectLanguagePlugin,
-    FontAwesomeIcon,
+    // Dropdown,
+    selectLanguageModal,
   },
 
   name: 'headerComponent',
@@ -102,6 +117,9 @@ export default defineComponent({
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const router = useRouter();
+
+    const navigationSideBar = inject('navigationSideBar');
+
     const notificationMessage = ref('');
     const notificationType = ref('noti');
 
@@ -234,6 +252,18 @@ export default defineComponent({
         await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
         connectListener();
       }
+    }
+
+    const toggleSidebar = () => {
+      navigationSideBar.isOpen = !navigationSideBar.isOpen;
+    }
+
+    const hoverOverNavigation = () => {
+      navigationSideBar.inNavi = true;
+    }
+
+    const hoverOutNavigation = () => {
+      navigationSideBar.inNavi = false;
     }
 
     doLogin();
@@ -429,13 +459,8 @@ export default defineComponent({
      emitter.on("listener:setEndpoint", endpoint =>{
        listener.value.endpoint = endpoint;
      });
-
-    const versioning = ref('0.0.1');
-
-    versioning.value = packageData.version;
-
     return {
-      versioning,
+      toggleSidebar,
       networkState,
       walletState,
       loginStatus,
@@ -449,7 +474,9 @@ export default defineComponent({
       chainAPIEndpoint,
       chainsNetworkOption,
       currentNativeTokenName,
-      listener
+      listener,
+      hoverOverNavigation,
+      hoverOutNavigation,
     };
   },
   created() {
@@ -477,6 +504,14 @@ export default defineComponent({
 <style lang="scss">
 @import "../assets/scss/multiselect.scss";
 
+.left-gray-line{
+  border-left: 1px solid #58585F;
+}
+
+.gray-bar{
+  background: #3F4058;
+}
+
 .lang-mobile-placement{
   top: -30px; position: relative;
 }
@@ -490,7 +525,7 @@ export default defineComponent({
 }
 
 .header-menu{
-  margin-right: 5px;
+  margin-left: 5px;
 }
 
 .header-menu a{
@@ -516,10 +551,6 @@ export default defineComponent({
   .lang-mobile-placement-postlogin{
     left: 0px;
   }
-}
-
-.gray-line-left{
-  border-left: 1px solid #E4E7EB;
 }
 
 .p-hidden-accessible {
@@ -693,7 +724,7 @@ export default defineComponent({
   }
 
   .header-menu{
-    margin-right: 20px;
+    margin-left: 20px;
   }
 
  .p-inputtext {

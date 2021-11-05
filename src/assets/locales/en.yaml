@@ -1,11 +1,12 @@
 ---
 Footer: 
   text: "Please report any issues identified to our"
-  link: helpdesk
+  link: Helpdesk
 Header: 
   version: "v"
   home: "Home"
   wallet: "Wallets"
+  walletTitle: "My Wallets"
   totalbalance: "Total balance"
   signout: "Sign Out"
   network: "Networks"
@@ -312,7 +313,7 @@ dashboard:
   assetidaddress: "Asset ID/Address"
   active: "Active"
   owner: "Owner"
-  assetid: "Asset ID"
+  assetid: "ASSET ID"
   alias: "Alias"
   quantity: "Quantity"
 transfer: 

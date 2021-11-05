@@ -135,6 +135,15 @@ export class Helper{
             hour: 'numeric', minute: 'numeric', second: 'numeric'
           }).format(date);
       }
+
+      static convertDisplayDateTimeFormat24(dateTimeJSON: string): string {
+        const date = new Date(dateTimeJSON);
+    
+        return new Intl.DateTimeFormat('default', {
+            year: 'numeric', month: 'numeric', day: 'numeric',
+            hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false,
+          }).format(date);
+      }
     
       static formatFixedDateTime(dateTimeJSON: string): string  {
     

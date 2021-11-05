@@ -11,14 +11,14 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal; naviPrivateKey = !naviPrivateKey;"></font-awesome-icon>
           </div>
           <div class="w-104" v-if="!naviPrivateKey">
-            <h1 class="default-title font-bold my-5">{{$t('delegate.selectacctype')}}</h1>
+            <h1 class="default-title my-5">{{$t('delegate.selectacctype')}}</h1>
             <div class="page-title-gray-line grid grid-cols-1 md:grid-cols-2 pt-20">
               <div class="px-5 self-center text-center my-10">
-                <img src="@/modules/wallet/img/icon-add-new-blue.svg" class="w-12 inline-block">
+                <img src="@/modules/wallet/img/icon-add-new.svg" class="w-12 inline-block">
                 <p class="mt-3">{{$t('delegate.newaccount')}}</p>
                 <button class="max-w-xs sm:max-w-sm inline-block default-btn my-3 self-center" @click="linkNewAcc()">{{$t('delegate.select')}}</button></div>
               <div class="px-5 self-center text-center my-10">
-                <img src="@/modules/wallet/img/icon-private-key-blue.svg" class="w-12 inline-block"><p class="mt-3">{{$t('createwallet.fromprivatekey')}}</p>
+                <img src="@/modules/wallet/img/icon-private-key.svg" class="w-12 inline-block"><p class="mt-3">{{$t('createwallet.fromprivatekey')}}</p>
                 <button class="max-w-xs sm:max-w-sm inline-block default-btn my-3 self-center" @click="naviPrivateKey = !naviPrivateKey">{{$t('delegate.select')}}</button>
               </div>
             </div>

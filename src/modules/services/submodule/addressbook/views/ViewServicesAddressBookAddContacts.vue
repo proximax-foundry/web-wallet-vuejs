@@ -1,23 +1,25 @@
 <template>
-  <div class="flex justify-between text-xs sm:text-sm">
-    <div><span class="text-gray-400">{{$t('services.addressbook')}} ></span> <span class="text-blue-primary font-bold">{{$t('services.addcontacts')}}</span></div>
-    <div>
-      <router-link :to="{name: 'ViewServicesAddressBook'}" class="font-bold" active-class="accounts">{{$t('services.addressbook')}}</router-link> | 
-      <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">{{$t('services.allservices')}}</router-link>
+  <div>
+    <div class="flex justify-between text-xs sm:text-sm">
+      <div><span class="text-gray-400">{{$t('services.addressbook')}} ></span> <span class="text-blue-primary font-bold">{{$t('services.addcontacts')}}</span></div>
+      <div>
+        <router-link :to="{name: 'ViewServicesAddressBook'}" class="font-bold" active-class="accounts">{{$t('services.addressbook')}}</router-link> | 
+        <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">{{$t('services.allservices')}}</router-link>
+      </div>
     </div>
-  </div>
-  <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>
-    <form @submit.prevent="SaveContact" class="mt-10">
-      <fieldset class="w-full">
-        <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <TextInput :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
-        <TextInput :placeholder="$t('createsuccessful.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" />
-        <div class="mt-10">
-          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
-          <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="SaveContact()">{{$t('accounts.save')}}</button>
-        </div>
-      </fieldset>
-    </form>
+    <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>
+      <form @submit.prevent="SaveContact" class="mt-10">
+        <fieldset class="w-full">
+          <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
+          <TextInput :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
+          <TextInput :placeholder="$t('createsuccessful.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" />
+          <div class="mt-10">
+            <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
+            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="SaveContact()">{{$t('accounts.save')}}</button>
+          </div>
+        </fieldset>
+      </form>
+    </div>
   </div>
 </template>
 <script>

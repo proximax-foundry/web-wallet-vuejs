@@ -1,88 +1,114 @@
 <template>
-  <div class="md:grid md:grid-cols-2 mb-8">
-    <div class="w-full text-center md:text-left mx-0 lg:mx-5">
-      <div class="font-bold hover:bg-gray-100 cursor-pointer inline-block py-1 px-2 pl-0 rounded-lg" @click="openSetDefaultModal = !openSetDefaultModal">
-        <font-awesome-icon icon="caret-down" class="h-5 w-5 text-gray-600 inline-block"></font-awesome-icon>&nbsp;{{ selectedAccountName }} 
-        <div v-if="isMultisig" class="text-xs font-normal ml-1 inline-block px-2 py-1 rounded bg-blue-200" >{{$t('accounts.multisig')}}</div>
-        <div v-if="isDefault" class="text-xs font-normal ml-1 inline-block px-2 py-1 rounded bg-yellow-200">{{$t('accounts.default')}}</div>
-      </div>
-      <div class="text-xs mb-2">
-        <div class="relative inline-block overflow-x-hidden address_div">
-          <div class="absolute z-20 h-full"></div>
-          <div
-            id="address"
-            class=" outline-none z-10 break-all" :copyValue="selectedAccountAddressPlain" copySubject="Address"
-          >{{ selectedAccountAddress }}</div>
-        </div>
-        <div class="mt-2 sm:inline-block relative">
-          <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 text-md cursor-pointer inline mx-2" style="top: 3px;"></font-awesome-icon>
-          <img src="@/modules/dashboard/img/icon-qr-code.svg" @click="showAddressQRModal = true" class="w-5 inline absolute">
-        </div>
-      </div>
-      <div class="text-center md:text-left">
-        <div class="inline-block mr-4"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 h-5 inline mr-1"><span class="text-xs">{{ selectedAccountBalance }} {{ currentNativeTokenName }}</span></div>
-        <div class="inline-block" v-if="displayConvertion"><img src="@/assets/img/icon-usd-blue.svg" class="w-5 inline mr-1"><span class="text-xs" >{{$t('dashboard.usd')}}{{ currencyConvert }}</span></div>
-      </div>
-    </div>
-
-    <div class="w-full mt-5 md:mt-0">
-      <div class="text-md text-center sm:text-right lg:text-left">{{$t('dashboard.transactions')}}: <span>{{ confirmedTransactions.length + unconfirmedTransactions.length }}</span></div>
-      <div class="xs:text-center sm:text-right lg:text-left">
-        <div class="mt-2">
-          <div class="rounded-full bg-blue-primary text-white w-24 h-15 px-2 py-1 mr-3 inline-block" :class="filteredConfirmedTransactions.length>0?'cursor-pointer':''" @click="clickConfirmedTransaction()">
-            <div class="flex justify-between">
-              <div class="rounded-full text-white border pt-1 pl-1 w-6 h-6 relative"><font-awesome-icon icon="check" class="w-4 h-3 absolute" style="top: 6px;"></font-awesome-icon></div>
-              <div class="text-xs font-bold flex items-center">{{ filteredConfirmedTransactions.length }}</div>
-            </div>
-          </div>
-          <div class="rounded-full bg-blue-300 text-white w-24 h-15 px-2 py-1 mr-3 inline-block" :class="filteredUnconfirmedTransactions.length>0?'cursor-pointer':''" @click="clickUnconfirmedTransaction()">
-            <div class="flex justify-between">
-              <div class="rounded-full text-white border pt-1 pl-1 w-6 h-6 relative"><font-awesome-icon icon="exclamation" class="w-4 h-3 absolute" style="left: 8px; top: 6px;"></font-awesome-icon></div>
-              <div class="text-xs font-bold flex items-center">{{ filteredUnconfirmedTransactions.length }}</div>
-            </div>
-          </div>
-          <div class="rounded-full bg-yellow-500 text-white w-24 h-15 px-2 py-1 inline-block" :class="filteredPartialTransactions.length>0?'cursor-pointer':''" @click="clickPartialTransactions()">
-            <div class="flex justify-between">
-              <img src="@/modules/dashboard/img/icon-transaction-partial-white.svg" class="w-6 h-6" />
-              <div class="text-xs font-bold flex items-center">{{ filteredPartialTransactions.length }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="grid grid-cols-12">
-    <div class="col-start-2 col-span-10">
-      <div class="grid grid-cols-12">
-          <div class="py-2 text-md col-start-5 col-span-2 rounded-lg rounded-r-none font-bold" 
-          :class="namespaceAssetView == 0 ? 'bg-blue-500 text-white' : 'bg-gray-400 text-gray-100'" @click="namespaceAssetView = 0">
-            {{$t('services.namespaces')}}
-          </div>
-          <div class="py-2 text-md col-span-2 rounded-lg rounded-l-none font-bold" 
-            :class="namespaceAssetView == 1 ? 'bg-blue-500 text-white' : 'bg-gray-400 text-gray-100'" @click="namespaceAssetView = 1">
-            {{$t('dashboard.otherassets')}}
-          </div>
-      </div>
-      <div class="grid grid-cols-12">
-        <div class="col-span-12 py-2">
-          <NamespaceDataTable v-if="namespaceAssetView == 0" :namespaces="selectedAccountNamespaces" />
-          <AssetDataTable v-if="namespaceAssetView == 1" :assets="selectedAccountAssets" />
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div>
-    <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed" type="confirmed"></DashboardDataTable>
-    <DashboardDataTable :showBlock="false" :showAction="false" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="filteredUnconfirmedTransactions" v-if="isShowUnconfirmed" type="unconfirmed"></DashboardDataTable>
-    <DashboardPartialDataTable :showBlock="false" :showAction="true" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" @openCosign="openCosignModal" :transactions="filteredPartialTransactions" v-if="isShowPartial" type="partial"></DashboardPartialDataTable>
-    <!--<PartialDashboardDataTable :transactions="partialTransactions.sort((a, b) => b.deadline - a.deadline)" v-if="isShowPartial"></PartialDashboardDataTable>-->
+    <div class="px-2 sm:px-10 bg-gray-200 pb-8 pt-5">
+      <div class="md:grid md:grid-cols-4">
+        <div class="pr-2">
+          <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/default-account-image.png') + ' )' }">
+            <div class="absolute top-0 px-2 py-1 default-account-header text-xxs text-gray-400 pappflex items-center rounded-b-sm"><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 mr-1 inline-block">DEFAULT ACCOUNT</div>
+            <div class="my-5 mt-6 flex items-center text-xs xl:text-sm cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">My Personal Account <img src="@/modules/dashboard/img/icon-arrow-right.svg" class="w-2 h-2 ml-4 inline-block"></div>
+            <div class="text-gray-400 text-xxs">WALLET ADDRESS</div>
+            <div class="flex items-center justify-between mb-3">
+              <div id="address" class="font-bold outline-none break-all text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
+              <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4" @click="copy('address')">
+            </div>
+            <div class="flex justify-around w-full">
+              <div class="my-3 flex items-center"><a href="https://bctestnetfaucet.xpxsirius.io/#/" target=_new><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span class="text-xs" style="margin-top: 1px">Request XPX</span></a></div>
+              <div class="my-3 flex items-center"><img src="@/modules/dashboard/img/icon-key.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Convert to Multisig</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="px-2">
+          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-gray-50 px-7 py-4 rounded-lg balance-div flex flex-col justify-between" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/balance-bg.png') + ' )' }">
+            <div>
+              <div class="mt-5 text-gray-300 text-txs">CURRENT BALANCE</div>
+              <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
+              <div class="text-gray-300 text-txs mt-1">Estimate US$ {{ currencyConvert }}</div>
+            </div>
+            <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Send XPX</div></router-link>
+          </div>
+        </div>
+        <div class="col-span-2 pl-2">
+          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-gray-50 px-7 py-4 rounded-lg transaction-div flex flex-row justify-evenly items-center" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/transaction-bg.png') + ' )' }">
+            <div class="text-center">
+              <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-successful-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredConfirmedTransactions.length }}</div></div>
+              <div class="text-xs mt-3">Succesful<br>Transactions</div>
+            </div>
+            <div class="text-center">
+              <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-unconfirmed-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredUnconfirmedTransactions.length }}</div></div>
+              <div class="text-xs mt-3">Unconfirmed<br>Transactions</div>
+            </div>
+            <div class="text-center">
+              <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-waiting-for-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredPartialTransactions.length }}</div></div>
+              <div class="text-xs mt-3">Waiting for<br>Signing</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-left px-2 sm:px-10 bg-gray-200">
+      <div class="transition-all flex items-end">
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='overview'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='overview'">Overview</div>
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='asset'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='asset'">Assets</div>
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='namespace'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='namespace'">Namespaces</div>
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='transaction'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='transaction'">All Transactions</div>
+      </div>
+    </div>
+    <div class="bg-white px-2 sm:px-10 pt-12" v-if="displayBoard=='overview'">
+      <div class="text-txs text-gray-400"><b class="text-gray-700">ASSETS</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">View all</span>)</div>
+      <AssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
+      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
+      <NamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" />
+      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ filteredConfirmedTransactions.length }} - View all)</div>
+      <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block).slice(0, 5)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
+      <div class="mt-10 flex">
+        <div class=" md:w-1/2">
+          <div class="mb-8 font-bold uppercase text-txs">Create something new</div>
+          <div class="flex flex-wrap">
+            <div class="flex items-center w-80 mb-2">
+              <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
+              <div class="inline-block ml-2 dashboard-link">
+                <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create Namespace</router-link>
+                <p class="text-txs w-60">Create an on-chain unique place for your business and your assets.</p>
+              </div>
+            </div>
+            <div class="flex items-center w-80 mb-2">
+              <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
+              <div class="inline-block ml-2 dashboard-link">
+                <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create an Asset</router-link>
+                <p class="text-txs w-60">An asset could be a token that has a unique identifier and configurable properties.</p>
+              </div>
+            </div>
+            <div class="flex items-center w-80mb-2">
+              <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
+              <div class="inline-block ml-2 dashboard-link">
+                <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create New Account</router-link>
+                <p class="text-txs w-60">Create an on-chain unique place for your business and your assets.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="md:w-1/2">
+          <div class="mb-8 font-bold text-txs uppercase">Getting started guide</div>
+          <div class="text-tsm">
+            <div class="mb-2"><a href=#>Guide Overview <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href=#>What is ProximaX Sirius Chain <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href=#>What is Namespace <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href=#>What is Asset <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='asset'">
+      <AssetDataTable :assets="selectedAccount.assets" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
+    </div>
+    <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='namespace'">
+      <NamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" />
+    </div>
+    <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='transaction'">
+      <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
+    </div>
     <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
-    <AddressQRModal :showModal="showAddressQRModal" :qrDataString="addressQR" :addressName="selectedAccountName" />
-    <MessageModal :showModal="showMessageModal" :message="messagePayload" />
-    <DecryptMessageModal :key="decryptMessageKey" :showModal="showDecryptMessageModal" :manualPublicKey="manualPublicKey" :message="messagePayload" :selectedAccountPublicKey="selectedAccountPublicKey" @decrypt="decryptMessage" :initialSignerPublicKey="initialSignerPublicKey" :isInitialSender="isInitialSender" :publicKeyToUse="publicKeyToUse"  />
-    <CosignModal :key="cosignModalKey" :showModal="showCosignModal" :txHash="txHash" @cosignTransaction="cosignTransaction" :signerPublicKey="signerPublicKey" :signedPublicKey="signedPublicKey" :selectedAccountPublicKey="selectedAccountPublicKey" />
   </div>
 </template>
 
@@ -120,19 +146,17 @@ import * as qrcode from 'qrcode-generator';
 import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
 
+
+
 export default defineComponent({
   name: 'ViewDashboard',
   components: {
-    DashboardDataTable,
-    DashboardPartialDataTable,
-    //PartialDashboardDataTable,
     SetAccountDefaultModal,
-    AddressQRModal,
+    DashboardDataTable,
+    //PartialDashboardDataTable,
     AssetDataTable,
     NamespaceDataTable,
-    MessageModal,
-    DecryptMessageModal,
-    CosignModal
+    
   },
 
   setup(){
@@ -140,10 +164,11 @@ export default defineComponent({
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
+    const displayBoard = ref('overview');
+
     const showAddressQRModal = ref(false);
     const showMessageModal = ref(false);
     const showDecryptMessageModal  = ref(false);
-    const namespaceAssetView = ref(0);
 
     const displayConvertion = ref(false);
     const openSetDefaultModal = ref(false);
@@ -159,7 +184,6 @@ export default defineComponent({
     const manualPublicKey = ref(false);
     const initialSignerPublicKey = ref('');
     const isInitialSender = ref(false);
-    const tempResolvedNamespace = new ResolvedNamespace();
     const cosignModalKey = ref(0);
     const decryptMessageKey = ref(0);
 
@@ -293,10 +317,12 @@ export default defineComponent({
     let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
     currentAccount.default = true;
 
-    let selectedAccount = ref(currentAccount);
+    const selectedAccount = ref(currentAccount);
+
+    const currentBlock = computed(() => listenerState.currentBlock);
 
     const selectedAccountPublicKey = computed(()=> selectedAccount.value.publicKey);
-    const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty());
+    const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty().substring(0, 13) + '....' + Helper.createAddress(selectedAccount.value.address).pretty().substring(Helper.createAddress(selectedAccount.value.address).pretty().length - 11));
     const selectedAccountAddressPlain = computed(()=> selectedAccount.value.address);
     const selectedAccountDirectChilds = computed(()=> {
       let multisigInfo = selectedAccount.value.multisigInfo.find((x)=> x.level === 0);
@@ -309,84 +335,31 @@ export default defineComponent({
       }
     });
 
-    const selectedAccountNamespaces = computed(()=>{
-      
-      let formattedNamespaces = [];
-      let namespaces = selectedAccount.value.namespaces;
-
-      for(let i=0; i < namespaces.length; ++i){
-        
-        let linkName = ""
-
-        switch (namespaces[i].linkType) {
-          case 1:
-            linkName = "Asset";
-            break;
-          case 2:
-            linkName = "Address";
-            break;
-        
-          default:
-            break;
-        }
-
-        let data = {
-          idHex: namespaces[i].idHex,
-          name: namespaces[i].idHex,
-          linkType: linkName,
-          linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
-          active: namespaces[i].active
-        };
-        
-        formattedNamespaces.push(data);
-      }
-
-      return formattedNamespaces;
+    const selectedAccountNamespaceCount = computed(()=>{
+      return selectedAccount.value.namespaces.length;
     });
 
-    const selectedAccountAssets = computed(()=>{
-
-      let formattedAssets = [];
-      let assets = selectedAccount.value.assets;
-
-      for(let i=0; i < assets.length; ++i){
-
-        let namespaceAlias = [];
-
-        let assetId = assets[i].idHex;
-
-        if(assetId === networkState.currentNetworkProfile.network.currency.assetId){
-          continue;
-        }
-
-        let namespaces = selectedAccount.value.findNamespaceNameByAsset(assetId);
-
-        for(let i =0; i < namespaces.length; ++i){
-          let aliasData = {
-            idHex: namespaces[i].idHex,
-            name: namespaces[i].name
-          };
-
-          namespaceAlias.push(aliasData);
-        }
-
-        let data = {
-          idHex: assetId,
-          owner: assets[i].owner,
-          amount: Helper.toCurrencyFormat(assets[i].getExactAmount(), assets[i].divisibility),
-          alias: namespaceAlias,
-          active: true
-        };
-        
-        formattedAssets.push(data);
-      }
-
-      return formattedAssets;
+    const selectedAccountAssetsCount = computed(()=>{
+      return selectedAccount.value.assets.length;
     });
 
     const selectedAccountBalance = computed(
-      () => {          
+      () => {
         return Helper.toCurrencyFormat(selectedAccount.value.balance, currentNativeTokenDivisibility.value);
+      }
+    );
+
+    const selectedAccountBalanceFront = computed(
+      () => {
+        let balance = selectedAccountBalance.value.split('.');
+        return balance[0];
+      }
+    );
+
+    const selectedAccountBalanceBack = computed(
+      () => {
+        let balance = selectedAccountBalance.value.split('.');
+        return balance[1];
       }
     );
 
@@ -447,7 +420,7 @@ export default defineComponent({
     })
 
     watch(filteredConfirmedTransactions, (newValue) => {
-        finalConfirmedTransaction.value = newValue;
+      finalConfirmedTransaction.value = newValue;
     });
 
     let selfKnownNamespace = [];
@@ -1103,13 +1076,14 @@ export default defineComponent({
       }
     }
 
-    const updateSelectedAccount = (data)=>{     
+    const updateSelectedAccount = (data)=>{
       if(data.type == 0){
         selectedAccount.value = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === data.name);
-      }
-      else{
+      }else{
         selectedAccount.value = walletState.currentLoggedInWallet.others.find((account)=> account.name === data.name);
       }
+      walletState.currentLoggedInWallet.setDefaultAccountByName(data.name);
+      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
     }
 
     emitter.on('CLOSE_SET_DEFAULT_ACCOUNT_MODAL', payload => {
@@ -1126,8 +1100,12 @@ export default defineComponent({
     });
 
     return {
+      currentBlock,
+      displayBoard,
       copy,
       selectedAccountBalance,
+      selectedAccountBalanceFront,
+      selectedAccountBalanceBack,
       selectedAccountName,
       selectedAccountPublicKey,
       confirmedTransactions,
@@ -1157,9 +1135,11 @@ export default defineComponent({
       showAddressQRModal,
       showMessageModal,
       showDecryptMessageModal,
-      namespaceAssetView,
-      selectedAccountNamespaces,
-      selectedAccountAssets,
+      selectedAccount,
+      selectedAccountNamespaceCount,
+      // selectedAccountNamespaces,
+      // selectedAccountAssets,
+      selectedAccountAssetsCount,
       openMessageModal,
       openDecryptMsgModal,
       messagePayload,
@@ -1175,14 +1155,16 @@ export default defineComponent({
       initialSignerPublicKey,
       isInitialSender,
       cosignModalKey,
-      decryptMessageKey
+      decryptMessageKey,
+      txHash,
     };
   }
 });
 </script>
 <style lang="scss" scoped>
+
 .address_div{
-    top: 4px;
+  top: 4px;
 }
 
 .p-dialog .p-dialog-header{
@@ -1193,10 +1175,37 @@ export default defineComponent({
   font-size: 1rem;
 }
 
+.default-account-header{
+  background-color: #4D4E65;
+}
+
 #address{
-  width: 350px;
   @extend .text-xs !optional;
 }
+
+.default-div{
+  @apply text-gray-100;
+  background: #33344A;
+  background-position: right top;
+  background-repeat: no-repeat;
+  background-size: 250px;
+  height: 184px;
+}
+
+.balance-div{
+  background: #fff;
+  background-position: right bottom;
+  background-repeat: no-repeat;
+  height: 184px;
+}
+
+.transaction-div{
+  background: #fff;
+  background-position: contain;
+  background-repeat: no-repeat;
+  height: 184px;
+}
+
 
 @media (min-width: 640px) {
   .address_div{
@@ -1210,9 +1219,12 @@ export default defineComponent({
   }
 
   #address{
-    width: 480px;
     @extend .text-sm !optional;
   }
+}
+
+.dashboard-link{
+  position: relative; top: -4px;
 }
 
 </style>

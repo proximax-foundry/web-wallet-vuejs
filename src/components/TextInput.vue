@@ -1,13 +1,7 @@
 <template>
   <div>
-    <div class="text-outline bg-white" :class="borderColor">
-      <div class="text-icon-outline text-icon" v-if="icon">
-        <img v-if="imgRequired" :src="getIcon()">
-        <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position" v-else></font-awesome-icon>
-      </div>
-      <div v-else class="mr-4"></div>
-      <input :disabled="disabled" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="text-placeholder bg-white" :placeholder="placeholder" @click="clickInputText()" @focus="focusInputText()" @blur="blurInputText()">
-      <div class="w-1/12 flex-none"></div>
+    <div class=" bg-white py-2 border">
+      <input :disabled="disabled" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="ml-2 text-placeholder bg-white w-full" :placeholder="placeholder" @click="clickInputText()" @focus="focusInputText()" @blur="blurInputText()">
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
   </div>
