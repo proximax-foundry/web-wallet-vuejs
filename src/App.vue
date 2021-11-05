@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, watch, ref } from "vue";
+import { computed, defineComponent, getCurrentInstance, provide, watch, ref, reactive } from "vue";
 import selectLanguageModal from '@/modules/home/components/selectLanguageModal.vue';
 import packageData from "../package.json";
 import headerComponent from '@/components/headerComponent.vue'
@@ -70,7 +70,14 @@ export default defineComponent({
   setup() {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance!.appContext.config.globalProperties.emitter;
-    const isShowNavi = ref(false);
+
+    const navigationSideBar = reactive({
+      isOpen: false,
+      inNavi: false,
+    });
+
+    provide('navigationSideBar', navigationSideBar);
+
     const router = useRouter();
     // chainNetwork.updateAvailableNetworks();
     const currentRouteName = computed(() => {
@@ -89,20 +96,26 @@ export default defineComponent({
 
     const login = computed(() =>walletState.isLogin);
 
-    emitter.on('OPEN_NAVI_BAR', () => {
-      isShowNavi.value = true;
+    const isShowNavi = computed(() => {
+      return navigationSideBar.isOpen
     });
 
-    emitter.on('CLOSE_NAVI_BAR', () => {
-      isShowNavi.value = false;
+    // emitted from App.vue when click on any part of the page
+    emitter.on('PAGE_CLICK', () => {
+      // if(!isInNavigation.value){
+      //   emitter.emit('CLOSE_NAVI_BAR');
+      // }
+      if(!navigationSideBar.inNavi){
+        navigationSideBar.isOpen =false;
+      }
     });
 
     return{
       login,
       clickEvent,
       versioning,
-      isShowNavi,
       currentRouteName,
+      isShowNavi,
     }
   }
 });
