@@ -123,8 +123,8 @@ export default{
         }
 
         let blockDifference = namespaces[i].endHeight - currentBlockHeight;
-        let blockTargetTimeByDay = (60 / blockTargetTime) * 60 * 24;
-        let blockTargetTimeByHour = (60 / blockTargetTime) * 60;
+        let blockTargetTimeByDay = Math.round((60 / blockTargetTime) * 60 * 24);
+        let blockTargetTimeByHour = Math.round((60 / blockTargetTime) * 60);
         let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
         let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
         let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
