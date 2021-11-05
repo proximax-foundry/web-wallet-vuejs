@@ -71,6 +71,6 @@ export enum AmountType{
 export class OtherAsset{
   asset: string = '';
   amount: number = 0;
-  assetid: MosaicId;
+  assetId: MosaicId;
   isLinked: boolean = false;
 }
