@@ -49,7 +49,7 @@
       </Column>
       <Column field="recipient" header="RECIPIENT" headerStyle="width:110px">
         <template #body="{data}">
-          <span v-tooltip.bottom="data.extractedData.recipient" class="truncate inline-block text-txs">{{ data.extractedData.recipientName?data.extractedData.recipientName:data.extractedData.recipient }}</span>
+          <span v-tooltip.bottom="data.extractedData.recipient" v-if="data.extractedData.recipient" class="truncate inline-block text-txs">{{ data.extractedData.recipientName?data.extractedData.recipientName:data.extractedData.recipient }}</span>
         </template>
       </Column>
       <Column header="TX FEE" headerStyle="width:110px">

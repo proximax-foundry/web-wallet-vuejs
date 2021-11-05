@@ -83,7 +83,7 @@
             </div>
             <PasswordInput placeholder="Enter Wallet Password" :errorMessage="'Please enter wallet password'" :showError="showPasswdError" v-model="walletPassword" icon="lock" :disabled="disabledPassword" />
             <div class="mt-10">
-              <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">{{$t('siginin.clear')}}</button>
+              <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50" :disabled="disabledClear" @click="clearInput()">Clear</button>
               <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="createNamespace">{{$t('welcome.create')}}</button>
             </div>
           </fieldset>

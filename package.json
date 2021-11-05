@@ -54,7 +54,8 @@
     "vue-router": "^4.0.0-0",
     "vue-tippy": "^6.0.0-alpha.29",
     "vue3-loading-overlay": "0.0.0",
-    "vue3-simple-file-input": "^1.0.3"
+    "vue3-simple-file-input": "^1.0.3",
+    "vuex": "^3.6.2"
   },
   "devDependencies": {
     "@intlify/vue-i18n-loader": "^2.1.0",
