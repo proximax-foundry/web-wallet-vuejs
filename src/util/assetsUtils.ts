@@ -96,9 +96,9 @@ export class AssetsUtils {
     let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
     chainConfig.init();
     let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
-    let blockTargetTimeByDay = Math.floor((60 * 60 * 24) / blockTargetTime);
+    let blockTargetTimeByDay = (60 * 60 * 24) / blockTargetTime;
     // 5760 = 4 * 60 * 24 -> 15sec per block
-    return durationInDay * blockTargetTimeByDay;
+    return Math.floor(durationInDay * blockTargetTimeByDay);
   }
 
   static getOwnedAssets = (address: string) => {
