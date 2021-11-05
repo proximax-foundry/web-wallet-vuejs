@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col min-h-screen justify-between" @click="clickEvent">
+  <div class="flex flex-col justify-between min-h-screen" @click="clickEvent">
     <Toast position="top-left" group="tl" />
     <Toast position="top-right" group="tr" />
     <Toast position="center" group="center" />
@@ -27,7 +27,7 @@
         <div :class="`${ login?'flex flex-col min-full-screen bg-white':''}`">
           <router-view class="flex-grow" v-if="currentRouteName=='ViewDashboard'"></router-view>
           <router-view class="flex-grow px-2 sm:px-10 pt-5" v-else></router-view>
-          <footer class="h-9 mt-10 text-center sm:text-justify sm:flex text-xs sm:justify-between container mx-auto text-gray-700 px-10 flex-grow-0" v-if="login">
+          <footer class="md:h-9 mt-10 text-center sm:text-justify sm:flex text-txs md:text-xs sm:justify-between container mx-auto text-gray-700 px-10 flex-grow-0" v-if="login">
             <div class="ml-2 sm:ml-0">Copyright 2021 ProximaX®. All rights reserved. <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary hover:underline">{{$t('Footer.link')}}</a> <selectLanguageModal class="inline-block" /></div>
             <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span>Version BETA {{$t('Header.version')}}{{ versioning }}</span></div>
           </footer>
@@ -35,7 +35,7 @@
       </div>
     </div>
     <!-- <PageComponent></PageComponent> -->
-    <footer class="h-12 mt-20 text-center sm:text-justify sm:flex text-xs sm:justify-between container mx-auto text-gray-700 pb-5" v-if="!login">
+    <footer class="h-12 mt-20 text-center sm:text-justify sm:flex text-txs md:text-xs sm:justify-between container mx-auto text-gray-700 pb-5" v-if="!login">
       <div class="ml-2 sm:ml-0">Copyright 2021 ProximaX®. All rights reserved. <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary hover:underline">{{$t('Footer.link')}}</a></div>
       <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span>Version BETA {{$t('Header.version')}}{{ versioning }}</span></div>
     </footer>
