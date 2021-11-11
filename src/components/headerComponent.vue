@@ -16,12 +16,12 @@
           </div> -->
           <div class="w-12 md:w-16 flex flex-row items-center left-gray-line">
             <div class="text-center w-full h-6">
-              <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block h-4 w-3 md:h-5 md:w-5">
+              <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block h-7 w-3 md:h-7 md:w-5">
             </div>
           </div>
           <div class="w-12 md:w-16 flex flex-row items-center left-gray-line">
             <div class="text-center w-full h-4 md:h-6">
-              <router-link :to="{name : 'ViewServices'}" class="h-4 w-4 md:h-6 md:w-6 inline-block">
+              <router-link :to="{name : 'ViewServices'}" class="h-7 w-4 md:h-6 md:w-6 inline-block">
                 <img src="@/assets/img/icon-setting.svg" class="opacity-80 hover:opacity-100 transition-all duration-300">
               </router-link>
             </div>
