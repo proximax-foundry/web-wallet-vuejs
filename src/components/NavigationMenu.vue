@@ -1,28 +1,28 @@
 <template>
   <div class="flex flex-col" @mouseover="hoverOverNavigation" @mouseout="hoverOutNavigation">
-    <div class="border-b border-gray-200 py-5 w-60 flex-grow-0">
+    <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
       <div class="my-3 px-10 font-txs text-gray-400">ACCOUNTS ({{ allAccountsCount }})</div>
       <div>
-        <router-link :to="{ name: 'ViewAccountDetails', params: { address: item.address }}" v-for="(item, index) in accounts" :key="index" class="link_block flex items-center" @click="closeNavi"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center"><div class="text-center w-full"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div></div><span class="truncate overflow-hidden">{{ item.name }}</span></router-link>
+        <router-link :to="{ name: 'ViewAccountDetails', params: { address: item.address }}" v-for="(item, index) in accounts" :key="index" class="link_block flex items-center" @click="closeNavi"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center"><div class="text-center w-full"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div></div><span class="truncate overflow-hidden text-white">{{ item.name }}</span></router-link>
       </div>
-      <router-link :to="{ name: 'ViewAccountDisplayAll'}" class="link_block flex items-center" v-if="allAccountsCount > 5" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-4 w-4 inline-block mr-1">View all accounts</router-link>
-      <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="block font-bold link_block" @click="closeNavi"><img src="@/assets/img/navi/icon-add.svg" class="h-4 w-4 inline-block relative mr-1">Create New Account</router-link>
+      <router-link :to="{ name: 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" v-if="allAccountsCount > 5" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-4 w-4 inline-block mr-1 text-white">View all accounts</router-link>
+      <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="block font-bold link_block text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-add.svg" class="h-4 w-4 inline-block relative mr-1">Create New Account</router-link>
     </div>
-    <div class="border-b border-gray-200 py-5 w-60 flex-grow-0">
+    <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
       <div class="my-3 px-10 text-gray-400">CREATE</div>
-      <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="link_block flex items-center" @click="closeNavi"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">Namespace</router-link>
-      <router-link :to="{ name : 'ViewServicesAssetsCreate'}"  class="link_block flex items-center" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">Asset</router-link>
-      <router-link :to="{ name : 'ViewServices'}"  class="link_block flex items-center" @click="closeNavi"><img src="@/assets/img/navi/icon-services.svg" class="h-3 w-3 inline-block relative mr-2">Other Services</router-link>
+      <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">Namespace</router-link>
+      <router-link :to="{ name : 'ViewServicesAssetsCreate'}"  class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">Asset</router-link>
+      <router-link :to="{ name : 'ViewServices'}"  class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-services.svg" class="h-3 w-3 inline-block relative mr-2">Other Services</router-link>
     </div>
-    <div class="border-b border-gray-200 py-5 w-60 flex-grow-0">
+    <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
       <div class="my-3 px-10 text-gray-400">NAVIGATE</div>
-      <router-link :to="{ name : 'ViewWallets'}" class="link_block flex items-center" @click="closeNavi"><img src="@/assets/img/navi/icon-wallets.svg" class="h-3 w-3 inline-block relative mr-2">Wallets</router-link>
-      <router-link :to="{ name : 'ViewAccountDisplayAll'}" class="link_block flex items-center" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-3 w-3 inline-block relative mr-2">Accounts</router-link>
-      <router-link :to="{ name : 'ViewServicesAddressBook'}" class="link_block flex items-center" @click="closeNavi"><img src="@/assets/img/navi/icon-address-book.svg" class="h-3 w-3 inline-block relative mr-2">Address Book</router-link>
+      <router-link :to="{ name : 'ViewWallets'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-wallets.svg" class="h-3 w-3 inline-block relative mr-2">Wallets</router-link>
+      <router-link :to="{ name : 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-3 w-3 inline-block relative mr-2">Accounts</router-link>
+      <router-link :to="{ name : 'ViewServicesAddressBook'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-address-book.svg" class="h-3 w-3 inline-block relative mr-2">Address Book</router-link>
     </div>
     <div class="flex-grow"></div>
-    <div class="flex-glow-0 w-60">
-      <a @click="logout()" class="signout_block flex items-center cursor-pointer"><img src="@/assets/img/navi/icon-sign-out.svg" class="h-3 w-3 inline-block relative mr-2" @click="logout()">{{$t('Header.signout')}}</a>
+    <div class="flex-glow-0 w-60 border-t border-gray-700">
+      <a @click="logout()" class="signout_block flex items-center cursor-pointer text-white"><img src="@/assets/img/navi/icon-sign-out.svg" class="h-4 w-4 inline-block relative mr-2" @click="logout()">{{$t('Header.signout')}}</a>
     </div>
   </div>
 </template>
@@ -154,10 +154,10 @@ export default{
 </script>
 <style lang="scss" scoped>
 .link_block{
-  @apply px-10 hover:bg-white py-2 transition-all duration-200;
+  @apply px-10 hover:bg-navy-lighter py-2 transition-all duration-200;
 }
 
 .signout_block{
-  @apply px-10 hover:bg-white py-5 transition-all duration-200;
+  @apply px-10 hover:bg-navy-lighter py-5 transition-all duration-200;
 }
 </style>

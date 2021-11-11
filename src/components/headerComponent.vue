@@ -1,11 +1,11 @@
 <template>
   <header>
-    <div class="header-height flex items-stretch pl-2 md:pr-2 gray-bar" v-if="loginStatus">
-      <div class="flex-none self-center flex items-end ml-2 sm:ml-0">
+    <div class="header-height flex items-stretch md:pr-2" v-if="loginStatus">
+      <div class="header-height flex-none self-center flex pt-3 md:pt-4 pl-2 sm:pl-4 bg-navy-primary logo-header">
         <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40"></router-link>
       </div>
       <div class="flex-none md:flex items-center md:ml-10 hidden md:visible">
-        <router-link :to="{name : 'ViewDashboard'}"><img src="@/assets/img/icon-home.svg" class="h-6 w-6 inline-block"></router-link>
+        <router-link :to="{name : 'ViewDashboard'}"><img src="@/assets/img/icon-home.svg" class="h-7 w-7 inline-block"></router-link>
       </div>
 
       <div class="flex-grow"></div>
@@ -16,19 +16,19 @@
           </div> -->
           <div class="w-12 md:w-16 flex flex-row items-center left-gray-line">
             <div class="text-center w-full h-6">
-              <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block h-4 w-3 md:h-5 md:w-5">
+              <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block h-7 w-3 md:h-7 md:w-5">
             </div>
           </div>
           <div class="w-12 md:w-16 flex flex-row items-center left-gray-line">
             <div class="text-center w-full h-4 md:h-6">
-              <router-link :to="{name : 'ViewServices'}" class="h-4 w-4 md:h-6 md:w-6 inline-block">
+              <router-link :to="{name : 'ViewServices'}" class="h-7 w-4 md:h-6 md:w-6 inline-block">
                 <img src="@/assets/img/icon-setting.svg" class="opacity-80 hover:opacity-100 transition-all duration-300">
               </router-link>
             </div>
           </div>
           <div class="w-16 md:w-40 pl-3 text-center flex items-center left-gray-line">
             <div class="md:flex md:items-center">
-              <img src="@/assets/img/icon-testnet-block.svg" class="w-3 md:w-7 block md:inline-block" :title="chainAPIEndpoint" v-if="wideScreen"> <div class="block md:inline-block text-txs text-white text-left md:ml-2"><div class="font-thin mb-1" v-if="wideScreen">CONNECTED TO</div><div class="text-xxs md:text-tsm">{{ networkState.chainNetworkName }}</div></div>
+              <img src="@/assets/img/icon-testnet-block.svg" class="w-3 md:w-7 block md:inline-block" :title="chainAPIEndpoint" v-if="wideScreen"> <div class="block md:inline-block text-txs text-white text-left md:ml-2"><div class="text-xxs md:text-tsm text-navy-primary">{{ networkState.chainNetworkName }}</div></div>
             </div>
           </div>
           <div class="w-12 md:w-16 flex flex-row items-center left-gray-line md:hidden">
@@ -505,7 +505,7 @@ export default defineComponent({
 @import "../assets/scss/multiselect.scss";
 
 .left-gray-line{
-  border-left: 1px solid #58585F;
+  border-left: 1px solid #dedede;
 }
 
 .gray-bar{
@@ -518,6 +518,10 @@ export default defineComponent({
 
 .lang-mobile-placement-postlogin{
   position: relative; top: 0px !important; left: -35px;
+}
+
+.logo-header{
+  width: 115px;
 }
 
 .header-height{
@@ -542,6 +546,10 @@ export default defineComponent({
 }
 
 @screen md {
+  .logo-header{
+    width: 240px;
+  }
+
  .version-text{
     font-size: 13px;
     top: 5px;

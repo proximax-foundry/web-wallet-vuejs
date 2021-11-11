@@ -22,7 +22,7 @@
     <ConfirmDialog></ConfirmDialog>
     <headerComponent></headerComponent>
     <div :class="login?`flex min-full-screen`:``">
-      <NavigationMenu v-if="login" class="flex-shrink-0 bg-gray-50 text-left text-xs bg-navi z-10 absolute md:relative inset-y-0 left-0 transform md:-translate-x-0 transition duration-200 ease-in-out" :class="`${isShowNavi?'-translate-x-0':'-translate-x-full'}`"></NavigationMenu>
+      <NavigationMenu v-if="login" class="flex-shrink-0 bg-navy-primary text-left text-xs bg-navi z-10 absolute md:relative inset-y-0 left-0 transform md:-translate-x-0 transition duration-200 ease-in-out" :class="`${isShowNavi?'-translate-x-0':'-translate-x-full'}`"></NavigationMenu>
       <div :class="`${ login?'inline-block flex-grow':''}`">
         <div :class="`${ login?'flex flex-col min-full-screen bg-white':''}`">
           <router-view class="flex-grow" v-if="currentRouteName=='ViewDashboard'"></router-view>
@@ -135,18 +135,5 @@ export default defineComponent({
   min-height:calc(100vh - 4rem) !important;
 }
 
-.bg-navi{
-  background: #F2F2F5;
-}
-
-@screen md {
- .bg-navi{
-    box-shadow: 7px 0px 10px -7px #dedede;
-  } 
-}
-
-.gray-bar{
-  background: #3F4058;
-}
 
 </style>

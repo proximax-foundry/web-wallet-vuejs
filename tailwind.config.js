@@ -40,7 +40,7 @@ module.exports = {
           primary: '#444444'
         },
         blue:{
-          primary:'#306eb5',
+          primary:'#585A80',
           link: '#007CFF'
         },
         red:{
@@ -48,6 +48,10 @@ module.exports = {
         },
         orange:{
           primary: '#E55B13'
+        },
+        navy: {
+          primary: '#33344A',
+          lighter: '#585A80'
         }
       },
       screens: {
