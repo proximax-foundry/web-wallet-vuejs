@@ -14,7 +14,7 @@
         <template #body="{data}">
           <div class="ml-2">
             <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block" v-if="data.extractedData.recipient==currentAddress">
-            <img src="@/modules/dashboard/img/icon-txn-out.svg" class="inline-block rotate-180 transform" v-else>
+            <img src="@/modules/dashboard/img/icon-txn-out.svg" class="inline-block" v-else>
           </div>
         </template>
       </Column>

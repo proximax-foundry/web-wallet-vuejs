@@ -3,7 +3,7 @@
     <div class="px-2 sm:px-10 bg-gray-200 pb-8 pt-5">
       <div class="md:grid md:grid-cols-4">
         <div class="pr-2">
-          <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/default-account-image.png') + ' )' }">
+          <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div">
             <div class="absolute top-0 px-2 py-1 default-account-header text-xxs text-gray-400 pappflex items-center rounded-b-sm"><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 mr-1 inline-block">DEFAULT ACCOUNT</div>
             <div class="my-5 mt-6 flex items-center text-xs xl:text-sm cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">My Personal Account <img src="@/modules/dashboard/img/icon-arrow-right.svg" class="w-2 h-2 ml-4 inline-block"></div>
             <div class="text-gray-400 text-xxs">WALLET ADDRESS</div>
@@ -18,7 +18,7 @@
           </div>
         </div>
         <div class="px-2">
-          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-gray-50 px-7 py-4 rounded-lg balance-div flex flex-col justify-between" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/balance-bg.png') + ' )' }">
+          <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-4 rounded-lg balance-div flex flex-col justify-between bg-navy-primary text-white">
             <div>
               <div class="mt-5 text-gray-300 text-txs">CURRENT BALANCE</div>
               <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
@@ -28,7 +28,7 @@
           </div>
         </div>
         <div class="col-span-2 pl-2">
-          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-gray-50 px-7 py-4 rounded-lg transaction-div flex flex-row justify-evenly items-center" :style="{ backgroundImage: 'url(' + require('@/modules/dashboard/img/transaction-bg.png') + ' )' }">
+          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-4 rounded-lg transaction-div flex flex-row justify-evenly items-center text-white">
             <div class="text-center">
               <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-successful-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredConfirmedTransactions.length }}</div></div>
               <div class="text-xs mt-3">Succesful<br>Transactions</div>
@@ -1193,16 +1193,10 @@ export default defineComponent({
 }
 
 .balance-div{
-  background: #fff;
-  background-position: right bottom;
-  background-repeat: no-repeat;
   height: 184px;
 }
 
 .transaction-div{
-  background: #fff;
-  background-position: contain;
-  background-repeat: no-repeat;
   height: 184px;
 }
 
