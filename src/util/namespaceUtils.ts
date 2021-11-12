@@ -11,6 +11,7 @@ import {
   SignedTransaction,
   TransactionBuilderFactory,
   UInt64,
+  MosaicId,
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { walletState } from "../state/walletState";
@@ -27,11 +28,25 @@ import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 
 
-export class NamespacesUtils {
+export class NamespaceUtils {
+
+  static async getLinkedMosaic(namespaceId: NamespaceId, endpoint: string): Promise<MosaicId>{
+     let rest = new ChainAPICall(endpoint);
+     let mosaicId = await rest.namespaceAPI.getLinkedMosaicId(namespaceId);
+
+     return mosaicId;
+  }
+
+  static async getLinkedAddress(namespaceId: NamespaceId, endpoint: string): Promise<Address>{
+    let rest = new ChainAPICall(endpoint);
+    let address = await rest.namespaceAPI.getLinkedAddress(namespaceId);
+
+    return address;
+ }
 
   static rootNamespaceTransaction = (networkType: NetworkType, generationHash: string, namespaceName: string, duration: number):RegisterNamespaceTransaction => {
     let buildTransactions = new BuildTransactions(networkType, generationHash);
-    return buildTransactions.registerRootNamespace(namespaceName, UInt64.fromUint(NamespacesUtils.calculateDuration(duration)));
+    return buildTransactions.registerRootNamespace(namespaceName, UInt64.fromUint(NamespaceUtils.calculateDuration(duration)));
   }
 
   static subNamespaceTransaction = (networkType: NetworkType, generationHash: string, rootNamespace: string, subNamespace: string):RegisterNamespaceTransaction => {
@@ -40,12 +55,12 @@ export class NamespacesUtils {
   }
 
   static getRootNamespaceTransactionFee = (networkType: NetworkType, generationHash: string, namespaceName: string, duration: number) :number => {
-    let registerRootNamespaceTransaction = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
+    let registerRootNamespaceTransaction = NamespaceUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
     return registerRootNamespaceTransaction.maxFee.compact();
   }
 
   static getSubNamespaceTransactionFee = (networkType: NetworkType, generationHash: string, subNamespace: string, rootNamespace: string) :number => {
-    let registerSubNamespaceTransaction = NamespacesUtils.subNamespaceTransaction(networkType, generationHash, rootNamespace, subNamespace);
+    let registerSubNamespaceTransaction = NamespaceUtils.subNamespaceTransaction(networkType, generationHash, rootNamespace, subNamespace);
     return registerSubNamespaceTransaction.maxFee.compact();
   }
 
@@ -53,9 +68,9 @@ export class NamespacesUtils {
     let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
     chainConfig.init();
     let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
-    let blockTargetTimeByDay = (60 / blockTargetTime) * 60 * 24;
+    let blockTargetTimeByDay = (60 * 60 * 24) / blockTargetTime;
     // 5760 = 4 * 60 * 24 -> 15sec per block
-    return durationInDay * blockTargetTimeByDay;
+    return Math.floor(durationInDay * blockTargetTimeByDay);
   }
 
   static listNamespaces = (address:string) => {
@@ -202,24 +217,24 @@ export class NamespacesUtils {
   }
 
   static createRootNamespace = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, namespaceName: string, duration: number) => {
-    let registerRootNamespaceTransaction = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
-    const account = NamespacesUtils.getSenderAccount(selectedAddress, walletPassword);
+    let registerRootNamespaceTransaction = NamespaceUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
+    const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
     let signedTx = account.sign(registerRootNamespaceTransaction, networkState.currentNetworkProfile.generationHash);
-    NamespacesUtils.annouce(signedTx);
+    NamespaceUtils.annouce(signedTx);
     return signedTx.hash;
   }
 
   static createSubNamespace = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, subNamespace: string, rootNamespace: string) => {
-    let registerSubNamespaceTransaction = NamespacesUtils.subNamespaceTransaction(networkType, generationHash, rootNamespace, subNamespace);
-    const account = NamespacesUtils.getSenderAccount(selectedAddress, walletPassword);
+    let registerSubNamespaceTransaction = NamespaceUtils.subNamespaceTransaction(networkType, generationHash, rootNamespace, subNamespace);
+    const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
     let signedTx = account.sign(registerSubNamespaceTransaction, networkState.currentNetworkProfile.generationHash);
-    NamespacesUtils.annouce(signedTx);
+    NamespaceUtils.annouce(signedTx);
   }
 
   static createRootNamespaceMultisig = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, namespaceName: string, duration: number, multiSigAddress:string) => {
     let buildTransactions = new BuildTransactions(networkType, generationHash);
-    let registerRootNamespaceTransaction = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
-    const account = NamespacesUtils.getSenderAccount(selectedAddress, walletPassword);
+    let registerRootNamespaceTransaction = NamespaceUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
+    const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
 
     const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
     const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
@@ -237,13 +252,13 @@ export class NamespacesUtils {
     );
 
     let signedHashlock = account.sign(hashLockTx, generationHash);
-    NamespacesUtils.multiSigAnnouce(aggregateBondedTxSigned, signedHashlock);
+    NamespaceUtils.multiSigAnnouce(aggregateBondedTxSigned, signedHashlock);
   }
 
   static createSubNamespaceMultisig = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, subNamespace: string, rootNamespace: string, multiSigAddress:string) => {
     let buildTransactions = new BuildTransactions(networkType, generationHash);
-    let registerSubNamespaceTransaction = NamespacesUtils.subNamespaceTransaction(networkType, generationHash, rootNamespace, subNamespace);
-    const account = NamespacesUtils.getSenderAccount(selectedAddress, walletPassword);
+    let registerSubNamespaceTransaction = NamespaceUtils.subNamespaceTransaction(networkType, generationHash, rootNamespace, subNamespace);
+    const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
 
     const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
     const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
@@ -261,20 +276,20 @@ export class NamespacesUtils {
     );
 
     let signedHashlock = account.sign(hashLockTx, generationHash);
-    NamespacesUtils.multiSigAnnouce(aggregateBondedTxSigned, signedHashlock);
+    NamespaceUtils.multiSigAnnouce(aggregateBondedTxSigned, signedHashlock);
   }
 
   static extendNamespace = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, namespaceName: string, duration: number) => {
-    let extendNamespaceTx = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
-    const account = NamespacesUtils.getSenderAccount(selectedAddress, walletPassword);
+    let extendNamespaceTx = NamespaceUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
+    const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
     let signedTx = account.sign(extendNamespaceTx, networkState.currentNetworkProfile.generationHash);
-    NamespacesUtils.annouce(signedTx);
+    NamespaceUtils.annouce(signedTx);
   }
 
   static extendNamespaceMultisig = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, namespaceName: string, duration: number, multiSigAddress:string) => {
     let buildTransactions = new BuildTransactions(networkType, generationHash);
-    let extendNamespaceTx = NamespacesUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
-    const account = NamespacesUtils.getSenderAccount(selectedAddress, walletPassword);
+    let extendNamespaceTx = NamespaceUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
+    const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
 
     const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
     const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
@@ -292,7 +307,7 @@ export class NamespacesUtils {
     );
 
     let signedHashlock = account.sign(hashLockTx, generationHash);
-    NamespacesUtils.multiSigAnnouce(aggregateBondedTxSigned, signedHashlock);
+    NamespaceUtils.multiSigAnnouce(aggregateBondedTxSigned, signedHashlock);
   }
 
   static annouce = (signedTransaction:SignedTransaction ) => {

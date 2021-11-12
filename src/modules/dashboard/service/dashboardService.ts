@@ -247,7 +247,7 @@ export class DashboardService {
                 signerDisplay: this.addressConvertToName(transactions[i].signer.address.plain()),
                 hash: transactions[i].transactionInfo.hash,
                 block: transactions[i].transactionInfo.height.compact(),
-                formattedDeadline: Helper.convertDisplayDateTimeFormatShort(transactions[i].deadline.value.toString()),
+                formattedDeadline: Helper.convertDisplayDateTimeFormat24(transactions[i].deadline.value.toString()),
                 relatedAddress: [],
                 relatedAsset: [],
                 relatedNamespace: [],
@@ -841,10 +841,8 @@ export class DashboardService {
 
                     // get other assets
                     if(mosaicIdHex.toUpperCase() != nativeTokenAssetId.value.toUpperCase() && mosaicIdHex.toUpperCase() != nativeTokenNamespaceId.value.toUpperCase()){
-                        (async() => {
-                            let otherAsset = await DashboardService.displayOtherAsset(newTransfer.amount, newTransfer.value, transferTx.mosaics[i].id);
-                            transactionDetails.otherAssets.push(otherAsset);
-                        })();
+                        let otherAsset = DashboardService.displayOtherAsset(newTransfer.amount, newTransfer.value, transferTx.mosaics[i].id);
+                        transactionDetails.otherAssets.push(otherAsset);
                     }
                 }else{
                     amountTip = DashboardService.createNamespaceAmountTip(newTransfer.amount, newTransfer.value, newTransfer.valueDisplay, true);
@@ -2583,7 +2581,7 @@ export class DashboardService {
         return amount > 0 ? amount / Math.pow(10, nativeTokenDivisibility.value) : 0;
     }
 
-    static displayOtherAsset = async(amount: number, assetId: string, mosaic_id: MosaicId) => {
+    static displayOtherAsset = (amount: number, assetId: string, mosaic_id: MosaicId) => {
         // let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
         // let chainAPICall = new ChainAPICall(apiEndpoint);
         // let asset = await chainAPICall.assetAPI.getMosaic(mosaic_id);
@@ -2595,7 +2593,7 @@ export class DashboardService {
         let otherAsset = new OtherAsset();
         otherAsset.amount = amount;
         otherAsset.asset = assetId;
-        otherAsset.assetid = mosaic_id;
+        otherAsset.assetId = mosaic_id;
         // if(nsAsset[0].names.length > 0){
         //     otherAsset.isLinked = true;
         //     otherAsset.asset = nsAsset[0].names[0].name;

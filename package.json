@@ -1,6 +1,6 @@
 {
   "name": "web-wallet-vuejs",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -23,10 +23,12 @@
     "crypto-js": "^3.3.0",
     "crypto-random-string": "^4.0.0",
     "ethers": "^5.4.1",
+    "file-saver": "^2.0.5",
     "js-joda": "^1.11.0",
     "js-sha3": "^0.8.0",
     "jsonwebtoken": "^8.5.1",
     "jspdf": "^2.3.1",
+    "jszip": "^3.7.1",
     "maska": "^1.4.1",
     "mitt": "^2.1.0",
     "nem-library": "^2.0.0-RC4",
@@ -46,6 +48,7 @@
     "v-wave": "^1.2.8",
     "vue": "^3.0.0",
     "vue-currency-input": "^2.0.0-rc.2",
+    "vue-debounce": "^3.0.1",
     "vue-i18n": "^9.1.6",
     "vue-password": "^3.0.0",
     "vue-router": "^4.0.0-0",
@@ -68,7 +71,7 @@
     "eslint": "^7.28.0",
     "eslint-plugin-vue": "^7.11.1",
     "geckodriver": "^2.0.4",
-    "nightwatch": "^1.7.3",
+    "nightwatch": "^1.7.11",
     "typescript": "~4.1.5",
     "vue-cli-plugin-i18n": "~2.1.1"
   },

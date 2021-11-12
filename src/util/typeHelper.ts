@@ -79,6 +79,10 @@ export class Helper{
         return Address.createFromRawAddress(address);
     }
 
+    static checkAddressNetwork(address: Address, networkType: NetworkType){
+        return address.networkType === networkType;
+    }
+
     static getMosaicSupplyType(): typeof MosaicSupplyType{
         return MosaicSupplyType;
     }
@@ -132,7 +136,7 @@ export class Helper{
           }).format(date);
       }
 
-      static convertDisplayDateTimeFormatShort(dateTimeJSON: string): string {
+      static convertDisplayDateTimeFormat24(dateTimeJSON: string): string {
         const date = new Date(dateTimeJSON);
     
         return new Intl.DateTimeFormat('default', {

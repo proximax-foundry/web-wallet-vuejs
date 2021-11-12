@@ -123,12 +123,12 @@ export default{
         }
 
         let blockDifference = namespaces[i].endHeight - currentBlockHeight;
-        let blockTargetTimeByDay = (60 / blockTargetTime) * 60 * 24;
-        let blockTargetTimeByHour = (60 / blockTargetTime) * 60;
+        let blockTargetTimeByDay = Math.floor((60 * 60 * 24) / blockTargetTime);
+        let blockTargetTimeByHour = Math.floor((60 * 60) / blockTargetTime);
         let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
         let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
         let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
-        let expiryDate = Helper.convertDisplayDateTimeFormatShort(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
+        let expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
         let data = {
           i: i,
           idHex: namespaces[i].idHex,

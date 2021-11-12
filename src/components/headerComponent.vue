@@ -32,7 +32,7 @@
             </div>
           </div>
           <div class="w-12 md:w-16 flex flex-row items-center left-gray-line md:hidden">
-            <div class="text-center w-full h-6">
+            <div class="text-center w-full h-6" @mouseover="hoverOverNavigation" @mouseout="hoverOutNavigation">
               <img src="@/assets/img/icon-menu.svg" class="h-4 w-4 opacity-80 hover:opacity-100 inline-block cursor-pointer" @click="toggleSidebar">
             </div>
           </div>
@@ -79,7 +79,7 @@
 </template>
 
 <script> 
-import { computed, defineComponent, getCurrentInstance, ref, watch } from "vue";
+import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { useRouter } from "vue-router";
@@ -117,6 +117,9 @@ export default defineComponent({
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const router = useRouter();
+
+    const navigationSideBar = inject('navigationSideBar');
+
     const notificationMessage = ref('');
     const notificationType = ref('noti');
 
@@ -251,14 +254,16 @@ export default defineComponent({
       }
     }
 
-    const isToggleSidebar = ref(false);
     const toggleSidebar = () => {
-      isToggleSidebar.value = !isToggleSidebar.value;
-      if(isToggleSidebar.value){
-        emitter.emit('OPEN_NAVI_BAR');
-      }else{
-        emitter.emit('CLOSE_NAVI_BAR');
-      }
+      navigationSideBar.isOpen = !navigationSideBar.isOpen;
+    }
+
+    const hoverOverNavigation = () => {
+      navigationSideBar.inNavi = true;
+    }
+
+    const hoverOutNavigation = () => {
+      navigationSideBar.inNavi = false;
     }
 
     doLogin();
@@ -469,7 +474,9 @@ export default defineComponent({
       chainAPIEndpoint,
       chainsNetworkOption,
       currentNativeTokenName,
-      listener
+      listener,
+      hoverOverNavigation,
+      hoverOutNavigation,
     };
   },
   created() {

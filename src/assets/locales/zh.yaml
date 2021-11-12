@@ -59,7 +59,6 @@ createprivatekeywallet:
   title: "恢复您现有的ProximaX 天狼星钱包，从其他服务中导入私钥，或者现在就创建一个新的钱包!"
   privatekey: "私密密钥"
   invalidprivatekey: "私钥无效"
-  swaptitle: "如果你想用这个私钥进行交换，请勾选此框。"
 createsuccessful: 
   congratz: "恭喜!"
   congratztext: "您的钱包已成功创建"
@@ -318,6 +317,7 @@ dashboard:
   alias: "别名"
   quantity: "数量"
 transfer: 
+  recipientPlaceholder: "Recipient / Namespace"
   maketransaction: "进行交易"
   cosigner: "共同签署人"
   nocosigner: "这个钱包里没有合格的共同签署人"

@@ -10,10 +10,6 @@
       <fieldset class="w-full">
         <div class="error error_box mb-2" v-if="err!=''">{{ err }}</div>
         <PasswordInput :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" v-model="privKey" class="ml-1" />
-        <label class="inline-flex items-center mb-5">
-            <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="nis1Swap">
-          <span class="ml-2 cursor-pointer">{{$t('createprivatekeywallet.swaptitle')}}</span>
-        </label>
         <TextInput :placeholder="$t('swap.accountname')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
         <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
         <div class="mt-10">
@@ -48,7 +44,6 @@ export default {
   setup(){
     const {t} = useI18n();
     const err = ref(false);
-    const nis1Swap = ref(false);
     const privKey = ref("");
     const accountName = ref("");
     const walletPassword = ref("");
@@ -82,10 +77,11 @@ export default {
             let password = WalletUtils.createPassword(walletPassword.value);
             const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, privKey.value, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
             let walletAccount = new WalletAccount(accountName.value, account.publicKey, wallet.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
-            if(nis1Swap.value == true){
-              const Nis1 = WalletUtils.createNis1AccountWithPrivateKey(privKey.value);
-              walletAccount.nis1Account = new nis1Account(Nis1.address, Nis1.publicKey);
-            } 
+            // code for NIS 1 checking
+            // if(nis1Swap.value == true){
+            //   const Nis1 = WalletUtils.createNis1AccountWithPrivateKey(privKey.value);
+            //   walletAccount.nis1Account = new nis1Account(Nis1.address, Nis1.publicKey);
+            // } 
             walletState.currentLoggedInWallet.accounts.push(walletAccount);
             walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
             router.push({ name: "ViewAccountCreated", params: {publicKey: account.publicKey, privateKey: privKey.value, address: wallet.address.plain(), name: accountName.value }});
@@ -102,7 +98,6 @@ export default {
       accountName,
       walletPassword,
       privKey,
-      nis1Swap,
       showPasswdError,
       disableCreate,
       walletName
