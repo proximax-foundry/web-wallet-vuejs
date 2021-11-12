@@ -1,6 +1,6 @@
 <template>
   <header>
-    <div class="header-height flex items-stretch md:pr-2" v-if="loginStatus">
+    <div class="header-height flex items-stretch md:pr-2 bg-gray-50" v-if="loginStatus">
       <div class="header-height flex-none self-center flex pt-3 md:pt-4 pl-2 sm:pl-4 bg-navy-primary logo-header">
         <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40"></router-link>
       </div>
@@ -11,12 +11,42 @@
       <div class="flex-grow"></div>
       <div class="flex-none">
         <div class="flex flex-row h-full">
-          <!-- <div class="w-5 sm:w-16 inline-block items-center relative">
-            <selectLanguageModal class="lang-mobile-placement-postlogin" />
-          </div> -->
+          <div class="flex flex-row items-center">
+            <div class="text-center w-full h-6 pr-10 mt-2 relative">
+              <div class="cursor-pointer text-blue-primary text-tsm" @mouseover="setHoverCreateToTrue" @mouseout="setHoverCreateToFalse">+ Create</div>
+              <div class="absolute z-20 w-60 text-left mt-2 bg-gray-50 shadow-sm rounded-md right-0 p-2 text-xs transition duration-200 block" v-if="isShowCreate" @mouseover="isShowCreate=true;isHoverCreatePanel=true;" @mouseout="hideCreatePanel">
+                <router-link :to="{ name: 'ViewServicesAssetsCreate'}" class="hover:bg-gray-200 p-2 block">
+                  <div>
+                  </div>
+                  <div>
+                    <div class="font-bold mb-1">Digital Asset</div>
+                    <div class="text-txs text-gray-400">Create your own unique token</div>
+                  </div>
+                </router-link>
+                <router-link :to="{ name: 'ViewServicesNamespaceCreate'}" class="hover:bg-gray-200 p-2 block">
+                  <div>
+
+                  </div>
+                  <div>
+                    <div class="font-bold mb-1">Namespace</div>
+                    <div class="text-txs text-gray-400">Create an on-chain unique space</div>
+                  </div>
+                </router-link>
+                <router-link :to="{ name: 'ViewAccountCreate'}" class="hover:bg-gray-200 p-2 block">
+                  <div>
+
+                  </div>
+                  <div>
+                    <div class="font-bold mb-1">Account</div>
+                    <div class="text-txs text-gray-400">Secure XPX in new account</div>
+                  </div>
+                </router-link>
+              </div>
+            </div>
+          </div>
           <div class="w-12 md:w-16 flex flex-row items-center left-gray-line">
-            <div class="text-center w-full h-6">
-              <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block h-7 w-3 md:h-7 md:w-5">
+            <div class="text-center w-full h-7">
+              <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block h-7 w-3 md:h-5 md:w-5">
             </div>
           </div>
           <div class="w-12 md:w-16 flex flex-row items-center left-gray-line">
@@ -36,14 +66,6 @@
               <img src="@/assets/img/icon-menu.svg" class="h-4 w-4 opacity-80 hover:opacity-100 inline-block cursor-pointer" @click="toggleSidebar">
             </div>
           </div>
-          <!-- <div class="w-17 text-center h-10 items-center mr-1">
-            <div class="text-xs inline-block mt-3" v-if="wideScreen">
-              <a @click="logout()">{{$t('Header.signout')}}</a>
-            </div>
-            <div class="inline-block mt-2" v-else>
-              <font-awesome-icon icon="sign-out-alt" @click="logout()" class="text-blue-400 w-6 h-6 cursor-pointer ml-3"></font-awesome-icon>
-            </div>
-          </div> -->
         </div>
       </div>
     </div>
@@ -62,9 +84,6 @@
         <div class="text-center inline-block">
           <selectLanguageModal />
         </div>
-        <!-- <div class="select mb-3 inline-block">
-          <Dropdown v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
-        </div> -->
       </div>
     </div>
     <div v-if="!wideScreen && !loginStatus" class="bg-gray-200 py-1 text-center">
@@ -117,6 +136,30 @@ export default defineComponent({
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const router = useRouter();
+
+    const isHoverCreate = ref(false);
+    const isShowCreate = ref(false);
+    const isHoverCreatePanel = ref(false);
+    const setHoverCreateToTrue = () => {
+      isHoverCreate.value = true;
+      isShowCreate.value = true;
+    }
+    const setHoverCreateToFalse = () => {
+      isHoverCreate.value = false;
+      setTimeout(() => {
+        if(!isHoverCreatePanel.value && !isHoverCreate.value){
+          isShowCreate.value = false;
+        }
+      }, 100);
+    }
+    const hideCreatePanel = () => {
+      isHoverCreatePanel.value = false;
+      setTimeout(() => {
+        if(!isHoverCreate.value && !isHoverCreatePanel.value){
+          isShowCreate.value = false;
+        }
+      }, 100);
+    }
 
     const navigationSideBar = inject('navigationSideBar');
 
@@ -477,6 +520,12 @@ export default defineComponent({
       listener,
       hoverOverNavigation,
       hoverOutNavigation,
+      isHoverCreate,
+      isShowCreate,
+      setHoverCreateToTrue,
+      setHoverCreateToFalse,
+      hideCreatePanel,
+      isHoverCreatePanel,
     };
   },
   created() {

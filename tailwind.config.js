@@ -40,7 +40,7 @@ module.exports = {
           primary: '#444444'
         },
         blue:{
-          primary:'#585A80',
+          primary:'#007CFF',
           link: '#007CFF'
         },
         red:{
