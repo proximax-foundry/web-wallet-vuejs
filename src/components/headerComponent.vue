@@ -44,6 +44,36 @@
               </div>
             </div>
           </div>
+          <div class="w-12 md:w-16 flex flex-row items-center left-gray-line relative">
+            <div class="text-center w-full h-7" @mouseover="setHoverSupportToTrue" @mouseout="setHoverSupportToFalse">
+              <img src="@/assets/img/icon-support-contact.svg" class="opacity-80 hover:opacity-100 inline-block h-4 w-4 md:h-5 md:w-5">
+            </div>
+            <div class="absolute z-20 w-96 text-left mt-60 bg-gray-50 shadow-sm rounded-md right-0 p-2 text-tsm transition duration-200 block" v-if="isShowSupport" @mouseover="isShowSupport=true;isHoverSupportPanel=true;" @mouseout="hideSupportPanel">
+              <div class="font-bold p-2 text-txs">BEGINNER'S GUIDE</div>
+              <div class="grid grid-cols-2">
+                <div>
+                  <div class="p-2">
+                    <a class="mb-2 block text-blue-primary" href="#" target=_new>Getting Started<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <div class="text-txs h-10">Everything you need to know about the Sirius Wallet</div>
+                  </div>
+                  <div class="p-2">
+                    <a class="mb-2 block text-blue-primary" href="#" target=_new>What is Sirius Chain?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <div class="text-txs h-10">Start building apps on the ProximaX Sirius blockchain layer</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="p-2">
+                    <a class="mb-2 block text-blue-primary" href="#" target=_new>What is Namespace?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <div class="text-txs h-10">Create an on-chain unique place for your business and your assets</div>
+                  </div>
+                  <div class="p-2">
+                    <a class="mb-2 block text-blue-primary" href="#" target=_new>What is Asset?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <div class="text-txs h-10">Everything you need to know about the Sirius Wallet</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="w-12 md:w-16 flex flex-row items-center left-gray-line">
             <div class="text-center w-full h-7">
               <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block h-7 w-3 md:h-5 md:w-5">
@@ -157,6 +187,30 @@ export default defineComponent({
       setTimeout(() => {
         if(!isHoverCreate.value && !isHoverCreatePanel.value){
           isShowCreate.value = false;
+        }
+      }, 100);
+    }
+
+    const isHoverSupport = ref(false);
+    const isShowSupport = ref(false);
+    const isHoverSupportPanel = ref(false);
+    const setHoverSupportToTrue = () => {
+      isHoverSupport.value = true;
+      isShowSupport.value = true;
+    }
+    const setHoverSupportToFalse = () => {
+      isHoverSupport.value = false;
+      setTimeout(() => {
+        if(!isHoverSupportPanel.value && !isHoverSupport.value){
+          isShowSupport.value = false;
+        }
+      }, 100);
+    }
+    const hideSupportPanel = () => {
+      isHoverSupportPanel.value = false;
+      setTimeout(() => {
+        if(!isHoverSupport.value && !isHoverSupportPanel.value){
+          isShowSupport.value = false;
         }
       }, 100);
     }
@@ -526,6 +580,12 @@ export default defineComponent({
       setHoverCreateToFalse,
       hideCreatePanel,
       isHoverCreatePanel,
+      isHoverSupport,
+      isShowSupport,
+      setHoverSupportToTrue,
+      setHoverSupportToFalse,
+      hideSupportPanel,
+      isHoverSupportPanel,
     };
   },
   created() {
