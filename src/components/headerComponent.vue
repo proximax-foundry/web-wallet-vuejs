@@ -16,27 +16,28 @@
               <div class="cursor-pointer text-blue-primary text-tsm" @mouseover="setHoverCreateToTrue" @mouseout="setHoverCreateToFalse">+ Create</div>
               <div class="absolute z-20 w-60 text-left mt-2 bg-gray-50 shadow-sm rounded-md right-0 p-2 text-xs transition duration-200 block" v-if="isShowCreate" @mouseover="isShowCreate=true;isHoverCreatePanel=true;" @mouseout="hideCreatePanel">
                 <router-link :to="{ name: 'ViewServicesAssetsCreate'}" class="hover:bg-gray-200 p-2 block">
-                  <div>
+                  <div class="inline-block mr-2">
+                    <img src="@/assets/img/icon-header-asset.svg" class="">
                   </div>
-                  <div>
+                  <div class="inline-block">
                     <div class="font-bold mb-1">Digital Asset</div>
                     <div class="text-txs text-gray-400">Create your own unique token</div>
                   </div>
                 </router-link>
                 <router-link :to="{ name: 'ViewServicesNamespaceCreate'}" class="hover:bg-gray-200 p-2 block">
-                  <div>
-
+                  <div class="inline-block mr-2">
+                    <img src="@/assets/img/icon-header-namespace.svg" class="">
                   </div>
-                  <div>
+                  <div class="inline-block">
                     <div class="font-bold mb-1">Namespace</div>
                     <div class="text-txs text-gray-400">Create an on-chain unique space</div>
                   </div>
                 </router-link>
                 <router-link :to="{ name: 'ViewAccountCreate'}" class="hover:bg-gray-200 p-2 block">
-                  <div>
-
+                  <div class="inline-block mr-2">
+                    <img src="@/assets/img/icon-header-account.svg" class="">
                   </div>
-                  <div>
+                  <div class="inline-block">
                     <div class="font-bold mb-1">Account</div>
                     <div class="text-txs text-gray-400">Secure XPX in new account</div>
                   </div>
@@ -45,10 +46,10 @@
             </div>
           </div>
           <div class="w-12 md:w-16 flex flex-row items-center left-gray-line relative">
-            <div class="text-center w-full h-7" @mouseover="setHoverSupportToTrue" @mouseout="setHoverSupportToFalse">
+            <div class="text-center w-full h-7 cursor-pointer" @mouseover="setHoverSupportToTrue" @mouseout="setHoverSupportToFalse">
               <img src="@/assets/img/icon-support-contact.svg" class="opacity-80 hover:opacity-100 inline-block h-4 w-4 md:h-5 md:w-5">
             </div>
-            <div class="absolute z-20 w-96 text-left mt-60 bg-gray-50 shadow-sm rounded-md right-0 p-2 text-tsm transition duration-200 block" v-if="isShowSupport" @mouseover="isShowSupport=true;isHoverSupportPanel=true;" @mouseout="hideSupportPanel">
+            <div class="absolute z-20 w-96 text-left bg-gray-50 shadow-sm rounded-md right-0 p-2 text-tsm transition duration-200 block" style="top: 60px" v-if="isShowSupport" @mouseover="isShowSupport=true;isHoverSupportPanel=true;" @mouseout="hideSupportPanel">
               <div class="font-bold p-2 text-txs">BEGINNER'S GUIDE</div>
               <div class="grid grid-cols-2">
                 <div>
@@ -71,6 +72,9 @@
                     <div class="text-txs h-10">Everything you need to know about the Sirius Wallet</div>
                   </div>
                 </div>
+              </div>
+              <div class="w-full p-2 pt-3 border-t border-gray-100">
+                <a href="#" target=_new class="text-xs text-blue-primary">Contact our support team</a>
               </div>
             </div>
           </div>
