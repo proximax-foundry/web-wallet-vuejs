@@ -54,6 +54,7 @@
                 <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Asset Details</router-link>
                 <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Modify Supply</router-link>
                 <router-link :to="{ name: 'ViewServicesAssetsLinkToNamespace' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Linked to namespace</router-link>
+                <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>View in Explorer<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
               </div>
             </div>
           </div>
@@ -126,6 +127,7 @@ export default{
             supply: Helper.toCurrencyFormat(assets[i].getExactSupply(), assets[i].divisibility),
             linkedNamespace: namespaceAlias,
             height: assets[i].height,
+            explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
           };
           formattedAssets.push(data);
           isMenuShow.value[i] = false;
