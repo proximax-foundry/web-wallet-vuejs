@@ -2,31 +2,27 @@
  <div class="container mx-auto md:grid md:grid-cols-2 md:mt-10 lg:px-20 xl:px-40 ">
     <IntroTextComponent />
     <div class="md:col-span-1 bg-white mx-5 md:mx-0 px-30 pt-1 md:pt-0 rounded-md">
-      <router-link v-if="!newWallet" :to="{ name: 'ViewWalletCreateSelection' }" class="text-xs m-2 text-blue-link items-center flex"><img src="@/assets/img/chevron_left.svg" class="w-5 inline-block">Back</router-link>
+      <router-link v-if="!newWallet" :to="{ name: 'ViewWalletCreateSelection' }" class="text-xs m-2 text-blue-primary items-center flex"><img src="@/assets/img/chevron_left.svg" class="w-5 inline-block">Back</router-link>
        <form
       v-if="!newWallet"
       @submit.prevent="createWallet"
     >
-      <div class="text-sm text-center mt-20">Create Wallet</div>
-      <div class="text-xs text-center text-blue-link mb-5">FROM A PRIVATE KEY</div>
+      <div class="text-sm text-center mt-20 font-semibold">Create Wallet</div>
+      <div class="text-xxs text-center text-blue-primary mb-5">FROM A PRIVATE KEY</div>
         <p class = 'w-9/12 ml-auto mr-auto text-xs text-center'>Restore your existing ProximaX Sirius Wallet, import a private key from another service or create a new wallet.</p>
-      <div class="mt-4 w-7/12 ml-auto mr-auto">
-          <div class="error error_box" v-if="err!=''">{{ err }}</div>
+      <div class="mt-4 w-8/12 ml-auto mr-auto">
+        <div class="error error_box" v-if="err!=''">{{ err }}</div>
+      </div>
+      <SelectNetworkInput />
+      <div class="mt-4 w-8/12 ml-auto mr-auto">
           <PasswordInput :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" v-model="privateKeyInput"  />
-          <!-- <label class="inline-flex items-center mb-5">
-              <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="nis1Swap">
-            <span class="ml-2 cursor-pointer">{{$t('createprivatekeywallet.swaptitle')}}</span>
-          </label> -->
           <TextInput :placeholder="$t('createwallet.walletname')" :errorMessage="$t('createwallet.inputwalletname')"  v-model="walletName" icon="wallet" />
-          
           <PasswordInput :placeholder="$t('createwallet.inputpassword')" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
           <PasswordInput  :placeholder="$t('createwallet.confirmpassword')" :errorMessage="$t('createwallet.confirmpassword')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd" />
-          <div class = 'text-center text-xs'>Current Network: </div>
-          <div class = 'text-center'>{{networkState.chainNetworkName}}</div>
         </div>
-        <button type="submit" class="text-center mt-5 font-bold default-btn block ml-auto mr-auto w-7/12 disabled:opacity-50" :disabled="disableCreate">{{$t('welcome.create')}}</button>
-        <div class ='mt-12 text-center text-xs mt-6 mb-1'>Already have Sirius wallet account?</div>
-        <div class ="text-center  text-xs text-blue-link"><router-link :to="{ name: 'Home' }">Sign in here ></router-link></div>
+        <button type="submit" class="text-center mt-5 font-bold blue-btn py-3 block ml-auto mr-auto w-8/12 disabled:opacity-50" :disabled="disableCreate">{{$t('welcome.create')}}</button>
+        <div class ='mt-12 text-center text-xs mt-6 mb-1 '>Already have Sirius wallet account?</div>
+        <div class ="text-center  text-xs text-blue-primary"><router-link :to="{ name: 'Home' }">Sign in here ></router-link></div>
         <div class = 'h-20'></div>
     </form>
       <div v-else>
@@ -111,12 +107,14 @@ import { networkState } from "@/state/networkState";
 import { walletState } from "@/state/walletState";
 import {useI18n} from 'vue-i18n'
 import IntroTextComponent from '@/components/IntroTextComponent.vue'
+import SelectNetworkInput from '@/components/SelectNetworkInput.vue';
 export default defineComponent({
   name: 'ViewWalletCreatePrivateKey',
   components: {
     TextInput,
     PasswordInput,
-    IntroTextComponent
+    IntroTextComponent,
+    SelectNetworkInput
   },
   data() {
     return {

@@ -5,8 +5,8 @@
         <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
       </div> -->
       <input  :type="inputType" :disabled="disabled == true" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="text-placeholder text-left ml-2" :placeholder="placeholder" @click="clickInputPassword()" @blur="blurInputPassword()" autocomplete="off">
-        <font-awesome-icon icon="eye" class="text-gray-400 relative cursor-pointer text-right mr-2" @click="hideShowPassword();" v-if="!showPassword"></font-awesome-icon>
-        <font-awesome-icon icon="eye-slash" class="text-gray-400 relative cursor-pointer text-right mr-2" @click="hideShowPassword();" v-if="showPassword"></font-awesome-icon>
+        <font-awesome-icon icon="eye" class="text-gray-800 relative cursor-pointer text-right mr-2" @click="hideShowPassword();" v-if="!showPassword"></font-awesome-icon>
+        <font-awesome-icon icon="eye-slash" class="text-gray-800 relative cursor-pointer text-right mr-2" @click="hideShowPassword();" v-if="showPassword"></font-awesome-icon>
     </div>
     <div class="h-3 mb-2 "><div class="error error-password text-left" v-if="pswdErr || showError">{{ errorMessage }}</div></div>
   </div>

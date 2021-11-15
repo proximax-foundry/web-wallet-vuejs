@@ -7,18 +7,21 @@
       v-if="!newWallet"
       @submit.prevent="createWallet"
       >
-      <div class="text-sm text-center mt-20 mb-6">Create Wallet</div>
-      <div class="w-7/12 ml-auto mr-auto">
+      <div class="text-sm text-center mt-20 mb-6 font-semibold">Create Wallet</div>
+      <div class='w-8/12 ml-auto mr-auto'>
         <div class="error error_box " v-if="err!=''">{{ err }}</div>
+      </div>
+      <SelectNetworkInput />
+      <div class="w-8/12 ml-auto mr-auto mt-5">
         <TextInput  placeholder="Name your wallet" :errorMessage="$t('createwallet.inputwalletname')" v-model="walletName" icon="wallet" />
         <PasswordInput placeholder="Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
         <PasswordInput placeholder="Confirm Password" :errorMessage="$t('createwallet.doesntmatch')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd"  />
-        <div class = 'mt-6 text-center text-xs'>Current Network: </div>
-        <div class = 'text-center'>{{networkState.chainNetworkName}}</div>
+        <!-- <div class = 'mt-6 text-center text-xs'>Current Network: </div>
+        <div class = 'text-center'>{{networkState.chainNetworkName}}</div> -->
       </div>
-      <button type="submit" class="text-center mt-5 font-bold default-btn block ml-auto mr-auto w-7/12 disabled:opacity-50" :disabled="disableCreate">{{$t('welcome.create')}}</button>
+      <button type="submit" class="text-center mt-5 font-bold blue-btn py-3 block ml-auto mr-auto w-8/12 disabled:opacity-50" :disabled="disableCreate">{{$t('welcome.create')}}</button>
        
-        <div class ='mt-12 text-center text-xs mt-6 mb-1'>Already have Sirius wallet account?</div>
+        <div class ='mt-12 text-center text-xs mt-6 mb-1 '>Already have Sirius wallet account?</div>
         <div class ="text-center  text-xs text-blue-link"><router-link :to="{ name: 'Home' }">Sign in here ></router-link></div>
       <div class = 'h-20'></div>
       </form>
@@ -107,13 +110,14 @@ import { networkState } from "@/state/networkState";
 import { walletState } from "@/state/walletState";
 import {useI18n} from 'vue-i18n'
 import IntroTextComponent from '@/components/IntroTextComponent.vue'
-
+import SelectNetworkInput from '@/components/SelectNetworkInput.vue';
 export default defineComponent({
   name: 'ViewWalletCreate',
   components: {
     IntroTextComponent,
     TextInput,
-    PasswordInput
+    PasswordInput,
+    SelectNetworkInput
   },
   data() {
     return {

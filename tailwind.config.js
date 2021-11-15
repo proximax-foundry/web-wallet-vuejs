@@ -33,7 +33,8 @@ module.exports = {
         '18': '90px',
         '5/10' : '50%',
         '6/10' : '60%',
-        'popup' : '500px'
+        'popup' : '500px',
+        '112'  : '28rem'
       },
       colors:{
         gray:{

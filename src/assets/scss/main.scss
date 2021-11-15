@@ -70,7 +70,7 @@ body{
 }
 
 .blue-btn{
-  @apply bg-blue-primary text-sm text-white font-bold rounded-3xl transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
+  @apply bg-blue-primary text-xs text-white font-bold rounded-sm transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
 }
 
 .gray-btn{
@@ -202,7 +202,7 @@ body{
 }
 
 .text-placeholder{
-  @apply flex-grow p-1 text-xs placeholder-gray-500 focus:outline-none;
+  @apply flex-grow p-1 text-xs placeholder-gray-800 focus:outline-none;
 }
 
 .drop-shadow{

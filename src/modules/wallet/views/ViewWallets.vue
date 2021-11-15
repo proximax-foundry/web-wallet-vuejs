@@ -1,8 +1,8 @@
 <template>
-  <div class="container mx-auto text-center w-60 sm:w-80">
-    <h1 class="big-title">{{$t('Header.walletTitle')}}</h1>
-    <div class='my-3'>
-      <p class="text-tsm mx-3 sm:text-tsm">{{$t('wallets.description', {network: networkState.chainNetworkName}) }}</p>
+  <div class="container mx-auto text-center  w-80 md:w-112">
+    <h1 class="text-white text-xxl ">{{$t('Header.walletTitle')}}</h1>
+    <div class='mt-12'>
+      <p class="text-tsm mx-3 sm:text-tsm text-white">{{$t('wallets.description') }}.</p>
       <div v-if="wallets.length == 0" class="text-center h4 my-2">
         {{$t('wallets.walletvalidation')}}
       </div>
@@ -12,7 +12,7 @@
     </div>
     <div class="mt-8 text-center w-full" v-if="!walletState.currentLoggedInWallet">
       <div class="inline-block">
-        <router-link :to="{ name : 'Home'}" class="flex items-center text-xs text-blue-link"><img src="@/assets/img/chevron_left.svg" class="w-5 inline-block">Back to Home</router-link>
+        <router-link :to="{ name : 'Home'}" class="flex items-center text-xs blue-btn py-3 px-8 ">Back to Home</router-link>
       </div>
     </div>
   </div>
