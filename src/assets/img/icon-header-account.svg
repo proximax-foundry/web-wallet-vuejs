@@ -1,0 +1,5 @@
+<svg id="account_balance_wallet_black_24dp" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <path id="Path_3716" data-name="Path 3716" d="M0,0H24V24H0Z" fill="none"/>
+  <path id="Path_3717" data-name="Path 3717" d="M21,7.28V5a2.006,2.006,0,0,0-2-2H5A2,2,0,0,0,3,5V19a2,2,0,0,0,2,2H19a2.006,2.006,0,0,0,2-2V16.72A2,2,0,0,0,22,15V9a2,2,0,0,0-1-1.72ZM20,9v6H13V9ZM5,19V5H19V7H13a2.006,2.006,0,0,0-2,2v6a2.006,2.006,0,0,0,2,2h6v2Z" fill="#007cff"/>
+  <circle id="Ellipse_50" data-name="Ellipse 50" cx="1.5" cy="1.5" r="1.5" transform="translate(14.5 10.5)" fill="#007cff"/>
+</svg>

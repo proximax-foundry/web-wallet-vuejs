@@ -3,6 +3,16 @@
     <div class="px-2 sm:px-10 bg-gray-200 pb-8 pt-5">
       <div class="md:grid md:grid-cols-4">
         <div class="pr-2">
+          <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-4 rounded-lg balance-div flex flex-col justify-between bg-navy-primary text-white">
+            <div>
+              <div class="mt-5 text-gray-300 text-txs">CURRENT BALANCE</div>
+              <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
+              <div class="text-gray-300 text-txs mt-1">Estimate US$ {{ currencyConvert }}</div>
+            </div>
+            <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Send XPX</div></router-link>
+          </div>
+        </div>
+        <div class="px-2">
           <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div">
             <div class="absolute top-0 px-2 py-1 default-account-header text-xxs text-gray-400 pappflex items-center rounded-b-sm"><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 mr-1 inline-block">DEFAULT ACCOUNT</div>
             <div class="my-5 mt-6 flex items-center text-xs xl:text-sm cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">My Personal Account <img src="@/modules/dashboard/img/icon-arrow-right.svg" class="w-2 h-2 ml-4 inline-block"></div>
@@ -15,16 +25,6 @@
               <div class="my-3 flex items-center"><a href="https://bctestnetfaucet.xpxsirius.io/#/" target=_new><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span class="text-xs" style="margin-top: 1px">Request XPX</span></a></div>
               <div class="my-3 flex items-center"><img src="@/modules/dashboard/img/icon-key.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Convert to Multisig</div></div>
             </div>
-          </div>
-        </div>
-        <div class="px-2">
-          <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-4 rounded-lg balance-div flex flex-col justify-between bg-navy-primary text-white">
-            <div>
-              <div class="mt-5 text-gray-300 text-txs">CURRENT BALANCE</div>
-              <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
-              <div class="text-gray-300 text-txs mt-1">Estimate US$ {{ currencyConvert }}</div>
-            </div>
-            <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Send XPX</div></router-link>
           </div>
         </div>
         <div class="col-span-2 pl-2">
