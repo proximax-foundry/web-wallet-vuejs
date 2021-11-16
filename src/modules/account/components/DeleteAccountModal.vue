@@ -1,20 +1,20 @@
 <template>
-    <div @click=" toggleModal = !toggleModal" class='flex' >
+    <div @click=" toggleModal = !toggleModal" class='flex ml-auto' >
       <img src='@/modules/account/img/delete-icon.svg' class='mt-3  w-3 h-3 cursor-pointer'>
-      <div class = 'pt-2.5 text-xs text-red-500 cursor-pointer ml-1'>Delete This Account</div>
+      <div class = 'pt-2.5 text-xs text-red-500 cursor-pointer ml-1 font-semibold'>Delete This Account</div>
     </div>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
     >
-      <div v-if="toggleModal" class="popup-outer absolute flex z-50">
+      <div v-if="toggleModal" class="popup-outer-lang absolute flex z-50">
         <div class="modal-popup-box ">
           <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
-            <div class= 'text-center mt-2 text-xs font-semibold'>Are you sure you want to delete this account?</div>
-            <div class ='text-gray-300 text-center text-xs mt-2'>For security, this is required before completely deleting your account.</div>
+            <div class= 'ml-auto mr-auto mt-2 text-xs  font-semibold' style='width:62%'>Are you sure you want to delete this account?</div>
+            <div class ='text-red-700  text-center text-txs mt-2'>For security purpose, this is required before completely deleting your account.</div>
             <PasswordInput class = 'mt-3' v-model= 'walletPasswd' :placeholder="'Password'"/>
-            <div @click="deleteAccount()"  class = 'border border-red-600 cursor-pointer text-xs text-red-600 py-2 text-center ml-auto mr-auto w-7/12'>Confirm Deletion</div>
-            <div class= 'text-center cursor-pointer text-xs text-blue-link mt-2' @click="toggleModal = !toggleModal">Cancel</div>
+            <div @click="deleteAccount()"  class = 'rounded-md bg-red-700 cursor-pointer text-xs text-white font-semibold py-2 text-center ml-auto mr-auto w-7/12'>Confirm Deletion</div>
+            <div class= 'text-center cursor-pointer font-semibold text-xs text-blue-link mt-2' @click="toggleModal = !toggleModal">Cancel</div>
             <!-- <div class="error error_box" v-if="err!=''">{{ err }}</div>
             <div class="mt-10 mb-5"><div class="font-bold text-xl text-gray-900">{{ name }}</div> <span class="text-lg text-gray-700">{{$t('deletewallet.deletemessage')}}</span></div>
             <div class="flex justify-between p-4 rounded-xl bg-yellow-100 mb-4">
@@ -40,7 +40,7 @@
         
       </div>
     </transition>
-    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-60 bg-gray-100"></div>
+    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-60 bg-gray-100 z-20"></div>
 </template>
 <script>
 import PasswordInput from '@/components/PasswordInput.vue';

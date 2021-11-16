@@ -70,7 +70,7 @@ body{
 }
 
 .blue-btn{
-  @apply bg-blue-primary text-xs text-white font-bold rounded-sm transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
+  @apply bg-blue-primary text-xs text-white font-bold rounded-md transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
 }
 
 .gray-btn{

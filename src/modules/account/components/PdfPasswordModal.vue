@@ -1,5 +1,5 @@
 <template>
-    <img src='@/modules/account/img/download-icon.svg' class="ml-2 w-5 h-5 text-blue-link cursor-pointer " @click=" toggleModal = !toggleModal">
+    <div  class=" blue-btn cursor-pointer py-3 px-3 " @click=" toggleModal = !toggleModal">Download Wallet Paper</div>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -8,14 +8,14 @@
         <div class="modal-popup-box ">
           <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
             <div class= 'text-center mt-2 text-xs font-semibold'>Enter Password</div>
-            <div class ='text-gray-300 text-center text-xs mt-2'>For security, this is required before downloading your paper wallet.</div>
+           <!--  <div class ='text-gray-300 text-center text-xs mt-2'>For security, this is required before downloading your paper wallet.</div> -->
             <PasswordInput class = 'mt-3' v-model= 'walletPasswd' :placeholder="'Password'"/>
-            <div @click="verifyWalletPwWalletPaper()"  class = 'default-btn cursor-pointer text-center ml-auto mr-auto w-7/12'>Confirm</div>
-            <div class= 'text-center cursor-pointer text-xs text-blue-link mt-2' @click="toggleModal = !toggleModal">Cancel</div>
+            <div @click="verifyWalletPwWalletPaper()"  class = 'blue-btn font-semibold py-2 cursor-pointer text-center ml-auto mr-auto w-7/12'>Confirm</div>
+            <div class= 'text-center cursor-pointer text-xs text-blue-link mt-2 font-semibold' @click="toggleModal = !toggleModal">Cancel</div>
           </div>
       </div>
     </transition>
-    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-60 bg-gray-100"></div>
+    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-60 z-20 bg-gray-100"></div>
 </template>
 <script>
 import PasswordInput from '@/components/PasswordInput.vue';
