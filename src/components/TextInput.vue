@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class=" bg-white py-2 border">
-      <input :disabled="disabled" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="ml-2 text-placeholder bg-white w-full" :placeholder="placeholder" @click="clickInputText()" @focus="focusInputText()" @blur="blurInputText()">
+      <input :disabled="disabled" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="ml-2 text-placeholder bg-white " :placeholder="placeholder" @click="clickInputText()" @focus="focusInputText()" @blur="blurInputText()">
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
   </div>

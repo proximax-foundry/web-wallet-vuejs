@@ -1,11 +1,13 @@
 <template>
+<div>
   <div class="container mx-auto md:grid md:grid-cols-2 md:mt-10 lg:px-20 xl:px-40 ">
     <IntroTextComponent />
     <div class="md:col-span-1 bg-white mx-5 md:mx-0 px-30 pt-1 md:pt-0 rounded-md">
-      <div class = 'text-center mt-16 text-gray-700 text-lg'>Sign In</div>
-      <div class="px-5 text-gray-700 md:text-lg text-tsm">
+      <div class = 'text-center font-semibold mt-16 text-gray-700 text-lg'>Sign In</div>
+      <div class="px-5 text-gray-700 md:text-lg text-tsm mt-4">
         <SignInComponent />
       </div>
+      <div v-if ='currentNetwork == "Sirius Mainnet"'>
       <h2 class = 'my-10 ml-auto mr-auto'><span class = 'text-semibold'>or</span></h2>
       <div class="px-5 mt-4  text-center">
         <router-link :to="{ name: 'ViewHomeSignInSiriusID' }" >
@@ -14,17 +16,21 @@
           </div>
           </router-link>
       </div>
+      </div>
       <div class ='text-center text-xs mt-6 mb-1'>No Sirius wallet account yet?</div>
       <div class ="text-center  text-xs text-blue-link"><router-link :to="{ name: 'ViewWalletCreateSelection' }">Create Account Wallet ></router-link></div>
       <div class = 'h-16 '></div>
     </div>
   </div>
+</div>
 </template>
 
 <script>
 //import SignInSiriusIDModal from '@/modules/home/views/ViewHomeSignInSiriusID.vue'
 import SignInComponent from '@/modules/home/components/SignInComponent.vue'
 import IntroTextComponent from '@/components/IntroTextComponent.vue'
+import { networkState } from '@/state/networkState'
+import { computed } from 'vue';
 export default {
   name: 'Home',
   components: {
@@ -32,6 +38,14 @@ export default {
     SignInComponent,
     IntroTextComponent,
   },
+  setup(){
+    let currentNetwork = computed(()=>{
+      return networkState.chainNetworkName
+    })
+    return{
+      currentNetwork
+    }
+  }
 }
 </script>
 

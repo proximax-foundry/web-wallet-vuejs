@@ -103,20 +103,20 @@
         </div>
       </div>
     </div>
-    <div class="container mx-auto header-height flex items-stretch" v-else>
+    <div class="container mx-auto header-height flex items-stretch " v-else>
       <div class="flex-none self-center flex items-end ml-2 sm:ml-0">
-        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-proximax-sirius-wallet.svg" class="w-24 tsm:w-40"></router-link>
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40"></router-link>
       </div>
       <div class="flex-grow"></div>
       <div class="flex-none self-center header-menu">
         <div class="w-20 inline-block ml-2 sm:ml-0" v-if="wideScreen">
-          <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">{{$t('Header.home')}}</router-link>
+          <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block text-white">{{$t('Header.home')}}</router-link>
         </div>
         <div class="w-20 inline-block" v-if="wideScreen">
-          <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold">{{$t('Header.wallet')}}</router-link>
+          <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold text-white">{{$t('Header.wallet')}}</router-link>
         </div>
-        <div class="text-center inline-block">
-          <selectLanguageModal />
+        <div class="text-center inline-block text-white">
+          <selectLanguageModal :loginStatus="loginStatus"/>
         </div>
       </div>
     </div>
