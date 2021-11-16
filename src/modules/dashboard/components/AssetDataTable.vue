@@ -52,6 +52,8 @@
       <Column field="creator" header="CREATOR" style="width: 180px;">
         <template #body="{data}">
           <span class="uppercase font-bold text-txs">{{ data.owner == currentPublicKey ? 'yes': 'no'}}</span>
+          <img v-if="data.owner == currentPublicKey" src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer" v-tooltip.bottom="'<tiptitle>WALLET ADDRESS</tiptitle><tiptext>' + data.address + '</tiptext><tipbottom>MY PERSONAL ACCOUNT <img src=&quot;/icons/icon-personal-blue.png&quot;></tipbottom>'">
+          <img v-else src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer" v-tooltip.bottom="'<tiptitle>WALLET ADDRESS</tiptitle><tiptext>' + data.address + '</tiptext>'">
         </template>
       </Column>
       <Column field="height" header="BLOCK HEIGHT" style="width: 180px;">
@@ -91,6 +93,8 @@ import Column from 'primevue/column';
 import { Helper } from '@/util/typeHelper';
 import { networkState } from "@/state/networkState";
 import { WalletAccount } from '@/models/walletAccount';
+import Tooltip from 'primevue/tooltip';
+import { PublicAccount } from 'tsjs-xpx-chain-sdk';
 
 export default{
   components: { DataTable, Column },
@@ -99,6 +103,9 @@ export default{
     assets: Array,
     currentPublicKey: String,
     account: WalletAccount
+  },
+  directives: {
+    'tooltip': Tooltip
   },
 
   setup(props, context){
@@ -120,6 +127,9 @@ export default{
     const generateAssetDatatable = (assets, account) => {
       let formattedAssets = [];
 
+      // let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+      // let chainAPICall = new ChainAPICall(apiEndpoint);
+
       for(let i=0; i < assets.length; ++i){
         let namespaceAlias = [];
         let assetId = assets[i].idHex;
@@ -134,10 +144,14 @@ export default{
             namespaceAlias.push(aliasData);
           }
 
+          // let getAsset = await chainAPICall.assetAPI.getMosaic(assetId);
+          // console.log(getAsset)
+
           let data = {
             i: i,
             idHex: assetId,
             owner: assets[i].owner,
+            address: PublicAccount.createFromPublicKey(assets[i].owner, networkState.currentNetworkProfile.network.type).address.pretty(),
             amount: Helper.toCurrencyFormat(assets[i].getExactAmount(), assets[i].divisibility),
             supply: Helper.toCurrencyFormat(assets[i].getExactSupply(), assets[i].divisibility),
             linkedNamespace: namespaceAlias,
