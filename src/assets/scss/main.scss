@@ -614,6 +614,19 @@ body{
   padding: 4px 6px;
 }
 
+.p-tooltip-text > tipbottom{
+  display: block;
+  padding: 4px 6px;
+  @apply text-blue-primary uppercase;
+
+  img{
+    @apply inline-block relative;
+    height: 15px;
+    width: 15px;
+    top: -1px;
+  }
+}
+
 .p-tooltip.p-tooltip-left .p-tooltip-arrow {
   border-left-color: #383838;
 }
