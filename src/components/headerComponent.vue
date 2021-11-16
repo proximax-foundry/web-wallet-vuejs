@@ -74,7 +74,7 @@
                 </div>
               </div>
               <div class="w-full p-2 pt-3 border-t border-gray-100">
-                <a href="#" target=_new class="text-xs text-blue-primary">Contact our support team</a>
+                <a href="https://t.me/proximaxhelpdesk" target=_new class="text-xs text-blue-primary">Contact our support team</a>
               </div>
             </div>
           </div>
