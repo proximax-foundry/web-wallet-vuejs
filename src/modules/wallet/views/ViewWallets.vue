@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto text-center  w-80 md:w-112">
+  <div class="container mx-auto text-center  w-80 tileWidth" >
     <h1 class="text-white text-xxl ">{{$t('Header.walletTitle')}}</h1>
     <div class='mt-12'>
       <p class="text-tsm mx-3 sm:text-tsm text-white">{{$t('wallets.description') }}.</p>
@@ -57,3 +57,11 @@ export default {
   },
 }
 </script>
+<style lang="scss" scoped>
+.tileWidth{
+@media (min-width: 640px) { 
+  width: 28rem ;
+}
+}
+
+</style>

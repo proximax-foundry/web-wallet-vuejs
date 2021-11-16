@@ -14,7 +14,8 @@
   </div>
   <div class='relative' style='left:16.7%'>
   <div v-if='toggleSelection' class='absolute border border-t-0 w-8/12  z-50 bg-white'>
-    <div class='text-xxs pt-2 pl-2 pb-2'>SELECT WALLET</div>
+    <div v-if='wallets.length>0' class='text-xxs pt-2 pl-2 pb-2'>SELECT WALLET</div>
+    <div v-else class='text-xxs pt-2 pl-2 pb-2'>The list is empty.</div>
     <div v-for='(items,index) in wallets' :key="items" class='px-2 py-1'>
         <div class='flex'>
             <img src='@/assets/img/icon-cube.svg' class='h-5 w-5 mt-auto mb-auto'>
