@@ -4,8 +4,17 @@
       <div class="header-height flex-none self-center flex pt-3 md:pt-4 pl-2 sm:pl-4 bg-navy-primary logo-header">
         <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40"></router-link>
       </div>
-      <div class="flex-none md:flex items-center md:ml-10 hidden md:visible">
-        <router-link :to="{name : 'ViewDashboard'}"><img src="@/assets/img/icon-home.svg" class="h-7 w-7 inline-block"></router-link>
+      <div class="flex-none md:flex items-center w-16 hidden md:visible right-gray-line">
+        <div class="text-center w-full h-7">
+          <router-link :to="{name : 'ViewDashboard'}"><img src="@/assets/img/icon-home.svg" class="h-7 w-7 inline-block"></router-link>
+        </div>
+      </div>
+      <div class="flex-none md:flex items-center md:ml-4 hidden md:visible">
+        <img src="@/assets/img/icon-blockheight.svg" class="h-10 w-10 inline-block">
+        <div class="ml-3">
+          <div class="uppercase text-txs text-gray-400">block height</div>
+          <div class="text-gray-800 text-md font-bold mt-1">{{ blockHeight }}</div>
+        </div>
       </div>
 
       <div class="flex-grow"></div>
@@ -74,7 +83,7 @@
                 </div>
               </div>
               <div class="w-full p-2 pt-3 border-t border-gray-100">
-                <a href="#" target=_new class="text-xs text-blue-primary">Contact our support team</a>
+                <a href="https://t.me/proximaxhelpdesk" target=_new class="text-xs text-blue-primary">Contact our support team</a>
               </div>
             </div>
           </div>
@@ -170,6 +179,8 @@ export default defineComponent({
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const router = useRouter();
+
+    const blockHeight = computed(() => networkState.currentNetworkProfileConfig.chainHeight);
 
     const isHoverCreate = ref(false);
     const isShowCreate = ref(false);
@@ -590,6 +601,7 @@ export default defineComponent({
       setHoverSupportToFalse,
       hideSupportPanel,
       isHoverSupportPanel,
+      blockHeight,
     };
   },
   created() {
@@ -619,6 +631,10 @@ export default defineComponent({
 
 .left-gray-line{
   border-left: 1px solid #dedede;
+}
+
+.right-gray-line{
+  border-right: 1px solid #dedede;
 }
 
 .gray-bar{

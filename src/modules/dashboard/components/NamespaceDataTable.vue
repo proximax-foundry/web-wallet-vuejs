@@ -50,6 +50,7 @@
               <div role="none" class="my-2">
                 <router-link :to="{ name: 'ViewServicesNamespaceCreate' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Namespace Details</router-link>
                 <router-link :to="{ name: 'ViewServicesNamespaceExtend' }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Extend Duration</router-link>
+                <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>View in Explorer<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
               </div>
             </div>
           </div>
@@ -139,6 +140,7 @@ export default{
           expiring: (blockDifference < (blockTargetTimeByDay * 14)),
           expiryRelative: currentBlockHeight?relativeTime(expiryDay, expiryHour, expiryMin):'',
           expiry: currentBlockHeight?expiryDate:'',
+          explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].idHex
         };
         formattedNamespaces.push(data);
         isMenuShow.value[i] = false;

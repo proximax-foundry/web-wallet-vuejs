@@ -20,9 +20,23 @@
       </Column>
       <Column field="linkedNamespace" header="NAMESPACE" :style="{ width: '180px' }">
         <template #body="{data}">
-          <div v-for="namespace, item in data.linkedNamespace" :key="item">
-            <div class="mb-1 text-txs">{{namespace.name}}</div>
+          <div v-if="data.linkedNamespace.length > 0">
+            <div v-if="data.linkedNamespace.length == 1">
+              <div v-for="namespace, item in data.linkedNamespace" :key="item">
+                <div class="mb-1 text-txs">{{ namespace.name }}</div>
+              </div>
+            </div>
+            <div v-else>
+              
+                <div class="mb-1 text-txs">{{ data.linkedNamespace[0].name }} <div class="inline-block border border-gray-300 p-1 rounded-sm ml-2 cursor-pointer" @click="showNsList(data.i)" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">+ <span class="font-bold">{{ data.linkedNamespace.length -1 }}</span></div></div>
+                <div class="border p-3 w-28 border-gray-100 shadow-sm absolute bg-white" v-if="isNsListShow[data.i]" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">
+                  <div v-for="namespace, item in data.linkedNamespace.slice(1)" :key="item">
+                    {{ namespace.name }}
+                  </div>
+                </div>
+              </div>
           </div>
+          <div v-else>no linked namespace</div>
         </template>
       </Column>
       <Column field="supply" header="SUPPLY" :style="{ width: '180px' }">
@@ -38,6 +52,8 @@
       <Column field="creator" header="CREATOR" style="width: 180px;">
         <template #body="{data}">
           <span class="uppercase font-bold text-txs">{{ data.owner == currentPublicKey ? 'yes': 'no'}}</span>
+          <img v-if="data.owner == currentPublicKey" src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer" v-tooltip.bottom="'<tiptitle>WALLET ADDRESS</tiptitle><tiptext>' + data.address + '</tiptext><tipbottom>MY PERSONAL ACCOUNT <img src=&quot;/icons/icon-personal-blue.png&quot;></tipbottom>'">
+          <img v-else src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer" v-tooltip.bottom="'<tiptitle>WALLET ADDRESS</tiptitle><tiptext>' + data.address + '</tiptext>'">
         </template>
       </Column>
       <Column field="height" header="BLOCK HEIGHT" style="width: 180px;">
@@ -54,6 +70,7 @@
                 <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Asset Details</router-link>
                 <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Modify Supply</router-link>
                 <router-link :to="{ name: 'ViewServicesAssetsLinkToNamespace' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Linked to namespace</router-link>
+                <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>View in Explorer<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
               </div>
             </div>
           </div>
@@ -76,6 +93,8 @@ import Column from 'primevue/column';
 import { Helper } from '@/util/typeHelper';
 import { networkState } from "@/state/networkState";
 import { WalletAccount } from '@/models/walletAccount';
+import Tooltip from 'primevue/tooltip';
+import { PublicAccount } from 'tsjs-xpx-chain-sdk';
 
 export default{
   components: { DataTable, Column },
@@ -85,6 +104,9 @@ export default{
     currentPublicKey: String,
     account: WalletAccount
   },
+  directives: {
+    'tooltip': Tooltip
+  },
 
   setup(props, context){
     const { assets, account } = toRefs(props);
@@ -92,6 +114,7 @@ export default{
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const accountAssets = ref();
     const isMenuShow = ref([]);
+    const isNsListShow = ref([]);
 
     watch(assets, (updatedAssets) => {
       accountAssets.value = generateAssetDatatable(updatedAssets, account.value);
@@ -103,6 +126,9 @@ export default{
 
     const generateAssetDatatable = (assets, account) => {
       let formattedAssets = [];
+
+      // let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+      // let chainAPICall = new ChainAPICall(apiEndpoint);
 
       for(let i=0; i < assets.length; ++i){
         let namespaceAlias = [];
@@ -118,17 +144,23 @@ export default{
             namespaceAlias.push(aliasData);
           }
 
+          // let getAsset = await chainAPICall.assetAPI.getMosaic(assetId);
+          // console.log(getAsset)
+
           let data = {
             i: i,
             idHex: assetId,
             owner: assets[i].owner,
+            address: PublicAccount.createFromPublicKey(assets[i].owner, networkState.currentNetworkProfile.network.type).address.pretty(),
             amount: Helper.toCurrencyFormat(assets[i].getExactAmount(), assets[i].divisibility),
             supply: Helper.toCurrencyFormat(assets[i].getExactSupply(), assets[i].divisibility),
             linkedNamespace: namespaceAlias,
             height: assets[i].height,
+            explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
           };
           formattedAssets.push(data);
           isMenuShow.value[i] = false;
+          isNsListShow.value[i] = false;
         }
       }
       return formattedAssets;
@@ -137,6 +169,11 @@ export default{
       // return formattedAssets;
     const borderColor = ref('border border-gray-400');
 
+    const showNsList = (i) => {
+      currentNsMenu.value = i;
+      isNsListShow.value[i] = !isNsListShow.value[i];
+    }
+
     const showMenu = (i) => {
       currentMenu.value = i;
       isMenuShow.value[i] = !isMenuShow.value[i];
@@ -144,6 +181,14 @@ export default{
 
     // emitted from App.vue when click on any part of the page
     emitter.on('PAGE_CLICK', () => {
+      var j = 0;
+      while(j < isNsListShow.value.length){
+        if(j != currentNsMenu.value){
+          isNsListShow.value[j] = false;
+        }
+        j++;
+      }
+
       var k = 0;
       while(k < isMenuShow.value.length){
         if(k != currentMenu.value){
@@ -154,6 +199,7 @@ export default{
     });
 
     const currentMenu = ref('empty');
+    const currentNsMenu = ref('empty');
 
     const hoverOverMenu = (i) => {
       currentMenu.value = i;
@@ -163,13 +209,25 @@ export default{
       currentMenu.value = 'empty';
     };
 
+    const hoverOverNsList = (i) => {
+      currentNsMenu.value = i;
+    };
+
+    const hoverOutNsList = () => {
+      currentNsMenu.value = 'empty';
+    };
+
     return {
       borderColor,
       showMenu,
+      showNsList,
       isMenuShow,
+      isNsListShow,
       accountAssets,
       hoverOverMenu,
-      hoverOutMenu
+      hoverOutMenu,
+      hoverOverNsList,
+      hoverOutNsList
     }
   }
 }
