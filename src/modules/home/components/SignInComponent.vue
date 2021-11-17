@@ -16,7 +16,7 @@
           <!-- <div class = 'text-center text-xs mt-3'>Current Network: </div>
           <div class = 'text-center'>{{networkState.chainNetworkName}}</div> -->
           <div class=" text-center">
-            <button type="submit" class="blue-btn bg-gray-primary py-2 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
+            <button type="submit" class="blue-btn bg-gray-primary mt-1 py-2 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
           </div>
       </fieldset>
     </form>

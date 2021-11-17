@@ -1,11 +1,11 @@
 <template>
   <div class= 'border w-8/12 ml-auto mr-auto py-3 px-2'>
     <div class='flex'>
-        <img src='@/assets/img/icon-cube.svg' class='h-5 w-5 mt-auto mb-auto'>
+        <img src='@/assets/img/icon-wallet.svg' class='h-5 w-5 mt-auto mb-auto'>
         <div class='flex flex-col ml-2'>
             <div class='text-xxs text-blue-primary'>WALLET</div>
             <div v-if='selectedWallet!=""' class='text-xs font-bold'>{{selectedWallet}} </div>
-            <div v-if='selectedWallet==""' class='text-xs font-bold'>Select Wallet </div>
+            <div v-if='selectedWallet==""' class='text-xs font-bold '>Select Wallet </div>
         </div>
         <div v-if='!toggleSelection && selectedWallet==""' @click='toggleSelection = !toggleSelection' class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>Select</div>
         <div v-if='!toggleSelection && selectedWallet!=""' @click='toggleSelection = !toggleSelection' class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>Change</div>
@@ -14,12 +14,12 @@
   </div>
   <div class='relative' style='left:16.7%'>
   <div v-if='toggleSelection' class='absolute border border-t-0 w-8/12  z-50 bg-white'>
-    <div v-if='wallets.length>0' class='text-xxs pt-2 pl-2 pb-2'>SELECT WALLET</div>
+    <div v-if='wallets.length>0' class='text-xxs pt-2 pl-2 pb-2 font-semibold'>SELECT WALLET</div>
     <div v-else class='text-xxs pt-2 pl-2 pb-2'>The list is empty.</div>
     <div v-for='(items,index) in wallets' :key="items" class='px-2 py-1'>
         <div class='flex'>
-            <img src='@/assets/img/icon-cube.svg' class='h-5 w-5 mt-auto mb-auto'>
-            <div class='text-xs ml-1 mt-0.5'>{{items.label}}</div>
+            <img src='@/assets/img/icon-wallet.svg' class='h-5 w-5 mt-auto mb-auto'>
+            <div class='text-xs ml-1 mt-0.5 font-bold'>{{items.label}}</div>
             <div @click='selectWallet(items.label)' v-if='items.label!=selectedWallet' class='cursor-pointer text-blue-primary text-xxs mt-0.5 ml-auto'>SELECT</div>
             <div v-if='items.label==selectedWallet' class='text-gray-primary text-xxs mt-0.5 ml-auto'>CURRENT</div>
         </div>
