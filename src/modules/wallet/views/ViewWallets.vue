@@ -1,8 +1,8 @@
 <template>
   <div class="container mx-auto text-center  w-80 tileWidth" >
-    <h1 class="text-white text-xxl ">{{$t('Header.walletTitle')}}</h1>
+    <h1 class="text-white text-xxl font-bold">{{$t('Header.walletTitle')}}</h1>
     <div class='mt-12'>
-      <p class="text-tsm mx-3 sm:text-tsm text-white">{{$t('wallets.description') }}.</p>
+      <p class="text-tsm mx-3 sm:text-tsm text-white font-semibold">{{$t('wallets.description') }}.</p>
       <div v-if="wallets.length == 0" class="text-center h4 my-2">
         {{$t('wallets.walletvalidation')}}
       </div>
