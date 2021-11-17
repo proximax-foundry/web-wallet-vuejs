@@ -36,7 +36,7 @@ export default defineComponent({
     }
   },
   emits:[
-    'update:modelValue'
+    'update:modelValue','space','removeSpace'
   ],
   name: 'PasswordInput',
   data() {
@@ -78,6 +78,15 @@ export default defineComponent({
         // }
       }
     },
+  },
+  watch:{
+    pswdErr:function(){
+      if(this.pswdErr){
+        this.$emit('space')
+      }else{
+        this.$emit('removeSpace')
+      }
+    }
   },
   mounted() {
     // this.emitter.on("CLEAR_PASSWORD", (payload) => {
