@@ -1,15 +1,103 @@
 <template>
   <div>
-  <div class = 'flex text-xs font-semibold'>
+    <div class='flex cursor-pointer'>
+      <img src='@/assets/img/chevron_left.svg'>
+      <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
+    </div>
+    <div class='w-9/12 ml-auto mr-auto '>
+      <div class = 'flex text-xs font-semibold border-b-2'>
+        <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Details</div>
+        <router-link :to="{ name: isMultiSig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
+      </div>
+      <div class='my-7 font-semibold'>Account Details</div>
+      <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
+      <div class='border-2'>
+        <div class='flex'>
+          <div v-html='svgString'></div>
+          <div class='flex flex-col justify-center'>
+            <div class='flex '>
+              <div class = ' ml-4 font-semibold text-md' v-if='showName'>{{ accountNameDisplay }}</div>
+              <input class='outline-none ml-4 font-semibold text-md'  v-model='accountName' v-if='!showName'/>
+              <img src="@/modules/account/img/edit-icon.svg"  v-if='showName' @click='showName=!showName' title='Edit Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
+              <img src="@/modules/account/img/edit-icon.svg"  v-if='!showName'  @click="changeName()" title='Confirm Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
+            </div>
+            <div class = 'flex mt-0.5'>
+              <img v-if='isDefault' src="@/modules/account/img/icon-pin.svg" class = 'ml-3 h-4 w-4 bg-gray-200' title='This is your default account everytime you login'>
+              <p v-if='isDefault' class = 'text-xxs pt-px bg-gray-200 text-blue-link cursor-default' title='This is your default account everytime you login' >DEFAULT ACCOUNT</p>
+              <img v-if='isMultiSig' src="@/modules/account/img/icon-pin.svg" class = 'ml-3 h-4 w-4 bg-gray-200' title='This is your default account everytime you login'>
+              <p v-if='isMultiSig' class = 'text-xxs pt-px bg-gray-200 text-blue-link cursor-default' title='This is a multisig account' >MULTISIG ACCOUNT</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class='border-2 mt-3 p-6'>
+        <div class = 'text-txs text-blue-primary mt-2 '>CURRENT BALANCE</div>
+        <div class='flex'>
+          <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
+          <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
+          <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
+          <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
+          <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
+          <div class='flex ml-auto gap-6 '>
+            <div class='flex cursor-pointer'>
+              <img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-5 h-5 mt-0.5  cursor-pointer mr-1">
+              <div class='text-xs mt-1 font-semibold '>Transfer XPX</div>
+            </div>
+            <div class='flex cursor-pointer'>
+              <img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-5 h-5 mt-0.5  cursor-pointer mr-1">
+              <div class='text-xs mt-1 font-semibold'>Request XPX</div>
+            </div>
+            <div class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
+              <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
+              <div class='text-xs mt-0.5 font-semibold text-white'>Top up XPX</div>
+            </div>
+          </div>
+        </div>
+        <div class = 'text-txs text-gray-400 '>Estimate US$ {{currencyConvert}}</div>
+        <div class='my-6 gray-line'></div>
+        <div class = 'text-txs text-blue-primary mt-2 '>WALLET ADDRESS</div>
+        <div class= 'flex'>
+          <div id="address" :copyValue="prettyAddress" copySubject="Address" class = 'text-xs font-semibold mt-1'>{{prettyAddress}} </div>
+          <font-awesome-icon icon="copy" title='Copy' @click="copy('address')" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+        </div>
+        <div class='my-6 gray-line'></div>
+        <div class = 'text-txs text-blue-primary mt-2 '>PUBLIC KEY</div>
+        <div class= 'flex'>
+          <div id="public" class="text-xs font-semibold mt-1 break-all" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
+          <font-awesome-icon icon="copy" @click="copy('public')" title='Copy' class="ml-2 pb-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+        </div>
+        <div class='my-6 gray-line'></div>
+        <div v-if='!other_acc' >
+          <div class = 'text-txs text-blue-primary mt-0.5 '>PRIVATE KEY</div>
+          <div class='flex '>
+            <div v-if="!showPwPK && !showPK" class='break-all font-semibold'>****************************************************************</div>
+            <PkPasswordModal v-if="!showPwPK && !showPK" :account = 'acc' />
+          </div>
+          <div class='flex'>
+            <div id="private" class="text-xs mt-1 font-semibold w-full break-all" type="text" :copyValue="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
+            <font-awesome-icon title='Copy' icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link cursor-pointer " v-if="showPK"></font-awesome-icon>
+            <font-awesome-icon icon="eye-slash" title='Hide Private Key' class="text-blue-link relative cursor-pointer ml-1" @click="showPwPK = false; showPK = false" v-if="showPK"></font-awesome-icon>
+          </div>
+          <p class = 'text-txs mt-2 text-gray-400'>{{$t('createsuccessful.warningtext1')}} {{$t('createsuccessful.warningtext2')}}</p>
+      </div>
+      <div class='my-6 gray-line' v-if='!other_acc'></div>
+      <div class='flex'>
+        <PdfPasswordModal v-if='!other_acc' />
+        <DeleteAccountModal v-if="!isDefault && !other_acc " :account ='acc' />
+        
+      </div>
+      </div>
+    </div>
+    
+ <!--  <div class = 'flex text-xs font-semibold'>
     <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Details</div>
     <router-link :to="{ name: isMultiSig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
-    <div class= 'w-18 text-center'>Backup</div>
   </div>
   <div class=' py-3 gray-line'>
     <div class = 'mt-2 text-md font-semibold'>Account Details</div>
     <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
       <div class= 'flex'>
-        <div class = 'mt-5 h-12 w-12 bg-gray-300 rounded-lg '></div>
+       
         <div class= 'flex flex-col mt-4'>
           <div class = 'flex'>
             <img v-if='isDefault' src="@/modules/account/img/info-icon.svg" class = 'ml-3 h-4 w-4 bg-gray-200' title='This is your default account everytime you login'>
@@ -22,7 +110,7 @@
             <div v-else>
               <TextInput class = 'mt-1 ml-4' :placeholder="$t('swap.accountname')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
             </div>
-            <img src="@/modules/account/img/edit-icon.svg" title='Edit Account Name' @click="editName()" class="w-5 h-5 text-black cursor-pointer mt-0.5 ml-1" v-if="showName">
+            <img src="@/modules/account/img/edit-icon.svg" title='Edit Account Name' @click="editName()" class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" v-if="showName">
             <div v-else class = 'flex flex-col'>
               <font-awesome-icon icon="check-circle" @click="changeName()" class="w-5 h-5 text-gray-500 cursor-pointer  mt-1.5 ml-3 mb-1"></font-awesome-icon>
               <font-awesome-icon @click="hidePanel()" icon="times-circle" class="w-5 h-5 text-gray-500 cursor-pointer ml-3"></font-awesome-icon>
@@ -60,8 +148,6 @@
             <PkPasswordModal v-if="!showPwPK && !showPK" :account = 'acc' />
             <font-awesome-icon icon="eye-slash" title='Hide Private Key' class="text-blue-link relative cursor-pointer ml-1" @click="showPwPK = false; showPK = false" v-if="showPK"></font-awesome-icon>
             <img src='@/modules/account/img/swap-icon.svg' title='Swap with this private key' class='w-5 h-4 ml-auto  '>
-            <!-- <button class="default-btn w-36" @click="showPwSwap = !showPwSwap" v-if="!showPwSwap">{{$t('accounts.enable')}}</button>
-            <button class="default-btn w-36" @click="verifyWalletPwSwap()" v-if="showPwSwap" >{{$t('accounts.submit')}}</button> -->
         </div>
         <div v-if="!showPwPK && !showPK">**************</div>
         <div id="private" class="text-xs text-gray-400 w-full break-all" type="text" :copyValue="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
@@ -71,11 +157,11 @@
       <div v-if="!isDefault && !other_acc " class= 'border-b-2 mt-10'></div> 
       <div v-if="!isDefault && !other_acc  " class= 'mt-7 text-sm font-semibold'>Delete Account</div>
       <DeleteAccountModal v-if="!isDefault && !other_acc " :account ='acc'/>
-  </div>
+  </div> -->
 </div>
 </template>
 
-<script>
+<script >
 import {getXPXcurrencyPrice } from '@/util/functions';
 import { watch, ref, computed, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
@@ -93,10 +179,12 @@ import qrcode from 'qrcode-generator';
 import PkPasswordModal from '@/modules/account/components/PkPasswordModal.vue'
 import PdfPasswordModal from '@/modules/account/components/PdfPasswordModal.vue'
 import DeleteAccountModal from '@/modules/account/components/DeleteAccountModal.vue'
+import { toSvg} from "jdenticon";
+
 export default {
   name: "ViewAccountDetails",
   components: {
-    TextInput,
+    /* TextInput, */
     PkPasswordModal,
     PdfPasswordModal,
     DeleteAccountModal
@@ -112,13 +200,15 @@ export default {
     // get account details
     var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
     const other_acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
-   
+    const svgString = ref(toSvg(acc.address, 100))
+ 
     if(!acc){
       if(other_acc)
       {
         acc = other_acc;
       }
     }
+    
     const isDefault = (acc.default == true) ? true: false
     if (acc === -1) {
       router.push({name: "ViewAccountDisplayAll"});
@@ -148,10 +238,7 @@ export default {
       toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
     };
 
-    const editName = () => {
-      showName.value = !showName.value;
-    };
-
+    
     const isMultiSig = computed(() => {
       let isMulti = acc.getDirectParentMultisig().length? true: false
       return isMulti;
@@ -183,16 +270,6 @@ export default {
       } else {
         err.value = t('scriptvalues.inputaccountname');
       }
-    };
-
-    const showPasswordPanel = () => {
-      showPwPK.value = !showPwPK.value;
-    };
-
-    const hidePanel = () => {
-      accountName.value = acc.name;
-      showName.value = !showName.value;
-      err.value = "";
     };
 
     const verifyWalletPwPk = () => {
@@ -308,6 +385,7 @@ export default {
       saveWalletPaper(e)
     });
     return {
+      svgString,
       splitBalance,
       other_acc,
       currencyConvert,
@@ -319,20 +397,17 @@ export default {
       showPwPK,
       showPasswdError,
       accountNameDisplay,
-      showPasswordPanel,
       verifyWalletPwPk,
       walletPasswd,
       walletPasswdSwap,
       showPwSwap,
       showName,
-      editName,
       changeName,
       accountName,
       acc,
       verifyWalletPwSwap,
       copy,
       privateKey,
-      hidePanel,
       prettyAddress,
       showWalletPaperPw,
       showSavePaperWallet,

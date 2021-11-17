@@ -8,15 +8,15 @@
         <div class="modal-popup-box ">
           <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
             <div class= 'text-center mt-2 text-xs font-semibold'>Enter Password</div>
-            <div class ='text-gray-300 text-center text-xs mt-2'>For security, this is required before revealing your private key.</div>
+            <!-- <div class ='text-gray-300 text-center text-xs mt-2'>For security, this is required before revealing your private key.</div> -->
             <PasswordInput class = 'mt-3' v-model= 'walletPasswd' :placeholder="'Password'"/>
-            <div @click="verifyWalletPwPk()"  class = 'default-btn cursor-pointer text-center ml-auto mr-auto w-7/12'>Confirm</div>
-            <div class= 'text-center cursor-pointer text-xs text-blue-link mt-2' @click="toggleModal = !toggleModal">Cancel</div>
+            <div @click="verifyWalletPwPk()"  class = 'blue-btn py-2  font-semibold cursor-pointer text-center ml-auto mr-auto w-7/12'>Confirm</div>
+            <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-2' @click="toggleModal = !toggleModal">Cancel</div>
           </div>
         
       </div>
     </transition>
-    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-60 bg-gray-100"></div>
+    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-60 bg-gray-100 z-20"></div>
 </template>
 <script>
 import PasswordInput from '@/components/PasswordInput.vue';
