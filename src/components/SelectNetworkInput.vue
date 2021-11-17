@@ -1,7 +1,8 @@
 <template>
   <div class= 'border w-8/12 ml-auto mr-auto py-3 px-2'>
     <div class='flex'>
-        <img src='@/assets/img/icon-cube.svg' class='h-5 w-5 mt-auto mb-auto'>
+        <img v-if='selectedNetwork.label== "Sirius Mainnet"' src="@/assets/img/icon-mainnet-block.svg" class='h-5 w-5 mt-auto mb-auto'>
+        <img v-else src="@/assets/img/icon-testnet-block.svg" class='h-5 w-5 mt-auto mb-auto'>
         <div class='flex flex-col ml-2'>
             <div class='text-xxs text-blue-primary'>NETWORK</div>
             <div class='text-xs font-bold'>{{selectedNetwork.label}}</div>
@@ -12,11 +13,12 @@
   </div>
   <div class='relative' style='left:16.7%'>
   <div v-if='toggleSelection' class='absolute border border-t-0 w-8/12  z-50 bg-white'>
-    <div class='text-xxs pt-2 pl-2 pb-2'>SELECT NETWORK</div>
+    <div class='text-xxs pt-2 pl-2 pb-2 font-semibold'>SELECT NETWORK</div>
     <div v-for='(items,index) in chainNetworks' :key="items" class='px-2 py-1'>
         <div class='flex'>
-            <img src='@/assets/img/icon-cube.svg' class='h-5 w-5 mt-auto mb-auto'>
-            <div class='text-xs ml-1 mt-0.5'>{{items.label}}</div>
+            <img v-if='index==0' src="@/assets/img/icon-mainnet-block.svg" class='h-5 w-5 mt-auto mb-auto'>
+            <img v-else src="@/assets/img/icon-testnet-block.svg" class='h-5 w-5 mt-auto mb-auto'>
+            <div class='text-xs ml-1 mt-0.5 font-bold'>{{items.label}}</div>
             <div @click='selectNetwork(index)' v-if='items.label!=selectedNetwork.label' class='cursor-pointer text-blue-primary text-xxs mt-0.5 ml-auto'>SELECT</div>
             <div v-if='items.label==selectedNetwork.label' class='text-gray-primary text-xxs mt-0.5 ml-auto'>CURRENT</div>
         </div>

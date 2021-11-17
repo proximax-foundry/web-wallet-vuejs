@@ -11,7 +11,7 @@
             <!-- <div class ='text-gray-300 text-center text-xs mt-2'>For security, this is required before revealing your private key.</div> -->
             <PasswordInput class = 'mt-3' v-model= 'walletPasswd' :placeholder="'Password'"/>
             <div @click="verifyWalletPwPk()"  class = 'blue-btn py-2  font-semibold cursor-pointer text-center ml-auto mr-auto w-7/12'>Confirm</div>
-            <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-2' @click="toggleModal = !toggleModal">Cancel</div>
+            <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-2' @click="toggleModal = !toggleModal;walletPasswd=''">Cancel</div>
           </div>
         
       </div>
