@@ -4,7 +4,7 @@
         <img v-if='selectedNetwork.label== "Sirius Mainnet"' src="@/assets/img/icon-mainnet-block.svg" class='h-5 w-5 mt-auto mb-auto'>
         <img v-else src="@/assets/img/icon-testnet-block.svg" class='h-5 w-5 mt-auto mb-auto'>
         <div class='flex flex-col ml-2'>
-            <div class='text-xxs text-blue-primary'>NETWORK</div>
+            <div class=' text-blue-primary font-semibold' style="font-size: 7px ; line-height: 9px;">NETWORK</div>
             <div class='text-xs font-bold'>{{selectedNetwork.label}}</div>
         </div>
         <div v-if='!toggleSelection' @click='toggleSelection = !toggleSelection' class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>Change</div>

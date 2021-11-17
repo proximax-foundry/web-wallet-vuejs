@@ -3,7 +3,7 @@
     <div class='flex'>
         <img src='@/assets/img/icon-wallet.svg' class='h-5 w-5 mt-auto mb-auto'>
         <div class='flex flex-col ml-2'>
-            <div class='text-xxs text-blue-primary'>WALLET</div>
+            <div class=' text-blue-primary font-semibold'  style="font-size: 7px ; line-height: 9px;">WALLET</div>
             <div v-if='selectedWallet!=""' class='text-xs font-bold'>{{selectedWallet}} </div>
             <div v-if='selectedWallet==""' class='text-xs font-bold '>Select Wallet </div>
         </div>
@@ -13,10 +13,10 @@
     </div>
   </div>
   <div class='relative' style='left:16.7%'>
-  <div v-if='toggleSelection' class='absolute border border-t-0 w-8/12  z-50 bg-white'>
+  <div v-if='toggleSelection' class='absolute border border-t-0 w-8/12  z-50 bg-white max-h-32 overflow-auto '>
     <div v-if='wallets.length>0' class='text-xxs pt-2 pl-2 pb-2 font-semibold'>SELECT WALLET</div>
     <div v-else class='text-xxs pt-2 pl-2 pb-2'>The list is empty.</div>
-    <div v-for='(items,index) in wallets' :key="items" class='px-2 py-1'>
+    <div v-for='(items,index) in wallets' :key="items" class='px-2 py-1 '>
         <div class='flex'>
             <img src='@/assets/img/icon-wallet.svg' class='h-5 w-5 mt-auto mb-auto'>
             <div class='text-xs ml-1 mt-0.5 font-bold'>{{items.label}}</div>

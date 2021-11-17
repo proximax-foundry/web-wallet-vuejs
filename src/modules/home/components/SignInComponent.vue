@@ -3,21 +3,16 @@
     <form @submit.prevent="login">
       <fieldset>
         <div class="w-8/12 text-center mr-auto ml-auto error error_box" v-if="err!=''">{{ err }}</div>
-          <div class='flex flex-col gap-1'>
             <SelectNetworkInput />
+            <div class='mt-2'></div>
             <SelectWalletInput />
+            <div class='mt-2'></div>
             <div class= 'text-center'>
               <PasswordInput @space="space=true" @removeSpace='space=false' class = 'w-8/12 block ml-auto mr-auto' placeholder="Password" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
             </div>
-          </div>
-          <!-- <div class = 'text-center'>
-            <Dropdown  selected v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
-          </div> -->
-          <!-- <div class = 'text-center text-xs mt-3'>Current Network: </div>
-          <div class = 'text-center'>{{networkState.chainNetworkName}}</div> -->
           <div class=" text-center">
             <button v-if='!space' type="submit" class="blue-btn bg-gray-primary  py-2 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
-            <button v-else type="submit" class="blue-btn bg-gray-primary mt-2 py-2 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
+            <button v-else type="submit" class="blue-btn bg-gray-primary mt-4 py-2 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
           </div>
       </fieldset>
     </form>

@@ -8,7 +8,7 @@
         <font-awesome-icon icon="eye" class="text-gray-800 relative cursor-pointer text-right mr-2" @click="hideShowPassword();" v-if="!showPassword"></font-awesome-icon>
         <font-awesome-icon icon="eye-slash" class="text-gray-800 relative cursor-pointer text-right mr-2" @click="hideShowPassword();" v-if="showPassword"></font-awesome-icon>
     </div>
-    <div class="h-3 mb-2 "><div class="error error-password text-left" v-if="pswdErr || showError">{{ errorMessage }}</div></div>
+    <div class="h-3 "><div class="error error-password text-left" v-if="pswdErr || showError">{{ errorMessage }}</div></div>
   </div>
 </template>
 
