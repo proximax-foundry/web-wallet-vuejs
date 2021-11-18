@@ -11,17 +11,20 @@
         <div class="error error_box " v-if="err!=''">{{ err }}</div>
       </div>
       <SelectNetworkInput />
-      <div class="w-8/12 ml-auto mr-auto mt-5">
-        <TextInput  placeholder="Name your wallet" :errorMessage="$t('createwallet.inputwalletname')" v-model="walletName" icon="wallet" />
-        <PasswordInput placeholder="Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
-        <PasswordInput placeholder="Confirm Password" :errorMessage="$t('createwallet.doesntmatch')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd"  />
+      <div class="w-8/12 ml-auto mr-auto mt-3">
+        <TextInput  @space="space1=true" @removeSpace='space1=false' placeholder="Name your wallet" :errorMessage="$t('createwallet.inputwalletname')" v-model="walletName" icon="wallet" />
+         <div v-if='space1' class='mt-3'></div>
+        <PasswordInput @space="space2=true" @removeSpace='space2=false' placeholder="Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
+        <div v-if='space2' class='mt-3'></div>
+        <PasswordInput @space="space3=true" @removeSpace='space3=false' placeholder="Confirm Password" :errorMessage="$t('createwallet.doesntmatch')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd"  />
+        <div v-if='showConfirmPasswdError | space3' class='mt-3'></div>
         <!-- <div class = 'mt-6 text-center text-xs'>Current Network: </div>
         <div class = 'text-center'>{{networkState.chainNetworkName}}</div> -->
       </div>
-      <button type="submit" class="text-center mt-5 font-bold blue-btn py-3 block ml-auto mr-auto w-8/12 disabled:opacity-50" :disabled="disableCreate">{{$t('welcome.create')}}</button>
+      <button type="submit" class="text-center  font-bold blue-btn py-3 block ml-auto mr-auto w-8/12 disabled:opacity-50" :disabled="disableCreate">Create Wallet</button>
        
         <div class ='mt-12 text-center text-xs mt-6 mb-1 '>Already have Sirius wallet account?</div>
-        <div class ="text-center  text-xs text-blue-link"><router-link :to="{ name: 'Home' }">Sign in here ></router-link></div>
+        <div class ="text-center  text-xs text-blue-link font-semibold"><router-link :to="{ name: 'Home' }">Sign in here ></router-link></div>
       <div class = 'h-20'></div>
       </form>
       <div v-if='showModal' >
@@ -42,56 +45,6 @@
         </transition>
         <div class="fixed inset-0 bg-opacity-60 z-10 bg-gray-100"></div>
       </div>
-      <!-- <div v-else>
-      <h1 class="text-sm mb-2 mt-8 text-center">{{$t('createsuccessful.congratz')}}</h1>
-      <p class="text-xs text-center mb-1">{{$t('createsuccessful.congratztext')}}.</p>
-        <div class="text-base mb-5 text-center">{{ walletName }}</div>
-        <div class="flex w-9/12 mr-auto ml-auto justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-          <div class="text-left w-full relative">
-            <div class="absolute z-20 w-full h-full"></div>
-            <div class="text-xs font-bold mb-1">{{$t('createsuccessful.address')}}:</div>
-            <div
-              id="address" :copyValue="newWallet.address" copySubject="Address"
-              class="text-xs w-full outline-none bg-gray-100 z-10 break-all"
-            >{{ newWallet.address }}</div>
-          </div>
-          <font-awesome-icon icon="copy" @click="copy('address', addressLabel)" class="w-5 h-5 pl-1 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
-        </div>
-        <div class="flex w-9/12 mr-auto ml-auto justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-          <div class="text-left w-full relative">
-            <div class="absolute z-20 w-full h-full"></div>
-            <div class="text-xs font-bold mb-1">{{$t('accounts.publickey')}}:</div>
-            <div
-              id="public" :copyValue="newWallet.publicKey" copySubject="Public Key"
-              class="text-xs w-full outline-none bg-gray-100 z-10 break-all"
-            >{{ newWallet.publicKey }}</div>
-          </div>
-          <font-awesome-icon icon="copy" @click="copy('public')" class="pl-1 w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
-        </div>
-        <div class="flex w-9/12 mr-auto ml-auto justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center" v-if="showPK">
-          <div class="text-left w-full relative">
-            <div class="absolute z-20 w-full h-full"></div>
-            <div class="text-xs font-bold mb-1">{{$t('createprivatekeywallet.privatekey')}}:</div>
-            <div
-              id="private" :copyValue="privateKey" copySubject="Private Key"
-              class="text-xs w-full outline-none bg-gray-100 z-10 break-all" 
-            >{{ privateKey }}</div>
-          </div>
-          <font-awesome-icon icon="copy" @click="copy('private')" class="pl-1 w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
-        </div>
-        <div class="flex w-9/12 mr-auto ml-auto justify-between p-4 rounded-xl bg-yellow-100 mb-4">
-          <div class="text-center w-full">
-            <p class = 'text-xs'>{{$t('createsuccessful.warningtext1')}}</p>
-            <p class = 'text-xs'>{{$t('createsuccessful.warningtext2')}}</p>
-          </div>
-        </div>
-       
-          <a class="mt-5 font-bold  text-center default-secondary-btn block ml-auto mr-auto w-9/12" @click="showPK = !showPK">{{ showPK? $t('createsuccessful.hide'):$t('createsuccessful.show') }} {{$t('createprivatekeywallet.privatekey')}}</a>
-          <a class="mt-3 font-bold  text-center default-secondary-btn block ml-auto mr-auto w-9/12">{{$t('createsuccessful.savewalletpaper')}}</a>
-          <router-link :to="{name: 'Home'}" class="block  mt-3 font-bold text-center default-btn block ml-auto mr-auto w-9/12">{{$t('createsuccessful.continue')}}</router-link>
-       
-        <div class = 'h-10'></div>
-    </div> -->
     </div>
   </div>
  
@@ -144,6 +97,9 @@ export default defineComponent({
     const showPasswdError = ref<boolean>(false);
     const passwdPattern: string  = "^[^ ]{8,}$";
     const showModal = ref(false)
+    const space1 = ref(false)
+    const space2 = ref(false)
+    const space3 = ref(false)
     const copy = (id :string) =>{ 
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
@@ -187,6 +143,9 @@ export default defineComponent({
     };
 
     return {
+      space1,
+      space2,
+      space3,
       showModal,
       networkState,
       err,
