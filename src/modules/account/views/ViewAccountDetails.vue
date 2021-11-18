@@ -21,17 +21,23 @@
               <img src="@/modules/account/img/edit-icon.svg"  v-if='showName' @click='showName=!showName' title='Edit Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
               <img src="@/modules/account/img/edit-icon.svg"  v-if='!showName'  @click="changeName()" title='Confirm Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
             </div>
-            <div class = 'flex mt-0.5'>
-              <img v-if='isDefault' src="@/modules/account/img/icon-pin.svg" class = 'ml-3 h-4 w-4 bg-gray-200' title='This is your default account everytime you login'>
-              <p v-if='isDefault' class = 'text-xxs pt-px bg-gray-200 text-blue-link cursor-default' title='This is your default account everytime you login' >DEFAULT ACCOUNT</p>
-              <img v-if='isMultiSig' src="@/modules/account/img/icon-pin.svg" class = 'ml-3 h-4 w-4 bg-gray-200' title='This is your default account everytime you login'>
-              <p v-if='isMultiSig' class = 'text-xxs pt-px bg-gray-200 text-blue-link cursor-default' title='This is a multisig account' >MULTISIG ACCOUNT</p>
+            <div class='flex'> 
+              <div  v-if='isDefault' class = 'ml-3 px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm'>
+                <img src="@/modules/account/img/icon-pin.svg" class = 'h-4 w-4 ' title='This is your default account everytime you login'>
+                <p class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is your default account everytime you login' >DEFAULT ACCOUNT</p>
+              </div>
+              <div v-if='isMultiSig' class = 'ml-3 px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm '>
+                <img v-if='isMultiSig' src="@/modules/account/img/icon-pin.svg" class = 'h-4 w-4' title='This is your default account everytime you login'>
+                <p v-if='isMultiSig' class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is a multisig account' >MULTISIG ACCOUNT</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div class='border-2 mt-3 p-6'>
-        <div class = 'text-txs text-blue-primary mt-2 '>CURRENT BALANCE</div>
+      <div class='border-2 mt-3 pb-6 px-6 pt-2'>
+        <img src="@/modules/account/img/icon-info.svg" class='h-4 w-4 ml-auto' 
+        title='Top up your account balance to a maximum of 100,000 test-XPX every 24 hours.'>
+        <div class = 'text-xxs text-blue-primary font-semibold'>CURRENT BALANCE</div>
         <div class='flex my-1'>
           <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
           <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
@@ -55,20 +61,20 @@
         </div>
         <div class = 'text-txs text-gray-400 '>Estimate US$ {{currencyConvert}}</div>
         <div class='my-6 gray-line'></div>
-        <div class = 'text-txs text-blue-primary mt-2 '>WALLET ADDRESS</div>
+        <div class = 'text-xxs text-blue-primary mt-2 font-semibold'>WALLET ADDRESS</div>
         <div class= 'flex'>
           <div id="address" :copyValue="prettyAddress" copySubject="Address" class = 'text-xs font-semibold mt-1'>{{prettyAddress}} </div>
           <font-awesome-icon icon="copy" title='Copy' @click="copy('address')" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
         </div>
         <div class='my-6 gray-line'></div>
-        <div class = 'text-txs text-blue-primary mt-2 '>PUBLIC KEY</div>
+        <div class = 'text-xxs text-blue-primary mt-2 font-semibold'>PUBLIC KEY</div>
         <div class= 'flex'>
           <div id="public" class="text-xs font-semibold mt-1 break-all" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
           <font-awesome-icon icon="copy" @click="copy('public')" title='Copy' class="ml-2 pb-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
         </div>
         <div class='my-6 gray-line'></div>
         <div v-if='!other_acc' >
-          <div class = 'text-txs text-blue-primary mt-0.5 '>PRIVATE KEY</div>
+          <div class = 'text-xxs text-blue-primary mt-0.5 font-semibold'>PRIVATE KEY</div>
           <div class='flex '>
             <div v-if="!showPwPK && !showPK" class='break-all font-semibold'>****************************************************************</div>
             <PkPasswordModal v-if="!showPwPK && !showPK" :account = 'acc' />
