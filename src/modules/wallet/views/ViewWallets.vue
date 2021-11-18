@@ -3,8 +3,8 @@
     <h1 class="text-white text-xxl font-bold">{{$t('Header.walletTitle')}}</h1>
     <div class='mt-12'>
       <p class="text-tsm mx-3 sm:text-tsm text-white font-semibold">{{$t('wallets.description') }}.</p>
-      <div v-if="wallets.length == 0" class="text-center h4 my-2">
-        {{$t('wallets.walletvalidation')}}
+      <div v-if="wallets.length == 0" class="text-center h4 my-2 text-white">
+        {{$t('wallets.walletvalidation')}}.
       </div>
       <div class="mt-8" v-else>
         <WalletTile :key="item.name" v-for="item in wallets" :wallet="item" />
