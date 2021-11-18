@@ -11,14 +11,14 @@
       <h2 class = 'my-10 ml-auto mr-auto'><span class = 'text-semibold'>or</span></h2>
       <div class="px-5 mt-4  text-center">
         <router-link :to="{ name: 'ViewHomeSignInSiriusID' }" >
-          <div class="sirius-id-button bg-gray-300 py-2 w-8/12 ml-auto mr-auto">
+          <div class="sirius-id-button bg-gray-200 py-2 w-8/12 ml-auto mr-auto ">
           <img src="@/assets/img/sirius-id-icon.svg" class="h-6 inline-block mr-1">{{$t('welcome.signinwithsiriusid')}}
           </div>
-          </router-link>
+        </router-link>
       </div>
       </div>
-      <div class ='text-center text-xs mt-6 mb-1'>No Sirius wallet account yet?</div>
-      <div class ="text-center  text-xs text-blue-link"><router-link :to="{ name: 'ViewWalletCreateSelection' }">Create Account Wallet ></router-link></div>
+      <div class ='text-center text-xs mt-6 mb-1 '>No Sirius wallet account yet?</div>
+      <div class ="text-center  text-xs text-blue-link font-semibold"><router-link :to="{ name: 'ViewWalletCreateSelection' }">Create Account Wallet ></router-link></div>
       <div class = 'h-16 '></div>
     </div>
   </div>
@@ -53,7 +53,7 @@ export default {
 h2 {
    width: 60%; 
    text-align: center; 
-   border-bottom: 1px solid #aeaeae; 
+   border-bottom: 1px solid #d3d3d3; 
    line-height: 0.1em;
    margin: 10px 0 20px; 
 } 
@@ -65,6 +65,6 @@ h2 span {
 
 .sirius-id-button{
  
-  @apply text-xs text-black font-extralight transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none
+  @apply text-xs text-black font-semibold transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none
 }
 </style>

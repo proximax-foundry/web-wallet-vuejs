@@ -1,14 +1,14 @@
 <template>
   <div>
     <div class=" bg-white py-2 border">
-      <input :disabled="disabled" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="ml-2 text-placeholder bg-white " :placeholder="placeholder" @click="clickInputText()" @focus="focusInputText()" @blur="blurInputText()">
+      <input :disabled="disabled" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="ml-2 text-placeholder bg-white w-11/12 " :placeholder="placeholder" @click="clickInputText()" @focus="focusInputText()" @blur="blurInputText()">
     </div>
-    <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
+    <div class="h-3 "><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
   </div>
 </template>
 
 <script>
-
+ 
 export default{
   props: {
     placeholder: String,
@@ -20,7 +20,7 @@ export default{
     imgRequired: Boolean,
   },
   emits:[
-    'update:modelValue'
+    'update:modelValue','space','removeSpace'
   ],
   name: 'TextInput',
   data() {
@@ -56,6 +56,15 @@ export default{
     focusInputText: function() {
       this.borderColor = 'border-2 border-blue-primary';
       this.textErr = false;
+    }
+  },
+  watch:{
+    textErr:function(){
+      if(this.textErr){
+        this.$emit('space')
+      }else{
+        this.$emit('removeSpace')
+      }
     }
   },
   mounted() {
