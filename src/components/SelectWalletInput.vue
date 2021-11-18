@@ -17,10 +17,10 @@
     <div v-if='wallets.length>0' class='pt-2 pl-2 pb-2 font-semibold' style="font-size: 7px ; line-height: 9px;">SELECT WALLET</div>
     <div v-else class='text-xxs pt-2 pl-2 pb-2' >The list is empty.</div>
     <div v-for='(items,index) in wallets' :key="items" class='px-2 py-1 '>
-        <div class='flex'>
+        <div @click='selectWallet(items.label)' class='flex cursor-pointer'>
             <img src='@/assets/img/icon-wallet.svg' class='h-5 w-5 mt-auto mb-auto'>
             <div class='text-xs ml-1 mt-0.5 font-bold'>{{items.label}}</div>
-            <div @click='selectWallet(items.label)' v-if='items.label!=selectedWallet' class='cursor-pointer text-blue-primary text-xxs mt-0.5 ml-auto font-semibold'>SELECT</div>
+            <div  v-if='items.label!=selectedWallet' class='cursor-pointer text-blue-primary text-xxs mt-0.5 ml-auto font-semibold'>SELECT</div>
             <div v-if='items.label==selectedWallet' class='text-gray-500 text-xxs mt-0.5 ml-auto'>CURRENT</div>
         </div>
         <div v-if="index != wallets.length - 1" class='gray-line mt-2'></div>
