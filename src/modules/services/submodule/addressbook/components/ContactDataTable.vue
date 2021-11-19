@@ -9,7 +9,7 @@
           <img src="@/modules/services/submodule/addressbook/img/icon-search_black.svg" class="inline-block">
         </div>
       </div>
-      <router-link :to="{ name: 'ViewServicesAddressBookAddContacts' }"  class="bg-blue-primary text-gray-50 text-tsm px-5 py-3 rounded-lg hover:bg-blue-600 transition-all duration-300">+ Add New Address</router-link>
+      <router-link :to="{ name: 'ViewServicesAddressBookAddContact' }"  class="bg-blue-primary text-gray-50 text-tsm px-5 py-3 rounded-lg hover:bg-blue-600 transition-all duration-300">+ Add New Address</router-link>
     </div>
     <div class='mt-2 py-3 gray-line'>
       <DataTable
@@ -40,7 +40,7 @@
               <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
               <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 <div role="none" class="my-2">
-                  <EditContactModal :data="data" class="block" :key="data.address" />
+                  <router-link :to="{ name: 'ViewServicesAddressBookEditContact' , params: { contactAddress: data.address }}" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Edit</router-link>
                   <ConfirmDeleteContactModal :data="data" class="block" />
                 </div>
               </div>
@@ -48,7 +48,8 @@
           </template>
         </Column>
         <template #empty>
-          {{$t('services.norecord')}}
+          <div>Nothing to show</div>
+          <div>You can add multiple wallet addresses to keep for your future transactions.</div>
         </template>
       </DataTable>
     </div>
@@ -62,7 +63,6 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {FilterMatchMode} from 'primevue/api';
 import ConfirmDeleteContactModal from '@/modules/services/submodule/addressbook/components/ConfirmDeleteContactModal.vue';
-import EditContactModal from '@/modules/services/submodule/addressbook/components/EditContactModal.vue';
 import { Helper } from "@/util/typeHelper";
 import { walletState } from '@/state/walletState';
 import { toSvg } from "jdenticon";
@@ -73,7 +73,6 @@ export default{
     DataTable,
     Column,
     ConfirmDeleteContactModal,
-    EditContactModal,
   },
   name: 'ContactDataTable',
 
@@ -156,7 +155,6 @@ export default{
     function uniqueValue(value, index, self) {
       return self.indexOf(value) === index;
     }
-
 
     const contactGroups = computed(() => {
       var uniqueGroupLabels = contactGroupsList.value.filter(uniqueValue);

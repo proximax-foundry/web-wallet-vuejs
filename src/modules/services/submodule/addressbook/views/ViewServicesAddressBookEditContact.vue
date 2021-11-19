@@ -9,7 +9,7 @@
         <router-link :to="{ name: 'ViewServicesAddressBookExport' }" class= 'w-18 text-center border-b pb-3'>Export</router-link>
       </div>
       <div class="border border-gray-100 p-5 filter drop-shadow-xl mt-10 bg-white">
-        <div class="text-md mb-5 font-semibold">Add New Contact</div>
+        <div class="text-md mb-5 font-semibold">Edit Contact</div>
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <div class='mt-2 py-3 text-center px-0 flex'>
           <AddContactTextInput :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" class="w-52 inline-block mr-2" />
@@ -24,7 +24,7 @@
 </template>
 <script>
 import { Address } from "tsjs-xpx-chain-sdk";
-import { computed, ref, watch, getCurrentInstance } from 'vue';
+import { computed, ref, watch, getCurrentInstance, onMounted } from 'vue';
 import AddContactTextInput from '@/modules/services/submodule/addressbook/components/AddContactTextInput.vue';
 import { useRouter } from 'vue-router';
 import { useToast } from "primevue/usetoast";
@@ -34,17 +34,22 @@ import { Wallet } from "@/models/wallet";
 import { Wallets } from "@/models/wallets";
 import { walletState } from '@/state/walletState';
 import { WalletStateUtils } from '@/state/utils/walletStateUtils';
-import {useI18n} from 'vue-i18n'
+import {useI18n} from 'vue-i18n';
+import { Helper } from "@/util/typeHelper";
 import AddContactSelectInputAddressBookPlugin from "@/modules/services/submodule/addressbook/components/AddContactSelectInputAddressBookPlugin.vue";
 import AddCustomGroupModal from "@/modules/services/submodule/addressbook/components/AddCustomGroupModal.vue";
 export default {
-  name: 'ViewCreateContacts',
+  name: 'ViewServicesAddressBookEditContact',
   components: {
     AddContactTextInput,
     AddContactSelectInputAddressBookPlugin,
     AddCustomGroupModal,
   },
-  setup(){
+  props: {
+    contactAddress: String
+  },
+
+  setup(props){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
@@ -52,24 +57,46 @@ export default {
 
     const {t} = useI18n();
     const toast = useToast();
-    const contactName = ref('');
-    const address = ref('');
     const err = ref('');
-    const verifyAdd = ref(false);
+    const verifyAdd = ref(true);
     const addMsg = ref('');
     const router = useRouter();
     const selectContactGroups = ref('');
 
+    // load particulars
+    const contact = walletState.currentLoggedInWallet.contacts.find((contact) => Helper.createAddress(contact.address).pretty() == props.contactAddress);
+    if(!contact){
+      router.push({name: "ViewServicesAddressBook"});
+    }
+    const contactName = ref(contact.name);
+    const address = ref(Helper.createAddress(contact.address).pretty());
+
+    const contactGroupsList = ref([]);
+    walletState.currentLoggedInWallet.contacts.forEach((contact) => {
+      contactGroupsList.value.push(contact.group);
+    });
+
+    onMounted(() => {
+      selectGroupDropdown.value.select(contact.group);
+    });
+
+    function uniqueValue(value, index, self) {
+      return self.indexOf(value) === index;
+    }
+
+    const defaultList = ['Work', 'Friend', 'Family', 'Employee', 'Director'];
+    const addressBookList = defaultList.concat(contactGroupsList.value);
+    var uniqueGroupLabels = addressBookList.filter(uniqueValue);
+    uniqueGroupLabels = uniqueGroupLabels.filter((value) => value != '-none-');
+    uniqueGroupLabels.sort();
+
     const action = ref([]);
-    action.value.push(
-      {value: '-none-', label: ' - '},
-      {value: 'Work', label: 'Work'},
-      {value: 'Friend', label: 'Friend'},
-      {value: 'Family', label: 'Family'},
-      {value: 'Employee', label: 'Employee'},
-      {value: 'Director', label: 'Director'},
-      {value: 'Custom', label: 'Custom'},
-    );
+    action.value.push({value: '-none-', label: ' - '});
+    uniqueGroupLabels.forEach((label) => {
+      action.value.push({value: label, label});
+    });
+    action.value.push({value: 'Custom', label: 'Custom'});
+
     const contactGroups = computed(() => {
       return action.value;
     });
@@ -113,29 +140,14 @@ export default {
     });
 
     const SaveContact = () => {
-      const rawAddress = Address.createFromRawAddress(address.value);
-      // let addressBook = new AddressBook(contactName.value, rawAddress.address);
-      let addressBook = new AddressBook(contactName.value, rawAddress.plain(), selectContactGroups.value);
-      const wallet = walletState.currentLoggedInWallet;
-
-      // check for existing account name in wallet
-      const accountNameIndex = wallet.accounts.findIndex((account) => account.name.toLowerCase() == contactName.value.toLowerCase());
-      const contactAddIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.address == rawAddress.plain()):(-1);
-      const contactNameIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.name.toLowerCase() == contactName.value.toLowerCase()):(-1);
-
-      if(contactAddIndex >= 0){
-        err.value = t('addressbook.addressvalidation');
-      }else if( contactNameIndex >= 0 || accountNameIndex >= 0 ){
-        err.value = t('addressbook.namevalidation');
-      }else{
-        walletState.currentLoggedInWallet.addAddressBook(addressBook);
-        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
-        err.value = '';
-        contactName.value = '';
-        address.value = '';
-        toast.add({severity:'info', summary: 'Address Book', detail: 'New contact added to Address Book', group: 'br', life: 5000});
-        router.push({ name: 'ViewServicesAddressBook' });
+      if(!walletState.currentLoggedInWallet){
+        return;
       }
+      const contactIndex = walletState.currentLoggedInWallet.contacts.findIndex((contact) => Helper.createAddress(contact.address).pretty() == props.contactAddress);
+      walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value, address: address.value, group: selectContactGroups.value });
+      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+      toast.add({severity:'info', summary: 'Address Book', detail: 'Contact info updated in Address Book', group: 'br', life: 5000});
+      router.push({name: "ViewServicesAddressBook"});
     }
 
     emitter.on('CLOSE_ADDCUSTOMGROUP_PANEL', () => {
@@ -144,7 +156,9 @@ export default {
 
     emitter.on('ADD_CUSTOM_GROUP', customGroup => {
       action.value.push({value: customGroup, label: customGroup});
-      selectGroupDropdown.value.select(customGroup);
+      if(selectGroupDropdown.value){
+        selectGroupDropdown.value.select(customGroup);
+      }
       isDisplayAddCustomPanel.value = false;
     });
 
