@@ -99,7 +99,7 @@ export default{
           let errContact = [];
           array.shift();
           array.forEach(element => {
-            var label, address;
+            var label, address, group;
             var arr = element.split(',');
             if(arr.length > 2){
               // merge all array as label except the last
@@ -111,7 +111,8 @@ export default{
             }else{
               label = arr[0].replace(/['"]+/g, '');
             }
-            address = arr[1].replace(/['"]+/g, '');
+            group = arr[1].replace(/['"]+/g, '');
+            address = arr[2].replace(/['"]+/g, '');
 
             // check if address or name is already in the contact book
             // check for existing account address in wallet
@@ -128,16 +129,16 @@ export default{
             }else if( contactNameIndex >= 0 || accountNameIndex >= 0 ){
               const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address);
               if(verifyContactAddress.isPassed){
-                addContact.push({label: label + ' - 2', address: address });
+                addContact.push({label: label + ' - 2', address, group });
               }else{
-                errContact.push({label: label, address: address });
+                errContact.push({label, address, group });
               }
             }else{
               const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address);
               if(verifyContactAddress.isPassed){
-                addContact.push({label: label, address: address });
+                addContact.push({label, address, group });
               }else{
-                errContact.push({label: label, address: address });
+                errContact.push({label, address, group });
               }
             }
           });
@@ -147,7 +148,7 @@ export default{
           }
           if(addContact.length > 0){
             addContact.forEach((element) => {
-              let addressBook = new AddressBook(element.label, element.address);
+              let addressBook = new AddressBook(element.label, element.address, element.group);
               walletState.currentLoggedInWallet.addAddressBook(addressBook);
             });
             walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);

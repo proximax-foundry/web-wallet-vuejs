@@ -31,14 +31,14 @@
             {{data.name}}
           </template>
         </Column>
-        <Column field="group" header="Group" headerStyle="width:30%">
-          <template #body="{data}">
-            {{data.group}}
-          </template>
-        </Column>
         <Column field="address" :header="$t('services.accountaddress')" headerStyle="width:55%">
           <template #body="{data}">
             {{ Helper.createAddress(data.address).pretty() }}
+          </template>
+        </Column>
+        <Column field="group" header="Group" headerStyle="width:30%">
+          <template #body="{data}">
+            {{data.group}}
           </template>
         </Column>
       </DataTable>
