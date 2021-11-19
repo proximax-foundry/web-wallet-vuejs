@@ -61,7 +61,7 @@ export default {
     const {groups} = toRefs(props);
     const addCustomGroup = () => {
       // check existing group
-      if(groups.value.find( group => (group.value == customGroup.value.toLowerCase())) || groupList.value.includes(customGroup.value.toLowerCase())){
+      if(groups.value.find( (({value}) => value.toLowerCase() === customGroup.value.toLowerCase())) || groupList.value.includes(customGroup.value.toLowerCase())){
         err.value = 'Group name is not availble or already exist';
       }else{
         emitter.emit('ADD_CUSTOM_GROUP', customGroup.value);

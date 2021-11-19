@@ -59,7 +59,7 @@ export default {
       }
     })
 
-    return {      
+    return {
       list,
     };
   },
