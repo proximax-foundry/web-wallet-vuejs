@@ -9,9 +9,10 @@
       <div class="mt-10">
         <div class="text-md my-5 font-semibold">Export Addresses</div>
         <div class="text-tsm">Export contacts for backup</div>
+        <div class="mt-4"><SelectInputAddressBookPlugin v-model="filters['global'].value" placeholder="Group" :options="contactGroups" selectDefault="" class="w-60 inline-block mr-2" /></div>
       </div>
       <input v-model="filters['global'].value" type="text" class="hidden">
-        
+
       <div @click="exportCSV($event)" class="cursor-pointer mt-5 py-2 px-5 rounded-md w-36 bg-blue-primary text-white text-tsm drop-shadow-lg filter hover:bg-blue-600 transition-all duration-500"><img src="@/modules/services/submodule/addressbook/img/icon-upload.svg" class="inline-block mr-4 relative top-1">{{$t('accounts.export')}}</div>
       <DataTable
         class="hidden"
@@ -24,10 +25,15 @@
         scrollDirection="horizontal"
         paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
         currentPageReportTemplate=""
-        :globalFilterFields="['name','address']">
+        :globalFilterFields="['group']">
         <Column field="name" :header="$t('services.label')" headerStyle="width:30%">
           <template #body="{data}">
             {{data.name}}
+          </template>
+        </Column>
+        <Column field="group" header="Group" headerStyle="width:30%">
+          <template #body="{data}">
+            {{data.group}}
           </template>
         </Column>
         <Column field="address" :header="$t('services.accountaddress')" headerStyle="width:55%">
@@ -40,13 +46,14 @@
   </div>
 </template>
 <script>
-import { getCurrentInstance, ref } from "vue";
+import { computed, getCurrentInstance, ref, onMounted } from "vue";
 import { walletState } from '@/state/walletState';
 import { Helper } from "@/util/typeHelper";
 import DataTable from 'primevue/datatable';
 import {FilterMatchMode} from 'primevue/api';
 import Column from 'primevue/column';
-import {useI18n} from 'vue-i18n'
+import {useI18n} from 'vue-i18n';
+import SelectInputAddressBookPlugin from "@/modules/services/submodule/addressbook/components/SelectInputAddressBookPlugin.vue";
 
 export default {
   name: 'ViewServicesAddressBookExport',
@@ -54,6 +61,7 @@ export default {
   components: {
     DataTable,
     Column,
+    SelectInputAddressBookPlugin,
   },
 
   setup() {
@@ -61,6 +69,26 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const list = ref([]);
+
+    const contactGroupsList = ref([]);
+
+    function uniqueValue(value, index, self) {
+      return self.indexOf(value) === index;
+    }
+
+    const contactGroups = computed(() => {
+      var uniqueGroupLabels = contactGroupsList.value.filter(uniqueValue);
+      uniqueGroupLabels = uniqueGroupLabels.filter((value) => value != '-none-');
+      uniqueGroupLabels.sort();
+      let action = [];
+      action.push(
+        {value: '', label: 'Show All'},
+      );
+      uniqueGroupLabels.forEach(label => {
+        action.push({value: label, label});
+      })
+      return action;
+    });
 
     const filters = ref({
       'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
@@ -72,6 +100,7 @@ export default {
         if(walletState.currentLoggedInWallet.contacts.length > 0){
           walletState.currentLoggedInWallet.contacts.forEach((contact) => {
             list.value.push(contact);
+            contactGroupsList.value.push(contact.group);
           });
           list.value.sort((a, b) => {
             if (a.name > b.name) return 1;
@@ -105,6 +134,7 @@ export default {
       list,
       filters,
       Helper,
+      contactGroups,
     };
   },
 }
