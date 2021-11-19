@@ -1,31 +1,31 @@
 <template>
+
   <div>
-    <div class="flex justify-between text-xs sm:text-sm">
-      <div><span class="text-gray-400">{{$t('services.addressbook')}} ></span> <span class="text-blue-primary font-bold">{{$t('services.addcontacts')}}</span></div>
-      <div>
-        <router-link :to="{name: 'ViewServicesAddressBook'}" class="font-bold" active-class="accounts">{{$t('services.addressbook')}}</router-link> | 
-        <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">{{$t('services.allservices')}}</router-link>
+    
+    <div class='w-9/12 ml-auto mr-auto mt-5'>
+      <div class ='flex text-xs font-semibold border-b-2 menu_title_div'>
+        <router-link :to="{ name: 'ViewServicesAddressBook' }" class= 'w-18 text-center border-b pb-3'>List</router-link>
+        <router-link :to="{ name: 'ViewServicesAddressBookImport' }" class= 'w-18 text-center border-b pb-3'>Import</router-link>
+        <router-link :to="{ name: 'ViewServicesAddressBookExport' }" class= 'w-18 text-center border-b pb-3'>Export</router-link>
+      </div>
+      <div class="border border-gray-100 p-5 filter drop-shadow-xl mt-10 bg-white">
+        <div class="text-md mb-5 font-semibold">Add New Contact</div>
+        <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
+        <div class='mt-2 py-3 text-center px-0 flex'>
+          <AddContactTextInput :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" class="w-52 inline-block mr-2" />
+          <AddContactTextInput :placeholder="$t('createsuccessful.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" class="w-96 inline-block mr-2" />
+          <AddContactSelectInputAddressBookPlugin v-model="selectContactGroups" placeholder="Group" :options="contactGroups" selectDefault="-none-" ref="selectGroupDropdown" class="w-60 inline-block mr-2" />
+          <button type="submit" class="default-btn py-1 disabled:opacity-50 h-12 flex items-center" :disabled="disableSave" @click="SaveContact()"><img src="@/modules/services/submodule/addressbook/img/icon-save.svg" class="inline-block mr-2">Save Address</button>
+        </div>
       </div>
     </div>
-    <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>
-      <form @submit.prevent="SaveContact" class="mt-10">
-        <fieldset class="w-full">
-          <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-          <TextInput :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" />
-          <TextInput :placeholder="$t('createsuccessful.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" />
-          <div class="mt-10">
-            <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="SaveContact()">{{$t('accounts.save')}}</button>
-          </div>
-        </fieldset>
-      </form>
-    </div>
+    <AddCustomGroupModal :toggleModal="isDisplayAddCustomPanel" :groups="contactGroups" />
   </div>
 </template>
 <script>
 import { Address } from "tsjs-xpx-chain-sdk";
-import { computed, ref, watch } from 'vue';
-import TextInput from '@/components/TextInput.vue';
+import { computed, ref, watch, getCurrentInstance } from 'vue';
+import AddContactTextInput from '@/modules/services/submodule/addressbook/components/AddContactTextInput.vue';
 import { useRouter } from 'vue-router';
 import { useToast } from "primevue/usetoast";
 import { AddressBook } from '@/models/addressBook';
@@ -35,21 +35,44 @@ import { Wallets } from "@/models/wallets";
 import { walletState } from '@/state/walletState';
 import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 import {useI18n} from 'vue-i18n'
+import AddContactSelectInputAddressBookPlugin from "@/modules/services/submodule/addressbook/components/AddContactSelectInputAddressBookPlugin.vue";
+import AddCustomGroupModal from "@/modules/services/submodule/addressbook/components/AddCustomGroupModal.vue";
 export default {
   name: 'ViewCreateContacts',
   components: {
-    TextInput
+    AddContactTextInput,
+    AddContactSelectInputAddressBookPlugin,
+    AddCustomGroupModal,
   },
   setup(){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+
+    const selectGroupDropdown = ref(null);
+
     const {t} = useI18n();
     const toast = useToast();
-    // const appStore = inject("appStore");
     const contactName = ref('');
     const address = ref('');
     const err = ref('');
     const verifyAdd = ref(false);
     const addMsg = ref('');
     const router = useRouter();
+    const selectContactGroups = ref('');
+
+    const action = ref([]);
+    action.value.push(
+      {value: '-none-', label: ' - '},
+      {value: 'Work', label: 'Work'},
+      {value: 'Friend', label: 'Friend'},
+      {value: 'Family', label: 'Family'},
+      {value: 'Employee', label: 'Employee'},
+      {value: 'Director', label: 'Director'},
+      {value: 'Custom', label: 'Custom'},
+    );
+    const contactGroups = computed(() => {
+      return action.value;
+    });
 
     const disableSave = computed(
       () => !(
@@ -82,16 +105,23 @@ export default {
       addMsg.value = verifyContactAddress.errMessage;
     });
 
+    const isDisplayAddCustomPanel = ref(false);
+    watch(selectContactGroups, (value) => {
+      if(value=='Custom'){
+        isDisplayAddCustomPanel.value = true;
+      }
+    });
+
     const SaveContact = () => {
       const rawAddress = Address.createFromRawAddress(address.value);
       // let addressBook = new AddressBook(contactName.value, rawAddress.address);
-      let addressBook = new AddressBook(contactName.value, rawAddress.plain());
+      let addressBook = new AddressBook(contactName.value, rawAddress.plain(), selectContactGroups.value);
       const wallet = walletState.currentLoggedInWallet;
 
       // check for existing account name in wallet
       const accountNameIndex = wallet.accounts.findIndex((account) => account.name.toLowerCase() == contactName.value.toLowerCase());
       const contactAddIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.address == rawAddress.plain()):(-1);
-      const contactNameIndex =(wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.name.toLowerCase() == contactName.value.toLowerCase()):(-1);
+      const contactNameIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.name.toLowerCase() == contactName.value.toLowerCase()):(-1);
 
       if(contactAddIndex >= 0){
         err.value = t('addressbook.addressvalidation');
@@ -108,11 +138,15 @@ export default {
       }
     }
 
-    const clearInput =() => {
-      contactName.value = '';
-      address.value = '';
-      err.value = '';
-    };
+    emitter.on('CLOSE_ADDCUSTOMGROUP_PANEL', () => {
+      isDisplayAddCustomPanel.value = false;
+    });
+
+    emitter.on('ADD_CUSTOM_GROUP', customGroup => {
+      action.value.push({value: customGroup, label: customGroup});
+      selectGroupDropdown.value.select(customGroup);
+      isDisplayAddCustomPanel.value = false;
+    });
 
     return {
       err,
@@ -123,7 +157,10 @@ export default {
       showAddErr,
       showNameErr,
       SaveContact,
-      clearInput,
+      selectContactGroups,
+      contactGroups,
+      isDisplayAddCustomPanel,
+      selectGroupDropdown,
     }
   },
 

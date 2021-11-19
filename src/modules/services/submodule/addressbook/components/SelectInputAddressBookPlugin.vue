@@ -1,13 +1,8 @@
 <template>
   <div>
-    <div class="select selectPlugin" style="position: relative">
-      <div class="h-5 text-left m-auto w-8/12 mb-1">
-        <transition enter-active-class="animate__animated animate__fadeInUp">
-          <span v-if="showSelectTitle" class="text-xs text-blue-400">{{ placeholder }}</span>
-        </transition>
-      </div>
+    <div class="select selectPlugin">
       <Multiselect
-        class = 'border w-8/12'
+        class = 'border'
         :placeholder="placeholder"
         :options="options"
         mode="single"
@@ -23,7 +18,6 @@
         ref="selectRef"
         :disabled="disabled"
       />
-      <div class="h-3 mb-2"></div>
     </div>
   </div>
 </template>
@@ -127,4 +121,15 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "@/assets/scss/multiselect.scss";
+.selectPlugin::v-deep{
+  .multiselect-input{
+    min-height: 30px;
+  }
+
+  .multiselect-clear{
+    display: inline-block;
+    right: 7px;
+    top: 7px;
+  }
+}
 </style>

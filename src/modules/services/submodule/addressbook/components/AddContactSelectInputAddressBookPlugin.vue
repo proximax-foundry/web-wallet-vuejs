@@ -1,29 +1,23 @@
 <template>
   <div>
-    <div class="select selectPlugin" style="position: relative">
-      <div class="h-5 text-left m-auto w-8/12 mb-1">
-        <transition enter-active-class="animate__animated animate__fadeInUp">
-          <span v-if="showSelectTitle" class="text-xs text-blue-400">{{ placeholder }}</span>
-        </transition>
-      </div>
+    <div class="border border-gray-200 py-1 select selectPlugin">
+      <div class="uppercase text-gray-400 font-light text-txs text-left mb-2 pl-2">{{ placeholder }}</div>
       <Multiselect
-        class = 'border w-8/12'
+        class = 'border'
         :placeholder="placeholder"
         :options="options"
         mode="single"
         :canDeselect="canDeselect"
-        @change="makeSelection"
         v-model="selected"
         :noOptionsText="noOptionsText"
         @close="closeSelection"
         :maxHeight="maxHeight"
         @deselect="$emit('update:modelValue', selected)"
-        @select="makeSelection;$emit('update:modelValue', selected);$emit('show-selection', selected)"
+        @select="$emit('update:modelValue', selected);$emit('show-selection', selected)"
         @clear="$emit('clear-selection')"
         ref="selectRef"
         :disabled="disabled"
       />
-      <div class="h-3 mb-2"></div>
     </div>
   </div>
 </template>
@@ -38,7 +32,6 @@ export default defineComponent({
     'errorMessage',
     'options',
     'modelValue',
-    'showSelectTitleProp',
     'selectDefault',
     'disabled',
     'noOptionsText',
@@ -46,29 +39,16 @@ export default defineComponent({
   emits:[
     'update:modelValue', 'show-selection', 'clear-selection'
   ],
-  name: 'SelectInputPlugin',
+  name: 'AddContactSelectInputAddressBookPlugin',
 
   setup(p){
-    const showSelectTitle = ref(false);
-    const selectErr = ref(false);
     const selectModel = ref(0);
     const selected = ref([]);
     const maxHeight = ref(300);
-    const canDeselect = ref(true);
-
-    if(p.showSelectTitleProp){
-      showSelectTitle.value = true;
-    }
+    const canDeselect = ref(false);
 
     const clearSelection = () => {
       selectModel.value = 0;
-      showSelectTitle.value = false;
-      selectErr.value = true;
-    };
-
-    const makeSelection =() => {
-      showSelectTitle.value = true;
-      selectErr.value = false;
     };
 
     const closeSelection =() => {
@@ -78,12 +58,9 @@ export default defineComponent({
     };
 
     return {
-      showSelectTitle,
-      selectErr,
       selectModel,
       selected,
       clearSelection,
-      makeSelection,
       closeSelection,
       maxHeight,
       canDeselect,
@@ -99,6 +76,9 @@ export default defineComponent({
       if(this.$refs.selectRef){
         this.$refs.selectRef.clear();
       }
+    },
+    select: function(group) {
+      this.$refs.selectRef.select(group, this.options);
     }
   },
 
@@ -127,4 +107,23 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "@/assets/scss/multiselect.scss";
+.selectPlugin::v-deep{
+  .multiselect-input{
+    min-height: 18px;
+  }
+
+  .multiselect-clear{
+    display: inline-block;
+    right: 7px;
+    top: 2px;
+  }
+
+  .multiselect-options{
+    margin-top: 4px;
+  }
+
+  > .border{
+    border-width: 0px !important;
+  }
+}
 </style>

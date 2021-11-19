@@ -1,66 +1,69 @@
 <template>
   <div>
-    <div class="flex">
-      <div class="flex-grow transition ease-in duration-300 w-full rounded-full px-5 py-1 mb-5" :class="borderColor">
-        <input v-model="filters['global'].value" type="text" class="w-full outline-none text-sm" :placeholder="$t('services.search')" @click="clickInputText()" @blur="blurInputText()">
+    <div class="flex justify-between">
+      <div class="flex items-center">
+        <div class='font-semibold mr-10'>Address Book</div>
+        <SelectInputAddressBookPlugin v-model="selectContactGroups" :options="contactGroups" selectDefault="" class="w-60 mr-4" />
+        <div class="w-30 px-3 py-1" :class="borderColor">
+          <input v-model="filters['global'].value" type="text" class="w-26 outline-none text-xs" :placeholder="$t('services.search')" @click="clickInputText()" @blur="blurInputText()">
+          <img src="@/modules/services/submodule/addressbook/img/icon-search_black.svg" class="inline-block">
+        </div>
       </div>
-      <a @click="exportCSV($event)" class="export-icon border-gray-300 border rounded-lg bg-gray-100 w-18 h-9 ml-3 relative flex-none">
-        <div class="absolute inline-block text-tsm text-gray-500" style="right: 10px; top: 6px;">{{$t('accounts.export')}}</div>
-        <font-awesome-icon icon="file-export" class="w-5 h-5 text-gray-400 cursor-pointer inline-block absolute" style="top: 5px; left: 8px;" title="Download CSV file"></font-awesome-icon>
-      </a>
-      <DisplayImportContactModal class="inline-block w-24 ml-1 flex-none" />
+      <router-link :to="{ name: 'ViewServicesAddressBookAddContacts' }"  class="bg-blue-primary text-gray-50 text-tsm px-5 py-3 rounded-lg">+ Add New Address</router-link>
     </div>
-    <DataTable
-      :value="contacts"
-      ref="dt"
-      v-model:filters="filters"
-      :paginator="true"
-      :rows="10"
-      responsiveLayout="scroll"
-      scrollDirection="horizontal"
-      paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-      currentPageReportTemplate=""
-      :globalFilterFields="['name','address']">
-      <Column field="name" :header="$t('services.label')" headerStyle="width:30%">
-        <template #body="{data}">
-          {{data.name}}
+    <div class='mt-2 py-3 gray-line'>
+      <DataTable
+        :value="contacts"
+        ref="dt"
+        v-model:filters="filters"
+        :paginator="true"
+        :rows="10"
+        responsiveLayout="scroll"
+        scrollDirection="horizontal"
+        paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+        currentPageReportTemplate=""
+        :globalFilterFields="['name','address']">
+        <Column field="name" :header="$t('services.label')" headerStyle="width:30%">
+          <template #body="{data}">
+            {{data.name}}
+          </template>
+        </Column>
+        <Column field="address" :header="$t('services.accountaddress')" headerStyle="width:55%">
+          <template #body="{data}">
+            {{ Helper.createAddress(data.address).pretty() }}
+          </template>
+        </Column>
+        <Column :header="$t('services.action')" headerStyle="width:15%">
+          <template #body="{data}">
+            <EditContactModal :data="data" class="inline-block" :key="data.address" />
+            <ConfirmDeleteContactModal :data="data" />
+          </template>
+        </Column>
+        <template #empty>
+          {{$t('services.norecord')}}
         </template>
-      </Column>
-      <Column field="address" :header="$t('services.accountaddress')" headerStyle="width:55%">
-        <template #body="{data}">
-          {{ Helper.createAddress(data.address).pretty() }}
-        </template>
-      </Column>
-      <Column :header="$t('services.action')" headerStyle="width:15%">
-        <template #body="{data}">
-          <EditContactModal :data="data" class="inline-block" :key="data.address" />
-          <ConfirmDeleteContactModal :data="data" />
-        </template>
-      </Column>
-      <template #empty>
-        {{$t('services.norecord')}}
-      </template>
-    </DataTable>
+      </DataTable>
+    </div>
   </div>
 </template>
 
 <script>
-import { ref } from "vue";
+import { computed, ref } from "vue";
+import SelectInputAddressBookPlugin from "@/modules/services/submodule/addressbook/components/SelectInputAddressBookPlugin.vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {FilterMatchMode} from 'primevue/api';
 import ConfirmDeleteContactModal from '@/modules/services/submodule/addressbook/components/ConfirmDeleteContactModal.vue';
 import EditContactModal from '@/modules/services/submodule/addressbook/components/EditContactModal.vue';
 import { Helper } from "@/util/typeHelper";
-import DisplayImportContactModal from '@/modules/services/submodule/addressbook/components/DisplayImportContactModal.vue'
 
 export default{
   components: {
+    SelectInputAddressBookPlugin,
     DataTable,
     Column,
     ConfirmDeleteContactModal,
     EditContactModal,
-    DisplayImportContactModal,
   },
   name: 'ContactDataTable',
   props: {
@@ -68,32 +71,45 @@ export default{
   },
 
   setup(){
-    const borderColor = ref('border border-gray-400');
+    const selectContactGroups = ref('');
+    const borderColor = ref('border border-gray-200');
     const filters = ref({
       'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
     });
 
     const clickInputText = () => {
-      borderColor.value = 'border border-white-100 drop-shadow';
+      borderColor.value = 'border border-white-100 drop-shadow-md';
     };
 
     const blurInputText = () => {
-      borderColor.value = 'border border-gray-400';
+      borderColor.value = 'border border-gray-200';
     };
 
-    const exportCSV = () => {
-      dt.value.exportCSV();
-    };
-
+    
     const dt = ref();
 
+    const contactGroups = computed(() => {
+      let action = [];
+      action.push(
+        {value: '', label: 'Show All'},
+        {value: '-n-', label: 'No Group'},
+        {value: 'Work', label: 'Work'},
+        {value: 'Friend', label: 'Friend'},
+        {value: 'Family', label: 'Family'},
+        {value: 'Employee', label: 'Employee'},
+        {value: 'Director', label: 'Director'},
+      );
+      return action;
+    });
+
     return {
+      selectContactGroups,
+      contactGroups,
       dt,
       borderColor,
       filters,
       clickInputText,
       blurInputText,
-      exportCSV,
       Helper,
     }
   },

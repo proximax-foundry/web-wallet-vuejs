@@ -1,13 +1,15 @@
 <template>
   <div>
-    <div class='w-9/12 ml-auto mr-auto mt-5'>
-      <div class ='flex text-xs font-semibold border-b-2 menu_title_div'>
-        <div class='w-18 text-center border-b-2 pb-3 border-yellow-500'>List</div>
-        <router-link :to="{ name: 'ViewServicesAddressBookImport' }" class= 'w-18 text-center border-b pb-3'>Import</router-link>
-        <router-link :to="{ name: 'ViewServicesAddressBookExport' }" class= 'w-18 text-center border-b pb-3'>Export</router-link>
+    <div class="flex justify-between text-xs sm:text-sm">
+      <div><span class="text-gray-400">{{$t('services.addressbook')}} ></span> <span class="text-blue-primary font-bold">{{$t('services.list')}}</span></div>
+      <div>
+        <router-link :to="{name: 'ViewServicesAddressBookAddContacts'}" class="font-bold" active-class="accounts">{{$t('services.addnewcontact')}}</router-link> |
+        <router-link :to="{name: 'ViewServices'}" class="font-bold" active-class="accounts">{{$t('services.allservices')}}</router-link>
       </div>
+    </div>
+    <div class='mt-2 py-3 gray-line'>
       <ContactDataTable :contacts="list" class="mt-10"></ContactDataTable>
-  </div>
+    </div>
   </div>
 </template>
 <script>
@@ -51,10 +53,9 @@ export default {
           refreshList();
         }, 1000);
       }
-    });
+    })
 
-
-    return {
+    return {      
       list,
     };
   },

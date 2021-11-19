@@ -1,9 +1,6 @@
 <template>
   <div>
-    <a @click="toggleModal = !toggleModal" class="import-icon border-gray-300 border rounded-lg bg-gray-100 w-18 h-9 relative inline-block">
-      <div class="absolute inline-block text-tsm text-gray-500" style="right: 10px; top: 6px;">{{$t('createwallet.import')}}</div>
-      <font-awesome-icon icon="file-import" class="w-5 h-5 text-gray-400 cursor-pointer inline-block absolute" style="top: 5px; left: 8px;" title="Download CSV file"></font-awesome-icon>
-    </a>
+    <div @click="toggleModal = !toggleModal" class="cursor-pointer mt-5 py-2 px-5 rounded-md bg-blue-primary text-white text-tsm drop-shadow-lg filter hover:bg-blue-600 transition-all duration-500"><img src="@/modules/services/submodule/addressbook/img/icon-download.svg" class="inline-block mr-4 relative top-1">{{$t('createwallet.import')}}</div>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -14,7 +11,7 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal; closeModel()"></font-awesome-icon>
           </div>
           <div class="w-104">
-            <h1 class="default-title font-bold my-10">{{$t('createwallet.import')}} {{$t('createsuccessful.address')}}</h1>
+            <h1 class="default-title font-bold mt-0 mb-5">{{$t('createwallet.import')}} {{$t('createsuccessful.address')}}</h1>
               <div class="bg-blue-200 text-left text-sm p-2 rounded-lg text-gray-800 mb-2" v-if="contactAdded > 0">{{ contactAdded }} {{$t('services.contact')}}{{ (contactAdded>1)?'s':'' }} {{$t('addressbook.addressbookmessage1')}}</div>
               <div class="bg-yellow-200 text-left text-sm p-2 rounded-lg text-gray-800 mb-2" v-if="contactExisted > 0">{{ contactExisted }} {{$t('services.contact')}}{{ (contactExisted>1)?'s':'' }} {{$t('addressbook.addressbookmessage2')}}</div>
               <div class="bg-red-200 text-left text-sm p-2 rounded-lg text-gray-800 mb-2" v-if="contactInvalidAddress.length > 0">{{ contactInvalidAddress.length }} {{$t('services.contact')}}{{ (contactInvalidAddress.length > 1)?'s':'' }} {{$t('addressbook.addressbookmessage3')}}</div>
@@ -25,7 +22,7 @@
                   <div class="inline-block">{{contact.address}}</div>
                 </div>
               </div>
-              <div class="px-10 py-5 my-5">
+              <div class="py-5 my-5 text-tsm">
                 <form enctype="multipart/form-data">
                   <input type="file" @change="onFileChange">
                 </form>
@@ -34,7 +31,7 @@
         </div>
       </div>
     </transition>
-    <div @click="toggleModal = !toggleModal; closeModel()" v-if="toggleModal" class="fixed inset-0 bg-opacity-90 bg-blue-primary z-30"></div>
+    <div @click="toggleModal = !toggleModal; closeModel()" v-if="toggleModal" class="fixed inset-0 bg-opacity-60 bg-gray-100 z-20"></div>
   </div>
 </template>
 
@@ -44,6 +41,8 @@ import { AddressBookUtils } from '@/util/addressBookUtils';
 import { AddressBook } from '@/models/addressBook';
 import { walletState } from '@/state/walletState';
 import { useToast } from "primevue/usetoast";
+import {useI18n} from 'vue-i18n';
+
 export default{
   name: 'DisplayImportContactModal',
   props: [
@@ -58,6 +57,7 @@ export default{
   },
 
   setup(){
+    const {t} = useI18n();
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
