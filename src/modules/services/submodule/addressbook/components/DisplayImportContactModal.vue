@@ -101,7 +101,7 @@ export default{
           array.forEach(element => {
             var label, address, group;
             var arr = element.split(',');
-            if(arr.length > 2){
+            if(arr.length > 3){
               // merge all array as label except the last
               let str = '';
               for(var a = 0; a < arr.length -1 ; ++a){
@@ -111,8 +111,13 @@ export default{
             }else{
               label = arr[0].replace(/['"]+/g, '');
             }
-            group = arr[1].replace(/['"]+/g, '');
-            address = arr[2].replace(/['"]+/g, '');
+            address = arr[1].replace(/['"]+/g, '');
+            if(arr[2]){
+              group = arr[2].replace(/['"]+/g, '');
+            }else{
+              group = '-none-';
+            }
+            
 
             // check if address or name is already in the contact book
             // check for existing account address in wallet
@@ -125,7 +130,7 @@ export default{
             const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
 
             if(contactAddIndex >= 0){
-              exist.push({label: label, address: address });
+              exist.push({label, address, group });
             }else if( contactNameIndex >= 0 || accountNameIndex >= 0 ){
               const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address);
               if(verifyContactAddress.isPassed){
