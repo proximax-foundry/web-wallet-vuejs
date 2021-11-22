@@ -23,7 +23,7 @@ export default{
   emits:[
     'update:modelValue'
   ],
-  name: 'AddContactTextInput',
+  name: 'TextInputClean',
   data() {
     return {
       inputText: "",

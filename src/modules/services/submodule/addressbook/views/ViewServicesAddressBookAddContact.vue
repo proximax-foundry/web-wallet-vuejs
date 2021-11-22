@@ -12,9 +12,9 @@
         <div class="text-md mb-5 font-semibold">Add New Contact</div>
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <div class='mt-2 py-3 text-center px-0 flex'>
-          <AddContactTextInput :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" class="w-52 inline-block mr-2" />
-          <AddContactTextInput :placeholder="$t('createsuccessful.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" class="w-96 inline-block mr-2" />
-          <AddContactSelectInputAddressBookPlugin v-model="selectContactGroups" placeholder="Group" :options="contactGroups" selectDefault="-none-" ref="selectGroupDropdown" class="w-60 inline-block mr-2" />
+          <TextInputClean :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" class="w-52 inline-block mr-2" />
+          <TextInputClean :placeholder="$t('createsuccessful.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" class="w-96 inline-block mr-2" />
+          <SelectInputPluginClean v-model="selectContactGroups" placeholder="Group" :options="contactGroups" selectDefault="-none-" ref="selectGroupDropdown" class="w-60 inline-block mr-2" />
           <button type="submit" class="default-btn py-1 disabled:opacity-50 h-12 flex items-center" :disabled="disableSave" @click="SaveContact()"><img src="@/modules/services/submodule/addressbook/img/icon-save.svg" class="inline-block mr-2">Save Address</button>
         </div>
       </div>
@@ -25,7 +25,7 @@
 <script>
 import { Address } from "tsjs-xpx-chain-sdk";
 import { computed, ref, watch, getCurrentInstance } from 'vue';
-import AddContactTextInput from '@/modules/services/submodule/addressbook/components/AddContactTextInput.vue';
+import TextInputClean from '@/components/TextInputClean.vue';
 import { useRouter } from 'vue-router';
 import { useToast } from "primevue/usetoast";
 import { AddressBook } from '@/models/addressBook';
@@ -35,13 +35,13 @@ import { Wallets } from "@/models/wallets";
 import { walletState } from '@/state/walletState';
 import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 import {useI18n} from 'vue-i18n'
-import AddContactSelectInputAddressBookPlugin from "@/modules/services/submodule/addressbook/components/AddContactSelectInputAddressBookPlugin.vue";
+import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 import AddCustomGroupModal from "@/modules/services/submodule/addressbook/components/AddCustomGroupModal.vue";
 export default {
   name: 'ViewServicesAddressBookAddContact',
   components: {
-    AddContactTextInput,
-    AddContactSelectInputAddressBookPlugin,
+    TextInputClean,
+    SelectInputPluginClean,
     AddCustomGroupModal,
   },
   setup(){

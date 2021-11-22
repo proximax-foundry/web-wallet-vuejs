@@ -9,7 +9,7 @@
       <div class="mt-10">
         <div class="text-md my-5 font-semibold">Export Addresses</div>
         <div class="text-tsm">Export contacts for backup</div>
-        <div class="mt-4"><SelectInputAddressBookPlugin v-model="filters['global'].value" placeholder="Group" :options="contactGroups" selectDefault="" class="w-60 inline-block mr-2" /></div>
+        <div class="mt-4"><SelectInputPluginClean v-model="filters['global'].value" placeholder="Group" :options="contactGroups" selectDefault="" class="w-60 inline-block mr-2" /></div>
       </div>
       <input v-model="filters['global'].value" type="text" class="hidden">
 
@@ -53,7 +53,7 @@ import DataTable from 'primevue/datatable';
 import {FilterMatchMode} from 'primevue/api';
 import Column from 'primevue/column';
 import {useI18n} from 'vue-i18n';
-import SelectInputAddressBookPlugin from "@/modules/services/submodule/addressbook/components/SelectInputAddressBookPlugin.vue";
+import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 
 export default {
   name: 'ViewServicesAddressBookExport',
@@ -61,7 +61,7 @@ export default {
   components: {
     DataTable,
     Column,
-    SelectInputAddressBookPlugin,
+    SelectInputPluginClean,
   },
 
   setup() {

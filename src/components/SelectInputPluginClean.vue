@@ -1,19 +1,19 @@
 <template>
   <div>
-    <div class="select selectPlugin">
+    <div class="border border-gray-200 select selectPlugin py-1" :class="`${ !placeholder?'pt-2':'' }`">
+      <div class="uppercase text-gray-400 font-light text-txs text-left mb-2 pl-2" v-if="placeholder">{{ placeholder }}</div>
       <Multiselect
         class = 'border'
         :placeholder="placeholder"
         :options="options"
         mode="single"
         :canDeselect="canDeselect"
-        @change="makeSelection"
         v-model="selected"
         :noOptionsText="noOptionsText"
         @close="closeSelection"
         :maxHeight="maxHeight"
         @deselect="$emit('update:modelValue', selected)"
-        @select="makeSelection;$emit('update:modelValue', selected);$emit('show-selection', selected)"
+        @select="$emit('update:modelValue', selected);$emit('show-selection', selected)"
         @clear="$emit('clear-selection')"
         ref="selectRef"
         :disabled="disabled"
@@ -32,7 +32,6 @@ export default defineComponent({
     'errorMessage',
     'options',
     'modelValue',
-    'showSelectTitleProp',
     'selectDefault',
     'disabled',
     'noOptionsText',
@@ -40,29 +39,16 @@ export default defineComponent({
   emits:[
     'update:modelValue', 'show-selection', 'clear-selection'
   ],
-  name: 'SelectInputPlugin',
+  name: 'SelectInputPluginClean',
 
   setup(p){
-    const showSelectTitle = ref(false);
-    const selectErr = ref(false);
     const selectModel = ref(0);
     const selected = ref([]);
     const maxHeight = ref(300);
-    const canDeselect = ref(true);
-
-    if(p.showSelectTitleProp){
-      showSelectTitle.value = true;
-    }
+    const canDeselect = ref(false);
 
     const clearSelection = () => {
       selectModel.value = 0;
-      showSelectTitle.value = false;
-      selectErr.value = true;
-    };
-
-    const makeSelection =() => {
-      showSelectTitle.value = true;
-      selectErr.value = false;
     };
 
     const closeSelection =() => {
@@ -72,12 +58,9 @@ export default defineComponent({
     };
 
     return {
-      showSelectTitle,
-      selectErr,
       selectModel,
       selected,
       clearSelection,
-      makeSelection,
       closeSelection,
       maxHeight,
       canDeselect,
@@ -93,6 +76,9 @@ export default defineComponent({
       if(this.$refs.selectRef){
         this.$refs.selectRef.clear();
       }
+    },
+    select: function(group) {
+      this.$refs.selectRef.select(group, this.options);
     }
   },
 
@@ -123,13 +109,21 @@ export default defineComponent({
 @import "@/assets/scss/multiselect.scss";
 .selectPlugin::v-deep{
   .multiselect-input{
-    min-height: 30px;
+    min-height: 18px;
   }
 
   .multiselect-clear{
     display: inline-block;
     right: 7px;
-    top: 7px;
+    top: 2px;
+  }
+
+  .multiselect-options{
+    margin-top: 4px;
+  }
+
+  > .border{
+    border-width: 0px !important;
   }
 }
 </style>

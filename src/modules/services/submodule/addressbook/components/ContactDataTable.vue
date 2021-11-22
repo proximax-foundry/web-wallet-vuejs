@@ -3,7 +3,7 @@
     <div class="flex justify-between">
       <div class="flex items-center">
         <div class='font-semibold mr-10'>Address Book</div>
-        <SelectInputAddressBookPlugin v-model="selectContactGroups" :options="contactGroups" selectDefault="" class="w-60 mr-4" />
+        <SelectInputPluginClean v-model="selectContactGroups" :options="contactGroups" selectDefault="" class="w-60 mr-4" />
         <div class="w-30 px-3 py-1" :class="borderColor">
           <input v-model="filters['global'].value" type="text" class="w-26 outline-none text-xs" :placeholder="$t('services.search')" @click="clickInputText()" @blur="blurInputText()">
           <img src="@/modules/services/submodule/addressbook/img/icon-search_black.svg" class="inline-block">
@@ -58,7 +58,7 @@
 
 <script>
 import { computed, ref, getCurrentInstance } from "vue";
-import SelectInputAddressBookPlugin from "@/modules/services/submodule/addressbook/components/SelectInputAddressBookPlugin.vue";
+import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {FilterMatchMode} from 'primevue/api';
@@ -69,7 +69,7 @@ import { toSvg } from "jdenticon";
 
 export default{
   components: {
-    SelectInputAddressBookPlugin,
+    SelectInputPluginClean,
     DataTable,
     Column,
     ConfirmDeleteContactModal,
