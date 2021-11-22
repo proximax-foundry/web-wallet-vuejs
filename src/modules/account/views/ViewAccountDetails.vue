@@ -4,6 +4,24 @@
       <img src='@/assets/img/chevron_left.svg'>
       <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
     </div>
+    <div v-if='showModal' >
+        <transition
+          enter-active-class="animate__animated animate__fadeInDown"
+          leave-active-class="animate__animated animate__fadeOutUp"
+        >
+          <div class="popup-outer-create-wallet absolute flex z-50">
+            <div class="modal-popup-box ">
+              <img src='@/assets/img/icon-blue-tick.svg' class='h-5 w-5 ml-auto mr-auto mb-3'>
+              <div class= 'text-center mt-2 text-xs font-semibold'>Account Creation Successful</div>
+              <div class ='text-gray-500 text-center text-xs mt-2'>Should you wish to get testnet XPX amount, you can top up every 24 hours in your account.</div>
+              <div class='flex flex-wrap content-center'>
+                <div @click="showModal=false" class= ' mt-4 w-4/12 ml-auto mr-auto text-center  blue-btn cursor-pointer font-semibold text-xs py-2 px-2 mt-2 font-semibold mb-3' >Close</div>
+              </div>
+            </div>
+          </div>
+        </transition>
+        <div class="fixed inset-0 bg-opacity-60 z-10 bg-gray-100"></div>
+      </div>
     <div class='w-9/12 ml-auto mr-auto '>
       <div class = 'flex text-xs font-semibold border-b-2'>
         <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Details</div>
@@ -125,13 +143,14 @@ export default {
     DeleteAccountModal
   },
   props: {
-    address: String
+    address: String,
+    accountCreated: Boolean
   },
   setup(p) {
     const {t} = useI18n();
     const toast = useToast();
     const router = useRouter();
-
+    const showModal = ref(false)
     // get account details
     var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
     const other_acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
@@ -143,7 +162,9 @@ export default {
         acc = other_acc;
       }
     }
-    
+    if(p.accountCreated){
+      showModal.value= true
+    }
     const isDefault = (acc.default == true) ? true: false
     if (acc === -1) {
       router.push({name: "ViewAccountDisplayAll"});
@@ -319,7 +340,10 @@ export default {
     emitter.on("unlockWalletPaper", (e) => {
       saveWalletPaper(e)
     });
+   
+
     return {
+      showModal,
       svgString,
       splitBalance,
       other_acc,
@@ -353,3 +377,10 @@ export default {
   }
 };
 </script>
+<style scoped>
+.popup-outer-create-wallet{
+  
+  top: 40px; left: 0; right: 0; margin-left: auto; margin-right: auto; max-width: 400px;
+
+}
+</style>

@@ -14,8 +14,8 @@
       </div>
       <SelectNetworkInput />
       <div class="mt-3 w-8/12 ml-auto mr-auto">
-          <PasswordInput @space='space1=true' @removeSpace="space1=false" :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" v-model="privateKeyInput"  />
-          <div v-if='space1' class='mt-3'></div>
+          <PasswordInput @space='space1=true' @removeSpace="space1=false" :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" :showError="showPkError" v-model="privateKeyInput"  />
+          <div v-if='space1 || showPkError' class='mt-3'></div>
           <TextInput @space='space2=true' @removeSpace="space2=false" :placeholder="$t('createwallet.walletname')" :errorMessage="$t('createwallet.inputwalletname')"  v-model="walletName" icon="wallet" />
           <div  v-if='space2' class='mt-3'></div>
           <PasswordInput @space='space3=true' @removeSpace="space3=false" :placeholder="$t('createwallet.inputpassword')" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
@@ -116,6 +116,9 @@ export default defineComponent({
           privateKeyInput.value.match(privKeyPattern)
       )
     );
+    const showPkError = computed(
+      () => !privateKeyInput.value.match(privKeyPattern) && privateKeyInput.value!=""
+    );
 
     // true to show error
     const showConfirmPasswdError = computed(
@@ -133,7 +136,7 @@ export default defineComponent({
         let password = WalletUtils.createPassword(passwd.value);
 
         const walletAccount = WalletUtils.addNewWalletWithPrivateKey(walletState.wallets, privateKeyInput.value, password, walletName.value, selectedNetworkName.value, selectedNetworkType.value);
-
+        
         privateKey.value = privateKeyInput.value;
         newWallet.value = walletAccount;
         showModal.value=true
@@ -148,6 +151,7 @@ export default defineComponent({
     };
 
     return {
+      showPkError,
       showModal,
       space1,
       space2,
