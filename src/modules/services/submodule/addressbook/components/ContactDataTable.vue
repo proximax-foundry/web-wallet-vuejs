@@ -48,8 +48,9 @@
           </template>
         </Column>
         <template #empty>
-          <div>Nothing to show</div>
-          <div>You can add multiple wallet addresses to keep for your future transactions.</div>
+          <div class="text-center my-5"><img src="@/modules/services/submodule/addressbook/img/open-book.svg" class="inline-block h-20 w-20"></div>
+          <div class="text-center text-blue-primary mb-2" style="font-size:15px">Nothing to show</div>
+          <div class="text-center text-gray-400" style="font-size:12px">You can add multiple wallet addresses to keep for your future transactions.</div>
         </template>
       </DataTable>
     </div>
