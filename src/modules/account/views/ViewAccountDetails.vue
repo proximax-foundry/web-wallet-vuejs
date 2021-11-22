@@ -104,7 +104,7 @@
           </div>
           <p class = 'text-txs mt-2 text-gray-400'>{{$t('createsuccessful.warningtext1')}} {{$t('createsuccessful.warningtext2')}}</p>
       </div>
-      <div class='my-6 gray-line' v-if='!other_acc && !isDefault'></div>
+      <div class='my-6 gray-line' v-if='!other_acc'></div>
       <div class='flex'>
         <PdfPasswordModal v-if='!other_acc' />
         <DeleteAccountModal v-if="!isDefault && !other_acc " :account ='acc' />
