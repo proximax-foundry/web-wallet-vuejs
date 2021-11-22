@@ -127,9 +127,6 @@ export default{
     const generateAssetDatatable = (assets, account) => {
       let formattedAssets = [];
 
-      // let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
-      // let chainAPICall = new ChainAPICall(apiEndpoint);
-
       for(let i=0; i < assets.length; ++i){
         let namespaceAlias = [];
         let assetId = assets[i].idHex;
@@ -143,9 +140,6 @@ export default{
 
             namespaceAlias.push(aliasData);
           }
-
-          // let getAsset = await chainAPICall.assetAPI.getMosaic(assetId);
-          // console.log(getAsset)
 
           let data = {
             i: i,

@@ -82,7 +82,7 @@ body{
 }
 
 .default-btn{
-  @apply gray-btn py-3 px-10;
+  @apply blue-btn py-3 px-10;
 }
 
 .default-secondary-btn{
@@ -633,4 +633,11 @@ body{
 
 .p-tooltip.p-tooltip-bottom .p-tooltip-arrow {
   border-bottom-color: #383838;
+}
+
+.menu_title_div{
+  > div, a{
+    position: relative;
+    top: 2px;
+  }
 }
