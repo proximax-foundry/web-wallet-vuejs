@@ -1,43 +1,45 @@
 <template>
-  <div class="inline-block">
-    <a class="action-icon border rounded-xl relative bg-gray-100 border-gray-400 w-10 h-8 inline-block shadow-md" @click="toggleModal = !toggleModal">
-      <font-awesome-icon icon="trash-alt" class="w-5 h-5 text-gray-400 text-sm cursor-pointer inline-block absolute" title="Remove this contact" style="top: 5px; left: 11px;"></font-awesome-icon>
-    </a>
+  <div>
+    <div class="block hover:bg-gray-100 transition duration-200 p-2 z-20 cursor-pointer text-red-600" @click="openRemoveModal()">Remove</div>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
     >
-      <div v-if="toggleModal" class="popup-outer absolute flex z-50">
+      <div v-if="toggleModal" class="popup-outer fixed flex z-50">
         <div class="modal-popup-box">
           <div class="delete-position">
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
           </div>
           <div class="w-104 font-normal">
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
-            <div class="mt-10 mb-5"><span class="text-lg text-gray-700">{{$t('services.removecontact')}}</span></div>
-            <div class="flex justify-between p-4 rounded-xl bg-yellow-100 mb-4 text-gray-900">
+            <div class="mb-5"><span class="text-sm text-gray-700">{{$t('services.removecontact')}}</span></div>
+            <div class="flex justify-between rounded-xl mb-4 text-gray-600">
               <div class="w-full text-left">
-                <div class="text-sm mt-3">
+                <div class="text-xs mt-3">
                   <div class="inline-block w-20 font-bold">{{$t('services.name')}}:</div>
                   <div class="inline-block">{{ data.name }}</div>
                 </div>
-                <div class="text-sm mt-3">
+                <div class="text-xs mt-3">
                   <div class="inline-block w-20 font-bold">{{$t('createsuccessful.address')}}:</div>
-                  <div class="inline-block">{{ data.address }}</div>
+                  <div class="inline-block mt-2">{{ data.address }}</div>
+                </div>
+                <div class="text-xs mt-3">
+                  <div class="inline-block w-20 font-bold">Group:</div>
+                  <div class="inline-block">{{ data.group }}</div>
                 </div>
               </div>
             </div>
             <fieldset class="w-full">
               <div class="text-center mt-5">
-                <button type="button" class="default-btn mr-5 focus:outline-none" @click="toggleModal = !toggleModal">{{$t('deletewallet.cancel')}}</button>
-                <button type="submit" class="default-btn py-1" @click="deleteContact(data);">{{$t('services.removecontact2')}}</button>
+                <div class="inline-block font-bold text-blue-primary mr-5 cursor-pointer" @click="closeRemoveModal">{{$t('deletewallet.cancel')}}</div>
+                <button type="submit" class="bg-red-primary text-white text-xs py-2 px-4 rounded-md" @click="deleteContact(data);">{{$t('services.removecontact2')}}</button>
               </div>
             </fieldset>
           </div>
         </div>
       </div>
     </transition>
-    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-90 bg-blue-primary z-20"></div>
+    <div @click="closeRemoveModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-60 bg-gray-100 z-20"></div>
   </div>
 </template>
 
@@ -62,11 +64,27 @@ export default{
       walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
       toggleModal.value = !toggleModal.value;
       emitter.emit('REFRESH_CONTACT_LIST', true);
+      emitter.emit('CLOSE_CONTACTMENU_PANEL');
     };
+
+    const openRemoveModal = () => {
+      toggleModal.value = !toggleModal.value;
+    }
+
+    const closeRemoveModal = () => {
+      toggleModal.value = !toggleModal.value;
+      setTimeout(() => {
+        emitter.emit('CLOSE_CONTACTMENU_PANEL');
+      }, 500);
+    }
+
     return {
       err,
       deleteContact,
       toggleModal,
+      openRemoveModal,
+      closeRemoveModal,
+      emitter
     };
   },
 }

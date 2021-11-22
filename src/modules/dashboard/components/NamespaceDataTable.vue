@@ -200,9 +200,6 @@ export default{
       }
     }
 
-
-
-
     const showMenu = (i) => {
       currentMenu.value = i;
       isMenuShow.value[i] = !isMenuShow.value[i];
