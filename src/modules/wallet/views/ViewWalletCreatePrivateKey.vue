@@ -8,21 +8,25 @@
       @submit.prevent="createWallet"
     >
       <div class="text-sm text-center mt-20 font-semibold">Create Wallet</div>
-      <div class="text-xxs text-center text-blue-primary mb-5">FROM A PRIVATE KEY</div>
+      <div class="text-xxs text-center text-blue-primary mb-5 font-bold">FROM A PRIVATE KEY</div>
         <p class = 'w-9/12 ml-auto mr-auto text-xs text-center'>Restore your existing ProximaX Sirius Wallet, import a private key from another service or create a new wallet.</p>
       <div class="mt-4 w-8/12 ml-auto mr-auto">
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
       </div>
       <SelectNetworkInput />
-      <div class="mt-4 w-8/12 ml-auto mr-auto">
-          <PasswordInput :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" v-model="privateKeyInput"  />
-          <TextInput :placeholder="$t('createwallet.walletname')" :errorMessage="$t('createwallet.inputwalletname')"  v-model="walletName" icon="wallet" />
-          <PasswordInput :placeholder="$t('createwallet.inputpassword')" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
-          <PasswordInput  :placeholder="$t('createwallet.confirmpassword')" :errorMessage="$t('createwallet.confirmpassword')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd" />
+      <div class="mt-3 w-8/12 ml-auto mr-auto">
+          <PasswordInput @space='space1=true' @removeSpace="space1=false" :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" v-model="privateKeyInput"  />
+          <div v-if='space1' class='mt-3'></div>
+          <TextInput @space='space2=true' @removeSpace="space2=false" :placeholder="$t('createwallet.walletname')" :errorMessage="$t('createwallet.inputwalletname')"  v-model="walletName" icon="wallet" />
+          <div  v-if='space2' class='mt-3'></div>
+          <PasswordInput @space='space3=true' @removeSpace="space3=false" :placeholder="$t('createwallet.inputpassword')" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
+          <div v-if='space3' class='mt-3'></div>
+          <PasswordInput  @space="space4=true" @removeSpace='space4=false' :placeholder="$t('createwallet.confirmpassword')" :errorMessage="$t('createwallet.doesntmatch')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd" />
+          <div v-if='showConfirmPasswdError | space4' class='mt-3'></div>
         </div>
-        <button type="submit" class="text-center mt-5 font-bold blue-btn py-3 block ml-auto mr-auto w-8/12 disabled:opacity-50" :disabled="disableCreate">{{$t('welcome.create')}}</button>
+        <button type="submit" class="text-center  font-bold blue-btn py-3 block ml-auto mr-auto w-8/12 disabled:opacity-50" :disabled="disableCreate">Create Wallet</button>
         <div class ='mt-12 text-center text-xs mt-6 mb-1 '>Already have Sirius wallet account?</div>
-        <div class ="text-center  text-xs text-blue-primary"><router-link :to="{ name: 'Home' }">Sign in here ></router-link></div>
+        <div class ="text-center  text-xs text-blue-primary font-semibold"><router-link :to="{ name: 'Home' }">Sign in here ></router-link></div>
         <div class = 'h-20'></div>
     </form>
       <div v-else>
@@ -138,6 +142,10 @@ export default defineComponent({
     const showPasswdError = ref(false);
     const privKeyPattern = "^(0x|0X)?[a-fA-F0-9].{63,65}$";
     const passwdPattern = "^[^ ]{8,}$";
+    const space1=ref(false)
+    const space2=ref(false)
+    const space3=ref(false)
+    const space4=ref(false)
     const copy = (id :string) =>{ 
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
@@ -183,6 +191,10 @@ export default defineComponent({
     };
 
     return {
+      space1,
+      space2,
+      space3,
+      space4,
       networkState,
       err,
       newWallet,
