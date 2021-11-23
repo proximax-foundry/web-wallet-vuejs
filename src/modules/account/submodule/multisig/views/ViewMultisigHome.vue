@@ -10,9 +10,9 @@
       <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Multisig</div>
     </div>
     <div class='font-semibold mt-8'>Multisig Settings</div>
-    <div class='mt-6 p-6 border '>
+    <div class='mt-6 p-6 border filter shadow-lg'>
       <div class='text-xs font-semibold'>Account Cosignatories</div>
-      <div class='border border-4 p-4 my-3'>
+      <div class='border border-4 p-4 my-3 '>
         <!-- <div v-if="isMultisig">im a multisig</div> -->
         <div v-if="!isMultisig" class='text-blue-primary text-xs text-center font-semibold'>Nothing to show.</div>
         <div class='flex text-txs w-9/12 ml-auto mr-auto text-gray-400 mt-1 text-center'>

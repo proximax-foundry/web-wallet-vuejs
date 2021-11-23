@@ -10,7 +10,7 @@
       <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Multisig</div>
     </div>
     <div class='font-semibold mt-8 mb-3'>Multisig Settings</div>
-    <div class="border lg:grid lg:grid-cols-12" >
+    <div class="border filter shadow-lg lg:grid lg:grid-cols-12" >
       <div class="lg:col-span-7 py-6 pr-6">
         <div class="text-xs font-semibold pl-6">Manage Cosignatories</div>
         <div class='pl-6'>
