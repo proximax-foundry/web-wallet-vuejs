@@ -7,7 +7,7 @@
         <router-link :to="{ name: 'ViewServicesAddressBookExport' }" class= 'w-18 text-center border-b pb-3'>Export</router-link>
       </div>
       <ContactDataTable class="mt-10"></ContactDataTable>
-  </div>
+    </div>
   </div>
 </template>
 <script>

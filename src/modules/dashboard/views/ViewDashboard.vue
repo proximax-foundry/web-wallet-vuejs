@@ -64,7 +64,7 @@
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-if="displayBoard=='overview'">
       <div class="text-txs text-gray-400"><b class="text-gray-700">ASSETS</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">View all</span>)</div>
-      <AssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
+      <DashboardAssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
       <NamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" />
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ filteredConfirmedTransactions.length }} - View all)</div>
@@ -108,7 +108,7 @@
       </div>
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='asset'">
-      <AssetDataTable :assets="selectedAccount.assets" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
+      <DashboardAssetDataTable :assets="selectedAccount.assets" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='namespace'">
       <NamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" />
@@ -126,7 +126,7 @@ import {ResolvedNamespace} from '@/modules/dashboard/model/resolvedNamespace';
 import {AmountType, TipType} from '@/modules/dashboard/model/dashboardClasses';
 import DashboardDataTable from '@/modules/dashboard/components/DashboardDataTable.vue';
 import DashboardPartialDataTable from '@/modules/dashboard/components/DashboardPartialDataTable.vue';
-import AssetDataTable from '@/modules/dashboard/components/AssetDataTable.vue';
+import DashboardAssetDataTable from '@/modules/dashboard/components/DashboardAssetDataTable.vue';
 import NamespaceDataTable from '@/modules/dashboard/components/NamespaceDataTable.vue';
 import PartialDashboardDataTable from '@/components/PartialDashboardDataTable.vue';
 import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
@@ -162,7 +162,7 @@ export default defineComponent({
     SetAccountDefaultModal,
     DashboardDataTable,
     //PartialDashboardDataTable,
-    AssetDataTable,
+    DashboardAssetDataTable,
     NamespaceDataTable,
     
   },

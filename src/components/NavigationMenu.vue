@@ -11,7 +11,7 @@
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
       <div class="my-3 px-10 text-gray-400">CREATE</div>
       <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">Namespace</router-link>
-      <router-link :to="{ name : 'ViewServicesAssetsCreate'}"  class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">Asset</router-link>
+      <router-link :to="{ name : 'ViewServicesAssets'}"  class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">Asset</router-link>
       <router-link :to="{ name : 'ViewServices'}"  class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-services.svg" class="h-3 w-3 inline-block relative mr-2">Other Services</router-link>
     </div>
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { computed, inject, watch } from "vue";
+import { computed, inject } from "vue";
 import { useRouter } from "vue-router";
 import { walletState } from '@/state/walletState';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
