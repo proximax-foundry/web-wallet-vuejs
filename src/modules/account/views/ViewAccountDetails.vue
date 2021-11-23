@@ -42,11 +42,11 @@
             <div class='flex'> 
               <div  v-if='isDefault' class = 'ml-3 px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm'>
                 <img src="@/modules/account/img/icon-pin.svg" class = 'h-4 w-4 ' title='This is your default account everytime you login'>
-                <p class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is your default account everytime you login' >DEFAULT ACCOUNT</p>
+                <p class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is your default account everytime you login' >DEFAULT</p>
               </div>
-              <div v-if='isMultiSig' class = 'ml-3 px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm '>
-                <img v-if='isMultiSig' src="@/modules/account/img/icon-pin.svg" class = 'h-4 w-4' title='This is your default account everytime you login'>
-                <p v-if='isMultiSig' class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is a multisig account' >MULTISIG ACCOUNT</p>
+              <div v-if='isMultiSig' class = 'ml-1.5 px-1 py-0.5 flex mt-0.5 bg-orange-primary rounded-sm '>
+                <img v-if='isMultiSig' src="@/assets/img/icon-key.svg" class = 'h-4 w-4 mr-1' title='This is your default account everytime you login'>
+                <p v-if='isMultiSig' class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is a multisig account' >MULTISIG</p>
               </div>
             </div>
           </div>
