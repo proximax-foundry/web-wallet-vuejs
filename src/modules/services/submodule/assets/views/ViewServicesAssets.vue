@@ -8,7 +8,26 @@
         <AssetDataTable class="mt-10"></AssetDataTable>
       </div>
       <div v-else>
-
+        <div class="border border-gray-200 filter drop-shadow-xl py-2 sm:py-14 px-2 sm:px-28 text-center bg-white">
+          <img src="@/modules/services/submodule/assets/img/asset_default.svg" class="inline-block h-18 w-18">
+          <div class="text-gray-700 text-sm my-5">Looks like you don’t have any assets yet.</div>
+          <div class="text-gray-600 text-tsm my-5">An asset could be a token, but it could also be a collection of more specialized assets such as reward points, shares of stock, signatures, status flags, votes or even other currencies.</div>
+          <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="bg-blue-primary py-2 px-7 rounded-lg text-white font-bold mt-4 inline-block">Create assets</router-link>
+        </div>
+        <div class="grid grid-cols-3 mt-16">
+          <div>
+            <a href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new class="text-blue-primary font-bold inline-block text-tsm">What is asset?</a>
+            <div class="text-gray-400 text-tsm my-3 sm:pr-2">Mosaics are part of what makes the Smart Asset System unique and flexible. They are fixed assets on the Sirius Chain that can represent a set of multiple identical things that do not change.</div>
+          </div>
+          <div>
+            <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="text-blue-primary font-bold inline-block text-tsm">The complete guide about Digital Asset</router-link>
+            <div class="text-gray-400 text-tsm my-3">What is asset?</div>
+          </div>
+          <div>
+            <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="text-blue-primary font-bold inline-block text-tsm">Give us feedback about your experience here</router-link>
+            <div class="text-gray-400 text-tsm my-3">Give us feedback about your experience here</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
