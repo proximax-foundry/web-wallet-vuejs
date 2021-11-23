@@ -25,7 +25,7 @@
     <div class='w-9/12 ml-auto mr-auto '>
       <div class = 'flex text-xs font-semibold border-b-2'>
         <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Details</div>
-        <router-link :to="{ name: isMultiSig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
+        <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
       </div>
       <div class='my-7 font-semibold'>Account Details</div>
       <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>

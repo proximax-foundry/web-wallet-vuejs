@@ -17,4 +17,13 @@ export const MultisigRoutes = [
       title: "Edit Multisig Account",
     }
   },
+  {
+    path: '/multisig-settings/:name',
+    name: 'ViewMultisigHome',
+    props: true,
+    component: () => import('@/modules/account/submodule/multisig/views/ViewMultisigHome.vue'),
+    meta: {
+      title: "View Multisig Settings",
+    }
+  },
 ];
