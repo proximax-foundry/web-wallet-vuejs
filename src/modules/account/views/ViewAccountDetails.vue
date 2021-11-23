@@ -25,7 +25,7 @@
     <div class='w-9/12 ml-auto mr-auto '>
       <div class = 'flex text-xs font-semibold border-b-2'>
         <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Details</div>
-        <router-link :to="{ name: isMultiSig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
+        <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
       </div>
       <div class='my-7 font-semibold'>Account Details</div>
       <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
@@ -42,11 +42,11 @@
             <div class='flex'> 
               <div  v-if='isDefault' class = 'ml-3 px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm'>
                 <img src="@/modules/account/img/icon-pin.svg" class = 'h-4 w-4 ' title='This is your default account everytime you login'>
-                <p class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is your default account everytime you login' >DEFAULT ACCOUNT</p>
+                <p class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is your default account everytime you login' >DEFAULT</p>
               </div>
-              <div v-if='isMultiSig' class = 'ml-3 px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm '>
-                <img v-if='isMultiSig' src="@/modules/account/img/icon-pin.svg" class = 'h-4 w-4' title='This is your default account everytime you login'>
-                <p v-if='isMultiSig' class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is a multisig account' >MULTISIG ACCOUNT</p>
+              <div v-if='isMultiSig' class = 'ml-1.5 px-1 py-0.5 flex mt-0.5 bg-orange-primary rounded-sm '>
+                <img v-if='isMultiSig' src="@/assets/img/icon-key.svg" class = 'h-4 w-4 mr-1' title='This is your default account everytime you login'>
+                <p v-if='isMultiSig' class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is a multisig account' >MULTISIG</p>
               </div>
             </div>
           </div>

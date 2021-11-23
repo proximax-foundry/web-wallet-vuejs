@@ -67,6 +67,7 @@ import { walletState } from "@/state/walletState";
 import {useI18n} from 'vue-i18n'
 import IntroTextComponent from '@/components/IntroTextComponent.vue'
 import SelectNetworkInput from '@/components/SelectNetworkInput.vue';
+import { useRouter } from 'vue-router';
 export default defineComponent({
   name: 'ViewWalletCreate',
   components: {
@@ -82,6 +83,7 @@ export default defineComponent({
   },
   setup(){
     const {t} = useI18n();
+    const router = useRouter();
     const toast = useToast();
     const selectedNetwork = computed(()=> networkState.chainNetwork);
     const selectedNetworkType = computed(()=> ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
