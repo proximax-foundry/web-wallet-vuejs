@@ -10,22 +10,40 @@
       <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Multisig</div>
     </div>
     <div class='font-semibold mt-8 mb-3'>Multisig Settings</div>
-    <div class="border filter shadow-lg lg:grid lg:grid-cols-12" >
-      <div class="lg:col-span-7 py-6 pr-6">
+    <div class="border filter shadow-lg lg:grid lg:grid-cols-3" >
+      <div class="lg:col-span-2 py-6 pr-6">
         <div class="text-xs font-semibold pl-6">Manage Cosignatories</div>
         <div class='pl-6'>
            <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
         </div>
         <div class="mt-4"></div>
-        <div v-for="(coSignAddress, index) in coSign" :key="index" class="flex ">
-          <img  src="@/modules/account/submodule/multisig/img/icon-delete.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
-          <TextInput class='w-5/12 mr-2' placeholder="Name"  v-model="contactName[index]"  />
-          <TextInput class='w-7/12 mr-2' placeholder="Public Key" errorMessage="Enter Valid Public Key" :showError="showAddressError[index]" v-model="coSign[index]" />
-          <div v-if="showAddressError[index]==true" class="mt-16"/>
-          <!-- <AddCosignModal :cosignPublicKeyIndex="index" :selectedAddress="selectedAddresses" :accountName="accountName" /> -->
-          <div class=' border h-11 cursor-pointer flex flex-col justify-center  p-2'>
-            <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
-            <div class='text-xxs text-blue-primary font-semibold'>SELECT</div>
+        <div class="flex flex-col gap-2">
+          <div v-for="(coSignAddress, index) in coSign" :key="index" >
+            <div class="flex">
+              <img  src="@/modules/account/submodule/multisig/img/icon-delete.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
+              <TextInput class='w-5/12 mr-2' placeholder="Name"  v-model="contactName[index]" :disabled="true"  />
+              <TextInput class='w-7/12 mr-2' placeholder="Public Key" errorMessage="Invalid Public Key" :showError="showAddressError[index]" v-model="coSign[index]" />
+              <div v-if="showAddressError[index]==true " class="mt-16"/>
+              <div @click="toggleContact[index]=!toggleContact[index]" class=' border  cursor-pointer flex flex-col justify-center  p-2' style="height:2.66rem">
+                <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
+                <div class='text-xxs text-blue-primary font-semibold'>SELECT</div>
+              </div>
+            </div>
+            
+            <div v-if="toggleContact[index]" class="pl-6 ">
+              <div class=" border">
+                <div class='text-xxs text-gray-300 font-semibold py-2 px-2'>IMPORT FROM ADDRESS BOOK</div>
+                <div v-for="(item, number) in contact" :key="number" class="cursor-pointer">
+                  <div @click="contactName[index]=item.label;coSign[index]=item.value;toggleContact[index]=false" class="flex justify-center">
+                    <div v-if="number%2==0" class="text-xs py-2 bg-gray-100 pl-2 w-full">{{item.label}}</div>
+                    <div v-if="number%2==1" class="text-xs py-2 pl-2 w-full">{{item.label}}</div>
+                    <div v-if="number%2==0" class="ml-auto pr-2 text-xxs py-2 font-semibold text-blue-primary bg-gray-100">SELECT</div>
+                    <div v-if="number%2==1" class="ml-auto mr-2 text-xxs py-2 font-semibold text-blue-primary">SELECT</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
         <button class="pl-6 font-semibold text-xs mt-1 text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">+ Add New Cosignatory</button>
@@ -35,24 +53,24 @@
           <div class="border w-6/12">
           <div class="border-b-2 text-xxs text-center py-1">TRANSACTIONS APPROVAL</div>
             <div class='flex justify-around'>
-              <div  @click="numApproveTransaction--">-</div>
+              <button class="text-blue-primary disabled:opacity-50" @click="numApproveTransaction--" :disabled="numApproveTransaction<=0">-</button>
               <input type="number" class=" w-4 outline-none text-xs" :min=0 @keypress="validateApproval" :max="maxNumApproveTransaction" v-model="numApproveTransaction" >
-              <div class="" @click="numApproveTransaction++">+</div>
+              <button class="text-blue-primary disabled:opacity-50" :disabled="numApproveTransaction>=maxNumApproveTransaction " @click="numApproveTransaction++">+</button>
             </div>
             <div class="text-xxs border-t-2 text-center py-1">OF {{maxNumApproveTransaction}} COSIGNATORIES</div>
           </div>
           <div class="border w-6/12">
             <div class="border-b-2 text-xxs text-center py-1">ACCOUNT DELETION APPROVAL</div>
             <div class='flex justify-around'>
-              <div  @click="numDeleteUser--">-</div>
+              <button class="text-blue-primary disabled:opacity-50" @click="numDeleteUser--" :disabled="numDeleteUser<=0">-</button>
               <input type="number" class=" w-4 outline-none text-xs" :min=0 @keypress="validateDelete" :max="maxNumDeleteUser" v-model="numDeleteUser" >
-              <div class="" @click="numDeleteUser++">+</div>
+              <button class="text-blue-primary disabled:opacity-50" :disabled="numDeleteUser>=maxNumDeleteUser " @click="numDeleteUser++">+</button>
             </div>
             <div class="text-xxs border-t-2 text-center py-1">OF {{maxNumDeleteUser}} COSIGNATORIES</div>
           </div>
         </div>
       </div>
-      <div class='bg-navy-primary p-6 lg:col-span-5'>
+      <div class='bg-navy-primary p-6 lg:col-span-1'>
         <div class='font-semibold text-xxs text-blue-primary'>ACCOUNT CURRENT BALANCE</div>
         <div class='flex text-white'>
           <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
@@ -61,12 +79,39 @@
           <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
           <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
         </div>
-        <div class='text-white text-xs mt-4'>Lockfund Fee</div>
-        <div class='text-white text-xs mt-0.5'>Transaction Fee</div>
+        <div v-if="fundStatus" class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
+          <div class="flex gap-2">
+            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+            <div class="flex-cols">
+               <div class="text-txs">Your account has insufficient amount of XPX. Please top up first before continue transacting on this page.</div>
+               <a class="text-xs text-blue-primary font-semibold underline " href="https://bctestnetfaucet.xpxsirius.io/#/" target="_blank">Top Up XPX<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
+            </div>
+          </div>
+        </div>
+        <div v-if="onPartial" class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
+          <div class="flex gap-2">
+            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+            <div class="text-txs">Your account has transaction(s) on partial.</div>
+          </div>
+        </div>
+        <div class="flex mt-4 text-white">
+          <div class='text-xs '>Lockfund Fee</div>
+          <div class="text-xs  ml-auto">26.7000</div>
+          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+        </div>
         <div class='border-b-2 border-gray-600 my-2'/>
-        <div class='text-white text-xs '>Aggregate Fee</div>
+        <div class="flex  text-white">
+          <div class='text-xs '>Aggregate Fee</div>
+          <div class="text-xs  ml-auto">19.5966</div>
+          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+        </div>
         <div class='border-b-2 border-gray-600 my-2'/>
-        <div class='text-white font-bold text-xs '>TOTAL</div>
+        <div class="flex text-white">
+          <div class=' font-bold text-xs '>TOTAL</div>
+          <div class="text-xs  ml-auto">46.2966</div>
+          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+        </div>
+        
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white'>Enter your password to continue</div>
         <div class='font-semibold text-xxs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
@@ -74,7 +119,7 @@
         <div v-if='space' class="mt-3"/>
         <button type="submit" class='w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="convertAccount()" :disabled="disableSend">Update Cosignatories</button>
         <div class="text-center">
-          <router-link :to="{name: 'ViewMultisigHome',params:{name:acc.name}}" class="content-center text-xs text-white border-b-2 border-white" >Cancel</router-link>
+          <router-link :to="{name: 'ViewMultisigHome',params:{name:acc.name}}" class="content-center text-xs text-white underline" >Cancel</router-link>
         </div>
       </div>
     </div>
@@ -224,6 +269,7 @@ export default {
     const contactName = ref([])
     const selectedAddresses = ref([]);
     const showAddressError = ref([]);
+    const toggleContact = ref([])
     const onPartial = ref(false);
     const space=ref(false)
     const isMultisig = ref(false);
@@ -241,6 +287,13 @@ export default {
         return 0
       }
     });
+    const contact = computed(() => {
+      let tempContact = multiSign.generateContact(acc.address,acc.name);
+      tempContact.forEach(item=>{
+        item.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==item.value).publicKey
+      })
+      return tempContact
+    });
      const splitBalance = computed(()=>{
       let split = accountBalance.value.split(".")
       if (split[1]!=undefined){
@@ -254,7 +307,7 @@ export default {
     ));
     const addCoSigButton = computed(() => {
       var status = false;
-      if(parseFloat(accountBalance.value) >= 10.0445 && !onPartial.value){
+      if(acc.balance >= 10.0445 && !onPartial.value){
         for(var i = 0; i < coSign.value.length; i++){
           if(showAddressError.value[i] != ''){
             status = true;
@@ -291,17 +344,21 @@ export default {
         // var audio = new Audio(require('@/assets/audio/ding.ogg'));
         // audio.play();
         clear();
-      }
+      } 
     };
     watch(() => [...coSign.value], (n) => {
       for(var i = 0; i < coSign.value.length; i++){
-        if((coSign.value[i].length == 64) || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)){
-          if(!coSign.value[i].match(publicKeyPattern) && (coSign.value[i].length == 64)){
+        if(coSign.value[i].length == 64) /* || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)) */{
+          if(/* coSign.value[i]==acc.address || coSign.value[i]==Helper.createAddress(acc.address).pretty() || */ coSign.value[i]==acc.publicKey ){
             showAddressError.value[i] = true;
-          }else if(!coSign.value[i].match(addressPatternLong) && (coSign.value[i].length == 46)){
+            err.value = "Cosigner cannot be this account itself"
+          }
+          else if(!coSign.value[i].match(publicKeyPattern) && (coSign.value[i].length == 64)){
+            showAddressError.value[i] = true;
+          /* }else if(!coSign.value[i].match(addressPatternLong) && (coSign.value[i].length == 46)){
             showAddressError.value[i] = true;
           }else if(!coSign.value[i].match(addressPatternShort) && (coSign.value[i].length == 40)){
-            showAddressError.value[i] = true;
+            showAddressError.value[i] = true; */
           }else{
             showAddressError.value[i] = false;
             const unique = Array.from(new Set(n));
@@ -342,6 +399,7 @@ export default {
         numApproveTransaction.value = maxNumApproveTransaction.value;
       }
       coSign.value.splice(i, 1);
+      contactName.value.splice(i, 1)
      /*  console.log(coSign.value) */
       selectedAddresses.value.splice(i, 1);
       showAddressError.value.splice(i,1)
@@ -351,13 +409,15 @@ export default {
         e.preventDefault();
       }
     }
-    let deleteUserErrorMsg = 'Number of cosignatories for Delete users is more than number of cosignatories for this account';
-    let approveTransactionErrMsg = 'Number of cosignatories for Approve transaction is more than number of cosignatories for this account';
+    let deleteUserErrorMsg = 'Number of cosignatories for deletion approval is more than number of cosignatories for this account';
+    let approveTransactionErrMsg = 'Number of cosignatories for transaction approval is more than number of cosignatories for this account';
     watch(numApproveTransaction, (n) => {
       if(maxNumApproveTransaction.value == 0 && n > 1){
         err.value = approveTransactionErrMsg;
       }else if((n > maxNumApproveTransaction.value) && (n !=1 && maxNumApproveTransaction.value != 0 )){
         err.value = approveTransactionErrMsg;
+      }else if(maxNumApproveTransaction.value>0 && n<=0){
+        err.value = "Number of cosignatories for transaction approval cannot be less than 1"
       }else{
         // check again for num delete user
         if((numDeleteUser.value > maxNumDeleteUser.value) && (numDeleteUser.value !=1 && maxNumDeleteUser.value != 0 )){
@@ -377,6 +437,8 @@ export default {
         err.value = deleteUserErrorMsg;
       }else if((n > maxNumDeleteUser.value) && (n !=1 && maxNumDeleteUser.value != 0 )){
         err.value = deleteUserErrorMsg;
+      }else if(maxNumDeleteUser.value>0 && n<=0){
+        err.value = "Number of cosignatories for deletion approval cannot be less than 1"
       }else{
         // check again for num approval transaction
         if((numApproveTransaction.value > maxNumApproveTransaction.value) && (numApproveTransaction.value !=1 && maxNumApproveTransaction.value != 0 )){
@@ -454,6 +516,8 @@ export default {
       }
     });
     return {
+      toggleContact,
+      contact,
       space,
       currentNativeTokenName,
       splitBalance,
