@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between text-md">
+  <div class="flex justify-between text-sm">
     <div><span class="text-gray-300">{{$t('services.assets')}} ></span> <span class="text-blue-primary font-bold">{{$t('services.linktonamespace')}}</span></div>
     <div>
       <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
@@ -14,12 +14,6 @@
               <div class="h-5 text-center">
                 <div class="rounded-full w-8 h-8 border border-gray-500 inline-block relative"><font-awesome-icon icon="times" class="text-gray-500 h-5 w-5 absolute" style="top: 5px; left:4px"></font-awesome-icon></div><br>
                 <div class="inline-block text-tsm">{{$t('accounts.insufficientbalance')}}</div>
-              </div>
-            </div>
-            <div v-if="isNotCosigner" class="border-2 rounded-3xl border-yellow-400 w-full h-24 text-center p-4">
-              <div class="h-5 text-center">
-                <div class="rounded-full w-8 h-8 border border-yellow-500 inline-block relative"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-5 w-5 absolute" style="top: 5px; left:11px"></font-awesome-icon></div><br>
-                <div class="inline-block text-tsm">You are not a cosigner to this account</div>
               </div>
             </div>
             <div v-if="isNotCosigner" class="border-2 rounded-3xl border-yellow-400 w-full h-24 text-center p-4">

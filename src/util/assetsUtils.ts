@@ -43,6 +43,7 @@ import { BuildTransactions } from "../util/buildTransactions";
 import { AutoAnnounceSignedTransaction, HashAnnounceBlock, AnnounceType, listenerState } from "@/state/listenerState";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { Helper } from "./typeHelper";
+import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 
 interface assetSelectionInterface {
   label: string,
@@ -92,8 +93,12 @@ export class AssetsUtils {
   };
 
   static calculateDuration = (durationInDay: number): number =>{
+    let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
+    chainConfig.init();
+    let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
+    let blockTargetTimeByDay = (60 * 60 * 24) / blockTargetTime;
     // 5760 = 4 * 60 * 24 -> 15sec per block
-    return durationInDay * 5760;
+    return Math.floor(durationInDay * blockTargetTimeByDay);
   }
 
   static getOwnedAssets = (address: string) => {
@@ -356,7 +361,6 @@ export class AssetsUtils {
         let label:string = '';
         let namespaceName:string = '';
         if(namespaceElement.linkedId != ''){
-          isDisabled = (linkOption=='link'?true:false);
           let linkName:string;
           let linkLabel:string;
 
@@ -364,10 +368,12 @@ export class AssetsUtils {
             case 1:
               linkName = "Asset";
               linkLabel = namespaceElement.linkedId;
+              isDisabled = (linkOption=='link'?true:false);
               break;
             case 2:
               linkName = "Address";
               linkLabel = Helper.createAddress(namespaceElement.linkedId).pretty()
+              isDisabled = true;
               break;
             default:
               break;

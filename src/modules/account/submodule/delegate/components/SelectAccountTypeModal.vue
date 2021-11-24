@@ -6,26 +6,26 @@
       leave-active-class="animate__animated animate__fadeOutUp"
     >
       <div v-if="toggleModal" class="popup-outer absolute flex z-50">
-        <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
         <div class="modal-popup-box">
           <div class="delete-position">
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal; naviPrivateKey = !naviPrivateKey;"></font-awesome-icon>
           </div>
           <div class="w-104" v-if="!naviPrivateKey">
-            <h1 class="default-title font-bold my-5">{{$t('delegate.selectacctype')}}</h1>
+            <h1 class="default-title my-5">{{$t('delegate.selectacctype')}}</h1>
             <div class="page-title-gray-line grid grid-cols-1 md:grid-cols-2 pt-20">
               <div class="px-5 self-center text-center my-10">
-                <img src="@/modules/wallet/img/icon-add-new-blue.svg" class="w-12 inline-block">
+                <img src="@/modules/wallet/img/icon-add-new.svg" class="w-12 inline-block">
                 <p class="mt-3">{{$t('delegate.newaccount')}}</p>
                 <button class="max-w-xs sm:max-w-sm inline-block default-btn my-3 self-center" @click="linkNewAcc()">{{$t('delegate.select')}}</button></div>
               <div class="px-5 self-center text-center my-10">
-                <img src="@/modules/wallet/img/icon-private-key-blue.svg" class="w-12 inline-block"><p class="mt-3">{{$t('createwallet.fromprivatekey')}}</p>
+                <img src="@/modules/wallet/img/icon-private-key.svg" class="w-12 inline-block"><p class="mt-3">{{$t('createwallet.fromprivatekey')}}</p>
                 <button class="max-w-xs sm:max-w-sm inline-block default-btn my-3 self-center" @click="naviPrivateKey = !naviPrivateKey">{{$t('delegate.select')}}</button>
               </div>
             </div>
           </div>
           <div class="w-104" v-else>
-            <h1 class="default-title font-bold my-5">{{$t('createwallet.fromprivatekey')}}</h1>
+            <h1 class="default-title font-bold my-5">{{$t('createwallet.fromprivatekey')}}</h1>            
+            <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
             <div class="page-title-gray-line pt-20">
               <div class="my-5">{{$t('delegate.linkmessage')}}</div>
               <PasswordInput :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('delegate.entervalidpk')" :showError="showPrivateKeyError" v-model="privateKey" icon="lock" :disabled="disabledPrivateKey" />
@@ -43,24 +43,23 @@
 </template>
 
 <script>
-import { getCurrentInstance, ref, computed } from 'vue';
+import { getCurrentInstance, ref, computed, unref } from 'vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { Account } from "tsjs-xpx-chain-sdk";
 import { networkState } from "@/state/networkState";
-import { Helper } from "@/util/typeHelper";
 import { ChainUtils } from "@/util/chainUtils"
-import { ChainAPICall } from "@/models/REST/chainAPICall"
 import { WalletUtils } from "@/util/walletUtils";
-import { walletState } from '@/state/walletState';
-import {useI18n} from 'vue-i18n'
+import { useI18n } from 'vue-i18n'
+import { accountUtils } from '@/util/accountUtils';
+
 export default{
   name: 'SelectAccountTypeModal',
 
   setup(){
-    const {t} = useI18n();
+    const { t } = useI18n();
     const privateKey = ref('');
     const toggleModal = ref(false);
-    const err = ref(false);
+    const err = ref('');
     const showPrivateKeyError = ref(false);
     const naviPrivateKey = ref(false);
     const disabledPrivateKey = ref(false);
@@ -73,8 +72,9 @@ export default{
       )
     );
 
-   const clearInput = () => {
+    const clearInput = () => {
       privateKey.value = '';
+      err.value = '';
     };
 
     const linkNewAcc = () =>{
@@ -82,26 +82,18 @@ export default{
       emitter.emit('NEW ACCOUNT', account);
       toggleModal.value = !toggleModal.value;
     };
-
+  
     const linkPrivateKey = async() =>{
       const networkType = networkState.currentNetworkProfile.network.type;
       const accountDetail = Account.createFromPrivateKey(privateKey.value, networkType);
-      try {
-        const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
-        const accountInfo = await chainAPICall.accountAPI.getAccountInfo(accountDetail.address);
-        if(accountInfo.accountType == 3 && accountInfo.linkedAccountKey == "0".repeat(64)){
-          console.log(accountInfo.linkedAccountKey)
-          console.log(accountInfo.accountType)
-          emitter.emit('FROM PRIVATE KEY', accountDetail);    
-        } else {
-          err.value = t('delegate.linkerror')
-        }
-      } catch(error) {
-          if(error == "HttpError: HTTP request failed"){
-            emitter.emit('FROM PRIVATE KEY', accountDetail);
-          }
-        }    
+      console.log(accountDetail.address.address);
+      const accountAPIResponse = await accountUtils.getValidAccount(accountDetail.address.address);
+      if(accountAPIResponse == true){        
+        emitter.emit('FROM PRIVATE KEY', accountDetail);          
         toggleModal.value = !toggleModal.value;
+      } else {          
+        err.value = t('delegate.linkerror')
+      }          
     };
 
     return{
@@ -110,6 +102,7 @@ export default{
       disabledPrivateKey,
       disableConfirm,
       linkNewAcc,
+      err,
       linkPrivateKey,
       naviPrivateKey,
       toggleModal,

@@ -1,23 +1,21 @@
 <template>
-  <div class="flex justify-between text-md">
-    <div><span class="text-gray-300">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.createaccount')}}</span></div>
-    <div>
-      <router-link :to="{name: 'ViewAccountCreateSelectType'}" class="font-bold">{{$t('accounts.back')}}</router-link>
-    </div>
+<div>
+  <div class='border w-8/12 ml-auto mr-auto mt-6 filter shadow-lg'>
+    <div class='text-lg text-center font-bold mt-10'>Create New Account</div>
+    <div class='text-blue-primary text-xs text-center font-bold'>Creating New</div>
+    <div class="error error_box mb-2 w-8/12 ml-auto mr-auto" v-if="err!=''">{{ err }}</div>
+    <div class="w-8/12 ml-auto mr-auto mt-3">
+        <TextInput  @space="space1=true" @removeSpace='space1=false' placeholder="Name your account" :errorMessage="$t('createwallet.inputwalletname')" v-model="accountName" icon="wallet" />
+         <div v-if='space1' class='mt-3'></div>
+        <PasswordInput @space="space2=true" @removeSpace='space2=false' placeholder="Enter Wallet Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPassword"  />
+        <div v-if='space2' class='mt-3'></div>
+      </div>
+      <div class="flex justify-center">
+        <button type="submit" class="blue-btn py-2 px-8 disabled:opacity-50" @click='create()' :disabled="disableCreate">{{$t('welcome.create')}}</button>
+      </div>
+    <div class='mt-10'></div>   
   </div>
-  <div class='mt-2 py-3 gray-line text-center'>
-    <form @submit.prevent="create" class="mt-10">
-      <fieldset class="w-full">
-        <div class="error error_box mb-2" v-if="err!=''">{{ err }}</div>
-        <TextInput :placeholder="$t('accounts.name')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
-        <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
-        <div class="mt-10">
-          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
-          <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">{{$t('welcome.create')}}</button>
-        </div>
-      </fieldset>
-    </form>
-  </div>
+</div>
 </template>
 <script>
 import { computed, ref } from 'vue';
@@ -46,12 +44,15 @@ export default {
     const showPasswdError = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
     const router = useRouter();
+    const space1 = ref(false)
+    const space2 = ref(false)
     const disableCreate = computed(
       () => !(
         walletPassword.value.match(passwdPattern) &&
-        accountName.value.length != ''
+        accountName.value.length != '' 
       )
     );
+
     const walletName = walletState.currentLoggedInWallet.name
     const create = () => {
     const verifyExistingAccountName = walletState.currentLoggedInWallet.accounts.find((element) => element.name == accountName.value);
@@ -69,10 +70,9 @@ export default {
           let walletAccount = new WalletAccount(accountName.value, account.publicKey, wallet.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
           walletState.currentLoggedInWallet.accounts.push(walletAccount);
 
-          const address = Helper.createAddress(account.address.address).pretty();
+          const address = Helper.createAddress(account.address.address);
           walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
-
-          router.push({ name: "ViewAccountCreated", params: {publicKey: account.publicKey, privateKey: account.privateKey, address: address, name: accountName.value }});
+          router.push({ name: "ViewAccountDetails", params: {address: account.address.address,accountCreated: true}});
 
         }
       }else{
@@ -87,6 +87,8 @@ export default {
     };
 
     return{
+      space1,
+      space2,
       walletState,
       err,
       create,

@@ -1,6 +1,5 @@
-export const DelegateRoutes = [
-  {
-    path: '/delegate',
+export const DelegateRoutes = [{
+    path: '/delegate/:address',
     name: 'ViewAccountDelegate',
     props: true,
     component: () =>
@@ -8,5 +7,4 @@ export const DelegateRoutes = [
     meta: {
         title: "Delegate",
     }
-  },
-];
+}, ];

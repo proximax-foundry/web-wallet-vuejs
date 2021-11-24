@@ -1,27 +1,22 @@
 <template>
-  <div class="flex justify-between text-md">
-    <div><span class="text-gray-300">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.importaccount')}}</span></div>
-    <div>
-      <router-link :to="{name: 'ViewAccountCreateSelectType'}" class="font-bold">{{$t('accounts.back')}}</router-link>
+  <div>
+    <div class='border w-8/12 ml-auto mr-auto mt-6 filter shadow-lg'>
+      <div class='text-lg text-center font-bold mt-10'>Create New Account</div>
+      <div class='text-blue-primary text-xs text-center font-bold'>From Private Key</div>
+      <div class="error error_box mb-2 w-8/12 ml-auto mr-auto" v-if="err!=''">{{ err }}</div>
+      <div class="w-8/12 ml-auto mr-auto mt-3">
+        <PasswordInput  @space="space1=true" @removeSpace='space1=false' :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" :showError="showPkError" v-model="privKey"  />
+        <div v-if='space1 || showPkError' class='mt-3'></div>
+        <TextInput  @space="space2=true" @removeSpace='space2=false' placeholder="Name your account" :errorMessage="$t('createwallet.inputwalletname')" v-model="accountName" icon="wallet" />
+        <div v-if='space2' class='mt-3'></div>
+        <PasswordInput @space="space3=true" @removeSpace='space3=false' placeholder="Enter Wallet Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPassword"  />
+        <div v-if='space3' class='mt-3'></div>
+      </div>
+      <div class="flex justify-center">
+        <button type="submit" class="blue-btn py-2 px-8 disabled:opacity-50" @click='create()' :disabled="disableCreate">{{$t('welcome.create')}}</button>
+      </div>
+      <div class='mt-10'></div>   
     </div>
-  </div>
-  <div class='mt-2 py-3 gray-line text-center'>
-    <form @submit.prevent="create" class="mt-10">
-      <fieldset class="w-full">
-        <div class="error error_box mb-2" v-if="err!=''">{{ err }}</div>
-        <PasswordInput :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" v-model="privKey" class="ml-1" />
-        <label class="inline-flex items-center mb-5">
-            <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="nis1Swap">
-          <span class="ml-2 cursor-pointer">{{$t('createprivatekeywallet.swaptitle')}}</span>
-        </label>
-        <TextInput :placeholder="$t('swap.accountname')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
-        <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
-        <div class="mt-10">
-          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput();">{{$t('signin.clear')}}</button>
-          <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate">{{$t('createwallet.import')}}</button>
-        </div>
-      </fieldset>
-    </form>
   </div>
 </template>
 <script>
@@ -35,9 +30,12 @@ import { WalletUtils } from '@/util/walletUtils';
 import { ChainUtils } from '@/util/chainUtils';
 import { WalletAccount } from "@/models/walletAccount"
 import { Helper } from "@/util/typeHelper";
-import { Account } from "tsjs-xpx-chain-sdk";
-import { nis1Account } from '@/models/nis1Account';
+import { Account, Address, MosaicId, UInt64 } from "tsjs-xpx-chain-sdk";
 import {useI18n} from 'vue-i18n'
+import { Asset } from '@/models/asset';
+import { Reconstruct } from '@/models/wallets';
+
+
 
 export default {
   name: 'ViewAccountCreatePrivateKey',
@@ -48,7 +46,6 @@ export default {
   setup(){
     const {t} = useI18n();
     const err = ref(false);
-    const nis1Swap = ref(false);
     const privKey = ref("");
     const accountName = ref("");
     const walletPassword = ref("");
@@ -63,8 +60,27 @@ export default {
         privKey.value.match(privKeyPattern)
       )
     );
+    const showPkError = computed(
+      () => !privKey.value.match(privKeyPattern) && privKey.value!=""
+    );
+
+    const space1 = ref(false)
+    const space2 = ref(false)
+    const space3 = ref(false)
+    const space4 = ref(false)
     const walletName = walletState.currentLoggedInWallet.name
-    const create = () => {
+    /* let recreateAsset = (tempAsset) =>{
+        let newAsset = new Asset(tempAsset.idHex, tempAsset.divisibility, tempAsset.supplyMutable, tempAsset.transferable, tempAsset.owner);
+        newAsset.amount = tempAsset.amount ? tempAsset.amount : 0;
+        newAsset.duration = tempAsset.duration ? tempAsset.duration : null;
+        newAsset.expirationBlock = tempAsset.expirationBlock ? tempAsset.expirationBlock : null;
+        newAsset.namespaceId = tempAsset.namespaceId ? tempAsset.namespaceId : [];
+        newAsset.owner = tempAsset.owner ? tempAsset.owner : null;
+        newAsset.supply = tempAsset.supply ? tempAsset.supply : 0;
+
+        return newAsset;
+    } */
+    const create = async() => {
     const verifyExistingAccountName = walletState.currentLoggedInWallet.accounts.find((element) => element.name == accountName.value);
       if(!verifyExistingAccountName) {
         var result = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPassword.value);
@@ -82,13 +98,14 @@ export default {
             let password = WalletUtils.createPassword(walletPassword.value);
             const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, privKey.value, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
             let walletAccount = new WalletAccount(accountName.value, account.publicKey, wallet.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
-            if(nis1Swap.value == true){
-              const Nis1 = WalletUtils.createNis1AccountWithPrivateKey(privKey.value);
-              walletAccount.nis1Account = new nis1Account(Nis1.address, Nis1.publicKey);
-            } 
+            // code for NIS 1 checking
+            // if(nis1Swap.value == true){
+            //   const Nis1 = WalletUtils.createNis1AccountWithPrivateKey(privKey.value);
+            //   walletAccount.nis1Account = new nis1Account(Nis1.address, Nis1.publicKey);
+            // }  
             walletState.currentLoggedInWallet.accounts.push(walletAccount);
-            walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
-            router.push({ name: "ViewAccountCreated", params: {publicKey: account.publicKey, privateKey: privKey.value, address: wallet.address.plain(), name: accountName.value }});
+            walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet),
+            router.push({ name: "ViewAccountDetails", params: {address: account.address.address, accountCreated: true }})
           }
         } 
       } else {
@@ -96,13 +113,16 @@ export default {
       }
     };
     return{
+      showPkError,
+      space1,
+      space2,
+      space3,
       walletState,
       err,
       create,
       accountName,
       walletPassword,
       privKey,
-      nis1Swap,
       showPasswdError,
       disableCreate,
       walletName

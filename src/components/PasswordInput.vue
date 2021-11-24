@@ -1,16 +1,11 @@
 <template>
   <div>
-    <div class="text-outline bg-white" :class="borderColor">
-      <div class="text-icon-outline text-icon">
-        <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
-      </div>
-      <input :type="inputType" :disabled="disabled == true" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="text-placeholder" :placeholder="placeholder" @click="clickInputPassword()" @blur="blurInputPassword()" autocomplete="off">
-      <div class="inline-block flex-none mr-2">
-        <font-awesome-icon icon="eye" class="text-gray-400 relative cursor-pointer" @click="hideShowPassword();" v-if="!showPassword"></font-awesome-icon>
-        <font-awesome-icon icon="eye-slash" class="text-gray-400 relative cursor-pointer" @click="hideShowPassword();" v-if="showPassword"></font-awesome-icon>
-      </div>
+    <div class="bg-white py-2 border flex" >
+      <input  :type="inputType" :disabled="disabled == true" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="text-placeholder text-left ml-2" :placeholder="placeholder" @click="clickInputPassword()" @blur="blurInputPassword()" autocomplete="off">
+        <font-awesome-icon icon="eye" class="text-gray-500 relative cursor-pointer text-right mr-2" @click="hideShowPassword();" v-if="!showPassword"></font-awesome-icon>
+        <font-awesome-icon icon="eye-slash" class="text-gray-500 relative cursor-pointer text-right mr-2" @click="hideShowPassword();" v-if="showPassword"></font-awesome-icon>
     </div>
-    <div class="h-3 mb-2"><div class="error error-password text-left" v-if="pswdErr || showError">{{ errorMessage }}</div></div>
+    <div class="h-3 "><div class="error error-password text-left" v-if="pswdErr || showError">{{ errorMessage }}</div></div>
   </div>
 </template>
 
@@ -38,7 +33,7 @@ export default defineComponent({
     }
   },
   emits:[
-    'update:modelValue'
+    'update:modelValue','space','removeSpace'
   ],
   name: 'PasswordInput',
   data() {
@@ -69,18 +64,26 @@ export default defineComponent({
       if(this.modelValue == ''){
         this.borderColor = 'border-2 border-red-primary';
         this.pswdErr = true;
-      }else{
-        // if(this.modelValue != undefined){
-        //   if(this.modelValue.match(passwdPattern) == null){
-        //     this.borderColor = 'border-2 border-red-primary';
-        //     this.pswdErr = true;
-        //   }
-        // }else{
-          this.borderColor = 'border-2 border-gray-300';
-          this.pswdErr = false;
+      }
+      else if (Object.keys(this.modelValue).length < 8){
+        this.borderColor = 'border-2 border-red-primary';
+        this.pswdErr = true;
+      }
+      else{
+        this.borderColor = 'border-2 border-gray-300';
+        this.pswdErr = false;
         // }
       }
     },
+  },
+  watch:{
+    pswdErr:function(){
+      if(this.pswdErr){
+        this.$emit('space')
+      }else{
+        this.$emit('removeSpace')
+      }
+    }
   },
   mounted() {
     // this.emitter.on("CLEAR_PASSWORD", (payload) => {

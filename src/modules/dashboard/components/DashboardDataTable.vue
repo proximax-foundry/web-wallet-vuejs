@@ -1,92 +1,85 @@
 <template>
   <div>
-    <div class="px-5 py-2 text-left text-xs text-gray-500">{{hints}}</div>
-    <div class="transition ease-in duration-300 w-full rounded-full px-5 py-1 mb-5" :class="borderColor">
-      <input v-model="filterText" type="text" class="w-full outline-none text-sm" :placeholder="$t('services.search')" @click="clickInputText()" @blur="blurInputText()" :title="hints" >
-    </div>
     <DataTable
       :value="transactions"
       :paginator="true"
-      :rows="10"
-      responsiveLayout="scroll"
+      :rows="20"
       scrollDirection="horizontal"
+      :alwaysShowPaginator="false"
+      responsiveLayout="scroll"
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column field="typeName" :header="$t('dashboard.type')" headerStyle="width:110px">
+      <Column header="IN/OUT" headerStyle="width:30px">
         <template #body="{data}">
-          <span class="font-semibold">{{data.typeName}}</span>
+          <div class="ml-2">
+            <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block" v-if="data.extractedData.recipient==currentAddress">
+            <img src="@/modules/dashboard/img/icon-txn-out.svg" class="inline-block" v-else>
+          </div>
         </template>
       </Column>
-      <Column :header="$t('accounts.details')" >
+      <Column field="typeName" header="TX HASH" headerStyle="width:100px">
         <template #body="{data}">
-            <div v-for="innerTx in data.innerTransactions" :key="innerTx">
-              <div class="font-bold"> {{ innerTx.typeName }}</div>
-              <div v-if="innerTx.displayList.size > 0"> {{ innerTx.displayList }}</div>
-              <div v-if="innerTx.transferList.length > 0"> {{ innerTx.transferList }}</div>
-            </div>
-            <div class="flex space-x-2" v-for="displayRow in data.displayTips" :key="displayRow">
-              <span v-for="displayTip in displayRow.rowTips" :key="displayTip" >
-                <span v-if="displayTip.tipType === 'toRightArrow'">
-                  <font-awesome-icon icon="arrow-right" class="text-gray-600 inline-block"></font-awesome-icon>
-                </span>
-                <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'asset'" class="text-xs font-semibold bg-yellow-300 inline-block truncate px-2 py-2 rounded">
-                  <a :href="getAssetExplorerUrl(displayTip.displayValue)" target="_blank">
-                    <img class="inline-block" src="@/modules/account/img/icon-mosaics-green-16h.svg" width="15" />
-                    {{ displayTip.displayValue }}
-                  </a>
-                </span>
-                <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'namespace' || displayTip.tipType === 'namespaceId'" class="text-xs font-semibold bg-yellow-400 inline-block truncate px-2 py-2 rounded">
-                  <a :href="getNamespaceExplorerUrl(displayTip.displayValue)" target="_blank">
-                    <font-awesome-icon icon="at" class="text-gray-600 inline-block"></font-awesome-icon>
-                    {{ displayTip.displayValue }}
-                  </a>
-                </span>
-                <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'publicKey'" class="text-xs font-semibold bg-gray-300 inline-block truncate px-2 py-2 rounded">
-                  <a :href="getPublicKeyExplorerUrl(displayTip.displayValue)" target="_blank">
-                    {{ displayTip.displayValue }}
-                  </a>
-                </span>
-                <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'empty'" class="border border-black text-xs font-semibold bg-gray-50 inline-block truncate px-2 py-2 rounded">
-                  {{ displayTip.displayValue }}
-                </span>
-                <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'other'" class="text-xs font-semibold bg-green-50 inline-block truncate px-2 py-2 rounded">
-                  {{ displayTip.displayValue }}
-                </span>
-                <span :title="displayTip.value" v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'plain'" class="text-xs font-semibold bg-blue-200 inline-block truncate px-2 py-2 rounded">
-                  {{ displayTip.displayValue }}
-                </span>
-                <span v-else-if="displayTip.tipType === 'message' && displayTip.valueType === 'encrypted'" class="text-xs font-semibold bg-blue-200 inline-block truncate px-2 py-2 rounded">
-                  {{ displayTip.displayValue }}
-                </span>
-                <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'absoluteAmount'" class="text-xs font-semibold bg-yellow-50 inline-block truncate px-2 py-2 rounded">
-                  {{ displayTip.displayValue }}
-                </span>
-                <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'exactAmount'" class="text-xs font-semibold bg-green-300 inline-block truncate px-2 py-2 rounded">
-                  {{ displayTip.displayValue }} 
-                </span>
-                <span :title="displayTip.displayValue" v-else-if="displayTip.tipType === 'address'" class="text-xs font-semibold bg-green-300 inline-block truncate px-2 py-2 rounded">
-                  <a :href="getAddressExplorerUrl(displayTip.value)" target="_blank">
-                    {{ displayTip.displayValue }}
-                  </a>
-                </span>
-                <span :title="displayTip.displayValue" v-else class="text-xs font-semibold bg-blue-300 inline-block truncate px-2 py-2 rounded">
-                  {{ displayTip.displayValue }}
-                </span>
-              </span>
-            </div>
+          <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column headerStyle="width: 12%" v-if="showBlock" field="block" :header="$t('dashboard.block')" :sortable="true" >
+      <Column field="typeName" header="TIMESTAMP" headerStyle="width:110px">
         <template #body="{data}">
-          <div>{{ data.block }}</div>
-          <div v-if="data.timestamp">{{ data.timestamp }}</div>
-          <div v-if="data.fee">{{$t('dashboard.fee')}}: {{ data.fee}}</div>
+          <span class="text-txs">{{data.formattedDeadline}}</span>
         </template>
       </Column>
-      <Column headerStyle="width: 12%" v-if="showAction" :header="$t('services.action')" >
+      <Column field="typeName" header="TYPE" headerStyle="width:110px">
         <template #body="{data}">
-          <SplitButton label="Explorer" @click="gotoHashExplorer(data.hash)" icon="pi pi-external-link" class="p-button-help p-mb-2" :model="setSplitButtonItems(data)"></SplitButton>
+          <span class="text-txs">{{data.typeName}}</span>
+        </template>
+      </Column>
+      <Column field="block" header="BLOCK" headerStyle="width:110px">
+        <template #body="{data}">
+          <div class="text-txs">{{ data.block }}</div>
+        </template>
+      </Column>
+      <Column field="signer" header="SENDER" headerStyle="width:110px">
+        <template #body="{data}">
+          <span v-tooltip.bottom="data.signerAddress" class="truncate inline-block text-txs">
+            <a :href="getPublicKeyExplorerUrl(data.signer)" target="_blank">
+              {{ data.signerDisplay === data.signerAddressPretty ? data.signer : data.signerDisplay }}
+            </a>
+          </span>
+        </template>
+      </Column>
+      <Column field="recipient" header="RECIPIENT" headerStyle="width:110px">
+        <template #body="{data}">
+          <span v-tooltip.bottom="data.extractedData.recipient" v-if="data.extractedData.recipient" class="truncate inline-block text-txs">{{ data.extractedData.recipientName?data.extractedData.recipientName:data.extractedData.recipient }}</span>
+        </template>
+      </Column>
+      <Column header="TX FEE" headerStyle="width:110px">
+        <template #body="{data}">
+          <div class="text-txs">{{ data.maxFee }} <b v-if="data.maxFee">XPX</b></div>
+        </template>
+      </Column>
+      <Column header="AMOUNT" headerStyle="width:110px">
+        <template #body="{data}">
+          <div class="text-txs" v-if="data.typeName=='Transfer'">{{ data.extractedData.amount?data.extractedData.amount:'0' }} <b>XPX</b></div>
+          <div class="text-txs" v-else>{{ data.extractedData.amount?data.extractedData.amount:'-' }} <b v-if="data.extractedData.amount">XPX</b></div>
+        </template>
+      </Column>
+      <Column header="SDA" headerStyle="width:40px">
+        <template #body="{data}">
+          <div>
+            <img src="@/modules/dashboard/img/icon-sda.svg" class="inline-block" v-if="checkOtherAsset(data.otherAssets)" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + d(data.otherAssets) + '</tiptext>'">
+          </div>
+        </template>
+      </Column>
+      <Column header="MESSAGE" headerStyle="width:40px">
+        <template #body="{data}">
+          <div>
+            <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.extractedData.messageTypeString + '</tiptitle><tiptext>' + data.extractedData.messagePayload + '</tiptext>'" class="inline-block" v-if="data.extractedData.messageType != 'empty' && data.extractedData.messageType">
+          </div>
+        </template>
+      </Column>
+      <Column header="" headerStyle="width:20px">
+        <template #body="{data}">
+          <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
         </template>
       </Column>
       <template #empty>
@@ -96,29 +89,38 @@
           {{$t('dashboard.loadingmessage')}}
       </template>
     </DataTable>
-    <DynamicModelComponent :modelName="dynamicModelComponentDisplay" :showModal="showTransactionModel" :transaction="modalData" />
   </div>
 </template>
 
-<script>
-import { getCurrentInstance, ref, computed, watch  } from "vue";
+<script lang="ts">
+import { defineComponent } from 'vue';
+import { getCurrentInstance, ref, computed, watch } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {FilterMatchMode} from 'primevue/api';
-import DynamicModelComponent from '@/modules/dashboard/components/DynamicModelComponent.vue'
 import { networkState } from "@/state/networkState";
 import Tooltip from 'primevue/tooltip';
-import { TipType } from '../model/dashboardClasses'
-import SplitButton from 'primevue/splitbutton';
+import { TipType} from '../model/dashboardClasses'
+import { ChainUtils } from "@/util/chainUtils";
+import { ChainAPICall } from "@/models/REST/chainAPICall";
+import { Helper } from "@/util/typeHelper";
+// import SplitButton from 'primevue/splitbutton';
 
-export default{
-  components: { DataTable, Column, DynamicModelComponent, SplitButton },
+export default defineComponent({
+  components: {
+    DataTable,
+    Column,
+    // SplitButton
+  },
   name: 'DashboardDataTable',
   props: {
     transactions: Array,
     showBlock: Boolean,
-    showAction: Boolean
+    showAction: Boolean,
+    type: String,
+    currentAddress: String
   },
+  emits: ['openMessage', 'openDecryptMsg'],
   directives: {
     'tooltip': Tooltip
   },
@@ -129,6 +131,9 @@ export default{
     const showTransactionModel = ref(false);
     const modalData = ref(null);
     const filterText = ref("");
+    const isShowConfirmed = p.type === "confirmed" ? true : false;
+    const isShowUnconfirmed = p.type === "unconfirmed" ? true : false;
+    const isShowPartial = p.type === "partial" ? true : false;
     /*
     const filters = ref({
       'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
@@ -136,18 +141,18 @@ export default{
     */
     watch(
      ()=> filterText.value, (newValue)=>{
-       context.emit('confirmedFilter', newValue);
+       emitter.emit("confirmedFilter", newValue);
     });
 
-    const nsHint = "\`ns:\` - filter by Namespace (ID or name)";
-    const nsHint2 = "\`ns:-\` - filter with Namespace Name alias";
-    const nsHint3 = "\`ns:'\` - convert namespace name to Namespace ID, will ignore when invalid";
-    const hashHint = "\`hash:\` - filter Transaction Hash ";
-    const pkHint = "\`pk:\` - Public Key";
-    const assetHint = "\`asset:\` - filter by Asset ID";
-    const addressHint = "\`add:\` - filter by Address"; 
+    // const nsHint = "\`ns:\` - filter by Namespace (ID or name)";
+    // const nsHint2 = "\`ns:-\` - filter with Namespace Name alias";
+    // const nsHint3 = "\`ns:'\` - convert namespace name to Namespace ID, will ignore when invalid";
+    // const hashHint = "\`hash:\` - filter Transaction Hash ";
+    // const pkHint = "\`pk:\` - Public Key";
+    // const assetHint = "\`asset:\` - filter by Asset ID";
+    // const addressHint = "\`add:\` - filter by Address"; 
 
-    const hints = [hashHint, assetHint, pkHint, addressHint, nsHint, nsHint2, nsHint3].join('\n');
+    // const hints = [hashHint, assetHint, pkHint, addressHint, nsHint, nsHint2, nsHint3].join('\n');
 
     const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
     const blockExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.blockRoute);
@@ -198,6 +203,7 @@ export default{
     const setSplitButtonItems = (data) =>{
 
       let items = [
+        /*
             {
                 label: 'Sample',
                 icon: 'pi pi-external-link',
@@ -205,7 +211,7 @@ export default{
                     window.open(explorerBaseURL.value + hashExplorerURL.value + "/" + data.hash, "_blank");
                 }
             },
-        /*
+        
             {
                 label: 'Update',
                 icon: 'pi pi-refresh',
@@ -259,8 +265,58 @@ export default{
       return explorerBaseURL.value + addressExplorerURL.value + "/" + address
     }
 
+    const getHashExplorerUrl = (hash) =>{
+
+      return explorerBaseURL.value + hashExplorerURL.value + "/" + hash
+    }
+
     const gotoHashExplorer = (hash)=>{
       window.open(explorerBaseURL.value + hashExplorerURL.value + "/" + hash, "_blank");
+    }
+
+
+    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+    let chainAPICall = new ChainAPICall(apiEndpoint);
+
+    const d = (assets) :Promise<string> => {
+      return displayAsset(assets).then(data => {
+        return data;
+      })
+    }
+
+    const displayAsset = async (assets) => {
+      let asset_divs = '';
+      if(assets.length > 0){
+        for(const asset of assets){
+          let asset_div = await displayAssetDiv(asset);
+          asset_divs += asset_div;
+        }
+        return asset_divs;
+      }
+    }
+
+    const displayAssetDiv = async (asset) => {
+      let otherAsset = await chainAPICall.assetAPI.getMosaic(asset.assetid);
+      let asset_div;
+      let assetarray = []
+      assetarray.push(asset.assetid);
+
+      let nsAsset = await chainAPICall.assetAPI.getMosaicsNames(assetarray);
+      if(nsAsset[0].names.length > 0){
+        asset_div = (Helper.convertToExact(asset.amount, otherAsset.divisibility) + ' ' + nsAsset[0].names[0].name);
+      }else{
+        asset_div = (asset.asset + ' - ' + Helper.convertToExact(asset.amount, otherAsset.divisibility) + ' xpx');
+      }
+      return asset_div;
+    }
+
+    const checkOtherAsset = (assets) => {
+      if(assets){
+        if(assets.length > 0){
+          return true;
+        }
+      }
+      return false;
     }
 
     return {
@@ -279,16 +335,22 @@ export default{
       hashExplorerURL,
       publicKeyExplorerURL,
       explorerBaseURL,
-      hints,
+      // hints,
       getPublicKeyExplorerUrl,
       getNamespaceExplorerUrl,
       getAssetExplorerUrl,
       getAddressExplorerUrl,
+      getHashExplorerUrl,
       setSplitButtonItems,
-      gotoHashExplorer
+      gotoHashExplorer,
+      isShowConfirmed,
+      isShowUnconfirmed,
+      isShowPartial,
+      d,
+      checkOtherAsset,
     }
   }
-}
+})
 </script>
 
 <style lang="scss">
@@ -299,10 +361,35 @@ export default{
 }
 
 .truncate {
-  max-width: 300px;
+  max-width: 10em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.truncate-lg {
+  max-width: 15em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.truncate-lg.inline-block{
+  vertical-align: middle;
+}
+
+.truncate.inline-block{
+  vertical-align: middle;
+}
+
+.inline-block{
+  .truncate{
+    vertical-align: middle;
+  }
+
+  .truncate-lg{
+    vertical-align: middle;
+  }
 }
 
 .p-splitbutton-defaultbutton{

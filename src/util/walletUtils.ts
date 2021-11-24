@@ -704,35 +704,42 @@ export class WalletUtils {
 
     static populateOtherAccountTypeMultisig(wallet: Wallet): void{
 
+        let othersList: string[] = [];
+
         for(let i = 0; i < wallet.accounts.length; ++i){
 
             let publicKeys = wallet.accounts[i].getDirectChildMultisig();
 
-            for(let i = 0; i < publicKeys.length; ++i){
+            for(let y = 0; y < publicKeys.length; ++y){
 
-                if(wallet.others.find((other)=> other.publicKey === publicKeys[i])){
+                othersList.push(publicKeys[y]);
+
+                if(wallet.others.find((other)=> other.publicKey === publicKeys[y])){
                     continue;
                 }
-                else if(wallet.accounts.find((account)=> account.publicKey === publicKeys[i])){
+                else if(wallet.accounts.find((account)=> account.publicKey === publicKeys[y])){
                     continue;
                 }
 
-                let publicAccount = Helper.createPublicAccount(publicKeys[i], localNetworkType.value) 
+                let publicAccount = Helper.createPublicAccount(publicKeys[y], localNetworkType.value) 
 
                 let address = publicAccount.address.plain();
 
                 let stripedAddress = address.substr(-4);
 
-                let newOtherAccount = new OtherAccount("MULTISIG-" + stripedAddress, publicKeys[i], address, Helper.getOtherWalletAccountType().MULTISIG_CHILD);
+                let newOtherAccount = new OtherAccount("MULTISIG-" + stripedAddress, publicKeys[y], address, Helper.getOtherWalletAccountType().MULTISIG_CHILD);
             
                 wallet.others.push(newOtherAccount);
             }
         }
+
+        wallet.others = wallet.others.filter((otherAcc)=> othersList.includes(otherAcc.publicKey) || otherAcc.type === Helper.getOtherWalletAccountType().DELEGATE_VALIDATE )
     }
 
     static async updateWalletAccountDetails(wallet: Wallet, addInLinkedAccount: boolean = false): Promise<void>{
 
         let tempAssets: Asset[] = [];
+        let tempLinkedList: string[] = [];
 
         for(let i = 0; i < wallet.accounts.length; ++i ){
 
@@ -749,6 +756,8 @@ export class WalletUtils {
             }
 
             if(accountInfo.linkedAccountKey !== "0".repeat(64) && addInLinkedAccount){
+
+                tempLinkedList.push(accountInfo.linkedAccountKey);
 
                 let linkedPublicAccount = Helper.createPublicAccount(accountInfo.linkedAccountKey, localNetworkType.value);
 
@@ -828,10 +837,10 @@ export class WalletUtils {
                 }
                 else{
                     let assetInfo = await chainAPICall.value.assetAPI.getMosaic(mosaic.id);
-
                     let newTempAsset = new Asset(mosaicIdHex, assetInfo.divisibility, assetInfo.isSupplyMutable(), assetInfo.isTransferable(), assetInfo.owner.publicKey);
                     newTempAsset.duration = assetInfo.duration.compact();
                     newTempAsset.supply = assetInfo.supply.compact();
+                    newTempAsset.height = assetInfo.height.compact();
 
                     tempAssets.push(newTempAsset);
 
@@ -840,8 +849,11 @@ export class WalletUtils {
                     assets.push(newAsset);
                 }
             }
-
             account.assets= assets;
+        }
+
+        if(addInLinkedAccount){
+            wallet.others = wallet.others.filter((otherAcc)=> tempLinkedList.includes(otherAcc.publicKey) || otherAcc.type === Helper.getOtherWalletAccountType().MULTISIG_CHILD);
         }
     }
 
@@ -963,7 +975,7 @@ export class WalletUtils {
         if(wallet === null){
             return;
         }
-        wallet.others = [];
+        //wallet.others = [];
 
         await WalletUtils.updateWalletMultisigInfo(wallet);
         WalletUtils.populateOtherAccountTypeMultisig(wallet);
@@ -982,6 +994,7 @@ export class WalletUtils {
             return;
         }
 
+        wallet.isReady = false;
         wallet.others = [];
 
         await WalletUtils.updateWalletMultisigInfo(wallet);
@@ -1002,6 +1015,7 @@ export class WalletUtils {
         }
 
         walletState.wallets.saveMyWalletOnlytoLocalStorage(wallet);
+        wallet.isReady = true;
     }
 
     static updateAllAccountBalance(wallet: Wallet, assetId: string): void{
@@ -1082,6 +1096,132 @@ export class WalletUtils {
 
         return walletAccount;
     }
+
+    static getAllMultisigAccount(wallet: Wallet): myAccount[]{
+
+        let allMultisigAccount: myAccount[] = [];
+
+        // console.log(wallet.accounts);
+        // console.log(wallet.others);
+        // console.log(wallet.others.length);
+        let multisigAccount: myAccount[] = wallet.accounts.filter((acc)=> acc.getDirectParentMultisig().length > 0);
+        let otherMultisigAccount: myAccount[] = wallet.others.filter((account)=> account.type === "MULTISIG");
+
+        // console.log(multisigAccount);
+        // console.log(otherMultisigAccount);
+        allMultisigAccount = multisigAccount.concat(otherMultisigAccount);
+
+        return allMultisigAccount;
+    }
+
+    static getAllMultisigInfoByPublicKey(wallet: Wallet, publicKey: string): MultisigInfo[]{
+
+        let account: WalletAccount = wallet.accounts.find((acc)=> acc.publicKey === publicKey);
+
+        if(account){
+            return account.multisigInfo;
+        }
+    
+        let otherAccount: OtherAccount = wallet.others.find((acc)=> acc.publicKey === publicKey);
+
+        if(otherAccount){
+            return otherAccount.multisigInfo;
+        }
+
+        return [];
+    }
+
+    static getWalletMultisigInfo(wallet: Wallet): PublicKeyMultisigInfos[]{
+
+        let data: PublicKeyMultisigInfos[] = [];
+        let multisigAccounts = WalletUtils.getAllMultisigAccount(wallet);
+
+        // console.log(multisigAccounts);
+        for(let i = 0; i < multisigAccounts.length; ++i){
+            let multisigInfos = WalletUtils.getAllMultisigInfoByPublicKey(wallet, multisigAccounts[i].publicKey);
+            //let parentCosigner = WalletUtils.getDirectParentCosigner(multisigInfos);
+            data.push({
+                publicKey: multisigAccounts[i].publicKey,
+                multisigInfos: multisigInfos
+            });
+        }
+
+        // console.log(data);
+
+        return data;
+    }
+
+    static findWalletAccountByPublicKey(wallet: Wallet, publicKey: string): WalletAccount | null{
+        let account: WalletAccount = wallet.accounts.find((acc)=> acc.publicKey === publicKey);
+
+        if(account){
+            return account;
+        }
+
+        return null;
+    }
+
+    static findAccountByPublicKey(wallet: Wallet, publicKey: string): myAccount | null{
+        let account: WalletAccount = wallet.accounts.find((acc)=> acc.publicKey === publicKey);
+
+        if(account){
+            return account;
+        }
+    
+        let otherAccount: OtherAccount = wallet.others.find((acc)=> acc.publicKey === publicKey);
+
+        if(otherAccount){
+            return otherAccount;
+        }
+
+        return null;
+    }
+
+    static findAccountPublicKeyByAddress(wallet: Wallet, address: string): string | null{
+        let account: WalletAccount = wallet.accounts.find((acc)=> acc.address === address);
+
+        if(account){
+            return account.publicKey;
+        }
+    
+        let otherAccount: OtherAccount = wallet.others.find((acc)=> acc.address === address);
+
+        if(otherAccount){
+            return otherAccount.publicKey;
+        }
+
+        return null;
+    }
+        
+
+    static getFinalCosigner(multisigInfos: MultisigInfo[]): string[]{
+        let cosigner: string[] = [];
+
+        let parentSelfOnlyMultisigInfo = multisigInfos.filter(info => info.level >= 0);
+
+        for(let i = 0; i < parentSelfOnlyMultisigInfo.length; ++i){
+            if(parentSelfOnlyMultisigInfo[i].minApproval === 0){
+                cosigner.push(parentSelfOnlyMultisigInfo[i].publicKey);
+            }
+        }
+
+        return cosigner;
+    }
+
+    static getDirectParentCosigner(multisigInfos: MultisigInfo[]): string[]{
+        let cosigner: string[] = [];
+
+        let selfMultisigInfo = multisigInfos.filter(info => info.level === 0);
+
+        cosigner = selfMultisigInfo[0].cosignaturies;
+
+        return cosigner;
+    }
+}
+
+interface PublicKeyMultisigInfos{
+    publicKey: string,
+    multisigInfos: MultisigInfo[]
 }
 
 interface oldWltFile{

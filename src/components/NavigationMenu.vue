@@ -1,63 +1,39 @@
 <template>
-  <div class="relative text-center">
-    <font-awesome-icon @click="showhideMenu();" icon="bars" :class="menuColorClass" class="menuBar absolute w-4 cursor-pointer" style="right: 7px; top: 9px;" v-if="showBar"></font-awesome-icon>
-    <nav class="navbar" ref="navbarRef" v-if="showMenu">
-      <router-link class="col" class-active="active" :to="{ name : 'ViewDashboard'}">{{$t('NavigationMenu.Dashboard')}}</router-link>
-      <router-link class="col" class-active="active" :to="{ name : 'ViewTransferCreate'}">{{$t('NavigationMenu.Transfer')}}</router-link>
-      <router-link class="col" class-active="active" :to="{ name : 'ViewAccountDisplayAll'}" :class="{'router-link-active': subIsActive([
-        '/view-all-accounts',
-        '/select-type-creation-account',
-        '/create-account',
-        '/import-account',
-        '/delete-account',
-        '/details-account',
-        '/created-account',
-        '/convert-account-multisign',
-        '/edit-account-multisign',
-        '/delegate',
-        '/alias-address-to-namespace',
-      ])}">{{$t('NavigationMenu.Accounts')}}</router-link>
-      <router-link class="col" class-active="active" :to="{ name : 'ViewServices'}" :class="{'router-link-active': subIsActive([
-        '/export-wallet',
-        '/wallets',
-        '/create-asset',
-        '/address-book',
-        '/add-contacts',
-        '/delete-wallet-confirmed' ,
-        '/nodes',
-        '/multisig-multi-level',
-        '/create-namespace',
-        '/extend-namespace',
-        '/asset-supply-change',
-        '/swap-account-list',
-        '/create-attestation',
-        '/audit-attestation',
-        '/notifications',
-        '/create-poll',
-        '/polls',
-        '/vote-poll',
-        '/my-file',
-        '/upload-file',
-        '/create-gift',
-        '/redeem-gift-card',
-        '/explorer',
-        '/partial',
-        '/swap-nis1',
-        '/swap-eth',
-        '/swap-bsc',
-        '/swap-bsc-sirius',
-        '/swap-sirius-bsc',
-        '/swap-sirius-eth',
-        '/swap-eth-sirus',
-        '/complete',
-      ])}">{{$t('NavigationMenu.Services')}}</router-link>
-    </nav>
-    <nav class="navbar h-9" v-else>
-    </nav>
+  <div class="flex flex-col" @mouseover="hoverOverNavigation" @mouseout="hoverOutNavigation">
+    <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
+      <div class="my-3 px-10 font-txs text-gray-400">ACCOUNTS ({{ allAccountsCount }})</div>
+      <div>
+        <router-link :to="{ name: 'ViewAccountDetails', params: { address: item.address }}" v-for="(item, index) in accounts" :key="index" class="link_block flex items-center" @click="closeNavi"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center"><div class="text-center w-full"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div></div><span class="truncate overflow-hidden text-white">{{ item.name }}</span></router-link>
+      </div>
+      <router-link :to="{ name: 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" v-if="allAccountsCount > 5" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-4 w-4 inline-block mr-1 text-white">View all accounts</router-link>
+      <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="block font-bold link_block text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-add.svg" class="h-4 w-4 inline-block relative mr-1">Create New Account</router-link>
+    </div>
+    <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
+      <div class="my-3 px-10 text-gray-400">CREATE</div>
+      <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">Namespace</router-link>
+      <router-link :to="{ name : 'ViewServicesAssetsCreate'}"  class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">Asset</router-link>
+      <router-link :to="{ name : 'ViewServices'}"  class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-services.svg" class="h-3 w-3 inline-block relative mr-2">Other Services</router-link>
+    </div>
+    <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
+      <div class="my-3 px-10 text-gray-400">NAVIGATE</div>
+      <router-link :to="{ name : 'ViewWallets'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-wallets.svg" class="h-3 w-3 inline-block relative mr-2">Wallets</router-link>
+      <router-link :to="{ name : 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-3 w-3 inline-block relative mr-2">Accounts</router-link>
+      <router-link :to="{ name : 'ViewServicesAddressBook'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-address-book.svg" class="h-3 w-3 inline-block relative mr-2">Address Book</router-link>
+    </div>
+    <div class="flex-grow"></div>
+    <div class="flex-glow-0 w-60 border-t border-gray-700">
+      <a @click="logout()" class="signout_block flex items-center cursor-pointer text-white"><img src="@/assets/img/navi/icon-sign-out.svg" class="h-4 w-4 inline-block relative mr-2" @click="logout()">{{$t('Header.signout')}}</a>
+    </div>
   </div>
 </template>
 
 <script>
+import { computed, inject, watch } from "vue";
+import { useRouter } from "vue-router";
+import { walletState } from '@/state/walletState';
+import { WalletStateUtils } from "@/state/utils/walletStateUtils";
+import {useI18n} from 'vue-i18n';
+
 export default{
   name: 'NavigationMenu',
   data() {
@@ -102,5 +78,86 @@ export default{
   unmounted() {
     window.removeEventListener("resize", this.navMenuHandler);
   },
+  setup(){
+    const {t} = useI18n();
+    const router = useRouter();
+
+    const navigationSideBar = inject('navigationSideBar');
+
+    const allAccountsCount = computed(
+      () => {
+        if(walletState.currentLoggedInWallet){
+          if(walletState.currentLoggedInWallet.others){
+            const concatOther = walletState.currentLoggedInWallet.accounts.length
+            return concatOther;
+          } else{
+            return walletState.currentLoggedInWallet.accounts.length;
+          }
+        } else{
+          return null;
+        }
+      }
+    );
+
+    const accounts = computed(
+      () => {
+        if(walletState.currentLoggedInWallet){
+          let displayAccounts = [];
+          let accountCount;
+          if(walletState.currentLoggedInWallet.accounts.length < 6){
+            accountCount = walletState.currentLoggedInWallet.accounts.length;
+          }else{
+            accountCount = 5;
+          }
+          for(var a = 0; a < accountCount; ++a){
+            displayAccounts.push(walletState.currentLoggedInWallet.accounts[a]);
+          }
+          return displayAccounts;
+        }else{
+          return null;
+        }
+      }
+    );
+
+    const logout = () => {
+      WalletStateUtils.doLogout();
+      router.push({ name: "Home"});
+      closeNavi();
+    };
+
+    // const isShowNavi = ref(false);
+    const hoverOverNavigation = () => {
+      navigationSideBar.inNavi = true;
+    }
+
+    const hoverOutNavigation = () => {
+      navigationSideBar.inNavi = false;
+    }
+
+    const closeNavi = () => {
+      navigationSideBar.inNavi = false;
+      navigationSideBar.isOpen = false;
+      console.log('close')
+    }
+
+    return {
+      logout,
+      walletState,
+      accounts,
+      allAccountsCount,
+      hoverOverNavigation,
+      hoverOutNavigation,
+      closeNavi,
+    };
+  }
 }
 </script>
+<style lang="scss" scoped>
+.link_block{
+  @apply px-10 hover:bg-navy-lighter py-2 transition-all duration-200;
+}
+
+.signout_block{
+  @apply px-10 hover:bg-navy-lighter py-5 transition-all duration-200;
+}
+</style>

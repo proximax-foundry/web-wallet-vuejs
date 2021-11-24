@@ -6,6 +6,7 @@ Header:
   version: "v"
   home: "На главную"
   wallet: "Кошельки"
+  walletTitle: "Мой Кошельки"
   totalbalance: "Итоговый баланс"
   signout: "Выход"
   network: "Сети"
@@ -58,7 +59,6 @@ createprivatekeywallet:
   title: "Восстановите свой существующий кошелек ProximaX Sirius, импортируйте закрытый ключ из другой службы или создайте новый кошелек прямо сейчас!"
   privatekey: "Закрытый Ключ"
   invalidprivatekey: "Неверный закрытый ключ"
-  swaptitle: "Установите этот флажок, если вы хотите мигрировать с NIS1 с помощью этого закрытого ключа."
 createsuccessful: 
   congratz: "Поздравляем!"
   congratztext: "Ваш кошелек был успешно создан"
@@ -313,10 +313,11 @@ dashboard:
   assetidaddress: "Asset ID/Address"
   active: "Active"
   owner: "Owner"
-  assetid: "Asset ID"
+  assetid: "ASSET ID"
   alias: "Alias"
   quantity: "Quantity"
 transfer: 
+  recipientPlaceholder: "Recipient / Namespace"
   maketransaction: "Совершить транзакцию"
   cosigner: "Содписант"
   nocosigner: "В этом кошельке нет подходящего соподписанта"

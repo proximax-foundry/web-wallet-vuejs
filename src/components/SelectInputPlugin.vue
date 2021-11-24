@@ -1,12 +1,13 @@
 <template>
   <div>
-    <div class="h-5 text-left">
-      <transition enter-active-class="animate__animated animate__fadeInUp">
-        <span v-if="showSelectTitle" class="text-xs text-blue-400 ">{{ placeholder }}</span>
-      </transition>
-    </div>
-    <div class="select mb-3 selectPlugin" style="position: relative">
+    <div class="select selectPlugin" style="position: relative">
+      <div class="h-5 text-left m-auto w-8/12 mb-1">
+        <transition enter-active-class="animate__animated animate__fadeInUp">
+          <span v-if="showSelectTitle" class="text-xs text-blue-400">{{ placeholder }}</span>
+        </transition>
+      </div>
       <Multiselect
+        class = 'border w-8/12'
         :placeholder="placeholder"
         :options="options"
         mode="single"
@@ -22,7 +23,7 @@
         ref="selectRef"
         :disabled="disabled"
       />
-      <div class="h-3 mb-2"><div class="error text-left" v-if="selectErr">{{ errorMessage }}</div></div>
+      <div class="h-3 mb-2"></div>
     </div>
   </div>
 </template>

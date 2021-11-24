@@ -10,12 +10,18 @@ import {
     MosaicNonce,
     WalletAlgorithm,
     AliasActionType,
-    QueryParams
+    QueryParams,
+    CosignatureTransaction,
+    Password
 } from "tsjs-xpx-chain-sdk";
 import Base64 from 'crypto-js/enc-base64';
 import { WalletAcountType } from "../models/const/otherAccountType";
 
 export class Helper{
+
+    static createPasswordInstance(password: string){
+        return new Password(password);
+    }
 
     static createPlainMessage(message: string): PlainMessage{
         return PlainMessage.create(message);
@@ -24,6 +30,10 @@ export class Helper{
     static createEncryptedMessage(message: string, recipientPublicKey: string, networkType: NetworkType, senderPrivateKey: string): EncryptedMessage{
         const publicAccount = PublicAccount.createFromPublicKey(recipientPublicKey, networkType);
         return EncryptedMessage.create(message, publicAccount, senderPrivateKey);
+    }
+
+    static createEncryptedMessageFromEncoded(payload: string): EncryptedMessage{
+        return EncryptedMessage.createFromPayload(payload);
     }
 
     static createUint64FromNumber(number: number): UInt64{
@@ -69,12 +79,20 @@ export class Helper{
         return Address.createFromRawAddress(address);
     }
 
+    static checkAddressNetwork(address: Address, networkType: NetworkType){
+        return address.networkType === networkType;
+    }
+
     static getMosaicSupplyType(): typeof MosaicSupplyType{
         return MosaicSupplyType;
     }
 
     static createPublicAccount(publicKey: string, network: NetworkType): PublicAccount{
         return PublicAccount.createFromPublicKey(publicKey, network);
+    }
+
+    static createAccount(privateKey: string, network: NetworkType): Account{
+        return Account.createFromPrivateKey(privateKey, network);
     }
 
     static createNonceRandom(): MosaicNonce {
@@ -115,6 +133,15 @@ export class Helper{
         return new Intl.DateTimeFormat('default', {
             year: 'numeric', month: 'numeric', day: 'numeric',
             hour: 'numeric', minute: 'numeric', second: 'numeric'
+          }).format(date);
+      }
+
+      static convertDisplayDateTimeFormat24(dateTimeJSON: string): string {
+        const date = new Date(dateTimeJSON);
+    
+        return new Intl.DateTimeFormat('default', {
+            year: 'numeric', month: 'numeric', day: 'numeric',
+            hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false,
           }).format(date);
       }
     
@@ -174,6 +201,10 @@ export class Helper{
         } catch (error) {
             return false;
         }
+      }
+
+      static createCosignatureTransaction(signedABT){
+        return CosignatureTransaction.create(signedABT);
       }
 
       static validateBuildSelectAccountBalance(balanceAccount: number, feeTransaction: number, rental: number): boolean {

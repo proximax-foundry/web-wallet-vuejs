@@ -1,55 +1,135 @@
 <template>
   <header>
-    <div class="header-height flex items-stretch">
-      <div class="flex-none self-center flex items-end logo">
-        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="../assets/img/logo-proximax-sirius-wallet-beta.svg" class="w-24 tsm:w-40"></router-link><span class="version-text">{{$t('Header.version')}}{{ versioning }}</span>
+    <div class="header-height flex items-stretch md:pr-2 bg-gray-50 filter drop-shadow-xl" v-if="loginStatus">
+      <div class="header-height flex-none self-center flex pt-3 md:pt-4 pl-2 sm:pl-4 bg-navy-primary logo-header">
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40"></router-link>
       </div>
-      <div class="flex-grow header-height"></div>
-      <div class="flex-none header-menu mt-1 tsm:mt-3" v-if="loginStatus">
-        <div class=" flex flex-row">
-          <div class="w-5 sm:w-16 inline-block items-center relative">
-            <SelectLanguagePlugin class="lang-mobile-placement-postlogin" />
-          </div>
-          <div class="w-10 text-center flex flex-row h-10 items-center">
-            <img src="../assets/img/icon-copy-notification-off-gray.svg" class="h-6 w-6 inline-block">
-          </div>
-          <div class="w-14 md:w-40 pl-3 text-center flex gray-line-left h-10 items-center">
-            <div>
-              <img src="../assets/img/icon-nodes-green-30h.svg" class="w-7 inline-block" :title="chainAPIEndpoint"> <div class="font-bold inline-block ml-1 text-xs" v-if="wideScreen">{{ networkState.chainNetworkName }}</div>
-            </div>
-          </div>
-          <div class="w-60 pl-3 inline-block text-left gray-line-left h-10 items-center" v-if="wideScreen">
-            <div>
-              <div class="text-xs inline-block">{{ walletState.currentLoggedInWallet.name }}</div>
-              <div class="text-xs">{{$t('Header.totalbalance')}}: <span>{{ totalBalance }}</span> {{ currentNativeTokenName}}</div>
-            </div>
-          </div>
-          <div class="w-17 text-center h-10 items-center gray-line-left mr-1">
-            <div class="text-xs inline-block mt-3" v-if="wideScreen">
-              <a @click="logout()">{{$t('Header.signout')}}</a>
-            </div>
-            <div class="inline-block mt-2" v-else>
-              <font-awesome-icon icon="sign-out-alt" @click="logout()" class="text-blue-400 w-6 h-6 cursor-pointer ml-3"></font-awesome-icon>
-            </div>
-          </div>
+      <div class="flex-none md:flex items-center w-16 hidden md:visible right-gray-line">
+        <div class="text-center w-full h-7">
+          <router-link :to="{name : 'ViewDashboard'}"><img src="@/assets/img/icon-home.svg" class="h-7 w-7 inline-block"></router-link>
         </div>
       </div>
-      <div class="flex-none self-center header-menu" v-else>
-        <div class="w-5 sm:w-16 inline-block mr-10 sm:mr-3 lang-mobile-placement">
-          <SelectLanguagePlugin />
+      <div class="flex-none md:flex items-center md:ml-4 hidden md:visible">
+        <img src="@/assets/img/icon-blockheight.svg" class="h-10 w-10 inline-block">
+        <div class="ml-3">
+          <div class="uppercase text-txs text-gray-400">block height</div>
+          <div class="text-gray-800 text-md font-bold mt-1">{{ blockHeight }}</div>
         </div>
-        <div class="select mb-3 inline-block">
-          <Dropdown v-model="selectedNetwork" name="selectedNetwork" :modelValue="networkState.chainNetwork" :options="chainsNetworkOption" optionLabel="label" optionGroupLabel="label" optionGroupChildren="items" @change="selectNetwork"></Dropdown>
-        </div>
-        <div class="w-16 text-center inline-block" v-if="wideScreen">
-          <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block">{{$t('Header.home')}}</router-link>
-        </div>
-        <div class="w-16 text-center inline-block" v-if="wideScreen">
-          <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold">{{$t('Header.wallet')}}</router-link>
+      </div>
+
+      <div class="flex-grow"></div>
+      <div class="flex-none">
+        <div class="flex flex-row h-full">
+          <div class="flex flex-row items-center">
+            <div class="text-center w-full h-6 pr-10 mt-2 relative">
+              <div class="cursor-pointer text-blue-primary text-tsm" @mouseover="setHoverCreateToTrue" @mouseout="setHoverCreateToFalse">+ Create</div>
+              <div class="absolute z-20 w-60 text-left mt-2 bg-gray-50 shadow-sm rounded-md right-0 p-2 text-xs transition duration-200 block" v-if="isShowCreate" @mouseover="isShowCreate=true;isHoverCreatePanel=true;" @mouseout="hideCreatePanel">
+                <router-link :to="{ name: 'ViewServicesAssetsCreate'}" class="hover:bg-gray-200 p-2 block">
+                  <div class="inline-block mr-2">
+                    <img src="@/assets/img/icon-header-asset.svg" class="">
+                  </div>
+                  <div class="inline-block">
+                    <div class="font-bold mb-1">Digital Asset</div>
+                    <div class="text-txs text-gray-400">Create your own unique token</div>
+                  </div>
+                </router-link>
+                <router-link :to="{ name: 'ViewServicesNamespaceCreate'}" class="hover:bg-gray-200 p-2 block">
+                  <div class="inline-block mr-2">
+                    <img src="@/assets/img/icon-header-namespace.svg" class="">
+                  </div>
+                  <div class="inline-block">
+                    <div class="font-bold mb-1">Namespace</div>
+                    <div class="text-txs text-gray-400">Create an on-chain unique space</div>
+                  </div>
+                </router-link>
+                <router-link :to="{ name: 'ViewAccountCreate'}" class="hover:bg-gray-200 p-2 block">
+                  <div class="inline-block mr-2">
+                    <img src="@/assets/img/icon-header-account.svg" class="">
+                  </div>
+                  <div class="inline-block">
+                    <div class="font-bold mb-1">Account</div>
+                    <div class="text-txs text-gray-400">Secure XPX in new account</div>
+                  </div>
+                </router-link>
+              </div>
+            </div>
+          </div>
+          <div class="w-12 md:w-16 flex flex-row items-center left-gray-line relative">
+            <div class="text-center w-full h-7 cursor-pointer" @mouseover="setHoverSupportToTrue" @mouseout="setHoverSupportToFalse">
+              <img src="@/assets/img/icon-support-contact.svg" class="opacity-80 hover:opacity-100 inline-block h-4 w-4 md:h-5 md:w-5">
+            </div>
+            <div class="absolute z-20 w-96 text-left bg-gray-50 shadow-sm rounded-md right-0 p-2 text-tsm transition duration-200 block" style="top: 60px" v-if="isShowSupport" @mouseover="isShowSupport=true;isHoverSupportPanel=true;" @mouseout="hideSupportPanel">
+              <div class="font-bold p-2 text-txs">BEGINNER'S GUIDE</div>
+              <div class="grid grid-cols-2">
+                <div>
+                  <div class="p-2">
+                    <a class="mb-2 block text-blue-primary" href="#" target=_new>Getting Started<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <div class="text-txs h-10">Everything you need to know about the Sirius Wallet</div>
+                  </div>
+                  <div class="p-2">
+                    <a class="mb-2 block text-blue-primary" href="#" target=_new>What is Sirius Chain?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <div class="text-txs h-10">Start building apps on the ProximaX Sirius blockchain layer</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="p-2">
+                    <a class="mb-2 block text-blue-primary" href="#" target=_new>What is Namespace?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <div class="text-txs h-10">Create an on-chain unique place for your business and your assets</div>
+                  </div>
+                  <div class="p-2">
+                    <a class="mb-2 block text-blue-primary" href="#" target=_new>What is Asset?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <div class="text-txs h-10">Everything you need to know about the Sirius Wallet</div>
+                  </div>
+                </div>
+              </div>
+              <div class="w-full p-2 pt-3 border-t border-gray-100">
+                <a href="https://t.me/proximaxhelpdesk" target=_new class="text-xs text-blue-primary">Contact our support team</a>
+              </div>
+            </div>
+          </div>
+          <div class="w-12 md:w-16 flex flex-row items-center left-gray-line">
+            <div class="text-center w-full h-7">
+              <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block h-7 w-3 md:h-5 md:w-5">
+            </div>
+          </div>
+          <div class="w-12 md:w-16 flex flex-row items-center left-gray-line">
+            <div class="text-center w-full h-4 md:h-6">
+              <router-link :to="{name : 'ViewServices'}" class="h-7 w-4 md:h-6 md:w-6 inline-block">
+                <img src="@/assets/img/icon-setting.svg" class="opacity-80 hover:opacity-100 transition-all duration-300">
+              </router-link>
+            </div>
+          </div>
+          <div class="w-16 md:w-40 pl-3 text-center flex items-center left-gray-line">
+            <div class="md:flex md:items-center">
+              <img src="@/assets/img/icon-testnet-block.svg" class="w-3 md:w-7 block md:inline-block" :title="chainAPIEndpoint" v-if="wideScreen"> <div class="block md:inline-block text-txs text-white text-left md:ml-2"><div class="text-xxs md:text-tsm text-navy-primary">{{ networkState.chainNetworkName }}</div></div>
+            </div>
+          </div>
+          <div class="w-12 md:w-16 flex flex-row items-center left-gray-line md:hidden">
+            <div class="text-center w-full h-6" @mouseover="hoverOverNavigation" @mouseout="hoverOutNavigation">
+              <img src="@/assets/img/icon-menu.svg" class="h-4 w-4 opacity-80 hover:opacity-100 inline-block cursor-pointer" @click="toggleSidebar">
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div v-if="!wideScreen && !loginStatus" class="bg-gray-100 py-1 text-center">
+    <div class="container mx-auto header-height flex items-stretch " v-else>
+      <div class="flex-none self-center flex items-end ml-2 sm:ml-0">
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40"></router-link>
+      </div>
+      <div class="flex-grow"></div>
+      <div class="flex-none self-center header-menu">
+        <div class="w-20 inline-block ml-2 sm:ml-0" v-if="wideScreen">
+          <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block text-white">{{$t('Header.home')}}</router-link>
+        </div>
+        <div class="w-20 inline-block" v-if="wideScreen">
+          <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold text-white">{{$t('Header.wallet')}}</router-link>
+        </div>
+        <div class="text-center inline-block text-white">
+          <selectLanguageModal :loginStatus="loginStatus"/>
+        </div>
+      </div>
+    </div>
+    <div v-if="!wideScreen && !loginStatus" class="bg-gray-200 py-1 text-center">
       <div class="w-16 text-center inline-block">
         <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block text-xs sm:text-sm">{{$t('Header.home')}}</router-link>
       </div>
@@ -61,20 +141,18 @@
 </template>
 
 <script> 
-import { computed, defineComponent, getCurrentInstance, ref, watch } from "vue";
+import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { useRouter } from "vue-router";
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { ChainUtils } from '@/util/chainUtils';
 import { Helper } from '@/util/typeHelper';
-// import { transferEmitter } from '../util/listener.js';
-import Dropdown from 'primevue/dropdown';
-import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+// import Dropdown from 'primevue/dropdown';
+// import SelectLanguagePlugin from '@/components/SelectLanguagePlugin.vue';
+import selectLanguageModal from '@/modules/home/components/selectLanguageModal.vue'
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { useToast } from "primevue/usetoast";
-import packageData from "../../package.json"
 import { Connector } from '../models/connector';
 import { listenerState} from "@/state/listenerState";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
@@ -84,9 +162,8 @@ import {useI18n} from 'vue-i18n'
 
 export default defineComponent({
   components: {
-    Dropdown,
-    SelectLanguagePlugin,
-    FontAwesomeIcon,
+    // Dropdown,
+    selectLanguageModal,
   },
 
   name: 'headerComponent',
@@ -102,6 +179,59 @@ export default defineComponent({
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const router = useRouter();
+
+    const blockHeight = computed(() => networkState.currentNetworkProfileConfig.chainHeight);
+
+    const isHoverCreate = ref(false);
+    const isShowCreate = ref(false);
+    const isHoverCreatePanel = ref(false);
+    const setHoverCreateToTrue = () => {
+      isHoverCreate.value = true;
+      isShowCreate.value = true;
+    }
+    const setHoverCreateToFalse = () => {
+      isHoverCreate.value = false;
+      setTimeout(() => {
+        if(!isHoverCreatePanel.value && !isHoverCreate.value){
+          isShowCreate.value = false;
+        }
+      }, 100);
+    }
+    const hideCreatePanel = () => {
+      isHoverCreatePanel.value = false;
+      setTimeout(() => {
+        if(!isHoverCreate.value && !isHoverCreatePanel.value){
+          isShowCreate.value = false;
+        }
+      }, 100);
+    }
+
+    const isHoverSupport = ref(false);
+    const isShowSupport = ref(false);
+    const isHoverSupportPanel = ref(false);
+    const setHoverSupportToTrue = () => {
+      isHoverSupport.value = true;
+      isShowSupport.value = true;
+    }
+    const setHoverSupportToFalse = () => {
+      isHoverSupport.value = false;
+      setTimeout(() => {
+        if(!isHoverSupportPanel.value && !isHoverSupport.value){
+          isShowSupport.value = false;
+        }
+      }, 100);
+    }
+    const hideSupportPanel = () => {
+      isHoverSupportPanel.value = false;
+      setTimeout(() => {
+        if(!isHoverSupport.value && !isHoverSupportPanel.value){
+          isShowSupport.value = false;
+        }
+      }, 100);
+    }
+
+    const navigationSideBar = inject('navigationSideBar');
+
     const notificationMessage = ref('');
     const notificationType = ref('noti');
 
@@ -119,8 +249,7 @@ export default defineComponent({
     watch(()=> networkState.availableNetworks, (availableNetworks)=>{
       let options = [];
 
-      console.log("Updated");
-      console.log(availableNetworks);
+      console.log("Network List Updated");
 
       for(let i=0; i < availableNetworks.length; ++i){
         options.push({ label: availableNetworks[i], value: i });
@@ -153,6 +282,18 @@ export default defineComponent({
       //}
       // console.log(e.value.value);
     }
+
+    // setInterval(()=>{
+    //   toast.add(
+    //     {
+    //       severity:'info', 
+    //       summary: `Waiting queue`, 
+    //       detail: `Please do not`, 
+    //       detail2: "refresh or logout",
+    //       group: 'brt'
+    //     }
+    //   );
+    // }, 60000);
 
     const currentNetworkType = computed(()=> networkState.currentNetworkProfile ? networkState.currentNetworkProfile.network.type : null);
 
@@ -196,6 +337,10 @@ export default defineComponent({
       }
       listener.value.terminate();
 
+      if(walletState.currentLoggedInWallet === null || walletState.currentLoggedInWallet === undefined){
+        return;
+      }
+
       let accountsAddress = walletState.currentLoggedInWallet.accounts.map((acc)=> acc.address);
       let othersAddress = walletState.currentLoggedInWallet.others.map((acc)=> acc.address);
 
@@ -214,18 +359,35 @@ export default defineComponent({
       listener.value.terminate();
     }
 
-    if(loginStatus.value){
-      WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
-      connectListener();
+    const doLogin = async () =>{
+      if(loginStatus.value){
+        await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
+        connectListener();
+      }
     }
 
-    watch(()=> loginStatus.value, (newValue)=>{
+    const toggleSidebar = () => {
+      navigationSideBar.isOpen = !navigationSideBar.isOpen;
+    }
+
+    const hoverOverNavigation = () => {
+      navigationSideBar.inNavi = true;
+    }
+
+    const hoverOutNavigation = () => {
+      navigationSideBar.inNavi = false;
+    }
+
+    doLogin();
+
+    watch(()=> loginStatus.value, async (newValue)=>{
       if(newValue){
-        connectListener();
-        WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
+        doLogin();
+        emitter.emit('LOGIN');
       }
       else{
         terminateListener();
+        emitter.emit('LOGOUT');
       }
     })
 
@@ -272,6 +434,7 @@ export default defineComponent({
 
       if(newValue > oldValue){
         let txLength = newValue - oldValue;
+        emitter.emit("TXN_UNCONFIRMED", txLength);
         let singularPluralText =  txLength > 1 ? "s" : "";
         toast.add(
           {
@@ -286,17 +449,17 @@ export default defineComponent({
      });
 
      watch(()=> confirmedTxLength.value, (newValue, oldValue)=>{
-
       if(newValue > oldValue){
         WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
 
         let txLength = newValue - oldValue;
 
+        emitter.emit("TXN_CONFIRMED", txLength);
+
         let transactionHashes = listenerState.allConfirmedTransactionsHash.slice(-txLength);
 
         let swapTransactionsCount = 0;
         let swapTransactionHash = [];
-
 
         for(let i =0; i < listenerState.confirmedTransactions.length; ++i){
           let txs = listenerState.confirmedTransactions[i].confirmedTransactions.filter((tx)=> transactionHashes.includes(tx.transactionInfo.hash));
@@ -345,8 +508,6 @@ export default defineComponent({
 
      watch(()=> transactionStatusLength.value, (newValue, oldValue)=>{
 
-       console.log(newValue + ":" + oldValue);
-
       if(newValue > oldValue){
         let txLength = newValue - oldValue;
         let totalTxLength = listenerState.allTransactionStatus.length;
@@ -355,6 +516,7 @@ export default defineComponent({
         for(let i= 0; i < txLength; ++i){
           let status = listenerState.allTransactionStatus[lastIndex - i].status;
           let hash = listenerState.allTransactionStatus[lastIndex - i].hash;
+          emitter.emit("TXN_ERROR", hash);
           toast.add({
             severity:'error', 
             summary: `Transaction Error`, 
@@ -370,6 +532,7 @@ export default defineComponent({
 
       if(newValue > oldValue){
         let txLength = newValue - oldValue;
+        emitter.emit("COSIGNER_SIGNED", txLength);
         let singularPluralText =  txLength > 1 ? "s" : "";
         toast.add(
           {
@@ -387,6 +550,7 @@ export default defineComponent({
 
       if(newValue > oldValue){
         let txLength = newValue - oldValue;
+        emitter.emit("ABT_ADDED", txLength);
         let singularPluralText =  txLength > 1 ? "s" : "";
         toast.add(
           {
@@ -407,13 +571,8 @@ export default defineComponent({
      emitter.on("listener:setEndpoint", endpoint =>{
        listener.value.endpoint = endpoint;
      });
-
-    const versioning = ref('0.0.1');
-
-    versioning.value = packageData.version;
-
     return {
-      versioning,
+      toggleSidebar,
       networkState,
       walletState,
       loginStatus,
@@ -427,7 +586,22 @@ export default defineComponent({
       chainAPIEndpoint,
       chainsNetworkOption,
       currentNativeTokenName,
-      listener
+      listener,
+      hoverOverNavigation,
+      hoverOutNavigation,
+      isHoverCreate,
+      isShowCreate,
+      setHoverCreateToTrue,
+      setHoverCreateToFalse,
+      hideCreatePanel,
+      isHoverCreatePanel,
+      isHoverSupport,
+      isShowSupport,
+      setHoverSupportToTrue,
+      setHoverSupportToFalse,
+      hideSupportPanel,
+      isHoverSupportPanel,
+      blockHeight,
     };
   },
   created() {
@@ -455,6 +629,18 @@ export default defineComponent({
 <style lang="scss">
 @import "../assets/scss/multiselect.scss";
 
+.left-gray-line{
+  border-left: 1px solid #dedede;
+}
+
+.right-gray-line{
+  border-right: 1px solid #dedede;
+}
+
+.gray-bar{
+  background: #3F4058;
+}
+
 .lang-mobile-placement{
   top: -30px; position: relative;
 }
@@ -463,12 +649,16 @@ export default defineComponent({
   position: relative; top: 0px !important; left: -35px;
 }
 
+.logo-header{
+  width: 115px;
+}
+
 .header-height{
   @apply h-12;
 }
 
 .header-menu{
-  margin-right: 5px;
+  margin-left: 5px;
 }
 
 .header-menu a{
@@ -485,6 +675,10 @@ export default defineComponent({
 }
 
 @screen md {
+  .logo-header{
+    width: 240px;
+  }
+
  .version-text{
     font-size: 13px;
     top: 5px;
@@ -494,10 +688,6 @@ export default defineComponent({
   .lang-mobile-placement-postlogin{
     left: 0px;
   }
-}
-
-.gray-line-left{
-  border-left: 1px solid #E4E7EB;
 }
 
 .p-hidden-accessible {
@@ -671,7 +861,7 @@ export default defineComponent({
   }
 
   .header-menu{
-    margin-right: 20px;
+    margin-left: 20px;
   }
 
  .p-inputtext {

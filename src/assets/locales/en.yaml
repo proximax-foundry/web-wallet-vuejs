@@ -1,11 +1,12 @@
 ---
 Footer: 
   text: "Please report any issues identified to our"
-  link: helpdesk
+  link: Helpdesk
 Header: 
   version: "v"
   home: "Home"
   wallet: "Wallets"
+  walletTitle: "My Wallets"
   totalbalance: "Total balance"
   signout: "Sign Out"
   network: "Networks"
@@ -58,7 +59,6 @@ createprivatekeywallet:
   title: "Restore your existing ProximaX Sirius Wallet, import a private key from another service or create a new wallet right now!"
   privatekey: "Private Key"
   invalidprivatekey: "Invalid private key"
-  swaptitle: "Check this box if you wish to swap with this private key."
 createsuccessful: 
   congratz: "Congratulations!"
   congratztext: "Your wallet has been successfully created"
@@ -313,10 +313,11 @@ dashboard:
   assetidaddress: "Asset ID/Address"
   active: "Active"
   owner: "Owner"
-  assetid: "Asset ID"
+  assetid: "ASSET ID"
   alias: "Alias"
   quantity: "Quantity"
 transfer: 
+  recipientPlaceholder: "Recipient / Namespace"
   maketransaction: "Make a transaction"
   cosigner: "Cosigner"
   nocosigner: "No eligible cosigner in this wallet"
@@ -381,7 +382,7 @@ addressbook:
   addressbookmessage3: "with invalid address"
   addressbookmessage4: "not imported"
   editcontact: "Edit this contact"
-  addressvalidation: "Address is already exists in account or address book."
+  addressvalidation: "Address already exist in address book."
   namevalidation: "Name is already exists in account or address book."
 swap:
   ethfull: "Ethereum (ETH)"

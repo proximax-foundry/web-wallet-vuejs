@@ -1,139 +1,176 @@
 <template>
-<div class="flex justify-between text-xs sm:text-sm">
-  <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.details')}}</span></div>
   <div>
-    <router-link :to="{name : 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('accounts.viewall')}}</router-link>
-  </div>
-</div>
-<div class='mt-2 py-3 gray-line'>
-  <div class="container mx-auto text-center">
-    <div class="mx-auto pt-5 lg:px-20">
+    <div class='flex cursor-pointer'>
+      <img src='@/assets/img/chevron_left.svg'>
+      <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
+    </div>
+    <div v-if='showModal' >
+        <transition
+          enter-active-class="animate__animated animate__fadeInDown"
+          leave-active-class="animate__animated animate__fadeOutUp"
+        >
+          <div class="popup-outer-create-wallet absolute flex z-50">
+            <div class="modal-popup-box ">
+              <img src='@/assets/img/icon-blue-tick.svg' class='h-5 w-5 ml-auto mr-auto mb-3'>
+              <div class= 'text-center mt-2 text-xs font-semibold'>Account Creation Successful</div>
+              <div class ='text-gray-500 text-center text-xs mt-2'>Should you wish to get testnet XPX amount, you can top up every 24 hours in your account.</div>
+              <div class='flex flex-wrap content-center'>
+                <div @click="showModal=false" class= ' mt-4 w-4/12 ml-auto mr-auto text-center  blue-btn cursor-pointer font-semibold text-xs py-2 px-2 mt-2 font-semibold mb-3' >Close</div>
+              </div>
+            </div>
+          </div>
+        </transition>
+        <div class="fixed inset-0 bg-opacity-60 z-10 bg-gray-100"></div>
+      </div>
+    <div class='w-9/12 ml-auto mr-auto '>
+      <div class = 'flex text-xs font-semibold border-b-2'>
+        <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Details</div>
+        <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
+      </div>
+      <div class='my-7 font-semibold'>Account Details</div>
       <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
-      <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-8 items-center">
-        <div class="text-left w-full relative">
-          <div class="text-xs font-bold mb-1">{{$t('accounts.name')}}:</div>
-          <div v-if="showName">{{ accountNameDisplay }}</div>
-          <div v-else>
-            <TextInput :placeholder="$t('swap.accountname')" :errorMessage="$t('accounts.namevalidation')" v-model="accountName" icon="wallet" />
-          </div>
-        </div>
-        <div class="inline-block ml-2">
-          <font-awesome-icon icon="edit" @click="editName()" class="w-5 h-5 text-gray-500 cursor-pointer inline-block" v-if="showName"></font-awesome-icon>
-          <div v-else>
-            <font-awesome-icon icon="check-circle" @click="changeName()" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mb-1"></font-awesome-icon>
-            <font-awesome-icon @click="hidePanel()" icon="times-circle" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
+      <div class='border-2'>
+        <div class='flex'>
+          <div v-html='svgString'></div>
+          <div class='flex flex-col justify-center'>
+            <div class='flex '>
+              <div class = ' ml-4 font-semibold text-md' v-if='showName'>{{ accountNameDisplay }}</div>
+              <input class='outline-none ml-4 font-semibold text-md'  v-model='accountName' v-if='!showName'/>
+              <img src="@/modules/account/img/edit-icon.svg"  v-if='showName' @click='showName=!showName' title='Edit Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
+              <img src="@/modules/account/img/edit-icon.svg"  v-if='!showName'  @click="changeName()" title='Confirm Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
+            </div>
+            <div class='flex'> 
+              <div  v-if='isDefault' class = 'ml-3 px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm'>
+                <img src="@/modules/account/img/icon-pin.svg" class = 'h-4 w-4 ' title='This is your default account everytime you login'>
+                <p class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is your default account everytime you login' >DEFAULT</p>
+              </div>
+              <div v-if='isMultiSig' class = 'ml-1.5 px-1 py-0.5 flex mt-0.5 bg-orange-primary rounded-sm '>
+                <img v-if='isMultiSig' src="@/assets/img/icon-key.svg" class = 'h-4 w-4 mr-1' title='This is your default account everytime you login'>
+                <p v-if='isMultiSig' class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is a multisig account' >MULTISIG</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-        <div class="text-left w-full relative">
-          <div class="absolute z-20 w-full h-full"></div>
-          <div class="text-xs font-bold mb-1">{{$t('createsuccessful.address')}}:</div>
-          <div id="address" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="prettyAddress" copySubject="Address">{{prettyAddress}}</div>
+      <div class='border-2 mt-3 pb-6 px-6 pt-2'>
+        <img src="@/modules/account/img/icon-info.svg" class='h-4 w-4 ml-auto' 
+        title='Top up your account balance to a maximum of 100,000 test-XPX every 24 hours.'>
+        <div class = 'text-xxs text-blue-primary font-semibold'>CURRENT BALANCE</div>
+        <div class='flex my-1'>
+          <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
+          <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
+          <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
+          <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
+          <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
+          <div class='flex ml-auto gap-6 '>
+            <div class='flex cursor-pointer'>
+              <img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-5 h-5 mt-0.5  cursor-pointer mr-1">
+              <div class='text-xs mt-1 font-semibold '>Transfer XPX</div>
+            </div>
+            <div class='flex cursor-pointer'>
+              <img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-5 h-5 mt-0.5  cursor-pointer mr-1">
+              <div class='text-xs mt-1 font-semibold'>Request XPX</div>
+            </div>
+            <div class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
+              <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
+              <div class='text-xs mt-0.5 font-semibold text-white'>Top up XPX</div>
+            </div>
+          </div>
         </div>
-        <font-awesome-icon icon="copy" @click="copy('address')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
+        <div class = 'text-txs text-gray-400 '>Estimate US$ {{currencyConvert}}</div>
+        <div class='my-6 gray-line'></div>
+        <div class = 'text-xxs text-blue-primary mt-2 font-semibold'>WALLET ADDRESS</div>
+        <div class= 'flex'>
+          <div id="address" :copyValue="prettyAddress" copySubject="Address" class = 'text-xs font-semibold mt-1'>{{prettyAddress}} </div>
+          <font-awesome-icon icon="copy" title='Copy' @click="copy('address')" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+        </div>
+        <div class='my-6 gray-line'></div>
+        <div class = 'text-xxs text-blue-primary mt-2 font-semibold'>PUBLIC KEY</div>
+        <div class= 'flex'>
+          <div id="public" class="text-xs font-semibold mt-1 break-all" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
+          <font-awesome-icon icon="copy" @click="copy('public')" title='Copy' class="ml-2 pb-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+        </div>
+        <div class='my-6 gray-line'></div>
+        <div v-if='!other_acc' >
+          <div class = 'text-xxs text-blue-primary mt-0.5 font-semibold'>PRIVATE KEY</div>
+          <div class='flex '>
+            <div v-if="!showPwPK && !showPK" class='break-all font-semibold'>****************************************************************</div>
+            <PkPasswordModal v-if="!showPwPK && !showPK" :account = 'acc' />
+          </div>
+          <div class='flex'>
+            <div id="private" class="text-xs mt-1 font-semibold w-full break-all" type="text" :copyValue="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
+            <font-awesome-icon title='Copy' icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link cursor-pointer " v-if="showPK"></font-awesome-icon>
+            <font-awesome-icon icon="eye-slash" title='Hide Private Key' class="text-blue-link relative cursor-pointer ml-1" @click="showPwPK = false; showPK = false" v-if="showPK"></font-awesome-icon>
+          </div>
+          <p class = 'text-txs mt-2 text-gray-400'>{{$t('createsuccessful.warningtext1')}} {{$t('createsuccessful.warningtext2')}}</p>
       </div>
-      <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-        <div class="text-left w-full relative">
-          <div class="absolute z-20 w-full h-full"></div>
-          <div class="text-xs font-bold mb-1">{{$t('accounts.publickey')}}:</div>
-          <div id="public" class="text-sm w-full outline-none bg-gray-100 z-10" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
-        </div>
-        <font-awesome-icon icon="copy" @click="copy('public')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
+      <div class='my-6 gray-line' v-if='!other_acc'></div>
+      <div class='flex'>
+        <PdfPasswordModal v-if='!other_acc' />
+        <DeleteAccountModal v-if="!isDefault && !other_acc " :account ='acc' />
       </div>
-      <div v-if="acc.encrypted != undefined && acc.encrypted != ''">
-        <div class="flex justify-between p-4 rounded-xl bg-yellow-100 mb-4">
-          <div class="text-center w-full">
-            <div class="border border-yellow-600 rounded-full w-8 h-8 inline-block mb-4">
-              <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-600 inline-block mt-1"></font-awesome-icon>
-            </div>
-            <p>{{$t('createsuccessful.warningtext1')}}</p>
-            <p>{{$t('createsuccessful.warningtext2')}}</p>
-          </div>
-        </div>
-        <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-          <div class="text-left w-full relative">
-            <div class="text-xs font-bold mr-2"><div class="mb-2 inline-block">{{$t('createprivatekeywallet.privatekey')}}:</div><div v-if="!showPwPK && !showPK">**************</div><PasswordInput v-if="showPwPK && !showPK" :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPasswd" /></div>
-            <div class="absolute z-20 w-full h-full" v-if="showPK"></div>
-            <div id="private" class="text-sm w-full outline-none bg-gray-100 z-10" type="text" :copyValue="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
-          </div>
-          <font-awesome-icon icon="copy" @click="copy('private')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mr-2" v-if="showPK"></font-awesome-icon>
-          <button class="default-btn w-36" @click="showPwPK = !showPwPK" v-if="!showPwPK && !showPK">{{$t('createsuccessful.show')}}</button>
-          <button class="default-btn w-36" @click="verifyWalletPwPk()" v-if="showPwPK && !showPK">{{$t('accounts.submit')}}</button>
-          <button class="default-btn w-36" @click="showPwPK = false; showPK = false" v-if="showPK">{{$t('createsuccessful.hide')}}</button>
-        </div>
-        <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-          <div class="text-left w-full relative">
-            <div class="text-xs font-bold mr-2">
-              <div class="text-sm font-bold mb-1">{{$t('accounts.swap')}}</div>
-              <PasswordInput v-if="showPwSwap" :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPasswdSwap" />
-            </div>
-          </div>
-          <button class="default-btn w-36" @click="showPwSwap = !showPwSwap" v-if="!showPwSwap">{{$t('accounts.enable')}}</button>
-          <button class="default-btn w-36" @click="verifyWalletPwSwap()" v-if="showPwSwap">{{$t('accounts.submit')}}</button>
-        </div>
-        <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-4 items-center">
-          <div class="text-left w-full relative">
-            <div class="text-xs font-bold mr-2">
-              <div class="text-sm font-bold mb-1">{{$t('createsuccessful.savewalletpaper')}}</div>
-              <PasswordInput v-if="showWalletPaperPw && !showSavePaperWallet" :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('accounts.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPasswdWalletPaper" />
-            </div>
-          </div>
-          <button class="default-btn w-36" @click="showWalletPaperPw = !showWalletPaperPw" v-if="!showWalletPaperPw">{{$t('accounts.save')}}</button>
-          <button class="default-btn w-36" @click="verifyWalletPwWalletPaper()" v-if="showWalletPaperPw && !showSavePaperWallet">{{$t('accounts.submit')}}</button>
-          <button class="default-btn w-36" @click="saveWalletPaper()" v-if="showSavePaperWallet">{{$t('accounts.save')}}</button>
-        </div>
       </div>
     </div>
-  </div>
 </div>
 </template>
 
-<script>
-import {ref, computed} from "vue";
-import {useRouter} from "vue-router";
+<script >
+import {getXPXcurrencyPrice } from '@/util/functions';
+import { watch, ref, computed, getCurrentInstance } from "vue";
+import { useRouter } from "vue-router";
 import TextInput from "@/components/TextInput.vue";
-import PasswordInput from "@/components/PasswordInput.vue";
-import {copyToClipboard } from '@/util/functions';
-import {useToast} from "primevue/usetoast";
-import {walletState} from "@/state/walletState";
-import {Helper} from "@/util/typeHelper";
-import {networkState} from "@/state/networkState";
-import {WalletUtils} from "@/util/walletUtils";
-import {useI18n} from 'vue-i18n';
+import { copyToClipboard } from '@/util/functions';
+import { useToast } from "primevue/usetoast";
+import { walletState } from "@/state/walletState";
+import { Helper } from "@/util/typeHelper";
+import { networkState } from "@/state/networkState";
+import { WalletUtils } from "@/util/walletUtils";
+import { useI18n } from 'vue-i18n';
 import { pdfWalletPaperImg } from '@/modules/account/pdfPaperWalletBackground';
 import jsPDF from 'jspdf';
 import qrcode from 'qrcode-generator';
+import PkPasswordModal from '@/modules/account/components/PkPasswordModal.vue'
+import PdfPasswordModal from '@/modules/account/components/PdfPasswordModal.vue'
+import DeleteAccountModal from '@/modules/account/components/DeleteAccountModal.vue'
+import { toSvg} from "jdenticon";
 
 export default {
   name: "ViewAccountDetails",
   components: {
-    TextInput,
-    PasswordInput
+    /* TextInput, */
+    PkPasswordModal,
+    PdfPasswordModal,
+    DeleteAccountModal
   },
   props: {
-    address: String
+    address: String,
+    accountCreated: Boolean
   },
-
   setup(p) {
     const {t} = useI18n();
     const toast = useToast();
     const router = useRouter();
-
+    const showModal = ref(false)
     // get account details
     var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
     const other_acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
-
+    const svgString = ref(toSvg(acc.address, 100))
+ 
     if(!acc){
       if(other_acc)
       {
         acc = other_acc;
       }
     }
-
+    if(p.accountCreated){
+      showModal.value= true
+    }
+    const isDefault = (acc.default == true) ? true: false
     if (acc === -1) {
       router.push({name: "ViewAccountDisplayAll"});
     }
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const prettyAddress = Helper.createAddress(acc.address).pretty();
     const err = ref(false);
     const accountName = ref(acc.name);
@@ -157,9 +194,11 @@ export default {
       toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
     };
 
-    const editName = () => {
-      showName.value = !showName.value;
-    };
+    
+    const isMultiSig = computed(() => {
+      let isMulti = acc.getDirectParentMultisig().length? true: false
+      return isMulti;
+    });  
 
     const changeName = () => {
       if (accountName.value.trim()) {
@@ -187,16 +226,6 @@ export default {
       } else {
         err.value = t('scriptvalues.inputaccountname');
       }
-    };
-
-    const showPasswordPanel = () => {
-      showPwPK.value = !showPwPK.value;
-    };
-
-    const hidePanel = () => {
-      accountName.value = acc.name;
-      showName.value = !showName.value;
-      err.value = "";
     };
 
     const verifyWalletPwPk = () => {
@@ -227,6 +256,40 @@ export default {
         err.value = "";
       }
     };
+    
+    const currencyConvert = ref('');
+     const getCurrencyPrice = () => {
+      let balance = acc.balance;
+      getXPXcurrencyPrice(balance).then((total) => {
+        currencyConvert.value = Helper.toCurrencyFormat(total, 6);
+      });
+    };
+     
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+
+    const accountBalance = computed(
+      () => {          
+        return Helper.toCurrencyFormat(acc.balance, currentNativeTokenDivisibility.value);
+      }
+    );
+
+    const splitBalance = computed(()=>{
+      let split = accountBalance.value.split(".")
+      if (split[1]!=undefined){
+        return {left:split[0],right:split[1]}
+      }else{
+        return {left:split[0], right:null}
+      }
+    })
+
+    if(networkState.currentNetworkProfile.network.currency.name === "XPX"){
+      getCurrencyPrice();
+
+      watch(accountBalance, () => {
+        getCurrencyPrice();
+      });
+    }
 
     const verifyWalletPwWalletPaper = () => {
       if (walletPasswdWalletPaper.value == "") {
@@ -250,14 +313,14 @@ export default {
       return qr.createDataURL(size, margin);
     }
 
-    const saveWalletPaper = () => {
+    const saveWalletPaper = (password) => {
       const doc = new jsPDF({
         unit: 'px'
       });
       doc.addImage(pdfWalletPaperImg, 'JPEG', 120, 60, 205, 132);
 
       // QR Code Address
-      const passwordInstance = WalletUtils.createPassword(walletPasswdWalletPaper.value);
+      const passwordInstance = WalletUtils.createPassword(password);
       const walletPrivateKey = WalletUtils.decryptPrivateKey(passwordInstance,acc.encrypted,acc.iv);
       let privateKey = walletPrivateKey.toUpperCase();
       doc.addImage(generateQR(privateKey, 1, 0), 151.5, 105);
@@ -268,27 +331,42 @@ export default {
       doc.text(prettyAddress, 146, 164, { maxWidth: 132 });
       doc.save('Your_Paper_Wallet');
     }
+    emitter.on("revealPK", (e) => {
+      showPK.value = e;
+    });
+    emitter.on("pkValue", (e) => {
+      privateKey.value = e
+    });
+    emitter.on("unlockWalletPaper", (e) => {
+      saveWalletPaper(e)
+    });
+   
 
     return {
+      showModal,
+      svgString,
+      splitBalance,
+      other_acc,
+      currencyConvert,
+      isMultiSig,
+      currentNativeTokenName,
+      isDefault,
       err,
       showPK,
       showPwPK,
       showPasswdError,
       accountNameDisplay,
-      showPasswordPanel,
       verifyWalletPwPk,
       walletPasswd,
       walletPasswdSwap,
       showPwSwap,
       showName,
-      editName,
       changeName,
       accountName,
       acc,
       verifyWalletPwSwap,
       copy,
       privateKey,
-      hidePanel,
       prettyAddress,
       showWalletPaperPw,
       showSavePaperWallet,
@@ -299,3 +377,10 @@ export default {
   }
 };
 </script>
+<style scoped>
+.popup-outer-create-wallet{
+  
+  top: 40px; left: 0; right: 0; margin-left: auto; margin-right: auto; max-width: 400px;
+
+}
+</style>

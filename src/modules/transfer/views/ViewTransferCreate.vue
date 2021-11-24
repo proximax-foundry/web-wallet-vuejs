@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between text-md">
+  <div class="flex justify-between text-sm">
     <div>
       <span class="text-gray-300">{{$t('NavigationMenu.Transfer')}}></span>
       <span class="text-blue-primary font-bold">{{$t('transfer.maketransaction')}}</span>
@@ -40,18 +40,18 @@
             <input type="hidden" v-model="currentSelectedName" />
           </div>
           <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4"> 
-            <div v-if="getWalletCosigner().length > 0">
+            <div v-if="getWalletCosigner.length > 0">
               <div class="text-tsm">
                 {{$t('transfer.cosigner')}}:
-                <span class="font-bold" v-if="getWalletCosigner().length == 1"> 
-                  {{ getWalletCosigner()[0].name }} ({{$t('services.balance')}}:{{  getWalletCosigner()[0].balance }} XPX)
-                    <span v-if="getWalletCosigner()[0].balance <lockFundTotalFee.value" class="error">
+                <span class="font-bold" v-if="getWalletCosigner.length == 1"> 
+                  {{ getWalletCosigner[0].name }} ({{$t('services.balance')}}:{{  getWalletCosigner[0].balance }} XPX)
+                    <span v-if="getWalletCosigner[0].balance <lockFundTotalFee.value" class="error">
                       - {{$t('accounts.insufficientbalance')}}
                     </span>
                 </span>
                 <span class="font-bold" v-else>
                   <select v-model="cosignAddress">
-                    <option v-for="(element, item) in  getWalletCosigner()" :value="element.address" :key="item">
+                    <option v-for="(element, item) in  getWalletCosigner" :value="element.address" :key="item">
                       {{ element.name }} ({{$t('services.balance')}}: {{ element.balance }} XPX)
                     </option>
                   </select>
@@ -68,7 +68,7 @@
           <SelectInputPlugin v-if="showContactSelection" :placeholder="$t('accounts.contacts')" errorMessage=""  v-model="selectContact" :options="contact" @default-selected="selectContact = 0"  @show-selection="updateAdd"/>
           <div class="flex">
             <div class="flex-grow mr-5">
-              <TextInput :placeholder="$t('dashboard.recipient')" :errorMessage="addressErrorMsg" :showError="showAddressError" v-model="recipient" icon="wallet" :disabled="disableRecipient"/>
+              <TextInput :placeholder="$t('transfer.recipientPlaceholder')" :errorMessage="addressErrorMsg" :showError="showAddressError" v-model="recipientInput" v-debounce:1000="checkRecipient" icon="wallet" :disabled="disableRecipient"/>
             </div>
             <div class="flex-none">
               <div class="rounded-full bg-gray-300 w-14 h-14 cursor-pointer relative" style="top: -5px" @click="showContactSelection = !showContactSelection">
@@ -99,7 +99,7 @@
             (+) {{$t('transfer.addmosaics')}} 
           </button>
         </div>
-        <div class="mb-5 border-t pt-4 border-gray-200">
+        <!-- <div class="mb-5 border-t pt-4 border-gray-200">
           <div class="rounded-2xl bg-gray-100 p-5">
             <input id="regularMsg" type="radio" name="msgOption" value="regular" v-model="msgOption" @change="clearMsg()" :disabled="disableRegularMsg == 1"/>
             <label for="regularMsg" class="cursor-pointer font-bold ml-4 mr-5"> 
@@ -110,7 +110,7 @@
               >{{$t('transfer.hexadecimal')}}
               </label>
           </div>
-        </div>
+        </div> -->
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <div class="rounded-2xl bg-gray-100 p-5">
             <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
@@ -119,7 +119,12 @@
             </label>
           </div>
         </div>
-        <TransferTextareaInput :placeholder="$t('dashboard.message')" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput"/>
+        <!-- <div class = "mt-5" v-if = "msgOption == 'hex'">
+        <TransferTextareaInput v-on:keypress="hexOnly(event)" :placeholder="$t('dashboard.message')" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput"/>
+        </div> -->
+        <div class = "mt-5" >
+        <TransferTextareaInput :placeholder="$t('dashboard.message')" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput" />
+        </div>
         <div class="rounded-2xl bg-gray-100 p-5">
           <div class="inline-block mr-4 text-xs">
             <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500"/>
@@ -155,7 +160,7 @@
     <ConfirmSendModal :toggleModal="toggleConfirm" />
   </div>
 </template>
-<script>
+<script >
 import { Helper } from "@/util/typeHelper";
 import { computed, ref, getCurrentInstance, watch } from "vue";
 import TextInput from "@/components/TextInput.vue";
@@ -177,6 +182,8 @@ import { networkState } from "@/state/networkState";
 import { accountUtils } from "@/util/accountUtils";
 import { TransactionUtils } from "@/util/transactionUtils";
 import { WalletUtils } from "@/util/walletUtils";
+import { ChainUtils } from '@/util/chainUtils';
+import { NamespaceUtils } from '@/util/namespaceUtils';
 
 export default { 
   name: "ViewTransferCreate",
@@ -198,6 +205,7 @@ export default {
     const showBalanceErr = ref(false);
     const selectContact = ref("0");
     const recipient = ref("");
+    const recipientInput = ref("");
     const msgOption = ref("regular");
     const messageText = ref("");
     const walletPassword = ref("");
@@ -227,43 +235,36 @@ export default {
     const disableMsgInput = computed(() => disableAllInput.value);
     const disablePassword = computed(() => disableAllInput.value);
     const cosignerBalanceInsufficient = ref(false);
-    
+    const isSearchNamespace = ref(false);
+    const namespace = ref('');
+    const networkType = networkState.currentNetworkProfile.network.type;
+    const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
 
     const walletName = walletState.currentLoggedInWallet.name
     const currencyName = computed(
       () => networkState.currentNetworkProfile.network.currency.name
     );
-    /* chainNetwork.getCurrencyName() */
-
-    // console.log('chainNetwork.getProfileConfig().lockedFundsPerAggregate')
-    // console.log(chainNetwork.getProfileConfig().lockedFundsPerAggregate)
-    // console.log(siriusStore.state.currentNetworkProfileConfig.maxMessageSize)
     const lockFund = computed(() =>
       Helper.convertToExact(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
         networkState.currentNetworkProfile.network.currency.divisibility
       )
     );
-    /*  chainNetwork.getProfileConfig().lockedFundsPerAggregate */
-    /*  chainNetwork.getCurrencyDivisibility() */
     const lockFundCurrency = computed(() =>
       Helper.convertToCurrency(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
         networkState.currentNetworkProfile.network.currency.divisibility
       )
     );
-    /*  chainNetwork.getProfileConfig().lockedFundsPerAggregate */
-    /*  chainNetwork.getCurrencyDivisibility() */
     const lockFundTxFee = ref(0.0445);
     const lockFundTotalFee = computed(
       () => lockFund.value + lockFundTxFee.value
     );
 
-    // const messageLimit = computed(()=> chainNetwork.getProfileConfig().maxMessageSize - 1);
+   
     const messageLimit = computed(
       () => networkState.currentNetworkProfileConfig.maxMessageSize - 1
     );
-    /*  siriusStore.state.currentNetworkProfileConfig.maxMessageSize - 1 */
 
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
@@ -279,7 +280,7 @@ export default {
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
     const disableCreate = computed(() => {
-      // console.log(walletPassword.value.match(passwdPattern) && !showAddressError.value && recipient.value.length > 0);
+
       return !(
         walletPassword.value.match(passwdPattern) &&
         !showAddressError.value &&
@@ -287,55 +288,87 @@ export default {
       );
     });
 
-    const isMultiSig = (address) => {
-      const account = walletState.currentLoggedInWallet.accounts.find(
-        (account) => account.address === address
-      );
-      let isMulti = false;
-      /*   appStore.getAccDetailsByAddress(address); */
-      if (account != undefined) {
-        isMulti = account.getDirectParentMultisig().length ? true : false;
-      }
+    
 
-      /* if(account.isMultisign != undefined){
-        if(account.isMultisign != '' || account.isMultisign != null){
-          if(account.isMultisign.cosignatories != undefined){
-            if(account.isMultisign.cosignatories.length > 0){
-              isMulti = true;
-            }
-          }
-        }
-      } */
-      return isMulti;
-    };
-
-    // get balance
+  
     const selectedAccName = ref(
       walletState.currentLoggedInWallet.selectDefaultAccount().name
     );
-    /* appStore.getFirstAccName() */
+
     const selectedAccAdd = ref(
       walletState.currentLoggedInWallet.selectDefaultAccount().address
     );
-    /* appStore.getFirstAccAdd() */
-    const balance = computed(() => {
-      if (walletState.currentLoggedInWallet) {
-        return walletState.currentLoggedInWallet.accounts.find(
-          (element) => element.address === selectedAccAdd.value
-        ).balance;
-      } else {
-        return "0";
-      }
-    });
-    const isMultiSigBool = ref(
-      isMultiSig(
-        selectedAccAdd.value
-      )
-    );
-    /*  appStore.getFirstAccAdd() */
 
-    // enable and disable inputs based on cosign balance
-   
+    
+
+    const getWalletCosigner = computed(() =>{
+      return multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
+    })
+    
+    
+    /* const accounts = computed( () => {
+      if(walletState.currentLoggedInWallet){
+        if(walletState.currentLoggedInWallet.others){
+          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+          return concatOther;
+        } else{
+          return walletState.currentLoggedInWallet.accounts;
+        }
+      } else{
+        return [];
+      }
+    }); */
+    
+    const accounts = computed(()=>{
+
+      if(!walletState.currentLoggedInWallet){
+        return [];
+      }
+      let accounts = walletState.currentLoggedInWallet.accounts.map(
+        (acc)=>{ 
+          return { 
+            name: acc.name,
+            balance: acc.balance,
+            address: acc.address,
+            publicKey: acc.publicKey,
+            isMultisig: acc.getDirectParentMultisig().length ? true: false
+          }; 
+        });
+        
+       
+       let otherAccounts =walletState.currentLoggedInWallet.others.filter((acc)=> acc.type === "MULTISIG").map(
+        (acc)=>{ 
+          return { 
+            name: acc.name,
+            balance: acc.balance,
+            address: acc.address,
+            publicKey: acc.publicKey,
+            isMultisig: true
+          }; 
+        });
+
+        return accounts.concat(otherAccounts);
+      
+    });
+    
+    const isMultiSig = (address) => {
+      const account = accounts.value.find(
+        (account) => account.address === address
+      );
+      let isMulti = false;
+     
+      if (account != undefined) {
+        isMulti = account.isMultisig;
+      }
+
+      return isMulti;
+    };
+    const isMultiSigBool = ref(
+          isMultiSig(
+            selectedAccAdd.value
+          )
+        );
+
     if (isMultiSigBool.value) {
       let cosigner = multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
       if (cosigner.length > 0) {
@@ -351,57 +384,39 @@ export default {
       }
     }
 
-    const getWalletCosigner = () =>{
-      return multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
-    }
+    const balance = computed(() => {
+        if (walletState.currentLoggedInWallet) {
+          if (accounts.value.find((element) => element.address === selectedAccAdd.value)==undefined){
+            return 0 
+          }else{
+            return accounts.value.find((element) => element.address === selectedAccAdd.value).balance
+          }
+        } else {
+          return 0;
+        }
+      });
     
-    // check account balance at first load
     if (balance.value < lockFundTotalFee.value) {
       showBalanceErr.value = true;
     }
 
-    const accounts = computed(() =>{
-      if(!walletState.currentLoggedInWallet)
-        return [];
-      return walletState.currentLoggedInWallet.accounts;
-    });
-    /*  appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts */
     const moreThanOneAccount = computed(() => {
-      /*  if(appStore.state.currentLoggedInWallet!=undefined){
-        return (appStore.getWalletByName(appStore.state.currentLoggedInWallet.name).accounts.length > 1)?true:false;
-      }else{
-        return false;
-      } */
-      return accounts.value.length > 1;
+      return accounts.value.length> 1;
     });
 
     const changeSelection = (i) => {
       selectedAccName.value = i.name;
       selectedAccAdd.value = i.address;
-      // balance.value = i.balance;
+     
       balance.value == 0? (showBalanceErr.value = true): (showBalanceErr.value = false);
       showMenu.value = !showMenu.value;
       currentSelectedName.value = i.name;
-      // reset mosaic selection
+      
       selectedMosaic.value = [];
       mosaicsCreated.value = [];
       selectedMosaicAmount.value = [];
       mosaicSupplyDivisibility.value = [];
     };
-    // get cosigner if available
-  /*   const getWalletCosigner = async() => {
-        return new Promise((resolve, reject) => {
-         multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
-        .then(response => {
-          
-          response.list.forEach(element=>{
-            list.push({address: element.address , name: element.name, balance: element.balance}) 
-          })
-          resolve(list)
-        })
-        .catch(() => reject)
-  })
-    }; */
 
  
     const contact = computed(() => {
@@ -410,7 +425,7 @@ export default {
       }
       const wallet = walletState.currentLoggedInWallet;
       var contact = [];
-      wallet.accounts.forEach((element) => {
+      accounts.value.forEach((element) => {
         contact.push({
           value: element.address,
           label: element.name + " -"+t('transfer.owneraccount'),
@@ -425,7 +440,7 @@ export default {
         });
       }
       return contact;
-      /* appStore.getContact() */
+     
     });
 
     const clearInput = () => {
@@ -448,290 +463,322 @@ export default {
       emitter.emit("CLEAR_TEXTAREA", 0);
     };
 
-    // update select
-    const updateAdd = (e) => {
-      recipient.value = e;
-    };
-    const makeTransfer = () => {
-      if (sendXPX.value == "0" && !forceSend.value) {
-        toggleConfirm.value = true;
-      } else {
-        // console.log(recipient.value.toUpperCase() + ' : ' + walletPassword.value + ' : ' + selectedAccName.value + ' : ' + encryptedMsg.value + ' : ' + walletPassword.value)
-        let selectedCosign;
-        if (isMultiSigBool.value) {
-          // if this is a multisig, get cosigner name along
-          let selectedCosignList = getWalletCosigner();
-          if (selectedCosignList.length > 1) {
-            selectedCosign = cosignAddress.value;
-          } else {
-            selectedCosign = getWalletCosigner()[0].address;
-          }
-        }
-        let transferStatus = createTransaction(
-          recipient.value.toUpperCase(),
-          sendXPX.value,
-          messageText.value,
-          selectedMosaic.value,
-          mosaicSupplyDivisibility.value,
-          walletPassword.value,
-          selectedAccName.value,
-          selectedCosign,
-          encryptedMsg.value
-        );
-        if (!transferStatus) {
-          err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
-        } else {
-          // transaction made
-          err.value = "";
-          // check if address is saved in the contact list
-          // if not display add contact model
-          if (!accountUtils.checkAvailableContact(recipient.value)) {
-            /* appStore.checkAvailableContact(recipient.value) */
-            // add new contact
-            togglaAddContact.value = true;
-          } else {
-            clearInput();
-          }
-          // show notification
-          // getMosaicsAllAccounts(appStore, siriusStore);
-          // play notification sound
-          forceSend.value = false;
-        }
-      }
-    };
-
-    const getSelectedMosaicBalance = (index) => {
-      const account = walletState.currentLoggedInWallet.accounts.find(
-        (account) => account.address === selectedAccAdd.value
-      );
-      let mosaic = account.assets.find(
-        (asset) => asset.idHex == selectedMosaic[index].id
-      );
-      /* let mosaic = appStore.getMosaicInfo(selectedAccAdd.value, selectedMosaic[index].id); */
-      if (mosaic != undefined) {
-        return mosaic.amount;
-      } else {
-        return "0";
-      }
-    };
-
-    // get mosaics of current selected account
-    // getMosaicsAllAccounts(appStore, siriusStore);
-    const addMosaicsButton = computed(() => {
-      if (!disableSupply.value) {
-        let account;
-        if(!walletState.currentLoggedInWallet){
-          account = undefined;
-        }else{
-          account = walletState.currentLoggedInWallet.accounts.find(
-            (element) => element.name == selectedAccName.value
-          );
-        }
-        
-        if (account != undefined) {
-          if (account.assets != undefined) {
-            if (
-              account.assets.length == 0 ||
-              mosaicsCreated.value.length == account.assets.length
-            ) {
-              return true;
-            } else {
-              return false;
-            }
-          }
-        }
-        /* let mosaic = appStore.getAccDetails(selectedAccName.value).mosaic; */
-
-        return true;
-      } else {
-        return true;
-      }
-    });
-
-    // generate mosaic selector
-    const mosaics = computed(() => {
-      var mosaicOption = [];
-      if(!walletState.currentLoggedInWallet){
-        return mosaicOption;
-      }
-      const account = walletState.currentLoggedInWallet.accounts.find(
-        (element) => element.name == selectedAccName.value
-      );
-      if (account.assets.length > 0) {
-        /*   appStore.getAccDetails(selectedAccName.value).mosaic.length > 0 */
-        account.assets.forEach((i, index) => {
-          /*  appStore.getAccDetails(selectedAccName.value).mosaic.forEach((i, index) */
-          mosaicOption.push({
-            val: i.idHex,
-            /*  i.id */
-            text: i.idHex + " >"+t('services.balance') +": " +Helper.amountFormatterSimple(i.amount,i.divisibility),
-            id: index + 1,
-          });
-        });
-      }
-      return mosaicOption;
-    });
-
-    const displayMosaicsOption = () => {
-      mosaicsCreated.value.push(0);
-      selectedMosaic.value.push({ id: 0, amount: "0" });
-    };
-
-    // update mosaic
-    const updateMosaic = (e) => {
-      // get mosaic info and format divisibility in supply input
-      const account = walletState.currentLoggedInWallet.accounts.find(
-        (account) => account.address === selectedAccAdd.value
-      );
-      let mosaic = account.assets.find(
-        (asset) => asset.idHex == selectedMosaic.value[e.index].id
-      );
-      /*  const mosaic = appStore.getMosaicInfo(selectedAccAdd.value, selectedMosaic.value[e.index].id); */
-      selectedMosaic.value[e.index].amount = "0";
-      mosaicSupplyDivisibility.value[e.index] = mosaic.divisibility;
-      emitter.emit("CLOSE_MOSAIC_INSUFFICIENT_ERR", false);
-    };
-
-    const removeMosaic = (e) => {
-      mosaicsCreated.value.splice(e.index, 1);
-      selectedMosaic.value.splice(e.index, 1);
-      mosaicSupplyDivisibility.value.splice(e.index, 1);
-    };
-    
-    watch(selectedAccAdd, (n, o) => {
-      isMultiSigBool.value = isMultiSig(n);
+  
+  const updateAdd = (e) => {
+    recipient.value = e;
+  };
+  const makeTransfer = async() => {
+    if (sendXPX.value == "0" && !forceSend.value) {
+      toggleConfirm.value = true;
+    } else {
+      
+      let selectedCosign;
       if (isMultiSigBool.value) {
         
-          let cosigner = multiSign.fetchMultiSigCosigners(n)
-          if (cosigner.length > 0) {
-            cosignAddress.value = cosigner[0].address;
-            if (cosigner[0].balance < lockFundTotalFee.value) {
-              disableAllInput.value = true;
-              // console.log('disableAllInput();')
-            } else {
-              disableAllInput.value = false;
-              // console.log('enableAllInput();')
-            }
-          } else {
-            disableAllInput.value = true;
-          }
-      }
-      else {
-        disableAllInput.value = false;
-      }   
-    })
-    
-
-    watch(cosignAddress, (n, o) => {
-      if (n != o) {
-         let cosigners = multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
-          if (
-          cosigners.find((element) => element.address == n).balance <
-          lockFundTotalFee.value
-        ) {
-          cosignerBalanceInsufficient.value = true;
+        let selectedCosignList = getWalletCosigner.value;
+        if (selectedCosignList.length > 1) {
+          selectedCosign = cosignAddress.value;
         } else {
-          cosignerBalanceInsufficient.value = false;
+          selectedCosign = getWalletCosigner.value[0].address;
         }
+      }
+      let transferStatus = await createTransaction(
+        recipient.value.toUpperCase(),
+        sendXPX.value,
+        messageText.value,
+        selectedMosaic.value,
+        mosaicSupplyDivisibility.value,
+        walletPassword.value,
+        selectedAccName.value,
+        selectedCosign,
+        encryptedMsg.value
+      );
+      if (!transferStatus) {
+        err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
+      } else {
         
-      }
-    });
-
-    watch(balance, (n) => {
-      if (n == 0) {
-        showBalanceErr.value = true;
-      }
-    });
-  
-    watch(recipient, (add) => {
-      if (
-        (recipient.value.length == 46 &&
-          recipient.value.match(addressPatternLong)) ||
-        (recipient.value.length == 40 &&
-          recipient.value.match(addressPatternShort))
-      ) {
-        if(!walletState.currentLoggedInWallet){
-          return;
-        }
-        const verifyRecipientAddress = accountUtils.verifyAddress(
-          walletState.currentLoggedInWallet.selectDefaultAccount().address,
-          recipient.value
-        );
-        /* appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name) */
-        showAddressError.value = !verifyRecipientAddress.isPassed.value;
-        addMsg.value = verifyRecipientAddress.errMessage.value;
-      } else {
-        recipient.value.length > 0
-          ? (showAddressError.value = true)
-          : (showAddressError.value = false);
-      }
-
-      // show and hide encrypted message option
-      if (add.match(addressPatternLong) || add.match(addressPatternShort)) {
-         accountUtils.verifyPublicKey(recipient.value).then(verify =>
-          encryptedMsgDisable.value = verify
-         )
-      } else {
-        encryptedMsgDisable.value = true;
-      }
-    });
-
-    watch(currentSelectedName, (n, o) => {
-      if (n != o) {
-        recipient.value = "";
-      }
-    });
-
-    watch(messageText, (n, o) => {
-      if (n != o) {
-        effectiveFee.value = makeTransaction.calculate_fee(
-          n,
-          sendXPX.value,
-          selectedMosaic.value
-        );
-        if (encryptedMsg.value && messageText.value) {
-          remainingChar.value = TransactionUtils.getFakeEncryptedMessageSize(messageText.value);
+        err.value = "";
+        selectedAccAdd.value = walletState.currentLoggedInWallet.selectDefaultAccount().address;
+        selectedAccName.value = walletState.currentLoggedInWallet.selectDefaultAccount().name;
+        if (!accountUtils.checkAvailableContact(recipient.value)) {
+          
+          // add new contact
+          togglaAddContact.value = true;
         } else {
-          remainingChar.value = TransactionUtils.getPlainMessageSize(messageText.value);
+          clearInput();
+        }
+        forceSend.value = false;
+      }
+    }
+  };
+
+  const getSelectedMosaicBalance = (index) => {
+    const account = walletState.currentLoggedInWallet.accounts.find(
+      (account) => account.address === selectedAccAdd.value) ||
+      walletState.currentLoggedInWallet.others.find(
+      (account) => account.address === selectedAccAdd.value) 
+    let mosaic = account.assets.find(
+      (asset) => asset.idHex == mosaic.value[index].id
+    );
+    
+    if (mosaic != undefined) {
+      return mosaic.getExactAmount();
+    } else {
+      return 0;
+    }
+  };
+
+  const addMosaicsButton = computed(() => {
+    if (!disableSupply.value) {
+      let account;
+      if(!walletState.currentLoggedInWallet){
+        account = undefined;
+      }else{
+        account = walletState.currentLoggedInWallet.accounts.find(
+          (element) => element.name == selectedAccName.value) ||
+          walletState.currentLoggedInWallet.others.find(
+          (element) => element.name == selectedAccName.value)
+      }
+      
+      if (account != undefined) {
+        if (account.assets != undefined) {
+          if (
+            account.assets.length == 0 ||
+            mosaicsCreated.value.length == account.assets.length
+          ) {
+            return true;
+          } else {
+            return false;
+          }
         }
       }
-    });
+      
 
-    watch(encryptedMsgDisable, (n) => {
-      if (!n) {
-        encryptedMsg.value = "";
+      return true;
+    } else {
+      return true;
+    }
+  });
+
+
+  const mosaics = computed(() => {
+    var mosaicOption = [];
+    if(!walletState.currentLoggedInWallet){
+      return mosaicOption;
+    }
+    const account = walletState.currentLoggedInWallet.accounts.find(
+      (element) => element.name == selectedAccName.value
+    ) ||  walletState.currentLoggedInWallet.others.find(
+      (element) => element.name == selectedAccName.value)
+    if (account.assets.length > 0) {
+      
+      account.assets.forEach((i, index) => {
+    
+        mosaicOption.push({
+          val: i.idHex,
+          text: i.idHex + " >"+t('services.balance') +": " +Helper.amountFormatterSimple(i.amount,i.divisibility),
+          id: index + 1,
+        });
+      });
+    }
+    return mosaicOption;
+  });
+
+  const displayMosaicsOption = () => {
+    mosaicsCreated.value.push(0);
+    selectedMosaic.value.push({ id: 0, amount: "0" });
+  };
+
+  // update mosaic
+  const updateMosaic = (e) => {
+    // get mosaic info and format divisibility in supply input
+    const account = walletState.currentLoggedInWallet.accounts.find(
+      (account) => account.address === selectedAccAdd.value) || 
+      walletState.currentLoggedInWallet.others.find(
+      (account) => account.address === selectedAccAdd.value)
+    let mosaic = account.assets.find(
+      (asset) => asset.idHex == selectedMosaic.value[e.index].id
+    );
+    selectedMosaic.value[e.index].amount = "0";
+    mosaicSupplyDivisibility.value[e.index] = mosaic.divisibility;
+    emitter.emit("CLOSE_MOSAIC_INSUFFICIENT_ERR", false);
+  };
+
+  const removeMosaic = (e) => {
+    mosaicsCreated.value.splice(e.index, 1);
+    selectedMosaic.value.splice(e.index, 1);
+    mosaicSupplyDivisibility.value.splice(e.index, 1);
+  };
+  
+  function hexOnly(evt) {
+      evt = (evt) ? evt : window.event;
+      var charCode = (evt.which) ? evt.which : evt.keyCode;
+      if ((charCode > 31 && (charCode < 48 || charCode > 57)  && (charCode < 65 || charCode > 70) && (charCode < 97 || charCode > 102))  ) {
+        evt.preventDefault();
+      } else {
+        return true;
       }
-    });
-
-    watch(encryptedMsg, (n) => {
-      if (n) {
-        if (messageText.value) {
-          remainingChar.value = TransactionUtils.getFakeEncryptedMessageSize(messageText.value);
+    }
+  
+  watch(selectedAccAdd, (n, o) => {
+    isMultiSigBool.value = isMultiSig(n);
+    if (isMultiSigBool.value) {
+      
+        let cosigner = multiSign.fetchMultiSigCosigners(n)
+        if (cosigner.length > 0) {
+          cosignAddress.value = cosigner[0].address;
+          if (cosigner[0].balance < lockFundTotalFee.value) {
+            disableAllInput.value = true;
+          } else {
+            disableAllInput.value = false;
+          }
+        } else {
+          disableAllInput.value = true;
         }
+    }
+    else {
+      disableAllInput.value = false;
+    }   
+  })
+  
+
+  watch(cosignAddress, (n, o) => {
+    if (n != o) {
+        let cosigners = multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
+        if (
+        cosigners.find((element) => element.address == n).balance <
+        lockFundTotalFee.value
+      ) {
+        cosignerBalanceInsufficient.value = true;
+      } else {
+        cosignerBalanceInsufficient.value = false;
+      }
+      
+    }
+  });
+
+  watch(balance, (n) => {
+    if (n == 0) { 
+      showBalanceErr.value = true;
+    }else if (n > lockFundTotalFee.value ){
+      showBalanceErr.value = false
+    }
+  });
+
+  const checkRecipient = () =>{
+
+    if(!walletState.currentLoggedInWallet){
+        return;
+    }
+
+    try {
+      let recipientAddress = Helper.createAddress(recipientInput.value);
+
+      let networkOk = Helper.checkAddressNetwork(recipientAddress, networkType);
+
+      if(!networkOk){
+        showAddressError.value = true;
+        addMsg.value = "Wrong network address";
+      }
+      else{
+        recipient.value = recipientInput.value;
+        checkEncryptable(recipientInput.value);
+        showAddressError.value = false;
+      }
+
+    } catch (error) {
+
+      try{
+        let namespaceId = Helper.createNamespaceId(recipientInput.value);
+
+        checkNamespace(namespaceId).then((address)=>{
+          recipient.value = address.plain();
+          showAddressError.value = false;
+          checkEncryptable(recipient.value);
+        }).catch((error)=>{
+          addMsg.value = "Invalid recipient";
+          showAddressError.value = true;
+        });
+      }
+      catch(error){
+        console.log(error);
+        addMsg.value = "Invalid recipient";
+        showAddressError.value = true;
+      }
+    }
+  }
+
+  const checkEncryptable = (add) =>{
+    // show and hide encrypted message option
+    if (add.match(addressPatternLong) || add.match(addressPatternShort)) {
+        accountUtils.verifyPublicKey(recipient.value).then(verify =>
+        encryptedMsgDisable.value = verify
+        )
+    } else {
+      encryptedMsgDisable.value = true;
+    }
+  }
+
+  const checkNamespace = async (nsId)=>{
+    return await NamespaceUtils.getLinkedAddress(nsId, chainAPIEndpoint.value);
+  }
+
+  watch(currentSelectedName, (n, o) => {
+    if (n != o) {
+      recipient.value = "";
+    }
+  });
+
+  watch(messageText, (n, o) => {
+    if (n != o) {
+      effectiveFee.value = makeTransaction.calculate_fee(
+        n,
+        sendXPX.value,
+        selectedMosaic.value
+      );
+      if (encryptedMsg.value && messageText.value) {
+        remainingChar.value = TransactionUtils.getFakeEncryptedMessageSize(messageText.value);
       } else {
         remainingChar.value = TransactionUtils.getPlainMessageSize(messageText.value);
       }
-    });
+    }
+  });
+  
+  
+  watch(encryptedMsgDisable, (n) => {
+    if (!n) {
+      encryptedMsg.value = "";
+    }
+  });
 
-    emitter.on("CLOSE_MODAL", (payload) => {
-      togglaAddContact.value = payload;
-      clearInput();
-    });
-
-    // confirm modal
-    emitter.on("CLOSE_CONFIRM_SEND_MODAL", (payload) => {
-      toggleConfirm.value = payload;
-    });
-
-    emitter.on("CONFIRM_PROCEED_SEND", (payload) => {
-      // console.log('Force send: ' + payload);
-      // console.log('PW:' + walletPassword.value);
-      if (payload) {
-        forceSend.value = payload;
-        toggleConfirm.value = false;
-        makeTransfer();
+  watch(encryptedMsg, (n) => {
+    if (n) {
+      if (messageText.value) {
+        remainingChar.value = TransactionUtils.getFakeEncryptedMessageSize(messageText.value);
       }
-    });
+    } else {
+      remainingChar.value = TransactionUtils.getPlainMessageSize(messageText.value);
+    }
+  });
+
+  emitter.on("CLOSE_CONTACT_MODAL", (payload) => {
+    togglaAddContact.value = payload;
+    clearInput();
+  });
+
+  // confirm modal
+  emitter.on("CLOSE_CONFIRM_SEND_MODAL", (payload) => {
+    toggleConfirm.value = payload;
+  });
+
+  emitter.on("CONFIRM_PROCEED_SEND", (payload) => {
+  
+    if (payload) {
+      forceSend.value = payload;
+      toggleConfirm.value = false;
+      makeTransfer();
+    }
+  });
 
     return {
       moreThanOneAccount,
@@ -746,6 +793,8 @@ export default {
       err,
       contact,
       recipient,
+      recipientInput,
+      namespace,
       sendXPX,
       messageText,
       msgOption,
@@ -782,6 +831,7 @@ export default {
       cosignAddress,
       getWalletCosigner,
       disableRecipient,
+      checkRecipient,
       disableSupply,
       disableRegularMsg,
       disableHexMsg,
@@ -795,7 +845,9 @@ export default {
       currencyName,
       lockFundTxFee,
       lockFundTotalFee,
-      walletName
+      walletName,
+      hexOnly,
+      checkNamespace
     };
   },
 };

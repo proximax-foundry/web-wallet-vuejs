@@ -1,122 +1,74 @@
 <template>
-  <div class="container mx-auto text-center">
-    <h1 class="font-bold default-title mt-20 mb-5">{{$t('createwallet.creationtype')}}</h1>
-    <div class="page-title-gray-line grid grid-cols-1 md:grid-cols-3 pt-20">
-      <div class="px-5 self-center text-center my-10">
-        <img src="@/modules/wallet/img/icon-add-new-blue.svg" class="w-12 inline-block">
-        <p class="mt-3">{{$t('createwallet.newwallet')}}</p>
-        <router-link :to="{ name: 'ViewWalletCreate'}" class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center">{{$t('welcome.create')}}</router-link></div>
-      <div class="px-5 self-center text-center my-10">
-        <img src="@/modules/wallet/img/icon-private-key-blue.svg" class="w-12 inline-block"><p class="mt-3">{{$t('createwallet.fromprivatekey')}}</p>
-        <router-link :to="{ name : 'ViewWalletCreatePrivateKey'}" class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center">{{$t('welcome.create')}}</router-link>
-      </div>
-      <div class="px-5 self-center text-center my-10"><img src="@/modules/wallet/img/icon-wallet-import-blue.svg" class="w-12 inline-block"><p class="mt-3">{{$t('createwallet.fromwalletbackup')}}</p>
-        <label class="max-w-xs sm:max-w-sm inline-block md:block default-btn my-3 self-center cursor-pointer">
-          <span>{{$t('createwallet.import')}}</span>
-          <input type="file" @change="readWalletBackup" ref="walletFile" hidden />
+  <div class="container mx-auto md:grid md:grid-cols-2 md:mt-10 lg:px-20 xl:px-40 ">
+    <IntroTextComponent />
+    <div class="md:col-span-1 bg-white mx-5 md:mx-0 px-30 pt-1 md:pt-0 rounded-md">
+      <router-link :to="{ name: 'Home' }" class="text-xs m-2 text-blue-link items-center flex"><img src="@/assets/img/chevron_left.svg" class="w-5 inline-block">Back</router-link>
+      <div class="text-sm text-center mt-20 mb-6 font-semibold">Create Wallet</div>
+      <div class = 'radio-toolbar text-center'>
+        <input name = 'create-type' type='radio' id='new-wallet' value = '0' v-model='currentValue'  :checked='true'>   
+        <label for = 'new-wallet' class = 'text-left py-3 text-xs pl-4'> 
+          <img  src="@/modules/wallet/img/icon-add-new.svg" class=" h-6 w-6 inline-block mr-1"> 
+          {{$t('createwallet.newwallet')}}
+          <font-awesome-icon  v-if = 'currentValue==0' class = 'p-1 mr-2 mt-1 float-right text-gray-200 bg-blue-primary rounded-full text-sm' icon="check" ></font-awesome-icon>
         </label>
-      </div>
+        <input name = 'create-type' type='radio' id='from-pk' value= '1'  v-model='currentValue'>   
+        <label for = 'from-pk' class = 'ml-1 text-left py-3 text-xs pl-4 '> 
+          <img src="@/modules/wallet/img/icon-private-key.svg" class=" h-6 w-6 inline-block mr-1"> 
+          {{$t('createwallet.fromprivatekey')}}
+          <font-awesome-icon  v-if = 'currentValue==1' class = 'p-1 mr-2 mt-1 float-right text-gray-200 bg-blue-primary rounded-full text-sm' icon="check" ></font-awesome-icon>
+        </label>
+        <input name = 'create-type' type='radio' id='import' value= '2'  v-model='currentValue' >   
+        <label for = 'import' class = 'text-left py-3 text-xs pl-4'> 
+          <img src="@/modules/wallet/img/icon-wallet-import.svg" class=" h-6 w-6 inline-block mr-1"> 
+          {{$t('createwallet.fromwalletbackup')}}
+          <font-awesome-icon v-if = 'currentValue==2' class = 'p-1 mr-2 mt-1 float-right text-gray-200 bg-blue-primary rounded-full text-sm ' icon="check" ></font-awesome-icon>
+        </label>
+     </div>
+      <router-link v-if='currentValue==0' :to="{ name: 'ViewWalletCreate' }" class = 'mt-5 font-bold text-center blue-btn py-2 px-10 block ml-auto mr-auto w-8/12'>Next</router-link>
+      <router-link v-if='currentValue==1' :to="{ name: 'ViewWalletCreatePrivateKey' }" class = 'mt-5 font-bold text-center blue-btn py-2 block ml-auto mr-auto w-8/12'>Next</router-link>
+      <router-link v-if='currentValue==2' :to="{ name: 'ViewWalletImport' }" class = 'mt-5 font-bold text-center blue-btn py-2 block ml-auto mr-auto w-8/12'>Next</router-link>
+      <div class = 'h-28'></div>
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, inject, ref, computed } from 'vue';
-import CryptoJS from 'crypto-js';
-import { useConfirm } from "primevue/useconfirm";
-import { useToast } from "primevue/usetoast";
-import { ChainUtils } from '@/util/chainUtils';
-import { networkState } from "@/state/networkState";
-import { WalletUtils } from '@/util/walletUtils';
-import { walletState } from '@/state/walletState';
+import { defineComponent,ref} from 'vue';
+import IntroTextComponent from '@/components/IntroTextComponent.vue'
+
 
 export default defineComponent({
   name: 'ViewWalletCreateSelection',
+  components: {
+    IntroTextComponent,
+  },
   setup(){
-    const confirm = useConfirm();
-    const toast = useToast();
-    // comparing with default networktype 168 till multiple network selection interface is added
-    const selectedNetworkType = computed(()=> ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
-    const selectedNetworkName = computed(()=> networkState.chainNetworkName);
-    const walletFile = ref('');
-
-    const readWalletBackup = (e) => {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = e => {
-        const file = CryptoJS.enc.Base64.parse(e.target.result);
-        try {
-          const dataDecryp = JSON.parse(file.toString(CryptoJS.enc.Utf8));
-
-          if(dataDecryp.networkName === undefined || dataDecryp.networkName !== selectedNetworkName.value){
-            confirm.require({
-              message: `You are about to import a wallet into ${selectedNetworkName.value}. Proceed ?`,
-              header: 'Confirm Import',
-              icon: 'pi pi-exclamation-triangle',
-              accept: () => {
-                var importResult = importBackup(dataDecryp);
-                toast.add({severity: importResult.status, detail: importResult.msg, group: 'br', life: 3000});
-              },
-            });
-          }
-          else{
-            var importResult = importBackup(dataDecryp);
-            toast.add({severity: importResult.status, detail: importResult.msg, group: 'br', life: 3000});
-          }
-        } catch (error) {
-          let failMsg = 'Unable to add wallet. Invalid file.';
-          toast.add({severity:'error', summary:'Import Failed', detail: failMsg, group: 'br', life: 5000});
-        }
-      }
-      reader.readAsText(file);
-    };
-
-    const importBackup = (dataDecryp) =>{
-
-      let status = "success";
-      let message = "Import Successful";
-
-      if(WalletUtils.checkIsNewFormat(dataDecryp)){
-          try {
-            WalletUtils.importWalletNewFormat(walletState.wallets, dataDecryp, selectedNetworkName.value, selectedNetworkType.value);
-
-          } catch (error) {
-            status = "error";
-
-            if(error.name === "SAME_NAME"){
-              message = error.message;
-            }
-            else{
-              message = "Unable to import wallet";
-            }
-          }
-      }
-      else{
-        try {
-          WalletUtils.importWltOldFormat(walletState.wallets, dataDecryp, selectedNetworkName.value, selectedNetworkType.value);
-        } catch (error) {
-          status = "error";
-
-          if(error.name === "SAME_NAME"){
-            message = error.message;
-          }
-          else{
-            message = "Unable to import wallet";
-          }
-        }
-      }
-
-      return {
-        msg: message,
-        status: status
-      };
-      
-    };
-
+    let currentValue = ref(0)
     return {
-      walletFile,
-      readWalletBackup
+      currentValue,
     };
   },
 });
 </script>
+
+<style lang = 'scss' scoped>
+.radio-toolbar {
+	input[type="radio"] {
+		opacity: 0;
+		width: 0;
+	}
+	label {
+		display: inline-block;
+		border: 1px solid #D3D3D3;
+		width: 66.67%;
+		&:nth-child(4) {
+			display: inline-block;
+			border-left: 1px solid #d3d3d3;
+			border-right: 1px solid #d3d3d3;
+			border-top: 0px solid #d3d3d3;
+			border-bottom: 0px solid #d3d3d3;
+			width: 66.67%;
+		}
+	}
+}
+</style>

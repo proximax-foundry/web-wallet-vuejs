@@ -753,19 +753,19 @@ export class SwapUtils {
   }
 
   static getETH_GasLimit = async (baseUrl: string):Promise<any> => {
-    return fetch(`${baseUrl}/gas/gaslimit/eth`).then(res => res.json());
+    return fetch(`${baseUrl}/gaslimit/eth`).then(res => res.json());
   }
 
   static getBSC_GasLimit = async (baseUrl: string):Promise<any> => {
-    return fetch(`${baseUrl}/gas/gaslimit/bsc`).then(res => res.json());
+    return fetch(`${baseUrl}/gaslimit/bsc`).then(res => res.json());
   }
 
   static getETH_SafeGwei = async (baseUrl: string):Promise<any> => {
-    return fetch(`${baseUrl}/gas/gasprice/eth`).then(res => res.json());
+    return fetch(`${baseUrl}/gasprice/eth`).then(res => res.json());
   }
 
   static getBSC_SafeGwei = async (baseUrl: string):Promise<any> => {
-    return fetch(`${baseUrl}/gas/gasprice/bsc`).then(res => res.json());
+    return fetch(`${baseUrl}/gasprice/bsc`).then(res => res.json());
   }
 
   static getOutgoing_SwapTransfer_URL = (baseUrl: string): string => {
@@ -780,16 +780,40 @@ export class SwapUtils {
     return `${baseUrl}/swap/${swapId}`;
   }
 
+  static getIncoming_ETHSwapTransfer_URL = (baseUrl: string): string => {
+    return `${baseUrl}/expx/transfer`;
+  }
+
+  static getIncoming_BSCSwapTransfer_URL = (baseUrl: string): string => {
+    return `${baseUrl}/bxpx/transfer`;
+  }
+
   static checkSwapService = (baseUrl: string): string => {
     return `${baseUrl}/checkBalanceOk`;
   }
 
   static checkSwapPrice = (baseUrl: string): string => {
-    return `${baseUrl}/latest`;
+    return `${baseUrl}/price/latest`;
   }
 
   static getServiceInfoURL(baseUrl: string){
     return `${baseUrl}/service-info`;
+  }
+
+  static getIncoming_ETHCheckStatus_URL(baseUrl: string){
+    return `${baseUrl}/expx/swap-status`;
+  }
+
+  static getIncoming_BSCCheckStatus_URL(baseUrl: string){
+    return `${baseUrl}/bxpx/swap-status`;
+  }
+
+  static getOutgoing_ETHCheckStatus_URL(baseUrl: string){
+    return `${baseUrl}/eth/swapByTx/`;
+  }
+
+  static getOutgoing_BSCCheckStatus_URL(baseUrl: string){
+    return `${baseUrl}/bsc/swapByTx/`;
   }
 
   static getOutgoingSwapServiceInfo = (url: string): Promise<any>=> {

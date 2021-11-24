@@ -39,7 +39,7 @@ export default {
       ]},
       {name: computed(() => t('services.addressbook')), desc: computed(() => t('services.addressbookdescription')), img: 'icon-address-book-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: computed(() => t('services.list')), link: 'ViewServicesAddressBook'},
-        {name: computed(() => t('services.addcontacts')), link: 'ViewServicesAddressBookAddContacts'},
+        {name: computed(() => t('services.addcontacts')), link: 'ViewServicesAddressBookAddContact'},
       ]},
       {name: computed(() => t('Header.wallet')), desc: computed(() => t('services.walletsdescription')), img: 'icon-address-book-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: computed(() => t('services.changepassword')), link: ''},
