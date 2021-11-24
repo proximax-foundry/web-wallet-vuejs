@@ -8,6 +8,7 @@
         <PasswordInput  @space="space1=true" @removeSpace='space1=false' :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" :showError="showPkError" v-model="privKey"  />
         <div v-if='space1 || showPkError' class='mt-3'></div>
         <TextInput  @space="space2=true" @removeSpace='space2=false' placeholder="Name your account" :errorMessage="$t('createwallet.inputwalletname')" v-model="accountName" icon="wallet" />
+        <div class="h-3"/>
         <div v-if='space2' class='mt-3'></div>
         <PasswordInput @space="space3=true" @removeSpace='space3=false' placeholder="Enter Wallet Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPassword"  />
         <div v-if='space3' class='mt-3'></div>
