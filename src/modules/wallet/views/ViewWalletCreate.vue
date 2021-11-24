@@ -13,6 +13,7 @@
       <SelectNetworkInput />
       <div class="w-8/12 ml-auto mr-auto mt-3">
         <TextInput  @space="space1=true" @removeSpace='space1=false' placeholder="Name your wallet" :errorMessage="$t('createwallet.inputwalletname')" v-model="walletName" icon="wallet" />
+        <div class="h-3"/>
          <div v-if='space1' class='mt-3'></div>
         <PasswordInput @space="space2=true" @removeSpace='space2=false' placeholder="Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
         <div v-if='space2' class='mt-3'></div>
