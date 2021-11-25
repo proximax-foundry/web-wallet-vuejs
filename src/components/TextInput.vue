@@ -3,7 +3,7 @@
     <div class=" bg-white py-2 border">
       <input :disabled="disabled" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="ml-2 text-placeholder bg-white w-11/12 " :placeholder="placeholder" @click="clickInputText()" @focus="focusInputText()" @blur="blurInputText()">
     </div>
-    <div class="h-3 "><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
+    <div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div>
   </div>
 </template>
 

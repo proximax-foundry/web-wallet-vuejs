@@ -6,6 +6,7 @@
     <div class="error error_box mb-2 w-8/12 ml-auto mr-auto" v-if="err!=''">{{ err }}</div>
     <div class="w-8/12 ml-auto mr-auto mt-3">
         <TextInput  @space="space1=true" @removeSpace='space1=false' placeholder="Name your account" :errorMessage="$t('createwallet.inputwalletname')" v-model="accountName" icon="wallet" />
+        <div class="h-3"/>
          <div v-if='space1' class='mt-3'></div>
         <PasswordInput @space="space2=true" @removeSpace='space2=false' placeholder="Enter Wallet Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPassword"  />
         <div v-if='space2' class='mt-3'></div>
