@@ -149,7 +149,7 @@ export default {
     const selectedAccName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
     // const selectedAccAdd = ref('');
     const selectedAccAdd = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
-    const balance = ref(walletState.currentLoggedInWallet.selectDefaultAccount().balance);
+    const balance = ref(Helper.toCurrencyFormat(walletState.currentLoggedInWallet.selectDefaultAccount().balance, networkState.currentNetworkProfile.network.currency.divisibility));
     // const balanceNumber = ref('');
     const balanceNumber = ref(walletState.currentLoggedInWallet.selectDefaultAccount().balance);
     const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
@@ -210,7 +210,7 @@ export default {
       let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
       selectedAccName.value = account.name;
       selectedAccAdd.value = address;
-      balance.value = account.balance;
+      balance.value = Helper.toCurrencyFormat(account.balance, networkState.currentNetworkProfile.network.currency.divisibility);
       showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value)?true:false;
       currentSelectedName.value = account.name;
       ownerPublicAccount.value = WalletUtils.createPublicAccount(account.publicKey, networkState.currentNetworkProfile.network.type);
