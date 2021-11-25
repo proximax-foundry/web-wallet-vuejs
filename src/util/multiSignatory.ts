@@ -100,7 +100,7 @@ const getPublicKey = (address :Address) :Promise<AccountInfo['publicKey']>=> {
 }
 
 /* coSign: array() */
-function convertAccount(coSign :string[], numApproveTransaction :number, numDeleteUser :number, accountToConvertName :string, walletPassword :string)  :boolean{
+async function convertAccount(coSign :string[], numApproveTransaction :number, numDeleteUser :number, accountToConvertName :string, walletPassword :string)  :Promise<boolean>{
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword)
   if (!verify) {
     return verify;
@@ -115,17 +115,17 @@ function convertAccount(coSign :string[], numApproveTransaction :number, numDele
     let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
     const accountToConvert = Account.createFromPrivateKey(privateKey, networkType);
 
-    const cosignatory = [];
-    coSign.forEach(async (cosignKey, index) => {
+    let cosignatory 
+    for(let cosignKey of coSign ){
       if (cosignKey.length == 64) {
-        cosignatory[index] = PublicAccount.createFromPublicKey(cosignKey, networkType);
+        cosignatory = PublicAccount.createFromPublicKey(cosignKey, networkType);
       } else if (cosignKey.length == 40 || cosignKey.length == 46) {
         let address = Address.createFromRawAddress(cosignKey);
 
         try {
           let publicKey;
           publicKey = await getPublicKey(address);
-          cosignatory[index] = PublicAccount.createFromPublicKey(publicKey, networkType);
+          cosignatory = PublicAccount.createFromPublicKey(publicKey, networkType);
         } catch (error) {
           console.log(error);
         }
@@ -133,9 +133,12 @@ function convertAccount(coSign :string[], numApproveTransaction :number, numDele
 
       multisigCosignatory.push(new MultisigCosignatoryModification(
         MultisigCosignatoryModificationType.Add,
-        cosignatory[index],
+        cosignatory,
       ));
-    });
+    }
+    
+     
+   
 
     const convertIntoMultisigTransaction = ModifyMultisigAccountTransaction.create(
       Deadline.create(),
