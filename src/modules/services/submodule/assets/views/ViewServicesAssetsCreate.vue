@@ -8,68 +8,90 @@
     <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
       <div class="xl:col-span-2 p-12">
         <div class='font-semibold mb-4'>Create Asset</div>
-        <div class='pl-6'>
-          <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
+        <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
+          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('accounts.insufficientbalance')}}</div>
         </div>
+        <div v-else-if="isNotCosigner" class="rounded-md bg-yellow-200 w-full p-2 flex items-center justify-center">
+          <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('accounts.cosigwarning2')}}</div>
+        </div>
+        <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="mt-4">
           <SelectInputAccount @select-account="changeSelection" v-model="selectedAccAdd" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
+          <div v-if="getMultiSigCosigner.list.length > 0">
+            <div class="text-tsm text-left mt-3">{{$t('transfer.cosigner')}}:
+              <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.list[0].balance, 0) }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+              <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
+            </div>
+          </div>
           <div class="lg:grid lg:grid-cols-2 mt-5">
-            <div class="lg:mr-2"><SupplyInputClean :disabled="showNoBalance" v-model="supply" :balance="balanceNumber" :placeholder="$t('services.supply')" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)? $t('scriptvalues.requiredfield'): $t('accounts.insufficientbalance')" :decimal="Number(divisibility)" toolTip="Please put the meaning of supply here.<br><br>Maximum supply is 900T.<br>Example: 900,000,000,000,000" /></div>
-            <div class="lg:ml-2"><NumberInputClean :disabled="showNoBalance" v-model="divisibility" :max="6" :placeholder="$t('services.divisibility')" :showError="showDivisibilityErr" errorMessage="Required Field - Only Numbers (0 - 6)" toolTip="Please put the meaning of divisibility here.<br><br>Maximum divisibility is 6.<br>Example: 0.000000" /></div>
+            <div class="lg:mr-2"><SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="balanceNumber" :placeholder="$t('services.supply')" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)? $t('scriptvalues.requiredfield'): $t('accounts.insufficientbalance')" :decimal="Number(divisibility)" toolTip="Please put the meaning of supply here.<br><br>Maximum supply is 900T.<br>Example: 900,000,000,000,000" /></div>
+            <div class="lg:ml-2"><NumberInputClean :disabled="showNoBalance||isNotCosigner" v-model="divisibility" :max="6" :placeholder="$t('services.divisibility')" :showError="showDivisibilityErr" errorMessage="Required Field - Only Numbers (0 - 6)" toolTip="Please put the meaning of divisibility here.<br><br>Maximum divisibility is 6.<br>Example: 0.000000" /></div>
           </div>
           <div class="lg:grid lg:grid-cols-2">
-            <div class="mb-5 lg:mb-0 lg:mr-2"><CheckInput :disabled="showNoBalance" v-model="isTransferable" title="Transferable" toolTip='If you tick "Transferable",<br>asset can be transferred.' @click="!showNoBalance?(isTransferable = !isTransferable):''" /></div>
-            <div class="mb-5 lg:mb-0 lg:ml-2"><CheckInput :disabled="showNoBalance" v-model="isMutable" title="Supply Mutable" toolTip='If you tick "Supply Mutable", supply can be changed.' @click="!showNoBalance?(isMutable = !isMutable):''" /></div>
+            <div class="mb-5 lg:mb-0 lg:mr-2"><CheckInput :disabled="showNoBalance||isNotCosigner" v-model="isTransferable" title="Transferable" toolTip='If you tick "Transferable",<br>asset can be transferred.' @click="!showNoBalance?(isTransferable = !isTransferable):''" /></div>
+            <div class="mb-5 lg:mb-0 lg:ml-2"><CheckInput :disabled="showNoBalance||isNotCosigner" v-model="isMutable" title="Supply Mutable" toolTip='If you tick "Supply Mutable", supply can be changed.' @click="!showNoBalance?(isMutable = !isMutable):''" /></div>
           </div>
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
         <div class="font-semibold text-xxs text-blue-primary">ACCOUNT CURRENT BALANCE</div>
-        <div class="flex text-gray-200 mb-5" v-if="!showNoBalance">
-          <!-- <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
-          <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
-          <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div> -->
-          <div>{{ balance }}</div>
-          <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
+        <div class="flex text-gray-200 mb-5">
+          <span v-html="splitCurrency(balance)"></span>
           <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
         </div>
-        <div v-else class="flex text-red-primary mb-5">{{$t('accounts.insufficientbalance')}}</div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-sm py-3">
-          <div class="font-bold">Transaction Fee</div>
-          <div>{{ transactionFee }}</div>
+        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
+          <div class="font-semibold">Transaction Fee</div>
+          <div v-html="splitCurrency(transactionFee)"></div>
         </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-sm py-3">
-          <div class="font-bold">Rental Fee</div>
-          <div>{{ rentalFeeCurrency }}</div>
+        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
+          <div class="font-semibold">Rental Fee</div>
+          <div v-html="splitCurrency(rentalFeeCurrency)"></div>
         </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-sm py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-bold">{{$t('accounts.lockfund')}}</div>
-          <div>{{ lockFundCurrency }}</div>
+        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
+          <div class="font-semibold">{{$t('accounts.lockfund')}}</div>
+          <div v-html="splitCurrency(lockFundCurrency)"></div>
         </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-sm py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-bold">{{$t('accounts.unconfirmed')}}</div>
-          <div>{{ lockFundTxFee }}</div>
+        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
+          <div class="font-semibold">{{$t('accounts.unconfirmed')}}</div>
+          <div v-html="splitCurrency(lockFundTxFee)"></div>
         </div>
-        <div class="flex justify-between border-gray-600 text-gray-200 text-sm py-5">
-          <div class="font-bold">Total</div>
-          <div>{{ totalFeeFormatted }}</div>
+        <div class="flex justify-between border-gray-600 text-white text-xs py-5">
+          <div class="font-bold uppercase">Total</div>
+          <div v-html="splitCurrency(totalFeeFormatted)"></div>
         </div>
         <div class='text-xs text-white mt-5'>Enter your password to continue</div>
         <div class='text-xs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
         <PasswordInput :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
-        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate">Create Asset</button>
+        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="createAsset">Create Asset</button>
         <div class="text-center">
           <button class="content-center text-xs text-white border-b-2 border-white" >Cancel</button>
         </div>
       </div>
     </div>
+
+    <div class="lg:grid lg:grid-cols-3 mt-10 lg:mt-16">
+      <div>
+        <a href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new class="text-blue-primary font-bold inline-block text-tsm">What is asset?</a>
+        <div class="text-gray-400 text-xs lg:text-tsm my-3 sm:pr-2">Mosaics are part of what makes the Smart Asset System unique and flexible. They are fixed assets on the Sirius Chain that can represent a set of multiple identical things that do not change.</div>
+      </div>
+      <div>
+        <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="text-blue-primary font-bold inline-block text-tsm">The complete guide about Digital Asset</router-link>
+        <div class="text-gray-400 text-xs lg:text-tsm my-3">What is asset?</div>
+      </div>
+      <div>
+        <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="text-blue-primary font-bold inline-block text-tsm">Give us feedback about your experience here</router-link>
+        <div class="text-gray-400 text-xs lg:text-tsm my-3">Give us feedback about your experience here</div>
+      </div>
+    </div>
   </div>
+  
+  
 </div>
 </template>
 
 <script>
 import { computed, ref, watch } from 'vue';
-// import { useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 import SelectInputAccount from '@/components/SelectInputAccount.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInputClean from '@/components/SupplyInputClean.vue';
@@ -95,6 +117,8 @@ export default {
     /* AddCosignModal, */
   },
   setup(){
+    const router = useRouter();
+
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
     const showSupplyErr = ref(false);
@@ -105,9 +129,7 @@ export default {
     const showDivisibilityErr = ref(false);
     const isTransferable = ref(false);
     const isMutable = ref(false);
-    const disabledMutableCheck = ref(false);
-    const disabledTransferableCheck = ref(false);
-    const disabledPassword = ref(false);
+    const disabledPassword = computed(() => showNoBalance.value||isNotCosigner.value);
     const disabledClear = ref(false);
     const disabledDuration = ref(false);
     const durationOption =ref('month');
@@ -131,7 +153,7 @@ export default {
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && !disabledMutableCheck.value && (divisibility.value != '') && (supply.value > 0) && (!showDurationErr.value)
+      walletPassword.value.match(passwdPattern) && (divisibility.value != '') && (supply.value > 0) && (!showDurationErr.value)
     ));
 
     const isMultiSig = (address) => {
@@ -168,16 +190,10 @@ export default {
       if(!isNotCosigner.value){
         showNoBalance.value = true;
       }
-      disabledMutableCheck.value = true;
-      disabledTransferableCheck.value = true;
-      disabledPassword.value = true;
       disabledClear.value = true;
       disabledDuration.value = true;
       durationCheckDisabled.value = true;
     }else{
-      disabledMutableCheck.value = false;
-      disabledTransferableCheck.value = false;
-      disabledPassword.value = false;
       disabledClear.value = false;
       disabledDuration.value = false;
       durationCheckDisabled.value = false;
@@ -211,7 +227,7 @@ export default {
       selectedAccName.value = account.name;
       selectedAccAdd.value = address;
       balance.value = Helper.toCurrencyFormat(account.balance, networkState.currentNetworkProfile.network.currency.divisibility);
-      showNoBalance.value = ((balance.value < rentalFee.value) && !isNotCosigner.value)?true:false;
+      showNoBalance.value = ((balance.value < (rentalFee.value + transactionFeeExact.value)) && !isNotCosigner.value) ?true:false;
       currentSelectedName.value = account.name;
       ownerPublicAccount.value = WalletUtils.createPublicAccount(account.publicKey, networkState.currentNetworkProfile.network.type);
     }
@@ -283,47 +299,27 @@ export default {
     watch(totalFee, (n) => {
       if(balance.value < n && !isNotCosigner.value){
         showNoBalance.value = true;
-        disabledMutableCheck.value = true;
-        disabledTransferableCheck.value = true;
-        disabledPassword.value = true;
       }else{
         showNoBalance.value = false;
-        disabledMutableCheck.value = false;
-        disabledTransferableCheck.value = false;
-        disabledPassword.value = false;
       }
     });
 
     watch(isNotCosigner, (n) => {
       if(n){
         showNoBalance.value = true;
-        disabledMutableCheck.value = true;
-        disabledTransferableCheck.value = true;
-        disabledPassword.value = true;
       }else{
         showNoBalance.value = false;
-        disabledMutableCheck.value = false;
-        disabledTransferableCheck.value = false;
-        disabledPassword.value = false;
       }
     });
 
-    const createMosaic = () => {
+    const createAsset = () => {
       if(cosigner.value){
         AssetsUtils.createAssetMultiSig( cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, selectedAccAdd.value); 
       }else{
         AssetsUtils.createAsset( selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value);
       }
       clearInput();
-      // to be replaced by new method to create new asset
-      // let createStatus = mosaicTransaction(divisibility.value, supply.value, duration.value, durationOption.value, isMutable.value, isTransferable.value, walletPassword.value, selectedAccName.value, appStore, siriusStore);
-      // if(!createStatus){
-      //   err.value = 'Invalid wallet password';
-      // }else{
-      //   // transaction made
-      //   err.value = '';
-      //   clearInput();
-      // }
+      router.push({ name: "ViewServicesAssets"});
     };
 
     const cosigner = ref('');
@@ -340,6 +336,15 @@ export default {
         cosigner.value = '';
       }
     });
+
+    const splitCurrency = (amount) => {
+      let split = amount.toString().split(".")
+      if (split[1]!=undefined){
+        return '<span class="font-semibold text-sm">' + split[0] + '</span>.<span class="font-semibold text-xs">' + split[1] + ' ' + currentNativeTokenName.value + '</span>';
+      }else{
+        return '<span class="font-semibold text-sm">' + split[0] + '</span> <span class="font-semibold text-xs">' + currentNativeTokenName.value + '</span>';
+      }
+    };
 
     return {
       accounts,
@@ -363,11 +368,9 @@ export default {
       supply,
       divisibility,
       transactionFee,
-      disabledMutableCheck,
-      disabledTransferableCheck,
       disabledPassword,
       disabledClear,
-      createMosaic,
+      createAsset,
       disabledDuration,
       durationOption,
       duration,
@@ -389,6 +392,9 @@ export default {
       currentNativeTokenName,
       currentNativeTokenDivisibility,
       walletState,
+      networkState,
+      Helper,
+      splitCurrency,
     }
   },
 }
