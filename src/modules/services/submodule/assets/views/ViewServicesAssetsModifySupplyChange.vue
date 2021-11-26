@@ -6,8 +6,8 @@
   </div>
   <div class='w-10/12 ml-auto mr-auto'>
     <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
-      <div class="xl:col-span-2 p-12">
-        <div class="flex justify-between items-center">
+      <div class="xl:col-span-2 p-6 lg:p-12">
+        <div class="lg:flex lg:justify-between lg:items-center">
           <div class='font-semibold mb-4 inline-block mt-1'>Modify Asset Supply</div>
           <div class="flex items-center">
             <div v-html="svgString" class="inline-block" />
@@ -32,7 +32,7 @@
           </div>
         </div>
         <div class="border border-gray-200 p-4 rounded mt-5">
-          <div class="grid grid-cols-2">
+          <div class="lg:grid lg:grid-cols-2">
             <div class="my-3">
               <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">CURRENT SUPPLY<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="'<tiptext>Maximum supply is 900T.<br>Example: 900,000,000,000,000</tiptext>'"></div>
               <div class="text-black font-bold text-sm">{{ assetSupply }}</div>
@@ -51,7 +51,7 @@
             </div>
           </div>
         </div>
-        <div class="grid grid-cols-2 mt-5">
+        <div class="lg:grid lg:grid-cols-2 mt-5">
           <SelectModificationType title="modification type" class="lg:mr-4" v-model="selectIncreaseDecrease" />
           <SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="balanceNumber" placeholder="Supply Quantity to Increase" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)? $t('scriptvalues.requiredfield'): $t('accounts.insufficientbalance')" :decimal="Number(assetDivisibility)" ckass="lg:ml-4" />
         </div>
@@ -96,7 +96,7 @@
         <PasswordInput :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableModify" @click="modifyAsset">Modify Asset Supply</button>
         <div class="text-center">
-          <button class="content-center text-xs text-white border-b-2 border-white" >Cancel</button>
+          <router-link :to="{name: 'ViewServicesAssets'}" class='content-center text-xs text-white border-b-2 border-white'>Cancel</router-link>
         </div>
       </div>
     </div>
