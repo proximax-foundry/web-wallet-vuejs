@@ -164,8 +164,9 @@
               
             </div>
           </div>
-          <div class="text-center align-text-bottom inset-x-0 bottom-0 absolute ">
-            <PasswordInput :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5" :disabled="disablePassword"/>
+          <div class="text-center align-text-bottom inset-x-0 bottom-0 absolute">
+            <div style="width:300px; margin:0 auto;">
+            <PasswordInput :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5" :disabled="disablePassword"/></div>
             <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="makeTransfer()">
             Send aggregate
            </button>
