@@ -1,8 +1,8 @@
 <template>
   <div :class="`${(!disabled)?'cursor-pointer':''}`">
-    <div class="border border-gray-200 px-2 py-1 h-12 flex items-center justify-between rounded-md">
+    <div class="border border-gray-200 px-2 py-1 h-14 flex items-center justify-between rounded-md">
       <div>
-        <div class="inline-block font-bold text-tsm" :class="`${ disabled?'text-gray-400':'text-black' }`">{{ title }}</div>
+        <div class="inline-block font-bold text-tsm" :class="`${ disabled?'text-gray-500':'text-black' }`">{{ title }}</div>
         <img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="'<tiptext>' + toolTip + '</tiptext>'" v-if="toolTip">
       </div>
       <img src="@/assets/img/icon-done.svg" class="inline-block" v-if="modelValue">

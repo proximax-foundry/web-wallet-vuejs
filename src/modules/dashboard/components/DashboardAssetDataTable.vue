@@ -27,14 +27,13 @@
               </div>
             </div>
             <div v-else>
-              
-                <div class="mb-1 text-txs">{{ data.linkedNamespace[0].name }} <div class="inline-block border border-gray-300 p-1 rounded-sm ml-2 cursor-pointer" @click="showNsList(data.i)" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">+ <span class="font-bold">{{ data.linkedNamespace.length -1 }}</span></div></div>
-                <div class="border p-3 w-28 border-gray-100 shadow-sm absolute bg-white" v-if="isNsListShow[data.i]" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">
-                  <div v-for="namespace, item in data.linkedNamespace.slice(1)" :key="item">
-                    {{ namespace.name }}
-                  </div>
+              <div class="mb-1 text-txs">{{ data.linkedNamespace[0].name }} <div class="inline-block border border-gray-300 p-1 rounded-sm ml-2 cursor-pointer" @click="showNsList(data.i)" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">+ <span class="font-bold">{{ data.linkedNamespace.length -1 }}</span></div></div>
+              <div class="border p-3 w-28 border-gray-100 shadow-sm absolute bg-white" v-if="isNsListShow[data.i]" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">
+                <div v-for="namespace, item in data.linkedNamespace.slice(1)" :key="item">
+                  {{ namespace.name }}
                 </div>
               </div>
+            </div>
           </div>
           <div v-else>no linked namespace</div>
         </template>
@@ -67,8 +66,7 @@
             <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
             <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div role="none" class="my-2">
-                <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Asset Details</router-link>
-                <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Modify Supply</router-link>
+                <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.idHex, address: data.address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Modify Supply</router-link>
                 <router-link :to="{ name: 'ViewServicesAssetsLinkToNamespace' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Linked to namespace</router-link>
                 <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>View in Explorer<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
               </div>

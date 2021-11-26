@@ -6,6 +6,7 @@
           <div><span class="text-gray-700">{{$t('services.assets')}}</span></div>
         </div>
         <AssetDataTable class="mt-10"></AssetDataTable>
+        <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="bg-blue-primary px-5 py-3 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-44"><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2"> Create New Asset</router-link>
       </div>
       <div v-else>
         <div class="border border-gray-200 filter drop-shadow-xl py-2 sm:py-14 px-2 sm:px-28 text-center bg-white">

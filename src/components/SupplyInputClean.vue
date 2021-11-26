@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="border border-gray-200 px-2 py-1 h-12 rounded-md">
-      <div class="uppercase text-gray-400 font-light text-txs text-left mb-2">{{ placeholder }} <img src="@/assets/img/icon-info.svg" class="inline-block ml-1 relative cursor-pointer" style="top: -1px;" v-tooltip.bottom="'<tiptext>' + toolTip + '</tiptext>'" v-if="toolTip"></div>
+    <div class="border border-gray-200 px-2 py-1 h-14 rounded-md">
+      <div class="uppercase text-gray-500 text-txs text-left mb-2">{{ placeholder }} <img src="@/assets/img/icon-info.svg" class="inline-block ml-1 relative cursor-pointer" style="top: -1px;" v-tooltip.bottom="'<tiptext>' + toolTip + '</tiptext>'" v-if="toolTip"></div>
       <input v-if="decimal==0" v-maska="'#*'" :disabled="disabled" class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
       <input v-else-if="decimal==1" v-maska="'#*.#'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
       <input v-else-if="decimal==2" v-maska="'#*.##'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
