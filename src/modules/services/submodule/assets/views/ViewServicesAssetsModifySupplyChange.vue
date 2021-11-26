@@ -256,12 +256,12 @@ export default {
     };
 
     const modifyAsset = () => {
-       if(cosigner.value){
-         AssetsUtils.changeAssetSupplyMultiSig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value, selectedAccAdd.value);
-       }else{
+      if(cosigner.value){
+        AssetsUtils.changeAssetSupplyMultiSig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value, selectedAccAdd.value);
+      }else{
         AssetsUtils.changeAssetSupply(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value);
-       }
-      clearInput();
+      }
+      router.push({ name: "ViewServicesAssets"});
     };
 
     watch(selectIncreaseDecrease, (n) => {
