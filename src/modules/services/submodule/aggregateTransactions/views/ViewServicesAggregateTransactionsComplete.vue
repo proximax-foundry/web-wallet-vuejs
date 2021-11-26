@@ -1,5 +1,6 @@
 <template>
-  <div class="flex justify-between text-md">
+<div>
+  <div class="flex justify-between text-sm">
     <div><span class="text-gray-300">Aggregate Transactions ></span> <span class="text-blue-primary font-bold">{{$t('welcome.create')}}</span></div>
     <div>
       <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
@@ -98,7 +99,7 @@
             (+) {{$t('transfer.addmosaics')}} 
           </button>
         </div>
-        <div class="mb-5 border-t pt-4 border-gray-200">
+        <!--<div class="mb-5 border-t pt-4 border-gray-200">
           <div class="rounded-2xl bg-gray-100 p-5">
             <input id="regularMsg" type="radio" name="msgOption" value="regular" v-model="msgOption" @change="clearMsg()" :disabled="disableRegularMsg == 1"/>
             <label for="regularMsg" class="cursor-pointer font-bold ml-4 mr-5"> 
@@ -109,7 +110,7 @@
               >{{$t('transfer.hexadecimal')}}
               </label>
           </div>
-        </div>
+        </div>-->
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <div class="rounded-2xl bg-gray-100 p-5">
             <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
@@ -171,6 +172,7 @@
           </div>
     </div>
   </div>
+</div>
 </template>
 <script>
 import { Helper } from "@/util/typeHelper";
