@@ -211,7 +211,20 @@ export default {
       }
     }
 
-    const svgString = ref(toSvg(selectedAccAdd.value, 40));
+    let jdenticonconfig = {
+      hues: [211],
+      lightness: {
+          color: [0.32, 0.80],
+          grayscale: [0.17, 0.82]
+      },
+      saturation: {
+          color: 1.00,
+          grayscale: 0.00
+      },
+      backColor: "#fff"
+    };
+
+    const svgString = ref(toSvg(selectedAccAdd.value, 40, jdenticonconfig));
 
     const selectAsset = ref('');
     const assetDivisibility = ref(0);
