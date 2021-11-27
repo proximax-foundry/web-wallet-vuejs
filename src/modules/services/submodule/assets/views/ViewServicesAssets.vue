@@ -5,7 +5,7 @@
         <div class="flex justify-between text-sm">
           <div><span class="text-gray-700">{{$t('services.assets')}}</span></div>
         </div>
-        <AssetDataTable class="mt-10"></AssetDataTable>
+        <AssetDataTable class="mt-10" :key="defaultIndex"></AssetDataTable>
         <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="bg-blue-primary px-5 py-3 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-44"><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2"> Create New Asset</router-link>
       </div>
       <div v-else>
@@ -34,7 +34,7 @@
   </div>
 </template>
 <script>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, getCurrentInstance } from 'vue';
 // import { useRouter } from "vue-router";
 import { ChainProfileConfig } from "@/models/stores/";
 import { walletState } from "@/state/walletState";
@@ -54,6 +54,10 @@ export default {
   },
 
   setup(){
+    const defaultIndex = ref(0);
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+
     // get assets
     const assets = ref([]);
     walletState.currentLoggedInWallet.accounts.forEach(account => {
@@ -62,8 +66,15 @@ export default {
       });
     });
 
+    emitter.on("TXN_CONFIRMED", txLength => {
+      setTimeout(() => {
+        ++defaultIndex.value;
+      }, 1000);
+    });
+
     return {
-      assets
+      assets,
+      defaultIndex,
     }
   },
 
@@ -71,39 +82,4 @@ export default {
 </script>
 <style scoped lang="scss">
 
-.slide-enter-active {
-   -moz-transition-duration: 1s;
-   -webkit-transition-duration: 1s;
-   -o-transition-duration: 1s;
-   transition-duration: 1s;
-   -moz-transition-timing-function: ease-in;
-   -webkit-transition-timing-function: ease-in;
-   -o-transition-timing-function: ease-in;
-   transition-timing-function: ease-in;
-}
-
-.slide-leave-active {
-   -moz-transition-duration: 1s;
-   -webkit-transition-duration: 1s;
-   -o-transition-duration: 1s;
-   transition-duration: 1s;
-   -moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-   -webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-   -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-   transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-}
-
-.slide-enter-to, .slide-leave-from {
-  max-height: 1000px;
-  overflow: hidden;
-}
-
-.slide-enter-from, .slide-leave-to {
-   overflow: hidden;
-   max-height: 0;
-}
-
-.optionDiv:hover{
-  background: #D9EBFF;
-}
 </style>

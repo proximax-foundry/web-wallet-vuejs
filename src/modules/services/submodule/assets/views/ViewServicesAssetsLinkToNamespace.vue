@@ -53,8 +53,7 @@
         </div>
         <div class="lg:grid lg:grid-cols-2 mt-5">
           <SelectLinkType title="modification type" class="lg:mr-4" v-model="selectAction" :disabled="disabledSelectAction" />
-          <!-- <SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="balanceNumber" placeholder="Supply Quantity to Increase" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)? $t('scriptvalues.requiredfield'): $t('accounts.insufficientbalance')" :decimal="Number(assetDivisibility)" ckass="lg:ml-4" /> -->
-          <SelectInputNamespace :action="selectAction" v-model="selectNamespace" address="selectedAccAdd" />
+          <SelectInputNamespace :action="selectAction" v-model="selectNamespace" :address="selectedAccAdd" />
         </div>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="mt-4">
@@ -165,7 +164,7 @@ export default {
 
 
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && (supply.value > 0)
+      walletPassword.value.match(passwdPattern) && (selectNamespace.value != '')
     ));
 
     const selectedAccName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
@@ -249,8 +248,6 @@ export default {
       }
     }
 
-    
-
     const transactionFee = ref('0.000000');
     const transactionFeeExact = ref(0);
     const rentalFeeCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.mosaicRentalFee, networkState.currentNetworkProfile.network.currency.divisibility) );
@@ -269,8 +266,8 @@ export default {
       if(selectAction.value=='link'){
         assetId = selectAsset.value;
       }else{
-        const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == selectedAccAdd.value);
-        const other = walletState.currentLoggedInWallet.others.find((account) => account.address == selectedAccAdd.value);
+        const account = walletState.currentLoggedInWallet.accounts.find((account) => Helper.createAddress(account.address).pretty() == selectedAccAdd.value);
+        const other = walletState.currentLoggedInWallet.others.find((account) => Helper.createAddress(account.address).pretty() == selectedAccAdd.value);
         assetId = account?account.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId:other.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
       }
       if(cosigner.value){
@@ -278,6 +275,7 @@ export default {
       }else{
         AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value );
       }
+      router.push({ name: "ViewServicesAssets"});
     };
 
     watch(selectAction, (n) => {

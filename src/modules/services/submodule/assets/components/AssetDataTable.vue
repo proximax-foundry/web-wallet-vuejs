@@ -51,13 +51,6 @@
           <span class="uppercase font-bold text-txs">{{data.amount}}</span>
         </template>
       </Column>
-      <Column field="creator" header="CREATOR" style="width: 180px;">
-        <template #body="{data}">
-          <span class="uppercase font-bold text-txs">{{ data.owner == selectedAccountPublicKey ? 'yes': 'no'}}</span>
-          <img v-if="data.owner == selectedAccountPublicKey" src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer" v-tooltip.bottom="'<tiptitle>WALLET ADDRESS</tiptitle><tiptext>' + data.address + '</tiptext><tipbottom>MY PERSONAL ACCOUNT <img src=&quot;/icons/icon-personal-blue.png&quot;></tipbottom>'">
-          <img v-else src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer" v-tooltip.bottom="'<tiptitle>WALLET ADDRESS</tiptitle><tiptext>' + data.address + '</tiptext>'">
-        </template>
-      </Column>
       <Column field="height" header="BLOCK HEIGHT" style="width: 180px;">
         <template #body="{data}">
           <span class="text-txs">{{data.height}}</span>
@@ -144,7 +137,7 @@ export default{
     const generateAssetAllDatatable = () => {
       let assets = [];
       walletState.currentLoggedInWallet.accounts.forEach(account => {
-        account.assets.forEach(asset => {
+        account.assets.filter(asset => asset.owner === account.publicKey).forEach(asset => {
           assets.push({asset, account});
         });
       });
@@ -185,7 +178,7 @@ export default{
 
     const generateAssetDatatable = (accountAddress) => {
       let account =walletState.currentLoggedInWallet.accounts.find(account => account.address == accountAddress) 
-      let assets = account.assets;
+      let assets = account.assets.filter(asset => asset.owner === account.publicKey);
       let formattedAssets = [];
 
       for(let i=0; i < assets.length; ++i){
