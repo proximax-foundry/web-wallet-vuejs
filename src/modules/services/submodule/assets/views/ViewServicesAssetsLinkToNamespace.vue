@@ -53,7 +53,7 @@
         </div>
         <div class="lg:grid lg:grid-cols-2 mt-5">
           <SelectLinkType title="modification type" class="lg:mr-4" v-model="selectAction" :disabled="disabledSelectAction" />
-          <SelectInputNamespace :action="selectAction" v-model="selectNamespace" :address="selectedAccAdd" />
+          <SelectInputNamespace :action="selectAction" v-model="selectNamespace" :address="selectedAccAdd" :assetId="selectAsset" />
         </div>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="mt-4">

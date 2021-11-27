@@ -43,7 +43,8 @@ export default defineComponent({
   props: [
     'modelValue',
     'action',
-    'address'
+    'address',
+    'assetId'
   ],
 
   setup(props){
@@ -58,7 +59,7 @@ export default defineComponent({
     };
 
     const namespaces = computed(() => {
-      return AssetsUtils.listActiveNamespacesToLink(Address.createFromRawAddress(props.address).plain(), props.action);
+      return AssetsUtils.listActiveNamespacesToLink(props.assetId, Address.createFromRawAddress(props.address).plain(), props.action);
     });
 
     return {
