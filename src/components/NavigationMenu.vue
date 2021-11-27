@@ -3,7 +3,7 @@
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
       <div class="my-3 px-10 font-txs text-gray-400">ACCOUNTS ({{ allAccountsCount }})</div>
       <div>
-        <router-link :to="{ name: 'ViewAccountDetails', params: { address: item.address }}" v-for="(item, index) in accounts" :key="index" class="link_block flex items-center" @click="closeNavi"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center"><div class="text-center w-full"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div></div><span class="truncate overflow-hidden text-white">{{ item.name }}</span></router-link>
+        <router-link :to="{ name: 'ViewAccountDetails', params: { address: item.address }}" v-for="(item) in accounts" :key="item.address" class="link_block flex items-center" @click="closeNavi"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center"><div class="text-center w-full"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div></div><span class="truncate overflow-hidden text-white">{{ item.name }}</span></router-link>
       </div>
       <router-link :to="{ name: 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" v-if="allAccountsCount > 5" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-4 w-4 inline-block mr-1 text-white">View all accounts</router-link>
       <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="block font-bold link_block text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-add.svg" class="h-4 w-4 inline-block relative mr-1">Create New Account</router-link>
@@ -11,8 +11,8 @@
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
       <div class="my-3 px-10 text-gray-400">CREATE</div>
       <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">Namespace</router-link>
-      <router-link :to="{ name : 'ViewServicesAssetsCreate'}"  class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">Asset</router-link>
-      <router-link :to="{ name : 'ViewServices'}"  class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-services.svg" class="h-3 w-3 inline-block relative mr-2">Other Services</router-link>
+      <router-link :to="{ name : 'ViewServicesAssets'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">Asset</router-link>
+      <router-link :to="{ name : 'ViewServices'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-services.svg" class="h-3 w-3 inline-block relative mr-2">Other Services</router-link>
     </div>
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
       <div class="my-3 px-10 text-gray-400">NAVIGATE</div>
@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { computed, inject, watch } from "vue";
+import { computed, inject } from "vue";
 import { useRouter } from "vue-router";
 import { walletState } from '@/state/walletState';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";

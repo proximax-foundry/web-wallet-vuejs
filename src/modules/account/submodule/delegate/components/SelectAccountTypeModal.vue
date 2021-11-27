@@ -24,7 +24,7 @@
             </div>
           </div>
           <div class="w-104" v-else>
-            <h1 class="default-title font-bold my-5">{{$t('createwallet.fromprivatekey')}}</h1>            
+            <h1 class="default-title font-bold my-5">{{$t('createwallet.fromprivatekey')}}</h1>
             <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
             <div class="page-title-gray-line pt-20">
               <div class="my-5">{{$t('delegate.linkmessage')}}</div>
@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import { getCurrentInstance, ref, computed, unref } from 'vue';
+import { getCurrentInstance, ref, computed } from 'vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { Account } from "tsjs-xpx-chain-sdk";
 import { networkState } from "@/state/networkState";

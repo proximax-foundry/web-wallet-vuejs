@@ -11,8 +11,7 @@
           <PasswordInput @space="space=true" @removeSpace='space=false' class = 'w-8/12 block ml-auto mr-auto' placeholder="Password" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
         </div>
         <div class=" text-center">
-          <button v-if='!space' type="submit" class="blue-btn bg-gray-primary  py-2.5 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
-          <button v-else type="submit" class="blue-btn bg-gray-primary mt-4 py-2.5 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
+          <button type="submit" class="blue-btn bg-gray-primary mt-2 py-2.5 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
         </div>
       </fieldset>
     </form>
