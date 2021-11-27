@@ -8,7 +8,7 @@
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"render\", function() { return render; });\n/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ \"./node_modules/vue/dist/vue.runtime.esm-bundler.js\");\n\nvar _hoisted_1 = { class: \"bg-white py-2 border flex\" };\nvar _hoisted_2 = { class: \"h-3 \" };\nvar _hoisted_3 = {\n    key: 0,\n    class: \"error error-password text-left\"\n};\nfunction render(_ctx, _cache, $props, $setup, $data, $options) {\n    var _component_font_awesome_icon = Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"resolveComponent\"])(\"font-awesome-icon\");\n    return (Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"openBlock\"])(), Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createBlock\"])(\"div\", null, [\n        Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createVNode\"])(\"div\", _hoisted_1, [\n            Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createVNode\"])(\"input\", {\n                type: _ctx.inputType,\n                disabled: _ctx.disabled == true,\n                value: _ctx.modelValue,\n                onInput: _cache[1] || (_cache[1] = function ($event) { return (_ctx.$emit('update:modelValue', $event.target.value)); }),\n                class: \"text-placeholder text-left ml-2\",\n                placeholder: _ctx.placeholder,\n                onClick: _cache[2] || (_cache[2] = function ($event) { return (_ctx.clickInputPassword()); }),\n                onBlur: _cache[3] || (_cache[3] = function ($event) { return (_ctx.blurInputPassword()); }),\n                autocomplete: \"off\"\n            }, null, 40 /* PROPS, HYDRATE_EVENTS */, [\"type\", \"disabled\", \"value\", \"placeholder\"]),\n            (!_ctx.showPassword)\n                ? (Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"openBlock\"])(), Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createBlock\"])(_component_font_awesome_icon, {\n                    key: 0,\n                    icon: \"eye\",\n                    class: \"text-gray-500 relative cursor-pointer text-right mr-2\",\n                    onClick: _cache[4] || (_cache[4] = function ($event) { _ctx.hideShowPassword(); })\n                }))\n                : Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createCommentVNode\"])(\"v-if\", true),\n            (_ctx.showPassword)\n                ? (Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"openBlock\"])(), Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createBlock\"])(_component_font_awesome_icon, {\n                    key: 1,\n                    icon: \"eye-slash\",\n                    class: \"text-gray-500 relative cursor-pointer text-right mr-2\",\n                    onClick: _cache[5] || (_cache[5] = function ($event) { _ctx.hideShowPassword(); })\n                }))\n                : Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createCommentVNode\"])(\"v-if\", true)\n        ]),\n        Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createVNode\"])(\"div\", _hoisted_2, [\n            (_ctx.pswdErr || _ctx.showError)\n                ? (Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"openBlock\"])(), Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createBlock\"])(\"div\", _hoisted_3, Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"toDisplayString\"])(_ctx.errorMessage), 1 /* TEXT */))\n                : Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createCommentVNode\"])(\"v-if\", true)\n        ])\n    ]));\n}\n\n\n//# sourceURL=webpack:///./src/components/PasswordInput.vue?./node_modules/cache-loader/dist/cjs.js??ref--13-0!./node_modules/ts-loader??ref--13-1!./node_modules/@vue/cli-service/node_modules/vue-loader-v16/dist/templateLoader.js??ref--6!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/@vue/cli-service/node_modules/vue-loader-v16/dist??ref--0-1");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"render\", function() { return render; });\n/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ \"./node_modules/vue/dist/vue.runtime.esm-bundler.js\");\n\nvar _hoisted_1 = { class: \"bg-white py-2 border flex\" };\nvar _hoisted_2 = {\n    key: 0,\n    class: \"error error-password text-left mt-1\"\n};\nfunction render(_ctx, _cache, $props, $setup, $data, $options) {\n    var _component_font_awesome_icon = Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"resolveComponent\"])(\"font-awesome-icon\");\n    return (Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"openBlock\"])(), Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createBlock\"])(\"div\", null, [\n        Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createVNode\"])(\"div\", _hoisted_1, [\n            Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createVNode\"])(\"input\", {\n                type: _ctx.inputType,\n                disabled: _ctx.disabled == true,\n                value: _ctx.modelValue,\n                onInput: _cache[1] || (_cache[1] = function ($event) { return (_ctx.$emit('update:modelValue', $event.target.value)); }),\n                class: \"text-placeholder text-left ml-2\",\n                placeholder: _ctx.placeholder,\n                onClick: _cache[2] || (_cache[2] = function ($event) { return (_ctx.clickInputPassword()); }),\n                onBlur: _cache[3] || (_cache[3] = function ($event) { return (_ctx.blurInputPassword()); }),\n                autocomplete: \"off\"\n            }, null, 40 /* PROPS, HYDRATE_EVENTS */, [\"type\", \"disabled\", \"value\", \"placeholder\"]),\n            (!_ctx.showPassword)\n                ? (Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"openBlock\"])(), Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createBlock\"])(_component_font_awesome_icon, {\n                    key: 0,\n                    icon: \"eye\",\n                    class: \"text-gray-500 relative cursor-pointer text-right mr-2\",\n                    onClick: _cache[4] || (_cache[4] = function ($event) { _ctx.hideShowPassword(); })\n                }))\n                : Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createCommentVNode\"])(\"v-if\", true),\n            (_ctx.showPassword)\n                ? (Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"openBlock\"])(), Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createBlock\"])(_component_font_awesome_icon, {\n                    key: 1,\n                    icon: \"eye-slash\",\n                    class: \"text-gray-500 relative cursor-pointer text-right mr-2\",\n                    onClick: _cache[5] || (_cache[5] = function ($event) { _ctx.hideShowPassword(); })\n                }))\n                : Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createCommentVNode\"])(\"v-if\", true)\n        ]),\n        (_ctx.pswdErr || _ctx.showError)\n            ? (Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"openBlock\"])(), Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createBlock\"])(\"div\", _hoisted_2, Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"toDisplayString\"])(_ctx.errorMessage), 1 /* TEXT */))\n            : Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createCommentVNode\"])(\"v-if\", true)\n    ]));\n}\n\n\n//# sourceURL=webpack:///./src/components/PasswordInput.vue?./node_modules/cache-loader/dist/cjs.js??ref--13-0!./node_modules/ts-loader??ref--13-1!./node_modules/@vue/cli-service/node_modules/vue-loader-v16/dist/templateLoader.js??ref--6!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/@vue/cli-service/node_modules/vue-loader-v16/dist??ref--0-1");
 
 /***/ }),
 
@@ -24,14 +24,25 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var vue_
 
 /***/ }),
 
-/***/ "./src/assets/img/icon-prx-xpx-blue.svg":
-/*!**********************************************!*\
-  !*** ./src/assets/img/icon-prx-xpx-blue.svg ***!
-  \**********************************************/
+/***/ "./src/assets/img/chevron_left.svg":
+/*!*****************************************!*\
+  !*** ./src/assets/img/chevron_left.svg ***!
+  \*****************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/icon-prx-xpx-blue.026c6b2b.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/icon-prx-xpx-blue.svg?");
+eval("module.exports = __webpack_require__.p + \"assets/img/chevron_left.120f1ae7.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/chevron_left.svg?");
+
+/***/ }),
+
+/***/ "./src/assets/img/icon-info.svg":
+/*!**************************************!*\
+  !*** ./src/assets/img/icon-info.svg ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("module.exports = __webpack_require__.p + \"assets/img/icon-info.c16cc71f.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/icon-info.svg?");
 
 /***/ }),
 
@@ -71,25 +82,25 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _nod
 
 /***/ }),
 
-/***/ "./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg":
-/*!****************************************************************************************************!*\
-  !*** ./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg ***!
-  \****************************************************************************************************/
+/***/ "./src/modules/account/img/proximax-logo.svg":
+/*!***************************************************!*\
+  !*** ./src/modules/account/img/proximax-logo.svg ***!
+  \***************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.541d4c2b.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg?");
+eval("module.exports = __webpack_require__.p + \"assets/img/proximax-logo.cb656acf.svg\";\n\n//# sourceURL=webpack:///./src/modules/account/img/proximax-logo.svg?");
 
 /***/ }),
 
-/***/ "./src/modules/services/submodule/voting/img/badge-silver-proximax-sirius-wallet.svg":
-/*!*******************************************************************************************!*\
-  !*** ./src/modules/services/submodule/voting/img/badge-silver-proximax-sirius-wallet.svg ***!
-  \*******************************************************************************************/
+/***/ "./src/modules/services/submodule/assets/img/icon-asset.svg":
+/*!******************************************************************!*\
+  !*** ./src/modules/services/submodule/assets/img/icon-asset.svg ***!
+  \******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/badge-silver-proximax-sirius-wallet.3291fc4b.svg\";\n\n//# sourceURL=webpack:///./src/modules/services/submodule/voting/img/badge-silver-proximax-sirius-wallet.svg?");
+eval("module.exports = __webpack_require__.p + \"assets/img/icon-asset.40e1e8d4.svg\";\n\n//# sourceURL=webpack:///./src/modules/services/submodule/assets/img/icon-asset.svg?");
 
 /***/ })
 
