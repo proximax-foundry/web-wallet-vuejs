@@ -71,7 +71,7 @@ import { Helper } from "@/util/typeHelper";
 import { useI18n } from 'vue-i18n'
 
 export default {
-  name: 'ViewAccountAliasAddressToNamespace',
+  name: 'ViewAccountAliasAddressToNamespace_a',
 
   components: {
     PasswordInput,
