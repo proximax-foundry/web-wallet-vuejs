@@ -34,7 +34,7 @@
                 <a v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" @click="exportWallet()">{{$t('accounts.export')}}</a>
                 <router-link :to="{ name: 'ViewAccountDelete', params: { name: account.name }}" v-if="!account.default && !otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">{{$t('accounts.delete')}}</router-link>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300">{{$t('accounts.delete')}}</div>
-                <router-link :to="{ name: isMultiSig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: account.name}}" v-if="!otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">{{$t('accounts.multisig')}}</router-link>
+                <router-link :to="{ name:'ViewMultisigHome', params: { name: account.name}}" v-if="!otheraccount(account.address) || account.type =='MULTISIG'" class="block px-2 py-1 text-xs text-gray-700 hover:bg-blue-primary hover:text-white" role="menuitem">{{$t('accounts.multisig')}}</router-link>
                 <div v-else class="block px-2 py-1 text-xs text-gray-300" role="menuitem" >{{$t('accounts.multisig')}}</div>
                 <div class="block px-2 py-1 text-xs text-gray-300">{{$t('services.restrictions')}}</div>
                 <div class="block px-2 py-1 text-xs text-gray-300">{{$t('services.metadata')}}</div>

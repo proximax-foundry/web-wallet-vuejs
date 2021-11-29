@@ -5,7 +5,7 @@
         <font-awesome-icon icon="eye" class="text-gray-500 relative cursor-pointer text-right mr-2" @click="hideShowPassword();" v-if="!showPassword"></font-awesome-icon>
         <font-awesome-icon icon="eye-slash" class="text-gray-500 relative cursor-pointer text-right mr-2" @click="hideShowPassword();" v-if="showPassword"></font-awesome-icon>
     </div>
-    <div class="error error-password text-left mt-1" v-if="pswdErr || showError">{{ errorMessage }}</div>
+    <div class="error error-password text-left my-2" v-if="pswdErr || showError">{{ errorMessage }}</div>
   </div>
 </template>
 
@@ -33,7 +33,7 @@ export default defineComponent({
     }
   },
   emits:[
-    'update:modelValue','space','removeSpace'
+    'update:modelValue'
   ],
   name: 'PasswordInput',
   data() {
@@ -75,15 +75,6 @@ export default defineComponent({
         // }
       }
     },
-  },
-  watch:{
-    pswdErr:function(){
-      if(this.pswdErr){
-        this.$emit('space')
-      }else{
-        this.$emit('removeSpace')
-      }
-    }
   },
   mounted() {
     // this.emitter.on("CLEAR_PASSWORD", (payload) => {
