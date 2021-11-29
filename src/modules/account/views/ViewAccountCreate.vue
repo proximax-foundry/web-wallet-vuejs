@@ -5,15 +5,12 @@
     <div class='text-blue-primary text-xs text-center font-bold'>Creating New</div>
     <div class="error error_box mb-2 w-8/12 ml-auto mr-auto" v-if="err!=''">{{ err }}</div>
     <div class="w-8/12 ml-auto mr-auto mt-3">
-        <TextInput  @space="space1=true" @removeSpace='space1=false' placeholder="Name your account" :errorMessage="$t('createwallet.inputwalletname')" v-model="accountName" icon="wallet" />
-        <div class="h-3"/>
-         <div v-if='space1' class='mt-3'></div>
-        <PasswordInput @space="space2=true" @removeSpace='space2=false' placeholder="Enter Wallet Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPassword"  />
-        <div v-if='space2' class='mt-3'></div>
-      </div>
-      <div class="flex justify-center">
-        <button type="submit" class="blue-btn py-2 px-8 disabled:opacity-50" @click='create()' :disabled="disableCreate">{{$t('welcome.create')}}</button>
-      </div>
+      <TextInput placeholder="Name your account" :errorMessage="$t('createwallet.inputwalletname')" v-model="accountName" icon="wallet" />
+      <PasswordInput placeholder="Enter Wallet Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPassword"  />
+    </div>
+    <div class="flex justify-center">
+      <button type="submit" class="blue-btn py-2 px-8 disabled:opacity-50" @click='create()' :disabled="disableCreate">{{$t('welcome.create')}}</button>
+    </div>
     <div class='mt-10'></div>   
   </div>
 </div>
@@ -45,8 +42,6 @@ export default {
     const showPasswdError = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
     const router = useRouter();
-    const space1 = ref(false)
-    const space2 = ref(false)
     const disableCreate = computed(
       () => !(
         walletPassword.value.match(passwdPattern) &&
@@ -88,8 +83,6 @@ export default {
     };
 
     return{
-      space1,
-      space2,
       walletState,
       err,
       create,

@@ -17,7 +17,6 @@
            <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
         </div>
         <div class="mt-4"></div>
-        <div class="flex flex-col gap-2">
           <div v-for="(coSignAddress, index) in coSign" :key="index" >
             <div class="flex">
               <img  src="@/modules/account/submodule/multisig/img/icon-delete.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
@@ -45,7 +44,7 @@
             </div>
 
           </div>
-        </div>
+       
         <button class="pl-6 font-semibold text-xs mt-1 text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">+ Add New Cosignatory</button>
         <div class="ml-6 my-7 gray-line"/> 
         <div class="pl-6 text-xs font-semibold mb-3">Scheme</div>

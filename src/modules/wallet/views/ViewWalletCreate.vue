@@ -12,15 +12,9 @@
       </div>
       <SelectNetworkInput />
       <div class="w-8/12 ml-auto mr-auto mt-3">
-        <TextInput  @space="space1=true" @removeSpace='space1=false' placeholder="Name your wallet" :errorMessage="$t('createwallet.inputwalletname')" v-model="walletName" icon="wallet" />
-        <div class="h-3"/>
-         <div v-if='space1' class='mt-3'></div>
-        <PasswordInput @space="space2=true" @removeSpace='space2=false' placeholder="Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
-        <div v-if='space2' class='mt-3'></div>
-        <PasswordInput @space="space3=true" @removeSpace='space3=false' placeholder="Confirm Password" :errorMessage="$t('createwallet.doesntmatch')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd"  />
-        <div v-if='showConfirmPasswdError | space3' class='mt-3'></div>
-        <!-- <div class = 'mt-6 text-center text-xs'>Current Network: </div>
-        <div class = 'text-center'>{{networkState.chainNetworkName}}</div> -->
+        <TextInput  placeholder="Name your wallet" :errorMessage="$t('createwallet.inputwalletname')" v-model="walletName" icon="wallet" />
+        <PasswordInput placeholder="Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
+        <PasswordInput  placeholder="Confirm Password" :errorMessage="$t('createwallet.doesntmatch')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd"  />
       </div>
       <button type="submit" class="text-center  font-bold blue-btn py-3 block ml-auto mr-auto w-8/12 disabled:opacity-50" :disabled="disableCreate">Create Wallet</button>
        
@@ -98,9 +92,6 @@ export default defineComponent({
     const showPasswdError = ref<boolean>(false);
     const passwdPattern: string  = "^[^ ]{8,}$";
     const showModal = ref(false)
-    const space1 = ref(false)
-    const space2 = ref(false)
-    const space3 = ref(false)
     const copy = (id :string) =>{ 
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
@@ -144,9 +135,6 @@ export default defineComponent({
     };
 
     return {
-      space1,
-      space2,
-      space3,
       showModal,
       networkState,
       err,

@@ -5,13 +5,9 @@
       <div class='text-blue-primary text-xs text-center font-bold'>From Private Key</div>
       <div class="error error_box mb-2 w-8/12 ml-auto mr-auto" v-if="err!=''">{{ err }}</div>
       <div class="w-8/12 ml-auto mr-auto mt-3">
-        <PasswordInput  @space="space1=true" @removeSpace='space1=false' :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" :showError="showPkError" v-model="privKey"  />
-        <div v-if='space1 || showPkError' class='mt-3'></div>
-        <TextInput  @space="space2=true" @removeSpace='space2=false' placeholder="Name your account" :errorMessage="$t('createwallet.inputwalletname')" v-model="accountName" icon="wallet" />
-        <div class="h-3"/>
-        <div v-if='space2' class='mt-3'></div>
-        <PasswordInput @space="space3=true" @removeSpace='space3=false' placeholder="Enter Wallet Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPassword"  />
-        <div v-if='space3' class='mt-3'></div>
+        <PasswordInput :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" :showError="showPkError" v-model="privKey"  />
+        <TextInput placeholder="Name your account" :errorMessage="$t('createwallet.inputwalletname')" v-model="accountName" icon="wallet" />
+        <PasswordInput placeholder="Enter Wallet Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPassword"  />
       </div>
       <div class="flex justify-center">
         <button type="submit" class="blue-btn py-2 px-8 disabled:opacity-50" @click='create()' :disabled="disableCreate">{{$t('welcome.create')}}</button>
@@ -65,10 +61,6 @@ export default {
       () => !privKey.value.match(privKeyPattern) && privKey.value!=""
     );
 
-    const space1 = ref(false)
-    const space2 = ref(false)
-    const space3 = ref(false)
-    const space4 = ref(false)
     const walletName = walletState.currentLoggedInWallet.name
     /* let recreateAsset = (tempAsset) =>{
         let newAsset = new Asset(tempAsset.idHex, tempAsset.divisibility, tempAsset.supplyMutable, tempAsset.transferable, tempAsset.owner);
@@ -115,9 +107,6 @@ export default {
     };
     return{
       showPkError,
-      space1,
-      space2,
-      space3,
       walletState,
       err,
       create,
