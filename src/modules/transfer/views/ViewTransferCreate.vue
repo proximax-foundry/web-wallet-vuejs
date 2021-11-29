@@ -99,7 +99,7 @@
             (+) {{$t('transfer.addmosaics')}} 
           </button>
         </div>
-        <!-- <div class="mb-5 border-t pt-4 border-gray-200">
+        <div class="mb-5 border-t pt-4 border-gray-200">
           <div class="rounded-2xl bg-gray-100 p-5">
             <input id="regularMsg" type="radio" name="msgOption" value="regular" v-model="msgOption" @change="clearMsg()" :disabled="disableRegularMsg == 1"/>
             <label for="regularMsg" class="cursor-pointer font-bold ml-4 mr-5"> 
@@ -110,7 +110,7 @@
               >{{$t('transfer.hexadecimal')}}
               </label>
           </div>
-        </div> -->
+        </div>
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <div class="rounded-2xl bg-gray-100 p-5">
             <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
@@ -386,7 +386,7 @@ export default {
 
     const balance = computed(() => {
         if (walletState.currentLoggedInWallet) {
-          if (accounts.value.find((element) => element.address === selectedAccAdd.value)==undefined){
+          if (accounts.value.find((element) => element.address === selectedAccAdd.value) == undefined){
             return 0 
           }else{
             return accounts.value.find((element) => element.address === selectedAccAdd.value).balance

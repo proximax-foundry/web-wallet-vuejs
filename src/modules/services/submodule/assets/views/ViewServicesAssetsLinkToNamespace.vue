@@ -24,6 +24,15 @@
         <div v-else-if="isNotCosigner" class="rounded-md bg-yellow-200 w-full p-2 flex items-center justify-center">
           <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('accounts.cosigwarning2')}}</div>
         </div>
+        <div class="error error_box" v-if="err!=''">{{ err }}</div>
+        <div class="text-right w-full">
+          <div v-if="getMultiSigCosigner.list.length > 0" class="inline-block">
+            <div class="text-tsm text-left mt-3">{{$t('transfer.cosigner')}}:
+              <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.list[0].balance, 0) }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+              <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
+            </div>
+          </div>
+        </div>
         <div class="border border-blue-primary p-4 bg-blue-100 flex items-center rounded mt-5">
           <img src="@/modules/services/submodule/assets/img/icon-asset.svg">
           <div class="ml-1">
@@ -54,15 +63,6 @@
         <div class="lg:grid lg:grid-cols-2 mt-5">
           <SelectLinkType title="modification type" class="lg:mr-4" v-model="selectAction" :disabled="disabledSelectAction" />
           <SelectInputNamespace :action="selectAction" v-model="selectNamespace" :address="selectedAccAdd" :assetId="selectAsset" />
-        </div>
-        <div class="error error_box" v-if="err!=''">{{ err }}</div>
-        <div class="mt-4">
-          <div v-if="getMultiSigCosigner.list.length > 0">
-            <div class="text-tsm text-left mt-3">{{$t('transfer.cosigner')}}:
-              <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.list[0].balance, 0) }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
-              <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
-            </div>
-          </div>
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
@@ -167,9 +167,9 @@ export default {
       walletPassword.value.match(passwdPattern) && (selectNamespace.value != '')
     ));
 
-    const selectedAccName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
-    const selectedAccAdd = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
-    const balance = ref(Helper.toCurrencyFormat(walletState.currentLoggedInWallet.selectDefaultAccount().balance, networkState.currentNetworkProfile.network.currency.divisibility));
+    const selectedAccName = ref('');
+    const selectedAccAdd = ref('');
+    const balance = ref('');
     const balanceNumber = ref(maxAmount);
 
     const isMultiSig = (address) => {
@@ -192,23 +192,18 @@ export default {
 
     const supply = ref('0');
 
-    // get asset id
-    let other;
     let account = walletState.currentLoggedInWallet.accounts.find((account) => Helper.createAddress(account.address).pretty() == props.address);
+    if(!account){
+      account = walletState.currentLoggedInWallet.others.find((account) => Helper.createAddress(account.address).pretty() == props.address);
+    }
+
     if(account != undefined){
       selectedAccName.value = account.name;
-      selectedAccAdd.value = Helper.createAddress(account.address).pretty();
-      balance.value = account.balance;
+      selectedAccAdd.value = account.address;
+      balance.value = Helper.toCurrencyFormat(account.balance, networkState.currentNetworkProfile.network.currency.divisibility);
     }else{
-      other = walletState.currentLoggedInWallet.others.find((account) => account.address == props.address);
-      if(other != undefined){
-        selectedAccName.value = other.name;
-        selectedAccAdd.value = Helper.createAddress(other.address).pretty();
-        balance.value = other.balance;
-      }else{
-        toast.add({severity:'error', detail: 'Addres is invalid', group: 'br', life: 3000});
-        router.push({ name: "ViewServicesAssets" });
-      }
+      toast.add({severity:'error', detail: 'Addres is invalid', group: 'br', life: 3000});
+      router.push({ name: "ViewServicesAssets" });
     }
 
     let jdenticonconfig = {
@@ -224,7 +219,7 @@ export default {
       backColor: "#fff"
     };
 
-    const svgString = ref(toSvg(selectedAccAdd.value, 40, jdenticonconfig));
+    const svgString = ref(toSvg(Helper.createAddress(selectedAccAdd.value).pretty(), 40, jdenticonconfig));
 
     const selectAsset = ref('');
     const assetDivisibility = ref(0);
@@ -257,6 +252,19 @@ export default {
     const getMultiSigCosigner = computed(() => {
       return AssetsUtils.getCosignerList(selectedAccAdd.value);
     });
+
+    const cosigner = ref('');
+    // get cosigner
+    // if it is a multisig
+    if(getMultiSigCosigner.value.list.length > 0){
+      if(getMultiSigCosigner.value.list.length > 1){
+        cosigner.value = cosignerAddress.value;
+      }else{
+        cosigner.value = getMultiSigCosigner.value.list[0].address;
+      }
+    }else{
+      cosigner.value = '';
+    }
 
     transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
     transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
@@ -353,21 +361,6 @@ export default {
       }
     });
 
-    const cosigner = ref('');
-    // get cosigner
-    watch(getMultiSigCosigner, (n) => {
-      // if it is a multisig
-      if(n.list.length > 0){
-        if(n.list.length > 1){
-          cosigner.value = cosignerAddress.value;
-        }else{
-          cosigner.value = n.list[0].address;
-        }
-      }else{
-        cosigner.value = '';
-      }
-    });
-
     const splitCurrency = (amount) => {
       let split = amount.toString().split(".")
       if (split[1]!=undefined){
@@ -413,6 +406,7 @@ export default {
       getMultiSigCosigner,
       cosignerBalanceInsufficient,
       cosignerAddress,
+      cosigner,
       isNotCosigner,
       disabledSelectAction,
       splitCurrency,

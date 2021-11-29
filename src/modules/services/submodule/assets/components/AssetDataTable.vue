@@ -131,6 +131,11 @@ export default{
           {value: account.address, label: account.name},
         );
       });
+      walletState.currentLoggedInWallet.others.forEach(account => {
+        accountOption.push(
+          {value: account.address, label: account.name},
+        );
+      });
       return accountOption;
     });
 
@@ -178,6 +183,9 @@ export default{
 
     const generateAssetDatatable = (accountAddress) => {
       let account =walletState.currentLoggedInWallet.accounts.find(account => account.address == accountAddress) 
+      if(!account){
+        account =walletState.currentLoggedInWallet.others.find(account => account.address == accountAddress) 
+      }
       let assets = account.assets.filter(asset => asset.owner === account.publicKey);
       let formattedAssets = [];
 

@@ -222,6 +222,9 @@ export default {
 
     const changeSelection = (address) => {
       let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
+      if(!account){
+        account = walletState.currentLoggedInWallet.others.find(account => account.address == address);
+      }
       selectedAccName.value = account.name;
       selectedAccAdd.value = address;
       balance.value = Helper.toCurrencyFormat(account.balance, networkState.currentNetworkProfile.network.currency.divisibility);

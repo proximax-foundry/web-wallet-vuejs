@@ -356,7 +356,6 @@ export class AssetsUtils {
     let namespacesArr = [];
     if(namespacesNum > 0){
       fetchedNamespace.forEach((namespaceElement) => {
-        console.log(namespaceElement)
         const level = namespaceElement.name.split('.');
         let isDisabled: boolean;
         let label:string = '';
