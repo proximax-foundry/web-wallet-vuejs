@@ -1,13 +1,13 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([[76],{
 
-/***/ "./src/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg":
-/*!************************************************************************************!*\
-  !*** ./src/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg ***!
-  \************************************************************************************/
+/***/ "./src/modules/dashboard/img/icon-more-options.svg":
+/*!*********************************************************!*\
+  !*** ./src/modules/dashboard/img/icon-more-options.svg ***!
+  \*********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/icon-account-green-16h-proximax-sirius-wallet.f8fb8a8a.svg\";\n\n//# sourceURL=webpack:///./src/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg?");
+eval("module.exports = __webpack_require__.p + \"assets/img/icon-more-options.54384d4a.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/icon-more-options.svg?");
 
 /***/ })
 
