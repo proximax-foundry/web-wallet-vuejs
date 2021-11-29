@@ -75,10 +75,6 @@
           <div class="font-semibold">Transaction Fee</div>
           <div v-html="splitCurrency(transactionFee)"></div>
         </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-          <div class="font-semibold">Rental Fee</div>
-          <div v-html="splitCurrency(rentalFeeCurrency)"></div>
-        </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
           <div class="font-semibold">{{$t('accounts.lockfund')}}</div>
           <div v-html="splitCurrency(lockFundCurrency)"></div>
@@ -94,7 +90,7 @@
         <div class='text-xs text-white mt-5'>Enter your password to continue</div>
         <div class='text-xs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
         <PasswordInput :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
-        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="linkNamespace">Link to Namespace</button>
+        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="linkNamespace">{{ (selectAction=='link')?'Link to':'Unlink' }} Namespace</button>
         <div class="text-center">
           <router-link :to="{name: 'ViewServicesAssets'}" class='content-center text-xs text-white border-b-2 border-white'>Cancel</router-link>
         </div>
@@ -245,7 +241,6 @@ export default {
 
     const transactionFee = ref('0.000000');
     const transactionFeeExact = ref(0);
-    const rentalFeeCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.mosaicRentalFee, networkState.currentNetworkProfile.network.currency.divisibility) );
 
     const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
 
@@ -266,7 +261,7 @@ export default {
       cosigner.value = '';
     }
 
-    transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+    transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
     transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
 
     const linkNamespace = () => {
@@ -274,9 +269,11 @@ export default {
       if(selectAction.value=='link'){
         assetId = selectAsset.value;
       }else{
-        const account = walletState.currentLoggedInWallet.accounts.find((account) => Helper.createAddress(account.address).pretty() == selectedAccAdd.value);
-        const other = walletState.currentLoggedInWallet.others.find((account) => Helper.createAddress(account.address).pretty() == selectedAccAdd.value);
-        assetId = account?account.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId:other.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
+        let account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == selectedAccAdd.value);
+        if(!account){
+          account = walletState.currentLoggedInWallet.others.find((account) => account.address == selectedAccAdd.value);
+        }
+        assetId = account.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
       }
       if(cosigner.value){
         AssetsUtils.linkedNamespaceToAssetMultiSig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value, selectedAccAdd.value);
@@ -288,7 +285,7 @@ export default {
 
     watch(selectAction, (n) => {
       if(selectAsset.value){
-        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
         transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
         balanceNumber.value = (n=='increase'?maxAmount:parseFloat(assetSupply.value));
       }else{
@@ -299,7 +296,7 @@ export default {
 
     watch(supply, (n) => {
       if(selectAsset.value){
-        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, n, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, n, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
         transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, n, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
       }
     });
@@ -396,7 +393,6 @@ export default {
       selectAction,
       linkNamespace,
       transactionFee,
-      rentalFeeCurrency,
       transactionFeeExact,
       assetSupply,
       assetDivisibility,

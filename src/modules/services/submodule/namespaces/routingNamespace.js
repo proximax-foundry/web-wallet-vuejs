@@ -1,5 +1,13 @@
 export const NamespaceRoutes = [
   {
+    path: '/namespace',
+    name: 'ViewServicesNamespace',
+    component: () => import('@/modules/services/submodule/namespaces/views/ViewServicesNamespace.vue'),
+    meta: {
+      title: "Namespace",
+    }
+  },
+  {
     path: '/create-namespace',
     name: 'ViewServicesNamespaceCreate',
     component: () => import('@/modules/services/submodule/namespaces/views/ViewServicesNamespaceCreate.vue'),

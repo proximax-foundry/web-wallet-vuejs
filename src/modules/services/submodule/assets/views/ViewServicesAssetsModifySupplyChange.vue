@@ -62,7 +62,7 @@
         </div>
         <div class="lg:grid lg:grid-cols-2 mt-5">
           <SelectModificationType title="modification type" class="lg:mr-4" v-model="selectIncreaseDecrease" />
-          <SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="balanceNumber" placeholder="Supply Quantity to Increase" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)? $t('scriptvalues.requiredfield'): $t('accounts.insufficientbalance')" :decimal="Number(assetDivisibility)" ckass="lg:ml-4" />
+          <SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="balanceNumber" :placeholder="'Quantity of ' + selectIncreaseDecrease" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)? $t('scriptvalues.requiredfield'): $t('accounts.insufficientbalance')" :decimal="Number(assetDivisibility)" ckass="lg:ml-4" />
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
@@ -74,10 +74,6 @@
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
           <div class="font-semibold">Transaction Fee</div>
           <div v-html="splitCurrency(transactionFee)"></div>
-        </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-          <div class="font-semibold">Rental Fee</div>
-          <div v-html="splitCurrency(rentalFeeCurrency)"></div>
         </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
           <div class="font-semibold">{{$t('accounts.lockfund')}}</div>
@@ -244,7 +240,6 @@ export default {
 
     const transactionFee = ref('0.000000');
     const transactionFeeExact = ref(0);
-    const rentalFeeCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.mosaicRentalFee, networkState.currentNetworkProfile.network.currency.divisibility) );
 
     const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
 
@@ -268,7 +263,7 @@ export default {
     const assetAmount = ref(0);
     const assetDuration = ref('0 Day');
 
-    transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+    transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
     transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
 
     const clearInput = () => {
@@ -287,7 +282,7 @@ export default {
 
     watch(selectIncreaseDecrease, (n) => {
       if(selectAsset.value){
-        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
         transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
         balanceNumber.value = (n=='increase'?maxAmount:parseFloat(assetSupply.value));
       }else{
@@ -298,7 +293,7 @@ export default {
 
     watch(supply, (n) => {
       if(selectAsset.value){
-        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, n, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, n, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
         transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, n, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
       }
     });
@@ -396,7 +391,6 @@ export default {
       selectIncreaseDecrease,
       modifyAsset,
       transactionFee,
-      rentalFeeCurrency,
       transactionFeeExact,
       assetSupply,
       assetAmount,

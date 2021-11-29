@@ -13,7 +13,7 @@
         <img src="@/assets/img/icon-blockheight.svg" class="h-10 w-10 inline-block">
         <div class="ml-3">
           <div class="uppercase text-txs text-gray-400">block height</div>
-          <div class="text-gray-800 text-md font-bold mt-1">{{ blockHeight }}</div>
+          <div class="text-gray-800 text-md font-bold mt-1">{{ currentBlockHeight==0?'Fetching...':currentBlockHeight }}</div>
         </div>
       </div>
 
@@ -180,8 +180,6 @@ export default defineComponent({
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const router = useRouter();
 
-    const blockHeight = computed(() => networkState.currentNetworkProfileConfig.chainHeight);
-
     const isHoverCreate = ref(false);
     const isShowCreate = ref(false);
     const isHoverCreatePanel = ref(false);
@@ -303,7 +301,6 @@ export default defineComponent({
       console.log('logout')
     };
 
-    //const totalBalance = ref(0);
     const totalBalance = computed(()=>{
 
       if(!walletState.currentLoggedInWallet){
@@ -601,7 +598,7 @@ export default defineComponent({
       setHoverSupportToFalse,
       hideSupportPanel,
       isHoverSupportPanel,
-      blockHeight,
+      currentBlockHeight,
     };
   },
   created() {

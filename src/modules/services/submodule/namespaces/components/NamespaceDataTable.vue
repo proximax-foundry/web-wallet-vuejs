@@ -1,5 +1,8 @@
 <template>
   <div>
+    <div class="text-right">
+      <SelectInputPluginClean v-model="filterNamespaces" :options="listAccounts" selectDefault="" class="w-60 mr-4 inline-block" />
+    </div>
     <DataTable
       :value="accountNamespaces"
       :paginator="true"
@@ -68,8 +71,10 @@
 
 <script>
 import { getCurrentInstance, ref, computed, watch, onMounted, toRefs  } from "vue";
+import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import { walletState } from "@/state/walletState";
 import {Namespace} from '@/models/namespace';
 import { listenerState } from '@/state/listenerState';
 import { Helper } from '@/util/typeHelper';
@@ -78,35 +83,67 @@ import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 import { WalletAccount } from '@/models/walletAccount';
 
 export default{
-  components: { DataTable, Column },
+  components: { DataTable, Column, SelectInputPluginClean },
   name: 'NamespaceDataTable',
   props: {
-    namespaces: Array,
     currentBlockHeight: Number,
     account: WalletAccount
   },
 
   setup(props, context){
     const rowLimit = 5;
-    const { namespaces, currentBlockHeight } = toRefs(props);
+    const { currentBlockHeight } = toRefs(props);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const accountNamespaces = ref();
     const isMenuShow = ref([]);
 
+    const listAccounts = computed(() => {
+      let accountOption = [];
+      accountOption.push(
+        {value: '', label: 'Show all'},
+      );
+      walletState.currentLoggedInWallet.accounts.forEach(account => {
+        accountOption.push(
+          {value: account.address, label: account.name},
+        );
+      });
+      walletState.currentLoggedInWallet.others.forEach(account => {
+        accountOption.push(
+          {value: account.address, label: account.name},
+        );
+      });
+      return accountOption;
+    });
+
     let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
     chainConfig.init();
     let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
 
-    watch([currentBlockHeight, namespaces], ([newBlockHeight, namespaces]) => {
-      accountNamespaces.value = generateDatatable(namespaces, newBlockHeight);
+    watch([currentBlockHeight], ([newBlockHeight]) => {
+      accountNamespaces.value = generateDatatable(newBlockHeight);
     });
 
-    onMounted(() => {
-      accountNamespaces.value = generateDatatable(namespaces.value, currentBlockHeight.value);
-    });
+    // onMounted(() => {
+    //   accountNamespaces.value = generateDatatable(currentBlockHeight.value);
+    // });
 
-    const generateDatatable = (namespaces, currentBlockHeight) => {
+    const calculateExpiryDate = (day, hour, min) => {
+      let current = new Date();
+      current.setTime(current.getTime() + (day * 24 * 60 * 60 * 1000 ));
+      current.setTime(current.getTime() + (hour * 60 * 60 * 1000));
+      current.setTime(current.getTime() + (min * 60 * 1000));
+      return current;
+    }
+
+    const generateDatatable = (currentBlockHeight) => {
+      let namespaces = [];
+      walletState.currentLoggedInWallet.accounts.forEach(account => {
+        account.namespaces.forEach(namespace => {
+          namespaces.push(namespace);
+        });
+      });
+
       let formattedNamespaces = [];
 
       for(let i=0; i < namespaces.length; ++i){
@@ -148,13 +185,21 @@ export default{
       return formattedNamespaces;
     }
 
-    const calculateExpiryDate = (day, hour, min) => {
-      let current = new Date();
-      current.setTime(current.getTime() + (day * 24 * 60 * 60 * 1000 ));
-      current.setTime(current.getTime() + (hour * 60 * 60 * 1000));
-      current.setTime(current.getTime() + (min * 60 * 1000));
-      return current;
+    const filterNamespaces = ref('');
+
+    if(filterNamespaces.value == ''){
+      accountNamespaces.value = generateDatatable(currentBlockHeight.value);
+    }else{
+      accountNamespaces.value = generateDatatable(currentBlockHeight.value);
     }
+
+    watch(filterNamespaces, (n) => {
+      if(n == ''){
+        accountNamespaces.value = generateDatatable(currentBlockHeight.value);
+      }else{
+        accountNamespaces.value = generateDatatable(currentBlockHeight.value);
+      }
+    });
 
     const relativeTime = (day, hour, min) => {
       let current = new Date();
@@ -244,7 +289,9 @@ export default{
       isMenuShow,
       accountNamespaces,
       hoverOverMenu,
-      hoverOutMenu
+      hoverOutMenu,
+      listAccounts,
+      filterNamespaces,
     }
   }
 }
