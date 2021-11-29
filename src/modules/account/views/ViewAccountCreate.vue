@@ -6,10 +6,10 @@
     <div class="error error_box mb-2 w-8/12 ml-auto mr-auto" v-if="err!=''">{{ err }}</div>
     <div class="w-8/12 ml-auto mr-auto mt-3">
       <TextInput placeholder="Name your account" :errorMessage="$t('createwallet.inputwalletname')" v-model="accountName" icon="wallet" />
-      <PasswordInput placeholder="Enter Wallet Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPassword"  />
+      <PasswordInput class="mt-3" placeholder="Enter Wallet Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPassword"  />
     </div>
     <div class="flex justify-center">
-      <button type="submit" class="blue-btn py-2 px-8 disabled:opacity-50" @click='create()' :disabled="disableCreate">{{$t('welcome.create')}}</button>
+      <button type="submit" class="mt-3 blue-btn py-2 px-8 disabled:opacity-50" @click='create()' :disabled="disableCreate">{{$t('welcome.create')}}</button>
     </div>
     <div class='mt-10'></div>   
   </div>

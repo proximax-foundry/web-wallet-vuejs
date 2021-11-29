@@ -17,6 +17,7 @@
            <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
         </div>
         <div class="mt-4"></div>
+        <div class="flex flex-col gap-2">
           <div v-for="(coSignAddress, index) in coSign" :key="index" >
             <div class="flex">
               <img  src="@/modules/account/submodule/multisig/img/icon-delete.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
@@ -44,7 +45,7 @@
             </div>
 
           </div>
-       
+       </div>
         <button class="pl-6 font-semibold text-xs mt-1 text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">+ Add New Cosignatory</button>
         <div class="ml-6 my-7 gray-line"/> 
         <div class="pl-6 text-xs font-semibold mb-3">Scheme</div>
@@ -123,13 +124,11 @@
           <div class="text-xs  ml-auto">56.2966</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
-        
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white'>Enter your password to continue</div>
         <div class='font-semibold text-xxs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
-        <PasswordInput @space='space=true' @removeSpace="space=false" :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="passwd" :disabled="disabledPassword" />
-        <div v-if='space' class="mt-3"/>
-        <button type="submit" class='w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="convertAccount()" :disabled="disableSend">Update Cosignatories</button>
+        <PasswordInput  :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="passwd" :disabled="disabledPassword" />
+        <div class="mt-3"><button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="convertAccount()" :disabled="disableSend">Update Cosignatories</button></div>
         <div class="text-center">
           <router-link :to="{name: 'ViewMultisigHome',params:{name:acc.name}}" class="content-center text-xs text-white underline" >Cancel</router-link>
         </div>

@@ -10,8 +10,8 @@
         <div class= 'text-center'>
           <PasswordInput class = 'w-8/12 block ml-auto mr-auto' placeholder="Password" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
         </div>
-        <div class=" text-center">
-          <button type="submit" class="blue-btn bg-gray-primary py-2.5 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
+        <div class=" text-center mt-2">
+          <button type="submit" class=" blue-btn bg-gray-primary py-2.5 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
         </div>
       </fieldset>
     </form>

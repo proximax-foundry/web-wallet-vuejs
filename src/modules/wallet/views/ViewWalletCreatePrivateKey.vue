@@ -14,12 +14,12 @@
       </div>
       <SelectNetworkInput />
       <div class="mt-3 w-8/12 ml-auto mr-auto">
-          <PasswordInput :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" :showError="showPkError" v-model="privateKeyInput"  />
-          <TextInput  :placeholder="$t('createwallet.walletname')" :errorMessage="$t('createwallet.inputwalletname')"  v-model="walletName" icon="wallet" />
-          <PasswordInput  :placeholder="$t('createwallet.inputpassword')" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
-          <PasswordInput   :placeholder="$t('createwallet.confirmpassword')" :errorMessage="$t('createwallet.doesntmatch')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd" />
+          <PasswordInput  :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" :showError="showPkError" v-model="privateKeyInput"  />
+          <TextInput  class="mt-3" :placeholder="$t('createwallet.walletname')" :errorMessage="$t('createwallet.inputwalletname')"  v-model="walletName" icon="wallet" />
+          <PasswordInput class="mt-3" :placeholder="$t('createwallet.inputpassword')" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
+          <PasswordInput  class="mt-3" :placeholder="$t('createwallet.confirmpassword')" :errorMessage="$t('createwallet.doesntmatch')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd" />
         </div>
-        <button type="submit" class="text-center  font-bold blue-btn py-3 block ml-auto mr-auto w-8/12 disabled:opacity-50" :disabled="disableCreate">Create Wallet</button>
+        <button type="submit" class="mt-3 text-center  font-bold blue-btn py-3 block ml-auto mr-auto w-8/12 disabled:opacity-50" :disabled="disableCreate">Create Wallet</button>
         <div class ='mt-12 text-center text-xs mt-6 mb-1 '>Already have Sirius wallet account?</div>
         <div class ="text-center  text-xs text-blue-primary font-semibold"><router-link :to="{ name: 'Home' }">Sign in here ></router-link></div>
         <div class = 'h-20'></div>

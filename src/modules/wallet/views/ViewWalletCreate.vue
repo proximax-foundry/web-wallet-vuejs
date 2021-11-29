@@ -13,12 +13,12 @@
       <SelectNetworkInput />
       <div class="w-8/12 ml-auto mr-auto mt-3">
         <TextInput  placeholder="Name your wallet" :errorMessage="$t('createwallet.inputwalletname')" v-model="walletName" icon="wallet" />
-        <PasswordInput placeholder="Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
-        <PasswordInput  placeholder="Confirm Password" :errorMessage="$t('createwallet.doesntmatch')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd"  />
+        <PasswordInput class="mt-3" placeholder="Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
+        <PasswordInput  class="mt-3" placeholder="Confirm Password" :errorMessage="$t('createwallet.doesntmatch')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd"  />
       </div>
-      <button type="submit" class="text-center  font-bold blue-btn py-3 block ml-auto mr-auto w-8/12 disabled:opacity-50" :disabled="disableCreate">Create Wallet</button>
+      <button type="submit" class="text-center mt-3 font-bold blue-btn py-3 block ml-auto mr-auto w-8/12 disabled:opacity-50" :disabled="disableCreate">Create Wallet</button>
        
-        <div class ='mt-12 text-center text-xs mt-6 mb-1 '>Already have Sirius wallet account?</div>
+        <div class ='mt-12 text-center text-xs  mb-1 '>Already have Sirius wallet account?</div>
         <div class ="text-center  text-xs text-blue-link font-semibold"><router-link :to="{ name: 'Home' }">Sign in here ></router-link></div>
       <div class = 'h-20'></div>
       </form>
