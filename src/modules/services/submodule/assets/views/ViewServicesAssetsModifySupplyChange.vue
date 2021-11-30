@@ -277,7 +277,7 @@ export default {
       }else{
         AssetsUtils.changeAssetSupply(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value);
       }
-      router.push({ name: "ViewServicesAssets"});
+      router.push({ name: "ViewServicesAssets", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()}});
     };
 
     watch(selectIncreaseDecrease, (n) => {

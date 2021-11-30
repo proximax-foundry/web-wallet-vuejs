@@ -280,7 +280,7 @@ export default {
       }else{
         AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value );
       }
-      router.push({ name: "ViewServicesAssets"});
+      router.push({ name: "ViewServicesAssets", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()} });
     };
 
     watch(selectAction, (n) => {

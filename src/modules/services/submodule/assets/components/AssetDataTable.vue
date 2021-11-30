@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="text-right">
-      <SelectInputPluginClean v-model="filterAssets" :options="listAccounts" selectDefault="" class="w-60 mr-4 inline-block" />
+      <SelectInputPluginClean v-model="filterAssets" :options="listAccounts" :selectDefault="selectedAddress" class="w-60 mr-4 inline-block" />
     </div>
     <DataTable
       :value="generateAssetDatatable"
@@ -81,7 +81,8 @@
 </template>
 
 <script>
-import { computed, ref, getCurrentInstance, watch } from "vue";
+import { computed, ref, getCurrentInstance, toRefs } from "vue";
+import { Address } from "tsjs-xpx-chain-sdk";
 import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 import { walletState } from "@/state/walletState";
 import DataTable from 'primevue/datatable';
@@ -97,18 +98,25 @@ export default{
   name: 'AssetDataTable',
   props: {
     assets: Array,
-    account: WalletAccount
+    account: WalletAccount,
+    address: String,
   },
   directives: {
     'tooltip': Tooltip
   },
 
-  setup(){
+  setup(props){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
     const isMenuShow = ref([]);
     const isNsListShow = ref([]);
+
+    const selectedAddress = ref('');
+    const {address} = toRefs(props);
+    if(props.address){
+      selectedAddress.value = Address.createFromRawAddress(address.value).plain();
+    }
 
     const listAccounts = computed(() => {
       let accountOption = [];
@@ -251,7 +259,8 @@ export default{
       listAccounts,
       filterAssets,
       walletState,
-      generateAssetDatatable
+      generateAssetDatatable,
+      selectedAddress
     }
   }
 }
