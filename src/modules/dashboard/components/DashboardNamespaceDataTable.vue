@@ -17,12 +17,12 @@
           </div>
         </template>
       </Column>
-      <Column field="name" :header="$t('services.name')" :style="{ width: '200px' }">
+      <Column field="name" header="NAME" :style="{ width: '200px' }">
         <template #body="{data}">
           {{data.name}}
         </template>
       </Column>
-      <Column field="namespaceId" :header="$t('namespace.namespaceid')" :style="{ width: '180px' }">
+      <Column field="namespaceId" header="NAMESPACE ID" :style="{ width: '180px' }">
         <template #body="{data}">
           <span class="uppercase">{{data.idHex}}</span>
         </template>
@@ -32,7 +32,7 @@
           <span class="uppercase">{{ data.linkedId }}</span>
         </template>
       </Column>
-      <Column field="linkType" header="BLOCK EXPIRES" :style="{ width: '180px' }">
+      <Column field="linkType" header="EXPIRES" :style="{ width: '180px' }">
         <template #body="{data}">
           <div class="data.expiryRelative">in {{ data.expiryRelative }}</div>
         </template>
@@ -48,7 +48,6 @@
             <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
             <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div role="none" class="my-2">
-                <router-link :to="{ name: 'ViewServicesNamespaceCreate' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Namespace Details</router-link>
                 <router-link :to="{ name: 'ViewServicesNamespaceExtend' }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Extend Duration</router-link>
                 <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>View in Explorer<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
               </div>

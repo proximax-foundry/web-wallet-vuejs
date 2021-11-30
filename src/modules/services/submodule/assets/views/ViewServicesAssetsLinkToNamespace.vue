@@ -182,7 +182,14 @@ export default {
 
     const isMultiSigBool = ref(isMultiSig(selectedAccAdd.value));
 
-    const showNoBalance = ref(false);
+    const showNoBalance = computed(() => {
+      if(isNotCosigner.value){
+        return balanceNumber.value < (transactionFeeExact.value);
+      }else{
+        return balanceNumber.value < (transactionFeeExact.value + lockFundTotalFee.value);
+      }
+    });
+
     const showNoAsset = ref(false);
     const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value) && !showNoAsset.value);
 
@@ -322,14 +329,14 @@ export default {
 
     watch(totalFee, (n) => {
       if(balance.value < n){
-        if(!showNoAsset.value){
-          if(!isNotCosigner.value){
-            showNoBalance.value = true;
-          }
-        }
+        // if(!showNoAsset.value){
+        //   if(!isNotCosigner.value){
+        //     showNoBalance.value = true;
+        //   }
+        // }
         setFormInput(true);
       }else{
-        showNoBalance.value = false;
+        // showNoBalance.value = false;
         setFormInput(false);
       }
     });

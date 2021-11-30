@@ -141,6 +141,14 @@ export default {
     const cosignerAddress = ref('');
 
     const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
+
+    const defaultDuration = ref(10 * 365);
+
+    const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
+
+    const transactionFee = ref( Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility));
+    const transactionFeeExact = ref(Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility));
+
     const rentalFee = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.mosaicRentalFee, networkState.currentNetworkProfile.network.currency.divisibility) );
     const rentalFeeCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.mosaicRentalFee, networkState.currentNetworkProfile.network.currency.divisibility) );
 
@@ -151,7 +159,7 @@ export default {
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && (divisibility.value != '') && (supply.value > 0) && (!showDurationErr.value)
+      walletPassword.value.match(passwdPattern) && (divisibility.value != '') && (supply.value > 0) && (!showDurationErr.value) && showSupplyErr.value
     ));
 
     const isMultiSig = (address) => {
@@ -176,17 +184,26 @@ export default {
 
     const supply = ref('0');
 
-    const showNoBalance = ref(false);
-
     const getMultiSigCosigner = computed(() => {
       return AssetsUtils.getCosignerList(selectedAccAdd.value);
     });
 
     const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
 
-    if(balance.value < rentalFee.value){
+    const showNoBalance = computed(() => {
+      if(isNotCosigner.value){
+        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value);
+      }else{
+        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value + lockFundTotalFee.value);
+      }
+    });
+
+    console.log(balance.value)
+    console.log(rentalFee.value)
+    console.log(transactionFee.value)
+    if(balanceNumber.value < (rentalFee.value + transactionFee.value)){
       if(!isNotCosigner.value){
-        showNoBalance.value = true;
+        // showNoBalance.value = true;
       }
       disabledClear.value = true;
       disabledDuration.value = true;
@@ -214,12 +231,6 @@ export default {
       return accounts.value.length > 1;
     });
 
-    const defaultDuration = ref(10 * 365);
-
-    const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
-    const transactionFee = ref( Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility));
-    const transactionFeeExact = ref(Helper.convertToExact(AssetsUtils.createAssetTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), networkState.currentNetworkProfile.network.currency.divisibility));
-
     const changeSelection = (address) => {
       let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
       if(!account){
@@ -228,7 +239,8 @@ export default {
       selectedAccName.value = account.name;
       selectedAccAdd.value = address;
       balance.value = Helper.toCurrencyFormat(account.balance, networkState.currentNetworkProfile.network.currency.divisibility);
-      showNoBalance.value = ((balance.value < (rentalFee.value + transactionFeeExact.value)) && !isNotCosigner.value) ?true:false;
+      balanceNumber.value = account.balance;
+      // showNoBalance.value = ((account.balance < (rentalFee.value + transactionFeeExact.value)) && !isNotCosigner.value) ?true:false;
       currentSelectedName.value = account.name;
       ownerPublicAccount.value = WalletUtils.createPublicAccount(account.publicKey, networkState.currentNetworkProfile.network.type);
     }
@@ -298,7 +310,7 @@ export default {
 
 
     watch(totalFee, (n) => {
-      if(balance.value < n && !isNotCosigner.value){
+      if(balanceNumber.value < n && !isNotCosigner.value){
         showNoBalance.value = true;
       }else{
         showNoBalance.value = false;

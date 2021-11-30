@@ -139,9 +139,9 @@ export default{
     const generateAssetDatatable = computed(() => {
       let assets = [];
       if(filterAssets.value){
-        let account =walletState.currentLoggedInWallet.accounts.find(account => account.address == filterAssets.value)
+        let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == filterAssets.value)
         if(!account){
-          account =walletState.currentLoggedInWallet.others.find(account => account.address == filterAssets.value)
+          account = walletState.currentLoggedInWallet.others.find(account => account.address == filterAssets.value)
         }
         account.assets.filter(asset => asset.owner === account.publicKey).forEach(asset => {
           assets.push({asset, account});

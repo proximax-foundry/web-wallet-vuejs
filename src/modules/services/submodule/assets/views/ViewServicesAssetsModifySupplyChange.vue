@@ -160,7 +160,7 @@ export default {
 
 
     const disableModify = computed(() => !(
-      walletPassword.value.match(passwdPattern) && (supply.value > 0)
+      walletPassword.value.match(passwdPattern) && (supply.value > 0) && !showSupplyErr.value
     ));
 
     const selectedAccName = ref('');
@@ -182,7 +182,14 @@ export default {
 
     const isMultiSigBool = ref(isMultiSig(selectedAccAdd.value));
 
-    const showNoBalance = ref(false);
+    const showNoBalance = computed(() => {
+      if(isNotCosigner.value){
+        return balanceNumber.value < (transactionFeeExact.value);
+      }else{
+        return balanceNumber.value < (transactionFeeExact.value + lockFundTotalFee.value);
+      }
+    });
+
     const showNoAsset = ref(false);
     const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value) && !showNoAsset.value);
 
@@ -260,9 +267,6 @@ export default {
       cosigner.value = '';
     }
 
-    const assetAmount = ref(0);
-    const assetDuration = ref('0 Day');
-
     transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
     transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
 
@@ -319,14 +323,14 @@ export default {
 
     watch(totalFee, (n) => {
       if(balance.value < n){
-        if(!showNoAsset.value){
-          if(!isNotCosigner.value){
-            showNoBalance.value = true;
-          }
-        }
+        // if(!showNoAsset.value){
+        //   if(!isNotCosigner.value){
+        //     showNoBalance.value = true;
+        //   }
+        // }
         setFormInput(true);
       }else{
-        showNoBalance.value = false;
+        // showNoBalance.value = false;
         setFormInput(false);
       }
     });
@@ -393,8 +397,6 @@ export default {
       transactionFee,
       transactionFeeExact,
       assetSupply,
-      assetAmount,
-      assetDuration,
       assetDivisibility,
       assetTransferable,
       assetMutable,

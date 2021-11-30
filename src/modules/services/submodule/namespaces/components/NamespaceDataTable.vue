@@ -4,7 +4,7 @@
       <SelectInputPluginClean v-model="filterNamespaces" :options="listAccounts" selectDefault="" class="w-60 mr-4 inline-block" />
     </div>
     <DataTable
-      :value="accountNamespaces"
+      :value="generateDatatable"
       :paginator="true"
       :rows="20"
       responsiveLayout="scroll"
@@ -20,29 +20,36 @@
           </div>
         </template>
       </Column>
-      <Column field="name" :header="$t('services.name')" :style="{ width: '200px' }">
+      <Column field="name" header="NAME" :style="{ width: '200px' }">
         <template #body="{data}">
-          {{data.name}}
+          <span class="text-xs">{{data.name}}</span>
         </template>
       </Column>
-      <Column field="namespaceId" :header="$t('namespace.namespaceid')" :style="{ width: '180px' }">
+      <Column field="namespaceId" header="NAMESPACE ID" :style="{ width: '180px' }">
         <template #body="{data}">
-          <span class="uppercase">{{data.idHex}}</span>
+          <span class="text-xs uppercase">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedId" header="LINKED ASSET / ADDRESS" :style="{ width: '360px' }">
+      <Column field="linkedId" header="LINKED ASSET / ADDRESS" :style="{ width: '250px' }">
         <template #body="{data}">
-          <span class="uppercase">{{ data.linkedId }}</span>
+          <span class="uppercase text-xs" v-if="data.linkedId">{{ data.linkedId }}</span>
+          <span class="text-xs" v-else>No linked asset</span>
         </template>
       </Column>
-      <Column field="linkType" header="BLOCK EXPIRES" :style="{ width: '180px' }">
+      <Column field="linkType" header="EXPIRES" :style="{ width: '150px' }">
         <template #body="{data}">
-          <div class="data.expiryRelative">in {{ data.expiryRelative }}</div>
+          <div class="data.expiryRelative text-xs" v-if="data.expiryRelative">in {{ data.expiryRelative }}</div>
+          <div class="text-gray-300 text-xs" v-else>Fetching..</div>
         </template>
       </Column>
-      <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" :style="{ width: '180px' }">
+      <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" :style="{ width: '210px' }">
         <template #body="{data}">
-          <span :class="data.expiring?'text-yellow-600':'text-gray-700'">{{ data.expiry }}</span>
+          <span class="text-xs" :class="data.expiring?'text-yellow-600':'text-gray-700'">{{ data.expiry }}</span>
+        </template>
+      </Column>
+      <Column field="Account" header="ACCOUNT" :style="{ width: '120px' }">
+        <template #body="{data}">
+          <div v-html="data.icon" class="inline-block" v-tooltip.bottom="'<tiptitle>WALLET ADDRESS</tiptitle><tiptext>' + data.address + '</tiptext>'"></div>
         </template>
       </Column>
       <Column style="width: 50px;">
@@ -51,7 +58,6 @@
             <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
             <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div role="none" class="my-2">
-                <router-link :to="{ name: 'ViewServicesNamespaceCreate' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Namespace Details</router-link>
                 <router-link :to="{ name: 'ViewServicesNamespaceExtend' }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Extend Duration</router-link>
                 <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>View in Explorer<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
               </div>
@@ -81,6 +87,8 @@ import { Helper } from '@/util/typeHelper';
 import { networkState } from "@/state/networkState";
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 import { WalletAccount } from '@/models/walletAccount';
+import { toSvg } from "jdenticon";
+import Tooltip from 'primevue/tooltip';
 
 export default{
   components: { DataTable, Column, SelectInputPluginClean },
@@ -89,13 +97,16 @@ export default{
     currentBlockHeight: Number,
     account: WalletAccount
   },
+  directives: {
+    'tooltip': Tooltip
+  },
 
   setup(props, context){
     const rowLimit = 5;
     const { currentBlockHeight } = toRefs(props);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const accountNamespaces = ref();
+    // const accountNamespaces = ref();
     const isMenuShow = ref([]);
 
     const listAccounts = computed(() => {
@@ -120,86 +131,13 @@ export default{
     chainConfig.init();
     let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
 
-    watch([currentBlockHeight], ([newBlockHeight]) => {
-      accountNamespaces.value = generateDatatable(newBlockHeight);
-    });
+    // watch([currentBlockHeight], ([newBlockHeight]) => {
+    //   accountNamespaces.value = generateDatatable(newBlockHeight);
+    // });
 
     // onMounted(() => {
     //   accountNamespaces.value = generateDatatable(currentBlockHeight.value);
     // });
-
-    const calculateExpiryDate = (day, hour, min) => {
-      let current = new Date();
-      current.setTime(current.getTime() + (day * 24 * 60 * 60 * 1000 ));
-      current.setTime(current.getTime() + (hour * 60 * 60 * 1000));
-      current.setTime(current.getTime() + (min * 60 * 1000));
-      return current;
-    }
-
-    const generateDatatable = (currentBlockHeight) => {
-      let namespaces = [];
-      walletState.currentLoggedInWallet.accounts.forEach(account => {
-        account.namespaces.forEach(namespace => {
-          namespaces.push(namespace);
-        });
-      });
-
-      let formattedNamespaces = [];
-
-      for(let i=0; i < namespaces.length; ++i){
-        let linkName = "";
-
-        switch (namespaces[i].linkType) {
-          case 1:
-            linkName = "Asset";
-            break;
-          case 2:
-            linkName = "Address";
-            break;
-          default:
-            break;
-        }
-
-        let blockDifference = namespaces[i].endHeight - currentBlockHeight;
-        let blockTargetTimeByDay = Math.floor((60 * 60 * 24) / blockTargetTime);
-        let blockTargetTimeByHour = Math.floor((60 * 60) / blockTargetTime);
-        let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
-        let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
-        let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
-        let expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
-        let data = {
-          i: i,
-          idHex: namespaces[i].idHex,
-          name: namespaces[i].name,
-          linkType: linkName,
-          linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
-          endHeight: namespaces[i].endHeight,
-          expiring: (blockDifference < (blockTargetTimeByDay * 14)),
-          expiryRelative: currentBlockHeight?relativeTime(expiryDay, expiryHour, expiryMin):'',
-          expiry: currentBlockHeight?expiryDate:'',
-          explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].idHex
-        };
-        formattedNamespaces.push(data);
-        isMenuShow.value[i] = false;
-      }
-      return formattedNamespaces;
-    }
-
-    const filterNamespaces = ref('');
-
-    if(filterNamespaces.value == ''){
-      accountNamespaces.value = generateDatatable(currentBlockHeight.value);
-    }else{
-      accountNamespaces.value = generateDatatable(currentBlockHeight.value);
-    }
-
-    watch(filterNamespaces, (n) => {
-      if(n == ''){
-        accountNamespaces.value = generateDatatable(currentBlockHeight.value);
-      }else{
-        accountNamespaces.value = generateDatatable(currentBlockHeight.value);
-      }
-    });
 
     const relativeTime = (day, hour, min) => {
       let current = new Date();
@@ -245,6 +183,110 @@ export default{
       }
     }
 
+    const calculateExpiryDate = (day, hour, min) => {
+      let current = new Date();
+      current.setTime(current.getTime() + (day * 24 * 60 * 60 * 1000 ));
+      current.setTime(current.getTime() + (hour * 60 * 60 * 1000));
+      current.setTime(current.getTime() + (min * 60 * 1000));
+      return current;
+    }
+
+    const generateDatatable = computed(() => {
+      let namespaces = [];
+
+      if(filterNamespaces.value){
+        let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == filterNamespaces.value)
+        if(!account){
+          account = walletState.currentLoggedInWallet.others.find(account => account.address == filterNamespaces.value)
+        }
+        account.namespaces.forEach(namespace => {
+          namespaces.push({namespace, account });
+        });
+      }else{
+        walletState.currentLoggedInWallet.accounts.forEach(account => {
+          account.namespaces.forEach(namespace => {
+            namespaces.push({namespace, account });
+          });
+        });
+        walletState.currentLoggedInWallet.others.forEach(other => {
+          other.namespaces.forEach(namespace => {
+            namespaces.push({namespace, account: other });
+          });
+        });
+      }
+
+      let formattedNamespaces = [];
+
+      let jdenticonconfig = {
+        hues: [211],
+        lightness: {
+            color: [0.32, 0.80],
+            grayscale: [0.17, 0.82]
+        },
+        saturation: {
+            color: 1.00,
+            grayscale: 0.00
+        },
+        backColor: "#fff"
+      };
+
+      for(let i=0; i < namespaces.length; ++i){
+        let linkName = "";
+
+        switch (namespaces[i].namespace.linkType) {
+          case 1:
+            linkName = "Asset";
+            break;
+          case 2:
+            linkName = "Address";
+            break;
+          default:
+            break;
+        }
+
+        let blockDifference = namespaces[i].namespace.endHeight - currentBlockHeight.value;
+        let blockTargetTimeByDay = Math.floor((60 * 60 * 24) / blockTargetTime);
+        let blockTargetTimeByHour = Math.floor((60 * 60) / blockTargetTime);
+        let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
+        let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
+        let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
+        let expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
+        let data = {
+          i: i,
+          idHex: namespaces[i].namespace.idHex,
+          name: namespaces[i].namespace.name,
+          linkType: linkName,
+          linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].namespace.linkedId).pretty() : namespaces[i].namespace.linkedId,
+          endHeight: namespaces[i].namespace.endHeight,
+          expiring: (blockDifference < (blockTargetTimeByDay * 14)),
+          expiryRelative: currentBlockHeight.value?relativeTime(expiryDay, expiryHour, expiryMin):'',
+          expiry: currentBlockHeight.value?expiryDate:'',
+          explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].namespace.idHex,
+          address: namespaces[i].account.address,
+          icon: toSvg(namespaces[i].account.address, 30, jdenticonconfig)
+        };
+        formattedNamespaces.push(data);
+        // isMenuShow.value[i] = false;
+      }
+      return formattedNamespaces;
+    });
+
+    const filterNamespaces = ref('');
+
+    // if(filterNamespaces.value == ''){
+    //   accountNamespaces.value = generateDatatable(currentBlockHeight.value);
+    // }else{
+    //   accountNamespaces.value = generateDatatable(currentBlockHeight.value);
+    // }
+
+    // watch(filterNamespaces, (n) => {
+    //   if(n == ''){
+    //     accountNamespaces.value = generateDatatable(currentBlockHeight.value);
+    //   }else{
+    //     accountNamespaces.value = generateDatatable(currentBlockHeight.value);
+    //   }
+    // });
+
     const showMenu = (i) => {
       currentMenu.value = i;
       isMenuShow.value[i] = !isMenuShow.value[i];
@@ -287,11 +329,12 @@ export default{
       explorerBaseURL,
       showMenu,
       isMenuShow,
-      accountNamespaces,
+      // accountNamespaces,
       hoverOverMenu,
       hoverOutMenu,
       listAccounts,
       filterNamespaces,
+      generateDatatable,
     }
   }
 }

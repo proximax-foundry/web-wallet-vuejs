@@ -2,7 +2,7 @@
   <div :class="disabled?'opacity-50':''">
     <div class="border border-gray-200 px-2 py-1 h-14 rounded-md">
       <div class="uppercase text-gray-500 text-txs text-left mb-2">{{ placeholder }} <img src="@/assets/img/icon-info.svg" class="inline-block ml-1 relative cursor-pointer" style="top: -1px;" v-tooltip.bottom="'<tiptext>' + toolTip + '</tiptext>'" v-if="toolTip"></div>
-      <input :disabled="disabled" :value="modelValue" @input="validate" @keypress="validateKey" type="number" maxlength="1" min=0 :max="max" :placeholder="placeholder" class="number_input" @click="clickInputText()" @focus="$event.target.select()">
+      <input :disabled="disabled" @input="$emit('update:modelValue', $event.target.value)" :value="modelValue" @keypress="validateKey" type="text" min=0 :max="max"  :maxlength="max" :placeholder="placeholder" class="number_input" @focus="$event.target.select()">
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
   </div>
@@ -39,26 +39,18 @@ export default{
   },
 
   methods: {
-    clickInputText: function() {
-      if(!this.pswdErr){
-        this.borderColor = 'border-2 border-blue-primary';
-      }
-    },
 
     validateKey: function(e){
-      if(e.charCode < 48 || e.charCode > 54){
-        e.preventDefault();
+      if(this.modelValue.length <=2){
+        if(e.charCode < 48 || e.charCode > 59){
+          e.preventDefault();
+        }else{
+          return e.key;
+        }
       }else{
-        // this.$emit('update:modelValue', e.key);
-        return e.key;
+        e.preventDefault();
       }
     },
-
-    validate: function(e) {
-      // if(e.data > -1 && e.data < 7){
-        this.$emit('update:modelValue', e.data);
-      // }
-    }
   },
 
   mounted() {
