@@ -4,7 +4,7 @@
       <SelectInputPluginClean v-model="filterAssets" :options="listAccounts" selectDefault="" class="w-60 mr-4 inline-block" />
     </div>
     <DataTable
-      :value="accountAssets"
+      :value="generateAssetDatatable"
       :paginator="true"
       :rows="20"
       responsiveLayout="scroll"
@@ -110,17 +110,6 @@ export default{
     const isMenuShow = ref([]);
     const isNsListShow = ref([]);
 
-    // watch(assets, (updatedAssets) => {
-    //   accountAssets.value = generateAssetDatatable(updatedAssets, account.value);
-    // });
-
-    let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
-    currentAccount.default = true;
-
-    const selectedAccount = ref(currentAccount);
-
-    const selectedAccountPublicKey = computed(()=> selectedAccount.value.publicKey);
-
     const listAccounts = computed(() => {
       let accountOption = [];
       accountOption.push(
@@ -139,13 +128,29 @@ export default{
       return accountOption;
     });
 
-    const generateAssetAllDatatable = () => {
+    const generateAssetDatatable = computed(() => {
       let assets = [];
-      walletState.currentLoggedInWallet.accounts.forEach(account => {
+      if(filterAssets.value){
+        let account =walletState.currentLoggedInWallet.accounts.find(account => account.address == filterAssets.value)
+        if(!account){
+          account =walletState.currentLoggedInWallet.others.find(account => account.address == filterAssets.value)
+        }
         account.assets.filter(asset => asset.owner === account.publicKey).forEach(asset => {
           assets.push({asset, account});
         });
-      });
+      }else{
+        walletState.currentLoggedInWallet.accounts.forEach(account => {
+          account.assets.filter(asset => asset.owner === account.publicKey).forEach(asset => {
+            assets.push({asset, account});
+          });
+        });
+        walletState.currentLoggedInWallet.others.forEach(other => {
+          other.assets.filter(asset => asset.owner === other.publicKey).forEach(asset => {
+            assets.push({asset, account:other});
+          });
+        });
+      }
+
       let formattedAssets = [];
 
       for(let i=0; i < assets.length; ++i){
@@ -174,70 +179,14 @@ export default{
             explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
           };
           formattedAssets.push(data);
-          isMenuShow.value[i] = false;
-          isNsListShow.value[i] = false;
+          // isMenuShow.value[i] = false;
+          // isNsListShow.value[i] = false;
         }
       }
       return formattedAssets;
-    }
-
-    const generateAssetDatatable = (accountAddress) => {
-      let account =walletState.currentLoggedInWallet.accounts.find(account => account.address == accountAddress) 
-      if(!account){
-        account =walletState.currentLoggedInWallet.others.find(account => account.address == accountAddress) 
-      }
-      let assets = account.assets.filter(asset => asset.owner === account.publicKey);
-      let formattedAssets = [];
-
-      for(let i=0; i < assets.length; ++i){
-        let namespaceAlias = [];
-        let assetId = assets[i].idHex;
-
-        if(assetId != networkState.currentNetworkProfile.network.currency.assetId){
-          let namespaces = account.findNamespaceNameByAsset(assetId);
-          for(let j = 0; j < namespaces.length; ++j){
-            let aliasData = {
-              name: namespaces[j].name
-            };
-
-            namespaceAlias.push(aliasData);
-          }
-
-          let data = {
-            i: i,
-            idHex: assetId,
-            owner: assets[i].owner,
-            address: PublicAccount.createFromPublicKey(assets[i].owner, networkState.currentNetworkProfile.network.type).address.pretty(),
-            amount: Helper.toCurrencyFormat(assets[i].getExactAmount(), assets[i].divisibility),
-            supply: Helper.toCurrencyFormat(assets[i].getExactSupply(), assets[i].divisibility),
-            linkedNamespace: namespaceAlias,
-            height: assets[i].height,
-            explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
-          };
-          formattedAssets.push(data);
-          isMenuShow.value[i] = false;
-          isNsListShow.value[i] = false;
-        }
-      }
-      return formattedAssets;
-    }
+    });
 
     const filterAssets = ref('');
-
-    const accountAssets = ref([]);
-    if(filterAssets.value == ''){
-      accountAssets.value = generateAssetAllDatatable();
-    }else{
-      accountAssets.value = generateAssetDatatable(filterAssets.value);
-    }
-
-    watch(filterAssets, (n) => {
-      if(n == ''){
-        accountAssets.value = generateAssetAllDatatable();
-      }else{
-        accountAssets.value = generateAssetDatatable(filterAssets.value);
-      }
-    });
 
     const borderColor = ref('border border-gray-400');
 
@@ -295,14 +244,14 @@ export default{
       showNsList,
       isMenuShow,
       isNsListShow,
-      accountAssets,
       hoverOverMenu,
       hoverOutMenu,
       hoverOverNsList,
       hoverOutNsList,
       listAccounts,
-      selectedAccountPublicKey,
-      filterAssets
+      filterAssets,
+      walletState,
+      generateAssetDatatable
     }
   }
 }
