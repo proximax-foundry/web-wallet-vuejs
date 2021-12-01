@@ -35,7 +35,6 @@
         {{$t('services.norecord')}}
       </template>
     </DataTable>
-    <PartialTransactionModal :showModal="showTransactionModel" :transaction="modalData" />
   </div>
 </template>
 
@@ -44,13 +43,11 @@ import { getCurrentInstance, ref } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {FilterMatchMode} from 'primevue/api';
-import PartialTransactionModal from '@/modules/dashboard/components/DashboardModels/PartialTransactionModal.vue'
 
 export default{
   components: {
     DataTable,
     Column,
-    PartialTransactionModal,
   },
   name: 'PartialDashboardDataTable',
   props: {

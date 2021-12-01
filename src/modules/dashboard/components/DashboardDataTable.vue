@@ -104,7 +104,6 @@ import { TipType} from '../model/dashboardClasses'
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";
-// import SplitButton from 'primevue/splitbutton';
 
 export default defineComponent({
   components: {

@@ -5,10 +5,9 @@ import {
   TransactionType,
   Transaction,
 } from "tsjs-xpx-chain-sdk";
-import { appStore } from "@/store/app";
+
 // import { proximaxProvider } from '../util/proximaxProvider.js';
-import { namespaces } from '../util/namespaces.js';
-import { environment } from '../environment/environment.js';
+// import { environment } from '../environment/environment.js';
 import { transactionTypeName } from '@/util/transactionUtils';
 import { walletState } from '@/state/walletState';
 //import { DashboardTransaction, PartialTransaction } from '@/models/interface/transaction';
@@ -131,25 +130,25 @@ const formatTransaction = (transaction:Transaction) :void => {
 //   return transaction;
 // }
 
-const getAccountsInfoTiedMultiSig = (signerPublicKey) => {
-  let cosigner = [];
-  const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
-  wallet.accounts.forEach(account => {
-    if(account.isMultisign != undefined){
-      if(account.isMultisign.multisigAccounts != undefined){
-        if(account.isMultisign.multisigAccounts.length > 0){
-          account.isMultisign.multisigAccounts.forEach(multisig => {
-            console.log(multisig.publicKey + ' ' + signerPublicKey)
-            if(multisig.publicKey == signerPublicKey){
-              cosigner.push({address: account.publicAccount.address.address});
-            }
-          });
-        }
-      }
-    }
-  });
-  return cosigner;
-};
+// const getAccountsInfoTiedMultiSig = (signerPublicKey) => {
+//   let cosigner = [];
+//   const wallet = appStore.getWalletByName(appStore.state.currentLoggedInWallet.name);
+//   wallet.accounts.forEach(account => {
+//     if(account.isMultisign != undefined){
+//       if(account.isMultisign.multisigAccounts != undefined){
+//         if(account.isMultisign.multisigAccounts.length > 0){
+//           account.isMultisign.multisigAccounts.forEach(multisig => {
+//             console.log(multisig.publicKey + ' ' + signerPublicKey)
+//             if(multisig.publicKey == signerPublicKey){
+//               cosigner.push({address: account.publicAccount.address.address});
+//             }
+//           });
+//         }
+//       }
+//     }
+//   });
+//   return cosigner;
+// };
 
 const formatTransfer = (transaction) => {
   const sender = transaction.signer.address.address;
@@ -210,36 +209,36 @@ const getDataPart = (data, cantPart) => {
   };
 }
 
-const getAmount = async (id, transaction) => {
-  let d = 6;
-  const n = await namespaces.getNamespaceFromId([id]);
-  // eslint-disable-next-line no-unused-vars
-  let namespaceName = id.toHex();
-  if ((n.length > 0)) {
-    namespaceName = (n[0].namespaceName.name === 'prx.xpx') ? 'XPX' : n[0].namespaceName.name;
-    const x = environment.swapAllowedMosaics.find(r => `${r.namespaceId}.${r.name}` === n[0].namespaceName.name);
-    if (x) { d = x.divisibility; }
-  }
-  const amount = amountFormatterSimple(transaction.mosaics[0].amount.compact(), d);
-  return getDataPart(amount.toString(), d);
-}
+// const getAmount = async (id, transaction) => {
+//   let d = 6;
+//   const n = await namespaces.getNamespaceFromId([id]);
+//   // eslint-disable-next-line no-unused-vars
+//   let namespaceName = id.toHex();
+//   if ((n.length > 0)) {
+//     namespaceName = (n[0].namespaceName.name === 'prx.xpx') ? 'XPX' : n[0].namespaceName.name;
+//     const x = environment.swapAllowedMosaics.find(r => `${r.namespaceId}.${r.name}` === n[0].namespaceName.name);
+//     if (x) { d = x.divisibility; }
+//   }
+//   const amount = amountFormatterSimple(transaction.mosaics[0].amount.compact(), d);
+//   return getDataPart(amount.toString(), d);
+// }
 
-const getLockFundAmount = async (id, transaction) => {
-  let d = 6;
-  const n = await namespaces.getNamespaceFromId([id]);
-  // console.log('n: ' + n)
-  // eslint-disable-next-line no-unused-vars
-  let namespaceName = id.toHex();
-  // console.log('namespaceName')
-  // console.log(namespaceName)
-  if ((n.length > 0)) {
-    namespaceName = (n[0].namespaceName.name === 'prx.xpx') ? 'XPX' : n[0].namespaceName.name;
-    const x = environment.swapAllowedMosaics.find(r => `${r.namespaceId}.${r.name}` === n[0].namespaceName.name);
-    if (x) { d = x.divisibility; }
-  }
-  const amount = amountFormatterSimple(transaction.mosaic.amount.compact(), d);
-  return getDataPart(amount.toString(), d);
-}
+// const getLockFundAmount = async (id, transaction) => {
+//   let d = 6;
+//   const n = await namespaces.getNamespaceFromId([id]);
+//   // console.log('n: ' + n)
+//   // eslint-disable-next-line no-unused-vars
+//   let namespaceName = id.toHex();
+//   // console.log('namespaceName')
+//   // console.log(namespaceName)
+//   if ((n.length > 0)) {
+//     namespaceName = (n[0].namespaceName.name === 'prx.xpx') ? 'XPX' : n[0].namespaceName.name;
+//     const x = environment.swapAllowedMosaics.find(r => `${r.namespaceId}.${r.name}` === n[0].namespaceName.name);
+//     if (x) { d = x.divisibility; }
+//   }
+//   const amount = amountFormatterSimple(transaction.mosaic.amount.compact(), d);
+//   return getDataPart(amount.toString(), d);
+// }
 
 const amountFormatter = (amountParam, manualDivisibility = 0) => {
   // console.log('amountParam', amountParam);
@@ -258,9 +257,9 @@ export const dashboardUtils = readonly({
   amountFormatterSimple,
   getNameTypeTransaction,
   getDataPart,
-  getAmount,
-  getLockFundAmount,
+  // getAmount,
+  // getLockFundAmount,
   // formatAggregateBondedTransaction,
   amountFormatter,
-  getAccountsInfoTiedMultiSig,
+  // getAccountsInfoTiedMultiSig,
 });

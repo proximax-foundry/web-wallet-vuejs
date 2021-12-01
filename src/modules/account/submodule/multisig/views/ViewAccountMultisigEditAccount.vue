@@ -140,7 +140,6 @@ import TextInput from '@/components/TextInput.vue'
 import AddCosignModal from '@/modules/account/submodule/multisig/components/AddCosignModal.vue';
 import { multiSign } from '@/util/multiSignatory';
 import MultisigSchemeModal from '@/modules/account/submodule/multisig/components/MultisigSchemeModal.vue';
-import { transferEmitter } from '@/util/listener.js';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import MultiSelectInputPlugin from '@/components/MultiSelectInputPlugin.vue';
 import { walletState } from '@/state/walletState';
@@ -545,32 +544,6 @@ export default {
       });
     });
 
-    // detect partial transaction announcement from listener
-    transferEmitter.on('ANNOUNCE_AGGREGATE_BONDED' , payload => {
-      if(payload.status && payload.address == acc.value.address){
-        onPartial.value = true;
-        clear();
-      }
-    });
-
-    // check co signiture added from listener
-    transferEmitter.on('ANNOUNCE_COSIGNITURE_ADDED' , payload => {
-      if(payload.status && payload.address == acc.value.address){
-        if(acc.value.getDirectParentMultisig().length > 0){
-          isMultisig.value = true;
-          onPartial.value = false;
-        }else{
-          isMultisig.value = false;
-        }
-      }
-    });
-
-    transferEmitter.on("UPDATE_EDIT_MULTISIG", payload => {
-      if(payload.status == true && payload.from == 'confirmed' && payload.signerAddress == acc.value.address){
-        isMultisig.value = false;
-        onPartial.value = false;
-      }
-    });
     function pretty(address){
       return address.replace(/([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{4})/, "$1-$2-$3-$4-$5-$6-$7");
     }
