@@ -159,7 +159,7 @@ export default {
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && (divisibility.value != '') && (supply.value > 0) && (!showDurationErr.value) && showSupplyErr.value
+      walletPassword.value.match(passwdPattern) && (divisibility.value != '') && (supply.value > 0) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value)
     ));
 
     const isMultiSig = (address) => {
@@ -198,9 +198,6 @@ export default {
       }
     });
 
-    console.log(balance.value)
-    console.log(rentalFee.value)
-    console.log(transactionFee.value)
     if(balanceNumber.value < (rentalFee.value + transactionFee.value)){
       if(!isNotCosigner.value){
         // showNoBalance.value = true;

@@ -164,7 +164,7 @@ export default {
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && (!showDurationErr.value)
+      walletPassword.value.match(passwdPattern) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value)
     ));
 
     const isMultiSig = (address) => {
@@ -179,10 +179,10 @@ export default {
       return isMulti;
     };
 
-    const selectedAccName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
-    const selectedAccAdd = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
-    const balance = ref(Helper.toCurrencyFormat(walletState.currentLoggedInWallet.selectDefaultAccount().balance, networkState.currentNetworkProfile.network.currency.divisibility));
-    const balanceNumber = ref(walletState.currentLoggedInWallet.selectDefaultAccount().balance);
+    const selectedAccName = ref('');
+    const selectedAccAdd = ref('');
+    const balance = ref('');
+    const balanceNumber = ref('');
     const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
 
     let account = walletState.currentLoggedInWallet.accounts.find((account) => Helper.createAddress(account.address).pretty() == props.address);
@@ -194,6 +194,7 @@ export default {
       selectedAccName.value = account.name;
       selectedAccAdd.value = account.address;
       balance.value = Helper.toCurrencyFormat(account.balance, networkState.currentNetworkProfile.network.currency.divisibility);
+      balanceNumber.value = account.balance;
     }else{
       toast.add({severity:'error', detail: 'Addres is invalid', group: 'br', life: 3000});
       router.push({ name: "ViewServicesNamespace" });
@@ -302,9 +303,10 @@ export default {
 
     const showNoBalance = computed(() => {
       if(isNotCosigner.value){
-        return balanceNumber.value < (transactionFeeExact.value);
+        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value);
       }else{
-        return balanceNumber.value < (transactionFeeExact.value + lockFundTotalFee.value);
+        console.log(balanceNumber.value)
+        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value + lockFundTotalFee.value);
       }
     });
 

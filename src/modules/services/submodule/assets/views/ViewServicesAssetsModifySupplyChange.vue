@@ -203,6 +203,7 @@ export default {
       selectedAccName.value = account.name;
       selectedAccAdd.value = account.address;
       balance.value = Helper.toCurrencyFormat(account.balance, networkState.currentNetworkProfile.network.currency.divisibility);
+      balanceNumber.value = account.balance;
     }else{
       toast.add({severity:'error', detail: 'Addres is invalid', group: 'br', life: 3000});
       router.push({ name: "ViewServicesAssets" });
