@@ -33,7 +33,7 @@
       </div>
     </div>
     <div class="rounded-2xl bg-gray-100 p-5 my-5">
-      <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{trxFee}} XPX</div>
+      <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{trxFee}} {{ currencyName }}</div>
     </div>
     <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800 mb-5" v-if="isMultiSig">
       <div class="text-center">

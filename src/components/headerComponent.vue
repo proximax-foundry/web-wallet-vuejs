@@ -48,7 +48,7 @@
                   </div>
                   <div class="inline-block">
                     <div class="font-bold mb-1">Account</div>
-                    <div class="text-txs text-gray-400">Secure XPX in new account</div>
+                    <div class="text-txs text-gray-400">Secure {{ currentNativeTokenName }} in new account</div>
                   </div>
                 </router-link>
               </div>

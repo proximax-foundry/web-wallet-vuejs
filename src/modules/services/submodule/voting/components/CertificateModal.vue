@@ -15,7 +15,7 @@
               <div class="block md:w-7/12 md:inline-block">
                 <div class="font-bold text-lg mb-5">{{$t('NavigationMenu.Transfer')}}&nbsp;&nbsp;<img src="@/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg" class="w-8 h-8 inline-block">&nbsp;&nbsp;<span class="text-red-500 ">{{$t('vote.sent')}}</span></div>
                 <div class="text-xs my-2">[ timestamp ]</div>
-                <div><span class="font-bold">{{$t('dashboard.effectivefee')}}:</span> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mx-2"><span class="text-xs">[ effectiveFee ]</span> <span class="text-sm">XPX</span></div>
+                <div><span class="font-bold">{{$t('dashboard.effectivefee')}}:</span> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mx-2"><span class="text-xs">[ effectiveFee ]</span> <span class="text-sm">{{ currentNativeTokenName }}</span></div>
                 <div class="content">
                   <div>
                     <div>{{$t('vote.polltitle')}}:</div>
@@ -68,6 +68,7 @@ export default{
     'showModal': Boolean,
   },
   setup() {
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const closeModal = () => {
@@ -76,6 +77,7 @@ export default{
 
     return {
       closeModal,
+      currentNativeTokenName,
     };
   }
 }

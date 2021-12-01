@@ -24,17 +24,16 @@ import {
   Password,
 } from "tsjs-xpx-chain-sdk";
 import { BuildTransactions } from '@/util/buildTransactions';
-import { announceAggregateBonded, announceLockfundAndWaitForConfirmation } from '../util/listener.js';
 //line246
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
-import { environment } from '../environment/environment.js';
+import { environment } from '@/environment/environment';
 import { networkState } from "@/state/networkState";
 import { NetworkStateUtils } from "@/state/utils/networkStateUtils";
 import { walletState } from "@/state/walletState";
 import { ChainUtils } from '@/util/chainUtils';
 import { WalletUtils } from '@/util/walletUtils'
 import { Helper } from "@/util/typeHelper";
-const config = require("@/../config/config.json");
+// const config = require("@/../config/config.json");
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { listenerState, AutoAnnounceSignedTransaction, HashAnnounceBlock, AnnounceType } from "@/state/listenerState";
 

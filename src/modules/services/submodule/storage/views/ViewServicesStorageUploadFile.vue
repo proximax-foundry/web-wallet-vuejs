@@ -31,7 +31,7 @@
           <PasswordInput content="At least 11 characters, must include UPPER CASE letters and numbers" v-tippy="{ arrow : true,  animation : 'shift-away', theme: 'light-border', trigger: 'click'}" placeholder="Confirm File Encryption Password" errorMessage="Confirm File Encryption Password required" :showError="showConfirmEncryptPasswdError" icon="lock" v-model="confirmEncryptPasswd" />
         </div>
         <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-          <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} <span class="text-txs"></span> XPX</div>
+          <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} <span class="text-txs"></span> {{ currentNativeTokenName }}</div>
         </div>
         <PasswordInput placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
         <div class="mt-10">
@@ -55,6 +55,7 @@ export default {
   },
 
   setup() {
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const fileType = ref('');
@@ -109,6 +110,7 @@ export default {
       showConfirmEncryptPasswdError,
       confirmEncryptPasswd,
       disableCreate,
+      currentNativeTokenName,
     };
   },
 }

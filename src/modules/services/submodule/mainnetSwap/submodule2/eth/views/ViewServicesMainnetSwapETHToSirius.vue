@@ -55,8 +55,8 @@
         <p class="font-bold text-tsm text-left">To: Sirius Address</p>
         <SelectSiriusAccountInputPlugin v-model="siriusAddress" icon="card-alt" :showError="showSiriusAddressErr" errorMessage="Sirius Address required" :options="siriusAddressOption" :disabled="disableSiriusAddress" />
         <p class="font-bold text-tsm text-left mb-1">Amount</p>
-        <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" title="ERC20 XPX (minimum = 51)" placeholder="ERC20 XPX" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':((parseFloat(amount) <= defaultXPXTxFee)?'Insufficient amount':'Insufficient token balance.')" :decimal="6" />
-        <div class="my-2 float-right text-xs text-blue-primary">* The fees for the transaction on Sirius Chain will be deducted from this amount, which is 50 XPX</div>
+        <SupplyInput :disabled="disableAmount" v-model="amount" :balance="balance" :title="'ERC20 ' + currentNativeTokenName + ' (minimum = 51)'" :placeholder="'ERC20 ' + currentNativeTokenName" type="text" icon="coins" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':((parseFloat(amount) <= defaultXPXTxFee)?'Insufficient amount':'Insufficient token balance.')" :decimal="6" />
+        <div class="my-2 float-right text-xs text-blue-primary">* The fees for the transaction on Sirius Chain will be deducted from this amount, which is 50 {{ currentNativeTokenName }}</div>
         <div class="mt-10 text-center">
           <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
           <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="sendRequest()">Send Request</button>
@@ -65,7 +65,7 @@
       <div v-if="currentPage==2">
         <div class="text-lg my-7">
           <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-          <div class="font-bold text-left text-xs md:text-sm lg:text-lg" :class="step1?'text-gray-700':'text-gray-300'">Step 1: Send ERC20 XPX to the escrow account</div>
+          <div class="font-bold text-left text-xs md:text-sm lg:text-lg" :class="step1?'text-gray-700':'text-gray-300'">Step 1: Send ERC20 {{currentNativeTokenName}} to the escrow account</div>
           <div class="flex border-b border-gray-300 p-3">
             <div class="flex-none">
               <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="step1?'border-blue-primary':'border-gray-300'">
@@ -236,6 +236,9 @@ export default {
   },
 
   setup() {
+
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+
     let verifyingTxn;
 
     const verifyMetaMaskPlugin = ref(true);
@@ -738,6 +741,7 @@ export default {
       isTxnNotConfirmed,
       transactionFailed,
       verifyMetaMaskPlugin,
+      currentNativeTokenName,
     };
   },
 }

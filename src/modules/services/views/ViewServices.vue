@@ -47,8 +47,8 @@ export default {
         {name: computed(() => t('accounts.delete')), link: 'ViewWallets'},
       ]},
       {name: computed(() => t('dashboard.transactions')), desc: computed(() => t('services.transactiondescription')), img: 'icon-transaction-explorer-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: computed(() => t('services.explorer')), link: 'ViewServicesExplorer'},
-        {name: computed(() => t('accounts.partial')), link: 'ViewServicesExplorerPartial'},
+        {name: computed(() => t('services.explorer')), link: ''},
+        {name: computed(() => t('accounts.partial')), link: ''},
       ]},
       {name: computed(() => t('services.nodes')), desc: computed(() => t('services.nodesdescription')), img: 'icon-nodes-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: computed(() => t('welcome.blockchain')), link: 'ViewServicesNodes'},

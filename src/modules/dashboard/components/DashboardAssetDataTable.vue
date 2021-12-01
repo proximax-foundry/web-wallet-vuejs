@@ -148,7 +148,8 @@ export default{
             supply: Helper.toCurrencyFormat(assets[i].getExactSupply(), assets[i].divisibility),
             linkedNamespace: namespaceAlias,
             height: assets[i].height,
-            explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
+            explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId,
+            address: Helper.createAddress(account.address).pretty()
           };
           formattedAssets.push(data);
           isMenuShow.value[i] = false;

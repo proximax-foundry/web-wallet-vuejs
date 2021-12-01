@@ -537,14 +537,16 @@ export default {
       }
     };
 
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+
     const txtRemoteTransactionErrorMsg = computed(() => {
       if(isDisplayFeeLowRemark.value){
         return 'Fees might be too low. Please do not change recommended fee in MetaMask.';
       }else{
         if(transactionNotFound.value){
-          return 'ETH transaction hash is not found. Please initiate new swap from ETH to XPX';
+          return 'ETH transaction hash is not found. Please initiate new swap from ETH to ' + currentNativeTokenName.value;
         }else{
-          return 'ETH transaction hash is invalid. Please initiate new swap from ETH to XPX';
+          return 'ETH transaction hash is invalid. Please initiate new swap from ETH to ' + currentNativeTokenName.value;
         }
       }
     });

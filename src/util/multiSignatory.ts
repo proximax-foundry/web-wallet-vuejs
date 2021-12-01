@@ -20,12 +20,10 @@ import {
 } from "tsjs-xpx-chain-sdk";
 
 //line 483,485
-// import { environment } from '../environment/environment.js';
 import { NetworkStateUtils } from "@/state/utils/networkStateUtils";
 import { WalletUtils } from "@/util/walletUtils";
 import { walletState } from '@/state/walletState'
 import { networkState } from "@/state/networkState"; // chainNetwork
-import { announceAggregateBonded, announceLockfundAndWaitForConfirmation, modifyMultisigAnnounceLockfundAndWaitForConfirmation, modifyMultisigAnnounceAggregateBonded } from '../util/listener.js';
 import { TransactionUtils } from "@/util/transactionUtils";
 import { WalletAccount } from '@/models/walletAccount';
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
@@ -277,7 +275,7 @@ function checkHasMultiSig(accountAddress :string) :boolean{
 
 
 // modify multisig
-function modifyMultisigAccount(coSign :string[], removeCosign :string[], numApproveTransaction :number, numDeleteUser :number, cosigners :{address :string}[] , multisigAccount :WalletAccount, walletPassword :string) :boolean | Promise<modifyMultisigAnnounceAggregateBonded>{
+function modifyMultisigAccount(coSign :string[], removeCosign :string[], numApproveTransaction :number, numDeleteUser :number, cosigners :{address :string}[] , multisigAccount :WalletAccount, walletPassword :string) :boolean {
 
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPassword);
   if (! verify) {
