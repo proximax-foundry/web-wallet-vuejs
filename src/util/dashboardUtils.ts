@@ -7,7 +7,6 @@ import {
 } from "tsjs-xpx-chain-sdk";
 
 // import { proximaxProvider } from '../util/proximaxProvider.js';
-// import { environment } from '../environment/environment.js';
 import { transactionTypeName } from '@/util/transactionUtils';
 import { walletState } from '@/state/walletState';
 //import { DashboardTransaction, PartialTransaction } from '@/models/interface/transaction';

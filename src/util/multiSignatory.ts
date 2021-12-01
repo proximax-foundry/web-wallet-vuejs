@@ -20,7 +20,6 @@ import {
 } from "tsjs-xpx-chain-sdk";
 
 //line 483,485
-// import { environment } from '../environment/environment.js';
 import { NetworkStateUtils } from "@/state/utils/networkStateUtils";
 import { WalletUtils } from "@/util/walletUtils";
 import { walletState } from '@/state/walletState'

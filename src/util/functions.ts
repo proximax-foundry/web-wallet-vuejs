@@ -1,6 +1,5 @@
 import { useToast } from "primevue/usetoast";
 import { ref } from 'vue';
-import { environment } from '../environment/environment.js';
 import { Address } from "tsjs-xpx-chain-sdk";
 
 // copy address keys
