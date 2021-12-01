@@ -159,10 +159,7 @@
             <!--<button type="button" id="t1" style="width:97%" class="text-black text-left rounded-lg border-2 border-blue-primary bg-white-primary flex-auto p-4 pl-2 m-1">
               <button type="button" id="delete" style="float:right"><img src="@/modules/wallet/img/icon-trash-can-gray-16h-proximax-sirius-wallet.svg" class="w-6 cursor-pointer"></button>
               Transaction 1
-            </button>-->
-            <div>
-              
-            </div>
+            </button>--> 
           </div>
           <div class="text-center align-text-bottom inset-x-0 bottom-0 absolute">
             <div style="width:300px; margin:0 auto;">
@@ -475,7 +472,7 @@ export default {
       recipient.value = e;
     };
     const makeTransfer = () => {
-        if (sendXPX.value == "0" && !forceSend.value) {
+        if (savedTransactions.length == 0) {
           toggleConfirm.value = true;
         } 
         else {
@@ -524,7 +521,7 @@ export default {
             // play notification sound
             forceSend.value = false;
             savedTransactions.splice(index,n);
-            sessionStorage.setItem('savedTransaction', JSON.stringify(savedTransactions));
+            sessionStorage.setItem('savedTransactions', JSON.stringify(savedTransactions));
           }
         }
     };
