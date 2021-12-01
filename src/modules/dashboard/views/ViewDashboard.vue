@@ -111,7 +111,7 @@
       <DashboardAssetDataTable :assets="selectedAccount.assets" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='namespace'">
-      <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" />
+      <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" :account="selectedAccount" />
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='transaction'">
       <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>

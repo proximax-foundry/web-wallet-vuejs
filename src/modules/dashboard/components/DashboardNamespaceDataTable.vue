@@ -27,14 +27,16 @@
           <span class="uppercase">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedId" header="LINKED ASSET / ADDRESS" :style="{ width: '360px' }">
+      <Column field="linkedId" header="LINKED ASSET / ADDRESS" :style="{ width: '250px' }">
         <template #body="{data}">
-          <span class="uppercase">{{ data.linkedId }}</span>
+          <span class="uppercase text-xs" v-if="data.linkedId">{{ data.linkedId }}</span>
+          <span class="text-xs" v-else>No linked asset</span>
         </template>
       </Column>
-      <Column field="linkType" header="EXPIRES" :style="{ width: '180px' }">
+      <Column field="linkType" header="EXPIRES" :style="{ width: '150px' }">
         <template #body="{data}">
-          <div class="data.expiryRelative">in {{ data.expiryRelative }}</div>
+          <div class="data.expiryRelative text-xs" v-if="data.expiryRelative">in {{ data.expiryRelative }}</div>
+          <div class="text-gray-300 text-xs" v-else>Fetching..</div>
         </template>
       </Column>
       <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" :style="{ width: '180px' }">
@@ -97,8 +99,8 @@ export default{
     chainConfig.init();
     let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
 
-    watch([currentBlockHeight, namespaces], ([newBlockHeight, namespaces]) => {
-      accountNamespaces.value = generateDatatable(namespaces, newBlockHeight, account.value);
+    watch([currentBlockHeight, namespaces, account], ([newBlockHeight, namespaces, account]) => {
+      accountNamespaces.value = generateDatatable(namespaces, newBlockHeight, account);
     });
 
     onMounted(() => {
@@ -140,7 +142,7 @@ export default{
           expiryRelative: currentBlockHeight?relativeTime(expiryDay, expiryHour, expiryMin):'',
           expiry: currentBlockHeight?expiryDate:'',
           explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].idHex,
-          address: Helper.createAddress(account.address).pretty(),
+          address: Helper.createAddress(account.address).pretty()
         };
         formattedNamespaces.push(data);
         isMenuShow.value[i] = false;
