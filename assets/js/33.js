@@ -58,6 +58,17 @@ eval("// style-loader: Adds some css to the DOM by adding a <style> tag\n\n// lo
 
 /***/ }),
 
+/***/ "./src/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg":
+/*!***************************************************************************************************!*\
+  !*** ./src/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg ***!
+  \***************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("module.exports = __webpack_require__.p + \"assets/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.73ce2a7d.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg?");
+
+/***/ }),
+
 /***/ "./src/modules/services/submodule/mainnetSwap/img/check-status.svg":
 /*!*************************************************************************!*\
   !*** ./src/modules/services/submodule/mainnetSwap/img/check-status.svg ***!
