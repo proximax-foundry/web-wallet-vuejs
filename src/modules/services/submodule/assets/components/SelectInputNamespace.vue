@@ -39,7 +39,7 @@ export default defineComponent({
   emits:[
     'select-account','update:modelValue',
   ],
-  name: 'SelectInputParentNamespace',
+  name: 'SelectInputNamespace',
   props: [
     'modelValue',
     'action',

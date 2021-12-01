@@ -1,13 +1,19 @@
 <template>
   <div>
-    <div class="flex justify-between text-xs sm:text-sm">
-      <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.viewall2')}}</span></div>
-      <div>
-        <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="font-bold" active-class="accounts">{{$t('accounts.createaccount')}}</router-link>
+    <div class='mt-4 w-11/12 ml-auto mr-auto border-b-2 '>
+      <div class = 'flex text-xxs md:text-xs font-semibold '>
+        <div class= 'w-18 text-center border-b-2 pb-4 lg:pb-3 border-yellow-500'>Overview</div>
+        <router-link :to="{ name: 'ViewNormalAccount'}"  class=" w-28 text-center "  style="width:6.5rem">My Accounts</router-link>
+        <router-link :to="{ name: 'ViewMultisigAccount'}" class="text-center " style="width:9rem">Multisig Accounts</router-link>
+        <router-link :to="{ name: 'ViewOtherAccount'}" class="text-center " style="width:8rem">Other Accounts</router-link>
+        <div class="flex flex-row gap-1 ml-auto ">
+          <img src="@/modules/account/img/icon-account-settings.svg" class="w-4 h-4">
+          <div>Accounts Settings</div>
+        </div>
       </div>
     </div>
-    <div class='mt-2 py-3 gray-line'>
-      <div class="grid xs-grid-cols-1 sm:grid-cols-2">
+    <div class='mt-2 py-3 '>
+      <div class="w-11/12 ml-auto mr-auto flex flex-col gap-3">
         <AccountTile :key="index" :account="item" :showMenuCall="showMenu[index]" :i="index" v-for="(item, index) in accounts" />
       </div>
     </div>
@@ -22,7 +28,7 @@ import { WalletUtils } from '@/util/walletUtils';
 import { networkState } from "@/state/networkState";
 
 export default {
-  name: 'ViewAccountDisplayAll',
+  name:"ViewAccountDisplayAll",
   props:[
     'deleteAccount'
   ],

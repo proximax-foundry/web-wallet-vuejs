@@ -160,8 +160,7 @@ export default defineComponent({
     DashboardDataTable,
     //PartialDashboardDataTable,
     DashboardAssetDataTable,
-    DashboardNamespaceDataTable,
-    
+    DashboardNamespaceDataTable,    
   },
 
   setup(){

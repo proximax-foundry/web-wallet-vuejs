@@ -21,8 +21,8 @@
           <div v-for="(coSignAddress, index) in coSign" :key="index" >
             <div class="flex">
               <img  src="@/modules/account/submodule/multisig/img/icon-delete.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
-              <TextInput class='w-5/12 mr-2' placeholder="Name"  v-model="contactName[index]" :disabled="true"  />
-              <TextInput class='w-7/12 mr-2' placeholder="Public Key" errorMessage="Invalid Public Key" :showError="showAddressError[index]" v-model="coSign[index]" />
+              <TextInput class='w-5/12 mr-2 ' placeholder="Name"  v-model="contactName[index]" :disabled="true"  />
+              <TextInput class='w-7/12 mr-2 ' placeholder="Address/Public Key" errorMessage="Invalid Input" :showError="showAddressError[index]" v-model="coSign[index]" />
               <div v-if="showAddressError[index]==true " class="mt-16"/>
               <div @click="toggleContact[index]=!toggleContact[index]" class=' border  cursor-pointer flex flex-col justify-center  p-2' style="height:2.66rem">
                 <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
@@ -45,7 +45,7 @@
             </div>
 
           </div>
-        </div>
+       </div>
         <button class="pl-6 font-semibold text-xs mt-1 text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">+ Add New Cosignatory</button>
         <div class="ml-6 my-7 gray-line"/> 
         <div class="pl-6 text-xs font-semibold mb-3">Scheme</div>
@@ -54,7 +54,7 @@
           <div class="border-b-2 text-xxs text-center py-1">TRANSACTIONS APPROVAL</div>
             <div class='flex justify-around'>
               <button class="text-blue-primary disabled:opacity-50" @click="numApproveTransaction--" :disabled="numApproveTransaction<=0">-</button>
-              <input type="number" class=" w-4 outline-none text-xs" :min=0 @keypress="validateApproval" :max="maxNumApproveTransaction" v-model="numApproveTransaction" >
+              <input type="number" class=" w-4 outline-none text-xs font-bold" :min=0 @keypress="validateApproval" :max="maxNumApproveTransaction" v-model="numApproveTransaction" >
               <button class="text-blue-primary disabled:opacity-50" :disabled="numApproveTransaction>=maxNumApproveTransaction " @click="numApproveTransaction++">+</button>
             </div>
             <div class="text-xxs border-t-2 text-center py-1">OF {{maxNumApproveTransaction}} COSIGNATORIES</div>
@@ -63,7 +63,7 @@
             <div class="border-b-2 text-xxs text-center py-1">ACCOUNT DELETION APPROVAL</div>
             <div class='flex justify-around'>
               <button class="text-blue-primary disabled:opacity-50" @click="numDeleteUser--" :disabled="numDeleteUser<=0">-</button>
-              <input type="number" class=" w-4 outline-none text-xs" :min=0 @keypress="validateDelete" :max="maxNumDeleteUser" v-model="numDeleteUser" >
+              <input type="number" class=" w-4 outline-none text-xs font-bold" :min=0 @keypress="validateDelete" :max="maxNumDeleteUser" v-model="numDeleteUser" >
               <button class="text-blue-primary disabled:opacity-50" :disabled="numDeleteUser>=maxNumDeleteUser " @click="numDeleteUser++">+</button>
             </div>
             <div class="text-xxs border-t-2 text-center py-1">OF {{maxNumDeleteUser}} COSIGNATORIES</div>
@@ -84,7 +84,9 @@
             <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
             <div class="flex-cols">
                <div class="text-txs">Your account has insufficient amount of XPX. Please top up first before continue transacting on this page.</div>
-               <a class="text-xs text-blue-primary font-semibold underline " href="https://bctestnetfaucet.xpxsirius.io/#/" target="_blank">Top Up XPX<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
+               <a v-if="networkState.chainNetwork == 0" class="text-xs text-blue-primary font-semibold underline " href="https://www.proximax.io/en/xpx" target="_blank">Top Up XPX<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
+               <a v-if="networkState.chainNetwork == 1" class="text-xs text-blue-primary font-semibold underline " href="https://bctestnetfaucet.xpxsirius.io/#/" target="_blank">Top Up XPX<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
+               <a v-if="networkState.chainNetwork == 2" class="text-xs text-blue-primary font-semibold underline " href="https://bctestnet2faucet.xpxsirius.io/#/" target="_blank">Top Up XPX<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
             </div>
           </div>
         </div>
@@ -94,9 +96,20 @@
             <div class="text-txs">Your account has transaction(s) on partial.</div>
           </div>
         </div>
+        <div v-if="isMultisig" class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
+          <div class="flex gap-2">
+            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+            <div class="text-txs">Your account is already a multisig.</div>
+          </div>
+        </div>
         <div class="flex mt-4 text-white">
           <div class='text-xs '>Lockfund Fee</div>
-          <div class="text-xs  ml-auto">26.7000</div>
+          <div class="text-xs  ml-auto">10.00</div>
+          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+        </div>
+        <div class="flex mt-0.5 text-white">
+          <div class='text-xs '>Transaction Fee</div>
+          <div class="text-xs  ml-auto">26.70</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
@@ -108,16 +121,14 @@
         <div class='border-b-2 border-gray-600 my-2'/>
         <div class="flex text-white">
           <div class=' font-bold text-xs '>TOTAL</div>
-          <div class="text-xs  ml-auto">46.2966</div>
+          <div class="text-xs  ml-auto">56.2966</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
-        
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white'>Enter your password to continue</div>
         <div class='font-semibold text-xxs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
-        <PasswordInput @space='space=true' @removeSpace="space=false" :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="passwd" :disabled="disabledPassword" />
-        <div v-if='space' class="mt-3"/>
-        <button type="submit" class='w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="convertAccount()" :disabled="disableSend">Update Cosignatories</button>
+        <PasswordInput  :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="passwd" :disabled="disabledPassword" />
+        <div class="mt-3"><button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="convertAccount()" :disabled="disableSend">Update Cosignatories</button></div>
         <div class="text-center">
           <router-link :to="{name: 'ViewMultisigHome',params:{name:acc.name}}" class="content-center text-xs text-white underline" >Cancel</router-link>
         </div>
@@ -231,6 +242,7 @@ import { multiSign } from '@/util/multiSignatory';
 import { transferEmitter } from '@/util/listener.js';
 import { walletState } from '@/state/walletState';
 import {
+  Address,
     PublicAccount
 } from "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
@@ -272,7 +284,9 @@ export default {
     const toggleContact = ref([])
     const onPartial = ref(false);
     const space=ref(false)
-    const isMultisig = ref(false);
+    let isMultisig = computed(()=>{
+      return multiSign.checkIsMultiSig(acc.address)
+    }) 
      // get account details
     const acc =  walletState.currentLoggedInWallet.accounts.find(acc =>acc.name ===p.name) ;
     if(acc== undefined){
@@ -288,11 +302,7 @@ export default {
       }
     });
     const contact = computed(() => {
-      let tempContact = multiSign.generateContact(acc.address,acc.name);
-      tempContact.forEach(item=>{
-        item.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==item.value).publicKey
-      })
-      return tempContact
+      return multiSign.generateContact(acc.address,acc.name)
     });
      const splitBalance = computed(()=>{
       let split = accountBalance.value.split(".")
@@ -303,7 +313,7 @@ export default {
       }
     })
     const disableSend = computed(() => !(
-      !isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) && coSign.value.length > 0  &&  err.value == '' && (showAddressError.value.every(value => value == false)) == true && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
+      !isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) && coSign.value.length > 0  &&  (err.value == '' || (err.value == t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name}))) && (showAddressError.value.every(value => value == false)) == true && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
     ));
     const addCoSigButton = computed(() => {
       var status = false;
@@ -333,8 +343,8 @@ export default {
       numDeleteUser.value = 1;
       maxNumDeleteUser.value = 0;
     };
-    const convertAccount = () => {
-      let convertstatus = multiSign.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.name, passwd.value);
+    const convertAccount = async() => {
+      let convertstatus = await multiSign.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.name, passwd.value);
       if(!convertstatus){
         err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
       }else{
@@ -348,17 +358,17 @@ export default {
     };
     watch(() => [...coSign.value], (n) => {
       for(var i = 0; i < coSign.value.length; i++){
-        if(coSign.value[i].length == 64) /* || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)) */{
-          if(/* coSign.value[i]==acc.address || coSign.value[i]==Helper.createAddress(acc.address).pretty() || */ coSign.value[i]==acc.publicKey ){
+        if((coSign.value[i].length == 64) || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)){
+          if(coSign.value[i]==acc.address || coSign.value[i]==Helper.createAddress(acc.address).pretty() || coSign.value[i]==acc.publicKey ){
             showAddressError.value[i] = true;
             err.value = "Cosigner cannot be this account itself"
           }
           else if(!coSign.value[i].match(publicKeyPattern) && (coSign.value[i].length == 64)){
             showAddressError.value[i] = true;
-          /* }else if(!coSign.value[i].match(addressPatternLong) && (coSign.value[i].length == 46)){
+          }else if(!coSign.value[i].match(addressPatternLong) && (coSign.value[i].length == 46)){
             showAddressError.value[i] = true;
           }else if(!coSign.value[i].match(addressPatternShort) && (coSign.value[i].length == 40)){
-            showAddressError.value[i] = true; */
+            showAddressError.value[i] = true;
           }else{
             showAddressError.value[i] = false;
             const unique = Array.from(new Set(n));
@@ -469,15 +479,9 @@ export default {
       onPartial.value = verify
     )
     
-     ;
+    
+
     // check if this address has cosigner
-    try{
-      let verifyMultisig = multiSign.checkIsMultiSig(acc.address)
-        isMultisig.value = verifyMultisig;
-      
-    }catch(err) {
-      isMultisig.value = false;
-    }
     emitter.on('ADD_CONTACT_COSIGN', payload => {
       multiSign.verifyContactPublicKey(payload.address).then((res)=>{
         if(res.status){
@@ -516,6 +520,7 @@ export default {
       }
     });
     return {
+      networkState,
       toggleContact,
       contact,
       space,
