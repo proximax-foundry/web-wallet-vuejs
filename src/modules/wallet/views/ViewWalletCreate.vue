@@ -31,7 +31,7 @@
             <div class="modal-popup-box ">
               <img src='@/assets/img/icon-blue-tick.svg' class='h-5 w-5 ml-auto mr-auto mb-3'>
               <div class= 'text-center mt-2 text-xs font-semibold'>Account Creation Successful</div>
-              <div class ='text-gray-500 text-center text-xs mt-2'>Should you wish to get testnet XPX amount, you can top up every 24 hours in your account.</div>
+              <div class ='text-gray-500 text-center text-xs mt-2'>Should you wish to get testnet {{ currentNativeTokenName }} amount, you can top up every 24 hours in your account.</div>
               <div class='flex flex-wrap content-center'>
                 <router-link :to="{name:'Home'}" class= ' mt-4 w-4/12 ml-auto mr-auto text-center  blue-btn cursor-pointer font-semibold text-xs py-2 px-2 mt-2 font-semibold mb-3' >Close</router-link>
               </div>
@@ -77,6 +77,7 @@ export default defineComponent({
     };
   },
   setup(){
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const {t} = useI18n();
     const router = useRouter();
     const toast = useToast();
@@ -151,7 +152,8 @@ export default defineComponent({
       createWallet,
       disableCreate,
       clearInput,
-      copy
+      copy,
+      currentNativeTokenName,
     };
   },
 

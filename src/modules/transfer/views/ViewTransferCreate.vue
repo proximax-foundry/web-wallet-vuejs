@@ -44,7 +44,7 @@
               <div class="text-tsm">
                 {{$t('transfer.cosigner')}}:
                 <span class="font-bold" v-if="getWalletCosigner.length == 1"> 
-                  {{ getWalletCosigner[0].name }} ({{$t('services.balance')}}:{{  getWalletCosigner[0].balance }} XPX)
+                  {{ getWalletCosigner[0].name }} ({{$t('services.balance')}}:{{  getWalletCosigner[0].balance }} {{ currentNativeTokenName }})
                     <span v-if="getWalletCosigner[0].balance <lockFundTotalFee.value" class="error">
                       - {{$t('accounts.insufficientbalance')}}
                     </span>
@@ -52,7 +52,7 @@
                 <span class="font-bold" v-else>
                   <select v-model="cosignAddress">
                     <option v-for="(element, item) in  getWalletCosigner" :value="element.address" :key="item">
-                      {{ element.name }} ({{$t('services.balance')}}: {{ element.balance }} XPX)
+                      {{ element.name }} ({{$t('services.balance')}}: {{ element.balance }} {{ currentNativeTokenName }})
                     </option>
                   </select>
                 </span>
@@ -84,7 +84,7 @@
               <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"/>
                 {{$t('services.balance')}}: 
               <span class="text-xs">
-                {{ balance }} XPX
+                {{ balance }} {{ currentNativeTokenName }}
               </span>
             </div>
           </div>
@@ -128,7 +128,7 @@
         <div class="rounded-2xl bg-gray-100 p-5">
           <div class="inline-block mr-4 text-xs">
             <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500"/>
-            {{$t('accounts.unconfirmed')}}: {{ effectiveFee }} XPX
+            {{$t('accounts.unconfirmed')}}: {{ effectiveFee }} {{ currentNativeTokenName }}
           </div>
         </div>
         <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800 " v-if="isMultiSig(selectedAccAdd)">
@@ -198,6 +198,7 @@ export default {
     ConfirmSendModal,
   },
   setup() {
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -847,7 +848,8 @@ export default {
       lockFundTotalFee,
       walletName,
       hexOnly,
-      checkNamespace
+      checkNamespace,
+      currentNativeTokenName,
     };
   },
 };

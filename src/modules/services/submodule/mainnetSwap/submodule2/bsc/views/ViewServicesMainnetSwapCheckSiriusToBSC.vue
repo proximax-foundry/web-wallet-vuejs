@@ -89,7 +89,7 @@
                 </div>
               </div>
               <div v-if="isInvalidSiriusTxnHash && step2" class="mt-2 text-sm text-gray-700">
-                Sirius transaction hash is not found in swap service. Please initiate new swap from XPX to BSC
+                Sirius transaction hash is not found in swap service. Please initiate new swap from {{ currentNativeTokenName }} to BSC
                 <router-link :to="{ name: 'ViewServicesMainnetSwapEthOptions' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">Swap</router-link>
               </div>
             </div>
@@ -155,6 +155,8 @@ export default {
   },
 
   setup() {
+
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
 
     const verifyMetaMaskPlugin = ref(true);
     if(!window.ethereum.isMetaMask){
@@ -441,6 +443,7 @@ export default {
       remoteTxnHash,
       txtRemoteTxnSummary,
       isDisabled,
+      currentNativeTokenName,
     };
   },
 }

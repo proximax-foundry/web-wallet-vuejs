@@ -54,13 +54,13 @@
       </Column>
       <Column header="TX FEE" headerStyle="width:110px">
         <template #body="{data}">
-          <div class="text-txs">{{ data.maxFee }} <b v-if="data.maxFee">XPX</b></div>
+          <div class="text-txs">{{ data.maxFee }} <b v-if="data.maxFee">{{currentNativeTokenName}}</b></div>
         </template>
       </Column>
       <Column header="AMOUNT" headerStyle="width:110px">
         <template #body="{data}">
-          <div class="text-txs" v-if="data.typeName=='Transfer'">{{ data.extractedData.amount?data.extractedData.amount:'0' }} <b>XPX</b></div>
-          <div class="text-txs" v-else>{{ data.extractedData.amount?data.extractedData.amount:'-' }} <b v-if="data.extractedData.amount">XPX</b></div>
+          <div class="text-txs" v-if="data.typeName=='Transfer'">{{ data.extractedData.amount?data.extractedData.amount:'0' }} <b>{{currentNativeTokenName}}</b></div>
+          <div class="text-txs" v-else>{{ data.extractedData.amount?data.extractedData.amount:'-' }} <b v-if="data.extractedData.amount">{{currentNativeTokenName}}</b></div>
         </template>
       </Column>
       <Column header="SDA" headerStyle="width:40px">
@@ -133,6 +133,8 @@ export default defineComponent({
     const isShowConfirmed = p.type === "confirmed" ? true : false;
     const isShowUnconfirmed = p.type === "unconfirmed" ? true : false;
     const isShowPartial = p.type === "partial" ? true : false;
+
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     /*
     const filters = ref({
       'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
@@ -347,6 +349,7 @@ export default defineComponent({
       isShowPartial,
       d,
       checkOtherAsset,
+      currentNativeTokenName,
     }
   }
 })
