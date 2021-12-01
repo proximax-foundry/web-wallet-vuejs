@@ -5,7 +5,7 @@
         <div class="flex justify-between text-sm">
           <div><span class="text-gray-700">{{$t('services.assets')}}</span></div>
         </div>
-        <AssetDataTable class="mt-10" :key="defaultIndex"></AssetDataTable>
+        <AssetDataTable class="mt-10" :key="walletState" :address="address"></AssetDataTable>
         <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="bg-blue-primary px-5 py-3 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-44"><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2"> Create New Asset</router-link>
       </div>
       <div v-else>
@@ -52,6 +52,9 @@ export default {
   components: {
     AssetDataTable
   },
+  props: {
+    address: String,
+  },
 
   setup(){
     const defaultIndex = ref(0);
@@ -66,6 +69,12 @@ export default {
       });
     });
 
+    walletState.currentLoggedInWallet.others.forEach(account => {
+      account.assets.forEach(asset => {
+        assets.value.push(asset);
+      });
+    });
+
     emitter.on("TXN_CONFIRMED", txLength => {
       setTimeout(() => {
         ++defaultIndex.value;
@@ -75,6 +84,7 @@ export default {
     return {
       assets,
       defaultIndex,
+      walletState
     }
   },
 

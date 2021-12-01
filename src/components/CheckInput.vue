@@ -1,5 +1,5 @@
 <template>
-  <div :class="`${(!disabled)?'cursor-pointer':''}`">
+  <div :class="`${(!disabled)?'cursor-pointer':'opacity-50'}`">
     <div class="border border-gray-200 px-2 py-1 h-14 flex items-center justify-between rounded-md">
       <div>
         <div class="inline-block font-bold text-tsm" :class="`${ disabled?'text-gray-500':'text-black' }`">{{ title }}</div>

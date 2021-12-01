@@ -125,7 +125,7 @@
                 </div>
               </div>
               <div v-if="isInvalidRemoteTxnHash && step4" class="mt-2 text-xs md:text-sm text-gray-700">
-                ETH transaction hash is not found. Please contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
+                BSC transaction hash is not found. Please contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
               </div>
             </div>
           </div>
