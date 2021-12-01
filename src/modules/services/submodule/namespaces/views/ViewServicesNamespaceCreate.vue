@@ -23,7 +23,7 @@
               <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
             </div>
           </div>
-          <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" v-model="selectNamespace" :address="selectedAccAdd" class="mt-5" :disabled="disableSelectNamespace" />
+          <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" ref="nsRef" v-model="selectNamespace" :address="selectedAccAdd" class="mt-5" :disabled="disableSelectNamespace" />
           <div class="lg:grid lg:grid-cols-2 mt-5">
             <div class="mb-5 lg:mb-0 lg:mr-2"><TextInputTooltip :disabled="disableNamespaceName" placeholder="Name" errorMessage="Fill in a valid name" v-model="namespaceName" icon="id-card-alt" :showError="showNamespaceNameError" class="w-full inline-block" toolTip="A namespace can have a maximium length of 16 alphanumerical characters while sub-namespaces can have a maximium length of 64 alphanumerical characters.<br><br>Three layers can be created. A namespace can have a subnamespace, and a subnamespace can have its own subnamespace (e.g., test1.test2.test3).<br><br>Certain phrases are already reserved." /></div>
             <div class="mb-5 lg:mb-0 lg:ml-2"><DurationInputClean :disabled="disabledDuration" v-model="duration" :max="365" placeholder="Duration (number of days)" :showError="showDurationErr" errorMessage="Required Field - Only Numbers (0 - 6)" toolTip="Maximum rental duration is<br>1 year (365 days)." /></div>
@@ -108,6 +108,8 @@ export default {
   },
   setup(){
     const router = useRouter();
+
+    const nsRef = ref(null);
 
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
@@ -263,6 +265,7 @@ export default {
         account = walletState.currentLoggedInWallet.others.find(account => account.address == address);
       }
       selectNamespace.value = '';
+      nsRef.value.clearLabel();
       selectedAccName.value = account.name;
       selectedAccAdd.value = account.address;
       balance.value = Helper.toCurrencyFormat(account.balance, networkState.currentNetworkProfile.network.currency.divisibility);
@@ -450,6 +453,7 @@ export default {
       splitCurrency,
       walletState,
       currentNativeTokenName,
+      nsRef,
     }
   },
 
