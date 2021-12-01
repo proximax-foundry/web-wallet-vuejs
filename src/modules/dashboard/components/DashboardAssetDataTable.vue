@@ -158,7 +158,7 @@ export default{
       return formattedAssets;
     }
 
-      // return formattedAssets;
+    // return formattedAssets;
     const borderColor = ref('border border-gray-400');
 
     const showNsList = (i) => {

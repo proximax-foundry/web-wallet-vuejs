@@ -66,7 +66,7 @@
       <div class="text-txs text-gray-400"><b class="text-gray-700">ASSETS</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">View all</span>)</div>
       <DashboardAssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
-      <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" />
+      <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" :account="selectedAccount" />
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ filteredConfirmedTransactions.length }} - View all)</div>
       <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block).slice(0, 5)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
       <div class="mt-10 flex">

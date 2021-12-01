@@ -5,7 +5,7 @@
         <div class="flex justify-between text-sm">
           <div><span class="text-gray-700">{{$t('services.namespaces')}}</span></div>
         </div>
-        <NamespaceDataTable class="mt-10" :key="defaultIndex" :currentBlockHeight="currentBlock"></NamespaceDataTable>
+        <NamespaceDataTable class="mt-10" :key="defaultIndex" :currentBlockHeight="currentBlock" :address="address"></NamespaceDataTable>
         <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="bg-blue-primary px-5 py-3 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-60"><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2"> Register New Namespace</router-link>
       </div>
       <div v-else>
@@ -21,11 +21,11 @@
             <div class="text-gray-400 text-tsm my-3 sm:pr-2">A namespace starts with a name that you choose, similar to an internet domain name.</div>
           </div>
           <div>
-            <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="text-blue-primary font-bold inline-block text-tsm">The complete guide about Namespace</router-link>
+            <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-blue-primary font-bold inline-block text-tsm">The complete guide about Namespace</router-link>
             <div class="text-gray-400 text-tsm my-3">What is namespace? Refer to the complete guide on Namespace here.</div>
           </div>
           <div>
-            <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="text-blue-primary font-bold inline-block text-tsm">Give us feedback about your experience here</router-link>
+            <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-blue-primary font-bold inline-block text-tsm">Give us feedback about your experience here</router-link>
             <div class="text-gray-400 text-tsm my-3">Give us feedback about your experience here</div>
           </div>
         </div>
@@ -52,6 +52,9 @@ export default {
   name: 'ViewServicesNamespace',
   components: {
     NamespaceDataTable
+  },
+  props: {
+    address: String,
   },
 
   setup(){

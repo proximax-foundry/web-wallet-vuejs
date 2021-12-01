@@ -190,8 +190,7 @@ export default {
       }
     });
 
-    const showNoAsset = ref(false);
-    const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value) && !showNoAsset.value);
+    const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
 
     const supply = ref('0');
 
@@ -270,11 +269,6 @@ export default {
     transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
     transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
 
-    const clearInput = () => {
-      walletPassword.value = '';
-      supply.value = '0';
-    };
-
     const modifyAsset = () => {
       if(cosigner.value){
         AssetsUtils.changeAssetSupplyMultiSig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value, selectedAccAdd.value);
@@ -335,14 +329,6 @@ export default {
       }
     });
 
-    watch(showNoAsset, (n) => {
-      if(n){
-        setFormInput(true);
-      }else{
-        setFormInput(false);
-      }
-    });
-
     watch(showNoBalance, (n) => {
       if(n){
         setFormInput(true);
@@ -378,12 +364,10 @@ export default {
       lockFundCurrency,
       lockFundTotalFee,
       totalFeeFormatted,
-      showNoAsset,
       showSupplyErr,
       err,
       walletPassword,
       disableModify,
-      clearInput,
       showPasswdError,
       supply,
       disabledPassword,

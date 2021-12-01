@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="text-right">
-      <SelectInputPluginClean v-model="filterNamespaces" :options="listAccounts" selectDefault="" class="w-60 mr-4 inline-block" />
+      <SelectInputPluginClean v-model="filterNamespaces" :options="listAccounts" :selectDefault="selectedAddress" class="w-60 mr-4 inline-block" />
     </div>
     <DataTable
       :value="generateDatatable"
@@ -58,7 +58,7 @@
             <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
             <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div role="none" class="my-2">
-                <router-link :to="{ name: 'ViewServicesNamespaceExtend' }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Extend Duration</router-link>
+                <router-link :to="{ name: 'ViewServicesNamespaceExtend', params: { address: data.address, namespaceId: data.idHex } }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Extend Duration</router-link>
                 <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>View in Explorer<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
               </div>
             </div>
@@ -77,6 +77,7 @@
 
 <script>
 import { getCurrentInstance, ref, computed, watch, onMounted, toRefs  } from "vue";
+import { Address } from "tsjs-xpx-chain-sdk";
 import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -95,7 +96,8 @@ export default{
   name: 'NamespaceDataTable',
   props: {
     currentBlockHeight: Number,
-    account: WalletAccount
+    account: WalletAccount,
+    address: String,
   },
   directives: {
     'tooltip': Tooltip
@@ -103,11 +105,16 @@ export default{
 
   setup(props, context){
     const rowLimit = 5;
-    const { currentBlockHeight } = toRefs(props);
+    const { currentBlockHeight, address } = toRefs(props);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     // const accountNamespaces = ref();
     const isMenuShow = ref([]);
+
+    const selectedAddress = ref('');
+    if(props.address){
+      selectedAddress.value = Address.createFromRawAddress(address.value).plain();
+    }
 
     const listAccounts = computed(() => {
       let accountOption = [];
@@ -262,7 +269,7 @@ export default{
           expiryRelative: currentBlockHeight.value?relativeTime(expiryDay, expiryHour, expiryMin):'',
           expiry: currentBlockHeight.value?expiryDate:'',
           explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].namespace.idHex,
-          address: namespaces[i].account.address,
+          address: Helper.createAddress(namespaces[i].account.address).pretty(),
           icon: toSvg(namespaces[i].account.address, 30, jdenticonconfig)
         };
         formattedNamespaces.push(data);
@@ -313,7 +320,6 @@ export default{
       currentMenu.value = 'e';
     };
 
-    const borderColor = ref('border border-gray-400');
     const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
     const publicKeyExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.publicKeyRoute);
     const addressExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.addressRoute);
@@ -321,7 +327,6 @@ export default{
     const assetExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.assetInfoRoute);
 
     return {
-      borderColor,
       addressExplorerURL,
       assetExplorerURL,
       namespaceExplorerURL,
@@ -329,12 +334,12 @@ export default{
       explorerBaseURL,
       showMenu,
       isMenuShow,
-      // accountNamespaces,
       hoverOverMenu,
       hoverOutMenu,
       listAccounts,
       filterNamespaces,
       generateDatatable,
+      selectedAddress,
     }
   }
 }

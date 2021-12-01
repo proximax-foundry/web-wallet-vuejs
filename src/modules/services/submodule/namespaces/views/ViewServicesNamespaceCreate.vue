@@ -2,7 +2,7 @@
  <div>
   <div class="flex cursor-pointer mt-8 ml-8 lg:ml-0 lg:absolute">
     <img src='@/assets/img/chevron_left.svg'>
-    <router-link :to="{name: 'ViewServicesAssets'}" class='text-blue-primary text-xs mt-0.5'>Back</router-link>
+    <router-link :to="{name: 'ViewServicesNamespace'}" class='text-blue-primary text-xs mt-0.5'>Back</router-link>
   </div>
   <div class='w-10/12 ml-auto mr-auto'>
     <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
@@ -72,11 +72,11 @@
         <div class="text-gray-400 text-tsm my-3 sm:pr-2">A namespace starts with a name that you choose, similar to an internet domain name.</div>
       </div>
       <div>
-        <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="text-blue-primary font-bold inline-block text-tsm">The complete guide about Namespace</router-link>
+        <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-blue-primary font-bold inline-block text-tsm">The complete guide about Namespace</router-link>
         <div class="text-gray-400 text-tsm my-3">What is namespace? Refer to the complete guide on Namespace here.</div>
       </div>
       <div>
-        <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="text-blue-primary font-bold inline-block text-tsm">Give us feedback about your experience here</router-link>
+        <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-blue-primary font-bold inline-block text-tsm">Give us feedback about your experience here</router-link>
         <div class="text-gray-400 text-tsm my-3">Give us feedback about your experience here</div>
       </div>
     </div>
