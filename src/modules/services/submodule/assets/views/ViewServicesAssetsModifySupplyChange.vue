@@ -16,8 +16,7 @@
               <div class="font-bold text-black text-sm">{{ selectedAccName }}</div>
             </div>
           </div>
-        </div>
-
+        </div>{{ showSupplyErr }} {{ selectIncreaseDecrease }}
         <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
           <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('accounts.insufficientbalance')}}</div>
         </div>
@@ -160,7 +159,7 @@ export default {
 
 
     const disableModify = computed(() => !(
-      walletPassword.value.match(passwdPattern) && (supply.value > 0) && !showSupplyErr.value
+      walletPassword.value.match(passwdPattern) && (supply.value > 0) && !showSupplyErr.value && !showNoBalance.value & !isNotCosigner.value
     ));
 
     const selectedAccName = ref('');
@@ -203,6 +202,7 @@ export default {
       selectedAccName.value = account.name;
       selectedAccAdd.value = account.address;
       balance.value = Helper.toCurrencyFormat(account.balance, networkState.currentNetworkProfile.network.currency.divisibility);
+      balanceNumber.value = account.balance;
     }else{
       toast.add({severity:'error', detail: 'Addres is invalid', group: 'br', life: 3000});
       router.push({ name: "ViewServicesAssets" });
@@ -226,6 +226,7 @@ export default {
     const selectAsset = ref('');
     const assetDivisibility = ref(0);
     const assetSupply = ref(0);
+    const assetSupplyExact = ref(false);
     const assetTransferable = ref(false);
     const assetMutable = ref(false);
     const selectIncreaseDecrease = ref('increase');
@@ -238,6 +239,7 @@ export default {
         assetMutable.value = asset.supplyMutable;
         assetDivisibility.value = asset.divisibility;
         assetSupply.value = Helper.convertToCurrency(asset.supply, asset.divisibility);
+        assetSupplyExact.value = asset.supply, asset.divisibility;
       }else{
         toast.add({severity:'error', detail: 'Asset ID is invalid', group: 'br', life: 3000});
         router.push({ name: "ViewServicesAssets" });
@@ -282,17 +284,23 @@ export default {
       if(selectAsset.value){
         transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
         transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
-        balanceNumber.value = (n=='increase'?maxAmount:parseFloat(assetSupply.value));
-      }else{
-        balanceNumber.value = (n=='increase'?maxAmount:0);
       }
-      showSupplyErr.value = supply.value>balanceNumber.value;
+      if(n== 'increase'){
+        showSupplyErr.value = supply.value > (balanceNumber.value - totalFee.value);
+      }else{
+        showSupplyErr.value = supply.value > Helper.convertToExact(assetSupplyExact.value, assetDivisibility.value);
+      }
     });
 
     watch(supply, (n) => {
       if(selectAsset.value){
         transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, n, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
         transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectIncreaseDecrease.value, n, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      }
+      if(selectIncreaseDecrease.value == 'increase'){
+        showSupplyErr.value = supply.value > (balanceNumber.value - totalFee.value);
+      }else{
+        showSupplyErr.value = n > Helper.convertToExact(assetSupplyExact.value, assetDivisibility.value);
       }
     });
 

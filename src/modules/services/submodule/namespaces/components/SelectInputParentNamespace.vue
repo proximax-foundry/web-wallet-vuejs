@@ -60,6 +60,11 @@ export default defineComponent({
       toggleSelection.value = !toggleSelection.value;
     };
 
+    const clearLabel = () => {
+      selectedNamespace.value = '';
+      selectedNamespaceLabel.value = '';
+    }
+
     const namespaces = computed(() => {
       let namespace = [];
       namespace.push({
@@ -90,6 +95,7 @@ export default defineComponent({
       selectedNamespace,
       selectedNamespaceLabel,
       selectNs,
+      clearLabel
     };
   }
 })
