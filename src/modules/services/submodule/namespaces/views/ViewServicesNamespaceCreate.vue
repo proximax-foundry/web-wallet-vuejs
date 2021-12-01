@@ -248,10 +248,6 @@ export default {
       }
     });
 
-    const moreThanOneAccount = computed(()=> {
-      return accounts.value.length > 1;
-    });
-
     const transactionFee = ref(0);
     const transactionFeeExact = ref(0);
 
@@ -410,7 +406,6 @@ export default {
     return {
       Helper,
       accounts,
-      moreThanOneAccount,
       currentSelectedName,
       selectedAccName,
       selectedAccAdd,

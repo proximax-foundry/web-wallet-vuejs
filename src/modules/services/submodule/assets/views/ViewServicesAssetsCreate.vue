@@ -24,7 +24,7 @@
             </div>
           </div>
           <div class="lg:grid lg:grid-cols-2 mt-5">
-            <div class="lg:mr-2"><SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="balanceNumber" :placeholder="$t('services.supply')" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)? $t('scriptvalues.requiredfield'): $t('accounts.insufficientbalance')" :decimal="Number(divisibility)" toolTip="Please put the meaning of supply here.<br><br>Maximum supply is 900T.<br>Example: 900,000,000,000,000" /></div>
+            <div class="lg:mr-2"><SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="balanceNumber" :placeholder="$t('services.supply')" type="text" @show-error="updateSupplyErr" :showError="showSupplyErr" :errorMessage="(!supply)? $t('scriptvalues.requiredfield'): $t('accounts.insufficientbalance')" :decimal="Number(divisibility)" toolTip="Please put the meaning of supply here.<br><br>Maximum supply is 900T.<br>Example: 900,000,000,000,000" /></div>
             <div class="lg:ml-2"><NumberInputClean :disabled="showNoBalance||isNotCosigner" v-model="divisibility" :max="6" :placeholder="$t('services.divisibility')" :showError="showDivisibilityErr" errorMessage="Required Field - Only Numbers (0 - 6)" toolTip="Please put the meaning of divisibility here.<br><br>Maximum divisibility is 6.<br>Example: 0.000000" /></div>
           </div>
           <div class="lg:grid lg:grid-cols-2">
@@ -159,7 +159,7 @@ export default {
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && (divisibility.value != '') && (supply.value > 0) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value)
+      walletPassword.value.match(passwdPattern) && (divisibility.value != '') && (supply.value > 0) && (!showSupplyErr.value) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value)
     ));
 
     const isMultiSig = (address) => {
@@ -322,6 +322,10 @@ export default {
       }
     });
 
+    const updateSupplyErr = (bolError) => {
+      showSupplyErr.value = bolError;
+    }
+
     const createAsset = () => {
       if(cosigner.value){
         AssetsUtils.createAssetMultiSig( cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, selectedAccAdd.value); 
@@ -405,6 +409,7 @@ export default {
       networkState,
       Helper,
       splitCurrency,
+      updateSupplyErr,
     }
   },
 }
