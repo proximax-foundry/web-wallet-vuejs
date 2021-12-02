@@ -17,7 +17,7 @@ import { WalletStateUtils } from './state/utils/walletStateUtils';
 import { NetworkStateUtils } from './state/utils/networkStateUtils';
 import { ChainUtils } from './util/chainUtils';
 import { ChainAPICall } from './models/REST/chainAPICall';
-import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainSwapConfig } from "./models/stores/"
+import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainSwapConfig, ApplicationConfig } from "./models/stores/"
 
 // Import Font Awesome Icons
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -52,6 +52,24 @@ app.component('ConfirmDialog', ConfirmDialog);
 app.component('Toast', Toast);
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.component(VuePassword);
+
+const loadAppConfig = async() => {
+  try {
+    const config = await fetch('./applicationConfig.json', {
+      headers: {
+        'Cache-Control': 'no-store',
+        'Pragma' : 'no-cache'
+      }
+    }).then((res) => res.json()).then((configInfo) => { return configInfo });
+
+    let appConfig = new ApplicationConfig('applicationConfig');
+    appConfig.updateConfig(config);
+    appConfig.saveToLocalStorage();
+  } catch (e) {
+    console.error(e);
+  }
+}
+loadAppConfig();
 
 const chainProfileIntegration = async () => {
   try {
