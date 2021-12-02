@@ -22,17 +22,5 @@
     "swapAllowedMosaics": [
         { "namespaceId": "zarcade", "name": "xar", "divisibility": 4 },
         { "namespaceId": "prx", "name": "xpx", "divisibility": 6 }
-    ],
-    "jdenticonConfig": {
-        "hues": [211],
-        "lightness": {
-          "color": [0.32, 0.80],
-          "grayscale": [0.17, 0.82]
-        },
-        "saturation": {
-          "color": 1.00,
-          "grayscale": 0.00
-        },
-        "backColor": "#fff"
-      }
+    ]
 }

@@ -95,7 +95,7 @@ import { walletState } from '@/state/walletState';
 import { Helper } from '@/util/typeHelper';
 //import { OtherAccount } from '@/models/otherAccount';
 import {toSvg} from "jdenticon";
-import { ApplicationConfig } from '@/models/stores/applicationConfig';
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 
 export default{
   name: 'AccountTile',
@@ -131,10 +131,10 @@ export default{
       }
     })
 
-    let appConfig = new ApplicationConfig('applicationConfig');
-    appConfig.init();
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
 
-    const svgString = ref(toSvg(p.account.address, 50, appConfig.jdenticonConfig));
+    const svgString = ref(toSvg(p.account.address, 50, themeConfig.jdenticonConfig));
 
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;

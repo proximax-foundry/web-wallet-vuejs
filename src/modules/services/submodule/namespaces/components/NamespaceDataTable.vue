@@ -90,7 +90,7 @@ import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 import { WalletAccount } from '@/models/walletAccount';
 import { toSvg } from "jdenticon";
 import Tooltip from 'primevue/tooltip';
-import { ApplicationConfig } from '@/models/stores/applicationConfig';
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 
 export default{
   components: { DataTable, Column, SelectInputPluginClean },
@@ -225,8 +225,8 @@ export default{
 
       let formattedNamespaces = [];
 
-      let appConfig = new ApplicationConfig('applicationConfig');
-      appConfig.init();
+      let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+      themeConfig.init();
 
       for(let i=0; i < namespaces.length; ++i){
         let linkName = "";
@@ -261,7 +261,7 @@ export default{
           expiry: currentBlockHeight.value?expiryDate:'',
           explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].namespace.idHex,
           address: Helper.createAddress(namespaces[i].account.address).pretty(),
-          icon: toSvg(namespaces[i].account.address, 30, appConfig.jdenticonConfig)
+          icon: toSvg(namespaces[i].account.address, 30, themeConfig.jdenticonConfig)
         };
         formattedNamespaces.push(data);
         // isMenuShow.value[i] = false;

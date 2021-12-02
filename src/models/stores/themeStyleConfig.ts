@@ -1,6 +1,6 @@
 import { StoreProperties } from "./storeProperties";
 
-export class ApplicationConfig extends StoreProperties{
+export class ThemeStyleConfig extends StoreProperties{
 
   constructor(storeName: string){
     super(storeName);

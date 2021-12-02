@@ -95,7 +95,7 @@ import { ChainUtils } from "@/util/chainUtils";
 import { listenerState} from "@/state/listenerState";
 import { toSvg } from "jdenticon";
 import { useToast } from "primevue/usetoast";
-import { ApplicationConfig } from '@/models/stores/applicationConfig';
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 
 export default {
   name: 'ViewServicesNamespaceExtend',
@@ -201,10 +201,10 @@ export default {
       router.push({ name: "ViewServicesNamespace" });
     }
 
-    let appConfig = new ApplicationConfig('applicationConfig');
-    appConfig.init();
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
 
-    const svgString = ref(toSvg(Helper.createAddress(selectedAccAdd.value).pretty(), 40, appConfig.jdenticonConfig));
+    const svgString = ref(toSvg(Helper.createAddress(selectedAccAdd.value).pretty(), 40, themeConfig.jdenticonConfig));
 
     if(account){
       let namespace = account.namespaces.find( namespace => namespace.idHex === props.namespaceId);

@@ -117,7 +117,7 @@ import { toSvg } from "jdenticon";
 import { useI18n } from 'vue-i18n';
 import { useToast } from "primevue/usetoast";
 import Tooltip from 'primevue/tooltip';
-import { ApplicationConfig } from '@/models/stores/applicationConfig';
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 
 export default {
   name: 'ViewServicesAssetsModifySupplyChange',
@@ -209,10 +209,10 @@ export default {
       router.push({ name: "ViewServicesAssets" });
     }
 
-    let appConfig = new ApplicationConfig('applicationConfig');
-    appConfig.init();
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
 
-    const svgString = ref(toSvg(Helper.createAddress(selectedAccAdd.value).pretty(), 40, appConfig.jdenticonConfig));
+    const svgString = ref(toSvg(Helper.createAddress(selectedAccAdd.value).pretty(), 40, themeConfig.jdenticonConfig));
 
     const selectAsset = ref('');
     const assetDivisibility = ref(0);

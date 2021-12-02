@@ -33,7 +33,7 @@ import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { walletState } from '@/state/walletState';
 import { computed, defineComponent, ref } from 'vue';
 import { toSvg } from "jdenticon";
-import { ApplicationConfig } from '@/models/stores/applicationConfig';
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 
 export default defineComponent({
   emits:[
@@ -48,9 +48,9 @@ export default defineComponent({
   setup(p){
     const toggleSelection = ref(false);
 
-    let appConfig = new ApplicationConfig('applicationConfig');
-    appConfig.init();
-    let jdenticonConfig = appConfig.jdenticonConfig;
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
+    let jdenticonConfig = themeConfig.jdenticonConfig;
 
     const accounts = computed(() =>{
       var accountList = [];

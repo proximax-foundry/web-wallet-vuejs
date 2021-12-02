@@ -133,7 +133,7 @@ import PkPasswordModal from '@/modules/account/components/PkPasswordModal.vue'
 import PdfPasswordModal from '@/modules/account/components/PdfPasswordModal.vue'
 import DeleteAccountModal from '@/modules/account/components/DeleteAccountModal.vue'
 import { toSvg } from "jdenticon";
-import { ApplicationConfig } from '@/models/stores/applicationConfig';
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 
 export default {
   name: "ViewAccountDetails",
@@ -156,10 +156,10 @@ export default {
     var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
     const other_acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
 
-    let appConfig = new ApplicationConfig('applicationConfig');
-    appConfig.init();
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
 
-    const svgString = ref(toSvg(acc.address, 100, appConfig.jdenticonConfig));
+    const svgString = ref(toSvg(acc.address, 100, themeConfig.jdenticonConfig));
 
     if(!acc){
       if(other_acc)
