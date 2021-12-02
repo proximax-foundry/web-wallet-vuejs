@@ -67,6 +67,7 @@ import ConfirmDeleteContactModal from '@/modules/services/submodule/addressbook/
 import { Helper } from "@/util/typeHelper";
 import { walletState } from '@/state/walletState';
 import { toSvg } from "jdenticon";
+import { ApplicationConfig } from '@/models/stores/applicationConfig';
 
 export default{
   components: {
@@ -97,20 +98,9 @@ export default{
 
     const contactGroupsList = ref([]);
 
+    let appConfig = new ApplicationConfig('applicationConfig');
+    appConfig.init();
     const formattedContacts = computed(() => {
-
-      let jdenticonconfig = {
-          hues: [211],
-          lightness: {
-              color: [0.32, 0.80],
-              grayscale: [0.17, 0.82]
-          },
-          saturation: {
-              color: 1.00,
-              grayscale: 0.00
-          },
-          backColor: "#fff"
-      };
       let contracts = []
       if(walletState.currentLoggedInWallet.contacts != undefined){
         if(walletState.currentLoggedInWallet.contacts.length > 0){
@@ -121,7 +111,7 @@ export default{
                 name: contact.name,
                 address: Helper.createAddress(contact.address).pretty(),
                 group: contact.group,
-                svgString: toSvg(contact.address, 45, jdenticonconfig),
+                svgString: toSvg(contact.address, 45, appConfig.jdenticonConfig),
               };
               contracts.push(data);
               isMenuShow.value[i] = false;
@@ -134,7 +124,7 @@ export default{
                 name: contact.name,
                 address: Helper.createAddress(contact.address).pretty(),
                 group: contact.group,
-                svgString: toSvg(contact.address, 45, jdenticonconfig),
+                svgString: toSvg(contact.address, 45, appConfig.jdenticonConfig),
               };
               contracts.push(data);
               isMenuShow.value[i] = false;

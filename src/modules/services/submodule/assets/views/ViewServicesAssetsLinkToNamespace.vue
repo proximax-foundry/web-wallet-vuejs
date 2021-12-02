@@ -118,6 +118,7 @@ import { toSvg } from "jdenticon";
 import { useI18n } from 'vue-i18n';
 import { useToast } from "primevue/usetoast";
 import Tooltip from 'primevue/tooltip';
+import { ApplicationConfig } from '@/models/stores/applicationConfig';
 
 export default {
   name: 'ViewServicesAssetsLinkToNamespace',
@@ -210,20 +211,10 @@ export default {
       router.push({ name: "ViewServicesAssets" });
     }
 
-    let jdenticonconfig = {
-      hues: [211],
-      lightness: {
-          color: [0.32, 0.80],
-          grayscale: [0.17, 0.82]
-      },
-      saturation: {
-          color: 1.00,
-          grayscale: 0.00
-      },
-      backColor: "#fff"
-    };
+    let appConfig = new ApplicationConfig('applicationConfig');
+    appConfig.init();
 
-    const svgString = ref(toSvg(Helper.createAddress(selectedAccAdd.value).pretty(), 40, jdenticonconfig));
+    const svgString = ref(toSvg(Helper.createAddress(selectedAccAdd.value).pretty(), 40, appConfig.jdenticonConfig));
 
     const selectAsset = ref('');
     const assetDivisibility = ref(0);

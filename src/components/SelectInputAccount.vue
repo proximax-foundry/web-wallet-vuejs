@@ -48,9 +48,9 @@ export default defineComponent({
   setup(p){
     const toggleSelection = ref(false);
 
-    let jdenticon = new ApplicationConfig('applicationConfig');
-    jdenticon.init();
-    let jdenticonConfig = jdenticon.jdenticonConfig;
+    let appConfig = new ApplicationConfig('applicationConfig');
+    appConfig.init();
+    let jdenticonConfig = appConfig.jdenticonConfig;
 
     const accounts = computed(() =>{
       var accountList = [];

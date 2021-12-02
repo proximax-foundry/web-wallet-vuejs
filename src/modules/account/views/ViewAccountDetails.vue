@@ -156,10 +156,10 @@ export default {
     var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
     const other_acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
 
-    let jdenticon = new ApplicationConfig('applicationConfig');
-    jdenticon.init();
+    let appConfig = new ApplicationConfig('applicationConfig');
+    appConfig.init();
 
-    const svgString = ref(toSvg(acc.address, 100, jdenticon.jdenticonConfig));
+    const svgString = ref(toSvg(acc.address, 100, appConfig.jdenticonConfig));
 
     if(!acc){
       if(other_acc)
