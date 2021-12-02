@@ -90,7 +90,7 @@
           <div id="public" class="text-xs font-semibold mt-1 break-all" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
           <font-awesome-icon icon="copy" @click="copy('public')" title='Copy' class="ml-2 pb-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
         </div>
-        <div class='my-6 gray-line'></div>
+        <div v-if='!other_acc' class='my-6 gray-line'></div>
         <div v-if='!other_acc' >
           <div class = 'text-xxs text-blue-primary mt-0.5 font-semibold'>PRIVATE KEY</div>
           <div class='flex '>
@@ -168,7 +168,7 @@ export default {
       backColor: "#fff"
     };
 
-    const svgString = ref(toSvg(acc.address, 100, jdenticonconfig));
+   
 
     if(!acc){
       if(other_acc)
@@ -179,6 +179,7 @@ export default {
     if(p.accountCreated){
       showModal.value= true
     }
+     const svgString = ref(toSvg(acc.address, 100, jdenticonconfig));
     const isDefault = (acc.default == true) ? true: false
     if (acc === -1) {
       router.push({name: "ViewAccountDisplayAll"});
