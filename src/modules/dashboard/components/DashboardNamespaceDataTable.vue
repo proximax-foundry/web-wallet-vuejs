@@ -13,7 +13,7 @@
       <Column :style="{ width: '50px' }">
         <template #body="{data}">
           <div class="text-center">
-            <div class="rounded-full w-2 h-2 inline-block" :class="data.expiring?'bg-yellow-500':'bg-green-500'"></div>
+            <div class="rounded-full w-2 h-2 inline-block" :class="data.expiring=='expired'?'bg-red-500':(data.expiring=='expiring'?'bg-yellow-500':'bg-green-500')"></div>
           </div>
         </template>
       </Column>
@@ -35,13 +35,13 @@
       </Column>
       <Column field="linkType" header="EXPIRES" :style="{ width: '150px' }">
         <template #body="{data}">
-          <div class="data.expiryRelative text-xs" v-if="data.expiryRelative">in {{ data.expiryRelative }}</div>
+          <div class="data.expiryRelative text-xs" v-if="data.expiryRelative">{{ data.expiryRelative }}</div>
           <div class="text-gray-300 text-xs" v-else>Fetching..</div>
         </template>
       </Column>
       <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" :style="{ width: '180px' }">
         <template #body="{data}">
-          <span :class="data.expiring?'text-yellow-600':'text-gray-700'">{{ data.expiry }}</span>
+          <span :class="data.expiring=='expired'?'text-red-500':(data.expiring=='expiring'?'text-yellow-500':'text-green-500')">{{ data.expiry }}</span>
         </template>
       </Column>
       <Column style="width: 50px;">
@@ -131,6 +131,18 @@ export default{
         let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
         let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
         let expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
+
+        let expiryStatus;
+        if(blockDifference > 0){
+          if((blockDifference < (blockTargetTimeByDay * 14))){
+            expiryStatus = 'expiring';
+          }else{
+            expiryStatus = 'valid';
+          }
+        }else{
+          expiryStatus = 'expired';
+        }
+
         let data = {
           i: i,
           idHex: namespaces[i].idHex,
@@ -138,8 +150,8 @@ export default{
           linkType: linkName,
           linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
           endHeight: namespaces[i].endHeight,
-          expiring: (blockDifference < (blockTargetTimeByDay * 14)),
-          expiryRelative: currentBlockHeight?relativeTime(expiryDay, expiryHour, expiryMin):'',
+          expiring: expiryStatus,
+          expiryRelative: currentBlockHeight?((blockDifference > 0)?'In ' + relativeTime(expiryDay, expiryHour, expiryMin):'Expired'):'',
           expiry: currentBlockHeight?expiryDate:'',
           explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].idHex,
           address: Helper.createAddress(account.address).pretty()
