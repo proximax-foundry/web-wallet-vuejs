@@ -13,7 +13,7 @@
         <img src="@/assets/img/icon-blockheight.svg" class="h-10 w-10 inline-block">
         <div class="ml-3">
           <div class="uppercase text-txs text-gray-400">block height</div>
-          <div class="text-md mt-1" :class="currentBlockHeight==0?'text-gray-400':'text-gray-800 font-bold'">{{ currentBlockHeight==0?'Fetching...':currentBlockHeight }}</div>
+          <div class="text-md mt-1" :class="currentBlockHeight==0?'text-gray-300':'text-gray-800 font-bold'">{{ currentBlockHeight==0?'Fetching...':currentBlockHeight }}</div>
         </div>
       </div>
 

@@ -1,58 +1,56 @@
 <template>
   <div>
     <div class="text-right">
-      <SelectInputPluginClean v-model="filterNamespaces" :options="listAccounts" :selectDefault="selectedAddress" class="w-60 mr-4 inline-block" />
+      <SelectInputPluginClean v-model="filterNamespaces" :options="listAccounts" :selectDefault="selectedAddress" class="w-60 inline-block" />
     </div>
     <DataTable
       :value="generateDatatable"
       :paginator="true"
-      :rows="20"
-      responsiveLayout="scroll"
+      :rows="10"
       :alwaysShowPaginator="false"
-      scrollDirection="horizontal"
-      paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-      currentPageReportTemplate=""
+      responsiveLayout="scroll"
+      tableStyle="table-layout: auto"
       >
-      <Column :style="{ width: '50px' }">
+      <Column style="min-width:3px">
         <template #body="{data}">
           <div class="text-center">
             <div class="rounded-full w-2 h-2 inline-block" :class="data.expiring=='expired'?'bg-red-500':(data.expiring=='expiring'?'bg-yellow-500':'bg-green-500')"></div>
           </div>
         </template>
       </Column>
-      <Column field="name" header="NAME" :style="{ width: '200px' }">
+      <Column field="name" header="NAME" style="min-width:160px">
         <template #body="{data}">
           <span class="text-xs">{{data.name}}</span>
         </template>
       </Column>
-      <Column field="namespaceId" header="NAMESPACE ID" :style="{ width: '180px' }">
+      <Column field="namespaceId" header="NAMESPACE ID" style="min-width:180px">
         <template #body="{data}">
           <span class="text-xs uppercase">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedId" header="LINKED ASSET / ADDRESS" :style="{ width: '250px' }">
+      <Column field="linkedId" header="LINKED ASSET / ADDRESS" style="min-width:200px">
         <template #body="{data}">
           <span class="uppercase text-xs" v-if="data.linkedId">{{ data.linkedId }}</span>
           <span class="text-xs" v-else>No linked asset</span>
         </template>
       </Column>
-      <Column field="linkType" header="EXPIRES" :style="{ width: '150px' }">
+      <Column field="linkType" header="EXPIRES" style="min-width:150px">
         <template #body="{data}">
           <div class="data.expiryRelative text-xs" v-if="data.expiryRelative">{{ data.expiryRelative }}</div>
           <div class="text-gray-300 text-xs" v-else>Fetching..</div>
         </template>
       </Column>
-      <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" :style="{ width: '210px' }">
+      <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" style="min-width:210px">
         <template #body="{data}">
           <span class="text-xs" :class="data.expiring=='expired'?'text-red-500':(data.expiring=='expiring'?'text-yellow-500':'text-green-500')">{{ data.expiry }}</span>
         </template>
       </Column>
-      <Column field="Account" header="ACCOUNT" :style="{ width: '120px' }">
+      <Column field="Account" header="ACCOUNT" style="min-width:60px" bodyStyle="text-align: center; overflow: visible">
         <template #body="{data}">
           <div v-html="data.icon" class="inline-block" v-tooltip.bottom="'<tiptitle>WALLET ADDRESS</tiptitle><tiptext>' + data.address + '</tiptext>'"></div>
         </template>
       </Column>
-      <Column style="width: 50px;">
+      <Column style="min-width:30px;">
         <template #body="{data}">
           <div class="text-txs text-center lg:mr-2" @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
             <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">

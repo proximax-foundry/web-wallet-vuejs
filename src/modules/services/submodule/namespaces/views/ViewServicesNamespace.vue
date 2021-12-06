@@ -1,11 +1,11 @@
 <template>
   <div>
-    <div class='w-9/12 ml-auto mr-auto mt-5'>
+    <div class='ml-2 mr-2 md:w-9/12 md:ml-auto md:mr-auto mt-5'>
       <div v-if="namespaces.length > 0">
         <div class="flex justify-between text-sm">
           <div><span class="text-gray-700">{{$t('services.namespaces')}}</span></div>
         </div>
-        <NamespaceDataTable class="mt-10" :key="defaultIndex" :currentBlockHeight="currentBlock" :address="address"></NamespaceDataTable>
+        <NamespaceDataTable class="mt-10 block overflow-hidden" :key="defaultIndex" :currentBlockHeight="currentBlock" :address="address"></NamespaceDataTable>
         <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="bg-blue-primary px-5 py-3 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-60"><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2"> Register New Namespace</router-link>
       </div>
       <div v-else>
