@@ -302,9 +302,10 @@ export default {
         messageText.value.length && recipient.value.length > 0
       );
     });
+
     const disableCreate = computed(() => {
       return !(
-        numTransactions.value < 0
+        (walletPassword.value.length > 8) && (savedTransactions.length > 0)
       );
     });
 
