@@ -102,7 +102,7 @@ export default {
           }
         } 
       } else {
-        err.value = $t('scriptvalues.accountnametaken');
+        err.value = t('scriptvalues.accountnametaken');
       }
     };
     return{

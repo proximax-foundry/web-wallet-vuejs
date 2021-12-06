@@ -20,7 +20,7 @@
         <div class="flex flex-col gap-2">
           <div v-for="(coSignAddress, index) in coSign" :key="index" >
             <div class="flex">
-              <img  src="@/modules/account/submodule/multisig/img/icon-delete.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
+              <img  src="@/modules/account/submodule/multisig/img/icon-delete-red.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
               <TextInput class='w-5/12 mr-2 ' placeholder="Name"  v-model="contactName[index]" :disabled="true"  />
               <TextInput class='w-7/12 mr-2 ' placeholder="Address/Public Key" errorMessage="Invalid Input" :showError="showAddressError[index]" v-model="coSign[index]" />
               <div v-if="showAddressError[index]==true " class="mt-16"/>

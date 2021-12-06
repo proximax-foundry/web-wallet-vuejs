@@ -42,7 +42,7 @@
                     <div class="text-txs text-gray-400">Create an on-chain unique space</div>
                   </div>
                 </router-link>
-                <router-link :to="{ name: 'ViewAccountCreate'}" class="hover:bg-gray-200 p-2 block">
+                <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="hover:bg-gray-200 p-2 block">
                   <div class="inline-block mr-2">
                     <img src="@/assets/img/icon-header-account.svg" class="">
                   </div>

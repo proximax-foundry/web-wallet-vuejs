@@ -32,19 +32,19 @@
       <div class='border-2'>
         <div class='flex'>
           <div v-html='svgString'></div>
-          <div class='flex flex-col justify-center'>
+          <div class='flex flex-col justify-center ml-4'>
             <div class='flex '>
-              <div class = ' ml-4 font-semibold text-md' v-if='showName'>{{ accountNameDisplay }}</div>
+              <div class = '  font-semibold text-md' v-if='showName'>{{ accountNameDisplay }}</div>
               <input class='outline-none ml-4 font-semibold text-md'  v-model='accountName' v-if='!showName'/>
               <img src="@/modules/account/img/edit-icon.svg"  v-if='showName' @click='showName=!showName' title='Edit Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
               <img src="@/modules/account/img/edit-icon.svg"  v-if='!showName'  @click="changeName()" title='Confirm Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
             </div>
-            <div class='flex'> 
-              <div  v-if='isDefault' class = 'ml-3 px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm'>
+            <div class='flex gap-2'> 
+              <div  v-if='isDefault' class = ' px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm'>
                 <img src="@/modules/account/img/icon-pin.svg" class = 'h-4 w-4 ' title='This is your default account everytime you login'>
                 <p class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is your default account everytime you login' >DEFAULT</p>
               </div>
-              <div v-if='isMultiSig' class = 'ml-1.5 px-1 py-0.5 flex mt-0.5 bg-orange-primary rounded-sm '>
+              <div v-if='isMultiSig' class = ' px-1 py-0.5 flex mt-0.5 bg-orange-primary rounded-sm '>
                 <img v-if='isMultiSig' src="@/assets/img/icon-key.svg" class = 'h-4 w-4 mr-1' title='This is your default account everytime you login'>
                 <p v-if='isMultiSig' class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is a multisig account' >MULTISIG</p>
               </div>
@@ -90,7 +90,7 @@
           <div id="public" class="text-xs font-semibold mt-1 break-all" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
           <font-awesome-icon icon="copy" @click="copy('public')" title='Copy' class="ml-2 pb-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
         </div>
-        <div class='my-6 gray-line'></div>
+        <div v-if='!other_acc' class='my-6 gray-line'></div>
         <div v-if='!other_acc' >
           <div class = 'text-xxs text-blue-primary mt-0.5 font-semibold'>PRIVATE KEY</div>
           <div class='flex '>
@@ -159,7 +159,7 @@ export default {
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
 
-    const svgString = ref(toSvg(acc.address, 100, themeConfig.jdenticonConfig));
+   
 
     if(!acc){
       if(other_acc)
@@ -167,6 +167,7 @@ export default {
         acc = other_acc;
       }
     }
+     
     if(p.accountCreated){
       showModal.value= true
     }
@@ -174,6 +175,7 @@ export default {
     if (acc === -1) {
       router.push({name: "ViewAccountDisplayAll"});
     }
+    const svgString = ref(toSvg(acc.address, 100, themeConfig.jdenticonConfig));
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const prettyAddress = Helper.createAddress(acc.address).pretty();

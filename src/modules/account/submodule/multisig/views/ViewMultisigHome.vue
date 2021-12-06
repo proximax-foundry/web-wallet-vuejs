@@ -90,7 +90,7 @@ export default {
         return walletState.currentLoggedInWallet.accounts.find(account=>account.address == convertAddress(publicKey).plain())
       }
       const getAccountName = (publicKey) =>{
-        return findAccount(publicKey) ? findAccount(publicKey).name : convertAddress(publicKey).plain().substr(-4)
+        return findAccount(publicKey) ? findAccount(publicKey).name : `Cosigner-${convertAddress(publicKey).plain().substr(-4)}`
       }
       let multisigAccountsList = computed(()=>{
         let multisigAccountsList= []
