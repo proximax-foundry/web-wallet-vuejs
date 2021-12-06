@@ -169,7 +169,7 @@ export default {
     if(p.accountCreated){
       showModal.value= true
     }
-     const svgString = ref(toSvg(acc.address, 100, jdenticonconfig));
+     const svgString = ref(toSvg(acc.address, 100, themeConfig));
     const isDefault = (acc.default == true) ? true: false
     if (acc === -1) {
       router.push({name: "ViewAccountDisplayAll"});
