@@ -132,7 +132,8 @@ import qrcode from 'qrcode-generator';
 import PkPasswordModal from '@/modules/account/components/PkPasswordModal.vue'
 import PdfPasswordModal from '@/modules/account/components/PdfPasswordModal.vue'
 import DeleteAccountModal from '@/modules/account/components/DeleteAccountModal.vue'
-import {toSvg} from "jdenticon";
+import { toSvg } from "jdenticon";
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 
 export default {
   name: "ViewAccountDetails",
@@ -155,20 +156,10 @@ export default {
     var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
     const other_acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
 
-    let jdenticonconfig = {
-      hues: [211],
-      lightness: {
-          color: [0.32, 0.80],
-          grayscale: [0.17, 0.82]
-      },
-      saturation: {
-          color: 1.00,
-          grayscale: 0.00
-      },
-      backColor: "#fff"
-    };
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
 
-   
+    const svgString = ref(toSvg(acc.address, 100, themeConfig.jdenticonConfig));
 
     if(!acc){
       if(other_acc)

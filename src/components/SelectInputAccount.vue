@@ -1,7 +1,7 @@
 <template>
   <div @click='toggleSelection = !toggleSelection' class= "border ml-auto mr-auto py-3 px-2 cursor-pointer rounded-md">
     <div class='flex'>
-      <div v-html="toSvg('account', 25, jdenticonconfig)" v-if='!selectedImg'></div>
+      <div v-html="toSvg('account', 25, jdenticonConfig)" v-if='!selectedImg'></div>
       <div v-html="selectedImg" v-else></div>
       <div class='flex flex-col ml-2'>
         <div class='text-blue-primary font-semibold text-xxs'  style="line-height: 9px;">ACCOUNT</div>
@@ -18,7 +18,7 @@
     <div v-if='accounts.length>0' class="pl-2 pt-4 text-xxs text-gray-400">SELECT ACCOUNT</div>
     <div v-else class='text-xxs pt-2 pl-2 pb-2' >The list is empty.</div>
     <div v-for='(items,index) in accounts' :key="items" class="px-2 py-3 flex cursor-pointer items-center" @click="selectAccount(items.label, items.value);$emit('update:modelValue', selectedAddress);$emit('select-account', selectedAddress);" :class='`${(index != accounts.length - 1)?"border-b border-gray-200":""}`'>
-      <div v-html="toSvg(items.value, 20, jdenticonconfig)"></div>
+      <div v-html="toSvg(items.value, 20, jdenticonConfig)"></div>
       <div class='text-xs ml-2 font-semibold'>{{items.label}}</div>
       <div v-if='items.label!=selectedAccount' class='cursor-pointer text-blue-primary text-xxs mt-0.5 ml-auto font-semibold'>SELECT</div>
       <div v-else class='text-gray-500 text-xxs mt-0.5 ml-auto'>CURRENT</div>
@@ -31,8 +31,9 @@
 import { networkState } from '@/state/networkState';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { walletState } from '@/state/walletState';
-import { computed, defineComponent, ref, watch, getCurrentInstance } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import { toSvg } from "jdenticon";
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 
 export default defineComponent({
   emits:[
@@ -46,21 +47,10 @@ export default defineComponent({
 
   setup(p){
     const toggleSelection = ref(false);
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
-    let jdenticonconfig = {
-      hues: [211],
-      lightness: {
-          color: [0.32, 0.80],
-          grayscale: [0.17, 0.82]
-      },
-      saturation: {
-          color: 1.00,
-          grayscale: 0.00
-      },
-      backColor: "#fff"
-    };
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
+    let jdenticonConfig = themeConfig.jdenticonConfig;
 
     const accounts = computed(() =>{
       var accountList = [];
@@ -81,11 +71,11 @@ export default defineComponent({
 
     const selectedAccount = ref(accounts.value.find(acc => acc.value == p.selectDefault).label);
     const selectedAddress = ref(p.selectDefault);
-    const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonconfig));
+    const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonConfig));
     const selectAccount = (accountName, accountAddress) => {
       selectedAccount.value = accountName;
       selectedAddress.value = accountAddress;
-      selectedImg.value = toSvg(accountAddress, 25, jdenticonconfig);
+      selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
       toggleSelection.value = !toggleSelection.value;
     };
 
@@ -96,7 +86,7 @@ export default defineComponent({
       accounts,
       toggleSelection,
       selectedAccount,
-      jdenticonconfig,
+      jdenticonConfig,
       toSvg
     };
   }
