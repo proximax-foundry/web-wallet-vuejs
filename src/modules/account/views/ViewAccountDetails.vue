@@ -159,6 +159,7 @@ export default {
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
 
+    const svgString = ref(toSvg(acc.address, 100, themeConfig.jdenticonConfig));
 
     if(!acc){
       if(other_acc)
@@ -169,7 +170,6 @@ export default {
     if(p.accountCreated){
       showModal.value= true
     }
-     const svgString = ref(toSvg(acc.address, 100, themeConfig));
     const isDefault = (acc.default == true) ? true: false
     if (acc === -1) {
       router.push({name: "ViewAccountDisplayAll"});
