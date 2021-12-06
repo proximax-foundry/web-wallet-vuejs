@@ -24,17 +24,6 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _sta
 
 /***/ }),
 
-/***/ "./src/assets/img/chevron_right.svg":
-/*!******************************************!*\
-  !*** ./src/assets/img/chevron_right.svg ***!
-  \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-eval("module.exports = __webpack_require__.p + \"assets/img/chevron_right.e5f72240.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/chevron_right.svg?");
-
-/***/ }),
-
 /***/ "./src/modules/account/submodule/multisig/views/ViewMultisigHome.vue":
 /*!***************************************************************************!*\
   !*** ./src/modules/account/submodule/multisig/views/ViewMultisigHome.vue ***!
