@@ -24,6 +24,15 @@
         <div v-else-if="isNotCosigner" class="rounded-md bg-yellow-200 w-full p-2 flex items-center justify-center">
           <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('accounts.cosigwarning2')}}</div>
         </div>
+        <div class="error error_box" v-if="err!=''">{{ err }}</div>
+        <div class="text-right w-full">
+          <div v-if="getMultiSigCosigner.list.length > 0" class="inline-block">
+            <div class="text-tsm text-left mt-3">{{$t('transfer.cosigner')}}:
+              <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.list[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+              <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
+            </div>
+          </div>
+        </div>
         <div class="border border-blue-primary p-4 bg-blue-100 flex items-center rounded mt-5">
           <img src="@/modules/services/submodule/assets/img/icon-asset.svg">
           <div class="ml-1">
@@ -55,15 +64,6 @@
           <SelectLinkType title="modification type" class="lg:mr-4" v-model="selectAction" :disabled="disabledSelectAction" />
           <SelectInputNamespace :action="selectAction" v-model="selectNamespace" :address="selectedAccAdd" :assetId="selectAsset" />
         </div>
-        <div class="error error_box" v-if="err!=''">{{ err }}</div>
-        <div class="mt-4">
-          <div v-if="getMultiSigCosigner.list.length > 0">
-            <div class="text-tsm text-left mt-3">{{$t('transfer.cosigner')}}:
-              <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.list[0].balance, 0) }} XPX) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
-              <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
-            </div>
-          </div>
-        </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
         <div class="font-semibold text-xxs text-blue-primary">ACCOUNT CURRENT BALANCE</div>
@@ -74,10 +74,6 @@
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
           <div class="font-semibold">Transaction Fee</div>
           <div v-html="splitCurrency(transactionFee)"></div>
-        </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-          <div class="font-semibold">Rental Fee</div>
-          <div v-html="splitCurrency(rentalFeeCurrency)"></div>
         </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
           <div class="font-semibold">{{$t('accounts.lockfund')}}</div>
@@ -94,7 +90,7 @@
         <div class='text-xs text-white mt-5'>Enter your password to continue</div>
         <div class='text-xs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
         <PasswordInput :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
-        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="linkNamespace">Link to Namespace</button>
+        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="linkNamespace">{{ (selectAction=='link')?'Link to':'Unlink' }} Namespace</button>
         <div class="text-center">
           <router-link :to="{name: 'ViewServicesAssets'}" class='content-center text-xs text-white border-b-2 border-white'>Cancel</router-link>
         </div>
@@ -122,6 +118,7 @@ import { toSvg } from "jdenticon";
 import { useI18n } from 'vue-i18n';
 import { useToast } from "primevue/usetoast";
 import Tooltip from 'primevue/tooltip';
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 
 export default {
   name: 'ViewServicesAssetsLinkToNamespace',
@@ -167,9 +164,9 @@ export default {
       walletPassword.value.match(passwdPattern) && (selectNamespace.value != '')
     ));
 
-    const selectedAccName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
-    const selectedAccAdd = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
-    const balance = ref(Helper.toCurrencyFormat(walletState.currentLoggedInWallet.selectDefaultAccount().balance, networkState.currentNetworkProfile.network.currency.divisibility));
+    const selectedAccName = ref('');
+    const selectedAccAdd = ref('');
+    const balance = ref('');
     const balanceNumber = ref(maxAmount);
 
     const isMultiSig = (address) => {
@@ -186,45 +183,38 @@ export default {
 
     const isMultiSigBool = ref(isMultiSig(selectedAccAdd.value));
 
-    const showNoBalance = ref(false);
+    const showNoBalance = computed(() => {
+      if(isNotCosigner.value){
+        return balanceNumber.value < (transactionFeeExact.value);
+      }else{
+        return balanceNumber.value < (transactionFeeExact.value + lockFundTotalFee.value);
+      }
+    });
+
     const showNoAsset = ref(false);
     const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value) && !showNoAsset.value);
 
     const supply = ref('0');
 
-    // get asset id
-    let other;
     let account = walletState.currentLoggedInWallet.accounts.find((account) => Helper.createAddress(account.address).pretty() == props.address);
-    if(account != undefined){
-      selectedAccName.value = account.name;
-      selectedAccAdd.value = Helper.createAddress(account.address).pretty();
-      balance.value = account.balance;
-    }else{
-      other = walletState.currentLoggedInWallet.others.find((account) => account.address == props.address);
-      if(other != undefined){
-        selectedAccName.value = other.name;
-        selectedAccAdd.value = Helper.createAddress(other.address).pretty();
-        balance.value = other.balance;
-      }else{
-        toast.add({severity:'error', detail: 'Addres is invalid', group: 'br', life: 3000});
-        router.push({ name: "ViewServicesAssets" });
-      }
+    if(!account){
+      account = walletState.currentLoggedInWallet.others.find((account) => Helper.createAddress(account.address).pretty() == props.address);
     }
 
-    let jdenticonconfig = {
-      hues: [211],
-      lightness: {
-          color: [0.32, 0.80],
-          grayscale: [0.17, 0.82]
-      },
-      saturation: {
-          color: 1.00,
-          grayscale: 0.00
-      },
-      backColor: "#fff"
-    };
+    if(account != undefined){
+      selectedAccName.value = account.name;
+      selectedAccAdd.value = account.address;
+      balance.value = Helper.toCurrencyFormat(account.balance, networkState.currentNetworkProfile.network.currency.divisibility);
+      balanceNumber.value = account.balance;
+    }else{
+      toast.add({severity:'error', detail: 'Addres is invalid', group: 'br', life: 3000});
+      router.push({ name: "ViewServicesAssets" });
+    }
 
-    const svgString = ref(toSvg(selectedAccAdd.value, 40, jdenticonconfig));
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
+
+    const svgString = ref(toSvg(Helper.createAddress(selectedAccAdd.value).pretty(), 40, themeConfig.jdenticonConfig));
 
     const selectAsset = ref('');
     const assetDivisibility = ref(0);
@@ -250,7 +240,6 @@ export default {
 
     const transactionFee = ref('0.000000');
     const transactionFeeExact = ref(0);
-    const rentalFeeCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.mosaicRentalFee, networkState.currentNetworkProfile.network.currency.divisibility) );
 
     const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
 
@@ -258,7 +247,20 @@ export default {
       return AssetsUtils.getCosignerList(selectedAccAdd.value);
     });
 
-    transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+    const cosigner = ref('');
+    // get cosigner
+    // if it is a multisig
+    if(getMultiSigCosigner.value.list.length > 0){
+      if(getMultiSigCosigner.value.list.length > 1){
+        cosigner.value = cosignerAddress.value;
+      }else{
+        cosigner.value = getMultiSigCosigner.value.list[0].address;
+      }
+    }else{
+      cosigner.value = '';
+    }
+
+    transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
     transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
 
     const linkNamespace = () => {
@@ -266,21 +268,23 @@ export default {
       if(selectAction.value=='link'){
         assetId = selectAsset.value;
       }else{
-        const account = walletState.currentLoggedInWallet.accounts.find((account) => Helper.createAddress(account.address).pretty() == selectedAccAdd.value);
-        const other = walletState.currentLoggedInWallet.others.find((account) => Helper.createAddress(account.address).pretty() == selectedAccAdd.value);
-        assetId = account?account.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId:other.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
+        let account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == selectedAccAdd.value);
+        if(!account){
+          account = walletState.currentLoggedInWallet.others.find((account) => account.address == selectedAccAdd.value);
+        }
+        assetId = account.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
       }
       if(cosigner.value){
         AssetsUtils.linkedNamespaceToAssetMultiSig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value, selectedAccAdd.value);
       }else{
         AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value );
       }
-      router.push({ name: "ViewServicesAssets"});
+      router.push({ name: "ViewServicesAssets", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()} });
     };
 
     watch(selectAction, (n) => {
       if(selectAsset.value){
-        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
         transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
         balanceNumber.value = (n=='increase'?maxAmount:parseFloat(assetSupply.value));
       }else{
@@ -291,7 +295,7 @@ export default {
 
     watch(supply, (n) => {
       if(selectAsset.value){
-        transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, n, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, n, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
         transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, n, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
       }
     });
@@ -317,14 +321,14 @@ export default {
 
     watch(totalFee, (n) => {
       if(balance.value < n){
-        if(!showNoAsset.value){
-          if(!isNotCosigner.value){
-            showNoBalance.value = true;
-          }
-        }
+        // if(!showNoAsset.value){
+        //   if(!isNotCosigner.value){
+        //     showNoBalance.value = true;
+        //   }
+        // }
         setFormInput(true);
       }else{
-        showNoBalance.value = false;
+        // showNoBalance.value = false;
         setFormInput(false);
       }
     });
@@ -353,21 +357,6 @@ export default {
       }
     });
 
-    const cosigner = ref('');
-    // get cosigner
-    watch(getMultiSigCosigner, (n) => {
-      // if it is a multisig
-      if(n.list.length > 0){
-        if(n.list.length > 1){
-          cosigner.value = cosignerAddress.value;
-        }else{
-          cosigner.value = n.list[0].address;
-        }
-      }else{
-        cosigner.value = '';
-      }
-    });
-
     const splitCurrency = (amount) => {
       let split = amount.toString().split(".")
       if (split[1]!=undefined){
@@ -378,6 +367,7 @@ export default {
     };
 
     return{
+      currentNativeTokenName,
       selectedAccName,
       selectedAccAdd,
       balance,
@@ -403,7 +393,6 @@ export default {
       selectAction,
       linkNamespace,
       transactionFee,
-      rentalFeeCurrency,
       transactionFeeExact,
       assetSupply,
       assetDivisibility,
@@ -413,6 +402,7 @@ export default {
       getMultiSigCosigner,
       cosignerBalanceInsufficient,
       cosignerAddress,
+      cosigner,
       isNotCosigner,
       disabledSelectAction,
       splitCurrency,

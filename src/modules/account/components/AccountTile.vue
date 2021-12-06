@@ -50,7 +50,7 @@
           <font-awesome-icon icon="copy" @click="copy(account.address)" class="w-5 h-5 text-gray-500 cursor-pointer inline-block"></font-awesome-icon>
         </div>
         <div class="flex justify-between">
-          <div class="inline-block mr-4"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"><span class="text-xs">{{ account.balance }} XPX</span></div>
+          <div class="inline-block mr-4"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"><span class="text-xs">{{ account.balance }} {{ currentNativeTokenName }}</span></div>
           <div class="inline-block mr-4" v-if="mosaicNum>0" :title="`Other mosaic${(mosaicNum>1)?'s':''}: ${mosaicNum}`"><img src="@/modules/account/img/icon-mosaics-green-16h.svg" class="w-5 inline mr-1"><span class="text-xs">{{ mosaicNum }}</span></div>
           <div class="relative inline-block text-left" @mouseover="hoverOverMenu" @mouseout="hoverOutMenu">
             <div>
@@ -95,6 +95,8 @@ import { walletState } from '@/state/walletState';
 import { Helper } from '@/util/typeHelper';
 //import { OtherAccount } from '@/models/otherAccount';
 import {toSvg} from "jdenticon";
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
+
 export default{
   name: 'AccountTile',
   props: ['account','showMenuCall', 'i'],
@@ -112,18 +114,7 @@ export default{
         return p.account.name;
       }
     })
-    let jdenticonconfig = {
-      hues: [211],
-      lightness: {
-          color: [0.32, 0.80],
-          grayscale: [0.17, 0.82]
-      },
-      saturation: {
-          color: 1.00,
-          grayscale: 0.00
-      },
-      backColor: "#fff"
-    };
+
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
     const accountBalance = computed(
@@ -140,7 +131,10 @@ export default{
       }
     })
 
-    const svgString = ref(toSvg(p.account.address, 50, jdenticonconfig));
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
+
+    const svgString = ref(toSvg(p.account.address, 50, themeConfig.jdenticonConfig));
 
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;

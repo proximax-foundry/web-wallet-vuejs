@@ -54,7 +54,7 @@
           </div>
           <div class="col-span-1 md:col-span-3">
             <div class="rounded-2xl bg-gray-100 p-5 my-5">
-              <div class="inline-block text-center self-centerk <div>mHellr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}}   XPX</div>
+              <div class="inline-block text-center self-centerk <div>mHellr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{ currentNativeTokenName }}</div>
             </div>
           </div>
         </div>
@@ -86,7 +86,7 @@
             </div>
             <div class="col-span-1 md:col-span-3">
               <div class="rounded-2xl bg-gray-100 p-5 my-5">
-                <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}}   XPX</div>
+                <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{ currentNativeTokenName }}</div>
               </div>
             </div>
           </div>
@@ -106,7 +106,7 @@
             </div>
             <div class="col-span-1 md:col-span-3">
               <div class="rounded-2xl bg-gray-100 p-5 my-5">
-                <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}}   XPX</div>
+                <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{ currentNativeTokenName }}</div>
               </div>
               <div class="rounded-2xl bg-gray-100 p-5 my-5">
                 <div class="inline-block mr-4 text-xs"><div class="text-tsm">{{$t('vote.optionslist')}}</div><div class="mt-2 text-tsm"><DisplayOptionModal :options="options" class="inline-block" /> | <a @click="navigateTo(2)" class="text-blue-primary font-bold">{{$t('vote.edit')}}</a></div></div>
@@ -147,7 +147,7 @@
             </div>
             <div class="col-span-1 md:col-span-3">
               <div class="rounded-2xl bg-gray-100 p-5 my-5">
-                <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}}   XPX</div>
+                <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{ currentNativeTokenName }}</div>
               </div>
               <div class="rounded-2xl bg-gray-100 p-5 my-5">
                 <div class="inline-block mr-4 text-xs"><div class="text-tsm">Options List</div><div class="mt-2 text-tsm"><DisplayOptionModal :options="options" class="inline-block" /> | <a @click="navigateTo(2)" class="text-blue-primary font-bold">{{$t('vote.edit')}}</a></div></div>
@@ -188,6 +188,7 @@ export default {
   },
 
   setup() {
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const toast = useToast();
     // const internalInstance = getCurrentInstance();
     // const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -349,6 +350,7 @@ export default {
       visitedPage,
       verifiedPage,
       createPoll,
+      currentNativeTokenName,
     };
   },
 }

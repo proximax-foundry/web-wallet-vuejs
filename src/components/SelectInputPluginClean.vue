@@ -1,7 +1,8 @@
 <template>
   <div>
-    <div class="border border-gray-200 select selectPlugin py-1" :class="`${ !placeholder?'pt-2':'' }`">
+    <div class="border border-gray-200 select selectPlugin py-1 relative" :class="`${ !placeholder?'pt-2':'' }`">
       <div class="uppercase text-gray-400 font-light text-txs text-left mb-2 pl-2" v-if="placeholder">{{ placeholder }}</div>
+      <img src="@/assets/img/icon-arrow-down.svg" class="inline-block float-right absolute right-0" style="top: 4px;">
       <Multiselect
         class = 'border'
         :placeholder="placeholder"

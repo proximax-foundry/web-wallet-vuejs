@@ -45,7 +45,7 @@
               </div>
             </div>
             <div class="rounded-2xl bg-gray-100 p-5 my-5">
-              <div class="inline-block text-center self-centerk <div>mHellr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{txFee}} XPX</div>
+              <div class="inline-block text-center self-centerk <div>mHellr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{txFee}} {{currentNativeTokenName}}</div>
             </div>
             <div class="rounded-2xl bg-gray-100 p-5">
               <input id="computer" type="radio" value="computer" name="uploadSource" v-model="uploadSource" /><label for="computer" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">{{$t('services.mycomputer')}}</label>
@@ -64,7 +64,7 @@
             <TextInput placeholder="+Tags" errorMessage="Please insert tags" v-model="tags" icon="" />
             <SelectInputPlugin selectDefault="2" showSelectTitleProp="true" placeholder="Select hashtag algorithm" errorMessage="" v-model="hashtagAlgorithm" :options="hashtagAlgorithmOption()" @clear-selection="clearOption" />
             <div class="rounded-2xl bg-gray-100 p-5 my-5">
-              <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{txFee}} XPX</div>
+              <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{txFee}} {{currentNativeTokenName}}</div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 mb-5">
               <div class="rounded-2xl bg-gray-100 p-5 mr-1 mb-3 flex">
@@ -154,6 +154,7 @@ export default {
     // const internalInstance = getCurrentInstance();
     // const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const {t} = useI18n();
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const uploadSource = ref('computer');
     const currentPage = ref(1);
     const disabledStorage = ref(true);
@@ -367,7 +368,8 @@ export default {
       balance,
       fileHash,
       base64ImageString,
-      checkInProgress
+      checkInProgress,
+      currentNativeTokenName
     };
   },
 }

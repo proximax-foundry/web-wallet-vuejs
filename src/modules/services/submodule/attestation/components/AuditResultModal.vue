@@ -48,7 +48,7 @@
             <div class = "flex mb-6 ">
               <p class="font-bold  mt-1 text-left text-lg ">Effective Fee: </p>
               <img src="@/assets/img/icon-prx-xpx-blue.svg" class = "ml-4 mt-1 w-7 h-7">
-              <p class="ml-2 mt-1 text-left text-lg">{{item.transaction.fee}} XPX</p>
+              <p class="ml-2 mt-1 text-left text-lg">{{item.transaction.fee}} {{currentNativeTokenName}}</p>
             </div>
             <div class = "mb-3">
               <p class = " font-bold text-left text-xs">File Name:  </p>
@@ -113,8 +113,9 @@
 </template>
 
 <script lang = 'ts'>
-import { defineComponent } from 'vue';
-import { ResultAuditInterface} from '@/util/attestationUtils'
+import { defineComponent, computed } from 'vue';
+import { ResultAuditInterface} from '@/util/attestationUtils';
+import { networkState } from "@/state/networkState";
 export default defineComponent({
   name: 'AuditResultModal',
   props: ['auditResult'],
@@ -123,16 +124,22 @@ export default defineComponent({
       toggleModal: false,
       item: this.auditResult as ResultAuditInterface
     };
-  },methods:{
-    toOriginal:(fullName: string) :string =>{
-    let x = fullName.split("_[")
-    const fileName = x[0]
-    x = x[1].split("]")
-    const fileExtension = x[1]
-   
-    return fileName+fileExtension
-  }
-  }
+  },
   
+  methods:{
+    toOriginal:(fullName: string) :string =>{
+      let x = fullName.split("_[")
+      const fileName = x[0]
+      x = x[1].split("]")
+      const fileExtension = x[1]
+      return fileName+fileExtension
+    }
+  },
+  setup(){
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    return{
+      currentNativeTokenName
+    }
+  }
 });
 </script>

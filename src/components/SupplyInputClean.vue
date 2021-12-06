@@ -1,14 +1,14 @@
 <template>
-  <div>
+  <div :class="disabled?'opacity-50':''">
     <div class="border border-gray-200 px-2 py-1 h-14 rounded-md">
       <div class="uppercase text-gray-500 text-txs text-left mb-2">{{ placeholder }} <img src="@/assets/img/icon-info.svg" class="inline-block ml-1 relative cursor-pointer" style="top: -1px;" v-tooltip.bottom="'<tiptext>' + toolTip + '</tiptext>'" v-if="toolTip"></div>
-      <input v-if="decimal==0" v-maska="'#*'" :disabled="disabled" class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-      <input v-else-if="decimal==1" v-maska="'#*.#'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-      <input v-else-if="decimal==2" v-maska="'#*.##'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-      <input v-else-if="decimal==3" v-maska="'#*.###'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-      <input v-else-if="decimal==4" v-maska="'#*.####'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-      <input v-else-if="decimal==5" v-maska="'#*.#####'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-      <input v-else v-maska="'#*.######'" :disabled="disabled" class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+      <input v-if="decimal==0" v-maska="'#*'" :disabled="disabled" class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+      <input v-else-if="decimal==1" v-maska="'#*.#'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+      <input v-else-if="decimal==2" v-maska="'#*.##'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+      <input v-else-if="decimal==3" v-maska="'#*.###'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+      <input v-else-if="decimal==4" v-maska="'#*.####'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+      <input v-else-if="decimal==5" v-maska="'#*.#####'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+      <input v-else v-maska="'#*.######'" :disabled="disabled" class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
   </div>
@@ -41,7 +41,7 @@ export default{
   },
 
   emits:[
-    'update:modelValue'
+    'update:modelValue', 'show-error'
   ],
 
   name: 'SupplyInput',
@@ -49,25 +49,17 @@ export default{
   data() {
     return {
       inputText: "",
-      borderColor: 'border border-gray-300',
       textErr: false,
     };
   },
 
   methods: {
-    clickInputText: function() {
-      if(!this.showError){
-        this.borderColor = 'border-2 border-blue-primary';
-      }
-    },
 
     blurInputText: function() {
       if(!this.disabled){
         if(this.modelValue == '' || this.modelValue > this.balance){
-          this.borderColor = 'border-2 border-red-primary';
           this.textErr = true;
         }else{
-          this.borderColor = 'border-2 border-gray-300';
           this.textErr = false;
         }
       }
@@ -77,8 +69,10 @@ export default{
       evt.target.value =  evt.target.value||0;
       if(this.balance < evt.target.value){
         this.textErr = true;
+        this.$emit('show-error', true);
       }else{
         this.textErr = false;
+        this.$emit('show-error', false);
       }
     },
   },
@@ -86,10 +80,8 @@ export default{
   watch:{
     showError: function(val){
       if(val){
-        this.borderColor = 'border-2 border-red-primary';
         this.textErr = true;
       }else{
-        this.borderColor = 'border-2 border-gray-300';
         this.textErr = false;
       }
     }
@@ -99,7 +91,6 @@ export default{
     this.emitter.on("CLEAR_TEXT", payload => {
       this.inputText = payload;
       this.textErr = false;
-      this.borderColor = 'border border-gray-300';
     });
 
     this.emitter.on("CLOSE_MOSAIC_INSUFFICIENT_ERR", payload => {

@@ -13,33 +13,35 @@
       <Column :style="{ width: '50px' }">
         <template #body="{data}">
           <div class="text-center">
-            <div class="rounded-full w-2 h-2 inline-block" :class="data.expiring?'bg-yellow-500':'bg-green-500'"></div>
+            <div class="rounded-full w-2 h-2 inline-block" :class="data.expiring=='expired'?'bg-red-500':(data.expiring=='expiring'?'bg-yellow-500':'bg-green-500')"></div>
           </div>
         </template>
       </Column>
-      <Column field="name" :header="$t('services.name')" :style="{ width: '200px' }">
+      <Column field="name" header="NAME" :style="{ width: '200px' }">
         <template #body="{data}">
           {{data.name}}
         </template>
       </Column>
-      <Column field="namespaceId" :header="$t('namespace.namespaceid')" :style="{ width: '180px' }">
+      <Column field="namespaceId" header="NAMESPACE ID" :style="{ width: '180px' }">
         <template #body="{data}">
           <span class="uppercase">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedId" header="LINKED ASSET / ADDRESS" :style="{ width: '360px' }">
+      <Column field="linkedId" header="LINKED ASSET / ADDRESS" :style="{ width: '250px' }">
         <template #body="{data}">
-          <span class="uppercase">{{ data.linkedId }}</span>
+          <span class="uppercase text-xs" v-if="data.linkedId">{{ data.linkedId }}</span>
+          <span class="text-xs" v-else>No linked asset</span>
         </template>
       </Column>
-      <Column field="linkType" header="BLOCK EXPIRES" :style="{ width: '180px' }">
+      <Column field="linkType" header="EXPIRES" :style="{ width: '150px' }">
         <template #body="{data}">
-          <div class="data.expiryRelative">in {{ data.expiryRelative }}</div>
+          <div class="data.expiryRelative text-xs" v-if="data.expiryRelative">{{ data.expiryRelative }}</div>
+          <div class="text-gray-300 text-xs" v-else>Fetching..</div>
         </template>
       </Column>
       <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" :style="{ width: '180px' }">
         <template #body="{data}">
-          <span :class="data.expiring?'text-yellow-600':'text-gray-700'">{{ data.expiry }}</span>
+          <span :class="data.expiring=='expired'?'text-red-500':(data.expiring=='expiring'?'text-yellow-500':'text-green-500')">{{ data.expiry }}</span>
         </template>
       </Column>
       <Column style="width: 50px;">
@@ -48,8 +50,7 @@
             <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
             <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div role="none" class="my-2">
-                <router-link :to="{ name: 'ViewServicesNamespaceCreate' }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Namespace Details</router-link>
-                <router-link :to="{ name: 'ViewServicesNamespaceExtend' }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Extend Duration</router-link>
+                <router-link :to="{ name: 'ViewServicesNamespaceExtend', params: { address: data.address, namespaceId: data.idHex } }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Extend Duration</router-link>
                 <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>View in Explorer<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
               </div>
             </div>
@@ -79,7 +80,7 @@ import { WalletAccount } from '@/models/walletAccount';
 
 export default{
   components: { DataTable, Column },
-  name: 'NamespaceDataTable',
+  name: 'DashboardNamespaceDataTable',
   props: {
     namespaces: Array,
     currentBlockHeight: Number,
@@ -88,7 +89,7 @@ export default{
 
   setup(props, context){
     const rowLimit = 5;
-    const { namespaces, currentBlockHeight } = toRefs(props);
+    const { namespaces, currentBlockHeight, account } = toRefs(props);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const accountNamespaces = ref();
@@ -98,15 +99,15 @@ export default{
     chainConfig.init();
     let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
 
-    watch([currentBlockHeight, namespaces], ([newBlockHeight, namespaces]) => {
-      accountNamespaces.value = generateDatatable(namespaces, newBlockHeight);
+    watch([currentBlockHeight, namespaces, account], ([newBlockHeight, namespaces, account]) => {
+      accountNamespaces.value = generateDatatable(namespaces, newBlockHeight, account);
     });
 
     onMounted(() => {
-      accountNamespaces.value = generateDatatable(namespaces.value, currentBlockHeight.value);
+      accountNamespaces.value = generateDatatable(namespaces.value, currentBlockHeight.value, account.value);
     });
 
-    const generateDatatable = (namespaces, currentBlockHeight) => {
+    const generateDatatable = (namespaces, currentBlockHeight, account) => {
       let formattedNamespaces = [];
 
       for(let i=0; i < namespaces.length; ++i){
@@ -130,6 +131,18 @@ export default{
         let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
         let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
         let expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
+
+        let expiryStatus;
+        if(blockDifference > 0){
+          if((blockDifference < (blockTargetTimeByDay * 14))){
+            expiryStatus = 'expiring';
+          }else{
+            expiryStatus = 'valid';
+          }
+        }else{
+          expiryStatus = 'expired';
+        }
+
         let data = {
           i: i,
           idHex: namespaces[i].idHex,
@@ -137,10 +150,11 @@ export default{
           linkType: linkName,
           linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
           endHeight: namespaces[i].endHeight,
-          expiring: (blockDifference < (blockTargetTimeByDay * 14)),
-          expiryRelative: currentBlockHeight?relativeTime(expiryDay, expiryHour, expiryMin):'',
+          expiring: expiryStatus,
+          expiryRelative: currentBlockHeight?((blockDifference > 0)?'In ' + relativeTime(expiryDay, expiryHour, expiryMin):'Expired'):'',
           expiry: currentBlockHeight?expiryDate:'',
-          explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].idHex
+          explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].idHex,
+          address: Helper.createAddress(account.address).pretty()
         };
         formattedNamespaces.push(data);
         isMenuShow.value[i] = false;

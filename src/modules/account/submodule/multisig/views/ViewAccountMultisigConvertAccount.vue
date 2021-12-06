@@ -239,7 +239,6 @@ import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import AddCosignModal from '@/modules/account/submodule/multisig/components/AddCosignModal.vue';
 import { multiSign } from '@/util/multiSignatory';
-import { transferEmitter } from '@/util/listener.js';
 import { walletState } from '@/state/walletState';
 import {
   Address,
@@ -500,25 +499,7 @@ export default {
         }
       });
     });
-    // detect partial transaction announcement from listener
-    transferEmitter.on('ANNOUNCE_AGGREGATE_BONDED' , payload => {
-      console.log(acc.address);
-      console.log(payload.address);
-      console.log(payload.status);
-      if(payload.status && payload.address == acc.address){
-        onPartial.value = true;
-        clear();
-      }
-    });
-    // detect co signiture added from listener
-    transferEmitter.on('ANNOUNCE_COSIGNITURE_ADDED' , payload => {
-      if(payload.status && payload.address == acc.address){
-        isMultisig.value = true;
-        onPartial.value = false;
-      }else{
-        isMultisig.value = false;
-      }
-    });
+
     return {
       networkState,
       toggleContact,

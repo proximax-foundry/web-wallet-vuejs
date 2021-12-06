@@ -37,7 +37,7 @@
             <div class="text-xs sm:text-tsm ml-3" :class="`${(!acc.isMultisig || includeMultisig)?'text-gray-700':'text-gray-200'}`">
               <div class="mb-1 sm:mb-0"><b>Account Name:</b> {{ acc.name }} <div v-if="acc.isMultisig" class="inline-block badge rounded bg-blue-200 p-1 text-white text-txs ml-2">Multisig</div></div>
               <div class="mb-1 sm:mb-0"><b>Sirius Address:</b> <div class="block mt-1 sm:inline-block sm:mt-0">{{ acc.address }}</div></div>
-              <div class="mb-1 sm:mb-0"><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ acc.balanceDisplay }} XPX</div></div>
+              <div class="mb-1 sm:mb-0"><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ acc.balanceDisplay }} {{ currentNativeTokenName }}</div></div>
             </div>
             <div class="self-center">
               <img src="@/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg" class="w-10 inline mr-3">
@@ -52,7 +52,7 @@
           <div class="text-xs sm:text-tsm ml-3 text-gray-700">
             <div class="mb-1 sm:mb-0"><b>Account Name:</b> {{ selectedAccount.name }}</div>
             <div class="mb-1 sm:mb-0"><b>Sirius Address:</b> <div class="block mt-1 sm:inline-block sm:mt-0">{{ selectedAccount.address }}</div></div>
-            <div class="mb-1 sm:mb-0"><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ selectedAccount.balanceDisplay }} XPX</div></div>
+            <div class="mb-1 sm:mb-0"><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ selectedAccount.balanceDisplay }} {{ currentNativeTokenName }}</div></div>
           </div>
           <div class="self-center">
             <button @click="currentPage=1" class="text-xs sm:text-sm hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none">Change</button>
@@ -67,28 +67,28 @@
             <div class="ethGasStrategy md:mr-6" :class="`${ (ethGasStrategy == 'standard')?'selected':'option' }`" @click="changeGasStrategy('standard')">
               <p class="font-bold text-tsm">Standard</p>
               <div>ETH {{ standardGasPrice }}</div>
-              <div>XPX {{ xpxAmountInStandardGasPrice }} = USD {{ standardGasPriceInUSD }}</div>
+              <div>{{ currentNativeTokenName }} {{ xpxAmountInStandardGasPrice }} = USD {{ standardGasPriceInUSD }}</div>
             </div>
           </div>
           <div class="md:col-span-1 mb-3">
             <div class="ethGasStrategy md:mx-3" :class="`${ (ethGasStrategy == 'fast')?'selected':'option' }`" @click="changeGasStrategy('fast')">
               <p class="font-bold text-tsm">Fast</p>
               <div>ETH {{ fastGasPrice }}</div>
-              <div>XPX {{ xpxAmountInFastGasPrice }} = USD {{ fastGasPriceInUSD }}</div>
+              <div>{{ currentNativeTokenName }} {{ xpxAmountInFastGasPrice }} = USD {{ fastGasPriceInUSD }}</div>
             </div>
           </div>
           <div class="md:col-span-1 mb-3">
             <div class="ethGasStrategy md:ml-6" :class="`${ (ethGasStrategy == 'rapid')?'selected':'option' }`" @click="changeGasStrategy('rapid')">
               <p class="font-bold text-tsm">Rapid</p>
               <div>ETH {{ rapidGasPrice }}</div>
-              <div>XPX {{ xpxAmountInRapidGasPrice }} = USD {{ rapidGasPriceInUSD }}</div>
+              <div>{{ currentNativeTokenName }} {{ xpxAmountInRapidGasPrice }} = USD {{ rapidGasPriceInUSD }}</div>
             </div>
           </div>
         </div>
         <div class="text-sm text-center mb-2 sm:mb-4">Fees are valid for: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
         <div class="tex-center font-bold text-lg mb-2">Transaction Fee (Sirius Network):</div>
         <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-          <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span>{{ txFeeDisplay }}</span> XPX</div>
+          <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span>{{ txFeeDisplay }}</span> {{ currentNativeTokenName }}</div>
         </div>
         <PasswordInput placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
         <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
@@ -167,6 +167,7 @@ export default {
   },
 
   setup() {
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const toast = useToast();
     const router = useRouter();
     const displayTimer = ref(true);
@@ -733,6 +734,7 @@ export default {
       callTocheckSwapStatus,
       siriusTransactionHash,
       xpxExplorerUrl,
+      currentNativeTokenName,
     };
   }
 }

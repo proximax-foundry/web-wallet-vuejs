@@ -13,7 +13,7 @@
             <div class="modal-popup-box ">
               <img src='@/assets/img/icon-blue-tick.svg' class='h-5 w-5 ml-auto mr-auto mb-3'>
               <div class= 'text-center mt-2 text-xs font-semibold'>Account Creation Successful</div>
-              <div class ='text-gray-500 text-center text-xs mt-2'>Should you wish to get testnet XPX amount, you can top up every 24 hours in your account.</div>
+              <div class ='text-gray-500 text-center text-xs mt-2'>Should you wish to get testnet {{currentNativeTokenName}} amount, you can top up every 24 hours in your account.</div>
               <div class='flex flex-wrap content-center'>
                 <div @click="showModal=false" class= ' mt-4 w-4/12 ml-auto mr-auto text-center  blue-btn cursor-pointer font-semibold text-xs py-2 px-2 mt-2 font-semibold mb-3' >Close</div>
               </div>
@@ -54,7 +54,7 @@
       </div>
       <div class='border-2 mt-3 pb-6 px-6 pt-2'>
         <img src="@/modules/account/img/icon-info.svg" class='h-4 w-4 ml-auto' 
-        title='Top up your account balance to a maximum of 100,000 test-XPX every 24 hours.'>
+        :title="'Top up your account balance to a maximum of 100,000 test-' + currentNativeTokenName + ' every 24 hours.'">
         <div class = 'text-xxs text-blue-primary font-semibold'>CURRENT BALANCE</div>
         <div class='flex my-1'>
           <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
@@ -65,15 +65,15 @@
           <div class='flex ml-auto gap-6 '>
             <div class='flex cursor-pointer'>
               <img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-5 h-5 mt-0.5  cursor-pointer mr-1">
-              <div class='text-xs mt-1 font-semibold '>Transfer XPX</div>
+              <div class='text-xs mt-1 font-semibold '>Transfer {{currentNativeTokenName}}</div>
             </div>
             <div class='flex cursor-pointer'>
               <img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-5 h-5 mt-0.5  cursor-pointer mr-1">
-              <div class='text-xs mt-1 font-semibold'>Request XPX</div>
+              <div class='text-xs mt-1 font-semibold'>Request {{currentNativeTokenName}}</div>
             </div>
             <div class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
               <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
-              <div class='text-xs mt-0.5 font-semibold text-white'>Top up XPX</div>
+              <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
             </div>
           </div>
         </div>
@@ -132,7 +132,8 @@ import qrcode from 'qrcode-generator';
 import PkPasswordModal from '@/modules/account/components/PkPasswordModal.vue'
 import PdfPasswordModal from '@/modules/account/components/PdfPasswordModal.vue'
 import DeleteAccountModal from '@/modules/account/components/DeleteAccountModal.vue'
-import {toSvg} from "jdenticon";
+import { toSvg } from "jdenticon";
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 
 export default {
   name: "ViewAccountDetails",
@@ -155,20 +156,10 @@ export default {
     var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
     const other_acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
 
-    let jdenticonconfig = {
-      hues: [211],
-      lightness: {
-          color: [0.32, 0.80],
-          grayscale: [0.17, 0.82]
-      },
-      saturation: {
-          color: 1.00,
-          grayscale: 0.00
-      },
-      backColor: "#fff"
-    };
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
 
-    const svgString = ref(toSvg(acc.address, 100, jdenticonconfig));
+    const svgString = ref(toSvg(acc.address, 100, themeConfig.jdenticonConfig));
 
     if(!acc){
       if(other_acc)
