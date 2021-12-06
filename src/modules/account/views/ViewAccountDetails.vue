@@ -159,7 +159,6 @@ export default {
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
 
-    const svgString = ref(toSvg(acc.address, 100, themeConfig.jdenticonConfig));
 
     if(!acc){
       if(other_acc)
