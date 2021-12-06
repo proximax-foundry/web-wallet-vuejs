@@ -144,7 +144,7 @@
           <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput()">
             {{$t('signin.clear')}}
           </button>
-          <button type="button" class="default-btn py-1 disabled:opacity-50" @click="saveTransaction()">
+          <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="saveTransaction()">
             Save
           </button>
         </div>
@@ -164,7 +164,7 @@
           <div class="text-center align-text-bottom inset-x-0 bottom-0 absolute">
             <div style="width:300px; margin:0 auto;">
             <PasswordInput :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5" :disabled="disablePassword"/></div>
-            <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="makeTransfer()">
+            <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="makeTransfer()">
             Send aggregate
            </button>
           </div>
@@ -297,12 +297,14 @@ export default {
 
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
-    const disableCreate = computed(() => {
-      // console.log(walletPassword.value.match(passwdPattern) && !showAddressError.value && recipient.value.length > 0);
+    const disableSave = computed(() => {
       return !(
-        walletPassword.value.match(passwdPattern) &&
-        !showAddressError.value &&
-        recipient.value.length > 0
+        messageText.value.length && recipient.value.length > 0
+      );
+    });
+    const disableCreate = computed(() => {
+      return !(
+        numTransactions.value < 0
       );
     });
 
@@ -625,40 +627,57 @@ export default {
     };
 
     const saveTransaction = () => {
-      var transactionDetails = new Object;
-      transactionDetails.recipient = recipient.value;
-      transactionDetails.sendXPX = sendXPX.value;
-      transactionDetails.messageText = messageText.value;
-      transactionDetails.selectedMosaic = selectedMosaic.value;
-      transactionDetails.selectedAccname = selectedAccName.value;
-      //transactionDetails.msgOption = msgOption.value;
-      //transactionDetails.transactionNumber = (numTransactions+= 1);
+      if (sendXPX.value == 0) {
+        toggleConfirm.value = true;
 
-      savedTransactions.push(transactionDetails);
-      sessionStorage.setItem('savedTransactions', JSON.stringify(savedTransactions));
-      numTransactions += 1;
-      console.log(savedTransactions);
+        var transactionDetails = new Object;
+        transactionDetails.recipient = recipient.value;
+        transactionDetails.sendXPX = 0;
+        transactionDetails.messageText = messageText.value;
+        transactionDetails.selectedMosaic = selectedMosaic.value;
+        transactionDetails.selectedAccname = selectedAccName.value;
 
-      clearInput();
-      createEditButton();
+        savedTransactions.push(transactionDetails);
+        sessionStorage.setItem('savedTransactions', JSON.stringify(savedTransactions));
+        numTransactions += 1;
+        console.log(savedTransactions);
+
+        clearInput();
+      }
+      else{
+        var transactionDetails = new Object;
+        transactionDetails.recipient = recipient.value;
+        transactionDetails.sendXPX = sendXPX.value;
+        transactionDetails.messageText = messageText.value;
+        transactionDetails.selectedMosaic = selectedMosaic.value;
+        transactionDetails.selectedAccname = selectedAccName.value;
+
+        savedTransactions.push(transactionDetails);
+        sessionStorage.setItem('savedTransactions', JSON.stringify(savedTransactions));
+        numTransactions += 1;
+        console.log(savedTransactions);
+
+        clearInput();
+        createEditButton();
+      }
     }
 
     const createEditButton = () =>{
-      var btn = document.createElement("button");
-      //<button type="button" id="delete" style="float:right"><img src="@/modules/wallet/img/icon-trash-can-gray-16h-proximax-sirius-wallet.svg" class="w-6 cursor-pointer"></button> 
-      var transNum = "Transaction " + numTransactions;
-      btn.style.width = "97%";
-      btn.style.flex = "auto";
-      btn.style.margin = "5px";
-      btn.style.border = "2px solid royalblue";
-      btn.style.borderRadius = "8px";
-      btn.style.color = "black";
-      btn.style.textAlign = "left";
-      btn.style.padding = "17px";
-      btn.style.paddingLeft = "10px";
-      btn.innerHTML = transNum;
+        var btn = document.createElement("button");
+        //<button type="button" id="delete" style="float:right"><img src="@/modules/wallet/img/icon-trash-can-gray-16h-proximax-sirius-wallet.svg" class="w-6 cursor-pointer"></button> 
+        var transNum = "Transaction " + numTransactions;
+        btn.style.width = "97%";
+        btn.style.flex = "auto";
+        btn.style.margin = "5px";
+        btn.style.border = "2px solid royalblue";
+        btn.style.borderRadius = "8px";
+        btn.style.color = "black";
+        btn.style.textAlign = "left";
+        btn.style.padding = "17px";
+        btn.style.paddingLeft = "10px";
+        btn.innerHTML = transNum;
 
-      document.getElementById("transac").appendChild(btn);
+        document.getElementById("transac").appendChild(btn);
     }
 
     watch(selectedAccAdd, (n, o) => {
@@ -792,7 +811,7 @@ export default {
       if (payload) {
         forceSend.value = payload;
         toggleConfirm.value = false;
-        makeTransfer();
+        createEditButton();
       }
     });
 
@@ -816,6 +835,7 @@ export default {
       selectContact,
       walletPassword,
       disableCreate,
+      disableSave,
       clearInput,
       showPasswdError,
       updateAdd,
