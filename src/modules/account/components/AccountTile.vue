@@ -95,6 +95,8 @@ import { walletState } from '@/state/walletState';
 import { Helper } from '@/util/typeHelper';
 //import { OtherAccount } from '@/models/otherAccount';
 import {toSvg} from "jdenticon";
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
+
 export default{
   name: 'AccountTile',
   props: ['account','showMenuCall', 'i'],
@@ -112,18 +114,7 @@ export default{
         return p.account.name;
       }
     })
-    let jdenticonconfig = {
-      hues: [211],
-      lightness: {
-          color: [0.32, 0.80],
-          grayscale: [0.17, 0.82]
-      },
-      saturation: {
-          color: 1.00,
-          grayscale: 0.00
-      },
-      backColor: "#fff"
-    };
+
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
     const accountBalance = computed(
@@ -140,7 +131,10 @@ export default{
       }
     })
 
-    const svgString = ref(toSvg(p.account.address, 50, jdenticonconfig));
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
+
+    const svgString = ref(toSvg(p.account.address, 50, themeConfig.jdenticonConfig));
 
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;

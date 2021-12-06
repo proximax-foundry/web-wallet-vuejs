@@ -16,7 +16,7 @@
       <Column :style="{ width: '50px' }">
         <template #body="{data}">
           <div class="text-center">
-            <div class="rounded-full w-2 h-2 inline-block" :class="data.expiring?'bg-yellow-500':'bg-green-500'"></div>
+            <div class="rounded-full w-2 h-2 inline-block" :class="data.expiring=='expired'?'bg-red-500':(data.expiring=='expiring'?'bg-yellow-500':'bg-green-500')"></div>
           </div>
         </template>
       </Column>
@@ -38,13 +38,13 @@
       </Column>
       <Column field="linkType" header="EXPIRES" :style="{ width: '150px' }">
         <template #body="{data}">
-          <div class="data.expiryRelative text-xs" v-if="data.expiryRelative">in {{ data.expiryRelative }}</div>
+          <div class="data.expiryRelative text-xs" v-if="data.expiryRelative">{{ data.expiryRelative }}</div>
           <div class="text-gray-300 text-xs" v-else>Fetching..</div>
         </template>
       </Column>
       <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" :style="{ width: '210px' }">
         <template #body="{data}">
-          <span class="text-xs" :class="data.expiring?'text-yellow-600':'text-gray-700'">{{ data.expiry }}</span>
+          <span class="text-xs" :class="data.expiring=='expired'?'text-red-500':(data.expiring=='expiring'?'text-yellow-500':'text-green-500')">{{ data.expiry }}</span>
         </template>
       </Column>
       <Column field="Account" header="ACCOUNT" :style="{ width: '120px' }">
@@ -90,6 +90,7 @@ import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 import { WalletAccount } from '@/models/walletAccount';
 import { toSvg } from "jdenticon";
 import Tooltip from 'primevue/tooltip';
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 
 export default{
   components: { DataTable, Column, SelectInputPluginClean },
@@ -224,18 +225,8 @@ export default{
 
       let formattedNamespaces = [];
 
-      let jdenticonconfig = {
-        hues: [211],
-        lightness: {
-            color: [0.32, 0.80],
-            grayscale: [0.17, 0.82]
-        },
-        saturation: {
-            color: 1.00,
-            grayscale: 0.00
-        },
-        backColor: "#fff"
-      };
+      let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+      themeConfig.init();
 
       for(let i=0; i < namespaces.length; ++i){
         let linkName = "";
@@ -258,6 +249,18 @@ export default{
         let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
         let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
         let expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
+
+        let expiryStatus;
+        if(blockDifference > 0){
+          if((blockDifference < (blockTargetTimeByDay * 14))){
+            expiryStatus = 'expiring';
+          }else{
+            expiryStatus = 'valid';
+          }
+        }else{
+          expiryStatus = 'expired';
+        }
+
         let data = {
           i: i,
           idHex: namespaces[i].namespace.idHex,
@@ -265,12 +268,12 @@ export default{
           linkType: linkName,
           linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].namespace.linkedId).pretty() : namespaces[i].namespace.linkedId,
           endHeight: namespaces[i].namespace.endHeight,
-          expiring: (blockDifference < (blockTargetTimeByDay * 14)),
-          expiryRelative: currentBlockHeight.value?relativeTime(expiryDay, expiryHour, expiryMin):'',
+          expiring: expiryStatus,
+          expiryRelative: currentBlockHeight.value?((blockDifference > 0)?'In ' + relativeTime(expiryDay, expiryHour, expiryMin):'Expired'):'',
           expiry: currentBlockHeight.value?expiryDate:'',
           explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].namespace.idHex,
           address: Helper.createAddress(namespaces[i].account.address).pretty(),
-          icon: toSvg(namespaces[i].account.address, 30, jdenticonconfig)
+          icon: toSvg(namespaces[i].account.address, 30, themeConfig.jdenticonConfig)
         };
         formattedNamespaces.push(data);
         // isMenuShow.value[i] = false;
