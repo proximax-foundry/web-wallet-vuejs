@@ -1,56 +1,75 @@
 <template>
   <div>
-    <div class="text-right">
-      <SelectInputPluginClean v-model="filterNamespaces" :options="listAccounts" :selectDefault="selectedAddress" class="w-60 inline-block" />
-    </div>
     <DataTable
       :value="generateDatatable"
       :paginator="true"
       :rows="10"
       :alwaysShowPaginator="false"
       responsiveLayout="scroll"
-      tableStyle="table-layout: auto"
       >
-      <Column style="min-width:3px">
+      <template #header>
+        <div class="flex justify-between">
+          <span class="text-sm pt-1 text-gray-700">{{$t('services.namespaces')}}</span>
+          <SelectInputPluginClean v-model="filterNamespaces" :options="listAccounts" :selectDefault="selectedAddress" class="w-48 lg:w-60 inline-block" />
+        </div>
+      </template>
+      <Column style="width: 250px" v-if="!wideScreen">
+        <template #body="{data}">
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Name</div>
+            <div class="uppercase font-bold text-txs">{{data.name}}</div>
+          </div>
+        </template>
+      </Column>
+      <Column style="width: 250px" v-if="!wideScreen">
+        <template #body="{data}">
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Expiration Timestamp Estimate</div>
+            <div class="uppercase font-bold text-txs" v-if="data.expiry">{{ data.expiry }} <div class="rounded-full w-2 h-2 inline-block ml-2" :class="data.expiring=='expired'?'bg-red-500':(data.expiring=='expiring'?'bg-yellow-500':'bg-green-500')"></div></div>
+            <div class="text-gray-300 text-xs" v-else>Fetching..</div>
+          </div>
+        </template>
+      </Column>
+      <Column style="width: 30px" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-center">
             <div class="rounded-full w-2 h-2 inline-block" :class="data.expiring=='expired'?'bg-red-500':(data.expiring=='expiring'?'bg-yellow-500':'bg-green-500')"></div>
           </div>
         </template>
       </Column>
-      <Column field="name" header="NAME" style="min-width:160px">
+      <Column field="name" header="NAME" style="`wideScreen?'min-width: 160px'?'width: 160px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-xs">{{data.name}}</span>
         </template>
       </Column>
-      <Column field="namespaceId" header="NAMESPACE ID" style="min-width:180px">
+      <Column field="namespaceId" header="NAMESPACE ID" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-xs uppercase">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedId" header="LINKED ASSET / ADDRESS" style="min-width:200px">
+      <Column field="linkedId" header="LINKED ASSET / ADDRESS" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase text-xs" v-if="data.linkedId">{{ data.linkedId }}</span>
           <span class="text-xs" v-else>No linked asset</span>
         </template>
       </Column>
-      <Column field="linkType" header="EXPIRES" style="min-width:150px">
+      <Column field="linkType" header="EXPIRES" style="`wideScreen?'min-width: 150px'?'width: 150px'`" v-if="wideScreen">
         <template #body="{data}">
           <div class="data.expiryRelative text-xs" v-if="data.expiryRelative">{{ data.expiryRelative }}</div>
           <div class="text-gray-300 text-xs" v-else>Fetching..</div>
         </template>
       </Column>
-      <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" style="min-width:210px">
+      <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" style="`wideScreen?'min-width: 210px'?'width: 210px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-xs" :class="data.expiring=='expired'?'text-red-500':(data.expiring=='expiring'?'text-yellow-500':'text-green-500')">{{ data.expiry }}</span>
         </template>
       </Column>
-      <Column field="Account" header="ACCOUNT" style="min-width:60px" bodyStyle="text-align: center; overflow: visible">
+      <Column field="Account" header="ACCOUNT" bodyStyle="text-align: center; overflow: visible" style="`wideScreen?'min-width: 60px'?'width: 60px'`" v-if="wideScreen">>
         <template #body="{data}">
           <div v-html="data.icon" class="inline-block" v-tooltip.bottom="'<tiptitle>WALLET ADDRESS</tiptitle><tiptext>' + data.address + '</tiptext>'"></div>
         </template>
       </Column>
-      <Column style="min-width:30px;">
+      <Column style="width: 30px">
         <template #body="{data}">
           <div class="text-txs text-center lg:mr-2" @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
             <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
@@ -74,7 +93,7 @@
 </template>
 
 <script>
-import { getCurrentInstance, ref, computed, watch, onMounted, toRefs  } from "vue";
+import { getCurrentInstance, ref, computed, watch, onMounted, toRefs, onUnmounted  } from "vue";
 import { Address } from "tsjs-xpx-chain-sdk";
 import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 import DataTable from 'primevue/datatable';
@@ -103,7 +122,25 @@ export default{
   },
 
   setup(props, context){
-    const rowLimit = 5;
+    
+    const wideScreen = ref(false);
+    const screenResizeHandler = () => {
+      if(window.innerWidth < '1024'){
+        wideScreen.value = false;
+      }else{
+        wideScreen.value = true;
+      }
+    };
+    screenResizeHandler();
+
+    onMounted(() => {
+      window.addEventListener("resize", screenResizeHandler);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener("resize", screenResizeHandler);
+    });
+
     const { currentBlockHeight, address } = toRefs(props);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -341,15 +378,18 @@ export default{
       filterNamespaces,
       generateDatatable,
       selectedAddress,
+      wideScreen,
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .p-datatable-tbody{
   td{
     font-size: 11px;
+    padding-left: 5px;
+    padding-right: 5px;
   }
 }
 
@@ -367,4 +407,6 @@ export default{
   -moz-transform:rotate(45deg);
   -webkit-transform:rotate(45deg);
 }
+
+
 </style>

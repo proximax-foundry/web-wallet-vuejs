@@ -1,8 +1,5 @@
 <template>
   <div>
-    <div class="text-right">
-      <SelectInputPluginClean v-model="filterAssets" :options="listAccounts" :selectDefault="selectedAddress" class="w-60 mr-4 inline-block" />
-    </div>
     <DataTable
       :value="generateAssetDatatable"
       :paginator="true"
@@ -13,15 +10,63 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       tableStyle=""
+      class="w-full"
       >
-      <Column :style="{ width: '50px' }">
+      <template #header>
+        <div class="flex justify-between">
+          <span class="text-sm pt-1 text-gray-700">{{$t('services.assets')}}</span>
+          <SelectInputPluginClean v-model="filterAssets" :options="listAccounts" :selectDefault="selectedAddress" class="w-48 lg:w-60 inline-block" />
+        </div>
+      </template>
+      <Column style="width: 250px" v-if="!wideScreen">
+        <template #body="{data}">
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Asset ID</div>
+            <div class="uppercase font-bold text-txs">{{data.idHex}}</div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Namespace</div>
+            <div class="uppercase font-bold text-txs">
+              <div v-if="data.linkedNamespace.length > 0">
+                <div v-if="data.linkedNamespace.length == 1">
+                  <div v-for="namespace, item in data.linkedNamespace" :key="item">
+                    <div class="mb-1 text-txs">{{ namespace.name }}</div>
+                  </div>
+                </div>
+                <div v-else>
+                  <div class="mb-1 text-txs">{{ data.linkedNamespace[0].name }} <div class="inline-block border border-gray-300 p-1 rounded-sm ml-2 cursor-pointer" @click="showNsList(data.i)" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">+ <span class="font-bold">{{ data.linkedNamespace.length -1 }}</span></div></div>
+                  <div class="border p-3 w-28 border-gray-100 shadow-sm absolute bg-white" v-if="isNsListShow[data.i]" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">
+                    <div v-for="namespace, item in data.linkedNamespace.slice(1)" :key="item">
+                      {{ namespace.name }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else>no linked namespace</div>
+            </div>
+          </div>
+        </template>
       </Column>
-      <Column field="assetId" :header="$t('dashboard.assetid')" :style="{ width: '200px' }">
+      <Column style="width: 250px" v-if="!wideScreen">
+        <template #body="{data}">
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Supply</div>
+            <div class="uppercase font-bold text-txs">{{data.supply}}</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">Amount</div>
+            <div class="uppercase font-bold text-txs">{{data.amount}}</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">Block Height</div>
+            <div class="uppercase font-bold text-txs">{{data.height}}</div>
+          </div>
+        </template>
+      </Column>
+      <Column style="width: 50px" v-if="wideScreen">
+      </Column>
+      <Column field="assetId" :header="$t('dashboard.assetid')" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase font-bold text-txs">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedNamespace" header="NAMESPACE" :style="{ width: '180px' }">
+      <Column field="linkedNamespace" header="NAMESPACE" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <div v-if="data.linkedNamespace.length > 0">
             <div v-if="data.linkedNamespace.length == 1">
@@ -30,33 +75,33 @@
               </div>
             </div>
             <div v-else>
-                <div class="mb-1 text-txs">{{ data.linkedNamespace[0].name }} <div class="inline-block border border-gray-300 p-1 rounded-sm ml-2 cursor-pointer" @click="showNsList(data.i)" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">+ <span class="font-bold">{{ data.linkedNamespace.length -1 }}</span></div></div>
-                <div class="border p-3 w-28 border-gray-100 shadow-sm absolute bg-white" v-if="isNsListShow[data.i]" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">
-                  <div v-for="namespace, item in data.linkedNamespace.slice(1)" :key="item">
-                    {{ namespace.name }}
-                  </div>
+              <div class="mb-1 text-txs">{{ data.linkedNamespace[0].name }} <div class="inline-block border border-gray-300 p-1 rounded-sm ml-2 cursor-pointer" @click="showNsList(data.i)" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">+ <span class="font-bold">{{ data.linkedNamespace.length -1 }}</span></div></div>
+              <div class="border p-3 w-28 border-gray-100 shadow-sm absolute bg-white" v-if="isNsListShow[data.i]" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">
+                <div v-for="namespace, item in data.linkedNamespace.slice(1)" :key="item">
+                  {{ namespace.name }}
                 </div>
               </div>
+            </div>
           </div>
           <div v-else>no linked namespace</div>
         </template>
       </Column>
-      <Column field="supply" header="SUPPLY" :style="{ width: '180px' }">
+      <Column field="supply" header="SUPPLY" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase text-txs">{{data.supply}}</span>
         </template>
       </Column>
-      <Column field="amount" header="AMOUNT" :style="{ width: '180px' }">
+      <Column field="amount" header="AMOUNT" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase font-bold text-txs">{{data.amount}}</span>
         </template>
       </Column>
-      <Column field="height" header="BLOCK HEIGHT" style="width: 180px;">
+      <Column field="height" header="BLOCK HEIGHT" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.height}}</span>
         </template>
       </Column>
-      <Column style="width: 50px;">
+      <Column style="width: 50px">
         <template #body="{data}">
           <div class="text-txs text-center lg:mr-2" @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
             <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
@@ -81,7 +126,7 @@
 </template>
 
 <script>
-import { computed, ref, getCurrentInstance, toRefs } from "vue";
+import { computed, ref, getCurrentInstance, toRefs, onMounted, onUnmounted } from "vue";
 import { Address } from "tsjs-xpx-chain-sdk";
 import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 import { walletState } from "@/state/walletState";
@@ -106,6 +151,25 @@ export default{
   },
 
   setup(props){
+
+    const wideScreen = ref(false);
+    const screenResizeHandler = () => {
+      if(window.innerWidth < '1024'){
+        wideScreen.value = false;
+      }else{
+        wideScreen.value = true;
+      }
+    };
+    screenResizeHandler();
+
+    onMounted(() => {
+      window.addEventListener("resize", screenResizeHandler);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener("resize", screenResizeHandler);
+    });
+
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
@@ -260,16 +324,24 @@ export default{
       filterAssets,
       walletState,
       generateAssetDatatable,
-      selectedAddress
+      selectedAddress,
+      wideScreen,
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+
+.p-datatable table{
+  min-width: 100%;
+}
 .p-datatable-tbody{
   td{
     font-size: 11px;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: block;
   }
 }
 

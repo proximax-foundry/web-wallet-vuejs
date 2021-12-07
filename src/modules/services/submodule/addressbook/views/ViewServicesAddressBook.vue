@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class='w-9/12 ml-auto mr-auto mt-5'>
+    <div class='ml-2 mr-2 w-full lg:ml-auto lg:mr-auto mt-5'>
       <div class ='flex text-xs font-semibold border-b-2 menu_title_div'>
         <div class='w-18 text-center border-b-2 pb-3 border-yellow-500'>List</div>
         <router-link :to="{ name: 'ViewServicesAddressBookImport' }" class= 'w-18 text-center border-b pb-3'>Import</router-link>

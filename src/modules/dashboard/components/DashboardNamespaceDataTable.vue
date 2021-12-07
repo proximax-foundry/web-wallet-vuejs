@@ -10,41 +10,58 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column :style="{ width: '50px' }">
+      <Column style="width: 250px" v-if="!wideScreen">
+        <template #body="{data}">
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Name</div>
+            <div class="uppercase font-bold text-txs">{{data.name}}</div>
+          </div>
+        </template>
+      </Column>
+      <Column style="width: 250px" v-if="!wideScreen">
+        <template #body="{data}">
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Expiration Timestamp Estimate</div>
+            <div class="uppercase font-bold text-txs" v-if="data.expiry">{{ data.expiry }} <div class="rounded-full w-2 h-2 inline-block ml-2" :class="data.expiring=='expired'?'bg-red-500':(data.expiring=='expiring'?'bg-yellow-500':'bg-green-500')"></div></div>
+            <div class="text-gray-300 text-xs" v-else>Fetching..</div>
+          </div>
+        </template>
+      </Column>
+      <Column style="width: 30px" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-center">
             <div class="rounded-full w-2 h-2 inline-block" :class="data.expiring=='expired'?'bg-red-500':(data.expiring=='expiring'?'bg-yellow-500':'bg-green-500')"></div>
           </div>
         </template>
       </Column>
-      <Column field="name" header="NAME" :style="{ width: '200px' }">
+      <Column field="name" header="NAME" style="`wideScreen?'min-width: 160px'?'width: 160px'`" v-if="wideScreen">
         <template #body="{data}">
-          {{data.name}}
+          <span class="text-xs">{{data.name}}</span>
         </template>
       </Column>
-      <Column field="namespaceId" header="NAMESPACE ID" :style="{ width: '180px' }">
+      <Column field="namespaceId" header="NAMESPACE ID" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
-          <span class="uppercase">{{data.idHex}}</span>
+          <span class="text-xs uppercase">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedId" header="LINKED ASSET / ADDRESS" :style="{ width: '250px' }">
+      <Column field="linkedId" header="LINKED ASSET / ADDRESS" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase text-xs" v-if="data.linkedId">{{ data.linkedId }}</span>
           <span class="text-xs" v-else>No linked asset</span>
         </template>
       </Column>
-      <Column field="linkType" header="EXPIRES" :style="{ width: '150px' }">
+      <Column field="linkType" header="EXPIRES" style="`wideScreen?'min-width: 150px'?'width: 150px'`" v-if="wideScreen">
         <template #body="{data}">
           <div class="data.expiryRelative text-xs" v-if="data.expiryRelative">{{ data.expiryRelative }}</div>
           <div class="text-gray-300 text-xs" v-else>Fetching..</div>
         </template>
       </Column>
-      <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" :style="{ width: '180px' }">
+      <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" style="`wideScreen?'min-width: 210px'?'width: 210px'`" v-if="wideScreen">
         <template #body="{data}">
-          <span :class="data.expiring=='expired'?'text-red-500':(data.expiring=='expiring'?'text-yellow-500':'text-green-500')">{{ data.expiry }}</span>
+          <span class="text-xs" :class="data.expiring=='expired'?'text-red-500':(data.expiring=='expiring'?'text-yellow-500':'text-green-500')">{{ data.expiry }}</span>
         </template>
       </Column>
-      <Column style="width: 50px;">
+      <Column style="width: 30px">
         <template #body="{data}">
           <div class="text-txs text-center lg:mr-2" @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
             <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
@@ -68,7 +85,7 @@
 </template>
 
 <script>
-import { getCurrentInstance, ref, computed, watch, onMounted, toRefs  } from "vue";
+import { getCurrentInstance, ref, computed, watch, onMounted, toRefs, onUnmounted } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {Namespace} from '@/models/namespace';
@@ -88,7 +105,20 @@ export default{
   },
 
   setup(props, context){
-    const rowLimit = 5;
+    const wideScreen = ref(false);
+    const screenResizeHandler = () => {
+      if(window.innerWidth < '1024'){
+        wideScreen.value = false;
+      }else{
+        wideScreen.value = true;
+      }
+    };
+    screenResizeHandler();
+
+    onUnmounted(() => {
+      window.removeEventListener("resize", screenResizeHandler);
+    });
+
     const { namespaces, currentBlockHeight, account } = toRefs(props);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -104,6 +134,7 @@ export default{
     });
 
     onMounted(() => {
+      window.addEventListener("resize", screenResizeHandler);
       accountNamespaces.value = generateDatatable(namespaces.value, currentBlockHeight.value, account.value);
     });
 
@@ -258,7 +289,8 @@ export default{
       isMenuShow,
       accountNamespaces,
       hoverOverMenu,
-      hoverOutMenu
+      hoverOutMenu,
+      wideScreen,
     }
   }
 }
