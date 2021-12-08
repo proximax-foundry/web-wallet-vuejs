@@ -1,5 +1,5 @@
 <template>
-  <header>
+  <header class="z-10 fixed w-full">
     <div class="header-height flex items-stretch md:pr-2 bg-gray-50 filter drop-shadow-xl" v-if="loginStatus">
       <div class="header-height flex-none self-center flex pt-3 md:pt-4 pl-2 sm:pl-4 bg-navy-primary logo-header">
         <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40"></router-link>
