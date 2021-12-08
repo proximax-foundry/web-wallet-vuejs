@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col justify-between min-h-screen bg-navy-primary" @click="clickEvent">
+  <div class="flex flex-col justify-between md:min-h-screen bg-navy-primary" @click="clickEvent">
     <Toast position="top-left" group="tl" />
     <Toast position="top-right" group="tr" />
     <Toast position="center" group="center" />
