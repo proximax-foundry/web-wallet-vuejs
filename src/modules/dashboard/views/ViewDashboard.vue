@@ -1,8 +1,46 @@
 <template>
   <div>
     <div class="px-2 sm:px-10 bg-gray-200 pb-8 pt-5">
-      <div class="md:grid md:grid-cols-4">
-        <div class="pr-2">
+      <div class="md:grid md:grid-cols-2 xl:grid-cols-3">
+        <div class="block md:hidden">
+          <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded flex flex-col bg-white text-black">
+            <div class="text-center py-3">
+              <div class="text-center my-2"><div class="inline-block"><span class="font-bold text-xl">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-md">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-xl">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-6 h-6 ml-3 relative" style="top: -6px;"></div>
+              <div class="inline-block text-xs font-bold text-blue-primary cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">My Personal Account</div>
+              <div class="mb-8">
+                <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddressShort }}</div>
+                <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
+              </div>
+              <div>
+                <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center mr-2">
+                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
+                    <div class="h-full w-full flex items-center justify-center">
+                      <img src="@/modules/dashboard/img/icon-balance-white.svg" class="w-5 h-5">
+                    </div>
+                  </div><br>
+                  <div class="text-xxs text-gray-400 inline-block uppercase">Top Up</div>
+                </router-link>
+                <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center mx-2">
+                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
+                    <div class="h-full w-full flex items-center justify-center">
+                      <img src="@/modules/dashboard/img/icon-transfer-white.svg" class="w-5 h-5">
+                    </div>
+                  </div><br>
+                  <div class="text-xxs text-gray-400 inline-block uppercase">Transfer</div>
+                </router-link>
+                <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center ml-2">
+                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
+                    <div class="h-full w-full flex items-center justify-center">
+                      <img src="@/modules/dashboard/img/icon-swap-white.svg" class="w-5 h-5">
+                    </div>
+                  </div><br>
+                  <div class="text-xxs text-gray-400 inline-block uppercase">Swap</div>
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pr-2 hidden md:inline-block">
           <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded-lg balance-div flex flex-col justify-between bg-navy-primary text-white">
             <div class="text-right">
               <div class="inline-block text-txs font-bold text-blue-primary pappflex items-center rounded-b-sm"><img src="@/modules/dashboard/img/icon-bookmark.svg" class="w-3 h-3 mr-1 inline-block">DEFAULT ACCOUNT</div><br>
@@ -15,18 +53,17 @@
             </div>
             <div class="flex justify-between mt-2">
               <div>
-                <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold inline-block" style="margin-top: 1px">Top Up {{currentNativeTokenName}}</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></router-link>
+                <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">Top Up {{currentNativeTokenName}}</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></router-link>
               </div>
-              <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
+              <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
             </div>
-            
           </div>
         </div>
-        <div class="px-2">
+        <div class="sm:pl-2 xl:px-2 hidden md:inline-block">
           <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div">
             <div class="text-gray-400 text-txs mt-7 mb-2">WALLET ADDRESS</div>
             <div class="flex items-center justify-between mb-8">
-              <div id="address" class="font-bold outline-none break-all text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
+              <div id="address" class="font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
               <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4" @click="copy('address')">
             </div>
             <div class="flex justify-between w-full">
@@ -35,20 +72,10 @@
             </div>
           </div>
         </div>
-        <div class="col-span-2 pl-2">
-          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-4 rounded-lg transaction-div flex flex-row justify-evenly items-center text-white">
-            <div class="text-center">
-              <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-successful-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredConfirmedTransactions.length }}</div></div>
-              <div class="text-xs mt-3">Succesful<br>Transactions</div>
-            </div>
-            <div class="text-center">
-              <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-unconfirmed-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredUnconfirmedTransactions.length }}</div></div>
-              <div class="text-xs mt-3">Unconfirmed<br>Transactions</div>
-            </div>
-            <div class="text-center">
-              <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-waiting-for-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredPartialTransactions.length }}</div></div>
-              <div class="text-xs mt-3">Waiting for<br>Signing</div>
-            </div>
+        <div class="pl-2 hidden xl:inline-block">
+          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-4 rounded-lg transaction-div text-white">
+            <div class="text-tsm mt-7">Recent Transactions</div>
+            <div class="text-gray-400 text-tsm mt-4 mb-2">Invite your families and friends to create Sirius Wallet account and start transferring to their accounts.</div>
           </div>
         </div>
       </div>
@@ -68,7 +95,7 @@
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
       <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" :account="selectedAccount" />
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ filteredConfirmedTransactions.length }} - View all)</div>
-      <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block).slice(0, 5)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
+      <!-- <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block).slice(0, 5)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable> -->
       <div class="mt-10 flex">
         <div class=" md:w-1/2">
           <div class="mb-8 font-bold uppercase text-txs">Create something new</div>
@@ -329,6 +356,12 @@ export default defineComponent({
     // const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty().substring(0, 13) + '....' + Helper.createAddress(selectedAccount.value.address).pretty().substring(Helper.createAddress(selectedAccount.value.address).pretty().length - 11));
     const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty());
     const selectedAccountAddressPlain = computed(()=> selectedAccount.value.address);
+    const selectedAccountAddressShort = computed(() => {
+      let prettyAddress = Helper.createAddress(selectedAccount.value.address).pretty();
+      let firstPartAddress = prettyAddress.substr(0, 11);
+      let secondPartAddress = prettyAddress.substr(-11);
+      return firstPartAddress + '...' + secondPartAddress;
+    });
     const selectedAccountDirectChilds = computed(()=> {
       let multisigInfo = selectedAccount.value.multisigInfo.find((x)=> x.level === 0);
 
@@ -1128,6 +1161,7 @@ export default defineComponent({
       currentNativeTokenName,
       selectedAccountAddress,
       selectedAccountAddressPlain,
+      selectedAccountAddressShort,
       updateSelectedAccount,
       isDefault,
       isMultisig,
