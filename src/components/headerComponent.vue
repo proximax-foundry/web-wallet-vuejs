@@ -13,15 +13,15 @@
         <img src="@/assets/img/icon-blockheight.svg" class="h-10 w-10 inline-block">
         <div class="ml-3">
           <div class="uppercase text-txs text-gray-400">block height</div>
-          <div class="text-gray-800 text-md font-bold mt-1">{{ currentBlockHeight==0?'Fetching...':currentBlockHeight }}</div>
+          <div class="text-md mt-1" :class="currentBlockHeight==0?'text-gray-300':'text-gray-800 font-bold'">{{ currentBlockHeight==0?'Fetching...':currentBlockHeight }}</div>
         </div>
       </div>
 
       <div class="flex-grow"></div>
       <div class="flex-none">
         <div class="flex flex-row h-full">
-          <div class="flex flex-row items-center">
-            <div class="text-center w-full h-6 pr-10 mt-2 relative">
+          <div class="flex-row items-center hidden lg:flex">
+            <div class="text-center w-full h-6 pr-2 lg:pr-10 mt-2 relative">
               <div class="cursor-pointer text-blue-primary text-tsm" @mouseover="setHoverCreateToTrue" @mouseout="setHoverCreateToFalse">+ Create</div>
               <div class="absolute z-20 w-60 text-left mt-2 bg-gray-50 shadow-sm rounded-md right-0 p-2 text-xs transition duration-200 block" v-if="isShowCreate" @mouseover="isShowCreate=true;isHoverCreatePanel=true;" @mouseout="hideCreatePanel">
                 <router-link :to="{ name: 'ViewServicesAssetsCreate'}" class="hover:bg-gray-200 p-2 block">
