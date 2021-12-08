@@ -6,7 +6,7 @@
           <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded flex flex-col bg-white text-black">
             <div class="text-center py-3">
               <div class="text-center my-2"><div class="inline-block"><span class="font-bold text-xl">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-md">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-xl">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-6 h-6 ml-3 relative" style="top: -6px;"></div>
-              <div class="inline-block text-xs font-bold text-blue-primary cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">My Personal Account</div>
+              <div class="inline-block text-xs font-bold text-blue-primary cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">My Personal Account<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></div>
               <div class="mb-8">
                 <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddressShort }}</div>
                 <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
@@ -47,15 +47,15 @@
               <div class="inline-block text-txs underline xl:text-sm cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">My Personal Account</div>
             </div>
             <div>
-              <div class="mt-1 text-gray-300 text-txs">CURRENT BALANCE</div>
+              <div class="text-gray-300 text-txs">CURRENT BALANCE</div>
               <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
               <div class="text-gray-300 text-txs mt-1">Estimate US$ {{ currencyConvert }}</div>
             </div>
             <div class="flex justify-between mt-2">
               <div>
-                <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">Top Up {{currentNativeTokenName}}</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></router-link>
+                <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">Top Up</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></router-link>
               </div>
-              <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
+              <div class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-swap.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold text-gray-500" style="margin-top: 1px">Swap</div></div>
             </div>
           </div>
         </div>
@@ -63,19 +63,20 @@
           <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div">
             <div class="text-gray-400 text-txs mt-7 mb-2">WALLET ADDRESS</div>
             <div class="flex items-center justify-between mb-8">
-              <div id="address" class="font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
+              <div id="address" class="font-bold outline-none break-all text-xs lg:text-tsm h-8" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
               <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4" @click="copy('address')">
             </div>
             <div class="flex justify-between w-full">
-              <div class="my-2 flex items-center"><a href="https://bctestnetfaucet.xpxsirius.io/#/" target=_new><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span class="text-xs" style="margin-top: 1px">Request {{currentNativeTokenName}}</span></a></div>
-              <div class="my-2 flex items-center"><img src="@/modules/dashboard/img/icon-key.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Convert to Multisig</div></div>
+              <div class="my-2 flex items-center"><a href="https://bctestnetfaucet.xpxsirius.io/#/" target=_new><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span class="text-xs font-bold" style="margin-top: 1px">Scan QR Code</span></a></div>
+              <div class="my-2 flex items-center"><img src="@/modules/dashboard/img/icon-multisig-blue.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">Convert to Multisig</div></div>
             </div>
           </div>
         </div>
         <div class="pl-2 hidden xl:inline-block">
-          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-4 rounded-lg transaction-div text-white">
-            <div class="text-tsm mt-7">Recent Transactions</div>
-            <div class="text-gray-400 text-tsm mt-4 mb-2">Invite your families and friends to create Sirius Wallet account and start transferring to their accounts.</div>
+          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-3 rounded-lg transaction-div text-white">
+            <div class="text-tsm mt-7">Recent Transfers</div>
+            <div class="text-gray-400 text-tsm mt-4 mb-2 h-12">Invite your families and friends to create Sirius Wallet account and start transferring to their accounts.</div>
+            <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mt-5"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
           </div>
         </div>
       </div>
@@ -96,8 +97,8 @@
       <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" :account="selectedAccount" />
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ filteredConfirmedTransactions.length }} - View all)</div>
       <!-- <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block).slice(0, 5)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable> -->
-      <div class="mt-10 flex">
-        <div class=" md:w-1/2">
+      <div class="mt-10 md:flex ml-5 md:ml-0">
+        <div class="w-full md:w-1/2">
           <div class="mb-8 font-bold uppercase text-txs">Create something new</div>
           <div class="flex flex-wrap">
             <div class="flex items-center w-80 mb-2">
@@ -114,7 +115,7 @@
                 <p class="text-txs w-60">An asset could be a token that has a unique identifier and configurable properties.</p>
               </div>
             </div>
-            <div class="flex items-center w-80mb-2">
+            <div class="flex items-center w-80 mb-2">
               <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
               <div class="inline-block ml-2 dashboard-link">
                 <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create New Account</router-link>
@@ -123,9 +124,9 @@
             </div>
           </div>
         </div>
-        <div class="md:w-1/2">
+        <div class="w-full md:w-1/2 mt-7 md:mt-0">
           <div class="mb-8 font-bold text-txs uppercase">Getting started guide</div>
-          <div class="text-tsm">
+          <div class="text-xs sm:text-tsm">
             <div class="mb-2"><a href=#>Guide Overview <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
             <div class="mb-2"><a href=#>What is ProximaX Sirius Chain <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
             <div class="mb-2"><a href=#>What is Namespace <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
