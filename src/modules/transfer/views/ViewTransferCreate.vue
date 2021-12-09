@@ -1,45 +1,15 @@
 <template>
-  <div class="flex justify-between text-sm">
-    <div>
-      <span class="text-gray-300">{{$t('NavigationMenu.Transfer')}}></span>
-      <span class="text-blue-primary font-bold">{{$t('transfer.maketransaction')}}</span>
-    </div>
-    <div>
-      <!-- <router-link :to="{ name: 'ViewServices' }" class="font-bold">All Services</router-link> -->
-    </div>
-  </div>
-  <div class="mt-2 py-3 gray-line text-center">
-    <form @submit.prevent="create" class="mt-10">
-      <fieldset class="w-full">
-        <div class="mb-5 border-b border-gray-200">
-          <div class="error error_box" v-if="err != ''">{{ err }}</div>
-          <div v-if="moreThanOneAccount" class="text-left p-4">
-            <div class="mb-1 cursor-pointer z-20 border-b border-gray-200" @click="showMenu = !showMenu">
-              <div class="font-bold text-xs">
-                {{ selectedAccName }}
-                <span v-if="isMultiSigBool" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">
-                  {{$t('accounts.multisig')}}
-                </span>
-              </div>
-              <div class="text-gray-400 mt-1 text-sm">{{ selectedAccAdd }}</div>
-            </div>
-            <transition name="slide">
-              <div v-if="showMenu" class="z-10">
-                <div :key="item.address" :i="index" v-for="(item, index) in accounts" class="p-2 cursor-pointer" :class=" item.name == selectedAccName ? 'bg-blue-primary text-white font-bold': 'text-gray-800 bg-gray-50 optionDiv'"
-                  @click="changeSelection(item)" :title="'Address is ' + item.address" >
-                  <div>
-                    {{ item.name }}
-                    <span
-                      v-if="isMultiSig(item.address)" class="text-xs font-normal ml-2 inline-block py-1 px-2 rounded bg-blue-200 text-gray-800">
-                        {{$t('accounts.multisig')}}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </transition>
-            <input type="hidden" v-model="currentSelectedName" />
-          </div>
-          <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4"> 
+<div>
+  <AddContactModal :toggleModal="togglaAddContact" :saveAddress="recipientInput" />
+  <ConfirmSendModal :toggleModal="toggleConfirm" />
+  <div class='w-10/12 ml-auto mr-auto mt-5'>
+    <div class="border filter shadow-lg lg:grid lg:grid-cols-3" >
+      <div class="lg:col-span-2 py-6 px-6">
+        <div class="text-sm font-semibold ">New Transfer</div>
+        <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
+        <div class="mt-4"/>
+        <SelectInputSender  v-model="selectedAccAdd" :selectDefault="selectedAccAdd"/>
+        <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4"> 
             <div v-if="getWalletCosigner.length > 0">
               <div class="text-tsm">
                 {{$t('transfer.cosigner')}}:
@@ -50,7 +20,7 @@
                     </span>
                 </span>
                 <span class="font-bold" v-else>
-                  <select v-model="cosignAddress">
+                  <select class="" v-model="cosignAddress">
                     <option v-for="(element, item) in  getWalletCosigner" :value="element.address" :key="item">
                       {{ element.name }} ({{$t('services.balance')}}: {{ element.balance }} {{ currentNativeTokenName }})
                     </option>
@@ -65,31 +35,85 @@
              {{$t('transfer.nocosigner')}} 
             </div>
           </div>
-          <SelectInputPlugin v-if="showContactSelection" :placeholder="$t('accounts.contacts')" errorMessage=""  v-model="selectContact" :options="contact" @default-selected="selectContact = 0"  @show-selection="updateAdd"/>
-          <div class="flex">
-            <div class="flex-grow mr-5">
-              <TextInput :placeholder="$t('transfer.recipientPlaceholder')" :errorMessage="addressErrorMsg" :showError="showAddressError" v-model="recipientInput" v-debounce:1000="checkRecipient" icon="wallet" :disabled="disableRecipient"/>
-            </div>
-            <div class="flex-none">
-              <div class="rounded-full bg-gray-300 w-14 h-14 cursor-pointer relative" style="top: -5px" @click="showContactSelection = !showContactSelection">
-                <font-awesome-icon icon="id-card-alt" class="h-20 w-20 inline text-blue-primary absolute" style="top: -12px; left: 19px"> 
-                </font-awesome-icon>
-              </div>
+        <div class="flex mt-3 gap-1">
+          <AddressInputClean placeholder="TRANSFER TO (WALLET ADDRESS / NAMESPACE)" v-model="recipientInput" v-debounce:1000="checkRecipient" :errorMessage="addressErrorMsg" :showError="showAddressError" :disabled="disableRecipient"/>
+          <div @click="toggleContact=!toggleContact" class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 ' >
+            <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
+            <div class='text-xxs text-blue-primary font-semibold'>SELECT</div>
+          </div>
+        </div>
+        <div v-if="toggleContact" class=" border ">
+          <div class='text-xxs text-gray-300 font-semibold py-2 px-2'>IMPORT FROM ADDRESS BOOK</div>
+          <div v-for="(item, number) in contacts" :key="number" class="cursor-pointer">
+            <div @click="recipientInput=item.address;toggleContact=false" class="flex justify-center">
+              <div v-if="number%2==0" class="text-xs py-2 bg-gray-100 pl-2 w-full">{{item.name}}</div>
+              <div v-if="number%2==1" class="text-xs py-2 pl-2 w-full">{{item.name}}</div>
+              <div v-if="number%2==0" class="ml-auto pr-2 text-xxs py-2 font-semibold text-blue-primary bg-gray-100">SELECT</div>
+              <div v-if="number%2==1" class="ml-auto mr-2 text-xxs py-2 font-semibold text-blue-primary">SELECT</div>
             </div>
           </div>
         </div>
-        <div class="text-left p-3 pb-0 border-l-8 border-gray-100">
-          <div class="bg-gray-100 rounded-2xl p-3">
-            <div class="inline-block mr-4 tfaddext-tsm">
-              <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"/>
-                {{$t('services.balance')}}: 
-              <span class="text-xs">
-                {{ balance }} {{ currentNativeTokenName }}
-              </span>
-            </div>
-          </div>
-          <SupplyInput v-model="sendXPX" :title="$t('accounts.send')" :balance="Number(balance)" :placeholder="$t('transfer.enteramount')" type="text" icon="coins" :showError="showBalanceErr" :errorMessage="$t('accounts.insufficientbalance')" :decimal="6" class="mt-5" :disabled="disableSupply"/>
+        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" placeholder="TRANSFER AMOUNT" type="text" :showError="showBalanceErr" :errorMessage="$t('accounts.insufficientbalance')" :decimal="6" class="mt-3 " :disabled="disableSupply"/>
+        <TransferTextareaInput placeholder="MESSAGE" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
+        <div class="mb-5" v-if="!encryptedMsgDisable">
+          <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
+          <label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">
+            {{$t('transfer.encrypted')}}
+          </label>
         </div>
+      </div>
+      <div class='bg-navy-primary p-6 lg:col-span-1'>
+        <div class='font-semibold text-xxs text-blue-primary'>ACCOUNT CURRENT BALANCE</div>
+        <div class="flex my-1 text-white">
+          <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
+          <div class = 'text-md font-bold ' v-if='splitBalance.right!=null'>.</div>
+          <div class='text-xs mt-2 font-bold'>{{splitBalance.right}}</div>
+          <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
+          <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
+        </div>
+         <div class="flex mt-4 text-white">
+          <div class='text-xs '>Transfer Amount</div>
+          <div class="text-xs  ml-auto">{{sendXPX}}</div>
+          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+        </div>
+        <div class="flex mt-0.5 text-white">
+          <div class='text-xs '>Transaction Fee</div>
+          <div class="text-xs  ml-auto">{{effectiveFee}}</div>
+          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+        </div>
+        <div v-if="isMultiSig(selectedAccAdd)" class='border-b-2 border-gray-600 my-2'/>
+        <div v-if="isMultiSig(selectedAccAdd)" class="flex  text-white">
+          <div class='text-xs '>LockFund</div>
+          <div class="text-xs  ml-auto">{{lockFundCurrency}}</div>
+          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+        </div>
+        <div v-if="isMultiSig(selectedAccAdd)" class="flex  text-white">
+          <div class='text-xs '>Transaction Fee</div>
+          <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
+          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+        </div>
+        <div class='border-b-2 border-gray-600 my-2'/>
+        <div class="flex text-white">
+          <div class=' font-bold text-xs '>TOTAL</div>
+          <div class="text-xs  ml-auto">{{totalFee}}</div>
+          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+        </div>
+        <div class="mt-5"/>
+        <div class='font-semibold text-xs text-white'>Enter your password to continue</div>
+        <div class='font-semibold text-xxs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
+        <PasswordInput  :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3" :disabled="disablePassword"/>
+        <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" :disabled="disableCreate" @click="makeTransfer()">
+            Transfer
+          </button>
+        <div class="text-center">
+          <router-link :to="{name: 'ViewDashboard'}" class="content-center text-xs text-white underline" >Cancel</router-link>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- 
+ 
         <div v-for="(mosaic, index) in mosaicsCreated" :key="index">
           <MosaicInput :placeholder="$t('transfer.selectmosaic')" errorMessage="" v-model="selectedMosaic[index].id" :index="index" :options="mosaics" :disableOptions="selectedMosaic" @show-mosaic-selection="updateMosaic" @remove-mosaic-selected="removeMosaic"/>
           <SupplyInput v-if="selectedMosaic[index].id != 0"  :title="$t('accounts.send')" v-model="selectedMosaic[index].amount" :balance="getSelectedMosaicBalance[index]" :placeholder="$t('transfer.enteramount')" type="text" icon="coins" :showError="showBalanceErr" :errorMessage="$t('accounts.insufficientbalance')" :decimal="mosaicSupplyDivisibility[index]"/>
@@ -99,66 +123,8 @@
             (+) {{$t('transfer.addmosaics')}} 
           </button>
         </div>
-        <div class="mb-5 border-t pt-4 border-gray-200">
-          <div class="rounded-2xl bg-gray-100 p-5">
-            <input id="regularMsg" type="radio" name="msgOption" value="regular" v-model="msgOption" @change="clearMsg()" :disabled="disableRegularMsg == 1"/>
-            <label for="regularMsg" class="cursor-pointer font-bold ml-4 mr-5"> 
-              {{$t('transfer.regular')}}
-            </label>
-            <input id="hexMsg" type="radio" name="msgOption" value="hex" v-model="msgOption" @change="clearMsg()" :disabled="disableHexMsg == 1"/>
-            <label for="hexMsg" class="cursor-pointer font-bold ml-4"
-              >{{$t('transfer.hexadecimal')}}
-              </label>
-          </div>
-        </div>
-        <div class="mb-5" v-if="!encryptedMsgDisable">
-          <div class="rounded-2xl bg-gray-100 p-5">
-            <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
-            <label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">
-              {{$t('transfer.encrypted')}}
-            </label>
-          </div>
-        </div>
-        <!-- <div class = "mt-5" v-if = "msgOption == 'hex'">
-        <TransferTextareaInput v-on:keypress="hexOnly(event)" :placeholder="$t('dashboard.message')" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput"/>
-        </div> -->
-        <div class = "mt-5" >
-        <TransferTextareaInput :placeholder="$t('dashboard.message')" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" class="mt-5" :msgOpt="msgOption" :disabled="disableMsgInput" />
-        </div>
-        <div class="rounded-2xl bg-gray-100 p-5">
-          <div class="inline-block mr-4 text-xs">
-            <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500"/>
-            {{$t('accounts.unconfirmed')}}: {{ effectiveFee }} {{ currentNativeTokenName }}
-          </div>
-        </div>
-        <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800 " v-if="isMultiSig(selectedAccAdd)">
-          <div class="text-center">
-            <div class="inline-block">
-              <div class="flex">
-                <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center"/>
-                <div class="inline-block self-center text-left">
-                  <div>{{$t('accounts.lockfund')}}: {{ lockFundCurrency }} {{ currencyName }}</div>
-                  <div> {{$t('accounts.unconfirmed')}}: {{ lockFundTxFee }}{{ currencyName }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <PasswordInput :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5" :disabled="disablePassword"/>
-        <div class="mt-10">
-          <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput()">
-            {{$t('signin.clear')}}
-          </button>
-          <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="makeTransfer()">
-            {{$t('welcome.create')}}
-          </button>
-        </div>
-      </fieldset>
-    </form>
-    <AddContactModal :toggleModal="togglaAddContact" :saveAddress="recipient" />
-    <ConfirmSendModal :toggleModal="toggleConfirm" />
-  </div>
+        
+  </div> -->
 </template>
 <script >
 import { Helper } from "@/util/typeHelper";
@@ -184,28 +150,36 @@ import { TransactionUtils } from "@/util/transactionUtils";
 import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from '@/util/chainUtils';
 import { NamespaceUtils } from '@/util/namespaceUtils';
-
+import SelectInputSender from "@/modules/transfer/components/SelectInputSender.vue";
+import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
+import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
 export default { 
   name: "ViewTransferCreate",
   components: {
-    TextInput,
+    AddressInputClean,
+    SelectInputSender,
+    TransferInputClean,
+    TransferTextareaInput,
+    PasswordInput,
+    AddContactModal,
+    ConfirmSendModal
+    /* TextInput,
     PasswordInput,
     MosaicInput,
     SelectInputPlugin,
     SupplyInput,
     TransferTextareaInput,
-    AddContactModal,
-    ConfirmSendModal,
+   */
   },
   setup() {
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const toggleContact = ref(false)
     const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showContactSelection = ref(false);
     const showBalanceErr = ref(false);
     const selectContact = ref("0");
-    const recipient = ref("");
     const recipientInput = ref("");
     const msgOption = ref("regular");
     const messageText = ref("");
@@ -213,7 +187,6 @@ export default {
     const err = ref("");
     const showMenu = ref(false);
     const encryptedMsg = ref("");
-    const currentSelectedName = ref("");
     const togglaAddContact = ref(false);
     const selectedMosaic = ref([]);
     const mosaicsCreated = ref([]);
@@ -225,7 +198,7 @@ export default {
     const encryptedMsgDisable = ref(true);
     const toggleConfirm = ref(false);
     const forceSend = ref(false);
-    const effectiveFee = ref("0.037750");
+    const effectiveFee = ref("22.650000");
     const cosignAddress = ref("");
     const disableAllInput = ref(false);
     const disableRecipient = computed(() => disableAllInput.value);
@@ -257,7 +230,8 @@ export default {
         networkState.currentNetworkProfile.network.currency.divisibility
       )
     );
-    const lockFundTxFee = ref(0.0445);
+    console.log(lockFundCurrency.value)
+    const lockFundTxFee = ref(26.700000);
     const lockFundTotalFee = computed(
       () => lockFund.value + lockFundTxFee.value
     );
@@ -272,7 +246,7 @@ export default {
 
     const addMsg = ref("");
     const remainingChar = ref(0);
-    const showAddressError = ref(false);
+    const showAddressError = ref(true);
     const addressErrorMsg = computed(() => {
       let addErrDefault = t('transfer.invalidrecipient');
       return addMsg.value ? addMsg.value : addErrDefault;
@@ -285,7 +259,7 @@ export default {
       return !(
         walletPassword.value.match(passwdPattern) &&
         !showAddressError.value &&
-        recipient.value.length > 0
+        recipientInput.value.length > 0
       );
     });
 
@@ -351,6 +325,8 @@ export default {
         return accounts.concat(otherAccounts);
       
     });
+
+    
     
     const isMultiSig = (address) => {
       const account = accounts.value.find(
@@ -372,6 +348,7 @@ export default {
 
     if (isMultiSigBool.value) {
       let cosigner = multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
+      cosignAddress.value = cosigner[0].address;
       if (cosigner.length > 0) {
         if (cosigner[0].balance < lockFundTotalFee.value) {
           disableAllInput.value = true;
@@ -384,7 +361,15 @@ export default {
         disableAllInput.value = true;
       }
     }
-
+    const contacts = computed(()=>{
+      let contact = accounts.value.concat(walletState.currentLoggedInWallet.contacts.map(contact=>{
+        return{
+          name: contact.name,
+          address: contact.address
+        }
+      }))
+      return contact
+    })
     const balance = computed(() => {
         if (walletState.currentLoggedInWallet) {
           if (accounts.value.find((element) => element.address === selectedAccAdd.value) == undefined){
@@ -396,6 +381,15 @@ export default {
           return 0;
         }
       });
+    const splitBalance = computed(()=>{
+      let accBalance = Helper.toCurrencyFormat(balance.value, networkState.currentNetworkProfile.network.currency.divisibility)
+      let split = accBalance.split(".")
+      if (split[1]!=undefined){
+        return {left:split[0],right:split[1]}
+      }else{
+        return {left:split[0], right:null}
+      }
+    })
     
     if (balance.value < lockFundTotalFee.value) {
       showBalanceErr.value = true;
@@ -404,20 +398,6 @@ export default {
     const moreThanOneAccount = computed(() => {
       return accounts.value.length> 1;
     });
-
-    const changeSelection = (i) => {
-      selectedAccName.value = i.name;
-      selectedAccAdd.value = i.address;
-     
-      balance.value == 0? (showBalanceErr.value = true): (showBalanceErr.value = false);
-      showMenu.value = !showMenu.value;
-      currentSelectedName.value = i.name;
-      
-      selectedMosaic.value = [];
-      mosaicsCreated.value = [];
-      selectedMosaicAmount.value = [];
-      mosaicSupplyDivisibility.value = [];
-    };
 
  
     const contact = computed(() => {
@@ -443,11 +423,11 @@ export default {
       return contact;
      
     });
-
+  
     const clearInput = () => {
       selectContact.value = "0";
       walletPassword.value = "";
-      recipient.value = "";
+      recipientInput.value = "";
       encryptedMsgDisable.value = true;
       messageText.value = "";
       sendXPX.value = "0";
@@ -466,7 +446,7 @@ export default {
 
   
   const updateAdd = (e) => {
-    recipient.value = e;
+    recipientInput.value = e;
   };
   const makeTransfer = async() => {
     if (sendXPX.value == "0" && !forceSend.value) {
@@ -484,13 +464,13 @@ export default {
         }
       }
       let transferStatus = await createTransaction(
-        recipient.value.toUpperCase(),
+        recipientInput.value.toUpperCase(),
         sendXPX.value,
         messageText.value,
         selectedMosaic.value,
         mosaicSupplyDivisibility.value,
         walletPassword.value,
-        selectedAccName.value,
+        selectedAccAdd.value,
         selectedCosign,
         encryptedMsg.value
       );
@@ -499,9 +479,8 @@ export default {
       } else {
         
         err.value = "";
-        selectedAccAdd.value = walletState.currentLoggedInWallet.selectDefaultAccount().address;
-        selectedAccName.value = walletState.currentLoggedInWallet.selectDefaultAccount().name;
-        if (!accountUtils.checkAvailableContact(recipient.value)) {
+       
+        if (!accountUtils.checkAvailableContact(recipientInput.value)) {
           
           // add new contact
           togglaAddContact.value = true;
@@ -561,7 +540,17 @@ export default {
     }
   });
 
+  const totalFee = computed(()=>{
+    if(!isMultiSig(selectedAccAdd.value)){
+      return Number(sendXPX.value) + Number(effectiveFee.value)
+    }if(isMultiSig(selectedAccAdd.value)){
+      return Helper.convertToCurrency((Number(sendXPX.value) + Number(effectiveFee.value) + lockFundTxFee.value + lockFund.value),0)
+    }else{
+      return 0
+    }
+  })
 
+  
   const mosaics = computed(() => {
     var mosaicOption = [];
     if(!walletState.currentLoggedInWallet){
@@ -593,10 +582,7 @@ export default {
   // update mosaic
   const updateMosaic = (e) => {
     // get mosaic info and format divisibility in supply input
-    const account = walletState.currentLoggedInWallet.accounts.find(
-      (account) => account.address === selectedAccAdd.value) || 
-      walletState.currentLoggedInWallet.others.find(
-      (account) => account.address === selectedAccAdd.value)
+    const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === selectedAccAdd.value) || walletState.currentLoggedInWallet.others.find((account) => account.address === selectedAccAdd.value)
     let mosaic = account.assets.find(
       (asset) => asset.idHex == selectedMosaic.value[e.index].id
     );
@@ -611,15 +597,7 @@ export default {
     mosaicSupplyDivisibility.value.splice(e.index, 1);
   };
   
-  function hexOnly(evt) {
-      evt = (evt) ? evt : window.event;
-      var charCode = (evt.which) ? evt.which : evt.keyCode;
-      if ((charCode > 31 && (charCode < 48 || charCode > 57)  && (charCode < 65 || charCode > 70) && (charCode < 97 || charCode > 102))  ) {
-        evt.preventDefault();
-      } else {
-        return true;
-      }
-    }
+ 
   
   watch(selectedAccAdd, (n, o) => {
     isMultiSigBool.value = isMultiSig(n);
@@ -665,7 +643,15 @@ export default {
       showBalanceErr.value = false
     }
   });
-
+  watch(recipientInput,n=>{
+    checkEncryptable(n);
+    if(n.length==40 || n.length==46){
+      checkEncryptable(n);
+      checkRecipient()
+    }else{
+      showAddressError.value = true
+    }
+  })
   const checkRecipient = () =>{
 
     if(!walletState.currentLoggedInWallet){
@@ -682,27 +668,25 @@ export default {
         addMsg.value = "Wrong network address";
       }
       else{
-        recipient.value = recipientInput.value;
         checkEncryptable(recipientInput.value);
         showAddressError.value = false;
       }
 
     } catch (error) {
-
       try{
         let namespaceId = Helper.createNamespaceId(recipientInput.value);
 
         checkNamespace(namespaceId).then((address)=>{
-          recipient.value = address.plain();
+          recipientInput.value = address.plain();
           showAddressError.value = false;
-          checkEncryptable(recipient.value);
+          checkEncryptable(recipientInput.value);
         }).catch((error)=>{
           addMsg.value = "Invalid recipient";
           showAddressError.value = true;
         });
       }
       catch(error){
-        console.log(error);
+        /* console.log(error); */
         addMsg.value = "Invalid recipient";
         showAddressError.value = true;
       }
@@ -711,10 +695,11 @@ export default {
 
   const checkEncryptable = (add) =>{
     // show and hide encrypted message option
+    console.log(recipientInput.value)
     if (add.match(addressPatternLong) || add.match(addressPatternShort)) {
-        accountUtils.verifyPublicKey(recipient.value).then(verify =>
+        accountUtils.verifyPublicKey(recipientInput.value).then(verify =>
         encryptedMsgDisable.value = verify
-        )
+        ).catch(err=>encryptedMsgDisable.value=true)
     } else {
       encryptedMsgDisable.value = true;
     }
@@ -724,9 +709,19 @@ export default {
     return await NamespaceUtils.getLinkedAddress(nsId, chainAPIEndpoint.value);
   }
 
-  watch(currentSelectedName, (n, o) => {
+  watch(selectedAccName, (n, o) => {
     if (n != o) {
-      recipient.value = "";
+      recipientInput.value = "";
+    }
+  });
+
+  watch(sendXPX, (n, o) => {
+    if (n != o) {
+      effectiveFee.value = makeTransaction.calculate_fee(
+        n,
+        sendXPX.value,
+        selectedMosaic.value
+      );
     }
   });
 
@@ -766,7 +761,17 @@ export default {
     togglaAddContact.value = payload;
     clearInput();
   });
-
+  emitter.on("select-account", (address) => {
+    selectedAccName.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)? walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address).name : walletState.currentLoggedInWallet.others.find(acc=>acc.address==address).name
+    selectedAccAdd.value = address;
+    
+    balance.value == 0? (showBalanceErr.value = true): (showBalanceErr.value = false);
+    
+    selectedMosaic.value = [];
+    mosaicsCreated.value = [];
+    selectedMosaicAmount.value = [];
+    mosaicSupplyDivisibility.value = [];
+  });
   // confirm modal
   emitter.on("CLOSE_CONFIRM_SEND_MODAL", (payload) => {
     toggleConfirm.value = payload;
@@ -782,9 +787,12 @@ export default {
   });
 
     return {
+      totalFee,
+      contacts,
+      toggleContact,
+      splitBalance,
       moreThanOneAccount,
       showMenu,
-      currentSelectedName,
       selectedAccName,
       selectedAccAdd,
       addressErrorMsg,
@@ -793,7 +801,6 @@ export default {
       showBalanceErr,
       err,
       contact,
-      recipient,
       recipientInput,
       namespace,
       sendXPX,
@@ -809,7 +816,6 @@ export default {
       addMosaicsButton,
       clearMsg,
       accounts,
-      changeSelection,
       encryptedMsgDisable,
       encryptedMsg,
       makeTransfer,
@@ -847,7 +853,6 @@ export default {
       lockFundTxFee,
       lockFundTotalFee,
       walletName,
-      hexOnly,
       checkNamespace,
       currentNativeTokenName,
     };
