@@ -121,7 +121,7 @@
         </div>
       </div>
     </div>
-    <div class="container mx-auto header-height flex items-stretch " v-else>
+    <div class="container mx-auto header-height flex items-stretch bg-navy-primary" v-else>
       <div class="flex-none self-center flex items-end ml-2 lg:ml-0">
         <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 lg:w-40"></router-link>
       </div>
