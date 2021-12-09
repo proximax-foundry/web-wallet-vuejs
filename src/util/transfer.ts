@@ -43,7 +43,7 @@ async function getAccInfo(address :string) :Promise<PublicAccount> {
   return accountInfo;
 }
 
-export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[], walletPassword :string, senderAccName :string, cosigner :string, encryptedMsg :string) : Promise<boolean>  => {
+export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[], walletPassword :string, senderAccAddress :string, cosigner :string, encryptedMsg :string) : Promise<boolean>  => {
   // verify password
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword)
   
@@ -86,12 +86,12 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
   // to get sender's private key
   let accountDetails, multisigAccountDetails, multisigPublicAccount;
   if (!cosigner) { // no cosigner, get private key from sender acc name
-    accountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.name === senderAccName);
+    accountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.address === senderAccAddress);
   } else {
     // a multisig, get cosigner's private key
     accountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.address === cosigner);
     // get multisig account info
-    multisigAccountDetails = walletState.currentLoggedInWallet.others.find((element) => element.name === senderAccName).publicKey;
+    multisigAccountDetails = walletState.currentLoggedInWallet.others.find((element) => element.address=== senderAccAddress)? walletState.currentLoggedInWallet.others.find((element) => element.address=== senderAccAddress).publicKey :  walletState.currentLoggedInWallet.accounts.find((element) => element.address=== senderAccAddress).publicKey
     multisigPublicAccount = PublicAccount.createFromPublicKey(multisigAccountDetails, networkType);
   }
 

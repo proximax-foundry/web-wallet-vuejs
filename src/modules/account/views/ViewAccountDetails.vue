@@ -63,18 +63,26 @@
           <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
           <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
           <div class='flex ml-auto gap-6 '>
-            <div class='flex cursor-pointer'>
+            <router-link :to='{name:"ViewTransferCreate"}' class='flex cursor-pointer'>
               <img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-5 h-5 mt-0.5  cursor-pointer mr-1">
               <div class='text-xs mt-1 font-semibold '>Transfer {{currentNativeTokenName}}</div>
-            </div>
+            </router-link>
             <div class='flex cursor-pointer'>
               <img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-5 h-5 mt-0.5  cursor-pointer mr-1">
               <div class='text-xs mt-1 font-semibold'>Request {{currentNativeTokenName}}</div>
             </div>
-            <div class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
+            <a v-if="networkState.chainNetwork == 0" href="https://www.proximax.io/en/xpx" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
               <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
               <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
-            </div>
+            </a>
+            <a v-if="networkState.chainNetwork == 1" href="https://bctestnetfaucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
+              <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
+              <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
+            </a>
+            <a v-if="networkState.chainNetwork == 2" href="https://bctestnet2faucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
+              <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
+              <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
+            </a>
           </div>
         </div>
         <div class = 'text-txs text-gray-400 '>Estimate US$ {{currencyConvert}}</div>
@@ -104,7 +112,7 @@
           </div>
           <p class = 'text-txs mt-2 text-gray-400'>{{$t('createsuccessful.warningtext1')}} {{$t('createsuccessful.warningtext2')}}</p>
       </div>
-      <div class='my-6 gray-line' v-if='!other_acc'></div>
+      <div class='my-6 gray-line' v-if="!other_acc "></div>
       <div class='flex'>
         <PdfPasswordModal v-if='!other_acc' />
         <DeleteAccountModal v-if="!isDefault && !other_acc " :account ='acc' />
@@ -350,6 +358,7 @@ export default {
    
 
     return {
+      networkState,
       showModal,
       svgString,
       splitBalance,
