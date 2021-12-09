@@ -58,7 +58,7 @@
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
           <label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">
-            {{$t('transfer.encrypted')}}
+            Enable Encryption
           </label>
         </div>
       </div>
