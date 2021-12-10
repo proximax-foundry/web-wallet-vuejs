@@ -182,6 +182,9 @@ import { WalletUtils } from '@/util/walletUtils';
 
 export default defineComponent({
   name: 'ViewDashboard',
+  props:{
+    type: String
+  },
   components: {
     SetAccountDefaultModal,
     DashboardDataTable,
@@ -189,7 +192,7 @@ export default defineComponent({
     DashboardNamespaceDataTable,
   },
 
-  setup(){
+  setup(props){
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -216,6 +219,15 @@ export default defineComponent({
     const isInitialSender = ref(false);
     const cosignModalKey = ref(0);
     const decryptMessageKey = ref(0);
+
+    if(props.type == 'transaction'){
+      displayBoard.value = 'transaction';
+    }
+    watch(props, (n)=> {
+      if(n.type == 'transaction'){
+        displayBoard.value = 'transaction';
+      }
+    });
 
     const openMessageModal = (message)=>{
       messagePayload.value = message;
@@ -430,7 +442,7 @@ export default defineComponent({
     let partialTransactions = ref([]);
 
     let finalConfirmedTransaction = ref([]);
-    
+
     let allConfirmedTransactions = ref([]);
     let allUnconfirmedTransactions = ref([]);
     let allPartialTransactions = ref([]);
