@@ -49,9 +49,8 @@ export default defineComponent({
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
-    const txnTypeParam = toRef(props);
     let txnType;
-    if(txnTypeParam.value == 'partial'){
+    if(props.transactionType == 'partial'){
       txnType = 'partial'
     }else{
       txnType = 'unconfirmed'

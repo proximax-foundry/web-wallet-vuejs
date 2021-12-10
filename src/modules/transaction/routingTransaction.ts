@@ -9,4 +9,14 @@ export const TransactionRoutes: RouteRecordRaw[] = [
       title: "Transaction Status",
     }
   },
+
+  {
+    path: '/sign/:txnHash',
+    name: 'ViewTransactionSign',
+    props: true,
+    component: () => import('@/modules/transaction/views/ViewTransactionSign.vue'),
+    meta: {
+      title: "Sign Transaction",
+    }
+  },
 ];

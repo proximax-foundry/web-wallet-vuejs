@@ -40,7 +40,7 @@
       <Column style="width: 100px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div v-if="data.sign" class="bg-orange-action text-white font-bold text-xxs text-center px-3 py-1 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">Waiting for Your Signature(s)</div>
+            <router-link :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" v-if="data.sign" class="bg-orange-action text-white font-bold text-xxs text-center px-3 py-1 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">Waiting for Your Signature(s)</router-link>
             <div v-else class="bg-orange-light text-orange-action font-bold text-xxs text-center px-3 py-1 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign.svg" class="mr-2">Waiting for Signature(s)</div>
           </div>
         </template>
@@ -71,7 +71,7 @@
       </Column>
       <Column field="sign" header="" headerStyle="width:80px" v-if="wideScreen">
         <template #body="{data}">
-          <div v-if="data.sign" class="bg-orange-action text-white font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">Waiting for Your Signature(s)</div>
+          <router-link :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" v-if="data.sign" class="bg-orange-action text-white font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">Waiting for Your Signature(s)</router-link>
           <div v-else class="bg-orange-light text-orange-action font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign.svg" class="mr-2">Waiting for Signature(s)</div>
         </template>
       </Column>
