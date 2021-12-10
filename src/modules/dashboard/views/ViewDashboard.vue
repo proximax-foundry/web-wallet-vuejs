@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="px-2 sm:px-10 bg-gray-200 pb-8 pt-5">
+    <div class="px-2 sm:px-10 bg-gray-200 pb-4 pt-5">
       <div class="md:grid md:grid-cols-2 xl:grid-cols-3">
         <div class="block md:hidden">
           <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded flex flex-col bg-white text-black">
@@ -156,7 +156,6 @@ import DashboardDataTable from '@/modules/dashboard/components/DashboardDataTabl
 import DashboardPartialDataTable from '@/modules/dashboard/components/DashboardPartialDataTable.vue';
 import DashboardAssetDataTable from '@/modules/dashboard/components/DashboardAssetDataTable.vue';
 import DashboardNamespaceDataTable from '@/modules/dashboard/components/DashboardNamespaceDataTable.vue';
-import PartialDashboardDataTable from '@/components/PartialDashboardDataTable.vue';
 import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
 import AddressQRModal from '@/modules/dashboard/components/AddressQRModal.vue';
 import MessageModal from '@/modules/dashboard/components/MessageModal.vue';
@@ -186,9 +185,8 @@ export default defineComponent({
   components: {
     SetAccountDefaultModal,
     DashboardDataTable,
-    //PartialDashboardDataTable,
     DashboardAssetDataTable,
-    DashboardNamespaceDataTable,    
+    DashboardNamespaceDataTable,
   },
 
   setup(){
@@ -460,6 +458,7 @@ export default defineComponent({
 
     watch(filteredConfirmedTransactions, (newValue) => {
       finalConfirmedTransaction.value = newValue;
+      console.log(finalConfirmedTransaction.value)
     });
 
     let selfKnownNamespace = [];
