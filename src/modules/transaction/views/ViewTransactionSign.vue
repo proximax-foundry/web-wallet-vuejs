@@ -2,7 +2,7 @@
   <div>
     <div class='flex cursor-pointer'>
       <img src='@/assets/img/chevron_left.svg'>
-      <router-link :to='{name:"ViewTransactionStatus", params: {hash: txnHash }}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
+      <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
     </div>
     <div class='md:w-8/12 lg:w-10/12 xl:w-6/12 ml-2 mr-2 md:ml-auto md:mr-auto mt-5'>
       <div class='border-2'>
@@ -15,7 +15,7 @@
           <div class="lg:h-28 lg:flex lg:items-center my-5 mb-10 lg:my-0 lg:mb-0">
             <div>
               <div class="uppercase text-blue-primary text-xs font-bold">MULTISIG-JLON</div>
-              <div class="uppercase text-xs font-bold">VC5K6T-HMZXBB-XQWKLS-L4Q5BK-PXKV4H-UKJSJ2-JLON</div>
+              <div class="uppercase text-xs font-bold p-1">VC5K6T-HMZXBB-XQWKLS-L4Q5BK-PXKV4H-UKJSJ2-JLON</div>
             </div>
           </div>
           <div class="lg:h-28 flex text-center justify-center">
@@ -28,17 +28,59 @@
           <div class="lg:h-28 lg:flex lg:items-center my-5 lg:my-0">
             <div>
               <div class="inline-block uppercase text-blue-primary text-xs font-bold">My Personal Account</div>
-              <div class="uppercase text-xs font-bold">VCPB4E-BOMKQA-F347JL-KE5QJQ-BQTSPV-OB6NJ7-QYGQ</div>
+              <div class="uppercase text-xs font-bold p-1">VCPB4E-BOMKQA-F347JL-KE5QJQ-BQTSPV-OB6NJ7-QYGQ</div>
             </div>
           </div>
         </div>
         <div class="flex items-center h-14 lg:h-28 justify-center">
-          <div class="text-gray-600 bg-white px-5 py-2 lg:px-10 lg:py-3 rounded-md text-xs lg:text-tsm inline-block border-2 border-gray-200 mr-5">Do this later</div>
-          <div class="text-white bg-blue-primary px-7 py-2 lg:px-12 lg:py-3 rounded-md text-xs lg:text-tsm inline-block font-bold border-2 border-blue-primary">Approve</div>
+          <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class="text-gray-600 bg-white px-5 py-2 lg:px-10 lg:py-3 rounded-md text-xs lg:text-tsm inline-block border-2 border-gray-200 mr-5">Do this later</router-link>
+          <div class="text-white bg-blue-primary px-7 py-2 lg:px-12 lg:py-3 rounded-md text-xs lg:text-tsm inline-block font-bold border-2 border-blue-primary hover:opacity-80 transition-all duration-300">Approve</div>
         </div>
       </div>
-      <div class='border-2 mt-5 p-3'>
-        <div class="text-sm">Transaction information</div>
+      <div class='border-2 mt-5'>
+        <div class="flex justify-between p-3">
+          <div class="text-tsm">Transaction information</div>
+          <div class="cursor-pointer text-xs text-blue-primary uppercase flex justify-evenly items-center" @click="viewTxn = !viewTxn">View<img src="@/modules/transaction/img/icon-down-caret.svg" class="ml-2 transition-all duration-200" :class="`${viewTxn?'rotate-180 transform':''}`"></div>
+        </div>
+        <transition name="slide">
+          <div class="p-3 border-t-2 border-gray-200" v-if="viewTxn">
+            <div class="my-4 text-sm">Aggregate Bonded</div>
+            <div class="table_div border-b-2 border-gray-200 pb-5 mb-5">
+              <div>
+                <div>Type</div>
+                <div>4241</div>
+              </div>
+              <div>
+                <div>TX Hash</div>
+                <div>3719E9CF01C0EF0BA4137A64960DFF5DA0CFDDB095BF3C7C706279372E3DEBF9</div>
+              </div>
+              <div>
+                <div>Signer</div>
+                <div>VDRZET-KWBELD-NUZPE3-MA36S5-HVSF7X-ZHNBKM-JMSA</div>
+              </div>
+            </div>
+            <div class="mt-10">Transactions ({{ innerTransactions.length }})</div>
+            <div class="mt-3 border-2 border-gray-200 p-3" v-for="(item, index) in innerTransactions" :key="index">
+              <div class="text-sm flex justify-between cursor-pointer" @click="viewInnerTxn[index] = !viewInnerTxn[index]">{{ item.Inner }}<img src="@/modules/transaction/img/icon-down-caret-black.svg" class="mr-1 transition-all duration-200" :class="`${viewInnerTxn[index]?'rotate-180 transform':''}`"></div>
+              <transition name="slide">
+                <div class="mt-4 table_div" v-if="viewInnerTxn[index]">
+                  <div>
+                    <div>Type</div>
+                    <div>{{ item.Type }}</div>
+                  </div>
+                  <div>
+                    <div>TX Hash</div>
+                    <div>{{ item.PublicKey }}</div>
+                  </div>
+                  <div>
+                    <div>Signer</div>
+                    <div>{{ item.Address }}</div>
+                  </div>
+                </div>
+              </transition>
+            </div>
+          </div>
+        </transition>
       </div>
     </div>
   </div>
@@ -82,17 +124,92 @@ export default {
     // get account details
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    
+
+    const viewTxn = ref(false);
+
+    const viewInnerTxn = ref([false, false, false]);
+
+    const innerTransactions = [
+      {
+        Inner: 'Multisig Cosignatory Modification',
+        Type: 'Add',
+        Address: 'VB7HC7-FRJSGG-PRAPCM-OINO3P-DZFRY3-OMOFKT-DKOI',
+        PublicKey: '951D9FFCBAC28D691EF0C6D78E49B4613C23D7073FBE12D28FEEBC11371A7332'
+      },
+      {
+        Inner: 'Inner Txn 2',
+        Type: 'Add',
+        Address: 'VB7HC7-FRJSGG-PRAPCM-OINO3P-DZFRY3-OMOFKT-DKOI',
+        PublicKey: '951D9FFCBAC28D691EF0C6D78E49B4613C23D7073FBE12D28FEEBC11371A7332'
+      },
+      {
+        Inner: 'Inner Txn 3',
+        Type: 'Add',
+        Address: 'VB7HC7-FRJSGG-PRAPCM-OINO3P-DZFRY3-OMOFKT-DKOI',
+        PublicKey: '951D9FFCBAC28D691EF0C6D78E49B4613C23D7073FBE12D28FEEBC11371A7332'
+      }
+    ];
+
     return {
       showModal,
+      innerTransactions,
+      viewTxn,
+      viewInnerTxn,
     };
   }
 };
 </script>
-<style scoped>
+<style scoped lang="scss">
 .popup-outer-create-wallet{
-  
   top: 40px; left: 0; right: 0; margin-left: auto; margin-right: auto; max-width: 400px;
+}
 
+.table_div{
+  @apply text-xs;
+  > div{
+    @apply grid grid-cols-4;
+    > div{
+      @apply p-2;
+    }
+    > div:first-child{
+      @apply text-blue-primary w-24 font-bold;
+    }
+    > div:nth-child(2){
+      @apply break-all col-span-3;
+    }
+  }
+
+  > div:nth-child(2n+1){
+    @apply bg-gray-100;
+  }
+}
+
+.slide-enter-active {
+   -moz-transition-duration: 0.5s;
+   -webkit-transition-duration: 0.5s;
+   -o-transition-duration: 0.5s;
+   transition-duration: 0.5s;
+   -moz-transition-timing-function: ease-in-out;
+   -webkit-transition-timing-function: ease-in-out;
+   -o-transition-timing-function: ease-in-out;
+   transition-timing-function: ease-in-out;
+}
+.slide-leave-active {
+   -moz-transition-duration: 0.5s;
+   -webkit-transition-duration: 0.5s;
+   -o-transition-duration: 0.5s;
+   transition-duration: 0.5s;
+   -moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+   -webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+   -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+   transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+}
+.slide-enter-to, .slide-leave-from {
+   max-height: 1000px;
+   overflow: hidden;
+}
+.slide-enter-from, .slide-leave-to {
+   overflow: hidden;
+   max-height: 0;
 }
 </style>
