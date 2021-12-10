@@ -110,7 +110,7 @@
           </div>
         </template>
       </Column>
-      <Column header="" headerStyle="width:20px">
+      <Column header="" headerStyle="width:70px">
         <template #body="{data}">
           <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
         </template>
