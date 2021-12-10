@@ -34,13 +34,13 @@
         </div>
         <div class="flex items-center h-14 lg:h-28 justify-center">
           <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class="text-gray-600 bg-white px-5 py-2 lg:px-10 lg:py-3 rounded-md text-xs lg:text-tsm inline-block border-2 border-gray-200 mr-5">Do this later</router-link>
-          <div class="text-white bg-blue-primary px-7 py-2 lg:px-12 lg:py-3 rounded-md text-xs lg:text-tsm inline-block font-bold border-2 border-blue-primary hover:opacity-80 transition-all duration-300">Approve</div>
+          <CosignPasswordModal transactionHash = '432434324324343fwefewf' />
         </div>
       </div>
       <div class='border-2 mt-5'>
-        <div class="flex justify-between p-3">
+        <div class="cursor-pointer flex justify-between p-3" @click="viewTxn = !viewTxn">
           <div class="text-tsm">Transaction information</div>
-          <div class="cursor-pointer text-xs text-blue-primary uppercase flex justify-evenly items-center" @click="viewTxn = !viewTxn">View<img src="@/modules/transaction/img/icon-down-caret.svg" class="ml-2 transition-all duration-200" :class="`${viewTxn?'rotate-180 transform':''}`"></div>
+          <div class="text-xs text-blue-primary uppercase flex justify-evenly items-center">View<img src="@/modules/transaction/img/icon-down-caret.svg" class="ml-2 transition-all duration-200" :class="`${viewTxn?'rotate-180 transform':''}`"></div>
         </div>
         <transition name="slide">
           <div class="p-3 border-t-2 border-gray-200" v-if="viewTxn">
@@ -101,7 +101,7 @@ import { useI18n } from 'vue-i18n';
 import { pdfWalletPaperImg } from '@/modules/account/pdfPaperWalletBackground';
 import jsPDF from 'jspdf';
 import qrcode from 'qrcode-generator';
-import PkPasswordModal from '@/modules/account/components/PkPasswordModal.vue'
+import CosignPasswordModal from '@/modules/transaction/components/CosignPasswordModal.vue'
 import PdfPasswordModal from '@/modules/account/components/PdfPasswordModal.vue'
 import DeleteAccountModal from '@/modules/account/components/DeleteAccountModal.vue'
 import { toSvg } from "jdenticon";
@@ -110,8 +110,7 @@ import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 export default {
   name: "ViewTransactionSign",
   components: {
-    /* TextInput, */
-    // PkPasswordModal,
+    CosignPasswordModal
   },
   props: {
     txnHash: String,

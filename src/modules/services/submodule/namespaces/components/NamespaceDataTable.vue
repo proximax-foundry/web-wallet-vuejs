@@ -9,7 +9,7 @@
       >
       <template #header>
         <div class="flex justify-between">
-          <span class="text-sm pt-1 text-gray-700">{{$t('services.namespaces')}}</span>
+          <span class="text-sm pt-1 text-gray-700 ml-2 lg:ml-7">{{$t('services.namespaces')}}</span>
           <SelectInputPluginClean v-model="filterNamespaces" :options="listAccounts" :selectDefault="selectedAddress" class="w-48 lg:w-60 inline-block" />
         </div>
       </template>
