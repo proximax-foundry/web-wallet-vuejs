@@ -138,11 +138,11 @@
         </div>
       </div>
     </div>
-    <div v-if="!wideScreen && !loginStatus" class="bg-gray-200 py-1 text-center">
-      <div class="w-16 text-center inline-block">
+    <div v-if="!wideScreen && !loginStatus" class="py-1 text-center" style="background: #484A69">
+      <div class="w-20 text-center inline-block text-gray-300">
         <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block text-xs sm:text-sm">{{$t('Header.home')}}</router-link>
       </div>
-      <div class="w-16 text-center inline-block">
+      <div class="w-20 text-center inline-block text-gray-300">
         <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold text-xs sm:text-sm">{{$t('Header.wallet')}}</router-link>
       </div>
     </div>

@@ -22,7 +22,7 @@
         </transition>
         <div class="fixed inset-0 bg-opacity-60 z-10 bg-gray-100"></div>
       </div>
-    <div class='w-9/12 ml-auto mr-auto '>
+    <div class='w-9/12 ml-auto mr-auto'>
       <div class = 'flex text-xs font-semibold border-b-2'>
         <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Details</div>
         <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>

@@ -14,7 +14,7 @@
       >
       <template #header>
         <div class="flex justify-between">
-          <span class="text-sm pt-1 text-gray-700">{{$t('services.assets')}}</span>
+          <span class="text-sm pt-1 text-gray-700 ml-2 lg:ml-7">{{$t('services.assets')}}</span>
           <SelectInputPluginClean v-model="filterAssets" :options="listAccounts" :selectDefault="selectedAddress" class="w-48 lg:w-60 inline-block" />
         </div>
       </template>

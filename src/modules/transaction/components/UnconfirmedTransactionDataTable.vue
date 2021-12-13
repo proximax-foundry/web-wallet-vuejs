@@ -10,7 +10,40 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column header="IN/OUT" headerStyle="width:30px">
+      <Column style="width: 250px" v-if="!wideScreen">
+        <template #body="{data}">
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">TX HASH</div>
+            <div class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">TYPE</div>
+            <div class="uppercase font-bold text-txs">{{data.typeName}}</div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">RECEIPIENT</div>
+            <div class="uppercase font-bold text-txs" v-tooltip.bottom="data.extractedData.recipient" v-if="data.extractedData.recipient">{{ data.extractedData.recipientName?data.extractedData.recipientName:data.extractedData.recipient }}</div>
+          </div>
+        </template>
+      </Column>
+      <Column style="width: 250px" v-if="!wideScreen">
+        <template #body="{data}">
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">TIMESTAMP</div>
+            <div class="uppercase font-bold text-txs">{{data.formattedDeadline}}</div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mt-5 mb-1">SENDER</div>
+            <div class="uppercase font-bold text-txs">{{ data.signerDisplay === data.signerAddressPretty ? data.signer : data.signerDisplay }}</div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mt-5 mb-1">TX AMOUNT</div>
+            <div class="uppercase font-bold text-txs" v-if="data.typeName=='Transfer'">{{ data.extractedData.amount?data.extractedData.amount:'0' }} <b>{{currentNativeTokenName}}</b> <img src="@/modules/dashboard/img/icon-sda.svg" class="inline-block" v-if="checkOtherAsset(data.otherAssets)" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + d(data.otherAssets) + '</tiptext>'"> <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.extractedData.messageTypeString + '</tiptitle><tiptext>' + data.extractedData.messagePayload + '</tiptext>'" class="inline-block" v-if="data.extractedData.messageType != 'empty' && data.extractedData.messageType"></div>
+            <div class="uppercase font-bold text-txs" v-else>{{ data.extractedData.amount?data.extractedData.amount:'-' }} <b v-if="data.extractedData.amount">{{currentNativeTokenName}}</b></div>
+          </div>
+        </template>
+      </Column>
+      <Column header="IN/OUT" headerStyle="width:30px" v-if="wideScreen">
         <template #body="{data}">
           <div class="ml-2">
             <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block" v-if="data.extractedData.recipient==currentAddress">
@@ -18,27 +51,27 @@
           </div>
         </template>
       </Column>
-      <Column field="typeName" header="TX HASH" headerStyle="width:100px">
+      <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="typeName" header="TIMESTAMP" headerStyle="width:110px">
+      <Column field="formattedDeadline" header="TIMESTAMP" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.formattedDeadline}}</span>
         </template>
       </Column>
-      <Column field="typeName" header="TYPE" headerStyle="width:110px">
+      <Column field="typeName" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.typeName}}</span>
         </template>
       </Column>
-      <Column field="block" header="BLOCK" headerStyle="width:110px">
+      <Column field="block" header="BLOCK" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-txs">{{ data.block }}</div>
         </template>
       </Column>
-      <Column field="signer" header="SENDER" headerStyle="width:110px">
+      <Column field="signer" header="SENDER" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span v-tooltip.bottom="data.signerAddress" class="truncate inline-block text-txs">
             <a :href="getPublicKeyExplorerUrl(data.signer)" target="_blank">
@@ -47,37 +80,37 @@
           </span>
         </template>
       </Column>
-      <Column field="recipient" header="RECIPIENT" headerStyle="width:110px">
+      <Column field="recipient" header="RECIPIENT" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span v-tooltip.bottom="data.extractedData.recipient" v-if="data.extractedData.recipient" class="truncate inline-block text-txs">{{ data.extractedData.recipientName?data.extractedData.recipientName:data.extractedData.recipient }}</span>
         </template>
       </Column>
-      <Column header="TX FEE" headerStyle="width:110px">
+      <Column header="TX FEE" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-txs">{{ data.maxFee }} <b v-if="data.maxFee">{{currentNativeTokenName}}</b></div>
         </template>
       </Column>
-      <Column header="AMOUNT" headerStyle="width:110px">
+      <Column header="AMOUNT" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-txs" v-if="data.typeName=='Transfer'">{{ data.extractedData.amount?data.extractedData.amount:'0' }} <b>{{currentNativeTokenName}}</b></div>
           <div class="text-txs" v-else>{{ data.extractedData.amount?data.extractedData.amount:'-' }} <b v-if="data.extractedData.amount">{{currentNativeTokenName}}</b></div>
         </template>
       </Column>
-      <Column header="SDA" headerStyle="width:40px">
+      <Column header="SDA" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
           <div>
             <img src="@/modules/dashboard/img/icon-sda.svg" class="inline-block" v-if="checkOtherAsset(data.otherAssets)" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + d(data.otherAssets) + '</tiptext>'">
           </div>
         </template>
       </Column>
-      <Column header="MESSAGE" headerStyle="width:40px">
+      <Column header="MESSAGE" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
           <div>
             <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.extractedData.messageTypeString + '</tiptitle><tiptext>' + data.extractedData.messagePayload + '</tiptext>'" class="inline-block" v-if="data.extractedData.messageType != 'empty' && data.extractedData.messageType">
           </div>
         </template>
       </Column>
-      <Column header="" headerStyle="width:20px">
+      <Column header="" headerStyle="width:70px">
         <template #body="{data}">
           <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
         </template>
@@ -87,14 +120,13 @@
       </template>
       <template #loading>
           {{$t('dashboard.loadingmessage')}}
-      </template>
+    </template>
     </DataTable>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { getCurrentInstance, ref, computed, watch } from "vue";
+import { defineComponent, getCurrentInstance, ref, computed, watch, onMounted, onUnmounted } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { networkState } from "@/state/networkState";
@@ -111,47 +143,41 @@ export default defineComponent({
   },
   name: 'DashboardDataTable',
   props: {
-    transactions: Array,
     showBlock: Boolean,
     showAction: Boolean,
     type: String,
     currentAddress: String
   },
-  emits: ['openMessage', 'openDecryptMsg'],
   directives: {
     'tooltip': Tooltip
   },
   setup(p, context){
+
+    const wideScreen = ref(false);
+    const screenResizeHandler = () => {
+      if(window.innerWidth < 1024){
+        wideScreen.value = false;
+      }else{
+        wideScreen.value = true;
+      }
+    };
+    screenResizeHandler();
+
+    onMounted(() => {
+      window.addEventListener("resize", screenResizeHandler);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener("resize", screenResizeHandler);
+    });
+
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const borderColor = ref('border border-gray-400');
-    const showTransactionModel = ref(false);
-    const modalData = ref(null);
-    const filterText = ref("");
     const isShowConfirmed = p.type === "confirmed" ? true : false;
     const isShowUnconfirmed = p.type === "unconfirmed" ? true : false;
     const isShowPartial = p.type === "partial" ? true : false;
 
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    /*
-    const filters = ref({
-      'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
-    });
-    */
-    watch(
-     ()=> filterText.value, (newValue)=>{
-       emitter.emit("confirmedFilter", newValue);
-    });
-
-    // const nsHint = "\`ns:\` - filter by Namespace (ID or name)";
-    // const nsHint2 = "\`ns:-\` - filter with Namespace Name alias";
-    // const nsHint3 = "\`ns:'\` - convert namespace name to Namespace ID, will ignore when invalid";
-    // const hashHint = "\`hash:\` - filter Transaction Hash ";
-    // const pkHint = "\`pk:\` - Public Key";
-    // const assetHint = "\`asset:\` - filter by Asset ID";
-    // const addressHint = "\`add:\` - filter by Address"; 
-
-    // const hints = [hashHint, assetHint, pkHint, addressHint, nsHint, nsHint2, nsHint3].join('\n');
 
     const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
     const blockExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.blockRoute);
@@ -163,106 +189,11 @@ export default defineComponent({
 
     const dynamicModelComponentDisplay = ref('TransferTransactionModal');
 
-    const clickInputText = () => {
-      borderColor.value = 'border border-white-100 drop-shadow';
-    };
-
-    const blurInputText = () => {
-      borderColor.value = 'border border-gray-400';
-    };
-
-    const rowClick = (e) => {
-      // console.log(e.data.typeName);
-      console.log(e.data);
-      switch(e.data.typeName){
-        case 'Transfer':
-          dynamicModelComponentDisplay.value = 'TransferTransactionModal';
-          break;
-        case 'LockFund':
-          dynamicModelComponentDisplay.value = 'LockFundModal';
-          break;
-        case 'Aggregate Bonded':
-          dynamicModelComponentDisplay.value = 'AggregateBondedModal';
-          break;
-        case 'Aggregate Complete':
-          dynamicModelComponentDisplay.value = 'AggregateBondedModal';
-          break;
-        default:
-          dynamicModelComponentDisplay.value = 'TransferTransactionModal';
-      }
-      showTransactionModel.value = true;
-      // modalData.value = Object.assign({}, e.data);
-      modalData.value = e.data;
-    };
-
-    emitter.on("CLOSE_MODAL", payload => {
-      showTransactionModel.value = payload;
-    });
-
-    const setSplitButtonItems = (data) =>{
-
-      let items = [
-        /*
-            {
-                label: 'Sample',
-                icon: 'pi pi-external-link',
-                command: () => {
-                    window.open(explorerBaseURL.value + hashExplorerURL.value + "/" + data.hash, "_blank");
-                }
-            },
-        
-            {
-                label: 'Update',
-                icon: 'pi pi-refresh',
-                command: () => {
-                    //toast.add({severity:'success', summary:'Updated', detail:'Data Updated', life: 3000});
-                }
-            },
-            {
-                label: 'Delete',
-                icon: 'pi pi-times',
-                command: () => {
-                    //toast.add({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted', life: 3000});
-                }
-            },
-            {
-                label: 'Vue Website',
-                icon: 'pi pi-external-link',
-                command: () => {
-                    window.location.href = 'https://vuejs.org/'
-                }
-            },
-            {   label: 'Upload',
-                icon: 'pi pi-upload',
-                command: () => {
-					          //window.location.hash = "/fileupload"
-				        }
-            }
-            */
-        ];
-
-      return items;
-    }
 
     const getPublicKeyExplorerUrl = (publicKey) =>{
-
       return explorerBaseURL.value + publicKeyExplorerURL.value + "/" + publicKey
     }
 
-    const getNamespaceExplorerUrl = (namespaceIdHex) =>{
-
-      return explorerBaseURL.value + namespaceExplorerURL.value + "/" + namespaceIdHex
-    }
-
-    const getAssetExplorerUrl = (assetIdHex) =>{
-
-      return explorerBaseURL.value + assetExplorerURL.value + "/" + assetIdHex
-    }
-
-    const getAddressExplorerUrl = (address) =>{
-
-      return explorerBaseURL.value + addressExplorerURL.value + "/" + address
-    }
 
     const getHashExplorerUrl = (hash) =>{
 
@@ -276,6 +207,15 @@ export default defineComponent({
 
     let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
     let chainAPICall = new ChainAPICall(apiEndpoint);
+
+    const checkOtherAsset = (assets) => {
+      if(assets){
+        if(assets.length > 0){
+          return true;
+        }
+      }
+      return false;
+    }
 
     const d = (assets) :Promise<string> => {
       return displayAsset(assets).then(data => {
@@ -309,23 +249,30 @@ export default defineComponent({
       return asset_div;
     }
 
-    const checkOtherAsset = (assets) => {
-      if(assets){
-        if(assets.length > 0){
-          return true;
-        }
+    const transactions = [
+      {
+        hash: 'CFAF94204836EC9CB39AE8C13E60122E74CDE86DEA71B1660658E12E34CA9B80',
+        typeName: 'Transfer',
+        extractedData: {
+          recipient: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
+          recipientName: "acc2",
+          recipientType: "address",
+          amount: '1000',
+          messageTypeString: "Plain message",
+          messagePayload: 'Hello'
+        },
+        block: 12344,
+        signer: 'CFAF94204836EC9CB39AE8C13E60122E74CDE86DEA71B1660658E12E34CA9B80',
+        signerDisplay: 'nameABC',
+        signerAddress: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
+        signerAddressPretty: "VAOYQC-VXM2EN-SIA4JI-V6DF4U-BNOLQD-JTSCMT-KJEB",
+        formattedDeadline: "12/1/2021, 19:00:18",
+        otherAssets: undefined
       }
-      return false;
-    }
+    ];
 
     return {
-      borderColor,
-      filterText,
-      clickInputText,
-      blurInputText,
-      modalData,
-      rowClick,
-      showTransactionModel,
+      d,
       dynamicModelComponentDisplay,
       blockExplorerURL,
       addressExplorerURL,
@@ -336,18 +283,15 @@ export default defineComponent({
       explorerBaseURL,
       // hints,
       getPublicKeyExplorerUrl,
-      getNamespaceExplorerUrl,
-      getAssetExplorerUrl,
-      getAddressExplorerUrl,
       getHashExplorerUrl,
-      setSplitButtonItems,
       gotoHashExplorer,
       isShowConfirmed,
       isShowUnconfirmed,
       isShowPartial,
-      d,
-      checkOtherAsset,
       currentNativeTokenName,
+      wideScreen,
+      checkOtherAsset,
+      transactions,
     }
   }
 })
