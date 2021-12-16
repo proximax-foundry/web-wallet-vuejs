@@ -4,13 +4,13 @@
       <div v-html="toSvg('account', 25, jdenticonConfig)" v-if='!selectedImg'></div>
       <div v-html="selectedImg" v-else></div>
       <div class='flex flex-col ml-2'>
-        <div class='text-blue-primary font-semibold text-xxs'  style="line-height: 9px;">ACCOUNT</div>
+        <div class="text-blue-primary font-semibold text-xxs uppercase"  style="line-height: 9px;">{{ placeholder?placeholder:'Account' }}</div>
         <div v-if='selectedAccount!=""' class='mt-1 text-tsm font-bold'>{{selectedAccount}}</div>
         <div v-else class='text-tsm font-bold '>Select Account</div>
       </div>
       <div v-if='!toggleSelection && selectedAccount==""' class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>Select</div>
       <div v-if='!toggleSelection && selectedAccount!=""'  class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>Change</div>
-      <img v-if='toggleSelection' @click='selectedAccount=""' src="@/assets/img/delete.svg" class='h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>
+      <img v-if='toggleSelection' @click="selectedAccount='';$emit('update:modelValue', '');" src="@/assets/img/delete.svg" class='h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>
     </div>
   </div>
   <div class='relative'>
@@ -42,7 +42,8 @@ export default defineComponent({
   name: 'SelectWalletInput',
   props: [
     'modelValue',
-    'selectDefault'
+    'selectDefault',
+    'placeholder',
   ],
 
   setup(p){

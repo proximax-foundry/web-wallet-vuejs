@@ -1,6 +1,14 @@
 import { RouteRecordRaw } from 'vue-router'
 export const MainnetSwapRoutes: RouteRecordRaw[] = [
   {
+    path: '/swap',
+    name: 'ViewServicesMainnetSwap',
+    component: () => import('@/modules/services/submodule/mainnetSwap/views/ViewServicesMainnetSwap.vue'),
+    meta: {
+      title: "Swap",
+    }
+  },
+  {
     path: '/swap-nis1',
     name: 'ViewServicesMainnetSwapNIS1ToSirius',
     component: () => import('@/modules/services/submodule/mainnetSwap/submodule2/nis1/views/ViewServicesMainnetSwapNIS1ToSirius.vue'),

@@ -17,10 +17,12 @@
       </div>
     </div>
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10 text-gray-400">CREATE</div>
+      <div class="my-3 px-10 text-gray-400 uppercase">Quick Action</div>
+      <router-link :to="{ name : 'ViewTransferCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-transfer.svg" class="h-3 w-3 inline-block relative mr-2">Transfer</router-link>
       <router-link :to="{ name : 'ViewServicesNamespace'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">Namespace</router-link>
       <router-link :to="{ name : 'ViewServicesAssets'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">Asset</router-link>
-      <router-link :to="{ name : 'ViewServices'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-services.svg" class="h-3 w-3 inline-block relative mr-2">Other Services</router-link>
+      <router-link :to="{ name : 'ViewServicesMainnetSwap'}" class="link_block flex items-center text-white" @click="closeNavi" v-if="isDisplaySwap"><img src="@/assets/img/navi/icon-swap.svg" class="h-3 w-3 inline-block relative mr-2">Swap</router-link>
+      <!-- <router-link :to="{ name : 'ViewServices'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-services.svg" class="h-3 w-3 inline-block relative mr-2">Other Services</router-link> -->
     </div>
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
       <div class="my-3 px-10 text-gray-400">NAVIGATE</div>
@@ -40,6 +42,7 @@ import { computed, inject } from "vue";
 import { useRouter } from "vue-router";
 import { walletState } from '@/state/walletState';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
+import { networkState } from "@/state/networkState";
 import {useI18n} from 'vue-i18n';
 
 export default{
@@ -127,6 +130,10 @@ export default{
       }
     );
 
+    const isDisplaySwap = computed(() => {
+      return (networkState.chainNetworkName == 'Sirius Mainnet' || networkState.chainNetworkName == 'Sirius Testnet 1' || networkState.chainNetworkName == 'Sirius Testnet 2');
+    });
+
     const logout = () => {
       WalletStateUtils.doLogout();
       router.push({ name: "Home"});
@@ -156,6 +163,7 @@ export default{
       hoverOverNavigation,
       hoverOutNavigation,
       closeNavi,
+      isDisplaySwap,
     };
   }
 }
