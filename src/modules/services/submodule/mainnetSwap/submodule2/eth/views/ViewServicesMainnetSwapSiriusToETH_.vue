@@ -1,21 +1,31 @@
 <template>
   <div>
-    <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
-    <div class='mt-6 p-6 border filter shadow-lg text-center'>
-      <div class="text-md">Main Network Swap</div>
-      <div class="text-xs my-3 mb-5 sm:mb-10">Swap from ETH to Proximax Sirius Chain</div>
-      <div class="flex my-10">
+    <div class="flex justify-between text-xs sm:text-sm">
+      <div><span class="text-gray-400">Swap > ETH > Out > </span> <span class="text-blue-primary font-bold">Transaction</span></div>
+      <div>
+        <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
+      </div>
+    </div>
+    <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
+      <div class="flex">
         <div class="flex-none">
-          <div class="flex border border-gray-300 rounded-md filter shadow-md">
-            <div class="flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-yellow-500':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-txs sm:text-sm font-bold" :class="`${ currentPage>=1?'text-white':'text-gray-400' }`">1</div></div>
-            <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('swap.transaction')}}</div>
+          <div class="flex p-0 sm:p-3">
+            <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">1</div></div>
+            <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('wallets.account')}}</div>
           </div>
         </div>
-        <div class="flex-grow self-center md:mx-4 h-0.5 bg-gray-100"></div>
+        <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
         <div class="flex-none">
-          <div class="flex border border-gray-300 rounded-md filter shadow-md">
-            <div class="flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-yellow-500':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-txs sm:text-sm font-bold" :class="`${ currentPage>=2?'text-white':'text-gray-400' }`">2</div></div>
-            <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('swap.certificate')}}</div>
+          <div class="flex p-0 sm:p-3">
+            <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">2</div></div>
+            <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('swap.transaction')}}</div>
+          </div>
+        </div>
+        <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
+        <div class="flex-none">
+          <div class="flex p-0 sm:p-3">
+            <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage==3?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">3</div></div>
+            <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('swap.certificate')}}</div>
           </div>
         </div>
       </div>
@@ -122,7 +132,6 @@
           </div>
         </div>
       </div>
-    </div>
     </div>
   </div>
 </template>

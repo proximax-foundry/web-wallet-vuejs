@@ -70,9 +70,12 @@ export default defineComponent({
       return accountList;
     });
 
-    const selectedAccount = ref(accounts.value.find(acc => acc.value == p.selectDefault).label);
-    const selectedAddress = ref(p.selectDefault);
-    const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonConfig));
+    // const selectedAccount = ref(accounts.value.find(acc => acc.value == p.selectDefault).label);
+    const selectedAccount = ref('');
+    const selectedAddress = ref('');
+    // const selectedAddress = ref(p.selectDefault);
+    // const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonConfig));
+    const selectedImg = ref('');
     const selectAccount = (accountName, accountAddress) => {
       selectedAccount.value = accountName;
       selectedAddress.value = accountAddress;
