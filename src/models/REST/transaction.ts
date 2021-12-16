@@ -1,7 +1,8 @@
 import { 
     TransactionHttp,
     SignedTransaction, CosignatureSignedTransaction,
-    TransactionAnnounceResponse, Transaction, TransactionStatus, TransferTransaction
+    TransactionAnnounceResponse, Transaction, TransactionStatus, TransactionGroupType,
+    TransactionQueryParams, TransactionType, TransactionSearch, TransactionCount
 } from "tsjs-xpx-chain-sdk";
 
 export class TransactionAPI {
@@ -33,6 +34,22 @@ export class TransactionAPI {
     }
 
     /**
+     * Gets a transaction for a transactionId
+     * @param transactionId - Transaction id or hash.
+     */
+     getUnconfirmedTransaction(transactionId: string): Promise<Transaction>{
+        return this.transactionHttp.getUnconfirmedTransaction(transactionId).toPromise();
+    }
+
+    /**
+     * Gets a transaction for a transactionId
+     * @param transactionId - Transaction id or hash.
+     */
+     getPartialTransaction(transactionId: string): Promise<Transaction>{
+        return this.transactionHttp.getPartialTransaction(transactionId).toPromise();
+    }
+
+    /**
      * Gets an array of transactions for different transaction ids
      * @param transactionIds - Array of transactions id and/or hash.
      *
@@ -55,5 +72,13 @@ export class TransactionAPI {
 
     getTransactionsStatuses(transactionHashes: string[]): Promise<TransactionStatus[]>{
         return this.transactionHttp.getTransactionsStatuses(transactionHashes).toPromise();
+    }
+
+    searchTransactions(transactionGroupType: TransactionGroupType, transactionQueryParams ?:TransactionQueryParams): Promise<TransactionSearch>{
+        return this.transactionHttp.searchTransactions(transactionGroupType, transactionQueryParams).toPromise();
+    }
+
+    getTransactionsCount(transactionTypes: TransactionType[], transactionGroupType: TransactionGroupType): Promise<TransactionCount[]> {
+        return this.transactionHttp.getTransactionsCount(transactionTypes, transactionGroupType).toPromise();
     }
 }

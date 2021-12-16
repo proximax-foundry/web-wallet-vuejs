@@ -65,8 +65,7 @@ export class AssetsUtils {
 
   static assetSupplyChangeTransaction = (networkType: NetworkType, generationHash: string, mosaidStringId: string, changeType: string, supply: number, divisibility:number):MosaicSupplyChangeTransaction => {
     const buildTransactions = new BuildTransactions(networkType, generationHash);
-    let supplyChangeType: MosaicSupplyType;
-    supplyChangeType = (changeType=='increase')?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
+    let supplyChangeType: MosaicSupplyType = (changeType=='increase')?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
     return buildTransactions.buildMosaicSupplyChange(new MosaicId(mosaidStringId), supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(divisibility, supply)));
   }
 
