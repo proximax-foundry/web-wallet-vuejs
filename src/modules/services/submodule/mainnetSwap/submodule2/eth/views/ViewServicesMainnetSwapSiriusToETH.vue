@@ -39,7 +39,7 @@
         <div class="text-lg my-7 font-bold">Transaction Details</div>
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <SelectInputAccountOutgoingSwap v-model="siriusAddress" placeholder="From Sirius Chain Account" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
-        <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left">
+        <!-- <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left">
           <div class="text-xs sm:text-tsm ml-3 text-gray-700">
             <div class="mb-1 sm:mb-0"><b>Account Name:</b> {{ selectedAccount.name }}</div>
             <div class="mb-1 sm:mb-0"><b>Sirius Address:</b> <div class="block mt-1 sm:inline-block sm:mt-0">{{ selectedAccount.address }}</div></div>
@@ -48,9 +48,9 @@
           <div class="self-center">
             <button @click="currentPage=1" class="text-xs sm:text-sm hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none">Change</button>
           </div>
-        </div>
+        </div> -->
         <SwapInput v-model="amount" :maxAmount="maxSwapAmount" placeholder="Amount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" type="text" icon="coins" :showError="showAmountErr"
-                  :errorMessage="(selectedAccount.balance >= minBalanceAmount)?'Insufficient balance':'Balance is insufficient to cover transaction fee.'" emptyErrorMessage="Amount is empty" :disabled="disableAmount" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" />
+                  :errorMessage="(selectedAccountBalance >= minBalanceAmount)?'Insufficient balance':'Balance is insufficient to cover transaction fee.'" emptyErrorMessage="Amount is empty" :disabled="disableAmount" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" />
         <TextInput placeholder="ETH address receiving your swap" errorMessage="Valid ETH address is required" :showError="showAddressErr" v-model="ethAddress" icon="wallet" />
         <div class="tex-center font-bold text-lg mb-2">Transaction Fee (ETH Network):</div>
         <div class="md:grid md:grid-cols-3 mb-10">
@@ -197,6 +197,7 @@ export default {
 
     const selectedAccountName = ref("");
     const selectedAccountAddress = ref("");
+    const selectedAccountBalance = ref(0);
     const selectAccount = (name, address) => {
       currentPage.value = 2;
       selectedAccountName.value = name;
@@ -254,6 +255,8 @@ export default {
       return allAvailableAccounts.value.find(acc=> acc.name === selectedAccountName.value);
     });
 
+    const siriusAddress = ref('');
+
     watch(siriusAddress, (address) => {
       let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
       if(!account){
@@ -261,6 +264,7 @@ export default {
       }
       selectedAccountName.value = account.name;
       selectedAccountAddress.value = account.address;
+      selectedAccountBalance.value = account.balance;
     });
 
     // page 2
@@ -739,6 +743,7 @@ export default {
       xpxExplorerUrl,
       currentNativeTokenName,
       siriusAddress,
+      walletState,
     };
   }
 }
