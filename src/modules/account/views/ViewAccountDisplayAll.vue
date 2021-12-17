@@ -24,13 +24,7 @@ import { computed, getCurrentInstance, ref } from "vue";
 import AccountTile from '@/modules/account/components/AccountTile.vue';
 import { useToast } from "primevue/usetoast";
 import { walletState } from '@/state/walletState';
-import { WalletUtils } from '@/util/walletUtils';
 import { networkState } from "@/state/networkState";
-import { multiSign } from '@/util/multiSignatory';
-import { AccountAPI } from '@/models/REST/account';
-import { Address, NetworkHttp,PublicAccount } from 'tsjs-xpx-chain-sdk';
-import { ChainAPICall } from '@/models/REST/chainAPICall';
-import { ChainUtils } from '@/util/chainUtils';
 
 
 
