@@ -43,11 +43,6 @@ export default {
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const currentMenu = ref('');
     const showMenu = ref([]);
-    
-    
-    //WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
-    // get num of accounts
-    /* const totalAcc = [].concat(walletState.currentLoggedInWallet.accounts,walletState.currentLoggedInWallet.others) */
     const totalAcc = computed(()=>{
 
       if(!walletState.currentLoggedInWallet){
@@ -62,7 +57,6 @@ export default {
             publicKey: acc.publicKey,
             isMultisig: acc.getDirectParentMultisig().length ? true: false,
             multisigInfo: acc.multisigInfo,
-            multisig: []
           }; 
         });
         
@@ -76,7 +70,6 @@ export default {
             publicKey: acc.publicKey,
             isMultisig: true,
             multisigInfo: acc.multisigInfo,
-            multisig: []
           }; 
         });
 
@@ -178,14 +171,7 @@ export default {
       return accountStructure
     },{deep:true})
 
-    
     console.log(accountStructure.value)
-    
-    
-    
-    
-    
-    
     
     while(i < num_acc){
       showMenu.value[i] = false;
