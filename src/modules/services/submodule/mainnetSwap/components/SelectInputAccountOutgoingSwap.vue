@@ -1,16 +1,21 @@
 <template>
   <div @click='toggleSelection = !toggleSelection' class= "border ml-auto mr-auto py-3 px-2 cursor-pointer rounded-md">
-    <div class='flex'>
-      <div v-html="toSvg('account', 25, jdenticonConfig)" v-if='!selectedImg'></div>
-      <div v-html="selectedImg" v-else></div>
-      <div class="flex flex-col ml-2">
-        <div class="text-blue-primary font-semibold text-xxs uppercase"  style="line-height: 9px;">{{ placeholder?placeholder:'Account' }}</div>
-        <div v-if='selectedAccount!=""' class="mt-1 text-tsm font-bold text-left">{{selectedAccount}}</div>
-        <div v-else class="text-tsm font-bold  text-left">Select Account</div>
+    <div class='flex items-center justify-between'>
+      <div class="flex">
+        <div v-html="toSvg('account', 25, jdenticonConfig)" v-if='!selectedImg'></div>
+        <div v-html="selectedImg" v-else></div>
+        <div class="flex flex-col ml-2">
+          <div class="text-blue-primary font-semibold text-xxs uppercase"  style="line-height: 9px;">{{ placeholder?placeholder:'Account' }}</div>
+          <div v-if='selectedAccount!=""' class="mt-1 text-tsm font-bold text-left">{{selectedAccount}}</div>
+          <div v-else class="text-tsm font-bold mt-1 text-left">Select Account</div>
+        </div>
       </div>
-      <div v-if='!toggleSelection && selectedAccount==""' class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto">Select</div>
-      <div v-if='!toggleSelection && selectedAccount!=""'  class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto">Change</div>
+      <div class="flex">
+      <div class="text-xs mr-3" v-if="selectedAccount!=''">Balance <span v-html="selectedAccountBalanceFormatted"></span> <span class="text-xxs">{{ currentNativeTokenName }}</span></div>
+      <div v-if='!toggleSelection && selectedAccount==""' class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
+      <div v-if='!toggleSelection && selectedAccount!=""'  class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
       <img v-if='toggleSelection' @click="selectedAccount='';$emit('update:modelValue', '');" src="@/assets/img/delete.svg" class="h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto">
+      </div>
     </div>
   </div>
   <div class='relative'>
@@ -33,6 +38,7 @@ import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { walletState } from '@/state/walletState';
 import { computed, defineComponent, ref } from 'vue';
 import { toSvg } from "jdenticon";
+import { Helper } from "@/util/typeHelper";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 
 export default defineComponent({
@@ -47,6 +53,9 @@ export default defineComponent({
   ],
 
   setup(p){
+
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    
     const toggleSelection = ref(false);
 
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
@@ -97,14 +106,14 @@ export default defineComponent({
 
     const accounts = computed(() =>{
       var accountList = [];
-      let concatOther;
+      let accounts;
       if(includeMultisig.value){
-        concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+        accounts = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
       }else{
-        concatOther = walletState.currentLoggedInWallet.accounts;
+        accounts = walletState.currentLoggedInWallet.accounts;
       }
 
-      concatOther.forEach(account => {
+      accounts.forEach(account => {
         accountList.push({
           value: account.address,
           label: account.name,
@@ -121,19 +130,36 @@ export default defineComponent({
     // const selectedAccount = ref(accounts.value.find(acc => acc.value == p.selectDefault).label);
     const selectedAccount = ref('');
     const selectedAddress = ref('');
+    const selectedAccountBalance = ref(0);
     // const selectedAddress = ref(p.selectDefault);
     // const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonConfig));
     const selectedImg = ref('');
     const selectAccount = (accountName, accountAddress) => {
       selectedAccount.value = accountName;
       selectedAddress.value = accountAddress;
+      let accounts;
+      if(includeMultisig.value){
+        accounts = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+      }else{
+        accounts = walletState.currentLoggedInWallet.accounts;
+      }
+      selectedAccountBalance.value = accounts.find(account => account.address == accountAddress).balance;
       selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
       toggleSelection.value = !toggleSelection.value;
     };
 
+    const selectedAccountBalanceFormatted = computed(() => {
+      let balance = Helper.convertToCurrency(selectedAccountBalance.value, 0).split('.');
+      console.log(balance);
+      return '<span class="font-bold text-xs">' + balance[0] + '</span>' + (balance[1]?'.<span class="text-xxs">' + balance[1] + '</span>':'');
+    });
+
     return {
+      currentNativeTokenName,
       selectAccount,
       selectedAddress,
+      selectedAccountBalance,
+      selectedAccountBalanceFormatted,
       selectedImg,
       accounts,
       toggleSelection,

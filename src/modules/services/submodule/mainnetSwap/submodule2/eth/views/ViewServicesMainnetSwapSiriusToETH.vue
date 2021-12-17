@@ -36,7 +36,7 @@
         </div>
       </div> -->
       <div v-if="currentPage==1">
-        <div class="text-lg my-7 font-bold">Transaction Details</div>
+        <div class="text-sm my-5 font-bold">Transaction Details</div>
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <SelectInputAccountOutgoingSwap v-model="siriusAddress" placeholder="From Sirius Chain Account" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
         <!-- <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left">
@@ -49,48 +49,47 @@
             <button @click="currentPage=1" class="text-xs sm:text-sm hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none">Change</button>
           </div>
         </div> -->
-        <SwapInput v-model="amount" :maxAmount="maxSwapAmount" placeholder="Amount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" type="text" icon="coins" :showError="showAmountErr"
-                  :errorMessage="(selectedAccountBalance >= minBalanceAmount)?'Insufficient balance':'Balance is insufficient to cover transaction fee.'" emptyErrorMessage="Amount is empty" :disabled="disableAmount" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" />
-        <TextInput placeholder="ETH address receiving your swap" errorMessage="Valid ETH address is required" :showError="showAddressErr" v-model="ethAddress" icon="wallet" />
-        <div class="tex-center font-bold text-lg mb-2">Transaction Fee (ETH Network):</div>
-        <div class="md:grid md:grid-cols-3 mb-10">
+        <!-- <SwapInput v-model="amount" :maxAmount="maxSwapAmount" placeholder="Amount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" type="text" icon="coins" :showError="showAmountErr"
+                  :errorMessage="(selectedAccountBalance >= minBalanceAmount)?'Insufficient balance':'Balance is insufficient to cover transaction fee.'" emptyErrorMessage="Amount is empty" :disabled="disableAmount" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" /> -->
+
+        <SwapInputClean class="mt-5" :disabled="disableAmount" v-model="amount" :balance="selectedAccountBalance" :placeholder="currentNativeTokenName + ' Amount'" type="text" :showError="showAmountErr" :errorMessage="(selectedAccountBalance >= minBalanceAmount)?'Insufficient balance':'Balance is insufficient to cover transaction fee.'" emptyErrorMessage="Amount is empty" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" toolTip="XPX amount to swap to ERC20" />
+
+        <MetamaskAddressInput placeholder="ETH address receiving your swap" errorMessage="Valid ETH address is required" class="mt-5" :showError="showAddressErr" v-model="ethAddress" icon="wallet" />
+        <div class="tex-center font-bold text-sm my-5">Transaction Fee (ETH Network):</div>
+        <div class="md:grid md:grid-cols-3 mb-4">
           <div class="md:col-span-1 mb-3">
             <div class="ethGasStrategy md:mr-6" :class="`${ (ethGasStrategy == 'standard')?'selected':'option' }`" @click="changeGasStrategy('standard')">
-              <p class="font-bold text-tsm">Standard</p>
-              <div>ETH {{ standardGasPrice }}</div>
-              <div>{{ currentNativeTokenName }} {{ xpxAmountInStandardGasPrice }} = USD {{ standardGasPriceInUSD }}</div>
+              <p class="font-bold text-tsm mb-2">Standard</p>
+              <div class="mb-1">ETH {{ standardGasPrice }}</div>
+              <div>{{ currentNativeTokenName }} <b>{{ xpxAmountInStandardGasPrice }}</b> = USD {{ standardGasPriceInUSD }}</div>
             </div>
           </div>
           <div class="md:col-span-1 mb-3">
             <div class="ethGasStrategy md:mx-3" :class="`${ (ethGasStrategy == 'fast')?'selected':'option' }`" @click="changeGasStrategy('fast')">
-              <p class="font-bold text-tsm">Fast</p>
-              <div>ETH {{ fastGasPrice }}</div>
-              <div>{{ currentNativeTokenName }} {{ xpxAmountInFastGasPrice }} = USD {{ fastGasPriceInUSD }}</div>
+              <p class="font-bold text-tsm mb-2">Fast</p>
+              <div class="mb-1">ETH {{ fastGasPrice }}</div>
+              <div>{{ currentNativeTokenName }} <b>{{ xpxAmountInFastGasPrice }}</b> = USD {{ fastGasPriceInUSD }}</div>
             </div>
           </div>
           <div class="md:col-span-1 mb-3">
             <div class="ethGasStrategy md:ml-6" :class="`${ (ethGasStrategy == 'rapid')?'selected':'option' }`" @click="changeGasStrategy('rapid')">
-              <p class="font-bold text-tsm">Rapid</p>
-              <div>ETH {{ rapidGasPrice }}</div>
-              <div>{{ currentNativeTokenName }} {{ xpxAmountInRapidGasPrice }} = USD {{ rapidGasPriceInUSD }}</div>
+              <p class="font-bold text-tsm mb-2">Rapid</p>
+              <div class="mb-1">ETH {{ rapidGasPrice }}</div>
+              <div>{{ currentNativeTokenName }} <b>{{ xpxAmountInRapidGasPrice }}</b> = USD {{ rapidGasPriceInUSD }}</div>
             </div>
           </div>
         </div>
-        <div class="text-sm text-center mb-2 sm:mb-4">Fees are valid for: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
-        <div class="tex-center font-bold text-lg mb-2">Transaction Fee (Sirius Network):</div>
+        <div class="text-tsm text-center mb-2 sm:mb-10">Fees are valid for: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
+        <div class="tex-center font-bold text-sm mb-5">Transaction Fee (Sirius Network):</div>
         <div class="rounded-2xl bg-gray-100 p-5 mb-5">
           <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span>{{ txFeeDisplay }}</span> {{ currentNativeTokenName }}</div>
         </div>
-        <PasswordInput placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
-        <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
-          <div class="text-center w-full">
-            <div class="w-8 h-8 inline-block relative">
-              <div class="rounded-full border border-yellow-500 w-7 h-7 relative">
-                <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:3px; right: 10px;"></font-awesome-icon>
-              </div>
-            </div>
-            <div class="text-tsm mt-2">Swap completion time will vary depending on the performance of the ETH network. The more ETH transaction fees you pay, the faster your swap will occur. Displayed ETH fees are valid for only three minutes due to the ETH network’s fluctuating rates.</div>
-          </div>
+        <PasswordInputClean placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
+        <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center">
+          {{ amount }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 ml-4">
+        </div>
+        <div class="flex justify-center mt-3">
+          <div class="text-xs text-gray-600 mt-2 max-w-screen-md">Swap completion time will vary depending on the performance of the ETH network. The more ETH transaction fees you pay, the faster your swap will occur. Displayed ETH fees are valid for only three minutes due to the ETH network’s fluctuating rates.</div>
         </div>
         <div class="mt-10 text-center">
           <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">Maybe Later</button>
@@ -130,9 +129,9 @@
 <script>
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import PasswordInput from '@/components/PasswordInput.vue';
-import TextInput from '@/components/TextInput.vue';
-import SwapInput from '@/modules/services/submodule/mainnetSwap/components/SwapInput.vue';
+import PasswordInputClean from '@/components/PasswordInputClean.vue';
+import MetamaskAddressInput from '@/modules/services/submodule/mainnetSwap/components/MetamaskAddressInput.vue';
+import SwapInputClean from '@/modules/services/submodule/mainnetSwap/components/SwapInputClean.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
 import SelectInputAccountOutgoingSwap from '@/modules/services/submodule/mainnetSwap/components/SelectInputAccountOutgoingSwap.vue';
 import { walletState } from '@/state/walletState';
@@ -153,9 +152,9 @@ export default {
   name: 'ViewServicesMainnetSwapSiriusToETH',
 
   components: {
-    PasswordInput,
-    SwapInput,
-    TextInput,
+    PasswordInputClean,
+    SwapInputClean,
+    MetamaskAddressInput,
     SwapCertificateComponent,
     SelectInputAccountOutgoingSwap,
   },
@@ -188,7 +187,7 @@ export default {
     }
 
     const redirectToSelection = ()=>{
-      router.push({ name: "ViewServicesMainnetSwapEthOptions"});
+      router.push({ name: "ViewServicesMainnetSwap"});
     };
 
     const currentPage = ref(1);
@@ -197,6 +196,7 @@ export default {
 
     const selectedAccountName = ref("");
     const selectedAccountAddress = ref("");
+    const selectedAccountPublicKey = ref("");
     const selectedAccountBalance = ref(0);
     const selectAccount = (name, address) => {
       currentPage.value = 2;
@@ -265,6 +265,7 @@ export default {
       selectedAccountName.value = account.name;
       selectedAccountAddress.value = account.address;
       selectedAccountBalance.value = account.balance;
+      selectedAccountPublicKey.value = account.publicKey;
     });
 
     // page 2
@@ -382,7 +383,7 @@ export default {
                         .message(Helper.createPlainMessage(JSON.stringify(message2)))
                         .build();
       aggreateCompleteTransaction = aggregateBuilder
-                        .innerTransactions(Helper.createInnerTransaction([transferTx, feetransferTx], selectedAccount.value.publicKey))
+                        .innerTransactions(Helper.createInnerTransaction([transferTx, feetransferTx], selectedAccountPublicKey.value))
                         .build();
 
       txFee.value = Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(), 6);
@@ -691,6 +692,7 @@ export default {
     };
 
     return {
+      selectedAccountBalance,
       minBalanceAmount,
       includeMultisig,
       timerSecondsDisplay,
@@ -754,7 +756,7 @@ export default {
 }
 
 .ethGasStrategy{
-  @apply rounded-2xl p-3 text-xs border cursor-pointer;
+  @apply rounded p-3 text-xs border cursor-pointer;
 }
 
 .ethGasStrategy.selected{

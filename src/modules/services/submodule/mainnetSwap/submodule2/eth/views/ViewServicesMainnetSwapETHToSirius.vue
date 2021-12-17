@@ -78,7 +78,7 @@
               </div>
             </div>
           </div>
-          <SupplyInputClean :disabled="disableAmount" v-model="amount" :balance="balance" :placeholder="'ERC20 AMOUNT' + currentNativeTokenName + ' (MINIMUM = 51 )'" type="text" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':((parseFloat(amount) <= defaultXPXTxFee)?'Insufficient amount':'Insufficient token balance.')" :decimal="6" toolTip="BEP20 token amount to swap. Minimum 51 BEP20 amount is required as 50 will be deducted from the amount as transaction fee." />
+          <SupplyInputClean :disabled="disableAmount" v-model="amount" :balance="balance" :placeholder="'ERC20 AMOUNT ' + currentNativeTokenName + ' (MINIMUM = 51 )'" type="text" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':((parseFloat(amount) <= defaultXPXTxFee)?'Insufficient amount':'Insufficient token balance.')" :decimal="6" toolTip="BEP20 token amount to swap. Minimum 51 BEP20 amount is required as 50 will be deducted from the amount as transaction fee." />
           <div class="text-left">
             <SelectInputAccount v-model="siriusAddress" placeholder="To Sirius Chain Account" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
           </div>
