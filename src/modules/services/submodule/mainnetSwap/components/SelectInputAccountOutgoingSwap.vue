@@ -53,9 +53,57 @@ export default defineComponent({
     themeConfig.init();
     let jdenticonConfig = themeConfig.jdenticonConfig;
 
+    const includeMultisig = ref(false);
+
+    // const allAvailableAccounts = computed(()=>{
+
+    //   if(!walletState.currentLoggedInWallet){
+    //     return [];
+    //   }
+
+    //   let accounts = walletState.currentLoggedInWallet.accounts.map(
+    //     (acc)=>{ 
+    //       return { 
+    //         name: acc.name,
+    //         balance: acc.balance,
+    //         balanceDisplay: Helper.toCurrencyFormat(acc.balance, 6),
+    //         type: "",
+    //         address: Helper.createAddress(acc.address).pretty(),
+    //         publicKey: acc.publicKey,
+    //         isMultisig: acc.getDirectParentMultisig().length ? true: false
+    //       };  
+    //     });
+
+    //   if(includeMultisig.value){
+    //     let otherAccounts = walletState.currentLoggedInWallet.others.filter((acc)=> acc.type === "MULTISIG").map(
+    //     (acc)=>{ 
+    //       return { 
+    //         name: acc.name,
+    //         balance: acc.balance,
+    //         balanceDisplay: Helper.toCurrencyFormat(acc.balance, 6),
+    //         type: "MULTISIG",
+    //         address: Helper.createAddress(acc.address).pretty(),
+    //         publicKey: acc.publicKey,
+    //         isMultisig: true
+    //       }; 
+    //     });
+
+    //     return accounts.concat(otherAccounts);
+    //   }
+    //   else{
+    //     return accounts;
+    //   }
+    // });
+
     const accounts = computed(() =>{
       var accountList = [];
-      const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+      let concatOther;
+      if(includeMultisig.value){
+        concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+      }else{
+        concatOther = walletState.currentLoggedInWallet.accounts;
+      }
+
       concatOther.forEach(account => {
         accountList.push({
           value: account.address,

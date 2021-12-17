@@ -19,7 +19,7 @@
           </div>
         </div>
       </div>
-      <div v-if="currentPage==1">
+      <!-- <div v-if="currentPage==1">
         <p class="text-tsm my-5 text-gray-400">This is a list of your Sirius accounts available in this wallet.</p>
         <div class="text-lg my-7 font-bold">Please select a Sirius account</div>
         <div v-for="acc of allAvailableAccounts" :key="acc.name">
@@ -34,10 +34,11 @@
             </div>
           </div>
         </div>
-      </div>
-      <div v-if="currentPage==2">
+      </div> -->
+      <div v-if="currentPage==1">
         <div class="text-lg my-7 font-bold">Transaction Details</div>
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
+        <SelectInputAccountOutgoingSwap v-model="siriusAddress" placeholder="From Sirius Chain Account" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
         <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left">
           <div class="text-xs sm:text-tsm ml-3 text-gray-700">
             <div class="mb-1 sm:mb-0"><b>Account Name:</b> {{ selectedAccount.name }}</div>
@@ -133,6 +134,7 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import TextInput from '@/components/TextInput.vue';
 import SwapInput from '@/modules/services/submodule/mainnetSwap/components/SwapInput.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
+import SelectInputAccountOutgoingSwap from '@/modules/services/submodule/mainnetSwap/components/SelectInputAccountOutgoingSwap.vue';
 import { walletState } from '@/state/walletState';
 import { networkState } from '@/state/networkState';
 import { WalletUtils } from "@/util/walletUtils";
@@ -155,6 +157,7 @@ export default {
     SwapInput,
     TextInput,
     SwapCertificateComponent,
+    SelectInputAccountOutgoingSwap,
   },
 
   setup() {
@@ -249,6 +252,15 @@ export default {
 
     const selectedAccount = computed(()=> {
       return allAvailableAccounts.value.find(acc=> acc.name === selectedAccountName.value);
+    });
+
+    watch(siriusAddress, (address) => {
+      let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
+      if(!account){
+        account = walletState.currentLoggedInWallet.others.find(account => account.address == address);
+      }
+      selectedAccountName.value = account.name;
+      selectedAccountAddress.value = account.address;
     });
 
     // page 2
@@ -680,7 +692,7 @@ export default {
       timerSecondsDisplay,
       timerMinutes,
       currentPage,
-      selectAccount,
+      // selectAccount,
       ethAddress,
       showAddressErr,
       showPasswdError,
@@ -726,6 +738,7 @@ export default {
       siriusTransactionHash,
       xpxExplorerUrl,
       currentNativeTokenName,
+      siriusAddress,
     };
   }
 }
