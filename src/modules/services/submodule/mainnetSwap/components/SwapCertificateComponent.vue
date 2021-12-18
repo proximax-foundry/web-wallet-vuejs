@@ -21,7 +21,7 @@
             <div class="self-center">
               <b class="text-xs font-bold text-blue-primary">{{ networkTerm }} Transaction Hash:</b>
               <div class="break-all mt-1 flex"><a :href="swapLink" target=_new class="hover:underline self-center text-xs">{{ transactionHash }}<font-awesome-icon icon="external-link-alt" class="ml-1 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a></div>
-              <div class="font-bold inline-block mt-5" v-if="siriusTransactionHash">Sirius Transaction Hash:</div>
+              <div class="text-xs font-bold text-blue-primary inline-block mt-5" v-if="siriusTransactionHash">Sirius Transaction Hash:</div>
               <div class="break-all mt-1 flex" v-if="siriusTransactionHash"><a :href="xpxExplorer+siriusTransactionHash" target=_new class="hover:underline text-xs self-center">{{ siriusTransactionHash }}<font-awesome-icon icon="external-link-alt" class="text-blue-500 w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a></div>
               <div class="md:grid md:grid-cols-2">
                 <div class="mb-5">

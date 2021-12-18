@@ -241,7 +241,7 @@
               <span class="ml-2 cursor-pointer text-xs font-bold">I confirm that I have downloaded a copy of my certificate.</span>
             </label>
             <div class="sm:mt-5 text-center">
-              <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-40 inline-block mt-1" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
+              <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn mr-5 focus:outline-none w-40 inline-block mt-1" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
             </div>
           </div>
         </div>

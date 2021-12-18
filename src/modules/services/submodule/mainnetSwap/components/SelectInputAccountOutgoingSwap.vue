@@ -20,7 +20,7 @@
   </div>
   <div class='relative'>
   <div v-if='toggleSelection' class='absolute border border-t-0 w-full z-50 bg-white max-h-40 overflow-auto px-3 filter drop-shodow-xl'>
-    <div v-if='accounts.length>0' class="pl-2 pt-4 text-xxs text-gray-400">SELECT ACCOUNT</div>
+    <div v-if='accounts.length>0' class="pl-2 pt-4 text-xxs text-gray-400 text-left">SELECT ACCOUNT</div>
     <div v-else class='text-xxs pt-2 pl-2 pb-2' >The list is empty.</div>
     <div v-for='(items,index) in accounts' :key="items" class="px-2 py-3 flex cursor-pointer items-center" @click="selectAccount(items.label, items.value);$emit('update:modelValue', selectedAddress);$emit('select-account', selectedAddress);" :class='`${(index != accounts.length - 1)?"border-b border-gray-200":""}`'>
       <div v-html="toSvg(items.value, 20, jdenticonConfig)"></div>
@@ -150,7 +150,6 @@ export default defineComponent({
 
     const selectedAccountBalanceFormatted = computed(() => {
       let balance = Helper.convertToCurrency(selectedAccountBalance.value, 0).split('.');
-      console.log(balance);
       return '<span class="font-bold text-xs">' + balance[0] + '</span>' + (balance[1]?'.<span class="text-xxs">' + balance[1] + '</span>':'');
     });
 

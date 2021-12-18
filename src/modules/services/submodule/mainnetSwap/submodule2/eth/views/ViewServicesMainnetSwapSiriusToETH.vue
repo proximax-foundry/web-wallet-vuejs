@@ -51,74 +51,85 @@
         </div> -->
         <!-- <SwapInput v-model="amount" :maxAmount="maxSwapAmount" placeholder="Amount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" type="text" icon="coins" :showError="showAmountErr"
                   :errorMessage="(selectedAccountBalance >= minBalanceAmount)?'Insufficient balance':'Balance is insufficient to cover transaction fee.'" emptyErrorMessage="Amount is empty" :disabled="disableAmount" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" /> -->
+        <div class="relative">
+          <div class="opacity-90 w-full h-full absolute z-10 bg-white" v-if="!siriusAddress"></div>
+          <SwapInputClean class="mt-5" :disabled="disableAmount" v-model="amount" :balance="selectedAccountBalance" :placeholder="currentNativeTokenName + ' Amount'" type="text" :showError="showAmountErr" :errorMessage="(selectedAccountBalance >= minBalanceAmount)?'Insufficient balance':'Balance is insufficient to cover transaction fee.'" emptyErrorMessage="Amount is empty" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" toolTip="XPX amount to swap to ERC20" />
 
-        <SwapInputClean class="mt-5" :disabled="disableAmount" v-model="amount" :balance="selectedAccountBalance" :placeholder="currentNativeTokenName + ' Amount'" type="text" :showError="showAmountErr" :errorMessage="(selectedAccountBalance >= minBalanceAmount)?'Insufficient balance':'Balance is insufficient to cover transaction fee.'" emptyErrorMessage="Amount is empty" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" toolTip="XPX amount to swap to ERC20" />
-
-        <MetamaskAddressInput placeholder="ETH address receiving your swap" errorMessage="Valid ETH address is required" class="mt-5" :showError="showAddressErr" v-model="ethAddress" icon="wallet" />
-        <div class="tex-center font-bold text-sm my-5">Transaction Fee (ETH Network):</div>
-        <div class="md:grid md:grid-cols-3 mb-4">
-          <div class="md:col-span-1 mb-3">
-            <div class="ethGasStrategy md:mr-6" :class="`${ (ethGasStrategy == 'standard')?'selected':'option' }`" @click="changeGasStrategy('standard')">
-              <p class="font-bold text-tsm mb-2">Standard</p>
-              <div class="mb-1">ETH {{ standardGasPrice }}</div>
-              <div>{{ currentNativeTokenName }} <b>{{ xpxAmountInStandardGasPrice }}</b> = USD {{ standardGasPriceInUSD }}</div>
+          <MetamaskAddressInput placeholder="ETH address receiving your swap" errorMessage="Valid ETH address is required" class="mt-5" :showError="showAddressErr" v-model="ethAddress" icon="wallet" />
+          <div class="tex-center font-bold text-sm my-5">Transaction Fee (ETH Network):</div>
+          <div class="md:grid md:grid-cols-3 mb-4">
+            <div class="md:col-span-1 mb-3">
+              <div class="ethGasStrategy md:mr-6" :class="`${ (ethGasStrategy == 'standard')?'selected':'option' }`" @click="changeGasStrategy('standard')">
+                <p class="font-bold text-tsm mb-2">Standard</p>
+                <div class="mb-1">ETH {{ standardGasPrice }}</div>
+                <div>{{ currentNativeTokenName }} <b>{{ xpxAmountInStandardGasPrice }}</b> = USD {{ standardGasPriceInUSD }}</div>
+              </div>
+            </div>
+            <div class="md:col-span-1 mb-3">
+              <div class="ethGasStrategy md:mx-3" :class="`${ (ethGasStrategy == 'fast')?'selected':'option' }`" @click="changeGasStrategy('fast')">
+                <p class="font-bold text-tsm mb-2">Fast</p>
+                <div class="mb-1">ETH {{ fastGasPrice }}</div>
+                <div>{{ currentNativeTokenName }} <b>{{ xpxAmountInFastGasPrice }}</b> = USD {{ fastGasPriceInUSD }}</div>
+              </div>
+            </div>
+            <div class="md:col-span-1 mb-3">
+              <div class="ethGasStrategy md:ml-6" :class="`${ (ethGasStrategy == 'rapid')?'selected':'option' }`" @click="changeGasStrategy('rapid')">
+                <p class="font-bold text-tsm mb-2">Rapid</p>
+                <div class="mb-1">ETH {{ rapidGasPrice }}</div>
+                <div>{{ currentNativeTokenName }} <b>{{ xpxAmountInRapidGasPrice }}</b> = USD {{ rapidGasPriceInUSD }}</div>
+              </div>
             </div>
           </div>
-          <div class="md:col-span-1 mb-3">
-            <div class="ethGasStrategy md:mx-3" :class="`${ (ethGasStrategy == 'fast')?'selected':'option' }`" @click="changeGasStrategy('fast')">
-              <p class="font-bold text-tsm mb-2">Fast</p>
-              <div class="mb-1">ETH {{ fastGasPrice }}</div>
-              <div>{{ currentNativeTokenName }} <b>{{ xpxAmountInFastGasPrice }}</b> = USD {{ fastGasPriceInUSD }}</div>
-            </div>
+          <div class="text-tsm text-center mb-2 sm:mb-10">Fees are valid for: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
+          <div class="tex-center font-bold text-sm mb-5">Transaction Fee (Sirius Network):</div>
+          <div class="rounded bg-gray-100 p-5 mb-5">
+            <div class="inline-block mr-4 text-xs"><img src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 inline mr-2 text-gray-500 relative" style="top: -2px">Transaction Fee: <span>{{ txFeeDisplay }}</span> {{ currentNativeTokenName }}</div>
           </div>
-          <div class="md:col-span-1 mb-3">
-            <div class="ethGasStrategy md:ml-6" :class="`${ (ethGasStrategy == 'rapid')?'selected':'option' }`" @click="changeGasStrategy('rapid')">
-              <p class="font-bold text-tsm mb-2">Rapid</p>
-              <div class="mb-1">ETH {{ rapidGasPrice }}</div>
-              <div>{{ currentNativeTokenName }} <b>{{ xpxAmountInRapidGasPrice }}</b> = USD {{ rapidGasPriceInUSD }}</div>
-            </div>
+          <PasswordInputClean placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
+          <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center">
+            {{ amount }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 ml-4">
           </div>
-        </div>
-        <div class="text-tsm text-center mb-2 sm:mb-10">Fees are valid for: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
-        <div class="tex-center font-bold text-sm mb-5">Transaction Fee (Sirius Network):</div>
-        <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-          <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span>{{ txFeeDisplay }}</span> {{ currentNativeTokenName }}</div>
-        </div>
-        <PasswordInputClean placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
-        <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center">
-          {{ amount }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 ml-4">
-        </div>
-        <div class="flex justify-center mt-3">
-          <div class="text-xs text-gray-600 mt-2 max-w-screen-md">Swap completion time will vary depending on the performance of the ETH network. The more ETH transaction fees you pay, the faster your swap will occur. Displayed ETH fees are valid for only three minutes due to the ETH network’s fluctuating rates.</div>
-        </div>
-        <div class="mt-10 text-center">
-          <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">Maybe Later</button>
-          <button type="button" class="default-btn focus:outline-none disabled:opacity-50 mt-2" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?'Swap in progress. Please wait...':'Yes, Swap' }}</button>
-          <button class="default-btn focus:outline-none disabled:opacity-50 mt-2" v-if="canCheckStatus" @click="callTocheckSwapStatus">Check Swap Status</button>
+          <div class="flex justify-center mt-3">
+            <div class="text-xs text-gray-600 mt-2 max-w-screen-md">Swap completion time will vary depending on the performance of the ETH network. The more ETH transaction fees you pay, the faster your swap will occur. Displayed ETH fees are valid for only three minutes due to the ETH network’s fluctuating rates.</div>
+          </div>
+          <div class="mt-10 text-center">
+            <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">Maybe Later</button>
+            <button type="button" class="default-btn focus:outline-none disabled:opacity-50 mt-2" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?'Swap in progress. Please wait...':'Yes, Swap' }}</button>
+            <button class="default-btn focus:outline-none disabled:opacity-50 mt-2" v-if="canCheckStatus" @click="callTocheckSwapStatus">Check Swap Status</button>
+          </div>
         </div>
       </div>
-      <div v-if="currentPage==3">
+      <div v-if="currentPage==2">
         <div>
           <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
           <div class="text-sm mb-7">The swap process has already started!</div>
-          <swap-certificate-component networkTerm="ETH" swapType="Out" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :siriusAddress="selectedAccountAddress" :swapQr="swapQr" :swapLink="swapLink" :siriusTransactionHash="siriusTransactionHash" :xpxExplorer="xpxExplorerUrl" />
-          <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 my-8">
-            <div class="text-center w-full">
-              <div class="w-8 h-8 inline-block relative">
-                <div class="rounded-full border border-yellow-500 w-7 h-7 relative">
-                  <font-awesome-icon icon="exclamation" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:3px; right: 10px;"></font-awesome-icon>
-                </div>
-              </div>
-              <div class="text-tsm mt-2">Please download the certificate. It is needed in the event of an error. You can search the status of your ETH transaction using the above ETH Transaction Hash.</div>
-            </div>
+          <swap-certificate-component networkTerm="ETH" swapType="Out" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :swapQr="swapQr" :swapLink="swapLink" :siriusName="selectedAccountName" :swappedAmount="amount" :siriusAddress="Helper.createAddress(selectedAccountAddress).pretty()" :siriusTransactionHash="siriusTransactionHash" :xpxExplorer="xpxExplorerUrl"  />
+          
+          
+          <button type="button" class="w-40 hover:shadow-lg bg-blue-primary text-white text-xs hover:opacity-50 rounded font-bold px-4 py-3 border border-blue-primary outline-none mr-4 mt-6" @click="saveCertificate">Download Certificate</button>
+          <div class="mt-5">
+            <a :href="swapLink" target=_new class="underline self-center text-xs font-bold text-blue-primary">View Transaction in Ether Scan<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a><br>
+            <a :href="xpxExplorerUrl" target=_new class="underline self-center text-xs font-bold text-blue-primary">View Transaction in Explorer<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a>
           </div>
-          <label class="inline-flex items-center mb-10">
+          <div class="md:mx-20 lg:mx-40 font-bold text-center text-tsm py-5 sm:py-10 mt-5 sm:mt-10 border-t border-gray-200">Swap Details</div>
+          <div class="md:mx-20 lg:mx-10 xl:mx-40 border-2 border-gray-200 mt-4 p-5 text-xs font-bold filter shadow-lg">
+            <div class="text-blue-primary mb-1">From: {{ selectedAccountName }}</div>
+            <div class="break-all">{{ Helper.createAddress(selectedAccountAddress).pretty() }}</div>
+            <div class="mt-1">Swap Amount {{ amount }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
+            <div>
+              <img src="@/modules/services/submodule/mainnetSwap/img/icon-dots.svg" class="inline-block h-8 my-2">
+            </div>
+            <div class="text-blue-primary mb-1">To: MetaMask Account</div>
+            <div>{{ ethAddress }}</div>
+            <div class="mt-1">Equivalent to {{ amount }}</div>
+          </div>
+          <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">Please download the certificate. It is needed in the event of an error. You can search the status of your ETH transaction using the above ETH Transaction Hash.</div>
+          <label class="inline-flex items-center mb-5">
             <input type="checkbox" class="h-5 w-5 bg-blue-primary" value="true" v-model="savedCheck">
-            <span class="ml-2 cursor-pointer text-tsm">{{$t('certconsent')}}.</span>
+            <span class="ml-2 cursor-pointer text-xs font-bold">I confirm that I have downloaded a copy of my certificate.</span>
           </label>
-          <div class="sm:mt-10 text-center">
-            <button type="button" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none mr-4 w-60 mt-6" @click="saveCertificate">Download Certificate</button>
-            <router-link :to="{ name: 'ViewServices' }" class="default-btn mr-5 focus:outline-none w-60 inline-block mt-6" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
+          <div class="sm:mt-5 text-center">
+            <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn mr-5 focus:outline-none w-40 inline-block mt-1" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
           </div>
         </div>
       </div>
@@ -258,14 +269,22 @@ export default {
     const siriusAddress = ref('');
 
     watch(siriusAddress, (address) => {
-      let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
-      if(!account){
-        account = walletState.currentLoggedInWallet.others.find(account => account.address == address);
+      if(address){
+        let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
+        if(!account){
+          account = walletState.currentLoggedInWallet.others.find(account => account.address == address);
+        }
+        selectedAccountName.value = account.name;
+        selectedAccountAddress.value = account.address;
+        selectedAccountBalance.value = account.balance;
+        selectedAccountPublicKey.value = account.publicKey;
+        maxSwapAmount.value = Helper.convertNumberMinimumFormat(account.balance - txFee.value - gasPriceInXPX.value, 6);
+      }else{
+        selectedAccountName.value = '';
+        selectedAccountAddress.value = '';
+        selectedAccountBalance.value = '';
+        selectedAccountPublicKey.value = '';
       }
-      selectedAccountName.value = account.name;
-      selectedAccountAddress.value = account.address;
-      selectedAccountBalance.value = account.balance;
-      selectedAccountPublicKey.value = account.publicKey;
     });
 
     // page 2
@@ -516,7 +535,7 @@ export default {
       message2.gasPrice = selectedGasPriceInGwei.value;
       message2.gasLimit = selectedGasLimit.value;
 
-      maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccount.value.balance - txFee.value - gasPriceInXPX.value, 6);
+      maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value - txFee.value - gasPriceInXPX.value, 6);
       minBalanceAmount.value = Helper.convertNumberMinimumFormat(txFee.value + gasPriceInXPX.value, 6);
       if(amount.value > maxSwapAmount.value){
         amount.value = maxSwapAmount.value;
@@ -615,7 +634,7 @@ export default {
           swapTimestamp.value = '';
           swapId.value = res.data.swapId;
           swapQr.value = SwapUtils.generateQRCode(ethScanUrl + res.data.txHash);
-          currentPage.value = 3;
+          currentPage.value = 2;
         }
         else if(response.status==400){
           const res = await response.json();
@@ -660,7 +679,7 @@ export default {
         swapTimestamp.value = '';
         swapId.value = res.data._id;
         swapQr.value = SwapUtils.generateQRCode(ethScanUrl + res.fulfillTransaction);
-        currentPage.value = 3;
+        currentPage.value = 2;
       }
       else{
         addErrorToast('Swap not found', 'Swap not found for the current transaction ID');
@@ -715,6 +734,7 @@ export default {
       savedCheck,
       allAvailableAccounts,
       selectedAccount,
+      selectedAccountName,
       selectedGasPriceInGwei,
       selectedGasLimit,
       standardGasPrice,
@@ -746,6 +766,7 @@ export default {
       currentNativeTokenName,
       siriusAddress,
       walletState,
+      Helper,
     };
   }
 }
