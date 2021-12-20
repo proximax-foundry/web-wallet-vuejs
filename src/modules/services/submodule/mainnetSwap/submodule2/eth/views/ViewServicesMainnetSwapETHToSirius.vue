@@ -3,7 +3,7 @@
     <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
       <div class='mt-6 p-6 border filter shadow-lg text-center'>
         <div class="text-md">Main Network Swap</div>
-        <div class="text-xs my-3 mb-5 sm:mb-10">Swap from ETH to Proximax Sirius Chain</div>
+        <div class="text-xs my-3 mb-5 sm:mb-10"><img src="@/modules/services/submodule/mainnetSwap/img/eth.svg" class="mr-2 h-5 inline-block">Swap from ETH to Proximax Sirius Chain</div>
         <div class="flex my-10">
           <div class="flex-none">
             <div class="flex border border-gray-300 rounded-md filter shadow-md">

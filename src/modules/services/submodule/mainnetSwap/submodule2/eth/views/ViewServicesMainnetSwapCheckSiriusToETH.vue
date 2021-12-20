@@ -3,7 +3,7 @@
     <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
       <div class='mt-6 p-6 border filter shadow-lg text-center'>
         <div class="text-md">Main Network Swap</div>
-        <div class="text-xs my-3 mb-5 sm:mb-10">Check swap from Proximax Sirius Chain to ETH</div>
+        <div class="text-xs my-3 mb-5 sm:mb-10"><img src="@/modules/services/submodule/mainnetSwap/img/eth.svg" class="mr-2 h-5 inline-block">Check swap from Proximax Sirius Chain to ETH</div>
         <div class="flex my-10">
           <div class="flex-none">
             <div class="flex border border-gray-300 rounded-md filter shadow-md">
@@ -78,7 +78,7 @@
           </div>
           <TextInputClean placeholder="Sirius Transaction Hash" errorMessage="Please key in valid transaction hash" v-model="siriusTxnHash" :showError="showTxnHashError" class="w-full inline-block mr-2" />
           <div class="mt-10 text-center">
-            <button @click="$router.push({name: 'ViewServices'})" class="text-black font-bold text-xs mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
+            <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
             <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledCheck" @click="sendRequest()">Check Status</button>
           </div>
         </div>

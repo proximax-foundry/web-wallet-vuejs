@@ -3,7 +3,7 @@
     <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
     <div class='mt-6 p-6 border filter shadow-lg text-center'>
       <div class="text-md">Main Network Swap</div>
-      <div class="text-xs my-3 mb-5 sm:mb-10">Swap from BSC to Proximax Sirius Chain</div>
+      <div class="text-xs my-3 mb-5 sm:mb-10"><img src="@/modules/services/submodule/mainnetSwap/img/bsc.svg" class="mr-2 h-5 inline-block">Swap from BSC to Proximax Sirius Chain</div>
       <div class="flex my-10">
         <div class="flex-none">
           <div class="flex border border-gray-300 rounded-md filter shadow-md">
@@ -74,7 +74,7 @@
         <div>
           <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
           <div class="text-sm mb-7">The swap process has already started!</div>
-          <swap-certificate-component networkTerm="BSC" swapType="Out" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :swapQr="swapQr" :swapLink="swapLink" :siriusName="selectedAccountName" :swappedAmount="amount" :siriusAddress="Helper.createAddress(selectedAccountAddress).pretty()" :siriusTransactionHash="siriusTransactionHash" :xpxExplorer="xpxExplorerUrl" />
+          <SwapCertificateComponent networkTerm="BSC" swapType="Out" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :swapQr="swapQr" :swapLink="swapLink" :siriusName="selectedAccountName" :swappedAmount="amount" :siriusAddress="Helper.createAddress(selectedAccountAddress).pretty()" :siriusTransactionHash="siriusTransactionHash" :xpxExplorer="xpxExplorerUrl" />
           
           <button type="button" class="w-40 hover:shadow-lg bg-blue-primary text-white text-xs hover:opacity-50 rounded font-bold px-4 py-3 border border-blue-primary outline-none mr-4 mt-6" @click="saveCertificate">Download Certificate</button>
           <div class="mt-5">
