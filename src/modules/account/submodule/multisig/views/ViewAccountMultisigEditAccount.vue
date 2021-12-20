@@ -294,20 +294,19 @@ export default {
           })
           return cosignaturies     
   })
-const cosignerName = computed(()=>{
-  let name = []
-  cosignaturies.value.forEach(publicKey=>{
-    if(wallet.accounts.find(acc=>acc.publicKey ===publicKey)){
-      name.push(wallet.accounts.find(acc=>acc.publicKey ==publicKey).name)
-      console.log(name)
-    }else{
-      let address = Address.createFromPublicKey(publicKey,networkState.currentNetworkProfile.network.type).plain().substr(-4)
-      name.push("Cosigner-" +address)
-      console.log(name)
-    }
-  })
-  return name
-},{deep:true})
+    const cosignerName = computed(()=>{
+      let name = []
+      cosignaturies.value.forEach(publicKey=>{
+        if(wallet.accounts.find(acc=>acc.publicKey ===publicKey)){
+          name.push(wallet.accounts.find(acc=>acc.publicKey ==publicKey).name)
+        }else{
+          let address = Address.createFromPublicKey(publicKey,networkState.currentNetworkProfile.network.type).plain().substr(-4)
+          name.push("Cosigner-" +address)
+          console.log(name)
+        }
+      })
+      return name
+    },{deep:true})
 
 
     const getWalletCosigner = () => {
@@ -352,7 +351,7 @@ const cosignerName = computed(()=>{
     });
 
     const disableSend = computed(() => !(
-      isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) &&  err.value == '' && (showAddressError.value.indexOf(true) == -1) && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
+      isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) &&  err.value == ''|| err.value== t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name}) && (showAddressError.value.indexOf(true) == -1) && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
     ));
 
     const disabledPassword = computed(() => !(!onPartial.value && isMultisig.value && !fundStatus.value && isCoSigner.value));
@@ -402,24 +401,27 @@ const cosignerName = computed(()=>{
       err.value = '';
     };
 
-    const modifyAccount = () => {
+    const modifyAccount = async() => {
       let signer = [];
-      if(cosigners.value.length == 1){
-        // only one cosigner
+      cosigners.value.forEach((cosigner)=>{
+        signer.push({address: cosigner.address })
+      })
+      console.log(signer)
+      /* if(cosigners.value.length == 1){
+       
         signer.push({address: cosigners.value[0].address });
       }else{
-        // if there is more than one cosigner
-        // add primary signer selected
+       
         signer.push({address: selectMainCosign.value })
-        // add more if there is cosigner selected for this modification
+       
         if(selectOtherCosign.value.length > 0){
           selectOtherCosign.value.forEach((cosignerAddress) => {
             signer.push({address: cosignerAddress });
           });
         }
-      }
+      } */
 
-      let modifyStatus = multiSign.modifyMultisigAccount(coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value, signer, acc.value, passwd.value);
+      let modifyStatus = await multiSign.modifyMultisigAccount(coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value, signer, acc.value, passwd.value);
       // console.log(modifyStatus);
       if(!modifyStatus){
         err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
@@ -462,7 +464,7 @@ const cosignerName = computed(()=>{
       }
     }, {deep:true});
 
-    // check if this address is multisig
+   
     const contact = computed(() => {
       return multiSign.generateContact(acc.value.address,acc.value.name)
     });
@@ -582,6 +584,8 @@ const cosignerName = computed(()=>{
         err.value = approveTransactionErrMsg;
       }else if((n > maxNumApproveTransaction.value) && (n !=1 && maxNumApproveTransaction.value != 0 )){
         err.value = approveTransactionErrMsg;
+      }else if(maxNumApproveTransaction.value>0 && n<=0){
+        err.value = "Number of cosignatories for transaction approval cannot be less than 1"
       }else{
         // check again for num delete user
         if((numDeleteUser.value > maxNumDeleteUser.value) && (numDeleteUser.value !=1 && maxNumDeleteUser.value != 0 )){
@@ -603,6 +607,8 @@ const cosignerName = computed(()=>{
         err.value = deleteUserErrorMsg;
       }else if((n > maxNumDeleteUser.value) && (n !=1 && maxNumDeleteUser.value != 0 )){
         err.value = deleteUserErrorMsg;
+      }else if(maxNumDeleteUser.value>0 && n<=0){
+        err.value = "Number of cosignatories for transaction approval cannot be less than 1"
       }else{
         // check again for num approval transaction
         if((numApproveTransaction.value > maxNumApproveTransaction.value) && (numApproveTransaction.value !=1 && maxNumApproveTransaction.value != 0 )){

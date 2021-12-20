@@ -52,7 +52,7 @@ function verifyContactPublicKey(address :string) :Promise<{status: boolean, publ
   });
 }
 
-function generateContact(selected :string,name: string) :string[]{
+function generateContact(selected :string,name: string) :{value: string,label:string}[]{
   const wallet = walletState.currentLoggedInWallet
   let contact = [];
   let accounts = wallet.accounts.filter(account => account.name!= name)
@@ -61,7 +61,7 @@ function generateContact(selected :string,name: string) :string[]{
 
     }else{
       contact.push({
-        value: element.address,
+        value: element.publicKey,
         label: element.name + ' - Owner account',
       });
     }
@@ -121,8 +121,8 @@ async function convertAccount(coSign :string[], numApproveTransaction :number, n
         let address = Address.createFromRawAddress(cosignKey);
 
         try {
-          let publicKey;
-          publicKey = await getPublicKey(address);
+          /* let publicKey; */
+          let publicKey = await getPublicKey(address);
           cosignatory = PublicAccount.createFromPublicKey(publicKey, networkType);
         } catch (error) {
           console.log(error);
@@ -275,30 +275,31 @@ function checkHasMultiSig(accountAddress :string) :boolean{
 
 
 // modify multisig
-function modifyMultisigAccount(coSign :string[], removeCosign :string[], numApproveTransaction :number, numDeleteUser :number, cosigners :{address :string}[] , multisigAccount :WalletAccount, walletPassword :string) :boolean {
+async function modifyMultisigAccount(coSign :string[], removeCosign :string[], numApproveTransaction :number, numDeleteUser :number, cosigners :{address :string}[] , multisigAccount :WalletAccount, walletPassword :string) :Promise<boolean> {
 
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPassword);
   if (! verify) {
-    return verify;
+    return verify
   }
 
   const generationHash = networkState.currentNetworkProfile.generationHash
 
- 
     const multisigCosignatory = [];
     let coSigner = [];
     const networkType = networkState.currentNetworkProfile.network.type;
+
     if (cosigners.length > 0) {
       cosigners.forEach((signer) => {
         const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.address === signer.address)
+        console.log(accountDetails)
         let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
         coSigner.push(Account.createFromPrivateKey(privateKey, networkType));
       });
     }
 
-    const cosignatory = [];
-    coSign.forEach(async (cosignKey, index) => {
-      if (cosignKey.length == 64) {
+   const cosignatory =[]
+    for(let [index,cosignKey] of coSign.entries() ){
+      if (cosignKey.length == 64) { 
         cosignatory[index] = PublicAccount.createFromPublicKey(cosignKey, networkType);
       } else if (cosignKey.length == 40 || cosignKey.length == 46) {
         // option to accept address
@@ -306,10 +307,12 @@ function modifyMultisigAccount(coSign :string[], removeCosign :string[], numAppr
 
         try {
           let publicKey;
-          publicKey = await getPublicKey(address);
+          publicKey = await getPublicKey(address); 
+          
           cosignatory[index] = PublicAccount.createFromPublicKey(publicKey, networkType);
         } catch (error) {
           console.log(error);
+          //toast?
         }
       }
 
@@ -317,7 +320,7 @@ function modifyMultisigAccount(coSign :string[], removeCosign :string[], numAppr
         MultisigCosignatoryModificationType.Add,
         cosignatory[index],
       ));
-    });
+    }
 
     removeCosign.forEach((element, index) => {
       cosignatory[coSign.length + index] = PublicAccount.createFromPublicKey(element, networkType);
@@ -329,8 +332,6 @@ function modifyMultisigAccount(coSign :string[], removeCosign :string[], numAppr
 
     let relativeNumApproveTransaction = numApproveTransaction - multisigAccount.multisigInfo.find(element => element.level === 0).minApproval;
     let relativeNumDeleteUser = numDeleteUser - multisigAccount.multisigInfo.find(element => element.level === 0).minRemoval
-    console.log(relativeNumApproveTransaction)
-    console.log(relativeNumDeleteUser)
     const convertIntoMultisigTransaction = ModifyMultisigAccountTransaction.create(
       Deadline.create(),
       relativeNumApproveTransaction,
