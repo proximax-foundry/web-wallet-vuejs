@@ -2155,6 +2155,8 @@ export class DashboardService {
 
                 let accAddressRestrictionTxn = txns[i] as AccountAddressRestrictionModificationTransaction;
 
+                txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAddressRestrictionTxn.restrictionType).action;
+
                 for(let i = 0; i < accAddressRestrictionTxn.modifications.length; ++i){
                     
                     let modification = accAddressRestrictionTxn.modifications[i];
@@ -2169,6 +2171,8 @@ export class DashboardService {
             else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC){
 
                 let accAssetRestrictionTxn = txns[i] as AccountMosaicRestrictionModificationTransaction;
+
+                txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAssetRestrictionTxn.restrictionType).action;
 
                 for(let i = 0; i < accAssetRestrictionTxn.modifications.length; ++i){
                     
@@ -2202,6 +2206,8 @@ export class DashboardService {
             else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION){
 
                 let accOperationRestrictionTxn = txns[i] as AccountOperationRestrictionModificationTransaction;
+
+                txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accOperationRestrictionTxn.restrictionType).action;
 
                 for(let i = 0; i < accOperationRestrictionTxn.modifications.length; ++i){
         
@@ -2239,6 +2245,8 @@ export class DashboardService {
 
                 let accAddressRestrictionTxn = txns[i] as AccountAddressRestrictionModificationTransaction;
 
+                txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAddressRestrictionTxn.restrictionType).action;
+
                 for(let i = 0; i < accAddressRestrictionTxn.modifications.length; ++i){
                     
                     let modification = accAddressRestrictionTxn.modifications[i];
@@ -2253,6 +2261,8 @@ export class DashboardService {
             else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC){
 
                 let accAssetRestrictionTxn = txns[i] as AccountMosaicRestrictionModificationTransaction;
+
+                txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAssetRestrictionTxn.restrictionType).action;
 
                 for(let i = 0; i < accAssetRestrictionTxn.modifications.length; ++i){
                     
@@ -2286,6 +2296,8 @@ export class DashboardService {
             else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION){
 
                 let accOperationRestrictionTxn = txns[i] as AccountOperationRestrictionModificationTransaction;
+
+                txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accOperationRestrictionTxn.restrictionType).action;
 
                 for(let i = 0; i < accOperationRestrictionTxn.modifications.length; ++i){
         
@@ -2323,6 +2335,8 @@ export class DashboardService {
 
                 let accAddressRestrictionTxn = txns[i] as AccountAddressRestrictionModificationTransaction;
 
+                txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAddressRestrictionTxn.restrictionType).action;
+
                 for(let i = 0; i < accAddressRestrictionTxn.modifications.length; ++i){
                     
                     let modification = accAddressRestrictionTxn.modifications[i];
@@ -2337,6 +2351,8 @@ export class DashboardService {
             else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC){
 
                 let accAssetRestrictionTxn = txns[i] as AccountMosaicRestrictionModificationTransaction;
+
+                txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAssetRestrictionTxn.restrictionType).action;
 
                 for(let i = 0; i < accAssetRestrictionTxn.modifications.length; ++i){
                     
@@ -2371,6 +2387,8 @@ export class DashboardService {
             else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION){
 
                 let accOperationRestrictionTxn = txns[i] as AccountOperationRestrictionModificationTransaction;
+
+                txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accOperationRestrictionTxn.restrictionType).action;
 
                 for(let i = 0; i < accOperationRestrictionTxn.modifications.length; ++i){
         
@@ -2475,7 +2493,6 @@ export class DashboardService {
                 }
             }
             else if(txns[i].type === TransactionType.SECRET_PROOF){
-                // wait SDK to fix
                 let secretProofTxn = txns[i] as SecretProofTransaction;
                 txn.secret = secretProofTxn.secret;
                 txn.recipient = secretProofTxn.recipient.plain();
@@ -2926,6 +2943,45 @@ export class DashboardService {
         }
 
         return resolvedAsset;
+    }
+
+    static getRestrictionTypeName(restrictionType: RestrictionType){
+
+        let restrictionTypeName = {
+            action: '',
+            type: ''
+        };
+
+        switch(restrictionType){
+            case RestrictionType.AllowAddress:
+                restrictionTypeName.action = "Allow";
+                restrictionTypeName.type = "Address"
+                break;
+            case RestrictionType.BlockAddress:
+                restrictionTypeName.action = "Block";
+                restrictionTypeName.type = "Address"
+                break;
+            case RestrictionType.AllowMosaic:
+                restrictionTypeName.action = "Allow";
+                restrictionTypeName.type = "SDA"
+                break;
+            case RestrictionType.BlockMosaic:
+                restrictionTypeName.action = "Block";
+                restrictionTypeName.type = "SDA"
+                break;
+            case RestrictionType.AllowTransaction:
+                restrictionTypeName.action = "Allow";
+                restrictionTypeName.type = "Transaction Type"
+                break;
+            case RestrictionType.BlockTransaction:
+                restrictionTypeName.action = "Block";
+                restrictionTypeName.type = "Transaction Type"
+                break;
+            default:
+                break;
+        }
+
+        return restrictionTypeName;
     }
 
     async getAllAccountTransactions(): Promise<Transaction[]>{

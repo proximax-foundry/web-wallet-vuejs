@@ -35,6 +35,13 @@
           <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
+      <Column header="Type" headerStyle="width:110px">
+        <template #body="{data}">
+          <span>
+            {{ data.restrictionTypeOutput }}
+          </span>
+        </template>
+      </Column>
       <Column header="MODIFICATION" headerStyle="width:110px">
         <template #body="{data}">
           <span v-bind:key="restrictMod.value" v-for="restrictMod in data.modification">
