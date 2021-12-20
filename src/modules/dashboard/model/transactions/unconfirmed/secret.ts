@@ -6,8 +6,9 @@ export class UnconfirmedSecretTransaction extends UnconfirmedTransaction{
     hashType: string = "";
     proof?: string = "";
     recipient: string = "";
-    assetId: string = "";
+    assetId?: string = null;
     namespaceName?: string = "";
+    isSendWithNamespace: boolean = false;
     amount: number = 0;
     amountIsRaw: boolean = true;
     duration: number = 0;

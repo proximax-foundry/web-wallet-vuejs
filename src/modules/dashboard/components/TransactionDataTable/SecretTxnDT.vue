@@ -13,7 +13,7 @@
       <Column header="IN/OUT" headerStyle="width:30px">
         <template #body="{data}">
           <div class="ml-2" v-if="data.recipient">
-            <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block" v-if="isRecipient(data.recipient, selectedAddress)">
+            <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block" v-if="isRecipient(data.recipient, currentAddress)">
             <img src="@/modules/dashboard/img/icon-txn-out.svg" class="inline-block" v-else >
           </div>
         </template>
@@ -38,20 +38,23 @@
           <div class="text-txs">{{ data.block }}</div>
         </template>
       </Column>
-      <Column field="signer" header="SENDER" headerStyle="width:110px">
+      <!-- Display it in explorer, hide it if filter by signer -->
+      <!-- <Column field="signer" header="SENDER" headerStyle="width:110px">
         <template #body="{data}">
-          <span v-if="data.sender === '' || data.sender === null"></span>
-          <span v-else v-tooltip.bottom="data.sender" class="truncate inline-block text-txs">
-            <a :href="getPublicKeyExplorerUrl(data.sender)" target="_blank">
-              {{ data.sender }}
+          <span v-tooltip.bottom="data.signerAddress" class="truncate inline-block text-txs">
+            <a :href="getAddressExplorerUrl(data.signerAddress)" target="_blank">
+              {{ data.signerAddress }}
             </a>
           </span>
         </template>
-      </Column>
+      </Column> -->
       <Column field="recipient" header="RECIPIENT" headerStyle="width:110px">
         <template #body="{data}">
-          <span v-if="data.recipient === '' || data.recipient === null"></span>
-          <span v-tooltip.bottom="data.recipient" v-else class="truncate inline-block text-txs">{{ data.recipient }}</span>
+          <span v-tooltip.bottom="data.recipient" class="truncate inline-block text-txs">
+            <a :href="getAddressExplorerUrl(data.recipient)" target="_blank">
+              {{ data.recipient }}
+            </a>
+          </span>
         </template>
       </Column>
       <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED" headerStyle="width:110px">
@@ -83,13 +86,13 @@
       <Column header="SDA" headerStyle="width:40px">
         <template #body="{data}">
           <div>
-            <img src="@/modules/dashboard/img/icon-sda.svg" class="inline-block" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + constructSDA(data.assetId, data.amount, data.namespaceName) + '</tiptext>'">
+            <img src="@/modules/dashboard/img/icon-sda.svg" v-if="data.assetId" class="inline-block" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + constructSDA(data.assetId, data.amount, data.namespaceName) + '</tiptext>'">
           </div>
         </template>
       </Column>
       <Column header="Info" headerStyle="width:40px">
         <template #body="{data}">
-          <span class="inline-block bg-blue-500 text-white py-1 px-1 my-1 mx-1">{{ `Hash Type: ${data.hashType}` }}</span>
+          <!-- <span class="inline-block bg-blue-500 text-white py-1 px-1 my-1 mx-1">{{ `Hash Type: ${data.hashType}` }}</span> -->
           <span class="inline-block bg-blue-500 text-white py-1 px-1 my-1 mx-1" v-if="data.duration">{{ `Duration: ${data.duration} blocks` }}</span>
         </template>
       </Column>

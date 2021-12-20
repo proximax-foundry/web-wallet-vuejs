@@ -2428,14 +2428,32 @@ export class DashboardService {
                 txn.duration = secretLockTxn.duration.compact();
                 txn.secret = secretLockTxn.secret;
                 txn.recipient = secretLockTxn.recipient.plain();
-                txn.assetId = secretLockTxn.mosaic.id.toHex();
                 txn.amount = secretLockTxn.mosaic.amount.compact();
-                txn.hashType = Object.keys(myHashType)[secretLockTxn.hashType];
-                let assetsNames = await DashboardService.getAssetsName([secretLockTxn.mosaic.id]);
-                if(assetsNames[0].names[0]){
-                    txn.namespaceName = assetsNames[0].names[0].name;
-                }
+                txn.hashType = myHashType[secretLockTxn.hashType];
+
+                let isNamespace = DashboardService.isNamespace(secretLockTxn.mosaic.id);
+
                 try {
+                    if(!isNamespace){
+                        txn.assetId = secretLockTxn.mosaic.id.toHex();
+
+                        let assetsNames = await DashboardService.getAssetsName([secretLockTxn.mosaic.id]);
+
+                        if(assetsNames[0].names.length){
+                            txn.namespaceName = assetsNames[0].names[0].name;
+                        }
+                    }
+                    else{
+                        let namespaceId = new NamespaceId(secretLockTxn.mosaic.id.toDTO().id);
+                        let linkedAssetId = await DashboardService.getAssetAlias(namespaceId);
+
+                        txn.assetId = linkedAssetId.toHex();
+                        txn.isSendWithNamespace = true;
+
+                        let nsNames = await DashboardService.getNamespacesName([namespaceId]);
+                        txn.namespaceName = nsNames[0].name;
+                    }
+
                     let assetInfo = await DashboardService.getAssetInfo(txn.assetId);
 
                     if(assetInfo.divisibility > 0){
@@ -2451,7 +2469,7 @@ export class DashboardService {
                 let secretProofTxn = txns[i] as SecretProofTransaction;
                 txn.secret = secretProofTxn.secret;
                 txn.recipient = secretProofTxn.recipient.plain();
-                txn.hashType = Object.keys(myHashType)[secretProofTxn.hashType];
+                txn.hashType = myHashType[secretProofTxn.hashType];
                 txn.proof = secretProofTxn.proof;
             }
             formatedTxns.push(txn);
@@ -2473,14 +2491,30 @@ export class DashboardService {
                 txn.duration = secretLockTxn.duration.compact();
                 txn.secret = secretLockTxn.secret;
                 txn.recipient = secretLockTxn.recipient.plain();
-                txn.assetId = secretLockTxn.mosaic.id.toHex();
                 txn.amount = secretLockTxn.mosaic.amount.compact();
-                txn.hashType = Object.keys(myHashType)[secretLockTxn.hashType];
-                let assetsNames = await DashboardService.getAssetsName([secretLockTxn.mosaic.id]);
-                if(assetsNames[0].names[0]){
-                    txn.namespaceName = assetsNames[0].names[0].name;
-                }
+                txn.hashType = myHashType[secretLockTxn.hashType];
+
+                let isNamespace = DashboardService.isNamespace(secretLockTxn.mosaic.id);
+                let resolvedAssetId = await DashboardService.getResolvedAsset(secretLockTxn.mosaic.id, txn.block); 
+
+                txn.assetId = resolvedAssetId.toHex();
+
                 try {
+                    if(!isNamespace){
+                        let assetsNames = await DashboardService.getAssetsName([secretLockTxn.mosaic.id]);
+
+                        if(assetsNames[0].names.length){
+                            txn.namespaceName = assetsNames[0].names[0].name;
+                        }
+                    }
+                    else{
+                        txn.isSendWithNamespace = true;
+                        let namespaceId = new NamespaceId(secretLockTxn.mosaic.id.toDTO().id);
+
+                        let nsNames = await DashboardService.getNamespacesName([namespaceId]);
+                        txn.namespaceName = nsNames[0].name;
+                    }
+
                     let assetInfo = await DashboardService.getAssetInfo(txn.assetId);
 
                     if(assetInfo.divisibility > 0){
@@ -2496,7 +2530,7 @@ export class DashboardService {
                 let secretProofTxn = txns[i] as SecretProofTransaction;
                 txn.secret = secretProofTxn.secret;
                 txn.recipient = secretProofTxn.recipient.plain();
-                txn.hashType = Object.keys(myHashType)[secretProofTxn.hashType];
+                txn.hashType = myHashType[secretProofTxn.hashType];
                 txn.proof = secretProofTxn.proof;
             }
             formatedTxns.push(txn);
@@ -2518,14 +2552,32 @@ export class DashboardService {
                 txn.duration = secretLockTxn.duration.compact();
                 txn.secret = secretLockTxn.secret;
                 txn.recipient = secretLockTxn.recipient.plain();
-                txn.assetId = secretLockTxn.mosaic.id.toHex();
                 txn.amount = secretLockTxn.mosaic.amount.compact();
-                txn.hashType = Object.keys(myHashType)[secretLockTxn.hashType];
-                let assetsNames = await DashboardService.getAssetsName([secretLockTxn.mosaic.id]);
-                if(assetsNames[0].names[0]){
-                    txn.namespaceName = assetsNames[0].names[0].name;
-                }
+                txn.hashType = myHashType[secretLockTxn.hashType];
+
+                let isNamespace = DashboardService.isNamespace(secretLockTxn.mosaic.id);
+
                 try {
+                    if(!isNamespace){
+                        txn.assetId = secretLockTxn.mosaic.id.toHex();
+
+                        let assetsNames = await DashboardService.getAssetsName([secretLockTxn.mosaic.id]);
+
+                        if(assetsNames[0].names.length){
+                            txn.namespaceName = assetsNames[0].names[0].name;
+                        }
+                    }
+                    else{
+                        let namespaceId = new NamespaceId(secretLockTxn.mosaic.id.toDTO().id);
+                        let linkedAssetId = await DashboardService.getAssetAlias(namespaceId);
+
+                        txn.assetId = linkedAssetId.toHex();
+                        txn.isSendWithNamespace = true;
+
+                        let nsNames = await DashboardService.getNamespacesName([namespaceId]);
+                        txn.namespaceName = nsNames[0].name;
+                    }
+
                     let assetInfo = await DashboardService.getAssetInfo(txn.assetId);
 
                     if(assetInfo.divisibility > 0){
@@ -2541,7 +2593,7 @@ export class DashboardService {
                 let secretProofTxn = txns[i] as SecretProofTransaction;
                 txn.secret = secretProofTxn.secret;
                 txn.recipient = secretProofTxn.recipient.plain();
-                txn.hashType = Object.keys(myHashType)[secretProofTxn.hashType];
+                txn.hashType = myHashType[secretProofTxn.hashType];
                 txn.proof = secretProofTxn.proof;
             }
             formatedTxns.push(txn);
@@ -2904,14 +2956,14 @@ export class DashboardService {
     }
 
     static isNamespace(mosaicId: MosaicId): boolean{
-        return Array.from(namespaceIdFirstCharacterString).includes(mosaicId.toHex().substring(0, 1));
+        return Array.from(namespaceIdFirstCharacterString).includes(mosaicId.toHex().toUpperCase().substring(0, 1));
     }
 
     static async getResolvedAsset(mosaicId: MosaicId, blockHeight: number): Promise<MosaicId>{
 
         let resolvedAsset: MosaicId = null;
 
-        if(Array.from(namespaceIdFirstCharacterString).includes(mosaicId.toHex().substring(0, 1))){
+        if(DashboardService.isNamespace(mosaicId)){
 
             let receipts = await chainAPI.blockAPI.getBlockReceipts(blockHeight);
 

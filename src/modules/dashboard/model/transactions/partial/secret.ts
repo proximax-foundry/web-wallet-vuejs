@@ -6,8 +6,9 @@ export class PartialSecretTransaction extends PartialTransaction{
     hashType: string = "";
     proof?: string = "";
     recipient: string = "";
-    assetId: string = "";
+    assetId?: string = null;
     namespaceName?: string = "";
+    isSendWithNamespace: boolean = false;
     amount: number = 0;
     amountIsRaw: boolean = true;
     duration: number = 0;
