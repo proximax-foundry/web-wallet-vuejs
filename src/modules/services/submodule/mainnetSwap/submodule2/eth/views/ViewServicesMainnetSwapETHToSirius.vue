@@ -78,7 +78,7 @@
               </div>
             </div>
           </div>
-          <SupplyInputClean :disabled="disableAmount" v-model="amount" :balance="balance" :placeholder="'ERC20 AMOUNT ' + currentNativeTokenName + ' (MINIMUM = 51 )'" type="text" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':((parseFloat(amount) <= defaultXPXTxFee)?'Insufficient amount':'Insufficient token balance.')" :decimal="6" toolTip="BEP20 token amount to swap. Minimum 51 BEP20 amount is required as 50 will be deducted from the amount as transaction fee." />
+          <SupplyInputClean :disabled="disableAmount" v-model="amount" :balance="balance" :placeholder="'ERC20 ' + currentNativeTokenName + ' (MINIMUM = 51 )'" type="text" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':((parseFloat(amount) <= defaultXPXTxFee)?'Insufficient amount':'Insufficient token balance.')" :decimal="6" toolTip="BEP20 token amount to swap. Minimum 51 BEP20 amount is required as 50 will be deducted from the amount as transaction fee." />
           <div class="text-left">
             <SelectInputAccount v-model="siriusAddress" placeholder="To Sirius Chain Account" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
           </div>
@@ -87,7 +87,7 @@
           </div>
           <div class="my-4 text-xs">The fees for the transaction on Sirius Chain will be deducted from this amount, which is 50 {{ currentNativeTokenName }}</div>
           <div class="mt-10 text-center">
-            <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
+            <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
             <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="sendRequest()">Send Request</button>
           </div>
         </div>
@@ -118,7 +118,7 @@
                 {{ isInvalidConfirmedMeta?'Approval in MetaMask is rejected':'Waiting for confirmation in MetaMask' }}
                 <div v-if="isInvalidConfirmedMeta" class="mt-5">
                   <button type="button" class="bg-blue-primary rounded mr-5 focus:outline-none text-tsm font-bold py-2 border-blue-primary px-8 text-white hover:shadow-lg" @click="getValidation">Retry</button>
-                  <router-link :to="{ name: 'ViewServices' }" class="px-6 py-2 text-gray-500 outline-none focus:outline-none mr-4 w-32 text-tsm" tag="button">Cancel this swap</router-link>
+                  <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="px-6 py-2 text-gray-500 outline-none focus:outline-none mr-4 w-32 text-tsm" tag="button">Cancel this swap</router-link>
                 </div>
               </div>
             </div>
@@ -253,7 +253,6 @@
 import { computed, ref, watch, onBeforeUnmount } from "vue";
 import SupplyInputClean from '@/components/SupplyInputClean.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
-import SelectSiriusAccountInputPlugin from '@/modules/services/submodule/mainnetSwap/components/SelectSiriusAccountInputPlugin.vue';
 import SelectInputAccount from '@/components/SelectInputAccount.vue';
 import { walletState } from '@/state/walletState';
 import { copyToClipboard } from '@/util/functions';
@@ -270,15 +269,13 @@ export default {
   components: {
     SupplyInputClean,
     SwapCertificateComponent,
-    SelectSiriusAccountInputPlugin,
     SelectInputAccount,
   },
 
   setup() {
+    let verifyingTxn;
 
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-
-    let verifyingTxn;
 
     const verifyMetaMaskPlugin = ref(true);
     if(!window.ethereum.isMetaMask){

@@ -43,14 +43,14 @@
             <img src="@/modules/services/submodule/mainnetSwap/img/bsc.svg" class="float-left">
             <div class="text-left pl-5">
               <div class="text-md font-bold">BSC</div>
-              <div class="text-xs">Binance Smert Chain</div>
+              <div class="text-xs">Binance Smart Chain</div>
             </div>
           </div>
           <div class="w-full text-left z-20 bg-white" v-if="open['bsc']">
             <div class="bg-blue-100 border-blue-100 uppercase py-2 px-5 text-xxs">Select option</div>
-            <div class="py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">BSC to Sirius Chain</div>
-            <div class="py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">Sirius Chain to BSC</div>
-            <div class="py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">Check Status</div>
+            <router-link :to="{ name: 'ViewServicesMainnetSwapBSCToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">BSC to Sirius Chain</router-link>
+            <router-link :to="{ name: 'ViewServicesMainnetSwapSiriusToBSC' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">Sirius Chain to BSC</router-link>
+            <router-link :to="{ name: 'ViewServicesMainnetSwapCheckBSCToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">Check Status</router-link>
           </div>
         </div>
       </div>
