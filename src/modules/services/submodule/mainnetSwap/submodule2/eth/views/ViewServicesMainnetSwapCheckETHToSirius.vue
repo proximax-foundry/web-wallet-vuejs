@@ -75,7 +75,7 @@
               </div>
             </div>
           </div>
-          <TextInputClean placeholder="ETH Transaction Hash" errorMessage="Please key in valid transaction hash" v-model="remoteTxnHash" icon="id-card-alt" :showError="showTxnHashError" class="w-full inline-block mr-2" />
+          <TextInputClean placeholder="ETH Transaction Hash" errorMessage="Please key in valid transaction hash" v-model="remoteTxnHash" :showError="showTxnHashError" class="w-full inline-block mr-2" />
           <div class="mt-10 text-center">
             <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
             <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledCheck" @click="checkStatus">Check Status</button>
@@ -161,7 +161,6 @@
                 </div>
                 <div v-if="isInitiateSwap">
                   <div class="sm:flex justify-between">
-                    <!-- <SelectSiriusAccountCheckSwapInputPlugin class="sm:flex-grow mt-2" v-model="siriusAddressSelected" icon="card-alt" errorMessage="Sirius Address required" :options="siriusAddressOption" :disabled="disableSiriusAddress" @clear-selection="clearSiriusAddress" /> -->
                     <div class="w-full">
                       <SelectInputAccount v-model="siriusAddressSelected" placeholder="To Sirius Chain Account" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
                     </div>
@@ -236,8 +235,6 @@
           </div>
         </div>
         <div v-if="currentPage==3">
-
-
           <div>
             <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
             <div class="text-tsm mb-7">The swap process has already started!</div>
@@ -276,7 +273,6 @@
 import { computed, ref, watch, onBeforeUnmount } from "vue";
 import TextInputClean from '@/components/TextInputClean.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
-// import SelectSiriusAccountCheckSwapInputPlugin from '@/modules/services/submodule/mainnetSwap/components/SelectSiriusAccountCheckSwapInputPlugin.vue';
 import SelectInputAccount from '@/components/SelectInputAccount.vue';
 import { walletState } from '@/state/walletState';
 import { copyToClipboard } from '@/util/functions';

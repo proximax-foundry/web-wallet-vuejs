@@ -19,43 +19,14 @@
           </div>
         </div>
       </div>
-      <!-- <div v-if="currentPage==1">
-        <p class="text-tsm my-5 text-gray-400">This is a list of your Sirius accounts available in this wallet.</p>
-        <div class="text-lg my-7 font-bold">Please select a Sirius account</div>
-        <div v-for="acc of allAvailableAccounts" :key="acc.name">
-          <div class="mb-2 flex justify-between rounded-2xl p-3 text-left transition" :class="`${(!acc.isMultisig|| includeMultisig)?'cursor-pointer hover:bg-blue-100 bg-gray-100':'bg-gray-50'}`" @click="(!acc.isMultisig || includeMultisig) && selectAccount(acc.name, acc.address)">
-            <div class="text-xs sm:text-tsm ml-3" :class="`${(!acc.isMultisig || includeMultisig)?'text-gray-700':'text-gray-200'}`">
-              <div class="mb-1 sm:mb-0"><b>Account Name:</b> {{ acc.name }} <div v-if="acc.isMultisig" class="inline-block badge rounded bg-blue-200 p-1 text-white text-txs ml-2">Multisig</div></div>
-              <div class="mb-1 sm:mb-0"><b>Sirius Address:</b> <div class="block mt-1 sm:inline-block sm:mt-0">{{ acc.address }}</div></div>
-              <div class="mb-1 sm:mb-0"><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ acc.balanceDisplay }} {{ currentNativeTokenName }}</div></div>
-            </div>
-            <div class="self-center">
-              <img src="@/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg" class="w-10 inline mr-3">
-            </div>
-          </div>
-        </div>
-      </div> -->
       <div v-if="currentPage==1">
         <div class="text-sm my-5 font-bold">Transaction Details</div>
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <SelectInputAccountOutgoingSwap v-model="siriusAddress" placeholder="From Sirius Chain Account" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
-        <!-- <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left">
-          <div class="text-xs sm:text-tsm ml-3 text-gray-700">
-            <div class="mb-1 sm:mb-0"><b>Account Name:</b> {{ selectedAccount.name }}</div>
-            <div class="mb-1 sm:mb-0"><b>Sirius Address:</b> <div class="block mt-1 sm:inline-block sm:mt-0">{{ selectedAccount.address }}</div></div>
-            <div class="mb-1 sm:mb-0"><b>Sirius Balance:</b> <div class="block mt-1 sm:inline-block sm:mt-0"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline sm:ml-1"> {{ selectedAccount.balanceDisplay }} {{ currentNativeTokenName }}</div></div>
-          </div>
-          <div class="self-center">
-            <button @click="currentPage=1" class="text-xs sm:text-sm hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none">Change</button>
-          </div>
-        </div> -->
-        <!-- <SwapInput v-model="amount" :maxAmount="maxSwapAmount" placeholder="Amount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" type="text" icon="coins" :showError="showAmountErr"
-                  :errorMessage="(selectedAccountBalance >= minBalanceAmount)?'Insufficient balance':'Balance is insufficient to cover transaction fee.'" emptyErrorMessage="Amount is empty" :disabled="disableAmount" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" /> -->
         <div class="relative">
           <div class="opacity-90 w-full h-full absolute z-10 bg-white" v-if="!siriusAddress"></div>
           <SwapInputClean class="mt-5" :disabled="disableAmount" v-model="amount" :balance="selectedAccountBalance" :placeholder="currentNativeTokenName + ' Amount'" type="text" :showError="showAmountErr" :errorMessage="(selectedAccountBalance >= minBalanceAmount)?'Insufficient balance':'Balance is insufficient to cover transaction fee.'" emptyErrorMessage="Amount is empty" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" toolTip="XPX amount to swap to ERC20" />
-
-          <MetamaskAddressInput placeholder="ETH address receiving your swap" errorMessage="Valid ETH address is required" class="mt-5" :showError="showAddressErr" v-model="ethAddress" icon="wallet" />
+          <MetamaskAddressInput placeholder="ETH address receiving your swap" errorMessage="Valid ETH address is required" class="mt-5" :showError="showAddressErr" v-model="ethAddress" />
           <div class="tex-center font-bold text-sm my-5">Transaction Fee (ETH Network):</div>
           <div class="md:grid md:grid-cols-3 mb-4">
             <div class="md:col-span-1 mb-3">
@@ -90,7 +61,7 @@
             {{ amount }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 ml-4">
           </div>
           <div class="flex justify-center mt-3">
-            <div class="text-xs text-gray-600 mt-2 max-w-screen-md">Swap completion time will vary depending on the performance of the ETH network. The more ETH transaction fees you pay, the faster your swap will occur. Displayed ETH fees are valid for only three minutes due to the ETH network’s fluctuating rates.</div>
+            <div class="text-xs text-gray-600 mt-2 max-w-screen-md">Swap completion time will vary depending on the performance of the ETH network. The more ETH transaction fees you pay, the faster your swap will occur. Displayed ETH fees are valid for only three minutes due to the ETH network's fluctuating rates.</div>
           </div>
           <div class="mt-10 text-center">
             <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">Maybe Later</button>
@@ -103,7 +74,7 @@
         <div>
           <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
           <div class="text-sm mb-7">The swap process has already started!</div>
-          <swap-certificate-component networkTerm="ETH" swapType="Out" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :swapQr="swapQr" :swapLink="swapLink" :siriusName="selectedAccountName" :swappedAmount="amount" :siriusAddress="Helper.createAddress(selectedAccountAddress).pretty()" :siriusTransactionHash="siriusTransactionHash" :xpxExplorer="xpxExplorerUrl"  />
+          <swap-certificate-component networkTerm="ETH" swapType="Out" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :swapQr="swapQr" :swapLink="swapLink" :siriusName="selectedAccountName" :swappedAmount="amount" :siriusAddress="Helper.createAddress(selectedAccountAddress).pretty()" :siriusTransactionHash="siriusTransactionHash" :xpxExplorer="xpxExplorerUrl" />
           <button type="button" class="w-40 hover:shadow-lg bg-blue-primary text-white text-xs hover:opacity-50 rounded font-bold px-4 py-3 border border-blue-primary outline-none mr-4 mt-6" @click="saveCertificate">Download Certificate</button>
           <div class="mt-5">
             <a :href="swapLink" target=_new class="underline self-center text-xs font-bold text-blue-primary">View Transaction in Ether Scan<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a><br>
@@ -119,7 +90,7 @@
             </div>
             <div class="text-blue-primary mb-1">To: MetaMask Account</div>
             <div>{{ ethAddress }}</div>
-            <div class="mt-1">Equivalent to {{ amount }}</div>
+            <div class="mt-1">Equivalent to {{ amount }} ERC20 XPX</div>
           </div>
           <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">Please download the certificate. It is needed in the event of an error. You can search the status of your ETH transaction using the above ETH Transaction Hash.</div>
           <label class="inline-flex items-center mb-5">
@@ -155,7 +126,7 @@ import { ethers } from 'ethers';
 import { SwapUtils } from '@/util/swapUtils';
 //import { ChainUtils } from "@/util/chainUtils";
 //import { ChainAPICall } from "@/models/REST/chainAPICall";
-//import { listenerState} from "@/state/listenerState";
+//import { listenerState } from "@/state/listenerState";
 
 export default {
   name: 'ViewServicesMainnetSwapSiriusToETH',
@@ -236,7 +207,7 @@ export default {
             address: Helper.createAddress(acc.address).pretty(),
             publicKey: acc.publicKey,
             isMultisig: acc.getDirectParentMultisig().length ? true: false
-          };  
+          };
         });
 
       if(includeMultisig.value){
@@ -546,8 +517,7 @@ export default {
       if(selectedAccount.value.balance <= minBalanceAmount.value){
         disableAmount.value = true;
         showAmountErr.value = true;
-      }
-      else{
+      }else{
         disableAmount.value = false;
         showAmountErr.value = false;
       }
@@ -786,8 +756,7 @@ export default {
 }
 
 .ethGasStrategy.option{
-
-transition: all 0.5s;
+  transition: all 0.5s;
   @apply text-gray-600 bg-white border-gray-200 hover:bg-blue-100 hover:border-blue-100;
   p{
     @apply text-blue-primary;

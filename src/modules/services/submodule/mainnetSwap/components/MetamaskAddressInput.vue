@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="mb-5 border border-gray-200 rounded">
+    <div class="border border-gray-200 rounded">
       <div class="flex justify-left">
         <div class="w-18 flex items-center justify-center py-5 sm:h-20 flex-none">
           <img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask-fox.svg" class="w-8 h-8 inline-block">
@@ -13,7 +13,7 @@
         </div>
       </div>
     </div>
-    <div class="error error-text text-left my-2" v-if="textErr || showError">{{ errorMessage }}</div>
+    <div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div>
   </div>
 </template>
 
