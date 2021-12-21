@@ -17,7 +17,7 @@ import { WalletStateUtils } from './state/utils/walletStateUtils';
 import { NetworkStateUtils } from './state/utils/networkStateUtils';
 import { ChainUtils } from './util/chainUtils';
 import { ChainAPICall } from './models/REST/chainAPICall';
-import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainSwapConfig } from "./models/stores/"
+import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainSwapConfig, ThemeStyleConfig } from "./models/stores/"
 
 // Import Font Awesome Icons
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -28,8 +28,8 @@ import { fas,faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExc
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
-import i18n from './i18n'
-import VWave from 'v-wave'
+import i18n from './i18n';
+import VWave from 'v-wave';
 
 library.add(
   fas,faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
@@ -52,6 +52,24 @@ app.component('ConfirmDialog', ConfirmDialog);
 app.component('Toast', Toast);
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.component(VuePassword);
+
+const loadThemeConfig = async() => {
+  try {
+    const config = await fetch('./ThemeConfig.json', {
+      headers: {
+        'Cache-Control': 'no-store',
+        'Pragma' : 'no-cache'
+      }
+    }).then((res) => res.json()).then((configInfo) => { return configInfo });
+
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.updateConfig(config);
+    themeConfig.saveToLocalStorage();
+  } catch (e) {
+    console.error(e);
+  }
+}
+loadThemeConfig();
 
 const chainProfileIntegration = async () => {
   try {

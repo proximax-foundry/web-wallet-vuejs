@@ -1,15 +1,20 @@
 <template>
 <div>
-  <div class="flex justify-between text-sm">
-    <div><span class="text-gray-300">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('accounts.creationtype')}}</span></div>
-  </div>
-  <div class='mt-2 py-3 gray-line text-center'>
-    <div class="inline-block">
-      <div class="flex justify-around pt-16 buttons_outer">
-        <router-link :to="{ name : 'ViewAccountCreate'}" class="inline-block md:block default-btn my-3 self-center">{{$t('accounts.new')}}</router-link>
-        <router-link :to="{ name: 'ViewAccountCreatePrivateKey'}" class="inline-block md:block default-btn my-3 self-center">{{$t('createwallet.fromprivatekey')}}</router-link>
-      </div>
-    </div>
+  <div class='border w-8/12 ml-auto mr-auto mt-6 filter shadow-lg'>
+    <div class='text-lg text-center font-bold my-10 '>Create New Account</div>
+    <div class='text-center text-xs font-semibold'>Select Creation Type</div>
+    <div class='mt-3'></div>
+    <div class='flex gap-2 justify-center'>
+      <router-link :to="{ name : 'ViewAccountCreate'}" class='border p-6 w-4/12'>
+        <img src="@/modules/wallet/img/icon-add-new.svg" class="ml-auto mr-auto mt-4 mb-3 h-12 w-12 mr-1">
+        <div class='text-center text-xs font-semibold'>Create New</div>
+      </router-link>
+      <router-link :to="{ name: 'ViewAccountCreatePrivateKey'}" class='border p-6 w-4/12'>
+        <img src="@/modules/wallet/img/icon-private-key.svg" class=" ml-auto mr-auto mt-4 mb-3 h-12 w-12 mr-1">
+        <div class='text-center text-xs font-semibold'>From Private Key</div>
+      </router-link>
+    </div> 
+    <div class='mt-10'></div>   
   </div>
 </div>
 </template>

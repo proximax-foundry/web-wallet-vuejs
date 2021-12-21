@@ -24,9 +24,9 @@
           <font-awesome-icon v-if = 'currentValue==2' class = 'p-1 mr-2 mt-1 float-right text-gray-200 bg-blue-primary rounded-full text-sm ' icon="check" ></font-awesome-icon>
         </label>
      </div>
-      <router-link v-if='currentValue==0' :to="{ name: 'ViewWalletCreate' }" class = 'mt-5 font-bold text-center blue-btn py-2 px-10 block ml-auto mr-auto w-8/12'>Next</router-link>
-      <router-link v-if='currentValue==1' :to="{ name: 'ViewWalletCreatePrivateKey' }" class = 'mt-5 font-bold text-center blue-btn py-2 block ml-auto mr-auto w-8/12'>Next</router-link>
-      <router-link v-if='currentValue==2' :to="{ name: 'ViewWalletImport' }" class = 'mt-5 font-bold text-center blue-btn py-2 block ml-auto mr-auto w-8/12'>Next</router-link>
+      <router-link v-if='currentValue==0' :to="{ name: 'ViewWalletCreate' }" class = 'mt-3 font-bold text-center blue-btn py-2 px-10 block ml-auto mr-auto w-8/12'>Next</router-link>
+      <router-link v-if='currentValue==1' :to="{ name: 'ViewWalletCreatePrivateKey' }" class = 'mt-3 font-bold text-center blue-btn py-2 block ml-auto mr-auto w-8/12'>Next</router-link>
+      <router-link v-if='currentValue==2' :to="{ name: 'ViewWalletImport' }" class = 'mt-3 font-bold text-center blue-btn py-2 block ml-auto mr-auto w-8/12'>Next</router-link>
       <div class = 'h-28'></div>
     </div>
   </div>

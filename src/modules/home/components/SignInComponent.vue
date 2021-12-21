@@ -3,17 +3,16 @@
     <form @submit.prevent="login">
       <fieldset>
         <div class="w-8/12 text-center mr-auto ml-auto error error_box" v-if="err!=''">{{ err }}</div>
-            <SelectNetworkInput />
-            <div class='mt-2'></div>
-            <SelectWalletInput />
-            <div class='mt-2'></div>
-            <div class= 'text-center'>
-              <PasswordInput @space="space=true" @removeSpace='space=false' class = 'w-8/12 block ml-auto mr-auto' placeholder="Password" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
-            </div>
-          <div class=" text-center">
-            <button v-if='!space' type="submit" class="blue-btn bg-gray-primary  py-2.5 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
-            <button v-else type="submit" class="blue-btn bg-gray-primary mt-4 py-2.5 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
-          </div>
+        <SelectNetworkInput />
+        <div class='mt-3'></div>
+        <SelectWalletInput />
+        <div class='mt-3'></div>
+        <div class= 'text-center'>
+          <PasswordInput class = 'w-8/12 block ml-auto mr-auto' placeholder="Password" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+        </div>
+        <div class=" text-center mt-2">
+          <button type="submit" class=" blue-btn bg-gray-primary py-2.5 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
+        </div>
       </fieldset>
     </form>
   </div>
@@ -57,7 +56,6 @@ export default defineComponent({
         selectedWallet.value != ''
       )
     );
-    const space=ref(false)
     const selectedNetwork = computed(()=>{ return {label: networkState.chainNetworkName, value: networkState.chainNetwork }});
     emitter.on('select-wallet',(wallet)=>{
       selectedWallet.value=wallet
@@ -80,7 +78,6 @@ export default defineComponent({
     };
 
     return{
-      space,
       networkState,
       err,
       walletPassword,

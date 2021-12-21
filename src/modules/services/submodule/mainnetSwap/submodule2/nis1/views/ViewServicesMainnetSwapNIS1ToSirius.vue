@@ -36,7 +36,7 @@
           <div class="text-tsm ml-3 text-gray-700">
             <div><b>{{$t('swap.accountname')}}:</b> [[accountName]]</div>
             <div><b>{{$t('swap.nis1address')}}:</b> [[account address]]</div>
-            <div><b>NIS1 balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] XPX</div>
+            <div><b>NIS1 balance:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] {{ currentNativeTokenName }}</div>
           </div>
           <div class="self-center">
             <img src="@/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg" class="w-10 inline mr-3">
@@ -46,7 +46,7 @@
           <div class="text-tsm ml-3 text-gray-700">
             <div><b>{{$t('swap.accountname')}}:</b> [[accountName]]</div>
             <div><b>{{$t('swap.nis1address')}}:</b> [[account address]]</div>
-            <div><b>{{$t('swap.nis1balance')}}:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] XPX</div>
+            <div><b>{{$t('swap.nis1balance')}}:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] {{ currentNativeTokenName }}</div>
           </div>
           <div class="self-center">
             <img src="@/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg" class="w-10 inline mr-3">
@@ -56,7 +56,7 @@
           <div class="text-tsm ml-3 text-gray-700">
             <div><b>{{$t('swap.accountname')}}:</b> [[accountName]]</div>
             <div><b>{{$t('swap.nis1address')}}:</b> [[account address]]</div>
-            <div><b>{{$t('swap.nis1balance')}}:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] XPX</div>
+            <div><b>{{$t('swap.nis1balance')}}:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] {{ currentNativeTokenName }}</div>
           </div>
           <div class="self-center">
             <img src="@/modules/services/img/icon-account-green-16h-proximax-sirius-wallet.svg" class="w-10 inline mr-3">
@@ -69,7 +69,7 @@
           <div class="text-tsm ml-3 text-gray-700">
             <div><b>{{$t('swap.accountname')}}:</b> [[accountName]]</div>
             <div><b>{{$t('swap.nis1address')}}:</b> [[account address]]</div>
-            <div><b>{{$t('swap.nis1balance')}}:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] XPX</div>
+            <div><b>{{$t('swap.nis1balance')}}:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] {{ currentNativeTokenName }}</div>
           </div>
           <div class="self-center">
             <button @click="currentPage=1" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none">{{$t('swap.change')}}</button>
@@ -137,6 +137,7 @@ export default {
   },
 
   setup() {
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const currentPage = ref(1);
     const showPasswdError = ref(false);
     const walletPasswd = ref('');
@@ -174,6 +175,7 @@ export default {
       isDisabledSwap,
       swap,
       savedCheck,
+      currentNativeTokenName,
     };
   },
 }

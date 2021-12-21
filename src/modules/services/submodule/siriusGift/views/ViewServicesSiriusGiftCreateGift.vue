@@ -19,7 +19,7 @@
         </div>
         <CardMessageInput class="mb-4" :disabled="disabledMessage" v-model="messageCards" :limit="10" placeholder="Message on Gift Cards" title="Message on Gift Cards" icon="comment" :showError="messageErr " errorMessage="Message required" />
         <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-          <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} <span class="text-txs"></span> XPX</div>
+          <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} <span class="text-txs"></span> {{ currentNativeTokenName }}</div>
         </div>
         <PasswordInput placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
         <div class="mt-10">
@@ -33,7 +33,7 @@
         <div class="border-t border-b border-solid border-gray-300 my-10 h-32 flex">
           <div class="self-center text-center w-full">
             <div class="text-md font-bold">[ Gift card name ]</div>
-            <div class="text-md mt-3">[ amount ] XPX</div>
+            <div class="text-md mt-3">[ amount ] {{ currentNativeTokenName }}</div>
             <div class="text-xs mt-3">[ Gift card message ]</div>
           </div>
         </div>
@@ -78,6 +78,7 @@ export default {
   },
 
   setup() {
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const appStore = inject("appStore");
@@ -151,6 +152,7 @@ export default {
       generateGift,
       readCheck,
       backtoPanel,
+      currentNativeTokenName,
     };
   },
 }

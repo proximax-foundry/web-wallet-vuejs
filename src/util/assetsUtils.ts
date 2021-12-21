@@ -333,7 +333,7 @@ export class AssetsUtils {
     AssetsUtils.multiSigAnnouce(aggregateBondedTxSigned, signedHashlock);
   }
 
-  static listActiveNamespacesToLink = (address:string, linkOption: string) => {
+  static listActiveNamespacesToLink = (assetId: string, address:string, linkOption: string) => {
     // const accountNamespaces = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address).namespaces.filter(namespace => namespace.active === true);
 
     const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address);
@@ -355,6 +355,7 @@ export class AssetsUtils {
     let namespacesArr = [];
     if(namespacesNum > 0){
       fetchedNamespace.forEach((namespaceElement) => {
+        console.log(namespaceElement)
         const level = namespaceElement.name.split('.');
         let isDisabled: boolean;
         let label:string = '';
@@ -385,13 +386,24 @@ export class AssetsUtils {
           label = namespaceElement.name;
           namespaceName = namespaceElement.name;
         }
-        namespacesArr.push({
-          // value: namespaceElement.idHex,
-          value: namespaceName,
-          label: label,
-          disabled: isDisabled,
-          level: level
-        });
+        if(linkOption == 'link'){
+          namespacesArr.push({
+            // value: namespaceElement.idHex,
+            value: namespaceName,
+            label: label,
+            disabled: isDisabled,
+            level: level
+          });
+        }
+        if(linkOption == 'unlink' && namespaceElement.linkedId == assetId){
+          namespacesArr.push({
+            // value: namespaceElement.idHex,
+            value: namespaceName,
+            label: label,
+            disabled: isDisabled,
+            level: level
+          });
+        }
       });
 
       namespacesArr.sort((a, b) => {

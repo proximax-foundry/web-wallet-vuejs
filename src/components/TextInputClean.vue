@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div :class="disabled?'opacity-50':''">
     <div class="border border-gray-200 px-2 py-1 h-12">
       <div class="uppercase text-gray-400 font-light text-txs text-left mb-2">{{ placeholder }}</div>
-      <input :disabled="disabled" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="w-full flex border-0 outline-none border-white drop-shadow-none filter focus:outline-none text-tsm text-gray-600">
+      <input :disabled="disabled" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" class="text_input">
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
   </div>
@@ -68,3 +68,9 @@ export default{
   }
 }
 </script>
+
+<style lang="scss">
+.text_input{
+  @apply w-full flex border-0 outline-none border-white drop-shadow-none filter focus:outline-none text-tsm text-gray-600 font-bold disabled:opacity-50;
+}
+</style>

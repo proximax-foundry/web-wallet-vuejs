@@ -4,34 +4,58 @@
       <img src='@/assets/img/chevron_left.svg'>
       <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
     </div>
-    <div class='w-9/12 ml-auto mr-auto '>
+    <div v-if='showModal' >
+        <transition
+          enter-active-class="animate__animated animate__fadeInDown"
+          leave-active-class="animate__animated animate__fadeOutUp"
+        >
+          <div class="popup-outer-create-wallet absolute flex z-50">
+            <div class="modal-popup-box ">
+              <img src='@/assets/img/icon-blue-tick.svg' class='h-5 w-5 ml-auto mr-auto mb-3'>
+              <div class= 'text-center mt-2 text-xs font-semibold'>Account Creation Successful</div>
+              <div class ='text-gray-500 text-center text-xs mt-2'>Should you wish to get testnet {{currentNativeTokenName}} amount, you can top up every 24 hours in your account.</div>
+              <div class='flex flex-wrap content-center'>
+                <div @click="showModal=false" class= ' mt-4 w-4/12 ml-auto mr-auto text-center  blue-btn cursor-pointer font-semibold text-xs py-2 px-2 mt-2 font-semibold mb-3' >Close</div>
+              </div>
+            </div>
+          </div>
+        </transition>
+        <div class="fixed inset-0 bg-opacity-60 z-10 bg-gray-100"></div>
+      </div>
+    <div class='w-9/12 ml-auto mr-auto'>
       <div class = 'flex text-xs font-semibold border-b-2'>
         <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Details</div>
-        <router-link :to="{ name: isMultiSig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
+        <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
       </div>
       <div class='my-7 font-semibold'>Account Details</div>
       <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
       <div class='border-2'>
         <div class='flex'>
           <div v-html='svgString'></div>
-          <div class='flex flex-col justify-center'>
+          <div class='flex flex-col justify-center ml-4'>
             <div class='flex '>
-              <div class = ' ml-4 font-semibold text-md' v-if='showName'>{{ accountNameDisplay }}</div>
+              <div class = '  font-semibold text-md' v-if='showName'>{{ accountNameDisplay }}</div>
               <input class='outline-none ml-4 font-semibold text-md'  v-model='accountName' v-if='!showName'/>
               <img src="@/modules/account/img/edit-icon.svg"  v-if='showName' @click='showName=!showName' title='Edit Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
               <img src="@/modules/account/img/edit-icon.svg"  v-if='!showName'  @click="changeName()" title='Confirm Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
             </div>
-            <div class = 'flex mt-0.5'>
-              <img v-if='isDefault' src="@/modules/account/img/icon-pin.svg" class = 'ml-3 h-4 w-4 bg-gray-200' title='This is your default account everytime you login'>
-              <p v-if='isDefault' class = 'text-xxs pt-px bg-gray-200 text-blue-link cursor-default' title='This is your default account everytime you login' >DEFAULT ACCOUNT</p>
-              <img v-if='isMultiSig' src="@/modules/account/img/icon-pin.svg" class = 'ml-3 h-4 w-4 bg-gray-200' title='This is your default account everytime you login'>
-              <p v-if='isMultiSig' class = 'text-xxs pt-px bg-gray-200 text-blue-link cursor-default' title='This is a multisig account' >MULTISIG ACCOUNT</p>
+            <div class='flex gap-2'> 
+              <div  v-if='isDefault' class = ' px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm'>
+                <img src="@/modules/account/img/icon-pin.svg" class = 'h-4 w-4 ' title='This is your default account everytime you login'>
+                <p class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is your default account everytime you login' >DEFAULT</p>
+              </div>
+              <div v-if='isMultiSig' class = ' px-1 py-0.5 flex mt-0.5 bg-orange-primary rounded-sm '>
+                <img v-if='isMultiSig' src="@/assets/img/icon-key.svg" class = 'h-4 w-4 mr-1' title='This is your default account everytime you login'>
+                <p v-if='isMultiSig' class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is a multisig account' >MULTISIG</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div class='border-2 mt-3 p-6'>
-        <div class = 'text-txs text-blue-primary mt-2 '>CURRENT BALANCE</div>
+      <div class='border-2 mt-3 pb-6 px-6 pt-2'>
+        <img src="@/modules/account/img/icon-info.svg" class='h-4 w-4 ml-auto' 
+        :title="'Top up your account balance to a maximum of 100,000 test-' + currentNativeTokenName + ' every 24 hours.'">
+        <div class = 'text-xxs text-blue-primary font-semibold'>CURRENT BALANCE</div>
         <div class='flex my-1'>
           <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
           <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
@@ -39,36 +63,44 @@
           <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
           <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
           <div class='flex ml-auto gap-6 '>
+            <router-link :to='{name:"ViewTransferCreate"}' class='flex cursor-pointer'>
+              <img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-5 h-5 mt-0.5  cursor-pointer mr-1">
+              <div class='text-xs mt-1 font-semibold '>Transfer {{currentNativeTokenName}}</div>
+            </router-link>
             <div class='flex cursor-pointer'>
               <img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-5 h-5 mt-0.5  cursor-pointer mr-1">
-              <div class='text-xs mt-1 font-semibold '>Transfer XPX</div>
+              <div class='text-xs mt-1 font-semibold'>Request {{currentNativeTokenName}}</div>
             </div>
-            <div class='flex cursor-pointer'>
-              <img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-5 h-5 mt-0.5  cursor-pointer mr-1">
-              <div class='text-xs mt-1 font-semibold'>Request XPX</div>
-            </div>
-            <div class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
+            <a v-if="networkState.chainNetwork == 0" href="https://www.proximax.io/en/xpx" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
               <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
-              <div class='text-xs mt-0.5 font-semibold text-white'>Top up XPX</div>
-            </div>
+              <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
+            </a>
+            <a v-if="networkState.chainNetwork == 1" href="https://bctestnetfaucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
+              <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
+              <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
+            </a>
+            <a v-if="networkState.chainNetwork == 2" href="https://bctestnet2faucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
+              <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
+              <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
+            </a>
           </div>
         </div>
         <div class = 'text-txs text-gray-400 '>Estimate US$ {{currencyConvert}}</div>
         <div class='my-6 gray-line'></div>
-        <div class = 'text-txs text-blue-primary mt-2 '>WALLET ADDRESS</div>
+        <div class = 'text-xxs text-blue-primary mt-2 font-semibold'>WALLET ADDRESS</div>
         <div class= 'flex'>
           <div id="address" :copyValue="prettyAddress" copySubject="Address" class = 'text-xs font-semibold mt-1'>{{prettyAddress}} </div>
           <font-awesome-icon icon="copy" title='Copy' @click="copy('address')" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
         </div>
         <div class='my-6 gray-line'></div>
-        <div class = 'text-txs text-blue-primary mt-2 '>PUBLIC KEY</div>
+        <div class = 'text-xxs text-blue-primary mt-2 font-semibold'>PUBLIC KEY</div>
         <div class= 'flex'>
           <div id="public" class="text-xs font-semibold mt-1 break-all" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
           <font-awesome-icon icon="copy" @click="copy('public')" title='Copy' class="ml-2 pb-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
         </div>
-        <div class='my-6 gray-line'></div>
+        <div v-if='!other_acc' class='my-6 gray-line'></div>
         <div v-if='!other_acc' >
-          <div class = 'text-txs text-blue-primary mt-0.5 '>PRIVATE KEY</div>
+          <div class = 'text-xxs text-blue-primary mt-0.5 font-semibold'>PRIVATE KEY</div>
           <div class='flex '>
             <div v-if="!showPwPK && !showPK" class='break-all font-semibold'>****************************************************************</div>
             <PkPasswordModal v-if="!showPwPK && !showPK" :account = 'acc' />
@@ -80,7 +112,7 @@
           </div>
           <p class = 'text-txs mt-2 text-gray-400'>{{$t('createsuccessful.warningtext1')}} {{$t('createsuccessful.warningtext2')}}</p>
       </div>
-      <div class='my-6 gray-line' v-if='!other_acc'></div>
+      <div class='my-6 gray-line' v-if="!other_acc "></div>
       <div class='flex'>
         <PdfPasswordModal v-if='!other_acc' />
         <DeleteAccountModal v-if="!isDefault && !other_acc " :account ='acc' />
@@ -108,7 +140,8 @@ import qrcode from 'qrcode-generator';
 import PkPasswordModal from '@/modules/account/components/PkPasswordModal.vue'
 import PdfPasswordModal from '@/modules/account/components/PdfPasswordModal.vue'
 import DeleteAccountModal from '@/modules/account/components/DeleteAccountModal.vue'
-import { toSvg} from "jdenticon";
+import { toSvg } from "jdenticon";
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 
 export default {
   name: "ViewAccountDetails",
@@ -119,29 +152,38 @@ export default {
     DeleteAccountModal
   },
   props: {
-    address: String
+    address: String,
+    accountCreated: Boolean
   },
   setup(p) {
     const {t} = useI18n();
     const toast = useToast();
     const router = useRouter();
-
+    const showModal = ref(false)
     // get account details
     var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
     const other_acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
-    const svgString = ref(toSvg(acc.address, 100))
- 
+
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
+
+   
+
     if(!acc){
       if(other_acc)
       {
         acc = other_acc;
       }
     }
-    
+     
+    if(p.accountCreated){
+      showModal.value= true
+    }
     const isDefault = (acc.default == true) ? true: false
     if (acc === -1) {
       router.push({name: "ViewAccountDisplayAll"});
     }
+    const svgString = ref(toSvg(acc.address, 100, themeConfig.jdenticonConfig));
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const prettyAddress = Helper.createAddress(acc.address).pretty();
@@ -313,7 +355,11 @@ export default {
     emitter.on("unlockWalletPaper", (e) => {
       saveWalletPaper(e)
     });
+   
+
     return {
+      networkState,
+      showModal,
       svgString,
       splitBalance,
       other_acc,
@@ -347,3 +393,10 @@ export default {
   }
 };
 </script>
+<style scoped>
+.popup-outer-create-wallet{
+  
+  top: 40px; left: 0; right: 0; margin-left: auto; margin-right: auto; max-width: 400px;
+
+}
+</style>

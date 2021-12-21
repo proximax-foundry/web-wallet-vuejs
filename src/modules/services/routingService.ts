@@ -6,7 +6,6 @@ import { NotificationsRoutes } from '@/modules/services/submodule/notifications/
 import { VotingRoutes } from '@/modules/services/submodule/voting/routingVoting';
 import { StorageRoutes } from '@/modules/services/submodule/storage/routingStorage';
 import { SiriusGiftRoutes } from '@/modules/services/submodule/siriusGift/routingSiriusGift';
-import { ExplorerRoutes } from '@/modules/services/submodule/explorer/routingExplorer';
 import { NodesRoutes } from '@/modules/services/submodule/nodes/routingNodes';
 import { AssetsRoutes } from '@/modules/services/submodule/assets/routingAssets';
 import { RouteRecordRaw } from 'vue-router'
@@ -28,7 +27,6 @@ export const ServiceRoutes: RouteRecordRaw[] = [
   ...VotingRoutes,
   ...StorageRoutes,
   ...SiriusGiftRoutes,
-  ...ExplorerRoutes,
   ...NodesRoutes,
   ...AssetsRoutes,
 ];

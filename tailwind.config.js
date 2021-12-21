@@ -47,7 +47,9 @@ module.exports = {
           primary: '#dc3545'
         },
         orange:{
-          primary: '#E55B13'
+          primary: '#E55B13',
+          action: '#F06623',
+          light: '#FFF1EA'
         },
         navy: {
           primary: '#33344A',

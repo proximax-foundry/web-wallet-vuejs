@@ -537,14 +537,15 @@ export default {
       }
     };
 
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const txtRemoteTransactionErrorMsg = computed(() => {
       if(isDisplayFeeLowRemark.value){
         return 'Fees might be too low. Please do not change recommended fee in MetaMask.';
       }else{
         if(transactionNotFound.value){
-          return 'BSC transaction hash is not found. Please initiate new swap from BSC to XPX';
+          return 'BSC transaction hash is not found. Please initiate new swap from BSC to ' + currentNativeTokenName.value;
         }else{
-          return 'BSC transaction hash is invalid. Please initiate new swap from BSC to XPX';
+          return 'BSC transaction hash is invalid. Please initiate new swap from BSC to ' + currentNativeTokenName.value;
         }
       }
     });

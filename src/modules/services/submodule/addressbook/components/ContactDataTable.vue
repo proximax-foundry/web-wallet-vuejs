@@ -1,15 +1,17 @@
 <template>
   <div>
-    <div class="flex justify-between">
-      <div class="flex items-center">
-        <div class='font-semibold mr-10'>Address Book</div>
+    <div class="xl:flex xl:justify-between pb-3 xl:pb-0">
+      <div class="lg:flex lg:items-center lg:justify-items-start">
+        <div class='font-semibold mr-10 mb-4 lg:mb-0'>Address Book</div>
         <SelectInputPluginClean v-model="selectContactGroups" :options="contactGroups" selectDefault="" class="w-60 mr-4" />
-        <div class="w-30 px-3 py-1" :class="borderColor">
-          <input v-model="filters['global'].value" type="text" class="w-26 outline-none text-xs" :placeholder="$t('services.search')" @click="clickInputText()" @blur="blurInputText()">
+        <div class="w-60 px-3 py-1 flex justify-between my-3 xl:my-0" :class="borderColor">
+          <input v-model="filters['global'].value" type="text" class="w-28 outline-none text-xs float-left" :placeholder="$t('services.search')" @click="clickInputText()" @blur="blurInputText()">
           <img src="@/modules/services/submodule/addressbook/img/icon-search_black.svg" class="inline-block">
         </div>
       </div>
-      <router-link :to="{ name: 'ViewServicesAddressBookAddContact' }"  class="bg-blue-primary text-gray-50 text-tsm px-5 py-3 rounded-lg hover:bg-blue-600 transition-all duration-300">+ Add New Address</router-link>
+      <div class="block lg:inline-block mt-5 lg:mt-5 xl:mt-0">
+        <router-link :to="{ name: 'ViewServicesAddressBookAddContact' }"  class="bg-blue-primary text-gray-50 text-tsm px-5 py-3 rounded-lg hover:bg-blue-600 transition-all duration-300">+ Add New Address</router-link>
+      </div>
     </div>
     <div class='mt-2 py-3 gray-line'>
       <DataTable
@@ -29,7 +31,7 @@
               <div v-html="data.svgString" class="mr-2 inline-block"></div>
               <div class="inline-block">
                 <div class="text-blue-primary text-tsm">{{data.name}} <span class="inline-block ml-5 rounded-md text-blue-primary bg-blue-200 px-2 py-1 text-xxs font-bold" v-if="data.group!='-none-'">{{ data.group }}</span></div>
-                <div class="mt-1 text-tsm">{{data.address}}</div>
+                <div class="mt-1 text-xs md:text-tsm">{{data.address}}</div>
               </div>
             </div>
           </template>
@@ -67,6 +69,7 @@ import ConfirmDeleteContactModal from '@/modules/services/submodule/addressbook/
 import { Helper } from "@/util/typeHelper";
 import { walletState } from '@/state/walletState';
 import { toSvg } from "jdenticon";
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 
 export default{
   components: {
@@ -97,20 +100,9 @@ export default{
 
     const contactGroupsList = ref([]);
 
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
     const formattedContacts = computed(() => {
-
-      let jdenticonconfig = {
-          hues: [211],
-          lightness: {
-              color: [0.32, 0.80],
-              grayscale: [0.17, 0.82]
-          },
-          saturation: {
-              color: 1.00,
-              grayscale: 0.00
-          },
-          backColor: "#fff"
-      };
       let contracts = []
       if(walletState.currentLoggedInWallet.contacts != undefined){
         if(walletState.currentLoggedInWallet.contacts.length > 0){
@@ -121,7 +113,7 @@ export default{
                 name: contact.name,
                 address: Helper.createAddress(contact.address).pretty(),
                 group: contact.group,
-                svgString: toSvg(contact.address, 45, jdenticonconfig),
+                svgString: toSvg(contact.address, 45, themeConfig.jdenticonConfig),
               };
               contracts.push(data);
               isMenuShow.value[i] = false;
@@ -134,7 +126,7 @@ export default{
                 name: contact.name,
                 address: Helper.createAddress(contact.address).pretty(),
                 group: contact.group,
-                svgString: toSvg(contact.address, 45, jdenticonconfig),
+                svgString: toSvg(contact.address, 45, themeConfig.jdenticonConfig),
               };
               contracts.push(data);
               isMenuShow.value[i] = false;

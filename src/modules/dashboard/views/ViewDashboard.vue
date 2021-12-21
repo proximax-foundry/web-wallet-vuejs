@@ -1,54 +1,82 @@
 <template>
   <div>
-    <div class="px-2 sm:px-10 bg-gray-200 pb-8 pt-5">
-      <div class="md:grid md:grid-cols-4">
-        <div class="pr-2">
+    <div class="px-2 sm:px-10 bg-gray-200 pb-4 pt-5">
+      <div class="md:grid md:grid-cols-2 xl:grid-cols-3">
+        <div class="block md:hidden">
+          <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded flex flex-col bg-white text-black">
+            <div class="text-center py-3">
+              <div class="text-center my-2"><div class="inline-block"><span class="font-bold text-xl">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-md">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-xl">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-6 h-6 ml-3 relative" style="top: -6px;"></div>
+              <div class="inline-block text-xs font-bold text-blue-primary cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">My Personal Account<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></div>
+              <div class="mb-8">
+                <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddressShort }}</div>
+                <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
+              </div>
+              <div>
+                <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center mr-2">
+                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
+                    <div class="h-full w-full flex items-center justify-center">
+                      <img src="@/modules/dashboard/img/icon-balance-white.svg" class="w-5 h-5">
+                    </div>
+                  </div><br>
+                  <div class="text-xxs text-gray-400 inline-block uppercase">Top Up</div>
+                </router-link>
+                <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center mx-2">
+                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
+                    <div class="h-full w-full flex items-center justify-center">
+                      <img src="@/modules/dashboard/img/icon-transfer-white.svg" class="w-5 h-5">
+                    </div>
+                  </div><br>
+                  <div class="text-xxs text-gray-400 inline-block uppercase">Transfer</div>
+                </router-link>
+                <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center ml-2">
+                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
+                    <div class="h-full w-full flex items-center justify-center">
+                      <img src="@/modules/dashboard/img/icon-swap-white.svg" class="w-5 h-5">
+                    </div>
+                  </div><br>
+                  <div class="text-xxs text-gray-400 inline-block uppercase">Swap</div>
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pr-2 hidden md:inline-block">
           <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded-lg balance-div flex flex-col justify-between bg-navy-primary text-white">
             <div class="text-right">
               <div class="inline-block text-txs font-bold text-blue-primary pappflex items-center rounded-b-sm"><img src="@/modules/dashboard/img/icon-bookmark.svg" class="w-3 h-3 mr-1 inline-block">DEFAULT ACCOUNT</div><br>
               <div class="inline-block text-txs underline xl:text-sm cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">My Personal Account</div>
             </div>
             <div>
-              <div class="mt-1 text-gray-300 text-txs">CURRENT BALANCE</div>
+              <div class="text-gray-300 text-txs">CURRENT BALANCE</div>
               <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
               <div class="text-gray-300 text-txs mt-1">Estimate US$ {{ currencyConvert }}</div>
             </div>
             <div class="flex justify-between mt-2">
               <div>
-                <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold inline-block" style="margin-top: 1px">Top Up XPX</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></router-link>
+                <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">Top Up</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></router-link>
               </div>
-              <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">Transfer XPX</div></router-link>
+              <div class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-swap.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold text-gray-500" style="margin-top: 1px">Swap</div></div>
             </div>
-            
           </div>
         </div>
-        <div class="px-2">
+        <div class="sm:pl-2 xl:px-2 hidden md:inline-block">
           <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div">
             <div class="text-gray-400 text-txs mt-7 mb-2">WALLET ADDRESS</div>
             <div class="flex items-center justify-between mb-8">
-              <div id="address" class="font-bold outline-none break-all text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
+              <div id="address" class="font-bold outline-none break-all text-xs lg:text-tsm h-8" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
               <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4" @click="copy('address')">
             </div>
             <div class="flex justify-between w-full">
-              <div class="my-2 flex items-center"><a href="https://bctestnetfaucet.xpxsirius.io/#/" target=_new><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span class="text-xs" style="margin-top: 1px">Request XPX</span></a></div>
-              <div class="my-2 flex items-center"><img src="@/modules/dashboard/img/icon-key.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Convert to Multisig</div></div>
+              <div class="my-2 flex items-center"><a href="https://bctestnetfaucet.xpxsirius.io/#/" target=_new><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span class="text-xs font-bold" style="margin-top: 1px">Scan QR Code</span></a></div>
+              <div class="my-2 flex items-center"><img src="@/modules/dashboard/img/icon-multisig-blue.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">Convert to Multisig</div></div>
             </div>
           </div>
         </div>
-        <div class="col-span-2 pl-2">
-          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-4 rounded-lg transaction-div flex flex-row justify-evenly items-center text-white">
-            <div class="text-center">
-              <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-successful-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ accountConfirmedTxnsCount }}</div></div>
-              <div class="text-xs mt-3">Succesful<br>Transactions</div>
-            </div>
-            <div class="text-center">
-              <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-unconfirmed-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ accountUnconfirmedTxnsCount }}</div></div>
-              <div class="text-xs mt-3">Unconfirmed<br>Transactions</div>
-            </div>
-            <div class="text-center">
-              <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-waiting-for-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ accountPartialTxnsCount }}</div></div>
-              <div class="text-xs mt-3">Waiting for<br>Signing</div>
-            </div>
+        <div class="pl-2 hidden xl:inline-block">
+          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-3 rounded-lg transaction-div text-white">
+            <div class="text-tsm mt-7">Recent Transfers</div>
+            <div class="text-gray-400 text-tsm mt-4 mb-2 h-12">Invite your families and friends to create Sirius Wallet account and start transferring to their accounts.</div>
+            <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mt-5"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
           </div>
         </div>
       </div>
@@ -64,13 +92,13 @@
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-if="displayBoard=='overview'">
       <div class="text-txs text-gray-400"><b class="text-gray-700">ASSETS</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">View all</span>)</div>
-      <AssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
+      <DashboardAssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
-      <NamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" />
+      <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" :account="selectedAccount" />
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ accountConfirmedTxnsCount }} - View all)</div>
-      <MixedTxnDataTable :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="recentTransactions" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal"></MixedTxnDataTable>
-      <div class="mt-10 flex">
-        <div class=" md:w-1/2">
+      <MixedTxnDataTable :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="recentTransactions" @openDecryptMsg="openDecryptMsgModal"></MixedTxnDataTable>
+      <div class="mt-10 md:flex ml-5 md:ml-0">
+        <div class="w-full md:w-1/2">
           <div class="mb-8 font-bold uppercase text-txs">Create something new</div>
           <div class="flex flex-wrap">
             <div class="flex items-center w-80 mb-2">
@@ -87,7 +115,7 @@
                 <p class="text-txs w-60">An asset could be a token that has a unique identifier and configurable properties.</p>
               </div>
             </div>
-            <div class="flex items-center w-80mb-2">
+            <div class="flex items-center w-80 mb-2">
               <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
               <div class="inline-block ml-2 dashboard-link">
                 <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create New Account</router-link>
@@ -96,9 +124,9 @@
             </div>
           </div>
         </div>
-        <div class="md:w-1/2">
+        <div class="w-full md:w-1/2 mt-7 md:mt-0">
           <div class="mb-8 font-bold text-txs uppercase">Getting started guide</div>
-          <div class="text-tsm">
+          <div class="text-xs sm:text-tsm">
             <div class="mb-2"><a href=#>Guide Overview <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
             <div class="mb-2"><a href=#>What is ProximaX Sirius Chain <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
             <div class="mb-2"><a href=#>What is Namespace <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
@@ -108,10 +136,10 @@
       </div>
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='asset'">
-      <AssetDataTable :assets="selectedAccount.assets" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
+      <DashboardAssetDataTable :assets="selectedAccount.assets" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='namespace'">
-      <NamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" />
+      <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" :account="selectedAccount" />
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='transaction'">
       <select v-model="selectedTxnType" @change="changeSearchTxnType">
@@ -138,7 +166,7 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref, getCurrentInstance, watch, reactive } from 'vue';
+import { computed, defineComponent, ref, getCurrentInstance, watch } from 'vue';
 import {ResolvedNamespace} from '@/modules/dashboard/model/resolvedNamespace';
 import { TransactionFilterType, TransactionFilterTypes } from '@/modules/dashboard/model/transactions/transaction';
 import MixedTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/MixedTxnDataTable.vue';
@@ -156,8 +184,9 @@ import NamespaceTxnDataTable from '@/modules/dashboard/components/TransactionDat
 import RestrictionTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/RestrictionTxnDT.vue';
 import SecretTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/SecretTxnDT.vue';
 
-import AssetDataTable from '@/modules/dashboard/components/AssetDataTable.vue';
-import NamespaceDataTable from '@/modules/dashboard/components/NamespaceDataTable.vue';
+import DashboardAssetDataTable from '@/modules/dashboard/components/DashboardAssetDataTable.vue';
+import DashboardNamespaceDataTable from '@/modules/dashboard/components/DashboardNamespaceDataTable.vue';
+
 import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
 import AddressQRModal from '@/modules/dashboard/components/AddressQRModal.vue';
 import MessageModal from '@/modules/dashboard/components/MessageModal.vue';
@@ -181,6 +210,9 @@ import { WalletUtils } from '@/util/walletUtils';
 
 export default defineComponent({
   name: 'ViewDashboard',
+  props:{
+    type: String
+  },
   components: {
     SetAccountDefaultModal,
     MixedTxnDataTable,
@@ -197,11 +229,11 @@ export default defineComponent({
     NamespaceTxnDataTable,
     RestrictionTxnDataTable,
     SecretTxnDataTable,
-    AssetDataTable,
-    NamespaceDataTable,
+    DashboardAssetDataTable,
+    DashboardNamespaceDataTable,
   },
 
-  setup(){
+  setup(props){
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -228,6 +260,15 @@ export default defineComponent({
     const isInitialSender = ref(false);
     const cosignModalKey = ref(0);
     const decryptMessageKey = ref(0);
+
+    if(props.type == 'transaction'){
+      displayBoard.value = 'transaction';
+    }
+    watch(props, (n)=> {
+      if(n.type == 'transaction'){
+        displayBoard.value = 'transaction';
+      }
+    });
 
     const openMessageModal = (message)=>{
       messagePayload.value = message;
@@ -348,6 +389,12 @@ export default defineComponent({
     // const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty().substring(0, 13) + '....' + Helper.createAddress(selectedAccount.value.address).pretty().substring(Helper.createAddress(selectedAccount.value.address).pretty().length - 11));
     const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty());
     const selectedAccountAddressPlain = computed(()=> selectedAccount.value.address);
+    const selectedAccountAddressShort = computed(() => {
+      let prettyAddress = Helper.createAddress(selectedAccount.value.address).pretty();
+      let firstPartAddress = prettyAddress.substr(0, 11);
+      let secondPartAddress = prettyAddress.substr(-11);
+      return firstPartAddress + '...' + secondPartAddress;
+    });
     const selectedAccountDirectChilds = computed(()=> {
       let multisigInfo = selectedAccount.value.multisigInfo.find((x)=> x.level === 0);
 
@@ -923,6 +970,7 @@ export default defineComponent({
       currentNativeTokenName,
       selectedAccountAddress,
       selectedAccountAddressPlain,
+      selectedAccountAddressShort,
       updateSelectedAccount,
       isDefault,
       isMultisig,
