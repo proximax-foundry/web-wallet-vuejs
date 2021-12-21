@@ -8,6 +8,7 @@
     <div class="flex text-xs font-semibold border-b-2 menu_title_div">
       <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-18 text-center '>Details</router-link>
       <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Multisig</div>
+      <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
     </div>
     <div class='font-semibold mt-8'>Multisig Settings</div>
     <div class='mt-6 p-6 border filter shadow-lg'>
