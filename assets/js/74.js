@@ -1,5 +1,27 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([[74],{
 
+/***/ "./src/assets/img/chevron_left.svg":
+/*!*****************************************!*\
+  !*** ./src/assets/img/chevron_left.svg ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("module.exports = __webpack_require__.p + \"assets/img/chevron_left.120f1ae7.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/chevron_left.svg?");
+
+/***/ }),
+
+/***/ "./src/assets/img/chevron_right.svg":
+/*!******************************************!*\
+  !*** ./src/assets/img/chevron_right.svg ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("module.exports = __webpack_require__.p + \"assets/img/chevron_right.e5f72240.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/chevron_right.svg?");
+
+/***/ }),
+
 /***/ "./src/util/functions.ts":
 /*!*******************************!*\
   !*** ./src/util/functions.ts ***!

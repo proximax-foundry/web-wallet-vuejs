@@ -1,47 +1,62 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([[69],{
 
-/***/ "./node_modules/primevue/inlinemessage/inlinemessage.esm.js":
-/*!******************************************************************!*\
-  !*** ./node_modules/primevue/inlinemessage/inlinemessage.esm.js ***!
-  \******************************************************************/
+/***/ "./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader-v16/dist/index.js?!./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=script&lang=js":
+/*!*****************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader-v16/dist??ref--0-1!./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=script&lang=js ***!
+  \*****************************************************************************************************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ \"./node_modules/vue/dist/vue.runtime.esm-bundler.js\");\n\n\nvar script = {\n    name: 'InlineMessage',\n    props: {\n        severity: {\n            type: String,\n            default: 'error'\n        }\n    },\n    timeout: null,\n    data() {\n        return {\n            visible: true\n        }\n    },\n    mounted() {\n        if (!this.sticky) {\n            setTimeout(() => {\n                this.visible = false;\n            }, this.life);\n        }\n    },\n    computed: {\n        containerClass() {\n            return ['p-inline-message p-component p-inline-message-' + this.severity, {'p-inline-message-icon-only': !this.$slots.default}];\n        },\n        iconClass() {\n            return ['p-inline-message-icon pi', {\n                'pi-info-circle': this.severity === 'info',\n                'pi-check': this.severity === 'success',\n                'pi-exclamation-triangle': this.severity === 'warn',\n                'pi-times-circle': this.severity === 'error'\n            }];\n        }\n    }\n};\n\nconst _hoisted_1 = { class: \"p-inline-message-text\" };\nconst _hoisted_2 = /*#__PURE__*/Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createTextVNode\"])(\" \");\n\nfunction render(_ctx, _cache, $props, $setup, $data, $options) {\n  return (Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"openBlock\"])(), Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createBlock\"])(\"div\", {\n    \"aria-live\": \"polite\",\n    class: $options.containerClass\n  }, [\n    Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createVNode\"])(\"span\", { class: $options.iconClass }, null, 2),\n    Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createVNode\"])(\"span\", _hoisted_1, [\n      Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"renderSlot\"])(_ctx.$slots, \"default\", {}, () => [\n        _hoisted_2\n      ])\n    ])\n  ], 2))\n}\n\nfunction styleInject(css, ref) {\n  if ( ref === void 0 ) ref = {};\n  var insertAt = ref.insertAt;\n\n  if (!css || typeof document === 'undefined') { return; }\n\n  var head = document.head || document.getElementsByTagName('head')[0];\n  var style = document.createElement('style');\n  style.type = 'text/css';\n\n  if (insertAt === 'top') {\n    if (head.firstChild) {\n      head.insertBefore(style, head.firstChild);\n    } else {\n      head.appendChild(style);\n    }\n  } else {\n    head.appendChild(style);\n  }\n\n  if (style.styleSheet) {\n    style.styleSheet.cssText = css;\n  } else {\n    style.appendChild(document.createTextNode(css));\n  }\n}\n\nvar css_248z = \"\\n.p-inline-message {\\n    display: -webkit-inline-box;\\n    display: -ms-inline-flexbox;\\n    display: inline-flex;\\n    -webkit-box-align: center;\\n        -ms-flex-align: center;\\n            align-items: center;\\n    -webkit-box-pack: center;\\n        -ms-flex-pack: center;\\n            justify-content: center;\\n    vertical-align: top;\\n}\\n.p-inline-message-icon-only .p-inline-message-text {\\n    visibility: hidden;\\n    width: 0;\\n}\\n.p-fluid .p-inline-message {\\n    display: -webkit-box;\\n    display: -ms-flexbox;\\n    display: flex;\\n}\\n\";\nstyleInject(css_248z);\n\nscript.render = render;\n\n/* harmony default export */ __webpack_exports__[\"default\"] = (script);\n\n\n//# sourceURL=webpack:///./node_modules/primevue/inlinemessage/inlinemessage.esm.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n\n/* harmony default export */ __webpack_exports__[\"default\"] = ({\n  name: 'ViewServicesNotifications',\n\n  components: {\n  },\n\n  setup() {\n    return {\n    };\n  },\n});\n\n\n//# sourceURL=webpack:///./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader-v16/dist??ref--0-1");
 
 /***/ }),
 
-/***/ "./src/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg":
-/*!***************************************************************************************************!*\
-  !*** ./src/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg ***!
-  \***************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ "./node_modules/vue-loader-v16/dist/templateLoader.js?!./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader-v16/dist/index.js?!./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=template&id=51a780ea&scoped=true":
+/*!************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader-v16/dist/templateLoader.js??ref--6!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader-v16/dist??ref--0-1!./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=template&id=51a780ea&scoped=true ***!
+  \************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.73ce2a7d.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/arrow-transaction-receive-in-green-proximax-sirius-explorer.svg?");
-
-/***/ }),
-
-/***/ "./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg":
-/*!****************************************************************************************************!*\
-  !*** ./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg ***!
-  \****************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-eval("module.exports = __webpack_require__.p + \"assets/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.541d4c2b.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg?");
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"render\", function() { return render; });\n/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ \"./node_modules/vue/dist/vue.runtime.esm-bundler.js\");\n\nconst _withId = /*#__PURE__*/Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"withScopeId\"])(\"data-v-51a780ea\")\n\nObject(vue__WEBPACK_IMPORTED_MODULE_0__[\"pushScopeId\"])(\"data-v-51a780ea\")\nconst _hoisted_1 = { class: \"flex justify-between text-xs sm:text-sm\" }\nconst _hoisted_2 = { class: \"text-gray-400\" }\nconst _hoisted_3 = /*#__PURE__*/Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createTextVNode\"])()\nconst _hoisted_4 = { class: \"text-blue-primary font-bold\" }\nconst _hoisted_5 = /*#__PURE__*/Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createVNode\"])(\"div\", { class: \"mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80\" }, null, -1 /* HOISTED */)\nObject(vue__WEBPACK_IMPORTED_MODULE_0__[\"popScopeId\"])()\n\nconst render = /*#__PURE__*/_withId((_ctx, _cache, $props, $setup, $data, $options) => {\n  const _component_router_link = Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"resolveComponent\"])(\"router-link\")\n\n  return (Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"openBlock\"])(), Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createBlock\"])(vue__WEBPACK_IMPORTED_MODULE_0__[\"Fragment\"], null, [\n    Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createVNode\"])(\"div\", _hoisted_1, [\n      Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createVNode\"])(\"div\", null, [\n        Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createVNode\"])(\"span\", _hoisted_2, Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"toDisplayString\"])(_ctx.$t('services.notifications')) + \" >\", 1 /* TEXT */),\n        _hoisted_3,\n        Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createVNode\"])(\"span\", _hoisted_4, Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"toDisplayString\"])(_ctx.$t('accounts.viewall')), 1 /* TEXT */)\n      ]),\n      Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createVNode\"])(\"div\", null, [\n        Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createVNode\"])(_component_router_link, {\n          to: { name: 'ViewServices' },\n          class: \"font-bold\"\n        }, {\n          default: _withId(() => [\n            Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createTextVNode\"])(Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"toDisplayString\"])(_ctx.$t('services.allservices')), 1 /* TEXT */)\n          ]),\n          _: 1 /* STABLE */\n        })\n      ])\n    ]),\n    _hoisted_5\n  ], 64 /* STABLE_FRAGMENT */))\n})\n\n//# sourceURL=webpack:///./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?./node_modules/vue-loader-v16/dist/templateLoader.js??ref--6!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader-v16/dist??ref--0-1");
 
 /***/ }),
 
-/***/ "./src/modules/services/submodule/mainnetSwap/img/check-status.svg":
-/*!*************************************************************************!*\
-  !*** ./src/modules/services/submodule/mainnetSwap/img/check-status.svg ***!
-  \*************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ "./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue":
+/*!******************************************************************************************!*\
+  !*** ./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue ***!
+  \******************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/check-status.6f31b8ab.svg\";\n\n//# sourceURL=webpack:///./src/modules/services/submodule/mainnetSwap/img/check-status.svg?");
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _ViewServicesNotifications_vue_vue_type_template_id_51a780ea_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ViewServicesNotifications.vue?vue&type=template&id=51a780ea&scoped=true */ \"./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=template&id=51a780ea&scoped=true\");\n/* harmony import */ var _ViewServicesNotifications_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ViewServicesNotifications.vue?vue&type=script&lang=js */ \"./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=script&lang=js\");\n/* empty/unused harmony star reexport *//* harmony import */ var _home_runner_work_web_wallet_vuejs_web_wallet_vuejs_node_modules_vue_loader_v16_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader-v16/dist/exportHelper.js */ \"./node_modules/vue-loader-v16/dist/exportHelper.js\");\n/* harmony import */ var _home_runner_work_web_wallet_vuejs_web_wallet_vuejs_node_modules_vue_loader_v16_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_home_runner_work_web_wallet_vuejs_web_wallet_vuejs_node_modules_vue_loader_v16_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__);\n\n\n\n\n\nconst __exports__ = /*#__PURE__*/_home_runner_work_web_wallet_vuejs_web_wallet_vuejs_node_modules_vue_loader_v16_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2___default()(_ViewServicesNotifications_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"], [['render',_ViewServicesNotifications_vue_vue_type_template_id_51a780ea_scoped_true__WEBPACK_IMPORTED_MODULE_0__[\"render\"]],['__scopeId',\"data-v-51a780ea\"],['__file',\"src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue\"]])\n/* hot reload */\nif (false) {}\n\n\n/* harmony default export */ __webpack_exports__[\"default\"] = (__exports__);\n\n//# sourceURL=webpack:///./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?");
+
+/***/ }),
+
+/***/ "./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=script&lang=js":
+/*!******************************************************************************************************************!*\
+  !*** ./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=script&lang=js ***!
+  \******************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_v16_dist_index_js_ref_0_1_ViewServicesNotifications_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/cache-loader/dist/cjs.js??ref--0-0!../../../../../../node_modules/vue-loader-v16/dist??ref--0-1!./ViewServicesNotifications.vue?vue&type=script&lang=js */ \"./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader-v16/dist/index.js?!./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=script&lang=js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"default\", function() { return _node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_v16_dist_index_js_ref_0_1_ViewServicesNotifications_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"]; });\n\n/* empty/unused harmony star reexport */ \n\n//# sourceURL=webpack:///./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?");
+
+/***/ }),
+
+/***/ "./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=template&id=51a780ea&scoped=true":
+/*!************************************************************************************************************************************!*\
+  !*** ./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=template&id=51a780ea&scoped=true ***!
+  \************************************************************************************************************************************/
+/*! exports provided: render */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _node_modules_vue_loader_v16_dist_templateLoader_js_ref_6_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_v16_dist_index_js_ref_0_1_ViewServicesNotifications_vue_vue_type_template_id_51a780ea_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/vue-loader-v16/dist/templateLoader.js??ref--6!../../../../../../node_modules/cache-loader/dist/cjs.js??ref--0-0!../../../../../../node_modules/vue-loader-v16/dist??ref--0-1!./ViewServicesNotifications.vue?vue&type=template&id=51a780ea&scoped=true */ \"./node_modules/vue-loader-v16/dist/templateLoader.js?!./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader-v16/dist/index.js?!./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=template&id=51a780ea&scoped=true\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"render\", function() { return _node_modules_vue_loader_v16_dist_templateLoader_js_ref_6_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_v16_dist_index_js_ref_0_1_ViewServicesNotifications_vue_vue_type_template_id_51a780ea_scoped_true__WEBPACK_IMPORTED_MODULE_0__[\"render\"]; });\n\n\n\n//# sourceURL=webpack:///./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?");
 
 /***/ })
 
