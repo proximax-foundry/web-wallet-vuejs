@@ -2454,6 +2454,10 @@ export class DashboardService {
                         txn.namespaceName = nsNames[0].name;
                     }
 
+                    if(txn.namespaceName && txn.namespaceName === "prx.xpx"){
+                        txn.namespaceName = nativeTokenName.value;
+                    }
+
                     let assetInfo = await DashboardService.getAssetInfo(txn.assetId);
 
                     if(assetInfo.divisibility > 0){
@@ -2513,6 +2517,10 @@ export class DashboardService {
 
                         let nsNames = await DashboardService.getNamespacesName([namespaceId]);
                         txn.namespaceName = nsNames[0].name;
+                    }
+
+                    if(txn.namespaceName && txn.namespaceName === "prx.xpx"){
+                        txn.namespaceName = nativeTokenName.value;
                     }
 
                     let assetInfo = await DashboardService.getAssetInfo(txn.assetId);
@@ -2576,6 +2584,10 @@ export class DashboardService {
 
                         let nsNames = await DashboardService.getNamespacesName([namespaceId]);
                         txn.namespaceName = nsNames[0].name;
+                    }
+
+                    if(txn.namespaceName && txn.namespaceName === "prx.xpx"){
+                        txn.namespaceName = nativeTokenName.value;
                     }
 
                     let assetInfo = await DashboardService.getAssetInfo(txn.assetId);
