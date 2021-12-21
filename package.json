@@ -24,6 +24,7 @@
     "crypto-random-string": "^4.0.0",
     "ethers": "^5.4.1",
     "file-saver": "^2.0.5",
+    "fsevents": ">=1.0.0 <2.3.2",
     "jdenticon": "^3.1.1",
     "js-joda": "^1.11.0",
     "js-sha3": "^0.8.0",
