@@ -68,7 +68,11 @@
         "nodes": [
           { "protocol": "https", "domain": "bctestnetswap.xpxsirius.io", "port": 7890 }
         ]
-      }
+      },
+      "swapAllowedMosaics": [
+        { "namespaceId": "zarcade", "name": "xar", "divisibility": 4 },
+        { "namespaceId": "prx", "name": "xpx", "divisibility": 6 }
+      ]
     },
     "Sirius Testnet 2": {
       "version": "0.0.2",

@@ -1,13 +1,18 @@
+class balance{
+    xar: number;
+    xpx: number;
+}
+
 export class nis1Account{
 
     address: string;
     publicKey: string;
-    balance: number;
+    balance: balance;
 
-    constructor(address: string, publicKey: string, balance?: number){
+    constructor(address: string, publicKey: string, balance?: balance){
         this.address = address;
         this.publicKey = publicKey;
-        this.balance = balance ? balance : 0;
+        this.balance = balance;
     }
 
 }
