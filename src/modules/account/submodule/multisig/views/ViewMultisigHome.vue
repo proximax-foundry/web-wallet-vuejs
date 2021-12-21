@@ -4,10 +4,10 @@
     <img src='@/assets/img/chevron_left.svg'>
     <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
   </div>
-  <div class='w-9/12 ml-auto mr-auto '>
-    <div class = 'flex text-xs font-semibold border-b-2'>
+  <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
+    <div class="flex text-xs font-semibold border-b-2 menu_title_div">
       <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-18 text-center '>Details</router-link>
-      <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Multisig</div>
+      <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Multisig</div>
     </div>
     <div class='font-semibold mt-8'>Multisig Settings</div>
     <div class='mt-6 p-6 border filter shadow-lg'>
