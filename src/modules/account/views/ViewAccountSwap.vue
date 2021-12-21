@@ -10,8 +10,10 @@
         <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
         <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Swap</div>
       </div>
-      <div class='my-7 font-semibold'>Swap this account</div>
+      <div class='my-7 font-semibold'>NIS1 Swap</div>
       <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
+      <div class="text-xs">Enable NIS1 Swap with this account</div>
+      <SwapAccountModal />
     </div>
 </div>
 </template>
@@ -33,11 +35,12 @@ import jsPDF from 'jspdf';
 import qrcode from 'qrcode-generator';
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
+import SwapAccountModal from '@/modules/account/components/SwapAccountModal.vue'
 
 export default {
   name: "ViewAccountSwap",
   components: {
-
+    SwapAccountModal
   },
   props: {
     address: String,
