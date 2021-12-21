@@ -1,29 +1,31 @@
 <template>
   <div class="flex flex-col" @mouseover="hoverOverNavigation" @mouseout="hoverOutNavigation">
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10 font-txs text-gray-400">ACCOUNTS ({{ allAccountsCount }})</div>
+      <div class="my-3 px-10 lg:px-5 3xl:px-10 font-txs text-gray-400">ACCOUNTS ({{ allAccountsCount }})</div>
       <div>
-        <router-link :to="{ name: 'ViewAccountDetails', params: { address: item.address }}" v-for="(item) in accounts" :key="item.address" class="link_block flex items-center" @click="closeNavi"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center"><div class="text-center w-full"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div></div><span class="truncate overflow-hidden text-white">{{ item.name }}</span></router-link>
+        <router-link :to="{ name: 'ViewAccountDetails', params: { address: item.address }}" v-for="(item) in accounts" :key="item.address" class="link_block flex items-center" @click="closeNavi"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div><span class="truncate overflow-hidden text-white">{{ item.name }}</span></router-link>
       </div>
-      <router-link :to="{ name: 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" v-if="allAccountsCount > 5" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-4 w-4 inline-block mr-1 text-white">View all accounts</router-link>
+      <!-- <router-link :to="{ name: 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" v-if="allAccountsCount > 5" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-4 w-4 inline-block mr-1 text-white">View all accounts</router-link> -->
       <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="block font-bold link_block text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-add.svg" class="h-4 w-4 inline-block relative mr-1">Create New Account</router-link>
     </div>
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10 text-gray-400">Transactions</div>
-      <div class="flex justify-start pl-10 mt-5">
+      <div class="my-3 px-10 lg:px-5 3xl:px-10 text-gray-400">Transactions</div>
+      <div class="flex justify-start px-10 lg:px-5 3xl:px-10 mt-5">
         <router-link :to="{ name : 'ViewDashboard', params: {type: 'transaction' } }" class="relative mr-5"><div class="rounded-full h-8 w-8 flex items-center justify-center" style="background: #007CFF"><img src="@/assets/img/navi/icon-unconfirmed-transaction-white.svg" class="w-5 h-5"></div></router-link>
         <router-link :to="{ name : 'ViewTransactionStatus', params: {transactionType: 'unconfirmed' } }" class="relative mr-5"><div class="rounded-full h-8 w-8 flex items-center justify-center" style="background: #f3a91d"><img src="@/assets/img/navi/icon-unconfirmed-transaction-white.svg" class="w-5 h-5"></div><div class="absolute bg-gray-50 text-xxs rounded" style="padding: 1px 2px; top: -5px; right: -8px;">100</div></router-link>
         <router-link :to="{ name : 'ViewTransactionStatus', params: {transactionType: 'partial' } }" class="relative"><div class="rounded-full h-8 w-8 flex items-center justify-center" style="background: #f06623"><img src="@/assets/img/navi/icon-waiting-for-transaction-white.svg" class="w-5 h-5"></div><div class="absolute bg-gray-50 text-xxs rounded" style="padding: 1px 2px; top: -5px; right: -8px;">100</div></router-link>
       </div>
     </div>
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10 text-gray-400">CREATE</div>
+      <div class="my-3 px-10 lg:px-5 3xl:px-10 text-gray-400 uppercase">Quick Action</div>
+      <router-link :to="{ name : 'ViewTransferCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-transfer.svg" class="h-3 w-3 inline-block relative mr-2">Transfer</router-link>
       <router-link :to="{ name : 'ViewServicesNamespace'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">Namespace</router-link>
       <router-link :to="{ name : 'ViewServicesAssets'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">Asset</router-link>
-      <router-link :to="{ name : 'ViewServices'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-services.svg" class="h-3 w-3 inline-block relative mr-2">Other Services</router-link>
+      <router-link :to="{ name : 'ViewServicesMainnetSwap'}" class="link_block flex items-center text-white" @click="closeNavi" v-if="isDisplaySwap"><img src="@/assets/img/navi/icon-swap.svg" class="h-3 w-3 inline-block relative mr-2">Swap</router-link>
+      <!-- <router-link :to="{ name : 'ViewServices'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-services.svg" class="h-3 w-3 inline-block relative mr-2">Other Services</router-link> -->
     </div>
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10 text-gray-400">NAVIGATE</div>
+      <div class="my-3 px-10 lg:px-5 3xl:px-10 text-gray-400">NAVIGATE</div>
       <router-link :to="{ name : 'ViewWallets'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-wallets.svg" class="h-3 w-3 inline-block relative mr-2">Wallets</router-link>
       <router-link :to="{ name : 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-3 w-3 inline-block relative mr-2">Accounts</router-link>
       <router-link :to="{ name : 'ViewServicesAddressBook'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-address-book.svg" class="h-3 w-3 inline-block relative mr-2">Address Book</router-link>
@@ -40,6 +42,7 @@ import { computed, inject } from "vue";
 import { useRouter } from "vue-router";
 import { walletState } from '@/state/walletState';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
+import { networkState } from "@/state/networkState";
 import {useI18n} from 'vue-i18n';
 
 export default{
@@ -127,6 +130,10 @@ export default{
       }
     );
 
+    const isDisplaySwap = computed(() => {
+      return (networkState.chainNetworkName == 'Sirius Mainnet' || networkState.chainNetworkName == 'Sirius Testnet 1' || networkState.chainNetworkName == 'Sirius Testnet 2');
+    });
+
     const logout = () => {
       WalletStateUtils.doLogout();
       router.push({ name: "Home"});
@@ -156,13 +163,14 @@ export default{
       hoverOverNavigation,
       hoverOutNavigation,
       closeNavi,
+      isDisplaySwap,
     };
   }
 }
 </script>
 <style lang="scss" scoped>
 .link_block{
-  @apply px-10 hover:bg-navy-lighter py-2 transition-all duration-200;
+  @apply px-10 lg:px-5 3xl:px-10 hover:bg-navy-lighter py-2 transition-all duration-200;
 }
 
 .signout_block{
