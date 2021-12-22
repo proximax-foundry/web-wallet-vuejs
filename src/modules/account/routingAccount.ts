@@ -93,6 +93,15 @@ export const AccountRoutes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/swap-account/:address',
+    name: 'ViewAccountSwap',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccountSwap.vue'),
+    meta: {
+      title: "NIS1 Swap",
+    }
+  },
+  {
     path: '/delete-account/:name',
     name: 'ViewAccountDelete',
     props: true,
