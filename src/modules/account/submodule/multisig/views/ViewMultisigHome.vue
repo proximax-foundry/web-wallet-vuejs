@@ -53,6 +53,7 @@
           <span v-if="!isCosigner">"{{acc.name}}" is not a cosignatory of any accounts.</span>
         </div>
       </div>
+      <button class="blue-btn py-2 px-2 mt-3">View Scheme</button>
     </div>
   </div>
 </div>

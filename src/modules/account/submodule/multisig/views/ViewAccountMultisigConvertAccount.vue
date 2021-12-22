@@ -8,7 +8,6 @@
     <div class = 'flex text-xs font-semibold border-b-2'>
       <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-18 text-center '>Details</router-link>
       <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Multisig</div>
-      <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
     </div>
     <div class='font-semibold mt-8 mb-3'>Multisig Settings</div>
     <div class="border filter shadow-lg lg:grid lg:grid-cols-3" >
