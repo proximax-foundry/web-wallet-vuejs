@@ -96,8 +96,11 @@ export default {
             //   const Nis1 = WalletUtils.createNis1AccountWithPrivateKey(privKey.value);
             //   walletAccount.nis1Account = new nis1Account(Nis1.address, Nis1.publicKey);
             // }  
+            
             walletState.currentLoggedInWallet.accounts.push(walletAccount);
+            await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
             walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet),
+            
             router.push({ name: "ViewAccountDetails", params: {address: account.address.address, accountCreated: true }})
           }
         } 

@@ -26,6 +26,7 @@
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
         <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Details</div>
         <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
+        <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
         <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
       </div>
       <div class='my-7 font-semibold'>Account Details</div>

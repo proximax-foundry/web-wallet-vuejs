@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
+    <div class="lg:w-11/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
       <div class = 'flex text-xxs md:text-xs font-semibold border-b-2'>
         <router-link :to="{ name: 'ViewAccountDisplayAll'}" class= 'w-18 text-center '>Overview</router-link>
         <router-link :to="{ name: 'ViewNormalAccount'}" class=" w-28 text-center "  style="width:6.5rem">My Accounts</router-link>
