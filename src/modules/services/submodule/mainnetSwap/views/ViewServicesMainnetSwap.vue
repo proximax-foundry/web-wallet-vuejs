@@ -17,7 +17,6 @@
           <div class="w-full text-left z-20 bg-white" v-if="open['nis1']">
             <div class="bg-blue-100 border-blue-100 uppercase py-2 px-5 text-xxs">Select option</div>
             <div class="py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">NIS1 to Sirius Chain</div>
-            <div class="py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">Check Status</div>
           </div>
         </div>
         <br>
