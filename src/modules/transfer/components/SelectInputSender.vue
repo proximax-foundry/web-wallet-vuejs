@@ -9,9 +9,9 @@
         <div v-if='selectedAccount!=""' class='mt-1 text-tsm font-bold'>{{selectedAccount}}</div>
         <div v-else class='text-txs mt-1 font-bold '>SELECT ACCOUNT</div>
       </div>
-      <div v-if='!toggleSelection && selectedAccount==""' class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>Select</div>
+      <!-- <div v-if='!toggleSelection && selectedAccount==""' class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>Select</div> -->
       <div v-if='!toggleSelection && selectedAccount!=""'  class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>Change</div>
-      <img v-if='toggleSelection' @click='selectedAccount=""' src="@/assets/img/delete.svg" class='h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>
+      <!-- <img v-if='toggleSelection' @click='selectedAccount=""' src="@/assets/img/delete.svg" class='h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'> -->
     </div>
   </div>
   <div class='relative'>
@@ -31,7 +31,7 @@
 
 <script>
 import { walletState } from '@/state/walletState';
-import { computed, defineComponent, ref, getCurrentInstance } from 'vue';
+import { computed, defineComponent, ref, getCurrentInstance} from 'vue';
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 export default defineComponent({
@@ -74,6 +74,8 @@ setup(p){
       selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
       toggleSelection.value = !toggleSelection.value;
     };
+   
+  
     return {
       selectAccount,
       selectedAddress,

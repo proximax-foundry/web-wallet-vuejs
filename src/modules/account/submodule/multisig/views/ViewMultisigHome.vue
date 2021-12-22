@@ -8,6 +8,7 @@
     <div class = 'flex text-xs font-semibold border-b-2'>
       <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-18 text-center '>Details</router-link>
       <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Multisig</div>
+      <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
     </div>
     <div class='font-semibold mt-8'>Multisig Settings</div>
     <div class='mt-6 p-6 border filter shadow-lg'>
@@ -51,7 +52,6 @@
           <span v-if="!isCosigner">"{{acc.name}}" is not a cosignatory of any accounts.</span>
         </div>
       </div>
-      <button class="blue-btn py-2 px-2 mt-3">View Scheme</button>
     </div>
   </div>
 </div>

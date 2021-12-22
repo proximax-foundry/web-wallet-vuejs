@@ -10,18 +10,18 @@
         <div class="mt-4"/>
         <SelectInputSender  v-model="selectedAccAdd" :selectDefault="selectedAccAdd"/>
         <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4"> 
-            <div v-if="getWalletCosigner.length > 0">
+            <div v-if="getWalletCosigner.cosignerList.length > 0">
               <div class="text-tsm">
                 {{$t('transfer.cosigner')}}:
-                <span class="font-bold" v-if="getWalletCosigner.length == 1"> 
-                  {{ getWalletCosigner[0].name }} ({{$t('services.balance')}}:{{  getWalletCosigner[0].balance }} {{ currentNativeTokenName }})
-                    <span v-if="getWalletCosigner[0].balance <lockFundTotalFee.value" class="error">
+                <span class="font-bold" v-if="getWalletCosigner.cosignerList.length == 1"> 
+                  {{ getWalletCosigner.cosignerList[0].name }} ({{$t('services.balance')}}:{{  getWalletCosigner.cosignerList[0].balance }} {{ currentNativeTokenName }})
+                    <span v-if="getWalletCosigner.cosignerList[0].balance <lockFundTotalFee.value" class="error">
                       - {{$t('accounts.insufficientbalance')}}
                     </span>
                 </span>
                 <span class="font-bold" v-else>
                   <select class="" v-model="cosignAddress">
-                    <option v-for="(element, item) in  getWalletCosigner" :value="element.address" :key="item">
+                    <option v-for="(element, item) in  getWalletCosigner.cosignerList" :value="findAcc(element.publicKey).address" :key="item">
                       {{ element.name }} ({{$t('services.balance')}}: {{ element.balance }} {{ currentNativeTokenName }})
                     </option>
                   </select>
@@ -163,13 +163,6 @@ export default {
     PasswordInput,
     AddContactModal,
     ConfirmSendModal
-    /* TextInput,
-    PasswordInput,
-    MosaicInput,
-    SelectInputPlugin,
-    SupplyInput,
-    TransferTextareaInput,
-   */
   },
   setup() {
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
@@ -274,12 +267,11 @@ export default {
       walletState.currentLoggedInWallet.selectDefaultAccount().address
     );
 
-    
+    const findAcc = (publicKey)=>{
+      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
+    }
 
-    const getWalletCosigner = computed(() =>{
-      return multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
-    })
-    
+   
     
     /* const accounts = computed( () => {
       if(walletState.currentLoggedInWallet){
@@ -326,7 +318,17 @@ export default {
       
     });
 
-    
+     const getWalletCosigner = computed(() =>{
+      let cosigners= multiSign.getCosignerInWallet(accounts.value.find(acc=>acc.address==selectedAccAdd.value).publicKey)
+      let list =[]
+      
+      cosigners.cosignerList.forEach(publicKey=>{
+        list.push({publicKey:publicKey,name:findAcc(publicKey).name,balance:findAcc(publicKey).balance })
+      })
+      cosigners.cosignerList = list
+      console.log(cosigners)
+      return cosigners
+    })
     
     const isMultiSig = (address) => {
       const account = accounts.value.find(
@@ -347,8 +349,8 @@ export default {
         );
 
     if (isMultiSigBool.value) {
-      let cosigner = multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
-      cosignAddress.value = cosigner[0].address;
+      let cosigner = getWalletCosigner.value.cosignerList
+      cosignAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
       if (cosigner.length > 0) {
         if (cosigner[0].balance < lockFundTotalFee.value) {
           disableAllInput.value = true;
@@ -456,11 +458,11 @@ export default {
       let selectedCosign;
       if (isMultiSigBool.value) {
         
-        let selectedCosignList = getWalletCosigner.value;
+        let selectedCosignList = getWalletCosigner.value.cosignerList;
         if (selectedCosignList.length > 1) {
           selectedCosign = cosignAddress.value;
         } else {
-          selectedCosign = getWalletCosigner.value[0].address;
+          selectedCosign = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==selectedCosignList[0].publicKey).address
         }
       }
       let transferStatus = await createTransaction(
@@ -603,9 +605,9 @@ export default {
     isMultiSigBool.value = isMultiSig(n);
     if (isMultiSigBool.value) {
       
-        let cosigner = multiSign.fetchMultiSigCosigners(n)
+        let cosigner = getWalletCosigner.value.cosignerList
         if (cosigner.length > 0) {
-          cosignAddress.value = cosigner[0].address;
+          cosignAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey== cosigner[0].publicKey).address;
           if (cosigner[0].balance < lockFundTotalFee.value) {
             disableAllInput.value = true;
           } else {
@@ -623,9 +625,10 @@ export default {
 
   watch(cosignAddress, (n, o) => {
     if (n != o) {
-        let cosigners = multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
+        let cosigners = getWalletCosigner.value.cosignerList
+        console.log(n)
         if (
-        cosigners.find((element) => element.address == n).balance <
+        accounts.value.find((element) => element.address == n).balance <
         lockFundTotalFee.value
       ) {
         cosignerBalanceInsufficient.value = true;
@@ -695,7 +698,6 @@ export default {
 
   const checkEncryptable = (add) =>{
     // show and hide encrypted message option
-    console.log(recipientInput.value)
     if (add.match(addressPatternLong) || add.match(addressPatternShort)) {
         accountUtils.verifyPublicKey(recipientInput.value).then(verify =>
         encryptedMsgDisable.value = verify
@@ -772,6 +774,9 @@ export default {
     selectedMosaicAmount.value = [];
     mosaicSupplyDivisibility.value = [];
   });
+  
+    
+  
   // confirm modal
   emitter.on("CLOSE_CONFIRM_SEND_MODAL", (payload) => {
     toggleConfirm.value = payload;
@@ -787,6 +792,7 @@ export default {
   });
 
     return {
+      findAcc,
       totalFee,
       contacts,
       toggleContact,

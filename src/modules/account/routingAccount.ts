@@ -84,6 +84,15 @@ export const AccountRoutes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/view-multisig-scheme/:address',
+    name: 'ViewMultisigScheme',
+    props: true,
+    component: () => import('@/modules/account/views/ViewMultisigScheme.vue'),
+    meta: {
+      title: "Multisig Scheme",
+    }
+  },
+  {
     path: '/delete-account/:name',
     name: 'ViewAccountDelete',
     props: true,
