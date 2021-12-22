@@ -7,8 +7,9 @@
     <div class='w-9/12 ml-auto mr-auto '>
         <div class = 'flex text-xs font-semibold border-b-2'>
             <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-18 text-center '>Details</router-link>
-           <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
+            <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
             <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Scheme</div>
+            <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
         </div>
         <div class="font-semibold mt-7">Account Scheme</div>
     </div>
