@@ -1,6 +1,6 @@
 <template>
   <div>
-    <img src="@/modules/account/submodule/multisig/img/icon-flow-multisig-multilevel-button.svg" class="w-6 h-6 inline-block mr-6 cursor-pointer" @click="toggleModal = !toggleModal">
+    <!-- <img src="@/modules/account/submodule/multisig/img/icon-flow-multisig-multilevel-button.svg" class="w-6 h-6 inline-block mr-6 cursor-pointer" @click="toggleModal = !toggleModal">
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -9,9 +9,9 @@
         <div class="modal-popup-box">
           <div class="delete-position">
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>
-          </div>
+          </div>-->
           <div class="w-104 text-center pb-10">
-            <h1 class="default-title font-bold mt-10">{{$t('accounts.scheme')}}</h1>
+           <!--  <h1 class="default-title font-bold mt-10">{{$t('accounts.scheme')}}</h1>  -->
             <div class="tree overflow-auto ">
               <ul >
                 <li class="multiple-wrapper">
@@ -69,11 +69,11 @@
               </ul> -->
 
             </div>
-          </div>
-        </div>
+           </div>
+        <!--</div>
       </div>
     </transition>
-    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-90 bg-blue-primary z-10"></div>
+    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-90 bg-blue-primary z-10"></div> -->
   </div>
 </template>
 

@@ -53,7 +53,6 @@
           <span v-if="!isCosigner">"{{acc.name}}" is not a cosignatory of any accounts.</span>
         </div>
       </div>
-      <button class="blue-btn py-2 px-2 mt-3">View Scheme</button>
     </div>
   </div>
 </div>
@@ -100,7 +99,6 @@ export default {
         multisigAccounts.forEach(account=>multisigAccountsList.push({name: getAccountName(account.publicKey),address:  PublicAccount.createFromPublicKey(account.publicKey,networkType).address.pretty()}))
         return multisigAccountsList
       },{deep:true})
-
       let cosignerAccountsList = computed(()=>{
         let cosignerAccountsList= []
         let cosignerAccounts =  acc.multisigInfo.filter(info=>info.level== 1)
@@ -119,7 +117,6 @@ export default {
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-
       toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
     };
       
@@ -133,9 +130,7 @@ export default {
       }
     }
 }
-
 </script>
 
 <style>
-
 </style>
