@@ -7,7 +7,7 @@
       <div v-if="toggleModal" class="popup-outer-lang absolute flex z-50">
         <div class="modal-popup-box ">
           <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
-            <div class ='text-gray-700 text-center text-xs mt-2'>Please key in private key to confirm enable NIS1 for this account.</div>
+            <div class ='text-gray-700 text-center text-xs mt-2'>Please insert private key to enable NIS1 for this account.</div>
             <PasswordInput class = 'my-3' v-model= 'walletPasswd' :placeholder="'Password'"/>
             <div @click="enableNIS1Swap()"  class = 'rounded-md bg-blue-primary cursor-pointer text-xs text-white font-semibold py-2 text-center ml-auto mr-auto w-7/12'>Confirm</div>
             <div class= 'text-center cursor-pointer font-semibold text-xs mt-2' @click="toggleModal = !toggleModal; walletPasswd=''">Cancel</div>
@@ -21,6 +21,7 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import { walletState } from '@/state/walletState';
 import { networkState } from '@/state/networkState';
 import { WalletUtils } from '@/util/walletUtils';
+import { nis1SwapUtils } from '@/util/nis1SwapUtils';
 import { Account } from '@/models/account';
 import { ref} from "vue";
 import {useI18n} from 'vue-i18n'
@@ -29,25 +30,35 @@ export default {
     name: 'SwapAccountModal',
     components:{
         PasswordInput
-    }, 
-    props:{
-        account: Account
     },
-    setup(p){
+    emits:[
+      'enable-nis1-swap'
+    ],
+    props:{
+        address: String
+    },
+    setup(p, {emit}){
       const {t} = useI18n();
       const router = useRouter();
       let toggleModal = ref(false)
       let walletPasswd = ref('')
       let err = ref('')
       const enableNIS1Swap = () => {
-      const accountIndex = walletState.currentLoggedInWallet.accounts.findIndex((element) => element.name == p.account.name);
+      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == p.address);
+      if(!account){
+        account = walletState.currentLoggedInWallet.others.find((account) => account.address == p.address);
+      }
+
       if(WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPasswd.value)){
-        if(accountIndex > -1){
-            walletState.currentLoggedInWallet.removeAccount(p.account.name);
+        if(account){
+            let nis1 = nis1SwapUtils.createNIS1Account(walletPasswd.value, account);
+            account.nis1Account = nis1;
             walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
-            router.push({ name: 'ViewAccountDisplayAll', params: {deleteAccount: 'success' } });
+            // router.push({ name: 'ViewAccountDisplayAll', params: {deleteAccount: 'success' } });
+            toggleModal.value = !toggleModal.value;
+            emit('enable-nis1-swap', p.address);
         }else{
-            err.value = t('scriptvalues.removeaccount');
+            err.value = 'Unable to enable NIS1 swap for this account';
         }
       }else{
           err.value = "Wallet password is incorrect";
