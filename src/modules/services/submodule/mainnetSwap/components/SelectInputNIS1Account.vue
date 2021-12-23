@@ -36,114 +36,70 @@
 import { networkState } from '@/state/networkState';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { walletState } from '@/state/walletState';
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent, onBeforeMount, ref } from 'vue';
 import { toSvg } from "jdenticon";
 import { Helper } from "@/util/typeHelper";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
+import { nis1SwapUtils } from '@/util/nis1SwapUtils';
 
 export default defineComponent({
   emits:[
     'select-account','update:modelValue',
   ],
-  name: 'SelectInputAccountOutgoingSwap',
+  name: 'SelectInputNIS1Account',
   props: [
     'modelValue',
     'selectDefault',
     'placeholder',
   ],
 
-  setup(p){
+  async setup(p){
+    const toggleSelection = ref(false);
 
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-
-    const toggleSelection = ref(false);
 
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
     let jdenticonConfig = themeConfig.jdenticonConfig;
 
-    const includeMultisig = ref(false);
+    // onBeforeMount( () => {
+    console.log('Get nis1 acc info ');
 
-    // const allAvailableAccounts = computed(()=>{
-
-    //   if(!walletState.currentLoggedInWallet){
-    //     return [];
-    //   }
-
-    //   let accounts = walletState.currentLoggedInWallet.accounts.map(
-    //     (acc)=>{ 
-    //       return { 
-    //         name: acc.name,
-    //         balance: acc.balance,
-    //         balanceDisplay: Helper.toCurrencyFormat(acc.balance, 6),
-    //         type: "",
-    //         address: Helper.createAddress(acc.address).pretty(),
-    //         publicKey: acc.publicKey,
-    //         isMultisig: acc.getDirectParentMultisig().length ? true: false
-    //       };  
-    //     });
-
-    //   if(includeMultisig.value){
-    //     let otherAccounts = walletState.currentLoggedInWallet.others.filter((acc)=> acc.type === "MULTISIG").map(
-    //     (acc)=>{ 
-    //       return { 
-    //         name: acc.name,
-    //         balance: acc.balance,
-    //         balanceDisplay: Helper.toCurrencyFormat(acc.balance, 6),
-    //         type: "MULTISIG",
-    //         address: Helper.createAddress(acc.address).pretty(),
-    //         publicKey: acc.publicKey,
-    //         isMultisig: true
-    //       }; 
-    //     });
-
-    //     return accounts.concat(otherAccounts);
-    //   }
-    //   else{
-    //     return accounts;
-    //   }
+    // get nis1 account info
+    var accountList = [];
+    const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others);
+    const nis1Accounts = concatOther.filter(account => account.nis1Account != undefined || account.nis1Account != null);
+    if(nis1Accounts.length > 0){
+      nis1Accounts.forEach(account => {
+        nis1SwapUtils.getNIS1AccountInfo(account.publicKey);
+      });
+    }
     // });
 
     const accounts = computed(() =>{
-      var accountList = [];
-      let accounts;
-      if(includeMultisig.value){
-        accounts = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
-      }else{
-        accounts = walletState.currentLoggedInWallet.accounts;
-      }
-
-      accounts.forEach(account => {
-        accountList.push({
-          value: account.address,
-          label: account.name,
+      
+      // console.log(concatOther)
+      // console.log(nis1Accounts)
+      if(nis1Accounts.length > 0){
+        nis1Accounts.forEach(account => {
+          accountList.push({
+            value: account.address,
+            label: account.name,
+          });
         });
-      });
-      // accountList.sort((a, b) => {
-      //   if (a.label > b.label) return 1;
-      //   if (a.label < b.label) return -1;
-      //   return 0;
-      // });
+      }
       return accountList;
     });
 
-    // const selectedAccount = ref(accounts.value.find(acc => acc.value == p.selectDefault).label);
+    // console.log(accounts.value);
+
     const selectedAccount = ref('');
     const selectedAddress = ref('');
     const selectedAccountBalance = ref(0);
-    // const selectedAddress = ref(p.selectDefault);
-    // const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonConfig));
     const selectedImg = ref('');
     const selectAccount = (accountName, accountAddress) => {
       selectedAccount.value = accountName;
       selectedAddress.value = accountAddress;
-      let accounts;
-      if(includeMultisig.value){
-        accounts = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
-      }else{
-        accounts = walletState.currentLoggedInWallet.accounts;
-      }
-      selectedAccountBalance.value = accounts.find(account => account.address == accountAddress).balance;
       selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
       toggleSelection.value = !toggleSelection.value;
     };
@@ -154,17 +110,16 @@ export default defineComponent({
     });
 
     return {
-      currentNativeTokenName,
       selectAccount,
       selectedAddress,
-      selectedAccountBalance,
-      selectedAccountBalanceFormatted,
       selectedImg,
       accounts,
       toggleSelection,
       selectedAccount,
       jdenticonConfig,
-      toSvg
+      toSvg,
+      selectedAccountBalanceFormatted,
+      currentNativeTokenName,
     };
   }
 })

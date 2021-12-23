@@ -1,3 +1,4 @@
+import { timeout, first } from 'rxjs/operators';
 import jsPDF from 'jspdf';
 import qrcode from 'qrcode-generator';
 // import { Account, Address, AggregateTransaction, SignedTransaction } from "tsjs-xpx-chain-sdk";
@@ -38,14 +39,63 @@ export class nis1SwapUtils {
   static createNIS1Account = (walletPassword: string, accountDetails: WalletAccount): nis1Account => {
     let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv)
     let nis1Wallet = Account.createWithPrivateKey(privateKey);
-    const nis1Address = nis1Wallet.address.plain();
+  const nis1Address = nis1Wallet.address.plain();
     return {
       address: nis1Address,
       publicKey: nis1Wallet.publicKey,
-      balance: {
-        xpx: 0,
-        xar: 0
-      }
+      balance: []
     };
+  }
+
+  static fetchNis1Properties = async() => {
+    try {
+      return await fetch('./applicationConfig.json', {
+        headers: {
+          'Cache-Control': 'no-store',
+          'Pragma' : 'no-cache'
+        }
+      }).then((res) => res.json()).then((configInfo) => { return configInfo });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  
+
+  // create Address for nis1
+  static createAddressToString(address: string): Address {
+    return new Address(address);
+  }
+
+  // create Public Account for nis1
+  static createPublicAccount(publicKey: string): PublicAccount {
+    return PublicAccount.createWithPublicKey(publicKey);
+  }
+
+  // get nis1 account info
+  static async getAccountInfo(address: Address) {
+    const appSetting = await nis1SwapUtils.fetchNis1Properties();
+    try {
+      return await fetch(`${appSetting.nis1.url}/account/get?address=${address.plain()}`, {
+        headers: {
+          'Cache-Control': 'no-store',
+          'Pragma' : 'no-cache',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET',
+          'Access-Control-Allow-Credentials': 'true',
+        }
+      }).then((res) => res.json()).then((accountInfo) => { return accountInfo });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  static getNIS1AccountInfo = async (publicKey: string) => {
+    const appSetting = await nis1SwapUtils.fetchNis1Properties();
+    // console.log(appSetting);
+    const nis1PublicAccount = nis1SwapUtils.createPublicAccount(publicKey);
+    const nis1AddressToSwap = nis1SwapUtils.createAddressToString(nis1PublicAccount.address.pretty());
+    // console.log(nis1AddressToSwap);
+    const accountInfoOwnedSwap = await nis1SwapUtils.getAccountInfo(nis1AddressToSwap);
+    console.log(accountInfoOwnedSwap);
   }
 }

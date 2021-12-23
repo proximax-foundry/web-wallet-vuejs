@@ -21,17 +21,7 @@
         </div>
         <div v-if="currentPage==1">
           <div class="text-lg my-7 font-bold">Transaction Details</div>
-          <div class="mb-2 flex justify-between bg-gray-100 rounded-2xl p-3 text-left">
-            <div class="text-tsm ml-3 text-gray-700">
-              <div><b>{{$t('swap.accountname')}}:</b> [[accountName]]</div>
-              <div><b>{{$t('swap.nis1address')}}:</b> [[account address]]</div>
-              <div><b>{{$t('swap.nis1balance')}}:</b> <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline ml-1"> [[balance]] {{ currentNativeTokenName }}</div>
-            </div>
-            <div class="self-center">
-              <button @click="currentPage=1" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none">{{$t('swap.change')}}</button>
-            </div>
-          </div>
-          <div class="text-lg my-7 font-bold">{{$t('swap.swapamount')}}</div>
+          <SelectInputNIS1Account v-model="siriusAddressToSwap" placeholder="To Sirius Chain Account" />
           <SwapInput v-model="amount" placeholder="Amount" type="text" icon="coins" :showError="showAmountErr" errorMessage="Insufficient balance" :disabled="disableAmount" @clickedMaxAvailable="updateAmountToMax" :remarkOption="false" />
           <!-- <SwapInputClean class="mt-5" :disabled="disableAmount" v-model="amount" :balance="selectedAccountBalance" :placeholder="currentNativeTokenName + ' Amount'" type="text" :showError="showAmountErr" :errorMessage="(selectedAccountBalance >= minBalanceAmount)?'Insufficient balance':'Balance is insufficient to cover transaction fee.'" emptyErrorMessage="Amount is empty" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" toolTip="XPX amount to swap to ERC20" /> -->
           <!-- <div class="text-left">
@@ -87,6 +77,7 @@ import { computed, ref } from "vue";
 import PasswordInputClean from '@/components/PasswordInputClean.vue';
 import SwapInput from '@/modules/services/submodule/mainnetSwap/components/SwapInput.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
+import SelectInputNIS1Account from '@/modules/services/submodule/mainnetSwap/components/SelectInputNIS1Account.vue';
 import { networkState } from '@/state/networkState';
 // import SwapInputClean from '@/modules/services/submodule/mainnetSwap/components/SwapInputClean.vue';
 // import SelectInputAccount from '@/components/SelectInputAccount.vue';
@@ -99,6 +90,7 @@ export default {
     SwapInput,
     // SwapInputClean,
     SwapCertificateComponent,
+    SelectInputNIS1Account,
     // SelectInputAccount,
   },
 
@@ -113,6 +105,9 @@ export default {
     const isDisabledSwap = computed(() => 
       !(amount.value > 0 && walletPasswd.value.match(passwdPattern) )
     );
+
+    const siriusAddressToSwap = ref('');
+
     const amount = ref(0);
     const selectAccount = () => {
       currentPage.value = 2;
@@ -142,6 +137,7 @@ export default {
       swap,
       savedCheck,
       currentNativeTokenName,
+      siriusAddressToSwap,
     };
   },
 }

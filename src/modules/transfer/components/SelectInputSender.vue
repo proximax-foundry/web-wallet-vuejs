@@ -4,7 +4,7 @@
     <div class='flex'>
       <div v-html="toSvg('account', 25, jdenticonConfig)" v-if='!selectedImg'></div>
       <div v-html="selectedImg" v-else></div>
-      <div class='flex flex-col ml-2'>
+      <div class='flex flex-col ml-2 text-left'>
         <div class='text-blue-primary font-semibold text-xxs'  style="line-height: 9px;">TRANSFER FROM</div>
         <div v-if='selectedAccount!=""' class='mt-1 text-tsm font-bold'>{{selectedAccount}}</div>
         <div v-else class='text-txs mt-1 font-bold '>SELECT ACCOUNT</div>
