@@ -8,6 +8,8 @@
     <div class = 'flex text-xs font-semibold border-b-2'>
       <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-18 text-center '>Details</router-link>
       <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Multisig</div>
+      <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
+      <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
     </div>
     <div class='font-semibold mt-8 mb-3'>Multisig Settings</div>
     <div class="border filter shadow-lg lg:grid lg:grid-cols-3" >
@@ -36,7 +38,7 @@
             <div class="flex">
               <img  src="@/modules/account/submodule/multisig/img/icon-delete-red.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
               <TextInput class='w-5/12 mr-2 ' placeholder="Name"  v-model="contactName[index]" :disabled="true"  />
-              <TextInput class='w-7/12 mr-2 ' placeholder="Address/Public Key" errorMessage="Invalid Input" :showError="showAddressError[index]" v-model="coSign[index]" />
+              <TextInput class='w-7/12 mr-2 ' placeholder="Address/Public Key" errorMessage="Invalid Input" :showError="showAddressError[index]"  v-model="coSign[index]" />
               <!-- <div v-if="showAddressError[index]==true " class=""/> -->
               <div @click="toggleContact[index]=!toggleContact[index]" class=' border  cursor-pointer flex flex-col justify-center  p-2' style="height:2.66rem">
                 <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
@@ -178,7 +180,6 @@
                 </div>
                 <font-awesome-icon v-if="(!checkRemoval(cosigner))" icon="trash-alt" class="w-4 h-4 self-center" :class="`${(onPartial || fundStatus || !isCoSigner)?'text-gray-200 cursor-auto':'text-gray-400 hover:text-gray-600 cursor-pointer'}`" @click="addToRemovalList(cosigner)"></font-awesome-icon>
                 <a v-else class="self-center text-gray-400 hover:text-gray-600" @click="restoreFromRemovalList(cosigner)"><font-awesome-icon icon="trash-restore" class="inline-block w-4 h-4"></font-awesome-icon> <span class="text-xs">{{$t('accounts.restore')}}</span></a>
-
               </div>
             </div> -->
          
@@ -229,6 +230,7 @@ import { networkState } from '@/state/networkState';
 import {useI18n} from 'vue-i18n'
 import { WalletAccount } from '@/models/walletAccount';
 import { Helper } from '@/util/typeHelper';
+import { accountUtils } from '@/util/accountUtils';
 export default {
   name: 'ViewMultisigEditAccount',
   components: {
@@ -254,8 +256,6 @@ export default {
     const passwd = ref('');
     const showPasswdError = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
-    const numApproveTransaction = ref(1);
-    const numDeleteUser = ref(1);
     const publicKeyPattern = "^[0-9A-Fa-f]{64}$";
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
@@ -271,7 +271,6 @@ export default {
     const selectOtherCosign = ref([]);
     const contactName = ref([])
    
-
     // current wallet
     const wallet = walletState.currentLoggedInWallet;
     // get account details initialization
@@ -294,6 +293,8 @@ export default {
           })
           return cosignaturies     
   })
+    const numApproveTransaction = ref(acc.value.multisigInfo.find(acc=>acc.level==0).minApproval);
+    const numDeleteUser = ref(acc.value.multisigInfo.find(acc=>acc.level==0).minRemoval);
     const cosignerName = computed(()=>{
       let name = []
       cosignaturies.value.forEach(publicKey=>{
@@ -307,69 +308,23 @@ export default {
       })
       return name
     },{deep:true})
-
-
     const getWalletCosigner = () => {
-      return multiSign.fetchMultiSigCosigners(acc.value.address)
+      return multiSign.getCosignerInWallet(acc.value.publicKey)
     }
+    
     const otherAccount = wallet.accounts.find(element=>element.name ===p.name)? wallet.accounts : wallet.others
     if(acc.value == undefined){
       router.push({ name: "ViewAccountDisplayAll"});
     }
     const isMultisig =computed(()=> multiSign.checkIsMultiSig(acc.value.address))
-    const selectCosign = computed(() => {
-      const list = getWalletCosigner();
-      console.log(list)
-      const cosigner = [];
-      if(list.length > 0){
-        list.forEach((element) => {
-          const accountDetails = walletState.currentLoggedInWallet.accounts.find( account => account.address ===element.address);
-          if(accountDetails.balance > 10.0445){
-            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX' });
-          }else{
-            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX -' + t('accounts.insufficientbalance'), disabled: true });
-          }
-        });
-      }
-      return cosigner;
-    });
-    const selectOtherCosignerOptions = computed(() => {
-      const list = getWalletCosigner();
-      const cosigner = [];
-      if(list.length > 0){
-        let filtered_list = list.filter(element => element.address != selectMainCosign.value);
-        filtered_list.forEach((element) => {
-          const accountDetails = walletState.currentLoggedInWallet.accounts.find( account => account.address ===element.address);
-          if(accountDetails.balance > 10.0445){
-            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX' });
-          }else{
-            cosigner.push({ value: element.address, label: element.name + ' - ' + accountDetails.balance + ' XPX -' + t('accounts.insufficientbalance'), disabled: true });
-          }
-        });
-      }
-      return cosigner;
-    });
-
     const disableSend = computed(() => !(
       isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) &&  err.value == ''|| err.value== t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name}) && (showAddressError.value.indexOf(true) == -1) && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
     ));
-
     const disabledPassword = computed(() => !(!onPartial.value && isMultisig.value && !fundStatus.value && isCoSigner.value));
-
     const isCoSigner = computed(() => {
-      const currentAccount = acc.value;
-      let isCoSig = false;
-       for (var i = 0 ; i<currentAccount.getDirectParentMultisig().length;i++){
-         let verifyIsCosig = walletState.currentLoggedInWallet.accounts.find (acc=> acc.publicKey === currentAccount.getDirectParentMultisig()[i])
-          if (verifyIsCosig === undefined){
-              isCoSig = false
-          }else{
-            isCoSig = true
-            break
-          }
-       }
+      
        
-      return isCoSig;
+      return getWalletCosigner().hasCosigner;
     })
     const addCoSigButton = computed(() => {
           var status = false;
@@ -390,6 +345,7 @@ export default {
         });
     const clear = () => {
       coSign.value = [];
+      contactName.value=[];
       removeCosign.value = [];
       selectedAddresses.value = [];
       showAddressError.value = [];
@@ -400,29 +356,14 @@ export default {
       selectOtherCosign.value = [];
       err.value = '';
     };
-
     const modifyAccount = async() => {
       let signer = [];
-      cosigners.value.forEach((cosigner)=>{
-        signer.push({address: cosigner.address })
+      cosigners.value.cosignerList.forEach((publicKey)=>{
+        signer.push({address: walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey).address})
       })
       console.log(signer)
-      /* if(cosigners.value.length == 1){
-       
-        signer.push({address: cosigners.value[0].address });
-      }else{
-       
-        signer.push({address: selectMainCosign.value })
-       
-        if(selectOtherCosign.value.length > 0){
-          selectOtherCosign.value.forEach((cosignerAddress) => {
-            signer.push({address: cosignerAddress });
-          });
-        }
-      } */
-
       let modifyStatus = await multiSign.modifyMultisigAccount(coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value, signer, acc.value, passwd.value);
-      // console.log(modifyStatus);
+       console.log(modifyStatus);
       if(!modifyStatus){
         err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
       }else{
@@ -433,12 +374,6 @@ export default {
         clear();
       }
     };
-
-    watch(selectMainCosign, (n) => {
-      selectOtherCosign.value.splice(selectOtherCosign.value.indexOf(n), 1);
-      console.log(n)
-    });
-
     watch(() => [...coSign.value], (n) => {
       for(var i = 0; i < coSign.value.length; i++){
         if((coSign.value[i].length == 64) || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)){
@@ -450,7 +385,6 @@ export default {
             showAddressError.value[i] = true;
           }else{
             showAddressError.value[i] = false;
-
             const unique = Array.from(new Set(n));
             if(unique.length != n.length){
               err.value = t('scriptvalues.cosignerexists');
@@ -463,12 +397,10 @@ export default {
         }
       }
     }, {deep:true});
-
    
     const contact = computed(() => {
       return multiSign.generateContact(acc.value.address,acc.value.name)
     });
-
     const accountBalance = computed(() => {
        let accountBalance = 0
        if (acc.value == undefined){
@@ -495,19 +427,16 @@ export default {
         return {left:split[0], right:null}
       }
     })
-
     const addCoSig = () => {
       coSign.value.push('');
       showAddressError.value.push(false);
     };
-
     const deleteCoSigAddressInput = (i) => {
       coSign.value.splice(i, 1);
       contactName.value.splice(i, 1)
       showAddressError.value.splice(i, 1);
       selectedAddresses.value.splice(i, 1);
     }
-
     // add cosigner to remove list
     const addToRemovalList = (publicKey) => {
       if(!onPartial.value && !fundStatus.value && isCoSigner.value){
@@ -516,7 +445,6 @@ export default {
         console.log('Add to removal list: ' + publicKey);
       }
     };
-
     const checkRemoval = (publicKey) => {
       let verifyRemoval = false;
       if(removeCosign.value.length > 0){
@@ -528,24 +456,19 @@ export default {
       }
       return verifyRemoval;
     };
-
     const restoreFromRemovalList = (publicKey) => {
       const index = removeCosign.value.indexOf(publicKey);
       if (index > -1) {
         removeCosign.value.splice(index, 1);
       }
     }
-
     
-
     const maxNumApproveTransaction = computed( () => {
-      return getCosigns();
+      return getCosigns() - removeCosign.value.length + coSign.value.length;
     });
-
     const maxNumDeleteUser = computed( () => {
-      return getCosigns();
+      return getCosigns() - removeCosign.value.length + coSign.value.length;
     });
-
     function getCosigns(){
       const account = acc.value;
       if (account != undefined){
@@ -555,30 +478,36 @@ export default {
       }
      
     }
-
     /* numApproveTransaction.value =  acc.multisigInfo.find(acc=> acc.level === 0).minApproval;
     numDeleteUser.value = acc.multisigInfo.find(acc => acc.level === 0).minRemoval; */
-
     // refecth min number for both scheme if there is changes in max num for both approval and deletion
-    watch(maxNumApproveTransaction, () => {
-      if(walletState.currentLoggedInWallet){
-        const account = acc.value;
-        if(getCosigns()){
-          numApproveTransaction.value = account.multisigInfo.find(acc => acc.level === 0).minApproval;
-          numDeleteUser.value = account.multisigInfo.find(acc => acc.level === 0).minRemoval;
+    watch(maxNumApproveTransaction, (n,o) => {
+      if(n<o){
+        if(numApproveTransaction.value>n){
+          numApproveTransaction.value = maxNumApproveTransaction.value
+        }
+        if(numDeleteUser.value>n){
+          numDeleteUser.value = maxNumDeleteUser.value
         }
       }
     });
-
+     watch(maxNumDeleteUser, (n,o) => {
+      if(n<o){
+        if(numApproveTransaction.value>n){
+          numApproveTransaction.value = maxNumApproveTransaction.value
+        }
+        if(numDeleteUser.value>n){
+          numDeleteUser.value = maxNumDeleteUser.value
+        }
+      }
+    });
     const validateApproval = (e) => {
       if((numApproveTransaction.value * 10*(~~(maxNumApproveTransaction.value/10)) + e.charCode - 48) > maxNumApproveTransaction.value){
         e.preventDefault();
       }
     }
-
     let deleteUserErrorMsg = 'Number of cosignatories for Delete users is more than number of cosignatories for this account';
     let approveTransactionErrMsg = 'Number of cosignatories for Approve transaction is more than number of cosignatories for this account';
-
     watch(numApproveTransaction, (n) => {
       if(maxNumApproveTransaction.value == 0 && n > 1){
         err.value = approveTransactionErrMsg;
@@ -595,13 +524,11 @@ export default {
         }
       }
     });
-
     const validateDelete = (e) => {
       if((numDeleteUser.value * 10*(~~(maxNumDeleteUser.value/10)) + e.charCode - 48) > maxNumDeleteUser.value){
         e.preventDefault();
       }
     }
-
     watch(numDeleteUser, (n) => {
       if(maxNumDeleteUser.value == 0 && n > 1){
         err.value = deleteUserErrorMsg;
@@ -618,13 +545,11 @@ export default {
         }
       }
     });
-
     // get cosigners in this wallet for this multisig;
     const cosigners = computed(() => {
       let cosigner = getWalletCosigner();
       return cosigner;
     });
-
     setTimeout(()=> {
       if(accountBalance.value < 10.0445){
         fundStatus.value = true;
@@ -632,7 +557,6 @@ export default {
         fundStatus.value = false;
       }
     }, 500);
-
     watch(accountBalance, (n) => {
       if(n < 10.0445){
         fundStatus.value = true;
@@ -640,7 +564,6 @@ export default {
         fundStatus.value = false;
       }
     });
-
     // check if onPartial
     try {
        multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,networkState.currentNetworkProfile.network.type)).then(onPartialBoolean => onPartial.value = onPartialBoolean)
@@ -692,10 +615,6 @@ export default {
       checkRemoval,
       getWalletCosigner,
       cosignAddress,
-      selectCosign,
-      selectMainCosign,
-      selectOtherCosignerOptions,
-      selectOtherCosign,
       validateApproval,
       validateDelete,
       cosignaturies,
@@ -717,7 +636,6 @@ export default {
    -o-transition-timing-function: ease-in-out;
    transition-timing-function: ease-in-out;
 }
-
 .slide-leave-active {
    -moz-transition-duration: 1s;
    -webkit-transition-duration: 1s;
@@ -728,32 +646,26 @@ export default {
    -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
    transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
 }
-
 .slide-enter-to, .slide-leave-from {
    max-height: 1000px;
    overflow: hidden;
 }
-
 .slide-enter-from, .slide-leave-to {
    overflow: hidden;
    max-height: 0;
 }
-
 select{
   min-width: 150px;
   padding: 5px;
 }
-
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-
 /* Firefox */
 input[type=number] {
   -moz-appearance: textfield;
 }
-
 </style>

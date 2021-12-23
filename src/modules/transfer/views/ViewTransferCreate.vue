@@ -10,18 +10,18 @@
         <div class="mt-4"/>
         <SelectInputSender  v-model="selectedAccAdd" :selectDefault="selectedAccAdd"/>
         <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4"> 
-            <div v-if="getWalletCosigner.length > 0">
+            <div v-if="getWalletCosigner.cosignerList.length > 0">
               <div class="text-tsm">
                 {{$t('transfer.cosigner')}}:
-                <span class="font-bold" v-if="getWalletCosigner.length == 1"> 
-                  {{ getWalletCosigner[0].name }} ({{$t('services.balance')}}:{{  getWalletCosigner[0].balance }} {{ currentNativeTokenName }})
-                    <span v-if="getWalletCosigner[0].balance <lockFundTotalFee.value" class="error">
+                <span class="font-bold" v-if="getWalletCosigner.cosignerList.length == 1"> 
+                  {{ getWalletCosigner.cosignerList[0].name }} ({{$t('services.balance')}}:{{  getWalletCosigner.cosignerList[0].balance }} {{ currentNativeTokenName }})
+                    <span v-if="getWalletCosigner.cosignerList[0].balance <lockFundTotalFee.value" class="error">
                       - {{$t('accounts.insufficientbalance')}}
                     </span>
                 </span>
                 <span class="font-bold" v-else>
                   <select class="" v-model="cosignAddress">
-                    <option v-for="(element, item) in  getWalletCosigner" :value="element.address" :key="item">
+                    <option v-for="(element, item) in  getWalletCosigner.cosignerList" :value="findAcc(element.publicKey).address" :key="item">
                       {{ element.name }} ({{$t('services.balance')}}: {{ element.balance }} {{ currentNativeTokenName }})
                     </option>
                   </select>
@@ -163,13 +163,6 @@ export default {
     PasswordInput,
     AddContactModal,
     ConfirmSendModal
-    /* TextInput,
-    PasswordInput,
-    MosaicInput,
-    SelectInputPlugin,
-    SupplyInput,
-    TransferTextareaInput,
-   */
   },
   setup() {
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
@@ -213,7 +206,6 @@ export default {
     const namespace = ref('');
     const networkType = networkState.currentNetworkProfile.network.type;
     const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
-
     const walletName = walletState.currentLoggedInWallet.name
     const currencyName = computed(
       () => networkState.currentNetworkProfile.network.currency.name
@@ -235,15 +227,12 @@ export default {
     const lockFundTotalFee = computed(
       () => lockFund.value + lockFundTxFee.value
     );
-
    
     const messageLimit = computed(
       () => networkState.currentNetworkProfileConfig.maxMessageSize - 1
     );
-
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
-
     const addMsg = ref("");
     const remainingChar = ref(0);
     const showAddressError = ref(true);
@@ -251,35 +240,27 @@ export default {
       let addErrDefault = t('transfer.invalidrecipient');
       return addMsg.value ? addMsg.value : addErrDefault;
     });
-
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
     const disableCreate = computed(() => {
-
       return !(
         walletPassword.value.match(passwdPattern) &&
         !showAddressError.value &&
         recipientInput.value.length > 0
       );
     });
-
     
-
   
     const selectedAccName = ref(
       walletState.currentLoggedInWallet.selectDefaultAccount().name
     );
-
     const selectedAccAdd = ref(
       walletState.currentLoggedInWallet.selectDefaultAccount().address
     );
-
-    
-
-    const getWalletCosigner = computed(() =>{
-      return multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
-    })
-    
+    const findAcc = (publicKey)=>{
+      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
+    }
+   
     
     /* const accounts = computed( () => {
       if(walletState.currentLoggedInWallet){
@@ -295,7 +276,6 @@ export default {
     }); */
     
     const accounts = computed(()=>{
-
       if(!walletState.currentLoggedInWallet){
         return [];
       }
@@ -321,12 +301,20 @@ export default {
             isMultisig: true
           }; 
         });
-
         return accounts.concat(otherAccounts);
       
     });
-
-    
+     const getWalletCosigner = computed(() =>{
+      let cosigners= multiSign.getCosignerInWallet(accounts.value.find(acc=>acc.address==selectedAccAdd.value).publicKey)
+      let list =[]
+      
+      cosigners.cosignerList.forEach(publicKey=>{
+        list.push({publicKey:publicKey,name:findAcc(publicKey).name,balance:findAcc(publicKey).balance })
+      })
+      cosigners.cosignerList = list
+      console.log(cosigners)
+      return cosigners
+    })
     
     const isMultiSig = (address) => {
       const account = accounts.value.find(
@@ -337,7 +325,6 @@ export default {
       if (account != undefined) {
         isMulti = account.isMultisig;
       }
-
       return isMulti;
     };
     const isMultiSigBool = ref(
@@ -345,10 +332,9 @@ export default {
             selectedAccAdd.value
           )
         );
-
     if (isMultiSigBool.value) {
-      let cosigner = multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
-      cosignAddress.value = cosigner[0].address;
+      let cosigner = getWalletCosigner.value.cosignerList
+      cosignAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
       if (cosigner.length > 0) {
         if (cosigner[0].balance < lockFundTotalFee.value) {
           disableAllInput.value = true;
@@ -394,11 +380,9 @@ export default {
     if (balance.value < lockFundTotalFee.value) {
       showBalanceErr.value = true;
     }
-
     const moreThanOneAccount = computed(() => {
       return accounts.value.length> 1;
     });
-
  
     const contact = computed(() => {
       if(!walletState.currentLoggedInWallet){
@@ -438,12 +422,10 @@ export default {
       mosaicSupplyDivisibility.value = [];
       showContactSelection.value = false;
     };
-
     const clearMsg = () => {
       messageText.value = "";
       emitter.emit("CLEAR_TEXTAREA", 0);
     };
-
   
   const updateAdd = (e) => {
     recipientInput.value = e;
@@ -456,11 +438,11 @@ export default {
       let selectedCosign;
       if (isMultiSigBool.value) {
         
-        let selectedCosignList = getWalletCosigner.value;
+        let selectedCosignList = getWalletCosigner.value.cosignerList;
         if (selectedCosignList.length > 1) {
           selectedCosign = cosignAddress.value;
         } else {
-          selectedCosign = getWalletCosigner.value[0].address;
+          selectedCosign = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==selectedCosignList[0].publicKey).address
         }
       }
       let transferStatus = await createTransaction(
@@ -491,7 +473,6 @@ export default {
       }
     }
   };
-
   const getSelectedMosaicBalance = (index) => {
     const account = walletState.currentLoggedInWallet.accounts.find(
       (account) => account.address === selectedAccAdd.value) ||
@@ -507,7 +488,6 @@ export default {
       return 0;
     }
   };
-
   const addMosaicsButton = computed(() => {
     if (!disableSupply.value) {
       let account;
@@ -533,13 +513,11 @@ export default {
         }
       }
       
-
       return true;
     } else {
       return true;
     }
   });
-
   const totalFee = computed(()=>{
     if(!isMultiSig(selectedAccAdd.value)){
       return Number(sendXPX.value) + Number(effectiveFee.value)
@@ -549,7 +527,6 @@ export default {
       return 0
     }
   })
-
   
   const mosaics = computed(() => {
     var mosaicOption = [];
@@ -573,12 +550,10 @@ export default {
     }
     return mosaicOption;
   });
-
   const displayMosaicsOption = () => {
     mosaicsCreated.value.push(0);
     selectedMosaic.value.push({ id: 0, amount: "0" });
   };
-
   // update mosaic
   const updateMosaic = (e) => {
     // get mosaic info and format divisibility in supply input
@@ -590,7 +565,6 @@ export default {
     mosaicSupplyDivisibility.value[e.index] = mosaic.divisibility;
     emitter.emit("CLOSE_MOSAIC_INSUFFICIENT_ERR", false);
   };
-
   const removeMosaic = (e) => {
     mosaicsCreated.value.splice(e.index, 1);
     selectedMosaic.value.splice(e.index, 1);
@@ -603,9 +577,9 @@ export default {
     isMultiSigBool.value = isMultiSig(n);
     if (isMultiSigBool.value) {
       
-        let cosigner = multiSign.fetchMultiSigCosigners(n)
+        let cosigner = getWalletCosigner.value.cosignerList
         if (cosigner.length > 0) {
-          cosignAddress.value = cosigner[0].address;
+          cosignAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey== cosigner[0].publicKey).address;
           if (cosigner[0].balance < lockFundTotalFee.value) {
             disableAllInput.value = true;
           } else {
@@ -620,12 +594,12 @@ export default {
     }   
   })
   
-
   watch(cosignAddress, (n, o) => {
     if (n != o) {
-        let cosigners = multiSign.fetchMultiSigCosigners(selectedAccAdd.value)
+        let cosigners = getWalletCosigner.value.cosignerList
+        console.log(n)
         if (
-        cosigners.find((element) => element.address == n).balance <
+        accounts.value.find((element) => element.address == n).balance <
         lockFundTotalFee.value
       ) {
         cosignerBalanceInsufficient.value = true;
@@ -635,7 +609,6 @@ export default {
       
     }
   });
-
   watch(balance, (n) => {
     if (n == 0) { 
       showBalanceErr.value = true;
@@ -653,16 +626,12 @@ export default {
     }
   })
   const checkRecipient = () =>{
-
     if(!walletState.currentLoggedInWallet){
         return;
     }
-
     try {
       let recipientAddress = Helper.createAddress(recipientInput.value);
-
       let networkOk = Helper.checkAddressNetwork(recipientAddress, networkType);
-
       if(!networkOk){
         showAddressError.value = true;
         addMsg.value = "Wrong network address";
@@ -671,11 +640,9 @@ export default {
         checkEncryptable(recipientInput.value);
         showAddressError.value = false;
       }
-
     } catch (error) {
       try{
         let namespaceId = Helper.createNamespaceId(recipientInput.value);
-
         checkNamespace(namespaceId).then((address)=>{
           recipientInput.value = address.plain();
           showAddressError.value = false;
@@ -692,10 +659,8 @@ export default {
       }
     }
   }
-
   const checkEncryptable = (add) =>{
     // show and hide encrypted message option
-    console.log(recipientInput.value)
     if (add.match(addressPatternLong) || add.match(addressPatternShort)) {
         accountUtils.verifyPublicKey(recipientInput.value).then(verify =>
         encryptedMsgDisable.value = verify
@@ -704,17 +669,14 @@ export default {
       encryptedMsgDisable.value = true;
     }
   }
-
   const checkNamespace = async (nsId)=>{
     return await NamespaceUtils.getLinkedAddress(nsId, chainAPIEndpoint.value);
   }
-
   watch(selectedAccName, (n, o) => {
     if (n != o) {
       recipientInput.value = "";
     }
   });
-
   watch(sendXPX, (n, o) => {
     if (n != o) {
       effectiveFee.value = makeTransaction.calculate_fee(
@@ -724,7 +686,7 @@ export default {
       );
     }
   });
-
+  
   watch(messageText, (n, o) => {
     if (n != o) {
       effectiveFee.value = makeTransaction.calculate_fee(
@@ -746,7 +708,6 @@ export default {
       encryptedMsg.value = "";
     }
   });
-
   watch(encryptedMsg, (n) => {
     if (n) {
       if (messageText.value) {
@@ -756,7 +717,6 @@ export default {
       remainingChar.value = TransactionUtils.getPlainMessageSize(messageText.value);
     }
   });
-
   emitter.on("CLOSE_CONTACT_MODAL", (payload) => {
     togglaAddContact.value = payload;
     clearInput();
@@ -772,11 +732,13 @@ export default {
     selectedMosaicAmount.value = [];
     mosaicSupplyDivisibility.value = [];
   });
+  
+    
+  
   // confirm modal
   emitter.on("CLOSE_CONFIRM_SEND_MODAL", (payload) => {
     toggleConfirm.value = payload;
   });
-
   emitter.on("CONFIRM_PROCEED_SEND", (payload) => {
   
     if (payload) {
@@ -785,8 +747,8 @@ export default {
       makeTransfer();
     }
   });
-
     return {
+      findAcc,
       totalFee,
       contacts,
       toggleContact,
@@ -870,7 +832,6 @@ export default {
   -o-transition-timing-function: ease-in-out;
   transition-timing-function: ease-in-out;
 }
-
 .slide-leave-active {
   -moz-transition-duration: 1s;
   -webkit-transition-duration: 1s;
@@ -881,19 +842,16 @@ export default {
   -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
   transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
 }
-
 .slide-enter-to,
 .slide-leave-from {
   max-height: 1000px;
   overflow: hidden;
 }
-
 .slide-enter-from,
 .slide-leave-to {
   overflow: hidden;
   max-height: 0;
 }
-
 .optionDiv:hover {
   background: #d9ebff;
 }
