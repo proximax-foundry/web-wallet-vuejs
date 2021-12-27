@@ -164,7 +164,7 @@
           <div class="text-center align-text-bottom inset-x-0 bottom-0 absolute">
             <div style="width:300px; margin:0 auto;">
             <PasswordInput :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5" :disabled="disablePassword"/></div>
-            <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="makeTransfer()">
+            <button type="button" class="default-btn py-1 disabled:opacity-50" :disabled="disableCreate" @click="sendAggregate()">
             Send aggregate
            </button>
           </div>
@@ -172,6 +172,7 @@
   </div>
 </div>
 </template>
+
 <script>
 import { Helper } from "@/util/typeHelper";
 import { computed, ref, getCurrentInstance, watch } from "vue";
@@ -194,6 +195,17 @@ import { networkState } from "@/state/networkState";
 import { accountUtils } from "@/util/accountUtils";
 import { TransactionUtils } from "@/util/transactionUtils";
 import { WalletUtils } from "@/util/walletUtils";
+import {Deadline, DefaultMaxFee, InnerTransactions, NetworkType} from "tsjs-xpx-chain-sdk";
+import {AggregateTransaction} from "tsjs-xpx-chain-sdk";
+import {TransferTransaction} from "tsjs-xpx-chain-sdk";
+import {PlainMessage} from "tsjs-xpx-chain-sdk";
+import {Address} from "tsjs-xpx-chain-sdk";
+import {Account, PublicAccount} from "tsjs-xpx-chain-sdk";
+import {TransactionHttp, Mosaic, MosaicId, UInt64} from "tsjs-xpx-chain-sdk";
+import { NetworkStateUtils } from "@/state/utils/networkStateUtils";
+import { ChainUtils } from '@/util/chainUtils';
+import { BuildTransactions } from '@/util/buildTransactions';
+
 
 export default { 
   name: "ViewTransferCreate",
@@ -247,6 +259,7 @@ export default {
     var numTransactions = 0;
     const savedTransactions = [];
     
+
 
     const walletName = walletState.currentLoggedInWallet.name
     const currencyName = computed(
@@ -475,10 +488,6 @@ export default {
       recipient.value = e;
     };
     const makeTransfer = () => {
-        if (savedTransactions.length == 0) {
-          toggleConfirm.value = true;
-        } 
-        else {
           // console.log(recipient.value.toUpperCase() + ' : ' + walletPassword.value + ' : ' + selectedAccName.value + ' : ' + encryptedMsg.value + ' : ' + walletPassword.value)
           let selectedCosign;
           if (isMultiSigBool.value) {
@@ -523,11 +532,47 @@ export default {
             // getMosaicsAllAccounts(appStore, siriusStore);
             // play notification sound
             forceSend.value = false;
-            savedTransactions.splice(index,n);
-            sessionStorage.setItem('savedTransactions', JSON.stringify(savedTransactions));
           }
-        }
+          while (numTransactions > 0){
+             removeEditButton();
+             numTransactions--;
+          }
+          sessionStorage.clear();
     };
+
+
+    const sendAggregate = () => {
+      let aggregateTransaction = AggregateTransaction.createComplete(
+        Deadline.create(),
+        savedTransactions,
+        NetworkType.TEST_NET,
+        []
+      )
+
+      let transactionBuilder = new BuildTransactions(NetworkType)
+      
+      if (ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE || ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE_TEST) {
+        transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
+        //FeeCalculationStrategy.ZeroFeeCalculationStrategy
+      }
+      
+      let accountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.name === selectedAccName.value);
+      let privateKey = WalletUtils.decryptPrivateKey(walletPassword, accountDetails.encrypted, accountDetails.iv);
+      const senderAcc = Account.createFromPrivateKey(privateKey, NetworkType.TEST_NET);
+      const transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
+      const generationHash = networkState.currentNetworkProfile.generationHash;
+      const signedTransaction = senderAcc.sign(aggregateTransaction, generationHash);
+
+      transactionHttp
+        .announce(signedTransaction)
+        .subscribe(x => console.log(x), err => console.error(err));
+
+      while (numTransactions > 0){
+             removeEditButton();
+             numTransactions--;
+      }
+    };
+
 
     const getSelectedMosaicBalance = (index) => {
       const account = walletState.currentLoggedInWallet.accounts.find(
@@ -628,58 +673,74 @@ export default {
     };
 
     const saveTransaction = () => {
+      let senderAccountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.name === selectedAccName.value).publicKey;
+      let senderPublicAccount = PublicAccount.createFromPublicKey(senderAccountDetails, NetworkType.TEST_NET);
+
+      let xpxAmount = parseFloat(sendXPX) * Math.pow(10, 6);
+
+      let mosaics = [];
+      if (xpxAmount > 0) {
+        mosaics.push(new Mosaic(new MosaicId(networkState.currentNetworkProfile.network.currency.assetId), UInt64.fromUint(Number(xpxAmount))));
+      }
+      if (selectedMosaic.value.length > 0) {
+        selectedMosaic.value.forEach((mosaicSentInfo, index) => {
+          if (mosaicSentInfo.amount > 0) {
+            mosaics.push(
+              new Mosaic(
+                new MosaicId(mosaicSentInfo.id),
+                UInt64.fromUint(Number(mosaicSentInfo.amount * Math.pow(10, mosaicSupplyDivisibility[index])))
+              )
+            );
+          }
+        });
+      }
+
       if (sendXPX.value == 0) {
         toggleConfirm.value = true;
 
-        var transactionDetails = new Object;
-        transactionDetails.recipient = recipient.value;
-        transactionDetails.sendXPX = 0;
-        transactionDetails.messageText = messageText.value;
-        transactionDetails.selectedMosaic = selectedMosaic.value;
-        transactionDetails.selectedAccname = selectedAccName.value;
+        const recipientTransferTransaction = TransferTransaction.create(Deadline.create(), Address.createFromRawAddress(recipient.value), mosaics, PlainMessage.create(messageText.value), NetworkType.TEST_NET).toAggregate(senderPublicAccount); 
 
-        savedTransactions.push(transactionDetails);
-        sessionStorage.setItem('savedTransactions', JSON.stringify(savedTransactions));
-        numTransactions += 1;
+        savedTransactions.push(recipientTransferTransaction)
         console.log(savedTransactions);
-
+        numTransactions += 1;
         clearInput();
       }
       else{
-        var transactionDetails = new Object;
-        transactionDetails.recipient = recipient.value;
-        transactionDetails.sendXPX = sendXPX.value;
-        transactionDetails.messageText = messageText.value;
-        transactionDetails.selectedMosaic = selectedMosaic.value;
-        transactionDetails.selectedAccname = selectedAccName.value;
+        const recipientTransferTransaction = TransferTransaction.create(Deadline.create(), Address.createFromRawAddress(recipient.value), mosaics, PlainMessage.create(messageText.value), NetworkType.TEST_NET).toAggregate(senderPublicAccount);
 
-        savedTransactions.push(transactionDetails);
-        sessionStorage.setItem('savedTransactions', JSON.stringify(savedTransactions));
-        numTransactions += 1;
+        savedTransactions.push(recipientTransferTransaction)
         console.log(savedTransactions);
+        numTransactions += 1;
 
         clearInput();
         createEditButton();
       }
-    }
+    };
 
     const createEditButton = () =>{
-        var btn = document.createElement("button");
-        //<button type="button" id="delete" style="float:right"><img src="@/modules/wallet/img/icon-trash-can-gray-16h-proximax-sirius-wallet.svg" class="w-6 cursor-pointer"></button> 
-        var transNum = "Transaction " + numTransactions;
-        btn.style.width = "97%";
-        btn.style.flex = "auto";
-        btn.style.margin = "5px";
-        btn.style.border = "2px solid royalblue";
-        btn.style.borderRadius = "8px";
-        btn.style.color = "black";
-        btn.style.textAlign = "left";
-        btn.style.padding = "17px";
-        btn.style.paddingLeft = "10px";
-        btn.innerHTML = transNum;
+      var btn = document.createElement("button");
+      //<button type="button" id="delete" style="float:right"><img src="@/modules/wallet/img/icon-trash-can-gray-16h-proximax-sirius-wallet.svg" class="w-6 cursor-pointer"></button> 
+      var transNum = "Transaction " + numTransactions;
+      btn.id = "editBtn";
+      btn.style.width = "97%";
+      btn.style.flex = "auto";
+      btn.style.margin = "5px";
+      btn.style.border = "2px solid royalblue";
+      btn.style.borderRadius = "8px";
+      btn.style.color = "black";
+      btn.style.textAlign = "left";
+      btn.style.padding = "17px";
+      btn.style.paddingLeft = "10px";
+      btn.innerHTML = transNum;
 
-        document.getElementById("transac").appendChild(btn);
-    }
+      document.getElementById("transac").appendChild(btn);
+    };
+
+    const removeEditButton = () => {
+      var elem = document.getElementById('editBtn');
+        elem.parentNode.removeChild(elem);
+        return false;
+    };
 
     watch(selectedAccAdd, (n, o) => {
       isMultiSigBool.value = isMultiSig(n);
@@ -880,7 +941,10 @@ export default {
       lockFundTxFee,
       lockFundTotalFee,
       walletName,
+      numTransactions,
       saveTransaction,
+      removeEditButton,
+      sendAggregate
     };
   },
 };
