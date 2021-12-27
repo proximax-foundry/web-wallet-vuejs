@@ -571,6 +571,9 @@ export default {
              removeEditButton();
              numTransactions--;
       }
+
+      clearInput();
+      
     };
 
 
