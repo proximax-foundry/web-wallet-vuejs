@@ -8,7 +8,7 @@
     },
     "timeOutTransactionNis1": 20000,
     "nis1": {
-        "url": "https://bctestnetswap.xpxsirius.io:7890",
+        "url": "http://bctestnetswap.xpxsirius.io:7890",
         "urlExplorer": "http://testnet-explorer.nemtool.com/#/s_tx?hash=",
         "networkType": 152,
         "burnAddress": "TBF4LAZUEJMBIOC6J24D6ZGGXE5W775TX555CTTN",

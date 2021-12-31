@@ -36,6 +36,9 @@ import { WalletAccount } from "@/models/WalletAccount";
 NEMLibrary.bootstrap(NetworkTypes.TEST_NET);
 
 export class nis1SwapUtils {
+
+  accountHttp: AccountHttp;
+
   static createNIS1Account = (walletPassword: string, accountDetails: WalletAccount): nis1Account => {
     let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv)
     let nis1Wallet = Account.createWithPrivateKey(privateKey);
@@ -46,6 +49,10 @@ export class nis1SwapUtils {
       balance: []
     };
   }
+
+  // getAccountInfo(address: Address): Promise<AccountInfo>{
+  //   return this.accountHttp.getAccountInfo(address).toPromise();
+  // }
 
   static fetchNis1Properties = async() => {
     try {
@@ -75,16 +82,25 @@ export class nis1SwapUtils {
   static async getAccountInfo(address: Address) {
     const appSetting = await nis1SwapUtils.fetchNis1Properties();
     try {
-      return await fetch(`${appSetting.nis1.url}/account/get?address=${address.plain()}`, {
-        headers: {
-          'Cache-Control': 'no-store',
-          'Pragma' : 'no-cache',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET',
-          'Access-Control-Allow-Credentials': 'true',
-        }
-      }).then((res) => res.json()).then((accountInfo) => { return accountInfo });
+      // return await fetch(`${appSetting.nis1.url}/account/get?address=${address.plain()}`, {
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'Cache-Control': 'no-store',
+      //     'Access-Control-Allow-Origin': '*',
+      //     'Access-Control-Allow-Methods': 'GET, FETCH, PUT, UPDATE',
+      //     'Access-Control-Allow-Credentials': 'true',
+      //   }
+      // }).then((res) => res.json()).then((accountInfo) => { return accountInfo });
+      let headers = {}
+      fetch(`${appSetting.nis1.url}/account/get?address=${address.plain()}`, {
+        method: 'GET',
+        mode: 'cors',
+        headers: headers,
+      })
+        .then( response => response.json() )
+        .then( data => console.log(data) )
     } catch (e) {
+      console.log(e);
       console.error(e);
     }
   }
