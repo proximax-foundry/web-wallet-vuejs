@@ -92,13 +92,13 @@ export class nis1SwapUtils {
       //   }
       // }).then((res) => res.json()).then((accountInfo) => { return accountInfo });
       let headers = {}
-      fetch(`${appSetting.nis1.url}/account/get?address=${address.plain()}`, {
+      let nis1Acc = await fetch(`${appSetting.nis1.url}/account/get?address=${address.plain()}`, {
         method: 'GET',
         mode: 'cors',
         headers: headers,
       })
-        .then( response => response.json() )
-        .then( data => console.log(data) )
+        .then( response => {return response.json(); })
+        .then( data => { return data; })
     } catch (e) {
       console.log(e);
       console.error(e);
