@@ -1,4 +1,5 @@
-import { timeout, first } from 'rxjs/operators';
+import { first, timeout } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import jsPDF from 'jspdf';
 import qrcode from 'qrcode-generator';
 // import { Account, Address, AggregateTransaction, SignedTransaction } from "tsjs-xpx-chain-sdk";
@@ -82,16 +83,8 @@ export class nis1SwapUtils {
   static async getAccountInfo(address: Address) {
     const appSetting = await nis1SwapUtils.fetchNis1Properties();
     try {
-      // return await fetch(`${appSetting.nis1.url}/account/get?address=${address.plain()}`, {
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Cache-Control': 'no-store',
-      //     'Access-Control-Allow-Origin': '*',
-      //     'Access-Control-Allow-Methods': 'GET, FETCH, PUT, UPDATE',
-      //     'Access-Control-Allow-Credentials': 'true',
-      //   }
-      // }).then((res) => res.json()).then((accountInfo) => { return accountInfo });
       let headers = {}
+      console.log(`${appSetting.nis1.url}/account/get?address=${address.plain()}`)
       let nis1Acc = await fetch(`${appSetting.nis1.url}/account/get?address=${address.plain()}`, {
         method: 'GET',
         mode: 'cors',
@@ -99,10 +92,37 @@ export class nis1SwapUtils {
       })
         .then( response => {return response.json(); })
         .then( data => { return data; })
+      // if(nis1Acc.meta.cosignatories.length > 0){
+      //   // info account multisig
+      //   if(nis1Acc.meta.cosignatoryOf.length > 0){
+      //     nis1Acc.meta.cosignatoryOf.forEach(account => {
+      //       try {
+      //         const nis1Address = new Address(account.address);
+      //         const ownedMosaic = await nis1SwapUtils.getOwnedMosaics(nis1Address);
+      //       } catch (error) {
+              
+      //       }
+      //     });
+      //   }
+      // }
+      // const ownedMosaic = nis1SwapUtils.getOwnedMosaics(address);
+      return nis1Acc;
     } catch (e) {
       console.log(e);
       console.error(e);
     }
+  }
+
+  static getOwnedMosaics(address: Address, nodes: ServerConfig[]): Observable<AssetTransferable[]> {
+  // static getOwnedMosaics(address: Address) {
+    const assetHttp = new AssetHttp(nodes);
+    const accountHttp = new AccountHttp(nodes);
+    // const nodes: ServerConfig[] = [];
+    const accountOwnedMosaics = new AccountOwnedAssetService(accountHttp, assetHttp);
+    console.log(accountOwnedMosaics)
+    return accountOwnedMosaics.fromAddress(address);
+    // accountOwnedMosaics.filter()
+    // return accountOwnedMosaics.fromAddress(address);
   }
 
   static getNIS1AccountInfo = async (publicKey: string) => {
@@ -112,6 +132,11 @@ export class nis1SwapUtils {
     const nis1AddressToSwap = nis1SwapUtils.createAddressToString(nis1PublicAccount.address.pretty());
     // console.log(nis1AddressToSwap);
     const accountInfoOwnedSwap = await nis1SwapUtils.getAccountInfo(nis1AddressToSwap);
-    console.log(accountInfoOwnedSwap);
+    // console.log(accountInfoOwnedSwap);
+    const ownedMosaic = await nis1SwapUtils.getOwnedMosaics(nis1AddressToSwap, appSetting.nis1.nodes).pipe(first()).pipe((timeout(appSetting.timeOutTransactionNis1))).toPromise();
+    // const xpxFound = ownedMosaic.find(el => el.assetId.namespaceId === 'prx' && el.assetId.name === 'xpx');
+    console.log(ownedMosaic);
+    const mosaicsFound = ownedMosaic.filter(e => appSetting.swapAllowedMosaics.find(d => d.namespaceId === e.assetId.namespaceId && d.name === e.assetId.name));
+    console.log(mosaicsFound);
   }
 }
