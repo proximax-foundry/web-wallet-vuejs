@@ -334,8 +334,8 @@ export default {
         );
     if (isMultiSigBool.value) {
       let cosigner = getWalletCosigner.value.cosignerList
-      cosignAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
       if (cosigner.length > 0) {
+        cosignAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
         if (cosigner[0].balance < lockFundTotalFee.value) {
           disableAllInput.value = true;
           cosignerBalanceInsufficient.value = true;
