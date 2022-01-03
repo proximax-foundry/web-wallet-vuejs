@@ -35,6 +35,17 @@ eval("module.exports = __webpack_require__.p + \"assets/img/chevron_left.120f1ae
 
 /***/ }),
 
+/***/ "./src/assets/img/icon-info.svg":
+/*!**************************************!*\
+  !*** ./src/assets/img/icon-info.svg ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("module.exports = __webpack_require__.p + \"assets/img/icon-info.c16cc71f.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/icon-info.svg?");
+
+/***/ }),
+
 /***/ "./src/components/PasswordInput.vue":
 /*!******************************************!*\
   !*** ./src/components/PasswordInput.vue ***!
@@ -79,17 +90,6 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _nod
 /***/ (function(module, exports, __webpack_require__) {
 
 eval("module.exports = __webpack_require__.p + \"assets/img/proximax-logo.cb656acf.svg\";\n\n//# sourceURL=webpack:///./src/modules/account/img/proximax-logo.svg?");
-
-/***/ }),
-
-/***/ "./src/modules/services/submodule/assets/img/icon-asset.svg":
-/*!******************************************************************!*\
-  !*** ./src/modules/services/submodule/assets/img/icon-asset.svg ***!
-  \******************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-eval("module.exports = __webpack_require__.p + \"assets/img/icon-asset.40e1e8d4.svg\";\n\n//# sourceURL=webpack:///./src/modules/services/submodule/assets/img/icon-asset.svg?");
 
 /***/ })
 
