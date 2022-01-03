@@ -1,5 +1,6 @@
 <template>
-  <div class="container mx-auto md:grid md:grid-cols-2 md:mt-10 lg:px-20 xl:px-40 ">
+<div>
+  <div class="container mx-auto md:grid md:grid-cols-2 md:mt-10 lg:px-20 xl:px-40 gap-4">
     <IntroTextComponent />
     <div class="md:col-span-1 bg-white mx-5 md:mx-0 px-30 pt-1 md:pt-0 rounded-md">
         <router-link :to="{ name: 'ViewWalletCreateSelection' }" class="text-xs m-2 text-blue-link items-center flex"><img src="@/assets/img/chevron_left.svg" class="w-5 inline-block">Back</router-link>
@@ -16,6 +17,7 @@
         <div class = 'h-28'></div>
     </div>
   </div>
+</div>
 </template>
 
 <script>

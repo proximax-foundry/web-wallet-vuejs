@@ -1,5 +1,6 @@
 <template>
-  <div class="container mx-auto md:grid md:grid-cols-2 md:mt-10 lg:px-20 xl:px-40 ">
+<div>
+  <div class="container mx-auto md:grid md:grid-cols-2 md:mt-10 lg:px-20 xl:px-40  gap-4">
     <IntroTextComponent />
     <div class="md:col-span-1 bg-white mx-5 md:mx-0 px-30 pt-1 md:pt-0 rounded-md">
       <router-link :to="{ name: 'Home' }" class="text-xs m-2 text-blue-link items-center flex"><img src="@/assets/img/chevron_left.svg" class="w-5 inline-block">Back</router-link>
@@ -12,7 +13,7 @@
           <font-awesome-icon  v-if = 'currentValue==0' class = 'p-1 mr-2 mt-1 float-right text-gray-200 bg-blue-primary rounded-full text-sm' icon="check" ></font-awesome-icon>
         </label>
         <input name = 'create-type' type='radio' id='from-pk' value= '1'  v-model='currentValue'>   
-        <label for = 'from-pk' class = 'ml-1 text-left py-3 text-xs pl-4 '> 
+        <label for = 'from-pk' class = ' text-left py-3 text-xs pl-4 '> 
           <img src="@/modules/wallet/img/icon-private-key.svg" class=" h-6 w-6 inline-block mr-1"> 
           {{$t('createwallet.fromprivatekey')}}
           <font-awesome-icon  v-if = 'currentValue==1' class = 'p-1 mr-2 mt-1 float-right text-gray-200 bg-blue-primary rounded-full text-sm' icon="check" ></font-awesome-icon>
@@ -30,6 +31,7 @@
       <div class = 'h-28'></div>
     </div>
   </div>
+</div>
 </template>
 
 <script>
