@@ -22,10 +22,11 @@
         </transition>
         <div class="fixed inset-0 bg-opacity-60 z-10 bg-gray-100"></div>
       </div>
-    <div class='w-9/12 ml-auto mr-auto'>
-      <div class = 'flex text-xs font-semibold border-b-2'>
-        <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Details</div>
+    <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
+      <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
+        <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Details</div>
         <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
+        <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
       </div>
       <div class='my-7 font-semibold'>Account Details</div>
       <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>

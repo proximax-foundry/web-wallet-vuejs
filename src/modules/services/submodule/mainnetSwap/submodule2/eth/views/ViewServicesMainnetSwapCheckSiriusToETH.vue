@@ -1,137 +1,164 @@
 <template>
   <div>
-    <div class="flex justify-between text-xs sm:text-sm">
-      <div><span class="text-gray-400">Swap > ETH > Out ></span> <span class="text-blue-primary font-bold">Check Status</span></div>
-      <div>
-        <router-link :to="{ name: 'ViewServices' }" class="font-bold">{{$t('services.allservices')}}</router-link>
-      </div>
-    </div>
-    <div class='mt-2 py-3 gray-line px-0 lg:px-10 xl:px-80'>
-      <div class="flex">
-        <div class="flex-none">
-          <div class="flex p-0 sm:p-3">
-            <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">1</div></div>
-            <div class="inline-block self-center ml-3 text-xs sm:text-sm">Check status</div>
+    <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
+      <div class='mt-6 p-6 border filter shadow-lg text-center'>
+        <div class="text-md">Main Network Swap</div>
+        <div class="text-xs my-3 mb-5 sm:mb-10"><img src="@/modules/services/submodule/mainnetSwap/img/eth.svg" class="mr-2 h-5 inline-block">Check swap from Proximax Sirius Chain to ETH</div>
+        <div class="flex my-10">
+          <div class="flex-none">
+            <div class="flex border border-gray-300 rounded-md filter shadow-md">
+              <div class="flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-yellow-500':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-txs sm:text-sm font-bold" :class="`${ currentPage>=1?'text-white':'text-gray-400' }`">1</div></div>
+              <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">Input Information</div>
+            </div>
+          </div>
+          <div class="flex-grow self-center md:mx-4 h-0.5 bg-gray-100"></div>
+          <div class="flex-none">
+            <div class="flex border border-gray-300 rounded-md filter shadow-md">
+              <div class="flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-yellow-500':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-txs sm:text-sm font-bold" :class="`${ currentPage>=2?'text-white':'text-gray-400' }`">2</div></div>
+              <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('swap.validation')}}</div>
+            </div>
           </div>
         </div>
-        <div class="h-1 bg-gray-200 flex-grow mx-2 self-center"></div>
-        <div class="flex-none">
-          <div class="flex p-0 sm:p-3">
-            <div class="rounded-full flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-blue-primary':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-white text-txs sm:text-sm">2</div></div>
-            <div class="inline-block self-center ml-3 text-xs sm:text-sm">{{$t('swap.validation')}}</div>
+        <div v-if="currentPage==1">
+          <div class="text-lg my-7 font-bold">Check Swap Status</div>
+          <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">Please make sure there is no other crypto wallet extension currently being enabled except <b>MetaMask</b>.<div class="my-2">Refer to the <a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">walkthrough<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a> for more details.</div>Please refresh this page after disabling other wallet extensions.</div>
+          <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
+          <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
+          <p class="font-bold text-xs text-left mb-1">Type</p>
+          <div class="mb-5 mt-3 text-left">
+            <button class="border px-3 py-2 w-20 text-blue-primary font-bold rounded-l cursor-pointer hover:border-blue-primary hover:bg-blue-50 transition-all duration-200" @click="$router.push({name: 'ViewServicesMainnetSwapCheckETHToSirius'})">In</button><button class="bg-blue-primary px-3 py-2 w-20 text-white font-bold rounded-r border border-blue-primary cursor-auto">Out</button> <span class="text-gray-500 ml-3 text-tsm">From Sirius to ETH</span>
           </div>
-        </div>
-      </div>
-      <div v-if="currentPage==1">
-        <div class="text-lg my-7 font-bold">Check Swap Status</div>
-        <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">Please make sure there is no other crypto wallet extension currently being enabled except <b>MetaMask</b>.<div class="my-2">Refer to the <a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">walkthrough<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a> for more details.</div>Please refresh this page after disabling other wallet extensions.</div>
-        <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
-        <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <p class="font-bold text-tsm text-left mb-1">Type</p>
-        <div class="mb-5 mt-3 text-left">
-          <button class="border px-3 py-2 w-20 text-blue-primary font-bold rounded-l-xl cursor-pointer hover:border-blue-primary hover:bg-blue-50 transition-all duration-200" @click="$router.push({name: 'ViewServicesMainnetSwapCheckETHToSirius'})">In</button><button class="bg-blue-primary px-3 py-2 w-20 text-white font-bold rounded-r-xl border border-blue-primary cursor-auto">Out</button> <span class="text-gray-500 ml-3 text-tsm">From Sirius to ETH</span>
-        </div>
-        <p class="font-bold text-tsm text-left mb-1">MetaMask Address</p>
-        <div class="mb-5 flex justify-between bg-gray-100 rounded-2xl p-3 text-left" v-if="isInstallMetamask">
-          <div class="text-tsm text-gray-700 self-center relative">
-            <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block break-all">{{ isMetamaskConnected?(currentAccount?currentAccount:'Not connected'):'Not connected' }}</div></div>
-          </div>
-          <div class="self-center">
-            <button @click="connectMetamask()" class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-1 border-blue-primary text-blue-primary outline-none focus:outline-none" v-if="!currentAccount">Connect to MetaMask</button>
-            <button class=" bg-green-50 rounded-3xl border font-bold px-6 py-1 border-green-500 text-green-500 text-tsm outline-none focus:outline-none cursor-auto" v-else>Connected</button>
-          </div>
-        </div>
-        <div class="mb-5 flex justify-between bg-yellow-200 rounded-2xl p-3 text-left" v-else>
-          <div class="text-tsm text-gray-700 self-center relative">
-            <div><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask.svg" class="w-5 inline ml-1 mr-2 absolute" style="top: 0px;"> <div class="ml-8 inline-block text-gray-800">MetaMask is not installed</div></div>
-          </div>
-          <div class="self-center">
-            <a href="https://metamask.io/" target=_new class="hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none">Download MetaMask</a>
-          </div>
-        </div>
-        <p class="font-bold text-tsm text-left mb-1">Sirius Transaction Hash</p>
-        <TextInput placeholder="Sirius Transaction Hash" errorMessage="Please key in valid transaction hash" :showError="showTxnHashError" v-model="siriusTxnHash" icon="hashtag" class="w-full" />
-        <div class="mt-10 text-center">
-          <button @click="$router.push({name: 'ViewServices'})" class="default-btn mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
-          <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledCheck" @click="sendRequest()">Check Status</button>
-        </div>
-      </div>
-      <div v-if="currentPage==2">
-        <div class="text-lg my-7">
-          <div class="font-bold text-left text-xs md:text-sm lg:text-lg" :class="step1?'text-gray-700':'text-gray-300'">Step 1: Check Sirius transaction status</div>
-          <div class="flex border-b border-gray-300 p-3">
-            <div class="flex-none">
-              <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="step1?'border-blue-primary':'border-gray-300'">
-                <div class="flex h-full justify-center">
-                  <font-awesome-icon icon="check" :class="step1?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500"></font-awesome-icon>
+
+          <div class="mb-5 md:flex md:justify-between border border-gray-200 rounded">
+            <div class="flex justify-left">
+              <div class="w-18 flex items-center justify-center py-5 sm:h-20">
+                <img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask-fox.svg" class="w-8 h-8 inline-block">
+              </div>
+              <div class="text-left flex items-center">
+                <div>
+                  <div class="text-xxs uppercase text-blue-primary font-bold mb-1">From MetaMask Address</div>
+                  <div class="font-bold text-black text-tsm break-all mr-2">{{ isMetamaskConnected?(currentAccount?currentAccount:'Not connected'):'Not connected' }}</div>
                 </div>
               </div>
             </div>
-            <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Checking transaction status</div>
-          </div>
-          <div class="flex border-b border-gray-300 p-3">
-            <div class="flex-none">
-              <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="isInvalidSiriusTxnHash?'border-red-primary':(step2?'border-blue-primary':'border-gray-300')">
-                <div class="flex h-full justify-center">
-                  <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-if="isInvalidSiriusTxnHash"></font-awesome-icon>
-                  <font-awesome-icon icon="check" :class="step2?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-else></font-awesome-icon>
+            <div class="md:grid hidden " :class="currentAccount?'grid-cols-2':'grid-cols-1'">
+              <div class="border-l border-gray-200 text-green-500 font-semibold text-xxs w-16 lg:w-20 flex items-center justify-center uppercase" v-if="currentAccount">
+                <div>
+                  <img src="@/modules/services/submodule/mainnetSwap/img/icon-connected.svg" class="inline-block">
+                  <div>Connected</div>
+                </div>
+              </div>
+              <div class="border-l border-gray-200 text-blue-primary text-tsm font-bold w-16 lg:w-20 flex justify-center items-center">
+                <div v-if="isInstallMetamask">
+                  <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">Connect</div>
+                  <div class="cursor-pointer" @click="connectMetamask()" v-else>Change</div>
+                </div>
+                <div v-else>
+                  <a href="https://metamask.io/" target=_new>Download</a>
                 </div>
               </div>
             </div>
-            <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
-              {{ isInvalidSiriusTxnHash?'Transaction is not found.':'Sirius transaction is successful:' }}
-              <div v-if="!isInvalidSiriusTxnHash && step2" class="mt-2">
-                <div v-if="siriusTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
-                  <a :href="siriusTxnLink" target=_new :class="isInvalidSiriusTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="siriusTx" :copyValue="siriusTxnHash" copySubject="Sirius transaction hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ siriusTxnHash }}</a>
-                  <div class="flex-none">
-                    <font-awesome-icon icon="copy" @click="copy('siriusTx')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step2"></font-awesome-icon>
+            <div class="md:hidden">
+              <div class="border-t border-gray-200 text-green-500 font-semibold text-xxs uppercase p-2" v-if="currentAccount">
+                <div class="flex items-center justify-center">
+                  <img src="@/modules/services/submodule/mainnetSwap/img/icon-connected.svg" class="inline-block mr-2 w-4 h-4">
+                  Connected
+                </div>
+              </div>
+              <div class="border-t border-gray-200 text-blue-primary text-tsm font-bold p-3">
+                <div v-if="isInstallMetamask">
+                  <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">Connect</div>
+                  <div class="cursor-pointer" @click="connectMetamask()" v-else>Change</div>
+                </div>
+                <div v-else>
+                  <a href="https://metamask.io/" target=_new>Download</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <TextInputClean placeholder="Sirius Transaction Hash" errorMessage="Please key in valid transaction hash" v-model="siriusTxnHash" :showError="showTxnHashError" class="w-full inline-block mr-2" />
+          <div class="mt-10 text-center">
+            <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
+            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledCheck" @click="sendRequest()">Check Status</button>
+          </div>
+        </div>
+        <div v-if="currentPage==2">
+          <div class="text-lg my-7">
+            <div class="font-bold text-left text-xs md:text-sm" :class="step1?'text-gray-700':'text-gray-300'">Step 1: Check Sirius transaction status</div>
+            <div class="flex border-b border-gray-300 p-3">
+              <div class="flex-none">
+                <div class=" rounded-full border w-6 h-6 transition-all duration-500" :class="step1?'border-blue-primary':'border-gray-300'">
+                  <div class="flex h-full justify-center">
+                    <font-awesome-icon icon="check" :class="step1?'text-blue-primary':'text-gray-300'" class="w-3 h-3 self-center inline-block transition-all duration-500"></font-awesome-icon>
                   </div>
                 </div>
               </div>
-              <div v-if="isInvalidSiriusTxnHash && step2" class="mt-2 text-sm text-gray-700">
-                Sirius transaction hash is not found in swap service. Please initiate new swap from {{currentNativeTokenName}} to ETH
-                <router-link :to="{ name: 'ViewServicesMainnetSwapEthOptions' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">Swap</router-link>
-              </div>
+              <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Checking transaction status</div>
             </div>
-          </div>
-          <div class="font-bold text-left text-xs md:text-sm lg:text-lg mt-4" :class="step3?'text-gray-700':'text-gray-300'">Step 2: Check ETH transaction status</div>
-          <div class="flex border-b border-gray-300 p-3">
-            <div class="flex-none">
-              <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9" :class="step3?'border-blue-primary':'border-gray-300'">
-                <div class="flex h-full justify-center">
-                  <font-awesome-icon icon="check" :class="step3?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block"></font-awesome-icon>
-                </div>
-              </div>
-            </div>
-            <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Checking transaction status</div>
-          </div>
-          <div class="flex border-b border-gray-300 p-3">
-            <div class="flex-none">
-              <div class=" rounded-full border w-6 h-6 md:w-9 md:h-9 transition-all duration-500" :class="isInvalidRemoteTxnHash && step4?'border-red-primary':(step4?'border-blue-primary':'border-gray-300')">
-                <div class="flex h-full justify-center">
-                  <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-if="isInvalidRemoteTxnHash && step4"></font-awesome-icon>
-                  <font-awesome-icon icon="check" :class="step4?'text-blue-primary':'text-gray-300'" class="w-3 h-3 md:w-7 md:h-7 self-center inline-block transition-all duration-500" v-else></font-awesome-icon>
-                </div>
-              </div>
-            </div>
-            <div class="flex-grow text-left text-xs md:text-sm lg:text-lg ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">
-              {{ txtRemoteTxnSummary }}
-              <div v-if="!isInvalidRemoteTxnHash && step4" class="mt-2">
-                <div v-if="remoteTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
-                  <a :href="remoteTxnLink" target=_new :class="isInvalidRemoteTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="remoteTx" :copyValue="remoteTxnHash" copySubject="ETH transaction hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ remoteTxnHash }}</a>
-                  <div class="flex-none">
-                    <font-awesome-icon icon="copy" @click="copy('remoteTx')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step4"></font-awesome-icon>
+            <div class="flex border-b border-gray-300 p-3">
+              <div class="flex-none">
+                <div class=" rounded-full border w-6 h-6 transition-all duration-500" :class="isInvalidSiriusTxnHash?'border-red-primary':(step2?'border-blue-primary':'border-gray-300')">
+                  <div class="flex h-full justify-center">
+                    <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 self-center inline-block transition-all duration-500" v-if="isInvalidSiriusTxnHash"></font-awesome-icon>
+                    <font-awesome-icon icon="check" :class="step2?'text-blue-primary':'text-gray-300'" class="w-3 h-3 self-center inline-block transition-all duration-500" v-else></font-awesome-icon>
                   </div>
                 </div>
               </div>
-              <div v-if="isInvalidRemoteTxnHash && step4" class="mt-2 text-xs md:text-sm text-gray-700">
-                ETH transaction hash is not found. Please contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
+              <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
+                {{ isInvalidSiriusTxnHash?'Transaction is not found.':'Sirius transaction is successful:' }}
+                <div v-if="!isInvalidSiriusTxnHash && step2" class="mt-2">
+                  <div v-if="siriusTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
+                    <a :href="siriusTxnLink" target=_new :class="isInvalidSiriusTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="siriusTx" :copyValue="siriusTxnHash" copySubject="Sirius transaction hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ siriusTxnHash }}</a>
+                    <div class="flex-none">
+                      <font-awesome-icon icon="copy" @click="copy('siriusTx')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step2"></font-awesome-icon>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="isInvalidSiriusTxnHash && step2" class="mt-2 text-sm text-gray-700">
+                  Sirius transaction hash is not found in swap service. Please initiate new swap from {{currentNativeTokenName}} to ETH
+                  <router-link :to="{ name: 'ViewServicesMainnetSwapEthOptions' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">Swap</router-link>
+                </div>
+              </div>
+            </div>
+            <div class="font-bold text-left text-xs md:text-sm mt-4" :class="step3?'text-gray-700':'text-gray-300'">Step 2: Check ETH transaction status</div>
+            <div class="flex border-b border-gray-300 p-3">
+              <div class="flex-none">
+                <div class=" rounded-full border w-6 h-6" :class="step3?'border-blue-primary':'border-gray-300'">
+                  <div class="flex h-full justify-center">
+                    <font-awesome-icon icon="check" :class="step3?'text-blue-primary':'text-gray-300'" class="w-3 h-3 self-center inline-block"></font-awesome-icon>
+                  </div>
+                </div>
+              </div>
+              <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Checking transaction status</div>
+            </div>
+            <div class="flex border-b border-gray-300 p-3">
+              <div class="flex-none">
+                <div class=" rounded-full border w-6 h-6 transition-all duration-500" :class="isInvalidRemoteTxnHash && step4?'border-red-primary':(step4?'border-blue-primary':'border-gray-300')">
+                  <div class="flex h-full justify-center">
+                    <font-awesome-icon icon="times" class="text-red-primary w-3 h-3 self-center inline-block transition-all duration-500" v-if="isInvalidRemoteTxnHash && step4"></font-awesome-icon>
+                    <font-awesome-icon icon="check" :class="step4?'text-blue-primary':'text-gray-300'" class="w-3 h-3 self-center inline-block transition-all duration-500" v-else></font-awesome-icon>
+                  </div>
+                </div>
+              </div>
+              <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">
+                {{ txtRemoteTxnSummary }}
+                <div v-if="!isInvalidRemoteTxnHash && step4" class="mt-2">
+                  <div v-if="remoteTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
+                    <a :href="remoteTxnLink" target=_new :class="isInvalidRemoteTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="remoteTx" :copyValue="remoteTxnHash" copySubject="ETH transaction hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ remoteTxnHash }}</a>
+                    <div class="flex-none">
+                      <font-awesome-icon icon="copy" @click="copy('remoteTx')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step4"></font-awesome-icon>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="isInvalidRemoteTxnHash && step4" class="mt-2 text-xs md:text-sm text-gray-700">
+                  ETH transaction hash is not found. Please contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="mt-10 text-center">
-          <router-link :to="{ name: 'ViewServices' }" class="default-btn focus:outline-none w-40 inline-block" :class="isDisabled?'opacity-50':''" :is="isDisabled?'span':'router-link'" tag="button">Done</router-link>
+          <div class="mt-10 text-center">
+            <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn focus:outline-none w-40 inline-block" :class="isDisabled?'opacity-50':''" :is="isDisabled?'span':'router-link'" tag="button">Done</router-link>
+          </div>
         </div>
       </div>
     </div>
@@ -139,7 +166,7 @@
 </template>
 <script>
 import { computed, ref, onBeforeUnmount } from "vue";
-import TextInput from '@/components/TextInput.vue';
+import TextInputClean from '@/components/TextInputClean.vue';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { ethers } from 'ethers';
@@ -151,7 +178,7 @@ export default {
   name: 'ViewServicesMainnetSwapCheckSiriusToETH',
 
   components: {
-    TextInput,
+    TextInputClean,
   },
 
   setup() {

@@ -97,8 +97,7 @@ export default {
           displaErrorMessage.value = false;
           displayWaitMessage.value = false;
           router.push({ name: "ViewServicesMainnetSwapSiriusToETH"});
-        }
-        else{
+        }else{
           displayWaitMessage.value = false;
           displaErrorMessage.value = true;
           isOutgoingOptionDisabled.value = false;
