@@ -621,6 +621,7 @@ export default defineComponent({
     let loadRecentTransferTransactions = async()=>{
       let txnQueryParams = Helper.createTransactionQueryParams();
       txnQueryParams.pageSize = 1;
+      txnQueryParams.type = TransactionFilterTypes.getTransferTypes();
       txnQueryParams.signerPublicKey = selectedAccountPublicKey.value;
       txnQueryParams.embedded = true;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
@@ -629,6 +630,7 @@ export default defineComponent({
 
       let txnQueryParams2 = Helper.createTransactionQueryParams();
       txnQueryParams2.pageSize = 1;
+      txnQueryParams2.type = TransactionFilterTypes.getTransferTypes();
       txnQueryParams2.recipientAddress = selectedAccountAddressPlain.value;
       txnQueryParams2.embedded = true;
       txnQueryParams2.updateFieldOrder(blockDescOrderSortingField);
@@ -657,11 +659,11 @@ export default defineComponent({
       allTxnQueryParams.pageNumber = 1;
       endOfRecords = false;
 
-      searchedTransactions();
+      searchTransactions();
     }
 
     const loadMoreTxns = () =>{
-      searchedTransactions(true);
+      searchTransactions(true);
     }
 
     const searchTransaction = async(loadMore = false) =>{
