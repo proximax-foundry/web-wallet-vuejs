@@ -54,8 +54,8 @@ export class NamespaceUtils {
     return buildTransactions.registersubNamespace(rootNamespace, subNamespace);
   }
 
-  static getRootNamespaceTransactionFee = (networkType: NetworkType, generationHash: string, namespaceName: string, duration: number) :number => {
-    let registerRootNamespaceTransaction = NamespaceUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
+  static getRootNamespaceTransactionFee = (networkType: NetworkType, generationHash: string, namespaceName: string) :number => {
+    let registerRootNamespaceTransaction = NamespaceUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, 10);
     return registerRootNamespaceTransaction.maxFee.compact();
   }
 
