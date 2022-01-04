@@ -103,7 +103,7 @@
           </div>
           <div class="hidden lg:flex w-16 lg:flex-row items-center left-gray-line">
             <div class="text-center w-full h-4 lg:h-6">
-              <router-link :to="{name : 'ViewServices'}" class="h-7 w-4 lg:h-6 lg:w-6 inline-block">
+              <router-link :to="{name : 'ViewServicesNodes'}" class="h-7 w-4 lg:h-6 lg:w-6 inline-block">
                 <img src="@/assets/img/icon-setting.svg" class="opacity-80 hover:opacity-100 transition-all duration-300">
               </router-link>
             </div>
