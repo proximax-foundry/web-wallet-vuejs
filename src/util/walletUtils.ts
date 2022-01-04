@@ -25,6 +25,7 @@ import { Namespace } from "@/models/namespace";
 import { Account as myAccount } from "@/models/account";
 import { TransactionUtils } from "./transactionUtils"
 import { Account as NEM_Account, NetworkTypes, NEMLibrary } from "nem-library";
+import { AddressBook } from "@/models/addressBook"
 
 const config = require("@/../config/config.json");
 
@@ -536,6 +537,18 @@ export class WalletUtils {
         });
 
         const newWallet = new Wallet(wltFile.name, networkName, walletAccounts);
+
+        if(Array.isArray(wltFile.contacts)){
+            try {
+                for(let i=0; i < wltFile.contacts.length; ++i){
+                    let group = wltFile.contacts[i].group ? wltFile.contacts[i].group : '';
+                    let newAddressBook = new AddressBook(wltFile.contacts[i].name, wltFile.contacts[i].address, group);
+                    newWallet.addAddressBook(newAddressBook);
+                }
+            } catch (error) {
+                
+            }
+        }
 
         wallets.wallets.push(newWallet);
 
