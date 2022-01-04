@@ -141,8 +141,6 @@ export default {
 
   setup() {
     // check services
-    
-
 
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const toast = useToast();

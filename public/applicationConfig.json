@@ -21,7 +21,7 @@
         "addressAccountSimple": "VCWAHAMZRKWU4T3MSBEV7CJVYN7TGX5ZCYMVTUJW"
     },
     "swapAllowedMosaics": [
-        { "namespaceId": "zarcade", "name": "xar", "divisibility": 4 },
+        { "namespaceId": "xarcade", "name": "xar", "divisibility": 4 },
         { "namespaceId": "prx", "name": "xpx", "divisibility": 6 }
     ]
 }

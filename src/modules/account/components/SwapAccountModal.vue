@@ -21,7 +21,7 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import { walletState } from '@/state/walletState';
 import { networkState } from '@/state/networkState';
 import { WalletUtils } from '@/util/walletUtils';
-import { nis1SwapUtils } from '@/util/nis1SwapUtils';
+import { Nis1SwapUtils } from '@/util/nis1SwapUtils';
 import { Account } from '@/models/account';
 import { ref} from "vue";
 import {useI18n} from 'vue-i18n'
@@ -51,7 +51,7 @@ export default {
 
       if(WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPasswd.value)){
         if(account){
-            let nis1 = nis1SwapUtils.createNIS1Account(walletPasswd.value, account);
+            let nis1 = Nis1SwapUtils.createNIS1Account(walletPasswd.value, account);
             account.nis1Account = nis1;
             walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
             // router.push({ name: 'ViewAccountDisplayAll', params: {deleteAccount: 'success' } });
