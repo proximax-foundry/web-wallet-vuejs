@@ -71,10 +71,6 @@ export class Nis1SwapUtils {
     };
   }
 
-  // getAccountInfo(address: Address): Promise<AccountInfo>{
-  //   return this.accountHttp.getAccountInfo(address).toPromise();
-  // }
-
   static fetchNis1Properties = async() => {
     try {
       return await fetch('./applicationConfig.json', {
@@ -111,20 +107,6 @@ export class Nis1SwapUtils {
         })
         .then( response => {return response.json(); })
         .then( data => { return data; })
-      // if(nis1Acc.meta.cosignatories.length > 0){
-      //   // info account multisig
-      //   if(nis1Acc.meta.cosignatoryOf.length > 0){
-      //     nis1Acc.meta.cosignatoryOf.forEach(account => {
-      //       try {
-      //         const nis1Address = new Address(account.address);
-      //         const ownedMosaic = await Nis1SwapUtils.getOwnedMosaics(nis1Address);
-      //       } catch (error) {
-              
-      //       }
-      //     });
-      //   }
-      // }
-      // const ownedMosaic = Nis1SwapUtils.getOwnedMosaics(address);
       return nis1Acc;
     } catch (e) {
       console.log(e);
