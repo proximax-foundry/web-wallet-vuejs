@@ -6,31 +6,24 @@
           <div><span class="text-gray-700">{{$t('services.nodes')}}</span></div>
         </div>
         <div class="border border-gray-200 filter drop-shadow-xl py-2 sm:py-14 px-2 sm:px-28 text-center bg-white">
-          <div class="text-outline bg-white mt-5" :class="borderColor">
-            <div class="w-40 text-left">
-              <img src="@/modules/services/submodule/nodes/img/icon-block-height-blue-30h.svg" class="h-7 w-7 inline-block ml-4">
-              <div class="ml-2 text-tsm mt-1 text-gray-500 w-30 inline-block">{{$t('services.blockheight')}}</div>
-            </div>
-            <input disabled="disabled" v-model="blockHeight" class="text-placeholder bg-white text-right">
-            <div class="w-5"></div>
+
+          <div class="border border-gray-200 px-2 py-1 h-12">
+            <div class="uppercase text-gray-400 font-light text-txs text-left mb-2">{{ $t('services.blockheight') }}</div>
+            <input disabled="true" v-model="blockHeight" type="text" class="text_input">
           </div>
 
-          <div class="text-outline bg-white mt-5" :class="borderColor">
-            <div class="w-40 text-left">
-              <img src="@/modules/services/submodule/nodes/img/icon-nodes-blue-60h.svg" class="h-7 w-7 inline-block ml-4">
-              <div class="ml-2 text-tsm mt-1 text-gray-500 w-30 inline-block">{{$t('services.currentnode')}}</div>
-            </div>
-            <input disabled="disabled" v-model="currentNode" class="text-placeholder bg-white text-right">
-            <div class="w-5"></div>
+          <div class="border border-gray-200 px-2 py-1 h-12 mt-5">
+            <div class="uppercase text-gray-400 font-light text-txs text-left mb-2">{{ $t('services.currentnode') }}</div>
+            <input disabled="true" v-model="currentNode" type="text" class="text_input">
           </div>
 
-          <div class="mt-5">
+          <div class="mt-5 border border-gray-200 px-2 py-1">
             <div class="h-5 text-left">
               <transition enter-active-class="animate__animated animate__fadeInUp">
-                <span v-if="showSelectTitle" class="text-xs text-blue-400 ">{{ placeholder }}</span>
+                <span v-if="showSelectTitle" class="uppercase text-gray-400 font-light text-txs text-left">{{ placeholder }}</span>
               </transition>
             </div>
-            <div class="select mb-3 selectPlugin" style="position: relative">
+            <div class="select selectPlugin" style="position: relative">
               <Multiselect
                 :placeholder="placeholder"
                 :options="options"
@@ -44,11 +37,11 @@
               >
                 <template v-slot:singlelabel="{ value }">
                   <div class="multiselect-single-label">
-                    <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 h-5 mr-2"> {{ value.name }}
+                    <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 mr-2"> {{ value.name }}
                   </div>
                 </template>
                 <template v-slot:option="{ option }">
-                  <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 h-5 mr-2"> {{ option.name }}
+                  <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 mr-2"> {{ option.name }}
                 </template>
               </Multiselect>
             </div>
@@ -78,7 +71,7 @@ export default {
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const showSelectTitle = ref(false);
+    const showSelectTitle = ref(true);
     const borderColor = ref('border border-gray-300');
     const placeholder = ref('Node list');
     const canDeselect = ref(false);
@@ -135,4 +128,8 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "@/assets/scss/multiselect.scss";
+
+.text_input{
+  @apply w-full flex border-0 outline-none border-white drop-shadow-none filter focus:outline-none text-tsm text-gray-600 font-bold bg-white;
+}
 </style>
