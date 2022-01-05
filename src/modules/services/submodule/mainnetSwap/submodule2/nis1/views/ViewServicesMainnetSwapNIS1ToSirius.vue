@@ -158,9 +158,10 @@ export default {
       if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPasswd.value)) {
         err.value = "";
         const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others);
-        let account = concatOther.find((account) => account.address == siriusAddressToSwap.value);
+        let account = concatOther.find((account) => account.address == siriusAddress.value); //siriusAddressToSwap
+        let accountSender = concatOther.find((account) => account.address == siriusAddressToSwap.value); //siriusAddressToSwap
         (async() => {
-          const swapTransaction = await Nis1SwapUtils.initiateNis1Swap(walletPasswd.value, amount.value, swapDecimal.value, currentSwapTokenName.value, account); //, appSetting.nis1.nodes
+          const swapTransaction = await Nis1SwapUtils.initiateNis1Swap(walletPasswd.value, amount.value, swapDecimal.value, currentSwapTokenName.value, account, accountSender); //, appSetting.nis1.nodes
           if(swapTransaction.code == 1){
             nis1Hash.value = swapTransaction.hash;
             validationLink.value = swapTransaction.link;

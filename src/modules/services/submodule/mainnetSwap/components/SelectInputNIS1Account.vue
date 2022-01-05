@@ -79,8 +79,8 @@ export default defineComponent({
           account.nis1Account.balance = [];
           balances.forEach(balance => {
             const assetId = balance.assetId;
-            const divisibility = balance.properties.divisibility;
-            const quantity = balance.quantity;
+            const divisibility = balance.divisibility;
+            const quantity = balance.amount;
             account.nis1Account.balance.push({
               assetId, divisibility, amount:quantity
             });

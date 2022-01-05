@@ -139,15 +139,54 @@ export class Nis1SwapUtils {
     return accountOwnedMosaics.fromAddress(address);
   }
 
+  static getUnconfirmedTransaction(address: Address, nodes: ServerConfig[]): Promise<Transaction[]> {
+    const accountHttp = new AccountHttp(nodes);
+    return accountHttp.unconfirmedTransactions(address).toPromise();
+  }
+
   static getNIS1AccountBalance = async (publicKey: string) => {
     const appSetting = await Nis1SwapUtils.fetchNis1Properties();
     const nis1PublicAccount = Nis1SwapUtils.createPublicAccount(publicKey);
     const nis1AddressToSwap = Nis1SwapUtils.createAddressToString(nis1PublicAccount.address.pretty());
     const accountInfoOwnedSwap = await Nis1SwapUtils.getAccountInfo(nis1AddressToSwap);
-    const ownedMosaic = await Nis1SwapUtils.getOwnedMosaics(nis1AddressToSwap, appSetting.nis1.nodes).pipe(first()).pipe((timeout(appSetting.timeOutTransactionNis1))).toPromise();
-    // const xpxFound = ownedMosaic.find(el => el.assetId.namespaceId === 'prx' && el.assetId.name === 'xpx');
-    const mosaicsFound = ownedMosaic.filter(e => appSetting.swapAllowedMosaics.find(d => d.namespaceId === e.assetId.namespaceId && d.name === e.assetId.name));
-    return mosaicsFound;
+    let mosaicsFound = [];
+    let balances = [];
+    let disabledAsset = [];
+    if(accountInfoOwnedSwap.meta.cosignatories.length == 0){
+      if(accountInfoOwnedSwap.meta.cosignatoryOf.length > 0){
+        accountInfoOwnedSwap.meta.cosignatoryOf.forEach(async(multisig) => {
+          const multisigAddress = Nis1SwapUtils.createAddressToString(multisig.address);
+          const multisigOwnedMosaic = await Nis1SwapUtils.getOwnedMosaics(multisigAddress, appSetting.nis1.nodes).pipe(first()).pipe((timeout(appSetting.timeOutTransactionNis1))).toPromise();
+          const mulisigMosaicsFound = multisigOwnedMosaic.filter(e => appSetting.swapAllowedMosaics.find(d => d.namespaceId === e.assetId.namespaceId && d.name === e.assetId.name));
+          const unconfirmedTxn = await Nis1SwapUtils.getUnconfirmedTransaction(nis1AddressToSwap, appSetting.nis1.nodes);
+          mulisigMosaicsFound.forEach(async (mosaic) => {
+            const amount = await Nis1SwapUtils.validateBalanceAccounts(mosaic, nis1AddressToSwap, unconfirmedTxn);
+            if (mosaic.quantity - amount > 0) {
+              disabledAsset.push({ assetId: mosaic.assetId });
+            }
+          });
+        });
+      }
+
+      let filteredAsset = [];
+      if(disabledAsset.length > 0){
+        filteredAsset = appSetting.swapAllowedMosaics.filter(e => disabledAsset.find(d => d.namespaceId === e.assetId.namespaceId && d.name === e.assetId.name));
+      }else{
+        filteredAsset = appSetting.swapAllowedMosaics;
+      }
+      const ownedMosaic = await Nis1SwapUtils.getOwnedMosaics(nis1AddressToSwap, appSetting.nis1.nodes).pipe(first()).pipe((timeout(appSetting.timeOutTransactionNis1))).toPromise();
+      mosaicsFound = ownedMosaic.filter(e => filteredAsset.find(d => d.namespaceId === e.assetId.namespaceId && d.name === e.assetId.name));
+      const unconfirmedTxn = await Nis1SwapUtils.getUnconfirmedTransaction(nis1AddressToSwap, appSetting.nis1.nodes);
+      for (const element of mosaicsFound) {
+        const amount = await Nis1SwapUtils.validateBalanceAccounts(element, nis1AddressToSwap, unconfirmedTxn);
+        if (amount > 0) {
+          balances.push({ assetId: element.assetId, amount, divisibility: element.properties.divisibility });
+        }
+      }
+    }else{
+      balances = [];
+    }
+    return balances;
   }
 
   static async createTransaction(message: PlainMessage, assetId: AssetId, quantity: number, decimal: number) {
@@ -176,18 +215,18 @@ export class Nis1SwapUtils {
     return new TimeWindow(timeStampDateTime, deadlineDateTime);
   };
 
-  static initiateNis1Swap = async (walletPassword: string, quantity: number, decimal: number, token:string, accountDetails: WalletAccount) => {
-    let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv)
+  static initiateNis1Swap = async (walletPassword: string, quantity: number, decimal: number, token:string, accountDetails: WalletAccount, accountDetailsSender: WalletAccount) => {
+    let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetailsSender.encrypted, accountDetailsSender.iv)
     let nis1Account = Account.createWithPrivateKey(privateKey);
-    const asset = accountDetails.nis1Account.balance.find(asset => asset.assetId.name == token);
-    const msg = PlainMessage.create(accountDetails.nis1Account.publicKey);
+    const asset = accountDetailsSender.nis1Account.balance.find(asset => asset.assetId.name == token);
+    const msg = PlainMessage.create(accountDetails.publicKey);
     const transaction = await Nis1SwapUtils.createTransaction(msg, asset.assetId, quantity, decimal);
-    const publicAccount = Nis1SwapUtils.createPublicAccount(accountDetails.nis1Account.publicKey);
+    const publicAccount = Nis1SwapUtils.createPublicAccount(accountDetailsSender.nis1Account.publicKey);
     return await Nis1SwapUtils.anounceTransaction(transaction, nis1Account, publicAccount);
   }
 
   static async anounceTransaction(transaction: TransferTransaction | MultisigTransaction, account: Account, siriusAccount: PublicAccount):Promise<swapData> {
-    // console.log('\nIN ANNOUNCE TXN --->', transaction);
+
     const appSetting = await Nis1SwapUtils.fetchNis1Properties();
     const signedTransaction = account.signTransaction(transaction);
     let headers = {
@@ -210,6 +249,42 @@ export class Nis1SwapUtils {
       link: appSetting.nis1.urlExplorer + nis1Acc.transactionHash.data,
     }
     return returnData;
+  }
+
+  static async validateBalanceAccounts(assetsFound: any, addressSigner: Address, unconfirmedTxn: Transaction[]) {
+    let assetFoundQuantity = assetsFound.quantity;
+
+    const appSetting = await Nis1SwapUtils.fetchNis1Properties();
+    if (unconfirmedTxn.length > 0) {
+      let unconfirmedTxnQuantity = 0;
+      for (const item of unconfirmedTxn) {
+        let mosaicUnconfirmedTxn = null;
+        if (item.type === 257 && item['signer']['address']['value'] === addressSigner['value'] && item['_assets'].length > 0) {
+          mosaicUnconfirmedTxn = item['_assets'].find((e: AssetTransferable) => appSetting.swapAllowedMosaics.find(d =>
+            d.namespaceId === e.assetId.namespaceId &&
+            d.name === e.assetId.name &&
+            assetsFound.assetId.namespaceId === e.assetId.namespaceId &&
+            assetsFound.assetId.name === e.assetId.name
+          ));
+        } else if (item.type === 4100 && item['otherTransaction']['type'] === 257 && item['signer']['address']['value'] === addressSigner['value']) {
+          mosaicUnconfirmedTxn = item['otherTransaction']['_assets'].find((e: AssetTransferable) => appSetting.swapAllowedMosaics.find(d =>
+            d.namespaceId === e.assetId.namespaceId &&
+            d.name === e.assetId.name &&
+            assetsFound.assetId.namespaceId === e.assetId.namespaceId &&
+            assetsFound.assetId.name === e.assetId.name
+          ));
+        }
+
+        if (mosaicUnconfirmedTxn) {
+          unconfirmedTxnQuantity += mosaicUnconfirmedTxn.quantity;
+        }
+      }
+      assetFoundQuantity -= unconfirmedTxnQuantity;
+
+      return assetFoundQuantity;
+    } else {
+      return assetFoundQuantity;
+    }
   }
 
   static generateNis1PdfCert = (networkName: string, swapTimestamp: string, siriusAddress: string, asset: string, transactionHash: string, qrImage: string) => {
