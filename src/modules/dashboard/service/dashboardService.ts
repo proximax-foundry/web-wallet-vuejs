@@ -151,6 +151,15 @@ export class DashboardService {
                 let transferTxn = txns[i] as TransferTransaction;
                 txn.message = transferTxn.message.payload;
                 txn.messageType = transferTxn.message.type;
+
+                if(txn.messageType === MessageType.PlainMessage){
+                    let newType = this.convertToSwapType(txn.message);
+                
+                    if(newType){
+                        txn.type = newType;
+                    }
+                }
+
                 switch(txn.messageType){
                     case MessageType.PlainMessage:
                         txn.messageTypeTitle = "Plain Message";
@@ -278,6 +287,15 @@ export class DashboardService {
                 let transferTxn = txns[i] as TransferTransaction;
                 txn.message = transferTxn.message.payload;
                 txn.messageType = transferTxn.message.type;
+
+                if(txn.messageType === MessageType.PlainMessage){
+                    let newType = this.convertToSwapType(txn.message);
+                
+                    if(newType){
+                        txn.type = newType;
+                    }
+                }
+
                 switch(txn.messageType){
                     case MessageType.PlainMessage:
                         txn.messageTypeTitle = "Plain Message";
@@ -405,6 +423,14 @@ export class DashboardService {
                 let transferTxn = txns[i] as TransferTransaction;
                 txn.message = transferTxn.message.payload;
                 txn.messageType = transferTxn.message.type;
+
+                if(txn.messageType === MessageType.PlainMessage){
+                    let newType = this.convertToSwapType(txn.message);
+                
+                    if(newType){
+                        txn.type = newType;
+                    }
+                }
                 switch(txn.messageType){
                     case MessageType.PlainMessage:
                         txn.messageTypeTitle = "Plain Message";
@@ -3202,6 +3228,39 @@ export class DashboardService {
         transactionsCount.partial = searchPartialTxnResult.pagination.totalEntries;
 
         return transactionsCount;
+    }
+
+    convertToSwapType(txnMessage: string){
+        let newType = null;
+        
+        try {
+            if(txnMessage){
+               let messageData = JSON.parse(txnMessage);
+
+               if(messageData.type){
+                    switch (messageData.type) {
+                        case 'Swap':
+                            newType = 'Swap (nis1-XPX)';
+                            break;
+                        case 'Swap-bsc-xpx':
+                            newType = 'Swap (BSC-XPX)';
+                            break;
+                        case 'Swap-xpx-bsc':
+                            newType = 'Swap (XPX-BSC)';
+                            break;
+                        case 'Swap-xpx-bsc-fees':
+                            newType = 'Swap Fee (XPX-BSC)';
+                            break;
+                        default:
+                            break;
+                    }
+               }
+            }
+        } catch (error) {
+
+        }    
+
+        return newType;
     }
 
     // async fetchConfirmedTransactions(){
