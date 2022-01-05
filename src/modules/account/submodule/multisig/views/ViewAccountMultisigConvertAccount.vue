@@ -23,7 +23,7 @@
           <div v-for="(coSignAddress, index) in coSign" :key="index" >
             <div class="flex">
               <img  src="@/modules/account/submodule/multisig/img/icon-delete-red.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
-              <TextInput class='w-5/12 mr-2 ' placeholder="Name"  v-model="contactName[index]" :disabled="true"  />
+              <TextInput class='w-5/12 mr-2 ' :placeholder="`Cosignatory${index+1}`"  v-model="contactName[index]" :disabled="true"  />
               <TextInput class='w-7/12 mr-2 ' placeholder="Address/Public Key" errorMessage="Invalid Input" :showError="showAddressError[index]" v-model="coSign[index]" />
               <div v-if="showAddressError[index]==true " class="mt-16"/>
               <div @click="toggleContact[index]=!toggleContact[index]" class=' border  cursor-pointer flex flex-col justify-center  p-2' style="height:2.66rem">
@@ -360,6 +360,7 @@ export default {
     watch(() => [...coSign.value], (n) => {
       for(var i = 0; i < coSign.value.length; i++){
         if((coSign.value[i].length == 64) || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)){
+          checkCosign(i)
           if(coSign.value[i]==acc.address || coSign.value[i]==Helper.createAddress(acc.address).pretty() || coSign.value[i]==acc.publicKey ){
             showAddressError.value[i] = true;
             err.value = "Cosigner cannot be this account itself"
@@ -478,6 +479,19 @@ export default {
       onPartial.value = verify
     )
     
+    const checkCosign = (index) =>{
+      if (coSign.value[index].length == 40 || coSign.value[index].length == 46) {
+        try {
+          multiSign.verifyContactPublicKey(coSign.value[index]).then(result=>{
+            if(result.status==false){
+              showAddressError.value[index] = true
+            }
+          })
+        } catch (error) {
+          console.log(error)
+        }
+      }
+    }
     
     // check if this address has cosigner
     emitter.on('ADD_CONTACT_COSIGN', payload => {

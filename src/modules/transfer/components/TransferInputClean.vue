@@ -4,7 +4,7 @@
         <div class="flex flex-col">
             <div class="uppercase font-light text-gray-500 text-txs text-left mb-2">{{ placeholder }}</div>
             <div class="flex w-full">
-                <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
+                <img v-if="logo" src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
                 <input v-if="decimal==0" v-maska="'#*'" :disabled="disabled" class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
                 <input v-else-if="decimal==1" v-maska="'#*.#'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
                 <input v-else-if="decimal==2" v-maska="'#*.##'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
@@ -28,6 +28,7 @@ export default{
   directives: { maska, 'tooltip': Tooltip },
   props: {
     placeholder: String,
+    logo: Boolean,
     errorMessage: String,
     icon: String,
     showError: Boolean,
