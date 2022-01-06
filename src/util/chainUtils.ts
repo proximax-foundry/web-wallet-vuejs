@@ -2,8 +2,8 @@ import { ChainConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, Con
   NetworkType, 
   NamespaceId,
   MosaicId, Address, PublicAccount, CosignatureSignedTransaction, Statement,
-  AccountInfo, Transaction, TransactionQueryParams, SignedTransaction, TransactionType, NamespaceName, Mosaic, MosaicInfo, 
-  TransactionGroupType, TransactionSearch
+  AccountInfo, Transaction, TransactionQueryParams, SignedTransaction, TransactionType, NamespaceName, Mosaic, MosaicInfo,
+  NamespaceInfo, TransactionGroupType, TransactionSearch
 } from "tsjs-xpx-chain-sdk";
 import { NetworkConfig } from "../models/stores/chainProfileConfig";
 import { ChainAPICall } from "../models/REST/chainAPICall";
@@ -323,5 +323,13 @@ export class ChainUtils{
       let statement = await chainRESTCall.blockAPI.getBlockReceipts(blockHeight);
 
       return statement;
+    }
+
+    static async getNamespaceInfo(namespaceId: NamespaceId): Promise<NamespaceInfo>{
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let namespaceInfo = await chainRESTCall.namespaceAPI.getNamespace(namespaceId);
+
+      return namespaceInfo;
     }
 }

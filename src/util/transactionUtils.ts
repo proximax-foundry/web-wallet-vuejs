@@ -383,4 +383,14 @@ export class TransactionUtils {
 
     return typeName;
   }
+
+  static getLockFundFee = (networkType: NetworkType, generationHash: string):number => {
+    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    let tempAcc = Account.generateNewAccount(networkType);
+    let txn = buildTransactions.transfer(tempAcc.address, PlainMessage.create('hello'));
+    let abt = buildTransactions.aggregateBonded([txn.toAggregate(tempAcc.publicAccount)])
+    let signedTxn = tempAcc.sign(abt, generationHash);
+    return buildTransactions.hashLock(new Mosaic(new NamespaceId('prx.xpx'), UInt64.fromUint(10)), UInt64.fromUint(10), signedTxn).maxFee.compact();
+  }
 }
+
