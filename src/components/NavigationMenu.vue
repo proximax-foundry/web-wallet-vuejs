@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import { computed, inject, ref } from "vue";
+import { computed, inject, ref, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import { walletState } from '@/state/walletState';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
@@ -91,6 +91,9 @@ export default{
     window.removeEventListener("resize", this.navMenuHandler);
   },
   setup(){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+
     const {t} = useI18n();
     const router = useRouter();
 
@@ -114,6 +117,24 @@ export default{
     };
 
     updateAccountTransactionCount();
+
+    emitter.on("TXN_UNCONFIRMED", (num) => {
+      if(num> 0){
+        updateAccountTransactionCount();
+      }
+    });
+
+    emitter.on("TXN_CONFIRMED", (num) => {
+      if(num> 0){
+        updateAccountTransactionCount();
+      }
+    });
+
+    emitter.on("ABT_ADDED", (num) => {
+      if(num> 0){
+        updateAccountTransactionCount();
+      }
+    });
 
     const navigationSideBar = inject('navigationSideBar');
 

@@ -134,6 +134,8 @@ import Tooltip from 'primevue/tooltip';
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";
+import { walletState } from '@/state/walletState';
+import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 
 export default defineComponent({
   components: {
@@ -249,27 +251,52 @@ export default defineComponent({
       return asset_div;
     }
 
-    const transactions = [
-      {
-        hash: 'CFAF94204836EC9CB39AE8C13E60122E74CDE86DEA71B1660658E12E34CA9B80',
-        typeName: 'Transfer',
-        extractedData: {
-          recipient: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
-          recipientName: "acc2",
-          recipientType: "address",
-          amount: '1000',
-          messageTypeString: "Plain message",
-          messagePayload: 'Hello'
-        },
-        block: 12344,
-        signer: 'CFAF94204836EC9CB39AE8C13E60122E74CDE86DEA71B1660658E12E34CA9B80',
-        signerDisplay: 'nameABC',
-        signerAddress: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
-        signerAddressPretty: "VAOYQC-VXM2EN-SIA4JI-V6DF4U-BNOLQD-JTSCMT-KJEB",
-        formattedDeadline: "12/1/2021, 19:00:18",
-        otherAssets: undefined
-      }
-    ];
+    const transactions = ref([]);
+
+    let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
+
+    let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
+
+    let transactionGroupType = Helper.getTransactionGroupType();
+
+    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, currentAccount);
+
+    let loadRecentTransactions = async()=>{
+      let txnQueryParams = Helper.createTransactionQueryParams();
+      txnQueryParams.pageSize = 1;
+      txnQueryParams.address = currentAccount.address;
+      txnQueryParams.embedded = true;
+      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
+
+      let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.UNCONFIRMED, txnQueryParams);
+
+      let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
+      transactions.value = formattedTxns;
+    };
+
+    loadRecentTransactions();
+
+    // const transactions = [
+    //   {
+    //     hash: 'CFAF94204836EC9CB39AE8C13E60122E74CDE86DEA71B1660658E12E34CA9B80',
+    //     typeName: 'Transfer',
+    //     extractedData: {
+    //       recipient: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
+    //       recipientName: "acc2",
+    //       recipientType: "address",
+    //       amount: '1000',
+    //       messageTypeString: "Plain message",
+    //       messagePayload: 'Hello'
+    //     },
+    //     block: 12344,
+    //     signer: 'CFAF94204836EC9CB39AE8C13E60122E74CDE86DEA71B1660658E12E34CA9B80',
+    //     signerDisplay: 'nameABC',
+    //     signerAddress: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
+    //     signerAddressPretty: "VAOYQC-VXM2EN-SIA4JI-V6DF4U-BNOLQD-JTSCMT-KJEB",
+    //     formattedDeadline: "12/1/2021, 19:00:18",
+    //     otherAssets: undefined
+    //   }
+    // ];
 
     return {
       d,
