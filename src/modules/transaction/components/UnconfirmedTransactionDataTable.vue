@@ -141,7 +141,7 @@ export default defineComponent({
     Column,
     // SplitButton
   },
-  name: 'DashboardDataTable',
+  name: 'UnconfirmedTransactionDataTable',
   props: {
     showBlock: Boolean,
     showAction: Boolean,
