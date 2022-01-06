@@ -598,7 +598,28 @@ export class WalletUtils {
 
     static export(wallet: Wallet): string{
 
-        const walletJSON = JSON.stringify(wallet);
+        const exportingData = {
+            name: wallet.name,
+            networkName: wallet.networkName,
+            accounts: wallet.accounts,
+            contacts: wallet.contacts
+        };
+
+        const walletJSON = JSON.stringify(exportingData);
+
+        return Helper.base64encode(walletJSON);
+    }
+
+    static exportAccount(wallet: Wallet, exportingPublicKey: string): string{
+
+        const exportingData = {
+            name: wallet.name,
+            networkName: wallet.networkName,
+            accounts: wallet.accounts.find(acc => acc.publicKey === exportingPublicKey),
+            contacts: wallet.contacts
+        };
+
+        const walletJSON = JSON.stringify(exportingData);
 
         return Helper.base64encode(walletJSON);
     }
