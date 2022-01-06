@@ -1,13 +1,13 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([[86],{
 
-/***/ "./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg":
-/*!****************************************************************************************************!*\
-  !*** ./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg ***!
-  \****************************************************************************************************/
+/***/ "./src/assets/img/chevron_left.svg":
+/*!*****************************************!*\
+  !*** ./src/assets/img/chevron_left.svg ***!
+  \*****************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.541d4c2b.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg?");
+eval("module.exports = __webpack_require__.p + \"assets/img/chevron_left.120f1ae7.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/chevron_left.svg?");
 
 /***/ })
 
