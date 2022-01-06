@@ -53,7 +53,16 @@
             </div>
           </div>
         </div>
-        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" placeholder="TRANSFER AMOUNT" type="text" :showError="showBalanceErr" :errorMessage="$t('accounts.insufficientbalance')" :decimal="6" class="mt-3 " :disabled="disableSupply"/>
+        <div v-for="(mosaic, index) in mosaicsCreated" :key="index">
+          <MosaicInput placeholder="Select Asset" errorMessage="" v-model="selectedMosaic[index].id" :index="index" :options="mosaics" :disableOptions="selectedMosaic" @show-mosaic-selection="updateMosaic" @remove-mosaic-selected="removeMosaic"/>
+          <TransferInputClean v-if="selectedMosaic[index].id != 0" v-model="selectedMosaic[index].amount" :balance="getSelectedMosaicBalance[index]" placeholder="AMOUNT (ASSET)" type="text" :showError="showAssetBalanceErr[index]" :errorMessage="$t('accounts.insufficientbalance')" :decimal="mosaicSupplyDivisibility[index]"  />
+        </div>
+        <div>
+          <button class="my-2 font-semibold text-xs text-blue-primary outline-none focus:outline-none disabled:opacity-50" :disabled="addMosaicsButton" @click="displayMosaicsOption">
+           + Add Assets
+          </button>
+        </div>
+        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" placeholder="TRANSFER AMOUNT" :logo="true" type="text" :showError="showBalanceErr" :errorMessage="$t('accounts.insufficientbalance')" :decimal="6"  :disabled="disableSupply"/>
         <TransferTextareaInput placeholder="MESSAGE" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
@@ -112,19 +121,6 @@
     </div>
   </div>
 </div>
-  <!-- 
- 
-        <div v-for="(mosaic, index) in mosaicsCreated" :key="index">
-          <MosaicInput :placeholder="$t('transfer.selectmosaic')" errorMessage="" v-model="selectedMosaic[index].id" :index="index" :options="mosaics" :disableOptions="selectedMosaic" @show-mosaic-selection="updateMosaic" @remove-mosaic-selected="removeMosaic"/>
-          <SupplyInput v-if="selectedMosaic[index].id != 0"  :title="$t('accounts.send')" v-model="selectedMosaic[index].amount" :balance="getSelectedMosaicBalance[index]" :placeholder="$t('transfer.enteramount')" type="text" icon="coins" :showError="showBalanceErr" :errorMessage="$t('accounts.insufficientbalance')" :decimal="mosaicSupplyDivisibility[index]"/>
-        </div>
-        <div>
-          <button class="mb-5 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50" :disabled="addMosaicsButton" @click="displayMosaicsOption">
-            (+) {{$t('transfer.addmosaics')}} 
-          </button>
-        </div>
-        
-  </div> -->
 </template>
 <script >
 import { Helper } from "@/util/typeHelper";
@@ -162,7 +158,8 @@ export default {
     TransferTextareaInput,
     PasswordInput,
     AddContactModal,
-    ConfirmSendModal
+    ConfirmSendModal,
+    MosaicInput
   },
   setup() {
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
@@ -171,7 +168,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showContactSelection = ref(false);
-    const showBalanceErr = ref(false);
+    const showAssetBalanceErr = ref([])
     const selectContact = ref("0");
     const recipientInput = ref("");
     const msgOption = ref("regular");
@@ -222,7 +219,7 @@ export default {
         networkState.currentNetworkProfile.network.currency.divisibility
       )
     );
-    console.log(lockFundCurrency.value)
+    
     const lockFundTxFee = ref(26.700000);
     const lockFundTotalFee = computed(
       () => lockFund.value + lockFundTxFee.value
@@ -242,15 +239,8 @@ export default {
     });
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
-    const disableCreate = computed(() => {
-      return !(
-        walletPassword.value.match(passwdPattern) &&
-        !showAddressError.value &&
-        recipientInput.value.length > 0
-      );
-    });
     
-  
+    
     const selectedAccName = ref(
       walletState.currentLoggedInWallet.selectDefaultAccount().name
     );
@@ -260,20 +250,6 @@ export default {
     const findAcc = (publicKey)=>{
       return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
     }
-   
-    
-    /* const accounts = computed( () => {
-      if(walletState.currentLoggedInWallet){
-        if(walletState.currentLoggedInWallet.others){
-          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
-          return concatOther;
-        } else{
-          return walletState.currentLoggedInWallet.accounts;
-        }
-      } else{
-        return [];
-      }
-    }); */
     
     const accounts = computed(()=>{
       if(!walletState.currentLoggedInWallet){
@@ -312,7 +288,6 @@ export default {
         list.push({publicKey:publicKey,name:findAcc(publicKey).name,balance:findAcc(publicKey).balance })
       })
       cosigners.cosignerList = list
-      console.log(cosigners)
       return cosigners
     })
     
@@ -377,9 +352,7 @@ export default {
       }
     })
     
-    if (balance.value < lockFundTotalFee.value) {
-      showBalanceErr.value = true;
-    }
+   
     const moreThanOneAccount = computed(() => {
       return accounts.value.length> 1;
     });
@@ -473,21 +446,7 @@ export default {
       }
     }
   };
-  const getSelectedMosaicBalance = (index) => {
-    const account = walletState.currentLoggedInWallet.accounts.find(
-      (account) => account.address === selectedAccAdd.value) ||
-      walletState.currentLoggedInWallet.others.find(
-      (account) => account.address === selectedAccAdd.value) 
-    let mosaic = account.assets.find(
-      (asset) => asset.idHex == mosaic.value[index].id
-    );
-    
-    if (mosaic != undefined) {
-      return mosaic.getExactAmount();
-    } else {
-      return 0;
-    }
-  };
+ 
   const addMosaicsButton = computed(() => {
     if (!disableSupply.value) {
       let account;
@@ -527,6 +486,25 @@ export default {
       return 0
     }
   })
+
+  const showBalanceErr = computed(()=>{
+      if (sendXPX.value>balance.value){
+        return true
+      }else if (totalFee.value>balance.value){
+        return true
+      }else{
+        return false
+      }
+    })
+    const disableCreate = computed(() => {
+      return !(
+        walletPassword.value.match(passwdPattern) &&
+        !showAddressError.value &&
+        recipientInput.value.length > 0  &&
+        (showAssetBalanceErr.value.every(value => value == false)) &&
+        !showBalanceErr.value
+      );
+    });
   
   const mosaics = computed(() => {
     var mosaicOption = [];
@@ -550,6 +528,10 @@ export default {
     }
     return mosaicOption;
   });
+  for(let i=0;i<mosaics.value.length;i++){
+    showAssetBalanceErr.value.push(false)
+  }
+
   const displayMosaicsOption = () => {
     mosaicsCreated.value.push(0);
     selectedMosaic.value.push({ id: 0, amount: "0" });
@@ -568,12 +550,31 @@ export default {
   const removeMosaic = (e) => {
     mosaicsCreated.value.splice(e.index, 1);
     selectedMosaic.value.splice(e.index, 1);
+    showAssetBalanceErr.value.splice(e.index,1)
     mosaicSupplyDivisibility.value.splice(e.index, 1);
   };
   
- 
+  const getSelectedMosaicBalance = (index) => {
+    const account = walletState.currentLoggedInWallet.accounts.find(
+      (account) => account.address === selectedAccAdd.value) ||
+      walletState.currentLoggedInWallet.others.find(
+      (account) => account.address === selectedAccAdd.value) 
+    let mosaic = account.assets.find(
+      (asset) => asset.idHex == mosaics.value[index].val
+    );
+    
+    if (mosaic != undefined) {
+      return mosaic.getExactAmount();
+    } else {
+      return 0;
+    }
+  };
   
   watch(selectedAccAdd, (n, o) => {
+    showAssetBalanceErr.value = []
+    for(let i=0;i<mosaics.value.length;i++){
+      showAssetBalanceErr.value.push(false)
+    }
     isMultiSigBool.value = isMultiSig(n);
     if (isMultiSigBool.value) {
       
@@ -597,7 +598,6 @@ export default {
   watch(cosignAddress, (n, o) => {
     if (n != o) {
         let cosigners = getWalletCosigner.value.cosignerList
-        console.log(n)
         if (
         accounts.value.find((element) => element.address == n).balance <
         lockFundTotalFee.value
@@ -609,13 +609,7 @@ export default {
       
     }
   });
-  watch(balance, (n) => {
-    if (n == 0) { 
-      showBalanceErr.value = true;
-    }else if (n > lockFundTotalFee.value ){
-      showBalanceErr.value = false
-    }
-  });
+ 
   watch(recipientInput,n=>{
     checkEncryptable(n);
     if(n.length==40 || n.length==46){
@@ -717,6 +711,16 @@ export default {
       remainingChar.value = TransactionUtils.getPlainMessageSize(messageText.value);
     }
   });
+
+   watch(() => [...selectedMosaic.value], (n) => {
+      for(let i = 0; i < selectedMosaic.value.length; i++){
+        if(selectedMosaic.value[i].amount> getSelectedMosaicBalance(i)){
+          showAssetBalanceErr.value[i]= true
+        }else{
+          showAssetBalanceErr.value[i]= false
+        }
+      }
+    }, {deep:true});
   emitter.on("CLOSE_CONTACT_MODAL", (payload) => {
     togglaAddContact.value = payload;
     clearInput();
@@ -724,9 +728,6 @@ export default {
   emitter.on("select-account", (address) => {
     selectedAccName.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)? walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address).name : walletState.currentLoggedInWallet.others.find(acc=>acc.address==address).name
     selectedAccAdd.value = address;
-    
-    balance.value == 0? (showBalanceErr.value = true): (showBalanceErr.value = false);
-    
     selectedMosaic.value = [];
     mosaicsCreated.value = [];
     selectedMosaicAmount.value = [];
@@ -748,6 +749,7 @@ export default {
     }
   });
     return {
+      showAssetBalanceErr,
       findAcc,
       totalFee,
       contacts,

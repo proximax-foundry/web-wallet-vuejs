@@ -47,6 +47,7 @@ function verifyContactPublicKey(address :string) :Promise<{status: boolean, publ
       },
       (error) => {
         console.warn('Err: ' + error);
+        resolve({status:false,publicKey: ""})
       }
     );
   });
