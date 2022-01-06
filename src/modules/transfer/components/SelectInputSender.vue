@@ -9,9 +9,9 @@
         <div v-if='selectedAccount!=""' class='mt-1 text-tsm font-bold'>{{selectedAccount}}</div>
         <div v-else class='text-txs mt-1 font-bold '>SELECT ACCOUNT</div>
       </div>
-      <div v-if='!toggleSelection && selectedAccount==""' class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>Select</div>
+      <!-- <div v-if='!toggleSelection && selectedAccount==""' class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>Select</div> -->
       <div v-if='!toggleSelection && selectedAccount!=""'  class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>Change</div>
-      <img v-if='toggleSelection' @click='selectedAccount=""' src="@/assets/img/delete.svg" class='h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>
+      <!-- <img v-if='toggleSelection' @click='selectedAccount=""' src="@/assets/img/delete.svg" class='h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'> -->
     </div>
   </div>
   <div class='relative'>
@@ -44,14 +44,12 @@ props: [
     'selectDefault'
   ],
 setup(p){
-
     const toggleSelection = ref(false);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
     let jdenticonConfig = themeConfig.jdenticonConfig;
-
     const accounts = computed(() =>{
       var accountList = [];
       const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
@@ -74,6 +72,8 @@ setup(p){
       selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
       toggleSelection.value = !toggleSelection.value;
     };
+   
+  
     return {
       selectAccount,
       selectedAddress,
@@ -89,5 +89,4 @@ setup(p){
 </script>
 
 <style>
-
 </style>

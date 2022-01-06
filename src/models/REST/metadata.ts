@@ -1,7 +1,7 @@
 import { 
     MetadataHttp, NetworkHttp,
-    MosaicId, NamespaceId, 
-    AddressMetadata, NamespaceMetadata, MosaicMetadata
+    MosaicId, NamespaceId, MetadataQueryParams,
+    MetadataEntry, MetadataSearch
 } from "tsjs-xpx-chain-sdk";
 
 export class MetadataAPI {
@@ -13,19 +13,19 @@ export class MetadataAPI {
     }
 
     /**
-     * Gets the Metadata for a given accountId
-     * @param accountId - Account address/public key
+     * Get the Metadata for a given compositeHash
+     * @param compositeHash - compositeHash for Account/mosaic/namespace
      *
      */
-    getAccountMetadata(accountId: string): Promise<AddressMetadata>{
-        return this.metadataHttp.getAccountMetadata(accountId).toPromise();
+    getMetadata(compositeHash: string): Promise<MetadataEntry>{
+        return this.metadataHttp.getMetadata(compositeHash).toPromise();
     }
 
-    getMosaicMetadata(mosaicId: MosaicId): Promise<MosaicMetadata>{
-        return this.metadataHttp.getMosaicMetadata(mosaicId).toPromise();
+    getMetadatas(compositeHashes: string[]): Promise<MetadataEntry[]>{
+        return this.metadataHttp.getMetadatas(compositeHashes).toPromise();
     }
 
-    getNamespaceMetadata(namespaceId: NamespaceId): Promise<NamespaceMetadata>{
-        return this.metadataHttp.getNamespaceMetadata(namespaceId).toPromise();
+    searchMetadatas(metadataQueryParams: MetadataQueryParams): Promise<MetadataSearch>{
+        return this.metadataHttp.searchMetadata(metadataQueryParams).toPromise();
     }
 }

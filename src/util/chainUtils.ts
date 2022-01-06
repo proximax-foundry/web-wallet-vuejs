@@ -2,7 +2,8 @@ import { ChainConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, Con
   NetworkType, 
   NamespaceId,
   MosaicId, Address, PublicAccount, CosignatureSignedTransaction, Statement,
-  AccountInfo, Transaction, QueryParams, SignedTransaction, TransactionType, NamespaceName, Mosaic, MosaicInfo
+  AccountInfo, Transaction, TransactionQueryParams, SignedTransaction, TransactionType, NamespaceName, Mosaic, MosaicInfo,
+  NamespaceInfo, TransactionGroupType, TransactionSearch
 } from "tsjs-xpx-chain-sdk";
 import { NetworkConfig } from "../models/stores/chainProfileConfig";
 import { ChainAPICall } from "../models/REST/chainAPICall";
@@ -176,7 +177,7 @@ export class ChainUtils{
       return accountInfo;
     }
 
-    static async getAccountTransactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<Transaction[]>{
+    static async getAccountTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]>{
 
       let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
 
@@ -185,7 +186,16 @@ export class ChainUtils{
       return transactions;
     }
 
-    static async getAccountUnconfirmedTransactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<Transaction[]>{
+    static async searchTransactions(txnGroupType: TransactionGroupType, queryParams?: TransactionQueryParams): Promise<TransactionSearch>{
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let transactions = await chainRESTCall.transactionAPI.searchTransactions(txnGroupType, queryParams);
+
+      return transactions;
+    }
+
+    static async getAccountUnconfirmedTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]>{
 
       let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
 
@@ -194,7 +204,7 @@ export class ChainUtils{
       return transactions;
     }
 
-    static async getAccountPartialTransactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<Transaction[]>{
+    static async getAccountPartialTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]>{
 
       let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
 
@@ -313,5 +323,13 @@ export class ChainUtils{
       let statement = await chainRESTCall.blockAPI.getBlockReceipts(blockHeight);
 
       return statement;
+    }
+
+    static async getNamespaceInfo(namespaceId: NamespaceId): Promise<NamespaceInfo>{
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let namespaceInfo = await chainRESTCall.namespaceAPI.getNamespace(namespaceId);
+
+      return namespaceInfo;
     }
 }

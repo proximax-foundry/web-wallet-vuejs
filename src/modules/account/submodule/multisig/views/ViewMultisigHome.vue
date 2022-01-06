@@ -7,7 +7,8 @@
   <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
     <div class="flex text-xs font-semibold border-b-2 menu_title_div">
       <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-18 text-center '>Details</router-link>
-      <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Multisig</div>
+      <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Multisig</div>
+      <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
       <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
     </div>
     <div class='font-semibold mt-8'>Multisig Settings</div>
@@ -52,7 +53,6 @@
           <span v-if="!isCosigner">"{{acc.name}}" is not a cosignatory of any accounts.</span>
         </div>
       </div>
-      <button class="blue-btn py-2 px-2 mt-3">View Scheme</button>
     </div>
   </div>
 </div>
@@ -99,7 +99,6 @@ export default {
         multisigAccounts.forEach(account=>multisigAccountsList.push({name: getAccountName(account.publicKey),address:  PublicAccount.createFromPublicKey(account.publicKey,networkType).address.pretty()}))
         return multisigAccountsList
       },{deep:true})
-
       let cosignerAccountsList = computed(()=>{
         let cosignerAccountsList= []
         let cosignerAccounts =  acc.multisigInfo.filter(info=>info.level== 1)
@@ -118,7 +117,6 @@ export default {
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-
       toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
     };
       
@@ -132,9 +130,7 @@ export default {
       }
     }
 }
-
 </script>
 
 <style>
-
 </style>

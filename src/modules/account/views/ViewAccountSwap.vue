@@ -8,6 +8,7 @@
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
         <router-link :to="{name: 'ViewAccountDetails',params:{address: acc.address}}" class= 'w-18 text-center '>Details</router-link>
         <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
+        <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
         <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Swap</div>
       </div>
       <div class='my-7 font-semibold'>NIS1 Swap</div>
@@ -57,7 +58,6 @@ export default {
     const toast = useToast();
     const router = useRouter();
     const err = ref('');
-    
 
     var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
     if(!acc){

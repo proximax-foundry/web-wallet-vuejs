@@ -27,7 +27,7 @@ import {
   TransactionType,
   AggregateTransaction,
   CosignatureTransaction,
-  QueryParams,
+  TransactionQueryParams,
   AddressAliasTransaction,
   AddExchangeOfferTransaction,
   ChainConfigTransaction,
@@ -36,7 +36,10 @@ import {
   RemoveExchangeOfferTransaction,
   AccountLinkTransaction,
   LockFundsTransaction,
-  ModifyMetadataTransaction,
+  // ModifyMetadataTransaction,
+  AccountMetadataTransaction,
+  NamespaceMetadataTransaction,
+  MosaicMetadataTransaction,
   AccountMosaicRestrictionModificationTransaction,
   AccountOperationRestrictionModificationTransaction,
   AccountAddressRestrictionModificationTransaction,
@@ -53,7 +56,9 @@ import {
   RestrictionType,
   AccountRestrictionModification,
   SignedTransaction,
-  CosignatureSignedTransaction
+  CosignatureSignedTransaction,
+  TransactionGroupType,
+  TransactionSearch
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { walletState } from "../state/walletState";
@@ -80,11 +85,11 @@ export const transactionTypeName = {
   },
   mosaicDefinition: {
     id: TransactionType.MOSAIC_DEFINITION,
-    name: 'Mosaic Definition'
+    name: 'SDA Definition'
   },
   mosaicSupplyChange: {
     id: TransactionType.MOSAIC_SUPPLY_CHANGE,
-    name: 'Mosaic Supply Change'
+    name: 'SDA Supply Change'
   },
   modifyMultisigAccount: {
     id: TransactionType.MODIFY_MULTISIG_ACCOUNT,
@@ -100,7 +105,7 @@ export const transactionTypeName = {
   },
   mosaicAlias: {
     id: TransactionType.MOSAIC_ALIAS,
-    name: 'Mosaic Alias'
+    name: 'SDA Alias'
   },
   addressAlias: {
     id: TransactionType.ADDRESS_ALIAS,
@@ -132,7 +137,7 @@ export const transactionTypeName = {
   },
   modifyMosaicMetadata: {
     id: TransactionType.MODIFY_MOSAIC_METADATA,
-    name: 'Modify Asset Metadata'
+    name: 'Modify SDA Metadata'
   },
   modifyNamespaceMetadata: {
     id: TransactionType.MODIFY_NAMESPACE_METADATA,
@@ -140,15 +145,15 @@ export const transactionTypeName = {
   },
   modifyAccountRestrictionAddress: {
     id: TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS,
-    name: 'Modify Account Restriction Address'
+    name: 'Modify Account Address Restriction'
   },
   modifyAccountRestrictionMosaic: {
     id: TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC,
-    name: 'Modify Account Restriction Asset'
+    name: 'Modify Account SDA Restriction'
   },
   modifyAccountRestrictionOperation: {
     id: TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION,
-    name: 'Modify Account Restriction Operation'
+    name: 'Modify Account Operation Restriction'
   },
   chainConfigure: {
     id: TransactionType.CHAIN_CONFIGURE,
@@ -160,11 +165,31 @@ export const transactionTypeName = {
   },
   secretLock: {
     id: TransactionType.SECRET_LOCK,
-    name: "Secret lock"
+    name: "Secret Lock"
   },
   secretProof: {
     id: TransactionType.SECRET_PROOF,
-    name: "Secret proof"
+    name: "Secret Proof"
+  },
+  modifyAccountMetadata_v2: {
+    id: TransactionType.ACCOUNT_METADATA_V2,
+    name: "Account Metadata"
+  },
+  modifyMosaicMetadata_v2: {
+    id: TransactionType.MOSAIC_METADATA_V2,
+    name: "SDA Metadata"
+  },
+  modifyNamespaceMetadata_v2: {
+    id: TransactionType.NAMESPACE_METADATA_V2,
+    name: "Namespace Metadata"
+  },
+  modifyMosaicLevy: {
+    id: TransactionType.MODIFY_MOSAIC_LEVY,
+    name: "Modify SDA Levy"
+  },
+  removeRemoveLevy: {
+    id: TransactionType.REMOVE_MOSAIC_LEVY,
+    name: "Remove SDA Levy"
   }
 };
 
@@ -220,21 +245,28 @@ export class TransactionUtils {
     return account.signCosignatureTransaction(cosignatureTransaction);
   }
 
-  static async getTransactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<Transaction[]> {
+  static async getTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]> {
 
     let transactions = await ChainUtils.getAccountTransactions(publicAccount, queryParams);
 
     return transactions;
   }
 
-  static async getUnconfirmedTransactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<Transaction[]> {
+  static async searchTransactions(txnGroupType: TransactionGroupType, queryParams?: TransactionQueryParams): Promise<TransactionSearch> {
+
+    let transactionsResult = await ChainUtils.searchTransactions(txnGroupType, queryParams);
+
+    return transactionsResult;
+  }
+
+  static async getUnconfirmedTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]> {
 
     let transactions = await ChainUtils.getAccountUnconfirmedTransactions(publicAccount, queryParams);
 
     return transactions;
   }
 
-  static async getPartialTransactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<Transaction[]> {
+  static async getPartialTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]> {
 
     let transactions = await ChainUtils.getAccountPartialTransactions(publicAccount, queryParams);
 
@@ -328,6 +360,21 @@ export class TransactionUtils {
       case TransactionType.TRANSFER:
         typeName = transactionTypeName.transfer.name
         break;
+      case TransactionType.ACCOUNT_METADATA_V2:
+        typeName = transactionTypeName.modifyAccountMetadata_v2.name
+        break;
+      case TransactionType.MOSAIC_METADATA_V2:
+        typeName = transactionTypeName.modifyMosaicMetadata_v2.name
+        break;
+      case TransactionType.NAMESPACE_METADATA_V2:
+        typeName = transactionTypeName.modifyNamespaceMetadata_v2.name
+        break;
+      case TransactionType.MODIFY_MOSAIC_LEVY:
+        typeName = transactionTypeName.modifyMosaicLevy.name
+        break;
+      case TransactionType.REMOVE_MOSAIC_LEVY:
+        typeName = transactionTypeName.removeRemoveLevy.name
+        break;  
 
       default:
         typeName = null;
@@ -336,4 +383,14 @@ export class TransactionUtils {
 
     return typeName;
   }
+
+  static getLockFundFee = (networkType: NetworkType, generationHash: string):number => {
+    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    let tempAcc = Account.generateNewAccount(networkType);
+    let txn = buildTransactions.transfer(tempAcc.address, PlainMessage.create('hello'));
+    let abt = buildTransactions.aggregateBonded([txn.toAggregate(tempAcc.publicAccount)])
+    let signedTxn = tempAcc.sign(abt, generationHash);
+    return buildTransactions.hashLock(new Mosaic(new NamespaceId('prx.xpx'), UInt64.fromUint(10)), UInt64.fromUint(10), signedTxn).maxFee.compact();
+  }
 }
+

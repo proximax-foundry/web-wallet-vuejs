@@ -20,4 +20,7 @@ export class ExchangeAPI {
         return this.exchangeHttp.getExchangeOffers(offerType, mosaicId).toPromise();
     }
 
+    getExchangeList(): Promise<MosaicId[]>{
+        return this.exchangeHttp.getOfferList().toPromise();
+    }
 }

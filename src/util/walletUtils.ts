@@ -15,7 +15,7 @@ import {
     WalletAlgorithm, PublicAccount, Account, NetworkType, 
     AggregateTransaction, CosignatureTransaction, MosaicNonce,
     NamespaceId, Address, AccountInfo, MosaicId, AliasType, Transaction,
-    MultisigAccountGraphInfo,MultisigAccountInfo,QueryParams
+    MultisigAccountGraphInfo,MultisigAccountInfo,QueryParams, TransactionQueryParams
 } from "tsjs-xpx-chain-sdk"
 import { computed } from "vue";
 import { Helper, LooseObject } from "./typeHelper";
@@ -25,6 +25,7 @@ import { Namespace } from "@/models/namespace";
 import { Account as myAccount } from "@/models/account";
 import { TransactionUtils } from "./transactionUtils"
 import { Account as NEM_Account, NetworkTypes, NEMLibrary } from "nem-library";
+import { AddressBook } from "@/models/addressBook"
 
 const config = require("@/../config/config.json");
 
@@ -195,7 +196,9 @@ export class WalletUtils {
         const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
         return new Promise((resolve, reject) => {
             try {
-                chainAPICall.accountAPI.aggregateBondedTransactions(publicAccount,new QueryParams(100)).then(transactions => {
+                let txnQueryParams = new TransactionQueryParams();
+                txnQueryParams.pageSize = 100;
+                chainAPICall.accountAPI.aggregateBondedTransactions(publicAccount,txnQueryParams).then(transactions => {
                     resolve(transactions);
                 }).catch((error) => {
                     console.warn(error);
@@ -268,8 +271,12 @@ export class WalletUtils {
         return SimpleWallet.create(walletName, password, network);
     }
 
-    static createAccountSimpleFromPrivateKey(walletName: string, password: Password, privateKey: string, network: NetworkType){
+    static createAccountSimpleFromPrivateKey(walletName: string, password: Password, privateKey: string, network: NetworkType): SimpleWallet{
         return SimpleWallet.createFromPrivateKey(walletName, password, privateKey, network)
+    }
+
+    static createAccountSimpleFromEncryptedPrivateKey(walletName: string, encryptedPrivateKey: string, iv: string, publicKey: string, network: NetworkType): SimpleWallet{
+        return SimpleWallet.createFromEncryptedKey(walletName, encryptedPrivateKey, iv, publicKey, network);
     }
 
     /**
@@ -537,6 +544,18 @@ export class WalletUtils {
 
         const newWallet = new Wallet(wltFile.name, networkName, walletAccounts);
 
+        if(Array.isArray(wltFile.contacts)){
+            try {
+                for(let i=0; i < wltFile.contacts.length; ++i){
+                    let group = wltFile.contacts[i].group ? wltFile.contacts[i].group : '';
+                    let newAddressBook = new AddressBook(wltFile.contacts[i].name, wltFile.contacts[i].address, group);
+                    newWallet.addAddressBook(newAddressBook);
+                }
+            } catch (error) {
+                
+            }
+        }
+
         wallets.wallets.push(newWallet);
 
         wallets.savetoLocalStorage();
@@ -585,7 +604,28 @@ export class WalletUtils {
 
     static export(wallet: Wallet): string{
 
-        const walletJSON = JSON.stringify(wallet);
+        const exportingData = {
+            name: wallet.name,
+            networkName: wallet.networkName,
+            accounts: wallet.accounts,
+            contacts: wallet.contacts
+        };
+
+        const walletJSON = JSON.stringify(exportingData);
+
+        return Helper.base64encode(walletJSON);
+    }
+
+    static exportAccount(wallet: Wallet, exportingPublicKey: string): string{
+
+        const exportingData = {
+            name: wallet.name,
+            networkName: wallet.networkName,
+            accounts: wallet.accounts.find(acc => acc.publicKey === exportingPublicKey),
+            contacts: wallet.contacts
+        };
+
+        const walletJSON = JSON.stringify(exportingData);
 
         return Helper.base64encode(walletJSON);
     }
@@ -1064,7 +1104,7 @@ export class WalletUtils {
         const account = Account.generateNewAccount(networkType);
         const wallet = WalletUtils.createAccountSimpleFromPrivateKey(walletName, password, account.privateKey, networkType);
         let walletAccounts: WalletAccount[] = [];
-        let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
+        let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.publicAccount.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
         walletAccount.isBrain = true;
         walletAccount.default = true;
         walletAccounts.push(walletAccount);
@@ -1085,7 +1125,7 @@ export class WalletUtils {
         const account = Account.createFromPrivateKey(privateKey, networkType);
         const wallet = WalletUtils.createAccountSimpleFromPrivateKey(walletName, password, privateKey, networkType);
         let walletAccounts: WalletAccount[] = [];
-        let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
+        let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.publicAccount.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
         walletAccount.isBrain = true;
         walletAccount.default = true;
         walletAccounts.push(walletAccount);

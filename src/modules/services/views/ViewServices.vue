@@ -76,8 +76,8 @@ export default {
         {name: computed(() => t('welcome.create')), link: 'ViewServicesSiriusGiftCreateGift'},
         {name: computed(() => t('services.redeem')), link: 'ViewServicesSiriusGiftRedeem'},
       ]},
-      {name: computed(() => t('services.aggregatetransactions')), desc: computed(() => t('services.aggregatetransactions')), img: 'icon-aggregate-transactions-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[
-        {name: computed(() => t('services.complete')), link: ''},
+      {name: computed(() => t('services.aggregatetransactions')), desc: computed(() => t('services.aggregatetransactions')), img: 'icon-aggregate-transactions-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
+        {name: computed(() => t('services.complete')), link: 'ViewServicesAggregateTransactionsComplete'},
         {name: computed(() => t('services.bonded')), link: ''},
       ]},
       {name: computed(() => t('services.crosschainswap')), desc: computed(() => t('services.crosschaindescription')), img: 'icon-cross-chain-swap-full-color-80h-proximax-sirius-wallet.svg', enable: false, menu:[

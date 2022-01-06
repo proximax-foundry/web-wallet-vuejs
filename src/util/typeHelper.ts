@@ -12,7 +12,17 @@ import {
     AliasActionType,
     QueryParams,
     CosignatureTransaction,
-    Password
+    Password,
+    TransactionType,
+    TransactionHash, 
+    TransactionQueryParams,
+    MetadataQueryParams,
+    TransactionGroupType,
+    MetadataType,
+    Order,
+    TransactionSortingField,
+    TransactionFieldOrder,
+    Order_v2
 } from "tsjs-xpx-chain-sdk";
 import Base64 from 'crypto-js/enc-base64';
 import { WalletAcountType } from "../models/const/otherAccountType";
@@ -98,6 +108,38 @@ export class Helper{
     static createNonceRandom(): MosaicNonce {
         const nonce = MosaicNonce.createRandom();
         return nonce;
+    }
+
+    static createTransactionHash(hash: string, transactionType: number){
+        return new TransactionHash(hash, transactionType);
+    }
+
+    static createTransactionQueryParams(): TransactionQueryParams{
+        return new TransactionQueryParams();
+    }
+
+    static createMetadataQueryParams(): MetadataQueryParams{
+        return new MetadataQueryParams();
+    }
+
+    static createTransactionFieldOrder(order: Order_v2, sortingField: TransactionSortingField): TransactionFieldOrder{
+        return new TransactionFieldOrder(order, sortingField);
+    }
+
+    static getQueryParamOrder(): typeof Order{
+        return Order;
+    }
+
+    static getQueryParamOrder_v2(): typeof Order_v2{
+        return Order_v2;
+    }
+
+    static getTransactionSortField(): typeof TransactionSortingField{
+        return TransactionSortingField;
+    }
+
+    static getTransactionGroupType(): typeof TransactionGroupType{
+        return TransactionGroupType;
     }
 
     static getWalletAlgorithm(): typeof WalletAlgorithm{

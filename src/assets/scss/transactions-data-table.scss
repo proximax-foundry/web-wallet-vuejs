@@ -1,0 +1,71 @@
+.p-datatable-tbody{
+  td{
+    font-size: 11px;
+  }
+}
+
+.truncate {
+  max-width: 10em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.truncate-lg {
+  max-width: 15em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.truncate-lg.inline-block{
+  vertical-align: middle;
+}
+
+.truncate.inline-block{
+  vertical-align: middle;
+}
+
+.inline-block{
+  .truncate{
+    vertical-align: middle;
+  }
+
+  .truncate-lg{
+    vertical-align: middle;
+  }
+}
+
+.p-splitbutton-defaultbutton{
+  .p-button-label{
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
+.p-menu{
+  background-color: white;
+  min-width: 105px;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+
+  .p-menuitem-link{
+    padding-bottom: 3px;
+    padding-top: 3px;
+
+    .p-menuitem-icon{
+      padding: 5px;
+    }
+
+    .p-menuitem-text{
+      padding-right: 30px;
+    }
+
+    &:hover{
+      --tw-bg-opacity: 1;
+      background-color: rgba(229, 231, 235, var(--tw-bg-opacity));
+    }
+  }
+}
