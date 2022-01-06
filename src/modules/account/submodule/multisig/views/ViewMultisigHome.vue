@@ -5,16 +5,18 @@
     <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
   </div>
   <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
+    <AccountComponent :address="acc.address" class="mb-10"/>
     <div class="flex text-xs font-semibold border-b-2 menu_title_div">
-      <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-18 text-center '>Details</router-link>
+      <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-32 text-center '>Account Details</router-link>
       <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Multisig</div>
       <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
       <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
+      <MoreAccountOptions :address="acc.address"/>
     </div>
-    <div class='font-semibold mt-8'>Multisig Settings</div>
-    <div class='mt-6 p-6 border filter shadow-lg'>
+    
+    <div class=' p-6 border-2 border-t-0 filter shadow-lg'>
       <div class='text-xs font-semibold'>Account Cosignatories</div>
-      <div class='border border-4 p-4 my-3 '>
+      <div class='border p-4 my-3 '>
        <div class="flex flex-col gap-2">
         <div v-for="(cosigner,index) in cosignerAccountsList" :key="index">
             <div class="border w-full rounded-md p-3">
@@ -35,7 +37,7 @@
       <router-link :to="{ name: isMultisig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: acc.name}}" class="blue-btn py-2 px-2 ">Manage Cosignatories</router-link>
       <div class="gray-line my-8"></div>
       <div class='text-xs font-semibold'>Cosignatory of</div>
-      <div class='border border-4 p-4 mt-3'>
+      <div class='border p-4 mt-3'>
         <div class="flex flex-col gap-2">
           <div v-for="(multisig,index) in multisigAccountsList" :key="index">
             <div class="border w-full rounded-md p-3">
@@ -66,10 +68,16 @@ import { useToast } from "primevue/usetoast";
 import { multiSign } from '@/util/multiSignatory';
 import {Address, PublicAccount} from  "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
+import AccountComponent from "@/modules/account/components/AccountComponent.vue";
+import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 export default {
     name: "ViewMultisigHome",
     props: {
         name: String
+    },
+    components:{
+      AccountComponent,
+      MoreAccountOptions
     },
     setup(p){
       const toast = useToast();

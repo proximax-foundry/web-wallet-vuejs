@@ -5,14 +5,15 @@
       <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
     </div>
     <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
+      <AccountComponent :address="address" class="mb-10"/>
       <div class = 'flex text-xs font-semibold border-b-2 mt-5'>
-        <router-link :to="{name: 'ViewAccountDetails',params:{address:currentAccount.address}}" class= 'w-18 text-center '>Details</router-link>
+        <router-link :to="{name: 'ViewAccountDetails',params:{address:currentAccount.address}}" class= 'w-32 text-center '>Account Details</router-link>
         <router-link :to="{name:'ViewMultisigHome', params: { name: currentAccount.name}}" class= 'w-18 text-center'>Multisig</router-link>
         <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Scheme</div>
         <router-link :to="{name:'ViewAccountSwap', params: { address: currentAccount.address}}" class= 'w-18 text-center'>Swap</router-link>
+        <MoreAccountOptions :address="address"/>
       </div>
-      <div class="font-semibold mt-7 mb-3">Account Scheme</div>
-      <div class="overflow-auto w-full border bg-gray-50 p-10 ">
+      <div class="overflow-auto w-full border-2 border-t-0 bg-gray-50 p-10 ">
         <ul>
           <li class="flex items-center" >
             <AccountSchemeTile 
@@ -77,11 +78,14 @@ import AccountSchemeTile from '@/modules/account/components/AccountSchemeTile.vu
 import { networkState } from '@/state/networkState';
 import { Address } from 'tsjs-xpx-chain-sdk';
 import { Helper } from '@/util/typeHelper';
-
+import AccountComponent from "@/modules/account/components/AccountComponent.vue";
+import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 export default {
   name:"ViewMultisigScheme",
   components:{
-    AccountSchemeTile
+    AccountSchemeTile,
+    AccountComponent,
+    MoreAccountOptions
   },
   props: {
     address: String,

@@ -23,38 +23,15 @@
         <div class="fixed inset-0 bg-opacity-60 z-10 bg-gray-100"></div>
       </div>
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
+      <AccountComponent :address="acc.address" class="mb-10"/>
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-        <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Details</div>
+        <div class= 'w-32 text-center border-b-2 pb-3 border-yellow-500'>Account Details</div>
         <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
         <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
         <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
+        <MoreAccountOptions :address="acc.address"/>
       </div>
-      <div class='my-7 font-semibold'>Account Details</div>
-      <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
-      <div class='border-2'>
-        <div class='flex'>
-          <div v-html='svgString'></div>
-          <div class='flex flex-col justify-center ml-4'>
-            <div class='flex '>
-              <div class = '  font-semibold text-md' v-if='showName'>{{ accountNameDisplay }}</div>
-              <input class='outline-none ml-4 font-semibold text-md'  v-model='accountName' v-if='!showName'/>
-              <img src="@/modules/account/img/edit-icon.svg"  v-if='showName' @click='showName=!showName' title='Edit Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
-              <img src="@/modules/account/img/edit-icon.svg"  v-if='!showName'  @click="changeName()" title='Confirm Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
-            </div>
-            <div class='flex gap-2'> 
-              <div  v-if='isDefault' class = ' px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm'>
-                <img src="@/modules/account/img/icon-pin.svg" class = 'h-4 w-4 ' title='This is your default account everytime you login'>
-                <p class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is your default account everytime you login' >DEFAULT</p>
-              </div>
-              <div v-if='isMultiSig' class = ' px-1 py-0.5 flex mt-0.5 bg-orange-primary rounded-sm '>
-                <img v-if='isMultiSig' src="@/assets/img/icon-key.svg" class = 'h-4 w-4 mr-1' title='This is your default account everytime you login'>
-                <p v-if='isMultiSig' class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is a multisig account' >MULTISIG</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class='border-2 mt-3 pb-6 px-6 pt-2'>
+      <div class='border-2 border-t-0 pb-6 px-6 pt-2'>
         <img src="@/modules/account/img/icon-info.svg" class='h-4 w-4 ml-auto' 
         :title="'Top up your account balance to a maximum of 100,000 test-' + currentNativeTokenName + ' every 24 hours.'">
         <div class = 'text-xxs text-blue-primary font-semibold'>CURRENT BALANCE</div>
@@ -66,20 +43,18 @@
           <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
           <div class='flex ml-auto gap-6 '>
             <router-link :to='{name:"ViewTransferCreate"}' class='flex cursor-pointer'>
-              <img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-5 h-5 mt-0.5  cursor-pointer mr-1">
+              <img src="@/assets/img/icon-transfer.svg" class=" w-5 h-5 mt-0.5  cursor-pointer mr-1">
               <div class='text-xs mt-1 font-semibold '>Transfer {{currentNativeTokenName}}</div>
             </router-link>
-            <div class='flex cursor-pointer'>
-              <img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-5 h-5 mt-0.5  cursor-pointer mr-1">
-              <div class='text-xs mt-1 font-semibold'>Request {{currentNativeTokenName}}</div>
-            </div>
             <a v-if="networkState.chainNetwork == 0" href="https://www.proximax.io/en/xpx" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
               <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
               <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
+              <img src="@/modules/dashboard/img/icon-link-new.svg" class='h-5 w-5  cursor-pointer '>
             </a>
             <a v-if="networkState.chainNetwork == 1" href="https://bctestnetfaucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
               <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
               <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
+              <img src="@/modules/dashboard/img/icon-link-new-white.svg" class='h-3 w-3 mt-1 ml-1 cursor-pointer '>
             </a>
             <a v-if="networkState.chainNetwork == 2" href="https://bctestnet2faucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
               <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
@@ -88,12 +63,6 @@
           </div>
         </div>
         <div class = 'text-txs text-gray-400 '>Estimate US$ {{currencyConvert}}</div>
-        <div class='my-6 gray-line'></div>
-        <div class = 'text-xxs text-blue-primary mt-2 font-semibold'>WALLET ADDRESS</div>
-        <div class= 'flex'>
-          <div id="address" :copyValue="prettyAddress" copySubject="Address" class = 'text-xs font-semibold mt-1'>{{prettyAddress}} </div>
-          <font-awesome-icon icon="copy" title='Copy' @click="copy('address')" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
-        </div>
         <div class='my-6 gray-line'></div>
         <div class = 'text-xxs text-blue-primary mt-2 font-semibold'>PUBLIC KEY</div>
         <div class= 'flex'>
@@ -129,6 +98,8 @@ import {getXPXcurrencyPrice } from '@/util/functions';
 import { watch, ref, computed, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import TextInput from "@/components/TextInput.vue";
+import AccountComponent from "@/modules/account/components/AccountComponent.vue";
+import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { walletState } from "@/state/walletState";
@@ -151,7 +122,9 @@ export default {
     /* TextInput, */
     PkPasswordModal,
     PdfPasswordModal,
-    DeleteAccountModal
+    DeleteAccountModal,
+    AccountComponent,
+    MoreAccountOptions
   },
   props: {
     address: String,
@@ -166,8 +139,7 @@ export default {
     var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
     const other_acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
 
-    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
-    themeConfig.init();
+    
 
    
 
@@ -177,7 +149,7 @@ export default {
         acc = other_acc;
       }
     }
-     
+    
     if(p.accountCreated){
       showModal.value= true
     }
@@ -185,14 +157,13 @@ export default {
     if (acc === -1) {
       router.push({name: "ViewAccountDisplayAll"});
     }
-    const svgString = ref(toSvg(acc.address, 100, themeConfig.jdenticonConfig));
+    
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const prettyAddress = Helper.createAddress(acc.address).pretty();
     const err = ref(false);
-    const accountName = ref(acc.name);
-    const accountNameDisplay = ref(acc.name);
-    const showName = ref(true);
+    
+    
     const showPwPK = ref(false);
     const showPK = ref(false);
     const privateKey = ref("");
@@ -217,33 +188,7 @@ export default {
       return isMulti;
     });  
 
-    const changeName = () => {
-      if (accountName.value.trim()) {
-        const exist_account = walletState.currentLoggedInWallet.accounts.find((accName) => accName.name == accountName.value.trim());
-        const exist_other_account = walletState.currentLoggedInWallet.others.find((accName) => accName.name == accountName.value.trim());
-
-        if (!exist_account && !exist_other_account) {
-          const acc_index = walletState.currentLoggedInWallet.accounts.findIndex((accAdd) => accAdd.address === p.address);
-          if(acc_index == -1){
-            const other_acc_index = walletState.currentLoggedInWallet.others.findIndex((accAdd) => accAdd.address === p.address);
-            walletState.currentLoggedInWallet.others[other_acc_index].name = accountName.value;
-          }
-          else{
-            walletState.currentLoggedInWallet.accounts[acc_index].name = accountName.value;
-          }
-          walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
-          showName.value = true;
-          accountNameDisplay.value = accountName.value;
-          err.value = "";
-        } else if (exist_account || exist_other_account) {
-          err.value = t('scriptvalues.accountnametaken');
-        } else {
-          err.value = t('scriptvalues.accountnamevalidation');
-        }
-      } else {
-        err.value = t('scriptvalues.inputaccountname');
-      }
-    };
+   
 
     const verifyWalletPwPk = () => {
       if (walletPasswd.value == "") {
@@ -362,7 +307,6 @@ export default {
     return {
       networkState,
       showModal,
-      svgString,
       splitBalance,
       other_acc,
       currencyConvert,
@@ -373,14 +317,11 @@ export default {
       showPK,
       showPwPK,
       showPasswdError,
-      accountNameDisplay,
       verifyWalletPwPk,
       walletPasswd,
       walletPasswdSwap,
       showPwSwap,
-      showName,
-      changeName,
-      accountName,
+      
       acc,
       verifyWalletPwSwap,
       copy,

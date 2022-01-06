@@ -4,15 +4,17 @@
     <img src='@/assets/img/chevron_left.svg'>
     <router-link :to="{name: 'ViewMultisigHome',params:{name:acc.name}}" class='text-blue-primary text-xs mt-0.5'>Back</router-link>
   </div>
-  <div class='w-11/12 ml-auto mr-auto '>
+  <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5 '>
+    <AccountComponent :address="acc.address" class="mb-10"/>
     <div class = 'flex text-xs font-semibold border-b-2'>
-      <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-18 text-center '>Details</router-link>
+      <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-32 text-center '>Account Details</router-link>
       <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Multisig</div>
       <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
       <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
+      <MoreAccountOptions :address="acc.address"/>
     </div>
-    <div class='font-semibold mt-8 mb-3'>Multisig Settings</div>
-    <div class="border filter shadow-lg lg:grid lg:grid-cols-3" >
+    
+    <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 pr-6">
         <div class="text-xs font-semibold pl-6">Manage Cosignatories</div>
         <div class='pl-6'>
@@ -157,59 +159,7 @@
       </div>
     </div>
   </div>
-</div>
-
-
-
-          
-           
-            <!-- <div class="inline-block">
-              <MultisigSchemeModal :multiSigAccount="acc" class="inline-block mr-3" />
-              <img src="@/modules/account/submodule/multisig/img/icon-collapse-accordion-button.svg" class="w-6 h-6 inline-block cursor-pointer" @click="showCosigners = !showCosigners" v-if="!showCosigners">
-              <img src="@/modules/account/submodule/multisig/img/icon-expand-accordion-button.svg" class="w-6 h-6 inline-block" :class="`${(removeCosign.length==0)?'cursor-pointer':'cursor-auto'}`" @click="(removeCosign.length==0)?(showCosigners = !showCosigners):''" v-else>
-            </div> -->
-         
-        
-            <!-- <div v-if="showCosigners">
-              <div class="text-center text-md mb-5">{{$t('accounts.cosignaturyaccount')}}</div>
-              <div v-for="(cosigner, index) in cosignaturies" :key="index" class="mb-2 rounded-2xl px-5 py-3 flex justify-between" :class="`${(checkRemoval(cosigner))?'bg-yellow-100':'bg-white'}`">
-                <div>
-                  <div class="font-bold" v-if="otherAccount.find((acc) => acc.publicKey === cosigner)">{{ otherAccount.find(acc => acc.publicKey == cosigner).name }} <span v-if="checkRemoval(otherAccount.find((acc) => acc.address == cosigner).publicKey)" class="font-normal text-xs text-gray-500">({{$t('accounts.removing')}})</span></div>
-                  <div class="font-bold" v-else>Cosigner-{{ cosignerAddress(cosigner) }} <span v-if="checkRemoval(cosigner)" class="font-normal text-xs text-gray-500">({{$t('accounts.removing')}})</span></div>
-                  <div class="text-tsm">{{ pretty(cosigner) }}</div>
-                </div>
-                <font-awesome-icon v-if="(!checkRemoval(cosigner))" icon="trash-alt" class="w-4 h-4 self-center" :class="`${(onPartial || fundStatus || !isCoSigner)?'text-gray-200 cursor-auto':'text-gray-400 hover:text-gray-600 cursor-pointer'}`" @click="addToRemovalList(cosigner)"></font-awesome-icon>
-                <a v-else class="self-center text-gray-400 hover:text-gray-600" @click="restoreFromRemovalList(cosigner)"><font-awesome-icon icon="trash-restore" class="inline-block w-4 h-4"></font-awesome-icon> <span class="text-xs">{{$t('accounts.restore')}}</span></a>
-              </div>
-            </div> -->
-         
-     
-    
-
-      
-     <!--  <div v-if="isCoSigner">
-        <div class="mt-16">
-          <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-          <div v-for="(coSignAddress, index) in coSign" :key="index" class="flex">
-            <font-awesome-icon icon="trash-alt" class="w-4 h-4 text-gray-500 hover:text-gray-400 cursor-pointer mr-3 mt-3" @click="deleteCoSigAddressInput(index)"></font-awesome-icon>
-            <TextInput placeholder="Cosignatory Account Address or Public Key" errorMessage="Valid Cosignatory Account Address or Public Key is required" :showError="showAddressError[index]" v-model="coSign[index]" icon="key" class="flex-grow" />
-            <add-cosign-modal :cosignPublicKeyIndex="index" :selectedAddress="selectedAddresses"></add-cosign-modal>
-          </div>
-          <div class="text-lg" v-if="!coSign.length">{{$t('accounts.cosigmessage')}}</div>
-          <button class="my-8 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50 disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">(+) {{$t('accounts.addcosig')}}</button>
-        </div> -->
-        
-        
-        
-       <!--  <div v-if="getCosigns() > 1">
-          <SelectInputPlugin placeholder="Main cosignatory to sign" errorMessage="" v-model="selectMainCosign" :options="selectCosign" />
-          <MultiSelectInputPlugin placeholder="Also I will sign with these cosignatories" errorMessage="" v-model="selectOtherCosign" :options="selectOtherCosignerOptions" />
-        </div> -->
-       <!--  <PasswordInput placeholder="Enter Wallet Password" errorMessage="Wallet password is required to convert to MultiSig Account" :showError="showPasswdError" v-model="passwd" icon="lock" :disabled="disabledPassword" /> -->
-       
-         
-          <!-- <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="modifyAccount()" :disabled="disableSend">{{$t('accounts.send')}}</button> -->
-        
+</div>  
 </template>
 
 <script>
@@ -231,15 +181,15 @@ import {useI18n} from 'vue-i18n'
 import { WalletAccount } from '@/models/walletAccount';
 import { Helper } from '@/util/typeHelper';
 import { accountUtils } from '@/util/accountUtils';
+import AccountComponent from "@/modules/account/components/AccountComponent.vue";
+import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 export default {
   name: 'ViewMultisigEditAccount',
   components: {
-     PasswordInput,
+    PasswordInput,
     TextInput,
-    /* AddCosignModal,
-    MultisigSchemeModal,
-    SelectInputPlugin,
-    MultiSelectInputPlugin,  */
+    AccountComponent,
+    MoreAccountOptions
   },
   props: {
     name: String,
