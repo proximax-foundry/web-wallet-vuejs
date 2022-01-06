@@ -16,7 +16,6 @@ import qrcode from 'qrcode-generator';
 import { listenerState } from '@/state/listenerState';
 import { BlockAPI } from '@/models/REST/block';
 import { transactionTypeName, TransactionUtils } from './transactionUtils';
-import { dashboardUtils } from './dashboardUtils';
 import { Helper } from '@/util/typeHelper';
 export class Verifier {
     static Hash: any;
@@ -609,7 +608,7 @@ export interface SignedZipInterface {
       }
     }
 
-    const keyType = dashboardUtils.getNameTypeTransaction(transaction.type); 
+    const keyType = TransactionUtils.getTransactionTypeName(transaction.type); 
     if (keyType !== undefined) {
      /*  const dataTransaction = this.validateIsSwapTransaction(transaction, keyType, group); */
       const feeFormatter =  Helper.amountFormatterSimple(transaction.maxFee.compact());
