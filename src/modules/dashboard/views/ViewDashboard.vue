@@ -202,7 +202,7 @@ import { ChainUtils } from '@/util/chainUtils';
 import { networkState } from "@/state/networkState";
 import { AccountAPI } from '@/models/REST/account';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
-import { DashboardService } from '../service/dashboardService';
+import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 import qrcode from 'qrcode-generator';
 //import Dialog from 'primevue/dialog';
 import { listenerState } from '@/state/listenerState';
@@ -462,15 +462,11 @@ export default defineComponent({
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
 
     let accountConfirmedTxnsCount = ref(0);
-    let accountUnconfirmedTxnsCount = ref(0);
-    let accountPartialTxnsCount = ref(0);
 
     let updateAccountTransactionCount = async()=>{
       let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
       
       accountConfirmedTxnsCount.value = transactionsCount.confirmed;
-      accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
-      accountPartialTxnsCount.value = transactionsCount.partial;
     };
 
     updateAccountTransactionCount();
@@ -1005,8 +1001,6 @@ export default defineComponent({
       decryptMessageKey,
       txHash,
       accountConfirmedTxnsCount,
-      accountUnconfirmedTxnsCount,
-      accountPartialTxnsCount,
       txnTypeList,
       transactionGroupType,
       changeSearchTxnType,
