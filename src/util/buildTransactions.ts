@@ -40,6 +40,7 @@ import {
     LinkAction,
     Message,
     EmptyMessage,
+    TransactionHash
 } from 'tsjs-xpx-chain-sdk';
 import { WalletUtils } from "./walletUtils";
 import { Helper } from "./typeHelper";
@@ -171,13 +172,15 @@ export class BuildTransactions {
         return this.transactionBuilderFactory.aggregateComplete();
     }
 
-    hashLock(mosaic: Mosaic, duration: UInt64, signedTransaction: SignedTransaction): HashLockTransaction {
+    hashLock(mosaic: Mosaic, duration: UInt64, transactionHash: TransactionHash | SignedTransaction): HashLockTransaction {
+
+        let transactionHashToUse = transactionHash instanceof TransactionHash ? transactionHash : new TransactionHash(transactionHash.hash, transactionHash.type);
 
         return this.transactionBuilderFactory.hashLock()
             .deadline(Deadline.create())
             .duration(duration)
             .mosaic(mosaic)
-            .signedTransaction(signedTransaction)
+            .transactionHash(transactionHash)
             .build();
     }
 
