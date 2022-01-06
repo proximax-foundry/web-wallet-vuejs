@@ -29,7 +29,7 @@
               <TextInputTooltip :disabled="disableNamespaceName" placeholder="Name" :errorMessage="namespaceErrorMessage" v-model="namespaceName" v-debounce:1000="checkNamespace" icon="id-card-alt" :showError="showNamespaceNameError" class="w-full inline-block" toolTip="A namespace can have a maximium length of 16 alphanumerical characters while sub-namespaces can have a maximium length of 64 alphanumerical characters.<br><br>Three layers can be created. A namespace can have a subnamespace, and a subnamespace can have its own subnamespace (e.g., test1.test2.test3).<br><br>Certain phrases are already reserved." />
             </div>
             <div class="mb-5 lg:mb-0 lg:ml-2">
-              <DurationInputClean :disabled="disabledDuration" v-model="duration" :max="365" placeholder="Duration (number of days)" :showError="showDurationErr" errorMessage="Required Field - Only Numbers (0 - 6)" toolTip="Maximum rental duration is<br>1 year (365 days)." />
+              <DurationInputClean :disabled="disabledDuration" v-model="duration" :max="365" placeholder="Duration (number of days)" :showError="showDurationErr" errorMessage="Required Field - Only Numbers (0 - 6)" :toolTip="`Maximum rental duration is<br>${maxDurationInDays === 365 ? '1 year ' : ''}(${maxDurationInDays} days).`" />
             </div>
           </div>
         </div>
@@ -102,6 +102,8 @@ import { Helper } from '@/util/typeHelper';
 import { NamespaceUtils } from '@/util/namespaceUtils';
 import { ChainUtils } from '@/util/chainUtils';
 import { TransactionUtils } from '@/util/transactionUtils';
+import { UnitConverter } from '@/util/unitConverter';
+import { TimeUnit } from '@/models/const/timeUnit';
 
 export default {
   name: 'ViewServicesNamespaceCreate',
@@ -134,9 +136,10 @@ export default {
     const disabledClear = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
-    const namespacePattern = "^[0-9a-z]{2,16}$";
-    const childNamespacePattern = "^[0-9a-z]{2,64}$";
+    const maxNamespaceLength = networkState.currentNetworkProfileConfig.maxNameSize;
+    const namespacePattern = `^[0-9a-z]{2,${maxNamespaceLength}}$`;
     const showNamespaceNameError = ref(false);
+    const maxDurationInDays = Math.floor(UnitConverter.configReturn(networkState.currentNetworkProfileConfig.maxNamespaceDuration, TimeUnit.DAY));
 
     const selectNamespace = ref('');
     const cosignerBalanceInsufficient = ref(false);
@@ -191,7 +194,7 @@ export default {
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && namespaceName.value.match(childNamespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value) && !showNamespaceNameError.value
+      walletPassword.value.match(passwdPattern) && namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value) && !showNamespaceNameError.value
     ));
 
     const isMultiSig = (address) => {
@@ -317,8 +320,8 @@ export default {
     };
 
     watch(duration, (n) => {
-      if(n > 365){
-        duration.value = '365';
+      if(n > maxDurationInDays){
+        duration.value = `${maxDurationInDays}`;
       }
     });
 
@@ -421,7 +424,7 @@ export default {
           return;
         }
         else{
-          showNamespaceNameError.value = namespaceName.value.match(childNamespacePattern)? false:true;
+          showNamespaceNameError.value = namespaceName.value.match(namespacePattern)? false:true;
           if(showNamespaceNameError.value){
             namespaceErrorMessage.value = "Fill in a valid name";
           }
@@ -503,6 +506,7 @@ export default {
       walletState,
       currentNativeTokenName,
       nsRef,
+      maxDurationInDays
     }
   },
 
