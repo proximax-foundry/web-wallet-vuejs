@@ -1,6 +1,6 @@
 import { 
     MosaicHttp, NetworkHttp,
-    MosaicId, MosaicInfo, MosaicNames, RichlistEntry, PageQueryParams
+    MosaicId, MosaicInfo, MosaicNames, RichlistEntry, PageQueryParams, MosaicLevy
 } from "tsjs-xpx-chain-sdk";
 
 export class AssetAPI {
@@ -25,5 +25,9 @@ export class AssetAPI {
 
     getMosaicsNames(mosaicIds: MosaicId[]): Promise<MosaicNames[]>{
         return this.mosaicHttp.getMosaicsNames(mosaicIds).toPromise();
+    }
+
+    getMosaicLevy(mosaicId: MosaicId): Promise<MosaicLevy>{
+        return this.mosaicHttp.getMosaicLevy(mosaicId).toPromise();
     }
 }
