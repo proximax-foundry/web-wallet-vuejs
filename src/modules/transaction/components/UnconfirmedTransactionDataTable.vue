@@ -18,7 +18,7 @@
           </div>
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">TYPE</div>
-            <div class="uppercase font-bold text-txs">{{data.typeName}}</div>
+            <div class="uppercase font-bold text-txs">{{data.type}}</div>
           </div>
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">RECEIPIENT</div>
@@ -30,16 +30,16 @@
         <template #body="{data}">
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1">TIMESTAMP</div>
-            <div class="uppercase font-bold text-txs">{{data.formattedDeadline}}</div>
+            <div class="uppercase font-bold text-txs">{{data.deadline}}</div>
           </div>
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mt-5 mb-1">SENDER</div>
-            <div class="uppercase font-bold text-txs">{{ data.signerDisplay === data.signerAddressPretty ? data.signer : data.signerDisplay }}</div>
+            <div class="uppercase font-bold text-txs">{{ data.signerDisplay ? data.signerDisplay : data.signer }}</div>
           </div>
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mt-5 mb-1">TX AMOUNT</div>
-            <div class="uppercase font-bold text-txs" v-if="data.typeName=='Transfer'">{{ data.extractedData.amount?data.extractedData.amount:'0' }} <b>{{currentNativeTokenName}}</b> <img src="@/modules/dashboard/img/icon-sda.svg" class="inline-block" v-if="checkOtherAsset(data.otherAssets)" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + d(data.otherAssets) + '</tiptext>'"> <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.extractedData.messageTypeString + '</tiptitle><tiptext>' + data.extractedData.messagePayload + '</tiptext>'" class="inline-block" v-if="data.extractedData.messageType != 'empty' && data.extractedData.messageType"></div>
-            <div class="uppercase font-bold text-txs" v-else>{{ data.extractedData.amount?data.extractedData.amount:'-' }} <b v-if="data.extractedData.amount">{{currentNativeTokenName}}</b></div>
+            <div class="uppercase font-bold text-txs" v-if="data.type=='Transfer'">{{ data.amountTransfer?data.amountTransfer:'0' }} <b>{{currentNativeTokenName}}</b> <img src="@/modules/dashboard/img/icon-sda.svg" class="inline-block" v-if="checkOtherAsset(data.otherAssets)" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + d(data.otherAssets) + '</tiptext>'"> <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.extractedData.messageTypeString + '</tiptitle><tiptext>' + data.extractedData.messagePayload + '</tiptext>'" class="inline-block" v-if="data.extractedData.messageType != 'empty' && data.extractedData.messageType"></div>
+            <div class="uppercase font-bold text-txs" v-else>{{ data.amountTransfer?data.amountTransfer:'-' }} <b v-if="data.amount">{{currentNativeTokenName}}</b></div>
           </div>
         </template>
       </Column>
@@ -61,9 +61,9 @@
           <span class="text-txs">{{data.formattedDeadline}}</span>
         </template>
       </Column>
-      <Column field="typeName" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
+      <Column field="type" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-txs">{{data.typeName}}</span>
+          <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
       <Column field="block" header="BLOCK" headerStyle="width:110px" v-if="wideScreen">
@@ -92,8 +92,8 @@
       </Column>
       <Column header="AMOUNT" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
-          <div class="text-txs" v-if="data.typeName=='Transfer'">{{ data.extractedData.amount?data.extractedData.amount:'0' }} <b>{{currentNativeTokenName}}</b></div>
-          <div class="text-txs" v-else>{{ data.extractedData.amount?data.extractedData.amount:'-' }} <b v-if="data.extractedData.amount">{{currentNativeTokenName}}</b></div>
+          <div class="text-txs" v-if="data.type=='Transfer'">{{ data.amountTransfer?data.amountTransfer:'0' }} <b>{{currentNativeTokenName}}</b></div>
+          <div class="text-txs" v-else>{{ data.amountTransfer?data.amountTransfer:'-' }} <b v-if="data.amountTransfer">{{currentNativeTokenName}}</b></div>
         </template>
       </Column>
       <Column header="SDA" headerStyle="width:40px" v-if="wideScreen">
@@ -239,10 +239,10 @@ export default defineComponent({
     const displayAssetDiv = async (asset) => {
       let otherAsset = await chainAPICall.assetAPI.getMosaic(asset.assetid);
       let asset_div;
-      let assetarray = []
-      assetarray.push(asset.assetid);
+      let arrayAsset = []
+      arrayAsset.push(asset.assetid);
 
-      let nsAsset = await chainAPICall.assetAPI.getMosaicsNames(assetarray);
+      let nsAsset = await chainAPICall.assetAPI.getMosaicsNames(arrayAsset);
       if(nsAsset[0].names.length > 0){
         asset_div = (Helper.convertToExact(asset.amount, otherAsset.divisibility) + ' ' + nsAsset[0].names[0].name);
       }else{
@@ -275,6 +275,18 @@ export default defineComponent({
     };
 
     loadUnconfirmedTransactions();
+
+    emitter.on("TXN_UNCONFIRMED", (num) => {
+      if(num> 0){
+        loadUnconfirmedTransactions();
+      }
+    });
+
+    emitter.on("TXN_CONFIRMED", (num) => {
+      if(num> 0){
+        loadUnconfirmedTransactions();
+      }
+    });
 
     // const transactions = [
     //   {
@@ -319,6 +331,7 @@ export default defineComponent({
       wideScreen,
       checkOtherAsset,
       transactions,
+      Helper,
     }
   }
 })

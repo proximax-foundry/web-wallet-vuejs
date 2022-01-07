@@ -645,8 +645,9 @@ export default defineComponent({
         let formattedTxns2 = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult2.transactions);
         tempTxns = tempTxns.concat(formattedTxns2);
       }
-
+      
       recentTransferTransactions.value = removeDuplicateTxn(tempTxns);
+      console.log(recentTransferTransactions.value)
     };
 
     loadRecentTransferTransactions();

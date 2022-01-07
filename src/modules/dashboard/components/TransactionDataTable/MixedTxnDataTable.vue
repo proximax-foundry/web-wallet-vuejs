@@ -12,7 +12,7 @@
       >
       <Column header="IN/OUT" headerStyle="width:30px">
         <template #body="{data}">
-          <div class="ml-2">
+          <div class="ml-2" v-if="data.in_out">
             <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block" v-if="data.in_out === true">
             <img src="@/modules/dashboard/img/icon-txn-out.svg" class="inline-block" v-else-if="data.in_out === false">
           </div>

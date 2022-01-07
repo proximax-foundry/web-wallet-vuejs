@@ -44,7 +44,7 @@ import { walletState } from '@/state/walletState';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { networkState } from "@/state/networkState";
 import {useI18n} from 'vue-i18n';
-import { DashboardService } from '@/modules/dashboard/service/dashboardService';
+// import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 
 export default{
   name: 'NavigationMenu',
@@ -102,37 +102,37 @@ export default{
 
     const selectedAccount = ref(currentAccount);
 
-    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
+    // let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
 
     // let accountConfirmedTxnsCount = ref(0);
     let accountUnconfirmedTxnsCount = ref(0);
     let accountPartialTxnsCount = ref(0);
 
-    let updateAccountTransactionCount = async()=>{
-      let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
+    // let updateAccountTransactionCount = async()=>{
+    //   let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
       
-      // accountConfirmedTxnsCount.value = transactionsCount.confirmed;
-      accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
-      accountPartialTxnsCount.value = transactionsCount.partial;
-    };
+    //   // accountConfirmedTxnsCount.value = transactionsCount.confirmed;
+    //   accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
+    //   accountPartialTxnsCount.value = transactionsCount.partial;
+    // };
 
-    updateAccountTransactionCount();
+    // updateAccountTransactionCount();
 
     emitter.on("TXN_UNCONFIRMED", (num) => {
       if(num> 0){
-        updateAccountTransactionCount();
+        // updateAccountTransactionCount();
       }
     });
 
     emitter.on("TXN_CONFIRMED", (num) => {
       if(num> 0){
-        updateAccountTransactionCount();
+        // updateAccountTransactionCount();
       }
     });
 
     emitter.on("ABT_ADDED", (num) => {
       if(num> 0){
-        updateAccountTransactionCount();
+        // updateAccountTransactionCount();
       }
     });
 
