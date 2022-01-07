@@ -90,7 +90,7 @@ export default {
           } else {          
             let password = WalletUtils.createPassword(walletPassword.value);
             const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, privKey.value, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
-            let walletAccount = new WalletAccount(accountName.value, account.publicKey, wallet.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
+            let walletAccount = new WalletAccount(accountName.value, account.publicKey, account.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
             // code for NIS 1 checking
             // if(nis1Swap.value == true){
             //   const Nis1 = WalletUtils.createNis1AccountWithPrivateKey(privKey.value);

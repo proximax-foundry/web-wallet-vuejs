@@ -1,36 +1,4 @@
 {
-    "Sirius Mainnet": {
-      "version": "0.0.1",
-      "apiNodes":[
-          "arcturus.xpxsirius.io",
-          "aldebaran.xpxsirius.io",
-          "betelgeuse.xpxsirius.io",
-          "bigcalvin.xpxsirius.io",
-          "delphinus.xpxsirius.io",
-          "lyrasithara.xpxsirius.io"
-      ],
-      "httpPort": 3000,
-      "generationHash": "10540AD3A1BF46B1A05D8B1CF0252BC9FB2E0B53CFD748262B0CE341CEAFEB6B",
-      "network":{
-        "type": 184,
-        "currency":{
-            "name": "XPX",
-            "namespace": "prx.xpx",
-            "mosaicId": "",
-            "namespaceId": "bffb42a19116bdf6",
-            "divisibility": 6
-        }
-      },
-      "chainExplorer": {
-        "url": "https://explorer.xpxsirius.io",
-        "blockRoute": "#/result/blockHeight",
-        "publicKeyRoute": "#/result/publicKey",
-        "addressRoute": "#/result/address",
-        "hashRoute": "#/result/hash",
-        "namespaceInfoRoute": "#/result/namespaceInfo",
-        "assetInfoRoute": "#/result/assetInfo"
-      }
-    },
     "Sirius Testnet 1": {
       "version": "0.0.3",
       "apiNodes":[

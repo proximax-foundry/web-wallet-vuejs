@@ -4,15 +4,17 @@
     <img src='@/assets/img/chevron_left.svg'>
     <router-link :to="{name: 'ViewMultisigHome',params:{name:acc.name}}" class='text-blue-primary text-xs mt-0.5'>Back</router-link>
   </div>
-  <div class='w-11/12 ml-auto mr-auto '>
+  <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
+  <AccountComponent :address="acc.address" class="mb-10"/>
     <div class = 'flex text-xs font-semibold border-b-2'>
-      <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-18 text-center '>Details</router-link>
+      <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-32 text-center '>Account Details</router-link>
       <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Multisig</div>
       <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
       <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
+      <MoreAccountOptions :address="acc.address"/>
     </div>
-    <div class='font-semibold mt-8 mb-3'>Multisig Settings</div>
-    <div class="border filter shadow-lg lg:grid lg:grid-cols-3" >
+    
+    <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 pr-6">
         <div class="text-xs font-semibold pl-6">Manage Cosignatories</div>
         <div class='pl-6'>
@@ -23,7 +25,7 @@
           <div v-for="(coSignAddress, index) in coSign" :key="index" >
             <div class="flex">
               <img  src="@/modules/account/submodule/multisig/img/icon-delete-red.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
-              <TextInput class='w-5/12 mr-2 ' placeholder="Name"  v-model="contactName[index]" :disabled="true"  />
+              <TextInput class='w-5/12 mr-2 ' :placeholder="`Cosignatory${index+1}`"  v-model="contactName[index]" :disabled="true"  />
               <TextInput class='w-7/12 mr-2 ' placeholder="Address/Public Key" errorMessage="Invalid Input" :showError="showAddressError[index]" v-model="coSign[index]" />
               <div v-if="showAddressError[index]==true " class="mt-16"/>
               <div @click="toggleContact[index]=!toggleContact[index]" class=' border  cursor-pointer flex flex-col justify-center  p-2' style="height:2.66rem">
@@ -138,100 +140,6 @@
     </div>
   </div>
 </div>
-
-<!-- <span class="font-bold">{{$t('accounts.deleteusers')}}:</span>
-          <div class="ml-2 border rounded-2xl p-2 py-2 inline-block">
-            <input type="number" required min="0" :max="maxNumDeleteUser" v-model="numDeleteUser" class="text-right outline-none" @keypress="validateDelete">
-          </div> {{$t('accounts.schemedescription',{value: maxNumDeleteUser})}}</div> -->
-
-<!-- <div class="flex justify-between text-xs sm:text-sm">
-  <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} > {{$t('accounts.multisig')}}></span> <span class="text-blue-primary font-bold">{{$t('accounts.convertmultisig')}}</span></div>
-  <div>
-    <router-link :to="{name: 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('accounts.viewall')}}</router-link>
-  </div>
-</div>
-<div class='mt-2 py-3 gray-line'>
-  <div class="container mx-auto text-center">
-    <div class="mx-auto pt-5 lg:px-20">
-      <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-8 items-center">
-        <div class="text-left w-full relative">
-          <div class="text-xs font-bold mb-1">{{ accountNameDisplay }}</div>
-          <div>{{ acc.address }}</div>
-        </div>
-      </div>
-      <div class="flex justify-between p-4 rounded-xl bg-red-100 mb-8" v-if="fundStatus">
-        <div class="text-center w-full">
-          <div class="border border-gray-500 rounded-full w-8 h-8 inline-block relative">
-            <font-awesome-icon icon="times" class="w-5 h-5 text-gray-500 inline-block absolute" style="top:5px; right: 5px;"></font-awesome-icon>
-          </div>
-          <div class="font-bold text-sm">{{$t('accounts.insufficientbalance')}}</div>
-          <p class="text-xs mt-3">{{$t('accounts.balancedescription',{value: '10.044500 XPX'})}}</p>
-        </div>
-      </div>
-      <div class="flex justify-between p-4 rounded-xl border-red-800 border-2 bg-white mb-8" v-if="isMultisig">
-        <div class="text-center w-full">
-          <div class="border border-gray-500 rounded-full w-8 h-8 inline-block relative">
-            <font-awesome-icon icon="times" class="w-5 h-5 text-gray-500 inline-block absolute" style="top:5px; right: 5px;"></font-awesome-icon>
-          </div>
-          <div class="font-bold text-sm">{{$t('accounts.ismultisig')}}</div>
-        </div>
-      </div>
-      <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 mb-8" v-if="onPartial">
-        <div class="text-center w-full">
-          <div class="w-8 h-8 inline-block relative">
-            <font-awesome-icon icon="bell" class="w-5 h-5 text-yellow-500 inline-block absolute" style="top:5px; right: 5px;"></font-awesome-icon>
-          </div>
-          <div class="font-bold text-sm">{{$t('accounts.partial')}}</div>
-          <p class="text-xs mt-3">{{$t('accounts.partialdescription')}}</p>
-        </div>
-      </div>
-      <div>
-        <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <div class="block mt-2 font-bold text-md lg:inline-block lg:mr-20">{{$t('accounts.scheme')}} ></div>
-        <div class="mt-2 lg:inline-block lg:mr-20">
-          <span class="font-bold">{{$t('accounts.approvetransactions')}}</span>
-          <div class="ml-2 border rounded-2xl p-2 py-2 inline-block">
-            <input type="number" required min="0" :max="maxNumApproveTransaction" v-model="numApproveTransaction" class="text-right outline-none" @keypress="validateApproval">
-          </div> {{$t('accounts.schemedescription',{value: maxNumApproveTransaction})}} </div>
-        <div class="mt-2 lg:inline-block">
-          <span class="font-bold">{{$t('accounts.deleteusers')}}:</span>
-          <div class="ml-2 border rounded-2xl p-2 py-2 inline-block">
-            <input type="number" required min="0" :max="maxNumDeleteUser" v-model="numDeleteUser" class="text-right outline-none" @keypress="validateDelete">
-          </div> {{$t('accounts.schemedescription',{value: maxNumDeleteUser})}}</div>
-      </div>
-      <div class="mt-16">
-        <div v-for="(coSignAddress, index) in coSign" :key="index" class="flex">
-          <font-awesome-icon icon="trash-alt" class="w-4 h-4 text-gray-500 hover:text-gray-400 cursor-pointer mr-3 mt-3" @click="deleteCoSigAddressInput(index)"></font-awesome-icon>
-          <TextInput :placeholder="$t('accounts.cosigplaceholder')" :errorMessage="$t('accounts.addressvalidation')" :showError="showAddressError[index]" v-model="coSign[index]" icon="key" class="flex-grow" />
-          <AddCosignModal :cosignPublicKeyIndex="index" :selectedAddress="selectedAddresses" :accountName="accountName" />
-        </div>
-        <div class="text-lg" v-if="!coSign.length">{{$t('accounts.cosigmessage')}}</div>
-        <button class="my-8 hover:shadow-lg bg-white hover:bg-gray-100 rounded-3xl border-2 font-bold px-6 py-2 border-blue-primary text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">(+){{$t('accounts.addcosig')}}</button>
-      </div>
-      <div class="p-4 rounded-xl bg-gray-100 my-2 w-full text-xs text-gray-800">
-        <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1"> {{$t('accounts.unconfirmed')}}: 0.042750 XPX
-      </div>
-      <div class="p-4 rounded-xl bg-gray-100 mb-8 items-center w-full text-xs text-gray-800">
-        <div class="text-center">
-          <div class="inline-block">
-            <div class="flex">
-              <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
-              <div class="inline-block self-center text-left">
-                <div>{{$t('accounts.lockfund')}}: 10.000000 XPX</div>
-                <div>{{$t('accounts.unconfirmed')}}: 0.044500 XPX</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.multisigpasswordvalidation')" :showError="showPasswdError" v-model="passwd" icon="lock" :disabled="disabledPassword" />
-      <div class="mt-10">
-        <button type="button" class="default-btn mr-5 focus:outline-none" @click="clear()">{{$t('signin.clear')}}</button>
-        <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="convertAccount()" :disabled="disableSend">{{$t('accounts.send')}}</button>
-      </div>
-    </div>
-  </div>
-</div> -->
 </template>
 
 <script>
@@ -242,6 +150,8 @@ import TextInput from '@/components/TextInput.vue'
 import AddCosignModal from '@/modules/account/submodule/multisig/components/AddCosignModal.vue';
 import { multiSign } from '@/util/multiSignatory';
 import { walletState } from '@/state/walletState';
+import AccountComponent from "@/modules/account/components/AccountComponent.vue";
+import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 import {
   Address,
     PublicAccount
@@ -254,7 +164,8 @@ export default {
   components: {
     PasswordInput,
     TextInput,
-    /* AddCosignModal, */
+    AccountComponent,
+    MoreAccountOptions
   },
   props: {
     name: String,
@@ -360,6 +271,7 @@ export default {
     watch(() => [...coSign.value], (n) => {
       for(var i = 0; i < coSign.value.length; i++){
         if((coSign.value[i].length == 64) || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)){
+          checkCosign(i)
           if(coSign.value[i]==acc.address || coSign.value[i]==Helper.createAddress(acc.address).pretty() || coSign.value[i]==acc.publicKey ){
             showAddressError.value[i] = true;
             err.value = "Cosigner cannot be this account itself"
@@ -478,6 +390,19 @@ export default {
       onPartial.value = verify
     )
     
+    const checkCosign = (index) =>{
+      if (coSign.value[index].length == 40 || coSign.value[index].length == 46) {
+        try {
+          multiSign.verifyContactPublicKey(coSign.value[index]).then(result=>{
+            if(result.status==false){
+              showAddressError.value[index] = true
+            }
+          })
+        } catch (error) {
+          console.log(error)
+        }
+      }
+    }
     
     // check if this address has cosigner
     emitter.on('ADD_CONTACT_COSIGN', payload => {
