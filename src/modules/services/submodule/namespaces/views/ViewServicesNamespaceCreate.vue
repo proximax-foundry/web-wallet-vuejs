@@ -23,7 +23,7 @@
               <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
             </div>
           </div>
-          <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" ref="nsRef" v-model="selectNamespace" :address="selectedAccAdd" class="mt-5" :disabled="disableSelectNamespace" />
+          <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace" ref="nsRef" v-model="selectNamespace" :address="selectedAccAdd" class="mt-5" :disabled="disableSelectNamespace" />
           <div class="lg:grid lg:grid-cols-2 mt-5">
             <div class="mb-5 lg:mb-0 lg:mr-2">
               <TextInputTooltip :disabled="disableNamespaceName" placeholder="Name" :errorMessage="namespaceErrorMessage" v-model="namespaceName" v-debounce:1000="checkNamespace" icon="id-card-alt" :showError="showNamespaceNameError" class="w-full inline-block" toolTip="A namespace can have a maximium length of 16 alphanumerical characters while sub-namespaces can have a maximium length of 64 alphanumerical characters.<br><br>Three layers can be created. A namespace can have a subnamespace, and a subnamespace can have its own subnamespace (e.g., test1.test2.test3).<br><br>Certain phrases are already reserved." />
@@ -194,7 +194,7 @@ export default {
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value) && !showNamespaceNameError.value
+      walletPassword.value.match(passwdPattern) && namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value) && !showNamespaceNameError.value && selectNamespace.value
     ));
 
     const isMultiSig = (address) => {
@@ -260,6 +260,10 @@ export default {
     const getMultiSigCosigner = computed(() => {
       return NamespaceUtils.getCosignerList(selectedAccAdd.value);
     });
+
+    const removeNamespace = () => {
+      selectNamespace.value = '';
+    }
 
     const changeSelection = (address) => {
       let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
@@ -506,7 +510,8 @@ export default {
       walletState,
       currentNativeTokenName,
       nsRef,
-      maxDurationInDays
+      maxDurationInDays,
+      removeNamespace,
     }
   },
 
