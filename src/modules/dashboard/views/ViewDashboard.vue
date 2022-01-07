@@ -647,7 +647,6 @@ export default defineComponent({
       }
       
       recentTransferTransactions.value = removeDuplicateTxn(tempTxns);
-      console.log(recentTransferTransactions.value)
     };
 
     loadRecentTransferTransactions();
