@@ -154,7 +154,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-/deep/ .p-datatable-wrapper{
+.p-datatable-wrapper{
   .p-datatable-tbody{
     tr{
       td{
