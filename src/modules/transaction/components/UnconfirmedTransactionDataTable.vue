@@ -261,7 +261,7 @@ export default defineComponent({
 
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, currentAccount);
 
-    let loadRecentTransactions = async()=>{
+    let loadUnconfirmedTransactions = async()=>{
       let txnQueryParams = Helper.createTransactionQueryParams();
       txnQueryParams.pageSize = 1;
       txnQueryParams.address = currentAccount.address;
@@ -270,11 +270,11 @@ export default defineComponent({
 
       let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.UNCONFIRMED, txnQueryParams);
 
-      let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
+      let formattedTxns = await dashboardService.formatUnconfirmedMixedTxns(transactionSearchResult.transactions);
       transactions.value = formattedTxns;
     };
 
-    loadRecentTransactions();
+    loadUnconfirmedTransactions();
 
     // const transactions = [
     //   {
