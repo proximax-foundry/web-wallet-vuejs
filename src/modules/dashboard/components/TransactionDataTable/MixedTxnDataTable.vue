@@ -175,7 +175,6 @@ export default {
     'tooltip': Tooltip
   },
   setup(p, context){
-    console.log(p.transactions);
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
@@ -200,7 +199,6 @@ export default {
     const showTransactionModel = ref(false);
     const filterText = ref("");
     const transactionGroupType = Helper.getTransactionGroupType();
-    
     const nativeTokenName = computed(()=> networkState.currentNetworkProfile?.network.currency.name);
 
     const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
