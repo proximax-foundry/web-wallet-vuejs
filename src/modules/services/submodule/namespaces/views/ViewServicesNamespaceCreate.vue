@@ -322,6 +322,8 @@ export default {
     watch(duration, (n) => {
       if(n > maxDurationInDays){
         duration.value = `${maxDurationInDays}`;
+      }else if(n < 1){
+        duration.value = 1;
       }
     });
 
