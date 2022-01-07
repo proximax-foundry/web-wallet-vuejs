@@ -4,17 +4,17 @@
       <div class="flex">
         <div v-html="toSvg('account', 25, jdenticonConfig)" v-if='!selectedImg'></div>
         <div v-html="selectedImg" v-else></div>
-        <div class="flex flex-col ml-2">
+        <div class="flex flex-col ml-2 text-left">
           <div class="text-blue-primary font-semibold text-xxs uppercase"  style="line-height: 9px;">{{ placeholder?placeholder:'Account' }}</div>
           <div v-if='selectedAccount!=""' class="mt-1 text-tsm font-bold text-left">{{selectedAccount}}</div>
           <div v-else class="text-tsm font-bold mt-1 text-left">Select Account</div>
         </div>
       </div>
       <div class="flex">
-      <div class="text-xs mr-3" v-if="selectedAccount!=''">Balance <span v-html="selectedAccountBalanceFormatted"></span> <span class="text-xxs">{{ currentNativeTokenName }}</span></div>
-      <div v-if='!toggleSelection && selectedAccount==""' class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
-      <div v-if='!toggleSelection && selectedAccount!=""'  class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
-      <img v-if='toggleSelection' @click="selectedAccount='';$emit('update:modelValue', '');" src="@/assets/img/delete.svg" class="h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto">
+        <div class="text-xs mr-3" v-if="selectedAccount!=''">Balance <span v-html="selectedAccountBalanceFormatted"></span> <span class="text-xxs">{{ currentNativeTokenName }}</span></div>
+        <div v-if='!toggleSelection && selectedAccount==""' class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
+        <div v-if='!toggleSelection && selectedAccount!=""'  class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
+        <img v-if='toggleSelection' @click="selectedAccount='';$emit('update:modelValue', '');" src="@/assets/img/delete.svg" class="h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto">
       </div>
     </div>
   </div>
@@ -55,7 +55,7 @@ export default defineComponent({
   setup(p){
 
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    
+
     const toggleSelection = ref(false);
 
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');

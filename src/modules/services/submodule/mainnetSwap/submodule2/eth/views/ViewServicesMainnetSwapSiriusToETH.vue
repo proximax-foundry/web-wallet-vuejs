@@ -56,7 +56,7 @@
           <div class="rounded bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 inline mr-2 text-gray-500 relative" style="top: -2px">Transaction Fee: <span>{{ txFeeDisplay }}</span> {{ currentNativeTokenName }}</div>
           </div>
-          <PasswordInputClean placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
+          <PasswordInputClean placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" v-model="walletPasswd" />
           <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center">
             {{ amount }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 ml-4">
           </div>
@@ -141,8 +141,6 @@ export default {
 
   setup() {
     // check services
-    
-
 
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const toast = useToast();
