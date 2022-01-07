@@ -30,7 +30,8 @@
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5" v-if="data.recipient != '' && data.recipient != null">Receipient</div>
             <div class="uppercase font-bold text-txs">
               <span v-if="data.recipient === '' || data.recipient === null"></span>
-              <span v-tooltip.bottom="data.recipient" v-else class="truncate inline-block text-txs">{{ data.recipient }}</span>
+              <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else-if="data.recipientNamespaceName" class="truncate inline-block text-txs">{{ data.recipientNamespaceName }}</span>
+              <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient.substring(0, 20) }}...</span>
             </div>
           </div>
         </template>
@@ -45,9 +46,9 @@
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Sender</div>
             <div class="uppercase font-bold text-txs">
               <span v-if="data.sender === '' || data.sender === null"></span>
-              <span v-else v-tooltip.bottom="data.sender" class="truncate inline-block text-txs">
+              <span v-else v-tooltip.right="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
                 <a :href="getPublicKeyExplorerUrl(data.sender)" target="_blank">
-                  {{ data.sender }}
+                  {{ data.sender.substring(0, 20) }}...
                 </a>
               </span>
             </div>
@@ -89,7 +90,7 @@
       <Column field="signer" header="SENDER" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span v-if="data.sender === '' || data.sender === null"></span>
-          <span v-else v-tooltip.bottom="data.sender" class="truncate inline-block text-txs">
+          <span v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
             <a :href="getPublicKeyExplorerUrl(data.sender)" target="_blank">
               {{ data.sender }}
             </a>
@@ -99,7 +100,8 @@
       <Column field="recipient" header="RECIPIENT" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span v-if="data.recipient === '' || data.recipient === null"></span>
-          <span v-tooltip.bottom="data.recipient" v-else class="truncate inline-block text-txs">{{ data.recipient }}</span>
+          <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else-if="data.recipientNamespaceName" class="truncate inline-block text-txs">{{ data.recipientNamespaceName }}</span>
+          <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient.substring(0, 20) }}...</span>
         </template>
       </Column>
       <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:90px">
@@ -173,6 +175,7 @@ export default {
     'tooltip': Tooltip
   },
   setup(p, context){
+    console.log(p.transactions);
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
@@ -316,6 +319,7 @@ export default {
       convertLocalTime,
       transactionGroupType,
       wideScreen,
+      Helper,
     }
   }
 }
