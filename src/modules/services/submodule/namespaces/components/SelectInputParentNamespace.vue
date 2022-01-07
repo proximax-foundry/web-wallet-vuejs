@@ -9,7 +9,7 @@
         </div>
         <div v-if='!toggleSelection && selectedNamespace==""' class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>Select</div>
         <div v-if='!toggleSelection && selectedNamespace!=""'  class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>Change</div>
-        <img v-if='toggleSelection' @click='selectedNamespace=""' src="@/assets/img/delete.svg" class='h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>
+        <img v-if='toggleSelection' @click='selectedNamespace="";$emit("clear-namespace");' src="@/assets/img/delete.svg" class='h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>
       </div>
     </div>
     <div class='relative'>
@@ -37,7 +37,7 @@ import { NamespaceUtils } from '@/util/namespaceUtils';
 
 export default defineComponent({
   emits:[
-    'select-namespace','update:modelValue',
+    'select-namespace','update:modelValue', 'clear-namespace'
   ],
   name: 'SelectInputParentNamespace',
   props: [
