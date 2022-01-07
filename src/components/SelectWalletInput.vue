@@ -2,7 +2,7 @@
   <div  @click='toggleSelection = !toggleSelection' class= 'border w-8/12 ml-auto mr-auto py-3 px-2 cursor-pointer'>
     <div class='flex'>
         <img src='@/assets/img/icon-wallet.svg' class='h-5 w-5 mt-auto mb-auto'>
-        <div class='flex flex-col ml-2'>
+        <div class='flex flex-col ml-2 text-left'>
             <div class=' text-blue-primary font-semibold'  style="font-size: 7px ; line-height: 9px;">WALLET</div>
             <div v-if='selectedWallet!=""' class='text-xs font-bold'>{{selectedWallet}} </div>
             <div v-if='selectedWallet==""' class='text-xs font-bold '>Select Wallet </div>

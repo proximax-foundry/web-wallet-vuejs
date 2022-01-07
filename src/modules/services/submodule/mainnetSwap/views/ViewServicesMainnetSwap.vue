@@ -1,7 +1,7 @@
 <template>
 <div>
   <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
-    <div class='mt-6 p-6 border filter shadow-lg text-center'>
+    <div class='mt-6 px-6 py-10 border filter shadow-lg text-center'>
       <div class="text-md mb-3">Main Network Swap</div>
       <div class="text-xs max-w-md inline-block">You can swap from NIS1, ETH and BSC to ProximaX Sirius Chain. In reverse, ProximaX Sirius Chain is available to swap in ETH and BSC only.</div>
       <br>
@@ -16,8 +16,7 @@
           </div>
           <div class="w-full text-left z-20 bg-white" v-if="open['nis1']">
             <div class="bg-blue-100 border-blue-100 uppercase py-2 px-5 text-xxs">Select option</div>
-            <div class="py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">NIS1 to Sirius Chain</div>
-            <div class="py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">Check Status</div>
+            <router-link :to="{ name: 'ViewServicesMainnetSwapNIS1ToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">NIS1 to Sirius Chain</router-link>
           </div>
         </div>
         <br>
