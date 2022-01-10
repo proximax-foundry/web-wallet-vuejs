@@ -27,7 +27,7 @@ module.exports = {
             .navigate_namespace(browser.launch_url)
             .invalid_name(shortname)
             .empty_password(namespace_input)
-            .create_namespace(namespace_input, password)
+            // .create_namespace(namespace_input, password)
 
     }
 

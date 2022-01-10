@@ -6,7 +6,7 @@ var privatekey = "0ACDDBF848D081613E665144FF48181EBE4E009D27F33C53AC32180D73A6C6
 
 module.exports = {
 
-    "Namespace_test": function (browser) {
+    "Assets_test": function (browser) {
 
         var create = browser.page.Createwallet()
         var signin = browser.page.Signin()

@@ -10,7 +10,7 @@ var xpx = "27.450000"
 
 module.exports = {
 
-    "Namespace_test": function (browser) {
+    "Transfer_test": function (browser) {
 
         var create = browser.page.Createwallet()
         var signin = browser.page.Signin()
