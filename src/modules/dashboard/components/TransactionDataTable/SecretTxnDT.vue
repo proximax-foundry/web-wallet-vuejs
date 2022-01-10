@@ -49,7 +49,7 @@
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Info</div>
             <span class="inline-block bg-blue-200 text-blue-700 rounded py-1 px-2 my-1 text-txs font-bold" v-if="data.duration">{{ `Duration: ${data.duration} blocks` }}</span>
-            <spn v-else>-</spn>
+            <span v-else>-</span>
           </div>
         </template>
       </Column>
