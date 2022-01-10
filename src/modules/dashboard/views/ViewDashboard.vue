@@ -142,10 +142,12 @@
       <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" :account="selectedAccount" />
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='transaction'">
-      <select v-model="selectedTxnType" @change="changeSearchTxnType">
-        <option value="all">All</option>
-        <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value">{{ txnType.label}}</option>
-      </select>
+      <div class="text-right">
+        <select v-model="selectedTxnType" @change="changeSearchTxnType" class="border border-gray-200 px-2 py-1 focus:outline-none">
+          <option value="all" class="text-sm">All</option>
+          <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm">{{ txnType.label}}</option>
+        </select>
+      </div>
       <MixedTxnDataTable v-if="selectedTxnType === 'all'" :selectedGroupType="transactionGroupType.CONFIRMED" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></MixedTxnDataTable>
       <TransferTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.TRANSFER" :selectedGroupType="transactionGroupType.CONFIRMED" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></TransferTxnDataTable>
       <AccountTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ACCOUNT" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AccountTxnDataTable>

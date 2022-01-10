@@ -38,7 +38,7 @@
       <Column header="TRANSACTIONS" headerStyle="width:40px">
         <template #body="{data}">
           <span v-bind:key="index" v-for="(txn, index) in data.txnList">
-            <span class="inline-block bg-blue-500 text-white py-1 px-1 my-1 mx-1">
+            <span class="inline-block bg-gray-100 font-bold text-txs py-1 px-2 my-1 mx-1 rounded">
               {{ txn.name }}({{ txn.total }})
             </span>
           </span>

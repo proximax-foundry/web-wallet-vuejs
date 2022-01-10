@@ -92,7 +92,7 @@
           <span v-if="data.sender === '' || data.sender === null"></span>
           <span v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
             <a :href="getPublicKeyExplorerUrl(data.sender)" target="_blank">
-              {{ data.sender }}
+              {{ data.sender.substring(0, 20) }}
             </a>
           </span>
         </template>
