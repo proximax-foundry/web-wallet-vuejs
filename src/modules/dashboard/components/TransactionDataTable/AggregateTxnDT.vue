@@ -69,16 +69,18 @@
       </Column>
       <Column header="TRANSACTIONS" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
-          <span v-bind:key="index" v-for="(txn, index) in data.txnList">
+          <div v-bind:key="index" v-for="(txn, index) in data.txnList">
             <span class="inline-block bg-blue-100 text-blue-700 font-bold text-txs py-1 px-2 my-1 mx-1 rounded">
               {{ txn.name }}&nbsp;({{ txn.total }})
             </span>
-          </span>
+          </div>
         </template>
       </Column>
       <Column header="" headerStyle="width:50px">
         <template #body="{data}">
-          <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
+          <div class="flex justify-center">
+            <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
+          </div>
         </template>
       </Column>
       <template #empty>

@@ -118,7 +118,9 @@
       </Column>
       <Column header="" headerStyle="width:50px">
         <template #body="{data}">
-          <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
+          <div class="flex justify-center">
+            <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
+          </div>
         </template>
       </Column>
       <template #empty>
