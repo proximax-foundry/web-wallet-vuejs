@@ -10,7 +10,7 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-            <Column style="width: 200px" v-if="!wideScreen">
+      <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Tx Hash</div>

@@ -25,7 +25,7 @@
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Account</div>
             <div class="flex items-center">
-              <div class="uppercase font-bold text-txs mr-2" v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()">{{ data.signerAddress.substring(0, 15) }}</div>
+              <div class="uppercase font-bold text-txs mr-2" v-tooltip.right="Helper.createAddress(data.signerAddress).pretty()">{{ data.signerAddress.substring(0, 15) }}...</div>
             </div>
           </div>
         </template>
@@ -81,9 +81,14 @@
           <div class="text-txs">{{ data.block }}</div>
         </template>
       </Column>
+      <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
+        <template #body="{data}">
+          <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
+        </template>
+      </Column>
       <Column header="ACCOUNT" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
-          <div class="text-txs truncate inline-block" v-tooltip.bottom="data.signerAddress">{{ data.signerAddress }}</div>
+          <div class="text-txs truncate inline-block" v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()">{{ data.signerAddress }}</div>
         </template>
       </Column>
       <Column header="APPROVAL DELTA" headerStyle="width:60px" v-if="wideScreen">
