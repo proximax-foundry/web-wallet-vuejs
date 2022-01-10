@@ -67,17 +67,17 @@
           </div>
         </template>
       </Column>
-      <Column field="typeName" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
+      <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="typeName" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" header="TIMESTAMP" headerStyle="width:110px">
+      <Column field="timestamp" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" header="TIMESTAMP" headerStyle="width:110px">
         <template #body="{data}">
           <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
       </Column>
-      <Column field="typeName" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
+      <Column field="type" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.type}}</span>
         </template>

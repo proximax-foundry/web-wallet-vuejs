@@ -33,7 +33,7 @@ import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { nis1Account } from "@/models/nis1Account";
-import { WalletAccount } from "@/models/WalletAccount";
+import { WalletAccount } from "@/models/walletAccount";
 
 NEMLibrary.bootstrap(NetworkTypes.TEST_NET);
 
