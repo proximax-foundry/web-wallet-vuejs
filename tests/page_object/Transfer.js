@@ -17,7 +17,7 @@ const elements = {
     error_wrongpassword: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2)',
     transaction_successful: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
     password_eyeicon: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(10) > div:nth-child(1) > svg > path',
-    input_message: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(6) > div:nth-child(1) > textarea',
+    input_message: 'textarea.w-full',
     transaction_fee: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(2)',
 
 }
@@ -77,7 +77,7 @@ const commands = {
         .click('@password_eyeicon')
         .assert.elementPresent('@password_eyeicon', "When eye icon is clicked, password field is masked again")
         // write message
-        .setValue("@input_message", message)
+        .setValue("@input_message", message)                                                                        
         .assert.containsText('@transaction_fee', xpx, 'Transaction fee increases.')
         // create transfer
         .click("@transfer_button")

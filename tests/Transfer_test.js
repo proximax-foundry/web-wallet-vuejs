@@ -14,17 +14,12 @@ module.exports = {
 
         var create = browser.page.Createwallet()
         var signin = browser.page.Signin()
-        var network = browser.page.Topupxpx()
         var transfer = browser.page.Transfer()
         var account = browser.page.Createaccount()
 
-        // change to testnet 1
-        network 
-            .navigate()
-            .change_network()
-
         // create wallet
         create
+            .navigate()
             .navigate_createpkwallet(browser.launch_url)
             .create_pkwallet(browser.launch_url, privatekey, name, password1)
 
@@ -32,12 +27,13 @@ module.exports = {
         signin
             .signin_dashboard(browser.launch_url, password1)
         
+        // create new account in wallet
         account
             .navigate_createaccount(browser.launch_url)
             .navigate_createnewaccount(browser.launch_url)
             .create_account(name, password1)
         
-        // transfer
+        // transfer test
         transfer
             .navigation_transfer(browser.launch_url)
             .sender_account()
