@@ -45,7 +45,7 @@
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Duration</div>
             <div class="flex items-center">
-              <span class="text-txs font-bold" v-tooltip.left="'<tiptext>Approximately ' + remainingTime(data.duration) + ' day' + ((remainingTime(data.duration)>1)?'s':'') + '</tiptext>'">{{data.duration ? data.duration + ' block' + (data.duration>1?'s':'') : "-"}}</span>
+              <span class="text-txs font-bold" v-tooltip.left="'<tiptext>Approximately ' + durationTime(data.duration) + ' day' + ((durationTime(data.duration)>1)?'s':'') + '</tiptext>'">{{data.duration ? data.duration + ' block' + (data.duration>1?'s':'') : "-"}}</span>
             </div>
           </div>
         </template>
@@ -92,7 +92,7 @@
       </Column>
       <Column header="DURATION" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-txs" v-tooltip.bottom="'<tiptext>Approximately ' + remainingTime(data.duration) + ' day' + ((remainingTime(data.duration)>1)?'s':'') + '</tiptext>'">{{data.duration ? data.duration + ' block' + (data.duration>1?'s':'') : "-"}}</span>
+          <span class="text-txs" v-tooltip.bottom="'<tiptext>Approximately ' + durationTime(data.duration) + ' day' + ((durationTime(data.duration)>1)?'s':'') + '</tiptext>'">{{data.duration ? data.duration + ' block' + (data.duration>1?'s':'') : "-"}}</span>
         </template>
       </Column>
       <Column header="" headerStyle="width:50px">
@@ -232,7 +232,7 @@ export default defineComponent({
     chainConfig.init();
     let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
 
-    const remainingTime = (block) => {
+    const durationTime = (block) => {
       let durationByHour = block/(60/blockTargetTime * 60);
       let durationByDay = durationByHour/24;
       return durationByDay;
@@ -263,7 +263,7 @@ export default defineComponent({
       constructSDA,
       wideScreen,
       Helper,
-      remainingTime,
+      durationTime,
     }
   }
 })
