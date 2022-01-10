@@ -39,29 +39,29 @@
       </Column>
       <Column field="name" header="NAME" style="`wideScreen?'min-width: 160px'?'width: 160px'`" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-xs">{{data.name}}</span>
+          <span class="text-txs">{{data.name}}</span>
         </template>
       </Column>
       <Column field="namespaceId" header="NAMESPACE ID" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-xs uppercase">{{data.idHex}}</span>
+          <span class="text-txs uppercase">{{data.idHex}}</span>
         </template>
       </Column>
       <Column field="linkedId" header="LINKED ASSET / ADDRESS" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
         <template #body="{data}">
-          <span class="uppercase text-xs" v-if="data.linkedId">{{ data.linkedId }}</span>
-          <span class="text-xs" v-else>No linked asset</span>
+          <span class="uppercase text-txs" v-if="data.linkedId">{{ data.linkedId }}</span>
+          <span class="text-txs" v-else>No linked asset</span>
         </template>
       </Column>
       <Column field="linkType" header="EXPIRES" style="`wideScreen?'min-width: 150px'?'width: 150px'`" v-if="wideScreen">
         <template #body="{data}">
-          <div class="data.expiryRelative text-xs" v-if="data.expiryRelative">{{ data.expiryRelative }}</div>
-          <div class="text-gray-300 text-xs" v-else>Fetching..</div>
+          <div class="data.expiryRelative text-txs" v-if="data.expiryRelative">{{ data.expiryRelative }}</div>
+          <div class="text-gray-300 text-txs" v-else>Fetching..</div>
         </template>
       </Column>
       <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" style="`wideScreen?'min-width: 210px'?'width: 210px'`" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-xs" :class="data.expiring=='expired'?'text-red-500':(data.expiring=='expiring'?'text-yellow-500':'text-green-500')">{{ data.expiry }}</span>
+          <span class="text-txs" :class="data.expiring=='expired'?'text-red-500':(data.expiring=='expiring'?'text-yellow-500':'text-green-500')">{{ data.expiry }}</span>
         </template>
       </Column>
       <Column field="Account" header="ACCOUNT" bodyStyle="text-align: center; overflow: visible" style="`wideScreen?'min-width: 60px'?'width: 60px'`" v-if="wideScreen">>

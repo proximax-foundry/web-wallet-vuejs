@@ -10,59 +10,107 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column field="hash" header="TX HASH" headerStyle="width:100px">
+      <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
-          <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Tx Hash</div>
+            <div class="uppercase font-bold text-txs"><span class="text-txs" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span></div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Type</div>
+            <div class="flex items-center">
+              <div class="uppercase font-bold text-txs mr-2">{{data.type}}</div>
+            </div>
+          </div>
         </template>
       </Column>
-      <Column field="timestamp" header="TIMESTAMP" v-if="selectedGroupType === transactionGroupType.CONFIRMED" headerStyle="width:110px">
+      <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
-          <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
-        </template>
-      </Column>
-      <Column field="typeName" header="TYPE" headerStyle="width:110px">
-        <template #body="{data}">
-          <span class="text-txs">{{data.type}}</span>
-        </template>
-      </Column>
-      <Column field="block" header="BLOCK" v-if="selectedGroupType === transactionGroupType.CONFIRMED" headerStyle="width:110px">
-        <template #body="{data}">
-          <div class="text-txs">{{ data.block }}</div>
-        </template>
-      </Column>
-      <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED" headerStyle="width:110px">
-        <template #body="{data}">
-          <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
-        </template>
-      </Column>
-      <Column header="OFFERS" headerStyle="width:40px">
-        <template #body="{data}">
-          <div v-if="data.isTakingOffer">
+          <div v-if="selectedGroupType === transactionGroupType.CONFIRMED">
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Timestamp</div>
+            <div class="uppercase font-bold text-txs">{{ convertLocalTime(data.timestamp) }}</div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Offer</div>
+            <div v-if="data.isTakingOffer">
             <span v-bind:key="index" v-for="(exchangeOffer, index) in data.exchangeOffers">
-              <span class="inline-block bg-green-300 text-black py-1 px-1 my-1 mx-1" v-if="exchangeOffer.type === 'Sell'">
+              <span class="inline-block bg-green-200 font-bold text-green-700 text-txs rounded py-2 px-1 my-1" v-if="exchangeOffer.type === 'Sell'">
                 {{ displayExchangeSDA(exchangeOffer) }}
               </span>
-              <span class="inline-block bg-red-300 text-black py-1 px-1 my-1 mx-1" v-else>
+              <span class="inline-block bg-red-200 font-bold text-red-700 text-txs rounded py-2 px-1 my-1" v-else>
                 {{ displayExchangeSDA(exchangeOffer) }}
               </span>
             </span>
           </div>
           <div v-else>
             <span v-bind:key="index" v-for="(exchangeOffer, index) in data.exchangeOffers">
-              <span class="inline-block bg-green-300 text-black py-1 px-1 my-1 mx-1" v-if="exchangeOffer.type === 'Buy'">
+              <span class="inline-block bg-green-200 font-bold text-green-700 text-txs rounded py-2 px-1 my-1" v-if="exchangeOffer.type === 'Buy'">
                 {{ displayExchangeSDA(exchangeOffer) }}
                 <span v-if="exchangeOffer.duration">{{ ", Duration: " + exchangeOffer.duration }}</span>
               </span>
-              <span class="inline-block bg-red-300 text-black py-1 px-1 my-1 mx-1" v-else>
+              <span class="inline-block bg-red-200 font-bold text-red-700 text-txs rounded py-2 px-1 my-1" v-else>
+                {{ displayExchangeSDA(exchangeOffer) }}
+              </span>
+            </span>
+          </div>
+          </div>
+        </template>
+      </Column>
+      <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
+        <template #body="{data}">
+          <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
+        </template>
+      </Column>
+      <Column field="timestamp" header="TIMESTAMP" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
+        <template #body="{data}">
+          <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
+        </template>
+      </Column>
+      <Column field="typeName" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
+        <template #body="{data}">
+          <span class="text-txs">{{data.type}}</span>
+        </template>
+      </Column>
+      <Column field="block" header="BLOCK" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
+        <template #body="{data}">
+          <div class="text-txs">{{ data.block }}</div>
+        </template>
+      </Column>
+      <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
+        <template #body="{data}">
+          <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
+        </template>
+      </Column>
+      <Column header="OFFERS" headerStyle="width:40px" v-if="wideScreen">
+        <template #body="{data}">
+          <div v-if="data.isTakingOffer">
+            <span v-bind:key="index" v-for="(exchangeOffer, index) in data.exchangeOffers">
+              <span class="inline-block bg-green-200 font-bold text-green-700 text-txs rounded py-2 px-1 my-1 mx-1" v-if="exchangeOffer.type === 'Sell'">
+                {{ displayExchangeSDA(exchangeOffer) }}
+              </span>
+              <span class="inline-block bg-red-200 font-bold text-red-700 text-txs rounded py-2 px-1 my-1 mx-1" v-else>
+                {{ displayExchangeSDA(exchangeOffer) }}
+              </span>
+            </span>
+          </div>
+          <div v-else>
+            <span v-bind:key="index" v-for="(exchangeOffer, index) in data.exchangeOffers">
+              <span class="inline-block bg-green-200 font-bold text-green-700 text-txs rounded py-2 px-1 my-1 mx-1" v-if="exchangeOffer.type === 'Buy'">
+                {{ displayExchangeSDA(exchangeOffer) }}
+                <span v-if="exchangeOffer.duration">{{ ", Duration: " + exchangeOffer.duration }}</span>
+              </span>
+              <span class="inline-block bg-red-200 font-bold text-red-700 text-txs rounded py-2 px-1 my-1 mx-1" v-else>
                 {{ displayExchangeSDA(exchangeOffer) }}
               </span>
             </span>
           </div>
         </template>
       </Column>
-      <Column header="" headerStyle="width:20px">
+      <Column header="" headerStyle="width:40px">
         <template #body="{data}">
-          <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
+          <div class="flex justify-center">
+            <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
+          </div>
         </template>
       </Column>
       <template #empty>
@@ -77,7 +125,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { getCurrentInstance, ref, computed, watch } from "vue";
+import { getCurrentInstance, ref, computed, watch, onMounted, onUnmounted } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {FilterMatchMode} from 'primevue/api';
@@ -106,6 +154,24 @@ export default defineComponent({
     'tooltip': Tooltip
   },
   setup(p, context){
+    const wideScreen = ref(false);
+    const screenResizeHandler = () => {
+      if(window.innerWidth < 1024){
+        wideScreen.value = false;
+      }else{
+        wideScreen.value = true;
+      }
+    };
+    screenResizeHandler();
+
+    onUnmounted(() => {
+      window.removeEventListener("resize", screenResizeHandler);
+    });
+
+    onMounted(() => {
+      window.addEventListener("resize", screenResizeHandler);
+    });
+
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const borderColor = ref('border border-gray-400');
@@ -175,9 +241,9 @@ export default defineComponent({
 
     const displayExchangeSDA = (exchangeOffer: TxnExchangeOffer)=>{
 
-      let asset_div = exchangeOffer.amount + " ";  
+      let asset_div = (exchangeOffer.amount > 0)?(exchangeOffer.amount + " "):'';
       asset_div += (exchangeOffer.assetNamespace ?  exchangeOffer.assetNamespace : exchangeOffer.assetId);
-      asset_div += " - " + exchangeOffer.cost + " " + nativeTokenName.value;
+      asset_div += (exchangeOffer.cost > 0)?(" - " + exchangeOffer.cost + " " + nativeTokenName.value):'';
 
       return asset_div;
     }
@@ -205,7 +271,9 @@ export default defineComponent({
       nativeTokenName,
       convertLocalTime,
       transactionGroupType,
-      constructSDA
+      constructSDA,
+      wideScreen,
+      Helper,
     }
   }
 })

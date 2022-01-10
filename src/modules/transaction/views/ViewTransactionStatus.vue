@@ -7,11 +7,11 @@
       </div>
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-if="displayBoard=='unconfirmed'">
-      <div class="text-xxs font-bold uppercase">Unconfirmed Transactions <span class="font-normal">(1)</span></div>
+      <div class="text-xxs font-bold uppercase">Unconfirmed Transactions <span class="font-normal">({{ accountUnconfirmedTxnsCount }})</span></div>
       <UnconfirmedTransactionDataTable />
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else>
-      <div class="text-xxs font-bold uppercase">Waiting for signatures <span class="font-normal">(1)</span></div>
+      <div class="text-xxs font-bold uppercase">Waiting for signatures <span class="font-normal">({{ accountPartialTxnsCount }})</span></div>
       <PartialDashboardDataTable />
     </div>
   </div>
@@ -32,7 +32,7 @@ import { AccountAPI } from '@/models/REST/account';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
-
+import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 
 export default defineComponent({
   name: 'ViewTransactionStatus',
@@ -65,6 +65,42 @@ export default defineComponent({
       }
       displayBoard.value = txnType;
     });
+    let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
+    currentAccount.default = true;
+
+    const selectedAccount = ref(currentAccount);
+
+    let accountUnconfirmedTxnsCount = ref(0);
+    let accountPartialTxnsCount = ref(0);
+
+    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
+
+    let updateAccountTransactionCount = async()=>{
+      let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
+      accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
+      accountPartialTxnsCount.value = transactionsCount.partial;
+    };
+
+    updateAccountTransactionCount();
+
+    emitter.on("TXN_UNCONFIRMED", (num) => {
+      if(num> 0){
+        updateAccountTransactionCount();
+      }
+    });
+
+    emitter.on("TXN_CONFIRMED", (num) => {
+      if(num> 0){
+        updateAccountTransactionCount();
+      }
+    });
+
+    emitter.on("ABT_ADDED", (num) => {
+      if(num> 0){
+        updateAccountTransactionCount();
+      }
+    });
+
 
 
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
@@ -85,6 +121,8 @@ export default defineComponent({
       isShowUnconfirmed,
       isShowPartial,
       currentNativeTokenName,
+      accountUnconfirmedTxnsCount,
+      accountPartialTxnsCount,
     };
   }
 });
