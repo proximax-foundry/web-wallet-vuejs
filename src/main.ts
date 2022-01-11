@@ -57,7 +57,7 @@ app.component(VuePassword);
 const loadThemeConfig = async() => {
   try {
     AppStateUtils.addNewReadyStates('theme');
-    const config = await fetch('./ThemeConfig.json', {
+    const config = await fetch('./themeConfig.json', {
       headers: {
         'Cache-Control': 'no-store',
         'Pragma' : 'no-cache'

@@ -10,49 +10,87 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column field="hash" header="TX HASH" headerStyle="width:100px">
+      <Column style="width: 200px" v-if="!wideScreen">
+        <template #body="{data}">
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Tx Hash</div>
+            <div class="uppercase font-bold text-txs"><span class="text-txs" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span></div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Type</div>
+            <div class="flex items-center">
+              <div class="uppercase font-bold text-txs mr-2">{{data.type}}</div>
+            </div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">LockHash</div>
+            <div class="flex items-center">
+              <div class="font-bold text-txs" v-tooltip.right="data.lockHash">{{data.lockHash.substring(0, 20) }}...</div>
+            </div>
+          </div>
+        </template>
+      </Column>
+      <Column style="width: 200px" v-if="!wideScreen">
+        <template #body="{data}">
+          <div v-if="selectedGroupType === transactionGroupType.CONFIRMED">
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Timestamp</div>
+            <div class="uppercase font-bold text-txs">{{ convertLocalTime(data.timestamp) }}</div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Duration</div>
+            <div class="uppercase font-bold text-txs" v-tooltip.bottom="'<tiptext>Approximately ' + durationTime(data.duration) + ' day' + ((durationTime(data.duration)>1)?'s':'') + '</tiptext>'">{{data.duration ? data.duration + ' block' + (data.duration>1?'s':'') : "-"}}</div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Refunded</div>
+            <div class="uppercase font-bold text-txs">{{ data.isRefunded ? "Yes" : "No" }}</div>
+          </div>
+        </template>
+      </Column>
+      <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="timestamp" header="TIMESTAMP" v-if="selectedGroupType === transactionGroupType.CONFIRMED" headerStyle="width:110px">
+      <Column field="timestamp" header="TIMESTAMP" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
         <template #body="{data}">
           <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
       </Column>
-      <Column field="typeName" header="TYPE" headerStyle="width:110px">
+      <Column field="typeName" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
-      <Column field="block" header="BLOCK" v-if="selectedGroupType === transactionGroupType.CONFIRMED" headerStyle="width:110px">
+      <Column field="block" header="BLOCK" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
         <template #body="{data}">
           <div class="text-txs">{{ data.block }}</div>
         </template>
       </Column>
-      <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED" headerStyle="width:110px">
+      <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
         <template #body="{data}">
           <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
-      <Column header="LOCK HASH" headerStyle="width:40px">
+      <Column header="LOCK HASH" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-tooltip.bottom="data.lockHash">{{data.lockHash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column header="DURATION" headerStyle="width:40px">
+      <Column header="DURATION" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
-            {{ data.duration }}
+          <span class="text-txs" v-tooltip.bottom="'<tiptext>Approximately ' + durationTime(data.duration) + ' day' + ((durationTime(data.duration)>1)?'s':'') + '</tiptext>'">{{data.duration ? data.duration + ' block' + (data.duration>1?'s':'') : "-"}}</span>
         </template>
       </Column>
-      <Column header="REFUNDED" v-if="selectedGroupType === transactionGroupType.CONFIRMED" headerStyle="width:40px">
+      <Column header="REFUNDED" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:40px">
         <template #body="{data}">
-            {{ data.isRefunded ? "Yes" : "No" }}
+          <span class="text-txs">{{ data.isRefunded ? "Yes" : "No" }}</span>
         </template>
       </Column>
-      <Column header="" headerStyle="width:20px">
+      <Column header="" headerStyle="width:50px">
         <template #body="{data}">
-          <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
+          <div class="flex justify-center">
+            <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
+          </div>
         </template>
       </Column>
       <template #empty>
@@ -67,7 +105,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { getCurrentInstance, ref, computed, watch } from "vue";
+import { getCurrentInstance, ref, computed, watch, onMounted, onUnmounted } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {FilterMatchMode} from 'primevue/api';
@@ -76,6 +114,7 @@ import Tooltip from 'primevue/tooltip';
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";
+import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 // import SplitButton from 'primevue/splitbutton';
 
 export default defineComponent({
@@ -95,6 +134,24 @@ export default defineComponent({
     'tooltip': Tooltip
   },
   setup(p, context){
+    const wideScreen = ref(false);
+    const screenResizeHandler = () => {
+      if(window.innerWidth < 1024){
+        wideScreen.value = false;
+      }else{
+        wideScreen.value = true;
+      }
+    };
+    screenResizeHandler();
+
+    onUnmounted(() => {
+      window.removeEventListener("resize", screenResizeHandler);
+    });
+
+    onMounted(() => {
+      window.addEventListener("resize", screenResizeHandler);
+    });
+
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const borderColor = ref('border border-gray-400');
@@ -162,6 +219,16 @@ export default defineComponent({
       return Helper.convertDisplayDateTimeFormat24(dateTimeInJSON);
     };
 
+    let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
+    chainConfig.init();
+    let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
+
+    const durationTime = (block) => {
+      let durationByHour = block/(60/blockTargetTime * 60);
+      let durationByDay = durationByHour/24;
+      return durationByDay;
+    }
+
     return {
       borderColor,
       clickInputText,
@@ -184,7 +251,9 @@ export default defineComponent({
       nativeTokenName,
       convertLocalTime,
       transactionGroupType,
-      constructSDA
+      constructSDA,
+      durationTime,
+      wideScreen,
     }
   }
 })

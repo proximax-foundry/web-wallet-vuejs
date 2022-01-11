@@ -12,8 +12,8 @@
       <div class="my-3 px-10 lg:px-5 3xl:px-10 text-gray-400">Transactions</div>
       <div class="flex justify-start px-10 lg:px-5 3xl:px-10 mt-5">
         <router-link :to="{ name : 'ViewDashboard', params: {type: 'transaction' } }" class="relative mr-5"><div class="rounded-full h-8 w-8 flex items-center justify-center" style="background: #007CFF"><img src="@/assets/img/navi/icon-unconfirmed-transaction-white.svg" class="w-5 h-5"></div></router-link>
-        <router-link :to="{ name : 'ViewTransactionStatus', params: {transactionType: 'unconfirmed' } }" class="relative mr-5"><div class="rounded-full h-8 w-8 flex items-center justify-center" style="background: #f3a91d"><img src="@/assets/img/navi/icon-unconfirmed-transaction-white.svg" class="w-5 h-5"></div><div class="absolute bg-gray-50 text-xxs rounded" style="padding: 1px 2px; top: -5px; right: -8px;">100</div></router-link>
-        <router-link :to="{ name : 'ViewTransactionStatus', params: {transactionType: 'partial' } }" class="relative"><div class="rounded-full h-8 w-8 flex items-center justify-center" style="background: #f06623"><img src="@/assets/img/navi/icon-waiting-for-transaction-white.svg" class="w-5 h-5"></div><div class="absolute bg-gray-50 text-xxs rounded" style="padding: 1px 2px; top: -5px; right: -8px;">100</div></router-link>
+        <router-link :to="{ name : 'ViewTransactionStatus', params: {transactionType: 'unconfirmed' } }" class="relative mr-5"><div class="rounded-full h-8 w-8 flex items-center justify-center" style="background: #f3a91d"><img src="@/assets/img/navi/icon-unconfirmed-transaction-white.svg" class="w-5 h-5"></div><div class="absolute bg-gray-50 text-xxs rounded text-center" style="min-width: 15px; padding: 1px 2px; top: -5px; right: -8px;">{{ accountUnconfirmedTxnsCount }}</div></router-link>
+        <router-link :to="{ name : 'ViewTransactionStatus', params: {transactionType: 'partial' } }" class="relative"><div class="rounded-full h-8 w-8 flex items-center justify-center" style="background: #f06623"><img src="@/assets/img/navi/icon-waiting-for-transaction-white.svg" class="w-5 h-5"></div><div class="absolute bg-gray-50 text-xxs rounded text-center" style="min-width: 15px; padding: 1px 2px; top: -5px; right: -8px;">{{ accountPartialTxnsCount }}</div></router-link>
       </div>
     </div>
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
@@ -38,12 +38,13 @@
 </template>
 
 <script>
-import { computed, inject } from "vue";
+import { computed, inject, ref, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import { walletState } from '@/state/walletState';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { networkState } from "@/state/networkState";
 import {useI18n} from 'vue-i18n';
+// import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 
 export default{
   name: 'NavigationMenu',
@@ -90,8 +91,50 @@ export default{
     window.removeEventListener("resize", this.navMenuHandler);
   },
   setup(){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+
     const {t} = useI18n();
     const router = useRouter();
+
+    let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
+    currentAccount.default = true;
+
+    const selectedAccount = ref(currentAccount);
+
+    // let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
+
+    // let accountConfirmedTxnsCount = ref(0);
+    let accountUnconfirmedTxnsCount = ref(0);
+    let accountPartialTxnsCount = ref(0);
+
+    // let updateAccountTransactionCount = async()=>{
+    //   let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
+      
+    //   // accountConfirmedTxnsCount.value = transactionsCount.confirmed;
+    //   accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
+    //   accountPartialTxnsCount.value = transactionsCount.partial;
+    // };
+
+    // updateAccountTransactionCount();
+
+    emitter.on("TXN_UNCONFIRMED", (num) => {
+      if(num> 0){
+        // updateAccountTransactionCount();
+      }
+    });
+
+    emitter.on("TXN_CONFIRMED", (num) => {
+      if(num> 0){
+        // updateAccountTransactionCount();
+      }
+    });
+
+    emitter.on("ABT_ADDED", (num) => {
+      if(num> 0){
+        // updateAccountTransactionCount();
+      }
+    });
 
     const navigationSideBar = inject('navigationSideBar');
 
@@ -164,6 +207,8 @@ export default{
       hoverOutNavigation,
       closeNavi,
       isDisplaySwap,
+      accountUnconfirmedTxnsCount,
+      accountPartialTxnsCount,
     };
   }
 }

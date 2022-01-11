@@ -10,44 +10,56 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column style="width: 250px" v-if="!wideScreen">
+      <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">TX HASH</div>
-            <div class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Tx Hash</div>
+            <div class="uppercase font-bold text-txs"><span class="text-txs" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span></div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">TYPE</div>
-            <div class="uppercase font-bold text-txs">{{data.typeName}}</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Type</div>
+            <div class="flex items-center">
+              <div class="uppercase font-bold text-txs mr-2">{{data.type}}</div>
+              <div>
+                <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block w-5" v-if="data.in_out === true">
+                <img src="@/modules/dashboard/img/icon-txn-out.svg" class="inline-block w-5" v-else-if="data.in_out === false">
+              </div>
+            </div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">RECEIPIENT</div>
-            <div class="uppercase font-bold text-txs" v-tooltip.bottom="data.extractedData.recipient" v-if="data.extractedData.recipient">{{ data.extractedData.recipientName?data.extractedData.recipientName:data.extractedData.recipient }}</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5" v-if="data.recipient != '' && data.recipient != null">Receipient</div>
+            <div class="uppercase font-bold text-txs">
+              <span v-if="data.recipient === '' || data.recipient === null"></span>
+              <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else-if="data.recipientNamespaceName" class="truncate inline-block text-txs">{{ data.recipientNamespaceName }}</span>
+              <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient.substring(0, 20) }}...</span>
+            </div>
           </div>
         </template>
       </Column>
-      <Column style="width: 250px" v-if="!wideScreen">
+      <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">TIMESTAMP</div>
-            <div class="uppercase font-bold text-txs">{{data.formattedDeadline}}</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Sender</div>
+            <div class="uppercase font-bold text-txs">
+              <span v-if="data.sender === '' || data.sender === null"></span>
+              <span v-else v-tooltip.right="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
+                <a :href="getPublicKeyExplorerUrl(data.sender)" target="_blank">
+                  {{ data.sender.substring(0, 20) }}...
+                </a>
+              </span>
+            </div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mt-5 mb-1">SENDER</div>
-            <div class="uppercase font-bold text-txs">{{ data.signerDisplay === data.signerAddressPretty ? data.signer : data.signerDisplay }}</div>
-          </div>
-          <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mt-5 mb-1">TX AMOUNT</div>
-            <div class="uppercase font-bold text-txs" v-if="data.typeName=='Transfer'">{{ data.extractedData.amount?data.extractedData.amount:'0' }} <b>{{currentNativeTokenName}}</b> <img src="@/modules/dashboard/img/icon-sda.svg" class="inline-block" v-if="checkOtherAsset(data.otherAssets)" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + d(data.otherAssets) + '</tiptext>'"> <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.extractedData.messageTypeString + '</tiptitle><tiptext>' + data.extractedData.messagePayload + '</tiptext>'" class="inline-block" v-if="data.extractedData.messageType != 'empty' && data.extractedData.messageType"></div>
-            <div class="uppercase font-bold text-txs" v-else>{{ data.extractedData.amount?data.extractedData.amount:'-' }} <b v-if="data.extractedData.amount">{{currentNativeTokenName}}</b></div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Tx Amount</div>
+            <div class="text-txs uppercase font-bold" >{{ data.amountTransfer ? data.amountTransfer:'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
           </div>
         </template>
       </Column>
-      <Column header="IN/OUT" headerStyle="width:30px" v-if="wideScreen">
+      <Column header="IN/OUT" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
-          <div class="ml-2">
-            <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block" v-if="data.extractedData.recipient==currentAddress">
-            <img src="@/modules/dashboard/img/icon-txn-out.svg" class="inline-block" v-else>
+          <div>
+            <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block" v-if="data.in_out === true">
+            <img src="@/modules/dashboard/img/icon-txn-out.svg" class="inline-block" v-else-if="data.in_out === false">
           </div>
         </template>
       </Column>
@@ -56,61 +68,50 @@
           <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="formattedDeadline" header="TIMESTAMP" headerStyle="width:110px" v-if="wideScreen">
+      <Column field="type" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-txs">{{data.formattedDeadline}}</span>
-        </template>
-      </Column>
-      <Column field="typeName" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
-        <template #body="{data}">
-          <span class="text-txs">{{data.typeName}}</span>
-        </template>
-      </Column>
-      <Column field="block" header="BLOCK" headerStyle="width:110px" v-if="wideScreen">
-        <template #body="{data}">
-          <div class="text-txs">{{ data.block }}</div>
+          <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
       <Column field="signer" header="SENDER" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
-          <span v-tooltip.bottom="data.signerAddress" class="truncate inline-block text-txs">
-            <a :href="getPublicKeyExplorerUrl(data.signer)" target="_blank">
-              {{ data.signerDisplay === data.signerAddressPretty ? data.signer : data.signerDisplay }}
+          <span v-if="data.sender === '' || data.sender === null"></span>
+          <span v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
+            <a :href="getPublicKeyExplorerUrl(data.sender)" target="_blank">
+              {{ data.sender }}
             </a>
           </span>
         </template>
       </Column>
       <Column field="recipient" header="RECIPIENT" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
-          <span v-tooltip.bottom="data.extractedData.recipient" v-if="data.extractedData.recipient" class="truncate inline-block text-txs">{{ data.extractedData.recipientName?data.extractedData.recipientName:data.extractedData.recipient }}</span>
+          <span v-if="data.recipient === '' || data.recipient === null"></span>
+          <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else-if="data.recipientNamespaceName" class="truncate inline-block text-txs">{{ data.recipientNamespaceName }}</span>
+          <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column header="TX FEE" headerStyle="width:110px" v-if="wideScreen">
+      <Column header="AMOUNT" headerStyle="width:90px" v-if="wideScreen">
         <template #body="{data}">
-          <div class="text-txs">{{ data.maxFee }} <b v-if="data.maxFee">{{currentNativeTokenName}}</b></div>
-        </template>
-      </Column>
-      <Column header="AMOUNT" headerStyle="width:110px" v-if="wideScreen">
-        <template #body="{data}">
-          <div class="text-txs" v-if="data.typeName=='Transfer'">{{ data.extractedData.amount?data.extractedData.amount:'0' }} <b>{{currentNativeTokenName}}</b></div>
-          <div class="text-txs" v-else>{{ data.extractedData.amount?data.extractedData.amount:'-' }} <b v-if="data.extractedData.amount">{{currentNativeTokenName}}</b></div>
+          <div class="text-txs" >{{ data.amountTransfer ? data.amountTransfer:'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
       <Column header="SDA" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
-          <div>
-            <img src="@/modules/dashboard/img/icon-sda.svg" class="inline-block" v-if="checkOtherAsset(data.otherAssets)" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + d(data.otherAssets) + '</tiptext>'">
+          <div class="text-center">
+            <img src="@/modules/dashboard/img/icon-sda.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + displaySDAs(data.sda) + '</tiptext>'">
+            <span v-else>-</span>
           </div>
         </template>
       </Column>
       <Column header="MESSAGE" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
           <div>
-            <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.extractedData.messageTypeString + '</tiptitle><tiptext>' + data.extractedData.messagePayload + '</tiptext>'" class="inline-block" v-if="data.extractedData.messageType != 'empty' && data.extractedData.messageType">
+            <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>'" class="inline-block" v-if="data.message && data.messageType !== 1">
+            <div v-else class="w-full text-center">-</div>
           </div>
         </template>
       </Column>
-      <Column header="" headerStyle="width:70px">
+      <Column headerStyle="width:50px">
         <template #body="{data}">
           <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
         </template>
@@ -134,6 +135,8 @@ import Tooltip from 'primevue/tooltip';
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";
+import { walletState } from '@/state/walletState';
+import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 
 export default defineComponent({
   components: {
@@ -141,7 +144,7 @@ export default defineComponent({
     Column,
     // SplitButton
   },
-  name: 'DashboardDataTable',
+  name: 'UnconfirmedTransactionDataTable',
   props: {
     showBlock: Boolean,
     showAction: Boolean,
@@ -177,7 +180,7 @@ export default defineComponent({
     const isShowUnconfirmed = p.type === "unconfirmed" ? true : false;
     const isShowPartial = p.type === "partial" ? true : false;
 
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const nativeTokenName = computed(()=> networkState.currentNetworkProfile?.network.currency.name);
 
     const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
     const blockExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.blockRoute);
@@ -223,6 +226,10 @@ export default defineComponent({
       })
     }
 
+    const convertLocalTime = (dateTimeInJSON)=>{
+      return Helper.convertDisplayDateTimeFormat24(dateTimeInJSON);
+    };
+
     const displayAsset = async (assets) => {
       let asset_divs = '';
       if(assets.length > 0){
@@ -237,10 +244,10 @@ export default defineComponent({
     const displayAssetDiv = async (asset) => {
       let otherAsset = await chainAPICall.assetAPI.getMosaic(asset.assetid);
       let asset_div;
-      let assetarray = []
-      assetarray.push(asset.assetid);
+      let arrayAsset = []
+      arrayAsset.push(asset.assetid);
 
-      let nsAsset = await chainAPICall.assetAPI.getMosaicsNames(assetarray);
+      let nsAsset = await chainAPICall.assetAPI.getMosaicsNames(arrayAsset);
       if(nsAsset[0].names.length > 0){
         asset_div = (Helper.convertToExact(asset.amount, otherAsset.divisibility) + ' ' + nsAsset[0].names[0].name);
       }else{
@@ -249,27 +256,64 @@ export default defineComponent({
       return asset_div;
     }
 
-    const transactions = [
-      {
-        hash: 'CFAF94204836EC9CB39AE8C13E60122E74CDE86DEA71B1660658E12E34CA9B80',
-        typeName: 'Transfer',
-        extractedData: {
-          recipient: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
-          recipientName: "acc2",
-          recipientType: "address",
-          amount: '1000',
-          messageTypeString: "Plain message",
-          messagePayload: 'Hello'
-        },
-        block: 12344,
-        signer: 'CFAF94204836EC9CB39AE8C13E60122E74CDE86DEA71B1660658E12E34CA9B80',
-        signerDisplay: 'nameABC',
-        signerAddress: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
-        signerAddressPretty: "VAOYQC-VXM2EN-SIA4JI-V6DF4U-BNOLQD-JTSCMT-KJEB",
-        formattedDeadline: "12/1/2021, 19:00:18",
-        otherAssets: undefined
+    const transactions = ref([]);
+
+    let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
+
+    let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
+
+    let transactionGroupType = Helper.getTransactionGroupType();
+
+    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, currentAccount);
+
+    let loadUnconfirmedTransactions = async()=>{
+      let txnQueryParams = Helper.createTransactionQueryParams();
+      txnQueryParams.pageSize = 1;
+      txnQueryParams.address = currentAccount.address;
+      txnQueryParams.embedded = true;
+      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
+
+      let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.UNCONFIRMED, txnQueryParams);
+
+      let formattedTxns = await dashboardService.formatUnconfirmedMixedTxns(transactionSearchResult.transactions);
+      transactions.value = formattedTxns;
+    };
+
+    loadUnconfirmedTransactions();
+
+    emitter.on("TXN_UNCONFIRMED", (num) => {
+      if(num> 0){
+        loadUnconfirmedTransactions();
       }
-    ];
+    });
+
+    emitter.on("TXN_CONFIRMED", (num) => {
+      if(num> 0){
+        loadUnconfirmedTransactions();
+      }
+    });
+
+    // const transactions = [
+    //   {
+    //     hash: 'CFAF94204836EC9CB39AE8C13E60122E74CDE86DEA71B1660658E12E34CA9B80',
+    //     typeName: 'Transfer',
+    //     extractedData: {
+    //       recipient: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
+    //       recipientName: "acc2",
+    //       recipientType: "address",
+    //       amount: '1000',
+    //       messageTypeString: "Plain message",
+    //       messagePayload: 'Hello'
+    //     },
+    //     block: 12344,
+    //     signer: 'CFAF94204836EC9CB39AE8C13E60122E74CDE86DEA71B1660658E12E34CA9B80',
+    //     signerDisplay: 'nameABC',
+    //     signerAddress: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
+    //     signerAddressPretty: "VAOYQC-VXM2EN-SIA4JI-V6DF4U-BNOLQD-JTSCMT-KJEB",
+    //     formattedDeadline: "12/1/2021, 19:00:18",
+    //     otherAssets: undefined
+    //   }
+    // ];
 
     return {
       d,
@@ -288,10 +332,12 @@ export default defineComponent({
       isShowConfirmed,
       isShowUnconfirmed,
       isShowPartial,
-      currentNativeTokenName,
+      nativeTokenName,
       wideScreen,
       checkOtherAsset,
       transactions,
+      Helper,
+      convertLocalTime,
     }
   }
 })

@@ -2,14 +2,14 @@
   <div class="relative" :class="disabled?'opacity-50':'cursor-pointer'">
     <div @click='(!disabled)?toggleSelection = !toggleSelection:""' class= "border ml-auto mr-auto py-3 px-2  rounded-md w-full h-14">
       <div class='flex'>
-        <div class='flex flex-col ml-2'>
+        <div class='flex flex-col ml-2 text-left'>
           <div class='text-blue-primary font-semibold text-xxs mb-1'  style="line-height: 9px;">NAMESPACE</div>
           <div v-if='selectedNamespace!=""' class='mt-1 text-tsm font-bold'>{{selectedNamespaceLabel}}</div>
           <div v-else class='text-tsm font-bold '>Select Namespace</div>
         </div>
         <div v-if='!toggleSelection && selectedNamespace==""' class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>Select</div>
         <div v-if='!toggleSelection && selectedNamespace!=""'  class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>Change</div>
-        <img v-if='toggleSelection' @click='selectedNamespace=""' src="@/assets/img/delete.svg" class='h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>
+        <img v-if='toggleSelection' @click='selectedNamespace="";$emit("clear-namespace");' src="@/assets/img/delete.svg" class='h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>
       </div>
     </div>
     <div class='relative'>
@@ -37,7 +37,7 @@ import { NamespaceUtils } from '@/util/namespaceUtils';
 
 export default defineComponent({
   emits:[
-    'select-namespace','update:modelValue',
+    'select-namespace','update:modelValue', 'clear-namespace'
   ],
   name: 'SelectInputParentNamespace',
   props: [

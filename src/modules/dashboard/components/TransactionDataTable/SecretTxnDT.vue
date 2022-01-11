@@ -10,30 +10,73 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column header="IN/OUT" headerStyle="width:30px">
+      <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
-          <div class="ml-2" v-if="data.recipient">
-            <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block" v-if="isRecipient(data.recipient, currentAddress)">
-            <img src="@/modules/dashboard/img/icon-txn-out.svg" class="inline-block" v-else >
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Tx Hash</div>
+            <div class="uppercase font-bold text-txs"><span class="text-txs" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span></div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Type</div>
+            <div class="flex items-center">
+              <div class="uppercase font-bold text-txs mr-2">{{data.type}}</div>
+              <div>
+                <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block w-5" v-if="isRecipient(data.recipient, currentAddress)">
+                <img src="@/modules/dashboard/img/icon-txn-out.svg" class="inline-block w-5" v-else>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5" v-if="data.recipient != '' && data.recipient != null">Receipient</div>
+            <div v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" class="truncate inline-block font-bold text-txs">
+              <a :href="getAddressExplorerUrl(data.recipient)" target="_blank">
+                {{ data.recipient }}
+              </a>
+            </div>
           </div>
         </template>
       </Column>
-      <Column field="hash" header="TX HASH" headerStyle="width:100px">
+      <Column style="width: 200px" v-if="!wideScreen">
+        <template #body="{data}">
+          <div v-if="selectedGroupType === transactionGroupType.CONFIRMED">
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Timestamp</div>
+            <div class="uppercase font-bold text-txs">{{ convertLocalTime(data.timestamp) }}</div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Hash Type</div>
+            <div class="uppercase font-bold text-txs">{{ data.hashType }}</div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Info</div>
+            <span class="inline-block bg-blue-200 text-blue-700 rounded py-1 px-2 my-1 text-txs font-bold" v-if="data.duration">{{ `Duration: ${data.duration} blocks` }}</span>
+            <span v-else>-</span>
+          </div>
+        </template>
+      </Column>
+      <Column header="IN/OUT" headerStyle="width:30px" v-if="wideScreen">
+        <template #body="{data}">
+          <div class="ml-2" v-if="data.recipient">
+            <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block w-6" v-if="isRecipient(data.recipient, currentAddress)">
+            <img src="@/modules/dashboard/img/icon-txn-out.svg" class="inline-block w-6" v-else >
+          </div>
+        </template>
+      </Column>
+      <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="timestamp" header="TIMESTAMP" v-if="selectedGroupType === transactionGroupType.CONFIRMED" headerStyle="width:110px">
+      <Column field="timestamp" header="TIMESTAMP" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
         <template #body="{data}">
           <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
       </Column>
-      <Column field="typeName" header="TYPE" headerStyle="width:110px">
+      <Column field="typeName" header="TYPE" headerStyle="width:70px" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
-      <Column field="block" header="BLOCK" v-if="selectedGroupType === transactionGroupType.CONFIRMED" headerStyle="width:110px">
+      <Column field="block" header="BLOCK" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:70px">
         <template #body="{data}">
           <div class="text-txs">{{ data.block }}</div>
         </template>
@@ -48,64 +91,65 @@
           </span>
         </template>
       </Column> -->
-      <Column field="recipient" header="RECIPIENT" headerStyle="width:110px">
+      <Column field="recipient" header="RECIPIENT" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
-          <span v-tooltip.bottom="data.recipient" class="truncate inline-block text-txs">
+          <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" class="truncate inline-block text-txs">
             <a :href="getAddressExplorerUrl(data.recipient)" target="_blank">
               {{ data.recipient }}
             </a>
           </span>
         </template>
       </Column>
-      <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED" headerStyle="width:110px">
+      <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:80px">
         <template #body="{data}">
           <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
-      <Column header="HASH TYPE" headerStyle="width:40px">
+      <Column header="HASH TYPE" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
-          <div>
-            {{ data.hashType }}
-          </div>
+          <div class="text-txs">{{ data.hashType }}</div>
         </template>
       </Column>
-      <Column header="SECRET" headerStyle="width:40px">
+      <Column header="SECRET" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
-          <div>
+          <div class="flex justify-center">
             <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>Secret</tiptitle><tiptext>' + data.secret + '</tiptext>'" class="inline-block">
           </div>
         </template>
       </Column>
-      <Column header="Proof" headerStyle="width:40px">
+      <Column header="Proof" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
-          <div>
+          <div class="flex justify-center">
             <img src="@/modules/dashboard/img/icon-message.svg" v-if="data.proof" v-tooltip.left="'<tiptitle>Proof</tiptitle><tiptext>' + data.proof + '</tiptext>'" class="inline-block">
           </div>
         </template>
       </Column>
-      <Column header="SDA" headerStyle="width:40px">
+      <Column header="SDA" headerStyle="width:30px; text-align:center;" v-if="wideScreen">
         <template #body="{data}">
-          <div>
+          <div class="flex justify-center">
             <img src="@/modules/dashboard/img/icon-sda.svg" v-if="data.assetId" class="inline-block" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + constructSDA(data.assetId, data.amount, data.namespaceName) + '</tiptext>'">
           </div>
         </template>
       </Column>
-      <Column header="Info" headerStyle="width:40px">
+      <Column header="Info" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
           <!-- <span class="inline-block bg-blue-500 text-white py-1 px-1 my-1 mx-1">{{ `Hash Type: ${data.hashType}` }}</span> -->
-          <span class="inline-block bg-blue-500 text-white py-1 px-1 my-1 mx-1" v-if="data.duration">{{ `Duration: ${data.duration} blocks` }}</span>
+          <span class="inline-block bg-blue-200 text-blue-700 rounded py-1 px-2 my-1 mx-1 text-txs font-bold" v-if="data.duration">{{ `Duration: ${data.duration} blocks` }}</span>
+          <span v-else>-</span>
         </template>
       </Column>
-      <Column header="" headerStyle="width:20px">
+      <Column header="" headerStyle="width:50px">
         <template #body="{data}">
-          <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
+          <div class="flex justify-center">
+            <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
+          </div>
         </template>
       </Column>
       <template #empty>
         {{$t('services.norecord')}}
       </template>
       <template #loading>
-          {{$t('dashboard.loadingmessage')}}
+        {{$t('dashboard.loadingmessage')}}
       </template>
     </DataTable>
   </div>
@@ -113,7 +157,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { getCurrentInstance, ref, computed, watch } from "vue";
+import { getCurrentInstance, ref, computed, watch, onMounted, onUnmounted } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {FilterMatchMode} from 'primevue/api';
@@ -141,6 +185,24 @@ export default defineComponent({
     'tooltip': Tooltip
   },
   setup(p, context){
+    const wideScreen = ref(false);
+    const screenResizeHandler = () => {
+      if(window.innerWidth < 1024){
+        wideScreen.value = false;
+      }else{
+        wideScreen.value = true;
+      }
+    };
+    screenResizeHandler();
+
+    onUnmounted(() => {
+      window.removeEventListener("resize", screenResizeHandler);
+    });
+
+    onMounted(() => {
+      window.addEventListener("resize", screenResizeHandler);
+    });
+
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const borderColor = ref('border border-gray-400');
@@ -237,7 +299,9 @@ export default defineComponent({
       nativeTokenName,
       convertLocalTime,
       transactionGroupType,
-      constructSDA
+      constructSDA,
+      wideScreen,
+      Helper,
     }
   }
 })
