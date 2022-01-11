@@ -1,5 +1,5 @@
 <template>
-    <div class="cursor-pointer text-white bg-blue-primary px-7 py-2 lg:px-12 lg:py-3 rounded-md text-xs lg:text-tsm inline-block font-bold border-2 border-blue-primary hover:opacity-80 transition-all duration-300" @click=" toggleModal = !toggleModal">Approve</div>
+    <button class="cursor-pointer text-white bg-blue-primary px-7 py-2 lg:px-12 lg:py-3 rounded-md text-xs lg:text-tsm inline-block font-bold border-2 border-blue-primary hover:opacity-80 transition-all duration-300 disabled:opacity-50" @click=" toggleModal = !toggleModal" :disabled="disabled">Approve</button>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -29,7 +29,8 @@ import {  ref, getCurrentInstance } from "vue";
 export default {
     name: 'CosignPasswordModal',
     props:{
-      transactionHash: String
+      transactionHash: String,
+      disabled: Boolean
     },
     components:{
       PasswordInput

@@ -13,11 +13,11 @@
         <template #body="{data}">
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1">TX HASH</div>
-            <div class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</div>
+            <div class="text-txs font-bold inline-block" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">TIMESTAMP</div>
-            <div class="uppercase font-bold text-txs">{{data.formattedDeadline}}</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Deadline</div>
+            <div class="uppercase font-bold text-txs">{{ formatTime(data.deadline) }}</div>
           </div>
         </template>
       </Column>
@@ -25,23 +25,16 @@
         <template #body="{data}">
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1">SENDER</div>
-            <div class="uppercase font-bold text-txs" v-tooltip.bottom="data.signerAddress">
-              <a :href="getPublicKeyExplorerUrl(data.signer)" target="_blank">
-                {{ data.signerDisplay === data.signerAddressPretty ? data.signer : data.signerDisplay }}
-              </a>
+            <div class="uppercase font-bold text-txs" v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()">
+              <a :href="getPublicKeyExplorerUrl(data.signer)" target="_blank">{{ data.signerAddress.substring(0, 20) }}</a>
             </div>
           </div>
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">RECEIPIENT</div>
-            <div class="uppercase font-bold text-txs" v-tooltip.bottom="data.extractedData.recipient" v-if="data.extractedData.recipient">{{ data.extractedData.recipientName?data.extractedData.recipientName:data.extractedData.recipient }}</div>
-          </div>
-        </template>
-      </Column>
-      <Column style="width: 100px" v-if="!wideScreen">
-        <template #body="{data}">
-          <div>
-            <router-link :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" v-if="data.sign" class="bg-orange-action text-white font-bold text-xxs text-center px-3 py-1 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">Waiting for Your Signature(s)</router-link>
-            <div v-else class="bg-orange-light text-orange-action font-bold text-xxs text-center px-3 py-1 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign.svg" class="mr-2">Waiting for Signature(s)</div>
+            <div class="uppercase font-bold text-txs" v-if="data.recipient!=null">
+              <div v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()">{{ data.recipientNamespaceName?data.rrecipientNamespaceName:data.recipient }}</div>
+            </div>
+            <div v-else>-</div>
           </div>
         </template>
       </Column>
@@ -50,28 +43,31 @@
           <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="formattedDeadline" header="TIMESTAMP" headerStyle="width:110px" v-if="wideScreen">
+      <Column field="formattedDeadline" header="Deadline" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-txs">{{data.formattedDeadline}}</span>
+          <span class="text-txs">{{Helper.formatDeadline(data.deadline)}}</span>
         </template>
       </Column>
       <Column field="signer" header="SENDER" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
-          <span v-tooltip.bottom="data.signerAddress" class="truncate inline-block text-txs">
+          <span v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()" class="truncate inline-block text-txs">
             <a :href="getPublicKeyExplorerUrl(data.signer)" target="_blank">
-              {{ data.signerDisplay === data.signerAddressPretty ? data.signer : data.signerDisplay }}
+              {{ data.signerAddress }}
             </a>
           </span>
         </template>
       </Column>
       <Column field="recipient" header="RECIPIENT" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
-          <span v-tooltip.bottom="data.extractedData.recipient" v-if="data.extractedData.recipient" class="truncate inline-block text-txs">{{ data.extractedData.recipientName?data.extractedData.recipientName:data.extractedData.recipient }}</span>
+          <div v-if="data.recipient!=null">
+            <span class="truncate inline-block text-txs" v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()">{{ data.recipientNamespaceName?data.rrecipientNamespaceName:data.recipient }}</span>
+          </div>
+          <span v-else>-</span>
         </template>
       </Column>
-      <Column field="sign" header="" headerStyle="width:80px" v-if="wideScreen">
+      <Column field="sign" header="" headerStyle="width:110px">
         <template #body="{data}">
-          <router-link :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" v-if="data.sign" class="bg-orange-action text-white font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">Waiting for Your Signature(s)</router-link>
+          <router-link :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" v-if="data.signerAddress != currentAddress" class="bg-orange-action text-white font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">Waiting for Your Signature(s)</router-link>
           <div v-else class="bg-orange-light text-orange-action font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign.svg" class="mr-2">Waiting for Signature(s)</div>
         </template>
       </Column>
@@ -88,6 +84,9 @@ import DataTable from 'primevue/datatable';
 import Tooltip from 'primevue/tooltip';
 import Column from 'primevue/column';
 import { networkState } from "@/state/networkState";
+import { walletState } from '@/state/walletState';
+import { Helper } from "@/util/typeHelper";
+import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 
 export default{
   components: {
@@ -130,7 +129,7 @@ export default{
       return explorerBaseURL.value + publicKeyExplorerURL.value + "/" + publicKey
     }
 
-    const transactions = [
+    /*const transactions = [
       {
         hash: "04836EC9CFAF9423E60122E7CB39AE8C171B16604CDE86DEA4CA9B80658E12E3",
         extractedData: {
@@ -159,7 +158,48 @@ export default{
         formattedDeadline: "12/1/2021, 19:00:18",
         sign: false
       }
-    ];
+    ];*/
+
+    const formatTime = (timestamp) => {
+      return Helper.formatDeadline(timestamp);
+    }
+
+    const transactions = ref([]);
+    const currentAddress = ref('');
+
+    let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
+    currentAddress.value = currentAccount.address;
+    let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
+
+    let transactionGroupType = Helper.getTransactionGroupType();
+
+    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, currentAccount);
+
+    let loadUnconfirmedTransactions = async() => {
+      let txnQueryParams = Helper.createTransactionQueryParams();
+      txnQueryParams.pageSize = 1;
+      txnQueryParams.address = currentAccount.address;
+      txnQueryParams.embedded = true;
+      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
+
+      let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.PARTIAL, txnQueryParams);
+      let formattedTxns = await dashboardService.formatPartialMixedTxns(transactionSearchResult.transactions);
+      transactions.value = formattedTxns;
+    };
+
+    loadUnconfirmedTransactions();
+
+    emitter.on("TXN_UNCONFIRMED", (num) => {
+      if(num> 0){
+        loadUnconfirmedTransactions();
+      }
+    });
+
+    emitter.on("TXN_CONFIRMED", (num) => {
+      if(num> 0){
+        loadUnconfirmedTransactions();
+      }
+    });
 
     return {
       wideScreen,
@@ -167,6 +207,9 @@ export default{
       modalData,
       showTransactionModel,
       getPublicKeyExplorerUrl,
+      currentAddress,
+      formatTime,
+      Helper,
     }
   },
 }

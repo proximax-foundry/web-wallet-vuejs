@@ -8,14 +8,14 @@
       <div class='border-2'>
         <div class='w-full text-center border-b-2 border-gray-200 p-10'>
           <div class="text-xl">Action Required</div>
-          <div class="mt-5 text-tsm">An account has added you as cosignatory account. Would you like to approve it?</div>
-          <div class="mt-1 text-tsm font-bold">Deadline: 11/12/2021 23:19:54</div>
+          <div class="mt-5 text-tsm">Would you like to approve this transaction?</div>
+          <div class="mt-1 text-tsm font-bold">Deadline: {{ deadline }}</div>
         </div>
-        <div class='w-full text-center border-b-2 border-gray-200 lg:grid lg:grid-cols-3'>
+        <div class='w-full text-center border-b-2 border-gray-200 lg:grid lg:grid-cols-3' v-if="!invalidCosigner">
           <div class="lg:h-28 lg:flex lg:items-center my-5 mb-10 lg:my-0 lg:mb-0">
             <div>
-              <div class="uppercase text-blue-primary text-xs font-bold">MULTISIG-JLON</div>
-              <div class="uppercase text-xs font-bold p-1">VC5K6T-HMZXBB-XQWKLS-L4Q5BK-PXKV4H-UKJSJ2-JLON</div>
+              <div class="uppercase text-blue-primary text-xs font-bold">{{ signerName?signerName:'Signer' }}</div>
+              <div class="uppercase text-xs font-bold p-1">{{ signerAddress }}</div>
             </div>
           </div>
           <div class="lg:h-28 flex text-center justify-center">
@@ -27,14 +27,17 @@
           </div>
           <div class="lg:h-28 lg:flex lg:items-center my-5 lg:my-0">
             <div>
-              <div class="inline-block uppercase text-blue-primary text-xs font-bold">My Personal Account</div>
-              <div class="uppercase text-xs font-bold p-1">VCPB4E-BOMKQA-F347JL-KE5QJQ-BQTSPV-OB6NJ7-QYGQ</div>
+              <div class="inline-block uppercase text-blue-primary text-xs font-bold">{{ currentName }}</div>
+              <div class="uppercase text-xs font-bold p-1">{{ currentAddressFormatted }}</div>
             </div>
           </div>
         </div>
+        <div class='w-full text-center border-b-2 border-gray-200 py-5 text-tsm text-gray-500' v-else>
+          This partial transaction is invalid for this account <b>{{ currentName }}</b>
+        </div>
         <div class="flex items-center h-14 lg:h-28 justify-center">
           <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class="text-gray-600 bg-white px-5 py-2 lg:px-10 lg:py-3 rounded-md text-xs lg:text-tsm inline-block border-2 border-gray-200 mr-5">Do this later</router-link>
-          <CosignPasswordModal transactionHash = '432434324324343fwefewf' />
+          <CosignPasswordModal :transactionHash = 'txnHash' :disabled="invalidCosigner" />
         </div>
       </div>
       <div class='border-2 mt-5'>
@@ -43,41 +46,43 @@
           <div class="text-xs text-blue-primary uppercase flex justify-evenly items-center">View<img src="@/modules/transaction/img/icon-down-caret.svg" class="ml-2 transition-all duration-200" :class="`${viewTxn?'rotate-180 transform':''}`"></div>
         </div>
         <transition name="slide">
-          <div class="p-3 border-t-2 border-gray-200" v-if="viewTxn">
-            <div class="my-4 text-sm">Aggregate Bonded</div>
-            <div class="table_div border-b-2 border-gray-200 pb-5 mb-5">
+          <div class="p-3" :class="`${ innerTransactions.length>0?'border-t-2 border-gray-200':'' }`" v-if="viewTxn">
+            <div class="my-4 text-sm">{{ txnTypeLabel }}</div>
+            <div class="table_div pb-5" :class="`${ innerTransactions.length>0?'border-b-2 border-gray-200 mb-5':'' }`">
               <div>
                 <div>Type</div>
-                <div>4241</div>
+                <div>{{ txnType }}</div>
               </div>
               <div>
                 <div>TX Hash</div>
-                <div>3719E9CF01C0EF0BA4137A64960DFF5DA0CFDDB095BF3C7C706279372E3DEBF9</div>
+                <div>{{ txnHash }}</div>
               </div>
               <div>
                 <div>Signer</div>
-                <div>VDRZET-KWBELD-NUZPE3-MA36S5-HVSF7X-ZHNBKM-JMSA</div>
+                <div>{{ signerAddress }}</div>
               </div>
             </div>
-            <div class="mt-10">Transactions ({{ innerTransactions.length }})</div>
-            <div class="mt-3 border-2 border-gray-200 p-3" v-for="(item, index) in innerTransactions" :key="index">
-              <div class="text-sm flex justify-between cursor-pointer" @click="viewInnerTxn[index] = !viewInnerTxn[index]">{{ item.Inner }}<img src="@/modules/transaction/img/icon-down-caret-black.svg" class="mr-1 transition-all duration-200" :class="`${viewInnerTxn[index]?'rotate-180 transform':''}`"></div>
-              <transition name="slide">
-                <div class="mt-4 table_div" v-if="viewInnerTxn[index]">
-                  <div>
-                    <div>Type</div>
-                    <div>{{ item.Type }}</div>
+            <div v-if="innerTransactions.length > 0">
+              <div class="mt-10">Transactions ({{ innerTransactions.length }})</div>
+              <div class="mt-3 border-2 border-gray-200 p-3" v-for="(item, index) in innerTransactions" :key="index">
+                <div class="text-sm flex justify-between cursor-pointer" @click="viewInnerTxn[index] = !viewInnerTxn[index]">{{ item.Inner }}<img src="@/modules/transaction/img/icon-down-caret-black.svg" class="mr-1 transition-all duration-200" :class="`${viewInnerTxn[index]?'rotate-180 transform':''}`"></div>
+                <transition name="slide">
+                  <div class="mt-4 table_div" v-if="viewInnerTxn[index]">
+                    <div>
+                      <div>Type</div>
+                      <div>{{ item.Type }}</div>
+                    </div>
+                    <div>
+                      <div>Public Key</div>
+                      <div>{{ item.PublicKey }}</div>
+                    </div>
+                    <div>
+                      <div>Signer</div>
+                      <div>{{ item.Address }}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div>TX Hash</div>
-                    <div>{{ item.PublicKey }}</div>
-                  </div>
-                  <div>
-                    <div>Signer</div>
-                    <div>{{ item.Address }}</div>
-                  </div>
-                </div>
-              </transition>
+                </transition>
+              </div>
             </div>
           </div>
         </transition>
@@ -106,6 +111,7 @@ import PdfPasswordModal from '@/modules/account/components/PdfPasswordModal.vue'
 import DeleteAccountModal from '@/modules/account/components/DeleteAccountModal.vue'
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
+import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 
 export default {
   name: "ViewTransactionSign",
@@ -124,36 +130,102 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
-    const viewTxn = ref(false);
+    const viewTxn = ref(true);
 
-    const viewInnerTxn = ref([false, false, false]);
+    const currentAddress = ref('');
+    const currentAddressFormatted = ref('');
+    const currentName = ref('');
+    const deadline = ref('');
+    const txnType = ref('');
+    const signerAddress = ref('');
+    const signerName = ref('');
+    const txnTypeLabel = ref('');
 
-    const innerTransactions = [
-      {
-        Inner: 'Multisig Cosignatory Modification',
-        Type: 'Add',
-        Address: 'VB7HC7-FRJSGG-PRAPCM-OINO3P-DZFRY3-OMOFKT-DKOI',
-        PublicKey: '951D9FFCBAC28D691EF0C6D78E49B4613C23D7073FBE12D28FEEBC11371A7332'
-      },
-      {
-        Inner: 'Inner Txn 2',
-        Type: 'Add',
-        Address: 'VB7HC7-FRJSGG-PRAPCM-OINO3P-DZFRY3-OMOFKT-DKOI',
-        PublicKey: '951D9FFCBAC28D691EF0C6D78E49B4613C23D7073FBE12D28FEEBC11371A7332'
-      },
-      {
-        Inner: 'Inner Txn 3',
-        Type: 'Add',
-        Address: 'VB7HC7-FRJSGG-PRAPCM-OINO3P-DZFRY3-OMOFKT-DKOI',
-        PublicKey: '951D9FFCBAC28D691EF0C6D78E49B4613C23D7073FBE12D28FEEBC11371A7332'
+    const innerTransactions = ref([]);
+    const viewInnerTxn = ref([]);
+    const invalidCosigner = ref(true);
+
+    (async() => {
+      let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
+      currentAddress.value = currentAccount.address;
+      let currentPublicKey = currentAccount.publicKey;
+
+      currentName.value = currentAccount.name;
+      let dashboardService = new DashboardService(walletState.currentLoggedInWallet, currentAccount);
+      let aggregateTxn = await dashboardService.autoFindAggregateTransaction(p.txnHash);
+
+      // validate cosigner
+      let cosigners = [];
+      if(aggregateTxn.innerTransactions.length > 0){
+        aggregateTxn.innerTransactions.forEach(inner => {
+          if(inner.modifications.length > 0){
+            inner.modifications.forEach(modification => {
+              cosigners.push(modification.cosignatoryPublicAccount.publicKey);
+            });
+          }
+        });
       }
-    ];
+
+      let foundCosigner = cosigners.find(cosigner => cosigner == currentPublicKey);
+      if(foundCosigner.length == 0){
+        invalidCosigner.value = true;
+      }
+
+      let formattedAggTxn = await dashboardService.formatPartialTransaction(aggregateTxn);
+      deadline.value = Helper.formatDeadline(formattedAggTxn.deadline);
+      txnType.value = aggregateTxn.type;
+      txnTypeLabel.value = formattedAggTxn.type;
+      signerAddress.value = Helper.createAddress(formattedAggTxn.signerAddress).pretty();
+      signerName.value = formattedAggTxn.signerName;
+      currentAddressFormatted.value = Helper.createAddress(currentAddress.value).pretty();
+      if(aggregateTxn.innerTransactions.length > 0){
+        aggregateTxn.innerTransactions.forEach(inner => {
+          viewInnerTxn.value.push(false);
+          let formattedInner = dashboardService.extractInnerTransaction(inner);
+          innerTransactions.value.push({
+            Inner: formattedInner.typeName,
+            Type: formattedInner.extractedData.modifications[0].type,
+            PublicKey: formattedInner.signerPublicKeys[0],
+            Address: Helper.createAddress(formattedInner.signerAddress).pretty()
+          });
+        });
+      }
+    })();
+
+    // const innerTransactions = [
+    //   {
+    //     Inner: 'Multisig Cosignatory Modification',
+    //     Type: 'Add',
+    //     Address: 'VB7HC7-FRJSGG-PRAPCM-OINO3P-DZFRY3-OMOFKT-DKOI',
+    //     PublicKey: '951D9FFCBAC28D691EF0C6D78E49B4613C23D7073FBE12D28FEEBC11371A7332'
+    //   },
+    //   {
+    //     Inner: 'Inner Txn 2',
+    //     Type: 'Add',
+    //     Address: 'VB7HC7-FRJSGG-PRAPCM-OINO3P-DZFRY3-OMOFKT-DKOI',
+    //     PublicKey: '951D9FFCBAC28D691EF0C6D78E49B4613C23D7073FBE12D28FEEBC11371A7332'
+    //   },
+    //   {
+    //     Inner: 'Inner Txn 3',
+    //     Type: 'Add',
+    //     Address: 'VB7HC7-FRJSGG-PRAPCM-OINO3P-DZFRY3-OMOFKT-DKOI',
+    //     PublicKey: '951D9FFCBAC28D691EF0C6D78E49B4613C23D7073FBE12D28FEEBC11371A7332'
+    //   }
+    // ];
 
     return {
       showModal,
       innerTransactions,
       viewTxn,
       viewInnerTxn,
+      deadline,
+      txnType,
+      signerAddress,
+      signerName,
+      currentAddressFormatted,
+      currentName,
+      txnTypeLabel,
+      invalidCosigner,
     };
   }
 };
