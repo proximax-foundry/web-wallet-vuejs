@@ -15,16 +15,16 @@
           <div class = 'ml-1 text-xs  font-bold'>{{currentNativeTokenName}}</div>
           <img src="@/modules/account/img/proximax-logo.svg" class='h-4 w-4 '>
         </div>
-        <div class='flex'> 
-          <div  v-if='account.default' class = ' px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm' title='This is your default account everytime you login'>
+        <div class='flex gap-2 '> 
+          <div  v-if='account.default' class = 'px-1 py-0.5 flex items-center bg-blue-primary rounded-sm' title='This is your default account everytime you login'>
             <img src="@/modules/account/img/icon-pin.svg" class = 'h-4 w-4 ' >
             <p class = 'font-semibold text-white text-xxs pt-px cursor-default' >DEFAULT</p>
           </div>
-          <div v-if='isMultiSig' class = 'ml-1.5 px-1 py-0.5 flex mt-0.5 bg-green-500 rounded-sm ' title='This is a multisig account'>
+          <div v-if='isMultiSig' class = 'px-1 py-0.5 flex items-center bg-green-500 rounded-sm ' title='This is a multisig account'>
             <img src="@/assets/img/icon-multisig.svg" class = 'h-3 w-3 mr-1' style= "transform: rotateY(180deg)" >
             <p  class = 'font-semibold text-white text-xxs pt-px cursor-default'  >MULTISIG</p>
           </div>
-          <div v-if='isMultiSig && !otheraccount(account.address)' class = 'ml-1.5 px-1 py-0.5 flex mt-0.5 bg-purple-500 rounded-sm' title='You own this multisig account' >
+          <div v-if='isMultiSig && !otheraccount(account.address)' class = 'px-1 py-0.5 flex items-center bg-purple-500 rounded-sm' title='You own this multisig account' >
             <img src="@/assets/img/icon-key.svg" class = 'h-4 w-4 mr-1' >
             <p  class = 'font-semibold text-white text-xxs pt-px cursor-default'  >OWNER</p>
           </div>

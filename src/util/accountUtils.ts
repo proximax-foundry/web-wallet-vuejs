@@ -258,12 +258,13 @@ const linkAddressToNamespace = (senderAddress: string, walletPassword: string, n
   }
 }
 
-const createDelegatTransaction = (address: string, walletPassword: string, accPublicKey: string, delegateAction: LinkAction) =>{
+const createDelegatTransaction = (address: string, walletPassword: string, accPublicKey: string, delegateAction: LinkAction) :SignedTransaction=>{
   const senderAccount = getAccountDetail(address, walletPassword);
   const transactionBuilder = new BuildTransactions(networkType, Hash);
   const delegateTransaction = transactionBuilder.accountLink(accPublicKey, delegateAction);   
   const signTransaction = senderAccount.sign(delegateTransaction, Hash);
   announceTransaction(signTransaction);
+  return signTransaction
 }
 
 const getValidAccount = async (address: string): Promise<boolean> => {

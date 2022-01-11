@@ -1,48 +1,118 @@
 <template>
-  <div class="flex justify-between text-xs sm:text-sm" v-cloak>
-    <div><span class="text-gray-400">{{$t('NavigationMenu.Accounts')}} ></span> <span class="text-blue-primary font-bold">{{$t('delegate.delegate')}}</span></div>
-    <div>
-      <router-link :to="{name: 'ViewAccountDisplayAll'}" class="font-bold" active-class="accounts">{{$t('accounts.viewall')}}</router-link>
+<div>
+  <div class='flex cursor-pointer'>
+    <img src='@/assets/img/chevron_left.svg'>
+    <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
+  </div>
+  <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
+    <AccountComponent :address="acc.address" class="mb-10"/>
+    <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
+      <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>Account Details</router-link>
+      <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
+      <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>Scheme</router-link>
+      <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>Swap</router-link>
+      <MoreAccountOptions :address="acc.address" :selected="true"/>
+    </div>
+    <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
+      <div class="lg:col-span-2 py-6 pr-6">
+        <div class='pl-6'>
+           <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
+        </div>
+        <div v-if="!delegateValue">
+          <div class="text-xs font-semibold pl-6">Delegate</div>
+          <div class="text-xxs pl-6 mt-2">Your account is not linked to a delegated account.</div>
+          <div class="mt-4"></div>
+          <div class="ml-6 my-7 gray-line"/>
+          <button v-if="!toggleSelection" @click="toggleSelection=!toggleSelection" class='ml-6 w-44 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto' :disabled="isMultisig">Select Account to Link</button>
+          <div v-if="toggleSelection && !fromNew && !fromPk">
+            <div class='pl-6 text-xs font-semibold'>Select Account Type</div>
+            <div class='mt-3'></div>
+            <div class='flex gap-2 ml-6'>
+              <div class='border p-6 w-44 cursor-pointer'  @click="fromNew=true">
+                <img src="@/modules/wallet/img/icon-add-new.svg" class="ml-auto mr-auto mt-4 mb-3 h-12 w-12 ">
+                <div class='text-center text-xs font-semibold'>Create New</div>
+              </div>
+              <div class='border p-6 w-44 cursor-pointer' @click="fromPk=true">
+                <img src="@/modules/wallet/img/icon-private-key.svg" class=" ml-auto mr-auto mt-4 mb-3 h-12 w-12 ">
+                <div class='text-center text-xs font-semibold'>From Private Key</div>
+              </div>
+            </div> 
+          </div>
+          <div v-if="fromPk" class="pl-6">
+            <div class="text-xs font-semibold">From Private Key</div>
+            <div class="text-xxs mt-2">Please fill in the private key of the linking account.</div>
+            <PkInputClean placeholder="PRIVATE KEY" class="my-3" v-model="privateKey" errorMessage="Invalid Private Key" :showError="showPrivateKeyError" />
+            <div class="text-xs text-blue-primary font-semibold cursor-pointer" @click="fromPk=!fromPk">Back</div>
+          </div>
+          <div v-if="fromNew" class="pl-6">
+            <div class="text-xs font-semibold">New Account</div>
+            <div class="text-xxs my-2">New Account is selected as the linking account.</div>
+             <div class="text-xs text-blue-primary font-semibold cursor-pointer" @click="fromNew=!fromNew">Back</div>
+          </div>
+        </div>
+        <div v-else>
+          <div class="text-xs font-semibold pl-6">Account Delegated</div>
+          <div class="ml-6 px-3 py-2 mt-3 bg-green-100">
+            <img src='@/assets/img/icon-blue-tick.svg' class='h-3 w-3 inline-block mr-2'>
+            <div class="text-xs  mt-2 inline-block">Your account is linked to a delegated account.</div>
+          </div>
+          
+          <div class="border border-blue-300 rounded-md ml-6 p-3 mt-3 bg-blue-50">
+            <div class="text-xs inline-block">Public Key of the Delegated Account</div>
+            <font-awesome-icon icon="copy" @click="copy('delegatePublicKey')" title='Copy' class="inline-block float-right mt-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+            <div class="text-xs mt-0.5 font-semibold" id="delegatePublicKey" :copyValue="delegateAcc" copySubject="Delegate Public Key">{{delegateAcc}}</div>
+          </div>
+        </div>
+      </div>
+      <div class='bg-navy-primary p-6 lg:col-span-1'>
+        <div class='font-semibold text-xxs text-blue-primary'>ACCOUNT CURRENT BALANCE</div>
+        <div class='flex text-white'>
+          <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
+          <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
+          <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
+          <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
+          <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
+        </div>
+        <div v-if="isMultisig " class="mt-2 bg-yellow-50 p-3 rounded-md" >
+          <div class="flex items-center gap-2">
+            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+            <div class="text-txs">Account delegation is not allowed for a multisig account.</div>
+          </div>
+        </div>
+        <div class="flex mt-4 text-white">
+          <div class='text-xs '>Transaction Fee</div>
+          <div class="text-xs  ml-auto">10.00</div>
+          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+        </div>
+        <div class='border-b-2 border-gray-600 my-2'/>
+        <div class="flex text-white">
+          <div class=' font-bold text-xs '>TOTAL</div>
+          <div class="text-xs  ml-auto">56.2966</div>
+          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+        </div>
+        <div class="mt-5"/>
+        <div class='font-semibold text-xs text-white'>Enter your password to continue</div>
+        <div class='font-semibold text-xxs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
+        <PasswordInput  :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="walletPassword" />
+        <div class="mt-3">
+          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="delegateValue && !unlinking" :disabled="disableLinkBtn">Unlink Account</button>
+          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  v-if="delegateValue && unlinking" :disabled="true">Unlinking Account...Please wait</button>
+          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="!delegateValue && !pending" :disabled="disableLinkBtn">Delegate Account</button>
+          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  v-if="!delegateValue && pending" :disabled="true">Waiting for transaction to be confirmed...</button>
+        </div>
+        <div class="text-center">
+          <router-link :to="{name: 'ViewAccountDetails',params:{name:address}}" class="content-center text-xs text-white underline" >Cancel</router-link>
+        </div>
+      </div>
     </div>
   </div>
-  <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80'>    
-    <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
-    <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 mb-8 mt-3" >
-      <div class="text-center w-full" >
-          <p class="text-sm" v-if="delegateValue == true">{{$t('delegate.linkmessage2')}}</p>
-      <!-- </div>
-    </div> -->
-    <!-- <div class="flex justify-between p-4 rounded-xl bg-white border-yellow-500 border-2 mb-8 mt-3" v-if="delegateValue == false">
-      <div class="text-center w-full" > -->
-          <p v-cloak class="text-sm" v-if="delegateValue == false">{{$t('delegate.linkwarning')}}</p>
-      </div>
-    </div>
-    <div class="flex justify-between p-4 rounded-xl bg-gray-100 mb-7 items-center">
-      <div class="text-left w-full relative">
-        <div v-if="delegateValue" class="text-xs font-bold mb-1">{{$t('delegate.delegatepublic')}}</div>
-        <div v-if="delegateValue == false" class="text-xs font-bold mb-1">{{$t('delegate.linkingaccount')}}</div>
-        <div v-if="delegateValue" id="delegatePublicKey" :copyValue="delegateAcc" copySubject="Delegate Public Key" class="text-xs w-full outline-none bg-gray-100 z-10" >{{delegateAcc}}</div>
-        <div v-if="delegateValue == false && newAcc">{{$t('delegate.newaccount')}}</div>
-        <div v-else-if="delegateValue == false && newAccPK">{{$t('createwallet.fromprivatekey')}}</div>
-        <div v-if="delegateValue == false && !newAcc&& !newAccPK">{{$t('delegate.noneselected')}}</div>
-      </div>
-      <font-awesome-icon icon="copy" @click="copy('delegatePublicKey')" class="w-5 h-5 text-gray-500 cursor-pointer inline-block mr-2" v-if="delegateValue"></font-awesome-icon>
-      <div class="inline-block ml-2" v-if="delegateValue == false">
-        <SelectAccountTypeModal />
-      </div>
-    </div>
-    <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
-    <div class="mt-10">
-      <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="createDelegate" v-if="delegateValue" :disabled="disableLinkBtn">{{$t('delegate.unlinkaccount')}}</button>
-      <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="createDelegate" v-if="delegateValue == false" :disabled="disableLinkBtn">{{$t('delegate.linkaccount')}}</button>
-    </div>
-  </div>
+</div>
 </template>
 <script>
 
 import { ref, computed, getCurrentInstance,watch } from "vue";
 import PasswordInput from '@/components/PasswordInput.vue';
-import SelectAccountTypeModal from '@/modules/account/submodule/delegate/components/SelectAccountTypeModal.vue';
+import PkInputClean from '@/modules/account/submodule/delegate/components/PkInputClean.vue';
 import { walletState } from '@/state/walletState';
 import { WalletUtils } from "@/util/walletUtils";
 import { networkState } from "@/state/networkState";
@@ -57,6 +127,12 @@ import { useRouter } from "vue-router";
 import { LinkAction } from "tsjs-xpx-chain-sdk";
 import { useI18n } from 'vue-i18n';
 import { accountUtils } from "@/util/accountUtils";
+import AccountComponent from "@/modules/account/components/AccountComponent.vue";
+import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
+import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
+import { Account } from "tsjs-xpx-chain-sdk";
+import { listenerState } from '@/state/listenerState';
+import { multiSign } from '@/util/multiSignatory';
 //import { AsyncComputed } from 'vue-async-computed';
 //import AsyncComputed from '@vue3-async-computed';
 //import useAsyncComputed from './use-async-computed';
@@ -64,20 +140,74 @@ import { accountUtils } from "@/util/accountUtils";
 export default {
   name: 'ViewAccountDelegate',
   components: {
+    AccountComponent,
+    MoreAccountOptions,
     PasswordInput,
-    SelectAccountTypeModal,
+    PkInputClean
+    /* SelectAccountTypeModal, */
   },
   props: {
     address: String,
   },
   setup(p) {
     const { t } = useI18n();
+    const privKeyPattern = "^(0x|0X)?[a-fA-F0-9].{63,65}$"; 
+    let privateKey = ref('')
+    let showPrivateKeyError = ref(true)
     const walletPassword = ref("");
     const showPasswdError = ref(false);
-    const err = ref(false);
-    const newAcc = ref(false);
+    /* let showSuccess = ref(false) */
+    const err = ref(false); 
+    const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
+    let fromNew = ref(false)
+    let fromPk = ref(false)
+    let txHash = ref("")
+    let pending =ref(false)
+    let toggleSelection = ref(false)
+    const acc =  computed(()=>{
+      let account = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address)
+      return account
+    })
+    const isMultisig = computed(() => {
+      let isMulti = acc.value.getDirectParentMultisig().length? true: false
+      return isMulti;
+    });  
+    const accountBalance = computed(() => {
+       let accountBalance = 0
+       if (acc.value == undefined){
+         return 0
+       }
+        accountBalance = acc.value.balance
+       
+       return accountBalance
+    })
+    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+    const accountDisplayBalance = computed(() => {
+      if(walletState.currentLoggedInWallet){ 
+        return Helper.toCurrencyFormat(accountBalance.value, currentNativeTokenDivisibility.value);
+      }else{
+        return 0 
+      }
+    });
+    const splitBalance = computed(()=>{
+      let split = accountDisplayBalance.value.split(".")
+      if (split[1]!=undefined){
+        return {left:split[0],right:split[1]}
+      }else{
+        return {left:split[0], right:null}
+      }
+    })
+    
+    watch(privateKey,n=>{
+      if(!n.match(privKeyPattern)){
+        showPrivateKeyError.value = true
+      }else{
+        showPrivateKeyError.value = false
+      }
+    })
     //const delegateValue = ref(false);
-    const newAccPK = ref(false);
+    
     const delegateAcc = ref('');
     const AccPublicKey = ref("");
     const AccPrivateKey = ref("")
@@ -89,7 +219,33 @@ export default {
     const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
     const emitter = internalInstance.appContext.config.globalProperties.emitter;    
     const walletName = walletState.currentLoggedInWallet.name;
-    const disableLinkBtn = computed(() => !(walletPassword.value.match(passwdPattern)));
+    let unlinking = ref(false)
+    const disableLinkBtn = computed(() => {
+      if(!fromNew.value && !fromPk.value && !delegateValue.value){
+        return true
+      }else if(delegateValue.value){
+        if(walletPassword.value.match(passwdPattern)){
+          return false
+        }else{
+          return true
+        }
+      }else if(fromNew.value){
+        if(walletPassword.value.match(passwdPattern)){
+          return false
+        }else{
+          return true
+        }
+      }else if(fromPk.value){
+        if(walletPassword.value.match(passwdPattern) && showPrivateKeyError.value==false){
+          return false
+        }else{
+          return true
+        }
+      }else{
+        return true
+      }
+      
+    });
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
@@ -99,33 +255,19 @@ export default {
 
     const verifyDelegateAcc = async() => {
       const accountDetail = walletState.currentLoggedInWallet.accounts.find(account => account.address == accAddress.value);       
-      //delegateAccountKey;
       if (accountDetail) {
         const publicAccount = Helper.createPublicAccount(accountDetail.publicKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type)); 
-        console.log(walletState.currentLoggedInWallet.others);
-        console.log(walletState.currentLoggedInWallet.accounts);
         const accountInfo = await chainAPICall.accountAPI.getAccountInfo(publicAccount.address);
-        console.log(accountInfo);
-        // if(accountInfo.linkedAccountKey !== "0".repeat(64)){
-       // let delegateAccountKey = accountInfo.linkedAccountKey;
-        // } 
+     
         delegateAcc.value = accountInfo.linkedAccountKey;
       }
-      //return delegateAccountKey;
+     
     };
 
-    // watch(delegateAcc,(latest,prev)=>{          
-    //   if(latest!=prev){
-    //     delegateAcc.value = latest;
-    //   } 
-    // });
-    console.log(verifyDelegateAcc);
     verifyDelegateAcc();
 
-// const delegateValue = AsyncComputed(verifyDelegateAcc());
     const delegateValue = computed(()=>{
-      let delegateBoolean;
-      console.log(delegateAcc.value)
+      let delegateBoolean = false
       if(delegateAcc.value!=''){
         if(delegateAcc.value === "0".repeat(64)){
           delegateBoolean = false;
@@ -133,71 +275,99 @@ export default {
           delegateBoolean = true;
         }
       }
-      console.log(delegateBoolean);
       return delegateBoolean;
     });
 
-    const createDelegate = () => {
+    const createDelegate = async() => {
+      if(privateKey.value!=""){
+        const networkType = networkState.currentNetworkProfile.network.type;
+        const accountDetail = Account.createFromPrivateKey(privateKey.value, networkType);
+        const accountAPIResponse = await accountUtils.getValidAccount(accountDetail.address.address);
+        if(accountAPIResponse == true){        
+          if(accountDetail){
+            AccPublicKey.value = accountDetail.publicKey;
+          }      
+        } else {          
+          err.value = t('delegate.linkerror')
+        }  
+      }else{
+        const account = WalletUtils.generateNewAccount(ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+        if(account){
+          AccPublicKey.value = account.publicKey;
+         
+        }
+      }
       if (WalletUtils.verifyWalletPassword(walletName,networkState.chainNetworkName,walletPassword.value)) {
-        if (delegateAcc.value !== "0".repeat(64)) {
+        if (delegateAcc.value !== "0".repeat(64)) { //unlink
           const indexOtherAcc = walletState.currentLoggedInWallet.others.findIndex((other)=> other.publicKey === delegateAcc.value)
           if (indexOtherAcc > -1) {
-            accountUtils.createDelegatTransaction(accAddress.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
-
-            toast.add({severity:'success', summary: 'Notification', detail: 'Unlink Successfully', group: 'br', life: 5000});            
-            router.push({ name: "ViewAccountDisplayAll" });
+            let signedTx = accountUtils.createDelegatTransaction(accAddress.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
+            txHash.value = signedTx.hash.toUpperCase()
+            console.log(signedTx.type) //
+            /* toast.add({severity:'success', summary: 'Notification', detail: 'Unlink Successfully', group: 'br', life: 5000});   */          
+            /* router.push({ name: "ViewAccountDisplayAll" }); */
+            walletPassword.value=""
+            unlinking.value=true
+            err.value=""
           } else {
             err.value = t('delegate.linkerror2');
           }
-        } else if (!AccPublicKey.value == "" && !AccPrivateKey.value == "") {
-          accountUtils.createDelegatTransaction(accAddress.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
-
-          toast.add({severity:'success', summary: 'Notification', detail: 'Link Successfully', group: 'br', life: 5000});            
-          router.push({ name: "ViewAccountCreated", params: { name: '' ,publicKey: AccPublicKey.value, privateKey: AccPrivateKey.value }});
+        } else if (AccPublicKey.value != "" && (fromPk.value || fromNew.value)) { //link
+          let signedTx = accountUtils.createDelegatTransaction(accAddress.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
+          txHash.value = signedTx.hash.toUpperCase()
+          walletPassword.value=""
+          pending.value=true
+          err.value=""
         } else {
-          err.value = "Linking account not selected.";
+          
         }
       } else {
         err.value = t('scriptvalues.walletpasswordvalidation',{name : walletName});
       }
     };
     
-    emitter.on('NEW ACCOUNT', newAccPublicKey => {
-      if(newAccPublicKey){
-        AccPublicKey.value = newAccPublicKey.publicKey;
-        AccPrivateKey.value = newAccPublicKey.privateKey;
-        newAcc.value = true;
-        newAccPK.value = false;
+    
 
+    watch(confirmedTxLength, (n, o) => {
+      if (n != o){
+        if(listenerState.allConfirmedTransactionsHash.find(hash=> hash ==txHash.value)){
+          unlinking.value = false
+          txHash.value=""
+          pending.value=false
+          toast.add({severity:'success', summary: 'Notification', detail: delegateValue.value? 'Unlinked Successfully' :'Linked Successfully', group: 'br', life: 5000})
+          /* showSuccess.value=true */
+        }
+        verifyDelegateAcc()
       }
     })
-
-    emitter.on('FROM PRIVATE KEY', existingPublicKey => {
-      if(existingPublicKey){
-        AccPublicKey.value = existingPublicKey.publicKey;
-        AccPrivateKey.value = existingPublicKey.privateKey;
-        newAccPK.value = true;
-        newAcc.value = false;
-
-      }
-    })
+    
 
     return {
+      /* showSuccess, */
+      unlinking,
+      showPrivateKeyError,
+      privateKey,
+      fromNew,
+      fromPk,
+      toggleSelection,
+      currentNativeTokenName,
+      splitBalance,
+      isMultisig,
+      acc,
       walletPassword,
       showPasswdError,
       walletState,
       createDelegate,
       verifyDelegateAcc,
       delegateAcc,
-      newAccPK,
-      newAcc,
       AccPublicKey,
       AccPrivateKey,
       disableLinkBtn,
       copy,
       err,
       walletName,
-      delegateValue
+      delegateValue,
+      pending
     };
   },
 }
