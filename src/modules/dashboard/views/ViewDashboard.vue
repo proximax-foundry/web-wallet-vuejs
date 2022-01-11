@@ -207,6 +207,7 @@ import qrcode from 'qrcode-generator';
 //import Dialog from 'primevue/dialog';
 import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
+import {AppState} from '@/state/appState'
 
 export default defineComponent({
   name: 'ViewDashboard',
@@ -473,8 +474,6 @@ export default defineComponent({
       accountPartialTxnsCount.value = transactionsCount.partial;
     };
 
-    updateAccountTransactionCount();
-
     /*
     emitter.on("TXN_UNCONFIRMED", (num)=>{
 
@@ -571,17 +570,18 @@ export default defineComponent({
       toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
     };
 
-    
     // get USD conversion
     const currencyConvert = ref('');
 
-    if(networkState.currentNetworkProfile.network.currency.name === "XPX"){
-      displayConvertion.value = true;
-      getCurrencyPrice();
-
-      watch(selectedAccountBalance, () => {
+    const updatePricing = () =>{
+      if(networkState.currentNetworkProfile.network.currency.name === "XPX"){
+        displayConvertion.value = true;
         getCurrencyPrice();
-      });
+
+        watch(selectedAccountBalance, () => {
+          getCurrencyPrice();
+        });
+      }
     }
 
     // setup transaction loading
@@ -615,8 +615,6 @@ export default defineComponent({
       recentTransactions.value = formattedTxns.slice(0, 5);
       searchedTransactions.value = formattedTxns;
     };
-
-    loadRecentTransactions();
 
     let loadRecentTransferTransactions = async()=>{
       let txnQueryParams = Helper.createTransactionQueryParams();
@@ -652,8 +650,6 @@ export default defineComponent({
 
       recentTransferTransactions.value = removeDuplicateTxn(tempTxns);
     };
-
-    loadRecentTransferTransactions();
 
     const reloadSearchTxns = () =>{
       allTxnQueryParams.pageNumber = 1;
@@ -956,6 +952,27 @@ export default defineComponent({
       showCosignModal.value = false;
       showDecryptMessageModal.value = false;
     });
+
+    const init = ()=>{
+      updateAccountTransactionCount();
+      loadRecentTransactions();
+      loadRecentTransferTransactions();
+      updatePricing();
+    }
+
+    if(AppState.isReady){
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState.isReady, (value) => {
+        if(value){
+          init();
+          readyWatcher();
+        }     
+      });
+    }
+
+    
 
     return {
       currentBlock,

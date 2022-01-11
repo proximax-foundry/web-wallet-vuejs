@@ -49,14 +49,14 @@
     "tslib": "^2.3.1",
     "v-tooltip": "^4.0.0-alpha.1",
     "v-wave": "^1.2.8",
-    "vue": "^3.0.0",
+    "vue": "^3.2.0",
     "vue-currency-input": "^2.0.0-rc.2",
     "vue-debounce": "^3.0.1",
     "vue-i18n": "^9.1.6",
+    "vue-loading-overlay": "^5.0.1",
     "vue-password": "^3.0.0",
     "vue-router": "^4.0.0-0",
     "vue-tippy": "^6.0.0-alpha.29",
-    "vue3-loading-overlay": "0.0.0",
     "vue3-simple-file-input": "^1.0.3"
   },
   "devDependencies": {

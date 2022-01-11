@@ -1,4 +1,5 @@
 import { walletState } from "../walletState";
+import { AppStateUtils } from "../utils/appStateUtils";
 import { Wallets } from "../../models/wallets"
 import { Wallet } from "../../models/wallet";
 import { SessionService } from "../../models/stores/sessionService"
@@ -35,6 +36,8 @@ export class WalletStateUtils{
   }
 
   static checkFromSession(): boolean{
+
+    AppStateUtils.addNewReadyStates('checkSession');
 
     const sessionWalletToken = SessionService.getRaw(sessionWalletKey);
     const sessionNetworkName = SessionService.getRaw(sessionNetworkNameKey);
