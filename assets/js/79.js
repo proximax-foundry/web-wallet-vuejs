@@ -12,6 +12,28 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var prim
 
 /***/ }),
 
+/***/ "./src/assets/img/icon-info.svg":
+/*!**************************************!*\
+  !*** ./src/assets/img/icon-info.svg ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("module.exports = __webpack_require__.p + \"assets/img/icon-info.c16cc71f.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/icon-info.svg?");
+
+/***/ }),
+
+/***/ "./src/modules/account/img/proximax-logo.svg":
+/*!***************************************************!*\
+  !*** ./src/modules/account/img/proximax-logo.svg ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("module.exports = __webpack_require__.p + \"assets/img/proximax-logo.cb656acf.svg\";\n\n//# sourceURL=webpack:///./src/modules/account/img/proximax-logo.svg?");
+
+/***/ }),
+
 /***/ "./src/util/buildTransactions.ts":
 /*!***************************************!*\
   !*** ./src/util/buildTransactions.ts ***!
