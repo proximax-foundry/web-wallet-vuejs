@@ -274,7 +274,7 @@ export default defineComponent({
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
       let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.UNCONFIRMED, txnQueryParams);
-      let formattedTxns = await dashboardService.formatUnconfirmedMixedTxns(transactionSearchResult.transactions);``
+      let formattedTxns = await dashboardService.formatUnconfirmedMixedTxns(transactionSearchResult.transactions);
       transactions.value = formattedTxns;
     };
 

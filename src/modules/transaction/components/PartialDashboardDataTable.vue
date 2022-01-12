@@ -129,37 +129,6 @@ export default{
       return explorerBaseURL.value + publicKeyExplorerURL.value + "/" + publicKey
     }
 
-    /*const transactions = [
-      {
-        hash: "04836EC9CFAF9423E60122E7CB39AE8C171B16604CDE86DEA4CA9B80658E12E3",
-        extractedData: {
-          recipient: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
-          recipientName: "acc4",
-          recipientType: "address",
-        },
-        signer: '60122E74CDE86DEA71B166CB39AE8C13E0658E12E34CA9B80CFAF94204836EC9',
-        signerDisplay: 'ABC123',
-        signerAddress: "VXM2ENBNOLQDJTSCMTKJEBSIA4JIV6DF4UVAOYQC",
-        signerAddressPretty: "VXM2EN-BNOLQD-JTSCMT-KJEB-SIA4JI-V6DF4U-VAOYQC",
-        formattedDeadline: "12/1/2021, 19:00:18",
-        sign: true
-      },
-      {
-        hash: "CFAF94204836EC9CB39AE8C13E60122E74CDE86DEA71B1660658E12E34CA9B80",
-        extractedData: {
-          recipient: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
-          recipientName: "acc2",
-          recipientType: "address",
-        },
-        signer: 'CFAF94204836EC9CB39AE8C13E60122E74CDE86DEA71B1660658E12E34CA9B80',
-        signerDisplay: 'nameABC',
-        signerAddress: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
-        signerAddressPretty: "VAOYQC-VXM2EN-SIA4JI-V6DF4U-BNOLQD-JTSCMT-KJEB",
-        formattedDeadline: "12/1/2021, 19:00:18",
-        sign: false
-      }
-    ];*/
-
     const formatTime = (timestamp) => {
       return Helper.formatDeadline(timestamp);
     }
@@ -175,7 +144,7 @@ export default{
 
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, currentAccount);
 
-    let loadUnconfirmedTransactions = async() => {
+    let loadPartialTransactions = async() => {
       let txnQueryParams = Helper.createTransactionQueryParams();
       txnQueryParams.pageSize = 1;
       txnQueryParams.address = currentAccount.address;
@@ -187,17 +156,17 @@ export default{
       transactions.value = formattedTxns;
     };
 
-    loadUnconfirmedTransactions();
+    loadPartialTransactions();
 
     emitter.on("TXN_UNCONFIRMED", (num) => {
       if(num> 0){
-        loadUnconfirmedTransactions();
+        loadPartialTransactions();
       }
     });
 
     emitter.on("TXN_CONFIRMED", (num) => {
       if(num> 0){
-        loadUnconfirmedTransactions();
+        loadPartialTransactions();
       }
     });
 
