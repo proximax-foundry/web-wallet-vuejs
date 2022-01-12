@@ -283,6 +283,10 @@ export class TransactionUtils {
     ChainUtils.announceBondedTransaction(signedTx);
   }
 
+  static announceCosignitureSignedTransaction(signedTx: CosignatureSignedTransaction) :void {
+    ChainUtils.announceCosignTransaction(signedTx);
+  }
+
   static getTransactionTypeName(type: number): string | null {
 
     let typeName = "";

@@ -1,4 +1,5 @@
 import { 
+    Deadline,
     Message, NetworkType, 
     PublicAccount, Account,
     UInt64,
@@ -185,6 +186,10 @@ export class Helper{
             year: 'numeric', month: 'numeric', day: 'numeric',
             hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false,
           }).format(date);
+      }
+
+      static formatDeadline(timestamp: number) :string{
+        return new Date(timestamp + Deadline.timestampNemesisBlock * 1000).toLocaleString()
       }
     
       static formatFixedDateTime(dateTimeJSON: string): string  {
