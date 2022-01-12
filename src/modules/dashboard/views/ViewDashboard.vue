@@ -936,6 +936,7 @@ export default defineComponent({
       }
       walletState.currentLoggedInWallet.setDefaultAccountByName(data.name);
       walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+      toast.add({severity:'success', summary: 'Default account has switched to' , detail: data.name, group: 'br', life: 3000});
     }
 
     emitter.on('CLOSE_SET_DEFAULT_ACCOUNT_MODAL', payload => {
@@ -966,11 +967,13 @@ export default defineComponent({
         if(value){
           init();
           readyWatcher();
-        }     
+        }
       });
     }
 
-    
+    emitter.on('DEFAULT_ACCOUNT_SWITCHED', payload => {
+      selectedAccount.value = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === payload);
+    });
 
     return {
       currentBlock,

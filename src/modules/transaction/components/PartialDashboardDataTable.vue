@@ -68,7 +68,7 @@
       <Column field="sign" header="" headerStyle="width:110px">
         <template #body="{data}">
           <router-link :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" v-if="data.signerAddress != currentAddress" class="bg-orange-action text-white font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">Waiting for Your Signature(s)</router-link>
-          <div v-else class="bg-orange-light text-orange-action font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign.svg" class="mr-2">Waiting for Signature(s)</div>
+          <router-link :to="{ name: 'ViewTransactionWaitingSign', params: {txnHash: data.hash}}" v-else class="bg-orange-light text-orange-action font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign.svg" class="mr-2">Waiting for Signature(s)</router-link>
         </template>
       </Column>
       <template #empty>

@@ -3,7 +3,7 @@
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
       <div class="my-3 px-10 lg:px-5 3xl:px-10 font-txs text-gray-400">ACCOUNTS ({{ allAccountsCount }})</div>
       <div>
-        <router-link :to="{ name: 'ViewAccountDetails', params: { address: item.address }}" v-for="(item) in accounts" :key="item.address" class="link_block flex items-center" @click="closeNavi"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div><span class="truncate overflow-hidden text-white">{{ item.name }}</span></router-link>
+        <div @click="updateDefaultAccount(item.name)" v-for="(item) in accounts" :key="item.address" class="cursor-pointer link_block flex items-center"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div><span class="truncate overflow-hidden text-white">{{ item.name }}</span></div>
       </div>
       <!-- <router-link :to="{ name: 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" v-if="allAccountsCount > 5" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-4 w-4 inline-block mr-1 text-white">View all accounts</router-link> -->
       <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="block font-bold link_block text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-add.svg" class="h-4 w-4 inline-block relative mr-1">Create New Account</router-link>
@@ -38,13 +38,15 @@
 </template>
 
 <script>
-import { computed, inject, ref, getCurrentInstance } from "vue";
+import { computed, inject, ref, getCurrentInstance, watch } from "vue";
 import { useRouter } from "vue-router";
 import { walletState } from '@/state/walletState';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { networkState } from "@/state/networkState";
-import {useI18n} from 'vue-i18n';
-// import { DashboardService } from '@/modules/dashboard/service/dashboardService';
+import { useI18n } from 'vue-i18n';
+import { useToast } from "primevue/usetoast";
+import { AppState } from '@/state/appState';
+import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 
 export default{
   name: 'NavigationMenu',
@@ -93,7 +95,7 @@ export default{
   setup(){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-
+    const toast = useToast();
     const {t} = useI18n();
     const router = useRouter();
 
@@ -102,37 +104,32 @@ export default{
 
     const selectedAccount = ref(currentAccount);
 
-    // let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
+    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
 
-    // let accountConfirmedTxnsCount = ref(0);
     let accountUnconfirmedTxnsCount = ref(0);
     let accountPartialTxnsCount = ref(0);
 
-    // let updateAccountTransactionCount = async()=>{
-    //   let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
-      
-    //   // accountConfirmedTxnsCount.value = transactionsCount.confirmed;
-    //   accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
-    //   accountPartialTxnsCount.value = transactionsCount.partial;
-    // };
-
-    // updateAccountTransactionCount();
+    let updateAccountTransactionCount = async()=>{
+      let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
+      accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
+      accountPartialTxnsCount.value = transactionsCount.partial;
+    };
 
     emitter.on("TXN_UNCONFIRMED", (num) => {
       if(num> 0){
-        // updateAccountTransactionCount();
+        updateAccountTransactionCount();
       }
     });
 
     emitter.on("TXN_CONFIRMED", (num) => {
       if(num> 0){
-        // updateAccountTransactionCount();
+        updateAccountTransactionCount();
       }
     });
 
     emitter.on("ABT_ADDED", (num) => {
       if(num> 0){
-        // updateAccountTransactionCount();
+        updateAccountTransactionCount();
       }
     });
 
@@ -195,7 +192,32 @@ export default{
     const closeNavi = () => {
       navigationSideBar.inNavi = false;
       navigationSideBar.isOpen = false;
-      console.log('close')
+    }
+
+    const updateDefaultAccount = (accountName) => {
+      currentAccount = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === accountName);
+      walletState.currentLoggedInWallet.setDefaultAccountByName(accountName);
+      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+      toast.add({severity:'success', summary: 'Default account has switched to' , detail: accountName, group: 'br', life: 3000});
+      emitter.emit('DEFAULT_ACCOUNT_SWITCHED', accountName);
+      updateAccountTransactionCount();
+      closeNavi();
+    }
+
+    const init = ()=>{
+      updateAccountTransactionCount();
+    }
+
+    if(AppState.isReady){
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState.isReady, (value) => {
+        if(value){
+          init();
+          readyWatcher();
+        }
+      });
     }
 
     return {
@@ -209,6 +231,7 @@ export default{
       isDisplaySwap,
       accountUnconfirmedTxnsCount,
       accountPartialTxnsCount,
+      updateDefaultAccount,
     };
   }
 }
