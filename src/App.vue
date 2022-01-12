@@ -1,4 +1,6 @@
 <template>
+  <loading v-model:active="isLoading" :can-cancel="false"
+        :is-full-page="true" />
   <div class="flex flex-col justify-between md:min-h-screen bg-navy-primary" @click="clickEvent">
     <Toast position="top-left" group="tl" />
     <Toast position="top-right" group="tr" />
@@ -56,6 +58,9 @@ import { walletState } from "@/state/walletState";
 import { listenerState } from "@/state/listenerState";
 import { ChainUtils } from "@/util/chainUtils";
 import { useRouter } from 'vue-router';
+import { AppState } from '@/state/appState'
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
 
 export default defineComponent({
   name: 'App',
@@ -65,11 +70,14 @@ export default defineComponent({
     ConfirmDialog,
     Toast,
     selectLanguageModal,
+    Loading
   },
 
   setup() {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance!.appContext.config.globalProperties.emitter;
+
+    const isLoading = computed(()=>{ return !AppState.isReady});
 
     const navigationSideBar = reactive({
       isOpen: false,
@@ -113,6 +121,7 @@ export default defineComponent({
       versioning,
       currentRouteName,
       isShowNavi,
+      isLoading
     }
   }
 });
