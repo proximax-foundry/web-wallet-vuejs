@@ -19,4 +19,14 @@ export const TransactionRoutes: RouteRecordRaw[] = [
       title: "Sign Transaction",
     }
   },
+
+  {
+    path: '/waiting/:txnHash',
+    name: 'ViewTransactionWaitingSign',
+    props: true,
+    component: () => import('@/modules/transaction/views/ViewTransactionWaitingSign.vue'),
+    meta: {
+      title: "Waiting to Sign Transaction",
+    }
+  },
 ];

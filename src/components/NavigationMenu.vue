@@ -114,7 +114,6 @@ export default{
       accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
       accountPartialTxnsCount.value = transactionsCount.partial;
     };
-    // updateAccountTransactionCount();
 
     emitter.on("TXN_UNCONFIRMED", (num) => {
       if(num> 0){
@@ -196,10 +195,12 @@ export default{
     }
 
     const updateDefaultAccount = (accountName) => {
+      currentAccount = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === accountName);
       walletState.currentLoggedInWallet.setDefaultAccountByName(accountName);
       walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
       toast.add({severity:'success', summary: 'Default account has switched to' , detail: accountName, group: 'br', life: 3000});
       emitter.emit('DEFAULT_ACCOUNT_SWITCHED', accountName);
+      updateAccountTransactionCount();
       closeNavi();
     }
 
