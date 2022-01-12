@@ -2,7 +2,7 @@
   <div class="relative">
     <div @click='toggleSelection = !toggleSelection' class= "border ml-auto mr-auto py-3 px-2 cursor-pointer rounded-md w-full h-14">
       <div class='flex'>
-        <div class='flex flex-col ml-2'>
+        <div class='flex flex-col ml-2 text-left'>
           <div class='text-blue-primary font-semibold text-xxs mb-1'  style="line-height: 9px;">NAMESPACE</div>
           <div v-if='selectedNamespace!=""' class='mt-1 text-tsm font-bold'>{{selectedNamespace}}</div>
           <div v-else class='text-tsm font-bold '>Select Namespace</div>

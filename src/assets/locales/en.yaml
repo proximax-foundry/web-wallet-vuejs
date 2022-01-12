@@ -167,7 +167,7 @@ services:
   example: "Example"
   supplymessage: "If you tick 'Supply Mutable', supply can be changed"
   transferablemessage: "If you tick 'Transferable', mosaic can be transferred"
-  norecord: "No records found"
+  norecord: "No record found"
   label: "Label"
   accountaddress: "Account Address"
   action: "Action"

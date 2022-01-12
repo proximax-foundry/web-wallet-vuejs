@@ -26,11 +26,12 @@ import { Account as myAccount } from "@/models/account";
 import { TransactionUtils } from "./transactionUtils"
 import { Account as NEM_Account, NetworkTypes, NEMLibrary } from "nem-library";
 import { AddressBook } from "@/models/addressBook"
+import {AppState} from "@/state/appState";
 
 const config = require("@/../config/config.json");
 
-const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile!.network.type));
-const chainAPICall = computed(()=> new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort)));
+const localNetworkType = computed(() => ChainUtils.getNetworkType(AppState.networkType));
+const chainAPICall = computed(()=> AppState.chainAPI);
 
 export class WalletUtils {
 

@@ -106,8 +106,8 @@ import { ConfirmedTransferTransaction, UnconfirmedTransferTransaction, PartialTr
     ConfirmedSecretTransaction, UnconfirmedSecretTransaction, PartialSecretTransaction, 
     ConfirmedTransaction, UnconfirmedTransaction, PartialTransaction, 
     SDA, AliasNamespace, TxnExchangeOffer, RestrictionModification, TxnList } from "../model/transactions/transaction";
-import { ChainAPICall } from "../../../models/REST/chainAPICall";
 import { Account as MyAccount } from "../../../models/account";
+import { AppState } from "@/state/appState";
 
 const networkAPIEndpoint = computed(() => ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
 const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
@@ -116,7 +116,6 @@ const nativeTokenName = computed(()=> networkState.currentNetworkProfile?.networ
 const nativeTokenAssetId = computed(()=> networkState.currentNetworkProfile?.network.currency.assetId);
 const nativeTokenNamespaceId = computed(()=> networkState.currentNetworkProfile?.network.currency.namespaceId);
 const nativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile?.network.currency.divisibility);
-const chainAPI = new ChainAPICall(networkAPIEndpoint.value);
 
 export class DashboardService {
 
@@ -131,7 +130,7 @@ export class DashboardService {
 
     async searchTxns(transactionGroupType: TransactionGroupType, transactionQueryParams: TransactionQueryParams): Promise<TransactionSearch>{
 
-        let transactionSearchResult: TransactionSearch = await chainAPI.transactionAPI.searchTransactions(transactionGroupType, transactionQueryParams);
+        let transactionSearchResult: TransactionSearch = await AppState.chainAPI.transactionAPI.searchTransactions(transactionGroupType, transactionQueryParams);
 
         return transactionSearchResult;
     }
@@ -240,9 +239,9 @@ export class DashboardService {
 
                 if(namespaceIds.length || allAssetId.length){
                     let namespacesNames: NamespaceName[] = [];
-                    namespacesNames = await chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
-                    let assetsProperties = await chainAPI.assetAPI.getMosaics(allAssetId);
-                    let aliasNames: MosaicNames[] = await chainAPI.assetAPI.getMosaicsNames(allAssetId);
+                    namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
+                    let assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(allAssetId);
+                    let aliasNames: MosaicNames[] = await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
 
                     for(let x= 0; x < sdas.length; ++x){
 
@@ -376,9 +375,9 @@ export class DashboardService {
 
                 if(namespaceIds.length || allAssetId.length){
                     let namespacesNames: NamespaceName[] = [];
-                    namespacesNames = await chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
-                    let assetsProperties = await chainAPI.assetAPI.getMosaics(allAssetId);
-                    let aliasNames: MosaicNames[] = await chainAPI.assetAPI.getMosaicsNames(allAssetId);
+                    namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
+                    let assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(allAssetId);
+                    let aliasNames: MosaicNames[] = await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
 
                     for(let x= 0; x < sdas.length; ++x){
 
@@ -497,9 +496,9 @@ export class DashboardService {
 
                 if(namespaceIds.length || allAssetId.length){
                     let namespacesNames: NamespaceName[] = [];
-                    namespacesNames = await chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
-                    let assetsProperties = await chainAPI.assetAPI.getMosaics(allAssetId);
-                    let aliasNames: MosaicNames[] = await chainAPI.assetAPI.getMosaicsNames(allAssetId);
+                    namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
+                    let assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(allAssetId);
+                    let aliasNames: MosaicNames[] = await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
 
                     for(let x= 0; x < sdas.length; ++x){
 
@@ -550,7 +549,7 @@ export class DashboardService {
                     .map(x => x.cosignatoryPublicAccount.publicKey);
 
                 try {
-                    let multisigInfo = await chainAPI.accountAPI.getMultisigAccountInfo(modifyMultisigTxn.signer.address);
+                    let multisigInfo = await AppState.chainAPI.accountAPI.getMultisigAccountInfo(modifyMultisigTxn.signer.address);
 
                     if(multisigInfo){
                         txn.oldApprovalNumber = multisigInfo.minApproval;
@@ -613,7 +612,7 @@ export class DashboardService {
                     .map(x => x.cosignatoryPublicAccount.publicKey);
 
                 try {
-                    let multisigInfo = await chainAPI.accountAPI.getMultisigAccountInfo(modifyMultisigTxn.signer.address);
+                    let multisigInfo = await AppState.chainAPI.accountAPI.getMultisigAccountInfo(modifyMultisigTxn.signer.address);
 
                     if(multisigInfo){
                         txn.oldApprovalNumber = multisigInfo.minApproval;
@@ -2031,7 +2030,7 @@ export class DashboardService {
             txn.duration = lockFundTxn.duration.compact();
 
             try {
-                let txnStatus = await chainAPI.transactionAPI.getTransactionStatus(lockFundTxn.hash);
+                let txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(lockFundTxn.hash);
                 txn.isRefunded = txnStatus.group === TransactionGroupType.CONFIRMED;
             } catch (error) {
                 txn.isRefunded = false;
@@ -2751,7 +2750,7 @@ export class DashboardService {
             deadline = txn.deadline.adjustedValue.compact();
         }
 
-        let blockInfo = await chainAPI.blockAPI.getBlockByHeight(blockHeight);
+        let blockInfo = await AppState.chainAPI.blockAPI.getBlockByHeight(blockHeight);
 
         let fee = txnBytes * blockInfo.feeMultiplier;
 
@@ -2800,14 +2799,14 @@ export class DashboardService {
         while (txn === null && statusGroup !== "confirmed" && statusGroup !== "error"){
 
             try {
-                let txnStatus = await chainAPI.transactionAPI.getTransactionStatus(hash);
+                let txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(hash);
 
                 statusGroup = txnStatus.group;
 
                 switch (statusGroup) {
                     case TransactionGroupType.CONFIRMED:
                         try {
-                            txn = await chainAPI.transactionAPI.getTransaction(hash);
+                            txn = await AppState.chainAPI.transactionAPI.getTransaction(hash);
                         } catch (error) {
                             statusGroup = "error"
                         }
@@ -2816,14 +2815,14 @@ export class DashboardService {
 
                     case TransactionGroupType.UNCONFIRMED:
                         try {
-                            txn = await chainAPI.transactionAPI.getUnconfirmedTransaction(hash);
+                            txn = await AppState.chainAPI.transactionAPI.getUnconfirmedTransaction(hash);
                         } catch (error) {
                             
                         }
                         break;
                     case TransactionGroupType.PARTIAL:
                         try {
-                            txn = await chainAPI.transactionAPI.getPartialTransaction(hash);
+                            txn = await AppState.chainAPI.transactionAPI.getPartialTransaction(hash);
                         } catch (error) {
                             
                         }
@@ -2885,39 +2884,39 @@ export class DashboardService {
 
     static async getAssetInfo(assetId: string): Promise<MosaicInfo>{
         let mosaicId = new MosaicId(assetId);
-        let assetInfo = await chainAPI.assetAPI.getMosaic(mosaicId);
+        let assetInfo = await AppState.chainAPI.assetAPI.getMosaic(mosaicId);
  
         return assetInfo;
      }
 
      static async getAssetName(assetId: string): Promise<MosaicNames>{
         let mosaicId = new MosaicId(assetId);
-        let assetNames = await chainAPI.assetAPI.getMosaicsNames([mosaicId]);
+        let assetNames = await AppState.chainAPI.assetAPI.getMosaicsNames([mosaicId]);
  
         return assetNames[0];
      }
 
     static async getAssetsName(mosaicIds: MosaicId[]): Promise<MosaicNames[]>{
-        let assetNames = await chainAPI.assetAPI.getMosaicsNames(mosaicIds);
+        let assetNames = await AppState.chainAPI.assetAPI.getMosaicsNames(mosaicIds);
  
         return assetNames;
      }
 
     static async getNamespacesName(namespaceIds: NamespaceId[]): Promise<NamespaceName[]>{
-        let namespacesName = await chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
+        let namespacesName = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
  
         return namespacesName;
     }
 
     static async getAddressAlias(namespaceId: NamespaceId): Promise<Address>{
-       let address = await chainAPI.namespaceAPI.getLinkedAddress(namespaceId);
+       let address = await AppState.chainAPI.namespaceAPI.getLinkedAddress(namespaceId);
 
        return address;
     }
 
     static async getAssetAlias(namespaceId: NamespaceId): Promise<MosaicId>{
 
-        let assetId = await chainAPI.namespaceAPI.getLinkedMosaicId(namespaceId);
+        let assetId = await AppState.chainAPI.namespaceAPI.getLinkedMosaicId(namespaceId);
 
        return assetId;
     }
@@ -2928,7 +2927,7 @@ export class DashboardService {
         metadataQP.scopedMetadataKey = scopedMetadataKey;
         metadataQP.targetId = assetId;
 
-        let metadataResult = await chainAPI.metadataAPI.searchMetadatas(metadataQP);
+        let metadataResult = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQP);
 
         return metadataResult.metadataEntries.length ? metadataResult.metadataEntries[0] : null;
     }
@@ -2939,7 +2938,7 @@ export class DashboardService {
         metadataQP.scopedMetadataKey = scopedMetadataKey;
         metadataQP.targetId = nsId;
 
-        let metadataResult = await chainAPI.metadataAPI.searchMetadatas(metadataQP);
+        let metadataResult = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQP);
 
         return metadataResult.metadataEntries.length ? metadataResult.metadataEntries[0] : null;
     }
@@ -2950,7 +2949,7 @@ export class DashboardService {
         metadataQP.scopedMetadataKey = scopedMetadataKey;
         metadataQP.targetKey = targetKey;
 
-        let metadataResult = await chainAPI.metadataAPI.searchMetadatas(metadataQP);
+        let metadataResult = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQP);
 
         return metadataResult.metadataEntries.length ? metadataResult.metadataEntries[0] : null;
     }
@@ -2961,7 +2960,7 @@ export class DashboardService {
 
         if(transferTxn.recipient instanceof NamespaceId){
 
-            let receipts = await chainAPI.blockAPI.getBlockReceipts(blockHeight);
+            let receipts = await AppState.chainAPI.blockAPI.getBlockReceipts(blockHeight);
 
             for(let i=0; i < receipts.addressResolutionStatements.length; ++i){
                 let unresolved = receipts.addressResolutionStatements[i].unresolved;
@@ -3003,7 +3002,7 @@ export class DashboardService {
 
         if(DashboardService.isNamespace(mosaicId)){
 
-            let receipts = await chainAPI.blockAPI.getBlockReceipts(blockHeight);
+            let receipts = await AppState.chainAPI.blockAPI.getBlockReceipts(blockHeight);
 
             for(let i=0; i < receipts.mosaicResolutionStatements.length; ++i){
                 let unresolved = receipts.mosaicResolutionStatements[i].unresolved;

@@ -142,10 +142,12 @@
       <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" :account="selectedAccount" />
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='transaction'">
-      <select v-model="selectedTxnType" @change="changeSearchTxnType">
-        <option value="all">All</option>
-        <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value">{{ txnType.label}}</option>
-      </select>
+      <div class="text-right">
+        <select v-model="selectedTxnType" @change="changeSearchTxnType" class="border border-gray-200 px-2 py-1 focus:outline-none">
+          <option value="all" class="text-sm">All</option>
+          <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm">{{ txnType.label}}</option>
+        </select>
+      </div>
       <MixedTxnDataTable v-if="selectedTxnType === 'all'" :selectedGroupType="transactionGroupType.CONFIRMED" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></MixedTxnDataTable>
       <TransferTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.TRANSFER" :selectedGroupType="transactionGroupType.CONFIRMED" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></TransferTxnDataTable>
       <AccountTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ACCOUNT" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AccountTxnDataTable>
@@ -202,11 +204,12 @@ import { ChainUtils } from '@/util/chainUtils';
 import { networkState } from "@/state/networkState";
 import { AccountAPI } from '@/models/REST/account';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
-import { DashboardService } from '../service/dashboardService';
+import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 import qrcode from 'qrcode-generator';
 //import Dialog from 'primevue/dialog';
 import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
+import {AppState} from '@/state/appState'
 
 export default defineComponent({
   name: 'ViewDashboard',
@@ -462,18 +465,12 @@ export default defineComponent({
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
 
     let accountConfirmedTxnsCount = ref(0);
-    let accountUnconfirmedTxnsCount = ref(0);
-    let accountPartialTxnsCount = ref(0);
 
     let updateAccountTransactionCount = async()=>{
       let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
       
       accountConfirmedTxnsCount.value = transactionsCount.confirmed;
-      accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
-      accountPartialTxnsCount.value = transactionsCount.partial;
     };
-
-    updateAccountTransactionCount();
 
     /*
     emitter.on("TXN_UNCONFIRMED", (num)=>{
@@ -571,17 +568,18 @@ export default defineComponent({
       toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
     };
 
-    
     // get USD conversion
     const currencyConvert = ref('');
 
-    if(networkState.currentNetworkProfile.network.currency.name === "XPX"){
-      displayConvertion.value = true;
-      getCurrencyPrice();
-
-      watch(selectedAccountBalance, () => {
+    const updatePricing = () =>{
+      if(networkState.currentNetworkProfile.network.currency.name === "XPX"){
+        displayConvertion.value = true;
         getCurrencyPrice();
-      });
+
+        watch(selectedAccountBalance, () => {
+          getCurrencyPrice();
+        });
+      }
     }
 
     // setup transaction loading
@@ -616,8 +614,6 @@ export default defineComponent({
       searchedTransactions.value = formattedTxns;
     };
 
-    loadRecentTransactions();
-
     let loadRecentTransferTransactions = async()=>{
       let txnQueryParams = Helper.createTransactionQueryParams();
       txnQueryParams.pageSize = 1;
@@ -649,11 +645,9 @@ export default defineComponent({
         let formattedTxns2 = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult2.transactions);
         tempTxns = tempTxns.concat(formattedTxns2);
       }
-
+      
       recentTransferTransactions.value = removeDuplicateTxn(tempTxns);
     };
-
-    loadRecentTransferTransactions();
 
     const reloadSearchTxns = () =>{
       allTxnQueryParams.pageNumber = 1;
@@ -957,6 +951,27 @@ export default defineComponent({
       showDecryptMessageModal.value = false;
     });
 
+    const init = ()=>{
+      updateAccountTransactionCount();
+      loadRecentTransactions();
+      loadRecentTransferTransactions();
+      updatePricing();
+    }
+
+    if(AppState.isReady){
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState.isReady, (value) => {
+        if(value){
+          init();
+          readyWatcher();
+        }     
+      });
+    }
+
+    
+
     return {
       currentBlock,
       displayBoard,
@@ -1005,8 +1020,6 @@ export default defineComponent({
       decryptMessageKey,
       txHash,
       accountConfirmedTxnsCount,
-      accountUnconfirmedTxnsCount,
-      accountPartialTxnsCount,
       txnTypeList,
       transactionGroupType,
       changeSearchTxnType,

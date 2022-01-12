@@ -114,7 +114,7 @@ export default {
     const toast = useToast();
     const namespaceSelect = ref(null);
     const showDurationErr = ref(false);
-    const duration = ref("0");
+    const duration = ref("1");
     const walletPassword = ref('');
     const err = ref('');
     const disabledPassword = ref(false);
@@ -234,6 +234,8 @@ export default {
     watch(duration, (n) => {
       if(n > maxDurationInDays){
         duration.value = `${maxDurationInDays}`;
+      }else if(n < 1){
+        duration.value = 1;
       }else{
         let remainingBlock = endBlock.value - block.value;
         let availableDays = 0;

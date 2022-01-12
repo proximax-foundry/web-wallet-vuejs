@@ -17,7 +17,8 @@ import { WalletStateUtils } from './state/utils/walletStateUtils';
 import { NetworkStateUtils } from './state/utils/networkStateUtils';
 import { ChainUtils } from './util/chainUtils';
 import { ChainAPICall } from './models/REST/chainAPICall';
-import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainSwapConfig, ThemeStyleConfig } from "./models/stores/"
+import { AppStateUtils } from './state/utils/appStateUtils';
+import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainSwapConfig, ThemeStyleConfig, ChainProfileName } from "./models/stores/"
 
 // Import Font Awesome Icons
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -55,7 +56,8 @@ app.component(VuePassword);
 
 const loadThemeConfig = async() => {
   try {
-    const config = await fetch('./ThemeConfig.json', {
+    AppStateUtils.addNewReadyStates('theme');
+    const config = await fetch('./themeConfig.json', {
       headers: {
         'Cache-Control': 'no-store',
         'Pragma' : 'no-cache'
@@ -65,7 +67,9 @@ const loadThemeConfig = async() => {
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.updateConfig(config);
     themeConfig.saveToLocalStorage();
+    AppStateUtils.setStateReady('theme');
   } catch (e) {
+    AppStateUtils.setStateReady('theme');
     console.error(e);
   }
 }
@@ -73,6 +77,7 @@ loadThemeConfig();
 
 const chainProfileIntegration = async () => {
   try {
+    AppStateUtils.addNewReadyStates('chainProfile');
     const networksInfo = await fetch('./chainProfile.json', {
       headers: {
         'Cache-Control': 'no-store',
@@ -85,28 +90,54 @@ const chainProfileIntegration = async () => {
 
     const chainProfileNamesStore = ChainProfileNames.createDefault();
 
-    let namesUpdate = 0;
+    const chainNameArray: ChainProfileName[] = []; 
+    
+    for(let i = 0; i < chainProfileNames.length; ++i){
+      chainNameArray.push({
+        name: chainProfileNames[i],
+        isPreset: true
+      });
+    }
 
-    if(chainProfileNamesStore.names.length !== 0){
+    try {
+      let customChainProfile = chainProfileNamesStore.names.filter(data =>{
+        if (typeof data === 'string' || data instanceof String){
+          return false;
+        }
+        else{
+          return !data.isPreset;
+        }
+      });
+
+      chainNameArray.concat(customChainProfile);
+    } catch (error) {
       
-      switch (chainProfileNames.length) {
-        case 1:
-          namesUpdate = chainProfileNamesStore.replaceFirstNames(chainProfileNames);
-          break;
-        case 2:
-          namesUpdate = chainProfileNamesStore.replaceFirst2Names(chainProfileNames);
-          break;
-        case 3:
-          namesUpdate = chainProfileNamesStore.replaceFirst3Names(chainProfileNames);
-          break;
-        default:
-          break;
-      }
     }
-    else{
-      chainProfileNamesStore.names = chainProfileNames;
-      namesUpdate = 1;
-    }
+
+    // let namesUpdate = 0;
+
+    // if(chainProfileNamesStore.names.length !== 0){
+      
+    //   switch (chainProfileNames.length) {
+    //     case 1:
+    //       namesUpdate = chainProfileNamesStore.replaceFirstNames(chainProfileNames);
+    //       break;
+    //     case 2:
+    //       namesUpdate = chainProfileNamesStore.replaceFirst2Names(chainProfileNames);
+    //       break;
+    //     case 3:
+    //       namesUpdate = chainProfileNamesStore.replaceFirst3Names(chainProfileNames);
+    //       break;
+    //     default:
+    //       break;
+    //   }
+    // }
+    // else{
+    //   chainProfileNamesStore.names = chainProfileNames;
+    //   namesUpdate = 1;
+    // }
+
+    chainProfileNamesStore.names = chainNameArray;
     
     chainProfileNamesStore.saveToLocalStorage();
 
@@ -164,14 +195,13 @@ const chainProfileIntegration = async () => {
       }
     }
 
-    if(namesUpdate){
-      NetworkStateUtils.refreshAvailableNetwork();
-      NetworkStateUtils.checkDefaultNetwork();
-    }
+    NetworkStateUtils.refreshAvailableNetwork();
+    NetworkStateUtils.checkDefaultNetwork();
 
   } catch (e) {
     console.error(e);
   }
+  AppStateUtils.setStateReady('chainProfile');
 }
 
 chainProfileIntegration();
@@ -180,9 +210,12 @@ chainProfileIntegration();
 if (!walletState.currentLoggedInWallet) {
   // check sessionStorage
   if(!WalletStateUtils.checkFromSession()){
+    AppStateUtils.setStateReady('checkSession');
     router.push({ name: "Home"});
   }
+
+  AppStateUtils.setStateReady('checkSession');
 }
 
-NetworkStateUtils.checkDefaultNetwork();
+// NetworkStateUtils.checkDefaultNetwork();
 

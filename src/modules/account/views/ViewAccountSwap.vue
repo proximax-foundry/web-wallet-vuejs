@@ -11,8 +11,17 @@
         <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
         <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Swap</div>
       </div>
-      <div class='my-7 font-semibold'>Swap this account</div>
+      <div class='my-7 font-semibold'>NIS1 Swap</div>
       <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
+      <div v-if="!boolNIS1Enabled">
+        <div class="text-xs">Enable NIS1 Swap with this account</div>
+        <SwapAccountModal :address="address" @enable-nis1-swap="enableNis1" />
+      </div>
+      <div v-else>
+        <div class="text-xs">Disable NIS1 Swap with this account</div>
+        <div class="text-xs mt-2">NIS1 Address: <span>{{ nis1Address }}</span></div>
+        <div class="bg-gray-200 text-black text-xs px-5 py-2 rounded cursor-pointer mt-5 inline-block" @click="disableNIS1Swap">Disable</div>
+      </div>
     </div>
 </div>
 </template>
@@ -34,11 +43,12 @@ import jsPDF from 'jspdf';
 import qrcode from 'qrcode-generator';
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
+import SwapAccountModal from '@/modules/account/components/SwapAccountModal.vue'
 
 export default {
   name: "ViewAccountSwap",
   components: {
-
+    SwapAccountModal
   },
   props: {
     address: String,
@@ -53,11 +63,35 @@ export default {
     if(!acc){
       acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
     }
-    let isMultiSig = acc.getDirectParentMultisig().length>0? true: false
+
+    const nis1Address = computed(() => {
+      return acc.nis1Account.address;
+    });
+
+    const enableNis1 = () => {
+      console.log('Enabled')
+    }
+
+    const boolNIS1Enabled = computed(() => {
+      if(acc.nis1Account){
+        return true;
+      }else{
+        return false;
+      }
+    });
+
+    const disableNIS1Swap = () => {
+      acc.nis1Account = null;
+      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+    }
+
     return {
       err,
       acc,
-      isMultiSig
+      enableNis1,
+      nis1Address,
+      boolNIS1Enabled,
+      disableNIS1Swap,
     };
   }
 };

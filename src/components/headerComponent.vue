@@ -153,6 +153,7 @@
 import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
+import { AppState } from "@/state/appState";
 import { useRouter } from "vue-router";
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { ChainUtils } from '@/util/chainUtils';
@@ -242,7 +243,7 @@ export default defineComponent({
     const notificationMessage = ref('');
     const notificationType = ref('noti');
 
-    const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort))
+    const chainAPIEndpoint = computed(()=> AppState.nodeFullURL)
     const loginStatus = computed(() => walletState.isLogin);
     const chainsNetworks = computed(()=> {
 
@@ -354,8 +355,7 @@ export default defineComponent({
 
       //listener.addresses = allAddress;
       //console.log(allAddress);
-
-      listener.value = new Connector(ChainUtils.buildWSEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort), allAddress);
+      listener.value = new Connector(AppState.wsNodeFullURL, allAddress);
 
       listener.value.startListen();
     }
@@ -366,9 +366,12 @@ export default defineComponent({
     }
 
     const doLogin = async () =>{
-      if(loginStatus.value){
+      if(loginStatus.value && AppState.isReady){
         await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
         connectListener();
+      }
+      else if(loginStatus.value && !AppState.isReady){
+        setTimeout(doLogin, 100);
       }
     }
 

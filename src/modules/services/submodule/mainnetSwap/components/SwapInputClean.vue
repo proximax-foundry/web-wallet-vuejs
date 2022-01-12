@@ -3,7 +3,13 @@
     <div class="border border-gray-200 px-2 py-1 h-14 rounded-md flex justify-between">
       <div>
         <div class="uppercase text-gray-500 text-txs text-left mb-2">{{ placeholder }} <img src="@/assets/img/icon-info.svg" class="inline-block ml-1 relative cursor-pointer" style="top: -1px;" v-tooltip.bottom="'<tiptext>' + toolTip + '</tiptext>'" v-if="toolTip"></div>
-        <input v-maska="'#*.######'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+        <input v-if="decimal==0" v-maska="'#*'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+        <input v-else-if="decimal==1" v-maska="'#*.#'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+        <input v-else-if="decimal==2" v-maska="'#*.##'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+        <input v-else-if="decimal==3" v-maska="'#*.###'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+        <input v-else-if="decimal==4" v-maska="'#*.####'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+        <input v-else-if="decimal==5" v-maska="'#*.#####'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+        <input v-else v-maska="'#*.######'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
       </div>
       <button :disabled="disabled == true" class="cursor-pointer focus:outline-none text-blue-primary text-xs font-bold" @click="showRemark();$emit('clickedMaxAvailable', true);clearAllError()">Max. Amount</button>
     </div>
@@ -34,6 +40,7 @@ export default{
     transactionFee: String,
     gasFee: Number,
     toolTip: String,
+    decimal: Number,
   },
 
   setup (props) {
