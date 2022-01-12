@@ -37,7 +37,7 @@
         </div>
         <div class="flex items-center h-14 lg:h-28 justify-center">
           <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class="text-gray-600 bg-white px-5 py-2 lg:px-10 lg:py-3 rounded-md text-xs lg:text-tsm inline-block border-2 border-gray-200 mr-5">Do this later</router-link>
-          <CosignPasswordModal :transactionHash = 'txnHash' :disabled="invalidCosigner" />
+          <CosignPasswordModal :transactionHash = 'txnHash' :disabled="invalidCosigner" @return-password="signAggTxn" />
         </div>
       </div>
       <div class='border-2 mt-5'>
@@ -92,26 +92,18 @@
 </template>
 
 <script >
-import {getXPXcurrencyPrice } from '@/util/functions';
+import { Account, Password } from "tsjs-xpx-chain-sdk";
 import { watch, ref, computed, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
-import TextInput from "@/components/TextInput.vue";
-import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { walletState } from "@/state/walletState";
 import { Helper } from "@/util/typeHelper";
 import { networkState } from "@/state/networkState";
 import { WalletUtils } from "@/util/walletUtils";
 import { useI18n } from 'vue-i18n';
-import { pdfWalletPaperImg } from '@/modules/account/pdfPaperWalletBackground';
-import jsPDF from 'jspdf';
-import qrcode from 'qrcode-generator';
 import CosignPasswordModal from '@/modules/transaction/components/CosignPasswordModal.vue'
-import PdfPasswordModal from '@/modules/account/components/PdfPasswordModal.vue'
-import DeleteAccountModal from '@/modules/account/components/DeleteAccountModal.vue'
-import { toSvg } from "jdenticon";
-import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { DashboardService } from '@/modules/dashboard/service/dashboardService';
+import { TransactionUtils } from '@/util/transactionUtils';
 
 export default {
   name: "ViewTransactionSign",
@@ -143,14 +135,14 @@ export default {
 
     const innerTransactions = ref([]);
     const viewInnerTxn = ref([]);
-    const invalidCosigner = ref(true);
+    const invalidCosigner = ref(false);
+
+    let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
+    currentAddress.value = currentAccount.address;
+    let currentPublicKey = currentAccount.publicKey;
+    currentName.value = currentAccount.name;
 
     (async() => {
-      let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
-      currentAddress.value = currentAccount.address;
-      let currentPublicKey = currentAccount.publicKey;
-
-      currentName.value = currentAccount.name;
       let dashboardService = new DashboardService(walletState.currentLoggedInWallet, currentAccount);
       let aggregateTxn = await dashboardService.autoFindAggregateTransaction(p.txnHash);
 
@@ -192,26 +184,18 @@ export default {
       }
     })();
 
-    // const innerTransactions = [
-    //   {
-    //     Inner: 'Multisig Cosignatory Modification',
-    //     Type: 'Add',
-    //     Address: 'VB7HC7-FRJSGG-PRAPCM-OINO3P-DZFRY3-OMOFKT-DKOI',
-    //     PublicKey: '951D9FFCBAC28D691EF0C6D78E49B4613C23D7073FBE12D28FEEBC11371A7332'
-    //   },
-    //   {
-    //     Inner: 'Inner Txn 2',
-    //     Type: 'Add',
-    //     Address: 'VB7HC7-FRJSGG-PRAPCM-OINO3P-DZFRY3-OMOFKT-DKOI',
-    //     PublicKey: '951D9FFCBAC28D691EF0C6D78E49B4613C23D7073FBE12D28FEEBC11371A7332'
-    //   },
-    //   {
-    //     Inner: 'Inner Txn 3',
-    //     Type: 'Add',
-    //     Address: 'VB7HC7-FRJSGG-PRAPCM-OINO3P-DZFRY3-OMOFKT-DKOI',
-    //     PublicKey: '951D9FFCBAC28D691EF0C6D78E49B4613C23D7073FBE12D28FEEBC11371A7332'
-    //   }
-    // ];
+    const signAggTxn = (pswd) => {
+      const networkType = networkState.currentNetworkProfile.network.type;
+      let privateKey = WalletUtils.decryptPrivateKey(new Password(pswd), currentAccount.encrypted, currentAccount.iv);
+      const accountDetail = Account.createFromPrivateKey(privateKey, networkType);
+      (async() => {
+        let dashboardService = new DashboardService(walletState.currentLoggedInWallet, accountDetail);
+        let aggregateTxn = await dashboardService.autoFindAggregateTransaction(p.txnHash);
+        let signedTxn = TransactionUtils.cosignTransaction(aggregateTxn, accountDetail);
+        TransactionUtils.announceCosignitureSignedTransaction(signedTxn);
+        router.push({ name : 'ViewTransactionStatus', params: {transactionType: 'partial' }});
+      })()
+    }
 
     return {
       showModal,
@@ -226,6 +210,7 @@ export default {
       currentName,
       txnTypeLabel,
       invalidCosigner,
+      signAggTxn,
     };
   }
 };
