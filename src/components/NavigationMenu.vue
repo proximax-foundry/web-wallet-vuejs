@@ -38,14 +38,15 @@
 </template>
 
 <script>
-import { computed, inject, ref, getCurrentInstance } from "vue";
+import { computed, inject, ref, getCurrentInstance, watch } from "vue";
 import { useRouter } from "vue-router";
 import { walletState } from '@/state/walletState';
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { networkState } from "@/state/networkState";
-import {useI18n} from 'vue-i18n';
+import { useI18n } from 'vue-i18n';
 import { useToast } from "primevue/usetoast";
-// import { DashboardService } from '@/modules/dashboard/service/dashboardService';
+import { AppState } from '@/state/appState';
+import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 
 export default{
   name: 'NavigationMenu',
@@ -103,37 +104,33 @@ export default{
 
     const selectedAccount = ref(currentAccount);
 
-    // let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
+    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
 
-    // let accountConfirmedTxnsCount = ref(0);
     let accountUnconfirmedTxnsCount = ref(0);
     let accountPartialTxnsCount = ref(0);
 
-    // let updateAccountTransactionCount = async()=>{
-    //   let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
-      
-    //   // accountConfirmedTxnsCount.value = transactionsCount.confirmed;
-    //   accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
-    //   accountPartialTxnsCount.value = transactionsCount.partial;
-    // };
-
+    let updateAccountTransactionCount = async()=>{
+      let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
+      accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
+      accountPartialTxnsCount.value = transactionsCount.partial;
+    };
     // updateAccountTransactionCount();
 
     emitter.on("TXN_UNCONFIRMED", (num) => {
       if(num> 0){
-        // updateAccountTransactionCount();
+        updateAccountTransactionCount();
       }
     });
 
     emitter.on("TXN_CONFIRMED", (num) => {
       if(num> 0){
-        // updateAccountTransactionCount();
+        updateAccountTransactionCount();
       }
     });
 
     emitter.on("ABT_ADDED", (num) => {
       if(num> 0){
-        // updateAccountTransactionCount();
+        updateAccountTransactionCount();
       }
     });
 
@@ -204,6 +201,22 @@ export default{
       toast.add({severity:'success', summary: 'Default account has switched to' , detail: accountName, group: 'br', life: 3000});
       emitter.emit('DEFAULT_ACCOUNT_SWITCHED', accountName);
       closeNavi();
+    }
+
+    const init = ()=>{
+      updateAccountTransactionCount();
+    }
+
+    if(AppState.isReady){
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState.isReady, (value) => {
+        if(value){
+          init();
+          readyWatcher();
+        }
+      });
     }
 
     return {
