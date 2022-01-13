@@ -3,40 +3,12 @@
   <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
     <div class='mt-6 px-6 py-10 border filter shadow-lg text-center'>
       <div class="text-md mb-3">Main Network Swap</div>
-      <div class="text-xs max-w-md inline-block">You can swap from NIS1, ETH and BSC to ProximaX Sirius Chain. In reverse, ProximaX Sirius Chain is available to swap in ETH and BSC only.</div>
+      <template>
+      <!-- <div class="text-xs max-w-md inline-block">You can swap from NIS1, ETH and BSC to ProximaX Sirius Chain. In reverse, ProximaX Sirius Chain is available to swap in ETH and BSC only.</div> -->
+      </template>
       <br>
       <div class="inline-block relative w-full sm:w-80 text-left mt-5 transition-all duration-500">
-        <div class="border inline-block w-full shadow-md filter" :class="`${open['nis1']?'border-blue-500':'border-gray-200'}`" style="top: 0px;" @click="openMenu('nis1')">
-          <div class="flex items-center w-full px-5 h-20 cursor-pointer hover:bg-blue-50 transition-all duration-500" :class="`${open['nis1']?'bg-blue-50':'bg-white'}`">
-            <img src="@/modules/services/submodule/mainnetSwap/img/nem.svg" class="float-left">
-            <div class="text-left pl-5">
-              <div class="text-md font-bold">NIS1</div>
-              <div class="text-xs">NEM</div>
-            </div>
-          </div>
-          <div class="w-full text-left z-20 bg-white" v-if="open['nis1']">
-            <div class="bg-blue-100 border-blue-100 uppercase py-2 px-5 text-xxs">Select option</div>
-            <router-link :to="{ name: 'ViewServicesMainnetSwapNIS1ToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">NIS1 to Sirius Chain</router-link>
-          </div>
-        </div>
-        <br>
-        <div class="border inline-block w-full mt-4 rounded shadow-md filter" :class="`${open['eth']?'border-blue-500':'border-gray-200'}`" style="top: 95px;" @click="openMenu('eth')">
-          <div class="flex items-center w-full px-5 h-20 cursor-pointer hover:bg-blue-50 transition-all duration-500" :class="`${open['eth']?'bg-blue-50':'bg-white'}`">
-            <img src="@/modules/services/submodule/mainnetSwap/img/eth.svg" class="float-left">
-            <div class="text-left pl-5">
-              <div class="text-md font-bold">ETH</div>
-              <div class="text-xs">Ethereum</div>
-            </div>
-          </div>
-          <div class="w-full text-left z-20 bg-white" v-if="open['eth']">
-            <div class="bg-blue-100 border-blue-100 uppercase py-2 px-5 text-xxs">Select option</div>
-            <router-link :to="{ name: 'ViewServicesMainnetSwapETHToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">ETH to Sirius Chain</router-link>
-            <div class="py-3 px-5 text-sm font-bold transition-all duration-500 flex justify-between" :class="`${!displayWaitMessage['eth']?'cursor-pointer hover:bg-blue-500 hover:text-white':''}`" @click="gotoOutgoingPage('eth')">{{ displayOutgoingETHSwapLabel }}<div v-if="displayWaitMessage['eth']" style="border-top-color:transparent" class="inline-block ml-2 w-5 h-5 border-4 border-gray-700 border-solid rounded-full animate-spin"></div></div>
-            <router-link :to="{ name: 'ViewServicesMainnetSwapCheckETHToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">Check Status</router-link>
-          </div>
-        </div>
-        <br>
-        <div class="border inline-block w-full mt-4 rounded shadow-md filter" :class="`${open['bsc']?'border-blue-500':'border-gray-200'}`" style="top: 205px;" @click="openMenu('bsc')">
+         <div class="border inline-block w-full mt-4 rounded shadow-md filter" :class="`${open['bsc']?'border-blue-500':'border-gray-200'}`" style="top: 205px;" @click="openMenu('bsc')">
           <div class="flex items-center w-full px-5 h-20 cursor-pointer hover:bg-blue-50 transition-all duration-500" :class="`${open['bsc']?'bg-blue-50':'bg-white'}`">
             <img src="@/modules/services/submodule/mainnetSwap/img/bsc.svg" class="float-left">
             <div class="text-left pl-5">
@@ -51,6 +23,39 @@
             <router-link :to="{ name: 'ViewServicesMainnetSwapCheckBSCToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">Check Status</router-link>
           </div>
         </div>
+        <div class="border inline-block w-full shadow-md filter" :class="`${open['nis1']?'border-blue-500':'border-gray-200'}`" style="top: 0px;" @click="openMenu('nis1')">
+          <div class="flex items-center w-full px-5 h-20 cursor-pointer hover:bg-blue-50 transition-all duration-500" :class="`${open['nis1']?'bg-blue-50':'bg-white'}`">
+            <img src="@/modules/services/submodule/mainnetSwap/img/nem.svg" class="float-left">
+            <div class="text-left pl-5">
+              <div class="text-md font-bold">NIS1</div>
+              <div class="text-xs">NEM</div>
+            </div>
+          </div>
+          <div class="w-full text-left z-20 bg-white" v-if="open['nis1']">
+            <div class="bg-blue-100 border-blue-100 uppercase py-2 px-5 text-xxs">Select option</div>
+            <router-link :to="{ name: 'ViewServicesMainnetSwapNIS1ToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">NIS1 to Sirius Chain</router-link>
+          </div>
+        </div>
+        <br>
+        <template>
+        <!-- <div class="border inline-block w-full mt-4 rounded shadow-md filter" :class="`${open['eth']?'border-blue-500':'border-gray-200'}`" style="top: 95px;" @click="openMenu('eth')">
+          <div class="flex items-center w-full px-5 h-20 cursor-pointer hover:bg-blue-50 transition-all duration-500" :class="`${open['eth']?'bg-blue-50':'bg-white'}`">
+            <img src="@/modules/services/submodule/mainnetSwap/img/eth.svg" class="float-left">
+            <div class="text-left pl-5">
+              <div class="text-md font-bold">ETH</div>
+              <div class="text-xs">Ethereum</div>
+            </div>
+          </div>
+          <div class="w-full text-left z-20 bg-white" v-if="open['eth']">
+            <div class="bg-blue-100 border-blue-100 uppercase py-2 px-5 text-xxs">Select option</div>
+            <router-link :to="{ name: 'ViewServicesMainnetSwapETHToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">ETH to Sirius Chain</router-link>
+            <div class="py-3 px-5 text-sm font-bold transition-all duration-500 flex justify-between" :class="`${!displayWaitMessage['eth']?'cursor-pointer hover:bg-blue-500 hover:text-white':''}`" @click="gotoOutgoingPage('eth')">{{ displayOutgoingETHSwapLabel }}<div v-if="displayWaitMessage['eth']" style="border-top-color:transparent" class="inline-block ml-2 w-5 h-5 border-4 border-gray-700 border-solid rounded-full animate-spin"></div></div>
+            <router-link :to="{ name: 'ViewServicesMainnetSwapCheckETHToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">Check Status</router-link>
+          </div>
+        </div> -->
+        </template>
+        <br>
+       
       </div>
     </div>
   </div>
