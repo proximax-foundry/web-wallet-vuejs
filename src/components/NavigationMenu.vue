@@ -242,6 +242,6 @@ export default{
 }
 
 .signout_block{
-  @apply px-10 hover:bg-navy-lighter py-5 transition-all duration-200;
+  @apply  px-10 lg:px-5 3xl:px-10 hover:bg-navy-lighter py-5 transition-all duration-200;
 }
 </style>
