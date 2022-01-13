@@ -4,7 +4,7 @@
       <img src='@/assets/img/chevron_left.svg'>
       <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
     </div>
-    <div v-if='showModal' >
+    <!-- <div v-if='showModal' >
         <transition
           enter-active-class="animate__animated animate__fadeInDown"
           leave-active-class="animate__animated animate__fadeOutUp"
@@ -21,7 +21,7 @@
           </div>
         </transition>
         <div class="fixed inset-0 bg-opacity-60 z-10 bg-gray-100"></div>
-      </div>
+      </div> -->
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
       <AccountComponent :address="acc.address" class="mb-10"/>
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
