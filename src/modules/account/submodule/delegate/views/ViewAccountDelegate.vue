@@ -23,7 +23,7 @@
           <div class="text-xxs pl-6 mt-2">Your account is not linked to a delegated account.</div>
           <div class="mt-4"></div>
           <div class="ml-6 my-7 gray-line"/>
-          <button v-if="!toggleSelection" @click="toggleSelection=!toggleSelection" class='ml-6 w-44 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto' :disabled="isMultisig">Select Account to Link</button>
+          <button v-if="!toggleSelection" @click="toggleSelection=!toggleSelection" class='ml-6 w-44 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto' >Select Account to Link</button>
           <div v-if="toggleSelection && !fromNew && !fromPk">
             <div class='pl-6 text-xs font-semibold'>Select Account Type</div>
             <div class='mt-3'></div>
@@ -73,21 +73,31 @@
           <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
           <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
         </div>
-        <div v-if="isMultisig " class="mt-2 bg-yellow-50 p-3 rounded-md" >
+        <div v-if="isMultisig && !isCosigner " class="mt-2 bg-yellow-50 p-3 rounded-md mb-2" >
           <div class="flex items-center gap-2">
             <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-            <div class="text-txs">Account delegation is not allowed for a multisig account.</div>
+            <div class="text-txs">No eligible cosigner in this wallet.</div>
           </div>
         </div>
-        <div class="flex mt-4 text-white">
+        <div v-if="!(!isLockFund&& isMultisig)" class="flex mt-4 text-white">
           <div class='text-xs '>Transaction Fee</div>
-          <div class="text-xs  ml-auto">10.00</div>
+          <div class="text-xs  ml-auto">{{transactionFee}}</div>
+          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+        </div>
+        <div v-if="isLockFund && isMultisig" class="flex mt-4 text-white">
+          <div class='text-xs '>Lock Fund</div>
+          <div class="text-xs  ml-auto">{{lockFund}}</div>
+          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+        </div>
+       <div v-if="isMultisig" class="flex mt-4 text-white">
+          <div class='text-xs '>Aggregate Fee</div>
+          <div class="text-xs  ml-auto">{{aggregateFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
         <div class="flex text-white">
           <div class=' font-bold text-xs '>TOTAL</div>
-          <div class="text-xs  ml-auto">56.2966</div>
+          <div class="text-xs  ml-auto">{{totalFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class="mt-5"/>
@@ -133,9 +143,7 @@ import AddressInputClean from "@/modules/transfer/components/AddressInputClean.v
 import { Account } from "tsjs-xpx-chain-sdk";
 import { listenerState } from '@/state/listenerState';
 import { multiSign } from '@/util/multiSignatory';
-//import { AsyncComputed } from 'vue-async-computed';
-//import AsyncComputed from '@vue3-async-computed';
-//import useAsyncComputed from './use-async-computed';
+import { AppState } from '@/state/appState';
 
 export default {
   name: 'ViewAccountDelegate',
@@ -144,7 +152,6 @@ export default {
     MoreAccountOptions,
     PasswordInput,
     PkInputClean
-    /* SelectAccountTypeModal, */
   },
   props: {
     address: String,
@@ -157,6 +164,7 @@ export default {
     const walletPassword = ref("");
     const showPasswdError = ref(false);
     /* let showSuccess = ref(false) */
+   
     const err = ref(false); 
     const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
     let fromNew = ref(false)
@@ -168,10 +176,53 @@ export default {
       let account = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address)
       return account
     })
+     const getCosignerList = () =>{
+      return multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList;
+    }
+     const isCosigner = computed(() =>{
+      return (multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList.length>0)?true: false;
+    });
+    let isLockFund = computed(()=>{
+      let enoughSigner = false
+      let count = acc.value.multisigInfo.find(acc=>acc.level==0).minApproval
+      if (count<=getCosignerList().length){
+        enoughSigner = true
+      }
+      return !enoughSigner
+    })
+    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
     const isMultisig = computed(() => {
       let isMulti = acc.value.getDirectParentMultisig().length? true: false
       return isMulti;
     });  
+    let transactionFee = computed(()=>{
+      if(isLockFund.value){ //aggregate bonded
+        return 26.70
+      }if(!isLockFund.value && isMultisig.value){ //aggregate complete
+        return 0
+      }else{
+        return 23.25
+      }
+    })
+    const aggregateFee = computed(()=>{
+      if(isLockFund.value){ //aggregate bonded
+        return 20.404515
+      }if(!isLockFund.value && isMultisig.value){ //aggregate complete
+        return 30.15
+      }else{
+        return 0
+      }
+    })
+
+    const totalFee = computed(()=>{
+      if(isLockFund.value){ //aggregate bonded
+        return aggregateFee.value+lockFund.value + transactionFee.value
+      }if(!isLockFund.value && isMultisig.value){ //aggregate complete
+        return aggregateFee.value
+      }else{
+        return transactionFee.value
+      }
+    })
     const accountBalance = computed(() => {
        let accountBalance = 0
        if (acc.value == undefined){
@@ -181,6 +232,8 @@ export default {
        
        return accountBalance
     })
+
+   
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
     const accountDisplayBalance = computed(() => {
@@ -298,12 +351,13 @@ export default {
         }
       }
       if (WalletUtils.verifyWalletPassword(walletName,networkState.chainNetworkName,walletPassword.value)) {
+        let cosigner = getCosignerList()
         if (delegateAcc.value !== "0".repeat(64)) { //unlink
           const indexOtherAcc = walletState.currentLoggedInWallet.others.findIndex((other)=> other.publicKey === delegateAcc.value)
           if (indexOtherAcc > -1) {
-            let signedTx = accountUtils.createDelegatTransaction(accAddress.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
+            let signedTx = accountUtils.createDelegatTransaction(isMultisig.value,cosigner,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
+            /* let signedTx = accountUtils.createDelegatTransaction(accAddress.value,walletPassword.value,AccPublicKey.value, LinkAction.Unlink);  */
             txHash.value = signedTx.hash.toUpperCase()
-            console.log(signedTx.type) //
             /* toast.add({severity:'success', summary: 'Notification', detail: 'Unlink Successfully', group: 'br', life: 5000});   */          
             /* router.push({ name: "ViewAccountDisplayAll" }); */
             walletPassword.value=""
@@ -313,7 +367,9 @@ export default {
             err.value = t('delegate.linkerror2');
           }
         } else if (AccPublicKey.value != "" && (fromPk.value || fromNew.value)) { //link
-          let signedTx = accountUtils.createDelegatTransaction(accAddress.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
+        console.log(AccPublicKey.value)
+          let signedTx = accountUtils.createDelegatTransaction(isMultisig.value,cosigner,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
+           /* let signedTx = accountUtils.createDelegatTransaction(accAddress.value,walletPassword.value,AccPublicKey.value, LinkAction.Link);  */
           txHash.value = signedTx.hash.toUpperCase()
           walletPassword.value=""
           pending.value=true
@@ -367,7 +423,13 @@ export default {
       err,
       walletName,
       delegateValue,
-      pending
+      pending,
+      isCosigner,
+      isLockFund,
+      lockFund,
+      aggregateFee,
+      transactionFee,
+      totalFee
     };
   },
 }

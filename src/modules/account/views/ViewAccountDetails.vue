@@ -11,7 +11,7 @@
         <div class="border border-green-300 pl-6 pb-3 bg-green-50">
           <div class="flex items-center gap-3">
             <img src='@/assets/img/icon-green-tick.svg' class='h-10 w-10 pt-3 mr-2 '>
-            <div class="flex flex-col">
+            <div class="flex flex-col w-full">
               <div class="flex">
                 <div class="text-xs text-green-500 font-semibold pt-3">Congratulations!</div>
                 <img  @click="showModal=false" src="@/assets/img/delete.svg" class="w-5 ml-auto mr-1 cursor-pointer">
@@ -43,19 +43,20 @@
               <img src="@/assets/img/icon-transfer.svg" class=" w-5 h-5 mt-0.5  cursor-pointer mr-1">
               <div class='text-xs mt-1 font-semibold '>Transfer {{currentNativeTokenName}}</div>
             </router-link>
-            <a v-if="networkState.chainNetwork == 0" href="https://www.proximax.io/en/xpx" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
+            <!-- <a v-if="networkState.chainNetwork == 0" href="https://www.proximax.io/en/xpx" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
               <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
               <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
-              <img src="@/modules/dashboard/img/icon-link-new.svg" class='h-5 w-5  cursor-pointer '>
-            </a>
-            <a v-if="networkState.chainNetwork == 1" href="https://bctestnetfaucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
+              <img src="@/modules/dashboard/img/icon-link-new-white.svg" class='h-5 w-5  cursor-pointer '>
+            </a> -->
+            <a v-if="networkState.chainNetwork == 0" href="https://bctestnetfaucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
               <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
               <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
               <img src="@/modules/dashboard/img/icon-link-new-white.svg" class='h-3 w-3 mt-1 ml-1 cursor-pointer '>
             </a>
-            <a v-if="networkState.chainNetwork == 2" href="https://bctestnet2faucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
+            <a v-if="networkState.chainNetwork == 1" href="https://bctestnet2faucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
               <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
               <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
+              <img src="@/modules/dashboard/img/icon-link-new-white.svg" class='h-3 w-3 mt-1 ml-1 cursor-pointer '>
             </a>
           </div>
         </div>

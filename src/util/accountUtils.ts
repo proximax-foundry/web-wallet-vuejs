@@ -1,6 +1,6 @@
 import { walletState } from "@/state/walletState";
 import { readonly, ref } from "vue";
-import { Address, Account, SignedTransaction, AccountInfo, TransactionHttp, PublicAccount, LinkAction, NamespaceId, AliasActionType} from "tsjs-xpx-chain-sdk";
+import { Address, Account, SignedTransaction, AccountInfo, TransactionHttp, PublicAccount, LinkAction, NamespaceId, AliasActionType, Password, AggregateTransaction, Deadline} from "tsjs-xpx-chain-sdk";
 import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from "@/util/chainUtils";
 import { networkState } from "@/state/networkState";
@@ -10,6 +10,9 @@ import { Helper } from "@/util/typeHelper";
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { BuildTransactions } from '@/util/buildTransactions';
 import { ChainAPICall } from "@/models/REST/chainAPICall"
+import { WalletAccount } from "@/models/walletAccount";
+import { OtherAccount } from "@/models/otherAccount";
+import { e } from "mathjs";
 
 const networkType = networkState.currentNetworkProfile.network.type;
 const Hash = networkState.currentNetworkProfile.generationHash;
@@ -124,7 +127,7 @@ const namespacesOption = (address: string, linkOption: string) => {
       Label = namespaceElement.name + ' (Linked to ' + linkName + ') - ' + linkLabel;
   } else if (namespaceElement.linkedId == '') {
     isDisabled = (linkOption == 'Link' ? false : true);
-    Label = namespaceElement.name;
+    Label = namespaceElement.name +'(Current unused namespace)';
   }
     namespace.push({
       value: namespaceElement.name,
@@ -223,7 +226,7 @@ const announceTransaction = (signedTransaction:SignedTransaction) => {
 
 const multiSigAnnouce = (aggregateTx:SignedTransaction, hashSigned:SignedTransaction) => {
   let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(hashSigned);
-  hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock + 1;
+  hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock
   let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(aggregateTx);
   
   autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(hashSigned.hash);
@@ -234,38 +237,147 @@ const multiSigAnnouce = (aggregateTx:SignedTransaction, hashSigned:SignedTransac
   ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
 }
 
-const linkAddressToNamespace = (senderAddress: string, walletPassword: string, namespacesID: string, linkType: string, namespacesAddress: string, isCosigner: string) => {
+
+const linkAddressToNamespace = (isMultisig :boolean,cosigners: [], multisigAccount: WalletAccount | OtherAccount, walletPassword: string, namespacesID: string, linkType: string, namespacesAddress: string) :SignedTransaction=> {
   const namespaceTransaction = linkAddressToNamespaceTransaction(namespacesID, linkType, namespacesAddress);
-  const senderAccount = getAccountDetail(senderAddress, walletPassword);
-  if (isCosigner != null) {
-    const multisigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === isCosigner);
-    const multisigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === isCosigner);
-    const multisigPublicKey = multisigAccount ? multisigAccount.publicKey : multisigOther.publicKey;
-    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, networkType);
+  const senderAddress = multisigAccount.address
+  const senderAccount = getAccountDetail(senderAddress, walletPassword)
+  let signedTransaction :SignedTransaction
+  if (!isMultisig){ // normal account
+   signedTransaction = senderAccount.sign(namespaceTransaction, Hash);
+    announceTransaction(signedTransaction);
+  }else{ //multisig account
+    let enoughSigner= false
+    let aggregateTransaction :AggregateTransaction
+    let multisigPublicAccount = PublicAccount.createFromPublicKey(multisigAccount.publicKey, networkType);
     let innerTx = [namespaceTransaction.toAggregate(multisigPublicAccount)];
-    let newBuildTx = new BuildTransactions(networkType);
-    const aggreateBondedTx = newBuildTx.aggregateBonded(innerTx);
-    const signaggregateBondedTxn = senderAccount.sign(aggreateBondedTx, Hash);
-    let hashLockTx = newBuildTx.hashLock(
-      Helper.createAsset(networkState.currentNetworkProfile.network.currency.assetId, 10000000), 
-      Helper.createUint64FromNumber(200),
-      signaggregateBondedTxn);
-      let signedHashlock = senderAccount.sign(hashLockTx, Hash);
-      multiSigAnnouce(signaggregateBondedTxn, signedHashlock);
-  } else if (isCosigner == null) {
-    const signTransaction = senderAccount.sign(namespaceTransaction, Hash);
-    announceTransaction(signTransaction);
+    //check if all cosigners are in wallet and they are non multisig
+    let count = multisigAccount.multisigInfo.find(acc=>acc.level==0).minApproval
+    if (count<=cosigners.length){
+      enoughSigner = true
+    }
+    let coSigner :Account[] = [];
+    cosigners.forEach((signer) => { 
+      const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === signer)
+      let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
+      coSigner.push(Account.createFromPrivateKey(privateKey, networkType));
+    });
+    if(enoughSigner){ //aggregate complete
+      let firstCosigner = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==coSigner[0].address.plain()) 
+      let cosignerPrivateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), firstCosigner.encrypted, firstCosigner.iv);
+      coSigner.splice(0,1)
+      let account = Account.createFromPrivateKey(cosignerPrivateKey,networkType) 
+      
+      aggregateTransaction = AggregateTransaction.createComplete(
+        Deadline.create(), 
+        innerTx,
+        networkType,
+        []
+      )
+      let signedAggregateCompleteTransaction = account.signTransactionWithCosignatories(
+        aggregateTransaction,coSigner,Hash
+      )
+      announceTransaction(signedAggregateCompleteTransaction)
+      signedTransaction = signedAggregateCompleteTransaction
+    }else{ //aggregate bonded
+      let newBuildTx = new BuildTransactions(networkType);
+      const aggreateBondedTx = newBuildTx.aggregateBonded(innerTx);
+      let transactions :{signedAggregateBondedTransaction:SignedTransaction,lockFundsTransactionSigned:SignedTransaction}[] = [];
+      coSigner.forEach(signer=>{
+        const signedAggregateBondedTransaction = signer.sign(aggreateBondedTx, Hash);
+      
+        let hashLockTx = newBuildTx.hashLock(
+          Helper.createAsset(networkState.currentNetworkProfile.network.currency.assetId, 10000000), 
+          Helper.createUint64FromNumber(200),
+          signedAggregateBondedTransaction 
+        );
+
+      const lockFundsTransactionSigned = signer.sign(hashLockTx, Hash);
+
+      transactions.push({ signedAggregateBondedTransaction: signedAggregateBondedTransaction, lockFundsTransactionSigned: lockFundsTransactionSigned });
+      })
+      signedTransaction = transactions[transactions.length-1].signedAggregateBondedTransaction
+      for (const transaction of transactions) {
+        multiSigAnnouce(transaction.signedAggregateBondedTransaction,transaction.lockFundsTransactionSigned)
+      }
+    }
   }
+  return signedTransaction
+}
+const createDelegatTransaction = (isMultisig :boolean,cosigners: [],multisigAccount: WalletAccount, walletPassword: string, accPublicKey: string, delegateAction: LinkAction) :SignedTransaction=>{
+
+  const senderAddress = multisigAccount.address
+  const senderAccount = getAccountDetail(senderAddress, walletPassword);
+  const transactionBuilder = new BuildTransactions(networkType, Hash);
+  const delegateTransaction = transactionBuilder.accountLink(accPublicKey, delegateAction); 
+  let signedTransaction :SignedTransaction
+  if (!isMultisig){ //normal account
+    signedTransaction = senderAccount.sign(delegateTransaction, Hash);
+    announceTransaction(signedTransaction);
+  }else{ //multisig account
+    let enoughSigner= false
+    let aggregateTransaction :AggregateTransaction
+    let multisigPublicAccount = PublicAccount.createFromPublicKey(multisigAccount.publicKey, networkType);
+    let innerTx = [delegateTransaction.toAggregate(multisigPublicAccount)];
+    //check if all cosigners are in wallet and they are non multisig
+    let count = Math.max(multisigAccount.multisigInfo.find(acc=>acc.level==0).minApproval,multisigAccount.multisigInfo.find(acc=>acc.level==0).minRemoval) 
+    if (count<=cosigners.length){
+      enoughSigner = true
+    }
+    let coSigner :Account[] = [];
+    cosigners.forEach((signer) => { 
+      const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === signer)
+      let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
+      coSigner.push(Account.createFromPrivateKey(privateKey, networkType));
+    });
+    if(enoughSigner){ //aggregate complete
+      let firstCosigner = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==coSigner[0].address.plain()) 
+      let cosignerPrivateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), firstCosigner.encrypted, firstCosigner.iv);
+      coSigner.splice(0,1)
+      let account = Account.createFromPrivateKey(cosignerPrivateKey,networkType) 
+      
+      aggregateTransaction = AggregateTransaction.createComplete(
+        Deadline.create(), 
+        innerTx,
+        networkType,
+        []
+      )
+      let signedAggregateCompleteTransaction = account.signTransactionWithCosignatories(
+        aggregateTransaction,coSigner,Hash
+      )
+      announceTransaction(signedAggregateCompleteTransaction)
+      signedTransaction = signedAggregateCompleteTransaction
+    }else{//aggregate bonded
+      let newBuildTx = new BuildTransactions(networkType);
+      const aggreateBondedTx = newBuildTx.aggregateBonded(innerTx);
+      let transactions :{signedAggregateBondedTransaction:SignedTransaction,lockFundsTransactionSigned:SignedTransaction}[] = [];
+      coSigner.forEach(signer=>{
+        const signedAggregateBondedTransaction = signer.sign(aggreateBondedTx, Hash);
+      
+        let hashLockTx = newBuildTx.hashLock(
+          Helper.createAsset(networkState.currentNetworkProfile.network.currency.assetId, 10000000), 
+          Helper.createUint64FromNumber(200),
+          signedAggregateBondedTransaction 
+        );
+
+      const lockFundsTransactionSigned = signer.sign(hashLockTx, Hash);
+
+      transactions.push({ signedAggregateBondedTransaction: signedAggregateBondedTransaction, lockFundsTransactionSigned: lockFundsTransactionSigned });
+      })
+      signedTransaction = transactions[transactions.length-1].signedAggregateBondedTransaction
+      for (const transaction of transactions) {
+        multiSigAnnouce(transaction.signedAggregateBondedTransaction,transaction.lockFundsTransactionSigned)
+      }
+    }
+
+  }
+  
+  
+    
+  
+  return signedTransaction
 }
 
-const createDelegatTransaction = (address: string, walletPassword: string, accPublicKey: string, delegateAction: LinkAction) :SignedTransaction=>{
-  const senderAccount = getAccountDetail(address, walletPassword);
-  const transactionBuilder = new BuildTransactions(networkType, Hash);
-  const delegateTransaction = transactionBuilder.accountLink(accPublicKey, delegateAction);   
-  const signTransaction = senderAccount.sign(delegateTransaction, Hash);
-  announceTransaction(signTransaction);
-  return signTransaction
-}
 
 const getValidAccount = async (address: string): Promise<boolean> => {
   let baseUrl = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort)
