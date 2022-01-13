@@ -3,7 +3,9 @@
   <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
     <div class='mt-6 px-6 py-10 border filter shadow-lg text-center'>
       <div class="text-md mb-3">Main Network Swap</div>
+      <template>
       <!-- <div class="text-xs max-w-md inline-block">You can swap from NIS1, ETH and BSC to ProximaX Sirius Chain. In reverse, ProximaX Sirius Chain is available to swap in ETH and BSC only.</div> -->
+      </template>
       <br>
       <div class="inline-block relative w-full sm:w-80 text-left mt-5 transition-all duration-500">
          <div class="border inline-block w-full mt-4 rounded shadow-md filter" :class="`${open['bsc']?'border-blue-500':'border-gray-200'}`" style="top: 205px;" @click="openMenu('bsc')">
@@ -35,6 +37,7 @@
           </div>
         </div>
         <br>
+        <template>
         <!-- <div class="border inline-block w-full mt-4 rounded shadow-md filter" :class="`${open['eth']?'border-blue-500':'border-gray-200'}`" style="top: 95px;" @click="openMenu('eth')">
           <div class="flex items-center w-full px-5 h-20 cursor-pointer hover:bg-blue-50 transition-all duration-500" :class="`${open['eth']?'bg-blue-50':'bg-white'}`">
             <img src="@/modules/services/submodule/mainnetSwap/img/eth.svg" class="float-left">
@@ -50,6 +53,7 @@
             <router-link :to="{ name: 'ViewServicesMainnetSwapCheckETHToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">Check Status</router-link>
           </div>
         </div> -->
+        </template>
         <br>
        
       </div>
