@@ -10,7 +10,18 @@
             </div>
             <div class="truncate text-white">{{ selectedAccountName }}</div>
           </router-link>
-          <img src="@/assets/img/navi/icon-default-account-drop-down.svg" class="h-6 w-6">
+          <div @mouseover="hoverOverSetDefaultMenu" @mouseout="hoverOutSetDefaultMenu">
+            <img src="@/assets/img/navi/icon-default-account-drop-down.svg" class="h-6 w-6 cursor-pointer" @click="displayDefaultAccountMenu = true">
+            <div v-if="displayDefaultAccountMenu" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+              <div role="none" class="my-2">
+                <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Details</router-link>
+                <router-link :to="{ name:'ViewMultisigHome', params: { name: selectedAccountName }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Multisig</router-link>
+                <router-link :to="{name:'ViewMultisigScheme', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" v-if="isMultiSig" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Scheme</router-link>
+                <div :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" v-else class="block text-gray-300 transition duration-200 p-2 z-20">Scheme</div>
+                <router-link :to="{name:'ViewAccountSwap', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Swap</router-link>
+              </div>
+            </div>
+          </div>
         </div>
         <!-- <div @click="updateDefaultAccount(item.name)" v-for="(item) in accounts" :key="item.address" class="cursor-pointer link_block flex items-center"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div><span class="truncate overflow-hidden text-white">{{ item.name }}</span></div> -->
       </div>
@@ -124,6 +135,27 @@ export default{
       return selectedAccount.value.address;
     })
 
+    const isMultiSig = computed(() => {
+      return selectedAccount.value.getDirectParentMultisig().length? true: false;
+    });
+
+    // default account menu
+    const displayDefaultAccountMenu = ref(false);
+    const booleanOverDefaultAccount = ref(false);
+    const hoverOverSetDefaultMenu = () => {
+      booleanOverDefaultAccount.value = true;
+    }
+
+    const hoverOutSetDefaultMenu = () => {
+      booleanOverDefaultAccount.value = false;
+    }
+
+    emitter.on('PAGE_CLICK', () => {
+      if(!booleanOverDefaultAccount.value){
+        displayDefaultAccountMenu.value = false;
+      }
+    });
+
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
 
     let accountUnconfirmedTxnsCount = ref(0);
@@ -132,7 +164,6 @@ export default{
     let updateAccountTransactionCount = () => {
       
       (async() => {
-        console.log('update count')
         let transactionsCount = await dashboardService.getAccountTransactionsCount(selectedAccount.value);
         accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
         accountPartialTxnsCount.value = transactionsCount.partial;
@@ -255,6 +286,9 @@ export default{
     }
 
     return {
+      hoverOverSetDefaultMenu,
+      hoverOutSetDefaultMenu,
+      displayDefaultAccountMenu,
       logout,
       walletState,
       // accounts,
@@ -270,6 +304,7 @@ export default{
       openSetDefaultModal,
       selectedAccountAddress,
       triggerSetDefaultModal,
+      isMultiSig,
     };
   }
 }
@@ -281,5 +316,20 @@ export default{
 
 .signout_block{
   @apply  px-10 lg:px-5 3xl:px-10 hover:bg-navy-lighter py-5 transition-all duration-200;
+}
+
+.pop-option:after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: -6px;
+  right: 20px;
+  width: 10px;
+  height: 10px;
+  background: #FFFFFF;
+  border-left:1px solid #E4E4E4;
+  border-top:1px solid #E4E4E4;
+  -moz-transform:rotate(45deg);
+  -webkit-transform:rotate(45deg);
 }
 </style>

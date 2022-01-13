@@ -83,6 +83,11 @@ export default {
       }
     });
 
+    const isMultiSig = computed(() => {
+      let isMulti = acc.getDirectParentMultisig().length? true: false
+      return isMulti;
+    });
+
     const disableNIS1Swap = () => {
       acc.nis1Account = null;
       walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
@@ -95,6 +100,7 @@ export default {
       nis1Address,
       boolNIS1Enabled,
       disableNIS1Swap,
+      isMultiSig,
     };
   }
 };

@@ -27,10 +27,10 @@
                   <div class="text-xs mt-2 text-gray-400">{{ account.address }}</div>
                 </div>
               </div>
-              <div v-for="(account, index) in otherAccounts" :key="index" @click="setDefault(account.name, 1)" class="flex text-left p-2 py-2 text-gray-800 hover:bg-yellow-50 cursor-pointer" :class="`${ (index%2==0)?'bg-gray-50':'bg-blue-50' }`">
+              <div v-for="(account, index) in otherAccounts" :key="index" class="flex text-left p-2 py-2 text-gray-700" :class="`${ (index%2==0)?'bg-gray-50':'bg-blue-50' }`">
                 <div>
-                  <div class="font-bold text-xs text-gray-700">{{ account.name }}<span class="text-xxs font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(account)">{{$t('accounts.multisig')}}</span></div>
-                  <div class="text-xs mt-2 text-gray-400">{{ account.address }}</div>
+                  <div class="font-bold text-xs text-gray-300">{{ account.name }}<span class="text-xxs text-gray-400 font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(account)">{{$t('accounts.multisig')}}</span></div>
+                  <div class="text-xs mt-2 text-gray-300">{{ account.address }}</div>
                 </div>
               </div>
             </div>
@@ -91,10 +91,12 @@ export default{
     const setDefault = (name, type) => {
       walletState.currentLoggedInWallet.setDefaultAccountByName(name);
       emitter.emit("CLOSE_SET_DEFAULT_ACCOUNT_MODAL", true);
+
       let payload = {
         name,
         type
-      }
+      };
+
       emit('dashboardSelectAccount', payload);
       emitter.emit("DEFAULT_ACCOUNT_SWITCHED", name);
       closeModal();
