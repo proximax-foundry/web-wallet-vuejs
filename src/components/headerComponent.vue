@@ -147,6 +147,7 @@
       </div>
     </div>
   </header>
+  <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
 </template>
 
 <script> 
@@ -169,11 +170,13 @@ import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { TransactionType } from "tsjs-xpx-chain-sdk";
 import { WalletUtils } from "@/util/walletUtils";
 import {useI18n} from 'vue-i18n'
+import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
 
 export default defineComponent({
   components: {
     // Dropdown,
     selectLanguageModal,
+    SetAccountDefaultModal,
   },
 
   name: 'headerComponent',
@@ -237,6 +240,29 @@ export default defineComponent({
         }
       }, 100);
     }
+
+    const openSetDefaultModal = ref(false);
+
+    const updateSelectedAccount = (data)=>{
+      // if(data.type == 0){
+      //   selectedAccount.value = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === data.name);
+      // }else{
+      //   selectedAccount.value = walletState.currentLoggedInWallet.others.find((account)=> account.name === data.name);
+      // }
+      walletState.currentLoggedInWallet.setDefaultAccountByName(data.name);
+      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+      toast.add({severity:'success', summary: 'Default account has switched to' , detail: data.name, group: 'br', life: 3000});
+    }
+
+    emitter.on('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', (payload) => {
+      openSetDefaultModal.value = payload;
+    });
+
+    emitter.on('CLOSE_SET_DEFAULT_ACCOUNT_MODAL', payload => {
+      if(payload){
+        openSetDefaultModal.value = false;
+      }
+    });
 
     const navigationSideBar = inject('navigationSideBar');
 
@@ -410,7 +436,6 @@ export default defineComponent({
     const totalPendingNum = ref(0);
 
     watch(()=> listenerState.autoAnnounceSignedTransaction, (newValue)=>{
-      
       let newLength = newValue.length;
 
       if(newLength !== totalPendingNum.value){
@@ -430,14 +455,12 @@ export default defineComponent({
       }
 
       totalPendingNum.value = newLength;
-      
     }, true);
 
     watch(()=> currentBlockHeight.value, ()=>{
 
       listener.value.refreshTimer();
     });
-    
 
      watch(()=> unconfirmedTxLength.value, (newValue, oldValue)=>{
 
@@ -581,6 +604,8 @@ export default defineComponent({
        listener.value.endpoint = endpoint;
      });
     return {
+      openSetDefaultModal,
+      updateSelectedAccount,
       toggleSidebar,
       networkState,
       walletState,

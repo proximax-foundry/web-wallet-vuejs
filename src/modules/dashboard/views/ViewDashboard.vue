@@ -6,7 +6,7 @@
           <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded flex flex-col bg-white text-black">
             <div class="text-center py-3">
               <div class="text-center my-2"><div class="inline-block"><span class="font-bold text-xl">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-md">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-xl">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-6 h-6 ml-3 relative" style="top: -6px;"></div>
-              <div class="inline-block text-xs font-bold text-blue-primary cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">{{ selectedAccountName }}<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></div>
+              <div class="inline-block text-xs font-bold text-blue-primary cursor-pointer" @click="triggerSetDefaultModal">{{ selectedAccountName }}<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></div>
               <div class="mb-8">
                 <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddressShort }}</div>
                 <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
@@ -42,11 +42,7 @@
         </div>
         <div class="pr-2 hidden md:inline-block">
           <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded-lg balance-div flex flex-col justify-between bg-navy-primary text-white">
-            <div class="text-right">
-              <div class="inline-block text-txs font-bold text-blue-primary pappflex items-center rounded-b-sm"><img src="@/modules/dashboard/img/icon-bookmark.svg" class="w-3 h-3 mr-1 inline-block">DEFAULT ACCOUNT</div><br>
-              <div class="inline-block text-txs underline xl:text-sm cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">{{ selectedAccountName }}</div>
-            </div>
-            <div>
+            <div class="mt-8">
               <div class="text-gray-300 text-txs">CURRENT BALANCE</div>
               <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
               <div class="text-gray-300 text-txs mt-1">Estimate US$ {{ currencyConvert }}</div>
@@ -163,7 +159,6 @@
       <RestrictionTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></RestrictionTxnDataTable>
       <SecretTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.SECRET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></SecretTxnDataTable>
     </div>
-    <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
   </div>
 </template>
 
@@ -188,8 +183,6 @@ import SecretTxnDataTable from '@/modules/dashboard/components/TransactionDataTa
 
 import DashboardAssetDataTable from '@/modules/dashboard/components/DashboardAssetDataTable.vue';
 import DashboardNamespaceDataTable from '@/modules/dashboard/components/DashboardNamespaceDataTable.vue';
-
-import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
 import AddressQRModal from '@/modules/dashboard/components/AddressQRModal.vue';
 import MessageModal from '@/modules/dashboard/components/MessageModal.vue';
 import DecryptMessageModal from '@/modules/dashboard/components/DecryptMessageModal.vue';
@@ -217,7 +210,6 @@ export default defineComponent({
     type: String
   },
   components: {
-    SetAccountDefaultModal,
     MixedTxnDataTable,
     TransferTxnDataTable,
     AccountTxnDataTable,
@@ -248,7 +240,6 @@ export default defineComponent({
     const showDecryptMessageModal  = ref(false);
 
     const displayConvertion = ref(false);
-    const openSetDefaultModal = ref(false);
     const showCosignModal = ref(false);
     const txMessage = ref("");
     const messagePayload = ref("");
@@ -468,7 +459,6 @@ export default defineComponent({
 
     let updateAccountTransactionCount = async()=>{
       let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
-      
       accountConfirmedTxnsCount.value = transactionsCount.confirmed;
     };
 
@@ -928,22 +918,9 @@ export default defineComponent({
       return result;
     }
 
-    const updateSelectedAccount = (data)=>{
-      if(data.type == 0){
-        selectedAccount.value = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === data.name);
-      }else{
-        selectedAccount.value = walletState.currentLoggedInWallet.others.find((account)=> account.name === data.name);
-      }
-      walletState.currentLoggedInWallet.setDefaultAccountByName(data.name);
-      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
-      toast.add({severity:'success', summary: 'Default account has switched to' , detail: data.name, group: 'br', life: 3000});
+    const triggerSetDefaultModal = () => {
+      emitter.emit('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', true);
     }
-
-    emitter.on('CLOSE_SET_DEFAULT_ACCOUNT_MODAL', payload => {
-      if(payload){
-        openSetDefaultModal.value = false;
-      }
-    });
 
     emitter.on('CLOSE_MODAL', () => {
       showAddressQRModal.value = false;
@@ -972,7 +949,12 @@ export default defineComponent({
     }
 
     emitter.on('DEFAULT_ACCOUNT_SWITCHED', payload => {
-      selectedAccount.value = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === payload);
+      currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
+      currentAccount.default = true;
+      selectedAccount.value = currentAccount;
+      updateAccountTransactionCount();
+      loadRecentTransactions();
+      loadRecentTransferTransactions();
     });
 
     return {
@@ -984,14 +966,12 @@ export default defineComponent({
       selectedAccountBalanceBack,
       selectedAccountName,
       selectedAccountPublicKey,
-      openSetDefaultModal,
       currencyConvert,
       displayConvertion,
       currentNativeTokenName,
       selectedAccountAddress,
       selectedAccountAddressPlain,
       selectedAccountAddressShort,
-      updateSelectedAccount,
       isDefault,
       isMultisig,
       recentTransactions,
@@ -1002,6 +982,7 @@ export default defineComponent({
       showDecryptMessageModal,
       selectedAccount,
       selectedAccountNamespaceCount,
+      triggerSetDefaultModal,
       // selectedAccountNamespaces,
       // selectedAccountAssets,
       selectedAccountAssetsCount,
