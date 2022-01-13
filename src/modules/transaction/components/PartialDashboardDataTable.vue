@@ -153,9 +153,7 @@ export default{
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
       let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.PARTIAL, txnQueryParams);
-      console.log(transactionSearchResult)
       let formattedTxns = await dashboardService.formatPartialMixedTxns(transactionSearchResult.transactions);
-      console.log(formattedTxns)
       transactions.value = formattedTxns;
     };
 

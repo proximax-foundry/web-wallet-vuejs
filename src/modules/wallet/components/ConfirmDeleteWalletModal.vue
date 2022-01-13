@@ -5,7 +5,7 @@
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
     >
-      <div v-if="toggleModal" class="popup-outer absolute flex z-50">
+      <div v-if="toggleModal" class="popup-outer fixed flex z-50">
         <div class="modal-popup-box">
           <div class="delete-position">
             <img src="@/assets/img/delete.svg" class="w-5 inline-block cursor-pointer" @click="toggleModal = !toggleModal">

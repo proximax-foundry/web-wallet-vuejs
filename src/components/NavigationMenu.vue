@@ -1,15 +1,24 @@
 <template>
   <div class="flex flex-col" @mouseover="hoverOverNavigation" @mouseout="hoverOutNavigation">
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10 lg:px-5 3xl:px-10 font-txs text-gray-400">ACCOUNTS ({{ allAccountsCount }})</div>
+      <div class="my-3 px-10 lg:px-5 3xl:px-10 font-txs text-gray-400 uppercase flex justify-between items-center">Default account<img src="@/assets/img/navi/icon-switch-account.svg" class="cursor-pointer" @click="triggerSetDefaultModal"></div>
       <div>
-        <div @click="updateDefaultAccount(item.name)" v-for="(item) in accounts" :key="item.address" class="cursor-pointer link_block flex items-center"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div><span class="truncate overflow-hidden text-white">{{ item.name }}</span></div>
+        <div class="cursor-pointer link_block flex items-center justify-between">
+          <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" class="flex items-center">
+            <div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center">
+              <img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative">
+            </div>
+            <div class="truncate text-white">{{ selectedAccountName }}</div>
+          </router-link>
+          <img src="@/assets/img/navi/icon-default-account-drop-down.svg" class="h-6 w-6">
+        </div>
+        <!-- <div @click="updateDefaultAccount(item.name)" v-for="(item) in accounts" :key="item.address" class="cursor-pointer link_block flex items-center"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div><span class="truncate overflow-hidden text-white">{{ item.name }}</span></div> -->
       </div>
       <!-- <router-link :to="{ name: 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" v-if="allAccountsCount > 5" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-4 w-4 inline-block mr-1 text-white">View all accounts</router-link> -->
-      <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="block font-bold link_block text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-add.svg" class="h-4 w-4 inline-block relative mr-1">Create New Account</router-link>
+      <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="mt-2 block font-bold link_block text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-add.svg" class="h-4 w-4 inline-block relative mr-1">Create New Account</router-link>
     </div>
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10 lg:px-5 3xl:px-10 text-gray-400">Transactions</div>
+      <div class="my-3 px-10 lg:px-5 3xl:px-10 text-gray-400 uppercase">Transactions</div>
       <div class="flex justify-start px-10 lg:px-5 3xl:px-10 mt-5">
         <router-link :to="{ name : 'ViewDashboard', params: {type: 'transaction' } }" class="relative mr-5"><div class="rounded-full h-8 w-8 flex items-center justify-center" style="background: #007CFF"><img src="@/assets/img/navi/icon-unconfirmed-transaction-white.svg" class="w-5 h-5"></div></router-link>
         <router-link :to="{ name : 'ViewTransactionStatus', params: {transactionType: 'unconfirmed' } }" class="relative mr-5"><div class="rounded-full h-8 w-8 flex items-center justify-center" style="background: #f3a91d"><img src="@/assets/img/navi/icon-unconfirmed-transaction-white.svg" class="w-5 h-5"></div><div class="absolute bg-gray-50 text-xxs rounded text-center" style="min-width: 15px; padding: 1px 2px; top: -5px; right: -8px;">{{ accountUnconfirmedTxnsCount }}</div></router-link>
@@ -45,10 +54,11 @@ import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { networkState } from "@/state/networkState";
 import { useI18n } from 'vue-i18n';
 import { useToast } from "primevue/usetoast";
-import { AppState } from '@/state/appState';
 import { DashboardService } from '@/modules/dashboard/service/dashboardService';
+import {AppState} from '@/state/appState'
 
 export default{
+  
   name: 'NavigationMenu',
   data() {
     return {
@@ -99,20 +109,34 @@ export default{
     const {t} = useI18n();
     const router = useRouter();
 
+    const openSetDefaultModal = ref(false);
+
     let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
     currentAccount.default = true;
 
     const selectedAccount = ref(currentAccount);
+
+    const selectedAccountName = computed(() => {
+      return selectedAccount.value.name;
+    });
+
+    const selectedAccountAddress = computed(() => {
+      return selectedAccount.value.address;
+    })
 
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
 
     let accountUnconfirmedTxnsCount = ref(0);
     let accountPartialTxnsCount = ref(0);
 
-    let updateAccountTransactionCount = async()=>{
-      let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
-      accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
-      accountPartialTxnsCount.value = transactionsCount.partial;
+    let updateAccountTransactionCount = () => {
+      
+      (async() => {
+        console.log('update count')
+        let transactionsCount = await dashboardService.getAccountTransactionsCount(selectedAccount.value);
+        accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
+        accountPartialTxnsCount.value = transactionsCount.partial;
+      })();
     };
 
     emitter.on("TXN_UNCONFIRMED", (num) => {
@@ -133,42 +157,52 @@ export default{
       }
     });
 
+    const triggerSetDefaultModal = () => {
+      emitter.emit('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', true);
+    }
+
+    emitter.on('DEFAULT_ACCOUNT_SWITCHED', payload => {
+      currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
+      selectedAccount.value = currentAccount;
+      updateAccountTransactionCount();
+    });
+
     const navigationSideBar = inject('navigationSideBar');
 
-    const allAccountsCount = computed(
-      () => {
-        if(walletState.currentLoggedInWallet){
-          if(walletState.currentLoggedInWallet.others){
-            const concatOther = walletState.currentLoggedInWallet.accounts.length
-            return concatOther;
-          } else{
-            return walletState.currentLoggedInWallet.accounts.length;
-          }
-        } else{
-          return null;
-        }
-      }
-    );
+    // const allAccountsCount = computed(
+    //   () => {
+    //     if(walletState.currentLoggedInWallet){
+    //       if(walletState.currentLoggedInWallet.others){
+    //         const concatOther = walletState.currentLoggedInWallet.accounts.length
+    //         return concatOther;
+    //       } else{
+    //         return walletState.currentLoggedInWallet.accounts.length;
+    //       }
+    //     } else{
+    //       return null;
+    //     }
+    //   }
+    // );
 
-    const accounts = computed(
-      () => {
-        if(walletState.currentLoggedInWallet){
-          let displayAccounts = [];
-          let accountCount;
-          if(walletState.currentLoggedInWallet.accounts.length < 6){
-            accountCount = walletState.currentLoggedInWallet.accounts.length;
-          }else{
-            accountCount = 5;
-          }
-          for(var a = 0; a < accountCount; ++a){
-            displayAccounts.push(walletState.currentLoggedInWallet.accounts[a]);
-          }
-          return displayAccounts;
-        }else{
-          return null;
-        }
-      }
-    );
+    // const accounts = computed(
+    //   () => {
+    //     if(walletState.currentLoggedInWallet){
+    //       let displayAccounts = [];
+    //       let accountCount;
+    //       if(walletState.currentLoggedInWallet.accounts.length < 6){
+    //         accountCount = walletState.currentLoggedInWallet.accounts.length;
+    //       }else{
+    //         accountCount = 5;
+    //       }
+    //       for(var a = 0; a < accountCount; ++a){
+    //         displayAccounts.push(walletState.currentLoggedInWallet.accounts[a]);
+    //       }
+    //       return displayAccounts;
+    //     }else{
+    //       return null;
+    //     }
+    //   }
+    // );
 
     const isDisplaySwap = computed(() => {
       return (networkState.chainNetworkName == 'Sirius Mainnet' || networkState.chainNetworkName == 'Sirius Testnet 1' || networkState.chainNetworkName == 'Sirius Testnet 2');
@@ -194,15 +228,15 @@ export default{
       navigationSideBar.isOpen = false;
     }
 
-    const updateDefaultAccount = (accountName) => {
-      currentAccount = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === accountName);
-      walletState.currentLoggedInWallet.setDefaultAccountByName(accountName);
-      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
-      toast.add({severity:'success', summary: 'Default account has switched to' , detail: accountName, group: 'br', life: 3000});
-      emitter.emit('DEFAULT_ACCOUNT_SWITCHED', accountName);
-      updateAccountTransactionCount();
-      closeNavi();
-    }
+    // const updateDefaultAccount = (accountName) => {
+    //   currentAccount = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === accountName);
+    //   walletState.currentLoggedInWallet.setDefaultAccountByName(accountName);
+    //   walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+    //   toast.add({severity:'success', summary: 'Default account has switched to' , detail: accountName, group: 'br', life: 3000});
+    //   emitter.emit('DEFAULT_ACCOUNT_SWITCHED', accountName);
+    //   updateAccountTransactionCount();
+    //   closeNavi();
+    // }
 
     const init = ()=>{
       updateAccountTransactionCount();
@@ -223,15 +257,19 @@ export default{
     return {
       logout,
       walletState,
-      accounts,
-      allAccountsCount,
+      // accounts,
+      // allAccountsCount,
       hoverOverNavigation,
       hoverOutNavigation,
       closeNavi,
       isDisplaySwap,
       accountUnconfirmedTxnsCount,
       accountPartialTxnsCount,
-      updateDefaultAccount,
+      // updateDefaultAccount,
+      selectedAccountName,
+      openSetDefaultModal,
+      selectedAccountAddress,
+      triggerSetDefaultModal,
     };
   }
 }
