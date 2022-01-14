@@ -7,7 +7,7 @@
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
     >
-      <div v-if="toggleModal" class="popup-outer-lang absolute flex z-50">
+      <div v-if="toggleModal" class="popup-outer-lang fixed flex z-50">
         <div class="modal-popup-box ">
           <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
             <div class= 'ml-auto mr-auto mt-2 text-xs  font-semibold' style='width:64%'>Are you sure you want to delete this account?</div>

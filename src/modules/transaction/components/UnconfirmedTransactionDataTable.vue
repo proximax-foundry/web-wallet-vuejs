@@ -292,6 +292,11 @@ export default defineComponent({
       }
     });
 
+    emitter.on('DEFAULT_ACCOUNT_SWITCHED', payload => {
+      currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
+      loadUnconfirmedTransactions();
+    });
+
     return {
       d,
       dynamicModelComponentDisplay,
