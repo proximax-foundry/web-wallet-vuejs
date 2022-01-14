@@ -9,7 +9,7 @@
       <div class = 'flex text-xs font-semibold border-b-2 mt-5'>
         <router-link :to="{name: 'ViewAccountDetails',params:{address:currentAccount.address}}" class= 'w-32 text-center '>Account Details</router-link>
         <router-link :to="{name:'ViewMultisigHome', params: { name: currentAccount.name}}" class= 'w-18 text-center'>Multisig</router-link>
-        <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Scheme</div>
+        <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Scheme</div>
         <router-link :to="{name:'ViewAccountSwap', params: { address: currentAccount.address}}" class= 'w-18 text-center'>Swap</router-link>
         <MoreAccountOptions :address="address"/>
       </div>

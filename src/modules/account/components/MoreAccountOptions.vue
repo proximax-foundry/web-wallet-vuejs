@@ -4,7 +4,7 @@
     <div @click="toggleModal=!toggleModal" class="text-xs pl-24">More</div>
     <img @click="toggleModal=!toggleModal" src="@/modules/account/img/icon-arrow-down.svg" class="w-3 mt-0.5 h-3">
     </div>
-    <div v-if="selected" class="ml-20 border-b-2 border-yellow-300"></div>
+    <div v-if="selected" class="ml-20 border-b-2 border-yellow-500"></div>
     <div v-if="toggleModal" class="relative ">
     <div class='absolute border border-t-0 z-20 bg-white w-full p-3 '>
         <div  class="pb-2">
