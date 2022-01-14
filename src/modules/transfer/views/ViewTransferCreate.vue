@@ -695,7 +695,11 @@ export default {
       }
     }
   });
-  
+  const getMosaicBalanceById = (id) =>{
+    let accAddress = selectedAccAdd.value
+    let acc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==accAddress)? walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==accAddress):walletState.currentLoggedInWallet.others.find(acc=>acc.address==accAddress)
+    return acc.getAssetBalance(id)
+  }
   
   watch(encryptedMsgDisable, (n) => {
     if (!n) {
@@ -713,12 +717,14 @@ export default {
   });
 
    watch(() => [...selectedMosaic.value], (n) => {
-      for(let i = 0; i < selectedMosaic.value.length; i++){
-        if(selectedMosaic.value[i].amount> getSelectedMosaicBalance(i)){
+      for(let i = 0; i < n.length; i++){
+           if(n[i].amount> getMosaicBalanceById(n[i].id)){
           showAssetBalanceErr.value[i]= true
-        }else{
-          showAssetBalanceErr.value[i]= false
-        }
+          }else{
+            showAssetBalanceErr.value[i]= false
+          }
+         
+        
       }
     }, {deep:true});
   emitter.on("CLOSE_CONTACT_MODAL", (payload) => {

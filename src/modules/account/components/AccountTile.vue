@@ -96,6 +96,7 @@ import { Helper } from '@/util/typeHelper';
 //import { OtherAccount } from '@/models/otherAccount';
 import {toSvg} from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
+import { AppState} from '@/state/appState';
 
 export default{
   name: 'AccountTile',
@@ -115,8 +116,9 @@ export default{
       }
     })
 
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const accountBalance = computed(
       () => {          
         return Helper.toCurrencyFormat(p.account.balance, currentNativeTokenDivisibility.value);
