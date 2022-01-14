@@ -64,6 +64,12 @@
             <div class="text-txs">You have not created a namespace.</div>
           </div>
         </div>
+        <div v-if="onPartial " class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
+          <div class="flex gap-2">
+            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+            <div class="text-txs">Your account has transaction(s) on partial.</div>
+          </div>
+        </div>
         <div v-if="!(!isLockFund&& isMultiSig)" class="flex mt-4 text-white">
           <div class='text-xs '>Transaction Fee</div>
           <div class="text-xs  ml-auto">{{trxFee}}</div>
@@ -151,7 +157,7 @@ import { accountUtils } from "@/util/accountUtils";
 import { walletState } from "@/state/walletState";
 import { WalletUtils } from "@/util/walletUtils";
 import { useToast } from "primevue/usetoast";
-import { Address } from "tsjs-xpx-chain-sdk";
+import { Address, PublicAccount } from "tsjs-xpx-chain-sdk";
 import { ref, computed, watch } from "vue";
 import { Helper } from "@/util/typeHelper";
 import { useI18n } from 'vue-i18n'
@@ -211,6 +217,15 @@ export default {
     
     });
     const acc = ref(totalAcc.value.find(acc=>acc.address==p.address))
+    const onPartial = ref(false);
+     const checkIsPartial = ()=>{ 
+       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,networkState.currentNetworkProfile.network.type))
+       .then(onPartialBoolean => onPartial.value = onPartialBoolean)
+       .catch(err=>{
+         onPartial.value = false
+       })
+    }
+    checkIsPartial()
     const selectNamespaceRef = ref(null);
     const selectActionRef = ref(null);
     const currentAddress = ref(p.address);
@@ -279,6 +294,7 @@ export default {
       }
     })
     const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
+    const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
     const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
 
     const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
@@ -311,7 +327,7 @@ export default {
     })
 
     const disableCreate = computed(() => {
-      return !(walletPassword.value.match(passwordPattern) && selectAction.value != null && namespaceAddress.value != '' && selectNamespace.value != null && showAddressError.value ==false);
+      return !(onPartial.value==false && walletPassword.value.match(passwordPattern) && selectAction.value != null && namespaceAddress.value != '' && selectNamespace.value != null && showAddressError.value ==false);
     })
 
     const actionsOptions = computed(() => {
@@ -459,9 +475,15 @@ export default {
           if(recordAction.value!=""){
             toast.add({severity:'success', summary: 'Notification', detail: recordAction.value =="Link"? 'Linked Successfully' :'Unlinked Successfully', group: 'br', life: 5000})
           }
-          
+          checkIsPartial()
           /* showSuccess.value=true */
         }
+      }
+    })
+
+     watch(aggregateBondedTxLength, (n, o) => {
+      if (n != o){
+        checkIsPartial()
       }
     })
     
@@ -504,7 +526,8 @@ export default {
       pending,
       aggregateFee,
       totalFee,
-      isLockFund
+      isLockFund,
+      onPartial
     };
   },
 }

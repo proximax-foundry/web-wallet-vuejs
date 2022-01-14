@@ -79,6 +79,12 @@
             <div class="text-txs">No eligible cosigner in this wallet.</div>
           </div>
         </div>
+        <div v-if="onPartial " class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
+          <div class="flex gap-2">
+            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+            <div class="text-txs">Your account has transaction(s) on partial.</div>
+          </div>
+        </div>
         <div v-if="!(!isLockFund&& isMultisig)" class="flex mt-4 text-white">
           <div class='text-xs '>Transaction Fee</div>
           <div class="text-xs  ml-auto">{{transactionFee}}</div>
@@ -134,7 +140,7 @@ import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
 //import { BuildTransactions } from "@/util/buildTransactions";
-import { LinkAction } from "tsjs-xpx-chain-sdk";
+import { LinkAction, PublicAccount } from "tsjs-xpx-chain-sdk";
 import { useI18n } from 'vue-i18n';
 import { accountUtils } from "@/util/accountUtils";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
@@ -164,9 +170,10 @@ export default {
     const walletPassword = ref("");
     const showPasswdError = ref(false);
     /* let showSuccess = ref(false) */
-   
+    
     const err = ref(false); 
     const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
+    const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
     let fromNew = ref(false)
     let fromPk = ref(false)
     let txHash = ref("")
@@ -182,6 +189,15 @@ export default {
      const isCosigner = computed(() =>{
       return (multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList.length>0)?true: false;
     });
+    let onPartial = ref(false) 
+    const checkIsPartial = ()=>{
+       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,networkState.currentNetworkProfile.network.type))
+       .then(onPartialBoolean => onPartial.value = onPartialBoolean)
+       .catch(err=>{
+         onPartial.value = false
+       })
+    }
+    checkIsPartial()
     let isLockFund = computed(()=>{
       let enoughSigner = false
       let count = acc.value.multisigInfo.find(acc=>acc.level==0).minApproval
@@ -274,7 +290,9 @@ export default {
     const walletName = walletState.currentLoggedInWallet.name;
     let unlinking = ref(false)
     const disableLinkBtn = computed(() => {
-      if(!fromNew.value && !fromPk.value && !delegateValue.value){
+      if(onPartial.value){
+        return true
+      }else if(!fromNew.value && !fromPk.value && !delegateValue.value){
         return true
       }else if(delegateValue.value){
         if(walletPassword.value.match(passwdPattern)){
@@ -297,7 +315,6 @@ export default {
       }else{
         return true
       }
-      
     });
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
@@ -358,6 +375,7 @@ export default {
             let signedTx = accountUtils.createDelegatTransaction(isMultisig.value,cosigner,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
             /* let signedTx = accountUtils.createDelegatTransaction(accAddress.value,walletPassword.value,AccPublicKey.value, LinkAction.Unlink);  */
             txHash.value = signedTx.hash.toUpperCase()
+            
             /* toast.add({severity:'success', summary: 'Notification', detail: 'Unlink Successfully', group: 'br', life: 5000});   */          
             /* router.push({ name: "ViewAccountDisplayAll" }); */
             walletPassword.value=""
@@ -367,7 +385,6 @@ export default {
             err.value = t('delegate.linkerror2');
           }
         } else if (AccPublicKey.value != "" && (fromPk.value || fromNew.value)) { //link
-        console.log(AccPublicKey.value)
           let signedTx = accountUtils.createDelegatTransaction(isMultisig.value,cosigner,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
            /* let signedTx = accountUtils.createDelegatTransaction(accAddress.value,walletPassword.value,AccPublicKey.value, LinkAction.Link);  */
           txHash.value = signedTx.hash.toUpperCase()
@@ -394,8 +411,16 @@ export default {
           /* showSuccess.value=true */
         }
         verifyDelegateAcc()
+        checkIsPartial()
       }
     })
+
+    watch(aggregateBondedTxLength, (n, o) => {
+      if (n != o){
+        checkIsPartial()
+      }
+    })
+    
     
 
     return {
@@ -429,7 +454,8 @@ export default {
       lockFund,
       aggregateFee,
       transactionFee,
-      totalFee
+      totalFee,
+      onPartial
     };
   },
 }
