@@ -3,6 +3,7 @@ import { CommonTransaction } from "../commonTransaction"
 export class PartialTransaction extends CommonTransaction{
 
     cosignedPublickKey: string[] = [];
+    allCosignerPublicKey: string[] = [];
     pendingCosignPublicKey: string[] = [];
     groupType: string = "partial";
 

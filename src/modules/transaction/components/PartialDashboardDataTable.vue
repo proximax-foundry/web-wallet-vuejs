@@ -79,12 +79,13 @@
 </template>
 
 <script>
-import { computed, getCurrentInstance, ref, onMounted, onUnmounted } from "vue";
+import { computed, getCurrentInstance, ref, onMounted, onUnmounted, watch } from "vue";
 import DataTable from 'primevue/datatable';
 import Tooltip from 'primevue/tooltip';
 import Column from 'primevue/column';
 import { networkState } from "@/state/networkState";
 import { walletState } from '@/state/walletState';
+import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
 import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 
@@ -97,7 +98,6 @@ export default{
     'tooltip': Tooltip
   },
   name: 'PartialDashboardDataTable',
-
 
   setup(){
     const wideScreen = ref(false);
@@ -138,8 +138,7 @@ export default{
 
     let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
     currentAddress.value = currentAccount.address;
-    let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
-
+    
     let transactionGroupType = Helper.getTransactionGroupType();
 
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, currentAccount);
@@ -148,15 +147,27 @@ export default{
       let txnQueryParams = Helper.createTransactionQueryParams();
       txnQueryParams.pageSize = 1;
       txnQueryParams.address = currentAccount.address;
-      txnQueryParams.embedded = true;
-      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
       let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.PARTIAL, txnQueryParams);
       let formattedTxns = await dashboardService.formatPartialMixedTxns(transactionSearchResult.transactions);
       transactions.value = formattedTxns;
     };
 
-    loadPartialTransactions();
+    const init = ()=>{
+      loadPartialTransactions();
+    }
+
+    if(AppState.isReady){
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState.isReady, (value) => {
+        if(value){
+          init();
+          readyWatcher();
+        }     
+      });
+    }
 
     emitter.on("TXN_UNCONFIRMED", (num) => {
       if(num> 0){

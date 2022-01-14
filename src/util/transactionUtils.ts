@@ -396,5 +396,9 @@ export class TransactionUtils {
     let signedTxn = tempAcc.sign(abt, generationHash);
     return buildTransactions.hashLock(new Mosaic(new NamespaceId('prx.xpx'), UInt64.fromUint(10)), UInt64.fromUint(10), signedTxn).maxFee.compact();
   }
+
+  static castToAggregate(tx :Transaction){
+    return tx as AggregateTransaction;
+  }
 }
 
