@@ -96,10 +96,6 @@
       </div>
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-if="displayBoard=='overview'">
-      <div class="text-txs text-gray-400"><b class="text-gray-700">ASSETS</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">View all</span>)</div>
-      <DashboardAssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
-      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
-      <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" :account="selectedAccount" />
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ accountConfirmedTxnsCount }} - View all)</div>
       <MixedTxnDataTable :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="recentTransactions" @openDecryptMsg="openDecryptMsgModal"></MixedTxnDataTable>
       <div class="mt-10 md:flex ml-5 md:ml-0">
