@@ -93,7 +93,7 @@ export default {
     const SaveContact = () => {
       if (contactName.value !== ''&& address.value !== ''){
       walletState.currentLoggedInWallet.addAddressBook(
-        new AddressBook(contactName.value, address.value)
+        new AddressBook(contactName.value, address.value,'-none-')
       );
 
       err.value = "";

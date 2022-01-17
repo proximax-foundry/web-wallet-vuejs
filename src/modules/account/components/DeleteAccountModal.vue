@@ -12,8 +12,8 @@
           <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
             <div class= 'ml-auto mr-auto mt-2 text-xs  font-semibold' style='width:64%'>Are you sure you want to delete this account?</div>
             <div class ='text-red-700  text-center text-txs mt-2'>For security purpose, this is required before completely deleting your account.</div>
-            <PasswordInput class = 'my-3' v-model= 'walletPasswd' :placeholder="'Password'"/>
-            <div @click="deleteAccount()"  class = 'rounded-md bg-red-700 cursor-pointer text-xs text-white font-semibold py-2 text-center ml-auto mr-auto w-7/12'>Confirm Deletion</div>
+            <PasswordInput v-model= 'walletPasswd' :placeholder="'Password'"/>
+            <div @click="deleteAccount()"  class = 'rounded-md bg-red-700 cursor-pointer text-xs text-white font-semibold text-center'>Confirm Deletion</div>
             <div class= 'text-center cursor-pointer font-semibold text-xs text-blue-link mt-2' @click="toggleModal = !toggleModal;walletPasswd=''">Cancel</div>
           </div>
       </div>
