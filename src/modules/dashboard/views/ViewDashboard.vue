@@ -751,11 +751,11 @@ export default defineComponent({
         if(selectedAccountAddressPlain.value == txn.sender){
           formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToName(txn.recipient, true);
           formattedTransferTxn.transferContactAddress = txn.recipient;
-          formattedTransferTxn.amount = txn.amountTransfer;
+          formattedTransferTxn.amount = Helper.toCurrencyFormat(txn.amountTransfer);
         }else{
           formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToName(txn.sender, true);
           formattedTransferTxn.transferContactAddress = txn.sender;
-          formattedTransferTxn.amount = '-' + txn.amountTransfer;
+          formattedTransferTxn.amount = '-' + Helper.toCurrencyFormat(txn.amountTransfer);
         }
         formattedTransferTxn.hash = txn.hash;
         TransferTxn.push(formattedTransferTxn);
