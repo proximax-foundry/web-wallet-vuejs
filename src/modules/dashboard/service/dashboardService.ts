@@ -113,13 +113,8 @@ import { ConfirmedTransferTransaction, UnconfirmedTransferTransaction, PartialTr
 import { Account as MyAccount } from "../../../models/account";
 import { AppState } from "@/state/appState";
 
-const networkAPIEndpoint = computed(() => ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
-const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
 const namespaceIdFirstCharacterString = "89ABCDEF";
-const nativeTokenName = computed(()=> networkState.currentNetworkProfile?.network.currency.name);
-const nativeTokenAssetId = computed(()=> networkState.currentNetworkProfile?.network.currency.assetId);
-const nativeTokenNamespaceId = computed(()=> networkState.currentNetworkProfile?.network.currency.namespaceId);
-const nativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile?.network.currency.divisibility);
+const nativeTokenNamespaceId = computed(()=> new NamespaceId(AppState.nativeToken.fullNamespace).toHex());
 
 export enum MsgType{
     NONE = 0,
@@ -244,7 +239,7 @@ export class DashboardService {
 
                     let assetIdHex = assetId.toHex();
 
-                    if([nativeTokenAssetId.value, nativeTokenNamespaceId.value].includes(assetIdHex)){
+                    if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
                         txn.amountTransfer = DashboardService.convertToExactNativeAmount(actualAmount);
                         continue;
                     }
@@ -380,7 +375,7 @@ export class DashboardService {
 
                     let assetIdHex = assetId.toHex();
 
-                    if([nativeTokenAssetId.value, nativeTokenNamespaceId.value].includes(assetIdHex)){
+                    if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
                         txn.amountTransfer = DashboardService.convertToExactNativeAmount(actualAmount);
                         continue;
                     }
@@ -501,7 +496,7 @@ export class DashboardService {
                     let assetId = await DashboardService.getResolvedAsset(transferTxn.mosaics[y].id, txn.block);
                     let assetIdHex = assetId.toHex();
 
-                    if([nativeTokenAssetId.value, nativeTokenNamespaceId.value].includes(assetIdHex)){
+                    if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
                         txn.amountTransfer = DashboardService.convertToExactNativeAmount(actualAmount);
                         continue;
                     }
@@ -1099,6 +1094,7 @@ export class DashboardService {
             if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
                 let aggregateTxn = await this.autoFindAggregateTransaction(txn.hash);
                 txn.aggregateLength = aggregateTxn.innerTransactions.length;
+                txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
                 
                 for(let x=0; x < aggregateTxn.innerTransactions.length; ++x){
                     let txnType = aggregateTxn.innerTransactions[x].type;
@@ -1135,6 +1131,7 @@ export class DashboardService {
             if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
                 let aggregateTxn = await this.autoFindAggregateTransaction(txn.hash);
                 txn.aggregateLength = aggregateTxn.innerTransactions.length;
+                txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
                 
                 for(let x=0; x < aggregateTxn.innerTransactions.length; ++x){
                     let txnType = aggregateTxn.innerTransactions[x].type;
@@ -1171,6 +1168,7 @@ export class DashboardService {
             if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
                 let aggregateTxn = await this.autoFindAggregateTransaction(txn.hash);
                 txn.aggregateLength = aggregateTxn.innerTransactions.length;
+                txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
                 
                 for(let x=0; x < aggregateTxn.innerTransactions.length; ++x){
                     let txnType = aggregateTxn.innerTransactions[x].type;
@@ -2048,7 +2046,7 @@ export class DashboardService {
             txn.lockHash = lockFundTxn.hash;
             txn.duration = lockFundTxn.duration.compact();
             let amount = lockFundTxn.mosaic.amount.compact()
-            txn.amountLocking = nativeTokenDivisibility.value ? amount / Math.pow(10, nativeTokenDivisibility.value) : amount;
+            txn.amountLocking = AppState.nativeToken.divisibility ? amount / Math.pow(10, AppState.nativeToken.divisibility) : amount;
 
             formatedTxns.push(txn);
         }
@@ -2070,7 +2068,7 @@ export class DashboardService {
             txn.duration = lockFundTxn.duration.compact();
 
             let amount = lockFundTxn.mosaic.amount.compact()
-            txn.amountLocking = nativeTokenDivisibility.value ? amount / Math.pow(10, nativeTokenDivisibility.value) : amount;
+            txn.amountLocking = AppState.nativeToken.divisibility ? amount / Math.pow(10, AppState.nativeToken.divisibility) : amount;
 
             try {
                 let txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(lockFundTxn.hash);
@@ -2098,7 +2096,7 @@ export class DashboardService {
             txn.lockHash = lockFundTxn.hash;
             txn.duration = lockFundTxn.duration.compact();
             let amount = lockFundTxn.mosaic.amount.compact()
-            txn.amountLocking = nativeTokenDivisibility.value ? amount / Math.pow(10, nativeTokenDivisibility.value) : amount;
+            txn.amountLocking = AppState.nativeToken.divisibility ? amount / Math.pow(10, AppState.nativeToken.divisibility) : amount;
 
             formatedTxns.push(txn);
         }
@@ -2255,8 +2253,8 @@ export class DashboardService {
 
                     try {
                         let assetId = newRestrictionModification.value;
-                        if(assetId === nativeTokenAssetId.value){
-                            newRestrictionModification.name = nativeTokenName.value;
+                        if(assetId === AppState.nativeToken.assetId){
+                            newRestrictionModification.name = AppState.nativeToken.label;
                         }
                         else{
                             let assetName = await DashboardService.getAssetName(assetId);
@@ -2345,8 +2343,8 @@ export class DashboardService {
 
                     try {
                         let assetId = newRestrictionModification.value;
-                        if(assetId === nativeTokenAssetId.value){
-                            newRestrictionModification.name = nativeTokenName.value;
+                        if(assetId === AppState.nativeToken.assetId){
+                            newRestrictionModification.name = AppState.nativeToken.label;
                         }
                         else{
                             let assetName = await DashboardService.getAssetName(assetId);
@@ -2436,8 +2434,8 @@ export class DashboardService {
                     try {
                         let assetId = newRestrictionModification.value;
 
-                        if(assetId === nativeTokenAssetId.value){
-                            newRestrictionModification.name = nativeTokenName.value;
+                        if(assetId === AppState.nativeToken.assetId){
+                            newRestrictionModification.name = AppState.nativeToken.label;
                         }
                         else{
                             let assetName = await DashboardService.getAssetName(assetId);
@@ -2525,7 +2523,7 @@ export class DashboardService {
                     }
 
                     if(txn.namespaceName && txn.namespaceName === "prx.xpx"){
-                        txn.namespaceName = nativeTokenName.value;
+                        txn.namespaceName = AppState.nativeToken.label;
                     }
 
                     let assetInfo = await DashboardService.getAssetInfo(txn.assetId);
@@ -2590,7 +2588,7 @@ export class DashboardService {
                     }
 
                     if(txn.namespaceName && txn.namespaceName === "prx.xpx"){
-                        txn.namespaceName = nativeTokenName.value;
+                        txn.namespaceName = AppState.nativeToken.label;
                     }
 
                     let assetInfo = await DashboardService.getAssetInfo(txn.assetId);
@@ -2657,7 +2655,7 @@ export class DashboardService {
                     }
 
                     if(txn.namespaceName && txn.namespaceName === "prx.xpx"){
-                        txn.namespaceName = nativeTokenName.value;
+                        txn.namespaceName = AppState.nativeToken.label;
                     }
 
                     let assetInfo = await DashboardService.getAssetInfo(txn.assetId);
@@ -3174,7 +3172,7 @@ export class DashboardService {
 
     static async getAccountAllTransactions(account: myAccount): Promise<Transaction[]>{
         let pageNum = 1;
-        let publicAccount = Helper.createPublicAccount(account.publicKey, localNetworkType.value);
+        let publicAccount = Helper.createPublicAccount(account.publicKey, AppState.networkType);
 
         let fullTransaction: Transaction[] = [];
         let queryParams = new TransactionQueryParams()
@@ -3199,7 +3197,7 @@ export class DashboardService {
 
     static async getAccountAllUnconfirmedTransactions(account: myAccount): Promise<Transaction[]>{
         let pageNum = 1;
-        let publicAccount = Helper.createPublicAccount(account.publicKey, localNetworkType.value);
+        let publicAccount = Helper.createPublicAccount(account.publicKey, AppState.networkType);
 
         let fullTransaction: Transaction[] = [];
         let queryParams = new TransactionQueryParams()
@@ -3224,7 +3222,7 @@ export class DashboardService {
 
     static async getAccountAllPartialTransactions(account: myAccount): Promise<Transaction[]>{
         let pageNum = 1;
-        let publicAccount = Helper.createPublicAccount(account.publicKey, localNetworkType.value);
+        let publicAccount = Helper.createPublicAccount(account.publicKey, AppState.networkType);
 
         let fullTransaction: Transaction[] = [];
         let queryParams = new TransactionQueryParams()
@@ -3360,7 +3358,7 @@ export class DashboardService {
             let assetId = await DashboardService.getResolvedAsset(transferTxn.mosaics[y].id, blockNum);
             let assetIdHex = assetId.toHex();
 
-            if([nativeTokenAssetId.value, nativeTokenNamespaceId.value].includes(assetIdHex)){
+            if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
                 txnDetails.amountTransfer = DashboardService.convertToExactNativeAmount(actualAmount);
                 continue;
             }
@@ -3494,7 +3492,7 @@ export class DashboardService {
 
             let assetIdHex = assetId.toHex();
 
-            if([nativeTokenAssetId.value, nativeTokenNamespaceId.value].includes(assetIdHex)){
+            if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
                 txnDetails.amountTransfer = DashboardService.convertToExactNativeAmount(actualAmount);
                 continue;
             }
@@ -3981,7 +3979,7 @@ export class DashboardService {
             }
 
             if(txnDetails.namespaceName && txnDetails.namespaceName === "prx.xpx"){
-                txnDetails.namespaceName = nativeTokenName.value;
+                txnDetails.namespaceName = AppState.nativeToken.label;
             }
 
             let assetInfo = await DashboardService.getAssetInfo(txnDetails.assetId);
@@ -4038,7 +4036,7 @@ export class DashboardService {
             }
 
             if(txnDetails.namespaceName && txnDetails.namespaceName === "prx.xpx"){
-                txnDetails.namespaceName = nativeTokenName.value;
+                txnDetails.namespaceName = AppState.nativeToken.label;
             }
 
             let assetInfo = await DashboardService.getAssetInfo(txnDetails.assetId);
@@ -4320,8 +4318,8 @@ export class DashboardService {
             try {
                 let assetId = newRestrictionModification.value;
 
-                if(assetId === nativeTokenAssetId.value){
-                    newRestrictionModification.name = nativeTokenName.value;
+                if(assetId === AppState.nativeToken.assetId){
+                    newRestrictionModification.name = AppState.nativeToken.label;
                 }
                 else{
                     let assetName = await DashboardService.getAssetName(assetId);
@@ -4360,7 +4358,7 @@ export class DashboardService {
         txnDetails.duration = lockFundTxn.duration.compact();
 
         let amount = lockFundTxn.mosaic.amount.compact()
-        txnDetails.amountLocking = nativeTokenDivisibility.value ? amount / Math.pow(10, nativeTokenDivisibility.value) : amount;
+        txnDetails.amountLocking = AppState.nativeToken.divisibility ? amount / Math.pow(10, AppState.nativeToken.divisibility) : amount;
 
         try {
             let txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(lockFundTxn.hash);
@@ -4388,7 +4386,7 @@ export class DashboardService {
         txnDetails.duration = lockFundTxn.duration.compact();
 
         let amount = lockFundTxn.mosaic.amount.compact()
-        txnDetails.amountLocking = nativeTokenDivisibility.value ? amount / Math.pow(10, nativeTokenDivisibility.value) : amount;
+        txnDetails.amountLocking = AppState.nativeToken.divisibility ? amount / Math.pow(10, AppState.nativeToken.divisibility) : amount;
 
         return txnDetails;
     }
@@ -4700,7 +4698,7 @@ export class DashboardService {
                 for(let i =0; i < addExchangeOfferFormat.exchangeOffers.length; ++i){
                     let offer = addExchangeOfferFormat.exchangeOffers[i];
                     let offeringAssetString = `${offer.amount} ${offer.assetId}` + offer.assetNamespace ? ` (${offer.assetNamespace})`: '';
-                    let costString = `${offer.cost} ${nativeTokenName}`;
+                    let costString = `${offer.cost} ${AppState.nativeToken.label}`;
                     let offerInfo: TxnDetails = {
                         type: offer.type === "Buy" ? MsgType.GREEN: MsgType.RED,
                         value: costString + " - " + offeringAssetString + `. Duration: ${offer.duration}`
@@ -4729,8 +4727,8 @@ export class DashboardService {
                 for(let i =0; i < exchangeOfferFormat.exchangeOffers.length; ++i){
                     let offer = exchangeOfferFormat.exchangeOffers[i];
                     let offeringAssetString = `${offer.amount} ${offer.assetId}` + offer.assetNamespace ? ` (${offer.assetNamespace})`: '';
-                    let costString = `${offer.cost} ${nativeTokenName}`;
-                    let ownerPublicAccount = PublicAccount.createFromPublicKey(offer.owner, localNetworkType.value);
+                    let costString = `${offer.cost} ${AppState.nativeToken.label}`;
+                    let ownerPublicAccount = PublicAccount.createFromPublicKey(offer.owner, AppState.networkType);
                     let owner = this.wallet.convertAddressToName(ownerPublicAccount.address.plain());
                     let offerInfo: TxnDetails = {
                         type: offer.type === "Buy" ? MsgType.RED: MsgType.GREEN,
@@ -4886,7 +4884,7 @@ export class DashboardService {
                 let lockingInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Locking Amount",
-                    value: lockFundFormat.amountLocking + ` ${nativeTokenName}`
+                    value: lockFundFormat.amountLocking + ` ${AppState.nativeToken.label}`
                 };
                 infos.push(lockingInfo);
 
@@ -5061,7 +5059,7 @@ export class DashboardService {
                 infos.push(minRemovalInfo);
 
                 for(let i =0; i < modifyMultisigFormat.addedCosigner.length; ++i){
-                    let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.addedCosigner[i], localNetworkType.value)
+                    let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.addedCosigner[i], AppState.networkType)
                     let addCosignerInfo: TxnDetails = {
                         type: MsgType.GREEN,
                         value: modifyMultisigFormat.addedCosigner[i],
@@ -5072,7 +5070,7 @@ export class DashboardService {
                 }
 
                 for(let i =0; i < modifyMultisigFormat.removedCosigner.length; ++i){
-                    let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.removedCosigner[i], localNetworkType.value)
+                    let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.removedCosigner[i], AppState.networkType)
                     let removeCosignerInfo: TxnDetails = {
                         type: MsgType.GREEN,
                         value: modifyMultisigFormat.removedCosigner[i],
@@ -5470,7 +5468,7 @@ export class DashboardService {
                 let accMetadataFormat = tempData as InnerMetadataTransaction;
                 let infos: TxnDetails[] = [];
 
-                let targetPublicAccount =  PublicAccount.createFromPublicKey(accMetadataFormat.targetPublicKey, localNetworkType.value);
+                let targetPublicAccount =  PublicAccount.createFromPublicKey(accMetadataFormat.targetPublicKey, AppState.networkType);
                 let targetAddress = targetPublicAccount.address.plain();
 
                 let accountInfo: TxnDetails = {
@@ -5640,17 +5638,17 @@ export class DashboardService {
     }
 
     publickKeyConvertToName(publicKey: string){
-        let address = PublicAccount.createFromPublicKey(publicKey, localNetworkType.value).address.plain();
+        let address = PublicAccount.createFromPublicKey(publicKey, AppState.networkType).address.plain();
         let name = this.wallet.convertAddressToName(address);
         
         return name === address ? publicKey : name;
     }
 
     static convertToExactNativeAmount(amount: number){
-        if(nativeTokenDivisibility.value === 0){
+        if(AppState.nativeToken.divisibility === 0){
             return amount;
         }
-        return amount > 0 ? amount / Math.pow(10, nativeTokenDivisibility.value) : 0;
+        return amount > 0 ? amount / Math.pow(10, AppState.nativeToken.divisibility) : 0;
     }
 
     static convertToExactAmount(amount: number, divisibility: number){

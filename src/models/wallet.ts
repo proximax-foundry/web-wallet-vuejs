@@ -1,6 +1,7 @@
 import { WalletAccount } from './walletAccount';
 import { AddressBook } from './addressBook';
 import { OtherAccount } from './otherAccount';
+import { Address } from 'tsjs-xpx-chain-sdk';
 
 export class Wallet{
 
@@ -51,6 +52,32 @@ export class Wallet{
         }
 
         return aliasName ? aliasName : address;
+    }
+
+    convertAddressToNamePretty(address: string, includeOthers: boolean = false): string{
+        let aliasName :string = "";
+
+        const addressBook = this.contacts.find((addressBook)=> addressBook.address === address);
+
+        if(addressBook){
+            aliasName = addressBook.name;
+        }else{
+            const walletAccount = this.accounts.find((walletAccount)=> walletAccount.address === address);
+
+            if(walletAccount){
+                aliasName = walletAccount.name;
+            }
+
+            if(includeOthers){
+                const othersAccount = this.others.find((otherAccount)=> otherAccount.address === address);
+
+                if(othersAccount){
+                    aliasName = othersAccount.name;
+                }
+            }
+        }
+
+        return aliasName ? aliasName : Address.createFromRawAddress(address).pretty();
     }
 
     addAddressBook(addressBook: AddressBook): void{

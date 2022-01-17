@@ -65,6 +65,9 @@ export class NetworkStateUtils{
     chainProfile.init();
     networkState.currentNetworkProfile = chainProfile;
     AppState.buildTxn = new BuildTransactions(chainProfile.network.type, chainProfile.generationHash);
+    if(chainProfile.network.currency.assetId){
+      AppState.nativeToken.assetId = chainProfile.network.currency.assetId;
+    }
     AppState.nativeToken.divisibility = chainProfile.network.currency.divisibility;
     AppState.nativeToken.label = chainProfile.network.currency.name;
     AppState.nativeToken.fullNamespace = chainProfile.network.currency.namespace;

@@ -1045,12 +1045,13 @@ export class WalletUtils {
         await WalletUtils.updateOtherAccountDetails(wallet);
 
         try {
-            let mosaicId = await ChainUtils.getLinkedMosaicId(Helper.createNamespaceId(networkProfile.network.currency.namespace));
+            let assetId = await ChainUtils.getLinkedMosaicId(Helper.createNamespaceId(networkProfile.network.currency.namespace));
 
-            networkProfile.network.currency.assetId = mosaicId.toHex();
+            AppState.nativeToken.assetId = assetId.toHex();
+            networkProfile.network.currency.assetId = assetId.toHex();
             networkProfile.saveToLocalStorage();
 
-            WalletUtils.updateAllAccountBalance(wallet, mosaicId.toHex());
+            WalletUtils.updateAllAccountBalance(wallet, assetId.toHex());
         } catch (error) {
             console.log(error);   
         }

@@ -283,7 +283,7 @@ export class TransactionUtils {
     ChainUtils.announceBondedTransaction(signedTx);
   }
 
-  static announceCosignitureSignedTransaction(signedTx: CosignatureSignedTransaction) :void {
+  static announceCosignatureSignedTransaction(signedTx: CosignatureSignedTransaction) :void {
     ChainUtils.announceCosignTransaction(signedTx);
   }
 
