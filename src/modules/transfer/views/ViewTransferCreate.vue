@@ -149,6 +149,7 @@ import { NamespaceUtils } from '@/util/namespaceUtils';
 import SelectInputSender from "@/modules/transfer/components/SelectInputSender.vue";
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
+import { AppState } from '@/state/appState';
 export default { 
   name: "ViewTransferCreate",
   components: {
@@ -505,7 +506,7 @@ export default {
         !showBalanceErr.value
       );
     });
-  
+
   const mosaics = computed(() => {
     var mosaicOption = [];
     if(!walletState.currentLoggedInWallet){
@@ -521,7 +522,7 @@ export default {
     
         mosaicOption.push({
           val: i.idHex,
-          text: i.idHex + " >"+t('services.balance') +": " +Helper.amountFormatterSimple(i.amount,i.divisibility),
+          text: accountUtils.getNamespaceByAssetId(selectedAccAdd.value,i.idHex) + " >"+t('services.balance') +": " +Helper.amountFormatterSimple(i.amount,i.divisibility),
           id: index + 1,
         });
       });
@@ -661,6 +662,7 @@ export default {
         ).catch(err=>encryptedMsgDisable.value=true)
     } else {
       encryptedMsgDisable.value = true;
+      showAddressError.value=true
     }
   }
   const checkNamespace = async (nsId)=>{

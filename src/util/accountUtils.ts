@@ -13,6 +13,7 @@ import { ChainAPICall } from "@/models/REST/chainAPICall"
 import { WalletAccount } from "@/models/walletAccount";
 import { OtherAccount } from "@/models/otherAccount";
 import { e } from "mathjs";
+import { Namespace } from "@/models/namespace";
 
 const networkType = networkState.currentNetworkProfile.network.type;
 const Hash = networkState.currentNetworkProfile.generationHash;
@@ -67,14 +68,34 @@ const checkAvailableContact = (recipient :string) :boolean=> {
   return (isInContacts || (wallet.accounts.find((element) => element.address ===recipient))  || (wallet.others.find((element) => element.address === recipient))) ? true : false;
 }
 
-const getNamespacesListByAddress = (address: string) => {
-  let namespacelist = [];
+const getNamespacesListByAddress = (address: string) :Namespace [] => {
+  let namespacelist = []; 
   if (walletState.currentLoggedInWallet.others.find(account => account.address === address)) {
     namespacelist = walletState.currentLoggedInWallet.others.find(account => account.address == address).namespaces.filter(namespace => namespace.active === true);
   } else if (walletState.currentLoggedInWallet.accounts.find(account => account.address === address)){
     namespacelist = walletState.currentLoggedInWallet.accounts.find(account => account.address == address).namespaces.filter(namespace => namespace.active === true);
   } 
   return namespacelist;
+}
+
+const getNamespaceByAssetId= (address: string,assetId: string) :string=> {
+  let namespacelist = getNamespacesListByAddress(address);
+ let name = ""
+  if (namespacelist.length > 0) {
+    namespacelist.forEach((namespaceElement) => {
+        if (namespaceElement.linkType == 1) {
+          if(namespaceElement.linkedId == assetId){
+            name = namespaceElement.name
+          }
+        } 
+    });
+  }
+  if(name!=""){
+    return name
+  }else{
+    return assetId;
+  }
+  
 }
 
 const getContact = () => {
@@ -417,7 +438,8 @@ export const accountUtils = readonly({
   getLinkAddressToNamespaceTransactionFee,
   linkAddressToNamespace,
   createDelegatTransaction,
-  getValidAccount
+  getValidAccount,
+  getNamespaceByAssetId
   //getAccInfo
   //getAccInfoFromPrivateKey
 });
