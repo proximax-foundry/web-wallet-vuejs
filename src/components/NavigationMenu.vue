@@ -10,9 +10,9 @@
             </div>
             <div class="truncate text-white">{{ selectedAccountName }}</div>
           </router-link>
-          <div @mouseover="hoverOverSetDefaultMenu" @mouseout="hoverOutSetDefaultMenu">
+          <div @mouseover="hoverOverSetDefaultMenu" @mouseout="hoverOutSetDefaultMenu" class="relative">
             <img src="@/assets/img/navi/icon-default-account-drop-down.svg" class="h-6 w-6 cursor-pointer" @click="displayDefaultAccountMenu = true">
-            <div v-if="displayDefaultAccountMenu" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+            <div v-if="displayDefaultAccountMenu" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div role="none" class="my-2">
                 <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Details</router-link>
                 <router-link :to="{ name: 'ViewMultisigHome', params: { name: selectedAccountName }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Multisig</router-link>
@@ -158,18 +158,14 @@ export default{
       }
     });
 
-    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
-
     let accountUnconfirmedTxnsCount = ref(0);
     let accountPartialTxnsCount = ref(0);
 
-    let updateAccountTransactionCount = () => {
-      
-      (async() => {
-        let transactionsCount = await dashboardService.getAccountTransactionsCount(selectedAccount.value);
-        accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
-        accountPartialTxnsCount.value = transactionsCount.partial;
-      })();
+    let updateAccountTransactionCount = async() => {
+      let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
+      let transactionsCount = await dashboardService.getAccountTransactionsCount(selectedAccount.value);
+      accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
+      accountPartialTxnsCount.value = transactionsCount.partial;
     };
 
     emitter.on("TXN_UNCONFIRMED", (num) => {
@@ -325,7 +321,7 @@ export default{
   display: block;
   position: absolute;
   top: -6px;
-  right: 20px;
+  right: 40px;
   width: 10px;
   height: 10px;
   background: #FFFFFF;

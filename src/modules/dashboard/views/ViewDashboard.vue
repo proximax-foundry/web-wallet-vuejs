@@ -70,9 +70,18 @@
         </div>
         <div class="pl-2 hidden xl:inline-block">
           <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-3 rounded-lg transaction-div text-white">
-            <div class="text-tsm mt-7">Recent Transfers</div>
-            <div class="text-gray-400 text-tsm mt-4 mb-2 h-12">Invite your families and friends to create Sirius Wallet account and start transferring to their accounts.</div>
-            <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mt-5"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
+            <div class="text-txs mt-6 text-gray-400">Recent Transfers</div>
+            <div class="text-gray-400 text-tsm mt-6 mb-2 h-12" v-if="recentTransferTxnRow.length==0">Invite your families and friends to create Sirius Wallet account and start transferring to their accounts.</div>
+            <div v-else class="mt-2">
+              <div v-for="txn in recentTransferTxnRow" :key="txn.hash" class="flex items-center justify-between mb-1">
+                <a class="flex items-center max-w-xs" :href="addressExplorerURL + '/' + txn.transferContactAddress" target=_new>
+                  <div v-html="toSvg(txn.transferContactAddress, 20, jdenticonConfig)" class="mr-3"></div>
+                  <div class="truncate text-xs">{{ txn.transferContact }}</div>
+                </a>
+                <a class="text-tsm font-bold" :href="hashExplorerURL + '/' + txn.hash" target=_new>{{ txn.amount }} <span class="text-xxs font-normal">{{ currentNativeTokenName }}</span></a>
+              </div>
+            </div>
+            <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mt-4"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
           </div>
         </div>
       </div>
@@ -199,6 +208,8 @@ import { AccountAPI } from '@/models/REST/account';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 import qrcode from 'qrcode-generator';
+import { toSvg } from "jdenticon";
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 //import Dialog from 'primevue/dialog';
 import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
@@ -626,7 +637,7 @@ export default defineComponent({
       let tempTxns = [];
 
       if(transactionSearchResult.transactions.length){
-        let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult2.transactions);
+        let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
 
         tempTxns = formattedTxns;
       }
@@ -686,6 +697,70 @@ export default defineComponent({
       else{
         searchedTransactions.value = formattedTxns;
       }
+    }
+    
+    const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
+    const addressExplorerURL = computed(()=> explorerBaseURL.value + networkState.currentNetworkProfile.chainExplorer.addressRoute);
+    const hashExplorerURL = computed(()=> explorerBaseURL.value + networkState.currentNetworkProfile.chainExplorer.hashRoute);
+
+    const recentTransferTxnRow = ref([]);
+
+    const recentTransferTxn = async() => {
+      let txnQueryParams = Helper.createTransactionQueryParams();
+      txnQueryParams.pageSize = 1;
+      txnQueryParams.type = TransactionFilterTypes.getTransferTypes();
+      txnQueryParams.signerPublicKey = selectedAccountPublicKey.value;
+      txnQueryParams.embedded = true;
+      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
+
+      let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
+
+      let txnQueryParams2 = Helper.createTransactionQueryParams();
+      txnQueryParams2.pageSize = 1;
+      txnQueryParams2.type = TransactionFilterTypes.getTransferTypes();
+      txnQueryParams2.recipientAddress = selectedAccountAddressPlain.value;
+      txnQueryParams2.embedded = true;
+      txnQueryParams2.updateFieldOrder(blockDescOrderSortingField);
+
+      let transactionSearchResult2 = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams2);
+
+      let tempTxns = [];
+
+      if(transactionSearchResult.transactions.length){
+        let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
+
+        tempTxns = formattedTxns;
+      }
+
+      if(transactionSearchResult2.transactions.length){
+        let formattedTxns2 = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult2.transactions);
+        tempTxns = tempTxns.concat(formattedTxns2);
+      }
+
+      recentTransferTxnRow.value = formatRecentTransfer(removeDuplicateTxn(tempTxns).slice(0, 3));
+    };
+
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
+    const jdenticonConfig = themeConfig.jdenticonConfig;
+
+    const formatRecentTransfer = (transactions) => {
+      let TransferTxn = [];
+      transactions.forEach((txn) => {
+        let formattedTransferTxn = {};
+        if(selectedAccountAddressPlain.value == txn.sender){
+          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToName(txn.recipient, true);
+          formattedTransferTxn.transferContactAddress = txn.recipient;
+          formattedTransferTxn.amount = txn.amountTransfer;
+        }else{
+          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToName(txn.sender, true);
+          formattedTransferTxn.transferContactAddress = txn.sender;
+          formattedTransferTxn.amount = '-' + txn.amountTransfer;
+        }
+        formattedTransferTxn.hash = txn.hash;
+        TransferTxn.push(formattedTransferTxn);
+      });
+      return TransferTxn;
     }
 
     const formatConfirmedTransaction = async(transactions)=>{
@@ -934,6 +1009,7 @@ export default defineComponent({
       loadRecentTransactions();
       loadRecentTransferTransactions();
       updatePricing();
+      recentTransferTxn();
     }
 
     if(AppState.isReady){
@@ -958,6 +1034,9 @@ export default defineComponent({
     });
 
     return {
+      toSvg,
+      addressExplorerURL,
+      hashExplorerURL,
       currentBlock,
       displayBoard,
       copy,
@@ -1009,7 +1088,9 @@ export default defineComponent({
       changeSearchTxnType,
       changeTxnGroupType,
       selectedTxnType,
-      TransactionFilterType
+      TransactionFilterType,
+      recentTransferTxnRow,
+      jdenticonConfig,
     };
   }
 });
