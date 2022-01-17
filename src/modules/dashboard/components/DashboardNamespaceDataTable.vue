@@ -141,54 +141,56 @@ export default{
     const generateDatatable = (namespaces, currentBlockHeight, account) => {
       let formattedNamespaces = [];
 
-      for(let i=0; i < namespaces.length; ++i){
-        let linkName = "";
+      if(namespaces.length > 0){
+        for(let i=0; i < namespaces.length; ++i){
+          let linkName = "";
 
-        switch (namespaces[i].linkType) {
-          case 1:
-            linkName = "Asset";
-            break;
-          case 2:
-            linkName = "Address";
-            break;
-          default:
-            break;
-        }
-
-        let blockDifference = namespaces[i].endHeight - currentBlockHeight;
-        let blockTargetTimeByDay = Math.floor((60 * 60 * 24) / blockTargetTime);
-        let blockTargetTimeByHour = Math.floor((60 * 60) / blockTargetTime);
-        let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
-        let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
-        let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
-        let expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
-
-        let expiryStatus;
-        if(blockDifference > 0){
-          if((blockDifference < (blockTargetTimeByDay * 14))){
-            expiryStatus = 'expiring';
-          }else{
-            expiryStatus = 'valid';
+          switch (namespaces[i].linkType) {
+            case 1:
+              linkName = "Asset";
+              break;
+            case 2:
+              linkName = "Address";
+              break;
+            default:
+              break;
           }
-        }else{
-          expiryStatus = 'expired';
-        }
 
-        let data = {
-          i: i,
-          idHex: namespaces[i].idHex,
-          name: namespaces[i].name,
-          linkType: linkName,
-          linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
-          endHeight: namespaces[i].endHeight,
-          expiring: expiryStatus,
-          expiryRelative: currentBlockHeight?((blockDifference > 0)?'In ' + relativeTime(expiryDay, expiryHour, expiryMin):'Expired'):'',
-          expiry: currentBlockHeight?expiryDate:'',
-          explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].idHex,
-          address: Helper.createAddress(account.address).pretty()
-        };
-        formattedNamespaces.push(data);
-        isMenuShow.value[i] = false;
+          let blockDifference = namespaces[i].endHeight - currentBlockHeight;
+          let blockTargetTimeByDay = Math.floor((60 * 60 * 24) / blockTargetTime);
+          let blockTargetTimeByHour = Math.floor((60 * 60) / blockTargetTime);
+          let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
+          let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
+          let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
+          let expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
+
+          let expiryStatus;
+          if(blockDifference > 0){
+            if((blockDifference < (blockTargetTimeByDay * 14))){
+              expiryStatus = 'expiring';
+            }else{
+              expiryStatus = 'valid';
+            }
+          }else{
+            expiryStatus = 'expired';
+          }
+
+          let data = {
+            i: i,
+            idHex: namespaces[i].idHex,
+            name: namespaces[i].name,
+            linkType: linkName,
+            linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
+            endHeight: namespaces[i].endHeight,
+            expiring: expiryStatus,
+            expiryRelative: currentBlockHeight?((blockDifference > 0)?'In ' + relativeTime(expiryDay, expiryHour, expiryMin):'Expired'):'',
+            expiry: currentBlockHeight?expiryDate:'',
+            explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].idHex,
+            address: Helper.createAddress(account.address).pretty()
+          };
+          formattedNamespaces.push(data);
+          isMenuShow.value[i] = false;
+        }
       }
       return formattedNamespaces;
     }
