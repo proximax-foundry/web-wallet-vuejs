@@ -320,8 +320,8 @@ export default{
   content: '';
   display: block;
   position: absolute;
-  top: -6px;
-  right: 40px;
+  top: -4px;
+  right: 7px;
   width: 10px;
   height: 10px;
   background: #FFFFFF;
