@@ -4,7 +4,7 @@
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
     >
-      <div v-if="toggleModal" class="popup-outer-lang absolute flex z-50">
+      <div v-if="toggleModal" class="popup-outer-lang fixed flex z-50">
         <div class="modal-popup-box ">
           <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
             <div class ='text-gray-700 text-center text-xs mt-2'>Please insert private key to enable NIS1 for this account.</div>

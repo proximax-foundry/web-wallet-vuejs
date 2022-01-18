@@ -32,7 +32,7 @@
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
     >
-    <div v-if="toggleModal && item.fileHash!=''" class="popup-outer absolute flex z-50">
+    <div v-if="toggleModal && item.fileHash!=''" class="popup-outer fixed flex z-50">
       <div class="transition ease-in duration-300 w-popup px-6 py-6 bg-white rounded-3xl shadow-xl">
         <div class="delete-position">
           <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal"></font-awesome-icon>

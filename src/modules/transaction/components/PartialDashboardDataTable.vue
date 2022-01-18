@@ -68,7 +68,7 @@
       <Column field="sign" header="" headerStyle="width:110px">
         <template #body="{data}">
           <router-link :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" v-if="!checkIsSigned(data)" class="bg-orange-action text-white font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">Waiting for Your Signature(s)</router-link>
-          <div v-else class="bg-orange-light text-orange-action font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign.svg" class="mr-2">Waiting for Signature(s)</div>
+          <router-link :to="{ name: 'ViewTransactionWaitingSign', params: {txnHash: data.hash}}" v-else class="bg-orange-light text-orange-action font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign.svg" class="mr-2">Waiting for Signature(s)</router-link>
         </template>
       </Column>
       <template #empty>
@@ -141,9 +141,11 @@ export default{
     
     let transactionGroupType = Helper.getTransactionGroupType();
 
-    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, currentAccount);
+    let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
+      currentAddress.value = currentAccount.address;
 
     let loadPartialTransactions = async() => {
+      let dashboardService = new DashboardService(walletState.currentLoggedInWallet, currentAccount);
       let txnQueryParams = Helper.createTransactionQueryParams();
       txnQueryParams.pageSize = 1;
       txnQueryParams.address = currentAccount.address;
@@ -187,6 +189,12 @@ export default{
       if(num> 0){
         loadPartialTransactions();
       }
+    });
+
+    emitter.on('DEFAULT_ACCOUNT_SWITCHED', payload => {
+      currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
+      currentAddress.value = currentAccount.address;
+      loadPartialTransactions();
     });
 
     return {

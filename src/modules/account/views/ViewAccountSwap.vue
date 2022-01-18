@@ -5,8 +5,9 @@
       <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
     </div>
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
+      <AccountComponent :address="acc.address" class="mb-10" />
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-        <router-link :to="{name: 'ViewAccountDetails',params:{address: acc.address}}" class= 'w-18 text-center '>Details</router-link>
+        <router-link :to="{name: 'ViewAccountDetails',params:{address: acc.address}}" class= 'w-32 text-center '>Account Details</router-link>
         <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
         <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
         <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Swap</div>
@@ -28,6 +29,7 @@
 
 <script >
 import {getXPXcurrencyPrice } from '@/util/functions';
+import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import { watch, ref, computed, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import TextInput from "@/components/TextInput.vue";
@@ -48,6 +50,7 @@ import SwapAccountModal from '@/modules/account/components/SwapAccountModal.vue'
 export default {
   name: "ViewAccountSwap",
   components: {
+    AccountComponent,
     SwapAccountModal
   },
   props: {
@@ -80,6 +83,11 @@ export default {
       }
     });
 
+    const isMultiSig = computed(() => {
+      let isMulti = acc.getDirectParentMultisig().length? true: false
+      return isMulti;
+    });
+
     const disableNIS1Swap = () => {
       acc.nis1Account = null;
       walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
@@ -92,6 +100,7 @@ export default {
       nis1Address,
       boolNIS1Enabled,
       disableNIS1Swap,
+      isMultiSig,
     };
   }
 };

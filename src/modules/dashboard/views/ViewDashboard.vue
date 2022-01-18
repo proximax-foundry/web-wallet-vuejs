@@ -6,7 +6,7 @@
           <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded flex flex-col bg-white text-black">
             <div class="text-center py-3">
               <div class="text-center my-2"><div class="inline-block"><span class="font-bold text-xl">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-md">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-xl">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-6 h-6 ml-3 relative" style="top: -6px;"></div>
-              <div class="inline-block text-xs font-bold text-blue-primary cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">{{ selectedAccountName }}<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></div>
+              <div class="inline-block text-xs font-bold text-blue-primary cursor-pointer" @click="triggerSetDefaultModal">{{ selectedAccountName }}<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></div>
               <div class="mb-8">
                 <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddressShort }}</div>
                 <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
@@ -42,11 +42,7 @@
         </div>
         <div class="pr-2 hidden md:inline-block">
           <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded-lg balance-div flex flex-col justify-between bg-navy-primary text-white">
-            <div class="text-right">
-              <div class="inline-block text-txs font-bold text-blue-primary pappflex items-center rounded-b-sm"><img src="@/modules/dashboard/img/icon-bookmark.svg" class="w-3 h-3 mr-1 inline-block">DEFAULT ACCOUNT</div><br>
-              <div class="inline-block text-txs underline xl:text-sm cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">{{ selectedAccountName }}</div>
-            </div>
-            <div>
+            <div class="mt-8">
               <div class="text-gray-300 text-txs">CURRENT BALANCE</div>
               <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
               <div class="text-gray-300 text-txs mt-1">Estimate US$ {{ currencyConvert }}</div>
@@ -74,9 +70,18 @@
         </div>
         <div class="pl-2 hidden xl:inline-block">
           <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-3 rounded-lg transaction-div text-white">
-            <div class="text-tsm mt-7">Recent Transfers</div>
-            <div class="text-gray-400 text-tsm mt-4 mb-2 h-12">Invite your families and friends to create Sirius Wallet account and start transferring to their accounts.</div>
-            <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mt-5"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
+            <div class="text-txs mt-6 text-gray-400">Recent Transfers</div>
+            <div class="text-gray-400 text-tsm mt-6 mb-2 h-12" v-if="recentTransferTxnRow.length==0">Invite your families and friends to create Sirius Wallet account and start transferring to their accounts.</div>
+            <div v-else class="mt-2">
+              <div v-for="txn in recentTransferTxnRow" :key="txn.hash" class="flex items-center justify-between mb-1">
+                <a class="flex items-center max-w-xs" :href="addressExplorerURL + '/' + txn.transferContactAddress" target=_new>
+                  <div v-html="toSvg(txn.transferContactAddress, 20, jdenticonConfig)" class="mr-3"></div>
+                  <div class="truncate text-xs">{{ txn.transferContact }}</div>
+                </a>
+                <a class="text-tsm font-bold" :href="hashExplorerURL + '/' + txn.hash" target=_new>{{ txn.amount }} <span class="text-xxs font-normal">{{ currentNativeTokenName }}</span></a>
+              </div>
+            </div>
+            <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mt-4"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
           </div>
         </div>
       </div>
@@ -91,10 +96,6 @@
       </div>
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-if="displayBoard=='overview'">
-      <div class="text-txs text-gray-400"><b class="text-gray-700">ASSETS</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">View all</span>)</div>
-      <DashboardAssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
-      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
-      <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" :account="selectedAccount" />
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ accountConfirmedTxnsCount }} - View all)</div>
       <MixedTxnDataTable :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="recentTransactions" @openDecryptMsg="openDecryptMsgModal"></MixedTxnDataTable>
       <div class="mt-10 md:flex ml-5 md:ml-0">
@@ -163,7 +164,6 @@
       <RestrictionTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></RestrictionTxnDataTable>
       <SecretTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.SECRET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></SecretTxnDataTable>
     </div>
-    <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
   </div>
 </template>
 
@@ -188,8 +188,6 @@ import SecretTxnDataTable from '@/modules/dashboard/components/TransactionDataTa
 
 import DashboardAssetDataTable from '@/modules/dashboard/components/DashboardAssetDataTable.vue';
 import DashboardNamespaceDataTable from '@/modules/dashboard/components/DashboardNamespaceDataTable.vue';
-
-import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
 import AddressQRModal from '@/modules/dashboard/components/AddressQRModal.vue';
 import MessageModal from '@/modules/dashboard/components/MessageModal.vue';
 import DecryptMessageModal from '@/modules/dashboard/components/DecryptMessageModal.vue';
@@ -206,6 +204,8 @@ import { AccountAPI } from '@/models/REST/account';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 import qrcode from 'qrcode-generator';
+import { toSvg } from "jdenticon";
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 //import Dialog from 'primevue/dialog';
 import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
@@ -217,7 +217,6 @@ export default defineComponent({
     type: String
   },
   components: {
-    SetAccountDefaultModal,
     MixedTxnDataTable,
     TransferTxnDataTable,
     AccountTxnDataTable,
@@ -248,7 +247,6 @@ export default defineComponent({
     const showDecryptMessageModal  = ref(false);
 
     const displayConvertion = ref(false);
-    const openSetDefaultModal = ref(false);
     const showCosignModal = ref(false);
     const txMessage = ref("");
     const messagePayload = ref("");
@@ -468,7 +466,6 @@ export default defineComponent({
 
     let updateAccountTransactionCount = async()=>{
       let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
-      
       accountConfirmedTxnsCount.value = transactionsCount.confirmed;
     };
 
@@ -636,7 +633,7 @@ export default defineComponent({
       let tempTxns = [];
 
       if(transactionSearchResult.transactions.length){
-        let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult2.transactions);
+        let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
 
         tempTxns = formattedTxns;
       }
@@ -696,6 +693,70 @@ export default defineComponent({
       else{
         searchedTransactions.value = formattedTxns;
       }
+    }
+    
+    const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
+    const addressExplorerURL = computed(()=> explorerBaseURL.value + networkState.currentNetworkProfile.chainExplorer.addressRoute);
+    const hashExplorerURL = computed(()=> explorerBaseURL.value + networkState.currentNetworkProfile.chainExplorer.hashRoute);
+
+    const recentTransferTxnRow = ref([]);
+
+    const recentTransferTxn = async() => {
+      let txnQueryParams = Helper.createTransactionQueryParams();
+      txnQueryParams.pageSize = 1;
+      txnQueryParams.type = TransactionFilterTypes.getTransferTypes();
+      txnQueryParams.signerPublicKey = selectedAccountPublicKey.value;
+      txnQueryParams.embedded = true;
+      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
+
+      let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
+
+      let txnQueryParams2 = Helper.createTransactionQueryParams();
+      txnQueryParams2.pageSize = 1;
+      txnQueryParams2.type = TransactionFilterTypes.getTransferTypes();
+      txnQueryParams2.recipientAddress = selectedAccountAddressPlain.value;
+      txnQueryParams2.embedded = true;
+      txnQueryParams2.updateFieldOrder(blockDescOrderSortingField);
+
+      let transactionSearchResult2 = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams2);
+
+      let tempTxns = [];
+
+      if(transactionSearchResult.transactions.length){
+        let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
+
+        tempTxns = formattedTxns;
+      }
+
+      if(transactionSearchResult2.transactions.length){
+        let formattedTxns2 = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult2.transactions);
+        tempTxns = tempTxns.concat(formattedTxns2);
+      }
+
+      recentTransferTxnRow.value = formatRecentTransfer(removeDuplicateTxn(tempTxns).slice(0, 3));
+    };
+
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
+    const jdenticonConfig = themeConfig.jdenticonConfig;
+
+    const formatRecentTransfer = (transactions) => {
+      let TransferTxn = [];
+      transactions.forEach((txn) => {
+        let formattedTransferTxn = {};
+        if(selectedAccountAddressPlain.value == txn.sender){
+          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToName(txn.recipient, true);
+          formattedTransferTxn.transferContactAddress = txn.recipient;
+          formattedTransferTxn.amount = Helper.toCurrencyFormat(txn.amountTransfer);
+        }else{
+          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToName(txn.sender, true);
+          formattedTransferTxn.transferContactAddress = txn.sender;
+          formattedTransferTxn.amount = '-' + Helper.toCurrencyFormat(txn.amountTransfer);
+        }
+        formattedTransferTxn.hash = txn.hash;
+        TransferTxn.push(formattedTransferTxn);
+      });
+      return TransferTxn;
     }
 
     const formatConfirmedTransaction = async(transactions)=>{
@@ -928,21 +989,9 @@ export default defineComponent({
       return result;
     }
 
-    const updateSelectedAccount = (data)=>{
-      if(data.type == 0){
-        selectedAccount.value = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === data.name);
-      }else{
-        selectedAccount.value = walletState.currentLoggedInWallet.others.find((account)=> account.name === data.name);
-      }
-      walletState.currentLoggedInWallet.setDefaultAccountByName(data.name);
-      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+    const triggerSetDefaultModal = () => {
+      emitter.emit('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', true);
     }
-
-    emitter.on('CLOSE_SET_DEFAULT_ACCOUNT_MODAL', payload => {
-      if(payload){
-        openSetDefaultModal.value = false;
-      }
-    });
 
     emitter.on('CLOSE_MODAL', () => {
       showAddressQRModal.value = false;
@@ -956,6 +1005,7 @@ export default defineComponent({
       loadRecentTransactions();
       loadRecentTransferTransactions();
       updatePricing();
+      recentTransferTxn();
     }
 
     if(AppState.isReady){
@@ -966,13 +1016,23 @@ export default defineComponent({
         if(value){
           init();
           readyWatcher();
-        }     
+        }
       });
     }
 
-    
+    emitter.on('DEFAULT_ACCOUNT_SWITCHED', payload => {
+      currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
+      currentAccount.default = true;
+      selectedAccount.value = currentAccount;
+      updateAccountTransactionCount();
+      loadRecentTransactions();
+      loadRecentTransferTransactions();
+    });
 
     return {
+      toSvg,
+      addressExplorerURL,
+      hashExplorerURL,
       currentBlock,
       displayBoard,
       copy,
@@ -981,14 +1041,12 @@ export default defineComponent({
       selectedAccountBalanceBack,
       selectedAccountName,
       selectedAccountPublicKey,
-      openSetDefaultModal,
       currencyConvert,
       displayConvertion,
       currentNativeTokenName,
       selectedAccountAddress,
       selectedAccountAddressPlain,
       selectedAccountAddressShort,
-      updateSelectedAccount,
       isDefault,
       isMultisig,
       recentTransactions,
@@ -999,6 +1057,7 @@ export default defineComponent({
       showDecryptMessageModal,
       selectedAccount,
       selectedAccountNamespaceCount,
+      triggerSetDefaultModal,
       // selectedAccountNamespaces,
       // selectedAccountAssets,
       selectedAccountAssetsCount,
@@ -1025,7 +1084,9 @@ export default defineComponent({
       changeSearchTxnType,
       changeTxnGroupType,
       selectedTxnType,
-      TransactionFilterType
+      TransactionFilterType,
+      recentTransferTxnRow,
+      jdenticonConfig,
     };
   }
 });
