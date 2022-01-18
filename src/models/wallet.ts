@@ -53,7 +53,7 @@ export class Wallet{
             }
         }
 
-        return aliasName ? aliasName : Helper.createAddress(address).pretty();
+        return aliasName ? aliasName : address;
     }
 
     convertAddressToNamePretty(address: string, includeOthers: boolean = false): string{
