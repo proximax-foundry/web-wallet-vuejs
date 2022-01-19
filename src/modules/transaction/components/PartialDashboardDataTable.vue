@@ -141,13 +141,10 @@ export default{
     
     let transactionGroupType = Helper.getTransactionGroupType();
 
-    let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
-      currentAddress.value = currentAccount.address;
-
     let loadPartialTransactions = async() => {
       let dashboardService = new DashboardService(walletState.currentLoggedInWallet, currentAccount);
       let txnQueryParams = Helper.createTransactionQueryParams();
-      txnQueryParams.pageSize = 1;
+      txnQueryParams.pageSize = 100;
       txnQueryParams.address = currentAccount.address;
 
       let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.PARTIAL, txnQueryParams);
