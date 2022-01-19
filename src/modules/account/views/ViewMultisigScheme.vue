@@ -74,7 +74,7 @@ import { walletState } from '@/state/walletState'
 import { watch, ref, computed, getCurrentInstance, reactive } from "vue";
 
 import { networkState } from '@/state/networkState';
-import { Address } from 'tsjs-xpx-chain-sdk';
+import { Address, PublicAccount } from 'tsjs-xpx-chain-sdk';
 import { Helper } from '@/util/typeHelper';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
@@ -115,7 +115,14 @@ setup(p){
     return wallet.accounts.find(account=>account.address == convertAddress(publicKey).plain())
   }
   const getAccountName = (publicKey,length) =>{
-    return findAccount(publicKey) ? findAccount(publicKey).name : label(length) + convertAddress(publicKey).plain().substr(-4)
+    const address = PublicAccount.createFromPublicKey(publicKey,networkType).address.plain()
+    const contact = walletState.currentLoggedInWallet.contacts.find((contact) => contact.address==address);
+    if (contact){
+      return contact.name
+    }else{
+      return findAccount(publicKey) ? findAccount(publicKey).name : label(length) + convertAddress(publicKey).plain().substr(-4)
+    }
+    
   }
   const findCosignLength = publicKey =>{
     return multisigAccounts.find(account=>account.publicKey == publicKey).cosignaturies.length
