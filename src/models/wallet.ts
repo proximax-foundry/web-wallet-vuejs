@@ -1,6 +1,7 @@
 import { WalletAccount } from './walletAccount';
 import { AddressBook } from './addressBook';
 import { OtherAccount } from './otherAccount';
+import { Helper } from '@/util/typeHelper';
 
 export class Wallet{
 
@@ -28,6 +29,7 @@ export class Wallet{
     }
 
     convertAddressToName(address: string, includeOthers: boolean = false): string{
+
         let aliasName :string = "";
 
         const addressBook = this.contacts.find((addressBook)=> addressBook.address === address);
@@ -50,7 +52,7 @@ export class Wallet{
             }
         }
 
-        return aliasName ? aliasName : address;
+        return aliasName ? aliasName : Helper.createAddress(address).pretty();
     }
 
     addAddressBook(addressBook: AddressBook): void{
