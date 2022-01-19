@@ -28,9 +28,8 @@
 <script lang="ts">
 import { computed, getCurrentInstance, ref } from 'vue';
 import { networkState } from "@/state/networkState";
-import { useRouter } from 'vue-router';
 import { walletState } from '@/state/walletState';
-import {useI18n} from 'vue-i18n'
+import { useI18n } from 'vue-i18n'
 import PasswordInput from '@/components/PasswordInput.vue';
 import { WalletUtils } from '@/util/walletUtils';
 
@@ -52,9 +51,10 @@ export default{
     const disableDelete = computed(() => !(walletPassword.value.match(passwdPattern)));
 
     const deleteWallet = (walletName) => {   
-      var result = WalletUtils.verifyWalletPassword(walletName, walletState.currentLoggedInWallet.networkName, walletPassword.value);
+      var networkName = networkState.chainNetworkName;
+      var result = WalletUtils.verifyWalletPassword(walletName, networkName, walletPassword.value);
         if (result == true) {
-          walletState.wallets.removeWalletByNetworkNameAndName(walletState.currentLoggedInWallet.networkName, walletName);
+          walletState.wallets.removeWalletByNetworkNameAndName(networkName, walletName);
           emitter.emit('CLOSE_MODAL', false);
         } else {
           err.value = t('signin.invalidpassword');

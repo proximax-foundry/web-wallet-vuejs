@@ -1,11 +1,15 @@
 <template>
 <div class="xl:flex xl:justify-between pb-3 xl:pb-0">
     <div class="ml-20 mt-10">
-       <h1 class="font-bold text-base mb-5 ml-20">{{$t('Header.wallet')}}</h1>
+       <h1 v-if="walletState.currentLoggedInWallet" class="font-bold text-base mb-5 ml-20 text-black">{{$t('Header.wallet')}}</h1>
+        <h1 v-else class="font-bold text-base mb-5 text-white">{{$t('Header.wallet')}}</h1>
        <template>
       <!-- <p class="text-tsm sm:text-tsm text-white font-semibold">{{$t('wallets.description') }}.</p> -->
        </template>
-      <div v-if="wallets.length == 0" class="text-center h4 my-2 text-black">
+      <div v-if="wallets.length == 0 && walletState.currentLoggedInWallet" class=" h4 my-2 text-black">
+        {{$t('wallets.walletvalidation')}}.
+      </div>
+       <div v-if="wallets.length == 0 && !walletState.currentLoggedInWallet" class="text-center h4 my-2 text-white">
         {{$t('wallets.walletvalidation')}}.
       </div>
       <div class="ml-20 grid grid-cols-1 grid-cols-2 gap-2" v-else>
@@ -38,6 +42,7 @@ export default {
   setup(p) {
     
     const toast = useToast();
+    
     const wallets = computed(
       () =>{
         var wallet = walletState.wallets.filterByNetworkName(networkState.chainNetworkName);
@@ -52,7 +57,7 @@ export default {
     return {
       wallets,
       walletState,
-      networkState,
+      networkState
     };
   },
 }

@@ -1,12 +1,12 @@
 <template>
   <div class='p-1'>      
     <div class="flex justify-between bg-white border rounded-lg border-gray-200 filter shadow-lg  group">
-    <div class='border-l-4 rounded-l-lg border-blue-primary opacity-0 group-hover:opacity-100 '>
+    <div class='border-l-4 rounded-l-lg border-blue-primary opacity-0 group-hover:opacity-100'>
     </div>
       <div class="ml-5 mt-5 mr-5 mb-5 text-xs text-left">      
         <div class="font-bold text-blue-primary">{{ wallet.name }}  
-          <img v-if="wallet.name!=walletState.currentLoggedInWallet.name" src="@/modules/wallet/img/icon-delete.svg" class="opacity-0 group-hover:opacity-100 inline-block" @click="getModal()">
-          <div v-if="wallet.name == walletState.currentLoggedInWallet.name" class="mt-1"> </div>
+          <img v-if="currentLoggedInWallet(wallet.name) == true" src="@/modules/wallet/img/icon-delete.svg" class="opacity-0 group-hover:opacity-100 inline-block" @click="getModal()">
+          <div v-if="currentLoggedInWallet(wallet.name) == false" class="mt-1"> </div>
         </div>
         <div class="text-txs text-black-400">Number of accounts: <span class="font-bold">{{ wallet.accounts.length }}</span></div>
       </div>
@@ -28,6 +28,7 @@ import { ref,computed } from 'vue';
 import { walletState } from '@/state/walletState';
 import CryptoJS from 'crypto-js';
 import ConfirmDeleteWalletModal from "@/modules/wallet/components/ConfirmDeleteWalletModal.vue";
+import { networkState } from "@/state/networkState";
 
 export default defineComponent({
   name: 'WalletTile', 
@@ -41,7 +42,7 @@ export default defineComponent({
     },
   },
   
-  setup(){
+  setup(p){
     const showModal = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
     const walletPassword = ref("");
@@ -55,8 +56,8 @@ export default defineComponent({
     };
 
     const exportWallet = (walletName) => {
-      const wallet = walletState.wallets.filterByNetworkNameAndName(walletState.currentLoggedInWallet.networkName,walletName);
-      //appStore.getWalletByName(walletName);
+      var networkName = networkState.chainNetworkName;
+      const wallet = walletState.wallets.filterByNetworkNameAndName(networkName,walletName);
       let wordArray = CryptoJS.enc.Utf8.parse(JSON.stringify(wallet));
       let file = CryptoJS.enc.Base64.stringify(wordArray);
       const now = Date.now()
@@ -73,7 +74,7 @@ export default defineComponent({
       // the filename you want
       // let networkTypeName = siriusStore.getNetworkByType(appStore.getAccountByWallet(appStore.state.currentLoggedInWallet.name).network).name;
       // networkTypeName = (networkTypeName.includes(' ')) ? networkTypeName.split(' ').join('') : networkTypeName;
-      a.download = `${walletName}_${walletState.currentLoggedInWallet.networkName}_${year}-${month}-${day}.wlt`;
+      a.download = `${walletName}_${networkName}_${year}-${month}-${day}.wlt`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -83,13 +84,25 @@ export default defineComponent({
         showModal.value = payload;
     });
 
+    const currentLoggedInWallet = (walletName)=>{
+      if(walletState.currentLoggedInWallet==null){
+        return true;
+      }else{
+        if(walletState.currentLoggedInWallet.name == walletName){
+          return false;
+        }else{
+          return true;
+        }
+      }
+    };
+
     return {
       exportWallet,
       getModal,
       showModal,
       disableDelete,
       err,
-      walletState
+      currentLoggedInWallet
     };
   }
  
