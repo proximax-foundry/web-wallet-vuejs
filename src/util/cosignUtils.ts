@@ -9,7 +9,7 @@ export class CosignUtils{
 
         let cosigners: string[] = [];
 
-        let allKeys = multisigAccountsInfoMap.keys;
+        let allKeys = [...multisigAccountsInfoMap.keys()];
 
         for(let i =0; i < allKeys.length; ++i){
             let level = allKeys[i];
@@ -31,7 +31,7 @@ export class CosignUtils{
         let cosigners: string[] = [];
 
         for(let i =0; i < MultisigAccountInfo.length; ++i){
-            if(!multisigAccountsInfo[i].isMultisig()){
+            if(multisigAccountsInfo[i].minApproval === 0 && multisigAccountsInfo[i].minRemoval === 0){
                 cosigners.push(multisigAccountsInfo[i].account.publicKey);
             }
         }
@@ -123,12 +123,13 @@ export class CosignUtils{
             oriCosigners = multisigInfo.cosignatories.map(cosigner => cosigner.publicKey);
             
         } catch (error) {
-
+            neededSigners.push(signer);
         }
 
         searchingCosigners = oriCosigners.concat(addedPublicKeys);
 
         for(let i =0; i < searchingCosigners.length; ++i){
+
             try {
                 let multisigGraphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(Address.createFromPublicKey(searchingCosigners[i], AppState.networkType));
 
