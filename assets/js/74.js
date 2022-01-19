@@ -1,62 +1,58 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([[74],{
 
-/***/ "./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader-v16/dist/index.js?!./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=script&lang=js":
-/*!*****************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader-v16/dist??ref--0-1!./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=script&lang=js ***!
-  \*****************************************************************************************************************************************************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ "./src/assets/img/chevron_left.svg":
+/*!*****************************************!*\
+  !*** ./src/assets/img/chevron_left.svg ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n\n/* harmony default export */ __webpack_exports__[\"default\"] = ({\n  name: 'ViewServicesNotifications',\n\n  components: {\n  },\n\n  setup() {\n    return {\n    };\n  },\n});\n\n\n//# sourceURL=webpack:///./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader-v16/dist??ref--0-1");
-
-/***/ }),
-
-/***/ "./node_modules/vue-loader-v16/dist/templateLoader.js?!./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader-v16/dist/index.js?!./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=template&id=51a780ea":
-/*!************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader-v16/dist/templateLoader.js??ref--6!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader-v16/dist??ref--0-1!./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=template&id=51a780ea ***!
-  \************************************************************************************************************************************************************************************************************************************************************************************/
-/*! exports provided: render */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"render\", function() { return render; });\n/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ \"./node_modules/vue/dist/vue.runtime.esm-bundler.js\");\n\n\nconst _hoisted_1 = { class: \"flex justify-between text-xs sm:text-sm\" }\nconst _hoisted_2 = { class: \"text-gray-400\" }\nconst _hoisted_3 = /*#__PURE__*/Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createTextVNode\"])()\nconst _hoisted_4 = { class: \"text-blue-primary font-bold\" }\nconst _hoisted_5 = /*#__PURE__*/Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createElementVNode\"])(\"div\", { class: \"mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-80\" }, null, -1 /* HOISTED */)\n\nfunction render(_ctx, _cache, $props, $setup, $data, $options) {\n  const _component_router_link = Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"resolveComponent\"])(\"router-link\")\n\n  return (Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"openBlock\"])(), Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createElementBlock\"])(vue__WEBPACK_IMPORTED_MODULE_0__[\"Fragment\"], null, [\n    Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createElementVNode\"])(\"div\", _hoisted_1, [\n      Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createElementVNode\"])(\"div\", null, [\n        Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createElementVNode\"])(\"span\", _hoisted_2, Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"toDisplayString\"])(_ctx.$t('services.notifications')) + \" >\", 1 /* TEXT */),\n        _hoisted_3,\n        Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createElementVNode\"])(\"span\", _hoisted_4, Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"toDisplayString\"])(_ctx.$t('accounts.viewall')), 1 /* TEXT */)\n      ]),\n      Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createElementVNode\"])(\"div\", null, [\n        Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createVNode\"])(_component_router_link, {\n          to: { name: 'ViewServices' },\n          class: \"font-bold\"\n        }, {\n          default: Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"withCtx\"])(() => [\n            Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"createTextVNode\"])(Object(vue__WEBPACK_IMPORTED_MODULE_0__[\"toDisplayString\"])(_ctx.$t('services.allservices')), 1 /* TEXT */)\n          ]),\n          _: 1 /* STABLE */\n        })\n      ])\n    ]),\n    _hoisted_5\n  ], 64 /* STABLE_FRAGMENT */))\n}\n\n//# sourceURL=webpack:///./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?./node_modules/vue-loader-v16/dist/templateLoader.js??ref--6!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader-v16/dist??ref--0-1");
+eval("module.exports = __webpack_require__.p + \"assets/img/chevron_left.120f1ae7.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/chevron_left.svg?");
 
 /***/ }),
 
-/***/ "./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue":
-/*!******************************************************************************************!*\
-  !*** ./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue ***!
-  \******************************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ "./src/assets/img/chevron_right.svg":
+/*!******************************************!*\
+  !*** ./src/assets/img/chevron_right.svg ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _ViewServicesNotifications_vue_vue_type_template_id_51a780ea__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ViewServicesNotifications.vue?vue&type=template&id=51a780ea */ \"./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=template&id=51a780ea\");\n/* harmony import */ var _ViewServicesNotifications_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ViewServicesNotifications.vue?vue&type=script&lang=js */ \"./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=script&lang=js\");\n/* empty/unused harmony star reexport *//* harmony import */ var _home_runner_work_web_wallet_vuejs_web_wallet_vuejs_node_modules_vue_loader_v16_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader-v16/dist/exportHelper.js */ \"./node_modules/vue-loader-v16/dist/exportHelper.js\");\n/* harmony import */ var _home_runner_work_web_wallet_vuejs_web_wallet_vuejs_node_modules_vue_loader_v16_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_home_runner_work_web_wallet_vuejs_web_wallet_vuejs_node_modules_vue_loader_v16_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__);\n\n\n\n\n\nconst __exports__ = /*#__PURE__*/_home_runner_work_web_wallet_vuejs_web_wallet_vuejs_node_modules_vue_loader_v16_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2___default()(_ViewServicesNotifications_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"], [['render',_ViewServicesNotifications_vue_vue_type_template_id_51a780ea__WEBPACK_IMPORTED_MODULE_0__[\"render\"]],['__file',\"src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue\"]])\n/* hot reload */\nif (false) {}\n\n\n/* harmony default export */ __webpack_exports__[\"default\"] = (__exports__);\n\n//# sourceURL=webpack:///./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?");
-
-/***/ }),
-
-/***/ "./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=script&lang=js":
-/*!******************************************************************************************************************!*\
-  !*** ./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=script&lang=js ***!
-  \******************************************************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_v16_dist_index_js_ref_0_1_ViewServicesNotifications_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/cache-loader/dist/cjs.js??ref--0-0!../../../../../../node_modules/vue-loader-v16/dist??ref--0-1!./ViewServicesNotifications.vue?vue&type=script&lang=js */ \"./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader-v16/dist/index.js?!./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=script&lang=js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"default\", function() { return _node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_v16_dist_index_js_ref_0_1_ViewServicesNotifications_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"]; });\n\n/* empty/unused harmony star reexport */ \n\n//# sourceURL=webpack:///./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?");
+eval("module.exports = __webpack_require__.p + \"assets/img/chevron_right.e5f72240.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/chevron_right.svg?");
 
 /***/ }),
 
-/***/ "./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=template&id=51a780ea":
-/*!************************************************************************************************************************!*\
-  !*** ./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=template&id=51a780ea ***!
-  \************************************************************************************************************************/
-/*! exports provided: render */
+/***/ "./src/assets/img/icon-key.svg":
+/*!*************************************!*\
+  !*** ./src/assets/img/icon-key.svg ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("module.exports = __webpack_require__.p + \"assets/img/icon-key.0e181e5e.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/icon-key.svg?");
+
+/***/ }),
+
+/***/ "./src/modules/account/img/icon-pin.svg":
+/*!**********************************************!*\
+  !*** ./src/modules/account/img/icon-pin.svg ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("module.exports = __webpack_require__.p + \"assets/img/icon-pin.4428bcf6.svg\";\n\n//# sourceURL=webpack:///./src/modules/account/img/icon-pin.svg?");
+
+/***/ }),
+
+/***/ "./src/util/functions.ts":
+/*!*******************************!*\
+  !*** ./src/util/functions.ts ***!
+  \*******************************/
+/*! exports provided: copyKeyFunc, copyToClipboard, getCoingeckoCoinPrice, getCurrentPriceUSD, getXPXcurrencyPrice */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _node_modules_vue_loader_v16_dist_templateLoader_js_ref_6_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_v16_dist_index_js_ref_0_1_ViewServicesNotifications_vue_vue_type_template_id_51a780ea__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/vue-loader-v16/dist/templateLoader.js??ref--6!../../../../../../node_modules/cache-loader/dist/cjs.js??ref--0-0!../../../../../../node_modules/vue-loader-v16/dist??ref--0-1!./ViewServicesNotifications.vue?vue&type=template&id=51a780ea */ \"./node_modules/vue-loader-v16/dist/templateLoader.js?!./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader-v16/dist/index.js?!./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?vue&type=template&id=51a780ea\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"render\", function() { return _node_modules_vue_loader_v16_dist_templateLoader_js_ref_6_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_v16_dist_index_js_ref_0_1_ViewServicesNotifications_vue_vue_type_template_id_51a780ea__WEBPACK_IMPORTED_MODULE_0__[\"render\"]; });\n\n\n\n//# sourceURL=webpack:///./src/modules/services/submodule/notifications/views/ViewServicesNotifications.vue?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"copyKeyFunc\", function() { return copyKeyFunc; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"copyToClipboard\", function() { return copyToClipboard; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"getCoingeckoCoinPrice\", function() { return getCoingeckoCoinPrice; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"getCurrentPriceUSD\", function() { return getCurrentPriceUSD; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"getXPXcurrencyPrice\", function() { return getXPXcurrencyPrice; });\n/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ \"./node_modules/tslib/tslib.es6.js\");\n/* harmony import */ var primevue_usetoast__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! primevue/usetoast */ \"./node_modules/primevue/usetoast/usetoast.esm.js\");\n\n\n// copy address keys\nconst copyKeyFunc = (id) => {\n    const toast = Object(primevue_usetoast__WEBPACK_IMPORTED_MODULE_1__[\"useToast\"])();\n    // Credits: https://www.w3schools.com/howto/howto_js_copy_clipboard.asp\n    let copyText = document.getElementById(id);\n    /* Select the text field */\n    //copyText.innerText;\n    copyText === null || copyText === void 0 ? void 0 : copyText.select();\n    copyText === null || copyText === void 0 ? void 0 : copyText.setSelectionRange(0, 99999); /* For mobile devices */\n    /* Copy the text inside the text field */\n    document.execCommand(\"copy\");\n    let titleType;\n    if (id == 'private') {\n        titleType = 'Private key';\n    }\n    else if (id == 'public') {\n        titleType = 'Public key';\n    }\n    else if (id == 'pollIndexAddress') {\n        titleType = 'Poll Index Address';\n    }\n    else {\n        titleType = 'Address';\n    }\n    // toast.add({severity:'info', summary: titleType + ' copied', detail: copyText.value, group: 'br', life: 5000});\n};\nconst copyToClipboard = (data) => {\n    const listener = (e) => {\n        e.clipboardData.setData('text/plain', data);\n        e.preventDefault();\n        document.removeEventListener('copy', listener);\n    };\n    document.addEventListener('copy', listener);\n    document.execCommand('copy');\n};\nconst getCoingecko = (coinId) => {\n    return fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`).then((res) => res.json()).then((data) => { return data.market_data.current_price.usd; });\n};\nconst getCoingeckoCoinPrice = (coinId) => {\n    return fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`).then((res) => res.json()).then((data) => { return data.market_data.current_price; });\n};\nconst getCurrentPriceUSD = (url) => {\n    return fetch(url).then((res) => res.json()).then((data) => { return data; });\n};\nconst getXPXcurrencyPrice = (balance) => Object(tslib__WEBPACK_IMPORTED_MODULE_0__[\"__awaiter\"])(void 0, void 0, void 0, function* () {\n    let total;\n    let coinId = 'proximax';\n    let rate = yield getCoingecko(coinId);\n    total = rate * balance;\n    return total;\n});\n// export const getPrettyAddress = (address: string) => {\n//   const prettyAddress = Address.createFromRawAddress(address);\n//   return prettyAddress.pretty();\n// }\n\n\n//# sourceURL=webpack:///./src/util/functions.ts?");
 
 /***/ })
 
