@@ -212,7 +212,7 @@ class Reconstruct{
         newAsset.amount = tempAsset.amount ? tempAsset.amount : 0;
         newAsset.duration = tempAsset.duration ? tempAsset.duration : null;
         newAsset.expirationBlock = tempAsset.expirationBlock ? tempAsset.expirationBlock : null;
-        newAsset.namespaceId = tempAsset.namespaceId ? tempAsset.namespaceId : [];
+        newAsset.namespaceNames = tempAsset.namespaceNames ? tempAsset.namespaceNames : [];
         newAsset.owner = tempAsset.owner ? tempAsset.owner : null;
         newAsset.supply = tempAsset.supply ? tempAsset.supply : 0;
 
