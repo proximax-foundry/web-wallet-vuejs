@@ -883,6 +883,12 @@ export class WalletUtils {
                     newTempAsset.supply = assetInfo.supply.compact();
                     newTempAsset.height = assetInfo.height.compact();
 
+                    let assetNames = await chainAPICall.value.assetAPI.getMosaicsNames([mosaic.id])
+
+                    if(assetNames[0].names.length){
+                        newTempAsset.namespaceNames = assetNames[0].names.map(nsName => nsName.name);
+                    }
+
                     tempAssets.push(newTempAsset);
 
                     let newAsset = newTempAsset.duplicateNewInstance();
@@ -899,8 +905,6 @@ export class WalletUtils {
     }
 
     static async updateOtherAccountDetails(wallet: Wallet): Promise<void>{
-
-        
 
         let tempAssets: Asset[] = [];
 
@@ -984,6 +988,12 @@ export class WalletUtils {
                     newTempAsset.duration = assetInfo.duration.compact();
                     newTempAsset.supply = assetInfo.supply.compact();
 
+                    let assetNames = await chainAPICall.value.assetAPI.getMosaicsNames([mosaic.id])
+
+                    if(assetNames[0].names.length){
+                        newTempAsset.namespaceNames = assetNames[0].names.map(nsName => nsName.name);
+                    }
+
                     tempAssets.push(newTempAsset);
 
                     let newAsset = newTempAsset.duplicateNewInstance();
@@ -1058,6 +1068,8 @@ export class WalletUtils {
 
         walletState.wallets.saveMyWalletOnlytoLocalStorage(wallet);
         wallet.isReady = true;
+
+        console.log(wallet);
     }
 
     static updateAllAccountBalance(wallet: Wallet, assetId: string): void{
