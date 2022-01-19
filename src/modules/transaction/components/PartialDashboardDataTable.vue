@@ -88,7 +88,6 @@ import { walletState } from '@/state/walletState';
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
 import { DashboardService } from '@/modules/dashboard/service/dashboardService';
-import {AppState} from '@/state/appState'
 
 export default{
   components: {
@@ -163,22 +162,6 @@ export default{
       return allCosignedPublicKey.includes(currentAccount.publicKey);
     }
 
-    const init = ()=>{
-      loadPartialTransactions();
-    }
-
-    if(AppState.isReady){
-      init();
-    }
-    else{
-      let readyWatcher = watch(AppState.isReady, (value) => {
-        if(value){
-          init();
-          readyWatcher();
-        }     
-      });
-    }
-
     emitter.on("TXN_UNCONFIRMED", (num) => {
       if(num> 0){
         loadPartialTransactions();
@@ -198,11 +181,7 @@ export default{
     });
 
     const init = ()=>{
-      updateAccountTransactionCount();
-      loadRecentTransactions();
-      loadRecentTransferTransactions();
-      updatePricing();
-      recentTransferTxn();
+      loadPartialTransactions();
     }
 
     if(AppState.isReady){
