@@ -6,11 +6,12 @@
         <div class=" w-28 text-center border-b-2 pb-4 lg:pb-3 border-yellow-500"  style="width:6.5rem">My Accounts</div>
         <router-link :to="{ name: 'ViewMultisigAccount'}" class="text-center " style="width:9rem">Multisig Accounts</router-link>
         <router-link :to="{ name: 'ViewOtherAccount'}" class="text-center " style="width:8rem">Other Accounts</router-link>
-        <div class="flex flex-row gap-1 ml-auto">
-          <img src="@/modules/account/img/icon-account-settings.svg" class="w-4 h-4">
-          <div>Accounts Settings</div>
-        </div>
       </div>
+    </div>
+    <div class='my-4 w-11/12 ml-auto mr-auto '>
+      <router-link :to="{name:'ViewAccountCreateSelectType'}" >
+          <div class="float-right mb-4 text-center w-44 text-white bg-blue-primary rounded-md font-semibold text-xs p-2">+ Create New Account</div>
+      </router-link>
     </div>
     <div class='mt-2 py-3 '>
       <div class="w-11/12 ml-auto mr-auto flex flex-col gap-3">

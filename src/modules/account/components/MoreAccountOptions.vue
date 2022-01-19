@@ -8,11 +8,11 @@
     <div v-if="toggleModal" class="relative ">
     <div class='absolute border border-t-0 z-20 bg-white w-full p-3 '>
         <div  class="pb-2">
-            <router-link v-if="!otherAccount(address)" :to="{ name: 'ViewAccountDelegate', params: { address: address }}">Delegate Account</router-link>
+            <router-link class="hover:bg-gray-100" v-if="!otherAccount(address)" :to="{ name: 'ViewAccountDelegate', params: { address: address }}">Delegate Account</router-link>
             <div v-else class="text-gray-300">Delegate Account</div>
         </div>
-        <router-link  v-if="!otherAccount(address)" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">Link to Namespace</router-link>
-        <router-link  v-else-if="otherAccount(address) && other_acc.type =='MULTISIG'" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">Link to Namespace</router-link>
+        <router-link class="hover:bg-gray-100" v-if="!otherAccount(address)" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">Link to Namespace</router-link>
+        <router-link  class="hover:bg-gray-100" v-else-if="otherAccount(address) && other_acc.type =='MULTISIG'" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">Link to Namespace</router-link>
         <div  v-else class="text-gray-300">Link to Namespace</div>
     </div>
     </div>

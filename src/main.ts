@@ -31,14 +31,15 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
 import i18n from './i18n';
 import VWave from 'v-wave';
-
+import VueBlocksTree from 'vue3-blocks-tree';
+import 'vue3-blocks-tree/dist/vue3-blocks-tree.css';
 library.add(
   fas,faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
   faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore, faFileExport, faFileImport, faArrowRight, faArrowCircleRight, faAngleRight, faAt, faEquals, faNotEqual, faLink, faUnlink, faExternalLinkAlt, faHashtag
 );
 const app = createApp(App);
 const emitter = mitt();
-
+let defaultoptions = {treeName:'blocks-tree'}
 app.config.globalProperties.emitter = emitter;
 app.use(router)
 app.use(PrimeVue);
@@ -47,6 +48,7 @@ app.use(ToastService);
 app.use(i18n);
 app.use(VWave);
 app.use(vueDebounce);
+app.use(VueBlocksTree,defaultoptions)
 app.mount('#app');
 // Use Components
 app.component('ConfirmDialog', ConfirmDialog);
