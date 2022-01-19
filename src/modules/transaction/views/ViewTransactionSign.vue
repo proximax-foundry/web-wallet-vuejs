@@ -78,25 +78,22 @@
               </div>
             </div>
             <div v-if="innerTransactions.length > 0">
-              <div class="mt-10">Transactions ({{ innerTransactions.length }})</div>
+              <div class="mt-10">Transaction{{innerTransactions.length>1?'s':''}} ({{ innerTransactions.length }})</div>
               <div class="mt-3 border-2 border-gray-200 p-3" v-for="(item, index) in innerTransactionsSimple" :key="index">
-                <div class="text-sm flex justify-between cursor-pointer" @click="viewInnerTxn[index] = !viewInnerTxn[index]">{{ item.Inner }}<img src="@/modules/transaction/img/icon-down-caret-black.svg" class="mr-1 transition-all duration-200" :class="`${viewInnerTxn[index]?'rotate-180 transform':''}`"></div>
-                <transition name="slide">
-                  <div class="mt-4 table_div" v-if="viewInnerTxn[index]">
-                    <div>
-                      <div>Type</div>
-                      <div>{{ item.Type }}</div>
-                    </div>
-                    <div>
-                      <div>Public Key</div>
-                      <div>{{ item.PublicKey }}</div>
-                    </div>
-                    <div>
-                      <div>Signer</div>
-                      <div>{{ item.Address }}</div>
-                    </div>
+                <div class="mt-1 table_div">
+                  <div>
+                    <div>Type</div>
+                    <div>{{ item.Type }}</div>
                   </div>
-                </transition>
+                  <div>
+                    <div>Public Key</div>
+                    <div>{{ item.PublicKey }}</div>
+                  </div>
+                  <div>
+                    <div>Signer</div>
+                    <div>{{ item.Address }}</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -177,7 +174,11 @@ export default {
     currentName.value = currentAccount.name;
 
     const checkCosigner = ()=>{
+      console.log('allCosigners');
+      console.log(allCosigners);
       let foundCosigner = allCosigners.find(cosigner => cosigner === currentPublicKey);
+      console.log(currentPublicKey)
+      console.log(foundCosigner)
       if(foundCosigner === undefined){
         invalidCosigner.value = true;
       }
