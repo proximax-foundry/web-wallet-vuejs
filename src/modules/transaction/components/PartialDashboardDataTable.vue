@@ -87,6 +87,7 @@ import { networkState } from "@/state/networkState";
 import { walletState } from '@/state/walletState';
 import { Helper } from "@/util/typeHelper";
 import { DashboardService } from '@/modules/dashboard/service/dashboardService';
+import {AppState} from '@/state/appState'
 
 export default{
   components: {
@@ -152,9 +153,11 @@ export default{
       txnQueryParams.embedded = false;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
-      let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.PARTIAL, txnQueryParams);
-      let formattedTxns = await dashboardService.formatPartialMixedTxns(transactionSearchResult.transactions);
-      transactions.value = formattedTxns;
+      setTimeout(async() => {
+        let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.PARTIAL, txnQueryParams);
+        let formattedTxns = await dashboardService.formatPartialMixedTxns(transactionSearchResult.transactions);
+        transactions.value = formattedTxns;
+      }, 2500);
     };
 
     loadPartialTransactions();
@@ -176,6 +179,26 @@ export default{
       currentAddress.value = currentAccount.address;
       loadPartialTransactions();
     });
+
+    const init = ()=>{
+      updateAccountTransactionCount();
+      loadRecentTransactions();
+      loadRecentTransferTransactions();
+      updatePricing();
+      recentTransferTxn();
+    }
+
+    if(AppState.isReady){
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState.isReady, (value) => {
+        if(value){
+          init();
+          readyWatcher();
+        }
+      });
+    }
 
     return {
       wideScreen,
