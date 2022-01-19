@@ -160,16 +160,16 @@ export default {
 
     let aggregateTxn = null;
 
-    let allCosigners = [];
-    let pendingCosigners = [];
-    let innerOriginSigners = [];
-    let innerSignersList = [];
-    let innerSignersNameList = [];
-    let innerSignedList = [];
-    let innerRelatedList = [];
-    let cosignedSigner = [];
-    let oriSignedSigners = [];
-    let signedSigners = [];
+    let allCosigners = []; // hold all the final cosigners public Keys
+    let pendingCosigners = []; // pending final cosigners to sign
+    let innerOriginSigners = []; // the signer of each innerTxn
+    let innerSignersList = []; // the final signers of each innerTxn
+    let innerSignersNameList = []; // the signer name of each innerTxn, default - 'Signer'
+    let innerSignedList = []; // true, false list - innerTxn is fully signed
+    let innerRelatedList = []; // true, false list - related to current account
+    let cosignedSigner = []; // all the cosigned final signers, include multisig account (calculated)
+    let oriSignedSigners = []; // all the cosigned final signers + initiator
+    let signedSigners = []; // all the cosigned final signers + initiator, include multisig account (calculated)
 
     let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
     currentAddress.value = currentAccount.address;
@@ -270,6 +270,9 @@ export default {
             }
 
             signedSigners = Array.from(new Set(signedSigners));
+            let isSigned = flatCosigners.every((val) => signedSigners.includes(val));
+            innerSignedList.push(isSigned);
+            innerRelatedList.push(allDeepCosigners.includes(currentPublicKey));
             // currentInnerSigners = Array.from(new Set(currentInnerSigners));
           }
           else{
@@ -307,9 +310,9 @@ export default {
             }
 
             innerRelatedList.push(currentInnerSigners.includes(currentPublicKey));
-          }
 
-          innerSignedList.push(signedSigners.includes(innerSigner.publicKey));
+            innerSignedList.push(signedSigners.includes(innerSigner.publicKey));
+          }
           
           innerSignersList.push(currentInnerSigners);
           allCosigners = allCosigners.concat(currentInnerSigners);
