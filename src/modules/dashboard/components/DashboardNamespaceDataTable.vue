@@ -142,6 +142,7 @@ export default{
       let formattedNamespaces = [];
 
       if(namespaces.length > 0){
+
         for(let i=0; i < namespaces.length; ++i){
           let linkName = "";
 
