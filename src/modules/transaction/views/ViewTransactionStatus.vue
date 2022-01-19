@@ -33,6 +33,7 @@ import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
 import { DashboardService } from '@/modules/dashboard/service/dashboardService';
+import {AppState} from '@/state/appState'
 
 export default defineComponent({
   name: 'ViewTransactionStatus',
@@ -81,7 +82,21 @@ export default defineComponent({
       accountPartialTxnsCount.value = transactionsCount.partial;
     };
 
-    updateAccountTransactionCount();
+    const init = ()=>{
+      updateAccountTransactionCount();
+    }
+
+    if(AppState.isReady){
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState.isReady, (value) => {
+        if(value){
+          init();
+          readyWatcher();
+        }     
+      });
+    }
 
     emitter.on("TXN_UNCONFIRMED", (num) => {
       if(num> 0){
