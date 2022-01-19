@@ -129,11 +129,15 @@ export class CosignUtils{
         searchingCosigners = oriCosigners.concat(addedPublicKeys);
 
         for(let i =0; i < searchingCosigners.length; ++i){
-            let multisigGraphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(Address.createFromPublicKey(searchingCosigners[i], AppState.networkType));
+            try {
+                let multisigGraphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(Address.createFromPublicKey(searchingCosigners[i], AppState.networkType));
 
-            let allCosigner = CosignUtils.findAllLevelCosigners(multisigGraphInfo.multisigAccounts);
+                let allCosigner = CosignUtils.findAllLevelCosigners(multisigGraphInfo.multisigAccounts);
 
-            neededSigners = neededSigners.concat(allCosigner);
+                neededSigners = neededSigners.concat(allCosigner);
+            } catch (error) {
+                neededSigners.push(searchingCosigners[i]);
+            }
         }
 
         neededSigners = Array.from(new Set(neededSigners));
