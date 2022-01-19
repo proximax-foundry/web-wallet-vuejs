@@ -274,7 +274,7 @@ export default {
             let isSigned = flatCosigners.every((val) => signedSigners.includes(val));
             innerSignedList.push(isSigned);
             innerRelatedList.push(allDeepCosigners.includes(currentPublicKey));
-            // currentInnerSigners = Array.from(new Set(currentInnerSigners));
+            //currentInnerSigners = Array.from(new Set(currentInnerSigners));
           }
           else{
             try {
