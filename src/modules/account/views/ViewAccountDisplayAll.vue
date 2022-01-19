@@ -25,6 +25,7 @@ import AccountTile from '@/modules/account/components/AccountTile.vue';
 import { useToast } from "primevue/usetoast";
 import { walletState } from '@/state/walletState';
 import { networkState } from "@/state/networkState";
+import { AppState } from '@/state/appState';
 
 
 
@@ -129,7 +130,7 @@ export default {
           let childObject = []
           
           children.forEach(child=>{//each direct child
-            let grandchildAddresses = child.getMultisigAccountsAddress(networkState.currentNetworkProfile.network.type)// find each child's childen
+            let grandchildAddresses = child.getMultisigAccountsAddress(AppState.networkType)// find each child's childen
             let grandChildObject = [] 
             grandchildAddresses.forEach(address=>{//for each grandchild
               let acc = totalAcc.value.find(account=>account.address==address)
@@ -145,7 +146,7 @@ export default {
           let childObject = []
           
           children.forEach(child=>{//each direct child
-            let grandchildAddresses = child.getMultisigAccountsAddress(networkState.currentNetworkProfile.network.type)// find each child's childen
+            let grandchildAddresses = child.getMultisigAccountsAddress(AppState.networkType)// find each child's childen
             let grandChildObject = [] 
             grandchildAddresses.forEach(address=>{//for each child's children
               let acc = totalAcc.value.find(account=>account.address==address)

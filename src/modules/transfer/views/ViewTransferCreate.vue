@@ -149,6 +149,7 @@ import { NamespaceUtils } from '@/util/namespaceUtils';
 import SelectInputSender from "@/modules/transfer/components/SelectInputSender.vue";
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
+import { AppState } from '@/state/appState';
 export default { 
   name: "ViewTransferCreate",
   components: {
@@ -505,7 +506,7 @@ export default {
         !showBalanceErr.value
       );
     });
-  
+
   const mosaics = computed(() => {
     var mosaicOption = [];
     if(!walletState.currentLoggedInWallet){
@@ -521,7 +522,7 @@ export default {
     
         mosaicOption.push({
           val: i.idHex,
-          text: i.idHex + " >"+t('services.balance') +": " +Helper.amountFormatterSimple(i.amount,i.divisibility),
+          text: accountUtils.getNamespaceByAssetId(selectedAccAdd.value,i.idHex) + " >"+t('services.balance') +": " +Helper.amountFormatterSimple(i.amount,i.divisibility),
           id: index + 1,
         });
       });
@@ -661,6 +662,7 @@ export default {
         ).catch(err=>encryptedMsgDisable.value=true)
     } else {
       encryptedMsgDisable.value = true;
+      showAddressError.value=true
     }
   }
   const checkNamespace = async (nsId)=>{
@@ -695,7 +697,11 @@ export default {
       }
     }
   });
-  
+  const getMosaicBalanceById = (id) =>{
+    let accAddress = selectedAccAdd.value
+    let acc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==accAddress)? walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==accAddress):walletState.currentLoggedInWallet.others.find(acc=>acc.address==accAddress)
+    return acc.getAssetBalance(id)
+  }
   
   watch(encryptedMsgDisable, (n) => {
     if (!n) {
@@ -713,12 +719,14 @@ export default {
   });
 
    watch(() => [...selectedMosaic.value], (n) => {
-      for(let i = 0; i < selectedMosaic.value.length; i++){
-        if(selectedMosaic.value[i].amount> getSelectedMosaicBalance(i)){
+      for(let i = 0; i < n.length; i++){
+           if(n[i].amount> getMosaicBalanceById(n[i].id)){
           showAssetBalanceErr.value[i]= true
-        }else{
-          showAssetBalanceErr.value[i]= false
-        }
+          }else{
+            showAssetBalanceErr.value[i]= false
+          }
+         
+        
       }
     }, {deep:true});
   emitter.on("CLOSE_CONTACT_MODAL", (payload) => {
