@@ -5428,11 +5428,21 @@ export class DashboardService {
                 let recipientInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Recipient",
-                    value: transferFormat.recipient,
+                    value: Address.createFromRawAddress(transferFormat.recipient).pretty(),
                     short: shortName
                 };
 
                 infos.push(recipientInfo);
+
+                if(transferFormat.message){
+                    let msgInfo: TxnDetails = {
+                        type: MsgType.NONE,
+                        label: transferFormat.messageTypeTitle,
+                        value: transferFormat.messageType === MessageType.EncryptedMessage ? 'xxxxxx' : transferFormat.message,
+                    };
+    
+                    infos.push(msgInfo);
+                }
 
                 if(transferFormat.amountTransfer){
                     sdas.push(`${transferFormat.amountTransfer} ${AppState.nativeToken.label}`);
