@@ -163,7 +163,6 @@ export default{
           let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
           let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
           let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
-          let expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
 
           let expiryStatus;
           if(blockDifference > 0){
@@ -176,6 +175,29 @@ export default{
             expiryStatus = 'expired';
           }
 
+          let expiryDate;
+          if(expiryDay > 0 || expiryHour > 0 ||  expiryMin > 0){
+            expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
+          }else{
+            expiryDate = '-';
+            expiryStatus = 'valid';
+          }
+
+          let expiryRelativeTimeEstimate;
+          if(currentBlockHeight){
+            if(blockDifference > 0){
+              expiryRelativeTimeEstimate = 'In ' + relativeTime(expiryDay, expiryHour, expiryMin);
+            }else{
+              if(expiryDate != '-'){
+                expiryRelativeTimeEstimate = 'Expired';
+              }else{
+                expiryRelativeTimeEstimate = '-';
+              }
+            }
+          }else{
+            expiryRelativeTimeEstimate = '';
+          }
+
           let data = {
             i: i,
             idHex: namespaces[i].idHex,
@@ -184,7 +206,7 @@ export default{
             linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
             endHeight: namespaces[i].endHeight,
             expiring: expiryStatus,
-            expiryRelative: currentBlockHeight?((blockDifference > 0)?'In ' + relativeTime(expiryDay, expiryHour, expiryMin):'Expired'):'',
+            expiryRelative: expiryRelativeTimeEstimate,
             expiry: currentBlockHeight?expiryDate:'',
             explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].idHex,
             address: Helper.createAddress(account.address).pretty()
