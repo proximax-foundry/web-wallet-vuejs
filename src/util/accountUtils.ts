@@ -78,26 +78,6 @@ const getNamespacesListByAddress = (address: string) :Namespace [] => {
   return namespacelist;
 }
 
-const getNamespaceByAssetId= (address: string,assetId: string) :string=> {
-  let namespacelist = getNamespacesListByAddress(address);
- let name = ""
-  if (namespacelist.length > 0) {
-    namespacelist.forEach((namespaceElement) => {
-        if (namespaceElement.linkType == 1) {
-          if(namespaceElement.linkedId == assetId){
-            name = namespaceElement.name
-          }
-        } 
-    });
-  }
-  if(name!=""){
-    return name
-  }else{
-    return assetId;
-  }
-  
-}
-
 const getContact = () => {
   const wallet = walletState.currentLoggedInWallet;
     let contact = [];
@@ -439,7 +419,6 @@ export const accountUtils = readonly({
   linkAddressToNamespace,
   createDelegatTransaction,
   getValidAccount,
-  getNamespaceByAssetId
   //getAccInfo
   //getAccInfoFromPrivateKey
 });

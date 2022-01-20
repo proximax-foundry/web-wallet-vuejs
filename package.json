@@ -57,6 +57,7 @@
     "vue-password": "^3.0.0",
     "vue-router": "^4.0.0-0",
     "vue-tippy": "^6.0.0-alpha.29",
+    "vue3-blocks-tree": "^0.6.1",
     "vue3-simple-file-input": "^1.0.3"
   },
   "devDependencies": {

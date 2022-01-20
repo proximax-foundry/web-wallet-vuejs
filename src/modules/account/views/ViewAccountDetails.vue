@@ -39,10 +39,10 @@
           <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
           <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
           <div class='flex ml-auto gap-6 '>
-            <router-link :to='{name:"ViewTransferCreate"}' class='flex cursor-pointer'>
+            <!-- <router-link :to='{name:"ViewTransferCreate"}' class='flex cursor-pointer'>
               <img src="@/assets/img/icon-transfer.svg" class=" w-5 h-5 mt-0.5  cursor-pointer mr-1">
               <div class='text-xs mt-1 font-semibold '>Transfer {{currentNativeTokenName}}</div>
-            </router-link>
+            </router-link> -->
             <!-- <a v-if="networkState.chainNetwork == 0" href="https://www.proximax.io/en/xpx" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
               <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
               <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>

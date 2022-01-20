@@ -519,10 +519,9 @@ export default {
     if (account.assets.length > 0) {
       
       account.assets.forEach((i, index) => {
-    
         mosaicOption.push({
           val: i.idHex,
-          text: accountUtils.getNamespaceByAssetId(selectedAccAdd.value,i.idHex) + " >"+t('services.balance') +": " +Helper.amountFormatterSimple(i.amount,i.divisibility),
+          text: (i.namespaceNames.length>0?i.namespaceNames:i.idHex) + " >"+t('services.balance') +": " +Helper.amountFormatterSimple(i.amount,i.divisibility),
           id: index + 1,
         });
       });
