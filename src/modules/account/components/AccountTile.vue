@@ -33,13 +33,15 @@
       <!-- <router-link class="ml-auto mt-auto mb-auto" :to="{ name: 'ViewAccountDetails', params: { address: account.address }}">
         <img src="@/assets/img/chevron_right.svg" class="w-5 h-5 ">
       </router-link> -->
-      <div class="ml-auto mt-auto mb-auto">
-        <img src="@/assets/img/navi/icon-default-account-drop-down.svg" class="h-6 w-6 cursor-pointer" @click="displayDefaultAccountMenu =!displayDefaultAccountMenu ">
-        <div v-if="displayDefaultAccountMenu" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+      <div class="ml-auto mt-auto mb-auto ">
+        <img src="@/assets/img/navi/icon-default-account-drop-down.svg" class=" h-6 w-6 cursor-pointer" @click="displayDefaultAccountMenu =!displayDefaultAccountMenu ">
+        <div class="relative">
+          <div v-if="displayDefaultAccountMenu" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
           <div role="none" class="my-2">
             <router-link :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Details</router-link>
-            <router-link :to="{ name: 'ViewMultisigHome', params: { name: accountName}}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Multisig</router-link>
-            <router-link :to="{ name: 'ViewMultisigScheme', params: { address: account.address}}" @click="displayDefaultAccountMenu = false" v-if="isMultiSig" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Scheme</router-link>
+            <router-link v-if="!otheraccount(account.address) ||( otheraccount(account.address) && multisig_add!='')" :to="{ name: 'ViewMultisigHome', params: { name: accountName}}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Multisig</router-link>
+            <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">Multisig</div>
+            <router-link  :to="{ name: 'ViewMultisigScheme', params: { address: account.address}}" @click="displayDefaultAccountMenu = false" v-if="isMultiSig" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Scheme</router-link>
             <div  v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">Scheme</div>
             <router-link :to="{ name: 'ViewAccountSwap', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Swap</router-link>
             <router-link v-if="!otheraccount(account.address)" :to="{ name: 'ViewAccountDelegate', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Delegate</router-link>
@@ -47,6 +49,7 @@
             <router-link v-if="!otheraccount(account.address) ||( otheraccount(account.address) && multisig_add!='')" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: account.address}}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Namespace</router-link>
             <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">Namespace</div>
           </div>
+        </div>
         </div>
       </div>
     </div>
@@ -269,3 +272,19 @@ export default{
   },
 }
 </script>
+<style scoped>
+.pop-option:after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: -6px;
+  right: 10px;
+  width: 10px;
+  height: 10px;
+  background: #FFFFFF;
+  border-left:1px solid #E4E4E4;
+  border-top:1px solid #E4E4E4;
+  -moz-transform:rotate(45deg);
+  -webkit-transform:rotate(45deg);
+}
+</style>

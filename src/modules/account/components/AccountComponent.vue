@@ -67,12 +67,7 @@ setup(p){
     });  
     const accountName = ref(acc.name);
     const accountNameDisplay = computed(()=>{
-      const contact = walletState.currentLoggedInWallet.contacts.find((contact) => contact.address == p.address);
-      if(contact){
-        return contact.name;
-      }else{
-        return acc.name;
-      }
+      return walletState.currentLoggedInWallet.convertAddressToName(p.address,true)
     });
     const svgString = ref(toSvg(acc.address, 100, themeConfig.jdenticonConfig));    
     const showName = ref(true);

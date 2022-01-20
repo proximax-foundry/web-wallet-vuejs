@@ -70,6 +70,7 @@ import {Address, PublicAccount} from  "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
+import { AppState } from '@/state/appState';
 export default {
     name: "ViewMultisigHome",
     props: {
@@ -91,15 +92,21 @@ export default {
       }
       const isMultisig = ref(false) 
       const isCosigner = ref(false)
-      const networkType = networkState.currentNetworkProfile.network.type
+      const networkType = AppState.networkType
       const convertAddress = publicKey =>{ 
         return Address.createFromPublicKey(publicKey, networkType)
       }
       const findAccount = publicKey =>{
-        return walletState.currentLoggedInWallet.accounts.find(account=>account.address == convertAddress(publicKey).plain())
+        return walletState.currentLoggedInWallet.accounts.find(account=>account.address == convertAddress(publicKey).plain())?walletState.currentLoggedInWallet.accounts.find(account=>account.address == convertAddress(publicKey).plain()): walletState.currentLoggedInWallet.others.find(account=>account.address == convertAddress(publicKey).plain())
       }
       const getAccountName = (publicKey) =>{
-        return findAccount(publicKey) ? findAccount(publicKey).name : `Cosigner-${convertAddress(publicKey).plain().substr(-4)}`
+        const address = PublicAccount.createFromPublicKey(publicKey,networkType).address.plain()
+        const contact = walletState.currentLoggedInWallet.contacts.find((contact) => contact.address==address);
+        if (contact){
+          return contact.name
+        }else{
+          return findAccount(publicKey) ? findAccount(publicKey).name : `Cosigner-${convertAddress(publicKey).plain().substr(-4)}`
+        }
       }
       let multisigAccountsList = computed(()=>{
         let multisigAccountsList= []

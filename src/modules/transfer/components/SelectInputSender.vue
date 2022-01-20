@@ -56,7 +56,7 @@ setup(p){
       concatOther.forEach(account => {
         accountList.push({
           value: account.address,
-          label: account.name,
+          label: walletState.currentLoggedInWallet.convertAddressToName(account.address,true)
         });
       });
       
