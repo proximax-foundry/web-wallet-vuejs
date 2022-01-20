@@ -78,12 +78,52 @@
               </div>
             </div>
             <div v-if="innerTransactions.length > 0">
-              <div class="mt-10">Transaction{{innerTransactions.length>1?'s':''}} ({{ innerTransactions.length }})</div>
-              <div class="mt-3 border-2 border-gray-200 p-3" v-for="(item, index) in innerTransactionsSimple" :key="index">
-                <div class="mt-1 table_div">
-                  <div>
-                    <div>Type</div>
-                    <div>{{ item.Type }}</div>
+              <div class="mt-10">Transactions ({{ innerTransactions.length }})</div>
+              <div class="mt-3 border-2 border-gray-200 p-3" v-for="(item, index) in innerTransactions" :key="index">
+                <transition name="slide">
+                  <div class="mt-4 table_div" :class="innerRelatedList[index] ? 'border-4 border-yellow-400' :'border-2 border-slate-600'">
+                    <div>
+                      <div>Type</div>
+                      <div>{{ item.typeName }}</div>
+                    </div>
+                    <div>
+                      <div>Signer Public Key</div>
+                      <div>{{ item.signer }}</div>
+                    </div>
+                    <div>
+                      <div>Signer</div>
+                      <div>{{ convertName(item.signerAddressPlain) }}</div>
+                    </div>
+                    <div>
+                      <div>Fully signed</div>
+                      <div>{{ innerSignedList[index] }}</div>
+                    </div>
+                    <div v-for="(info, infoListindex) in item.infoList" :key="infoListindex">
+                      <div>{{ info.label ? info.label : '' }}</div>
+                      <div>{{ info.short ? info.short : info.value }}</div>
+                    </div>
+                    <div v-if="item.infoGreenList.length > 0">
+                      <div v-if="item.legendType === InnerTxnLegendType.ADD_REMOVE" >Add</div>
+                      <div v-else-if="item.legendType === InnerTxnLegendType.TRUE_FALSE" >True</div>
+                      <div v-else-if="item.legendType === InnerTxnLegendType.BUY_SELL" >Buy</div>
+                      <div v-else-if="item.legendType === InnerTxnLegendType.ALLOW_BLOCK" >Allow</div>
+                      <div>{{ item.infoGreenList.map(info => info.short ? info.short : info.value).join(", ") }}</div>
+                    </div>
+                    <div v-if="item.infoRedList.length > 0">
+                      <div v-if="item.legendType === InnerTxnLegendType.ADD_REMOVE" >Remove</div>
+                      <div v-else-if="item.legendType === InnerTxnLegendType.TRUE_FALSE" >False</div>
+                      <div v-else-if="item.legendType === InnerTxnLegendType.BUY_SELL" >Sell</div>
+                      <div v-else-if="item.legendType === InnerTxnLegendType.ALLOW_BLOCK" >Block</div>
+                      <div>{{ item.infoRedList.map(info => info.short ? info.short : info.value).join(", ") }}</div>
+                    </div>
+                    <div v-if="item.infoInfoList.length > 0">
+                      <div>Info</div>
+                      <div>{{ item.infoInfoList.map(info => info.short ? info.short : info.value).join(", ") }}</div>
+                    </div>
+                    <div v-if="item.sdas.length > 0">
+                      <div>SDAs</div>
+                      <div>{{ item.sdas.join("<br>") }}</div>
+                    </div>
                   </div>
                   <div>
                     <div>Public Key</div>
@@ -117,7 +157,7 @@ import { networkState } from "@/state/networkState";
 import { WalletUtils } from "@/util/walletUtils";
 import { useI18n } from 'vue-i18n';
 import CosignPasswordModal from '@/modules/transaction/components/CosignPasswordModal.vue'
-import { DashboardService } from '@/modules/dashboard/service/dashboardService';
+import { DashboardService, InnerTxnLegendType, MsgType } from '@/modules/dashboard/service/dashboardService';
 import { TransactionUtils } from '@/util/transactionUtils';
 import { CosignUtils } from '@/util/cosignUtils';
 
@@ -233,6 +273,12 @@ export default {
           }
 
           innerTransactionsSimple.value.push(simpleData);
+
+          extractedData.infoInfoList = extractedData.infos.filter(info => !info.label && info.type === MsgType.INFO);
+          extractedData.infoGreenList = extractedData.infos.filter(info => !info.label && info.type === MsgType.GREEN);
+          extractedData.infoRedList = extractedData.infos.filter(info => !info.label && info.type === MsgType.RED);
+          extractedData.infoList = extractedData.infos.filter(info => info.type === MsgType.NONE);
+
           allInnerTransactions.push(extractedData);
           console.log(extractedData);
           let innerSigner = castedAggregateTxn.innerTransactions[i].signer;
@@ -342,6 +388,10 @@ export default {
       }
     }
 
+    const convertName = (address) =>{
+      return walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.convertAddressToNamePretty(address) : address;
+    }
+
     const init = ()=>{
       loadPartialTransaction();
     }
@@ -388,7 +438,9 @@ export default {
       isSigned,
       innerRelatedList,
       innerSignedList,
-      innerSignersNameList
+      innerSignersNameList,
+      convertName,
+      InnerTxnLegendType
     };
   }
 };
