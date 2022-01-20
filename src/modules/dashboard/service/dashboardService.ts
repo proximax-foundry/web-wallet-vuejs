@@ -5060,10 +5060,12 @@ export class DashboardService {
 
                 for(let i =0; i < modifyMultisigFormat.addedCosigner.length; ++i){
                     let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.addedCosigner[i], AppState.networkType)
+                    let tryShortName = this.wallet.convertAddressToName(publicAccount.address.plain());
+                    let shortName = tryShortName === publicAccount.address.plain() ? '' : tryShortName;
                     let addCosignerInfo: TxnDetails = {
                         type: MsgType.GREEN,
                         value: modifyMultisigFormat.addedCosigner[i],
-                        short: this.wallet.convertAddressToName(publicAccount.address.plain())
+                        short: shortName
                     };
     
                     infos.push(addCosignerInfo); 
@@ -5423,6 +5425,9 @@ export class DashboardService {
                 
                 if(shortName === transferFormat.recipient && transferFormat.recipientNamespaceName){
                     shortName = transferFormat.recipientNamespaceName;
+                }
+                else if(shortName === transferFormat.recipient){
+                    shortName = '';
                 }
 
                 let recipientInfo: TxnDetails = {
