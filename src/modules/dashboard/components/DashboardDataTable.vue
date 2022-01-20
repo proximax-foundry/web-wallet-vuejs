@@ -18,12 +18,12 @@
           </div>
         </template>
       </Column>
-      <Column field="typeName" header="TX HASH" headerStyle="width:100px">
+      <Column field="hash" header="TX HASH" headerStyle="width:100px">
         <template #body="{data}">
           <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="typeName" header="TIMESTAMP" headerStyle="width:110px">
+      <Column field="formattedDeadline" header="TIMESTAMP" headerStyle="width:110px">
         <template #body="{data}">
           <span class="text-txs">{{data.formattedDeadline}}</span>
         </template>
@@ -97,10 +97,8 @@ import { defineComponent } from 'vue';
 import { getCurrentInstance, ref, computed, watch } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import {FilterMatchMode} from 'primevue/api';
 import { networkState } from "@/state/networkState";
 import Tooltip from 'primevue/tooltip';
-import { TipType} from '../model/dashboardClasses'
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";

@@ -5,8 +5,8 @@
         <AssetDataTable class="mt-10 w-full" :key="walletState" :address="address"></AssetDataTable>
         <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="mt-10 lg:mt-0 bg-blue-primary px-5 py-3 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-44"><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2"> Create New Asset</router-link>
       </div>
-      <div v-else>
-        <div class="flex justify-between text-sm">
+      <div v-else class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
+        <div class="flex justify-between text-sm mb-5">
           <div><span class="text-gray-700">{{$t('services.assets')}}</span></div>
         </div>
         <div class="border border-gray-200 filter drop-shadow-xl py-2 sm:py-14 px-2 sm:px-28 text-center bg-white">

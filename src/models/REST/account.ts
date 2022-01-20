@@ -4,7 +4,7 @@ import {
     MultisigAccountGraphInfo, MultisigAccountInfo,
     AccountInfo,
     AggregateTransaction, Transaction, 
-    AccountRestrictionsInfo, AccountNames
+    AccountRestrictionsInfo, AccountNames, TransactionQueryParams
 } from "tsjs-xpx-chain-sdk";
 
 export class AccountAPI {
@@ -19,7 +19,7 @@ export class AccountAPI {
         return this.accountHttp.getAccountInfo(address).toPromise();
     }
 
-    aggregateBondedTransactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<AggregateTransaction[]>{
+    aggregateBondedTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<AggregateTransaction[]>{
 
         return this.accountHttp.aggregateBondedTransactions(publicAccount, queryParams).toPromise();
     }
@@ -54,22 +54,22 @@ export class AccountAPI {
         return this.accountHttp.getMultisigAccountInfo(address).toPromise();
     }
 
-    transactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<Transaction[]>{
+    transactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]>{
 
         return this.accountHttp.transactions(publicAccount, queryParams).toPromise();
     }
 
-    incomingTransactions(accountId: Address | PublicAccount, queryParams?: QueryParams): Promise<Transaction[]>{
+    incomingTransactions(accountId: Address | PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]>{
 
         return this.accountHttp.incomingTransactions(accountId, queryParams).toPromise();
     }
 
-    outgoingTransactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<Transaction[]>{
+    outgoingTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]>{
 
         return this.accountHttp.outgoingTransactions(publicAccount, queryParams).toPromise();
     }
 
-    unconfirmedTransactions(publicAccount: PublicAccount, queryParams?: QueryParams): Promise<Transaction[]>{
+    unconfirmedTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]>{
 
         return this.accountHttp.unconfirmedTransactions(publicAccount, queryParams).toPromise();
     }

@@ -8,8 +8,8 @@ export class Asset{
     expirationBlock: number | null = null;
     supplyMutable: boolean;
     transferable: boolean;
-    owner: string | null;
-    namespaceId: string[] = []; 
+    owner: string | null; 
+    namespaceNames: string[] = []; 
     height: number = 0;
 
     constructor(idHex: string, divisibility: number, supplyMutable: boolean, transferable: boolean, owner?: string){
@@ -25,7 +25,7 @@ export class Asset{
 
         newAsset.duration = this.duration;
         newAsset.expirationBlock = this.expirationBlock;
-        newAsset.namespaceId = this.namespaceId;
+        newAsset.namespaceNames = this.namespaceNames;
         newAsset.supply = this.supply;
         newAsset.amount = this.amount;
         newAsset.height = this.height;

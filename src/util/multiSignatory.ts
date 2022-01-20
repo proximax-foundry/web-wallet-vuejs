@@ -16,7 +16,7 @@ import {
   AccountInfo, 
   Password,
   MultisigAccountGraphInfo,
-
+  SignedTransaction,
 } from "tsjs-xpx-chain-sdk";
 
 //line 483,485
@@ -47,12 +47,13 @@ function verifyContactPublicKey(address :string) :Promise<{status: boolean, publ
       },
       (error) => {
         console.warn('Err: ' + error);
+        resolve({status:false,publicKey: ""})
       }
     );
   });
 }
 
-function generateContact(selected :string,name: string) :string[]{
+function generateContact(selected :string,name: string) :{value: string,label:string}[]{
   const wallet = walletState.currentLoggedInWallet
   let contact = [];
   let accounts = wallet.accounts.filter(account => account.name!= name)
@@ -61,7 +62,7 @@ function generateContact(selected :string,name: string) :string[]{
 
     }else{
       contact.push({
-        value: element.address,
+        value: element.publicKey,
         label: element.name + ' - Owner account',
       });
     }
@@ -121,8 +122,8 @@ async function convertAccount(coSign :string[], numApproveTransaction :number, n
         let address = Address.createFromRawAddress(cosignKey);
 
         try {
-          let publicKey;
-          publicKey = await getPublicKey(address);
+          /* let publicKey; */
+          let publicKey = await getPublicKey(address);
           cosignatory = PublicAccount.createFromPublicKey(publicKey, networkType);
         } catch (error) {
           console.log(error);
@@ -270,119 +271,228 @@ function checkHasMultiSig(accountAddress :string) :boolean{
 }
 
 
+function getCosignerInWallet(publicKey :string) :{hasCosigner:boolean,cosignerList:any[]}{
+  let accounts = walletState.currentLoggedInWallet.accounts.map(
+    (acc)=>{ 
+      return { 
+        publicKey: acc.publicKey,
+        isMultisig: acc.getDirectParentMultisig().length ? true: false,
+        multisigInfo: acc.multisigInfo,
+      }; 
+    });
+    
+   let otherAccounts =walletState.currentLoggedInWallet.others.filter((acc)=> acc.type === "MULTISIG").map(
+    (acc)=>{ 
+      return { 
+        publicKey: acc.publicKey,
+        isMultisig: true,
+        multisigInfo: acc.multisigInfo,
+      }; 
+    });
 
-
-
+    let totalAcc = accounts.concat(otherAccounts);
+    let foundAcc = totalAcc.find(acc=>acc.publicKey==publicKey) 
+    let allTopCosignerList = []
+    totalAcc.forEach(acc=>{
+      if (!acc.isMultisig && acc.multisigInfo.filter(acc=>acc.level==-1).length>0){
+        allTopCosignerList.push(acc)
+      }
+    })
+    
+    let level3 = foundAcc.multisigInfo.filter(acc=>acc.level==3)
+    let level2 = foundAcc.multisigInfo.filter(acc=>acc.level==2)
+    let level1 = foundAcc.multisigInfo.filter(acc=>acc.level==1)
+    
+    let filteredCosignerList = []
+    level3.forEach(info=>{
+      allTopCosignerList.forEach(acc=>{
+        if (acc.publicKey==info.publicKey){
+          filteredCosignerList.push(info.publicKey)
+        }
+      })
+    })
+    level2.forEach(info=>{
+      allTopCosignerList.forEach(acc=>{
+        if (acc.publicKey==info.publicKey){
+          filteredCosignerList.push(info.publicKey)
+        }
+      })
+    })
+    level1.forEach(info=>{
+      allTopCosignerList.forEach(acc=>{
+        if (acc.publicKey==info.publicKey){
+          filteredCosignerList.push(info.publicKey)
+        }
+      })
+    })
+    let hasCosigner = false
+    if(filteredCosignerList.length>0){
+      hasCosigner=true
+    }
+    return {hasCosigner:hasCosigner,cosignerList:filteredCosignerList}
+}
 
 // modify multisig
-function modifyMultisigAccount(coSign :string[], removeCosign :string[], numApproveTransaction :number, numDeleteUser :number, cosigners :{address :string}[] , multisigAccount :WalletAccount, walletPassword :string) :boolean {
+async function modifyMultisigAccount(coSign :string[], removeCosign :string[], numApproveTransaction :number, numDeleteUser :number, cosigners :{address :string}[] , multisigAccount :WalletAccount, walletPassword :string) :Promise<boolean> {
 
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPassword);
   if (! verify) {
-    return verify;
+    return verify
   }
 
   const generationHash = networkState.currentNetworkProfile.generationHash
 
- 
-    const multisigCosignatory = [];
-    let coSigner = [];
-    const networkType = networkState.currentNetworkProfile.network.type;
-    if (cosigners.length > 0) {
-      cosigners.forEach((signer) => {
-        const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.address === signer.address)
-        let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
-        coSigner.push(Account.createFromPrivateKey(privateKey, networkType));
-      });
-    }
+  const multisigCosignatory = [];
 
-    const cosignatory = [];
-    coSign.forEach(async (cosignKey, index) => {
-      if (cosignKey.length == 64) {
-        cosignatory[index] = PublicAccount.createFromPublicKey(cosignKey, networkType);
-      } else if (cosignKey.length == 40 || cosignKey.length == 46) {
-        // option to accept address
-        let address = Address.createFromRawAddress(cosignKey);
+  const networkType = networkState.currentNetworkProfile.network.type;
 
-        try {
-          let publicKey;
-          publicKey = await getPublicKey(address);
-          cosignatory[index] = PublicAccount.createFromPublicKey(publicKey, networkType);
-        } catch (error) {
-          console.log(error);
-        }
+  const cosignatory :PublicAccount[]=[] 
+  for(let [index,cosignKey] of coSign.entries() ){
+    if (cosignKey.length == 64) { 
+      cosignatory[index] = PublicAccount.createFromPublicKey(cosignKey, networkType);
+    } else if (cosignKey.length == 40 || cosignKey.length == 46) {
+      // option to accept address
+      let address = Address.createFromRawAddress(cosignKey);
+
+      try {
+        let publicKey;
+        publicKey = await getPublicKey(address); 
+        
+        cosignatory[index] = PublicAccount.createFromPublicKey(publicKey, networkType);
+      } catch (error) {
+        console.log(error);
+        //toast?
       }
-
-      multisigCosignatory.push(new MultisigCosignatoryModification(
-        MultisigCosignatoryModificationType.Add,
-        cosignatory[index],
-      ));
-    });
-
-    removeCosign.forEach((element, index) => {
-      cosignatory[coSign.length + index] = PublicAccount.createFromPublicKey(element, networkType);
-      multisigCosignatory.push(new MultisigCosignatoryModification(
-        MultisigCosignatoryModificationType.Remove,
-        cosignatory[coSign.length + index],
-      ));
-    });
-
-    let relativeNumApproveTransaction = numApproveTransaction - multisigAccount.multisigInfo.find(element => element.level === 0).minApproval;
-    let relativeNumDeleteUser = numDeleteUser - multisigAccount.multisigInfo.find(element => element.level === 0).minRemoval
-    console.log(relativeNumApproveTransaction)
-    console.log(relativeNumDeleteUser)
-    const convertIntoMultisigTransaction = ModifyMultisigAccountTransaction.create(
-      Deadline.create(),
-      relativeNumApproveTransaction,
-      relativeNumDeleteUser,
-      multisigCosignatory,
-      networkType
-    );
-
-    const aggregateTransaction = AggregateTransaction.createBonded(
-      Deadline.create(),
-      [convertIntoMultisigTransaction.toAggregate(PublicAccount.createFromPublicKey(multisigAccount.publicKey,networkState.currentNetworkProfile.network.type))],
-      networkType
-    );
-
-    if (coSigner.length > 0) {
-      let transactions = [];
-      coSigner.forEach((coSignerAccount) => {
-        const signedAggregateBoundedTransaction = coSignerAccount.sign(aggregateTransaction, generationHash);
-
-        const lockFundsTransaction = LockFundsTransaction.create(
-          Deadline.create(),
-          NetworkCurrencyMosaic.createRelative(10),
-          UInt64.fromUint(1000),
-          signedAggregateBoundedTransaction,
-          networkType
-        );
-
-        const lockFundsTransactionSigned = coSignerAccount.sign(lockFundsTransaction, generationHash);
-
-        transactions.push({ coSignerAccount: coSignerAccount, signedAggregateBoundedTransaction: signedAggregateBoundedTransaction, lockFundsTransactionSigned: lockFundsTransactionSigned });
-      });
-
-      const transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
-      (async () => {
-        try {
-          for (const transaction of transactions) {
-            let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(transaction.lockFundsTransactionSigned);
-            hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock + 1;
-            let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(transaction.signedAggregateBoundedTransaction);
-            autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(transaction.lockFundsTransactionSigned.hash);
-            autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
-            autoAnnounceSignedTx.type = AnnounceType.BONDED;
-            ListenerStateUtils.addAutoAnnounceSignedTransaction(hashLockAutoAnnounceSignedTx);
-            ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      })();
-    return verify
     }
+
+    multisigCosignatory.push(new MultisigCosignatoryModification(
+      MultisigCosignatoryModificationType.Add,
+      cosignatory[index],
+    ));
+  }
+
+  removeCosign.forEach((element, index) => {
+    cosignatory[coSign.length + index] = PublicAccount.createFromPublicKey(element, networkType);
+    multisigCosignatory.push(new MultisigCosignatoryModification(
+      MultisigCosignatoryModificationType.Remove,
+      cosignatory[coSign.length + index],
+    ));
+  });
+  let relativeNumApproveTransaction = numApproveTransaction - multisigAccount.multisigInfo.find(element => element.level === 0).minApproval;
+  let relativeNumDeleteUser = numDeleteUser - multisigAccount.multisigInfo.find(element => element.level === 0).minRemoval
+  console.log(relativeNumApproveTransaction)
+  console.log(relativeNumDeleteUser)
+  const modifyMultisigTransaction = ModifyMultisigAccountTransaction.create(
+    Deadline.create(),
+    relativeNumApproveTransaction,
+    relativeNumDeleteUser,
+    multisigCosignatory,
+    networkType
+  );
+
+  let aggregateTransaction = AggregateTransaction.createBonded(
+    Deadline.create(),
+    [modifyMultisigTransaction.toAggregate(PublicAccount.createFromPublicKey(multisigAccount.publicKey,networkType))],
+    networkType
+  );
+
  
+  
+  let enoughSigner= false
+  
+  //check if all cosigners are in wallet and they are non multisig
+  let count = Math.max(multisigAccount.multisigInfo.find(acc=>acc.level==0).minApproval,multisigAccount.multisigInfo.find(acc=>acc.level==0).minRemoval) 
+  if (count<=cosigners.length){
+    enoughSigner = true
+  }
+  let number =0
+  let addedCosignInWallet = false
+  for(let signer of coSign){
+    let findAcc =  walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === signer)
+    if(findAcc!=undefined){
+      number++
+    }
+  } 
+  if(number==coSign.length){
+    addedCosignInWallet=true
+  }
+  let coSigner :Account[] = [];
+
+  cosigners.forEach((signer) => {
+    const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.address === signer.address)
+    let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
+    coSigner.push(Account.createFromPrivateKey(privateKey, networkType));
+  });
+  
+  
+  if (enoughSigner&&addedCosignInWallet) {//aggregate complete
+    let firstCosigner = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==coSigner[0].address.plain()) 
+    let cosignerPrivateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), firstCosigner.encrypted, firstCosigner.iv);
+    coSigner.splice(0,1)
+    let account = Account.createFromPrivateKey(cosignerPrivateKey,networkType)
+    coSign.forEach(signer=>{
+      const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === signer)
+      let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
+      coSigner.push(Account.createFromPrivateKey(privateKey, networkType));
+    })
+    
+
+    aggregateTransaction = AggregateTransaction.createComplete(
+      Deadline.create(),
+      [modifyMultisigTransaction.toAggregate(PublicAccount.createFromPublicKey(multisigAccount.publicKey,networkType))],
+      networkType,
+      []
+    )
+    let signedAggregateCompleteTransaction = account.signTransactionWithCosignatories(
+      aggregateTransaction,coSigner,generationHash
+    )
+    let transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
+    transactionHttp
+    .announce(signedAggregateCompleteTransaction)
+    .subscribe(x => console.log(x), err => console.error(err))
+    
+  }else{ //aggregate bonded
+
+    /* let aggregateTransaction = AggregateTransaction.createBonded(
+      Deadline.create(),
+      [modifyMultisigTransaction.toAggregate(PublicAccount.createFromPublicKey(multisigAccount.publicKey,networkType))],
+      networkType
+    ); */
+    let transactions :{signedAggregateBondedTransaction:SignedTransaction,lockFundsTransactionSigned:SignedTransaction}[] = [];
+    
+    coSigner.forEach((coSignerAccount) => {
+      const signedAggregateBondedTransaction = coSignerAccount.sign(aggregateTransaction, generationHash);
+      
+      const lockFundsTransaction = LockFundsTransaction.create(
+        Deadline.create(),
+        NetworkCurrencyMosaic.createRelative(10),
+        UInt64.fromUint(1000),
+        signedAggregateBondedTransaction,
+        networkType
+      );
+
+      const lockFundsTransactionSigned = coSignerAccount.sign(lockFundsTransaction, generationHash);
+
+      transactions.push({ signedAggregateBondedTransaction: signedAggregateBondedTransaction, lockFundsTransactionSigned: lockFundsTransactionSigned });
+    });
+    
+  
+    for (const transaction of transactions) {
+      let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(transaction.lockFundsTransactionSigned);
+      hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock + 1;
+      let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(transaction.signedAggregateBondedTransaction);
+      autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(transaction.lockFundsTransactionSigned.hash);
+      autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
+      autoAnnounceSignedTx.type = AnnounceType.BONDED;
+      ListenerStateUtils.addAutoAnnounceSignedTransaction(hashLockAutoAnnounceSignedTx);
+      ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
+    }
+  }
+  
+    
+  
+  
+  return verify
 }
 
  
@@ -423,6 +533,7 @@ function modifyMultisigAccount(coSign :string[], removeCosign :string[], numAppr
 
 export const multiSign = readonly({
   // config,
+  getCosignerInWallet,
   getPublicKey,
   generateContact,
   verifyContactPublicKey,

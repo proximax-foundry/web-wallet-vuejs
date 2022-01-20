@@ -17,6 +17,6 @@ export const networkState = reactive<networkStateInterface>({
     currentNetworkProfile: null,
     currentNetworkProfileConfig: null,
     selectedAPIEndpoint: "",
-    availableNetworks: ChainProfileNames.createDefault().names,
+    availableNetworks: ChainProfileNames.createDefault().names.map(val => val.name),
     blockHeight: 0
 });

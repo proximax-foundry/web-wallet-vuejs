@@ -23,10 +23,14 @@
               <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
             </div>
           </div>
-          <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" ref="nsRef" v-model="selectNamespace" :address="selectedAccAdd" class="mt-5" :disabled="disableSelectNamespace" />
+          <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace" ref="nsRef" v-model="selectNamespace" :address="selectedAccAdd" class="mt-5" :disabled="disableSelectNamespace" />
           <div class="lg:grid lg:grid-cols-2 mt-5">
-            <div class="mb-5 lg:mb-0 lg:mr-2"><TextInputTooltip :disabled="disableNamespaceName" placeholder="Name" errorMessage="Fill in a valid name" v-model="namespaceName" icon="id-card-alt" :showError="showNamespaceNameError" class="w-full inline-block" toolTip="A namespace can have a maximium length of 16 alphanumerical characters while sub-namespaces can have a maximium length of 64 alphanumerical characters.<br><br>Three layers can be created. A namespace can have a subnamespace, and a subnamespace can have its own subnamespace (e.g., test1.test2.test3).<br><br>Certain phrases are already reserved." /></div>
-            <div class="mb-5 lg:mb-0 lg:ml-2"><DurationInputClean :disabled="disabledDuration" v-model="duration" :max="365" placeholder="Duration (number of days)" :showError="showDurationErr" errorMessage="Required Field - Only Numbers (0 - 6)" toolTip="Maximum rental duration is<br>1 year (365 days)." /></div>
+            <div class="mb-5 lg:mb-0 lg:mr-2">
+              <TextInputTooltip :disabled="disableNamespaceName" placeholder="Name" :errorMessage="namespaceErrorMessage" v-model="namespaceName" v-debounce:1000="checkNamespace" icon="id-card-alt" :showError="showNamespaceNameError" class="w-full inline-block" toolTip="A namespace can have a maximium length of 16 alphanumerical characters while sub-namespaces can have a maximium length of 64 alphanumerical characters.<br><br>Three layers can be created. A namespace can have a subnamespace, and a subnamespace can have its own subnamespace (e.g., test1.test2.test3).<br><br>Certain phrases are already reserved." />
+            </div>
+            <div class="mb-5 lg:mb-0 lg:ml-2">
+              <DurationInputClean :disabled="disabledDuration" v-model="duration" :max="maxDurationInDays" placeholder="Duration (number of days)" :showError="showDurationErr" errorMessage="Required Field - Only Numbers (0 - 6)" :toolTip="`Maximum rental duration is<br>${maxDurationInDays === 365 ? '1 year ' : ''}(${maxDurationInDays} days).`" />
+            </div>
           </div>
         </div>
       </div>
@@ -49,7 +53,7 @@
           <div v-html="splitCurrency(lockFundCurrency)"></div>
         </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-semibold">{{$t('accounts.unconfirmed')}}</div>
+          <div class="font-semibold">Lock Fund Tx Fee</div>
           <div v-html="splitCurrency(lockFundTxFee)"></div>
         </div>
         <div class="flex justify-between border-gray-600 text-white text-xs py-5">
@@ -96,6 +100,10 @@ import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { Helper } from '@/util/typeHelper';
 import { NamespaceUtils } from '@/util/namespaceUtils';
+import { ChainUtils } from '@/util/chainUtils';
+import { TransactionUtils } from '@/util/transactionUtils';
+import { UnitConverter } from '@/util/unitConverter';
+import { TimeUnit } from '@/models/const/timeUnit';
 
 export default {
   name: 'ViewServicesNamespaceCreate',
@@ -121,26 +129,17 @@ export default {
     const duration = ref("1");
     const walletPassword = ref('');
     const err = ref('');
+    const namespaceErrorMessage = ref('Fill in valid name');
     const currentSelectedName = ref('');
     const disabledPassword = ref(false);
     const disabledDuration = ref(false);
     const disabledClear = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
-    const namespacePattern = "^[0-9a-zA-Z]{2,16}$";
-    const childNamespacePattern = "^[0-9a-zA-Z]{2,64}$";
-
-    const showNamespaceNameError = computed(() => {
-      if(namespaceName.value.length > 0){
-        if(selectNamespace.value == '1'){
-          return (namespaceName.value.match(namespacePattern)?false:true);
-        }else{
-          return (namespaceName.value.match(childNamespacePattern)?false:true);
-        }
-      }else{
-        return false;
-      }
-    });
+    const maxNamespaceLength = networkState.currentNetworkProfileConfig.maxNameSize;
+    const namespacePattern = `^[0-9a-z]{2,${maxNamespaceLength}}$`;
+    const showNamespaceNameError = ref(false);
+    const maxDurationInDays = Math.floor(UnitConverter.configReturn(networkState.currentNetworkProfileConfig.maxNamespaceDuration, TimeUnit.DAY));
 
     const selectNamespace = ref('');
     const cosignerBalanceInsufficient = ref(false);
@@ -171,24 +170,31 @@ export default {
             return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock, networkState.currentNetworkProfile.network.currency.divisibility);
           }
         }else{
-          return Helper.convertToExact(networkState.currentNetworkProfileConfig.childNamespaceRentalFee, 6);
+          return Helper.convertToExact(networkState.currentNetworkProfileConfig.childNamespaceRentalFee, networkState.currentNetworkProfile.network.currency.divisibility);
         }
       }else{
         return 0;
       }
     });
 
-    const rentalFeeCurrency = computed(()=> Helper.toCurrencyFormat(rentalFee.value, 6) );
+    const rentalFeeCurrency = computed(()=> Helper.toCurrencyFormat(rentalFee.value, networkState.currentNetworkProfile.network.currency.divisibility));
 
     const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
-    const lockFundCurrency = computed(()=> Helper.toCurrencyFormat(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
+    const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility));
 
-    const lockFundTxFee = ref(0.0445);
+    const lockFundTxFee = computed(()=>{
+        if(networkState.currentNetworkProfile){
+          let networkType = ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type);
+          return Helper.convertToExact(TransactionUtils.getLockFundFee(networkType, networkState.currentNetworkProfile.generationHash), networkState.currentNetworkProfile.network.currency.divisibility);
+        }
+        return 0;  
+    });
+
     const lockFundTxFeeCurrency = ref('0.044500');
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value)
+      walletPassword.value.match(passwdPattern) && namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value) && !showNamespaceNameError.value && selectNamespace.value
     ));
 
     const isMultiSig = (address) => {
@@ -255,6 +261,10 @@ export default {
       return NamespaceUtils.getCosignerList(selectedAccAdd.value);
     });
 
+    const removeNamespace = () => {
+      selectNamespace.value = '';
+    }
+
     const changeSelection = (address) => {
       let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
       if(!account){
@@ -270,20 +280,23 @@ export default {
     }
 
     const updateNamespaceSelection = (namespaceNameSelected) => {
+      let fee = 0;
       if(namespaceNameSelected == '1'){
         //root
         disabledDuration.value = false;
-        if(namespaceName.value.length > 0){
-          transactionFee.value = Helper.convertToCurrency(NamespaceUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
-          transactionFeeExact.value = Helper.convertToExact(NamespaceUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
+          fee = NamespaceUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value);
+          transactionFee.value = Helper.convertToCurrency(fee, networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFeeExact.value = Helper.convertToExact(fee, networkState.currentNetworkProfile.network.currency.divisibility);
         }
       }else{
         duration.value = '0';
         //subnamespace
         disabledDuration.value = true;
-        if(namespaceName.value.length > 0){
-          transactionFee.value = Helper.convertToCurrency(NamespaceUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
-          transactionFeeExact.value = Helper.convertToExact(NamespaceUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, namespaceName.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
+          fee = NamespaceUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, namespaceName.value);
+          transactionFee.value = Helper.convertToCurrency(fee, networkState.currentNetworkProfile.network.currency.divisibility);
+          transactionFeeExact.value = Helper.convertToExact(fee, networkState.currentNetworkProfile.network.currency.divisibility);
         }
       }
     };
@@ -311,33 +324,10 @@ export default {
     };
 
     watch(duration, (n) => {
-      if(n > 365){
-        duration.value = '365';
-      }
-    });
-
-    watch(namespaceName, (n) => {
-      if(namespaceName.value.length > 0){
-        if(selectNamespace.value==='1'){
-          if(namespaceName.value.match(namespacePattern)){
-            transactionFee.value = Helper.convertToCurrency(NamespaceUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
-            transactionFeeExact.value = Helper.convertToExact(NamespaceUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
-          }else{
-            transactionFee.value = '0';
-            transactionFeeExact.value = 0;
-          }
-        }else{
-          if(namespaceName.value.match(childNamespacePattern)){
-            transactionFee.value = Helper.convertToCurrency(NamespaceUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
-            transactionFeeExact.value = Helper.convertToExact(NamespaceUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, n, duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
-          }else{
-            transactionFee.value = '0';
-            transactionFeeExact.value = 0;
-          }
-        }
-      }else{
-        transactionFee.value = '0';
-        transactionFeeExact.value = 0;
+      if(n > maxDurationInDays){
+        duration.value = `${maxDurationInDays}`;
+      }else if(n < 1){
+        duration.value = 1;
       }
     });
 
@@ -403,6 +393,77 @@ export default {
       }
     };
 
+    const reservedRootNamespace = networkState.currentNetworkProfileConfig.reservedRootNamespaceNames.split(",").map(ns => ns.trim());
+
+    const isReservedRootNamespace = ()=>{
+      if(selectNamespace.value === "1" && reservedRootNamespace.includes(namespaceName.value.trim())){
+          showNamespaceNameError.value = true;
+          namespaceErrorMessage.value = "Reserved namespace name";
+
+          return true;
+      }
+      return false;
+    }
+
+    const notRootNamespaceOwner = async ()=>{
+      if(selectNamespace.value === "1" && namespaceName.value.trim()){
+        try {
+          let namespaceInfo = await ChainUtils.getNamespaceInfo(Helper.createNamespaceId(namespaceName.value));
+        
+          if(namespaceInfo.owner.address.plain !== selectedAccAdd.value){
+            showNamespaceNameError.value = true;
+            namespaceErrorMessage.value = "Namespace have been registered";
+
+            return true;
+          }
+        } catch (error) {
+          return false;
+        }
+      }
+      return false;
+    }
+
+    const checkNamespace = async () =>{
+      showNamespaceNameError.value = false;
+      if(namespaceName.value.trim()){
+        if(isReservedRootNamespace()){
+          return;
+        }
+        else{
+          showNamespaceNameError.value = namespaceName.value.match(namespacePattern)? false:true;
+          if(showNamespaceNameError.value){
+            namespaceErrorMessage.value = "Fill in a valid name";
+          }
+          else{
+            let isNotOwner = await notRootNamespaceOwner();
+            
+            if(isNotOwner){
+              return;
+            }
+
+            let fee = 0;
+
+            if(selectNamespace.value == '1'){
+              
+              //root
+              if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
+                fee = NamespaceUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value);
+                transactionFee.value = Helper.convertToCurrency(fee, networkState.currentNetworkProfile.network.currency.divisibility);
+                transactionFeeExact.value = Helper.convertToExact(fee, networkState.currentNetworkProfile.network.currency.divisibility);
+              }
+            }else{
+              //sub
+              if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
+                fee = NamespaceUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value);
+                transactionFee.value = Helper.convertToCurrency(fee, networkState.currentNetworkProfile.network.currency.divisibility);
+                transactionFeeExact.value = Helper.convertToExact(fee, networkState.currentNetworkProfile.network.currency.divisibility);
+              }
+            }
+          }
+        }
+      }
+    }
+
     return {
       Helper,
       accounts,
@@ -413,6 +474,8 @@ export default {
       showNoBalance,
       err,
       showNamespaceNameError,
+      namespaceErrorMessage,
+      checkNamespace,
       namespaceName,
       disableNamespaceName,
       walletPassword,
@@ -449,6 +512,8 @@ export default {
       walletState,
       currentNativeTokenName,
       nsRef,
+      maxDurationInDays,
+      removeNamespace,
     }
   },
 

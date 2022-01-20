@@ -9,7 +9,7 @@
       >
       <template #header>
         <div class="flex justify-between">
-          <span class="text-sm pt-1 text-gray-700">{{$t('services.namespaces')}}</span>
+          <span class="text-sm pt-1 text-gray-700 ml-2 lg:ml-7">{{$t('services.namespaces')}}</span>
           <SelectInputPluginClean v-model="filterNamespaces" :options="listAccounts" :selectDefault="selectedAddress" class="w-48 lg:w-60 inline-block" />
         </div>
       </template>
@@ -39,29 +39,29 @@
       </Column>
       <Column field="name" header="NAME" style="`wideScreen?'min-width: 160px'?'width: 160px'`" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-xs">{{data.name}}</span>
+          <span class="text-txs">{{data.name}}</span>
         </template>
       </Column>
       <Column field="namespaceId" header="NAMESPACE ID" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-xs uppercase">{{data.idHex}}</span>
+          <span class="text-txs uppercase">{{data.idHex}}</span>
         </template>
       </Column>
       <Column field="linkedId" header="LINKED ASSET / ADDRESS" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
         <template #body="{data}">
-          <span class="uppercase text-xs" v-if="data.linkedId">{{ data.linkedId }}</span>
-          <span class="text-xs" v-else>No linked asset</span>
+          <span class="uppercase text-txs" v-if="data.linkedId">{{ data.linkedId }}</span>
+          <span class="text-txs" v-else>No linked asset</span>
         </template>
       </Column>
       <Column field="linkType" header="EXPIRES" style="`wideScreen?'min-width: 150px'?'width: 150px'`" v-if="wideScreen">
         <template #body="{data}">
-          <div class="data.expiryRelative text-xs" v-if="data.expiryRelative">{{ data.expiryRelative }}</div>
-          <div class="text-gray-300 text-xs" v-else>Fetching..</div>
+          <div class="data.expiryRelative text-txs" v-if="data.expiryRelative">{{ data.expiryRelative }}</div>
+          <div class="text-gray-300 text-txs" v-else>Fetching..</div>
         </template>
       </Column>
       <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" style="`wideScreen?'min-width: 210px'?'width: 210px'`" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-xs" :class="data.expiring=='expired'?'text-red-500':(data.expiring=='expiring'?'text-yellow-500':'text-green-500')">{{ data.expiry }}</span>
+          <span class="text-txs" :class="data.expiring=='expired'?'text-red-500':(data.expiring=='expiring'?'text-yellow-500':'text-green-500')">{{ data.expiry }}</span>
         </template>
       </Column>
       <Column field="Account" header="ACCOUNT" bodyStyle="text-align: center; overflow: visible" style="`wideScreen?'min-width: 60px'?'width: 60px'`" v-if="wideScreen">>
@@ -263,55 +263,80 @@ export default{
       let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
       themeConfig.init();
 
-      for(let i=0; i < namespaces.length; ++i){
-        let linkName = "";
+      if(namespaces.length > 0){
 
-        switch (namespaces[i].namespace.linkType) {
-          case 1:
-            linkName = "Asset";
-            break;
-          case 2:
-            linkName = "Address";
-            break;
-          default:
-            break;
-        }
+        for(let i=0; i < namespaces.length; ++i){
+          let linkName = "";
 
-        let blockDifference = namespaces[i].namespace.endHeight - currentBlockHeight.value;
-        let blockTargetTimeByDay = Math.floor((60 * 60 * 24) / blockTargetTime);
-        let blockTargetTimeByHour = Math.floor((60 * 60) / blockTargetTime);
-        let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
-        let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
-        let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
-        let expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
+          switch (namespaces[i].namespace.linkType) {
+            case 1:
+              linkName = "Asset";
+              break;
+            case 2:
+              linkName = "Address";
+              break;
+            default:
+              break;
+          }
 
-        let expiryStatus;
-        if(blockDifference > 0){
-          if((blockDifference < (blockTargetTimeByDay * 14))){
-            expiryStatus = 'expiring';
+          let blockDifference = namespaces[i].namespace.endHeight - currentBlockHeight.value;
+          let blockTargetTimeByDay = Math.floor((60 * 60 * 24) / blockTargetTime);
+          let blockTargetTimeByHour = Math.floor((60 * 60) / blockTargetTime);
+          let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
+          let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
+          let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
+
+          let expiryStatus;
+          if(blockDifference > 0){
+            if((blockDifference < (blockTargetTimeByDay * 14))){
+              expiryStatus = 'expiring';
+            }else{
+              expiryStatus = 'valid';
+            }
           }else{
+            expiryStatus = 'expired';
+          }
+
+          let expiryDate;
+          if(expiryDay > 0 || expiryHour > 0 ||  expiryMin > 0){
+            expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
+          }else{
+            expiryDate = 'None';
             expiryStatus = 'valid';
           }
-        }else{
-          expiryStatus = 'expired';
-        }
 
-        let data = {
-          i: i,
-          idHex: namespaces[i].namespace.idHex,
-          name: namespaces[i].namespace.name,
-          linkType: linkName,
-          linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].namespace.linkedId).pretty() : namespaces[i].namespace.linkedId,
-          endHeight: namespaces[i].namespace.endHeight,
-          expiring: expiryStatus,
-          expiryRelative: currentBlockHeight.value?((blockDifference > 0)?'In ' + relativeTime(expiryDay, expiryHour, expiryMin):'Expired'):'',
-          expiry: currentBlockHeight.value?expiryDate:'',
-          explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].namespace.idHex,
-          address: Helper.createAddress(namespaces[i].account.address).pretty(),
-          icon: toSvg(namespaces[i].account.address, 30, themeConfig.jdenticonConfig)
-        };
-        formattedNamespaces.push(data);
-        // isMenuShow.value[i] = false;
+          let expiryRelativeTimeEstimate;
+          if(currentBlockHeight){
+            if(blockDifference > 0){
+              expiryRelativeTimeEstimate = 'In ' + relativeTime(expiryDay, expiryHour, expiryMin);
+            }else{
+              if(expiryDate != '-'){
+                expiryRelativeTimeEstimate = 'Expired';
+              }else{
+                expiryRelativeTimeEstimate = '-';
+              }
+            }
+          }else{
+            expiryRelativeTimeEstimate = '';
+          }
+
+          let data = {
+            i: i,
+            idHex: namespaces[i].namespace.idHex,
+            name: namespaces[i].namespace.name,
+            linkType: linkName,
+            linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].namespace.linkedId).pretty() : namespaces[i].namespace.linkedId,
+            endHeight: namespaces[i].namespace.endHeight,
+            expiring: expiryStatus,
+            expiryRelative: expiryRelativeTimeEstimate,
+            expiry: currentBlockHeight.value?expiryDate:'',
+            explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].namespace.idHex,
+            address: Helper.createAddress(namespaces[i].account.address).pretty(),
+            icon: toSvg(namespaces[i].account.address, 30, themeConfig.jdenticonConfig)
+          };
+          formattedNamespaces.push(data);
+          // isMenuShow.value[i] = false;
+        }
       }
       return formattedNamespaces;
     });

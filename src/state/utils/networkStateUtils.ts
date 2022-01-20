@@ -1,6 +1,9 @@
 import { networkState } from "../networkState";
+import { AppState } from "../appState";
 import { SessionService } from "../../models/stores/sessionService"
 import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainProfilePreferences } from "../../models/stores/"
+import { ChainAPICall } from "@/models/REST/chainAPICall";
+import { BuildTransactions } from "@/util/buildTransactions";
 
 const sessionNetworkName = "networkName";
 const sessionNetworkIndex = "network";
@@ -10,7 +13,7 @@ const lastAccessNetworkName = "lastAccessNetworkName";
 export class NetworkStateUtils{
 
   static refreshAvailableNetwork(): void{
-    networkState.availableNetworks = ChainProfileNames.createDefault().names;
+    networkState.availableNetworks = ChainProfileNames.createDefault().names.map(value => value.name);
   }
 
   static changeNetworkByName(networkName:string): void{
@@ -20,7 +23,7 @@ export class NetworkStateUtils{
 
     if(networkChain < 0){
       networkChain = 0;
-      networkState.chainNetworkName = chainProfileNames.names[0];
+      networkState.chainNetworkName = chainProfileNames.names[0].name;
     }
     else{
       networkState.chainNetworkName = networkName;
@@ -41,11 +44,11 @@ export class NetworkStateUtils{
 
     try {
 
-      selectedNetworkName = chainProfileNames.names[selectedIndex];
+      selectedNetworkName = chainProfileNames.names[selectedIndex].name;
 
     } catch (error) {
       selectedIndex = 0;
-      selectedNetworkName = chainProfileNames.names[selectedIndex];
+      selectedNetworkName = chainProfileNames.names[selectedIndex].name;
     }
 
     networkState.chainNetworkName = selectedNetworkName;
@@ -61,6 +64,10 @@ export class NetworkStateUtils{
     const chainProfile = new ChainProfile(networkState.chainNetworkName);
     chainProfile.init();
     networkState.currentNetworkProfile = chainProfile;
+    AppState.buildTxn = new BuildTransactions(chainProfile.network.type, chainProfile.generationHash);
+    AppState.nativeToken.divisibility = chainProfile.network.currency.divisibility;
+    AppState.nativeToken.label = chainProfile.network.currency.name;
+    AppState.nativeToken.fullNamespace = chainProfile.network.currency.namespace;
 
     const chainProfileConfig = new ChainProfileConfig(networkState.chainNetworkName);
 
@@ -94,6 +101,11 @@ export class NetworkStateUtils{
     }
     SessionService.setNumber('nodePort', networkState.currentNetworkProfile?.httpPort || 3000);
     SessionService.setRaw('selectedChainNode', networkState.selectedAPIEndpoint);
+
+    AppState.nodeFullURL = NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint);
+    AppState.nodeURL = networkState.selectedAPIEndpoint;
+    AppState.wsNodeFullURL = NetworkStateUtils.buildWSEndpointURL(networkState.selectedAPIEndpoint);
+    AppState.chainAPI = new ChainAPICall(AppState.nodeFullURL);
   }
 
   static updateChainNode(apiNode: string): void{
@@ -101,6 +113,10 @@ export class NetworkStateUtils{
     chainProfilePreferences.apiNode = apiNode;
     chainProfilePreferences.saveToLocalStorage();
     networkState.selectedAPIEndpoint = apiNode;
+    AppState.nodeFullURL = NetworkStateUtils.buildAPIEndpointURL(apiNode);
+    AppState.nodeURL = apiNode;
+    AppState.wsNodeFullURL = NetworkStateUtils.buildWSEndpointURL(apiNode);
+    AppState.chainAPI = new ChainAPICall(AppState.nodeFullURL);
     SessionService.setRaw(sessionSelectedAPINode, networkState.selectedAPIEndpoint);
   }
 

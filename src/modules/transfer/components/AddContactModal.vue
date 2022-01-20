@@ -1,41 +1,38 @@
 <template>
   <div>
     <transition enter-active-class="animate__animated animate__fadeInDown" leave-active-class="animate__animated animate__fadeOutUp">
-      <div v-if="toggleModal" class="popup-outer absolute flex z-50" style="top: 110px !important">
+      <div v-if="toggleModal" class="popup-outer fixed flex z-50" style="top: 110px !important">
         <div class="modal-popup-box">
           <div class="delete-position">
-            <font-awesome-icon icon="times" class="delete-icon-style" @click="closeModal()">
+            <font-awesome-icon icon="times" class="delete-icon-style" @click="isAddContactQues=true;closeModal()">
             </font-awesome-icon>
           </div>
           <div class="w-104" v-if="isAddContactQues && !isSuccessAdded">
-            <h1 class="text-md my-5">{{$t('services.addcontact')}}</h1>
-            <div>
-              <button type="button" class="default-btn mr-5 focus:outline-none" @click="closeModal()">
-                {{$t('services.no')}}
-              </button>
-              <button type="button" class="default-btn py-1" @click="proceed()">
-                {{$t('services.yes')}}
-              </button>
-            </div>
+            <h1 class="text-md text-center my-5">{{$t('services.addcontact')}}</h1>
+            <div type="button" class="blue-btn py-2  font-semibold cursor-pointer text-center ml-auto mr-auto w-7/12" @click="proceed()">{{$t('services.yes')}}</div>
+            <div type="button" class="text-center cursor-pointer text-xs font-semibold text-blue-link mt-2" @click="closeModal()">{{$t('services.no')}}</div>
           </div>
           <div class="w-104" v-if="!isAddContactQues && !isSuccessAdded">
-            <h1 class="default-title font-bold my-10">
+            <h1 class="default-title font-bold mt-4 text-center">
               {{$t('services.addcontacts')}}
             </h1>
-            <form @submit.prevent="create" class="mt-10">
+            <form @submit.prevent="create" class="mt-4">
               <fieldset class="w-full">
                 <div class="error error_box mb-5" v-if="err != ''">
                   {{ err }}
                 </div>
-                <TextInput :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr"/>
+                <TextInput class="mb-3" :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr"/>
                 <TextInput :placeholder="$t('createsuccessful.address')" v-model="address" icon="wallet" :showError="showAddErr" :disabled="true"/>
-                <div class="mt-10">
-                  <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput()">
+                <div class="mt-4 text-center">
+                  <!-- <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput()">
                     {{$t('signin.clear')}}
-                  </button>
-                  <button type="submit" class="default-btn py-1 disabled:opacity-50" :disabled="disableSave" @click="SaveContact()">
+                  </button> -->
+                  <button type="submit" class="blue-btn py-2  font-semibold cursor-pointer text-center ml-auto mr-auto w-7/12" :disabled="disableSave" @click="SaveContact()">
                     {{$t('accounts.save')}}
                   </button>
+                  <div class="text-center cursor-pointer text-xs font-semibold text-blue-link mt-2" :disabled="disableSave" @click="isAddContactQues=true">
+                    Cancel
+                  </div>
                 </div>
               </fieldset>
             </form>
@@ -51,7 +48,7 @@
     <!-- <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-90 bg-blue-primary"></div> -->
     <div
       v-if="toggleModal"
-      class="fixed inset-0 bg-opacity-90 bg-blue-primary"
+      class="fixed inset-0 bg-opacity-90 bg-gray-100 z-20"
     ></div>
   </div>
 </template>
@@ -79,7 +76,6 @@ export default {
     // const addMsg = ref('');
     const isAddContactQues = ref(true);
     const isSuccessAdded = ref(false);
-
     const disableSave = computed(
       () => !(verifyAdd.value && contactName.value != "")
     );

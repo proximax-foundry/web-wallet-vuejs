@@ -73,7 +73,6 @@ export default defineComponent({
         WalletStateUtils.updateLoggedIn(wallet);
         NetworkStateUtils.updateLastAccessNetworkName(networkState.chainNetworkName);
         router.push({ name: "ViewDashboard"});
-        // router.push({ path: "/create-transfer"});
       }
     };
 

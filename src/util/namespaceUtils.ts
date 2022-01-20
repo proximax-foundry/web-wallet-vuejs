@@ -54,8 +54,8 @@ export class NamespaceUtils {
     return buildTransactions.registersubNamespace(rootNamespace, subNamespace);
   }
 
-  static getRootNamespaceTransactionFee = (networkType: NetworkType, generationHash: string, namespaceName: string, duration: number) :number => {
-    let registerRootNamespaceTransaction = NamespaceUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
+  static getRootNamespaceTransactionFee = (networkType: NetworkType, generationHash: string, namespaceName: string) :number => {
+    let registerRootNamespaceTransaction = NamespaceUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, 10);
     return registerRootNamespaceTransaction.maxFee.compact();
   }
 
@@ -77,13 +77,16 @@ export class NamespaceUtils {
     const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === address);
     const accountNamespaces = account?account.namespaces.filter(namespace => namespace.active === true):[];
     const other = walletState.currentLoggedInWallet.others.find((account) => account.address === address);
-    const otherNamespaces = other?other.namespaces.filter(namespace => namespace.active === true):[];
+    const otherNamespaces = other ? other.namespaces.filter(namespace => namespace.active === true) : [];
+
     const accountNamespacesNum = accountNamespaces.length;
     const otherNamespacesNum = otherNamespaces.length;
     let namespacesArr = [];
     if((accountNamespacesNum + otherNamespacesNum) > 0){
       if(accountNamespacesNum > 0){
         accountNamespaces.forEach((namespaceElement) => {
+          let blockDifference = namespaceElement.endHeight - listenerState.currentBlock;
+
           const level = namespaceElement.name.split('.');
           let isDisabled: boolean;
           if(level.length > 2){
@@ -91,17 +94,21 @@ export class NamespaceUtils {
           }else{
             isDisabled = false;
           }
-          namespacesArr.push({
-            value: namespaceElement.name,
-            label: namespaceElement.name,
-            disabled: isDisabled,
-            level: level
-          });
+          if (blockDifference > 0) {
+            namespacesArr.push({
+              value: namespaceElement.name,
+              label: namespaceElement.name,
+              disabled: isDisabled,
+              level: level
+            });
+          }
         });
       }
 
       if(otherNamespacesNum > 0){
         otherNamespaces.forEach((namespaceElement) => {
+          let blockDifference = namespaceElement.endHeight - listenerState.currentBlock;
+
           const level = namespaceElement.name.split('.');
           let isDisabled: boolean;
           if(level.length > 2){
@@ -109,12 +116,14 @@ export class NamespaceUtils {
           }else{
             isDisabled = false;
           }
-          namespacesArr.push({
-            value: namespaceElement.name,
-            label: namespaceElement.name,
-            disabled: isDisabled,
-            level: level
-          });
+          if (blockDifference > 0) {
+            namespacesArr.push({
+              value: namespaceElement.name,
+              label: namespaceElement.name,
+              disabled: isDisabled,
+              level: level
+            });
+          }
         });
       }
 

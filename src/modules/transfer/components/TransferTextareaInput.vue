@@ -1,10 +1,7 @@
 <template>
   <div>
-    <div class="text-outline bg-white flex" :class="borderColor">
-      <div class="text-icon-outline text-icon self-center">
-        <font-awesome-icon :icon="icon" class="text-blue-primary text-txs text-icon-position"></font-awesome-icon>
-      </div>
-      <textarea :value="modelValue" :disabled="disabled==1" @input="countChar($event); $emit('update:modelValue', $event.target.value)" rows=2 class="mt-7 ml-2 self-center w-full text-gray-500 focus:outline-none bg-white text-md" :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()"></textarea>
+    <div class="rounded-md bg-white flex border " >
+      <textarea :value="modelValue" :disabled="disabled==1" @input="countChar($event); $emit('update:modelValue', $event.target.value)" rows=2 class="  w-full text-gray-500 px-2 py-1 outline-none bg-white text-xs " :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()"></textarea>
       <div class="w-1 flex-none"></div>
     </div>
     <div class="float-right mt-1 text-tsm text-gray-800">{{remainingLength}}/{{limit}}</div>

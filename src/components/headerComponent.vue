@@ -1,15 +1,15 @@
 <template>
-  <header>
-    <div class="header-height flex items-stretch md:pr-2 bg-gray-50 filter drop-shadow-xl" v-if="loginStatus">
-      <div class="header-height flex-none self-center flex pt-3 md:pt-4 pl-2 sm:pl-4 bg-navy-primary logo-header">
-        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40"></router-link>
+  <header class="z-10 fixed w-full">
+    <div class="header-height flex items-stretch lg:pr-2 bg-gray-50 filter drop-shadow-xl" v-if="loginStatus">
+      <div class="header-height flex-none self-center flex pt-3 lg:pt-4 pl-2 sm:pl-4 bg-white lg:bg-navy-primary logo-header">
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-blacktxt.svg" class="w-40 lg:hidden"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40 hidden lg:inline-block"></router-link>
       </div>
-      <div class="flex-none md:flex items-center w-16 hidden md:visible right-gray-line">
+      <div class="flex items-center w-16 lg:right-gray-line">
         <div class="text-center w-full h-7">
-          <router-link :to="{name : 'ViewDashboard'}"><img src="@/assets/img/icon-home.svg" class="h-7 w-7 inline-block"></router-link>
+          <router-link :to="{name : 'ViewDashboard'}"><img src="@/assets/img/icon-home.svg" class="h-5 w-5 lg:h-7 lg:w-7 inline-block"></router-link>
         </div>
       </div>
-      <div class="flex-none md:flex items-center md:ml-4 hidden md:visible">
+      <div class="flex-none lg:flex items-center lg:ml-4 hidden lg:visible">
         <img src="@/assets/img/icon-blockheight.svg" class="h-10 w-10 inline-block">
         <div class="ml-3">
           <div class="uppercase text-txs text-gray-400">block height</div>
@@ -22,11 +22,20 @@
         <div class="flex flex-row h-full">
           <div class="flex-row items-center hidden lg:flex">
             <div class="text-center w-full h-6 pr-2 lg:pr-10 mt-2 relative">
-              <div class="cursor-pointer text-blue-primary text-tsm" @mouseover="setHoverCreateToTrue" @mouseout="setHoverCreateToFalse">+ Create</div>
+              <div class="cursor-pointer text-blue-primary text-tsm" @mouseover="setHoverCreateToTrue" @mouseout="setHoverCreateToFalse">+ New</div>
               <div class="absolute z-20 w-60 text-left mt-2 bg-gray-50 shadow-sm rounded-md right-0 p-2 text-xs transition duration-200 block" v-if="isShowCreate" @mouseover="isShowCreate=true;isHoverCreatePanel=true;" @mouseout="hideCreatePanel">
+                <router-link :to="{ name: 'ViewTransferCreate'}" class="hover:bg-gray-200 p-2 block">
+                  <div class="inline-block mr-2">
+                    <img src="@/assets/img/icon-transfer.svg">
+                  </div>
+                  <div class="inline-block">
+                    <div class="font-bold mb-1">Transfer</div>
+                    <div class="text-txs text-gray-400">Send XPX to another account</div>
+                  </div>
+                </router-link>
                 <router-link :to="{ name: 'ViewServicesAssetsCreate'}" class="hover:bg-gray-200 p-2 block">
                   <div class="inline-block mr-2">
-                    <img src="@/assets/img/icon-header-asset.svg" class="">
+                    <img src="@/assets/img/icon-header-asset.svg">
                   </div>
                   <div class="inline-block">
                     <div class="font-bold mb-1">Digital Asset</div>
@@ -35,7 +44,7 @@
                 </router-link>
                 <router-link :to="{ name: 'ViewServicesNamespaceCreate'}" class="hover:bg-gray-200 p-2 block">
                   <div class="inline-block mr-2">
-                    <img src="@/assets/img/icon-header-namespace.svg" class="">
+                    <img src="@/assets/img/icon-header-namespace.svg">
                   </div>
                   <div class="inline-block">
                     <div class="font-bold mb-1">Namespace</div>
@@ -44,7 +53,7 @@
                 </router-link>
                 <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="hover:bg-gray-200 p-2 block">
                   <div class="inline-block mr-2">
-                    <img src="@/assets/img/icon-header-account.svg" class="">
+                    <img src="@/assets/img/icon-header-account.svg">
                   </div>
                   <div class="inline-block">
                     <div class="font-bold mb-1">Account</div>
@@ -54,9 +63,9 @@
               </div>
             </div>
           </div>
-          <div class="w-12 md:w-16 flex flex-row items-center left-gray-line relative">
+          <div class="hidden lg:flex w-16 flex-row items-center left-gray-line relative">
             <div class="text-center w-full h-7 cursor-pointer" @mouseover="setHoverSupportToTrue" @mouseout="setHoverSupportToFalse">
-              <img src="@/assets/img/icon-support-contact.svg" class="opacity-80 hover:opacity-100 inline-block h-4 w-4 md:h-5 md:w-5">
+              <img src="@/assets/img/icon-support-contact.svg" class="opacity-80 hover:opacity-100 inline-block h-4 w-4 lg:h-5 lg:w-5">
             </div>
             <div class="absolute z-20 w-96 text-left bg-gray-50 shadow-sm rounded-md right-0 p-2 text-tsm transition duration-200 block" style="top: 60px" v-if="isShowSupport" @mouseover="isShowSupport=true;isHoverSupportPanel=true;" @mouseout="hideSupportPanel">
               <div class="font-bold p-2 text-txs">BEGINNER'S GUIDE</div>
@@ -87,24 +96,24 @@
               </div>
             </div>
           </div>
-          <div class="w-12 md:w-16 flex flex-row items-center left-gray-line">
+          <div class="w-12 lg:w-16 flex flex-row items-center left-gray-line">
             <div class="text-center w-full h-7">
-              <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block h-7 w-3 md:h-5 md:w-5">
+              <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block h-7 w-3 lg:h-5 lg:w-5">
             </div>
           </div>
-          <div class="w-12 md:w-16 flex flex-row items-center left-gray-line">
-            <div class="text-center w-full h-4 md:h-6">
-              <router-link :to="{name : 'ViewServices'}" class="h-7 w-4 md:h-6 md:w-6 inline-block">
+          <div class="hidden lg:flex w-16 lg:flex-row items-center left-gray-line">
+            <div class="text-center w-full h-4 lg:h-6">
+              <router-link :to="{name : 'ViewServicesNodes'}" class="h-7 w-4 lg:h-6 lg:w-6 inline-block">
                 <img src="@/assets/img/icon-setting.svg" class="opacity-80 hover:opacity-100 transition-all duration-300">
               </router-link>
             </div>
           </div>
-          <div class="w-16 md:w-40 pl-3 text-center flex items-center left-gray-line">
-            <div class="md:flex md:items-center">
-              <img src="@/assets/img/icon-testnet-block.svg" class="w-3 md:w-7 block md:inline-block" :title="chainAPIEndpoint" v-if="wideScreen"> <div class="block md:inline-block text-txs text-white text-left md:ml-2"><div class="text-xxs md:text-tsm text-navy-primary">{{ networkState.chainNetworkName }}</div></div>
+          <div class="hidden w-40 pl-3 text-center lg:flex items-center left-gray-line">
+            <div class="lg:flex lg:items-center">
+              <img src="@/assets/img/icon-testnet-block.svg" class="w-3 lg:w-7 block lg:inline-block" :title="chainAPIEndpoint" v-if="wideScreen"> <div class="block lg:inline-block text-txs text-white text-left lg:ml-2"><div class="text-xxs lg:text-tsm text-navy-primary">{{ networkState.chainNetworkName }}</div></div>
             </div>
           </div>
-          <div class="w-12 md:w-16 flex flex-row items-center left-gray-line md:hidden">
+          <div class="w-12 lg:w-16 flex flex-row items-center left-gray-line lg:hidden">
             <div class="text-center w-full h-6" @mouseover="hoverOverNavigation" @mouseout="hoverOutNavigation">
               <img src="@/assets/img/icon-menu.svg" class="h-4 w-4 opacity-80 hover:opacity-100 inline-block cursor-pointer" @click="toggleSidebar">
             </div>
@@ -112,9 +121,9 @@
         </div>
       </div>
     </div>
-    <div class="container mx-auto header-height flex items-stretch " v-else>
-      <div class="flex-none self-center flex items-end ml-2 sm:ml-0">
-        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40"></router-link>
+    <div class="container mx-auto header-height flex items-stretch bg-navy-primary" v-else>
+      <div class="flex-none self-center flex items-end ml-2 lg:ml-0">
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 lg:w-40"></router-link>
       </div>
       <div class="flex-grow"></div>
       <div class="flex-none self-center header-menu">
@@ -129,21 +138,23 @@
         </div>
       </div>
     </div>
-    <div v-if="!wideScreen && !loginStatus" class="bg-gray-200 py-1 text-center">
-      <div class="w-16 text-center inline-block">
+    <div v-if="!wideScreen && !loginStatus" class="py-1 text-center" style="background: #484A69">
+      <div class="w-20 text-center inline-block text-gray-300">
         <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block text-xs sm:text-sm">{{$t('Header.home')}}</router-link>
       </div>
-      <div class="w-16 text-center inline-block">
+      <div class="w-20 text-center inline-block text-gray-300">
         <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold text-xs sm:text-sm">{{$t('Header.wallet')}}</router-link>
       </div>
     </div>
   </header>
+  <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
 </template>
 
 <script> 
 import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
+import { AppState } from "@/state/appState";
 import { useRouter } from "vue-router";
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { ChainUtils } from '@/util/chainUtils';
@@ -159,11 +170,13 @@ import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { TransactionType } from "tsjs-xpx-chain-sdk";
 import { WalletUtils } from "@/util/walletUtils";
 import {useI18n} from 'vue-i18n'
+import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
 
 export default defineComponent({
   components: {
     // Dropdown,
     selectLanguageModal,
+    SetAccountDefaultModal,
   },
 
   name: 'headerComponent',
@@ -228,12 +241,35 @@ export default defineComponent({
       }, 100);
     }
 
+    const openSetDefaultModal = ref(false);
+
+    const updateSelectedAccount = (data)=>{
+      // if(data.type == 0){
+      //   selectedAccount.value = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === data.name);
+      // }else{
+      //   selectedAccount.value = walletState.currentLoggedInWallet.others.find((account)=> account.name === data.name);
+      // }
+      walletState.currentLoggedInWallet.setDefaultAccountByName(data.name);
+      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+      toast.add({severity:'success', summary: 'Default account has switched to' , detail: data.name, group: 'br', life: 3000});
+    }
+
+    emitter.on('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', (payload) => {
+      openSetDefaultModal.value = payload;
+    });
+
+    emitter.on('CLOSE_SET_DEFAULT_ACCOUNT_MODAL', payload => {
+      if(payload){
+        openSetDefaultModal.value = false;
+      }
+    });
+
     const navigationSideBar = inject('navigationSideBar');
 
     const notificationMessage = ref('');
     const notificationType = ref('noti');
 
-    const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort))
+    const chainAPIEndpoint = computed(()=> AppState.nodeFullURL)
     const loginStatus = computed(() => walletState.isLogin);
     const chainsNetworks = computed(()=> {
 
@@ -345,8 +381,7 @@ export default defineComponent({
 
       //listener.addresses = allAddress;
       //console.log(allAddress);
-
-      listener.value = new Connector(ChainUtils.buildWSEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort), allAddress);
+      listener.value = new Connector(AppState.wsNodeFullURL, allAddress);
 
       listener.value.startListen();
     }
@@ -357,9 +392,12 @@ export default defineComponent({
     }
 
     const doLogin = async () =>{
-      if(loginStatus.value){
+      if(loginStatus.value && AppState.isReady){
         await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
         connectListener();
+      }
+      else if(loginStatus.value && !AppState.isReady){
+        setTimeout(doLogin, 100);
       }
     }
 
@@ -398,7 +436,6 @@ export default defineComponent({
     const totalPendingNum = ref(0);
 
     watch(()=> listenerState.autoAnnounceSignedTransaction, (newValue)=>{
-      
       let newLength = newValue.length;
 
       if(newLength !== totalPendingNum.value){
@@ -418,14 +455,12 @@ export default defineComponent({
       }
 
       totalPendingNum.value = newLength;
-      
     }, true);
 
     watch(()=> currentBlockHeight.value, ()=>{
 
       listener.value.refreshTimer();
     });
-    
 
      watch(()=> unconfirmedTxLength.value, (newValue, oldValue)=>{
 
@@ -569,6 +604,8 @@ export default defineComponent({
        listener.value.endpoint = endpoint;
      });
     return {
+      openSetDefaultModal,
+      updateSelectedAccount,
       toggleSidebar,
       networkState,
       walletState,
@@ -671,7 +708,7 @@ export default defineComponent({
   left: 5px;
 }
 
-@screen md {
+@screen lg {
   .logo-header{
     width: 240px;
   }
@@ -852,7 +889,7 @@ export default defineComponent({
   background-color: #ffffff;
 }
 
-@screen md {
+@screen lg {
   .header-height{
     @apply h-16;
   }

@@ -1,54 +1,87 @@
 <template>
   <div>
-    <div class="px-2 sm:px-10 bg-gray-200 pb-8 pt-5">
-      <div class="md:grid md:grid-cols-4">
-        <div class="pr-2">
-          <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded-lg balance-div flex flex-col justify-between bg-navy-primary text-white">
-            <div class="text-right">
-              <div class="inline-block text-txs font-bold text-blue-primary pappflex items-center rounded-b-sm"><img src="@/modules/dashboard/img/icon-bookmark.svg" class="w-3 h-3 mr-1 inline-block">DEFAULT ACCOUNT</div><br>
-              <div class="inline-block text-txs underline xl:text-sm cursor-pointer" @click="openSetDefaultModal = !openSetDefaultModal">My Personal Account</div>
+    <div class="px-2 sm:px-10 bg-gray-200 pb-4 pt-5">
+      <div class="md:grid md:grid-cols-2 xl:grid-cols-3">
+        <div class="block md:hidden">
+          <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded flex flex-col bg-white text-black">
+            <div class="text-center py-3">
+              <div class="text-center my-2"><div class="inline-block"><span class="font-bold text-xl">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-md">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-xl">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-6 h-6 ml-3 relative" style="top: -6px;"></div>
+              <div class="inline-block text-xs font-bold text-blue-primary cursor-pointer" @click="triggerSetDefaultModal">{{ selectedAccountName }}<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></div>
+              <div class="mb-8">
+                <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddressShort }}</div>
+                <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
+              </div>
+              <div>
+                <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center mr-2">
+                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
+                    <div class="h-full w-full flex items-center justify-center">
+                      <img src="@/modules/dashboard/img/icon-balance-white.svg" class="w-5 h-5">
+                    </div>
+                  </div><br>
+                  <div class="text-xxs text-gray-400 inline-block uppercase">Top Up</div>
+                </router-link>
+                <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center mx-2">
+                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
+                    <div class="h-full w-full flex items-center justify-center">
+                      <img src="@/modules/dashboard/img/icon-transfer-white.svg" class="w-5 h-5">
+                    </div>
+                  </div><br>
+                  <div class="text-xxs text-gray-400 inline-block uppercase">Transfer</div>
+                </router-link>
+                <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center ml-2">
+                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
+                    <div class="h-full w-full flex items-center justify-center">
+                      <img src="@/modules/dashboard/img/icon-swap-white.svg" class="w-5 h-5">
+                    </div>
+                  </div><br>
+                  <div class="text-xxs text-gray-400 inline-block uppercase">Swap</div>
+                </router-link>
+              </div>
             </div>
-            <div>
-              <div class="mt-1 text-gray-300 text-txs">CURRENT BALANCE</div>
+          </div>
+        </div>
+        <div class="pr-2 hidden md:inline-block">
+          <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded-lg balance-div flex flex-col justify-between bg-navy-primary text-white">
+            <div class="mt-8">
+              <div class="text-gray-300 text-txs">CURRENT BALANCE</div>
               <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
               <div class="text-gray-300 text-txs mt-1">Estimate US$ {{ currencyConvert }}</div>
             </div>
             <div class="flex justify-between mt-2">
               <div>
-                <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold inline-block" style="margin-top: 1px">Top Up {{currentNativeTokenName}}</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></router-link>
+                <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">Top Up</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></router-link>
               </div>
-              <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-send-xpx.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
+              <div class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-swap.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold text-gray-500" style="margin-top: 1px">Swap</div></div>
             </div>
-            
           </div>
         </div>
-        <div class="px-2">
+        <div class="sm:pl-2 xl:px-2 hidden md:inline-block">
           <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div">
             <div class="text-gray-400 text-txs mt-7 mb-2">WALLET ADDRESS</div>
             <div class="flex items-center justify-between mb-8">
-              <div id="address" class="font-bold outline-none break-all text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
+              <div id="address" class="font-bold outline-none break-all text-xs lg:text-tsm h-8" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
               <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4" @click="copy('address')">
             </div>
             <div class="flex justify-between w-full">
-              <div class="my-2 flex items-center"><a href="https://bctestnetfaucet.xpxsirius.io/#/" target=_new><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span class="text-xs" style="margin-top: 1px">Request {{currentNativeTokenName}}</span></a></div>
-              <div class="my-2 flex items-center"><img src="@/modules/dashboard/img/icon-key.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs" style="margin-top: 1px">Convert to Multisig</div></div>
+              <div class="my-2 flex items-center"><a href="https://bctestnetfaucet.xpxsirius.io/#/" target=_new><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span class="text-xs font-bold" style="margin-top: 1px">Scan QR Code</span></a></div>
+              <div class="my-2 flex items-center"><img src="@/modules/dashboard/img/icon-multisig-blue.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">Convert to Multisig</div></div>
             </div>
           </div>
         </div>
-        <div class="col-span-2 pl-2">
-          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-4 rounded-lg transaction-div flex flex-row justify-evenly items-center text-white">
-            <div class="text-center">
-              <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-successful-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredConfirmedTransactions.length }}</div></div>
-              <div class="text-xs mt-3">Succesful<br>Transactions</div>
+        <div class="pl-2 hidden xl:inline-block">
+          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-3 rounded-lg transaction-div text-white">
+            <div class="text-txs mt-6 text-gray-400">Recent Transfers</div>
+            <div class="text-gray-400 text-tsm mt-6 mb-2 h-12" v-if="recentTransferTxnRow.length==0">Invite your families and friends to create Sirius Wallet account and start transferring to their accounts.</div>
+            <div v-else class="mt-2">
+              <div v-for="txn in recentTransferTxnRow" :key="txn.hash" class="flex items-center justify-between mb-1">
+                <a class="flex items-center max-w-xs" :href="addressExplorerURL + '/' + txn.transferContactAddress" target=_new>
+                  <div v-html="toSvg(txn.transferContactAddress, 20, jdenticonConfig)" class="mr-3"></div>
+                  <div class="truncate text-xs">{{ txn.transferContact }}</div>
+                </a>
+                <a class="text-tsm font-bold" :href="hashExplorerURL + '/' + txn.hash" target=_new>{{ txn.amount }} <span class="text-xxs font-normal">{{ currentNativeTokenName }}</span></a>
+              </div>
             </div>
-            <div class="text-center">
-              <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-unconfirmed-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredUnconfirmedTransactions.length }}</div></div>
-              <div class="text-xs mt-3">Unconfirmed<br>Transactions</div>
-            </div>
-            <div class="text-center">
-              <div class="flex items-center justify-center"><img src="@/modules/dashboard/img/icon-waiting-for-transaction.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><div class="inline-block text-md">{{ filteredPartialTransactions.length }}</div></div>
-              <div class="text-xs mt-3">Waiting for<br>Signing</div>
-            </div>
+            <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mt-4"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
           </div>
         </div>
       </div>
@@ -67,10 +100,10 @@
       <DashboardAssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
       <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" :account="selectedAccount" />
-      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ filteredConfirmedTransactions.length }} - View all)</div>
-      <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block).slice(0, 5)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
-      <div class="mt-10 flex">
-        <div class=" md:w-1/2">
+      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ accountConfirmedTxnsCount }} - View all)</div>
+      <MixedTxnDataTable :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="recentTransactions" @openDecryptMsg="openDecryptMsgModal"></MixedTxnDataTable>
+      <div class="mt-10 md:flex ml-5 md:ml-0">
+        <div class="w-full md:w-1/2">
           <div class="mb-8 font-bold uppercase text-txs">Create something new</div>
           <div class="flex flex-wrap">
             <div class="flex items-center w-80 mb-2">
@@ -87,7 +120,7 @@
                 <p class="text-txs w-60">An asset could be a token that has a unique identifier and configurable properties.</p>
               </div>
             </div>
-            <div class="flex items-center w-80mb-2">
+            <div class="flex items-center w-80 mb-2">
               <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
               <div class="inline-block ml-2 dashboard-link">
                 <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create New Account</router-link>
@@ -96,9 +129,9 @@
             </div>
           </div>
         </div>
-        <div class="md:w-1/2">
+        <div class="w-full md:w-1/2 mt-7 md:mt-0">
           <div class="mb-8 font-bold text-txs uppercase">Getting started guide</div>
-          <div class="text-tsm">
+          <div class="text-xs sm:text-tsm">
             <div class="mb-2"><a href=#>Guide Overview <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
             <div class="mb-2"><a href=#>What is ProximaX Sirius Chain <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
             <div class="mb-2"><a href=#>What is Namespace <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
@@ -114,22 +147,51 @@
       <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" :account="selectedAccount" />
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='transaction'">
-      <DashboardDataTable :showBlock="true" :showAction="true" @openMessage="openMessageModal" @confirmedFilter="doFilterConfirmed" @openDecryptMsg="openDecryptMsgModal" :transactions="finalConfirmedTransaction.sort((a, b) => b.block - a.block)" v-if="isShowConfirmed" type="confirmed" :currentAddress="selectedAccountAddressPlain"></DashboardDataTable>
+      <div class="text-right">
+        <select v-model="selectedTxnType" @change="changeSearchTxnType" class="border border-gray-200 px-2 py-1 focus:outline-none">
+          <option value="all" class="text-sm">All</option>
+          <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm">{{ txnType.label}}</option>
+        </select>
+      </div>
+      <MixedTxnDataTable v-if="selectedTxnType === 'all'" :selectedGroupType="transactionGroupType.CONFIRMED" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></MixedTxnDataTable>
+      <TransferTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.TRANSFER" :selectedGroupType="transactionGroupType.CONFIRMED" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></TransferTxnDataTable>
+      <AccountTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ACCOUNT" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AccountTxnDataTable>
+      <AggregateTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.AGGREGATE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AggregateTxnDataTable>
+      <AliasTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ALIAS" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AliasTxnDataTable>
+      <AssetTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ASSET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AssetTxnDataTable>
+      <ChainTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.CHAIN" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></ChainTxnDataTable>
+      <ExchangeTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></ExchangeTxnDataTable>
+      <LinkTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LINK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></LinkTxnDataTable>
+      <LockTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LOCK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></LockTxnDataTable>
+      <MetadataTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.METADATA" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></MetadataTxnDataTable>
+      <NamespaceTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.NAMESPACE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></NamespaceTxnDataTable>
+      <RestrictionTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></RestrictionTxnDataTable>
+      <SecretTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.SECRET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></SecretTxnDataTable>
     </div>
-    <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
   </div>
 </template>
 
 <script>
 import { computed, defineComponent, ref, getCurrentInstance, watch } from 'vue';
 import {ResolvedNamespace} from '@/modules/dashboard/model/resolvedNamespace';
-import {AmountType, TipType} from '@/modules/dashboard/model/dashboardClasses';
-import DashboardDataTable from '@/modules/dashboard/components/DashboardDataTable.vue';
-import DashboardPartialDataTable from '@/modules/dashboard/components/DashboardPartialDataTable.vue';
+import { TransactionFilterType, TransactionFilterTypes } from '@/modules/dashboard/model/transactions/transaction';
+import MixedTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/MixedTxnDataTable.vue';
+import TransferTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/TransferTxnDataTable.vue';
+import AccountTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AccountTxnDT.vue';
+import AggregateTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AggregateTxnDT.vue';
+import AliasTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AliasTxnDT.vue';
+import AssetTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AssetTxnDT.vue';
+import ChainTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/ChainTxnDT.vue';
+import ExchangeTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/ExchangeTxnDT.vue';
+import LinkTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/LinkTxnDT.vue';
+import LockTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/LockTxnDT.vue';
+import MetadataTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/MetadataTxnDT.vue';
+import NamespaceTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/NamespaceTxnDT.vue';
+import RestrictionTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/RestrictionTxnDT.vue';
+import SecretTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/SecretTxnDT.vue';
+
 import DashboardAssetDataTable from '@/modules/dashboard/components/DashboardAssetDataTable.vue';
 import DashboardNamespaceDataTable from '@/modules/dashboard/components/DashboardNamespaceDataTable.vue';
-import PartialDashboardDataTable from '@/components/PartialDashboardDataTable.vue';
-import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
 import AddressQRModal from '@/modules/dashboard/components/AddressQRModal.vue';
 import MessageModal from '@/modules/dashboard/components/MessageModal.vue';
 import DecryptMessageModal from '@/modules/dashboard/components/DecryptMessageModal.vue';
@@ -144,26 +206,40 @@ import { ChainUtils } from '@/util/chainUtils';
 import { networkState } from "@/state/networkState";
 import { AccountAPI } from '@/models/REST/account';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
-import { DashboardService } from '../service/dashboardService';
-import * as qrcode from 'qrcode-generator';
-// import { dashboardUtils } from '@/util/dashboardUtils';
+import { DashboardService } from '@/modules/dashboard/service/dashboardService';
+import qrcode from 'qrcode-generator';
+import { toSvg } from "jdenticon";
+import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 //import Dialog from 'primevue/dialog';
 import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
-
-
+import {AppState} from '@/state/appState'
 
 export default defineComponent({
   name: 'ViewDashboard',
+  props:{
+    type: String
+  },
   components: {
-    SetAccountDefaultModal,
-    DashboardDataTable,
-    //PartialDashboardDataTable,
+    MixedTxnDataTable,
+    TransferTxnDataTable,
+    AccountTxnDataTable,
+    AggregateTxnDataTable,
+    AliasTxnDataTable,
+    AssetTxnDataTable,
+    ChainTxnDataTable,
+    ExchangeTxnDataTable,
+    LinkTxnDataTable,
+    LockTxnDataTable,
+    MetadataTxnDataTable,
+    NamespaceTxnDataTable,
+    RestrictionTxnDataTable,
+    SecretTxnDataTable,
     DashboardAssetDataTable,
-    DashboardNamespaceDataTable,    
+    DashboardNamespaceDataTable,
   },
 
-  setup(){
+  setup(props){
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -175,7 +251,6 @@ export default defineComponent({
     const showDecryptMessageModal  = ref(false);
 
     const displayConvertion = ref(false);
-    const openSetDefaultModal = ref(false);
     const showCosignModal = ref(false);
     const txMessage = ref("");
     const messagePayload = ref("");
@@ -190,6 +265,15 @@ export default defineComponent({
     const isInitialSender = ref(false);
     const cosignModalKey = ref(0);
     const decryptMessageKey = ref(0);
+
+    if(props.type == 'transaction'){
+      displayBoard.value = 'transaction';
+    }
+    watch(props, (n)=> {
+      if(n.type == 'transaction'){
+        displayBoard.value = 'transaction';
+      }
+    });
 
     const openMessageModal = (message)=>{
       messagePayload.value = message;
@@ -278,45 +362,26 @@ export default defineComponent({
 
     const selectedCosignHash = ref("");
 
-    const openCosignModal = (hash) =>{
-      
-      selectedCosignHash.value = hash;
-      txHash.value = hash;
-
-      let selectedPartialTx = allPartialTransactions.value.find((x)=> x.hash === hash);
-
-      if(selectedPartialTx){
-        let allSignerPublicKeys = selectedPartialTx.innerTransactions.map((x)=> x.signerPublicKeys);
-        let flatSignerPublicKeys = Array.from(new Set([].concat(...allSignerPublicKeys)));
-        // console.log(flatSignerPublicKeys);
-        // console.log(selectedPartialTx.signedPublicKeys);
-        signerPublicKey.value = flatSignerPublicKeys;
-        signedPublicKey.value = selectedPartialTx.signedPublicKeys;
-
-        cosignModalKey.value++;
-        showCosignModal.value = true;
-      }
-    }
-
-    const cosignAggregateBondedTransaction = (signedAggregateBoundedTransaction, account) => {
-      const cosignatureTransaction = Helper.createCosignatureTransaction(signedAggregateBoundedTransaction);
+    const cosignAggregateBondedTransaction = (signedAggregateBondedTransaction, account) => {
+      const cosignatureTransaction = Helper.createCosignatureTransaction(signedAggregateBondedTransaction);
       return account.signCosignatureTransaction(cosignatureTransaction);
     };
 
-    const cosignTransaction = (account)=>{
+    // const cosignTransaction = (account)=>{
 
-      let selectedPartialTx = rawPartialTransactions.value.find((x)=> x.transactionInfo.hash === selectedCosignHash.value);
+    //   let selectedPartialTx = rawPartialTransactions.value.find((x)=> x.transactionInfo.hash === selectedCosignHash.value);
 
-      if(selectedPartialTx){
-        let cosignatureSignedTransaction = cosignAggregateBondedTransaction(selectedPartialTx, account);
-        ChainUtils.announceCosignTransaction(cosignatureSignedTransaction);
-      }
+    //   if(selectedPartialTx){
+    //     let cosignatureSignedTransaction = cosignAggregateBondedTransaction(selectedPartialTx, account);
+    //     ChainUtils.announceCosignTransaction(cosignatureSignedTransaction);
+    //   }
 
-      showCosignModal.value = false;
-    }
+    //   showCosignModal.value = false;
+    // }
 
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+    const currentNativeTokenId = computed(()=> networkState.currentNetworkProfile.network.currency.assetId);
 
     let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
     currentAccount.default = true;
@@ -329,6 +394,12 @@ export default defineComponent({
     // const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty().substring(0, 13) + '....' + Helper.createAddress(selectedAccount.value.address).pretty().substring(Helper.createAddress(selectedAccount.value.address).pretty().length - 11));
     const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty());
     const selectedAccountAddressPlain = computed(()=> selectedAccount.value.address);
+    const selectedAccountAddressShort = computed(() => {
+      let prettyAddress = Helper.createAddress(selectedAccount.value.address).pretty();
+      let firstPartAddress = prettyAddress.substr(0, 11);
+      let secondPartAddress = prettyAddress.substr(-11);
+      return firstPartAddress + '...' + secondPartAddress;
+    });
     const selectedAccountDirectChilds = computed(()=> {
       let multisigInfo = selectedAccount.value.multisigInfo.find((x)=> x.level === 0);
 
@@ -345,7 +416,7 @@ export default defineComponent({
     });
 
     const selectedAccountAssetsCount = computed(()=>{
-      return selectedAccount.value.assets.length;
+      return selectedAccount.value.assets.filter(x => x.idHex !== currentNativeTokenId.value).length;
     });
 
     const selectedAccountBalance = computed(
@@ -393,451 +464,16 @@ export default defineComponent({
       });
     };
 
-    let confirmedTransactions = ref([]);
-    let unconfirmedTransactions = ref([]);
-    let partialTransactions = ref([]);
+    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
 
-    let finalConfirmedTransaction = ref([]);
-    
-    let allConfirmedTransactions = ref([]);
-    let allUnconfirmedTransactions = ref([]);
-    let allPartialTransactions = ref([]);
-    let filteredConfirmedTransactions = computed(()=>{
+    let accountConfirmedTxnsCount = ref(0);
 
-      if(allConfirmedTransactions.value.length === 0){
-        return [];
-      }
-
-      let addressToSearch = [selectedAccountAddressPlain.value];
-      // addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
-      return allConfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
-    })
-
-    let filteredUnconfirmedTransactions = computed(()=>{
-
-      if(allUnconfirmedTransactions.value.length === 0){
-        return [];
-      }
-
-      let addressToSearch = [selectedAccountAddressPlain.value];
-      // addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
-      return allUnconfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
-    })
-
-    watch(filteredConfirmedTransactions, (newValue) => {
-      finalConfirmedTransaction.value = newValue;
-    });
-
-    let selfKnownNamespace = [];
-    let selfKnownAsset = [];
-    let assetIdToQuery = [];
-    let namespaceIdToQuery = [];
-    let namespaceList = [];
-    let assetList = [];
-    let dashboardService = new DashboardService(walletState.currentLoggedInWallet);
-    let blockResolvedData = [];
-
-    // const exactConfirmedTransactionUnresolvedInfo = () =>{
-      
-    //   for(let i =0; i < allConfirmedTransactions.value.length; ++i){
-        
-    //   }
-    // }
-
-    // const exactUnconfirmedTransactionUnresolvedInfo = () =>{
-
-    // }
-
-    dashboardService.fetchConfirmedTransactions().then((txs)=>{
-      //console.log(txs);
-      allConfirmedTransactions.value = txs;
-
-      for(let i = 0; i < txs.length; ++i){
-        if(txs[i].typeName === "Register Namespace"){
-          selfKnownNamespace.push({
-            id: txs[i].extractedData.namespaceIdHex,
-            name: txs[i].extractedData.namespaceName,
-            parentId: txs[i].extractedData.parentId
-          });
-        }
-        else if(txs[i].typeName === "Mosaic Definition" ){
-          selfKnownAsset.push({ 
-            id: txs[i].extractedData.mosaicIdHex, 
-            divisibility:  txs[i].extractedData.divisibility
-          });
-        }
-
-        if(txs[i].innerTransactions){
-          for(let y = 0; y < txs[i].innerTransactions.length; ++y){
-            if(txs[i].innerTransactions[y].typeName === "Register Namespace"){
-              selfKnownNamespace.push({
-                id: txs[i].innerTransactions[y].extractedData.namespaceIdHex,
-                name: txs[i].innerTransactions[y].extractedData.namespaceName,
-                parentId: txs[i].innerTransactions[y].extractedData.parentId
-              });
-            }
-            else if(txs[i].innerTransactions[y].typeName === "Mosaic Definition" ){
-              selfKnownAsset.push({ 
-                id: txs[i].innerTransactions[y].extractedData.mosaicIdHex, 
-                divisibility: txs[i].innerTransactions[y].extractedData.properties.divisibility}
-              );
-            }
-          }
-        }
-      }
-
-      let addressToSearch = [selectedAccountAddressPlain.value];
-      // addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
-      filteredConfirmedTransactions.value = allConfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
-
-      updateAllConfirmedTransaction();
-    });
-
-    const updateAllConfirmedTransaction = () =>{
-
-      for(let i = 0; i < allConfirmedTransactions.value.length; ++i){
-
-        for(let y=0; y < allConfirmedTransactions.value[i].displayTips.length; ++y){
-
-            // below are the namespace Id to name
-            let namespaceDisplayTip = allConfirmedTransactions.value[i].displayTips[y].rowTips.filter(x=> x.tipType === TipType.NAMESPACE_ID);
-
-            for(let tip=0; tip < namespaceDisplayTip.length; ++tip){
-              if(namespaceDisplayTip[tip].valueType === "fixed"){
-                continue;
-              }
-              namespaceDisplayTip[tip].displayValue = getCompleteName(namespaceDisplayTip[tip].value);
-            }
-
-            let aliasAssetDisplayTip = allConfirmedTransactions.value[i].displayTips[y].rowTips.filter(x=> x.tipType === TipType.ASSET_ALIAS);
-
-            for(let tip=0; tip < aliasAssetDisplayTip.length; ++tip){
-              aliasAssetDisplayTip[tip].displayValue = getCompleteName(aliasAssetDisplayTip[tip].value);
-            }
-
-            let aliasAddressDisplayTip = allConfirmedTransactions.value[i].displayTips[y].rowTips.filter(x=> x.tipType === TipType.ADDRESS_ALIAS);
-
-            for(let tip=0; tip < aliasAddressDisplayTip.length; ++tip){
-              aliasAddressDisplayTip[tip].displayValue = getCompleteName(aliasAddressDisplayTip[tip].value);
-            }
-
-            let msgNamespaceDisplayTip = allConfirmedTransactions.value[i].displayTips[y].rowTips.filter(x=> x.tipType === TipType.MSG_NAMESPACE);
-
-            for(let tip=0; tip < msgNamespaceDisplayTip.length; ++tip){
-              msgNamespaceDisplayTip[tip].displayValue2 = getCompleteName(msgNamespaceDisplayTip[tip].value2);
-            }
-
-            // below are the amount absolute to exact
-            let supplyAssetAmountDisplayTip = allConfirmedTransactions.value[i].displayTips[y].rowTips.filter(x=> x.tipType === TipType.SUPPLY_ASSET_AMOUNT && x.valueType === AmountType.RAW);
-
-            for(let tip=0; tip < supplyAssetAmountDisplayTip.length; ++tip){
-              let assetInfo = findSelfKnowAssetInfo(supplyAssetAmountDisplayTip[tip].value2); 
-
-              if(assetInfo){
-                let newAmount = Helper.convertToCurrency(parseFloat(supplyAssetAmountDisplayTip[tip].value), assetInfo.divisibility);
-                let oldAmount = supplyAssetAmountDisplayTip[tip].value;
-                supplyAssetAmountDisplayTip[tip].value = newAmount;
-                supplyAssetAmountDisplayTip[tip].displayValue = oldAmount > 0 ? "+" + newAmount: newAmount;
-                supplyAssetAmountDisplayTip[tip].valueType = AmountType.EXACT;
-              }
-            }
-
-            let assetAmountDisplayTip = allConfirmedTransactions.value[i].displayTips[y].rowTips.filter(x=> x.tipType === TipType.ASSET_AMOUNT && x.valueType === AmountType.RAW);
-
-            for(let tip=0; tip < assetAmountDisplayTip.length; ++tip){
-              let assetInfo = findSelfKnowAssetInfo(assetAmountDisplayTip[tip].value2); 
-
-              if(assetInfo){
-                let newAmount = Helper.convertToCurrency(parseFloat(assetAmountDisplayTip[tip].value), assetInfo.divisibility);
-                assetAmountDisplayTip[tip].value = newAmount;
-                assetAmountDisplayTip[tip].displayValue = newAmount;
-                assetAmountDisplayTip[tip].valueType = AmountType.EXACT;
-              }
-            }
-
-            let supplyAmountDisplayTip = allConfirmedTransactions.value[i].displayTips[y].rowTips.filter(x=> x.tipType === TipType.SUPPLY_AMOUNT && x.valueType === AmountType.RAW);
-
-            for(let tip=0; tip < supplyAmountDisplayTip.length; ++tip){
-              let assetInfo = findSelfKnowAssetInfo(supplyAmountDisplayTip[tip].value2); 
-
-              if(assetInfo){
-                let newAmount = Helper.convertToCurrency(parseFloat(supplyAmountDisplayTip[tip].value), assetInfo.divisibility);
-                let oldAmount = supplyAssetAmountDisplayTip[tip].value;
-                supplyAssetAmountDisplayTip[tip].value = newAmount;
-                supplyAssetAmountDisplayTip[tip].displayValue = oldAmount > 0 ? "+" + newAmount: newAmount;
-                supplyAssetAmountDisplayTip[tip].valueType = AmountType.EXACT;
-              }
-            }
-            // SUPPLY_AMOUNT NAMESPACE_AMOUNT
-        }
-
-        if(!allConfirmedTransactions.value[i].innerTransactions){
-          continue;
-        }
-        for(let y=0; y < allConfirmedTransactions.value[i].innerTransactions.length; ++y){
-          for(let z=0; z < allConfirmedTransactions.value[i].innerTransactions[y].displayTips.length; ++z){
-
-            // below are the namespace Id to name
-            let namespaceDisplayTip = allConfirmedTransactions.value[i].innerTransactions[y].displayTips[z].rowTips.filter(x=> x.tipType === TipType.NAMESPACE_ID);
-
-            for(let tip=0; tip < namespaceDisplayTip.length; ++tip){
-              if(namespaceDisplayTip[tip].valueType === "fixed"){
-                continue;
-              }
-              namespaceDisplayTip[tip].displayValue = getCompleteName(namespaceDisplayTip[tip].value);
-            }
-
-            let aliasAssetDisplayTip = allConfirmedTransactions.value[i].innerTransactions[y].displayTips[z].rowTips.filter(x=> x.tipType === TipType.ASSET_ALIAS);
-
-            for(let tip=0; tip < aliasAssetDisplayTip.length; ++tip){
-              aliasAssetDisplayTip[tip].displayValue = getCompleteName(aliasAssetDisplayTip[tip].value);
-            }
-
-            let aliasAddressDisplayTip = allConfirmedTransactions.value[i].innerTransactions[y].displayTips[z].rowTips.filter(x=> x.tipType === TipType.ADDRESS_ALIAS);
-
-            for(let tip=0; tip < aliasAddressDisplayTip.length; ++tip){
-              aliasAddressDisplayTip[tip].displayValue = getCompleteName(aliasAddressDisplayTip[tip].value);
-            }
-
-            let msgNamespaceDisplayTip = allConfirmedTransactions.value[i].innerTransactions[y].displayTips[z].rowTips.filter(x=> x.tipType === TipType.MSG_NAMESPACE);
-
-            for(let tip=0; tip < msgNamespaceDisplayTip.length; ++tip){
-              msgNamespaceDisplayTip[tip].displayValue2 = getCompleteName(msgNamespaceDisplayTip[tip].value2);
-            }
-
-            // below are the amount absolute to exact
-            let supplyAssetAmountDisplayTip = allConfirmedTransactions.value[i].innerTransactions[y].displayTips[z].rowTips.filter(x=> x.tipType === TipType.SUPPLY_ASSET_AMOUNT && x.valueType === AmountType.RAW);
-
-            for(let tip=0; tip < supplyAssetAmountDisplayTip.length; ++tip){
-              let assetInfo = findSelfKnowAssetInfo(supplyAssetAmountDisplayTip[tip].value2); 
-
-              if(assetInfo){
-                let newAmount = Helper.convertToCurrency(parseFloat(supplyAssetAmountDisplayTip[tip].value), assetInfo.divisibility);
-                let oldAmount = supplyAssetAmountDisplayTip[tip].value;
-                supplyAssetAmountDisplayTip[tip].value = newAmount;
-                supplyAssetAmountDisplayTip[tip].displayValue = oldAmount > 0 ? "+" + newAmount: newAmount;
-                supplyAssetAmountDisplayTip[tip].valueType = AmountType.EXACT;
-              }
-            }
-
-            let assetAmountDisplayTip = allConfirmedTransactions.value[i].innerTransactions[y].displayTips[z].rowTips.filter(x=> x.tipType === TipType.ASSET_AMOUNT && x.valueType === AmountType.RAW);
-
-            for(let tip=0; tip < assetAmountDisplayTip.length; ++tip){
-              let assetInfo = findSelfKnowAssetInfo(assetAmountDisplayTip[tip].value2); 
-
-              if(assetInfo){
-                let newAmount = Helper.convertToCurrency(parseFloat(assetAmountDisplayTip[tip].value), assetInfo.divisibility);
-                assetAmountDisplayTip[tip].value = newAmount;
-                assetAmountDisplayTip[tip].displayValue = newAmount;
-                assetAmountDisplayTip[tip].valueType = AmountType.EXACT;
-              }
-            }
-
-            let supplyAmountDisplayTip = allConfirmedTransactions.value[i].innerTransactions[y].displayTips[z].rowTips.filter(x=> x.tipType === TipType.SUPPLY_AMOUNT && x.valueType === AmountType.RAW);
-
-            for(let tip=0; tip < supplyAmountDisplayTip.length; ++tip){
-              let assetInfo = findSelfKnowAssetInfo(supplyAmountDisplayTip[tip].value2); 
-
-              if(assetInfo){
-                let newAmount = Helper.convertToCurrency(parseFloat(supplyAmountDisplayTip[tip].value), assetInfo.divisibility);
-                let oldAmount = supplyAssetAmountDisplayTip[tip].value;
-                supplyAssetAmountDisplayTip[tip].value = newAmount;
-                supplyAssetAmountDisplayTip[tip].displayValue = oldAmount > 0 ? "+" + newAmount: newAmount;
-                supplyAssetAmountDisplayTip[tip].valueType = AmountType.EXACT;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    const findSelfKnowAssetInfo = (id) =>{
-      let assetInfo = selfKnownAsset.find(x => x.id === id);
-
-      if(!assetInfo){
-        assetIdToQuery.push(id);
-      }
-
-      return assetInfo ? assetInfo : null;
-    }
-
-    const getCompleteName = (id)=>{
-      let namespace = selfKnownNamespace.find(x=> x.id === id);
-
-      if(!namespace){
-        namespaceIdToQuery.push(id);
-        return id;
-      }
-      let fullNameArray = [namespace.name];
-      let done = true;
-
-      if(namespace.parentId){
-        done = false;
-      }
-
-      while(!done){
-        let parentId = namespace.parentId;
-
-        if(!parentId){
-          done = true;
-          break;
-        }
-
-        namespace = selfKnownNamespace.find(x=> x.id === parentId);
-        fullNameArray.unshift(namespace.name);
-      }
-
-      return fullNameArray.join(".");
-    } 
-
-    dashboardService.fetchUnconfirmedTransactions().then((txs)=>{
-      allUnconfirmedTransactions.value = txs;
-
-      let addressToSearch = [selectedAccountAddressPlain.value];
-      // addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
-      filteredUnconfirmedTransactions.value = allUnconfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
-    });
-
-    let rawPartialTransactions = ref([]);
-    //let filteredPartialTransactions = ref([]);
-
-    let filteredPartialTransactions = computed(()=>{
-
-      if(allPartialTransactions.value.length === 0){
-        return [];
-      }
-
-      let addressToSearch = [selectedAccountAddressPlain.value];
-      addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
-      return allPartialTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
-    })
-    
-    /*
-    const refreshPartialTransaction = () =>{
-      let addressToSearch = [selectedAccountAddressPlain.value];
-      addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
-      filteredPartialTransactions.value = allPartialTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
-    }
-    */
-
-    let publicKeysMultisigInfo = [];
-    //  = computed(()=>{
-    //   if(walletState.isLogin){
-    //     return WalletUtils.getWalletMultisigInfo(walletState.currentLoggedInWallet);
-    //   }
-    //   else{
-    //     return [];
-    //   }
-    // });
-    let publicKeyToQuery = ref([]);
-
-    // let count = 1;
-
-    // let tempInterval = setInterval(()=>{
-    //   if(count > 100){
-    //     clearInterval(tempInterval);
-    //   }
-    //   count++;
-    //   console.log(walletState.wallets.isReady);
-    //   console.log(walletState.currentLoggedInWallet.accounts[0].multisigInfo);
-    //   console.log(walletState.currentLoggedInWallet.others[0].multisigInfo);
-    //   console.log(WalletUtils.getWalletMultisigInfo(walletState.currentLoggedInWallet));
-    // }, 50);
-
-    const updatePartialTransaction = ()=>{
-
-      if(walletState.currentLoggedInWallet === null){
-        return;
-      }
-
-      if(!walletState.currentLoggedInWallet.isReady){
-        setTimeout(()=>{
-          updatePartialTransaction();
-        }, 1000)
-        return;
-      }
-      publicKeysMultisigInfo = WalletUtils.getWalletMultisigInfo(walletState.currentLoggedInWallet);
-
-      for(let i = 0; i < allPartialTransactions.value.length; ++i){
-        for(let x = 0; x < allPartialTransactions.value[i].innerTransactions.length; ++x){
-          
-          let newSignerPublicKeys = [];
-          let signerPublicKeys = allPartialTransactions.value[i].innerTransactions[x].signerPublicKeys;
-
-          //console.log(signerPublicKeys);
-
-          for(let y=0; y < signerPublicKeys.length; ++y){
-            // console.log(signerPublicKeys[y]);
-            let foundMultisigInfo = publicKeysMultisigInfo.find(pkMultisigInfo=> pkMultisigInfo.publicKey === signerPublicKeys[y]);
-            
-            //console.log(foundMultisigInfo);
-            if(foundMultisigInfo){
-              let allCosigners = WalletUtils.getFinalCosigner(foundMultisigInfo.multisigInfos);
-              let directCosigner = WalletUtils.getDirectParentCosigner(foundMultisigInfo.multisigInfos);
-              allPartialTransactions.value[i].innerTransactions[x].directParent = directCosigner;
-              allPartialTransactions.value[i].innerTransactions[x].numToApprove = directCosigner.length;
-              newSignerPublicKeys = newSignerPublicKeys.concat(allCosigners);
-            }
-            else{
-              let foundInWallet = WalletUtils.findAccountByPublicKey(walletState.currentLoggedInWallet, signerPublicKeys[y]);
-              
-              if(!foundInWallet){
-                publicKeyToQuery.value.push(signerPublicKeys[y]);
-              }
-              newSignerPublicKeys = newSignerPublicKeys.concat(signerPublicKeys[y]);
-            }
-          }
-          allPartialTransactions.value[i].innerTransactions[x].signerPublicKeys = Array.from(new Set(newSignerPublicKeys));
-        }
-      }
-
-      //refreshPartialTransaction();
+    let updateAccountTransactionCount = async()=>{
+      let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
+      accountConfirmedTxnsCount.value = transactionsCount.confirmed;
     };
 
-    dashboardService.fetchPartialTransactions().then((partialData)=>{
-      rawPartialTransactions.value = partialData.txns;
-      allPartialTransactions.value = partialData.formatted;
-
-      let addressToSearch = [selectedAccountAddressPlain.value];
-      addressToSearch = addressToSearch.concat(selectedAccountDirectChilds.value);
-      filteredPartialTransactions.value = allPartialTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.includes(address)));
-    
-      updatePartialTransaction();
-    });
-
-    emitter.on("TXN_CONFIRMED", (num)=>{
-      let newConfirmTxNum = num;
-
-      let newTxs = [];
-      let confirmedTxHashes = listenerState.allConfirmedTransactionsHash.slice(-newConfirmTxNum);
-
-      txHashLoop:
-      for(let i = 0; i < confirmedTxHashes.length; ++i){
-
-        if(allConfirmedTransactions.value.find((tx)=> tx.hash === confirmedTxHashes[i])){
-          continue;
-        }
-
-        addressTransactionLoop:
-        for(let x = 0; x < listenerState.confirmedTransactions.length; ++x){
-          let foundTx = listenerState.confirmedTransactions[i].confirmedTransactions.find((tx)=> confirmedTxHashes.includes(tx.transactionInfo.hash));
-        
-          if(foundTx){
-            newTxs.push(foundTx);
-            break addressTransactionLoop;
-          }
-        }
-      }
-
-      if(newTxs.length > 0){
-        let formatedTxs = dashboardService.formatConfirmedWithTransaction(newTxs);
-        allConfirmedTransactions.value = formatedTxs.concat(allConfirmedTransactions.value);
-
-        allUnconfirmedTransactions.value = allUnconfirmedTransactions.value.filter((tx)=> !listenerState.allConfirmedTransactionsHash.includes(tx.hash));
-        allPartialTransactions.value = allPartialTransactions.value.filter((tx)=> !listenerState.allConfirmedTransactionsHash.includes(tx.hash));
-      }
-    })
-
+    /*
     emitter.on("TXN_UNCONFIRMED", (num)=>{
 
       let newUnconfirmedTxnCount = num;
@@ -924,7 +560,7 @@ export default defineComponent({
       allUnconfirmedTransactions.value = allUnconfirmedTransactions.value.filter((tx)=> ![hash].includes(tx.hash));
       allPartialTransactions.value = allPartialTransactions.value.filter((tx)=> ![hash].includes(tx.hash));
     });
-
+    */
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
@@ -933,169 +569,433 @@ export default defineComponent({
       toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
     };
 
-    
     // get USD conversion
     const currencyConvert = ref('');
 
-    if(networkState.currentNetworkProfile.network.currency.name === "XPX"){
-      displayConvertion.value = true;
-      getCurrencyPrice();
-
-      watch(selectedAccountBalance, () => {
+    const updatePricing = () =>{
+      if(networkState.currentNetworkProfile.network.currency.name === "XPX"){
+        displayConvertion.value = true;
         getCurrencyPrice();
-      });
+
+        watch(selectedAccountBalance, () => {
+          getCurrencyPrice();
+        });
+      }
     }
 
-    // const confirmedTransactions = ref<ConfirmedTransaction[]>([]);
-    // const unconfirmedTransactions = ref<UnconfirmedTransaction[]>([]);
-    // const aggregateBondedTransactions = ref<AggregateBondedTransaction[]>([]);
-    // const pageSize:number = 10;
-    const isShowConfirmed = ref(true);
-    const isShowUnconfirmed = ref(false);
-    const isShowPartial = ref(false);
+    // setup transaction loading
+    const recentTransactions = ref([]);
+    const searchedTransactions = ref([]);
+    const recentTransferTransactions = ref([]);
+    let allTxnQueryParams = Helper.createTransactionQueryParams();
+    let transactionGroupType = Helper.getTransactionGroupType();
+    let selectedTxnGroupType = transactionGroupType.CONFIRMED;
+    let selectedTxnType = ref("all");
+    let txnTypeList = Object.entries(TransactionFilterType).map(([label, value])=>({label, value}));
+    let endOfRecords = false;
+    let searchingTxn = ref(false);
 
-    const clickConfirmedTransaction = () => {
-      isShowConfirmed.value = true;
-      isShowUnconfirmed.value = false;
-      isShowPartial.value = false;
+    let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
+
+    allTxnQueryParams.updateFieldOrder(blockDescOrderSortingField);
+    allTxnQueryParams.embedded = true;
+    // allTxnQueryParams.address = selectedAccountAddressPlain.value;
+
+    let loadRecentTransactions = async()=>{
+      let txnQueryParams = Helper.createTransactionQueryParams();
+      txnQueryParams.pageSize = 1;
+      txnQueryParams.address = selectedAccountAddressPlain.value;
+      txnQueryParams.embedded = true;
+      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
+
+      let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
+
+      let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
+      recentTransactions.value = formattedTxns.slice(0, 5);
+      searchedTransactions.value = formattedTxns;
     };
 
-    const clickUnconfirmedTransaction = () => {
-      if(filteredUnconfirmedTransactions.value.length > 0){
-        isShowUnconfirmed.value = true;
-        isShowConfirmed.value = false;
-        isShowPartial.value = false;
+    let loadRecentTransferTransactions = async()=>{
+      let txnQueryParams = Helper.createTransactionQueryParams();
+      txnQueryParams.pageSize = 1;
+      txnQueryParams.type = TransactionFilterTypes.getTransferTypes();
+      txnQueryParams.signerPublicKey = selectedAccountPublicKey.value;
+      txnQueryParams.embedded = true;
+      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
+
+      let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
+
+      let txnQueryParams2 = Helper.createTransactionQueryParams();
+      txnQueryParams2.pageSize = 1;
+      txnQueryParams2.type = TransactionFilterTypes.getTransferTypes();
+      txnQueryParams2.recipientAddress = selectedAccountAddressPlain.value;
+      txnQueryParams2.embedded = true;
+      txnQueryParams2.updateFieldOrder(blockDescOrderSortingField);
+
+      let transactionSearchResult2 = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams2);
+
+      let tempTxns = [];
+
+      if(transactionSearchResult.transactions.length){
+        let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
+
+        tempTxns = formattedTxns;
       }
-    };
 
-    const clickPartialTransactions = () => {
-      if(filteredPartialTransactions.value.length > 0){
-        isShowPartial.value = true;
-        isShowConfirmed.value = false;
-        isShowUnconfirmed.value = false;
+      if(transactionSearchResult2.transactions.length){
+        let formattedTxns2 = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult2.transactions);
+        tempTxns = tempTxns.concat(formattedTxns2);
       }
-    };
-
-    const doFilterConfirmed = (input)=>{
       
-      if(input == ""){
-        finalConfirmedTransaction.value = filteredConfirmedTransactions.value;
-        return;
+      recentTransferTransactions.value = removeDuplicateTxn(tempTxns);
+    };
+
+    const reloadSearchTxns = () =>{
+      allTxnQueryParams.pageNumber = 1;
+      endOfRecords = false;
+
+      searchTransactions();
+    }
+
+    const loadMoreTxns = () =>{
+      searchTransactions(true);
+    }
+
+    const searchTransaction = async(loadMore = false) =>{
+
+      allTxnQueryParams.pageNumber = loadMore ? allTxnQueryParams.pageSize + 1 : 1;
+      searchingTxn.value = true;
+
+      let transactionSearchResult = await dashboardService.searchTxns(selectedTxnGroupType, allTxnQueryParams);
+
+      if(transactionSearchResult.pagination.pageNumber <= allTxnQueryParams.pageNumber){
+        endOfRecords = true;
+      }else{
+        endOfRecords = false;
       }
 
-      let indexOfType = input.indexOf(':');
-      let type = "none";
-      let value = "";
+      searchingTxn.value = false;
 
-      if(indexOfType > -1){
-        type = input.substr(0,input.indexOf(':'));
-        value = input.substr(input.indexOf(':')+1);
+      let formattedTxns = [];
+
+      switch (selectedTxnGroupType) {
+        case transactionGroupType.CONFIRMED:
+          formattedTxns = await formatConfirmedTransaction(transactionSearchResult.transactions);
+          break;
+        case transactionGroupType.UNCONFIRMED:
+          formattedTxns = await formatUnconfirmedTransaction(transactionSearchResult.transactions);
+          break;
+        case transactionGroupType.PARTIAL:
+          formattedTxns = await formatPartialTransaction(transactionSearchResult.transactions);
+          break;
       }
 
-      if(value){
-        switch (type) {
-          case "ns":
-          case 'namespace':
-            let nsToSearch = new RegExp(value.toUpperCase());
-            if(["'",'"', "-"].includes(value.substr(0, 1))){
-              let convertingValue = value.substr(1);
-              if(convertingValue == ""){
-                return;
-              }
-              try {
-                let nsHex = Helper.createNamespaceId(convertingValue.toLowerCase()).toHex().toUpperCase();
-                
-                if(value.substr(0, 1) === "-"){
-                  if(convertingValue === networkState.currentNetworkProfile.network.currency.namespace){
-                    let assetToSearch = new RegExp(networkState.currentNetworkProfile.network.currency.assetId.toUpperCase());
-                    finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.relatedAsset.some((asset)=> assetToSearch.test(asset)));
-                    return;
-                  }
-                  else{
-                    nsToSearch = new RegExp(nsHex);
-                    let mosaicAliasTx = filteredConfirmedTransactions.value.find(
-                      (tx)=> tx.typeName === "Mosaic Alias" && tx.relatedNamespace.some((ns)=> nsToSearch.test(ns))
-                    );
-
-                    if(mosaicAliasTx){
-                      let assetsToSearch = mosaicAliasTx.relatedAsset;
-                      finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.relatedAsset.some((asset)=> assetsToSearch.include(asset)));
-                      return;
-                    }
-                    else{
-                      let addressAliasTx = filteredConfirmedTransactions.value.find(
-                        (tx)=> tx.typeName === "Address Alias" && tx.relatedNamespace.some((ns)=> nsToSearch.test(ns))
-                      );
-
-                      if(addressAliasTx){
-                        let addressToSearch = addressAliasTx.relatedAddress;
-                        finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.include(address)));
-                        return;
-                      }
-                    }
-                    
-                    return;
-                  }
-                }
-                else{
-                  nsToSearch = new RegExp(nsHex);
-                }
-                
-              } catch (error) {
-                return;
-              }
-            }
-
-            finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.relatedNamespace.some((ns)=> nsToSearch.test(ns)));
-            break;
-          case 'address':
-          case 'add':
-            let addressToSearch = new RegExp(value.toUpperCase().split('-').join(""));
-            finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.relatedAddress.some((address)=> addressToSearch.test(address)));
-            break;
-          case 'pk':
-          case 'publicKey':
-          case 'publickey':
-            let pkToSearch = new RegExp(value.toUpperCase());
-            finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.relatedPublicKey.some((pk)=> pkToSearch.test(pk)));
-            break;
-          case 'asset':
-          case 'mosaic':
-            let assetToSearch = new RegExp(value.toUpperCase());
-            finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.relatedAsset.some((asset)=> assetToSearch.test(asset)));
-            break;
-          case 'hash':
-            let hashToSearch = new RegExp(value.toUpperCase());
-            finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> hashToSearch.test(tx.hash));
-            break;
-          case 'none':
-          default:
-            let searchString = new RegExp(value);
-            finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.searchString.some((searchStr)=> searchString.test(searchStr)));
-            break;
-        }
+      if(loadMore){
+        let tempTxns = searchedTransactions.value.concat(formattedTxns);
+        searchedTransactions.value = removeDuplicateTxn(tempTxns);
       }
       else{
-        let searchString = new RegExp(input);
-        finalConfirmedTransaction.value = filteredConfirmedTransactions.value.filter((tx)=> tx.searchString.some((searchStr)=> searchString.test(searchStr)));
+        searchedTransactions.value = formattedTxns;
       }
     }
+    
+    const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
+    const addressExplorerURL = computed(()=> explorerBaseURL.value + networkState.currentNetworkProfile.chainExplorer.addressRoute);
+    const hashExplorerURL = computed(()=> explorerBaseURL.value + networkState.currentNetworkProfile.chainExplorer.hashRoute);
 
-    const updateSelectedAccount = (data)=>{
-      if(data.type == 0){
-        selectedAccount.value = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === data.name);
-      }else{
-        selectedAccount.value = walletState.currentLoggedInWallet.others.find((account)=> account.name === data.name);
+    const recentTransferTxnRow = ref([]);
+
+    const recentTransferTxn = async() => {
+      let txnQueryParams = Helper.createTransactionQueryParams();
+      txnQueryParams.pageSize = 1;
+      txnQueryParams.type = TransactionFilterTypes.getTransferTypes();
+      txnQueryParams.signerPublicKey = selectedAccountPublicKey.value;
+      txnQueryParams.embedded = true;
+      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
+
+      let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
+
+      let txnQueryParams2 = Helper.createTransactionQueryParams();
+      txnQueryParams2.pageSize = 1;
+      txnQueryParams2.type = TransactionFilterTypes.getTransferTypes();
+      txnQueryParams2.recipientAddress = selectedAccountAddressPlain.value;
+      txnQueryParams2.embedded = true;
+      txnQueryParams2.updateFieldOrder(blockDescOrderSortingField);
+
+      let transactionSearchResult2 = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams2);
+
+      let tempTxns = [];
+
+      if(transactionSearchResult.transactions.length){
+        let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
+
+        tempTxns = formattedTxns;
       }
-      walletState.currentLoggedInWallet.setDefaultAccountByName(data.name);
-      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+
+      if(transactionSearchResult2.transactions.length){
+        let formattedTxns2 = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult2.transactions);
+        tempTxns = tempTxns.concat(formattedTxns2);
+      }
+
+      recentTransferTxnRow.value = formatRecentTransfer(removeDuplicateTxn(tempTxns).slice(0, 3));
+    };
+
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
+    const jdenticonConfig = themeConfig.jdenticonConfig;
+
+    const formatRecentTransfer = (transactions) => {
+      let TransferTxn = [];
+      transactions.forEach((txn) => {
+        let formattedTransferTxn = {};
+        if(selectedAccountAddressPlain.value == txn.sender){
+          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToName(txn.recipient, true);
+          formattedTransferTxn.transferContactAddress = txn.recipient;
+          formattedTransferTxn.amount = Helper.toCurrencyFormat(txn.amountTransfer);
+        }else{
+          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToName(txn.sender, true);
+          formattedTransferTxn.transferContactAddress = txn.sender;
+          formattedTransferTxn.amount = '-' + Helper.toCurrencyFormat(txn.amountTransfer);
+        }
+        formattedTransferTxn.hash = txn.hash;
+        TransferTxn.push(formattedTransferTxn);
+      });
+      return TransferTxn;
     }
 
-    emitter.on('CLOSE_SET_DEFAULT_ACCOUNT_MODAL', payload => {
-      if(payload){
-        openSetDefaultModal.value = false;
+    const formatConfirmedTransaction = async(transactions)=>{
+
+      let formattedTxns = [];
+
+      switch(selectedTxnType.value){
+        case TransactionFilterType.TRANSFER:
+          formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactions);
+          break;
+        case TransactionFilterType.ACCOUNT:
+          formattedTxns = await dashboardService.formatConfirmedAccountTransaction(transactions);
+          break;
+        case TransactionFilterType.AGGREGATE:
+          formattedTxns = await dashboardService.formatConfirmedAggregateTransaction(transactions);
+          break;
+        case TransactionFilterType.RESTRICTION:
+          formattedTxns = await dashboardService.formatConfirmedRestrictionTransaction(transactions);
+          break;
+        case TransactionFilterType.SECRET:
+          formattedTxns = await dashboardService.formatConfirmedSecretTransaction(transactions);
+          break;
+        case TransactionFilterType.ALIAS:
+          formattedTxns = await dashboardService.formatConfirmedAliasTransaction(transactions);
+          break;
+        case TransactionFilterType.ASSET:
+          formattedTxns = await dashboardService.formatConfirmedAssetTransaction(transactions);
+          break;
+        case TransactionFilterType.METADATA:
+          formattedTxns = await dashboardService.formatConfirmedMetadataTransaction(transactions);
+          break;
+        case TransactionFilterType.CHAIN:
+          formattedTxns = await dashboardService.formatConfirmedChainTransaction(transactions);
+          break;
+        case TransactionFilterType.EXCHANGE:
+          formattedTxns = await dashboardService.formatConfirmedExchangeTransaction(transactions);
+          break;
+        case TransactionFilterType.LINK:
+          formattedTxns = await dashboardService.formatConfirmedLinkTransaction(transactions);
+          break;
+        case TransactionFilterType.LOCK:
+          formattedTxns = await dashboardService.formatConfirmedLockTransaction(transactions);
+          break;
+        case TransactionFilterType.NAMESPACE:
+          formattedTxns = await dashboardService.formatConfirmedNamespaceTransaction(transactions);
+          break;
+        default:
+          formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactions);
+          break;
       }
-    });
+
+      return formattedTxns;
+    }
+
+    const formatUnconfirmedTransaction = async(transactions)=>{
+
+      let formattedTxns = [];
+
+      switch(selectedTxnType.value){
+        case TransactionFilterType.TRANSFER:
+          formattedTxns = await dashboardService.formatUnconfirmedMixedTxns(transactions);
+          break;
+        case TransactionFilterType.ACCOUNT:
+          formattedTxns = await dashboardService.formatUnconfirmedAccountTransaction(transactions);
+          break;
+        case TransactionFilterType.AGGREGATE:
+          formattedTxns = await dashboardService.formatUnconfirmedAggregateTransaction(transactions);
+          break;
+        case TransactionFilterType.RESTRICTION:
+          formattedTxns = await dashboardService.formatUnconfirmedRestrictionTransaction(transactions);
+          break;
+        case TransactionFilterType.SECRET:
+          formattedTxns = await dashboardService.formatUnconfirmedSecretTransaction(transactions);
+          break;
+        case TransactionFilterType.ALIAS:
+          formattedTxns = await dashboardService.formatUnconfirmedAliasTransaction(transactions);
+          break;
+        case TransactionFilterType.ASSET:
+          formattedTxns = await dashboardService.formatUnconfirmedAssetTransaction(transactions);
+          break;
+        case TransactionFilterType.METADATA:
+          formattedTxns = await dashboardService.formatUnconfirmedMetadataTransaction(transactions);
+          break;
+        case TransactionFilterType.CHAIN:
+          formattedTxns = await dashboardService.formatUnconfirmedChainTransaction(transactions);
+          break;
+        case TransactionFilterType.EXCHANGE:
+          formattedTxns = await dashboardService.formatUnconfirmedExchangeTransaction(transactions);
+          break;
+        case TransactionFilterType.LINK:
+          formattedTxns = await dashboardService.formatUnconfirmedLinkTransaction(transactions);
+          break;
+        case TransactionFilterType.LOCK:
+          formattedTxns = await dashboardService.formatUnconfirmedLockTransaction(transactions);
+          break;
+        case TransactionFilterType.NAMESPACE:
+          formattedTxns = await dashboardService.formatUnconfirmedNamespaceTransaction(transactions);
+          break;
+      }
+
+      return formattedTxns;
+    }
+
+    const formatPartialTransaction = async(transactions)=>{
+
+      let formattedTxns = [];
+
+      switch(selectedTxnType.value){
+        case TransactionFilterType.TRANSFER:
+          formattedTxns = await dashboardService.formatPartialMixedTxns(transactions);
+          break;
+        case TransactionFilterType.ACCOUNT:
+          formattedTxns = await dashboardService.formatPartialAccountTransaction(transactions);
+          break;
+        case TransactionFilterType.AGGREGATE:
+          formattedTxns = await dashboardService.formatPartialAggregateTransaction(transactions);
+          break;
+        case TransactionFilterType.RESTRICTION:
+          formattedTxns = await dashboardService.formatPartialRestrictionTransaction(transactions);
+          break;
+        case TransactionFilterType.SECRET:
+          formattedTxns = await dashboardService.formatPartialSecretTransaction(transactions);
+          break;
+        case TransactionFilterType.ALIAS:
+          formattedTxns = await dashboardService.formatPartialAliasTransaction(transactions);
+          break;
+        case TransactionFilterType.ASSET:
+          formattedTxns = await dashboardService.formatPartialAssetTransaction(transactions);
+          break;
+        case TransactionFilterType.METADATA:
+          formattedTxns = await dashboardService.formatPartialMetadataTransaction(transactions);
+          break;
+        case TransactionFilterType.CHAIN:
+          formattedTxns = await dashboardService.formatPartialChainTransaction(transactions);
+          break;
+        case TransactionFilterType.EXCHANGE:
+          formattedTxns = await dashboardService.formatPartialExchangeTransaction(transactions);
+          break;
+        case TransactionFilterType.LINK:
+          formattedTxns = await dashboardService.formatPartialLinkTransaction(transactions);
+          break;
+        case TransactionFilterType.LOCK:
+          formattedTxns = await dashboardService.formatPartialLockTransaction(transactions);
+          break;
+        case TransactionFilterType.NAMESPACE:
+          formattedTxns = await dashboardService.formatPartialNamespaceTransaction(transactions);
+          break;
+      }
+
+      return formattedTxns;
+    }
+
+    const changeTxnGroupType = (txnGroupType) =>{
+
+      searchedTransactions.value = [];
+
+      switch (txnGroupType) {
+        case transactionGroupType.CONFIRMED:
+          selectedTxnGroupType = transactionGroupType.CONFIRMED;
+          break;
+        case transactionGroupType.UNCONFIRMED:
+          selectedTxnGroupType = transactionGroupType.UNCONFIRMED;
+          break;
+        case transactionGroupType.PARTIAL:
+          selectedTxnGroupType = transactionGroupType.PARTIAL;
+          break;
+      }
+
+      searchTransaction();
+    }
+
+    const changeSearchTxnType = () =>{
+      searchedTransactions.value = [];
+      let txnFilterGroup = selectedTxnType.value;
+
+      switch (txnFilterGroup) {
+        case TransactionFilterType.TRANSFER:
+          allTxnQueryParams.type = TransactionFilterTypes.getTransferTypes();
+          break;
+        case TransactionFilterType.ACCOUNT:
+          allTxnQueryParams.type = TransactionFilterTypes.getAccountTypes();
+          break;
+        case TransactionFilterType.ASSET:
+          allTxnQueryParams.type = TransactionFilterTypes.getAssetTypes();
+          break;
+        case TransactionFilterType.ALIAS:
+          allTxnQueryParams.type = TransactionFilterTypes.getAliasTypes();
+          break;
+        case TransactionFilterType.NAMESPACE:
+          allTxnQueryParams.type = TransactionFilterTypes.getNamespaceTypes();
+          break;
+        case TransactionFilterType.METADATA:
+          allTxnQueryParams.type = TransactionFilterTypes.getMetadataTypes();
+          break;
+        case TransactionFilterType.CHAIN:
+          allTxnQueryParams.type = TransactionFilterTypes.getChainTypes();
+          break;
+        case TransactionFilterType.EXCHANGE:
+          allTxnQueryParams.type = TransactionFilterTypes.getExchangeTypes();
+          break;
+        case TransactionFilterType.AGGREGATE:
+          allTxnQueryParams.type = TransactionFilterTypes.getAggregateTypes();
+          break;
+        case TransactionFilterType.LINK:
+          allTxnQueryParams.type = TransactionFilterTypes.getLinkTypes();
+          break;
+        case TransactionFilterType.LOCK:
+          allTxnQueryParams.type = TransactionFilterTypes.getLockTypes();
+          break;
+        case TransactionFilterType.SECRET:
+          allTxnQueryParams.type = TransactionFilterTypes.getSecretTypes();
+          break;
+        case TransactionFilterType.RESTRICTION:
+          allTxnQueryParams.type = TransactionFilterTypes.getRestrictionTypes();
+          break;
+        default:
+          allTxnQueryParams.type = undefined;
+          break;
+      }
+
+      searchTransaction();
+    }
+
+    const removeDuplicateTxn = (txns) =>{
+      let result = txns.filter((value, index, self) =>
+        index === self.findIndex((t) => (
+          t.hash === value.hash
+        ))
+      )
+      return result;
+    }
+
+    const triggerSetDefaultModal = () => {
+      emitter.emit('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', true);
+    }
 
     emitter.on('CLOSE_MODAL', () => {
       showAddressQRModal.value = false;
@@ -1104,7 +1004,39 @@ export default defineComponent({
       showDecryptMessageModal.value = false;
     });
 
+    const init = ()=>{
+      updateAccountTransactionCount();
+      loadRecentTransactions();
+      loadRecentTransferTransactions();
+      updatePricing();
+      recentTransferTxn();
+    }
+
+    if(AppState.isReady){
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState.isReady, (value) => {
+        if(value){
+          init();
+          readyWatcher();
+        }
+      });
+    }
+
+    emitter.on('DEFAULT_ACCOUNT_SWITCHED', payload => {
+      currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
+      currentAccount.default = true;
+      selectedAccount.value = currentAccount;
+      updateAccountTransactionCount();
+      loadRecentTransactions();
+      loadRecentTransferTransactions();
+    });
+
     return {
+      toSvg,
+      addressExplorerURL,
+      hashExplorerURL,
       currentBlock,
       displayBoard,
       copy,
@@ -1113,35 +1045,23 @@ export default defineComponent({
       selectedAccountBalanceBack,
       selectedAccountName,
       selectedAccountPublicKey,
-      confirmedTransactions,
-      unconfirmedTransactions,
-      partialTransactions,
-      isShowConfirmed,
-      isShowUnconfirmed,
-      isShowPartial,
-      clickConfirmedTransaction,
-      clickUnconfirmedTransaction,
-      clickPartialTransactions,
-      openSetDefaultModal,
       currencyConvert,
       displayConvertion,
       currentNativeTokenName,
       selectedAccountAddress,
       selectedAccountAddressPlain,
-      updateSelectedAccount,
+      selectedAccountAddressShort,
       isDefault,
       isMultisig,
-      finalConfirmedTransaction,
-      filteredUnconfirmedTransactions,
-      doFilterConfirmed,
-      filteredConfirmedTransactions,
-      filteredPartialTransactions,
+      recentTransactions,
+      searchedTransactions, 
       addressQR,
       showAddressQRModal,
       showMessageModal,
       showDecryptMessageModal,
       selectedAccount,
       selectedAccountNamespaceCount,
+      triggerSetDefaultModal,
       // selectedAccountNamespaces,
       // selectedAccountAssets,
       selectedAccountAssetsCount,
@@ -1150,10 +1070,10 @@ export default defineComponent({
       messagePayload,
       recipientAddress,
       showCosignModal,
-      openCosignModal,
+      // openCosignModal,
       signerPublicKey,
       signedPublicKey,
-      cosignTransaction,
+      // cosignTransaction,
       //decryptedMessage,
       manualPublicKey,
       publicKeyToUse,
@@ -1162,6 +1082,15 @@ export default defineComponent({
       cosignModalKey,
       decryptMessageKey,
       txHash,
+      accountConfirmedTxnsCount,
+      txnTypeList,
+      transactionGroupType,
+      changeSearchTxnType,
+      changeTxnGroupType,
+      selectedTxnType,
+      TransactionFilterType,
+      recentTransferTxnRow,
+      jdenticonConfig,
     };
   }
 });

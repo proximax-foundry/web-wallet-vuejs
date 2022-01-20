@@ -152,7 +152,7 @@ export default{
 
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
-      if(window.innerWidth < '1024'){
+      if(window.innerWidth < 1024){
         wideScreen.value = false;
       }else{
         wideScreen.value = true;
@@ -160,7 +160,7 @@ export default{
     };
     screenResizeHandler();
 
-    onMounted(() => {
+    onUnmounted(() => {
       window.removeEventListener("resize", screenResizeHandler);
     });
 

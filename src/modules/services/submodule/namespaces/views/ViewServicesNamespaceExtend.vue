@@ -40,8 +40,8 @@
             <div class="text-black text-sm font-bold">{{ selectNamespace }}</div>
           </div>
         </div>
-        <DurationInputClean class="mt-5" :disabled="disabledDuration" v-model="duration" :max="365" placeholder="Duration (number of days)" :showError="showDurationErr" errorMessage="Required Field - Only Numbers (0 - 6)" toolTip="Maximum rental duration is<br>1 year (365 days)." />
-        <div v-if="showMaxDaysLabel" class="text-xs inline-block text-gray-400">Maximum number of days for the extension of this namespace is {{ 365-numDaysleft }} day{{ (365-numDaysleft)>1?'s':'' }}</div>
+        <DurationInputClean class="mt-5" :disabled="disabledDuration" v-model="duration" :max="maxDurationInDays" placeholder="Duration (number of days)" :showError="showDurationErr" errorMessage="Required Field - Only Numbers (0 - 6)" :toolTip="`Maximum rental duration is<br>${maxDurationInDays === 365 ? '1 year ' : ''}(${maxDurationInDays} days).`" />
+        <div v-if="showMaxDaysLabel" class="text-xs inline-block text-gray-400">Maximum number of days for the extension of this namespace is {{ maxDurationInDays-numDaysleft }} day{{ (maxDurationInDays-numDaysleft)>1?'s':'' }}</div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
         <div class="font-semibold text-xxs text-blue-primary">ACCOUNT CURRENT BALANCE</div>
@@ -96,6 +96,8 @@ import { listenerState} from "@/state/listenerState";
 import { toSvg } from "jdenticon";
 import { useToast } from "primevue/usetoast";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
+import { UnitConverter } from '@/util/unitConverter';
+import { TimeUnit } from '@/models/const/timeUnit';
 
 export default {
   name: 'ViewServicesNamespaceExtend',
@@ -112,7 +114,7 @@ export default {
     const toast = useToast();
     const namespaceSelect = ref(null);
     const showDurationErr = ref(false);
-    const duration = ref("0");
+    const duration = ref("1");
     const walletPassword = ref('');
     const err = ref('');
     const disabledPassword = ref(false);
@@ -128,6 +130,7 @@ export default {
     const endBlock = ref(0);
     const numDaysleft = ref(0);
     const showMaxDaysLabel = ref(false);
+    const maxDurationInDays = Math.floor(UnitConverter.configReturn(networkState.currentNetworkProfileConfig.maxNamespaceDuration, TimeUnit.DAY));
 
     const blockListener = computed(()=> listenerState.currentBlock);
 
@@ -229,14 +232,16 @@ export default {
 
     let isMaxDuration = false;
     watch(duration, (n) => {
-      if(n > 365){
-        duration.value = '365';
+      if(n > maxDurationInDays){
+        duration.value = `${maxDurationInDays}`;
+      }else if(n < 1){
+        duration.value = 1;
       }else{
         let remainingBlock = endBlock.value - block.value;
         let availableDays = 0;
         numDaysleft.value = Math.ceil(remainingBlock/(24 * 60 * 4));
-        if((parseInt(n) + numDaysleft.value) > 365){
-          availableDays = 365 - numDaysleft.value;
+        if((parseInt(n) + numDaysleft.value) > maxDurationInDays){
+          availableDays = maxDurationInDays - numDaysleft.value;
           duration.value = availableDays.toString();
           showMaxDaysLabel.value = true;
           isMaxDuration = true;
@@ -377,6 +382,7 @@ export default {
       svgString,
       Helper,
       currentNativeTokenName,
+      maxDurationInDays
     }
   },
 

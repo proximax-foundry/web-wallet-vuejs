@@ -1,4 +1,5 @@
 import { 
+    Deadline,
     Message, NetworkType, 
     PublicAccount, Account,
     UInt64,
@@ -12,7 +13,17 @@ import {
     AliasActionType,
     QueryParams,
     CosignatureTransaction,
-    Password
+    Password,
+    TransactionType,
+    TransactionHash, 
+    TransactionQueryParams,
+    MetadataQueryParams,
+    TransactionGroupType,
+    MetadataType,
+    Order,
+    TransactionSortingField,
+    TransactionFieldOrder,
+    Order_v2
 } from "tsjs-xpx-chain-sdk";
 import Base64 from 'crypto-js/enc-base64';
 import { WalletAcountType } from "../models/const/otherAccountType";
@@ -100,6 +111,38 @@ export class Helper{
         return nonce;
     }
 
+    static createTransactionHash(hash: string, transactionType: number){
+        return new TransactionHash(hash, transactionType);
+    }
+
+    static createTransactionQueryParams(): TransactionQueryParams{
+        return new TransactionQueryParams();
+    }
+
+    static createMetadataQueryParams(): MetadataQueryParams{
+        return new MetadataQueryParams();
+    }
+
+    static createTransactionFieldOrder(order: Order_v2, sortingField: TransactionSortingField): TransactionFieldOrder{
+        return new TransactionFieldOrder(order, sortingField);
+    }
+
+    static getQueryParamOrder(): typeof Order{
+        return Order;
+    }
+
+    static getQueryParamOrder_v2(): typeof Order_v2{
+        return Order_v2;
+    }
+
+    static getTransactionSortField(): typeof TransactionSortingField{
+        return TransactionSortingField;
+    }
+
+    static getTransactionGroupType(): typeof TransactionGroupType{
+        return TransactionGroupType;
+    }
+
     static getWalletAlgorithm(): typeof WalletAlgorithm{
         return WalletAlgorithm;
     }
@@ -143,6 +186,10 @@ export class Helper{
             year: 'numeric', month: 'numeric', day: 'numeric',
             hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false,
           }).format(date);
+      }
+
+      static formatDeadline(timestamp: number) :string{
+        return new Date(timestamp + Deadline.timestampNemesisBlock * 1000).toLocaleString()
       }
     
       static formatFixedDateTime(dateTimeJSON: string): string  {
