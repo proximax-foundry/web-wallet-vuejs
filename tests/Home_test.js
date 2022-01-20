@@ -2,7 +2,6 @@ var name = "Selenium"
 var password = "abcd1234"
 var account = "Primary"
 
-
 module.exports = {
 
     "Home_test": function(browser) {
@@ -29,13 +28,12 @@ module.exports = {
         .home(browser.launch_url)
         .navigate_namespace(browser.launch_url)
         .home(browser.launch_url)
-        .navigate_namespace(browser.launch_url)
+        .navigate_account(browser.launch_url)
         .home(browser.launch_url)
         .click_tabs()
         .home(browser.launch_url)
         .click_headercomponents(browser.launch_url)
-        .delete_wallet(browser.launch_url)
-        .accounts_overview(account)
+        // .delete_wallet(browser.launch_url)
 
     },
     

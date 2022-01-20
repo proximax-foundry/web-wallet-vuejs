@@ -1,6 +1,6 @@
 var name = "Selenium"
 var shortname = "s"
-var namespace_input = "opqr"
+var namespace_input = "justatesting"
 var password = "abcd12345678"
 var privatekey = "0ACDDBF848D081613E665144FF48181EBE4E009D27F33C53AC32180D73A6C667"        // asset acc pk
 

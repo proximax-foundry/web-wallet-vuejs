@@ -1,51 +1,43 @@
 const elements = {
 
-    account: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > a:nth-child(1)',
-    accountname_value: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1)',
-    accountdetails_tab: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2)',
-    new_account: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > a:nth-child(2)',
-    back: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > a',
-    copy_address: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(7) > svg > path',
-    copyaddress_popup: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    copy_publickey: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(10) > svg > path',
-    copypublickey_popup: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    copy_privatekey: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(12) > div:nth-child(3) > svg:nth-child(2) > path',
-    confirm_button: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(12) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div:nth-child(3)',
-    confirm_button2: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(2) > div:nth-child(1) > div:nth-child(3)',
-    confirm_deletionbutton: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(3) > div:nth-child(1) > div:nth-child(4)',
-    cancel_button: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(12) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div:nth-child(5)',
-    cancel_button2: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(12) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div:nth-child(4)',
-    cancel_button3: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(2) > div:nth-child(1) > div:nth-child(5)',
-    cancel_button4: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(2) > div:nth-child(1) > div:nth-child(4)',
-    cancel_deletionbutton: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(3) > div:nth-child(1) > div:nth-child(5)',
-    cancel_deletionbutton2: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(3) > div:nth-child(1) > div:nth-child(6)',
-    delete: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(2) > div:nth-child(2)',
-    deleteaccount_popup: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(3) > div:nth-child(1)',
+    account_ellipsis: 'img.h-6:nth-child(1)',
+    details_selection: 'a.block:nth-child(1)',
+    accountdetails_tab: 'div.w-32:nth-child(1)', 
+    accountname_value: 'div.justify-center:nth-child(2) > div:nth-child(1) > div:nth-child(1)',
+    change_default: '.font-txs > img:nth-child(1)',
+    new_account: 'div.p-2:nth-child(2)',
+    back: 'a[href="#/dashboard"]',
+    copy_address: 'div.justify-center:nth-child(2) > div:nth-child(2) > svg:nth-child(2) > path:nth-child(2)',
+    copyaddress_popup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
+    copy_publickey: '.pb-1 > path:nth-child(2)',
+    copypublickey_popup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
+    copy_privatekey: 'div.border-2:nth-child(3) > div:nth-child(9) > div:nth-child(3) > svg:nth-child(2) > path:nth-child(2)',
+    confirm_button_pk: 'div.blue-btn:nth-child(3)',
+    confirm_button_wp: 'div.blue-btn:nth-child(3)',
+    cancel_button_pk: 'div.cursor-pointer:nth-child(5)',
+    cancel_button_wp: 'div.cursor-pointer:nth-child(5)',
     delete_successfulpopup: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    download_button: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(1)',
-    download_passwordpopup: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(2) > div:nth-child(1)',
-    edit_nameicon: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > img',
-    enter_passwordpopup: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(12) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1)',
-    error_emptyname: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div.error.error_box.mb-3',
-    error_existingname: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div.error.error_box.mb-3',
-    error_emptypassword: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(12) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div.error.error_box.mb-3',
-    error_emptypassword2: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(2) > div:nth-child(1) > div.error.error_box.mb-3',
-    error_wrongpassword: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(12) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div.error.error_box.mb-3',
-    error_wrongpassword2: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(2) > div:nth-child(1) > div.error.error_box.mb-3',
-    error_wrongpassworddeletion: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(3) > div:nth-child(1) > div.error.error_box.mb-3',
-    input_accountname: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > input',
-    input_password: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(12) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > input',
-    input_password2: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > input',
-    input_passworddeletion: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(3) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > input',
-    password_eyeicon: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(12) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > svg > path',
-    password_eyeicon2: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > svg > path',
-    password_eyeicondeletion: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(14) > div:nth-child(3) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > svg > path',
+    download_button: '.blue-btn',
+    download_passwordpopup: '.z-50 > div:nth-child(1)',
+    edit_nameicon: 'img.w-4:nth-child(2)',
+    enter_passwordpopup: 'div.popup-outer-lang:nth-child(3) > div:nth-child(1)',
+    error_emptyname: '.text-red-500',
+    error_existingname: '.text-red-500',
+    error_emptypassword_pk: 'div.error:nth-child(1)',
+    error_emptypassword_wp: 'div.error:nth-child(1)',
+    error_wrongpassword_pk: '.error',
+    error_wrongpassword_wp: '.error',
+    input_accountname: '.outline-none',
+    input_password: 'input.w-full',
+    input_password_wp: 'input.w-full',
+    password_eyeicon_pk: '.text-gray-500 > path:nth-child(1)',
+    password_eyeicon_wp: '.text-gray-500 > path:nth-child(1)',
     private_key: '#private',
-    private_keyhidden: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(12) > div:nth-child(2) > div:nth-child(1)',
-    pk_successfulpopup: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    hide_privatekey: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(12) > div:nth-child(3) > svg:nth-child(3) > path',
-    view_privatekey: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(12) > div:nth-child(2) > svg > path',
-    transfer_button: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(3) > div:nth-child(5) > a:nth-child(1) > div:nth-child(2)'
+    private_keyhidden: 'div.border-2:nth-child(3) > div:nth-child(9) > div:nth-child(2) > div:nth-child(1)',    
+    pk_successfulpopup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
+    hide_privatekey: 'svg.svg-inline--fa:nth-child(3) > path:nth-child(2)',
+    view_privatekey: '.fa-eye > path:nth-child(2)',
+    transfer_button: 'div.flex:nth-child(5) > a:nth-child(1) > div:nth-child(2)',
 
 }
 
@@ -53,7 +45,8 @@ const commands = {
 
     navigate_accountdetails(){
         return this
-        .click("@account")
+        .click("@account_ellipsis")
+        .click("@details_selection")
         .isVisible('@accountdetails_tab', callback = result => {
             this.assert.equal(result.value, true, "If account is clicked, user is navigated to account details page")
         })
@@ -77,13 +70,16 @@ const commands = {
         .click("@edit_nameicon")
         .assert.elementPresent('@error_existingname',' When account name is already taken, error is shown')
         .click("@back")
-        .click("@account")
+        .click("@account_ellipsis")
+        .click("@details_selection")
+
     },
 
     edit_accountname(name){
         return this
         .click("@back")
-        .click("@account")
+        .click("@account_ellipsis")
+        .click("@details_selection")
         .click("@edit_nameicon")
         .assert.elementPresent('@input_accountname', 'When edit button is clicked, account name field is open for edit.')
         .click("@input_accountname")
@@ -111,49 +107,10 @@ const commands = {
 
     transfer_xpx(browser){
         return this
-        .click("@account")
         .click("@transfer_button")
         .assert.urlEquals(browser + 'create-transfer', 'When transfer xpx button is clicked, user is directed to create transfer page')
         .pause(1000)
         .end()
-
-    },
-
-    delete_account(browser, password, password2){
-        return this
-        .click("@new_account")
-        .click("@delete")
-        .isVisible('@deleteaccount_popup', callback = (result) => {
-            this.assert.equal(result.value, true, 'If user clicks to delete account, it will prompt for user confirmation and password')
-        })
-        .click("@input_passworddeletion")
-        .setValue("@input_passworddeletion", password)
-        .click("@cancel_deletionbutton")
-        .isVisible('@accountdetails_tab', callback = result => {
-            this.assert.equal(result.value, true, "If user clicks cancel, user is navigated back to account details page")
-        })
-        .click("@delete")
-        .click("@input_passworddeletion")
-        .setValue("@input_passworddeletion", password2)
-        .click("@confirm_deletionbutton")
-        .isVisible('@error_wrongpassworddeletion', callback = (result) => {
-            this.assert.equal(result.value, true, 'If user enters wrong wallet password, it will show an error')
-        })
-        .click("@cancel_deletionbutton2")
-        .click("@back")
-        .click("@new_account")
-        .click("@delete")
-        .pause(2000)
-        .click("@input_passworddeletion")
-        .setValue("@input_passworddeletion", password)
-        .click("@password_eyeicondeletion")
-        .assert.elementPresent('@password_eyeicondeletion', "When eye icon is clicked, password field is unmasked")
-        .click("@confirm_deletionbutton")
-        .pause(2000)
-        .isVisible('@delete_successfulpopup', callback = (result) => {
-            this.assert.equal(result.value, true, 'If user clicks to delete account, a notification is shown')
-        })
-        .assert.urlEquals(browser + 'view-all-accounts', 'When account is successfully deleted, user is directed to view all accounts page')
 
     },
 
@@ -163,40 +120,32 @@ const commands = {
         .isVisible('@download_passwordpopup', callback = (result) => {
             this.assert.equal(result.value, true, 'If user clicks to download wallet paper, it will prompt for user to enter password')
         })
-        .click("@input_password2")
-        .click("@confirm_button2")
-        .isVisible('@error_emptypassword2', callback = (result) => {
+        .click("@input_password_wp")
+        .click("@confirm_button_wp")
+        .isVisible('@error_emptypassword_wp', callback = (result) => {
             this.assert.equal(result.value, true, 'If password field has no input, it will show an error')
         })
-        .click("@cancel_button3")
+        .click("@cancel_button_wp")
         .pause(1000)
         .click("@back")
-        .click("@account")
+        .click("@account_ellipsis")
+        .click("@details_selection")
         .click("@download_button")
-        .click("@input_password2")
-        .setValue("@input_password2", password)
-        .pause(1000)
-        .click("@cancel_button4")
-        .isVisible('@accountdetails_tab', callback = result => {
-            this.assert.equal(result.value, true, "If user clicks cancel, user is navigated back to account details page")
-        })
+        .click("@input_password_wp")
+        .setValue("@input_password_wp", password)
         .pause(2000)
-        .click("@download_button")
-        .click("@input_password2")
-        .setValue("@input_password2", password)
-        .click("@password_eyeicon2")
-        .assert.elementPresent('@password_eyeicon2', "When eye icon is clicked, password field is unmasked")
+        .click("@password_eyeicon_wp")
+        .assert.elementPresent('@password_eyeicon_wp', "When eye icon is clicked, password field is unmasked")
         .pause(1000)
-        .click("@confirm_button2")
+        .click("@confirm_button_wp")
         .pause(5000)
         .click("@download_button")
-        .click("@input_password2")
-        .setValue("@input_password2", password2)
-        .click("@confirm_button2")
-        .isVisible('@error_wrongpassword2', callback = result => {
+        .setValue("@input_password_wp", password2)
+        .click("@confirm_button_wp")
+        .isVisible('@error_wrongpassword_wp', callback = result => {
             this.assert.equal(result.value, true, "If user enters wrong wallet password, an error is shown")
         })
-        .click("@cancel_button3")
+        .click("@cancel_button_wp")
         .pause(5000)
         
     },
@@ -208,37 +157,31 @@ const commands = {
             this.assert.equal(result.value, true, 'If user clicks to view private key, it will prompt for user to enter password')
         })
         .click("@input_password")
-        .click("@confirm_button")
-        .isVisible('@error_emptypassword', callback = (result) => {
+        .click("@confirm_button_pk")
+        .isVisible('@error_emptypassword_pk', callback = (result) => {
             this.assert.equal(result.value, true, 'If password field has no input, it will show an error')
         })
-        .click("@cancel_button")
+        .click("@cancel_button_pk")
         .click("@back")
-        .click("@account")
-        .click("@view_privatekey")
-        .click("@input_password")
-        .setValue("@input_password", password1)
-        .pause(1000)
-        .click("@cancel_button2")
-        .isVisible('@accountdetails_tab', callback = result => {
-            this.assert.equal(result.value, true, "If user clicks cancel, user is navigated back to account details page")
-        })
+        .click("@account_ellipsis")
+        .click("@details_selection")
         .click("@view_privatekey")
         .click("@input_password")
         .setValue("@input_password", password2)
-        .click("@confirm_button")
-        .isVisible('@error_wrongpassword', callback = result => {
+        .click("@confirm_button_pk")
+        .isVisible('@error_wrongpassword_pk', callback = result => {
             this.assert.equal(result.value, true, "If user enters wrong wallet password, an error is shown")
         })
-        .click("@cancel_button")
+        .click("@cancel_button_pk")
         .click("@back")
-        .click("@account")
+        .click("@account_ellipsis")
+        .click("@details_selection")
         .click("@view_privatekey")
         .click("@input_password")
         .setValue("@input_password", password1)
-        .click("@password_eyeicon")
-        .assert.elementPresent('@password_eyeicon', "When eye icon is clicked, private key field is unmasked")
-        .click("@confirm_button")
+        .click("@password_eyeicon_pk")
+        .assert.elementPresent('@password_eyeicon_pk', "When eye icon is clicked, private key field is unmasked")
+        .click("@confirm_button_pk")
         .assert.elementPresent('@private_key','If wallet password is correct, private key is revealed')
         .click("@copy_privatekey")
         .isVisible('@pk_successfulpopup', callback = result => {

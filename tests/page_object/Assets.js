@@ -1,17 +1,17 @@
 const elements = {
 
-    back: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > a',
-    assets_tab: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(3) > a:nth-child(4)',
-    createnew_asset: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > a:nth-child(2)',
-    input_password: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(8) > div:nth-child(1) > input',
-    error_emptypassword: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(8) > div.error.error-password.text-left.my-2',
-    input_supply: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > input',
-    input_divisibility: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > input',
-    transferable: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)',
-    supply_mutable: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1)',
-    createasset_button: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > button',
-    transaction_confirmpopup: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    asset_id: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > table:nth-child(1) > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2) > span',
+    back: 'a.text-blue-primary:nth-child(2)',
+    assets_tab: 'a[href="#/assets"]',
+    createnew_asset: 'a[href="#/create-asset"]',
+    input_password: 'input.w-full',
+    error_emptypassword: '.error',
+    input_supply: '.supply_input',
+    input_divisibility: '.number_input',
+    transferable: 'div.mb-5:nth-child(1) > div:nth-child(1) > div:nth-child(1)',
+    supply_mutable: 'div.mt-4 > div:nth-child(4) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1)',
+    createasset_button: '.mt-3',
+    transaction_confirmpopup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
+    asset_id: '.p-datatable-tbody > tr:nth-child(1) > td:nth-child(2) > span:nth-child(1)',
 
 }
 
@@ -54,7 +54,7 @@ const commands = {
         .isVisible('@transaction_confirmpopup', callback = result => {
             this.assert.equal(result.value, true, "A notification is shown saying transaction is confirmed after creating asset")
         })
-        .pause(10000)
+        .pause(30000)
         .assert.visible('@asset_id', 'Asset is successfully created with id')
 
 

@@ -1,33 +1,33 @@
 const elements = {
 
     address: '#address',
-    account_detailstab: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2)',
-    close: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > div:nth-child(1)',
-    create: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > button',
-    create_account: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > a',
-    createnew_account: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > a:nth-child(1)',
-    createnew_frompk: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > a:nth-child(2)',
-    createsuccessful_popup: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1)',
-    input_accountname: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > input',
-    input_accountname_pk: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > input',
-    input_walletpassword: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > input',
-    input_walletpassword_pk: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > input',
-    input_privatekey: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > input',
-    home_icon: '#app > div:nth-child(1) > header > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > a > img',
-    empty_accountname: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div.error.error-text.text-left.my-2',
-    empty_accountname_pk: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(2) > div.error.error-text.text-left.my-2',
-    empty_walletpassword: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(2) > div.error.error-password.text-left.my-2',
-    empty_walletpassword_pk: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(3) > div.error.error-password.text-left.my-2',
-    empty_privatekey: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div.error.error-password.text-left.my-2',
-    error_existingname: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3)',
-    error_existingprivatekey: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3)',
-    error_invalidpk: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div.error.error-password.text-left.my-2',
-    wrong_walletpassword: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3)',
-    password_eyeicon: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > div:nth-child(2) > div:nth-child(1) > svg > path',
-    password_eyeicon_pk: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > div:nth-child(3) > div:nth-child(1) > svg > path',
-    privatekey_eyeicon: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > div:nth-child(1) > div:nth-child(1) > svg > path',
+    account_detailstab: '.w-32',
+    close: '.mt-4',
+    create: '.blue-btn',
+    create_account: 'a.block',
+    createnew_account: 'a.border:nth-child(1)',
+    createnew_frompk: 'a.border:nth-child(2)',
+    createsuccessful_popup: '.popup-outer-create-wallet > div:nth-child(1)',
+    input_accountname: 'input.bg-white',
+    input_accountname_pk: 'input.bg-white',
+    input_walletpassword: 'input.w-full',
+    input_walletpassword_pk: 'div.flex.flex-col.min-full-screen.bg-white > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > input',
+    input_privatekey: 'div.bg-white.py-2.border.flex.justify-between > input.w-full.text-placeholder.text-left.ml-2',
+    home_icon: 'div.text-center.w-full.h-7 > a[href="#/dashboard"] > img',
+    empty_accountname: '.error-text',
+    empty_accountname_pk: '.error-text',
+    empty_walletpassword: '.error-password',
+    empty_walletpassword_pk: 'div.error.error-password.text-left.my-2',
+    empty_privatekey: '.error-password',
+    error_existingname: '.error',
+    error_existingprivatekey: '.error',
+    error_invalidpk: '.error',
+    wrong_walletpassword: '.error',
+    password_eyeicon: '.svg-inline--fa',
+    password_eyeicon_pk: 'div.flex.flex-col.min-full-screen.bg-white > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > div:nth-child(3) > div:nth-child(1) > svg:nth-child(2) > path',
+    privatekey_eyeicon: 'div.bg-white.py-2.border.flex.justify-between > svg:nth-child(2) > path:nth-child(1)',
     public_key: '#public',
-    private_key: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(9) > div:nth-child(2) > div:nth-child(1)',
+    private_key: 'div.break-all.font-semibold',
 
 }
 
@@ -59,7 +59,6 @@ const commands = {
 
     empty_inputaccount(){
         return this
-        .click("@input_accountname")
         .setValue("@input_accountname", "\ue004")
         .isVisible('@empty_accountname', callback = (result) => {
             this.assert.equal(result.value, true, 'If account name has no input, error is shown')
@@ -72,7 +71,6 @@ const commands = {
 
     empty_inputaccount_pk(){
         return this
-        .click("@input_privatekey")
         .setValue("@input_privatekey", "\ue004")
         .isVisible('@empty_privatekey', callback = (result) => {
             this.assert.equal(result.value, true, 'If private key has no input, error is shown')
@@ -100,9 +98,9 @@ const commands = {
 
     wrong_walletpassword_pk(privatekey, name, password){
         return this
-        .click("@input_privatekey")
         .setValue("@input_privatekey", privatekey)
         .setValue("@input_accountname_pk", name)
+        .pause(5000)
         .setValue("@input_walletpassword_pk", password)
         .click("@create")
         .isVisible('@wrong_walletpassword', callback = (result) => {
@@ -140,10 +138,7 @@ const commands = {
         .setValue("@input_accountname", name)
         .setValue("@input_walletpassword", password)
         .click("@create")
-        .pause(1000)
-        .assert.visible('@createsuccessful_popup', 'Account is successfully created when account name is valid and wallet password is correct')
-        .click("@close")
-        .pause(1000)
+        .pause(10000)
         .isVisible('@account_detailstab', callback = (result) => {
             this.assert.equal(result.value, true, 'If account is successfully created, user is navigated to the newly created account details page')
         })
@@ -168,9 +163,6 @@ const commands = {
         .setValue("@input_accountname_pk", name)
         .setValue("@input_walletpassword_pk", password)
         .click("@create")
-        .pause(1000)
-        .assert.visible('@createsuccessful_popup', 'Account is successfully created when account name is valid and wallet password is correct')
-        .click("@close")
         .pause(1000)
         .isVisible('@account_detailstab', callback = (result) => {
             this.assert.equal(result.value, true, 'If account is successfully created, user is navigated to the newly created account details page')
