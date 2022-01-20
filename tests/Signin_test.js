@@ -7,7 +7,7 @@ module.exports = {
         var create = browser.page.Createwallet();
         var signin = browser.page.Signin();
 
-        // to create an account
+        // to create wallet
         create
             .navigate()
             .navigate_createnewwallet(browser.launch_url)

@@ -1,13 +1,13 @@
 const elements = {
     
-    back: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > a',
+    back: 'a.text-xs',
     create: 'form > button',
     createnew: 'div.text-center.text-xs.text-blue-link.font-semibold > a',
     createnew_wallet: 'div.radio-toolbar.text-center > label:nth-child(2)',
     createnew_frompk: 'div.radio-toolbar.text-center > label:nth-child(4)',                                    
     createnew_backup: 'div.radio-toolbar.text-center > label:nth-child(6)',
-    createsuccessful_popup: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1)',          
-    close: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > a',
+    createsuccessful_popup: '.popup-outer-create-wallet > div:nth-child(1)',
+    close: 'a.mt-4',
     next: 'a[href="#/create-wallet"]',
     pknext: 'a[href="#/import-wallet"]',
     backupnext: 'a[href="#/backup-wallet"]',
@@ -39,7 +39,7 @@ const elements = {
     error_pkduplicatename: 'form > div:nth-child(4) > div',
     signin_here: 'form > div:nth-child(8) > a',
     signin_herepk: 'form > div:nth-child(10) > a',
-    signin_herebackup: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(9) > a'
+    signin_herebackup: 'div.text-center:nth-child(9) > a:nth-child(1)',
 }
 
 const commands = {
@@ -55,7 +55,8 @@ const commands = {
 
     // create new wallet navigation
     navigate_createnewwallet(browser){
-        return this 
+        return this
+        .pause(8000)
         .click("@createnew")
         .assert.urlEquals(browser + 'create', 'Create acc wallet is clicked, user is navigated to wallet selection type.')
         .click("@createnew_wallet")
@@ -71,6 +72,7 @@ const commands = {
     // create pk wallet navigation
     navigate_createpkwallet(browser){
         return this
+        .pause(8000)
         .click("@createnew")
         .assert.urlEquals(browser + 'create', 'Create acc wallet is clicked, user is navigated to wallet selection type.')
         .click("@createnew_frompk")
@@ -86,6 +88,7 @@ const commands = {
     // create backup wallet navigation
     navigate_createbackupwallet(browser){
         return this
+        .pause(8000)
         .click("@createnew")
         .assert.urlEquals(browser + 'create', 'Create acc wallet is clicked, user is navigated to wallet selection type.')
         .click("@createnew_backup")

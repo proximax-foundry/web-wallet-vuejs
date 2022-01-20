@@ -1,15 +1,13 @@
 const elements = {
 
-    wallet_dropdown: 'form > fieldset > div:nth-child(4) > div:nth-child(1)',
-    select_wallet: 'form > fieldset > div:nth-child(5) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)',
-    input_password: 'form > fieldset > div:nth-child(7) > div:nth-child(1) > div:nth-child(1) > input',
-    clearinput_password: 'form > fieldset > div:nth-child(8) > div:nth-child(1) > div:nth-child(1)',
-    sign_in: 'form > fieldset > div:nth-child(8) > button',
-    sign_out: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(6) > a',
-    error_emptypassword: 'form > fieldset > div:nth-child(7) > div:nth-child(1) > div.error.error-password.text-left.my-2',
-    error_wrongpassword: 'form > fieldset > div:nth-child(1)',
-    password_eyeicon: 'form > fieldset > div:nth-child(8) > div:nth-child(1) > div:nth-child(1) > svg > path',
-    create: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(5) > a'
+    wallet_dropdown: 'div.border:nth-child(4)',
+    select_wallet: 'div.px-2:nth-child(2) > div:nth-child(1)',
+    input_password: 'input.w-full',
+    sign_in: '.blue-btn',
+    sign_out: '.signout_block',
+    error_emptypassword: '.error',
+    error_wrongpassword: '.error',
+    password_eyeicon: '.svg-inline--fa', 
 
   }
 
@@ -53,10 +51,12 @@ const commands = {
         .isVisible('@error_wrongpassword', callback = result => {
             this.assert.equal(result.value, true, "If password is wrong, error is shown")
         })
+
     },
 
     eye_icon(){
         return this
+        .pause(2000)
         .click('@password_eyeicon')
         .assert.elementPresent('@password_eyeicon', "When eye icon is clicked, password field is unmasked")
         .click('@password_eyeicon')
