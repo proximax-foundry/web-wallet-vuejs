@@ -67,8 +67,8 @@
       </Column>
       <Column field="sign" header="" headerStyle="width:110px">
         <template #body="{data}">
-          <router-link :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" v-if="!checkIsSigned(data)" class="bg-orange-action text-white font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">Waiting for Your Signature(s)</router-link>
-          <router-link :to="{ name: 'ViewTransactionWaitingSign', params: {txnHash: data.hash}}" v-else class="bg-orange-light text-orange-action font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign.svg" class="mr-2">Waiting for Signature(s)</router-link>
+          <router-link :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" class="bg-orange-action text-white font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">Waiting for signature(s)</router-link>
+          <!--<router-link :to="{ name: 'ViewTransactionWaitingSign', params: {txnHash: data.hash}}" v-else class="bg-orange-light text-orange-action font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign.svg" class="mr-2">Waiting for Signature(s)</router-link>-->
         </template>
       </Column>
       <template #empty>
@@ -154,7 +154,6 @@ export default{
 
     const checkIsSigned =(data)=>{
 
-      console.log(data);
       let allCosignedPublicKey = data.cosignedPublickKey.concat([data.signer]);
 
       return allCosignedPublicKey.includes(currentAccount.publicKey);
