@@ -2,7 +2,10 @@ var name = "Selenium"
 var password = "abcd1234"
 var supply = "2"
 var divisibility = "6"
-var privatekey = "0ACDDBF848D081613E665144FF48181EBE4E009D27F33C53AC32180D73A6C667" // new account
+// var privatekey = "449198BF93D383DD7F9769DD0ED212B8F28D4A5F2CFD3B282685C3707356DA0C"
+// var privatekey1 = "449198BF93D383DD7F9769DD0ED212B8F28D4A5F2CFD3B282685C3707356DA0C"
+// var privatekey2 = "AD947A8674BBB115DBC7C33351F808D3ED4C8F2DCBFAFA8C68861B3124CA4E26"
+var forasset = "694D033164D2E96BF383F071AD0FCE9AE4A0520862F296EF18215D99BDC5F857"
 
 module.exports = {
 
@@ -16,7 +19,7 @@ module.exports = {
         create
             .navigate()
             .navigate_createpkwallet(browser.launch_url)
-            .create_pkwallet(browser.launch_url, privatekey, name, password)
+            .create_pkwallet(browser.launch_url, forasset, name, password)
 
         // sign in
         signin
@@ -26,7 +29,7 @@ module.exports = {
         asset
             .navigation_assets(browser.launch_url)
             .empty_password()
-            .create_asset(supply, divisibility, password)
+            // .create_asset(supply, divisibility, password)
 
     }
 

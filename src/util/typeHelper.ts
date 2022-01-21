@@ -189,7 +189,7 @@ export class Helper{
       }
 
       static formatDeadline(timestamp: number) :string{
-        return new Date(timestamp + Deadline.timestampNemesisBlock * 1000).toLocaleString()
+        return Helper.convertDisplayDateTimeFormat24(new Date(timestamp + Deadline.timestampNemesisBlock * 1000).toISOString());
       }
     
       static formatFixedDateTime(dateTimeJSON: string): string  {

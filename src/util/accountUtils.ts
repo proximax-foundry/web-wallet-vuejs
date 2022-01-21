@@ -12,8 +12,8 @@ import { BuildTransactions } from '@/util/buildTransactions';
 import { ChainAPICall } from "@/models/REST/chainAPICall"
 import { WalletAccount } from "@/models/walletAccount";
 import { OtherAccount } from "@/models/otherAccount";
-import { e } from "mathjs";
 import { Namespace } from "@/models/namespace";
+import { AppState } from "@/state/appState";
 
 const networkType = networkState.currentNetworkProfile.network.type;
 const Hash = networkState.currentNetworkProfile.generationHash;
@@ -225,17 +225,21 @@ const announceTransaction = (signedTransaction:SignedTransaction) => {
     }, err => console.error(err)); 
 }
 
-const multiSigAnnouce = (aggregateTx:SignedTransaction, hashSigned:SignedTransaction) => {
-  let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(hashSigned);
-  hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock
+const multiSigAnnouce = (aggregateTx:SignedTransaction, lockHashSigned:SignedTransaction) => {
+  // let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(hashSigned);
+  // hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock + 1;
   let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(aggregateTx);
   
-  autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(hashSigned.hash);
+  autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(lockHashSigned.hash);
   autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
   autoAnnounceSignedTx.type = AnnounceType.BONDED;
 
-  ListenerStateUtils.addAutoAnnounceSignedTransaction(hashLockAutoAnnounceSignedTx);
+  AppState.chainAPI.transactionAPI.announce(lockHashSigned);
+
+  // ListenerStateUtils.addAutoAnnounceSignedTransaction(hashLockAutoAnnounceSignedTx);
   ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
+
+  AppState.isPendingTxnAnnounce = true;
 }
 
 

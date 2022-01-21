@@ -44,6 +44,7 @@ import { AutoAnnounceSignedTransaction, HashAnnounceBlock, AnnounceType, listene
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { Helper } from "./typeHelper";
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
+import { AppState } from "@/state/appState";
 
 interface assetSelectionInterface {
   label: string,
@@ -426,17 +427,18 @@ export class AssetsUtils {
     chainAPICall.transactionAPI.announce(signedTransaction);
   }
 
-  static multiSigAnnouce = (aggregateTx:SignedTransaction, hashSigned:SignedTransaction) => {
-    let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(hashSigned);
-    hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock + 1;
-
+  static multiSigAnnouce = (aggregateTx:SignedTransaction, lockHashSigned:SignedTransaction) => {
     let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(aggregateTx);
-    autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(hashSigned.hash);
+  
+    autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(lockHashSigned.hash);
     autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
     autoAnnounceSignedTx.type = AnnounceType.BONDED;
 
-    ListenerStateUtils.addAutoAnnounceSignedTransaction(hashLockAutoAnnounceSignedTx);
+    AppState.chainAPI.transactionAPI.announce(lockHashSigned);
+
     ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
+
+    AppState.isPendingTxnAnnounce = true;
   }
 }
 

@@ -1,24 +1,26 @@
 const elements = {
 
-    transfer_tab: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(3) > a:nth-child(2)',
-    sender_acc: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1)',
-    primary_acc: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2)',
-    second_acc: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(3)',
-    receiver_acc: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > input',
-    invalid_icon: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2)',
-    select_contact: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > div:nth-child(2)',
-    contact_list: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(5) > div:nth-child(3) > div:nth-child(1)',
-    input_password: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(10) > div:nth-child(1) > input',
-    error_emptypassword: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(10) > div:nth-child(2)',
-    cancel_button: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(12) > a',
+    transfer_tab: 'a[href="#/create-transfer"]',
+    sender_acc: 'div.ml-auto:nth-child(1)',
+    primary_acc: 'div.px-2:nth-child(2)',
+    second_acc: 'div.px-2:nth-child(3)', 
+    receiver_acc: 'input.w-full:nth-child(2)',
+    invalid_icon: '.text-red-400',
+    select_contact: 'div.border:nth-child(2)',
+    contact_list: 'div.text-xs.py-2.pl-2.w-full',
+    input_password: 'input.w-full:nth-child(1)',
+    error_emptypassword: '.error',
+    cancel_button: 'a[href="#/dashboard"]',
     transfer_amount: '.supply_input',
-    home_icon: '#app > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > a:nth-child(1) > img',
-    transfer_button: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > button:nth-child(11)',
-    error_wrongpassword: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2)',
-    transaction_successful: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    password_eyeicon: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(10) > div:nth-child(1) > svg > path',
-    input_message: 'textarea.w-full',
-    transaction_fee: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(2)',
+    transfer_button: 'button.w-full',
+    error_wrongpassword: '.error',
+    transaction_successful: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
+    password_eyeicon: 'svg.svg-inline--fa:nth-child(2) > path:nth-child(1)',
+    add_asset: 'button.my-2',
+    select_asset: 'select.text-gray-600',
+    asset: 'option.text-gray-800:nth-child(2)',
+    input_assetamount: 'input.supply_input',
+    insufficient_balance: '.error',
 
 }
 
@@ -52,18 +54,17 @@ const commands = {
         return this
         .setValue("@receiver_acc", address)
         .assert.containsText('@invalid_icon', status, 'Wallet address is invalid.')
+        .clearValue("@receiver_acc")
 
     },
 
-    create_transfer(amount, message, xpx, password1, password2){
+    create_transfer(amount, password1, password2){
         return this
         .pause(5000)
-        .clearValue("@receiver_acc")
         .click("@select_contact")
         .click("@contact_list")
         .setValue("@transfer_amount", amount)
         .setValue("@input_password", password2)
-        .setValue("@input_password", '\ue004')
         .click("@transfer_button")
         // enter wrong password
         .isVisible('@error_wrongpassword', callback = result => {
@@ -76,15 +77,25 @@ const commands = {
         .assert.elementPresent('@password_eyeicon', "When eye icon is clicked, password field is unmasked")
         .click('@password_eyeicon')
         .assert.elementPresent('@password_eyeicon', "When eye icon is clicked, password field is masked again")
-        // write message
-        .setValue("@input_message", message)                                                                        
-        .assert.containsText('@transaction_fee', xpx, 'Transaction fee increases.')
         // create transfer
         .click("@transfer_button")
-        .pause(8000)
         .isVisible('@transaction_successful', callback = result => {
             this.assert.equal(result.value, true, "A notification is shown after the transaction is processed")
         })
+        .pause(40000)
+    },
+
+    transfer_asset(amount1, amount2){
+        return this
+        .click("@add_asset")
+        .click("@select_asset")
+        .click("@asset")
+        .setValue("@input_assetamount", amount1)
+        .updateValue("@input_assetamount", amount2)
+        .isVisible('@insufficient_balance', callback = result => {
+            this.assert.equal(result.value, true, "An error is shown if it exceeds account balance")
+        })
+        .pause(1000)
 
     },
 

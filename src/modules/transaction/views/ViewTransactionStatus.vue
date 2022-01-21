@@ -7,11 +7,11 @@
       </div>
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-if="displayBoard=='unconfirmed'">
-      <div class="text-xxs font-bold uppercase">Unconfirmed Transactions <span class="font-normal">({{ accountUnconfirmedTxnsCount }})</span></div>
+      <div class="text-xxs font-bold uppercase">Unconfirmed Transactions of <b>{{ selectedAccount.name }}</b> <span class="font-normal">({{ accountUnconfirmedTxnsCount }})</span></div>
       <UnconfirmedTransactionDataTable />
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else>
-      <div class="text-xxs font-bold uppercase">Waiting for signatures <span class="font-normal">({{ accountPartialTxnsCount }})</span></div>
+      <div class="text-xxs font-bold uppercase">Waiting for signatures of <b>{{selectedAccount.name}}</b> <span class="font-normal">({{ accountPartialTxnsCount }})</span></div>
       <PartialDashboardDataTable />
     </div>
   </div>
@@ -33,6 +33,7 @@ import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
 import { DashboardService } from '@/modules/dashboard/service/dashboardService';
+import {AppState} from '@/state/appState'
 
 export default defineComponent({
   name: 'ViewTransactionStatus',
@@ -81,7 +82,21 @@ export default defineComponent({
       accountPartialTxnsCount.value = transactionsCount.partial;
     };
 
-    updateAccountTransactionCount();
+    const init = ()=>{
+      updateAccountTransactionCount();
+    }
+
+    if(AppState.isReady){
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState.isReady, (value) => {
+        if(value){
+          init();
+          readyWatcher();
+        }     
+      });
+    }
 
     emitter.on("TXN_UNCONFIRMED", (num) => {
       if(num> 0){
@@ -101,7 +116,11 @@ export default defineComponent({
       }
     });
 
-
+    emitter.on('DEFAULT_ACCOUNT_SWITCHED', payload => {
+      currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
+      selectedAccount.value = currentAccount;
+      updateAccountTransactionCount();
+    });
 
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
@@ -115,6 +134,7 @@ export default defineComponent({
 
     return {
       displayBoard,
+      selectedAccount,
       unconfirmedTransactions,
       partialTransactions,
       isShowConfirmed,

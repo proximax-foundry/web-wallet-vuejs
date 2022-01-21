@@ -1,39 +1,37 @@
 const elements = {
 
-    new_button: '#app > div:nth-child(1) > header > div:nth-child(1) > div:nth-child(5) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)',
-    transfer_button: '#app > div:nth-child(1) > header > div:nth-child(1) > div:nth-child(5) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > a:nth-child(1)',
-    digitalasset_button: '#app > div:nth-child(1) > header > div:nth-child(1) > div:nth-child(5) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > a:nth-child(2)',
-    namespace_button: '#app > div:nth-child(1) > header > div:nth-child(1) > div:nth-child(5) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > a:nth-child(3)',
-    account_button: '#app > div:nth-child(1) > header > div:nth-child(1) > div:nth-child(5) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > a:nth-child(4)',
-    home_button: '#app > div:nth-child(1) > header > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > a:nth-child(1) > img',
-    overview_tab: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1)',
-    assets_tab: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2)',
-    namespaces_tab: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(3)',
-    transactions_tab: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(4)',
-    assets_title: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > b',
-    assetid_title: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > table:nth-child(1) > thead:nth-child(1) > tr:nth-child(1) > th:nth-child(2) > div:nth-child(1) > span',
-    namespaces_title: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(3) > b',
-    transactions_title: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(5) > b',
-    name_title: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > table:nth-child(1) > thead:nth-child(1) > tr:nth-child(1) > th:nth-child(2) > div:nth-child(1) > span',
-    txhash_title: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > table:nth-child(1) > thead:nth-child(1) > tr:nth-child(1) > th:nth-child(2) > div:nth-child(1) > span',
-    primary_account: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3)',
-    top_up: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > a:nth-child(1) > div:nth-child(2)',
-    account_popup: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > div:nth-child(1) > div:nth-child(1)',
-    copy_address: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > img',
-    transfer_xpx: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > div:nth-child(1) > a:nth-child(3) > div:nth-child(2)',
-    close: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > img',
-    copy_successfulpopup: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    wallet_tab: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(4) > a:nth-child(2)',
-    wallet_close: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2)  > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > a > img',
-    proceed_button: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(6) > div:nth-child(1) > button',
-    deletewallet_popup: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(6) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)',
-    confirmation_checkbox: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(6) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > fieldset > label > input',
-    deletenow_button: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(6) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > fieldset > div:nth-child(2) > button',
-    deletesuccessful_popup: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    accounts_tab: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(4) > a:nth-child(3)',
-    accountoverview_tab: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)',
-    account_title: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)',
+    new_button: 'div.pr-2:nth-child(1) > div:nth-child(1)',
+    transfer_button: 'a[href="#/create-transfer"]',
+    digitalasset_button: 'a[href="#/create-asset"]',
+    namespace_button: 'a[href="#/create-namespace"]',
+    account_button: 'a[href="#/select-type-creation-account"]',
+    home_button: 'div.text-center.w-full.h-7 > a[href="#/dashboard"] > img',
+    overview_tab: 'div.px-3:nth-child(1)',
+    assets_tab: 'div.px-3:nth-child(2)',
+    namespaces_tab: 'div.text-xs:nth-child(3)',
+    transactions_tab: 'div.text-xs:nth-child(4)',
+    recenttxn_title: 'div.bg-white:nth-child(3) > div:nth-child(1) > b:nth-child(1)',
+    assetid_title: '.p-datatable-thead > tr:nth-child(1) > th:nth-child(2) > div:nth-child(1) > span:nth-child(1)',
+    namespaces_title: 'div.mt-10:nth-child(3) > b:nth-child(1)',
+    transactions_title: 'div.text-txs:nth-child(5) > b:nth-child(1)',
+    name_title: '.p-datatable-thead > tr:nth-child(1) > th:nth-child(2) > div:nth-child(1) > span:nth-child(1)',
+    txhash_title: '.p-datatable-thead > tr:nth-child(1) > th:nth-child(2) > div:nth-child(1) > span:nth-child(1)',
+    account_popup: '.popup-outer > div:nth-child(1)',
+    copy_address: 'div.mb-8:nth-child(2) > img:nth-child(2)',
+    transfer_xpx: 'a[href="#/create-transfer"] > div:nth-child(2)',          
+    copy_successfulpopup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
+    wallet_tab: 'a[href="#/wallets"]',
+    wallet_close: '.mr-7 > a:nth-child(1) > img:nth-child(1)',
+    proceed_button: '.default-btn',
+    deletewallet_popup: '.popup-outer > div:nth-child(1)',
+    confirmation_checkbox: 'input.h-5',
+    deletenow_button: '.py-1',
+    deletesuccessful_popup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
+    // primary_account: '.underline',
+    // top_up: '#app > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > a:nth-child(1) > div:nth-child(2)',
+    // close: '.popup-outer > div:nth-child(1) > div:nth-child(1) > img:nth-child(1)',
 
+  
   }
 
 
@@ -61,7 +59,7 @@ const commands = {
         .assert.urlEquals(browser + 'create-namespace', 'When namespace is clicked, user is directed to create namespace page')
     },
 
-    navigate_namespace(browser){
+    navigate_account(browser){
         return this
         .click("@new_button")
         .click("@account_button")
@@ -70,6 +68,7 @@ const commands = {
 
     home(browser){
         return this
+        .pause(1000)
         .click("@home_button")
         .assert.urlEquals(browser + 'dashboard', 'When home icon is clicked, user is directed back to dashboard page')
 
@@ -90,28 +89,14 @@ const commands = {
           this.assert.equal(result.value, true, 'If transactions tab is clicked, user transactions will be shown')
         })
         .click("@overview_tab")
-        .isVisible('@assets_title', callback = (result) => {
-          this.assert.equal(result.value, true, 'If overview tab is clicked, user assets will be shown')
-        })
-        .isVisible('@namespaces_title', callback = (result) => {
-          this.assert.equal(result.value, true, 'If overview tab is clicked, user namespaces will be shown')
-        })
-        .isVisible('@transactions_title', callback = (result) => {
-          this.assert.equal(result.value, true, 'If overview tab is clicked, user transactions will be shown')
+        .isVisible('@recenttxn_title', callback = (result) => {
+          this.assert.equal(result.value, true, 'If overview tab is clicked, user recent transactions will be shown')
         })
 
     },
 
     click_headercomponents(browser){
         return this
-        .click("@primary_account")
-        .isVisible('@account_popup', callback = (result) => {
-          this.assert.equal(result.value, true, 'If user clicks primary account, a list of user accounts will be shown')
-        })
-        .click("@close")
-        .click("@top_up")
-        .assert.urlEquals(browser + 'create-transfer', 'When top up button is clicked, user is directed to create transfer page')
-        .click("@home_button")
         .click("@transfer_xpx")
         .assert.urlEquals(browser + 'create-transfer', 'When transfer xpx button is clicked, user is directed to create transfer page')
         .click("@home_button")
@@ -140,16 +125,6 @@ const commands = {
       
     },
 
-    accounts_overview(account){
-        return this
-        .pause(2000)
-        .click("@accounts_tab")
-        .isVisible('@accountoverview_tab', callback = (result) => {
-          this.assert.equal(result.value, true, 'If user clicks accounts, an overview tab of accounts is available')
-        })
-        .assert.containsText('@account_title', account, 'User account is displayed under overviews')
-
-    },
 
 }
 

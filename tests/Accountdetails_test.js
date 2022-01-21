@@ -60,8 +60,6 @@ module.exports = {
         account
             .navigate_accountdetails()
             .download_walletpaper(password, password2)
-            .delete_account(browser.launch_url, password, password2)
-            .transfer_xpx(browser.launch_url)
 
     }
 
