@@ -17,6 +17,8 @@ import {
   Password,
   MultisigAccountGraphInfo,
   SignedTransaction,
+  Mosaic,
+  NamespaceId,
 } from "tsjs-xpx-chain-sdk";
 
 //line 483,485
@@ -28,6 +30,7 @@ import { TransactionUtils } from "@/util/transactionUtils";
 import { WalletAccount } from '@/models/walletAccount';
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { listenerState, AutoAnnounceSignedTransaction, HashAnnounceBlock, AnnounceType } from "@/state/listenerState";
+import { AppState } from "@/state/appState";
 
 const walletKey = "sw";
 
@@ -155,9 +158,14 @@ async function convertAccount(coSign :string[], numApproveTransaction :number, n
 
     const signedAggregateBoundedTransaction = accountToConvert.sign(aggregateTransaction, generationHash);
 
+    const nativeTokenNamespace = networkState.currentNetworkProfile.network.currency.namespace;
+    // const nativeTokenDivisibility = networkState.currentNetworkProfile.network.currency.divisibility;
+    const lockingAtomicFee = networkState.currentNetworkProfileConfig.lockedFundsPerAggregate ?? 0;
+    // const lockingFee = nativeTokenDivisibility ? lockingAtomicFee / Math.pow(10, nativeTokenDivisibility) : lockingAtomicFee;
+
     const lockFundsTransaction = LockFundsTransaction.create(
       Deadline.create(),
-      NetworkCurrencyMosaic.createRelative(10),
+      new Mosaic(new NamespaceId(nativeTokenNamespace), UInt64.fromUint(lockingAtomicFee)),
       UInt64.fromUint(1000),
       signedAggregateBoundedTransaction,
       networkType
@@ -168,14 +176,18 @@ async function convertAccount(coSign :string[], numApproveTransaction :number, n
    /*  const transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint)); */
     (async () => {
       try {
-        let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(lockFundsTransactionSigned);
-        hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock + 1;
+        // let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(lockFundsTransactionSigned);
+        // hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock + 1;
         let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(signedAggregateBoundedTransaction);
         autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(lockFundsTransactionSigned.hash);
         autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
         autoAnnounceSignedTx.type = AnnounceType.BONDED;
-        ListenerStateUtils.addAutoAnnounceSignedTransaction(hashLockAutoAnnounceSignedTx);
+        // ListenerStateUtils.addAutoAnnounceSignedTransaction(hashLockAutoAnnounceSignedTx);
         ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
+
+        AppState.chainAPI.transactionAPI.announce(lockFundsTransactionSigned);
+
+        AppState.isPendingTxnAnnounce = true;
       /*   const confirmedTx = await announceLockfundAndWaitForConfirmation(accountToConvert.address, lockFundsTransactionSigned, lockFundsTransactionSigned.hash, transactionHttp);
         console.log('confirmedTx');
         console.log(confirmedTx);
@@ -478,14 +490,18 @@ async function modifyMultisigAccount(coSign :string[], removeCosign :string[], n
     
   
     for (const transaction of transactions) {
-      let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(transaction.lockFundsTransactionSigned);
-      hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock + 1;
+      // let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(transaction.lockFundsTransactionSigned);
+      // hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock + 1;
       let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(transaction.signedAggregateBondedTransaction);
       autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(transaction.lockFundsTransactionSigned.hash);
       autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
       autoAnnounceSignedTx.type = AnnounceType.BONDED;
-      ListenerStateUtils.addAutoAnnounceSignedTransaction(hashLockAutoAnnounceSignedTx);
+      // ListenerStateUtils.addAutoAnnounceSignedTransaction(hashLockAutoAnnounceSignedTx);
       ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
+
+      AppState.chainAPI.transactionAPI.announce(transaction.lockFundsTransactionSigned);
+
+      AppState.isPendingTxnAnnounce = true;
     }
   }
   
