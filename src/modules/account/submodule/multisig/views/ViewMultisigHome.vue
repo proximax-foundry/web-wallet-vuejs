@@ -8,7 +8,7 @@
     <AccountComponent :address="acc.address" class="mb-10"/>
     <div class="flex text-xs font-semibold border-b-2 menu_title_div">
       <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-32 text-center '>Account Details</router-link>
-      <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Multisig</div>
+      <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Multisig</div>
       <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
       <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
       <MoreAccountOptions :address="acc.address"/>
@@ -70,6 +70,7 @@ import {Address, PublicAccount} from  "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
+import { AppState } from '@/state/appState';
 export default {
     name: "ViewMultisigHome",
     props: {
@@ -91,15 +92,21 @@ export default {
       }
       const isMultisig = ref(false) 
       const isCosigner = ref(false)
-      const networkType = networkState.currentNetworkProfile.network.type
+      const networkType = AppState.networkType
       const convertAddress = publicKey =>{ 
         return Address.createFromPublicKey(publicKey, networkType)
       }
       const findAccount = publicKey =>{
-        return walletState.currentLoggedInWallet.accounts.find(account=>account.address == convertAddress(publicKey).plain())
+        return walletState.currentLoggedInWallet.accounts.find(account=>account.address == convertAddress(publicKey).plain())?walletState.currentLoggedInWallet.accounts.find(account=>account.address == convertAddress(publicKey).plain()): walletState.currentLoggedInWallet.others.find(account=>account.address == convertAddress(publicKey).plain())
       }
       const getAccountName = (publicKey) =>{
-        return findAccount(publicKey) ? findAccount(publicKey).name : `Cosigner-${convertAddress(publicKey).plain().substr(-4)}`
+        const address = PublicAccount.createFromPublicKey(publicKey,networkType).address.plain()
+        const contact = walletState.currentLoggedInWallet.contacts.find((contact) => contact.address==address);
+        if (contact){
+          return contact.name
+        }else{
+          return findAccount(publicKey) ? findAccount(publicKey).name : `Cosigner-${convertAddress(publicKey).plain().substr(-4)}`
+        }
       }
       let multisigAccountsList = computed(()=>{
         let multisigAccountsList= []

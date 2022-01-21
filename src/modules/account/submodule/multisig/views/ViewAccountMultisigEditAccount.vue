@@ -8,7 +8,7 @@
     <AccountComponent :address="acc.address" class="mb-10"/>
     <div class = 'flex text-xs font-semibold border-b-2'>
       <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-32 text-center '>Account Details</router-link>
-      <div class= 'w-18 text-center border-b-4 pb-3 border-yellow-500'>Multisig</div>
+      <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Multisig</div>
       <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
       <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
       <MoreAccountOptions :address="acc.address"/>
@@ -169,7 +169,7 @@ import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import AddCosignModal from '@/modules/account/submodule/multisig/components/AddCosignModal.vue';
 import { multiSign } from '@/util/multiSignatory';
-import MultisigSchemeModal from '@/modules/account/submodule/multisig/components/MultisigSchemeModal.vue';
+
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import MultiSelectInputPlugin from '@/components/MultiSelectInputPlugin.vue';
 import { walletState } from '@/state/walletState';

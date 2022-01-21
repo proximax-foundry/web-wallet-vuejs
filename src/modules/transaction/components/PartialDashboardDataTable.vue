@@ -68,7 +68,7 @@
       <Column field="sign" header="" headerStyle="width:110px">
         <template #body="{data}">
           <router-link :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" v-if="data.signerAddress != currentAddress" class="bg-orange-action text-white font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">Waiting for Your Signature(s)</router-link>
-          <div v-else class="bg-orange-light text-orange-action font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign.svg" class="mr-2">Waiting for Signature(s)</div>
+          <router-link :to="{ name: 'ViewTransactionWaitingSign', params: {txnHash: data.hash}}" v-else class="bg-orange-light text-orange-action font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign.svg" class="mr-2">Waiting for Signature(s)</router-link>
         </template>
       </Column>
       <template #empty>
@@ -129,37 +129,6 @@ export default{
       return explorerBaseURL.value + publicKeyExplorerURL.value + "/" + publicKey
     }
 
-    /*const transactions = [
-      {
-        hash: "04836EC9CFAF9423E60122E7CB39AE8C171B16604CDE86DEA4CA9B80658E12E3",
-        extractedData: {
-          recipient: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
-          recipientName: "acc4",
-          recipientType: "address",
-        },
-        signer: '60122E74CDE86DEA71B166CB39AE8C13E0658E12E34CA9B80CFAF94204836EC9',
-        signerDisplay: 'ABC123',
-        signerAddress: "VXM2ENBNOLQDJTSCMTKJEBSIA4JIV6DF4UVAOYQC",
-        signerAddressPretty: "VXM2EN-BNOLQD-JTSCMT-KJEB-SIA4JI-V6DF4U-VAOYQC",
-        formattedDeadline: "12/1/2021, 19:00:18",
-        sign: true
-      },
-      {
-        hash: "CFAF94204836EC9CB39AE8C13E60122E74CDE86DEA71B1660658E12E34CA9B80",
-        extractedData: {
-          recipient: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
-          recipientName: "acc2",
-          recipientType: "address",
-        },
-        signer: 'CFAF94204836EC9CB39AE8C13E60122E74CDE86DEA71B1660658E12E34CA9B80',
-        signerDisplay: 'nameABC',
-        signerAddress: "VAOYQCVXM2ENSIA4JIV6DF4UBNOLQDJTSCMTKJEB",
-        signerAddressPretty: "VAOYQC-VXM2EN-SIA4JI-V6DF4U-BNOLQD-JTSCMT-KJEB",
-        formattedDeadline: "12/1/2021, 19:00:18",
-        sign: false
-      }
-    ];*/
-
     const formatTime = (timestamp) => {
       return Helper.formatDeadline(timestamp);
     }
@@ -167,19 +136,20 @@ export default{
     const transactions = ref([]);
     const currentAddress = ref('');
 
-    let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
-    currentAddress.value = currentAccount.address;
+    
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
 
     let transactionGroupType = Helper.getTransactionGroupType();
 
-    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, currentAccount);
+    let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
+      currentAddress.value = currentAccount.address;
 
-    let loadUnconfirmedTransactions = async() => {
+    let loadPartialTransactions = async() => {
+      let dashboardService = new DashboardService(walletState.currentLoggedInWallet, currentAccount);
       let txnQueryParams = Helper.createTransactionQueryParams();
       txnQueryParams.pageSize = 1;
       txnQueryParams.address = currentAccount.address;
-      txnQueryParams.embedded = true;
+      txnQueryParams.embedded = false;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
       let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.PARTIAL, txnQueryParams);
@@ -187,18 +157,24 @@ export default{
       transactions.value = formattedTxns;
     };
 
-    loadUnconfirmedTransactions();
+    loadPartialTransactions();
 
     emitter.on("TXN_UNCONFIRMED", (num) => {
       if(num> 0){
-        loadUnconfirmedTransactions();
+        loadPartialTransactions();
       }
     });
 
     emitter.on("TXN_CONFIRMED", (num) => {
       if(num> 0){
-        loadUnconfirmedTransactions();
+        loadPartialTransactions();
       }
+    });
+
+    emitter.on('DEFAULT_ACCOUNT_SWITCHED', payload => {
+      currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
+      currentAddress.value = currentAccount.address;
+      loadPartialTransactions();
     });
 
     return {

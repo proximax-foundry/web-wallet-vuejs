@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="bg-white py-2 border flex" >
-      <input  :type="inputType" :disabled="disabled == true" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="text-placeholder text-left ml-2" :placeholder="placeholder" @click="clickInputPassword()" @blur="blurInputPassword()" autocomplete="off">
+    <div class="bg-white py-2 border flex justify-between" >
+      <input  :type="inputType" :disabled="disabled == true" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="w-full text-placeholder text-left ml-2" :placeholder="placeholder" @click="clickInputPassword()" @blur="blurInputPassword()" autocomplete="off">
         <font-awesome-icon icon="eye" class="text-gray-500 relative cursor-pointer text-right mr-2" @click="hideShowPassword();" v-if="!showPassword"></font-awesome-icon>
         <font-awesome-icon icon="eye-slash" class="text-gray-500 relative cursor-pointer text-right mr-2" @click="hideShowPassword();" v-if="showPassword"></font-awesome-icon>
     </div>

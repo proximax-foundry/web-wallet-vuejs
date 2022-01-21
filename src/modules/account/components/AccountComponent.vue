@@ -7,7 +7,7 @@
                 <div class='flex '>
                     <div class = '  font-semibold text-md' v-if='showName'>{{ accountNameDisplay }}</div>
                     <input class='outline-none ml-4 font-semibold text-md'  v-model='accountName' v-if='!showName'/>
-                    <img src="@/modules/account/img/edit-icon.svg"  v-if='showName' @click='showName=!showName' title='Edit Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
+                    <img src="@/modules/account/img/edit-icon.svg"  v-if='showName && !other_acc' @click='showName=!showName' title='Edit Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
                     <img src="@/modules/account/img/edit-icon.svg"  v-if='!showName'  @click="changeName()" title='Confirm Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
                 </div>
                 <div class= 'flex'>
@@ -66,7 +66,9 @@ setup(p){
       return isMulti;
     });  
     const accountName = ref(acc.name);
-    const accountNameDisplay = ref(acc.name);
+    const accountNameDisplay = computed(()=>{
+      return walletState.currentLoggedInWallet.convertAddressToName(p.address,true)
+    });
     const svgString = ref(toSvg(acc.address, 100, themeConfig.jdenticonConfig));    
     const showName = ref(true);
     const changeName = () => {
@@ -115,7 +117,8 @@ setup(p){
         prettyAddress,
         changeName,
         copy,
-        err
+        err,
+        other_acc
     }
 }
 }

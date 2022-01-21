@@ -1,19 +1,26 @@
 var name = 'Selenium'
-var password = "abcd1234";
+var password = "abcd1234"
 var password2 = 'abcd12345'
+
 module.exports = {
     "Sign In": browser => {
         var create = browser.page.Createwallet();
         var signin = browser.page.Signin();
-        //create an account
+
+        // to create wallet
         create
             .navigate()
-            .createwallet(name,password)
-        //signin test
+            .navigate_createnewwallet(browser.launch_url)
+            .create_wallet(browser.launch_url, name, password)
+
+        // sign in test
         signin
-           .emptyfields_validation()
-           .wrongpassword_validation(password2)
-           .signinto_dashboard(browser.launch_url,password)
-    },
+           .empty_password()
+           .signin_dashboard(browser.launch_url, password)
+           .signout_dashboard()
+           .wrong_password(password2)
+           .eye_icon()
+
+    }
     
 }

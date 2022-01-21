@@ -26,11 +26,12 @@ import { Account as myAccount } from "@/models/account";
 import { TransactionUtils } from "./transactionUtils"
 import { Account as NEM_Account, NetworkTypes, NEMLibrary } from "nem-library";
 import { AddressBook } from "@/models/addressBook"
+import {AppState} from "@/state/appState";
 
 const config = require("@/../config/config.json");
 
-const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile!.network.type));
-const chainAPICall = computed(()=> new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort)));
+const localNetworkType = computed(() => ChainUtils.getNetworkType(AppState.networkType));
+const chainAPICall = computed(()=> AppState.chainAPI);
 
 export class WalletUtils {
 
@@ -882,6 +883,12 @@ export class WalletUtils {
                     newTempAsset.supply = assetInfo.supply.compact();
                     newTempAsset.height = assetInfo.height.compact();
 
+                    let assetNames = await chainAPICall.value.assetAPI.getMosaicsNames([mosaic.id])
+
+                    if(assetNames[0].names.length){
+                        newTempAsset.namespaceNames = assetNames[0].names.map(nsName => nsName.name);
+                    }
+
                     tempAssets.push(newTempAsset);
 
                     let newAsset = newTempAsset.duplicateNewInstance();
@@ -898,8 +905,6 @@ export class WalletUtils {
     }
 
     static async updateOtherAccountDetails(wallet: Wallet): Promise<void>{
-
-        
 
         let tempAssets: Asset[] = [];
 
@@ -983,6 +988,12 @@ export class WalletUtils {
                     newTempAsset.duration = assetInfo.duration.compact();
                     newTempAsset.supply = assetInfo.supply.compact();
 
+                    let assetNames = await chainAPICall.value.assetAPI.getMosaicsNames([mosaic.id])
+
+                    if(assetNames[0].names.length){
+                        newTempAsset.namespaceNames = assetNames[0].names.map(nsName => nsName.name);
+                    }
+
                     tempAssets.push(newTempAsset);
 
                     let newAsset = newTempAsset.duplicateNewInstance();
@@ -1056,6 +1067,8 @@ export class WalletUtils {
 
         walletState.wallets.saveMyWalletOnlytoLocalStorage(wallet);
         wallet.isReady = true;
+
+        console.log(wallet);
     }
 
     static updateAllAccountBalance(wallet: Wallet, assetId: string): void{

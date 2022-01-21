@@ -1,17 +1,18 @@
 <template>
 <div class="flex ml-auto flex-col w-40">
     <div class="flex  gap-1 cursor-pointer mb-3 ">
-    <div @click="toggleModal=!toggleModal" class=" text-xs pl-24">More</div>
+    <div @click="toggleModal=!toggleModal" class="text-xs pl-24">More</div>
     <img @click="toggleModal=!toggleModal" src="@/modules/account/img/icon-arrow-down.svg" class="w-3 mt-0.5 h-3">
     </div>
+    <div v-if="selected" class="ml-20 border-b-2 border-yellow-500"></div>
     <div v-if="toggleModal" class="relative ">
-    <div class='absolute border z-20 bg-white w-full p-3 '>
+    <div class='absolute border border-t-0 z-20 bg-white w-full p-3 '>
         <div  class="pb-2">
-            <router-link v-if="!otherAccount(address)" :to="{ name: 'ViewAccountDelegate', params: { address: address }}">Delegate Account</router-link>
+            <router-link class="hover:bg-gray-100" v-if="!otherAccount(address)" :to="{ name: 'ViewAccountDelegate', params: { address: address }}">Delegate Account</router-link>
             <div v-else class="text-gray-300">Delegate Account</div>
         </div>
-        <router-link  v-if="!otherAccount(address)" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">Link to Namespace</router-link>
-        <router-link  v-else-if="otherAccount(address) && other_acc.type =='MULTISIG'" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">Link to Namespace</router-link>
+        <router-link class="hover:bg-gray-100" v-if="!otherAccount(address)" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">Link to Namespace</router-link>
+        <router-link  class="hover:bg-gray-100" v-else-if="otherAccount(address) && other_acc.type =='MULTISIG'" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">Link to Namespace</router-link>
         <div  v-else class="text-gray-300">Link to Namespace</div>
     </div>
     </div>
@@ -24,7 +25,8 @@ import { walletState } from '@/state/walletState';
 export default {
 name:"MoreAccountOptions",
 props:{
-    address: String
+    address: String,
+    selected: Boolean
 },
 setup(p){
     let toggleModal = ref(false)

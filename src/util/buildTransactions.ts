@@ -53,7 +53,7 @@ export class BuildTransactions {
 
     constructor(networkType: NetworkType, generationHash?: string, feeStrategy?: FeeCalculationStrategy) {
         this.transactionBuilderFactory = new TransactionBuilderFactory();
-        if(feeStrategy)
+        if(feeStrategy !== undefined)
             this.transactionBuilderFactory.feeCalculationStrategy = feeStrategy;
         
         this.transactionBuilderFactory.networkType = networkType;

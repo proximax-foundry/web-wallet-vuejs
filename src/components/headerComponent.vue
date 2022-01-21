@@ -147,12 +147,14 @@
       </div>
     </div>
   </header>
+  <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
 </template>
 
 <script> 
 import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
+import { AppState } from "@/state/appState";
 import { useRouter } from "vue-router";
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { ChainUtils } from '@/util/chainUtils';
@@ -168,11 +170,13 @@ import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { TransactionType } from "tsjs-xpx-chain-sdk";
 import { WalletUtils } from "@/util/walletUtils";
 import {useI18n} from 'vue-i18n'
+import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
 
 export default defineComponent({
   components: {
     // Dropdown,
     selectLanguageModal,
+    SetAccountDefaultModal,
   },
 
   name: 'headerComponent',
@@ -237,12 +241,35 @@ export default defineComponent({
       }, 100);
     }
 
+    const openSetDefaultModal = ref(false);
+
+    const updateSelectedAccount = (data)=>{
+      // if(data.type == 0){
+      //   selectedAccount.value = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === data.name);
+      // }else{
+      //   selectedAccount.value = walletState.currentLoggedInWallet.others.find((account)=> account.name === data.name);
+      // }
+      walletState.currentLoggedInWallet.setDefaultAccountByName(data.name);
+      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+      toast.add({severity:'success', summary: 'Default account has switched to' , detail: data.name, group: 'br', life: 3000});
+    }
+
+    emitter.on('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', (payload) => {
+      openSetDefaultModal.value = payload;
+    });
+
+    emitter.on('CLOSE_SET_DEFAULT_ACCOUNT_MODAL', payload => {
+      if(payload){
+        openSetDefaultModal.value = false;
+      }
+    });
+
     const navigationSideBar = inject('navigationSideBar');
 
     const notificationMessage = ref('');
     const notificationType = ref('noti');
 
-    const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort))
+    const chainAPIEndpoint = computed(()=> AppState.nodeFullURL)
     const loginStatus = computed(() => walletState.isLogin);
     const chainsNetworks = computed(()=> {
 
@@ -354,8 +381,7 @@ export default defineComponent({
 
       //listener.addresses = allAddress;
       //console.log(allAddress);
-
-      listener.value = new Connector(ChainUtils.buildWSEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort), allAddress);
+      listener.value = new Connector(AppState.wsNodeFullURL, allAddress);
 
       listener.value.startListen();
     }
@@ -366,9 +392,12 @@ export default defineComponent({
     }
 
     const doLogin = async () =>{
-      if(loginStatus.value){
+      if(loginStatus.value && AppState.isReady){
         await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
         connectListener();
+      }
+      else if(loginStatus.value && !AppState.isReady){
+        setTimeout(doLogin, 100);
       }
     }
 
@@ -407,7 +436,6 @@ export default defineComponent({
     const totalPendingNum = ref(0);
 
     watch(()=> listenerState.autoAnnounceSignedTransaction, (newValue)=>{
-      
       let newLength = newValue.length;
 
       if(newLength !== totalPendingNum.value){
@@ -427,14 +455,12 @@ export default defineComponent({
       }
 
       totalPendingNum.value = newLength;
-      
     }, true);
 
     watch(()=> currentBlockHeight.value, ()=>{
 
       listener.value.refreshTimer();
     });
-    
 
      watch(()=> unconfirmedTxLength.value, (newValue, oldValue)=>{
 
@@ -578,6 +604,8 @@ export default defineComponent({
        listener.value.endpoint = endpoint;
      });
     return {
+      openSetDefaultModal,
+      updateSelectedAccount,
       toggleSidebar,
       networkState,
       walletState,
