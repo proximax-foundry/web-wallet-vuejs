@@ -1,20 +1,32 @@
 <template>
   <div class='p-1'>      
-    <div class="flex justify-between bg-white border rounded-lg border-gray-200 filter shadow-lg  group">
-    <div class='border-l-4 rounded-l-lg border-blue-primary opacity-0 group-hover:opacity-100'>
+    <div class="flex justify-between bg-white border rounded-lg border-gray-200 shadow-lg group" >
+    <!-- <div class="flex justify-between bg-white border rounded-lg border-gray-200 shadow-lg group"> -->
+    <div v-if="walletState.currentLoggedInWallet" class='border-l-4 rounded-l-lg border-blue-primary opacity-0 group-hover:opacity-100'>
     </div>
-      <div class="ml-5 mt-5 mr-5 mb-5 text-xs text-left">      
-        <div class="font-bold text-blue-primary">{{ wallet.name }}  
-          <img v-if="currentLoggedInWallet(wallet.name) == true" src="@/modules/wallet/img/icon-delete.svg" class="opacity-0 group-hover:opacity-100 inline-block" @click="getModal()">
-          <div v-if="currentLoggedInWallet(wallet.name) == false" class="mt-1"> </div>
+      <div class="w-1/2 ml-5 mt-5 mb-5 text-xs text-left">      
+        <div v-if="walletState.currentLoggedInWallet"  class="font-bold text-blue-primary flex items-center">{{ wallet.name }}  
+          <img v-if="currentLoggedIn(wallet.name) == true" src="@/modules/wallet/img/icon-delete.svg" class="opacity-0 group-hover:opacity-100 inline-block ml-2" @click="getModal()">
+          <div v-if="currentLoggedIn(wallet.name) == false" class="ml-4 mt-5"> </div>
         </div>
-        <div class="text-txs text-black-400">Number of accounts: <span class="font-bold">{{ wallet.accounts.length }}</span></div>
+        <div v-else class="text-black flex items-center px-2">{{ wallet.name }}  
+        </div>
+        <div v-if="walletState.currentLoggedInWallet" class="text-txs text-black-400">Accounts: <span>{{ wallet.accounts.length }}</span></div>
+          <div v-else class="text-txs pt-1 px-2 text-gray-400">Number of Accounts: <span>{{ wallet.accounts.length }}</span></div>
       </div>
-      <div class="mr-1 ml-5 text-xs font-bold flex">   
-        <button class="bg-transparent font-bold py-2 px-4 rounded inline-flex items-center " @click="exportWallet(wallet.name)">
-          <svg class="color-blue-primary" id="file_upload_black_24dp" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+      <div v-if="walletState.currentLoggedInWallet" class="xl:mr-1 xl:ml-15 text-xs font-bold flex">   
+        <button class="bg-transparent font-bold py-2 px-10 md:py-2 md:px-5 xl:py-2 xl:px-2 rounded inline-flex items-center" @click="exportWallet(wallet.name)">
+          <svg class="color-blue-primary" id="file_upload_black_24dp" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 20 20">
           <path d="M15.667,13.167v2.5h-10v-2.5H4v2.5a1.672,1.672,0,0,0,1.667,1.667h10a1.672,1.672,0,0,0,1.667-1.667v-2.5Zm-9.167-5L7.675,9.342l2.158-2.15V14H11.5V7.192l2.158,2.15,1.175-1.175L10.667,4Z" fill="#007cff"/></svg>
-          <span>Export</span>
+          <span class="sm:mr-0 ml-1 xl:mr-2 font-semibold text-txs">Export</span>
+        </button>
+      </div>
+       <div v-else class="xl:mr-1 xl:ml-15 text-xs font-bold flex">   
+        <button class="font-bold py-2 px-10 sm:py-2 md:px-5  md:py-2 md:px-5 xl:py-2 xl:px-2 rounded inline-flex items-center" @click="getModal()">
+        <svg id="clear_black_24dp" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24">
+          <path id="Path_114" data-name="Path 114" d="M0,0H24V24H0Z" fill="none"/>
+          <path id="Path_115" data-name="Path 115" d="M18.3,5.71a1,1,0,0,0-1.41,0L12,10.59,7.11,5.7A1,1,0,0,0,5.7,7.11L10.59,12,5.7,16.89A1,1,0,0,0,7.11,18.3L12,13.41l4.89,4.89a1,1,0,0,0,1.41-1.41L13.41,12,18.3,7.11A1,1,0,0,0,18.3,5.71Z"/>
+        </svg>
         </button>
       </div>
     </div>
@@ -84,10 +96,8 @@ export default defineComponent({
         showModal.value = payload;
     });
 
-    const currentLoggedInWallet = (walletName)=>{
-      if(walletState.currentLoggedInWallet==null){
-        return true;
-      }else{
+    const currentLoggedIn = (walletName)=>{
+      if(walletState.currentLoggedInWallet){
         if(walletState.currentLoggedInWallet.name == walletName){
           return false;
         }else{
@@ -102,7 +112,8 @@ export default defineComponent({
       showModal,
       disableDelete,
       err,
-      currentLoggedInWallet
+      currentLoggedIn,
+      walletState
     };
   }
  
