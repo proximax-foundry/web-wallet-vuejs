@@ -56,9 +56,12 @@ app.component('Toast', Toast);
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.component(VuePassword);
 
+AppStateUtils.addNewReadyStates('chainProfile');
+AppStateUtils.addNewReadyStates('theme');
+AppStateUtils.addNewReadyStates('checkSession');
+
 const loadThemeConfig = async() => {
   try {
-    AppStateUtils.addNewReadyStates('theme');
     const config = await fetch('./themeConfig.json', {
       headers: {
         'Cache-Control': 'no-store',
@@ -79,7 +82,6 @@ loadThemeConfig();
 
 const chainProfileIntegration = async () => {
   try {
-    AppStateUtils.addNewReadyStates('chainProfile');
     const networksInfo = await fetch('./chainProfile.json', {
       headers: {
         'Cache-Control': 'no-store',
