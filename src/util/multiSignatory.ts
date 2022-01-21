@@ -490,17 +490,14 @@ async function modifyMultisigAccount(coSign :string[], removeCosign :string[], n
     
   
     for (const transaction of transactions) {
-      // let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(transaction.lockFundsTransactionSigned);
-      // hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock + 1;
       let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(transaction.signedAggregateBondedTransaction);
       autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(transaction.lockFundsTransactionSigned.hash);
       autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
       autoAnnounceSignedTx.type = AnnounceType.BONDED;
-      // ListenerStateUtils.addAutoAnnounceSignedTransaction(hashLockAutoAnnounceSignedTx);
+
       ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
 
       AppState.chainAPI.transactionAPI.announce(transaction.lockFundsTransactionSigned);
-
       AppState.isPendingTxnAnnounce = true;
     }
   }

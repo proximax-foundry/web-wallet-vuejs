@@ -36,7 +36,7 @@ import { Helper } from "@/util/typeHelper";
 // const config = require("@/../config/config.json");
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { listenerState, AutoAnnounceSignedTransaction, HashAnnounceBlock, AnnounceType } from "@/state/listenerState";
-
+import { AppState } from "@/state/appState";
 
 async function getAccInfo(address :string) :Promise<PublicAccount> {
   let accountInfo = await WalletUtils.getAccInfo(address).then(accountinfo => accountinfo.publicAccount);
@@ -141,14 +141,15 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
 
    
       try {
-        let hashLockAutoAnnounceSignedTx = new AutoAnnounceSignedTransaction(hashLockTransactionSigned);
-        hashLockAutoAnnounceSignedTx.announceAtBlock = listenerState.currentBlock + 1;
         let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(aggregateBondedTransactionSigned);
         autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(hashLockTransactionSigned.hash);
         autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
         autoAnnounceSignedTx.type = AnnounceType.BONDED;
-        ListenerStateUtils.addAutoAnnounceSignedTransaction(hashLockAutoAnnounceSignedTx);
+
         ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
+
+        AppState.chainAPI.transactionAPI.announce(hashLockTransactionSigned);
+        AppState.isPendingTxnAnnounce = true;
       } catch (error) {
         console.log(error);
       }
