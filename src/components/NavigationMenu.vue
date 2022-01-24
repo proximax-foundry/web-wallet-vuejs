@@ -162,6 +162,11 @@ export default{
     let accountPartialTxnsCount = ref(0);
 
     let updateAccountTransactionCount = async() => {
+      if(!AppState.isReady){
+        setTimeout(updateAccountTransactionCount, 100);
+        return ;
+      }
+
       let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
       let transactionsCount = await dashboardService.getAccountTransactionsCount(selectedAccount.value);
       accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
@@ -266,6 +271,8 @@ export default{
     //   updateAccountTransactionCount();
     //   closeNavi();
     // }
+
+    updateAccountTransactionCount();
 
     const init = ()=>{
       updateAccountTransactionCount();

@@ -3261,9 +3261,9 @@ export class DashboardService {
         let txnQueryParams = new TransactionQueryParams();
         txnQueryParams.address = account.address;
 
-        let searchConfirmedTxnResult = await TransactionUtils.searchTransactions(TransactionGroupType.CONFIRMED, txnQueryParams);
-        let searchUnconfirmedTxnResult = await TransactionUtils.searchTransactions(TransactionGroupType.UNCONFIRMED, txnQueryParams);
-        let searchPartialTxnResult = await TransactionUtils.searchTransactions(TransactionGroupType.PARTIAL, txnQueryParams);
+        let searchConfirmedTxnResult = await AppState.chainAPI.transactionAPI.searchTransactions(TransactionGroupType.CONFIRMED, txnQueryParams);
+        let searchUnconfirmedTxnResult = await AppState.chainAPI.transactionAPI.searchTransactions(TransactionGroupType.UNCONFIRMED, txnQueryParams);
+        let searchPartialTxnResult = await AppState.chainAPI.transactionAPI.searchTransactions(TransactionGroupType.PARTIAL, txnQueryParams);
 
         transactionsCount.confirmed = searchConfirmedTxnResult.pagination.totalEntries;
         transactionsCount.unconfirmed = searchUnconfirmedTxnResult.pagination.totalEntries;
