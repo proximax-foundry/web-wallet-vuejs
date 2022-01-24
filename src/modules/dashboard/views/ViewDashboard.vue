@@ -71,12 +71,12 @@
         <div class="pl-2 hidden xl:inline-block">
           <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-3 rounded-lg transaction-div text-white">
             <div class="text-txs mt-6 text-gray-400">Recent Transfers</div>
-            <div class="text-gray-400 text-tsm mt-6 mb-2 h-12" v-if="recentTransferTxnRow.length==0">Invite your families and friends to create Sirius Wallet account and start transferring to their accounts.</div>
+            <div class="text-gray-400 text-tsm mt-6 mb-2 h-12" v-if="recentTransferTxnRow.length==0">No transaction made</div>
             <div v-else class="mt-2">
               <div v-for="txn in recentTransferTxnRow" :key="txn.hash" class="flex items-center justify-between mb-1">
-                <a class="flex items-center max-w-xs" :href="addressExplorerURL + '/' + txn.transferContactAddress" target=_new>
-                  <div v-html="toSvg(txn.transferContactAddress, 20, jdenticonConfig)" class="mr-3"></div>
-                  <div class="truncate text-xs">{{ txn.transferContact }}</div>
+                <a class="flex items-center max-w-xs " :href="addressExplorerURL + '/' + txn.transferContactAddress" target=_new>
+                  <div v-html="toSvg(txn.transferContactAddress, 20, jdenticonConfig)" class="mr-3 inline-block"></div>
+                  <div class="text-xs inline-block w-40 truncate">{{ txn.transferContact }}</div>
                 </a>
                 <a class="text-tsm font-bold" :href="hashExplorerURL + '/' + txn.hash" target=_new>{{ txn.amount }} <span class="text-xxs font-normal">{{ currentNativeTokenName }}</span></a>
               </div>
@@ -749,13 +749,15 @@ export default defineComponent({
       transactions.forEach((txn) => {
         let formattedTransferTxn = {};
         if(selectedAccountAddressPlain.value == txn.sender){
-          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToName(txn.recipient, true);
+          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToNamePretty(txn.recipient, true).substring(0, 20);
           formattedTransferTxn.transferContactAddress = txn.recipient;
-          formattedTransferTxn.amount = Helper.toCurrencyFormat(txn.amountTransfer);
+          console.log(txn.amountTransfer)
+          formattedTransferTxn.amount = Helper.toCurrencyFormat(txn.amountTransfer, );
         }else{
-          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToName(txn.sender, true);
+          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToNamePretty(txn.sender, true).substring(0, 30);
           formattedTransferTxn.transferContactAddress = txn.sender;
-          formattedTransferTxn.amount = '-' + Helper.toCurrencyFormat(txn.amountTransfer);
+          console.log(txn.amountTransfer)
+          formattedTransferTxn.amount = '-' + Helper.toCurrencyFormat(txn.amountTransfer, 6);
         }
         formattedTransferTxn.hash = txn.hash;
         TransferTxn.push(formattedTransferTxn);
@@ -1028,6 +1030,7 @@ export default defineComponent({
       currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
       currentAccount.default = true;
       selectedAccount.value = currentAccount;
+      recentTransferTxn();
       updateAccountTransactionCount();
       loadRecentTransactions();
       loadRecentTransferTransactions();

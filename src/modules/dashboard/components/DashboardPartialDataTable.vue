@@ -266,7 +266,7 @@ import SplitButton from 'primevue/splitbutton';
 
 export default{
   components: { DataTable, Column, SplitButton },
-  name: 'DashboardDataTable',
+  name: 'DashboardPartialDataTable',
   props: {
     transactions: Array,
     showBlock: Boolean,

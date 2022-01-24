@@ -29,13 +29,6 @@
               <a :href="getPublicKeyExplorerUrl(data.signer)" target="_blank">{{ data.signerAddress.substring(0, 20) }}</a>
             </div>
           </div>
-          <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">RECEIPIENT</div>
-            <div class="uppercase font-bold text-txs" v-if="data.recipient!=null">
-              <div v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()">{{ data.recipientNamespaceName?data.rrecipientNamespaceName:data.recipient }}</div>
-            </div>
-            <div v-else>-</div>
-          </div>
         </template>
       </Column>
       <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
