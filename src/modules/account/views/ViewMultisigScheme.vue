@@ -54,13 +54,13 @@
       <input name = 'view-type' type='radio' value='1' v-model="viewType" >   
       <label  class = 'text-left py-3 text-xs pl-4'> Vertical</label>
       <div>
-        <input name = 'view-type-2' type='radio' value='1' v-model="viewType2" >   
+        <input name = 'view-type-2' type='radio' value='0' v-model="viewType2" :checked='true'>   
         <label v-if="viewType==0" class = 'text-left py-3 text-xs pl-4'> Right to left</label>
-        <label v-if="viewType==1" class = 'text-left py-3 text-xs pl-4'> Bottom to top</label>
+        <label v-if="viewType==1" class = 'text-left py-3 text-xs pl-4'> Top to Bottom</label>
       </div>
-      <input name = 'view-type-2' type='radio' value='0' v-model="viewType2" :checked='true'>   
+      <input name = 'view-type-2' type='radio' value='1' v-model="viewType2" >   
       <label v-if="viewType==0" class = 'text-left py-3 text-xs pl-4'> Left to right</label>
-      <label v-if="viewType==1" class = 'text-left py-3 text-xs pl-4'> Top to bottom</label>
+      <label v-if="viewType==1" class = 'text-left py-3 text-xs pl-4'> Bottom to Top</label>
       <div>
         <input type="checkbox" @click="collapsable=!collapsable">
         <label class = 'text-left py-3 text-xs pl-4'>Collapsible</label>
@@ -243,7 +243,7 @@ setup(p){
   };
   const prettyAddress = address => Address.createFromRawAddress(address).pretty()
   const viewType = ref(0)
-  const viewType2 = ref(0)
+  const viewType2 = ref(1)
   const collapsable = ref(false)
   return{
     viewType,

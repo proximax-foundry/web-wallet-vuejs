@@ -22,7 +22,7 @@
             <div class = 'inline-block text-md font-bold' v-if='splitBalance(mosaic.balance).right!=null'>.</div>
             <div class='inline-block text-xs mt-1.5 font-bold'>{{splitBalance(mosaic.balance).right}}</div>
             <div v-if="displayTokenName(mosaic.name).registered" class="inline-block text-md font-bold ml-2">{{displayTokenName(mosaic.name).name}}</div>
-            <div v-else class="inline-block text-xs text-gray-400 font-semibold ml-2 hover:text-black cursor-pointer transition-all duration-200">{{displayTokenName(mosaic.name).name}}</div>
+            <a v-else :href="explorerLink(mosaic.name)" target=_new><div  class="inline-block text-xs text-gray-400 font-semibold ml-2 hover:text-black cursor-pointer transition-all duration-200">{{mosaic.name}}</div></a>
             <div v-if="index != (mosaics.length - 1)" class='my-6 gray-line' ></div>
         </div>
     </div>
@@ -36,6 +36,8 @@ import AccountComponent from "@/modules/account/components/AccountComponent.vue"
 import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 import { walletState } from '@/state/walletState';
 import { Helper } from '@/util/typeHelper';
+import { AppState } from '@/state/appState';
+import { networkState } from '@/state/networkState';
 export default {
     name:'ViewAccountAssets',
     components:{
@@ -105,13 +107,17 @@ export default {
                 return {left:split[0], right:null}
             }
         }
+        const explorerLink = assetId=>{ 
+            return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
+        }
         return{
             acc,
             isDelegate,
             isMultiSig,
             mosaics,
             displayTokenName,
-            splitBalance
+            splitBalance,
+            explorerLink
         }
     }
 }
