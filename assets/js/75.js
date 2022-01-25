@@ -1,16 +1,5 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([[75],{
 
-/***/ "./src/assets/img/chevron_left.svg":
-/*!*****************************************!*\
-  !*** ./src/assets/img/chevron_left.svg ***!
-  \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-eval("module.exports = __webpack_require__.p + \"assets/img/chevron_left.120f1ae7.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/chevron_left.svg?");
-
-/***/ }),
-
 /***/ "./src/assets/img/icon-key.svg":
 /*!*************************************!*\
   !*** ./src/assets/img/icon-key.svg ***!
@@ -22,6 +11,17 @@ eval("module.exports = __webpack_require__.p + \"assets/img/icon-key.0e181e5e.sv
 
 /***/ }),
 
+/***/ "./src/assets/img/icon-multisig.svg":
+/*!******************************************!*\
+  !*** ./src/assets/img/icon-multisig.svg ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("module.exports = __webpack_require__.p + \"assets/img/icon-multisig.ab5a7131.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/icon-multisig.svg?");
+
+/***/ }),
+
 /***/ "./src/modules/account/img/icon-pin.svg":
 /*!**********************************************!*\
   !*** ./src/modules/account/img/icon-pin.svg ***!
@@ -30,6 +30,17 @@ eval("module.exports = __webpack_require__.p + \"assets/img/icon-key.0e181e5e.sv
 /***/ (function(module, exports, __webpack_require__) {
 
 eval("module.exports = __webpack_require__.p + \"assets/img/icon-pin.4428bcf6.svg\";\n\n//# sourceURL=webpack:///./src/modules/account/img/icon-pin.svg?");
+
+/***/ }),
+
+/***/ "./src/modules/account/img/proximax-logo.svg":
+/*!***************************************************!*\
+  !*** ./src/modules/account/img/proximax-logo.svg ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("module.exports = __webpack_require__.p + \"assets/img/proximax-logo.cb656acf.svg\";\n\n//# sourceURL=webpack:///./src/modules/account/img/proximax-logo.svg?");
 
 /***/ }),
 

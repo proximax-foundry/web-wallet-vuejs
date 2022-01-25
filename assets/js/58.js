@@ -24,14 +24,14 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var vue_
 
 /***/ }),
 
-/***/ "./src/assets/img/icon-prx-xpx-blue.svg":
-/*!**********************************************!*\
-  !*** ./src/assets/img/icon-prx-xpx-blue.svg ***!
-  \**********************************************/
+/***/ "./src/assets/img/chevron_left.svg":
+/*!*****************************************!*\
+  !*** ./src/assets/img/chevron_left.svg ***!
+  \*****************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/icon-prx-xpx-blue.026c6b2b.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/icon-prx-xpx-blue.svg?");
+eval("module.exports = __webpack_require__.p + \"assets/img/chevron_left.120f1ae7.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/chevron_left.svg?");
 
 /***/ }),
 
@@ -71,25 +71,25 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _nod
 
 /***/ }),
 
-/***/ "./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg":
-/*!****************************************************************************************************!*\
-  !*** ./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg ***!
-  \****************************************************************************************************/
+/***/ "./src/modules/account/img/proximax-logo.svg":
+/*!***************************************************!*\
+  !*** ./src/modules/account/img/proximax-logo.svg ***!
+  \***************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.541d4c2b.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/arrow-transaction-sender-out-orange-proximax-sirius-explorer.svg?");
+eval("module.exports = __webpack_require__.p + \"assets/img/proximax-logo.cb656acf.svg\";\n\n//# sourceURL=webpack:///./src/modules/account/img/proximax-logo.svg?");
 
 /***/ }),
 
-/***/ "./src/modules/services/submodule/voting/img/badge-silver-proximax-sirius-wallet.svg":
-/*!*******************************************************************************************!*\
-  !*** ./src/modules/services/submodule/voting/img/badge-silver-proximax-sirius-wallet.svg ***!
-  \*******************************************************************************************/
+/***/ "./src/modules/services/submodule/assets/img/icon-asset.svg":
+/*!******************************************************************!*\
+  !*** ./src/modules/services/submodule/assets/img/icon-asset.svg ***!
+  \******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/badge-silver-proximax-sirius-wallet.3291fc4b.svg\";\n\n//# sourceURL=webpack:///./src/modules/services/submodule/voting/img/badge-silver-proximax-sirius-wallet.svg?");
+eval("module.exports = __webpack_require__.p + \"assets/img/icon-asset.40e1e8d4.svg\";\n\n//# sourceURL=webpack:///./src/modules/services/submodule/assets/img/icon-asset.svg?");
 
 /***/ })
 
