@@ -36,9 +36,6 @@ export class WalletStateUtils{
   }
 
   static checkFromSession(): boolean{
-
-    AppStateUtils.addNewReadyStates('checkSession');
-
     const sessionWalletToken = SessionService.getRaw(sessionWalletKey);
     const sessionNetworkName = SessionService.getRaw(sessionNetworkNameKey);
 
