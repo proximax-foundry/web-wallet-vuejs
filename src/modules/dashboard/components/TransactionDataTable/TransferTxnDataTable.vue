@@ -9,6 +9,8 @@
       responsiveLayout="scroll"
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
+      v-model:filters="filterAccount"
+      :globalFilterFields="['recipient','sender', 'signerAddress', 'type']"
       >
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
@@ -223,6 +225,12 @@ export default defineComponent({
       borderColor.value = 'border border-gray-400';
     };
 
+    console.log(p.currentAddress)
+
+    const filterAccount = ref({
+      'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
+    });
+
     emitter.on("CLOSE_MODAL", payload => {
       showTransactionModel.value = payload;
     });
@@ -322,7 +330,8 @@ export default defineComponent({
       transactionGroupType,
       wideScreen,
       Helper,
-       walletState,
+      walletState,
+      filterAccount,
     }
   }
 })
