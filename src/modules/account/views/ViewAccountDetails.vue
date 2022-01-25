@@ -40,24 +40,10 @@
           <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
           <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
           <div class='flex ml-auto gap-6 '>
-            <!-- <router-link :to='{name:"ViewTransferCreate"}' class='flex cursor-pointer'>
-              <img src="@/assets/img/icon-transfer.svg" class=" w-5 h-5 mt-0.5  cursor-pointer mr-1">
-              <div class='text-xs mt-1 font-semibold '>Transfer {{currentNativeTokenName}}</div>
-            </router-link> -->
-            <!-- <a v-if="networkState.chainNetwork == 0" href="https://www.proximax.io/en/xpx" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
+            <a  :href="topUpUrl" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
               <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
               <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
               <img src="@/modules/dashboard/img/icon-link-new-white.svg" class='h-5 w-5  cursor-pointer '>
-            </a> -->
-            <a v-if="networkState.chainNetwork == 0" href="https://bctestnetfaucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
-              <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
-              <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
-              <img src="@/modules/dashboard/img/icon-link-new-white.svg" class='h-3 w-3 mt-1 ml-1 cursor-pointer '>
-            </a>
-            <a v-if="networkState.chainNetwork == 1" href="https://bctestnet2faucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
-              <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
-              <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
-              <img src="@/modules/dashboard/img/icon-link-new-white.svg" class='h-3 w-3 mt-1 ml-1 cursor-pointer '>
             </a>
           </div>
         </div>
@@ -114,6 +100,7 @@ import PdfPasswordModal from '@/modules/account/components/PdfPasswordModal.vue'
 import DeleteAccountModal from '@/modules/account/components/DeleteAccountModal.vue'
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
+import { AppState } from '@/state/appState';
 
 export default {
   name: "ViewAccountDetails",
@@ -319,6 +306,18 @@ export default {
       }
       return mosaicOption;
     }); */
+    const topUpUrl = computed(()=>{
+      if (AppState.networktype == 184){ 
+        return 'https://www.proximax.io/en/xpx'
+      }else if (AppState.networkType == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
+        return 'https://bctestnetfaucet.xpxsirius.io/#/'
+      }else if (AppState.networkType == 168 && networkState.chainNetworkName=='Sirius Testnet 2'){
+        return 'https://bctestnet2faucet.xpxsirius.io/#/'
+      }else{
+        return ''
+      }
+    }) 
+    console.log(networkState.chainNetworkName)
     emitter.on("revealPK", (e) => {
       showPK.value = e;
     });
@@ -332,6 +331,7 @@ export default {
 
     return {
       /* mosaics,   */
+      topUpUrl,
       networkState,
       showModal,
       splitBalance,

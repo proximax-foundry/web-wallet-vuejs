@@ -23,6 +23,10 @@
             <div class='inline-block text-xs mt-1.5 font-bold'>{{splitBalance(mosaic.balance).right}}</div>
             <div v-if="displayTokenName(mosaic.name).registered" class="inline-block text-md font-bold ml-2">{{displayTokenName(mosaic.name).name}}</div>
             <a v-else :href="explorerLink(mosaic.name)" target=_new><div  class="inline-block text-xs text-gray-400 font-semibold ml-2 hover:text-black cursor-pointer transition-all duration-200">{{mosaic.name}}</div></a>
+            <router-link v-if="index==0" :to='{name:"ViewTransferCreate"}' class='cursor-pointer float-right'>
+              <img src="@/assets/img/icon-transfer.svg" class="  inline-block w-5 h-5 mt-0.5  cursor-pointer mr-1">
+              <div class='inline-block text-xs mt-1 font-semibold '>Transfer {{currentNativeTokenName}}</div>
+            </router-link>
             <div v-if="index != (mosaics.length - 1)" class='my-6 gray-line' ></div>
         </div>
     </div>
@@ -49,6 +53,7 @@ export default {
     },
     setup(p){
         const wallet = walletState.currentLoggedInWallet 
+        const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
         const acc= computed(()=>{
             let currentAccount=wallet.accounts.find(account=> account.address == p.address)
             if (currentAccount!=undefined){
@@ -117,7 +122,8 @@ export default {
             mosaics,
             displayTokenName,
             splitBalance,
-            explorerLink
+            explorerLink,
+            currentNativeTokenName
         }
     }
 }
