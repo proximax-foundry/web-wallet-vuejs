@@ -16,7 +16,7 @@
     <div class=' my-3 pl-2 font-semibold' style="font-size: 7px ; line-height: 9px;">SELECT NETWORK</div>
     <div v-for='(items,index) in chainNetworks' :key="items" class='px-2 py-1'>
         <div @click='selectNetwork(index)' class='flex cursor-pointer'>
-            <img v-if='index==0' src="@/assets/img/icon-mainnet-block.svg" class='h-5 w-5 mt-auto mb-auto'>
+            <img v-if="items.label == 'Sirius Mainnet'" src="@/assets/img/icon-mainnet-block.svg" class='h-5 w-5 mt-auto mb-auto'>
             <img v-else src="@/assets/img/icon-testnet-block.svg" class='h-5 w-5 mt-auto mb-auto'>
             <div class='text-xs ml-1 mt-0.5 font-bold'>{{items.label}}</div>
             <div  v-if='items.label!=selectedNetwork.label' class='cursor-pointer text-blue-primary font-semibold text-xxs mt-0.5 ml-auto'>SELECT</div>
@@ -43,13 +43,14 @@ export default defineComponent({
     const toggleSelection = ref(false);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-
+    
     const selectedNetwork = computed(()=>{ return {label: networkState.chainNetworkName, value: networkState.chainNetwork }});
      const chainNetworks = computed(()=> {
          
       let options = [];
       networkState.availableNetworks.forEach((network, index) => {
         options.push({ label: network, value: index });
+        console.log(network)
       });
        /* options.push({ label: 'Sirius Testnet 2', value: 2}); */
       return options;

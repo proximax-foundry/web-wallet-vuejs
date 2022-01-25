@@ -8,9 +8,11 @@
       <AccountComponent :address="acc.address" class="mb-10" />
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
         <router-link :to="{name: 'ViewAccountDetails',params:{address: acc.address}}" class= 'w-32 text-center '>Account Details</router-link>
+         <router-link :to="{name:'ViewAccountAssets', params: { name: acc.address}}" class= 'w-18 text-center'>Assets</router-link>
         <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
         <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
         <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Swap</div>
+        <MoreAccountOptions :address="acc.address"/>
       </div>
       <div class='my-7 font-semibold'>NIS1 Swap</div>
       <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
@@ -46,12 +48,13 @@ import qrcode from 'qrcode-generator';
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import SwapAccountModal from '@/modules/account/components/SwapAccountModal.vue'
-
+import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 export default {
   name: "ViewAccountSwap",
   components: {
     AccountComponent,
-    SwapAccountModal
+    SwapAccountModal,
+    MoreAccountOptions
   },
   props: {
     address: String,

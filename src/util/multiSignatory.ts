@@ -223,7 +223,7 @@ async function onPartial(publicAccount :PublicAccount) :Promise<boolean>{
       }
     }
   }).catch(error => {
-    reject('Err: ' + error)
+    /* reject('Err: ' + error) */
   })
 })
 
