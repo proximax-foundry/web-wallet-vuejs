@@ -23,6 +23,7 @@
       </div>
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
         <div class= 'w-32 text-center border-b-2 pb-3 border-yellow-500'>Account Details</div>
+        <router-link v-if="!isDelegate()" :to="{name:'ViewAccountAssets', params: { address: acc.address}}" class= 'w-18 text-center'>Assets</router-link>
         <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
         <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
         <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
@@ -296,6 +297,28 @@ export default {
       doc.text(prettyAddress, 146, 164, { maxWidth: 132 });
       doc.save('Your_Paper_Wallet');
     }
+
+    /* const mosaics = computed(() => {
+      var mosaicOption = [];
+      if(!walletState.currentLoggedInWallet){
+        return mosaicOption;
+      }
+      const account = walletState.currentLoggedInWallet.accounts.find(
+        (element) => element.address == p.address
+      ) ||  walletState.currentLoggedInWallet.others.find(
+        (element) => element.address == p.address)
+      let filteredAsset = account.assets.filter(asset=>asset.namespaceNames[0]!='prx.xpx')
+      
+      if (filteredAsset.length > 0) {
+        filteredAsset.forEach((i) => {
+          mosaicOption.push({
+            name: (i.namespaceNames.length>0?i.namespaceNames[0]:i.idHex),
+            balance: Helper.amountFormatterSimple(i.amount,i.divisibility)
+          });
+        });
+      }
+      return mosaicOption;
+    }); */
     emitter.on("revealPK", (e) => {
       showPK.value = e;
     });
@@ -308,6 +331,7 @@ export default {
    
 
     return {
+      /* mosaics,   */
       networkState,
       showModal,
       splitBalance,

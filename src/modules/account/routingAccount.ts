@@ -110,6 +110,15 @@ export const AccountRoutes: RouteRecordRaw[] = [
       title: "Delete account",
     }
   },
+  {
+    path: '/view-assets/:address',
+    name: 'ViewAccountAssets',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccountAssets.vue'),
+    meta: {
+      title: "Account Assets",
+    }
+  },
   ...DelegateRoutes,
   ...LinkToNamespaceRoutes,
   ...MultisigRoutes,

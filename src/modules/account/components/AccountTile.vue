@@ -34,22 +34,24 @@
         <img src="@/assets/img/chevron_right.svg" class="w-5 h-5 ">
       </router-link> -->
       <div class="ml-auto mt-auto mb-auto ">
-        <img src="@/assets/img/navi/icon-default-account-drop-down.svg" class=" h-6 w-6 cursor-pointer" @click="displayDefaultAccountMenu =!displayDefaultAccountMenu ">
-        <div class="relative">
-          <div v-if="displayDefaultAccountMenu" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-          <div role="none" class="my-2">
-            <router-link :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Details</router-link>
-            <router-link v-if="!otheraccount(account.address) ||( otheraccount(account.address) && multisig_add!='')" :to="{ name: 'ViewMultisigHome', params: { name: accountName}}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Multisig</router-link>
-            <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">Multisig</div>
-            <router-link  :to="{ name: 'ViewMultisigScheme', params: { address: account.address}}" @click="displayDefaultAccountMenu = false" v-if="isMultiSig" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Scheme</router-link>
-            <div  v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">Scheme</div>
-            <router-link :to="{ name: 'ViewAccountSwap', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Swap</router-link>
-            <router-link v-if="!otheraccount(account.address)" :to="{ name: 'ViewAccountDelegate', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Delegate</router-link>
-            <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">Delegate</div>
-            <router-link v-if="!otheraccount(account.address) ||( otheraccount(account.address) && multisig_add!='')" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: account.address}}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Namespace</router-link>
-            <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">Namespace</div>
+        <img src="@/assets/img/navi/icon-default-account-drop-down.svg" class=" h-6 w-6 cursor-pointer" @mouseover="isHover = true" @mouseout="isHover = false"  @click="displayDefaultAccountMenu = true" >
+        <div class="relative"  @mouseover="isHover = true" @mouseout="isHover = false">
+          <div v-if="displayDefaultAccountMenu"  class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+            <div role="none" class="my-2">
+              <router-link :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Details</router-link>
+              <router-link v-if="!otheraccount(account.address) ||( otheraccount(account.address) && multisig_add!='')" :to="{name:'ViewAccountAssets', params: { address: account.address}}" class= 'block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs'>Assets</router-link>
+              <div  v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">Assets</div>
+              <router-link v-if="!otheraccount(account.address) ||( otheraccount(account.address) && multisig_add!='')" :to="{ name: 'ViewMultisigHome', params: { name: accountName}}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Multisig</router-link>
+              <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">Multisig</div>
+              <router-link  :to="{ name: 'ViewMultisigScheme', params: { address: account.address}}" @click="displayDefaultAccountMenu = false" v-if="isMultiSig" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Scheme</router-link>
+              <div  v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">Scheme</div>
+              <router-link :to="{ name: 'ViewAccountSwap', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Swap</router-link>
+              <router-link v-if="!otheraccount(account.address)" :to="{ name: 'ViewAccountDelegate', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Delegate</router-link>
+              <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">Delegate</div>
+              <router-link v-if="!otheraccount(account.address) ||( otheraccount(account.address) && multisig_add!='')" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: account.address}}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Namespace</router-link>
+              <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">Namespace</div>
+            </div>
           </div>
-        </div>
         </div>
       </div>
     </div>
@@ -250,6 +252,15 @@ export default{
     const hoverOutMenu = () => {
       emitter.emit("HOVER_OUT_MENU_TRIGGER");
     };
+    const isHover = ref(false)
+    emitter.on('PAGE_CLICK', () => {
+      if(!isHover.value && !displayDefaultAccountMenu.value){
+
+      }else if(!isHover.value && displayDefaultAccountMenu.value){
+        displayDefaultAccountMenu.value = false
+      }
+    });
+
 
     return {
       currentNativeTokenName,
@@ -267,7 +278,8 @@ export default{
       isMultiSig,
       accountName,
       displayDefaultAccountMenu,
-      multisig_add
+      multisig_add,
+      isHover
     }
   },
 }
