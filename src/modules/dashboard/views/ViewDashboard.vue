@@ -414,7 +414,11 @@ export default defineComponent({
           return false;
         }
       }else{
-        return false;
+        if(AppState.networkType == 184){
+          return 'https://www.proximax.io/en/xpx';
+        }else{
+          return false;
+        }
       }
     });
 
