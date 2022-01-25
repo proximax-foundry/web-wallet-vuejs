@@ -12,14 +12,14 @@
                 <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
               </div>
               <div>
-                <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center mr-2">
+                <a :href="faucetLink" target=_new class="inline-block text-center mr-2" v-if="faucetLink">
                   <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
                     <div class="h-full w-full flex items-center justify-center">
                       <img src="@/modules/dashboard/img/icon-balance-white.svg" class="w-5 h-5">
                     </div>
                   </div><br>
                   <div class="text-xxs text-gray-400 inline-block uppercase">Top Up</div>
-                </router-link>
+                </a>
                 <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center mx-2">
                   <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
                     <div class="h-full w-full flex items-center justify-center">
@@ -28,7 +28,7 @@
                   </div><br>
                   <div class="text-xxs text-gray-400 inline-block uppercase">Transfer</div>
                 </router-link>
-                <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center ml-2">
+                <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="inline-block text-center ml-2">
                   <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
                     <div class="h-full w-full flex items-center justify-center">
                       <img src="@/modules/dashboard/img/icon-swap-white.svg" class="w-5 h-5">
@@ -49,9 +49,9 @@
             </div>
             <div class="flex justify-between mt-2">
               <div>
-                <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">Top Up</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></router-link>
+                <a :href="faucetLink" class="flex items-center mb-3" target=_new v-if="faucetLink"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">Top Up</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></a>
               </div>
-              <div class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-swap.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold text-gray-500" style="margin-top: 1px">Swap</div></div>
+              <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-swap.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold text-white" style="margin-top: 1px">Swap</div></router-link>
             </div>
           </div>
         </div>
@@ -154,8 +154,8 @@
             <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">Account removed</span>
           </div>
           <div v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE" class="flex items-center">
-            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">Asset bought</span>
-            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">Asset sold</span>
+            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">Buy offer</span>
+            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">Sell offer</span>
           </div>
           <div v-if="selectedTxnType === TransactionFilterType.ASSET" class="flex items-center">
             <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">Enabled</span>
@@ -399,6 +399,24 @@ export default defineComponent({
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
     const currentNativeTokenId = computed(()=> networkState.currentNetworkProfile.network.currency.assetId);
+
+    const displyFaucet = computed(() => {
+      return (AppState.networkType == 168)?true:false;
+    });
+
+    const faucetLink = computed(() => {
+      if(displyFaucet.value){
+        if(networkState.chainNetworkName == 'Sirius Testnet 1'){
+          return 'https://bctestnetfaucet.xpxsirius.io/#/';
+        }else if(networkState.chainNetworkName == 'Sirius Testnet 2'){
+          return 'https://bctestnet2faucet.xpxsirius.io/#/';
+        }else{
+          return false;
+        }
+      }else{
+        return false;
+      }
+    });
 
     let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
     currentAccount.default = true;
@@ -1111,6 +1129,7 @@ export default defineComponent({
       TransactionFilterType,
       recentTransferTxnRow,
       jdenticonConfig,
+      faucetLink,
     };
   }
 });
