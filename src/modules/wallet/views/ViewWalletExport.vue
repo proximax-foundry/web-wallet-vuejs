@@ -8,25 +8,26 @@
 <div class='mt-2 py-3 gray-line'>
   <div class="container mx-auto text-center">
     <div class="mx-auto pt-5 lg:px-20">
-      <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
+     <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
       <div class="grid xs-grid-cols-1 sm:grid-cols-2 mt-10" v-else>
-        <div class='p-3' :key="wallet.name" v-for="wallet in appStore.state.wallets">
+        <div class='p-3' :key="wallet.name" v-for="wallet in walletState.currentLoggedInWallet">
           <div class="bg-gray-200 rounded-2xl flex justify-between py-3">
             <div class="ml-5 text-left text-sm"><div class="font-bold mb-1">{{ wallet.name }}</div><div class="text-xs">{{$t('wallets.account')}}{{ (wallet.accounts.length>1)?'s':'' }}: <span class="font-bold">{{ wallet.accounts.length }}</span></div></div>
             <div class="mr-5 self-center"><img src="@/assets/img/icon-wallet-export-blue.svg" class="w-7 cursor-pointer" @click="exportWallet(wallet.name)"></div>
-          </div>
+          </div> 
         </div>
       </div>
     </div>
   </div>
-</div>
+</div> 
 
 </template>
 
 <script>
-import { ref, inject } from 'vue';
+import { ref } from 'vue';
 import CryptoJS from 'crypto-js';
 // import FontAwesomeIcon from '../../libs/FontAwesomeIcon.vue';
+import { walletState } from '@/state/walletState';
 
 export default {
   name: 'ViewWalletExport',
@@ -34,13 +35,12 @@ export default {
     // FontAwesomeIcon,
   },
   setup(){
-    const appStore = inject("appStore");
-    const siriusStore = inject("siriusStore");
 
     const err = ref(false);
 
     const exportWallet = (walletName) => {
-      const wallet = appStore.getWalletByName(walletName);
+      const wallet = walletState.currentLoggedInWallet.accounts.findIndex((accAdd) => accAdd.name === walletName);
+      //appStore.getWalletByName(walletName);
       let wordArray = CryptoJS.enc.Utf8.parse(JSON.stringify(wallet));
       let file = CryptoJS.enc.Base64.stringify(wordArray);
       const now = Date.now()
@@ -65,7 +65,7 @@ export default {
 
 
     return {
-      appStore,
+      walletState,      
       exportWallet,
       err,
     };

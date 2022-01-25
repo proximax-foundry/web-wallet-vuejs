@@ -28,6 +28,7 @@ import { walletState } from "@/state/walletState"
 import ConfirmDeleteWalletModal from '@/modules/wallet/components/ConfirmDeleteWalletModal.vue';
 import { Helper } from '@/util/typeHelper';
 
+
 export default defineComponent({
   name: 'ViewWalletDeleteConfirmation',
   props: ['name', 'networkName'],
