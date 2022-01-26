@@ -17,9 +17,16 @@
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="mt-4">
           <SelectInputAccount @select-account="changeSelection" v-model="selectedAccAdd" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
-          <div v-if="getMultiSigCosigner.list.length > 0">
+          <div v-if="getMultiSigCosigner.cosignerList.length > 0">
             <div class="text-tsm text-left mt-3">{{$t('transfer.cosigner')}}:
-              <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.list[0].balance, 0) }} {{currentNativeTokenName}}) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{currentNativeTokenName}}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+              <span class="font-bold" v-else>
+                <select class="" v-model="cosignerAddress">
+                  <option v-for="(element, item) in  getMultiSigCosigner.cosignerList" :value="fetchAccount(element.publicKey).address" :key="item">
+                    {{ element.name }} ({{$t('services.balance')}}: {{ element.balance }} {{ currentNativeTokenName }})
+                  </option>
+                </select>
+              </span>
               <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
             </div>
           </div>
@@ -104,6 +111,9 @@ import { Helper } from '@/util/typeHelper';
 import { ChainUtils } from '@/util/chainUtils';
 import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
+import { multiSign } from '@/util/multiSignatory';
+import { Address } from 'tsjs-xpx-chain-sdk'
+
 export default {
   name: 'ViewServicesAssetsCreate',
   components: {
@@ -184,11 +194,47 @@ export default {
 
     const supply = ref('0');
 
-    const getMultiSigCosigner = computed(() => {
-      return AssetsUtils.getCosignerList(selectedAccAdd.value);
+    const accounts = computed( () => {
+      if(walletState.currentLoggedInWallet){
+        if(walletState.currentLoggedInWallet.others){
+          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+          return concatOther;
+        } else{
+          return walletState.currentLoggedInWallet.accounts;
+        }
+      } else{
+        return [];
+      }
     });
 
-    const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
+    const fetchAccount = (publicKey) => {
+      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
+    };
+
+    // const selectedAccount = computed(() => {
+    //   return walletState.currentLoggedInWallet.accounts.find(account => account.address == selectedAccAdd.value);
+    // })
+
+    const getMultiSigCosigner = computed(() => {
+      // return AssetsUtils.getCosignerList(selectedAccAdd.value);
+      // return multiSign.getCosignerInWallet(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey);
+      let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value).publicKey);
+      // console.log(walletState.currentLoggedInWallet.accounts.find(account => account.address === selectedAccAdd.value).publicKey)
+      // console.log(cosigners)
+      let list = [];
+      cosigners.cosignerList.forEach( publicKey => {
+        list.push({
+          publicKey,
+          name: fetchAccount(publicKey).name,
+          balance: fetchAccount(publicKey).balance
+        });
+      });
+
+      cosigners.cosignerList = list;
+      return cosigners;
+    });
+
+    const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
 
     const showNoBalance = computed(() => {
       if(isNotCosigner.value){
@@ -210,19 +256,6 @@ export default {
       disabledDuration.value = false;
       durationCheckDisabled.value = false;
     }
-
-    const accounts = computed( () => {
-      if(walletState.currentLoggedInWallet){
-        if(walletState.currentLoggedInWallet.others){
-          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
-          return concatOther;
-        } else{
-          return walletState.currentLoggedInWallet.accounts;
-        }
-      } else{
-        return [];
-      }
-    });
 
     const moreThanOneAccount = computed(()=>{
       return accounts.value.length > 1;
@@ -340,11 +373,11 @@ export default {
     // get cosigner
     watch(getMultiSigCosigner, (n) => {
       // if it is a multisig
-      if(n.list.length > 0){
-        if(n.list.length > 1){
+      if(n.cosignerList.length > 0){
+        if(n.cosignerList.length > 1){
           cosigner.value = cosignerAddress.value;
         }else{
-          cosigner.value = n.list[0].address;
+          cosigner.value = n.cosignerList[0];
         }
       }else{
         cosigner.value = '';
@@ -361,6 +394,7 @@ export default {
     };
 
     return {
+      fetchAccount,
       accounts,
       moreThanOneAccount,
       currentSelectedName,

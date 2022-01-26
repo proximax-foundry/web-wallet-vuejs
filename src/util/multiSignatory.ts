@@ -310,7 +310,7 @@ function getCosignerInWallet(publicKey :string) :{hasCosigner:boolean,cosignerLi
         allTopCosignerList.push(acc)
       }
     })
-    
+    console.log(allTopCosignerList)
     let level3 = foundAcc.multisigInfo.filter(acc=>acc.level==3)
     let level2 = foundAcc.multisigInfo.filter(acc=>acc.level==2)
     let level1 = foundAcc.multisigInfo.filter(acc=>acc.level==1)
