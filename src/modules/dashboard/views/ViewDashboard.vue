@@ -648,12 +648,11 @@ export default defineComponent({
 
     allTxnQueryParams.updateFieldOrder(blockDescOrderSortingField);
     allTxnQueryParams.embedded = true;
-    // allTxnQueryParams.address = selectedAccountAddressPlain.value;
 
     let loadRecentTransactions = async()=>{
       let txnQueryParams = Helper.createTransactionQueryParams();
       txnQueryParams.pageSize = 1;
-      txnQueryParams.address = selectedAccountAddressPlain.value;
+      txnQueryParams.publicKey = selectedAccount.value.publicKey;
       txnQueryParams.embedded = true;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
@@ -666,37 +665,20 @@ export default defineComponent({
 
     let loadRecentTransferTransactions = async()=>{
       let txnQueryParams = Helper.createTransactionQueryParams();
-      txnQueryParams.pageSize = 1;
+      txnQueryParams.pageSize = 20;
       txnQueryParams.type = TransactionFilterTypes.getTransferTypes();
-      txnQueryParams.signerPublicKey = selectedAccountPublicKey.value;
+      txnQueryParams.publicKey = selectedAccount.value.publicKey;
       txnQueryParams.embedded = true;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
       let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
 
-      let txnQueryParams2 = Helper.createTransactionQueryParams();
-      txnQueryParams2.pageSize = 1;
-      txnQueryParams2.type = TransactionFilterTypes.getTransferTypes();
-      txnQueryParams2.recipientAddress = selectedAccountAddressPlain.value;
-      txnQueryParams2.embedded = true;
-      txnQueryParams2.updateFieldOrder(blockDescOrderSortingField);
-
-      let transactionSearchResult2 = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams2);
-
-      let tempTxns = [];
-
       if(transactionSearchResult.transactions.length){
         let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
 
-        tempTxns = formattedTxns;
+        recentTransferTransactions.value = formattedTxns;
+        recentTransferTxnRow.value = formatRecentTransfer(formattedTxns).slice(0, 3);
       }
-
-      if(transactionSearchResult2.transactions.length){
-        let formattedTxns2 = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult2.transactions);
-        tempTxns = tempTxns.concat(formattedTxns2);
-      }
-      
-      recentTransferTransactions.value = removeDuplicateTxn(tempTxns);
     };
 
     const reloadSearchTxns = () =>{
@@ -713,6 +695,7 @@ export default defineComponent({
     const searchTransaction = async(loadMore = false) =>{
 
       allTxnQueryParams.pageNumber = loadMore ? allTxnQueryParams.pageSize + 1 : 1;
+      allTxnQueryParams.publicKey = selectedAccount.value.publicKey;
       searchingTxn.value = true;
 
       let transactionSearchResult = await dashboardService.searchTxns(selectedTxnGroupType, allTxnQueryParams);
@@ -739,8 +722,6 @@ export default defineComponent({
           break;
       }
 
-      console.log(formattedTxns)
-
       if(loadMore){
         let tempTxns = searchedTransactions.value.concat(formattedTxns);
         searchedTransactions.value = removeDuplicateTxn(tempTxns);
@@ -757,62 +738,36 @@ export default defineComponent({
 
     const recentTransferTxnRow = ref([]);
 
-    const recentTransferTxn = async() => {
-      let txnQueryParams = Helper.createTransactionQueryParams();
-      txnQueryParams.pageSize = 1;
-      txnQueryParams.type = TransactionFilterTypes.getTransferTypes();
-      txnQueryParams.signerPublicKey = selectedAccountPublicKey.value;
-      txnQueryParams.embedded = true;
-      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
-
-      let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
-
-      let txnQueryParams2 = Helper.createTransactionQueryParams();
-      txnQueryParams2.pageSize = 1;
-      txnQueryParams2.type = TransactionFilterTypes.getTransferTypes();
-      txnQueryParams2.recipientAddress = selectedAccountAddressPlain.value;
-      txnQueryParams2.embedded = true;
-      txnQueryParams2.updateFieldOrder(blockDescOrderSortingField);
-
-      let transactionSearchResult2 = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams2);
-
-      let tempTxns = [];
-
-      if(transactionSearchResult.transactions.length){
-        let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
-
-        tempTxns = formattedTxns;
-      }
-
-      if(transactionSearchResult2.transactions.length){
-        let formattedTxns2 = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult2.transactions);
-        tempTxns = tempTxns.concat(formattedTxns2);
-      }
-
-      recentTransferTxnRow.value = formatRecentTransfer(removeDuplicateTxn(tempTxns).slice(0, 3));
-    };
-
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
     const jdenticonConfig = themeConfig.jdenticonConfig;
 
     const formatRecentTransfer = (transactions) => {
-      let TransferTxn = [];
-      transactions.forEach((txn) => {
+      let transferTxn = [];
+      let nativeTokenTxns = transactions.filter(txn => txn.amountTransfer > 0);
+
+      for(const txn of nativeTokenTxns){
         let formattedTransferTxn = {};
-        if(selectedAccountAddressPlain.value == txn.sender){
-          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToNamePretty(txn.recipient, true).substring(0, 20);
+        if(selectedAccountAddressPlain.value == txn.sender && selectedAccountAddressPlain.value == txn.recipient){
+          continue;
+        }
+        else if(selectedAccountAddressPlain.value == txn.sender){
+          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToNamePretty(txn.recipient, true);
           formattedTransferTxn.transferContactAddress = txn.recipient;
-          formattedTransferTxn.amount = Helper.toCurrencyFormat(txn.amountTransfer, );
+          formattedTransferTxn.amount = '-' + Helper.toCurrencyFormat(txn.amountTransfer, AppState.nativeToken.divisibility);
         }else{
           formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToNamePretty(txn.sender, true).substring(0, 30);
           formattedTransferTxn.transferContactAddress = txn.sender;
-          formattedTransferTxn.amount = '-' + Helper.toCurrencyFormat(txn.amountTransfer, 6);
+          formattedTransferTxn.amount = Helper.toCurrencyFormat(txn.amountTransfer, AppState.nativeToken.divisibility);
+        }
+        
+        if(formattedTransferTxn.transferContact.length > 20){
+            formattedTransferTxn.transferContact = formattedTransferTxn.transferContact.substring(0, 17) + "...";
         }
         formattedTransferTxn.hash = txn.hash;
-        TransferTxn.push(formattedTransferTxn);
-      });
-      return TransferTxn;
+        transferTxn.push(formattedTransferTxn);
+      }
+      return transferTxn;
     }
 
     const formatConfirmedTransaction = async(transactions)=>{
@@ -1062,7 +1017,6 @@ export default defineComponent({
       loadRecentTransactions();
       loadRecentTransferTransactions();
       updatePricing();
-      recentTransferTxn();
     }
 
     if(AppState.isReady){
