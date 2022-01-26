@@ -31,7 +31,7 @@
             <div class="uppercase font-bold text-txs">
               <span v-if="data.recipient === '' || data.recipient === null"></span>
               <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else-if="data.recipientNamespaceName" class="truncate inline-block text-txs">{{ data.recipientNamespaceName }}</span>
-              <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient.substring(0, 20) }}...</span>
+              <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.recipient).substring(0, 20) }}</span>
             </div>
           </div>
         </template>
@@ -48,7 +48,7 @@
               <span v-if="data.sender === '' || data.sender === null"></span>
               <span v-else v-tooltip.right="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
                 <a :href="getPublicKeyExplorerUrl(data.sender)" target="_blank">
-                  {{ data.sender.substring(0, 20) }}...
+                  {{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.sender).substring(0, 20) }}
                 </a>
               </span>
             </div>
@@ -92,7 +92,7 @@
           <span v-if="data.sender === '' || data.sender === null"></span>
           <span v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
             <a :href="getPublicKeyExplorerUrl(data.sender)" target="_blank">
-              {{ data.sender.substring(0, 20) }}
+              {{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.sender).substring(0, 20) }}
             </a>
           </span>
         </template>
@@ -101,7 +101,7 @@
         <template #body="{data}">
           <span v-if="data.recipient === '' || data.recipient === null"></span>
           <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else-if="data.recipientNamespaceName" class="truncate inline-block text-txs">{{ data.recipientNamespaceName }}</span>
-          <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient.substring(0, 20) }}...</span>
+          <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.recipient).substring(0, 20) }}</span>
         </template>
       </Column>
       <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:90px">
@@ -158,6 +158,7 @@ import Tooltip from 'primevue/tooltip';
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";
+import { walletState } from "@/state/walletState";
 // import SplitButton from 'primevue/splitbutton';
 
 export default {
@@ -320,6 +321,7 @@ export default {
       transactionGroupType,
       wideScreen,
       Helper,
+      walletState,
     }
   }
 }

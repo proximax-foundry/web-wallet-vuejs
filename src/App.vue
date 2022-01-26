@@ -24,7 +24,7 @@
     <ConfirmDialog></ConfirmDialog>
     <headerComponent></headerComponent>
     <div :class="login?`flex min-full-screen`:``">
-      <NavigationMenu v-if="login" class="lg:mt-16 flex-shrink-0 bg-navy-primary text-left text-xs bg-navi z-10 overflow-y-auto fixed inset-y-0 left-0 transform lg:-translate-x-0 transition duration-200 ease-in-out" :class="`${isShowNavi?'-translate-x-0':'-translate-x-full'}`"></NavigationMenu>
+      <NavigationMenu v-if="login" class="lg:mt-16 flex-shrink-0 bg-navy-primary text-left text-xs bg-navi z-20 overflow-y-auto fixed inset-y-0 left-0 transform lg:-translate-x-0 transition duration-200 ease-in-out" :class="`${isShowNavi?'-translate-x-0':'-translate-x-full'}`"></NavigationMenu>
       <div :class="`${ login?'inline-block flex-grow':''}`">
         <div :class="`${ login?'flex flex-col min-full-screen bg-white':''}`">
           <router-view class="lg:ml-60 mt-12 lg:mt-16 flex-grow" v-if="currentRouteName=='ViewDashboard' || currentRouteName=='ViewTransactionStatus'"></router-view>

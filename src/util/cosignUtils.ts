@@ -30,7 +30,7 @@ export class CosignUtils{
 
         let cosigners: string[] = [];
 
-        for(let i =0; i < MultisigAccountInfo.length; ++i){
+        for(let i =0; i < multisigAccountsInfo.length; ++i){
             if(multisigAccountsInfo[i].minApproval === 0 && multisigAccountsInfo[i].minRemoval === 0){
                 cosigners.push(multisigAccountsInfo[i].account.publicKey);
             }

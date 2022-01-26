@@ -8,6 +8,7 @@
       <AccountComponent :address="address" class="mb-10"/>
       <div class = 'flex text-xs font-semibold mt-5'>
         <router-link :to="{name: 'ViewAccountDetails',params:{address:currentAccount.address}}" class= 'w-32 text-center '>Account Details</router-link>
+        <router-link :to="{name:'ViewAccountAssets', params: { address: currentAccount.address}}" class= 'w-18 text-center'>Assets</router-link>
         <router-link :to="{name:'ViewMultisigHome', params: { name: currentAccount.name}}" class= 'w-18 text-center'>Multisig</router-link>
         <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Scheme</div>
         <router-link :to="{name:'ViewAccountSwap', params: { address: currentAccount.address}}" class= 'w-18 text-center'>Swap</router-link>
@@ -54,15 +55,15 @@
       <label  class = 'text-left py-3 text-xs pl-4'> Vertical</label>
       <div>
         <input name = 'view-type-2' type='radio' value='0' v-model="viewType2" :checked='true'>   
-        <label v-if="viewType==0" class = 'text-left py-3 text-xs pl-4'> Left to right</label>
-        <label v-if="viewType==1" class = 'text-left py-3 text-xs pl-4'> Top to bottom</label>
+        <label v-if="viewType==0" class = 'text-left py-3 text-xs pl-4'> Right to left</label>
+        <label v-if="viewType==1" class = 'text-left py-3 text-xs pl-4'> Top to Bottom</label>
       </div>
       <input name = 'view-type-2' type='radio' value='1' v-model="viewType2" >   
-      <label v-if="viewType==0" class = 'text-left py-3 text-xs pl-4'> Right to left</label>
-      <label v-if="viewType==1" class = 'text-left py-3 text-xs pl-4'> Bottom to top</label>
+      <label v-if="viewType==0" class = 'text-left py-3 text-xs pl-4'> Left to right</label>
+      <label v-if="viewType==1" class = 'text-left py-3 text-xs pl-4'> Bottom to Top</label>
       <div>
         <input type="checkbox" @click="collapsable=!collapsable">
-        <label class = 'text-left py-3 text-xs pl-4'>Collapsable</label>
+        <label class = 'text-left py-3 text-xs pl-4'>Collapsible</label>
       </div>
       
     </div>
@@ -242,7 +243,7 @@ setup(p){
   };
   const prettyAddress = address => Address.createFromRawAddress(address).pretty()
   const viewType = ref(0)
-  const viewType2 = ref(0)
+  const viewType2 = ref(1)
   const collapsable = ref(false)
   return{
     viewType,

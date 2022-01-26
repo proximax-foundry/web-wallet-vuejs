@@ -25,7 +25,7 @@
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Account</div>
             <div class="flex items-center">
-              <div class="uppercase font-bold text-txs mr-2" v-tooltip.right="Helper.createAddress(data.signerAddress).pretty()">{{ data.signerAddress.substring(0, 15) }}...</div>
+              <div class="uppercase font-bold text-txs mr-2 truncate" v-tooltip.right="Helper.createAddress(data.signerAddress).pretty()">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.signerAddress) }}</div>
             </div>
           </div>
         </template>
@@ -88,7 +88,7 @@
       </Column>
       <Column header="ACCOUNT" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
-          <div class="text-txs truncate inline-block" v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()">{{ data.signerAddress }}</div>
+          <div class="text-txs truncate inline-block" v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.signerAddress) }}</div>
         </template>
       </Column>
       <Column header="APPROVAL DELTA" headerStyle="width:60px" v-if="wideScreen">
@@ -144,6 +144,7 @@ import Tooltip from 'primevue/tooltip';
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";
+import { walletState } from "@/state/walletState";
 // import SplitButton from 'primevue/splitbutton';
 
 export default defineComponent({
@@ -286,6 +287,7 @@ export default defineComponent({
       transactionGroupType,
       wideScreen,
       Helper,
+      walletState,
     }
   }
 })

@@ -29,13 +29,6 @@
               <a :href="getPublicKeyExplorerUrl(data.signer)" target="_blank">{{ data.signerAddress.substring(0, 20) }}</a>
             </div>
           </div>
-          <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">RECEIPIENT</div>
-            <div class="uppercase font-bold text-txs" v-if="data.recipient!=null">
-              <div v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()">{{ data.recipientNamespaceName?data.rrecipientNamespaceName:data.recipient }}</div>
-            </div>
-            <div v-else>-</div>
-          </div>
         </template>
       </Column>
       <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
@@ -48,21 +41,13 @@
           <span class="text-txs">{{Helper.formatDeadline(data.deadline)}}</span>
         </template>
       </Column>
-      <Column field="signer" header="SENDER" headerStyle="width:110px" v-if="wideScreen">
+      <Column field="signer" header="INITIATOR" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()" class="truncate inline-block text-txs">
             <a :href="getPublicKeyExplorerUrl(data.signer)" target="_blank">
               {{ data.signerAddress }}
             </a>
           </span>
-        </template>
-      </Column>
-      <Column field="recipient" header="RECIPIENT" headerStyle="width:110px" v-if="wideScreen">
-        <template #body="{data}">
-          <div v-if="data.recipient!=null">
-            <span class="truncate inline-block text-txs" v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()">{{ data.recipientNamespaceName?data.rrecipientNamespaceName:data.recipient }}</span>
-          </div>
-          <span v-else>-</span>
         </template>
       </Column>
       <Column field="sign" header="" headerStyle="width:110px">

@@ -1,6 +1,6 @@
 {
     "Sirius Testnet 1": {
-      "version": "0.0.3",
+      "version": "0.0.4",
       "apiNodes":[
           "bctestnet3.brimstone.xpxsirius.io"
       ],
@@ -27,7 +27,7 @@
       }
     },
     "Sirius Testnet 2": {
-      "version": "0.0.3",
+      "version": "0.0.4",
       "apiNodes":[
           "api-2.testnet2.xpxsirius.io"
       ],
