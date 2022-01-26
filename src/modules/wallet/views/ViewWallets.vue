@@ -1,7 +1,8 @@
 <template>
 <div class="sm:ml-0 xl:flex xl:justify-between pb-3">
-    <div v-if="walletState.currentLoggedInWallet" class="sm:ml-0 xl:ml-15 xl:mt-10 md:px-10">
-       <h1 class="text-lg md:text-xl xl:text-xl mb-5 ml-5 text-black xl:ml-5 sm:ml-0">{{$t('Header.wallet')}}</h1>
+    <div v-if="walletState.currentLoggedInWallet" class="sm:ml-0 xl:ml-15 xl:mt-5 md:px-10">
+       <!-- <h1 class="text-lg md:text-xl xl:text-xl mb-5 ml-5 text-black xl:ml-5 sm:ml-0">{{$t('Header.wallet')}}</h1> -->
+       <div class="text-md mb-5 font-semibold">{{$t('Header.wallet')}}</div>
        <template>
       <!-- <p class="text-tsm sm:text-tsm text-white font-semibold">{{$t('wallets.description') }}.</p> -->
        </template>
