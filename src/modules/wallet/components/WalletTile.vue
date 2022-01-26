@@ -11,7 +11,7 @@
           
           </div>
           <div v-if="currentLoggedIn(wallet.name) == false" class="w-36 inline-block truncate">{{ wallet.name }}</div>
-          <div v-if="currentLoggedIn(wallet.name) == false" class="ml-2 mt-4"> </div>
+          <div v-if="currentLoggedIn(wallet.name) == false" class="ml-0 mt-4"> </div>
           
         </div>
         <div v-else class="font-bold text-blue-primary flex items-center">
