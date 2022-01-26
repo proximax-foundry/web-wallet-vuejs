@@ -20,13 +20,7 @@
           <div v-if="getMultiSigCosigner.cosignerList.length > 0">
             <div class="text-tsm text-left mt-3">{{$t('transfer.cosigner')}}:
               <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{currentNativeTokenName}}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
-              <span class="font-bold" v-else>
-                <select class="" v-model="cosignerAddress">
-                  <option v-for="(element, item) in  getMultiSigCosigner.cosignerList" :value="fetchAccount(element.publicKey).address" :key="item">
-                    {{ element.name }} ({{$t('services.balance')}}: {{ element.balance }} {{ currentNativeTokenName }})
-                  </option>
-                </select>
-              </span>
+              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.cosignerList" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
               <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
             </div>
           </div>
@@ -112,7 +106,6 @@ import { ChainUtils } from '@/util/chainUtils';
 import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { multiSign } from '@/util/multiSignatory';
-import { Address } from 'tsjs-xpx-chain-sdk'
 
 export default {
   name: 'ViewServicesAssetsCreate',
@@ -211,16 +204,9 @@ export default {
       return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
     };
 
-    // const selectedAccount = computed(() => {
-    //   return walletState.currentLoggedInWallet.accounts.find(account => account.address == selectedAccAdd.value);
-    // })
-
     const getMultiSigCosigner = computed(() => {
       // return AssetsUtils.getCosignerList(selectedAccAdd.value);
-      // return multiSign.getCosignerInWallet(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey);
       let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value).publicKey);
-      // console.log(walletState.currentLoggedInWallet.accounts.find(account => account.address === selectedAccAdd.value).publicKey)
-      // console.log(cosigners)
       let list = [];
       cosigners.cosignerList.forEach( publicKey => {
         list.push({
