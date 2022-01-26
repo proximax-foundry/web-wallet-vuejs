@@ -240,7 +240,7 @@ export class DashboardService {
                     let assetIdHex = assetId.toHex();
 
                     if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
-                        txn.amountTransfer = DashboardService.convertToExactNativeAmount(actualAmount);
+                        txn.amountTransfer += DashboardService.convertToExactNativeAmount(actualAmount);
                         continue;
                     }
 
@@ -376,7 +376,7 @@ export class DashboardService {
                     let assetIdHex = assetId.toHex();
 
                     if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
-                        txn.amountTransfer = DashboardService.convertToExactNativeAmount(actualAmount);
+                        txn.amountTransfer += DashboardService.convertToExactNativeAmount(actualAmount);
                         continue;
                     }
 
@@ -497,7 +497,7 @@ export class DashboardService {
                     let assetIdHex = assetId.toHex();
 
                     if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
-                        txn.amountTransfer = DashboardService.convertToExactNativeAmount(actualAmount);
+                        txn.amountTransfer += DashboardService.convertToExactNativeAmount(actualAmount);
                         continue;
                     }
 
