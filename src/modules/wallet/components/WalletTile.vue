@@ -1,33 +1,32 @@
 <template>
   <div class='p-1'>      
-    <div class="flex justify-between bg-white border rounded-lg border-gray-200 shadow-lg group" >
+    <div class="bg-white border rounded-lg border-gray-200 shadow-lg group" >
     <!-- <div class="flex justify-between bg-white border rounded-lg border-gray-200 shadow-lg group"> -->
     <div v-if="walletState.currentLoggedInWallet" class='border-l-4 rounded-l-lg border-blue-primary opacity-0 group-hover:opacity-100'>
     </div>
+    <div class="flex justify-between items-center">
       <div class="ml-4 mt-5 mb-5 mr-5 text-txs text-left">      
         <div v-if="walletState.currentLoggedInWallet" class="font-bold text-blue-primary flex items-center">
           <div v-if="currentLoggedIn(wallet.name) == true" class="w-36 inline truncate">{{ wallet.name }}
           <ConfirmDeleteWalletModal :walletName="wallet.name"/> 
-          
           </div>
           <div v-if="currentLoggedIn(wallet.name) == false" class="w-36 inline-block truncate">{{ wallet.name }}</div>
           <div v-if="currentLoggedIn(wallet.name) == false" class="ml-0 mt-4"> </div>
-          
         </div>
         <div v-else class="font-bold text-blue-primary flex items-center">
             <div class="w-32 inline-block truncate">{{ wallet.name }}</div>
         </div>
         <div v-if="walletState.currentLoggedInWallet" class="text-txs text-black-400">Accounts: <span>{{ wallet.accounts.length }}</span></div>
-          <div v-else class="text-txs pt-1 px-2 text-gray-400">Number of Accounts: <span>{{ wallet.accounts.length }}</span></div>
+          <div v-else class="text-txs pt-1 text-gray-400">Number of Accounts: <span>{{ wallet.accounts.length }}</span></div>
       </div>
-      <div v-if="walletState.currentLoggedInWallet" class="xl:mr-3 xl:ml-0 text-xs font-bold flex">   
+      <div v-if="walletState.currentLoggedInWallet" class="xl:mr-3 xl:ml-0 text-xs font-bold">   
         <button class="bg-transparent font-bold py-2 ml-2 mr-2 rounded inline-flex items-center" @click="exportWallet(wallet.name)">
           <svg class="color-blue-primary" id="file_upload_black_24dp" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 20 20">
           <path d="M15.667,13.167v2.5h-10v-2.5H4v2.5a1.672,1.672,0,0,0,1.667,1.667h10a1.672,1.672,0,0,0,1.667-1.667v-2.5Zm-9.167-5L7.675,9.342l2.158-2.15V14H11.5V7.192l2.158,2.15,1.175-1.175L10.667,4Z" fill="#007cff"/></svg>
           <span class="font-semibold text-txs">Export</span>
         </button>
       </div>
-       <div v-else class="xl:mr-1 xl:ml-5 text-xs font-bold flex">   
+      <div v-else class="xl:mr-1 xl:ml-5 text-xs font-bold">   
         <button class="font-bold py-2 sm:py-2 md:px-5 md:py-2 xl:py-2 xl:mr-2 xl:ml-0 rounded inline-flex items-center" @click="deleteWallet(wallet.name)">
         <svg id="clear_black_24dp" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24">
           <path id="Path_114" data-name="Path 114" d="M0,0H24V24H0Z" fill="none"/>
@@ -35,6 +34,7 @@
         </svg>
         </button>
       </div>
+    </div>
     </div>
   </div>
 </template>

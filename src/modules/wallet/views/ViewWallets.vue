@@ -13,7 +13,7 @@
         {{$t('wallets.walletvalidation')}}.
       </div>
       <!-- <div class="grid grid-cols-1 sm:ml-0 md:grid-cols-2 md:gap-6 xl:ml-2 xl:mr-2 xl:grid-cols-2 lg:grid-cols-3 xl:gap-6" v-else> -->
-        <div class="grid grid-cols-1 sm:ml-0 md:grid-cols-2 md:gap-6 xl:ml-0 xl:mr-20 xl:gap-6 2xl:grid-cols-4 xl:grid-cols-3 fixed" v-else>
+        <div class="grid grid-cols-1 sm:ml-0 md:grid-cols-2 md:gap-6 xl:ml-0 xl:mr-20 xl:gap-6 2xl:grid-cols-4 xl:grid-cols-3 sm:fixed" v-else>
         <WalletTile :key="item.name" v-for="item in wallets" :wallet="item" />
       </div>
     </div>
