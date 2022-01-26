@@ -26,9 +26,10 @@
         </div>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="text-right w-full">
-          <div v-if="getMultiSigCosigner.list.length > 0" class="inline-block">
+          <div v-if="getMultiSigCosigner.cosignerList.length > 0" class="inline-block">
             <div class="text-tsm text-left mt-3">{{$t('transfer.cosigner')}}:
-              <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.list[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.cosignerList" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
               <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
             </div>
           </div>
@@ -98,6 +99,7 @@ import { useToast } from "primevue/usetoast";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
+import { multiSign } from '@/util/multiSignatory';
 
 export default {
   name: 'ViewServicesNamespaceExtend',
@@ -291,17 +293,30 @@ export default {
       router.push({ name: "ViewServicesNamespace", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()}});
     };
 
-    const getMultiSigCosigner = computed(() => {
-      return NamespaceUtils.getCosignerList(selectedAccAdd.value);
-    });
+    const fetchAccount = (publicKey) => {
+      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
+    };
 
-    const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
+    let cosigners = multiSign.getCosignerInWallet(account.publicKey);
+    let list = [];
+    cosigners.cosignerList.forEach( publicKey => {
+      list.push({
+        publicKey,
+        name: fetchAccount(publicKey).name,
+        balance: fetchAccount(publicKey).balance
+      });
+    });
+    cosigners.cosignerList = list;
+
+    const getMultiSigCosigner = ref(cosigners);
+
+    const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
 
     const showNoBalance = computed(() => {
       if(isNotCosigner.value){
         return balanceNumber.value < (rentalFee.value + transactionFeeExact.value);
       }else{
-        console.log(balanceNumber.value)
+        // console.log(balanceNumber.value)
         return balanceNumber.value < (rentalFee.value + transactionFeeExact.value + lockFundTotalFee.value);
       }
     });
@@ -316,18 +331,17 @@ export default {
       }
     });
 
-    const cosigner = ref('');
     // get cosigner
-    watch(getMultiSigCosigner, (n) => {
-      // if it is a multisig
-      if(n.list.length > 0){
-        if(n.list.length > 1){
-          cosigner.value = cosignerAddress.value;
+    // if it is a multisig
+    const cosigner = computed(() => {
+      if(getMultiSigCosigner.value.cosignerList.length > 0){
+        if(getMultiSigCosigner.value.cosignerList.length > 1){
+          return cosignerAddress.value;
         }else{
-          cosigner.value = n.list[0].address;
+          return fetchAccount(getMultiSigCosigner.value.cosignerList[0].publicKey).address;
         }
       }else{
-        cosigner.value = '';
+        return '';
       }
     });
 

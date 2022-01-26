@@ -363,7 +363,7 @@ export default {
         if(n.cosignerList.length > 1){
           cosigner.value = cosignerAddress.value;
         }else{
-          cosigner.value = n.cosignerList[0];
+          cosigner.value = fetchAccount(n.cosignerList[0].publicKey).address;
         }
       }else{
         cosigner.value = '';
