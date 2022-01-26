@@ -63,8 +63,8 @@
               <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4" @click="copy('address')">
             </div>
             <div class="flex justify-between w-full">
-              <div class="my-2 flex items-center"><a href="https://bctestnetfaucet.xpxsirius.io/#/" target=_new><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span class="text-xs font-bold" style="margin-top: 1px">Scan QR Code</span></a></div>
-              <div class="my-2 flex items-center"><img src="@/modules/dashboard/img/icon-multisig-blue.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">Convert to Multisig</div></div>
+              <AddressQRModal :accountAddressQR="addressQR" />
+              <router-link :to="{ name: 'ViewMultisigHome', params: { name: selectedAccountName }}" class="my-2 flex items-center" v-if="!isMultisig"><img src="@/modules/dashboard/img/icon-multisig-blue.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">Convert to Multisig</div></router-link>
             </div>
           </div>
         </div>
@@ -81,7 +81,7 @@
                 <a class="text-tsm font-bold" :href="hashExplorerURL + '/' + txn.hash" target=_new><span :class="`${ (txn.amount[0] ==='-')?'text-red-500':'text-green-500' }`">{{ txn.amount }}</span> <span class="text-xxs font-normal">{{ currentNativeTokenName }}</span></a>
               </div>
             </div>
-            <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mt-4"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
+            <router-link :to="{ name: 'ViewTransferCreate'}" class="flex items-center mt-4"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
           </div>
         </div>
       </div>
@@ -263,6 +263,7 @@ export default defineComponent({
     SecretTxnDataTable,
     DashboardAssetDataTable,
     DashboardNamespaceDataTable,
+    AddressQRModal,
   },
 
   setup(props){
@@ -495,7 +496,7 @@ export default defineComponent({
 
     const addressQR = computed(
       () => {
-        let qr = qrcode(10, 'H');
+        let qr = qrcode(15, 'H');
         qr.addData(selectedAccountAddress.value);
         qr.make();
         return qr.createDataURL();
