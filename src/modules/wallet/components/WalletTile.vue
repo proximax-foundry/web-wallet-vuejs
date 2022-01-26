@@ -6,10 +6,12 @@
     </div>
       <div class="ml-4 mt-5 mb-5 mr-5 text-txs text-left">      
         <div v-if="walletState.currentLoggedInWallet" class="font-bold text-blue-primary flex items-center">
-          <div v-if="currentLoggedIn(wallet.name) == true" class="w-32 inline-block truncate">{{ wallet.name }}
-          <ConfirmDeleteWalletModal :walletName="wallet.name"/> </div>
-          <div v-if="currentLoggedIn(wallet.name) == false" class="w-32 inline-block truncate">{{ wallet.name }}</div>
-          <div v-if="currentLoggedIn(wallet.name) == false" class="ml-2 mt-0"> </div>
+          <div v-if="currentLoggedIn(wallet.name) == true" class="w-36 inline truncate">{{ wallet.name }}
+          <ConfirmDeleteWalletModal :walletName="wallet.name"/> 
+          
+          </div>
+          <div v-if="currentLoggedIn(wallet.name) == false" class="w-36 inline-block truncate">{{ wallet.name }}</div>
+          <div v-if="currentLoggedIn(wallet.name) == false" class="ml-2 mt-2"> </div>
           
         </div>
         <div v-else class="font-bold text-blue-primary flex items-center">
