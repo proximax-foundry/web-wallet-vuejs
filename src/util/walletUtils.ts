@@ -1068,8 +1068,6 @@ export class WalletUtils {
 
         walletState.wallets.saveMyWalletOnlytoLocalStorage(wallet);
         wallet.isReady = true;
-
-        console.log(wallet);
     }
 
     static updateAllAccountBalance(wallet: Wallet, assetId: string): void{
