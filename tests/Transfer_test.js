@@ -6,7 +6,7 @@ var invalidaddress = "VBE2LN-QYZS2P-ODPWSO-CARZXJ-3I3RUI-IK5PX5-PMO"
 var status = "INVALID"
 var amount = "0.1"
 var amount1 = "10000"
-var amount2 = "100000"
+var amount2 = "200000"
 
 module.exports = {
 

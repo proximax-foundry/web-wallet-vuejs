@@ -27,18 +27,18 @@ module.exports = {
       launch_url: 'https://proximax-foundry.github.io/web-wallet-vuejs/#/',
 
       screenshots: {
-        enabled: false,
+        enabled: true,
         path: 'screens',
         on_failure: true
       },
 
       desiredCapabilities: {
-        browserName : 'chrome'
+        browserName : 'firefox'
       },
 
       webdriver: {
         start_process: true,
-        server_path: (Services.chromedriver ? Services.chromedriver.path : '')
+        server_path: (Services.geckodriver ? Services.geckodriver.path : '')
       }
     },
 
