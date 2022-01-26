@@ -72,7 +72,7 @@
           <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-3 rounded-lg transaction-div text-white">
             <div class="text-txs mt-6 text-gray-400">Recent Transfers</div>
             <div class="text-gray-400 text-tsm mt-8 mb-3 h-12" v-if="recentTransferTxnRow.length==0">No transactions in {{ selectedAccountName }}</div>
-            <div v-else class="mt-3">
+            <div v-else class="mt-3 h-16">
               <div v-for="txn in recentTransferTxnRow" :key="txn.hash" class="flex items-center justify-between mb-1">
                 <a class="flex items-center max-w-xs " :href="addressExplorerURL + '/' + txn.transferContactAddress" target=_new>
                   <div v-html="toSvg(txn.transferContactAddress, 20, jdenticonConfig)" class="mr-3 inline-block"></div>
@@ -81,7 +81,7 @@
                 <a class="text-tsm font-bold" :href="hashExplorerURL + '/' + txn.hash" target=_new><span :class="`${ (txn.amount[0] ==='-')?'text-red-500':'text-green-500' }`">{{ txn.amount }}</span> <span class="text-xxs font-normal">{{ currentNativeTokenName }}</span></a>
               </div>
             </div>
-            <router-link :to="{ name: 'ViewTransferCreate'}" class="flex items-center mt-4"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
+            <router-link :to="{ name: 'ViewTransferCreate'}" class="flex items-center mt-5"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
           </div>
         </div>
       </div>
