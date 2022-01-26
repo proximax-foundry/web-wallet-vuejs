@@ -1,87 +1,79 @@
 <template>
-  <div class="inline-block">
-    <button @click="toggleModal = !toggleModal" class="default-btn w-50">{{$t('deletewallet.proceed')}}</button>
-    <transition
-      enter-active-class="animate__animated animate__fadeInDown"
-      leave-active-class="animate__animated animate__fadeOutUp"
-    >
-      <div v-if="toggleModal" class="popup-outer fixed flex z-50">
-        <div class="modal-popup-box">
-          <div class="delete-position">
-            <img src="@/assets/img/delete.svg" class="w-5 inline-block cursor-pointer" @click="toggleModal = !toggleModal">
-          </div>
-          <div class="w-104">
-            <div class="error error_box" v-if="err!=''">{{ err }}</div>
-            <div class="mt-10 mb-5"><div class="text-xl text-gray-900">{{ name }}</div> <span class="text-sm text-gray-700">{{$t('deletewallet.deletemessage')}}.</span></div>
-            <div class="flex justify-between p-4 rounded-md bg-yellow-100 mb-4">
-              <div class="text-center w-full">
-                <div class="border border-gray-600 rounded-full w-8 h-8 inline-block relative">
-                  <font-awesome-icon icon="exclamation" class="w-5 h-5 text-gray-600 inline-block absolute" style="top:5px; left: 12px"></font-awesome-icon>
-                </div>
-                <div class="font-bold text-xs">{{$t('deletewallet.warning')}}</div>
-                <p class="text-xs mt-3 tracking-wider leading-snug">{{$t('deletewallet.warningmessage')}}.</p>
+     <transition
+          enter-active-class="animate__animated animate__fadeInDown"
+          leave-active-class="animate__animated animate__fadeOutUp"
+        >
+          <div v-if='toggleModal' class="popup-outer fixed flex z-50">
+            <div class="modal-popup-box">
+              <div class="error error_box mb-3 text-center" v-if="err!=''">{{ err }}</div>
+              <div class ='text-center mt-2 text-normal font-semibold'>Wallet Deletion</div>
+              <img src='@/modules/wallet/img/icon-delete-wallet.svg' class='ml-auto mr-auto'>
+              <div class ='text-gray-500 text-center text-xs mt-2'>This action will delete the wallet.</div>
+              <div class ='font-bold text-center text-xs mt-2'>Are you sure you want to delete this wallet?</div>
+              <div class="w-92">
+                <div class= 'text-center'>
+                  <div class="mt-3">
+                    <PasswordInput class ='w-8/12 ml-auto mr-auto' placeholder="Password"  v-model="walletPassword" icon="lock"/>
+                    <button @click="deleteWallet(walletName)" class='red-btn px-4 py-3 font-semibold cursor-pointer text-center ml-auto mt-3 mr-auto w-8/12 disabled:opacity-50 disabled:cursor-auto' :disabled="disableDelete">Confirm Wallet Deletion</button>
+                    <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-3' @click="closeModal()">Cancel</div>
+                  </div>
+                </div> 
               </div>
             </div>
-            <fieldset class="w-full">
-              <label class="inline-flex items-center mb-10">
-                <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="readCheck">
-                <span class="ml-2 cursor-pointer text-xs">{{$t('deletewallet.deleteconsent')}}.</span>
-              </label>
-              <div>
-                <button type="submit" class="default-btn py-1 disabled:opacity-50" @click="deleteWallet();" :disabled="disableDelete">{{$t('deletewallet.delete')}}</button>
-                <div class="text-center">
-                  <a href="#" class="text-blue-link mt-3 text-xs inline-block" @click="toggleModal = !toggleModal">{{$t('deletewallet.cancel')}}</a>
-                </div>
-              </div>
-            </fieldset>
           </div>
-        </div>
-      </div>
-    </transition>
-    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-90 bg-white"></div>
-  </div>
+        </transition>
+        <div @click="toggleModal!=toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-60 bg-gray-100 z-20"></div>
 </template>
 
 <script lang="ts">
-import { computed, ref } from 'vue';
+import { computed, getCurrentInstance, ref } from 'vue';
 import { networkState } from "@/state/networkState";
-import { useRouter } from 'vue-router';
 import { walletState } from '@/state/walletState';
-import {useI18n} from 'vue-i18n'
-
+import { useI18n } from 'vue-i18n'
+import PasswordInput from '@/components/PasswordInput.vue';
+import { WalletUtils } from '@/util/walletUtils';
 
 export default{
   name: 'ConfirmDeleteWalletModal',
-  props:['name', 'networkName'],
-  data() {
-    return {
-      toggleModal: false,
-    };
+  props:['toggleModal','walletName'],
+   components: {
+    PasswordInput
   },
 
   setup(p){
-    const {t} = useI18n()
-    const router = useRouter();
+    const {t} = useI18n();
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;    
+    const passwdPattern = "^[^ ]{8,}$";
+    const walletPassword = ref("");
     const err = ref("");
-    const readCheck = ref(false);
-    const disableDelete = computed(
-      () => !(
-          readCheck.value
-      )
-    );
-    const deleteWallet = () => {
-      let removeWalletStatus = walletState.wallets.removeWalletByNetworkNameAndName(p.networkName, p.name)
-      if(removeWalletStatus){
-        router.push({ name: 'ViewWallets', params: {deleteWallet: 'success' } });
-      }else{
-        err.value = t('wallets.failremovewallet');
-      }
+
+    const disableDelete = computed(() => !(walletPassword.value.match(passwdPattern)));
+
+    const deleteWallet = (walletName) => {   
+      var networkName = networkState.chainNetworkName;
+      var result = WalletUtils.verifyWalletPassword(walletName, networkName, walletPassword.value);
+        if (result == true) {
+          walletState.wallets.removeWalletByNetworkNameAndName(networkName, walletName);
+          emitter.emit('CLOSE_MODAL', false);
+        } else {
+          err.value = t('signin.invalidpassword');
+          walletPassword.value = "";
+        }
     };
+
+     const closeModal = () => {
+        emitter.emit('CLOSE_MODAL', false);
+        err.value = "";
+        walletPassword.value = "";
+    };
+    
     return {
       err,
-      readCheck,
       disableDelete,
       deleteWallet,
+      closeModal,
+      walletPassword
     };
   },
 }

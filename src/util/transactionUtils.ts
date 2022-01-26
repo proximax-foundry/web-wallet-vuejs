@@ -283,7 +283,7 @@ export class TransactionUtils {
     ChainUtils.announceBondedTransaction(signedTx);
   }
 
-  static announceCosignitureSignedTransaction(signedTx: CosignatureSignedTransaction) :void {
+  static announceCosignatureSignedTransaction(signedTx: CosignatureSignedTransaction) :void {
     ChainUtils.announceCosignTransaction(signedTx);
   }
 
@@ -395,6 +395,10 @@ export class TransactionUtils {
     let abt = buildTransactions.aggregateBonded([txn.toAggregate(tempAcc.publicAccount)])
     let signedTxn = tempAcc.sign(abt, generationHash);
     return buildTransactions.hashLock(new Mosaic(new NamespaceId('prx.xpx'), UInt64.fromUint(10)), UInt64.fromUint(10), signedTxn).maxFee.compact();
+  }
+
+  static castToAggregate(tx :Transaction){
+    return tx as AggregateTransaction;
   }
 }
 

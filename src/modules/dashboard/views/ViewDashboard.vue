@@ -12,14 +12,14 @@
                 <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
               </div>
               <div>
-                <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center mr-2">
+                <a :href="faucetLink" target=_new class="inline-block text-center mr-2" v-if="faucetLink">
                   <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
                     <div class="h-full w-full flex items-center justify-center">
                       <img src="@/modules/dashboard/img/icon-balance-white.svg" class="w-5 h-5">
                     </div>
                   </div><br>
                   <div class="text-xxs text-gray-400 inline-block uppercase">Top Up</div>
-                </router-link>
+                </a>
                 <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center mx-2">
                   <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
                     <div class="h-full w-full flex items-center justify-center">
@@ -28,7 +28,7 @@
                   </div><br>
                   <div class="text-xxs text-gray-400 inline-block uppercase">Transfer</div>
                 </router-link>
-                <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center ml-2">
+                <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="inline-block text-center ml-2">
                   <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
                     <div class="h-full w-full flex items-center justify-center">
                       <img src="@/modules/dashboard/img/icon-swap-white.svg" class="w-5 h-5">
@@ -49,9 +49,9 @@
             </div>
             <div class="flex justify-between mt-2">
               <div>
-                <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mb-3"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">Top Up</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></router-link>
+                <a :href="faucetLink" class="flex items-center mb-3" target=_new v-if="faucetLink"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">Top Up</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></a>
               </div>
-              <div class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-swap.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold text-gray-500" style="margin-top: 1px">Swap</div></div>
+              <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-swap.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold text-white" style="margin-top: 1px">Swap</div></router-link>
             </div>
           </div>
         </div>
@@ -71,14 +71,14 @@
         <div class="pl-2 hidden xl:inline-block">
           <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-3 rounded-lg transaction-div text-white">
             <div class="text-txs mt-6 text-gray-400">Recent Transfers</div>
-            <div class="text-gray-400 text-tsm mt-6 mb-2 h-12" v-if="recentTransferTxnRow.length==0">Invite your families and friends to create Sirius Wallet account and start transferring to their accounts.</div>
+            <div class="text-gray-400 text-tsm mt-6 mb-2 h-12" v-if="recentTransferTxnRow.length==0">No transactions in {{ selectedAccountName }}</div>
             <div v-else class="mt-2">
               <div v-for="txn in recentTransferTxnRow" :key="txn.hash" class="flex items-center justify-between mb-1">
-                <a class="flex items-center max-w-xs" :href="addressExplorerURL + '/' + txn.transferContactAddress" target=_new>
-                  <div v-html="toSvg(txn.transferContactAddress, 20, jdenticonConfig)" class="mr-3"></div>
-                  <div class="truncate text-xs">{{ txn.transferContact }}</div>
+                <a class="flex items-center max-w-xs " :href="addressExplorerURL + '/' + txn.transferContactAddress" target=_new>
+                  <div v-html="toSvg(txn.transferContactAddress, 20, jdenticonConfig)" class="mr-3 inline-block"></div>
+                  <div class="text-xs inline-block w-40 truncate">{{ txn.transferContact }}</div>
                 </a>
-                <a class="text-tsm font-bold" :href="hashExplorerURL + '/' + txn.hash" target=_new>{{ txn.amount }} <span class="text-xxs font-normal">{{ currentNativeTokenName }}</span></a>
+                <a class="text-tsm font-bold" :href="hashExplorerURL + '/' + txn.hash" target=_new><span :class="`${ (txn.amount[0] ==='-')?'text-red-500':'text-green-500' }`">{{ txn.amount }}</span> <span class="text-xxs font-normal">{{ currentNativeTokenName }}</span></a>
               </div>
             </div>
             <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mt-4"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
@@ -147,26 +147,52 @@
       <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" :account="selectedAccount" />
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='transaction'">
-      <div class="text-right">
-        <select v-model="selectedTxnType" @change="changeSearchTxnType" class="border border-gray-200 px-2 py-1 focus:outline-none">
-          <option value="all" class="text-sm">All</option>
-          <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm">{{ txnType.label}}</option>
-        </select>
+      <div class="flex justify-between items-center">
+        <div>
+          <div v-if="selectedTxnType === TransactionFilterType.ACCOUNT" class="flex items-center">
+            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">Account added</span>
+            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">Account removed</span>
+          </div>
+          <div v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE" class="flex items-center">
+            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">Buy offer</span>
+            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">Sell offer</span>
+          </div>
+          <div v-if="selectedTxnType === TransactionFilterType.ASSET" class="flex items-center">
+            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">Enabled</span>
+            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">Disabled</span>
+          </div>
+        </div>
+        <div class="bg-gray-50">
+          <select v-model="selectedTxnType" @change="changeSearchTxnType" class="border border-gray-200 px-2 py-1 focus:outline-none">
+            <option value="all" class="text-sm">All</option>
+            <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm">{{ txnType.label}}</option>
+          </select>
+        </div>
       </div>
-      <MixedTxnDataTable v-if="selectedTxnType === 'all'" :selectedGroupType="transactionGroupType.CONFIRMED" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></MixedTxnDataTable>
-      <TransferTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.TRANSFER" :selectedGroupType="transactionGroupType.CONFIRMED" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></TransferTxnDataTable>
-      <AccountTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ACCOUNT" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AccountTxnDataTable>
-      <AggregateTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.AGGREGATE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AggregateTxnDataTable>
-      <AliasTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ALIAS" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AliasTxnDataTable>
-      <AssetTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ASSET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AssetTxnDataTable>
-      <ChainTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.CHAIN" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></ChainTxnDataTable>
-      <ExchangeTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></ExchangeTxnDataTable>
-      <LinkTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LINK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></LinkTxnDataTable>
-      <LockTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LOCK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></LockTxnDataTable>
-      <MetadataTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.METADATA" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></MetadataTxnDataTable>
-      <NamespaceTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.NAMESPACE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></NamespaceTxnDataTable>
-      <RestrictionTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></RestrictionTxnDataTable>
-      <SecretTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.SECRET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></SecretTxnDataTable>
+      <div v-if="boolIsTxnFetched">
+        <MixedTxnDataTable v-if="selectedTxnType === 'all'" :selectedGroupType="transactionGroupType.CONFIRMED" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></MixedTxnDataTable>
+        <TransferTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.TRANSFER" :selectedGroupType="transactionGroupType.CONFIRMED" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></TransferTxnDataTable>
+        <AccountTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ACCOUNT" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AccountTxnDataTable>
+        <AggregateTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.AGGREGATE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AggregateTxnDataTable>
+        <AliasTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ALIAS" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AliasTxnDataTable>
+        <AssetTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ASSET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AssetTxnDataTable>
+        <ChainTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.CHAIN" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></ChainTxnDataTable>
+        <ExchangeTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></ExchangeTxnDataTable>
+        <LinkTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LINK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></LinkTxnDataTable>
+        <LockTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LOCK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></LockTxnDataTable>
+        <MetadataTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.METADATA" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></MetadataTxnDataTable>
+        <NamespaceTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.NAMESPACE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></NamespaceTxnDataTable>
+        <RestrictionTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></RestrictionTxnDataTable>
+        <SecretTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.SECRET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></SecretTxnDataTable>
+      </div>
+      <div v-else class="border-t border-b border-gray-200 text-gray-400 text-xs mt-10">
+        <div class="border-t border-b border-gray-200 my-3 py-6 px-2">
+          <div class="flex justify-center items-center border-gray-400">
+            <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-navy-primary mr-2"></div>
+            Fetching transactions
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -383,6 +409,28 @@ export default defineComponent({
     const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
     const currentNativeTokenId = computed(()=> networkState.currentNetworkProfile.network.currency.assetId);
 
+    const displyFaucet = computed(() => {
+      return (AppState.networkType == 168)?true:false;
+    });
+
+    const faucetLink = computed(() => {
+      if(displyFaucet.value){
+        if(networkState.chainNetworkName == 'Sirius Testnet 1'){
+          return 'https://bctestnetfaucet.xpxsirius.io/#/';
+        }else if(networkState.chainNetworkName == 'Sirius Testnet 2'){
+          return 'https://bctestnet2faucet.xpxsirius.io/#/';
+        }else{
+          return false;
+        }
+      }else{
+        if(AppState.networkType == 184){
+          return 'https://www.proximax.io/en/xpx';
+        }else{
+          return false;
+        }
+      }
+    });
+
     let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
     currentAccount.default = true;
 
@@ -594,6 +642,7 @@ export default defineComponent({
     let txnTypeList = Object.entries(TransactionFilterType).map(([label, value])=>({label, value}));
     let endOfRecords = false;
     let searchingTxn = ref(false);
+    let boolIsTxnFetched = ref(true);
 
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
 
@@ -690,6 +739,8 @@ export default defineComponent({
           break;
       }
 
+      console.log(formattedTxns)
+
       if(loadMore){
         let tempTxns = searchedTransactions.value.concat(formattedTxns);
         searchedTransactions.value = removeDuplicateTxn(tempTxns);
@@ -697,6 +748,7 @@ export default defineComponent({
       else{
         searchedTransactions.value = formattedTxns;
       }
+      boolIsTxnFetched.value = true;
     }
     
     const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
@@ -749,13 +801,13 @@ export default defineComponent({
       transactions.forEach((txn) => {
         let formattedTransferTxn = {};
         if(selectedAccountAddressPlain.value == txn.sender){
-          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToName(txn.recipient, true);
+          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToNamePretty(txn.recipient, true).substring(0, 20);
           formattedTransferTxn.transferContactAddress = txn.recipient;
-          formattedTransferTxn.amount = Helper.toCurrencyFormat(txn.amountTransfer);
+          formattedTransferTxn.amount = Helper.toCurrencyFormat(txn.amountTransfer, );
         }else{
-          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToName(txn.sender, true);
+          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToNamePretty(txn.sender, true).substring(0, 30);
           formattedTransferTxn.transferContactAddress = txn.sender;
-          formattedTransferTxn.amount = '-' + Helper.toCurrencyFormat(txn.amountTransfer);
+          formattedTransferTxn.amount = '-' + Helper.toCurrencyFormat(txn.amountTransfer, 6);
         }
         formattedTransferTxn.hash = txn.hash;
         TransferTxn.push(formattedTransferTxn);
@@ -933,6 +985,7 @@ export default defineComponent({
     }
 
     const changeSearchTxnType = () =>{
+      boolIsTxnFetched.value = false;
       searchedTransactions.value = [];
       let txnFilterGroup = selectedTxnType.value;
 
@@ -1028,6 +1081,7 @@ export default defineComponent({
       currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
       currentAccount.default = true;
       selectedAccount.value = currentAccount;
+      recentTransferTxn();
       updateAccountTransactionCount();
       loadRecentTransactions();
       loadRecentTransferTransactions();
@@ -1091,6 +1145,8 @@ export default defineComponent({
       TransactionFilterType,
       recentTransferTxnRow,
       jdenticonConfig,
+      faucetLink,
+      boolIsTxnFetched,
     };
   }
 });

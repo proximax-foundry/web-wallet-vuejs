@@ -105,17 +105,50 @@ import { ConfirmedTransferTransaction, UnconfirmedTransferTransaction, PartialTr
     ConfirmedRestrictionTransaction, UnconfirmedRestrictionTransaction, PartialRestrictionTransaction,
     ConfirmedSecretTransaction, UnconfirmedSecretTransaction, PartialSecretTransaction, 
     ConfirmedTransaction, UnconfirmedTransaction, PartialTransaction, 
-    SDA, AliasNamespace, TxnExchangeOffer, RestrictionModification, TxnList } from "../model/transactions/transaction";
+    SDA, AliasNamespace, TxnExchangeOffer, RestrictionModification, TxnList,
+    InnerAccountTransaction, InnerAliasTransaction, InnerAssetTransaction, InnerChainTransaction, 
+    InnerExchangeTransaction, InnerLinkTransaction, InnerLockTransaction, InnerMetadataTransaction, InnerNamespaceTransaction,
+    InnerRestrictionTransaction, InnerSecretTransaction, InnerTransaction as MyInnerTxn, InnerTransferTransaction
+} from "../model/transactions/transaction";
 import { Account as MyAccount } from "../../../models/account";
 import { AppState } from "@/state/appState";
 
-const networkAPIEndpoint = computed(() => ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
-const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
 const namespaceIdFirstCharacterString = "89ABCDEF";
-const nativeTokenName = computed(()=> networkState.currentNetworkProfile?.network.currency.name);
-const nativeTokenAssetId = computed(()=> networkState.currentNetworkProfile?.network.currency.assetId);
-const nativeTokenNamespaceId = computed(()=> networkState.currentNetworkProfile?.network.currency.namespaceId);
-const nativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile?.network.currency.divisibility);
+const nativeTokenNamespaceId = computed(()=> new NamespaceId(AppState.nativeToken.fullNamespace).toHex());
+
+export enum MsgType{
+    NONE = 0,
+    GREEN = 1,
+    RED = 2,
+    INFO = 3,
+}
+
+export interface TxnDetails{
+    type: MsgType,
+    value: string | number;
+    label?: string;
+    short?: string;
+    hover?: string;
+}
+
+export enum InnerTxnLegendType{
+    NONE = 0,
+    ADD_REMOVE = 1,
+    TRUE_FALSE = 2,
+    BUY_SELL = 3,
+    ALLOW_BLOCK = 4
+}
+
+export interface InnerTxnDetails{
+
+    typeName: string;
+    signer: string;
+    signerAddressPretty: string;
+    signerAddressPlain: string;
+    infos: TxnDetails[];
+    legendType: InnerTxnLegendType;
+    sdas: string[];
+}
 
 export class DashboardService {
 
@@ -151,13 +184,13 @@ export class DashboardService {
                 txn.message = transferTxn.message.payload;
                 txn.messageType = transferTxn.message.type;
 
-                if(txn.messageType === MessageType.PlainMessage){
-                    let newType = this.convertToSwapType(txn.message);
+                // if(txn.messageType === MessageType.PlainMessage){
+                //     let newType = this.convertToSwapType(txn.message);
                 
-                    if(newType){
-                        txn.type = newType;
-                    }
-                }
+                //     if(newType){
+                //         txn.type = newType;
+                //     }
+                // }
 
                 switch(txn.messageType){
                     case MessageType.PlainMessage:
@@ -206,7 +239,7 @@ export class DashboardService {
 
                     let assetIdHex = assetId.toHex();
 
-                    if([nativeTokenAssetId.value, nativeTokenNamespaceId.value].includes(assetIdHex)){
+                    if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
                         txn.amountTransfer = DashboardService.convertToExactNativeAmount(actualAmount);
                         continue;
                     }
@@ -342,7 +375,7 @@ export class DashboardService {
 
                     let assetIdHex = assetId.toHex();
 
-                    if([nativeTokenAssetId.value, nativeTokenNamespaceId.value].includes(assetIdHex)){
+                    if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
                         txn.amountTransfer = DashboardService.convertToExactNativeAmount(actualAmount);
                         continue;
                     }
@@ -463,7 +496,7 @@ export class DashboardService {
                     let assetId = await DashboardService.getResolvedAsset(transferTxn.mosaics[y].id, txn.block);
                     let assetIdHex = assetId.toHex();
 
-                    if([nativeTokenAssetId.value, nativeTokenNamespaceId.value].includes(assetIdHex)){
+                    if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
                         txn.amountTransfer = DashboardService.convertToExactNativeAmount(actualAmount);
                         continue;
                     }
@@ -1061,6 +1094,7 @@ export class DashboardService {
             if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
                 let aggregateTxn = await this.autoFindAggregateTransaction(txn.hash);
                 txn.aggregateLength = aggregateTxn.innerTransactions.length;
+                txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
                 
                 for(let x=0; x < aggregateTxn.innerTransactions.length; ++x){
                     let txnType = aggregateTxn.innerTransactions[x].type;
@@ -1097,6 +1131,7 @@ export class DashboardService {
             if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
                 let aggregateTxn = await this.autoFindAggregateTransaction(txn.hash);
                 txn.aggregateLength = aggregateTxn.innerTransactions.length;
+                txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
                 
                 for(let x=0; x < aggregateTxn.innerTransactions.length; ++x){
                     let txnType = aggregateTxn.innerTransactions[x].type;
@@ -1133,6 +1168,7 @@ export class DashboardService {
             if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
                 let aggregateTxn = await this.autoFindAggregateTransaction(txn.hash);
                 txn.aggregateLength = aggregateTxn.innerTransactions.length;
+                txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
                 
                 for(let x=0; x < aggregateTxn.innerTransactions.length; ++x){
                     let txnType = aggregateTxn.innerTransactions[x].type;
@@ -2009,6 +2045,8 @@ export class DashboardService {
             
             txn.lockHash = lockFundTxn.hash;
             txn.duration = lockFundTxn.duration.compact();
+            let amount = lockFundTxn.mosaic.amount.compact()
+            txn.amountLocking = AppState.nativeToken.divisibility ? amount / Math.pow(10, AppState.nativeToken.divisibility) : amount;
 
             formatedTxns.push(txn);
         }
@@ -2028,6 +2066,9 @@ export class DashboardService {
 
             txn.lockHash = lockFundTxn.hash;
             txn.duration = lockFundTxn.duration.compact();
+
+            let amount = lockFundTxn.mosaic.amount.compact()
+            txn.amountLocking = AppState.nativeToken.divisibility ? amount / Math.pow(10, AppState.nativeToken.divisibility) : amount;
 
             try {
                 let txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(lockFundTxn.hash);
@@ -2054,6 +2095,8 @@ export class DashboardService {
 
             txn.lockHash = lockFundTxn.hash;
             txn.duration = lockFundTxn.duration.compact();
+            let amount = lockFundTxn.mosaic.amount.compact()
+            txn.amountLocking = AppState.nativeToken.divisibility ? amount / Math.pow(10, AppState.nativeToken.divisibility) : amount;
 
             formatedTxns.push(txn);
         }
@@ -2210,8 +2253,8 @@ export class DashboardService {
 
                     try {
                         let assetId = newRestrictionModification.value;
-                        if(assetId === nativeTokenAssetId.value){
-                            newRestrictionModification.name = nativeTokenName.value;
+                        if(assetId === AppState.nativeToken.assetId){
+                            newRestrictionModification.name = AppState.nativeToken.label;
                         }
                         else{
                             let assetName = await DashboardService.getAssetName(assetId);
@@ -2300,8 +2343,8 @@ export class DashboardService {
 
                     try {
                         let assetId = newRestrictionModification.value;
-                        if(assetId === nativeTokenAssetId.value){
-                            newRestrictionModification.name = nativeTokenName.value;
+                        if(assetId === AppState.nativeToken.assetId){
+                            newRestrictionModification.name = AppState.nativeToken.label;
                         }
                         else{
                             let assetName = await DashboardService.getAssetName(assetId);
@@ -2391,8 +2434,8 @@ export class DashboardService {
                     try {
                         let assetId = newRestrictionModification.value;
 
-                        if(assetId === nativeTokenAssetId.value){
-                            newRestrictionModification.name = nativeTokenName.value;
+                        if(assetId === AppState.nativeToken.assetId){
+                            newRestrictionModification.name = AppState.nativeToken.label;
                         }
                         else{
                             let assetName = await DashboardService.getAssetName(assetId);
@@ -2480,7 +2523,7 @@ export class DashboardService {
                     }
 
                     if(txn.namespaceName && txn.namespaceName === "prx.xpx"){
-                        txn.namespaceName = nativeTokenName.value;
+                        txn.namespaceName = AppState.nativeToken.label;
                     }
 
                     let assetInfo = await DashboardService.getAssetInfo(txn.assetId);
@@ -2545,7 +2588,7 @@ export class DashboardService {
                     }
 
                     if(txn.namespaceName && txn.namespaceName === "prx.xpx"){
-                        txn.namespaceName = nativeTokenName.value;
+                        txn.namespaceName = AppState.nativeToken.label;
                     }
 
                     let assetInfo = await DashboardService.getAssetInfo(txn.assetId);
@@ -2612,7 +2655,7 @@ export class DashboardService {
                     }
 
                     if(txn.namespaceName && txn.namespaceName === "prx.xpx"){
-                        txn.namespaceName = nativeTokenName.value;
+                        txn.namespaceName = AppState.nativeToken.label;
                     }
 
                     let assetInfo = await DashboardService.getAssetInfo(txn.assetId);
@@ -3129,7 +3172,7 @@ export class DashboardService {
 
     static async getAccountAllTransactions(account: myAccount): Promise<Transaction[]>{
         let pageNum = 1;
-        let publicAccount = Helper.createPublicAccount(account.publicKey, localNetworkType.value);
+        let publicAccount = Helper.createPublicAccount(account.publicKey, AppState.networkType);
 
         let fullTransaction: Transaction[] = [];
         let queryParams = new TransactionQueryParams()
@@ -3154,7 +3197,7 @@ export class DashboardService {
 
     static async getAccountAllUnconfirmedTransactions(account: myAccount): Promise<Transaction[]>{
         let pageNum = 1;
-        let publicAccount = Helper.createPublicAccount(account.publicKey, localNetworkType.value);
+        let publicAccount = Helper.createPublicAccount(account.publicKey, AppState.networkType);
 
         let fullTransaction: Transaction[] = [];
         let queryParams = new TransactionQueryParams()
@@ -3179,7 +3222,7 @@ export class DashboardService {
 
     static async getAccountAllPartialTransactions(account: myAccount): Promise<Transaction[]>{
         let pageNum = 1;
-        let publicAccount = Helper.createPublicAccount(account.publicKey, localNetworkType.value);
+        let publicAccount = Helper.createPublicAccount(account.publicKey, AppState.networkType);
 
         let fullTransaction: Transaction[] = [];
         let queryParams = new TransactionQueryParams()
@@ -3218,9 +3261,9 @@ export class DashboardService {
         let txnQueryParams = new TransactionQueryParams();
         txnQueryParams.address = account.address;
 
-        let searchConfirmedTxnResult = await TransactionUtils.searchTransactions(TransactionGroupType.CONFIRMED, txnQueryParams);
-        let searchUnconfirmedTxnResult = await TransactionUtils.searchTransactions(TransactionGroupType.UNCONFIRMED, txnQueryParams);
-        let searchPartialTxnResult = await TransactionUtils.searchTransactions(TransactionGroupType.PARTIAL, txnQueryParams);
+        let searchConfirmedTxnResult = await AppState.chainAPI.transactionAPI.searchTransactions(TransactionGroupType.CONFIRMED, txnQueryParams);
+        let searchUnconfirmedTxnResult = await AppState.chainAPI.transactionAPI.searchTransactions(TransactionGroupType.UNCONFIRMED, txnQueryParams);
+        let searchPartialTxnResult = await AppState.chainAPI.transactionAPI.searchTransactions(TransactionGroupType.PARTIAL, txnQueryParams);
 
         transactionsCount.confirmed = searchConfirmedTxnResult.pagination.totalEntries;
         transactionsCount.unconfirmed = searchUnconfirmedTxnResult.pagination.totalEntries;
@@ -3262,2148 +3305,2343 @@ export class DashboardService {
         return newType;
     }
 
-    // async fetchConfirmedTransactions(){
+    // -----------------------------------extract Transfer only--------------------------------------------------- 
+    async extractConfirmedTransfer(transferTxn: TransferTransaction, blockNum: number): Promise<InnerTransferTransaction> {
+        let txnDetails = new InnerTransferTransaction();
+        
+        txnDetails.signer = transferTxn.signer.publicKey;
+        txnDetails.signerAddress = transferTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(transferTxn.type);
 
-    //     let transactions = await this.getAllAccountTransactions();
-    //     let dashboardTransactions: DashboardTransaction[] = this.formatConfirmedTransaction(transactions);
-    //     return dashboardTransactions;
-    // }
+        let sdas: SDA[] = [];
 
-    // async fetchUnconfirmedTransactions(){
+        txnDetails.message = transferTxn.message.payload;
+        txnDetails.messageType = transferTxn.message.type;
 
-    //     let transactions = await this.getAllAccountUnconfirmedTransactions();
-
-    //     let dashboardTransactions: DashboardTransaction[] = this.formatUnconfirmedTransaction(transactions);
-    //     return dashboardTransactions;
-    // }
-
-    // async fetchPartialTransactions(){
-
-    //     let transactions = await this.getAllAccountPartialTransactions();
-
-    //     let dashboardTransactions: DashboardTransaction[] = this.formatUnconfirmedTransaction(transactions);
-    //     return { txns: transactions, formatted: dashboardTransactions};
-    // }
-
-    // formatConfirmedWithTransaction(txs: Transaction[]){
-    //     let dashboardTransactions: DashboardTransaction[] = this.formatConfirmedTransaction(txs);
-    //     return dashboardTransactions;
-    // }
-
-    // formatUnconfirmedWithTransaction(txs: Transaction[]){
-    //     let dashboardTransactions: DashboardTransaction[] = this.formatUnconfirmedTransaction(txs);
-    //     return dashboardTransactions;
-    // }
-
-    // formatConfirmedTransaction(transactions: Transaction[]): DashboardTransaction[] {
-    //     let formattedTransactions: DashboardTransaction[] = [];
-
-    //     for (let i = 0; i < transactions.length; ++i) {
-
-    //         let dashboardTransaction: DashboardTransaction = {
-    //             id: transactions[i].transactionInfo.id,
-    //             typeName: TransactionUtils.getTransactionTypeName(transactions[i].type),
-    //             signer: transactions[i].signer.publicKey,
-    //             size: transactions[i].size,
-    //             signerAddress: transactions[i].signer.address.plain(),
-    //             signerAddressPretty: transactions[i].signer.address.pretty(),
-    //             signerDisplay: this.addressConvertToName(transactions[i].signer.address.plain()),
-    //             hash: transactions[i].transactionInfo.hash,
-    //             block: transactions[i].transactionInfo.height.compact(),
-    //             formattedDeadline: Helper.convertDisplayDateTimeFormat24(transactions[i].deadline.value.toString()),
-    //             relatedAddress: [],
-    //             relatedAsset: [],
-    //             relatedNamespace: [],
-    //             relatedPublicKey: [],
-    //             searchString: [],
-    //             extractedData: {},
-    //             displayList: new Map<string, string>(),
-    //             transferList: [],
-    //             displayTips: [],
-    //             cosignatures: null,
-    //             signedPublicKeys: [transactions[i].signer.publicKey],
-    //             maxFee: Helper.convertToExact(transactions[i].maxFee.compact(), 6),
-    //             otherAssets: [],
-    //         };
-    //         dashboardTransaction.searchString.push(dashboardTransaction.block.toString());
-    //         dashboardTransaction.searchString.push(dashboardTransaction.hash);
-
-    //         // dashboardTransaction.relatedAddress.push(transactions[i].signer.address.plain());
-    //         // dashboardTransaction.relatedPublicKey.push(dashboardTransaction.signer);
-
-    //         let tempData: DashboardInnerTransaction;
-    //         let totalLength: number = 1;
-
-    //         switch (transactions[i].type) {
-    //             case TransactionType.ADDRESS_ALIAS:
-    //                 let addressAliasTx = transactions[i] as AddressAliasTransaction;
-    //                 tempData = this.extractTransactionAddressAlias(addressAliasTx);
-    //                 break;
-    //             case TransactionType.ADD_EXCHANGE_OFFER:
-    //                 let addExchangeOfferTx = transactions[i] as AddExchangeOfferTransaction;
-    //                 tempData = this.extractTransactionAddExchangeOffer(addExchangeOfferTx);
-    //                 break;
-    //             case TransactionType.AGGREGATE_BONDED:
-    //                 let aggregateBondedTx = transactions[i] as AggregateTransaction;
-    //                 if(aggregateBondedTx.cosignatures.length){
-    //                     dashboardTransaction.cosignatures = { 
-    //                         cosigners: aggregateBondedTx.cosignatures.map(
-    //                             (x)=> { return { publicKey: x.signer.publicKey, address: x.signer.address.plain()}}
-    //                         )
-    //                     };
-    //                     dashboardTransaction.signedPublicKeys = dashboardTransaction.signedPublicKeys.concat(dashboardTransaction.cosignatures.cosigners.map(x => x.publicKey));
-    //                 }   
-    //                 totalLength = aggregateBondedTx.innerTransactions.length;
-    //                 dashboardTransaction.innerTransactions = [];
-    //                 tempData = {
-    //                     signer: aggregateBondedTx.signer.publicKey,
-    //                     relatedAsset: [],
-    //                     relatedNamespace: [],
-    //                     relatedPublicKey: [],
-    //                     signerAddress: aggregateBondedTx.signer.address.plain(),
-    //                     relatedAddress: [],
-    //                     typeName: TransactionUtils.getTransactionTypeName(aggregateBondedTx.type),
-    //                     searchString: [],
-    //                     extractedData: {},
-    //                     displayList: new Map<string, string>(),
-    //                     transferList: [],
-    //                     displayTips: [],
-    //                     signerPublicKeys: [aggregateBondedTx.signer.publicKey]
-    //                 };
-
-    //                 for (let y = 0; y < totalLength; ++y) {
-    //                     let tempInnerData = this.extractInnerTransaction(aggregateBondedTx.innerTransactions[y]);
-
-    //                     tempData.relatedAddress = tempData.relatedAddress.concat(tempInnerData.relatedAddress);
-    //                     tempData.relatedAsset = tempData.relatedAsset.concat(tempInnerData.relatedAsset);
-    //                     tempData.relatedNamespace = tempData.relatedNamespace.concat(tempInnerData.relatedNamespace);
-    //                     tempData.relatedPublicKey = tempData.relatedPublicKey.concat(tempInnerData.relatedPublicKey);
-    //                     tempData.searchString = tempData.searchString.concat(tempInnerData.searchString);
-
-    //                     dashboardTransaction.innerTransactions.push(tempInnerData);
-    //                 }
-    //                 break;
-    //             case TransactionType.AGGREGATE_COMPLETE:
-    //                 let aggregateCompleteTx = transactions[i] as AggregateTransaction;
-    //                 if(aggregateCompleteTx.cosignatures.length){
-    //                     dashboardTransaction.cosignatures = { 
-    //                         cosigners: aggregateCompleteTx.cosignatures.map(
-    //                             (x)=> { return { publicKey: x.signer.publicKey, address: x.signer.address.plain()}}
-    //                         )
-    //                     };
-    //                     dashboardTransaction.signedPublicKeys = dashboardTransaction.signedPublicKeys.concat(dashboardTransaction.cosignatures.cosigners.map(x => x.publicKey));
-    //                 }     
-    //                 totalLength = aggregateCompleteTx.innerTransactions.length;
-    //                 dashboardTransaction.innerTransactions = [];
-
-    //                 tempData = {
-    //                     signer: aggregateCompleteTx.signer.publicKey,
-    //                     relatedAsset: [],
-    //                     relatedNamespace: [],
-    //                     relatedPublicKey: [],
-    //                     signerAddress: aggregateCompleteTx.signer.address.plain(),
-    //                     relatedAddress: [],
-    //                     typeName: TransactionUtils.getTransactionTypeName(aggregateCompleteTx.type),
-    //                     searchString: [],
-    //                     extractedData: {},
-    //                     displayList: new Map<string, string>(),
-    //                     displayTips: [],
-    //                     signerPublicKeys: [aggregateCompleteTx.signer.publicKey]
-    //                 };
-
-    //                 for (let x = 0; x < totalLength; ++x) {
-    //                     let tempInnerData = this.extractInnerTransaction(aggregateCompleteTx.innerTransactions[x]);
-
-    //                     tempData.relatedAddress = tempData.relatedAddress.concat(tempInnerData.relatedAddress);
-    //                     tempData.relatedAsset = tempData.relatedAsset.concat(tempInnerData.relatedAsset);
-    //                     tempData.relatedNamespace = tempData.relatedNamespace.concat(tempInnerData.relatedNamespace);
-    //                     tempData.relatedPublicKey = tempData.relatedPublicKey.concat(tempInnerData.relatedPublicKey);
-    //                     tempData.searchString = tempData.searchString.concat(tempInnerData.searchString);
-
-    //                     dashboardTransaction.innerTransactions.push(tempInnerData);
-    //                 }
-    //                 break;
-    //             case TransactionType.CHAIN_CONFIGURE:
-    //                 let chainConfigureTx = transactions[i] as ChainConfigTransaction;
-    //                 tempData = this.extractTransactionChainConfig(chainConfigureTx);
-    //                 break;
-    //             case TransactionType.CHAIN_UPGRADE:
-    //                 let chainUpgradeTx = transactions[i] as ChainUpgradeTransaction;
-    //                 tempData = this.extractTransactionChainUpgrade(chainUpgradeTx);
-    //                 break;
-    //             case TransactionType.EXCHANGE_OFFER:
-    //                 let exchangeOfferTx = transactions[i] as ExchangeOfferTransaction;
-    //                 tempData = this.extractTransactionExchangeOffer(exchangeOfferTx);
-    //                 break;
-    //             case TransactionType.REMOVE_EXCHANGE_OFFER:
-    //                 let removeExchangeOfferTx = transactions[i] as RemoveExchangeOfferTransaction;
-    //                 tempData = this.extractTransactionRemoveExchangeOffer(removeExchangeOfferTx);
-    //                 break;
-    //             case TransactionType.LINK_ACCOUNT:
-    //                 let accountLinkTx = transactions[i] as AccountLinkTransaction;
-    //                 tempData = this.extractTransactionAccountLink(accountLinkTx);
-    //                 break;
-    //             case TransactionType.LOCK:
-    //                 let lockFundTx = transactions[i] as LockFundsTransaction;
-    //                 tempData = this.extractTransactionLockFunds(lockFundTx);
-    //                 break;
-    //             // case TransactionType.MODIFY_ACCOUNT_METADATA:
-    //             //     let modifyAccountMetadataTx = transactions[i] as ModifyMetadataTransaction;
-    //             //     tempData = this.extractTransactionModifyAccountMetadata(modifyAccountMetadataTx);
-    //             //     break;
-    //             // case TransactionType.MODIFY_MOSAIC_METADATA:
-    //             //     let modifyMosaicMetadataTx = transactions[i] as ModifyMetadataTransaction;
-    //             //     tempData = this.extractTransactionModifyMosaicMetadata(modifyMosaicMetadataTx);
-    //             //     break;
-    //             // case TransactionType.MODIFY_NAMESPACE_METADATA:
-    //             //     let modifyNamespaceMetadataTx = transactions[i] as ModifyMetadataTransaction;
-    //             //     tempData = this.extractTransactionModifyNamespaceMetadata(modifyNamespaceMetadataTx);
-    //             //     break;
-    //             case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS:
-    //                 let accAddressModifyTx = transactions[i] as AccountAddressRestrictionModificationTransaction;
-    //                 tempData = this.extractTransactionAccountAddressRestriction(accAddressModifyTx);
-    //                 break;
-    //             case TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC:
-    //                 let accMosaicModifyTx = transactions[i] as AccountMosaicRestrictionModificationTransaction;
-    //                 tempData = this.extractTransactionAccountMosaicRestriction(accMosaicModifyTx);
-    //                 break;
-    //             case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:
-    //                 let accOperationModifyTx = transactions[i] as AccountOperationRestrictionModificationTransaction;
-    //                 tempData = this.extractTransactionAccountOperationRestriction(accOperationModifyTx);
-    //                 break;
-    //             case TransactionType.MODIFY_MULTISIG_ACCOUNT:
-    //                 let modifyMultisigAccountTx = transactions[i] as ModifyMultisigAccountTransaction;
-    //                 tempData = this.extractTransactionModifyMultisigAccount(modifyMultisigAccountTx);
-    //                 break;
-    //             case TransactionType.MOSAIC_ALIAS:
-    //                 let mosaicAliasTx = transactions[i] as MosaicAliasTransaction;
-    //                 tempData = this.extractTransactionMosaicAlias(mosaicAliasTx);
-    //                 break;
-    //             case TransactionType.MOSAIC_DEFINITION:
-    //                 let mosaicDefinitionTx = transactions[i] as MosaicDefinitionTransaction;
-    //                 tempData = this.extractTransactionMosaicDefinition(mosaicDefinitionTx);
-    //                 break;
-    //             case TransactionType.MOSAIC_SUPPLY_CHANGE:
-    //                 let mosaicSupplyTx = transactions[i] as MosaicSupplyChangeTransaction;
-    //                 tempData = this.extractTransactionMosaicSupplyChange(mosaicSupplyTx);
-    //                 break;
-    //             case TransactionType.REGISTER_NAMESPACE:
-    //                 let registerNamespaceTx = transactions[i] as RegisterNamespaceTransaction;
-    //                 tempData = this.extractTransactionRegisterNamespace(registerNamespaceTx);
-    //                 break;
-    //             case TransactionType.SECRET_LOCK:
-    //                 let secretLockTx = transactions[i] as SecretLockTransaction;
-    //                 tempData = this.extractTransactionSecretLock(secretLockTx);
-    //                 break;
-    //             case TransactionType.SECRET_PROOF:
-    //                 let secretProofTx = transactions[i] as SecretProofTransaction;
-    //                 tempData = this.extractTransactionSecretProof(secretProofTx);
-    //                 break;
-    //             case TransactionType.TRANSFER:
-    //                 let transferTx = transactions[i] as TransferTransaction;
-    //                 tempData = this.extractTransactionTransfer(transferTx);
-    //                 break;
-    //             default:
-    //                 break;
-    //         }
-
-    //         dashboardTransaction.relatedAddress = dashboardTransaction.relatedAddress.concat(tempData.relatedAddress);
-    //         dashboardTransaction.relatedAsset = dashboardTransaction.relatedAsset.concat(tempData.relatedAsset);
-    //         dashboardTransaction.relatedNamespace = dashboardTransaction.relatedNamespace.concat(tempData.relatedNamespace);
-    //         dashboardTransaction.relatedPublicKey = dashboardTransaction.relatedPublicKey.concat(tempData.relatedPublicKey);
-    //         dashboardTransaction.searchString = dashboardTransaction.searchString.concat(tempData.searchString);
-    //         dashboardTransaction.extractedData = tempData.extractedData;
-    //         dashboardTransaction.displayList = tempData.displayList;
-    //         dashboardTransaction.transferList = tempData.transferList ? tempData.transferList: [];
-    //         dashboardTransaction.displayTips = tempData.displayTips;
-    //         dashboardTransaction.otherAssets = tempData.otherAssets;
-
-    //         dashboardTransaction.relatedAddress = Array.from(new Set(dashboardTransaction.relatedAddress));
-    //         dashboardTransaction.relatedAsset = Array.from(new Set(dashboardTransaction.relatedAsset));
-    //         dashboardTransaction.relatedNamespace = Array.from(new Set(dashboardTransaction.relatedNamespace));
-    //         dashboardTransaction.relatedPublicKey = Array.from(new Set(dashboardTransaction.relatedPublicKey));
-    //         dashboardTransaction.searchString = Array.from(new Set(dashboardTransaction.searchString));
-
-    //         formattedTransactions.push(dashboardTransaction);
-    //     }
-
-    //     return formattedTransactions;
-    // }
-
-    // formatUnconfirmedTransaction(transactions: Transaction[]): DashboardTransaction[] {
-    //     let formattedTransactions: DashboardTransaction[] = [];
-
-    //     for (let i = 0; i < transactions.length; ++i) {
-    //         let dashboardTransaction: DashboardTransaction = {
-    //             id: transactions[i].transactionInfo.id,
-    //             typeName: TransactionUtils.getTransactionTypeName(transactions[i].type),
-    //             signer: transactions[i].signer.publicKey,
-    //             size: transactions[i].size,
-    //             signerAddress: transactions[i].signer.address.plain(),
-    //             signerAddressPretty: transactions[i].signer.address.pretty(),
-    //             signerDisplay: this.addressConvertToName(transactions[i].signer.address.plain()),
-    //             hash: transactions[i].transactionInfo.hash,
-    //             formattedDeadline: Helper.convertDisplayDateTimeFormat(transactions[i].deadline.value.toString()),
-    //             relatedAddress: [],
-    //             relatedAsset: [],
-    //             relatedNamespace: [],
-    //             relatedPublicKey: [],
-    //             searchString: [],
-    //             extractedData: {},
-    //             displayList: new Map<string, string>(),
-    //             transferList: [],
-    //             displayTips: [],
-    //             cosignatures: null,
-    //             signedPublicKeys: [transactions[i].signer.publicKey],
-    //             otherAssets: []
-    //         };
-
-    //         dashboardTransaction.searchString.push(dashboardTransaction.hash);
-
-    //         // dashboardTransaction.relatedAddress.push(transactions[i].signer.address.plain());
-    //         // dashboardTransaction.relatedPublicKey.push(dashboardTransaction.signer);
-
-    //         let tempData: DashboardInnerTransaction;
-    //         let totalLength: number = 1;
-
-    //         switch (transactions[i].type) {
-    //             case TransactionType.ADDRESS_ALIAS:
-    //                 let addressAliasTx = transactions[i] as AddressAliasTransaction;
-    //                 tempData = this.extractTransactionAddressAlias(addressAliasTx);
-    //                 break;
-    //             case TransactionType.ADD_EXCHANGE_OFFER:
-    //                 let addExchangeOfferTx = transactions[i] as AddExchangeOfferTransaction;
-    //                 tempData = this.extractTransactionAddExchangeOffer(addExchangeOfferTx);
-    //                 break;
-    //             case TransactionType.AGGREGATE_BONDED:
-    //                 let aggregateBondedTx = transactions[i] as AggregateTransaction;
-    //                 if(aggregateBondedTx.cosignatures.length){
-    //                     dashboardTransaction.cosignatures = { 
-    //                         cosigners: aggregateBondedTx.cosignatures.map(
-    //                             (x)=> { return { publicKey: x.signer.publicKey, address: x.signer.address.plain()}}
-    //                         )
-    //                     };
-    //                     dashboardTransaction.signedPublicKeys = dashboardTransaction.signedPublicKeys.concat(dashboardTransaction.cosignatures.cosigners.map(x => x.publicKey));
-    //                 }
-    //                 totalLength = aggregateBondedTx.innerTransactions.length;
-    //                 dashboardTransaction.innerTransactions = [];
-    //                 tempData = {
-    //                     signer: aggregateBondedTx.signer.publicKey,
-    //                     relatedAsset: [],
-    //                     relatedNamespace: [],
-    //                     relatedPublicKey: [],
-    //                     signerAddress: aggregateBondedTx.signer.address.plain(),
-    //                     relatedAddress: [],
-    //                     typeName: TransactionUtils.getTransactionTypeName(aggregateBondedTx.type),
-    //                     searchString: [],
-    //                     extractedData: {},
-    //                     displayList: new Map<string, string>(),
-    //                     transferList: [],
-    //                     displayTips: [],
-    //                     signerPublicKeys: [aggregateBondedTx.signer.publicKey]
-    //                 };
-
-    //                 for (let y = 0; y < totalLength; ++y) {
-    //                     let tempInnerData = this.extractInnerTransaction(aggregateBondedTx.innerTransactions[y]);
-
-    //                     tempData.relatedAddress = tempData.relatedAddress.concat(tempInnerData.relatedAddress);
-    //                     tempData.relatedAsset = tempData.relatedAsset.concat(tempInnerData.relatedAsset);
-    //                     tempData.relatedNamespace = tempData.relatedNamespace.concat(tempInnerData.relatedNamespace);
-    //                     tempData.relatedPublicKey = tempData.relatedPublicKey.concat(tempInnerData.relatedPublicKey);
-    //                     tempData.searchString = tempData.searchString.concat(tempInnerData.searchString);
-
-    //                     dashboardTransaction.innerTransactions.push(tempInnerData);
-    //                 }
-    //                 break;
-    //             case TransactionType.AGGREGATE_COMPLETE:
-    //                 let aggregateCompleteTx = transactions[i] as AggregateTransaction;
-    //                 if(aggregateCompleteTx.cosignatures.length){
-    //                     dashboardTransaction.cosignatures = { 
-    //                         cosigners: aggregateCompleteTx.cosignatures.map(
-    //                             (x)=> { return { publicKey: x.signer.publicKey, address: x.signer.address.plain()}}
-    //                         )
-    //                     };
-    //                     dashboardTransaction.signedPublicKeys = dashboardTransaction.signedPublicKeys.concat(dashboardTransaction.cosignatures.cosigners.map(x => x.publicKey));
-    //                 }
-    //                 totalLength = aggregateCompleteTx.innerTransactions.length;
-    //                 dashboardTransaction.innerTransactions = [];
-
-    //                 tempData = {
-    //                     signer: aggregateCompleteTx.signer.publicKey,
-    //                     relatedAsset: [],
-    //                     relatedNamespace: [],
-    //                     relatedPublicKey: [],
-    //                     signerAddress: aggregateCompleteTx.signer.address.plain(),
-    //                     relatedAddress: [],
-    //                     typeName: TransactionUtils.getTransactionTypeName(aggregateCompleteTx.type),
-    //                     searchString: [],
-    //                     extractedData: {},
-    //                     displayList: new Map<string, string>(),
-    //                     displayTips: [],
-    //                     signerPublicKeys: [aggregateCompleteTx.signer.publicKey]
-    //                 };
-
-    //                 for (let x = 0; x < totalLength; ++x) {
-    //                     let tempInnerData = this.extractInnerTransaction(aggregateCompleteTx.innerTransactions[x]);
-
-    //                     tempData.relatedAddress = tempData.relatedAddress.concat(tempInnerData.relatedAddress);
-    //                     tempData.relatedAsset = tempData.relatedAsset.concat(tempInnerData.relatedAsset);
-    //                     tempData.relatedNamespace = tempData.relatedNamespace.concat(tempInnerData.relatedNamespace);
-    //                     tempData.relatedPublicKey = tempData.relatedPublicKey.concat(tempInnerData.relatedPublicKey);
-    //                     tempData.searchString = tempData.searchString.concat(tempInnerData.searchString);
-
-    //                     dashboardTransaction.innerTransactions.push(tempInnerData);
-    //                 }
-    //                 break;
-    //             case TransactionType.CHAIN_CONFIGURE:
-    //                 let chainConfigureTx = transactions[i] as ChainConfigTransaction;
-    //                 tempData = this.extractTransactionChainConfig(chainConfigureTx);
-    //                 break;
-    //             case TransactionType.CHAIN_UPGRADE:
-    //                 let chainUpgradeTx = transactions[i] as ChainUpgradeTransaction;
-    //                 tempData = this.extractTransactionChainUpgrade(chainUpgradeTx);
-    //                 break;
-    //             case TransactionType.EXCHANGE_OFFER:
-    //                 let exchangeOfferTx = transactions[i] as ExchangeOfferTransaction;
-    //                 tempData = this.extractTransactionExchangeOffer(exchangeOfferTx);
-    //                 break;
-    //             case TransactionType.REMOVE_EXCHANGE_OFFER:
-    //                 let removeExchangeOfferTx = transactions[i] as RemoveExchangeOfferTransaction;
-    //                 tempData = this.extractTransactionRemoveExchangeOffer(removeExchangeOfferTx);
-    //                 break;
-    //             case TransactionType.LINK_ACCOUNT:
-    //                 let accountLinkTx = transactions[i] as AccountLinkTransaction;
-    //                 tempData = this.extractTransactionAccountLink(accountLinkTx);
-    //                 break;
-    //             case TransactionType.LOCK:
-    //                 let lockFundTx = transactions[i] as LockFundsTransaction;
-    //                 tempData = this.extractTransactionLockFunds(lockFundTx);
-    //                 break;
-    //             // case TransactionType.MODIFY_ACCOUNT_METADATA:
-    //             //     let modifyAccountMetadataTx = transactions[i] as ModifyMetadataTransaction;
-    //             //     tempData = this.extractTransactionModifyAccountMetadata(modifyAccountMetadataTx);
-    //             //     break;
-    //             // case TransactionType.MODIFY_MOSAIC_METADATA:
-    //             //     let modifyMosaicMetadataTx = transactions[i] as ModifyMetadataTransaction;
-    //             //     tempData = this.extractTransactionModifyMosaicMetadata(modifyMosaicMetadataTx);
-    //             //     break;
-    //             // case TransactionType.MODIFY_NAMESPACE_METADATA:
-    //             //     let modifyNamespaceMetadataTx = transactions[i] as ModifyMetadataTransaction;
-    //             //     tempData = this.extractTransactionModifyNamespaceMetadata(modifyNamespaceMetadataTx);
-    //             //     break;
-    //             case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS:
-    //                 let accAddressModifyTx = transactions[i] as AccountAddressRestrictionModificationTransaction;
-    //                 tempData = this.extractTransactionAccountAddressRestriction(accAddressModifyTx);
-    //                 break;
-    //             case TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC:
-    //                 let accMosaicModifyTx = transactions[i] as AccountMosaicRestrictionModificationTransaction;
-    //                 tempData = this.extractTransactionAccountMosaicRestriction(accMosaicModifyTx);
-    //                 break;
-    //             case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:
-    //                 let accOperationModifyTx = transactions[i] as AccountOperationRestrictionModificationTransaction;
-    //                 tempData = this.extractTransactionAccountOperationRestriction(accOperationModifyTx);
-    //                 break;
-    //             case TransactionType.MODIFY_MULTISIG_ACCOUNT:
-    //                 let modifyMultisigAccountTx = transactions[i] as ModifyMultisigAccountTransaction;
-    //                 tempData = this.extractTransactionModifyMultisigAccount(modifyMultisigAccountTx);
-    //                 break;
-    //             case TransactionType.MOSAIC_ALIAS:
-    //                 let mosaicAliasTx = transactions[i] as MosaicAliasTransaction;
-    //                 tempData = this.extractTransactionMosaicAlias(mosaicAliasTx);
-    //                 break;
-    //             case TransactionType.MOSAIC_DEFINITION:
-    //                 let mosaicDefinitionTx = transactions[i] as MosaicDefinitionTransaction;
-    //                 tempData = this.extractTransactionMosaicDefinition(mosaicDefinitionTx);
-    //                 break;
-    //             case TransactionType.MOSAIC_SUPPLY_CHANGE:
-    //                 let mosaicSupplyTx = transactions[i] as MosaicSupplyChangeTransaction;
-    //                 tempData = this.extractTransactionMosaicSupplyChange(mosaicSupplyTx);
-    //                 break;
-    //             case TransactionType.REGISTER_NAMESPACE:
-    //                 let registerNamespaceTx = transactions[i] as RegisterNamespaceTransaction;
-    //                 tempData = this.extractTransactionRegisterNamespace(registerNamespaceTx);
-    //                 break;
-    //             case TransactionType.SECRET_LOCK:
-    //                 let secretLockTx = transactions[i] as SecretLockTransaction;
-    //                 tempData = this.extractTransactionSecretLock(secretLockTx);
-    //                 break;
-    //             case TransactionType.SECRET_PROOF:
-    //                 let secretProofTx = transactions[i] as SecretProofTransaction;
-    //                 tempData = this.extractTransactionSecretProof(secretProofTx);
-    //                 break;
-    //             case TransactionType.TRANSFER:
-    //                 let transferTx = transactions[i] as TransferTransaction;
-    //                 tempData = this.extractTransactionTransfer(transferTx);
-    //                 break;
-    //             default:
-    //                 break;
-    //         }
-
-    //         dashboardTransaction.relatedAddress = dashboardTransaction.relatedAddress.concat(tempData.relatedAddress);
-    //         dashboardTransaction.relatedAsset = dashboardTransaction.relatedAsset.concat(tempData.relatedAsset);
-    //         dashboardTransaction.relatedNamespace = dashboardTransaction.relatedNamespace.concat(tempData.relatedNamespace);
-    //         dashboardTransaction.relatedPublicKey = dashboardTransaction.relatedPublicKey.concat(tempData.relatedPublicKey);
-    //         dashboardTransaction.searchString = dashboardTransaction.searchString.concat(tempData.searchString);
-    //         dashboardTransaction.extractedData = tempData.extractedData;
-    //         dashboardTransaction.displayList = tempData.displayList;
-    //         dashboardTransaction.transferList = tempData.transferList ? tempData.transferList: [];
-    //         dashboardTransaction.displayTips = tempData.displayTips;
-
-    //         dashboardTransaction.relatedAddress = Array.from(new Set(dashboardTransaction.relatedAddress));
-    //         dashboardTransaction.relatedAsset = Array.from(new Set(dashboardTransaction.relatedAsset));
-    //         dashboardTransaction.relatedNamespace = Array.from(new Set(dashboardTransaction.relatedNamespace));
-    //         dashboardTransaction.relatedPublicKey = Array.from(new Set(dashboardTransaction.relatedPublicKey));
-    //         dashboardTransaction.searchString = Array.from(new Set(dashboardTransaction.searchString));
-
-    //         formattedTransactions.push(dashboardTransaction);
-    //     }
-
-    //     return formattedTransactions;
-    // }
-
-    extractTransactionTransfer(transferTx: TransferTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: transferTx.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [transferTx.signer.publicKey],
-            signerAddress: transferTx.signer.address.plain(),
-            relatedAddress: [transferTx.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(transferTx.type),
-            searchString: [],
-            transferList: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [transferTx.signer.publicKey],
-            otherAssets: [],
-        };
-
-        let sendTo = "";
-        let toType = "";
-
-        if (transferTx.recipient instanceof NamespaceId) {
-            let recipientNamespaceIdHex = transferTx.recipient.toHex().toUpperCase();
-            transactionDetails.relatedNamespace.push(recipientNamespaceIdHex);
-            sendTo = recipientNamespaceIdHex;
-            toType = "namespace";
+        if(txnDetails.messageType === MessageType.PlainMessage){
+            let newType = this.convertToSwapType(txnDetails.message);
+        
+            if(newType){
+                txnDetails.type = newType;
+            }
         }
-        else {
-            let plainRecipientAddress = transferTx.recipient.plain();
-            transactionDetails.relatedAddress.push(transferTx.recipient.plain());
-            sendTo = plainRecipientAddress;
-            toType = "address";
+        switch(txnDetails.messageType){
+            case MessageType.PlainMessage:
+                txnDetails.messageTypeTitle = "Plain Message";
+                break;
+            case MessageType.EncryptedMessage:
+                txnDetails.messageTypeTitle = "Encrypted Message";
+                break;
+            case MessageType.HexadecimalMessage:
+                txnDetails.messageTypeTitle = "Hexadecimal Message";
+                break;
+        }
+        let recipientIsNamespace = transferTxn.recipient instanceof NamespaceId ? true : false;
+
+        if(transferTxn.recipient instanceof NamespaceId){
+            txnDetails.recipientNamespaceId = transferTxn.recipient.toHex();
+            let namespacesName = await DashboardService.getNamespacesName([transferTxn.recipient]);
+            txnDetails.recipientNamespaceName = namespacesName[0].name;
         }
 
-        let fromToRowTip = new RowDashboardTip();
+        let recipient = await DashboardService.getRecipient(transferTxn, blockNum);
 
-        // sender
-        let senderDisplay = this.addressConvertToName(transactionDetails.signerAddress);
-        //let senderTip: DashboardTip = DashboardService.createAddressTip(senderDisplay, transactionDetails.signerAddress);
+        txnDetails.recipient = recipient.plain();
+        txnDetails.sender = transferTxn.signer.address.plain();
+        txnDetails.in_out = this.selectedAccount.address === txnDetails.sender ? false: true;
 
-        // to who
-        //let recipientTip: DashboardTip = toType === "namespace" ? DashboardService.createNamespaceIDTip(sendTo): DashboardService.createAddressTip(this.addressConvertToName(sendTo), sendTo);
+        for(let y = 0; y < transferTxn.mosaics.length; ++y){
 
-        let transferTip;
+            let rawAmount = transferTxn.mosaics[y].amount.compact();
+            let actualAmount = rawAmount;
+            let isSendWithNamespace = DashboardService.isNamespace(transferTxn.mosaics[y].id);
+            let assetId = await DashboardService.getResolvedAsset(transferTxn.mosaics[y].id, blockNum);
+            let assetIdHex = assetId.toHex();
 
-        if(toType === "namespace"){
-            transferTip = DashboardService.createTransferUnresolvedTip(transactionDetails.signerAddress, senderDisplay, sendTo, sendTo);
+            if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
+                txnDetails.amountTransfer = DashboardService.convertToExactNativeAmount(actualAmount);
+                continue;
+            }
+
+            let newSDA: SDA = {
+                amount: rawAmount,
+                divisibility: 0,
+                id: assetIdHex,
+                amountIsRaw: true,
+                sendWithNamespace: isSendWithNamespace
+            };
+
+            if(isSendWithNamespace){
+                let namespaceId = transferTxn.mosaics[y].id;
+
+                newSDA.sendWithAlias = {
+                    idHex: namespaceId.toHex(),
+                    id: namespaceId.toDTO().id
+                }
+            }
+
+            sdas.push(newSDA);
+        }
+
+        let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => Helper.createNamespaceId(sda.sendWithAlias.id));
+
+        let allAssetId = sdas.filter(sda =>{ 
+            return sda.amountIsRaw
+        }).map(sda => Helper.createAssetId(sda.id));
+
+        if(namespaceIds.length || allAssetId.length){
+            let namespacesNames: NamespaceName[] = [];
+            namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
+            let assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(allAssetId);
+            let aliasNames: MosaicNames[] = await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
+
+            for(let x= 0; x < sdas.length; ++x){
+
+                let assetProperties = assetsProperties.filter(aliasName=> aliasName.mosaicId.toHex() === sdas[x].id)[0];
+
+                sdas[x].divisibility = assetProperties.divisibility;
+                sdas[x].amount = DashboardService.convertToExactAmount(sdas[x].amount, assetProperties.divisibility);
+                sdas[x].amountIsRaw = false;
+
+                let mosaicNames: MosaicNames = aliasNames.filter(aliaName => aliaName.mosaicId.toHex() === sdas[x].id)[0];
+                let currentAliasNames: NamespaceName[] = mosaicNames.names;
+                sdas[x].currentAlias = currentAliasNames.map(currentAlias =>{ 
+                    return { name: currentAlias.name, id: currentAlias.namespaceId.toDTO().id, idHex: currentAlias.namespaceId.toHex() }
+                });
+
+                if(sdas[x].sendWithAlias){
+                    sdas[x].sendWithAlias.name = namespacesNames
+                        .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
+                        .map(nsName => nsName.name)[0]
+                }
+            }
+        }
+        txnDetails.sda = sdas;
+        return txnDetails;
+    }
+
+    async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promise<InnerTransferTransaction> {
+        let txnDetails = await this.extractPartialTransfer(transferTxn);
+
+        if(txnDetails.messageType === MessageType.PlainMessage){
+            let newType = this.convertToSwapType(txnDetails.message);
+        
+            if(newType){
+                txnDetails.type = newType;
+            }
+        }
+        return txnDetails;
+    }
+
+    async extractPartialTransfer(transferTxn: TransferTransaction): Promise<InnerTransferTransaction> {
+        let txnDetails = new InnerTransferTransaction();
+        
+        txnDetails.signer = transferTxn.signer.publicKey;
+        txnDetails.signerAddress = transferTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(transferTxn.type);
+
+        let sdas: SDA[] = [];
+
+        txnDetails.message = transferTxn.message.payload;
+        txnDetails.messageType = transferTxn.message.type;
+
+        switch(txnDetails.messageType){
+            case MessageType.PlainMessage:
+                txnDetails.messageTypeTitle = "Plain Message";
+                break;
+            case MessageType.EncryptedMessage:
+                txnDetails.messageTypeTitle = "Encrypted Message";
+                break;
+            case MessageType.HexadecimalMessage:
+                txnDetails.messageTypeTitle = "Hexadecimal Message";
+                break;
+        }
+        let recipientIsNamespace = transferTxn.recipient instanceof NamespaceId ? true : false;
+
+        let recipient;
+
+        if(transferTxn.recipient instanceof NamespaceId){
+            txnDetails.recipientNamespaceId = transferTxn.recipient.toHex();
+            recipient = await DashboardService.getAddressAlias(transferTxn.recipient);
+            let namespacesName = await DashboardService.getNamespacesName([transferTxn.recipient]);
+            txnDetails.recipientNamespaceName = namespacesName[0].name;
         }
         else{
-            transferTip = DashboardService.createTransferTip(transactionDetails.signerAddress, senderDisplay, sendTo, this.addressConvertToName(sendTo));
+            recipient = transferTxn.recipient;
         }
 
-        // fromToRowTip.rowTips.push(senderTip);
-        // fromToRowTip.rowTips.push(DashboardService.createToRightArrowTip());
-        fromToRowTip.rowTips.push(transferTip);
+        txnDetails.recipient = recipient.plain();
+        txnDetails.sender = transferTxn.signer.address.plain();
+        txnDetails.in_out = this.selectedAccount.address === txnDetails.sender ? false: true;
 
-        let messageTypeString: string;
-        let messageType: string;
+        for(let y = 0; y < transferTxn.mosaics.length; ++y){
 
-        if (transferTx.message.payload.length === 0) {
-            messageTypeString = "Empty message";
-            messageType = "empty";
-        }
-        else if (transferTx.message.type === 0) {
-            messageTypeString = "Plain message";
-            messageType = "plain";
-        } else if (transferTx.message.type === 1) {
-            messageTypeString = "Encrypted message";
-            messageType = "encrypted";
-        }
-        else {
-            messageTypeString = "Other message";
-            messageType = "other";
-        }
+            let rawAmount = transferTxn.mosaics[y].amount.compact();
+            let actualAmount = rawAmount;
 
-        let messageTip = new DashboardTip(TipType.MESSAGE);
-        messageTip.displayValue = messageTypeString;
-        messageTip.valueType = messageType;
-        messageTip.value = transferTx.message.payload;
+            let assetId;
+            let isSendWithNamespace = DashboardService.isNamespace(transferTxn.mosaics[y].id);
 
-        fromToRowTip.rowTips.push(messageTip);
+            if(isSendWithNamespace){
+                let namespaceId = new NamespaceId(transferTxn.mosaics[y].id.toDTO().id);
+                assetId = await DashboardService.getAssetAlias(namespaceId);
+            }
+            else{
+                assetId = transferTxn.mosaics[y].id;
+            }
 
-        transactionDetails.displayTips.push(fromToRowTip);
+            let assetIdHex = assetId.toHex();
 
-        let newRowTip = new RowDashboardTip();
-        newRowTip.rowTips.push(messageTip);
+            if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
+                txnDetails.amountTransfer = DashboardService.convertToExactNativeAmount(actualAmount);
+                continue;
+            }
 
-        let transfer: TransferList[] = [];
+            let newSDA: SDA = {
+                amount: rawAmount,
+                divisibility: 0,
+                id: assetIdHex,
+                amountIsRaw: true,
+                sendWithNamespace: isSendWithNamespace
+            };
 
-        let txnAmount: number;
+            if(isSendWithNamespace){
+                let namespaceId = transferTxn.mosaics[y].id;
 
-        if (transferTx.mosaics.length) {
-            for (let i = 0; i < transferTx.mosaics.length; ++i) {
-                let valueType = "asset"; 
-                let mosaicIdHex = transferTx.mosaics[i].id.toHex().toUpperCase();
-
-                if(Array.from(namespaceIdFirstCharacterString).includes(mosaicIdHex.substring(0, 1)) ){
-                    valueType = "namespace";
-                    transactionDetails.relatedNamespace.push(mosaicIdHex);
-                }else{
-                    transactionDetails.relatedAsset.push(mosaicIdHex);
+                newSDA.sendWithAlias = {
+                    idHex: namespaceId.toHex(),
+                    id: namespaceId.toDTO().id
                 }
+            }
+
+            sdas.push(newSDA);
+        }
+
+        let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => Helper.createNamespaceId(sda.sendWithAlias.id));
+
+        let allAssetId = sdas.filter(sda =>{ 
+            return sda.amountIsRaw
+        }).map(sda => Helper.createAssetId(sda.id));
+
+        if(namespaceIds.length || allAssetId.length){
+            let namespacesNames: NamespaceName[] = [];
+            namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
+            let assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(allAssetId);
+            let aliasNames: MosaicNames[] = await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
+
+            for(let x= 0; x < sdas.length; ++x){
+
+                let assetProperties = assetsProperties.filter(aliasName=> aliasName.mosaicId.toHex() === sdas[x].id)[0];
+
+                sdas[x].divisibility = assetProperties.divisibility;
+                sdas[x].amount = DashboardService.convertToExactAmount(sdas[x].amount, assetProperties.divisibility);
+                sdas[x].amountIsRaw = false;
+
+                let mosaicNames: MosaicNames = aliasNames.filter(aliaName => aliaName.mosaicId.toHex() === sdas[x].id)[0];
+                let currentAliasNames: NamespaceName[] = mosaicNames.names;
+                sdas[x].currentAlias = currentAliasNames.map(currentAlias =>{ 
+                    return { name: currentAlias.name, id: currentAlias.namespaceId.toDTO().id, idHex: currentAlias.namespaceId.toHex() }
+                });
+
+                if(sdas[x].sendWithAlias){
+                    sdas[x].sendWithAlias.name = namespacesNames
+                        .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
+                        .map(nsName => nsName.name)[0]
+                }
+            }
+        }
+        txnDetails.sda = sdas;
+        return txnDetails;
+    }
+
+    async extractNonconfirmedTransfer(transferTxn: TransferTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.UNCONFIRMED): Promise<InnerTransferTransaction> {
+        
+        if(txnGroupType === TransactionGroupType.UNCONFIRMED){
+            return await this.extractUnconfirmedTransfer(transferTxn);
+        }
+        else{
+            return await this.extractPartialTransfer(transferTxn);
+        }
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Modify Multisig only--------------------------------------------------- 
+    async extractConfirmedModifyMultisig(modifyMultisigTxn: ModifyMultisigAccountTransaction): Promise<InnerAccountTransaction> {
+        let txnDetails = new InnerAccountTransaction();
+        
+        txnDetails.signer = modifyMultisigTxn.signer.publicKey;
+        txnDetails.signerAddress = modifyMultisigTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(modifyMultisigTxn.type);
+
+        txnDetails.approvalDelta = modifyMultisigTxn.minApprovalDelta;
+        txnDetails.removalDelta = modifyMultisigTxn.minRemovalDelta;
+        txnDetails.addedCosigner = modifyMultisigTxn.modifications.filter(x => x.type === MultisigCosignatoryModificationType.Add)
+            .map(x => x.cosignatoryPublicAccount.publicKey);
+        txnDetails.removedCosigner = modifyMultisigTxn.modifications.filter(x => x.type === MultisigCosignatoryModificationType.Remove)
+            .map(x => x.cosignatoryPublicAccount.publicKey);
+        
+        return txnDetails;
+    }
+
+    async extractUnconfirmedModifyMultisig(modifyMultisigTxn: ModifyMultisigAccountTransaction): Promise<InnerAccountTransaction> {
+        return await this.extractPartialModifyMultisig(modifyMultisigTxn);
+    }
+
+    async extractPartialModifyMultisig(modifyMultisigTxn: ModifyMultisigAccountTransaction): Promise<InnerAccountTransaction> {
+        let txnDetails = new InnerAccountTransaction();
+        
+        txnDetails.signer = modifyMultisigTxn.signer.publicKey;
+        txnDetails.signerAddress = modifyMultisigTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(modifyMultisigTxn.type);
+
+        txnDetails.approvalDelta = modifyMultisigTxn.minApprovalDelta;
+        txnDetails.removalDelta = modifyMultisigTxn.minRemovalDelta;
+        txnDetails.addedCosigner = modifyMultisigTxn.modifications.filter(x => x.type === MultisigCosignatoryModificationType.Add)
+            .map(x => x.cosignatoryPublicAccount.publicKey);
+        txnDetails.removedCosigner = modifyMultisigTxn.modifications.filter(x => x.type === MultisigCosignatoryModificationType.Remove)
+            .map(x => x.cosignatoryPublicAccount.publicKey);
+
+        try {
+            let multisigInfo = await AppState.chainAPI.accountAPI.getMultisigAccountInfo(modifyMultisigTxn.signer.address);
+
+            if(multisigInfo){
+                txnDetails.oldApprovalNumber = multisigInfo.minApproval;
+                txnDetails.oldRemovalNumber = multisigInfo.minRemoval;
+            }
+
+        } catch (error) {
+            txnDetails.oldApprovalNumber = 0;
+            txnDetails.oldRemovalNumber = 0;
+        }
+        
+        return txnDetails;
+    }
+
+    async extractModifyMultisig(modifyMultisigTxn: ModifyMultisigAccountTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.CONFIRMED): Promise<InnerAccountTransaction> {
+        
+        if(txnGroupType === TransactionGroupType.CONFIRMED){
+            return await this.extractConfirmedModifyMultisig(modifyMultisigTxn);
+        }
+        else if(txnGroupType === TransactionGroupType.UNCONFIRMED){
+            return await this.extractUnconfirmedModifyMultisig(modifyMultisigTxn);
+        }
+        else{
+            return await this.extractPartialModifyMultisig(modifyMultisigTxn);
+        }
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Address Alias only--------------------------------------------------- 
+    async extractAddressAlias(addressAliasTxn: AddressAliasTransaction): Promise<InnerAliasTransaction> {
+        let txnDetails = new InnerAliasTransaction();
+        
+        txnDetails.signer = addressAliasTxn.signer.publicKey;
+        txnDetails.signerAddress = addressAliasTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(addressAliasTxn.type);
+
+        txnDetails.address = addressAliasTxn.address.plain();
+        txnDetails.aliasType = addressAliasTxn.actionType;
+        txnDetails.aliasTypeName = addressAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
+        
+        let nsId = addressAliasTxn.namespaceId;
+
+        try {
+            let nsName = await DashboardService.getNamespacesName([nsId]);
+
+            txnDetails.aliasName = nsName[0].name;
+        } catch (error) {
+            
+        }
+        
+        return txnDetails;
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Asset Alias only--------------------------------------------------- 
+    async extractAssetAlias(assetAliasTxn: MosaicAliasTransaction): Promise<InnerAliasTransaction> {
+        let txnDetails = new InnerAliasTransaction();
+        
+        txnDetails.signer = assetAliasTxn.signer.publicKey;
+        txnDetails.signerAddress = assetAliasTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(assetAliasTxn.type);
+
+        txnDetails.assetId = assetAliasTxn.mosaicId.toHex();
+        txnDetails.aliasType = assetAliasTxn.actionType;
+        txnDetails.aliasTypeName = assetAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
+
+        let nsId = assetAliasTxn.namespaceId;
+
+        try {
+            let nsName = await DashboardService.getNamespacesName([nsId]);
+
+            txnDetails.aliasName = nsName[0].name;
+        } catch (error) {
+            
+        }
+        
+        return txnDetails;
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Account Metadata_v2 only--------------------------------------------------- 
+    async extractConfirmedAccountMetadata(accMetadataTxn: AccountMetadataTransaction): Promise<InnerMetadataTransaction> {
+        let txnDetails = new InnerMetadataTransaction();
+        
+        txnDetails.signer = accMetadataTxn.signer.publicKey;
+        txnDetails.signerAddress = accMetadataTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(accMetadataTxn.type);
+
+        txnDetails.metadataType = MetadataType.ACCOUNT;
+        txnDetails.metadataTypeName = "Account";
+
+        txnDetails.scopedMetadataKey = accMetadataTxn.scopedMetadataKey.toHex();
+        txnDetails.targetPublicKey = accMetadataTxn.targetPublicKey.publicKey;
+        txnDetails.sizeChanged = accMetadataTxn.valueSizeDelta;
+        
+        return txnDetails;
+    }
+
+    async extractUnconfirmedAccountMetadata(accMetadataTxn: AccountMetadataTransaction): Promise<InnerMetadataTransaction> {
+        
+        return await this.extractPartialAccountMetadata(accMetadataTxn);
+    }
+
+    async extractPartialAccountMetadata(accMetadataTxn: AccountMetadataTransaction): Promise<InnerMetadataTransaction> {
+        let txnDetails = new InnerMetadataTransaction();
+        
+        txnDetails.signer = accMetadataTxn.signer.publicKey;
+        txnDetails.signerAddress = accMetadataTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(accMetadataTxn.type);
+        
+        txnDetails.metadataType = MetadataType.ACCOUNT;
+        txnDetails.metadataTypeName = "Account";
+
+        txnDetails.scopedMetadataKey = accMetadataTxn.scopedMetadataKey.toHex();
+        txnDetails.targetPublicKey = accMetadataTxn.targetPublicKey.publicKey;
+        txnDetails.sizeChanged = accMetadataTxn.valueSizeDelta;
+        txnDetails.valueChange = Convert.uint8ToHex(accMetadataTxn.valueDifferences);
+
+        try {
+            let nsMetadataEntry = await DashboardService.getAccountMetadata(accMetadataTxn.targetPublicKey, accMetadataTxn.scopedMetadataKey);
+            
+            if(nsMetadataEntry){
+                txnDetails.oldValue = nsMetadataEntry.value;
+                txnDetails.newValue = DashboardService.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
+            }
+        } catch (error) {
+            
+        }
+        
+        return txnDetails;
+    }
+
+    async extractAccMetadata(accMetadataTxn: AccountMetadataTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.CONFIRMED): Promise<InnerMetadataTransaction> {
+        
+        if(txnGroupType === TransactionGroupType.CONFIRMED){
+            return await this.extractConfirmedAccountMetadata(accMetadataTxn);
+        }
+        else if(txnGroupType === TransactionGroupType.UNCONFIRMED){
+            return await this.extractUnconfirmedAccountMetadata(accMetadataTxn);
+        }
+        else{
+            return await this.extractPartialAccountMetadata(accMetadataTxn);
+        }
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Namespace Metadata_v2 only--------------------------------------------------- 
+    async extractConfirmedNamespaceMetadata(nsMetadataTxn: NamespaceMetadataTransaction): Promise<InnerMetadataTransaction> {
+        let txnDetails = new InnerMetadataTransaction();
+        
+        txnDetails.signer = nsMetadataTxn.signer.publicKey;
+        txnDetails.signerAddress = nsMetadataTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(nsMetadataTxn.type);
+
+        let nsId = nsMetadataTxn.targetNamespaceId.toHex();
+
+        txnDetails.metadataType = MetadataType.NAMESPACE;
+        txnDetails.metadataTypeName = "Namespace";
+        txnDetails.scopedMetadataKey = nsMetadataTxn.scopedMetadataKey.toHex();
+        txnDetails.targetId = nsId;
+        txnDetails.targetPublicKey = nsMetadataTxn.targetPublicKey.publicKey;
+        txnDetails.sizeChanged = nsMetadataTxn.valueSizeDelta;
+
+        try {
+            let nsName = await DashboardService.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
+
+            if(nsName.length){
+                txnDetails.targetIdName = nsName[0].name;
+            }
+            
+        } catch (error) {
+            
+        }
+        
+        return txnDetails;
+    }
+
+    async extractUnconfirmedNamespaceMetadata(nsMetadataTxn: NamespaceMetadataTransaction): Promise<InnerMetadataTransaction> {
+        
+        return await this.extractPartialNamespaceMetadata(nsMetadataTxn);
+    }
+
+    async extractPartialNamespaceMetadata(nsMetadataTxn: NamespaceMetadataTransaction): Promise<InnerMetadataTransaction> {
+        let txnDetails = new InnerMetadataTransaction();
+        
+        txnDetails.signer = nsMetadataTxn.signer.publicKey;
+        txnDetails.signerAddress = nsMetadataTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(nsMetadataTxn.type);
+        
+        let nsId = nsMetadataTxn.targetNamespaceId.toHex();
+
+        txnDetails.metadataType = MetadataType.NAMESPACE;
+        txnDetails.metadataTypeName = "Namespace";
+        txnDetails.scopedMetadataKey = nsMetadataTxn.scopedMetadataKey.toHex();
+        txnDetails.targetId = nsId;
+        txnDetails.targetPublicKey = nsMetadataTxn.targetPublicKey.publicKey;
+        txnDetails.sizeChanged = nsMetadataTxn.valueSizeDelta;
+        txnDetails.valueChange = Convert.uint8ToHex(nsMetadataTxn.valueDifferences);
+
+        try {
+            let nsName = await DashboardService.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
+
+            if(nsName.length){
+                txnDetails.targetIdName = nsName[0].name;
+            }
+
+            let nsMetadataEntry = await DashboardService.getNamespaceMetadata(nsMetadataTxn.targetNamespaceId, nsMetadataTxn.scopedMetadataKey);
+            
+            if(nsMetadataEntry){
+                txnDetails.oldValue = nsMetadataEntry.value;
+                txnDetails.newValue = DashboardService.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
+            }
+            
+        } catch (error) {
+            
+        }
+        
+        return txnDetails;
+    }
+
+    async extractNamespaceMetadata(nsMetadataTxn: NamespaceMetadataTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.CONFIRMED): Promise<InnerMetadataTransaction> {
+        
+        if(txnGroupType === TransactionGroupType.CONFIRMED){
+            return await this.extractConfirmedNamespaceMetadata(nsMetadataTxn);
+        }
+        else if(txnGroupType === TransactionGroupType.UNCONFIRMED){
+            return await this.extractUnconfirmedNamespaceMetadata(nsMetadataTxn);
+        }
+        else{
+            return await this.extractPartialNamespaceMetadata(nsMetadataTxn);
+        }
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Asset Metadata_v2 only--------------------------------------------------- 
+    async extractConfirmedAssetMetadata(assetMetadataTxn: MosaicMetadataTransaction): Promise<InnerMetadataTransaction> {
+        let txnDetails = new InnerMetadataTransaction();
+        
+        txnDetails.signer = assetMetadataTxn.signer.publicKey;
+        txnDetails.signerAddress = assetMetadataTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(assetMetadataTxn.type);
+
+        let assetId = assetMetadataTxn.targetMosaicId.toHex();
+
+        txnDetails.metadataType = MetadataType.MOSAIC;
+        txnDetails.metadataTypeName = "Asset";
+        txnDetails.scopedMetadataKey = assetMetadataTxn.scopedMetadataKey.toHex();
+        txnDetails.targetId = assetId;
+        txnDetails.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
+        txnDetails.sizeChanged = assetMetadataTxn.valueSizeDelta;
+
+        try {
+            let assetName = await DashboardService.getAssetName(assetId);
+
+            if(assetName.names.length){
+                txnDetails.targetIdName = assetName.names[0].name;
+            }
+            
+        } catch (error) {
+            
+        }
+        
+        return txnDetails;
+    }
+
+    async extractUnconfirmedAssetMetadata(assetMetadataTxn: MosaicMetadataTransaction): Promise<InnerMetadataTransaction> {
+        
+        return await this.extractPartialAssetMetadata(assetMetadataTxn);
+    }
+
+    async extractPartialAssetMetadata(assetMetadataTxn: MosaicMetadataTransaction): Promise<InnerMetadataTransaction> {
+        let txnDetails = new InnerMetadataTransaction();
+        
+        txnDetails.signer = assetMetadataTxn.signer.publicKey;
+        txnDetails.signerAddress = assetMetadataTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(assetMetadataTxn.type);
+        
+        let assetId = assetMetadataTxn.targetMosaicId.toHex();
+
+        txnDetails.metadataType = MetadataType.MOSAIC;
+        txnDetails.metadataTypeName = "Asset";
+        txnDetails.scopedMetadataKey = assetMetadataTxn.scopedMetadataKey.toHex();
+        txnDetails.targetId = assetId;
+        txnDetails.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
+        txnDetails.sizeChanged = assetMetadataTxn.valueSizeDelta;
+        txnDetails.valueChange = Convert.uint8ToHex(assetMetadataTxn.valueDifferences);
+
+        try {
+            let assetName = await DashboardService.getAssetName(assetId);
+
+            if(assetName.names.length){
+                txnDetails.targetIdName = assetName.names[0].name;
+            }
+
+            let assetMetadataEntry = await DashboardService.getAssetMetadata(assetMetadataTxn.targetMosaicId, assetMetadataTxn.scopedMetadataKey);
+            
+            if(assetMetadataEntry){
+                txnDetails.oldValue = assetMetadataEntry.value;
+                txnDetails.newValue = DashboardService.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
+            }
+            
+        } catch (error) {
+            
+        }
+        
+        return txnDetails;
+    }
+
+    async extractAssetMetadata(assetMetadataTxn: MosaicMetadataTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.CONFIRMED): Promise<InnerMetadataTransaction> {
+        
+        if(txnGroupType === TransactionGroupType.CONFIRMED){
+            return await this.extractConfirmedAssetMetadata(assetMetadataTxn);
+        }
+        else if(txnGroupType === TransactionGroupType.UNCONFIRMED){
+            return await this.extractUnconfirmedAssetMetadata(assetMetadataTxn);
+        }
+        else{
+            return await this.extractPartialAssetMetadata(assetMetadataTxn);
+        }
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Secret Proof only--------------------------------------------------- 
+    extractSecretProof(secretProofTxn: SecretProofTransaction): InnerSecretTransaction {
+        let txnDetails = new InnerSecretTransaction();
+        
+        txnDetails.signer = secretProofTxn.signer.publicKey;
+        txnDetails.signerAddress = secretProofTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(secretProofTxn.type);
+
+        txnDetails.secret = secretProofTxn.secret;
+        txnDetails.recipient = secretProofTxn.recipient.plain();
+        txnDetails.hashType = myHashType[secretProofTxn.hashType];
+        txnDetails.proof = secretProofTxn.proof;
+        
+        return txnDetails;
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Secret Lock only--------------------------------------------------- 
+    async extractConfirmedSecretLock(secretLockTxn: SecretLockTransaction, blockNum: number): Promise<InnerSecretTransaction> {
+
+        let txnDetails = new InnerSecretTransaction();
+        
+        txnDetails.signer = secretLockTxn.signer.publicKey;
+        txnDetails.signerAddress = secretLockTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(secretLockTxn.type);
+
+        txnDetails.duration = secretLockTxn.duration.compact();
+        txnDetails.secret = secretLockTxn.secret;
+        txnDetails.recipient = secretLockTxn.recipient.plain();
+        txnDetails.amount = secretLockTxn.mosaic.amount.compact();
+        txnDetails.hashType = myHashType[secretLockTxn.hashType];
+
+        let isNamespace = DashboardService.isNamespace(secretLockTxn.mosaic.id);
+        let resolvedAssetId = await DashboardService.getResolvedAsset(secretLockTxn.mosaic.id, blockNum); 
+
+        txnDetails.assetId = resolvedAssetId.toHex();
+
+        try {
+            if(!isNamespace){
+                let assetsNames = await DashboardService.getAssetsName([secretLockTxn.mosaic.id]);
+
+                if(assetsNames[0].names.length){
+                    txnDetails.namespaceName = assetsNames[0].names[0].name;
+                }
+            }
+            else{
+                txnDetails.isSendWithNamespace = true;
+                let namespaceId = new NamespaceId(secretLockTxn.mosaic.id.toDTO().id);
+
+                let nsNames = await DashboardService.getNamespacesName([namespaceId]);
+                txnDetails.namespaceName = nsNames[0].name;
+            }
+
+            if(txnDetails.namespaceName && txnDetails.namespaceName === "prx.xpx"){
+                txnDetails.namespaceName = AppState.nativeToken.label;
+            }
+
+            let assetInfo = await DashboardService.getAssetInfo(txnDetails.assetId);
+
+            if(assetInfo.divisibility > 0){
+                txnDetails.amount = DashboardService.convertToExactAmount(txnDetails.amount, assetInfo.divisibility);
+            }
+            
+            txnDetails.amountIsRaw = false;                    
+        } catch (error) {
+            
+        }
+        return txnDetails;
+    }
+
+    async extractUnconfirmedSecretLock(secretLockTxn: SecretLockTransaction): Promise<InnerSecretTransaction> {
+        return this.extractPartialSecretLock(secretLockTxn);
+    }
+
+    async extractPartialSecretLock(secretLockTxn: SecretLockTransaction): Promise<InnerSecretTransaction> {
+        let txnDetails = new InnerSecretTransaction();
+        
+        txnDetails.signer = secretLockTxn.signer.publicKey;
+        txnDetails.signerAddress = secretLockTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(secretLockTxn.type);
+
+        txnDetails.duration = secretLockTxn.duration.compact();
+        txnDetails.secret = secretLockTxn.secret;
+        txnDetails.recipient = secretLockTxn.recipient.plain();
+        txnDetails.amount = secretLockTxn.mosaic.amount.compact();
+        txnDetails.hashType = myHashType[secretLockTxn.hashType];
+
+        let isNamespace = DashboardService.isNamespace(secretLockTxn.mosaic.id);
+
+        try {
+            if(!isNamespace){
+                txnDetails.assetId = secretLockTxn.mosaic.id.toHex();
+
+                let assetsNames = await DashboardService.getAssetsName([secretLockTxn.mosaic.id]);
+
+                if(assetsNames[0].names.length){
+                    txnDetails.namespaceName = assetsNames[0].names[0].name;
+                }
+            }
+            else{
+                let namespaceId = new NamespaceId(secretLockTxn.mosaic.id.toDTO().id);
+                let linkedAssetId = await DashboardService.getAssetAlias(namespaceId);
+
+                txnDetails.assetId = linkedAssetId.toHex();
+                txnDetails.isSendWithNamespace = true;
+
+                let nsNames = await DashboardService.getNamespacesName([namespaceId]);
+                txnDetails.namespaceName = nsNames[0].name;
+            }
+
+            if(txnDetails.namespaceName && txnDetails.namespaceName === "prx.xpx"){
+                txnDetails.namespaceName = AppState.nativeToken.label;
+            }
+
+            let assetInfo = await DashboardService.getAssetInfo(txnDetails.assetId);
+
+            if(assetInfo.divisibility > 0){
+                txnDetails.amount = DashboardService.convertToExactAmount(txnDetails.amount, assetInfo.divisibility);
+            }
+            
+            txnDetails.amountIsRaw = false;                    
+        } catch (error) {
+            
+        }
+
+        return txnDetails;
+    }
+
+    async extractNonconfirmedSecretLock(secretLockTxn: SecretLockTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.UNCONFIRMED): Promise<InnerSecretTransaction> {
+        
+        if(txnGroupType === TransactionGroupType.UNCONFIRMED){
+            return await this.extractUnconfirmedSecretLock(secretLockTxn);
+        }
+        else{
+            return await this.extractPartialSecretLock(secretLockTxn);
+        }
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Register Namespace only--------------------------------------------------- 
+    async extractRegisterNamespace(registerNSTxn: RegisterNamespaceTransaction): Promise<InnerNamespaceTransaction> {
+
+        let txnDetails = new InnerNamespaceTransaction();
+        
+        txnDetails.signer = registerNSTxn.signer.publicKey;
+        txnDetails.signerAddress = registerNSTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(registerNSTxn.type);
+
+        txnDetails.namespaceName = registerNSTxn.namespaceName;
+
+        if(registerNSTxn.namespaceType === NamespaceType.RootNamespace){
+            txnDetails.duration = registerNSTxn.duration.compact();
+            txnDetails.registerType = NamespaceType.RootNamespace;
+            txnDetails.registerTypeName = "Root namespace";
+
+            try {
+               let namespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespace(registerNSTxn.namespaceId);
+
+               txnDetails.isExtend = true;
+            } catch (error) {
                 
-                let newTransfer: TransferList = {
-                    from: transactionDetails.signerAddress,
-                    to: sendTo,
-                    toType: toType,
-                    sendingType: valueType,
-                    value: mosaicIdHex,
-                    valueDisplay: mosaicIdHex,
-                    amount: transferTx.mosaics[i].amount.compact()
-                };
+            }
+        }
+        else{
+            txnDetails.registerType = NamespaceType.SubNamespace;
+            txnDetails.registerTypeName = "Sub namespace";
+            txnDetails.parentId = registerNSTxn.parentId.toHex();
+            let namespaceName = await DashboardService.getNamespacesName([registerNSTxn.parentId]);
+            txnDetails.parentName = namespaceName[0].name;
+        }
 
-                if(mosaicIdHex.toUpperCase() === nativeTokenAssetId.value.toUpperCase()){
-                    txnAmount = transferTx.mosaics[i].amount.compact();
+        txnDetails.namespaceId = registerNSTxn.namespaceId.toHex();
+        
+        return txnDetails;
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Asset Definition only--------------------------------------------------- 
+    extractAssetDefinition(assetDefTxn: MosaicDefinitionTransaction): InnerAssetTransaction {
+
+        let txnDetails = new InnerAssetTransaction();
+        
+        txnDetails.signer = assetDefTxn.signer.publicKey;
+        txnDetails.signerAddress = assetDefTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(assetDefTxn.type);
+
+        txnDetails.assetId = assetDefTxn.mosaicId.toHex();
+        txnDetails.divisibility = assetDefTxn.mosaicProperties.divisibility;
+        txnDetails.duration = assetDefTxn.mosaicProperties.duration ? 
+                assetDefTxn.mosaicProperties.duration.compact() : undefined;
+        txnDetails.transferable = assetDefTxn.mosaicProperties.transferable;
+        txnDetails.supplyMutable = assetDefTxn.mosaicProperties.supplyMutable;
+        txnDetails.nonce = assetDefTxn.mosaicNonce.toNumber();
+        
+        return txnDetails;
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Asset Supply Change only--------------------------------------------------- 
+    async extractAssetSupplyChange(assetSupplyChangeTxn: MosaicSupplyChangeTransaction): Promise<InnerAssetTransaction> {
+
+        let txnDetails = new InnerAssetTransaction();
+        
+        txnDetails.signer = assetSupplyChangeTxn.signer.publicKey;
+        txnDetails.signerAddress = assetSupplyChangeTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(assetSupplyChangeTxn.type);
+
+        let assetId = assetSupplyChangeTxn.mosaicId.toHex();
+
+        txnDetails.assetId = assetId;
+        txnDetails.supplyDelta = assetSupplyChangeTxn.delta.compact();
+        txnDetails.supplyDeltaIsRaw = true;
+
+        if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
+            txnDetails.supplyDelta = -txnDetails.supplyDelta;
+        }
+
+        try {
+            let assetInfo = await DashboardService.getAssetInfo(assetId);
+
+            txnDetails.supplyDelta = DashboardService.convertToExactAmount(txnDetails.supplyDelta, assetInfo.divisibility);
+
+            txnDetails.supplyDeltaIsRaw = false;
+            
+        } catch (error) {
+            
+        }
+
+        return txnDetails;
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Asset Modify Levy only--------------------------------------------------- 
+    async extractAssetModifyLevy(assetModifyLevyTxn: MosaicModifyLevyTransaction): Promise<InnerAssetTransaction> {
+
+        let txnDetails = new InnerAssetTransaction();
+        
+        txnDetails.signer = assetModifyLevyTxn.signer.publicKey;
+        txnDetails.signerAddress = assetModifyLevyTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(assetModifyLevyTxn.type);
+
+        let assetId = assetModifyLevyTxn.mosaicId.toHex();
+        let levyAssetId = assetModifyLevyTxn.mosaicLevy.mosaicId.toHex();
+        let levyAmount = assetModifyLevyTxn.mosaicLevy.fee.compact();
+
+        txnDetails.assetId = assetId;
+        txnDetails.levyAssetId = levyAssetId;
+        txnDetails.levyAssetAmount = levyAmount;
+        txnDetails.levyAssetAmountIsRaw = true;
+        txnDetails.levyType = assetModifyLevyTxn.mosaicLevy.type;
+        txnDetails.levyRecipient = assetModifyLevyTxn.mosaicLevy.recipient.plain();
+
+        try {
+            let assetName = await DashboardService.getAssetName(assetId);
+
+            if(assetName.names.length){
+                txnDetails.namespaceName = assetName.names[0].name;
+            }
+
+            let levyAssetInfo = await DashboardService.getAssetInfo(levyAssetId);
+
+            txnDetails.levyAssetAmount = DashboardService.convertToExactAmount(levyAmount, levyAssetInfo.divisibility);
+
+            txnDetails.levyAssetAmountIsRaw = false;
+
+            let levyAssetName = await DashboardService.getAssetName(levyAssetId);
+
+            if(levyAssetName.names.length){
+                txnDetails.levyAssetName = levyAssetName.names[0].name;
+            }
+        
+        } catch (error) {
+            
+        }
+
+        return txnDetails;
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Asset Remove Levy only--------------------------------------------------- 
+    async extractAssetRemoveLevy(assetRemoveLevyTxn: MosaicRemoveLevyTransaction): Promise<InnerAssetTransaction> {
+
+        let txnDetails = new InnerAssetTransaction();
+        
+        txnDetails.signer = assetRemoveLevyTxn.signer.publicKey;
+        txnDetails.signerAddress = assetRemoveLevyTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(assetRemoveLevyTxn.type);
+
+        let assetId = assetRemoveLevyTxn.mosaicId.toHex();
+
+        txnDetails.assetId = assetId;
+        
+        try {
+            let assetName = await DashboardService.getAssetName(assetId);
+
+            if(assetName.names.length){
+                txnDetails.namespaceName = assetName.names[0].name;
+            }
+        
+        } catch (error) {
+            
+        }
+
+        return txnDetails;
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Account Operation Restriction only--------------------------------------------------- 
+    extractAccOperationRestriction(accOperationRestrictTxn: AccountOperationRestrictionModificationTransaction): InnerRestrictionTransaction {
+
+        let txnDetails = new InnerRestrictionTransaction();
+        
+        txnDetails.signer = accOperationRestrictTxn.signer.publicKey;
+        txnDetails.signerAddress = accOperationRestrictTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(accOperationRestrictTxn.type);
+
+        txnDetails.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accOperationRestrictTxn.restrictionType).action;
+
+        for(let i = 0; i < accOperationRestrictTxn.modifications.length; ++i){
+
+            let modification = accOperationRestrictTxn.modifications[i];
+
+            let newRestrictionModification: RestrictionModification = {
+                action: modification.modificationType === RestrictionModificationType.Add ? "Add" : "Remove",
+                value: TransactionUtils.getTransactionTypeNameByEnum(modification.value)
+            };
+
+            txnDetails.modification.push(newRestrictionModification);
+        }
+
+        let allAddModification = txnDetails.modification.filter(x => x.action === "Add");
+        let allRemoveModification = txnDetails.modification.filter(x => x.action === "Remove");
+
+        txnDetails.modification = allAddModification.concat(allRemoveModification);
+
+        return txnDetails;
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Account Address Restriction only--------------------------------------------------- 
+    extractAccAddressRestriction(accAddressRestrictTxn: AccountAddressRestrictionModificationTransaction): InnerRestrictionTransaction {
+
+        let txnDetails = new InnerRestrictionTransaction();
+        
+        txnDetails.signer = accAddressRestrictTxn.signer.publicKey;
+        txnDetails.signerAddress = accAddressRestrictTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(accAddressRestrictTxn.type);
+
+        txnDetails.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAddressRestrictTxn.restrictionType).action;
+
+        for(let i = 0; i < accAddressRestrictTxn.modifications.length; ++i){
+            
+            let modification = accAddressRestrictTxn.modifications[i];
+
+            let newRestrictionModification: RestrictionModification = {
+                action: modification.modificationType === RestrictionModificationType.Add ? "Add" : "Remove",
+                value: modification.value
+            };
+            txnDetails.modification.push(newRestrictionModification);
+        }
+
+        let allAddModification = txnDetails.modification.filter(x => x.action === "Add");
+        let allRemoveModification = txnDetails.modification.filter(x => x.action === "Remove");
+
+        txnDetails.modification = allAddModification.concat(allRemoveModification);
+
+        return txnDetails;
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Account Asset Restriction only--------------------------------------------------- 
+    async extractAccAssetRestriction(accAssetRestrictTxn: AccountMosaicRestrictionModificationTransaction): Promise<InnerRestrictionTransaction> {
+
+        let txnDetails = new InnerRestrictionTransaction();
+        
+        txnDetails.signer = accAssetRestrictTxn.signer.publicKey;
+        txnDetails.signerAddress = accAssetRestrictTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(accAssetRestrictTxn.type);
+
+        txnDetails.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAssetRestrictTxn.restrictionType).action;
+
+        for(let i = 0; i < accAssetRestrictTxn.modifications.length; ++i){
+            
+            let modification = accAssetRestrictTxn.modifications[i];
+
+            let newRestrictionModification: RestrictionModification = {
+                action: modification.modificationType === RestrictionModificationType.Add ? "Add" : "Remove",
+                value: new MosaicId(modification.value).toHex()
+            };
+
+            try {
+                let assetId = newRestrictionModification.value;
+
+                if(assetId === AppState.nativeToken.assetId){
+                    newRestrictionModification.name = AppState.nativeToken.label;
                 }
+                else{
+                    let assetName = await DashboardService.getAssetName(assetId);
 
-                let resolved = false;
-
-                if(mosaicIdHex.toUpperCase() === nativeTokenAssetId.value.toUpperCase() || mosaicIdHex.toUpperCase() === nativeTokenNamespaceId.value.toUpperCase()){
-                    newTransfer.value = nativeTokenAssetId.value.toUpperCase();
-                    valueType = "asset";
-                    newTransfer.valueDisplay = "XPX";
-                    newTransfer.amount = DashboardService.convertToExactNativeAmount(newTransfer.amount);
-                    resolved = true;
-                }
-
-                transfer.push(newTransfer);
-                transactionDetails.transferList.push(newTransfer);
-
-                let newRowTip = new RowDashboardTip();
-
-                //let sendingAmountTip: DashboardTip = resolved ? DashboardService.createExactAmountTip(newTransfer.amount) : DashboardService.createAbsoluteAmountTip(newTransfer.amount);
-                // send what
-                //let sendingTip: DashboardTip = valueType === "asset" ? DashboardService.createAssetTip(newTransfer.valueDisplay, newTransfer.value) : DashboardService.createNamespaceIDTip(newTransfer.value);
-
-                let amountTip: DashboardTip;
-
-                if(valueType === "asset"){
-                    amountTip = DashboardService.createAssetAmountTip(newTransfer.amount, newTransfer.value, newTransfer.valueDisplay, true);
-
-                    // get other assets
-                    if(mosaicIdHex.toUpperCase() != nativeTokenAssetId.value.toUpperCase() && mosaicIdHex.toUpperCase() != nativeTokenNamespaceId.value.toUpperCase()){
-                        let otherAsset = DashboardService.displayOtherAsset(newTransfer.amount, newTransfer.value, transferTx.mosaics[i].id);
-                        transactionDetails.otherAssets.push(otherAsset);
+                    if(assetName.names.length){
+                        newRestrictionModification.name = assetName.names[0].name;
                     }
-                }else{
-                    amountTip = DashboardService.createNamespaceAmountTip(newTransfer.amount, newTransfer.value, newTransfer.valueDisplay, true);
+                }
+                
+            } catch (error) {
+                
+            } 
+
+            txnDetails.modification.push(newRestrictionModification);
+        }
+
+        let allAddModification = txnDetails.modification.filter(x => x.action === "Add");
+        let allRemoveModification = txnDetails.modification.filter(x => x.action === "Remove");
+
+        txnDetails.modification = allAddModification.concat(allRemoveModification);
+
+        return txnDetails;
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Lock Hash only--------------------------------------------------- 
+    async extractConfirmedLockHash(lockFundTxn: LockFundsTransaction): Promise<InnerLockTransaction> {
+
+        let txnDetails = new InnerLockTransaction();
+        
+        txnDetails.signer = lockFundTxn.signer.publicKey;
+        txnDetails.signerAddress = lockFundTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(lockFundTxn.type);
+
+        txnDetails.lockHash = lockFundTxn.hash;
+        txnDetails.duration = lockFundTxn.duration.compact();
+
+        let amount = lockFundTxn.mosaic.amount.compact()
+        txnDetails.amountLocking = AppState.nativeToken.divisibility ? amount / Math.pow(10, AppState.nativeToken.divisibility) : amount;
+
+        try {
+            let txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(lockFundTxn.hash);
+            txnDetails.isRefunded = txnStatus.group === TransactionGroupType.CONFIRMED;
+        } catch (error) {
+            txnDetails.isRefunded = false;
+        }
+
+        return txnDetails;
+    }
+
+    extractUnconfirmedLockHash(lockFundTxn: LockFundsTransaction): InnerLockTransaction {
+        return this.extractPartialLockHash(lockFundTxn);
+    }
+
+    extractPartialLockHash(lockFundTxn: LockFundsTransaction): InnerLockTransaction {
+
+        let txnDetails = new InnerLockTransaction();
+        
+        txnDetails.signer = lockFundTxn.signer.publicKey;
+        txnDetails.signerAddress = lockFundTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(lockFundTxn.type);
+
+        txnDetails.lockHash = lockFundTxn.hash;
+        txnDetails.duration = lockFundTxn.duration.compact();
+
+        let amount = lockFundTxn.mosaic.amount.compact()
+        txnDetails.amountLocking = AppState.nativeToken.divisibility ? amount / Math.pow(10, AppState.nativeToken.divisibility) : amount;
+
+        return txnDetails;
+    }
+
+    async extractLockHash(lockFundTxn: LockFundsTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.CONFIRMED): Promise<InnerLockTransaction> {
+
+        if(txnGroupType === TransactionGroupType.CONFIRMED){
+            return await this.extractConfirmedLockHash(lockFundTxn);
+        }
+        if(txnGroupType === TransactionGroupType.UNCONFIRMED){
+            return this.extractUnconfirmedLockHash(lockFundTxn);
+        }
+        else{
+            return this.extractPartialLockHash(lockFundTxn);
+        }
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Account Link only---------------------------------------------------
+    extractAccountLink(accLinkTxn: AccountLinkTransaction): InnerLinkTransaction {
+
+        let txnDetails = new InnerLinkTransaction();
+        
+        txnDetails.signer = accLinkTxn.signer.publicKey;
+        txnDetails.signerAddress = accLinkTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(accLinkTxn.type);
+
+        txnDetails.action = accLinkTxn.linkAction === LinkAction.Link ? "Link" : "Unlink";
+
+        txnDetails.remotePublicKey = accLinkTxn.remoteAccountKey;
+
+        return txnDetails;
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Chain Upgrade only---------------------------------------------------
+    extractChainUpgrade(chainUpdateTxn: ChainUpgradeTransaction): InnerChainTransaction {
+
+        let txnDetails = new InnerChainTransaction();
+        
+        txnDetails.signer = chainUpdateTxn.signer.publicKey;
+        txnDetails.signerAddress = chainUpdateTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(chainUpdateTxn.type);
+
+        txnDetails.upgradePeriod = chainUpdateTxn.upgradePeriod.compact();
+        txnDetails.newVersion = chainUpdateTxn.newBlockchainVersion.toHex()
+
+        return txnDetails;
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Chain Configure only---------------------------------------------------
+    extractChainConfig(chainConfigureTxn: ChainConfigTransaction): InnerChainTransaction {
+
+        let txnDetails = new InnerChainTransaction();
+        
+        txnDetails.signer = chainConfigureTxn.signer.publicKey;
+        txnDetails.signerAddress = chainConfigureTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(chainConfigureTxn.type);
+
+        txnDetails.applyHeightDelta = chainConfigureTxn.applyHeightDelta.compact();
+
+        return txnDetails;
+    }
+    // --------------------------------------end------------------------------------------------------------------
+
+    // -----------------------------------extract Add Exchange Offer only---------------------------------------------------
+    async extractAddExchangeOffer(addExchangeOfferTxn: AddExchangeOfferTransaction): Promise<InnerExchangeTransaction> {
+
+        let txnDetails = new InnerExchangeTransaction();
+        
+        txnDetails.signer = addExchangeOfferTxn.signer.publicKey;
+        txnDetails.signerAddress = addExchangeOfferTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(addExchangeOfferTxn.type);
+
+        for(let i = 0; i < addExchangeOfferTxn.offers.length; ++i){
+            let tempExchangeOffer = addExchangeOfferTxn.offers[i];
+
+            let assetId = tempExchangeOffer.mosaicId.toHex();
+            let amount = tempExchangeOffer.mosaicAmount.compact();
+
+            let newTxnExchangeOffer: TxnExchangeOffer = {
+                amount: amount,
+                amountIsRaw: true,
+                assetId: assetId,
+                cost: DashboardService.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
+                duration: tempExchangeOffer.duration.compact(),
+                type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
+            }; 
+
+            try {
+                let assetInfo = await DashboardService.getAssetInfo(assetId);
+
+                newTxnExchangeOffer.amountIsRaw = false;
+                newTxnExchangeOffer.amount = DashboardService.convertToExactAmount(amount, assetInfo.divisibility);
+
+                let assetName = await DashboardService.getAssetName(assetId);
+
+                if(assetName.names.length){
+                    newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
                 }
 
-                newRowTip.rowTips.push(amountTip);
-                //newRowTip.rowTips.push(sendingTip);              
+            } catch (error) {
                 
-                transactionDetails.displayTips.push(newRowTip);
-            }
+            }                    
 
+            txnDetails.exchangeOffers.push(newTxnExchangeOffer);
         }
 
-        let data = {
-            transferList: transfer,
-            recipient: sendTo,
-            recipientType: toType,
-            recipientName: this.addressConvertToName(sendTo),
-            messageTypeString: messageTypeString,
-            messageType: messageType,
-            messagePayload: transferTx.message.payload,
-            amount: txnAmount?Helper.convertToExact(txnAmount, 6):'',
-        };
+        
+        let allBuyOffers = txnDetails.exchangeOffers.filter(x => x.type === "Buy");
+        let allSellOffers = txnDetails.exchangeOffers.filter(x => x.type === "Sell");
 
-        //transactionDetails.displayTips.push(newRowTip);
+        txnDetails.exchangeOffers = txnDetails.isTakingOffer ? allSellOffers.concat(allBuyOffers) : allBuyOffers.concat(allSellOffers);
 
-        transactionDetails.extractedData = data;
-
-        //transactionDetails.displayList.set("Address", data.address);
-        //transactionDetails.displayList.set("Namespace ID", data.namespaceId);
-
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
+        return txnDetails;
     }
+    // --------------------------------------end------------------------------------------------------------------
 
-    extractTransactionAddressAlias(addressAliasTransaction: AddressAliasTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: addressAliasTransaction.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [addressAliasTransaction.namespaceId.toHex().toUpperCase()],
-            relatedPublicKey: [addressAliasTransaction.signer.publicKey],
-            signerAddress: addressAliasTransaction.signer.address.plain(),
-            relatedAddress: [addressAliasTransaction.signer.address.plain(), addressAliasTransaction.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(addressAliasTransaction.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [addressAliasTransaction.signer.publicKey]
-        };
+    // -----------------------------------extract Remove Exchange Offer only---------------------------------------------------
+    async extractRemoveExchangeOffer(removeExchangeOfferTxn: RemoveExchangeOfferTransaction): Promise<InnerExchangeTransaction> {
 
-        let linkType = addressAliasTransaction.actionType === 0 ? "Link" : "Unlink";
+        let txnDetails = new InnerExchangeTransaction();
+        
+        txnDetails.signer = removeExchangeOfferTxn.signer.publicKey;
+        txnDetails.signerAddress = removeExchangeOfferTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(removeExchangeOfferTxn.type);
 
-        let data = {
-            linkType: linkType,
-            address: addressAliasTransaction.address.pretty(),
-            addressPlain: addressAliasTransaction.address.plain(),
-            namespaceId: addressAliasTransaction.namespaceId.toHex().toUpperCase(),
-        }
+        for(let i = 0; i < removeExchangeOfferTxn.offers.length; ++i){
+            let tempExchangeOffer = removeExchangeOfferTxn.offers[i];
 
-        let newRowTip = new RowDashboardTip();
-        let addressDisplay = this.addressConvertToName(data.addressPlain);
-        let namespaceIdDisplay = data.namespaceId;
+            let assetId = tempExchangeOffer.mosaicId.toHex();
 
-        if(linkType === "Link"){
-            newRowTip.rowTips.push(DashboardService.createAddressAliasTip(data.namespaceId, namespaceIdDisplay, data.addressPlain, addressDisplay));
-        }
-        else{
-            newRowTip.rowTips.push(DashboardService.createRemoveAddressAliasTip(data.namespaceId, namespaceIdDisplay, data.addressPlain, addressDisplay));
-        }
-
-        transactionDetails.displayTips.push(newRowTip);
-
-        transactionDetails.extractedData = data;
-
-        // transactionDetails.displayList.set("Address", data.address);
-        // transactionDetails.displayList.set("Namespace ID", data.namespaceId);
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    extractTransactionAddExchangeOffer(addExchangeOfferTransaction: AddExchangeOfferTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: addExchangeOfferTransaction.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [addExchangeOfferTransaction.signer.publicKey],
-            signerAddress: addExchangeOfferTransaction.signer.address.plain(),
-            relatedAddress: [addExchangeOfferTransaction.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(addExchangeOfferTransaction.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [addExchangeOfferTransaction.signer.publicKey]
-        };
-
-        let offerArray = [];
-
-        for (let i = 0; i < addExchangeOfferTransaction.offers.length; ++i) {
-            let cost = addExchangeOfferTransaction.offers[i].cost.compact();
-            let duration = addExchangeOfferTransaction.offers[i].duration.compact();
-            let mosaicAmount = addExchangeOfferTransaction.offers[i].mosaicAmount.compact();
-            let assetId = addExchangeOfferTransaction.offers[i].mosaicId.toHex().toUpperCase();
-            let type = addExchangeOfferTransaction.offers[i].type === 0 ? "Sell offer" : "Buy offer";
-
-            offerArray.push({
-                cost: cost,
-                duration: duration,
-                assetAmount: mosaicAmount,
+            let newTxnExchangeOffer: TxnExchangeOffer = {
                 assetId: assetId,
-                type: type
-            });
+                type: tempExchangeOffer.offerType === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
+            }; 
 
-            let exactAmount: number = DashboardService.convertToExactNativeAmount(cost);
+            try {
+                let assetName = await DashboardService.getAssetName(assetId);
 
-            let newRowTip = new RowDashboardTip();
-            
-            let typeTip = DashboardService.createSimpleStringTip(type);
-            let durationTip = DashboardService.createDurationTip(duration)
-            let assetAmountTip = DashboardService.createAbsoluteAmountTip(mosaicAmount);
-            let assetTip = DashboardService.createAssetTip(assetId);
-            let costTip = DashboardService.createStringTip(exactAmount.toString(), "Cost:", nativeTokenName.value);
+                if(assetName.names.length){
+                    newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
+                }
 
-            newRowTip.rowTips.push(typeTip);
-            newRowTip.rowTips.push(durationTip);
-            newRowTip.rowTips.push(assetAmountTip);
-            newRowTip.rowTips.push(assetTip);
-            newRowTip.rowTips.push(costTip);
+            } catch (error) {
+                
+            }                    
 
-            transactionDetails.displayTips.push(newRowTip);
+            txnDetails.exchangeOffers.push(newTxnExchangeOffer);
         }
 
-        let data = {
-            offers: offerArray
-        };
+        let allBuyOffers = txnDetails.exchangeOffers.filter(x => x.type === "Buy");
+        let allSellOffers = txnDetails.exchangeOffers.filter(x => x.type === "Sell");
 
-        transactionDetails.extractedData = data;
+        txnDetails.exchangeOffers = txnDetails.isTakingOffer ? allSellOffers.concat(allBuyOffers) : allBuyOffers.concat(allSellOffers);
 
-        /*
-        transactionDetails.displayList.set("Offers Added", data.offers.map(
-            (offer)=> `${offer.type}: ${offer.assetAmount} ${offer.assetId} for ${offer.cost} per unit (Duration: ${offer.duration} blocks)`).join('<br>')
-        );
-        */
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
+        return txnDetails;
     }
+    // --------------------------------------end------------------------------------------------------------------
 
-    extractTransactionChainConfig(chainConfigTransaction: ChainConfigTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: chainConfigTransaction.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [chainConfigTransaction.signer.publicKey],
-            signerAddress: chainConfigTransaction.signer.address.plain(),
-            relatedAddress: [chainConfigTransaction.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(chainConfigTransaction.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [chainConfigTransaction.signer.publicKey]
-        };
+    // -----------------------------------extract Exchange Offer only---------------------------------------------------
+    async extractExchangeOffer(exchangeOfferTxn: ExchangeOfferTransaction): Promise<InnerExchangeTransaction> {
 
-        let data = {
-            applyHeightDelta: chainConfigTransaction.applyHeightDelta.compact(),
-            networkConfig: chainConfigTransaction.networkConfig,
-            supportedEntityVersions: chainConfigTransaction.supportedEntityVersions
-        };
+        let txnDetails = new InnerExchangeTransaction();
+        
+        txnDetails.signer = exchangeOfferTxn.signer.publicKey;
+        txnDetails.signerAddress = exchangeOfferTxn.signer.address.plain();
+        txnDetails.type = TransactionUtils.getTransactionTypeName(exchangeOfferTxn.type);
 
-        let newRowTip = new RowDashboardTip();
-            
-        let applyHeightDeltaTip = DashboardService.createStringTip(data.applyHeightDelta.toString(), "Apply after", "blocks");
+        txnDetails.isTakingOffer = true;
+                
+        for(let i = 0; i < exchangeOfferTxn.offers.length; ++i){
+            let tempExchangeOffer = exchangeOfferTxn.offers[i];
 
-        newRowTip.rowTips.push(applyHeightDeltaTip);
+            let assetId = tempExchangeOffer.mosaicId.toHex();
+            let amount = tempExchangeOffer.mosaicAmount.compact();
 
-        transactionDetails.displayTips.push(newRowTip);
-
-        transactionDetails.extractedData = data;
-
-        //transactionDetails.displayList.set("Apply after", `${data.applyHeightDelta} `);
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    extractTransactionChainUpgrade(chainUpgradeTransaction: ChainUpgradeTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: chainUpgradeTransaction.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [chainUpgradeTransaction.signer.publicKey],
-            signerAddress: chainUpgradeTransaction.signer.address.plain(),
-            relatedAddress: [chainUpgradeTransaction.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(chainUpgradeTransaction.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [chainUpgradeTransaction.signer.publicKey]
-        };
-
-        let data = {
-            newVersion: chainUpgradeTransaction.newBlockchainVersion.compact(),
-            upgradePeriod: chainUpgradeTransaction.upgradePeriod.compact()
-        }
-
-        let newRowTip = new RowDashboardTip();
-            
-        let versionTip = DashboardService.createStringTip(data.newVersion.toString(), "New version:");
-        let upgradePeriodTip = DashboardService.createStringTip(data.upgradePeriod.toString(), "Upgrade period:" + "blocks");
-
-        newRowTip.rowTips.push(versionTip);
-        newRowTip.rowTips.push(upgradePeriodTip);
-
-        transactionDetails.displayTips.push(newRowTip);
-
-        transactionDetails.extractedData = data;
-
-        // transactionDetails.displayList.set("New Version", `${data.newVersion}`);
-        // transactionDetails.displayList.set("Upgrade Period", `${data.upgradePeriod} blocks`);
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    extractTransactionExchangeOffer(exchangeOfferTransaction: ExchangeOfferTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: exchangeOfferTransaction.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [exchangeOfferTransaction.signer.publicKey],
-            signerAddress: exchangeOfferTransaction.signer.address.plain(),
-            relatedAddress: [exchangeOfferTransaction.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(exchangeOfferTransaction.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [exchangeOfferTransaction.signer.publicKey]
-        };
-
-        let exchangeOfferArray = [];
-
-        for (let i = 0; i < exchangeOfferTransaction.offers.length; ++i) {
-            let cost = exchangeOfferTransaction.offers[i].cost.compact();
-            let owner = exchangeOfferTransaction.offers[i].owner; // Owner of the offer we want to accept
-            let mosaicAmount = exchangeOfferTransaction.offers[i].mosaicAmount.compact();
-            let assetId = exchangeOfferTransaction.offers[i].mosaicId.toHex().toUpperCase();
-            let type = exchangeOfferTransaction.offers[i].type === 0 ? "Sell offer" : "Buy offer";
-
-            exchangeOfferArray.push({
-                cost: cost,
-                owner: owner,
-                assetAmount: mosaicAmount,
+            let newTxnExchangeOffer: TxnExchangeOffer = {
+                amount: amount,
+                amountIsRaw: true,
                 assetId: assetId,
-                type: type
-            });
+                cost: DashboardService.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
+                owner: tempExchangeOffer.owner.publicKey,
+                type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
+            }; 
 
-            let exactAmount: number = DashboardService.convertToExactNativeAmount(cost);
+            try {
+                let assetInfo = await DashboardService.getAssetInfo(assetId);
 
-            let newRowTip = new RowDashboardTip();
-            
-            let typeTip = DashboardService.createSimpleStringTip(type);
-            let publicKeyTip = DashboardService.createStringTip(owner.publicKey, "Owner: ")
-            let assetAmountTip = DashboardService.createAbsoluteAmountTip(mosaicAmount);
-            let assetTip = DashboardService.createAssetTip(assetId);
-            let costTip = DashboardService.createStringTip(exactAmount.toString(), "Cost:", nativeTokenName.value);
+                newTxnExchangeOffer.amountIsRaw = false;
+                newTxnExchangeOffer.amount = DashboardService.convertToExactAmount(amount, assetInfo.divisibility);
 
-            newRowTip.rowTips.push(typeTip);
-            newRowTip.rowTips.push(publicKeyTip);
-            newRowTip.rowTips.push(assetAmountTip);
-            newRowTip.rowTips.push(assetTip);
-            newRowTip.rowTips.push(costTip);
+                let assetName = await DashboardService.getAssetName(assetId);
 
-            transactionDetails.displayTips.push(newRowTip);
+                if(assetName.names.length){
+                    newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
+                }
+
+            } catch (error) {
+                
+            }                    
+
+            txnDetails.exchangeOffers.push(newTxnExchangeOffer);
         }
 
-        let data = {
-            exchangeOffers: exchangeOfferArray
-        };
+        let allBuyOffers = txnDetails.exchangeOffers.filter(x => x.type === "Buy");
+        let allSellOffers = txnDetails.exchangeOffers.filter(x => x.type === "Sell");
 
-        transactionDetails.extractedData = data;
+        txnDetails.exchangeOffers = txnDetails.isTakingOffer ? allSellOffers.concat(allBuyOffers) : allBuyOffers.concat(allSellOffers);
 
-        // transactionDetails.displayList.set("Offer Exchanges", data.exchangeOffers.map(
-        //     (arr)=> `${arr.type}: Offer ${arr.assetAmount} ${arr.assetId} from ${arr.owner} for ${arr.cost} per unit`).join("<br>")
-        // );
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
+        return txnDetails;
     }
+    // --------------------------------------end------------------------------------------------------------------
 
-    extractTransactionRemoveExchangeOffer(removeExchangeOfferTransaction: RemoveExchangeOfferTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: removeExchangeOfferTransaction.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [removeExchangeOfferTransaction.signer.publicKey],
-            signerAddress: removeExchangeOfferTransaction.signer.address.plain(),
-            relatedAddress: [removeExchangeOfferTransaction.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(removeExchangeOfferTransaction.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [removeExchangeOfferTransaction.signer.publicKey]
-        };
 
-        let offerRemoveArray = [];
+    async extractPartialInnerTransaction(innerTransaction: InnerTransaction): Promise<InnerTxnDetails> {
 
-        for (let i = 0; i < removeExchangeOfferTransaction.offers.length; ++i) {
-            let assetId = removeExchangeOfferTransaction.offers[i].mosaicId.toHex().toUpperCase();
-            let type = removeExchangeOfferTransaction.offers[i].offerType === 0 ? "Sell offer" : "Buy offer";
+        let transactionDetails: InnerTxnDetails;
 
-            offerRemoveArray.push({
-                assetId: assetId,
-                type: type
-            });
-            transactionDetails.relatedAsset.push(assetId);
-
-            let newRowTip = new RowDashboardTip();
-            
-            let typeTip = DashboardService.createSimpleStringTip(type);
-            let assetTip = DashboardService.createAssetTip(assetId);
-
-            newRowTip.rowTips.push(typeTip);
-            newRowTip.rowTips.push(assetTip);
-
-            transactionDetails.displayTips.push(newRowTip);
-        }
-
-        let data = {
-            offersRemove: offerRemoveArray
-        };
-
-        transactionDetails.extractedData = data;
-
-        //transactionDetails.displayList.set("Removed Offers", data.offersRemove.map((arr)=> `${arr.type}: ${arr.assetId}`).join("<br>"));
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    extractTransactionAccountLink(accountLinkTransaction: AccountLinkTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: accountLinkTransaction.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [accountLinkTransaction.signer.publicKey],
-            signerAddress: accountLinkTransaction.signer.address.plain(),
-            relatedAddress: [accountLinkTransaction.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(accountLinkTransaction.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [accountLinkTransaction.signer.publicKey]
-        };
-
-        let publicKey = accountLinkTransaction.remoteAccountKey;
-
-        let data = {
-            remoteAccountKey: publicKey,
-            linkAction: accountLinkTransaction.linkAction === 0 ? "Link" : "Unlink"
-        }
-
-        transactionDetails.extractedData = data;
-
-        let newRowTip = new RowDashboardTip();
-        let remoteAddress = PublicAccount.createFromPublicKey(data.remoteAccountKey, localNetworkType.value).address.plain();
-        let remoteAddressPretty = PublicAccount.createFromPublicKey(data.remoteAccountKey, localNetworkType.value).address.pretty();
-        let searchedAddress = this.addressConvertToName(remoteAddress);
-        let publicKeyDisplay = searchedAddress === remoteAddressPretty ? data.remoteAccountKey: searchedAddress;
-
-        if(data.linkAction === "Link"){
-            newRowTip.rowTips.push(DashboardService.createAccountLinkTip(data.remoteAccountKey, publicKeyDisplay));
-        }
-        else{
-            newRowTip.rowTips.push(DashboardService.createAccountUnlinkTip(data.remoteAccountKey, publicKeyDisplay));
-        }
-
-        transactionDetails.displayTips.push(newRowTip);
-
-        // transactionDetails.displayList.set("Action", `${data.linkAction}`);
-        // transactionDetails.displayList.set("Linked Account", `${data.remoteAccountKey}`);   
-
-        transactionDetails.relatedPublicKey.push(publicKey);
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    extractTransactionLockFunds(lockFundsTransaction: LockFundsTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: lockFundsTransaction.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [lockFundsTransaction.signer.publicKey],
-            signerAddress: lockFundsTransaction.signer.address.plain(),
-            relatedAddress: [lockFundsTransaction.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(lockFundsTransaction.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [lockFundsTransaction.signer.publicKey]
-        };
-
-        let lockedHash = lockFundsTransaction.hash;
-        let mosaicIdHex = lockFundsTransaction.mosaic.id.toHex().toUpperCase();
-
-        let data = {
-            lockedHash: lockFundsTransaction.hash,
-            duration: lockFundsTransaction.duration.compact(),
-            mosaicId: mosaicIdHex,
-            mosaicAmount: lockFundsTransaction.mosaic.amount.compact()
-        };
-
-        transactionDetails.extractedData = data;
-
-        let newRowTip = new RowDashboardTip();
-            
-        let lockHashTip = DashboardService.createTxHashTip(data.lockedHash);
-        let durationTip = DashboardService.createDurationTip(data.duration);
-
-        let assetAmountTip = DashboardService.createAssetAmountTip(DashboardService.convertToExactNativeAmount(data.mosaicAmount), data.mosaicId, "XPX", true);
-        // let assetIdTip = DashboardService.createAssetTip(data.mosaicId);
-        // let mosaicAmountTip = DashboardService.createExactAmountTip(DashboardService.convertToExactNativeAmount(data.mosaicAmount));
-
-        //assetIdTip.displayValue = "XPX";
-
-        newRowTip.rowTips.push(lockHashTip);
-        newRowTip.rowTips.push(durationTip);
-        newRowTip.rowTips.push(assetAmountTip);
-        // newRowTip.rowTips.push(assetIdTip);
-
-        transactionDetails.displayTips.push(newRowTip);
-
-        // transactionDetails.displayList.set("Locked Hash", `${data.lockedHash}`);
-        // transactionDetails.displayList.set("Duration", `${data.duration} blocks`);
-        // transactionDetails.displayList.set("Asset ID", `${data.mosaicId}`);
-        // transactionDetails.displayList.set("Asset Amount", `${data.mosaicAmount}`);
-
-        transactionDetails.searchString.push(lockedHash);
-        transactionDetails.relatedAsset.push(mosaicIdHex);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    // extractTransactionModifyAccountMetadata(modifyAccountMetadataTx: ModifyMetadataTransaction): DashboardInnerTransaction {
-    //     let transactionDetails: DashboardInnerTransaction = {
-    //         signer: modifyAccountMetadataTx.signer.publicKey,
-    //         relatedAsset: [],
-    //         relatedNamespace: [],
-    //         relatedPublicKey: [modifyAccountMetadataTx.signer.publicKey],
-    //         signerAddress: modifyAccountMetadataTx.signer.address.plain(),
-    //         relatedAddress: [modifyAccountMetadataTx.signer.address.plain()],
-    //         typeName: TransactionUtils.getTransactionTypeName(modifyAccountMetadataTx.type),
-    //         searchString: [],
-    //         extractedData: {},
-    //         displayList: new Map<string, string>(),
-    //         displayTips: [],
-    //         signerPublicKeys: [modifyAccountMetadataTx.signer.publicKey]
-    //     };
-
-    //     let metadataId = modifyAccountMetadataTx.metadataId;
-    //     let metadataType = "Address";
-
-    //     let modifications = [];
-    //     let modificationsTip: DashboardTip[] = [];
-
-    //     for (let i = 0; i < modifyAccountMetadataTx.modifications.length; ++i) {
-    //         let key = modifyAccountMetadataTx.modifications[i].key;
-    //         let type = modifyAccountMetadataTx.modifications[i].type === 0 ? "Add" : "Remove";
-    //         let value = modifyAccountMetadataTx.modifications[i].value;
-
-    //         modifications.push({
-    //             key: key,
-    //             value: value,
-    //             type: type
-    //         });
-
-    //         modificationsTip.push(DashboardService.createSimpleStringTip(`${type}-${key}:${value}`));
-    //     }
-
-    //     let data = {
-    //         metadataId: metadataId,
-    //         metadataType: metadataType,
-    //         modifications: modifications
-    //     };
-
-    //     transactionDetails.extractedData = data;
-
-    //     let newRowTip = new RowDashboardTip();
-            
-    //     let metadataIdTip = DashboardService.createStringTip(data.metadataId, "Metadata ID:");
-    //     let metadataTypeTip = DashboardService.createSimpleStringTip(data.metadataType);
-
-    //     let allTip: DashboardTip[] = [ metadataIdTip, metadataTypeTip];
-
-    //     allTip = allTip.concat(modificationsTip);
-
-    //     newRowTip.rowTips = allTip;
-
-    //     transactionDetails.displayTips.push(newRowTip);
-
-    //     // transactionDetails.displayList.set("Type", `${data.metadataType}`);
-    //     // transactionDetails.displayList.set("Address", `${data.metadataId}`);
-    //     // transactionDetails.displayList.set("Modifications", data.modifications.map((modi)=> `${modi.type}: '${modi.value}' into '${modi.key}' key`).join("<br>"));
-
-    //     transactionDetails.relatedAddress.push(metadataId);
-
-    //     transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-    //     transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-    //     transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-    //     transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-    //     return transactionDetails;
-    // }
-
-    // extractTransactionModifyMosaicMetadata(modifyMosaicMetadataTx: ModifyMetadataTransaction): DashboardInnerTransaction {
-    //     let transactionDetails: DashboardInnerTransaction = {
-    //         signer: modifyMosaicMetadataTx.signer.publicKey,
-    //         relatedAsset: [],
-    //         relatedNamespace: [],
-    //         relatedPublicKey: [modifyMosaicMetadataTx.signer.publicKey],
-    //         signerAddress: modifyMosaicMetadataTx.signer.address.plain(),
-    //         relatedAddress: [modifyMosaicMetadataTx.signer.address.plain()],
-    //         typeName: TransactionUtils.getTransactionTypeName(modifyMosaicMetadataTx.type),
-    //         searchString: [],
-    //         extractedData: {},
-    //         displayList: new Map<string, string>(),
-    //         displayTips: [],
-    //         signerPublicKeys: [modifyMosaicMetadataTx.signer.publicKey]
-    //     };
-
-    //     let metadataId = modifyMosaicMetadataTx.metadataId;
-    //     let metadataType = "Asset";
-
-    //     let modifications = [];
-    //     let modificationsTip: DashboardTip[] = [];
-
-    //     for (let i = 0; i < modifyMosaicMetadataTx.modifications.length; ++i) {
-    //         let key = modifyMosaicMetadataTx.modifications[i].key;
-    //         let type = modifyMosaicMetadataTx.modifications[i].type === 0 ? "Add" : "Remove";
-    //         let value = modifyMosaicMetadataTx.modifications[i].value;
-
-    //         modifications.push({
-    //             key: key,
-    //             value: value,
-    //             type: type
-    //         });
-
-    //         modificationsTip.push(DashboardService.createSimpleStringTip(`${type}-${key}:${value}`));
-    //     }
-
-    //     let data = {
-    //         metadataId: metadataId,
-    //         metadataType: metadataType,
-    //         modifications: modifications
-    //     };
-
-    //     transactionDetails.extractedData = data;
-
-    //     let newRowTip = new RowDashboardTip();
-            
-    //     let metadataIdTip = DashboardService.createStringTip(data.metadataId, "Metadata ID:");
-    //     let metadataTypeTip = DashboardService.createSimpleStringTip(data.metadataType);
-
-    //     let allTip: DashboardTip[] = [ metadataIdTip, metadataTypeTip];
-
-    //     allTip = allTip.concat(modificationsTip);
-
-    //     newRowTip.rowTips = allTip;
-
-    //     transactionDetails.displayTips.push(newRowTip);
-
-    //     // transactionDetails.displayList.set("Type", `${data.metadataType}`);
-    //     // transactionDetails.displayList.set("Asset ID", `${data.metadataId}`);
-    //     // transactionDetails.displayList.set("Modifications", data.modifications.map((modi)=> `${modi.type}: '${modi.value}' into '${modi.key}' key`).join("<br>"));
-
-    //     transactionDetails.relatedAsset.push(metadataId);
-
-    //     transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-    //     transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-    //     transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-    //     transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-    //     return transactionDetails;
-    // }
-
-    // extractTransactionModifyNamespaceMetadata(modifyNamespaceMetadataTx: ModifyMetadataTransaction): DashboardInnerTransaction {
-    //     let transactionDetails: DashboardInnerTransaction = {
-    //         signer: modifyNamespaceMetadataTx.signer.publicKey,
-    //         relatedAsset: [],
-    //         relatedNamespace: [],
-    //         relatedPublicKey: [modifyNamespaceMetadataTx.signer.publicKey],
-    //         signerAddress: modifyNamespaceMetadataTx.signer.address.plain(),
-    //         relatedAddress: [modifyNamespaceMetadataTx.signer.address.plain()],
-    //         typeName: TransactionUtils.getTransactionTypeName(modifyNamespaceMetadataTx.type),
-    //         searchString: [],
-    //         extractedData: {},
-    //         displayList: new Map<string, string>(),
-    //         displayTips: [],
-    //         signerPublicKeys: [modifyNamespaceMetadataTx.signer.publicKey]
-    //     };
-
-    //     let metadataId = modifyNamespaceMetadataTx.metadataId;
-    //     let metadataType = "Namespace";
-
-    //     let modifications = [];
-    //     let modificationsTip: DashboardTip[] = [];
-
-    //     for (let i = 0; i < modifyNamespaceMetadataTx.modifications.length; ++i) {
-    //         let key = modifyNamespaceMetadataTx.modifications[i].key;
-    //         let type = modifyNamespaceMetadataTx.modifications[i].type === 0 ? "Add" : "Remove";
-    //         let value = modifyNamespaceMetadataTx.modifications[i].value;
-
-    //         modifications.push({
-    //             key: key,
-    //             value: value,
-    //             type: type
-    //         });
-
-    //         modificationsTip.push(DashboardService.createSimpleStringTip(`${type}-${key}:${value}`));
-    //     }
-
-    //     let data = {
-    //         metadataId: metadataId,
-    //         metadataType: metadataType,
-    //         modifications: modifications
-    //     };
-
-    //     transactionDetails.extractedData = data;
-
-    //     let newRowTip = new RowDashboardTip();
-            
-    //     let metadataIdTip = DashboardService.createStringTip(data.metadataId, "Metadata ID:");
-    //     let metadataTypeTip = DashboardService.createSimpleStringTip(data.metadataType);
-
-    //     let allTip: DashboardTip[] = [ metadataIdTip, metadataTypeTip];
-
-    //     allTip = allTip.concat(modificationsTip);
-
-    //     newRowTip.rowTips = allTip;
-
-    //     transactionDetails.displayTips.push(newRowTip);
-
-    //     // transactionDetails.displayList.set("Type", `${data.metadataType}`);
-    //     // transactionDetails.displayList.set("Namespace ID", `${data.metadataId}`);
-    //     // transactionDetails.displayList.set("Modifications", data.modifications.map((modi)=> `${modi.type}: '${modi.value}' into '${modi.key}' key`).join("<br>"));
-
-    //     transactionDetails.relatedNamespace.push(metadataId);
-
-    //     transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-    //     transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-    //     transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-    //     transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-    //     return transactionDetails;
-    // }
-
-    extractTransactionAccountAddressRestriction(accAddressRestrictModification: AccountAddressRestrictionModificationTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: accAddressRestrictModification.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [accAddressRestrictModification.signer.publicKey],
-            signerAddress: accAddressRestrictModification.signer.address.plain(),
-            relatedAddress: [accAddressRestrictModification.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(accAddressRestrictModification.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [accAddressRestrictModification.signer.publicKey]
-        };
-
-        let restrictionType = accAddressRestrictModification.restrictionType == RestrictionType.AllowAddress ? "Allow Address" : "Block Address";
-
-        let modifications = [];
-        let modificationsTip: DashboardTip[] = [];
-
-        for (let i = 0; i < accAddressRestrictModification.modifications.length; ++i) {
-            let modificationType = accAddressRestrictModification.modifications[i].modificationType === 0 ? "Add" : "Remove";
-            let address: string = accAddressRestrictModification.modifications[i].value;
-
-            modifications.push({
-                modificationType: modificationType,
-                address: address
-            });
-
-            let addressName = this.addressConvertToName(address);
-            modificationsTip.push(DashboardService.createSimpleStringTip(`${modificationType} ${addressName}`));
-
-            transactionDetails.relatedAddress.push(address);
-        }
-
-        let data = {
-            restrictionType: restrictionType,
-            modifications: modifications
-        };
-
-        transactionDetails.extractedData = data;
-
-        let newRowTip = new RowDashboardTip();
-            
-        let restrictionTypeTip = DashboardService.createStringTip(data.restrictionType);
-
-        let allTip: DashboardTip[] = [ restrictionTypeTip];
-
-        allTip = allTip.concat(modificationsTip);
-
-        newRowTip.rowTips = allTip;
-
-        transactionDetails.displayTips.push(newRowTip);
-
-        // transactionDetails.displayList.set("Type", `${data.restrictionType}`);
-        // transactionDetails.displayList.set("Modifications", data.modifications.map((modi)=> `${modi.modificationType} ${modi.address}`).join("<br>"));
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    extractTransactionAccountMosaicRestriction(accMosaicRestrictModification: AccountMosaicRestrictionModificationTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: accMosaicRestrictModification.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [accMosaicRestrictModification.signer.publicKey],
-            signerAddress: accMosaicRestrictModification.signer.address.plain(),
-            relatedAddress: [accMosaicRestrictModification.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(accMosaicRestrictModification.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [accMosaicRestrictModification.signer.publicKey]
-        };
-
-        let restrictionType = accMosaicRestrictModification.restrictionType == RestrictionType.AllowMosaic ? "Allow Asset" : "Block Asset";
-
-        let modifications = [];
-        let modificationsTip: DashboardTip[] = [];
-
-        for (let i = 0; i < accMosaicRestrictModification.modifications.length; ++i) {
-            let modificationType = accMosaicRestrictModification.modifications[i].modificationType === 0 ? "Add" : "Remove";
-            let assetId = accMosaicRestrictModification.modifications[i].value;
-            let assetIdHex = Helper.createAssetId(assetId).toHex().toUpperCase();
-
-            modifications.push({
-                modificationType: modificationType,
-                assetIdHex: assetIdHex
-            });
-
-            transactionDetails.relatedAsset.push(assetIdHex);
-
-            modificationsTip.push(DashboardService.createSimpleStringTip(`${modificationType} ${assetIdHex}`));
-        }
-
-        let data = {
-            restrictionType: restrictionType,
-            modifications: modifications
-        };
-
-        transactionDetails.extractedData = data;
-
-        let newRowTip = new RowDashboardTip();
-        let restrictionTypeTip = DashboardService.createStringTip(data.restrictionType);
-
-        let allTip: DashboardTip[] = [ restrictionTypeTip];
-        allTip = allTip.concat(modificationsTip);
-
-        newRowTip.rowTips = allTip;
-        transactionDetails.displayTips.push(newRowTip);
-
-        // transactionDetails.displayList.set("Type", `${data.restrictionType}`);
-        // transactionDetails.displayList.set("Modifications", data.modifications.map((modi)=> `${modi.modificationType} - ${modi.assetIdHex}`).join("<br>"));
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    extractTransactionAccountOperationRestriction(accOperationRestrictModification: AccountOperationRestrictionModificationTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: accOperationRestrictModification.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [accOperationRestrictModification.signer.publicKey],
-            signerAddress: accOperationRestrictModification.signer.address.plain(),
-            relatedAddress: [accOperationRestrictModification.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(accOperationRestrictModification.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [accOperationRestrictModification.signer.publicKey]
-        };
-
-        let restrictionType = accOperationRestrictModification.restrictionType == RestrictionType.AllowTransaction ? "Allow Transaction" : "Block Transaction";
-
-        let modifications = [];
-        let modificationsTip: DashboardTip[] = [];
-
-        for (let i = 0; i < accOperationRestrictModification.modifications.length; ++i) {
-            let modificationType = accOperationRestrictModification.modifications[i].modificationType === 0 ? "Add" : "Remove";
-            let transactionType: TransactionType = accOperationRestrictModification.modifications[i].value;
-            let transactionName = TransactionUtils.getTransactionTypeNameByEnum(transactionType);
-
-            modifications.push({
-                modificationType: modificationType,
-                transactionName: transactionName
-            });
-
-            modificationsTip.push(DashboardService.createSimpleStringTip(`${modificationType} ${transactionName}`));
-        }
-
-        let data = {
-            restrictionType: restrictionType,
-            modifications: modifications
-        };
-
-        transactionDetails.extractedData = data;
-
-        let newRowTip = new RowDashboardTip();
-        let restrictionTypeTip = DashboardService.createStringTip(data.restrictionType);
-
-        let allTip: DashboardTip[] = [ restrictionTypeTip];
-        allTip = allTip.concat(modificationsTip);
-
-        newRowTip.rowTips = allTip;
-        transactionDetails.displayTips.push(newRowTip);
-
-        // transactionDetails.displayList.set("Type", `${data.restrictionType}`);
-        // transactionDetails.displayList.set("Modifications", data.modifications.map((modi)=> `${modi.modificationType} - ${modi.transactionName}`).join("<br>"));
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    extractTransactionModifyMultisigAccount(modifyMultisigAccountTransaction: ModifyMultisigAccountTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: modifyMultisigAccountTransaction.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [modifyMultisigAccountTransaction.signer.publicKey],
-            signerAddress: modifyMultisigAccountTransaction.signer.address.plain(),
-            relatedAddress: [modifyMultisigAccountTransaction.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(modifyMultisigAccountTransaction.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [modifyMultisigAccountTransaction.signer.publicKey]
-        };
-
-        let modificationArray = [];
-        let modificationsTip: DashboardTip[] = [];
-
-        for (let i = 0; i < modifyMultisigAccountTransaction.modifications.length; ++i) {
-            let cosignerPublicKey = modifyMultisigAccountTransaction.modifications[i].cosignatoryPublicAccount.publicKey;
-            let type = modifyMultisigAccountTransaction.modifications[i].type === 0 ? "Add" : "Remove";
-
-            transactionDetails.relatedPublicKey.push(cosignerPublicKey);
-            transactionDetails.relatedAddress.push(modifyMultisigAccountTransaction.modifications[i].cosignatoryPublicAccount.address.plain());
-
-            modificationArray.push({
-                cosignerPublicKey: cosignerPublicKey,
-                type: type
-            });
-
-            let modify = type === "Add" ? "+" : "-";
-
-            if(type === "Add"){
-                transactionDetails.signerPublicKeys.push(cosignerPublicKey);
-            }
-
-            let cosignerDisplay = this.publickKeyConvertToName(cosignerPublicKey);
-
-            let modifyTip = DashboardService.createPublicKeyStringTip(cosignerPublicKey, cosignerDisplay, modify)
-
-            modificationsTip.push(modifyTip);
-        }
-
-        let data = {
-            minApproval: modifyMultisigAccountTransaction.minApprovalDelta,
-            minRemoval: modifyMultisigAccountTransaction.minRemovalDelta,
-            modifications: modificationArray
-        }
-
-        transactionDetails.extractedData = data;
-
-        let newRowTip = new RowDashboardTip();
-        let multisigMinApproveTip = DashboardService.createStringTip(`Min.Approval: ${data.minApproval}`);
-        let multisigMinRemoveTip = DashboardService.createStringTip(`Min.Removal: ${data.minRemoval}`);
-
-        let allTip: DashboardTip[] = [ multisigMinApproveTip, multisigMinRemoveTip];
-        allTip = allTip.concat(modificationsTip);
-
-        newRowTip.rowTips = allTip;
-        transactionDetails.displayTips.push(newRowTip);
-
-        // transactionDetails.displayList.set("Minimum Approval", `${data.minApproval}`);
-        // transactionDetails.displayList.set("Minimum Removal", `${data.minRemoval}`);
-        // transactionDetails.displayList.set("Modifications", data.modifications.map((modi)=> `${modi.type} ${modi.cosignerPublicKey}`).join("<br>"));
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    extractTransactionMosaicAlias(mosaicAliasTx: MosaicAliasTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: mosaicAliasTx.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [mosaicAliasTx.signer.publicKey],
-            signerAddress: mosaicAliasTx.signer.address.plain(),
-            relatedAddress: [mosaicAliasTx.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(mosaicAliasTx.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [mosaicAliasTx.signer.publicKey]
-        };
-
-        let mosaicIdHex = mosaicAliasTx.mosaicId.toHex().toUpperCase();
-        let namespaceIdHex = mosaicAliasTx.namespaceId.toHex().toUpperCase();
-        let linkType = mosaicAliasTx.actionType === 0 ? "Link" : "Unlink";
-
-        let data = {
-            mosaicIdHex: mosaicIdHex,
-            namespaceIdHex: namespaceIdHex,
-            linkType: linkType,
-        };
-
-        transactionDetails.extractedData = data;
-
-        let newRowTip = new RowDashboardTip();
-        let namespaceIdDisplay = data.namespaceIdHex === nativeTokenNamespaceId.value.toUpperCase() ? "prx.xpx" : data.namespaceIdHex;
-
-        if(linkType === "Link"){
-            newRowTip.rowTips.push(DashboardService.createAssetAliasTip(namespaceIdHex, namespaceIdDisplay, mosaicIdHex, mosaicIdHex));
-        }
-        else{
-            newRowTip.rowTips.push(DashboardService.createRemoveAssetAliasTip(namespaceIdHex, namespaceIdDisplay, mosaicIdHex, mosaicIdHex));
-        }
-
-        transactionDetails.displayTips.push(newRowTip);
-
-        // transactionDetails.displayList.set("Action", linkType);
-        // transactionDetails.displayList.set("Asset ID", mosaicIdHex);
-        // transactionDetails.displayList.set("Namespace ID", namespaceIdHex);
-
-        transactionDetails.relatedAsset.push(mosaicIdHex);
-        transactionDetails.relatedNamespace.push(namespaceIdHex);
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    extractTransactionMosaicDefinition(mosaicDefinitionTransaction: MosaicDefinitionTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: mosaicDefinitionTransaction.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [mosaicDefinitionTransaction.signer.publicKey],
-            signerAddress: mosaicDefinitionTransaction.signer.address.plain(),
-            relatedAddress: [mosaicDefinitionTransaction.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(mosaicDefinitionTransaction.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [mosaicDefinitionTransaction.signer.publicKey]
-        };
-
-        let mosaicIdHex = mosaicDefinitionTransaction.mosaicId.toHex().toUpperCase();
-        let nonceString = "";//mosaicDefinitionTransaction.nonce.nonce.toString();
-        let properties = mosaicDefinitionTransaction.mosaicProperties;
-
-        let data = {
-            mosaicIdHex: mosaicIdHex,
-            nonce: nonceString,
-            properties: {
-                divisibility: properties.divisibility,
-                supplyMutable: properties.supplyMutable ? "TRUE" : "FALSE",
-                transferable: properties.transferable ? "TRUE" : "FALSE",
-                duration: properties.duration ? properties.duration.compact() : 0
-            }
-        };
-
-        let newRowTip = new RowDashboardTip();
-
-        newRowTip.rowTips.push(DashboardService.createAssetTip(mosaicIdHex, mosaicIdHex));
-        //newRowTip.rowTips.push(DashboardService.createStringTip(`Nonce: ${nonceString}`));
-        newRowTip.rowTips.push(DashboardService.createStringTip(`Divisibility: ${properties.divisibility}`));
-        newRowTip.rowTips.push(DashboardService.createStringTip(`Supply Mutable: ${properties.supplyMutable}`));
-        newRowTip.rowTips.push(DashboardService.createStringTip(`Transferable: ${properties.transferable}`));
-
-        if(data.properties.duration !== 0){
-            newRowTip.rowTips.push(DashboardService.createDurationTip(data.properties.duration));
-        }
-
-        transactionDetails.displayTips.push(newRowTip);
-
-        transactionDetails.extractedData = data;
-
-        // transactionDetails.displayList.set("Asset ID", mosaicIdHex);
-        // transactionDetails.displayList.set("Nonce", nonceString);
-        // transactionDetails.displayList.set("Divisibility", `${data.properties.divisibility}`);
-        // transactionDetails.displayList.set("Supply Mutable", data.properties.supplyMutable);
-        // transactionDetails.displayList.set("Transferable", data.properties.transferable);
-        // transactionDetails.displayList.set("Duration", data.properties.duration === 0 ? "No Expiration" : `${data.properties.duration} blocks`);
-
-        transactionDetails.relatedAsset.push(mosaicIdHex);
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    extractTransactionMosaicSupplyChange(mosaicSupplyChangeTransaction: MosaicSupplyChangeTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: mosaicSupplyChangeTransaction.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [mosaicSupplyChangeTransaction.signer.publicKey],
-            signerAddress: mosaicSupplyChangeTransaction.signer.address.plain(),
-            relatedAddress: [mosaicSupplyChangeTransaction.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(mosaicSupplyChangeTransaction.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [mosaicSupplyChangeTransaction.signer.publicKey]
-        };
-
-        let mosaicIdHex = mosaicSupplyChangeTransaction.mosaicId.toHex().toUpperCase();
-        let deltaAmount = mosaicSupplyChangeTransaction.delta.compact();
-        let direction = mosaicSupplyChangeTransaction.direction === 0 ? "Decrease" : "Increase";
-
-        let data = {
-            mosaicIdHex: mosaicIdHex,
-            deltaAmount: deltaAmount,
-            direction: direction,
-        };
-
-        transactionDetails.extractedData = data;
-
-        let newRowTip = new RowDashboardTip();
-
-        //newRowTip.rowTips.push(DashboardService.createAssetTip(mosaicIdHex, mosaicIdHex));
-
-        newRowTip.rowTips.push(DashboardService.createSupplyAssetAmountTip(deltaAmount, false, mosaicIdHex, mosaicIdHex, direction === "Increase"));
-        //newRowTip.rowTips.push(DashboardService.createSupplyAmountTip(deltaAmount, false, direction === "Increase"));
-
-        transactionDetails.displayTips.push(newRowTip);
-
-        // transactionDetails.displayList.set("Asset ID", mosaicIdHex);
-        // transactionDetails.displayList.set("Type", direction);
-        // transactionDetails.displayList.set("Delta Amount", `${deltaAmount}`);
-
-        transactionDetails.relatedAsset.push(mosaicIdHex);
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    extractTransactionRegisterNamespace(registerNamespaceTx: RegisterNamespaceTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: registerNamespaceTx.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [registerNamespaceTx.signer.publicKey],
-            signerAddress: registerNamespaceTx.signer.address.plain(),
-            relatedAddress: [registerNamespaceTx.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(registerNamespaceTx.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [registerNamespaceTx.signer.publicKey]
-        };
-
-        let namespaceIdHex = registerNamespaceTx.namespaceId.toHex().toUpperCase();
-        let namespaceName = registerNamespaceTx.namespaceName;
-        let parentId = registerNamespaceTx.parentId ? registerNamespaceTx.parentId.toHex().toUpperCase() : null;
-        let duration = registerNamespaceTx.duration ? registerNamespaceTx.duration.compact() : null;
-        let type = registerNamespaceTx.namespaceType === 0 ? "RootNamespace" : "SubNamespace";
-
-        let data = {
-            namespaceIdHex: namespaceIdHex,
-            namespaceName: namespaceName,
-            parentId: parentId,
-            duration: duration,
-            type: type
-        };
-
-        let newRowTip = new RowDashboardTip();
-
-        newRowTip.rowTips.push(DashboardService.createStringTip(type, "Type: "));
-        let namespaceTip = DashboardService.createNamespaceIDTip(namespaceName, namespaceIdHex);
-        namespaceTip.valueType = "fixed";
-        newRowTip.rowTips.push(namespaceTip);
-        
-        if(parentId){
-            newRowTip.rowTips.push(DashboardService.createMsgNamespaceTip(parentId, parentId, "Parent ID:"));
-        }
-
-        if(duration){
-            newRowTip.rowTips.push(DashboardService.createDurationTip(duration));
-        }
-        
-        transactionDetails.displayTips.push(newRowTip);
-
-        transactionDetails.extractedData = data;
-
-        // transactionDetails.displayList.set("Type", type);
-        // transactionDetails.displayList.set("Namespace ID", namespaceIdHex);
-        // transactionDetails.displayList.set("Name", namespaceName);
-        // transactionDetails.displayList.set("Duration", `${duration} blocks`);
-
-        transactionDetails.relatedNamespace.push(namespaceIdHex);
-        transactionDetails.relatedNamespace.push(namespaceName);
-
-        
-        if (parentId) {
-            transactionDetails.relatedNamespace.push(parentId);
-            //transactionDetails.displayList.set("Parent ID", parentId);
-        } 
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    extractTransactionSecretLock(secretLockTx: SecretLockTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: secretLockTx.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [secretLockTx.signer.publicKey],
-            signerAddress: secretLockTx.signer.address.plain(),
-            relatedAddress: [secretLockTx.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(secretLockTx.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [secretLockTx.signer.publicKey]
-        };
-
-        let assetIdHex = secretLockTx.mosaic.id.toHex().toUpperCase();
-        let assetAmount = secretLockTx.mosaic.amount.compact();
-        let address = secretLockTx.recipient.pretty();
-        let addressPlain = secretLockTx.recipient.plain();
-        let secret = secretLockTx.secret;
-        let duration = secretLockTx.duration.compact();
-        let hashType = "";
-
-        switch (secretLockTx.hashType) {
-            case HashType.Op_Sha3_256:
-                hashType = "Op_Sha3_256";
-                break;
-            case HashType.Op_Keccak_256:
-                hashType = "Op_Keccak_256";
-                break;
-            case HashType.Op_Hash_160:
-                hashType = "Op_Hash_160";
-                break;
-            case HashType.Op_Hash_256:
-                hashType = "Op_Hash_256";
-                break;
-        }
-
-        let data = {
-            assetIdHex: assetIdHex,
-            assetAmount: assetAmount,
-            secret: secret,
-            duration: duration,
-            hashType: hashType,
-            address: address,
-            addressPlain: addressPlain
-        };
-
-        let newRowTip = new RowDashboardTip();
-
-        let recipientDisplay = this.addressConvertToName(addressPlain);
-        let senderDisplay = this.addressConvertToName(transactionDetails.signerAddress)
-        newRowTip.rowTips.push(DashboardService.createTransferTip(transactionDetails.signerAddress, senderDisplay, addressPlain, recipientDisplay));
-        
-        let newRow2Tip = new RowDashboardTip();
-
-        let assetAmountTip = DashboardService.createAssetAmountTip(data.assetAmount, data.assetIdHex, data.assetIdHex, false);
-
-        if(data.assetIdHex === nativeTokenAssetId.value){
-            assetAmountTip.displayValue2 = "XPX";
-            assetAmountTip.value = DashboardService.convertToExactNativeAmount(data.assetAmount).toString();
-            assetAmountTip.valueType = AmountType.EXACT;
-        }
-
-        newRow2Tip.rowTips.push(assetAmountTip);
-        newRow2Tip.rowTips.push(DashboardService.createStringTip(data.hashType, "Hash Type:"));
-        newRow2Tip.rowTips.push(DashboardService.createStringTip(data.secret, "Secret:"));
-
-        transactionDetails.displayTips.push(newRowTip);
-        transactionDetails.displayTips.push(newRow2Tip);
-
-        transactionDetails.extractedData = data;
-
-        // transactionDetails.displayList.set("Hash Type", hashType);
-        // transactionDetails.displayList.set("Secret", secret);
-        // transactionDetails.displayList.set("Duration", `${duration} blocks`);
-        // transactionDetails.displayList.set("Asset ID", assetIdHex);
-        // transactionDetails.displayList.set("Asset Amount", `${assetAmount}`);
-        // transactionDetails.displayList.set("Address", address);
-
-        transactionDetails.relatedAsset.push(assetIdHex);
-        transactionDetails.relatedAddress.push(addressPlain);
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    extractTransactionSecretProof(secretProofTx: SecretProofTransaction): DashboardInnerTransaction {
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: secretProofTx.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [secretProofTx.signer.publicKey],
-            signerAddress: secretProofTx.signer.address.plain(),
-            relatedAddress: [secretProofTx.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(secretProofTx.type),
-            searchString: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [secretProofTx.signer.publicKey]
-        };
-
-        let proof = secretProofTx.proof;
-        let address = secretProofTx.recipient.pretty();
-        let addressPlain = secretProofTx.recipient.plain();
-        let secret = secretProofTx.secret;
-        let hashType = "";
-
-        switch (secretProofTx.hashType) {
-            case HashType.Op_Sha3_256:
-                hashType = "Op_Sha3_256";
-                break;
-            case HashType.Op_Keccak_256:
-                hashType = "Op_Keccak_256";
-                break;
-            case HashType.Op_Hash_160:
-                hashType = "Op_Hash_160";
-                break;
-            case HashType.Op_Hash_256:
-                hashType = "Op_Hash_256";
-                break;
-        }
-
-        let data = {
-            proof: proof,
-            secret: secret,
-            address: address,
-            addressPlain: addressPlain,
-            hashType: hashType
-        };
-
-        transactionDetails.extractedData = data;
-
-        let newRowTip = new RowDashboardTip();
-
-        let recipientDisplay = this.addressConvertToName(addressPlain);
-        let senderDisplay = this.addressConvertToName(transactionDetails.signerAddress)
-        newRowTip.rowTips.push(DashboardService.createTransferTip(transactionDetails.signerAddress, senderDisplay, address, recipientDisplay));
-        
-        let newRow2Tip = new RowDashboardTip();
-
-        newRow2Tip.rowTips.push(DashboardService.createStringTip(data.hashType, "Hash Type:"));
-        newRow2Tip.rowTips.push(DashboardService.createStringTip(data.secret, "Secret:"));
-        newRow2Tip.rowTips.push(DashboardService.createStringTip(data.proof, "Proof:"));
-
-        transactionDetails.displayTips.push(newRowTip);
-        transactionDetails.displayTips.push(newRow2Tip);
-
-        // transactionDetails.displayList.set("Hash Type", hashType);
-        // transactionDetails.displayList.set("Secret", secret);
-        // transactionDetails.displayList.set("Proof", proof);
-        // transactionDetails.displayList.set("Address", address);
-
-        transactionDetails.relatedAddress.push(addressPlain);
-
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAsset);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedAddress);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedPublicKey);
-        transactionDetails.searchString = transactionDetails.searchString.concat(transactionDetails.relatedNamespace);
-
-        return transactionDetails;
-    }
-
-    extractInnerTransaction(innerTransaction: InnerTransaction): DashboardInnerTransaction {
-
-        let transactionDetails: DashboardInnerTransaction = {
-            signer: innerTransaction.signer.publicKey,
-            relatedAsset: [],
-            relatedNamespace: [],
-            relatedPublicKey: [innerTransaction.signer.publicKey],
-            signerAddress: innerTransaction.signer.address.plain(),
-            relatedAddress: [innerTransaction.signer.address.plain()],
-            typeName: TransactionUtils.getTransactionTypeName(innerTransaction.type),
-            searchString: [],
-            transferList: [],
-            extractedData: {},
-            displayList: new Map<string, string>(),
-            displayTips: [],
-            signerPublicKeys: [innerTransaction.signer.publicKey]
-        };
-
-        let tempData: DashboardInnerTransaction;
+        let tempData: MyInnerTxn;
 
         switch (innerTransaction.type) {
-            case TransactionType.ADDRESS_ALIAS:
+            case TransactionType.ADDRESS_ALIAS:{
                 let addressAliasTx = innerTransaction as AddressAliasTransaction;
-                tempData = this.extractTransactionAddressAlias(addressAliasTx);
+                tempData = await this.extractAddressAlias(addressAliasTx);
+                let addressAliasFormat = tempData as InnerAliasTransaction;
+
+                let infos: TxnDetails[] = [];
+
+                let namespaceInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Namespace",
+                    value: addressAliasFormat.aliasName
+                };
+                infos.push(namespaceInfo);
+
+                let actionInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Action",
+                    value: addressAliasFormat.aliasTypeName
+                };
+                infos.push(actionInfo);
+
+                let addressInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Address",
+                    value: addressAliasFormat.address
+                };
+                infos.push(addressInfo);
+
+                transactionDetails = {
+                    signer: addressAliasFormat.signer,
+                    signerAddressPlain: addressAliasFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(addressAliasFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.NONE,
+                    typeName: addressAliasFormat.type
+                };
+            }
                 break;
-            case TransactionType.ADD_EXCHANGE_OFFER:
-                let addExchangeOfferTx = innerTransaction as AddExchangeOfferTransaction;
-                tempData = this.extractTransactionAddExchangeOffer(addExchangeOfferTx);
-                break;
-            case TransactionType.CHAIN_CONFIGURE:
-                let chainConfigureTx = innerTransaction as ChainConfigTransaction;
-                tempData = this.extractTransactionChainConfig(chainConfigureTx);
-                break;
-            case TransactionType.CHAIN_UPGRADE:
-                let chainUpgradeTx = innerTransaction as ChainUpgradeTransaction;
-                tempData = this.extractTransactionChainUpgrade(chainUpgradeTx);
-                break;
-            case TransactionType.EXCHANGE_OFFER:
-                let exchangeOfferTx = innerTransaction as ExchangeOfferTransaction;
-                tempData = this.extractTransactionExchangeOffer(exchangeOfferTx);
-                break;
-            case TransactionType.REMOVE_EXCHANGE_OFFER:
-                let removeExchangeOfferTx = innerTransaction as RemoveExchangeOfferTransaction;
-                tempData = this.extractTransactionRemoveExchangeOffer(removeExchangeOfferTx);
-                break;
-            case TransactionType.LINK_ACCOUNT:
-                let accountLinkTx = innerTransaction as AccountLinkTransaction;
-                tempData = this.extractTransactionAccountLink(accountLinkTx);
-                break;
-            case TransactionType.LOCK:
-                let lockFundTx = innerTransaction as LockFundsTransaction;
-                tempData = this.extractTransactionLockFunds(lockFundTx);
-                break;
-            // case TransactionType.MODIFY_ACCOUNT_METADATA:
-            //     let modifyAccountMetadataTx = innerTransaction as ModifyMetadataTransaction;
-            //     tempData = this.extractTransactionModifyAccountMetadata(modifyAccountMetadataTx);
-            //     break;
-            // case TransactionType.MODIFY_MOSAIC_METADATA:
-            //     let modifyMosaicMetadataTx = innerTransaction as ModifyMetadataTransaction;
-            //     tempData = this.extractTransactionModifyMosaicMetadata(modifyMosaicMetadataTx);
-            //     break;
-            // case TransactionType.MODIFY_NAMESPACE_METADATA:
-            //     let modifyNamespaceMetadataTx = innerTransaction as ModifyMetadataTransaction;
-            //     tempData = this.extractTransactionModifyNamespaceMetadata(modifyNamespaceMetadataTx);
-            //     break;
-            case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS:
-                let accAddressModifyTx = innerTransaction as AccountAddressRestrictionModificationTransaction;
-                tempData = this.extractTransactionAccountAddressRestriction(accAddressModifyTx);
-                break;
-            case TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC:
-                let accMosaicModifyTx = innerTransaction as AccountMosaicRestrictionModificationTransaction;
-                tempData = this.extractTransactionAccountMosaicRestriction(accMosaicModifyTx);
-                break;
-            case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:
-                let accOperationModifyTx = innerTransaction as AccountOperationRestrictionModificationTransaction;
-                tempData = this.extractTransactionAccountOperationRestriction(accOperationModifyTx);
-                break;
-            case TransactionType.MODIFY_MULTISIG_ACCOUNT:
-                let modifyMultisigAccountTx = innerTransaction as ModifyMultisigAccountTransaction;
-                tempData = this.extractTransactionModifyMultisigAccount(modifyMultisigAccountTx);
-                break;
-            case TransactionType.MOSAIC_ALIAS:
+            case TransactionType.MOSAIC_ALIAS:{
                 let mosaicAliasTx = innerTransaction as MosaicAliasTransaction;
-                tempData = this.extractTransactionMosaicAlias(mosaicAliasTx);
+                tempData = await this.extractAssetAlias(mosaicAliasTx);
+                let assetAliasFormat = tempData as InnerAliasTransaction;
+
+                let infos: TxnDetails[] = [];
+
+                let namespaceInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Namespace",
+                    value: assetAliasFormat.aliasName
+                };
+                infos.push(namespaceInfo);
+
+                let actionInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Action",
+                    value: assetAliasFormat.aliasTypeName
+                };
+                infos.push(actionInfo);
+
+                let assetInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Asset",
+                    value: assetAliasFormat.assetId
+                };
+                infos.push(assetInfo);
+
+                transactionDetails = {
+                    signer: assetAliasFormat.signer,
+                    signerAddressPlain: assetAliasFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(assetAliasFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.NONE,
+                    typeName: assetAliasFormat.type
+                };
+            }
                 break;
-            case TransactionType.MOSAIC_DEFINITION:
+            case TransactionType.ADD_EXCHANGE_OFFER:{
+                let addExchangeOfferTx = innerTransaction as AddExchangeOfferTransaction;
+                tempData = await this.extractAddExchangeOffer(addExchangeOfferTx);
+                let addExchangeOfferFormat = tempData as InnerExchangeTransaction;
+
+                let infos: TxnDetails[] = [];
+
+                for(let i =0; i < addExchangeOfferFormat.exchangeOffers.length; ++i){
+                    let offer = addExchangeOfferFormat.exchangeOffers[i];
+                    let offeringAssetString = `${offer.amount} ${offer.assetId}` + offer.assetNamespace ? ` (${offer.assetNamespace})`: '';
+                    let costString = `${offer.cost} ${AppState.nativeToken.label}`;
+                    let offerInfo: TxnDetails = {
+                        type: offer.type === "Buy" ? MsgType.GREEN: MsgType.RED,
+                        value: costString + " - " + offeringAssetString + `. Duration: ${offer.duration}`
+                    };
+                    infos.push(offerInfo);
+                }
+
+                transactionDetails = {
+                    signer: addExchangeOfferFormat.signer,
+                    signerAddressPlain: addExchangeOfferFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(addExchangeOfferFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.BUY_SELL,
+                    typeName: addExchangeOfferFormat.type
+                };
+            }
+                break;
+            case TransactionType.EXCHANGE_OFFER:{
+                let exchangeOfferTx = innerTransaction as ExchangeOfferTransaction;
+                tempData = await this.extractExchangeOffer(exchangeOfferTx);
+                let exchangeOfferFormat = tempData as InnerExchangeTransaction;
+
+                let infos: TxnDetails[] = [];
+
+                for(let i =0; i < exchangeOfferFormat.exchangeOffers.length; ++i){
+                    let offer = exchangeOfferFormat.exchangeOffers[i];
+                    let offeringAssetString = `${offer.amount} ${offer.assetId}` + offer.assetNamespace ? ` (${offer.assetNamespace})`: '';
+                    let costString = `${offer.cost} ${AppState.nativeToken.label}`;
+                    let ownerPublicAccount = PublicAccount.createFromPublicKey(offer.owner, AppState.networkType);
+                    let owner = this.wallet.convertAddressToName(ownerPublicAccount.address.plain());
+                    let offerInfo: TxnDetails = {
+                        type: offer.type === "Buy" ? MsgType.RED: MsgType.GREEN,
+                        value: costString + " - " + offeringAssetString + `. From: ${owner}`
+                    };
+                    infos.push(offerInfo);
+                }
+
+                transactionDetails = {
+                    signer: exchangeOfferFormat.signer,
+                    signerAddressPlain: exchangeOfferFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(exchangeOfferFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.BUY_SELL,
+                    typeName: exchangeOfferFormat.type
+                };
+            }
+                break;
+            case TransactionType.REMOVE_EXCHANGE_OFFER:{
+                let removeExchangeOfferTx = innerTransaction as RemoveExchangeOfferTransaction;
+                tempData = await this.extractRemoveExchangeOffer(removeExchangeOfferTx);
+                let removeExchangeOfferFormat = tempData as InnerExchangeTransaction;
+
+                let infos: TxnDetails[] = [];
+
+                for(let i =0; i < removeExchangeOfferFormat.exchangeOffers.length; ++i){
+                    let offer = removeExchangeOfferFormat.exchangeOffers[i];
+                    let offeringAssetString = `${offer.assetId}` + offer.assetNamespace ? ` (${offer.assetNamespace})`: '';
+
+                    let offerInfo: TxnDetails = {
+                        type: offer.type === "Buy" ? MsgType.GREEN: MsgType.RED,
+                        value: offeringAssetString
+                    };
+                    infos.push(offerInfo);
+                }
+
+                transactionDetails = {
+                    signer: removeExchangeOfferFormat.signer,
+                    signerAddressPlain: removeExchangeOfferFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(removeExchangeOfferFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.BUY_SELL,
+                    typeName: removeExchangeOfferFormat.type
+                };
+            }
+                break;
+            case TransactionType.CHAIN_CONFIGURE:{
+                let chainConfigureTx = innerTransaction as ChainConfigTransaction;
+                tempData = this.extractChainConfig(chainConfigureTx);
+                let chainConfigFormat = tempData as InnerChainTransaction;
+
+                let infos: TxnDetails[] = [];
+
+                let applyHeightDeltaInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Apply after blocks",
+                    value: chainConfigFormat.applyHeightDelta
+                };
+                infos.push(applyHeightDeltaInfo);
+
+                transactionDetails = {
+                    signer: chainConfigFormat.signer,
+                    signerAddressPlain: chainConfigFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(chainConfigFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.NONE,
+                    typeName: chainConfigFormat.type
+                };
+            }
+                break;
+            case TransactionType.CHAIN_UPGRADE:{
+                let chainUpgradeTx = innerTransaction as ChainUpgradeTransaction;
+                tempData = this.extractChainUpgrade(chainUpgradeTx);
+                let chainUpgradeFormat = tempData as InnerChainTransaction;
+
+                let infos: TxnDetails[] = [];
+
+                let versionInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "New Version",
+                    value: chainUpgradeFormat.newVersion
+                };
+                infos.push(versionInfo);
+
+                let upgradePeriodInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Upgrade After Blocks",
+                    value: chainUpgradeFormat.upgradePeriod
+                };
+                infos.push(upgradePeriodInfo);
+
+                transactionDetails = {
+                    signer: chainUpgradeFormat.signer,
+                    signerAddressPlain: chainUpgradeFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(chainUpgradeFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.NONE,
+                    typeName: chainUpgradeFormat.type
+                };
+            }
+                break;
+            
+            case TransactionType.LINK_ACCOUNT:{
+                let accountLinkTx = innerTransaction as AccountLinkTransaction;
+                tempData = this.extractAccountLink(accountLinkTx);
+                let accountLinkFormat = tempData as InnerLinkTransaction;
+
+                let infos: TxnDetails[] = [];
+
+                let linkInfo: TxnDetails = {
+                    type: accountLinkFormat.action === "Link" ? MsgType.GREEN : MsgType.RED,
+                    value: accountLinkFormat.remotePublicKey
+                };
+                infos.push(linkInfo);
+
+                transactionDetails = {
+                    signer: accountLinkFormat.signer,
+                    signerAddressPlain: accountLinkFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(accountLinkFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.ADD_REMOVE,
+                    typeName: accountLinkFormat.type
+                };
+            }
+                break;
+            case TransactionType.LOCK:{
+                let lockFundTx = innerTransaction as LockFundsTransaction;
+                tempData = await this.extractLockHash(lockFundTx, TransactionGroupType.PARTIAL);
+                let lockFundFormat = tempData as InnerLockTransaction;
+
+                let infos: TxnDetails[] = [];
+
+                let hashInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Hash",
+                    value: lockFundFormat.lockHash
+                };
+                infos.push(hashInfo);
+                
+                let durationInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Action",
+                    value: lockFundFormat.duration
+                };
+
+                infos.push(durationInfo);
+
+                let lockingInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Locking Amount",
+                    value: lockFundFormat.amountLocking + ` ${AppState.nativeToken.label}`
+                };
+                infos.push(lockingInfo);
+
+                transactionDetails = {
+                    signer: lockFundFormat.signer,
+                    signerAddressPlain: lockFundFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(lockFundFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.NONE,
+                    typeName: lockFundFormat.type
+                };
+            }
+                break;
+            case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS:{
+                let accAddressRestrictionTx = innerTransaction as AccountAddressRestrictionModificationTransaction;
+                tempData = this.extractAccAddressRestriction(accAddressRestrictionTx);
+                let accAddressRestrictionFormat = tempData as InnerRestrictionTransaction;
+
+                let infos: TxnDetails[] = [];
+
+                let actionInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Action",
+                    value: accAddressRestrictionFormat.restrictionTypeOutput
+                };
+
+                infos.push(actionInfo);
+                
+                for(let i =0; i < accAddressRestrictionFormat.modification.length; ++i){
+                    let modification = accAddressRestrictionFormat.modification[i];
+
+                    let restrictInfo: TxnDetails = {
+                        type:  modification.action === "Add" ? MsgType.GREEN : MsgType.RED,
+                        value: modification.value,
+                        short: this.wallet.convertAddressToName(modification.value)
+                    };
+    
+                    infos.push(restrictInfo); 
+                }
+
+                transactionDetails = {
+                    signer: accAddressRestrictionFormat.signer,
+                    signerAddressPlain: accAddressRestrictionFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(accAddressRestrictionFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.ALLOW_BLOCK,
+                    typeName: accAddressRestrictionFormat.type
+                };
+            }
+                break;
+            case TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC:{
+                let accMosaicModifyTx = innerTransaction as AccountMosaicRestrictionModificationTransaction;
+                tempData = await this.extractAccAssetRestriction(accMosaicModifyTx);
+                let accAssetRestrictionFormat = tempData as InnerRestrictionTransaction;
+
+                let infos: TxnDetails[] = [];
+
+                let actionInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Action",
+                    value: accAssetRestrictionFormat.restrictionTypeOutput
+                };
+
+                infos.push(actionInfo);
+                
+                for(let i =0; i < accAssetRestrictionFormat.modification.length; ++i){
+                    let modification = accAssetRestrictionFormat.modification[i];
+
+                    let restrictInfo: TxnDetails = {
+                        type:  modification.action === "Add" ? MsgType.GREEN : MsgType.RED,
+                        value: modification.value + modification.name ? `(${modification.name})` : ''
+                    };
+    
+                    infos.push(restrictInfo); 
+                }
+
+                transactionDetails = {
+                    signer: accAssetRestrictionFormat.signer,
+                    signerAddressPlain: accAssetRestrictionFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(accAssetRestrictionFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.ALLOW_BLOCK,
+                    typeName: accAssetRestrictionFormat.type
+                };
+            }
+                break;
+            case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:{
+                let accOperationModifyTx = innerTransaction as AccountOperationRestrictionModificationTransaction;
+                tempData = this.extractAccOperationRestriction(accOperationModifyTx);
+                let accOperationRestrictionFormat = tempData as InnerRestrictionTransaction;
+
+                let infos: TxnDetails[] = [];
+
+                let actionInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Action",
+                    value: accOperationRestrictionFormat.restrictionTypeOutput
+                };
+
+                infos.push(actionInfo);
+                
+                for(let i =0; i < accOperationRestrictionFormat.modification.length; ++i){
+                    let modification = accOperationRestrictionFormat.modification[i];
+
+                    let restrictInfo: TxnDetails = {
+                        type:  modification.action === "Add" ? MsgType.GREEN : MsgType.RED,
+                        value: modification.value
+                    };
+    
+                    infos.push(restrictInfo); 
+                }
+
+                transactionDetails = {
+                    signer: accOperationRestrictionFormat.signer,
+                    signerAddressPlain: accOperationRestrictionFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(accOperationRestrictionFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.ALLOW_BLOCK,
+                    typeName: accOperationRestrictionFormat.type
+                };
+            }
+                break;
+            case TransactionType.MODIFY_MULTISIG_ACCOUNT:{
+                let modifyMultisigAccountTx = innerTransaction as ModifyMultisigAccountTransaction;
+                tempData = await this.extractModifyMultisig(modifyMultisigAccountTx, TransactionGroupType.PARTIAL);
+                let modifyMultisigFormat = tempData as InnerAccountTransaction;
+
+                let infos: TxnDetails[] = [];
+                
+                let approvalChanges: string;
+
+                if(modifyMultisigFormat.approvalDelta === 0){
+                    approvalChanges = '';
+                }
+                else if(modifyMultisigFormat.approvalDelta > 0){
+                    approvalChanges = ` (+${modifyMultisigFormat.approvalDelta})`;
+                }
+                else{
+                    approvalChanges = ` (${modifyMultisigFormat.approvalDelta})`;
+                }
+
+                let minApprovalInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Minimum Approval",
+                    value: modifyMultisigFormat.oldApprovalNumber + approvalChanges 
+                };
+
+                infos.push(minApprovalInfo);
+
+                let removalChanges: string;
+
+                if(modifyMultisigFormat.removalDelta === 0){
+                    removalChanges = '';
+                }
+                else if(modifyMultisigFormat.removalDelta > 0){
+                    removalChanges = ` (+${modifyMultisigFormat.removalDelta})`;
+                }
+                else{
+                    removalChanges = ` (${modifyMultisigFormat.removalDelta})`;
+                }
+
+                let minRemovalInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Minimum Removal",
+                    value: modifyMultisigFormat.oldRemovalNumber + removalChanges 
+                };
+
+                infos.push(minRemovalInfo);
+
+                for(let i =0; i < modifyMultisigFormat.addedCosigner.length; ++i){
+                    let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.addedCosigner[i], AppState.networkType)
+                    let tryShortName = this.wallet.convertAddressToName(publicAccount.address.plain());
+                    let shortName = tryShortName === publicAccount.address.plain() ? '' : tryShortName;
+                    let addCosignerInfo: TxnDetails = {
+                        type: MsgType.GREEN,
+                        value: modifyMultisigFormat.addedCosigner[i],
+                        short: shortName
+                    };
+    
+                    infos.push(addCosignerInfo); 
+                }
+
+                for(let i =0; i < modifyMultisigFormat.removedCosigner.length; ++i){
+                    let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.removedCosigner[i], AppState.networkType)
+                    let removeCosignerInfo: TxnDetails = {
+                        type: MsgType.GREEN,
+                        value: modifyMultisigFormat.removedCosigner[i],
+                        short: this.wallet.convertAddressToName(publicAccount.address.plain())
+                    };
+    
+                    infos.push(removeCosignerInfo); 
+                }
+
+                transactionDetails = {
+                    signer: modifyMultisigFormat.signer,
+                    signerAddressPlain: modifyMultisigFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(modifyMultisigFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.ADD_REMOVE,
+                    typeName: modifyMultisigFormat.type
+                };
+            }
+                break;
+            case TransactionType.MOSAIC_DEFINITION:{
                 let mosaicDefinitionTx = innerTransaction as MosaicDefinitionTransaction;
-                tempData = this.extractTransactionMosaicDefinition(mosaicDefinitionTx);
+                tempData = this.extractAssetDefinition(mosaicDefinitionTx);
+                let assetDefFormat = tempData as InnerAssetTransaction;
+
+                let infos: TxnDetails[] = [];
+                
+                let assetInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Asset",
+                    value: assetDefFormat.assetId
+                };
+
+                infos.push(assetInfo);
+
+                let assetDivisibilityInfo: TxnDetails = {
+                    type: MsgType.INFO,
+                    value: `Divisibility: ${assetDefFormat.divisibility}`
+                };
+
+                infos.push(assetDivisibilityInfo);
+
+                let assetTransferableInfo: TxnDetails = {
+                    type: assetDefFormat.transferable ? MsgType.GREEN : MsgType.RED,
+                    value: `Transferable`
+                };
+
+                infos.push(assetTransferableInfo);
+
+                let assetSupplyMutableInfo: TxnDetails = {
+                    type: assetDefFormat.supplyMutable ? MsgType.GREEN : MsgType.RED,
+                    value: `Supply Mutable`
+                };
+
+                infos.push(assetSupplyMutableInfo);
+
+                if(assetDefFormat.duration){
+                    let assetDurationInfo: TxnDetails = {
+                        type: MsgType.INFO,
+                        label: "Duration",
+                        value: assetDefFormat.duration
+                    };
+    
+                    infos.push(assetDurationInfo);
+                }
+
+                transactionDetails = {
+                    signer: assetDefFormat.signer,
+                    signerAddressPlain: assetDefFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(assetDefFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.TRUE_FALSE,
+                    typeName: assetDefFormat.type
+                };
+            }
                 break;
-            case TransactionType.MOSAIC_SUPPLY_CHANGE:
+            case TransactionType.MOSAIC_SUPPLY_CHANGE:{
                 let mosaicSupplyTx = innerTransaction as MosaicSupplyChangeTransaction;
-                tempData = this.extractTransactionMosaicSupplyChange(mosaicSupplyTx);
+                tempData = await this.extractAssetSupplyChange(mosaicSupplyTx);
+                let assetSupplyFormat = tempData as InnerAssetTransaction;
+
+                let infos: TxnDetails[] = [];
+                
+                let assetInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Asset",
+                    value: assetSupplyFormat.assetId + assetSupplyFormat.namespaceName ? ` (${assetSupplyFormat.namespaceName})` : ''
+                };
+
+                infos.push(assetInfo);
+
+                let assetSupplyInfo: TxnDetails = {
+                    type: MsgType.INFO,
+                    label: "Asset",
+                    value: assetSupplyFormat.supplyDelta > 0 ? `+${assetSupplyFormat.supplyDelta}` : assetSupplyFormat.supplyDelta
+                };
+
+                infos.push(assetSupplyInfo);
+
+                transactionDetails = {
+                    signer: assetSupplyFormat.signer,
+                    signerAddressPlain: assetSupplyFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(assetSupplyFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.NONE,
+                    typeName: assetSupplyFormat.type
+                };
+            }
                 break;
-            case TransactionType.REGISTER_NAMESPACE:
+            case TransactionType.MODIFY_MOSAIC_LEVY:{
+                let assetLevyTx = innerTransaction as MosaicModifyLevyTransaction;
+                tempData = await this.extractAssetModifyLevy(assetLevyTx);
+                let assetLevyFormat = tempData as InnerAssetTransaction;
+
+                let infos: TxnDetails[] = [];
+                
+                let assetInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Asset",
+                    value: assetLevyFormat.assetId + assetLevyFormat.namespaceName ? ` (${assetLevyFormat.namespaceName})` : ''
+                };
+
+                infos.push(assetInfo);
+
+                let levyAssetInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Levy Asset",
+                    value: assetLevyFormat.levyAssetAmount + ' ' + assetLevyFormat.levyAssetId + assetLevyFormat.levyAssetName ? ` (${assetLevyFormat.levyAssetName})` : ''
+                };
+
+                infos.push(levyAssetInfo);
+
+                let levyAssetRecipientInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Levy Recipient",
+                    value: assetLevyFormat.levyRecipient,
+                    short: this.wallet.convertAddressToName(assetLevyFormat.levyRecipient)
+                };
+
+                infos.push(levyAssetRecipientInfo);
+
+                transactionDetails = {
+                    signer: assetLevyFormat.signer,
+                    signerAddressPlain: assetLevyFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(assetLevyFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.NONE,
+                    typeName: assetLevyFormat.type
+                };
+            }
+                break;
+            case TransactionType.REMOVE_MOSAIC_LEVY:{
+                let assetRemoveLevyTx = innerTransaction as MosaicRemoveLevyTransaction;
+                tempData = await this.extractAssetRemoveLevy(assetRemoveLevyTx);
+                let removeAssetLevyFormat = tempData as InnerAssetTransaction;
+
+                let infos: TxnDetails[] = [];
+                
+                let assetInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Asset",
+                    value: removeAssetLevyFormat.assetId + removeAssetLevyFormat.namespaceName ? ` (${removeAssetLevyFormat.namespaceName})` : ''
+                };
+
+                infos.push(assetInfo);
+
+                transactionDetails = {
+                    signer: removeAssetLevyFormat.signer,
+                    signerAddressPlain: removeAssetLevyFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(removeAssetLevyFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.NONE,
+                    typeName: removeAssetLevyFormat.type
+                };
+            }
+                break;
+            case TransactionType.REGISTER_NAMESPACE:{
                 let registerNamespaceTx = innerTransaction as RegisterNamespaceTransaction;
-                tempData = this.extractTransactionRegisterNamespace(registerNamespaceTx);
+                tempData = await this.extractRegisterNamespace(registerNamespaceTx);
+                let registerNamespaceFormat = tempData as InnerNamespaceTransaction;
+
+                let infos: TxnDetails[] = [];
+                
+                let typeInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Type",
+                    value: registerNamespaceFormat.registerTypeName + registerNamespaceFormat.isExtend ? ' (Extend)' : ' (Register)'
+                };
+
+                infos.push(typeInfo);
+
+                let nameInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Name",
+                    value: registerNamespaceFormat.namespaceName
+                };
+
+                infos.push(nameInfo);
+
+                if(registerNamespaceFormat.parentName){
+                    let parentNameInfo: TxnDetails = {
+                        type: MsgType.NONE,
+                        label: "Parent Name",
+                        value: registerNamespaceFormat.parentName
+                    };
+    
+                    infos.push(parentNameInfo);
+                }
+
+                if(registerNamespaceFormat.duration){
+                    let durationInfo: TxnDetails = {
+                        type: MsgType.NONE,
+                        label: "Duration",
+                        value: registerNamespaceFormat.duration.toString()
+                    };
+    
+                    infos.push(durationInfo);
+                }
+
+                transactionDetails = {
+                    signer: registerNamespaceFormat.signer,
+                    signerAddressPlain: registerNamespaceFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(registerNamespaceFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.NONE,
+                    typeName: registerNamespaceFormat.type
+                };
+            }
                 break;
-            case TransactionType.SECRET_LOCK:
+            case TransactionType.SECRET_LOCK:{
                 let secretLockTx = innerTransaction as SecretLockTransaction;
-                tempData = this.extractTransactionSecretLock(secretLockTx);
+                tempData = await this.extractNonconfirmedSecretLock(secretLockTx, TransactionGroupType.PARTIAL);
+                let secretLockFormat = tempData as InnerSecretTransaction;
+
+                let infos: TxnDetails[] = [];
+                let sdas = [];
+
+                let sdaString = `${secretLockFormat.amount} ${secretLockFormat.assetId}` + secretLockFormat.namespaceName ? ` (${secretLockFormat.namespaceName})`: '';
+
+                sdas.push(sdaString);
+
+                let recipientInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Recipient",
+                    value: secretLockFormat.recipient,
+                    short: this.wallet.convertAddressToName(secretLockFormat.recipient)
+                };
+
+                infos.push(recipientInfo);
+
+                let hashTypeInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Hash Type",
+                    value: secretLockFormat.hashType
+                };
+
+                infos.push(hashTypeInfo);
+
+                let secretInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Secret",
+                    value: secretLockFormat.secret
+                };
+
+                infos.push(secretInfo);
+
+                let durationInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Duration",
+                    value: secretLockFormat.duration
+                };
+
+                infos.push(durationInfo);
+
+                transactionDetails = {
+                    signer: secretLockFormat.signer,
+                    signerAddressPlain: secretLockFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(secretLockFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: sdas,
+                    legendType: InnerTxnLegendType.NONE,
+                    typeName: secretLockFormat.type
+                };
+            }
                 break;
-            case TransactionType.SECRET_PROOF:
+            case TransactionType.SECRET_PROOF:{
                 let secretProofTx = innerTransaction as SecretProofTransaction;
-                tempData = this.extractTransactionSecretProof(secretProofTx);
+                tempData = this.extractSecretProof(secretProofTx);
+                let secretProofFormat = tempData as InnerSecretTransaction;
+
+                let infos: TxnDetails[] = [];
+
+                let recipientInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Recipient",
+                    value: secretProofFormat.recipient,
+                    short: this.wallet.convertAddressToName(secretProofFormat.recipient)
+                };
+
+                infos.push(recipientInfo);
+
+                let hashTypeInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Hash Type",
+                    value: secretProofFormat.hashType
+                };
+
+                infos.push(hashTypeInfo);
+
+                let secretInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Secret",
+                    value: secretProofFormat.secret
+                };
+
+                infos.push(secretInfo);
+
+                let proofInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Proof",
+                    value: secretProofFormat.proof
+                };
+
+                infos.push(proofInfo);
+
+                transactionDetails = {
+                    signer: secretProofFormat.signer,
+                    signerAddressPlain: secretProofFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(secretProofFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.NONE,
+                    typeName: secretProofFormat.type
+                };
+            }
                 break;
-            case TransactionType.TRANSFER:
+            case TransactionType.TRANSFER:{
                 let transferTx = innerTransaction as TransferTransaction;
-                tempData = this.extractTransactionTransfer(transferTx);
+                tempData = await this.extractNonconfirmedTransfer(transferTx, TransactionGroupType.PARTIAL);
+                let transferFormat = tempData as InnerTransferTransaction;
+                let sdas = [];
+                let infos: TxnDetails[] = [];
+
+                let shortName = this.wallet.convertAddressToName(transferFormat.recipient);
+                
+                if(shortName === transferFormat.recipient && transferFormat.recipientNamespaceName){
+                    shortName = transferFormat.recipientNamespaceName;
+                }
+                else if(shortName === transferFormat.recipient){
+                    shortName = '';
+                }
+
+                let recipientInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Recipient",
+                    value: Address.createFromRawAddress(transferFormat.recipient).pretty(),
+                    short: shortName
+                };
+
+                infos.push(recipientInfo);
+
+                if(transferFormat.message){
+                    let msgInfo: TxnDetails = {
+                        type: MsgType.NONE,
+                        label: transferFormat.messageTypeTitle,
+                        value: transferFormat.messageType === MessageType.EncryptedMessage ? 'xxxxxx' : transferFormat.message,
+                    };
+    
+                    infos.push(msgInfo);
+                }
+
+                if(transferFormat.amountTransfer){
+                    sdas.push(`${transferFormat.amountTransfer} ${AppState.nativeToken.label}`);
+                }
+
+                for(let i = 0; i < transferFormat.sda.length; ++i){
+                    let tempSDA = transferFormat.sda[i];
+                    let sdaString = '';
+                    if(tempSDA.currentAlias && tempSDA.currentAlias.length){
+                        sdaString = (tempSDA.amount + ` ${tempSDA.id} ` + `(${tempSDA.currentAlias[0].name})`);
+                    }
+                      else{
+                        sdaString = (tempSDA.amount + ' ' + tempSDA.id);
+                    }
+                    sdas.push(sdaString);
+                }
+
+                transactionDetails = {
+                    signer: transferFormat.signer,
+                    signerAddressPlain: transferFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(transferFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: sdas,
+                    legendType: InnerTxnLegendType.NONE,
+                    typeName: transferFormat.type
+                };
+            }
                 break;
+            
+            case TransactionType.ACCOUNT_METADATA_V2:{
+                let accMetadataTx = innerTransaction as AccountMetadataTransaction;
+                tempData = await this.extractAccMetadata(accMetadataTx, TransactionGroupType.PARTIAL);
+                let accMetadataFormat = tempData as InnerMetadataTransaction;
+                let infos: TxnDetails[] = [];
+
+                let targetPublicAccount =  PublicAccount.createFromPublicKey(accMetadataFormat.targetPublicKey, AppState.networkType);
+                let targetAddress = targetPublicAccount.address.plain();
+
+                let accountInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Account",
+                    value: targetPublicAccount.address.plain(),
+                    short: this.wallet.convertAddressToName(targetAddress)
+                };
+
+                infos.push(accountInfo);
+
+                let scopedMetadataKeyInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Scoped Metadata Key",
+                    value: accMetadataFormat.scopedMetadataKey
+                };
+
+                infos.push(scopedMetadataKeyInfo);
+
+                if(accMetadataFormat.oldValue){
+                    let oldValueInfo: TxnDetails = {
+                        type: MsgType.NONE,
+                        label: "Current Value",
+                        value: accMetadataFormat.oldValue
+                    };
+
+                    infos.push(oldValueInfo);
+                }
+
+                let newValueInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "New Value",
+                    value: accMetadataFormat.newValue
+                };
+
+                infos.push(newValueInfo);
+
+                transactionDetails = {
+                    signer: accMetadataFormat.signer,
+                    signerAddressPlain: accMetadataFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(accMetadataFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.NONE,
+                    typeName: accMetadataFormat.type
+                };
+            }
+                break;
+            
+            case TransactionType.NAMESPACE_METADATA_V2:{
+                let nsMetadataTx = innerTransaction as NamespaceMetadataTransaction;
+                tempData = await this.extractNamespaceMetadata(nsMetadataTx, TransactionGroupType.PARTIAL);
+                let namespaceMetadataFormat = tempData as InnerMetadataTransaction;
+
+                let infos: TxnDetails[] = [];
+
+                let namespaceInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Namespace",
+                    value: namespaceMetadataFormat.targetIdName ? namespaceMetadataFormat.targetIdName: namespaceMetadataFormat.targetId
+                };
+
+                infos.push(namespaceInfo);
+
+                let scopedMetadataKeyInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Scoped Metadata Key",
+                    value: namespaceMetadataFormat.scopedMetadataKey
+                };
+
+                infos.push(scopedMetadataKeyInfo);
+
+                if(namespaceMetadataFormat.oldValue){
+                    let oldValueInfo: TxnDetails = {
+                        type: MsgType.NONE,
+                        label: "Current Value",
+                        value: namespaceMetadataFormat.oldValue
+                    };
+
+                    infos.push(oldValueInfo);
+                }
+
+                let newValueInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "New Value",
+                    value: namespaceMetadataFormat.newValue
+                };
+
+                infos.push(newValueInfo);
+
+                transactionDetails = {
+                    signer: namespaceMetadataFormat.signer,
+                    signerAddressPlain: namespaceMetadataFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(namespaceMetadataFormat.signerAddress).pretty(),
+                    infos: infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.NONE,
+                    typeName: namespaceMetadataFormat.type
+                };
+            }
+                break;
+            
+            case TransactionType.MOSAIC_METADATA_V2:{
+                let assetMetadataTx = innerTransaction as MosaicMetadataTransaction;
+                tempData = await this.extractAssetMetadata(assetMetadataTx, TransactionGroupType.PARTIAL);
+                let assetMetadataFormat = tempData as InnerMetadataTransaction;
+
+                let infos: TxnDetails[] = [];
+
+                let namespaceInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Asset",
+                    value: assetMetadataFormat.targetIdName ? assetMetadataFormat.targetIdName: assetMetadataFormat.targetId
+                };
+
+                infos.push(namespaceInfo);
+
+                let scopedMetadataKeyInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "Scoped Metadata Key",
+                    value: assetMetadataFormat.scopedMetadataKey
+                };
+
+                infos.push(scopedMetadataKeyInfo);
+
+                if(assetMetadataFormat.oldValue){
+                    let oldValueInfo: TxnDetails = {
+                        type: MsgType.NONE,
+                        label: "Current Value",
+                        value: assetMetadataFormat.oldValue
+                    };
+
+                    infos.push(oldValueInfo);
+                }
+
+                let newValueInfo: TxnDetails = {
+                    type: MsgType.NONE,
+                    label: "New Value",
+                    value: assetMetadataFormat.newValue
+                };
+
+                infos.push(newValueInfo);
+
+                transactionDetails = {
+                    signer: assetMetadataFormat.signer,
+                    signerAddressPlain: assetMetadataFormat.signerAddress,
+                    signerAddressPretty: Address.createFromRawAddress(assetMetadataFormat.signerAddress).pretty(),
+                    infos:infos,
+                    sdas: [],
+                    legendType: InnerTxnLegendType.NONE,
+                    typeName: assetMetadataFormat.type
+                };
+            }
+                break;
+            
             default:
                 break;
         }
-
-        transactionDetails.relatedAddress = tempData.relatedAddress;
-        transactionDetails.relatedAsset = tempData.relatedAsset;
-        transactionDetails.relatedNamespace = tempData.relatedNamespace;
-        transactionDetails.relatedPublicKey = tempData.relatedPublicKey;
-        transactionDetails.searchString = tempData.searchString;
-        transactionDetails.extractedData = tempData.extractedData;
-        transactionDetails.displayList = tempData.displayList;
-        transactionDetails.transferList = tempData.transferList ? tempData.transferList: [];
-        transactionDetails.displayTips = tempData.displayTips;
-        transactionDetails.otherAssets = tempData.otherAssets ? tempData.otherAssets: [];
 
         return transactionDetails;
     }
@@ -5415,236 +5653,17 @@ export class DashboardService {
     }
 
     publickKeyConvertToName(publicKey: string){
-        let address = PublicAccount.createFromPublicKey(publicKey, localNetworkType.value).address.plain();
+        let address = PublicAccount.createFromPublicKey(publicKey, AppState.networkType).address.plain();
         let name = this.wallet.convertAddressToName(address);
         
         return name === address ? publicKey : name;
     }
 
-    static createNamespaceIDTip(displayValue: string, value?: string): DashboardTip{
-        let newTip = new DashboardTip(TipType.NAMESPACE_ID);
-        newTip.displayValue = displayValue;
-        newTip.value = value ? value: displayValue;
-        return newTip;
-    }
-
-    static createNamespaceStringTip(displayValue: string, value?: string): DashboardTip{
-        let newTip = new DashboardTip(TipType.NAMESPACE_STR);
-        newTip.displayValue = displayValue;
-        newTip.value = value ? value: displayValue;
-        return newTip;
-    }
-
-    static createMsgNamespaceTip(value: string, displayValue: string, pre: string = ""): DashboardTip{
-        let newTip = new DashboardTip(TipType.MSG_NAMESPACE);
-        newTip.displayValue = pre;
-        newTip.value = pre;
-        newTip.displayValue2 = displayValue;
-        newTip.value2 = value;
-        return newTip;
-    }
-
-    static createAssetTip(displayValue: string, value?: string): DashboardTip{
-        let newTip = new DashboardTip(TipType.ASSET);
-        newTip.displayValue = displayValue;
-        newTip.value = value ? value: displayValue;
-        return newTip;
-    }
-
-    static createPublicKeyTip(displayValue: string, value?: string): DashboardTip{
-        let newTip = new DashboardTip(TipType.PUBLIC_KEY);
-        newTip.displayValue = displayValue;
-        newTip.value = value ? value: displayValue;
-        return newTip;
-    }
-    static createPublicKeyStringTip(publicKey:string, displayValue: string, pre: string): DashboardTip{
-        let newTip = new DashboardTip(TipType.PUBLIC_KEY_STRING);
-        newTip.displayValue = pre;
-        newTip.displayValue2 = displayValue;
-        newTip.value = pre;
-        newTip.value2 = publicKey;
-        return newTip;
-    }
-
-    static createAddressTip(displayValue: string, value?: string): DashboardTip{
-        let newTip = new DashboardTip(TipType.ADDRESS);
-        newTip.displayValue = displayValue;
-        newTip.value = value ? value: displayValue;
-        return newTip;
-    }
-
-    static createToRightArrowTip(): DashboardTip{
-        let newTip = new DashboardTip(TipType.TO_RIGHT_ARROW);
-        return newTip;
-    }
-
-    static createAbsoluteAmountTip(amount: number): DashboardTip{
-        let newTip = new DashboardTip(TipType.ABSOLUTE_AMOUNT);
-        newTip.value = amount.toString();
-        newTip.displayValue = Helper.toCurrencyFormat(amount, 0); 
-        return newTip;
-    }
-
-    static createExactAmountTip(amount: number): DashboardTip{
-        let newTip = new DashboardTip(TipType.EXACT_AMOUNT);
-        newTip.value = amount.toString();
-        newTip.displayValue = Helper.toCurrencyFormat(amount, 0); 
-        return newTip;
-    }
-
-    static createSimpleStringTip(messageString: string): DashboardTip{
-        let newTip = new DashboardTip(TipType.STRING);
-        newTip.value = messageString;
-        newTip.displayValue = messageString; 
-        return newTip;
-    }
-
-    static createStringTip(messageString: string, pre: string = "", post: string =""): DashboardTip{
-        let newTip = new DashboardTip(TipType.STRING);
-        newTip.value = messageString;
-        newTip.displayValue = pre + " " + messageString + " " + post; 
-        return newTip;
-    }
-
-    static createDurationTip(duration: number): DashboardTip{
-        let newTip = new DashboardTip(TipType.DURATION);
-        newTip.value = duration.toString();
-        newTip.displayValue = "Duration: " + duration + " blocks"; 
-        return newTip;
-    }
-
-    static createTxHashTip(txHash: string): DashboardTip{
-        let newTip = new DashboardTip(TipType.HASH);
-        newTip.value = txHash;
-        newTip.displayValue = "Hash: " + txHash; 
-        return newTip;
-    }
-
-    static createAssetAmountTip(amount: number, assetId: string, assetDisplay: string, amountExact: boolean, divisibility: number = 0): DashboardTip{
-        let newTip = new DashboardTip(TipType.ASSET_AMOUNT);
-        newTip.value = amount.toString();
-        newTip.value2 = assetId;
-        newTip.displayValue = amountExact ? Helper.toCurrencyFormat(amount, divisibility) : amount.toString();
-        newTip.displayValue2 = assetDisplay;
-        newTip.valueType = amountExact ? AmountType.EXACT: AmountType.RAW;
-
-        return newTip;
-    }
-
-    static createSupplyAmountTip(amount: number, amountExact: boolean, increase: boolean): DashboardTip{
-        let newTip = new DashboardTip(TipType.SUPPLY_AMOUNT);
-        newTip.value = increase ? "+": "-";
-        newTip.value2 = amount.toString();
-        newTip.displayValue = newTip.value;
-        newTip.displayValue2 = amount.toString();
-        newTip.valueType2= amountExact ? AmountType.EXACT: AmountType.RAW;
-
-        return newTip;
-    }
-
-    static createSupplyAssetAmountTip(amount: number, amountExact: boolean, assetDisplay: string, assetId: string, increase: boolean): DashboardTip{
-        let newTip = new DashboardTip(TipType.SUPPLY_ASSET_AMOUNT);
-        newTip.value = increase ? amount.toString(): "-" + amount.toString();
-        newTip.value2 = assetId;
-        newTip.displayValue = increase ? "+" + amount.toString() : newTip.value;
-        newTip.displayValue2 = assetDisplay;
-        newTip.valueType= amountExact ? AmountType.EXACT: AmountType.RAW;
-
-        return newTip;
-    }
-
-    static createNamespaceAmountTip(amount: number, namespaceId: string, namespaceDisplay: string, amountExact: boolean = false): DashboardTip{
-        let newTip = new DashboardTip(TipType.NAMESPACE_AMOUNT);
-        newTip.value = amount.toString();
-        newTip.value2 = namespaceId;
-        newTip.displayValue = amount.toString();
-        newTip.displayValue2 = namespaceDisplay;
-        newTip.valueType = amountExact ? AmountType.EXACT: AmountType.RAW;
-
-        return newTip;
-    }
-
-    static createTransferTip(addressFrom: string, addressFromDisplay: string, addressTo: string, addressToDisplay): DashboardTip{
-        let newTip = new DashboardTip(TipType.TRANSFER);
-        newTip.value = addressFrom;
-        newTip.value2 = addressTo;
-        newTip.displayValue = addressFromDisplay;
-        newTip.displayValue2 = addressToDisplay;
-
-        return newTip;
-    }
-
-    static createTransferUnresolvedTip(addressFrom: string, addressFromDisplay: string, addressTo: string, addressToDisplay): DashboardTip{
-        let newTip = new DashboardTip(TipType.TRANSFER_UNRESOLVED);
-        newTip.value = addressFrom;
-        newTip.value2 = addressTo;
-        newTip.displayValue = addressFromDisplay;
-        newTip.displayValue2 = addressToDisplay;
-
-        return newTip;
-    }
-
-    static createAssetAliasTip(namespaceId: string, namespaceDisplay: string, assetId: string, assetDisplay: string): DashboardTip{
-        let newTip = new DashboardTip(TipType.ASSET_ALIAS);
-        newTip.value = namespaceId;
-        newTip.value2 = assetId;
-        newTip.displayValue = namespaceDisplay;
-        newTip.displayValue2 = assetDisplay;
-
-        return newTip;
-    }
-
-    static createRemoveAssetAliasTip(namespaceId: string, namespaceDisplay: string, assetId: string, assetDisplay: string): DashboardTip{
-        let newTip = new DashboardTip(TipType.REMOVE_ASSET_ALIAS);
-        newTip.value = namespaceId;
-        newTip.value2 = assetId;
-        newTip.displayValue = namespaceDisplay;
-        newTip.displayValue2 = assetDisplay;
-
-        return newTip;
-    }
-
-    static createAddressAliasTip(namespaceId: string, namespaceDisplay: string, address: string, addressDisplay: string): DashboardTip{
-        let newTip = new DashboardTip(TipType.ADDRESS_ALIAS);
-        newTip.value = namespaceId;
-        newTip.value2 = address;
-        newTip.displayValue = namespaceDisplay;
-        newTip.displayValue2 = addressDisplay;
-
-        return newTip;
-    }
-
-    static createRemoveAddressAliasTip(namespaceId: string, namespaceDisplay: string, address: string, addressDisplay: string): DashboardTip{
-        let newTip = new DashboardTip(TipType.REMOVE_ADDRESS_ALIAS);
-        newTip.value = namespaceId;
-        newTip.value2 = address;
-        newTip.displayValue = namespaceDisplay;
-        newTip.displayValue2 = addressDisplay;
-
-        return newTip;
-    }
-
-    static createAccountLinkTip(publicKey: string, publicKeyDisplay): DashboardTip{
-        let newTip = new DashboardTip(TipType.LINK_PUBLICKEY);
-        newTip.value = publicKey;
-        newTip.displayValue = publicKeyDisplay;
-
-        return newTip;
-    }
-
-    static createAccountUnlinkTip(publicKey: string, publicKeyDisplay): DashboardTip{
-        let newTip = new DashboardTip(TipType.UNLINK_PUBLICKEY);
-        newTip.value = publicKey;
-        newTip.displayValue = publicKeyDisplay;
-
-        return newTip;
-    }
-
     static convertToExactNativeAmount(amount: number){
-        if(nativeTokenDivisibility.value === 0){
+        if(AppState.nativeToken.divisibility === 0){
             return amount;
         }
-        return amount > 0 ? amount / Math.pow(10, nativeTokenDivisibility.value) : 0;
+        return amount > 0 ? amount / Math.pow(10, AppState.nativeToken.divisibility) : 0;
     }
 
     static convertToExactAmount(amount: number, divisibility: number){
@@ -5652,29 +5671,6 @@ export class DashboardService {
             return amount;
         }
         return amount > 0 ? amount / Math.pow(10, divisibility) : 0;
-    }
-
-    static displayOtherAsset = (amount: number, assetId: string, mosaic_id: MosaicId) => {
-        // let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
-        // let chainAPICall = new ChainAPICall(apiEndpoint);
-        // let asset = await chainAPICall.assetAPI.getMosaic(mosaic_id);
-
-        // let assetarray = []
-        // assetarray.push(mosaic_id);
-        // let nsAsset = await chainAPICall.assetAPI.getMosaicsNames(assetarray);
-
-        let otherAsset = new OtherAsset();
-        otherAsset.amount = amount;
-        otherAsset.asset = assetId;
-        otherAsset.assetId = mosaic_id;
-        // if(nsAsset[0].names.length > 0){
-        //     otherAsset.isLinked = true;
-        //     otherAsset.asset = nsAsset[0].names[0].name;
-        // }else{
-        //     otherAsset.isLinked = false;
-        //     otherAsset.asset = assetId;
-        // }
-        return otherAsset;
     }
 }
 

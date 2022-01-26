@@ -95,7 +95,7 @@
         <template #body="{data}">
           <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" class="truncate inline-block text-txs">
             <a :href="getAddressExplorerUrl(data.recipient)" target="_blank">
-              {{ data.recipient }}
+              {{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.recipient) }}
             </a>
           </span>
         </template>
@@ -166,6 +166,7 @@ import Tooltip from 'primevue/tooltip';
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";
+import { walletState } from "@/state/walletState";
 // import SplitButton from 'primevue/splitbutton';
 
 export default defineComponent({
@@ -302,6 +303,7 @@ export default defineComponent({
       constructSDA,
       wideScreen,
       Helper,
+      walletState,
     }
   }
 })

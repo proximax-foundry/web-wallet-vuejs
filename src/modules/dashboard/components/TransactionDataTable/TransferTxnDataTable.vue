@@ -9,6 +9,8 @@
       responsiveLayout="scroll"
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
+      v-model:filters="filterAccount"
+      :globalFilterFields="['recipient','sender', 'signerAddress', 'type']"
       >
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
@@ -31,7 +33,7 @@
             <div class="uppercase font-bold text-txs">
               <span v-if="data.recipient === '' || data.recipient === null"></span>
               <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else-if="data.recipientNamespaceName" class="truncate inline-block text-txs">{{ data.recipientNamespaceName }}</span>
-              <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient.substring(0, 20) }}...</span>
+              <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.recipient) }}</span>
             </div>
           </div>
         </template>
@@ -92,7 +94,7 @@
           <span v-if="data.sender === '' || data.sender === null"></span>
           <span v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
             <a :href="getPublicKeyExplorerUrl(data.sender)" target="_blank">
-              {{ data.sender.substring(0, 20) }}
+              {{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.sender) }}
             </a>
           </span>
         </template>
@@ -101,7 +103,7 @@
         <template #body="{data}">
           <span v-if="data.recipient === '' || data.recipient === null"></span>
           <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else-if="data.recipientNamespaceName" class="truncate inline-block text-txs">{{ data.recipientNamespaceName }}</span>
-          <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient.substring(0, 20) }}...</span>
+          <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.recipient) }}</span>
         </template>
       </Column>
       <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
@@ -158,6 +160,7 @@ import Tooltip from 'primevue/tooltip';
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";
+import { walletState } from "@/state/walletState";
 // import SplitButton from 'primevue/splitbutton';
 
 export default defineComponent({
@@ -221,6 +224,12 @@ export default defineComponent({
     const blurInputText = () => {
       borderColor.value = 'border border-gray-400';
     };
+
+    console.log(p.currentAddress)
+
+    const filterAccount = ref({
+      'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
+    });
 
     emitter.on("CLOSE_MODAL", payload => {
       showTransactionModel.value = payload;
@@ -321,6 +330,8 @@ export default defineComponent({
       transactionGroupType,
       wideScreen,
       Helper,
+      walletState,
+      filterAccount,
     }
   }
 })

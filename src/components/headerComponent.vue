@@ -165,7 +165,7 @@ import selectLanguageModal from '@/modules/home/components/selectLanguageModal.v
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { useToast } from "primevue/usetoast";
 import { Connector } from '../models/connector';
-import { listenerState} from "@/state/listenerState";
+import { listenerState, AnnounceType} from "@/state/listenerState";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { TransactionType } from "tsjs-xpx-chain-sdk";
 import { WalletUtils } from "@/util/walletUtils";
@@ -434,6 +434,84 @@ export default defineComponent({
     const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
     const cosignatureAddedTxLength = computed(()=> listenerState.cosignatureAddedTxLength);
     const totalPendingNum = ref(0);
+    const transactionGroupType = Helper.getTransactionGroupType(); 
+
+    const doAutoAnnounce = async () => {
+      if(!AppState.isReady){
+        setTimeout(doAutoAnnounce, 1000);
+      }
+
+      let currentBlockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
+
+      for (let i = 0; i < listenerState.autoAnnounceSignedTransaction.length; ++i) {
+
+          let letAnnouce = false;
+          
+          let currentAutoAnnounceTx = listenerState.autoAnnounceSignedTransaction[i];
+
+          if(currentAutoAnnounceTx.announced){
+              continue;
+          }
+
+          if(currentAutoAnnounceTx.announceAtBlock && currentBlockHeight >= currentAutoAnnounceTx.announceAtBlock){
+              letAnnouce = true;
+          }
+          else if(currentAutoAnnounceTx.hashAnnounceBlock && currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock){
+              if(currentBlockHeight > currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock + currentAutoAnnounceTx.hashAnnounceBlock.annouceAfterBlockNum){
+                  letAnnouce = true;
+              }
+          }
+          else if(currentAutoAnnounceTx.hashAnnounceBlock){
+            try {
+              let txnStatusInfo = await AppState.chainAPI.transactionAPI.getTransactionStatus(currentAutoAnnounceTx.hashAnnounceBlock.trackHash);
+            
+              if(txnStatusInfo.group === transactionGroupType.CONFIRMED){
+                currentAutoAnnounceTx.hashAnnounceBlock.hashFound = true;
+                currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock = txnStatusInfo.height.compact();
+
+                if(currentBlockHeight > currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock + currentAutoAnnounceTx.hashAnnounceBlock.annouceAfterBlockNum){
+                  letAnnouce = true;
+                }
+              }
+            } catch (error) {
+              currentAutoAnnounceTx.checkCount += 1;
+            }
+          }
+
+          if(letAnnouce){
+              if (currentAutoAnnounceTx.type === AnnounceType.NORMAL) {
+                  await AppState.chainAPI.transactionAPI.announce(currentAutoAnnounceTx.signedTransaction);
+              }
+              else {
+                  await AppState.chainAPI.transactionAPI.announceAggregateBonded(currentAutoAnnounceTx.signedTransaction);
+              }
+
+              currentAutoAnnounceTx.announced = true;
+          }
+      }
+
+      let remainingTransactionsToAnnounce = listenerState.autoAnnounceSignedTransaction.filter(
+          (autoTx) => !autoTx.announced
+      );
+
+      listenerState.autoAnnounceSignedTransaction = remainingTransactionsToAnnounce;
+
+      if(listenerState.autoAnnounceSignedTransaction.length){
+        setTimeout(doAutoAnnounce, 15000);
+      }
+      else{
+        AppState.isPendingTxnAnnounce = false;
+      }
+    }
+
+    watch(()=> AppState.isPendingTxnAnnounce, async (newValue)=>{
+      if(newValue){
+        setTimeout(doAutoAnnounce, 5000);
+      }
+      else{
+        toast.removeGroup("tr");
+      }
+    }, {immediate: true});
 
     watch(()=> listenerState.autoAnnounceSignedTransaction, (newValue)=>{
       let newLength = newValue.length;
@@ -455,7 +533,7 @@ export default defineComponent({
       }
 
       totalPendingNum.value = newLength;
-    }, true);
+    }, {immediate: true});
 
     watch(()=> currentBlockHeight.value, ()=>{
 

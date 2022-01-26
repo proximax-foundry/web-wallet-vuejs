@@ -29,13 +29,6 @@
               <a :href="getPublicKeyExplorerUrl(data.signer)" target="_blank">{{ data.signerAddress.substring(0, 20) }}</a>
             </div>
           </div>
-          <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">RECEIPIENT</div>
-            <div class="uppercase font-bold text-txs" v-if="data.recipient!=null">
-              <div v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()">{{ data.recipientNamespaceName?data.rrecipientNamespaceName:data.recipient }}</div>
-            </div>
-            <div v-else>-</div>
-          </div>
         </template>
       </Column>
       <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
@@ -48,7 +41,7 @@
           <span class="text-txs">{{Helper.formatDeadline(data.deadline)}}</span>
         </template>
       </Column>
-      <Column field="signer" header="SENDER" headerStyle="width:110px" v-if="wideScreen">
+      <Column field="signer" header="INITIATOR" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()" class="truncate inline-block text-txs">
             <a :href="getPublicKeyExplorerUrl(data.signer)" target="_blank">
@@ -57,18 +50,10 @@
           </span>
         </template>
       </Column>
-      <Column field="recipient" header="RECIPIENT" headerStyle="width:110px" v-if="wideScreen">
-        <template #body="{data}">
-          <div v-if="data.recipient!=null">
-            <span class="truncate inline-block text-txs" v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()">{{ data.recipientNamespaceName?data.rrecipientNamespaceName:data.recipient }}</span>
-          </div>
-          <span v-else>-</span>
-        </template>
-      </Column>
       <Column field="sign" header="" headerStyle="width:110px">
         <template #body="{data}">
-          <router-link :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" v-if="data.signerAddress != currentAddress" class="bg-orange-action text-white font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">Waiting for Your Signature(s)</router-link>
-          <router-link :to="{ name: 'ViewTransactionWaitingSign', params: {txnHash: data.hash}}" v-else class="bg-orange-light text-orange-action font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign.svg" class="mr-2">Waiting for Signature(s)</router-link>
+          <router-link :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" class="bg-orange-action text-white font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">Waiting for signature(s)</router-link>
+          <!--<router-link :to="{ name: 'ViewTransactionWaitingSign', params: {txnHash: data.hash}}" v-else class="bg-orange-light text-orange-action font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign.svg" class="mr-2">Waiting for Signature(s)</router-link>-->
         </template>
       </Column>
       <template #empty>
@@ -79,12 +64,13 @@
 </template>
 
 <script>
-import { computed, getCurrentInstance, ref, onMounted, onUnmounted } from "vue";
+import { computed, getCurrentInstance, ref, onMounted, onUnmounted, watch } from "vue";
 import DataTable from 'primevue/datatable';
 import Tooltip from 'primevue/tooltip';
 import Column from 'primevue/column';
 import { networkState } from "@/state/networkState";
 import { walletState } from '@/state/walletState';
+import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
 import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 
@@ -97,7 +83,6 @@ export default{
     'tooltip': Tooltip
   },
   name: 'PartialDashboardDataTable',
-
 
   setup(){
     const wideScreen = ref(false);
@@ -136,28 +121,44 @@ export default{
     const transactions = ref([]);
     const currentAddress = ref('');
 
-    
-    let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
-
-    let transactionGroupType = Helper.getTransactionGroupType();
-
     let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
-      currentAddress.value = currentAccount.address;
+    currentAddress.value = currentAccount.address;
+    
+    let transactionGroupType = Helper.getTransactionGroupType();
 
     let loadPartialTransactions = async() => {
       let dashboardService = new DashboardService(walletState.currentLoggedInWallet, currentAccount);
       let txnQueryParams = Helper.createTransactionQueryParams();
-      txnQueryParams.pageSize = 1;
+      txnQueryParams.pageSize = 100;
       txnQueryParams.address = currentAccount.address;
-      txnQueryParams.embedded = false;
-      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
       let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.PARTIAL, txnQueryParams);
       let formattedTxns = await dashboardService.formatPartialMixedTxns(transactionSearchResult.transactions);
       transactions.value = formattedTxns;
     };
 
-    loadPartialTransactions();
+    const checkIsSigned =(data)=>{
+
+      let allCosignedPublicKey = data.cosignedPublickKey.concat([data.signer]);
+
+      return allCosignedPublicKey.includes(currentAccount.publicKey);
+    }
+
+    const init = ()=>{
+      loadPartialTransactions();
+    }
+
+    if(AppState.isReady){
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState.isReady, (value) => {
+        if(value){
+          init();
+          readyWatcher();
+        }     
+      });
+    }
 
     emitter.on("TXN_UNCONFIRMED", (num) => {
       if(num> 0){
@@ -186,6 +187,7 @@ export default{
       currentAddress,
       formatTime,
       Helper,
+      checkIsSigned
     }
   },
 }

@@ -15,6 +15,7 @@
             <div v-if="displayDefaultAccountMenu" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div role="none" class="my-2">
                 <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Details</router-link>
+                <router-link :to="{ name: 'ViewAccountAssets', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Assets</router-link>
                 <router-link :to="{ name: 'ViewMultisigHome', params: { name: selectedAccountName }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Multisig</router-link>
                 <router-link :to="{ name: 'ViewMultisigScheme', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" v-if="isMultiSig" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Scheme</router-link>
                 <div :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" v-else class="block text-gray-300 transition duration-200 p-2 z-20">Scheme</div>
@@ -162,6 +163,11 @@ export default{
     let accountPartialTxnsCount = ref(0);
 
     let updateAccountTransactionCount = async() => {
+      if(!AppState.isReady){
+        setTimeout(updateAccountTransactionCount, 100);
+        return ;
+      }
+
       let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
       let transactionsCount = await dashboardService.getAccountTransactionsCount(selectedAccount.value);
       accountUnconfirmedTxnsCount.value = transactionsCount.unconfirmed;
@@ -266,6 +272,8 @@ export default{
     //   updateAccountTransactionCount();
     //   closeNavi();
     // }
+
+    updateAccountTransactionCount();
 
     const init = ()=>{
       updateAccountTransactionCount();

@@ -23,6 +23,7 @@
       </div>
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
         <div class= 'w-32 text-center border-b-2 pb-3 border-yellow-500'>Account Details</div>
+        <router-link v-if="!isDelegate()" :to="{name:'ViewAccountAssets', params: { address: acc.address}}" class= 'w-18 text-center'>Assets</router-link>
         <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
         <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
         <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
@@ -39,24 +40,10 @@
           <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
           <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
           <div class='flex ml-auto gap-6 '>
-            <!-- <router-link :to='{name:"ViewTransferCreate"}' class='flex cursor-pointer'>
-              <img src="@/assets/img/icon-transfer.svg" class=" w-5 h-5 mt-0.5  cursor-pointer mr-1">
-              <div class='text-xs mt-1 font-semibold '>Transfer {{currentNativeTokenName}}</div>
-            </router-link> -->
-            <!-- <a v-if="networkState.chainNetwork == 0" href="https://www.proximax.io/en/xpx" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
+            <a  :href="topUpUrl" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
               <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
               <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
               <img src="@/modules/dashboard/img/icon-link-new-white.svg" class='h-5 w-5  cursor-pointer '>
-            </a> -->
-            <a v-if="networkState.chainNetwork == 0" href="https://bctestnetfaucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
-              <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
-              <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
-              <img src="@/modules/dashboard/img/icon-link-new-white.svg" class='h-3 w-3 mt-1 ml-1 cursor-pointer '>
-            </a>
-            <a v-if="networkState.chainNetwork == 1" href="https://bctestnet2faucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
-              <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
-              <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
-              <img src="@/modules/dashboard/img/icon-link-new-white.svg" class='h-3 w-3 mt-1 ml-1 cursor-pointer '>
             </a>
           </div>
         </div>
@@ -113,6 +100,7 @@ import PdfPasswordModal from '@/modules/account/components/PdfPasswordModal.vue'
 import DeleteAccountModal from '@/modules/account/components/DeleteAccountModal.vue'
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
+import { AppState } from '@/state/appState';
 
 export default {
   name: "ViewAccountDetails",
@@ -296,6 +284,40 @@ export default {
       doc.text(prettyAddress, 146, 164, { maxWidth: 132 });
       doc.save('Your_Paper_Wallet');
     }
+
+    /* const mosaics = computed(() => {
+      var mosaicOption = [];
+      if(!walletState.currentLoggedInWallet){
+        return mosaicOption;
+      }
+      const account = walletState.currentLoggedInWallet.accounts.find(
+        (element) => element.address == p.address
+      ) ||  walletState.currentLoggedInWallet.others.find(
+        (element) => element.address == p.address)
+      let filteredAsset = account.assets.filter(asset=>asset.namespaceNames[0]!='prx.xpx')
+      
+      if (filteredAsset.length > 0) {
+        filteredAsset.forEach((i) => {
+          mosaicOption.push({
+            name: (i.namespaceNames.length>0?i.namespaceNames[0]:i.idHex),
+            balance: Helper.amountFormatterSimple(i.amount,i.divisibility)
+          });
+        });
+      }
+      return mosaicOption;
+    }); */
+    const topUpUrl = computed(()=>{
+      if (AppState.networktype == 184){ 
+        return 'https://www.proximax.io/en/xpx'
+      }else if (AppState.networkType == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
+        return 'https://bctestnetfaucet.xpxsirius.io/#/'
+      }else if (AppState.networkType == 168 && networkState.chainNetworkName=='Sirius Testnet 2'){
+        return 'https://bctestnet2faucet.xpxsirius.io/#/'
+      }else{
+        return ''
+      }
+    }) 
+    console.log(networkState.chainNetworkName)
     emitter.on("revealPK", (e) => {
       showPK.value = e;
     });
@@ -308,6 +330,8 @@ export default {
    
 
     return {
+      /* mosaics,   */
+      topUpUrl,
       networkState,
       showModal,
       splitBalance,
