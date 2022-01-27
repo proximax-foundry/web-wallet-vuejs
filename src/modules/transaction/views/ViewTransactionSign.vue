@@ -8,8 +8,18 @@
       <div class='border-2 border-gray-200'>
         <div class='w-full text-center p-10' v-if="isSigned">
           <div class="text-xl">No action Required</div>
-          <div class="mt-5 text-tsm">You have already approved these transactions</div>
+          <div class="mt-5 text-tsm">You have already approved {{ innerTransactions.length>1?'these transactions':'this transaction' }}</div>
           <div class="mt-1 text-tsm font-bold">Deadline: {{ deadline }}</div>
+          <div class="mt-10">
+            <div class='flex items-center border-t border-gray-200 py-2' v-for="cosigner, item in allTxnCosigners" :key="item">
+              <img src="@/modules/transaction/img/digital-signature-success.png" class="w-14 inline-block ml-2" v-if="isHasSigned(cosigner)">
+              <img src="@/modules/transaction/img/digital-signature-not-signed.png" class="w-14 inline-block ml-2" v-else>
+              <div class="text-left ml-3 inline-block">
+                <div class="uppercase text-blue-primary text-txs font-bold">{{ displayAccountLabel(cosigner) }} {{ isHasSigned(cosigner)?'(Signed)':'' }}</div>
+                <div class="uppercase text-xxs text-gray-500 mt-1">{{ displayAccountAddress(cosigner) }}</div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class='w-full text-center p-10' v-else-if="!invalidCosigner">
           <div class="text-xl">Action Required</div>
@@ -39,7 +49,7 @@
               </div>
             </div>
             <div v-if="innerTransactions.length > 0">
-              <div class="mt-10">Transactions ({{ innerTransactions.length }})</div>
+              <div class="mt-10">Transaction{{ innerTransactions.length>1?'s':'' }} ({{ innerTransactions.length }})</div>
               <div class="mt-3 border border-gray-200 p-1" v-for="(item, index) in innerTransactions" :key="index">
                 <div class="table_div" :class="innerRelatedList[index] ? 'highlighted' :''">
                   <div>
@@ -90,18 +100,19 @@
           </div>
         </transition>
       </div>
-      <div class="flex items-center h-14 lg:h-28 justify-center">
+      <div class="flex items-center h-14 lg:h-28 justify-center" v-if="!isSigned">
         <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class="text-gray-600 bg-white px-5 py-2 lg:px-10 lg:py-3 rounded-md text-xs lg:text-tsm inline-block border-2 border-gray-200 mr-5">Do this later</router-link>
         <CosignPasswordModal :transactionHash = 'txnHash' :disabled="invalidCosigner || isSigned" @return-password="signAggTxn" />
+      </div>
+      <div class="flex items-center h-14 lg:h-28 justify-center" v-else>
+        <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class="text-gray-600 bg-white px-5 py-2 lg:px-10 lg:py-3 rounded-md text-xs lg:text-tsm inline-block border-2 border-gray-200 mr-5">Close</router-link>
       </div>
     </div>
   </div>
 </template>
 
 <script >
-import { Account, Password, TransactionType, 
-  PublicAccount 
-} from "tsjs-xpx-chain-sdk";
+import { Account, Address, Password, TransactionType, PublicAccount } from "tsjs-xpx-chain-sdk";
 import { watch, ref, computed, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
@@ -180,6 +191,8 @@ export default {
         }
       }
     }
+
+    const allTxnCosigners = ref([]);
 
     const loadPartialTransaction = async () =>{
 
@@ -321,22 +334,60 @@ export default {
 
         // remove those not signed
         pendingCosigners = allCosigners.filter(pk=> !signedSigners.includes(pk));
-
-        console.log("Inner signers list: ", innerSignersList);
-        console.log("Inner signed list: ", innerSignedList);
-        console.log("Inner related list: ", innerRelatedList);
-        console.log("All cosigners: ", allCosigners);
-        console.log("Pending cosigners: ", pendingCosigners);    
+        // console.log("Inner signers list: ", innerSignersList);
+        // console.log("Inner signed list: ", innerSignedList);
+        // console.log("Inner related list: ", innerRelatedList);
+        // console.log("All cosigners: ", allCosigners);
+        // console.log("Pending cosigners: ", pendingCosigners);
+        // console.log("Signed cosigners: ", signedSigners);
+        allTxnCosigners.value = allCosigners;
 
         checkCosigner();
 
         innerTransactions.value = allInnerTransactions;
 
-        console.log(innerTransactions.value);
-        
+        // console.log(innerTransactions.value);
       } catch (error) {
         console.log(error);
       }
+    }
+
+    const isHasSigned = (cosignerPublicKey) => {
+      let signed = (signedSigners.find(element => element == cosignerPublicKey))?true:false;
+      let isPending = (pendingCosigners.find(element => element == cosignerPublicKey))?true:false;
+      return (signed && !isPending)?true:false;
+    }
+
+    const displayAccountLabel = (cosignerPublicKey) => {
+      let cosignerAddress = Address.createFromPublicKey(cosignerPublicKey, AppState.networkType);
+      return convertCosignerAddressToName(cosignerAddress.address);
+    }
+
+    const displayAccountAddress = (cosignerPublicKey) => {
+      let cosignerAddress = Address.createFromPublicKey(cosignerPublicKey, AppState.networkType).pretty();
+      return cosignerAddress;
+    }
+
+    const convertCosignerAddressToName = (address) => {
+        let aliasName = "";
+        const addressBook = walletState.currentLoggedInWallet.contacts.find((addressBook)=> addressBook.address === address);
+
+        if(addressBook){
+            aliasName = addressBook.name;
+        }else{
+          const walletAccount = walletState.currentLoggedInWallet.accounts.find((walletAccount)=> walletAccount.address === address);
+
+          if(walletAccount){
+              aliasName = walletAccount.name;
+          }
+
+          const othersAccount = walletState.currentLoggedInWallet.others.find((otherAccount)=> otherAccount.address === address);
+
+          if(othersAccount){
+              aliasName = othersAccount.name;
+          }
+        }
+        return aliasName ? aliasName : 'Cosigner';
     }
 
     const convertName = (address) =>{
@@ -391,7 +442,13 @@ export default {
       innerSignedList,
       innerSignersNameList,
       convertName,
-      InnerTxnLegendType
+      InnerTxnLegendType,
+      allTxnCosigners,
+      pendingCosigners,
+      signedSigners,
+      isHasSigned,
+      displayAccountLabel,
+      displayAccountAddress,
     };
   }
 };
