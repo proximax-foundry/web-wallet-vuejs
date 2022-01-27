@@ -29,14 +29,42 @@ export const copyKeyFunc = (id:string, ):void => {
 };
 
 
-export const copyToClipboard = (data: string): void => {
-  const listener = (e: ClipboardEvent) => {
+export const copyToClipboard = (data: string): boolean => {
+  /*const listener = (e: ClipboardEvent) => {
     e.clipboardData.setData('text/plain', data);
     e.preventDefault();
     document.removeEventListener('copy', listener);
   };
   document.addEventListener('copy', listener);
-  document.execCommand('copy');
+  document.execCommand('copy');*/
+  let textInput :any;
+
+  try {
+    textInput = document.createElement('textarea');
+    textInput.setAttribute('readonly', true);
+    textInput.setAttribute('contenteditable', true);
+    textInput.style.position = 'fixed';
+    textInput.value = data;
+    document.body.appendChild(textInput);
+    textInput.focus();
+    textInput.select();
+
+    const range = document.createRange();
+    range.selectNodeContents(textInput);
+
+    const textSelection = window.getSelection();
+    textSelection.removeAllRanges();
+    textSelection.addRange(range);
+
+    textInput.setSelectionRange(0, textInput.value.length);
+    document.execCommand('copy');
+  } catch (err) {
+    console.error(err);
+  } finally {
+    document.body.removeChild(textInput);
+  }
+  return true;
+
 }
 
 
