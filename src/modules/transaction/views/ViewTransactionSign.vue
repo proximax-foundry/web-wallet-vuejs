@@ -213,7 +213,13 @@ export default {
       
         allCosigners.push(castedAggregateTxn.signer.publicKey);
         cosignedSigner = castedAggregateTxn.cosignatures.map(cosigner=> cosigner.signer);
-        oriSignedSigners = cosignedSigner.concat([aggregateTxn.signer.publicKey]);
+        let cosignerSigned = []
+        if(cosignedSigner.length > 0){
+          cosignedSigner.forEach(cosigner => {
+            cosignerSigned.push(cosigner.publicKey);
+          })
+        }
+        oriSignedSigners = cosignerSigned.concat([aggregateTxn.signer.publicKey]);
         signedSigners = [...oriSignedSigners];
 
         let allInnerTransactions = [];
@@ -270,6 +276,7 @@ export default {
 
                   for(let x =0; x < multisigAccountsInfo.length ;++x){
                     if(CosignUtils.isFulllySigned(multisigAccountsInfo[x], signedSigners)){
+                      console.log(multisigAccountsInfo[x].account.publicKey);
                       signedSigners.push(multisigAccountsInfo[x].account.publicKey);
                     }
                   }
@@ -301,6 +308,7 @@ export default {
 
                 for(let x =0; x < multisigAccountsInfo.length ;++x){
                   if(CosignUtils.isFulllySigned(multisigAccountsInfo[x], signedSigners)){
+                    console.log(multisigAccountsInfo[x].account.publicKey)
                     signedSigners.push(multisigAccountsInfo[x].account.publicKey);
                   }
                 }
@@ -321,7 +329,6 @@ export default {
             }
 
             innerRelatedList.push(currentInnerSigners.includes(currentPublicKey));
-
             innerSignedList.push(signedSigners.includes(innerSigner.publicKey));
           }
           

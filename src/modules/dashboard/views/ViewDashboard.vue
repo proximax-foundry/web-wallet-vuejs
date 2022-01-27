@@ -1036,7 +1036,7 @@ export default defineComponent({
       currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
       currentAccount.default = true;
       selectedAccount.value = currentAccount;
-      recentTransferTxn();
+      // recentTransferTxn();
       updateAccountTransactionCount();
       loadRecentTransactions();
       loadRecentTransferTransactions();
