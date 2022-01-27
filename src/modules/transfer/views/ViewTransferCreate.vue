@@ -108,8 +108,7 @@
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class="mt-5"/>
-        <div class='font-semibold text-xs text-white'>Enter your password to continue</div>
-        <div class='font-semibold text-xxs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
+        <div class='font-semibold text-xs text-white mb-1.5'>Enter your password to continue</div>
         <PasswordInput  :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3" :disabled="disablePassword"/>
         <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" :disabled="disableCreate" @click="makeTransfer()">
             Transfer
