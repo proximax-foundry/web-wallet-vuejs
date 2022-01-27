@@ -6,10 +6,20 @@
     </div>
     <div class='md:w-8/12 lg:w-10/12 xl:w-6/12 ml-2 mr-2 md:ml-auto md:mr-auto mt-5'>
       <div class='border-2 border-gray-200'>
-        <div class='w-full text-center p-10' v-if="isSigned">
+        <div class='w-full text-center pt-10 pl-10 pr-10' v-if="isSigned">
           <div class="text-xl">No action Required</div>
           <div class="mt-5 text-tsm">You have already approved {{ innerTransactions.length>1?'these transactions':'this transaction' }}</div>
           <div class="mt-1 text-tsm font-bold">Deadline: {{ deadline }}</div>
+        </div>
+        <div class='w-full text-center pt-10 pl-10 pr-10' v-else-if="!invalidCosigner">
+          <div class="text-xl">Action Required</div>
+          <div class="mt-5 text-tsm">Would you like to approve this transaction? (Highlighted in yellow <div class="inline-block h-3 w-3 bg-yellow-300 ml-1"></div>)</div>
+          <div class="mt-1 text-tsm font-bold">Deadline: {{ deadline }}</div>
+        </div>
+        <div class='w-full text-center py-5 text-tsm text-gray-500' v-else>
+          This partial transaction is invalid for this account <b>{{ currentName }}</b>
+        </div>
+        <div class='w-full text-center pb-10 pl-10 pr-10' v-if="isSigned || !invalidCosigner">
           <div class="mt-10">
             <div class='flex items-center border-t border-gray-200 py-2' v-for="cosigner, item in allTxnCosigners" :key="item">
               <img src="@/modules/transaction/img/digital-signature-success.png" class="w-14 inline-block ml-2" v-if="isHasSigned(cosigner)">
@@ -20,14 +30,6 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class='w-full text-center p-10' v-else-if="!invalidCosigner">
-          <div class="text-xl">Action Required</div>
-          <div class="mt-5 text-tsm">Would you like to approve this transaction? (Highlighted in yellow <div class="inline-block h-3 w-3 bg-yellow-300 ml-1"></div>)</div>
-          <div class="mt-1 text-tsm font-bold">Deadline: {{ deadline }}</div>
-        </div>
-        <div class='w-full text-center py-5 text-tsm text-gray-500' v-else>
-          This partial transaction is invalid for this account <b>{{ currentName }}</b>
         </div>
       </div>
       <div class='border-2 mt-5'>
@@ -212,7 +214,7 @@ export default {
         let castedAggregateTxn = TransactionUtils.castToAggregate(aggregateTxn);     
       
         allCosigners.push(castedAggregateTxn.signer.publicKey);
-        cosignedSigner = castedAggregateTxn.cosignatures.map(cosigner=> cosigner.signer);
+        cosignedSigner = castedAggregateTxn.cosignatures.map(cosigner=> cosigner.signer.publicKey);
         oriSignedSigners = cosignedSigner.concat([aggregateTxn.signer.publicKey]);
         signedSigners = [...oriSignedSigners];
 
@@ -306,13 +308,6 @@ export default {
                 }
               }
 
-              // accountMultisigGraphInfo.multisigAccounts.forEach((value, key)=>{
-              //     const level = key;
-
-              //     let cosigners = CosignUtils.findCosigner(value);
-              //     currentInnerSigners = currentInnerSigners.concat(cosigners);
-              // });
-
               signedSigners = Array.from(new Set(signedSigners));
               currentInnerSigners = Array.from(new Set(currentInnerSigners));
             } catch (error) {
@@ -321,7 +316,6 @@ export default {
             }
 
             innerRelatedList.push(currentInnerSigners.includes(currentPublicKey));
-
             innerSignedList.push(signedSigners.includes(innerSigner.publicKey));
           }
           
@@ -331,31 +325,31 @@ export default {
 
         // remove duplicate
         allCosigners = Array.from(new Set(allCosigners));
+        allTxnCosigners.value = allCosigners;
 
         // remove those not signed
         pendingCosigners = allCosigners.filter(pk=> !signedSigners.includes(pk));
+
+        checkCosigner();
+
+        innerTransactions.value = allInnerTransactions;
+
         // console.log("Inner signers list: ", innerSignersList);
         // console.log("Inner signed list: ", innerSignedList);
         // console.log("Inner related list: ", innerRelatedList);
         // console.log("All cosigners: ", allCosigners);
         // console.log("Pending cosigners: ", pendingCosigners);
         // console.log("Signed cosigners: ", signedSigners);
-        allTxnCosigners.value = allCosigners;
-
-        checkCosigner();
-
-        innerTransactions.value = allInnerTransactions;
-
-        // console.log(innerTransactions.value);
+        
       } catch (error) {
         console.log(error);
       }
     }
 
     const isHasSigned = (cosignerPublicKey) => {
-      let signed = (signedSigners.find(element => element == cosignerPublicKey))?true:false;
-      let isPending = (pendingCosigners.find(element => element == cosignerPublicKey))?true:false;
-      return (signed && !isPending)?true:false;
+      let signed = signedSigners.includes(cosignerPublicKey);
+      let isPending = pendingCosigners.includes(cosignerPublicKey);
+      return (signed && !isPending);
     }
 
     const displayAccountLabel = (cosignerPublicKey) => {
