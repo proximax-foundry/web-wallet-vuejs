@@ -8,7 +8,6 @@
         <div class="modal-popup-box ">
           <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
             <div class= 'text-center mt-2 text-xs font-semibold'>Enter Password</div>
-           <!--  <div class ='text-gray-300 text-center text-xs mt-2'>For security, this is required before downloading your paper wallet.</div> -->
             <PasswordInput class = 'my-3' v-model= 'walletPasswd' :placeholder="'Password'"/>
             <div @click="verifyWalletPwWalletPaper()"  class = 'blue-btn font-semibold py-2 cursor-pointer text-center ml-auto mr-auto w-7/12'>Confirm</div>
             <div class= 'text-center cursor-pointer text-xs text-blue-link mt-2 font-semibold' @click="toggleModal = !toggleModal;walletPasswd=''">Cancel</div>
