@@ -28,7 +28,7 @@ export default{
     'update:modelValue'
   ],
 
-  name: 'DurationInputClean',
+  name: 'NumberInputClean',
 
   data() {
     return {

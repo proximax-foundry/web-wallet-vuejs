@@ -2,7 +2,7 @@
   <div :class="disabled?'opacity-50':''">
     <div class="border border-gray-200 px-2 py-1 h-14 rounded-md">
       <div class="uppercase text-gray-500 text-txs text-left mb-2">{{ placeholder }} <img src="@/assets/img/icon-info.svg" class="inline-block ml-1 relative cursor-pointer" style="top: -1px;" v-tooltip.bottom="'<tiptext>' + toolTip + '</tiptext>'" v-if="toolTip"></div>
-      <input :disabled="disabled" @input="$emit('update:modelValue', $event.target.value)" :value="modelValue" @keypress="validateKey" type="text" min=0 :max="max"  :maxlength="max" :placeholder="placeholder" class="number_input" @focus="$event.target.select()">
+      <input :disabled="disabled" @input="$emit('update:modelValue', $event.target.value)" :value="modelValue" @blur="verifyMinimum" @keypress="validateKey" type="text" min=1 :max="max" :maxlength="max" :placeholder="placeholder" class="number_input" @focus="$event.target.select()">
     </div>
     <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
   </div>
@@ -25,7 +25,7 @@ export default{
   },
 
   emits:[
-    'update:modelValue'
+    'update:modelValue', 'set-default-duration'
   ],
 
   name: 'DurationInputClean',
@@ -40,6 +40,12 @@ export default{
 
   methods: {
 
+    verifyMinimum: function(e) {
+      if(e.target.value == 0){
+        this.$emit('set-default-duration', '1');
+      }
+    },
+
     validateKey: function(e){
       if(this.modelValue.length <=2){
         if(e.charCode < 48 || e.charCode > 59){
@@ -52,15 +58,6 @@ export default{
       }
     },
   },
-
-  mounted() {
-    this.emitter.on("CLEAR_TEXT", payload => {
-      this.inputText = payload;
-      this.textErr = false;
-      this.borderColor = 'border border-gray-300';
-    });
-
-  }
 }
 </script>
 <style lang="scss">

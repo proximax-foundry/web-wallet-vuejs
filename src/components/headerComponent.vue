@@ -97,7 +97,11 @@
             </div>
           </div>
           <div class="w-12 lg:w-16 flex flex-row items-center left-gray-line">
-            <div class="text-center w-full h-7">
+            <div class="text-center w-full h-7 relative">
+              <span class="flex h-3 w-3 items-center justify-center absolute" style="right: 18px">
+                <span class="animate-ping absolute inline-flex rounded-full bg-blue-primary opacity-75 h-4 w-4"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-primary"></span>
+              </span>
               <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block h-7 w-3 lg:h-5 lg:w-5">
             </div>
           </div>
