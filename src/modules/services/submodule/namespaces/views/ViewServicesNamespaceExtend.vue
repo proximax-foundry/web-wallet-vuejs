@@ -70,7 +70,7 @@
           <div class="font-bold uppercase">Total</div>
           <div v-html="splitCurrency(totalFeeFormatted)"></div>
         </div>
-        <div class='text-xs text-white mt-5 mb-1.5'>Enter your password to continue</div>
+        <div class='text-xs text-white my-5'>Enter your password to continue</div>
         <PasswordInput :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="extendNamespace">Extend Duration</button>
         <div class="text-center">
@@ -236,7 +236,7 @@ export default {
       if(n > maxDurationInDays){
         duration.value = `${maxDurationInDays}`;
       }else if(n < 1){
-        duration.value = 1;
+        duration.value = '1';
       }else{
         let remainingBlock = endBlock.value - block.value;
         let availableDays = 0;

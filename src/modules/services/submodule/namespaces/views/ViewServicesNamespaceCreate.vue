@@ -127,7 +127,7 @@ export default {
     const disableSelectNamespace = ref(false);
     const namespaceName = ref('');
     const showDurationErr = ref(false);
-    const duration = ref("1");
+    const duration = ref('1');
     const walletPassword = ref('');
     const err = ref('');
     const namespaceErrorMessage = ref('Fill in valid name');
@@ -344,7 +344,7 @@ export default {
       if(n > maxDurationInDays){
         duration.value = `${maxDurationInDays}`;
       }else if(n < 1){
-        duration.value = 1;
+        duration.value = '1';
       }
     });
 
