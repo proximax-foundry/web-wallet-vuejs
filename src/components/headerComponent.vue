@@ -97,7 +97,7 @@
             </div>
           </div>
           <div class="w-12 lg:w-16 flex flex-row items-center left-gray-line">
-            <div class="text-center w-full h-7">
+            <div class="text-center w-full h-7 relative">
               <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block h-7 w-3 lg:h-5 lg:w-5">
             </div>
           </div>
