@@ -47,12 +47,20 @@ const fetchPartialTxn = async(account: WalletAccount):Promise<Notification[]> =>
 const loadPartialTransactions = async(): Promise<Notification[]> => {
 
   const notifications:Array<Notification> = [];
-  let accounts:Array<WalletAccount> = [];
-  if(walletState.currentLoggedInWallet.others){
-    accounts = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others);
-  }else{
-    accounts = walletState.currentLoggedInWallet.accounts;
-  }
+  let accounts = [];
+  let accountsAddress = walletState.currentLoggedInWallet.accounts.map((acc)=> {
+    return { 
+      address: acc.address,
+      namespaces: acc.namespaces,
+    };
+  });
+  let othersAddress = walletState.currentLoggedInWallet.others.map((acc)=> {
+    return { 
+      address: acc.address,
+      namespaces: acc.namespaces,
+    };
+  });
+  accounts = accountsAddress.concat(othersAddress);
 
   for (const account of accounts) {
     let noti = await fetchPartialTxn(account);
@@ -72,11 +80,20 @@ const loadExpiringNamespace = (): Notification[] => {
   let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
 
   let minBlockBeforeExpire = (30 * 60 * 60 * 24)/blockTargetTime;
-  if(walletState.currentLoggedInWallet.others){
-    accounts = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others);
-  }else{
-    accounts = walletState.currentLoggedInWallet.accounts;
-  }
+
+  let accountsAddress = walletState.currentLoggedInWallet.accounts.map((acc)=> {
+    return { 
+      address: acc.address,
+      namespaces: acc.namespaces,
+    };
+  });
+  let othersAddress = walletState.currentLoggedInWallet.others.map((acc)=> {
+    return { 
+      address: acc.address,
+      namespaces: acc.namespaces,
+    };
+  });
+  accounts = accountsAddress.concat(othersAddress);
   accounts.forEach(account => {
     account.namespaces.forEach(namespace => {
       let differenceHeight = namespace.endHeight - namespace.startHeight;
