@@ -98,9 +98,12 @@
           </div>
           <div class="w-12 lg:w-16 flex flex-row items-center left-gray-line">
             <router-link :to="{name : 'ViewNotification'}" class="text-center w-full h-7 relative">
-              <span class="flex h-3 w-3 items-center justify-center absolute" style="right: 18px">
+              <span class="flex h-5 w-5 items-center justify-center absolute" style="right: 15px; top: -2px;" v-if="isNewNotification">
                 <span class="animate-ping absolute inline-flex rounded-full bg-blue-primary opacity-75 h-4 w-4"></span>
                 <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-primary"></span>
+              </span>
+              <span class="flex items-center justify-center absolute" style="right: 15px; top: -2px;" v-else>
+                <span class="relative inline-flex rounded-full z-20 h-4 w-4 bg-blue-primary text-xxs text-white items-center justify-center">{{ newNotificationCount }}</span>
               </span>
               <div class="mt-1 h-7 w-3 lg:h-5 lg:w-5 inline-block">
                 <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100">
@@ -200,6 +203,8 @@ export default defineComponent({
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const router = useRouter();
 
+    const isNewNotification = ref(false);
+    const newNotificationCount = ref(0);
     const isHoverCreate = ref(false);
     const isShowCreate = ref(false);
     const isHoverCreatePanel = ref(false);
@@ -401,7 +406,9 @@ export default defineComponent({
     const doLogin = async () =>{
       if(loginStatus.value && AppState.isReady){
         await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
-        await NotificationUtils.getNotification();
+        let notification = await NotificationUtils.getNotification();
+        newNotificationCount.value = notification.length;
+        isNewNotification.value = NotificationUtils.highlightNewNotification();
         connectListener();
       }
       else if(loginStatus.value && !AppState.isReady){
@@ -546,7 +553,9 @@ export default defineComponent({
     watch(()=> currentBlockHeight.value, async()=>{
 
       listener.value.refreshTimer();
-      await NotificationUtils.getNotification();
+      let notification = await NotificationUtils.getNotification();
+      newNotificationCount.value = notification.length;
+      isNewNotification.value = NotificationUtils.highlightNewNotification();
 
     });
 
@@ -666,7 +675,7 @@ export default defineComponent({
       }
      });
 
-     watch(()=> aggregateBondedTxLength.value, (newValue, oldValue)=>{
+     watch(()=> aggregateBondedTxLength.value, async(newValue, oldValue)=>{
 
       if(newValue > oldValue){
         let txLength = newValue - oldValue;
@@ -681,6 +690,9 @@ export default defineComponent({
             life: 5000
           }
         );
+        let notification = await NotificationUtils.getNotification();
+        newNotificationCount.value = notification.length;
+        isNewNotification.value = NotificationUtils.highlightNewNotification();
       }
      });
 
@@ -724,6 +736,8 @@ export default defineComponent({
       hideSupportPanel,
       isHoverSupportPanel,
       currentBlockHeight,
+      isNewNotification,
+      newNotificationCount,
     };
   },
   created() {

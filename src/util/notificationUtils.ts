@@ -33,7 +33,6 @@ const fetchPartialTxn = async(account: WalletAccount):Promise<Notification[]> =>
   let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.PARTIAL, txnQueryParams);
   let formattedTxns = await dashboardService.formatPartialMixedTxns(transactionSearchResult.transactions);
   formattedTxns.forEach(txn => {
-    console.log(txn)
     notifications.push({
       id: txn.hash,
       type: 'Partial',
@@ -83,7 +82,6 @@ const loadExpiringNamespace = (): Notification[] => {
       let differenceHeight = namespace.endHeight - namespace.startHeight;
       let remainingBlockHeight = namespace.endHeight - currentBlock.value;
       if(differenceHeight < minBlockBeforeExpire){
-        console.log(namespace);
         notifications.push({
           id: namespace.idHex,
           type: 'Namespace',
@@ -163,6 +161,7 @@ export class NotificationUtils {
       return a.timestamp - b.timestamp;
     });
     SessionService.setObject('notification', notifications);
+    return notifications;
   }
 
   static getNotificationFromStorage(){
@@ -178,10 +177,24 @@ export class NotificationUtils {
     localStorage.setItem('VisitedNotification', JSON.stringify(notificationID));
   }
 
-  savetoLocalStorage(): void{
-    let timestamp = new Date();
-    localStorage.setItem('VisitNotification', timestamp.toString());
+  static highlightNewNotification(){
+    let visitedNotification = JSON.parse(localStorage.getItem('VisitedNotification'));
+    const notifications = NotificationUtils.getNotificationFromStorage();
+    let newNotification = false;
+    if(notifications.length > 0){
+      notifications.forEach(notification => {
+        let matchId = visitedNotification.find(noti => noti == notification.id);
+        if(!matchId){
+          newNotification = true;
+          return newNotification;
+        }
+      });
+    }
+
+    return newNotification;
   }
+
+
 
 }
 
