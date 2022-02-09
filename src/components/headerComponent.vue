@@ -703,6 +703,13 @@ export default defineComponent({
      emitter.on("listener:setEndpoint", endpoint =>{
        listener.value.endpoint = endpoint;
      });
+
+     emitter.on("VIEW_NOTIFICATION", async() => {
+       let notification = await NotificationUtils.getNotification();
+        newNotificationCount.value = notification.length;
+        isNewNotification.value = NotificationUtils.highlightNewNotification();
+     });
+
     return {
       openSetDefaultModal,
       updateSelectedAccount,
