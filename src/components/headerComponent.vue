@@ -97,13 +97,15 @@
             </div>
           </div>
           <div class="w-12 lg:w-16 flex flex-row items-center left-gray-line">
-            <div class="text-center w-full h-7">
+            <router-link :to="{name : 'ViewNotification'}" class="text-center w-full h-7 relative">
               <span class="flex h-3 w-3 items-center justify-center absolute" style="right: 18px">
                 <span class="animate-ping absolute inline-flex rounded-full bg-blue-primary opacity-75 h-4 w-4"></span>
                 <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-primary"></span>
               </span>
-              <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100 inline-block h-7 w-3 lg:h-5 lg:w-5">
-            </div>
+              <div class="mt-1 h-7 w-3 lg:h-5 lg:w-5 inline-block">
+                <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100">
+              </div>
+            </router-link>
           </div>
           <div class="hidden lg:flex w-16 lg:flex-row items-center left-gray-line">
             <div class="text-center w-full h-4 lg:h-6">
@@ -175,6 +177,7 @@ import { TransactionType } from "tsjs-xpx-chain-sdk";
 import { WalletUtils } from "@/util/walletUtils";
 import {useI18n} from 'vue-i18n'
 import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
+import { NotificationUtils } from '@/util/notificationUtils';
 
 export default defineComponent({
   components: {
@@ -398,6 +401,7 @@ export default defineComponent({
     const doLogin = async () =>{
       if(loginStatus.value && AppState.isReady){
         await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
+        await NotificationUtils.getNotification();
         connectListener();
       }
       else if(loginStatus.value && !AppState.isReady){
@@ -539,9 +543,11 @@ export default defineComponent({
       totalPendingNum.value = newLength;
     }, {immediate: true});
 
-    watch(()=> currentBlockHeight.value, ()=>{
+    watch(()=> currentBlockHeight.value, async()=>{
 
       listener.value.refreshTimer();
+      await NotificationUtils.getNotification();
+
     });
 
      watch(()=> unconfirmedTxLength.value, (newValue, oldValue)=>{
