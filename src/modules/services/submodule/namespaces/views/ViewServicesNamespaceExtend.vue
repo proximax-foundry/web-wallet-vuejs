@@ -41,7 +41,7 @@
             <div class="text-black text-sm font-bold">{{ selectNamespace }}</div>
           </div>
         </div>
-        <DurationInputClean class="mt-5" :disabled="disabledDuration" v-model="duration" :max="maxDurationInDays" placeholder="Duration (number of days)" :showError="showDurationErr" errorMessage="Required Field - Only Numbers (0 - 6)" :toolTip="`Maximum rental duration is<br>${maxDurationInDays === 365 ? '1 year ' : ''}(${maxDurationInDays} days).`" />
+        <DurationInputClean class="mt-5" :disabled="disabledDuration" v-model="duration" @set-default-duration="setDefaultDuration" :max="maxDurationInDays" placeholder="Duration (number of days)" :showError="showDurationErr" errorMessage="Required Field - Only Numbers (0 - 6)" :toolTip="`Maximum rental duration is<br>${maxDurationInDays === 365 ? '1 year ' : ''}(${maxDurationInDays} days).`" />
         <div v-if="showMaxDaysLabel" class="text-xs inline-block text-gray-400">Maximum number of days for the extension of this namespace is {{ maxDurationInDays-numDaysleft }} day{{ (maxDurationInDays-numDaysleft)>1?'s':'' }}</div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
@@ -235,9 +235,7 @@ export default {
     watch(duration, (n) => {
       if(n > maxDurationInDays){
         duration.value = `${maxDurationInDays}`;
-      }else if(n < 1){
-        duration.value = '1';
-      }else{
+      }else {
         let remainingBlock = endBlock.value - block.value;
         let availableDays = 0;
         numDaysleft.value = Math.ceil(remainingBlock/(24 * 60 * 4));
@@ -254,6 +252,10 @@ export default {
         }
       }
     });
+
+    const setDefaultDuration = () => {
+      duration.value = '1';
+    }
 
     // calculate fees
     const totalFee = computed(() => {
@@ -395,7 +397,8 @@ export default {
       svgString,
       Helper,
       currentNativeTokenName,
-      maxDurationInDays
+      maxDurationInDays,
+      setDefaultDuration,
     }
   },
 
