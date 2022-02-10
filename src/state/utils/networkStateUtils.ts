@@ -128,14 +128,18 @@ export class NetworkStateUtils{
   static buildAPIEndpointURL(url: string): string{
     const portNumber = networkState.currentNetworkProfile ? networkState.currentNetworkProfile.httpPort : 3000;
 
-    return location.protocol=='https:' ? `https://${url}` : `http://${url}:${portNumber}`;
+    const protocols = ["https:", "file:"];
+
+    return protocols.includes(location.protocol) ? `https://${url}` : `http://${url}:${portNumber}`;
   }
 
   static buildWSEndpointURL(url: string): string{
 
     const portNumber = networkState.currentNetworkProfile ? networkState.currentNetworkProfile.httpPort : 3000;
 
-    return location.protocol=='https:' ? `wss://${url}` : `ws://${url}:${portNumber}`;
+    const protocols = ["https:", "file:"];
+
+    return protocols.includes(location.protocol) ? `wss://${url}` : `ws://${url}:${portNumber}`;
   }
 
   static setLocalDefaultNetwork(networkName: string): void{
