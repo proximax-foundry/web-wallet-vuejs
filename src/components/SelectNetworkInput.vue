@@ -50,7 +50,7 @@ export default defineComponent({
       let options = [];
       networkState.availableNetworks.forEach((network, index) => {
         options.push({ label: network, value: index });
-        console.log(network)
+        // console.log(network)
       });
        /* options.push({ label: 'Sirius Testnet 2', value: 2}); */
       return options;
