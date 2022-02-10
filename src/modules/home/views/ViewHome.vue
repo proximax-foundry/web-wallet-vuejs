@@ -7,7 +7,7 @@
       <div class="px-5 text-gray-700 md:text-lg text-tsm mt-4">
         <SignInComponent />
       </div>
-      <div v-if ='currentNetwork == "Sirius Mainnet"'>
+     <!--  <div v-if ='currentNetwork == "Sirius Mainnet"'>
       <h2 class = 'my-10 ml-auto mr-auto'><span class = 'text-semibold'>or</span></h2>
       <div class="px-5 mt-4  text-center">
         <router-link :to="{ name: 'ViewHomeSignInSiriusID' }" >
@@ -16,7 +16,7 @@
           </div>
         </router-link>
       </div>
-      </div>
+      </div> -->
       <div class ='text-center text-xs mt-6 mb-1 '>No Sirius wallet account yet?</div>
       <div class ="text-center  text-xs text-blue-link font-semibold"><router-link :to="{ name: 'ViewWalletCreateSelection' }">Create Account Wallet ></router-link></div>
       <div class = 'h-16 '></div>
