@@ -17,9 +17,10 @@
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="mt-4">
           <SelectInputAccount @select-account="changeSelection" v-model="selectedAccAdd" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
-          <div v-if="getMultiSigCosigner.list.length > 0">
+          <div v-if="getMultiSigCosigner.cosignerList.length > 0">
             <div class="text-tsm text-left mt-3">{{$t('transfer.cosigner')}}:
-              <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.list[0].balance, 0) }} {{currentNativeTokenName}}) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{currentNativeTokenName}}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.cosignerList" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
               <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
             </div>
           </div>
@@ -59,8 +60,7 @@
           <div class="font-bold uppercase">Total</div>
           <div v-html="splitCurrency(totalFeeFormatted)"></div>
         </div>
-        <div class='text-xs text-white mt-5'>Enter your password to continue</div>
-        <div class='text-xs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
+        <div class='text-xs text-white my-5'>Enter your password to continue</div>
         <PasswordInput :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="createAsset">Create Asset</button>
         <div class="text-center">
@@ -104,6 +104,8 @@ import { Helper } from '@/util/typeHelper';
 import { ChainUtils } from '@/util/chainUtils';
 import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
+import { multiSign } from '@/util/multiSignatory';
+
 export default {
   name: 'ViewServicesAssetsCreate',
   components: {
@@ -184,11 +186,40 @@ export default {
 
     const supply = ref('0');
 
-    const getMultiSigCosigner = computed(() => {
-      return AssetsUtils.getCosignerList(selectedAccAdd.value);
+    const accounts = computed( () => {
+      if(walletState.currentLoggedInWallet){
+        if(walletState.currentLoggedInWallet.others){
+          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+          return concatOther;
+        } else{
+          return walletState.currentLoggedInWallet.accounts;
+        }
+      } else{
+        return [];
+      }
     });
 
-    const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
+    const fetchAccount = (publicKey) => {
+      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
+    };
+
+    const getMultiSigCosigner = computed(() => {
+      // return AssetsUtils.getCosignerList(selectedAccAdd.value);
+      let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value).publicKey);
+      let list = [];
+      cosigners.cosignerList.forEach( publicKey => {
+        list.push({
+          publicKey,
+          name: fetchAccount(publicKey).name,
+          balance: fetchAccount(publicKey).balance
+        });
+      });
+
+      cosigners.cosignerList = list;
+      return cosigners;
+    });
+
+    const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
 
     const showNoBalance = computed(() => {
       if(isNotCosigner.value){
@@ -210,19 +241,6 @@ export default {
       disabledDuration.value = false;
       durationCheckDisabled.value = false;
     }
-
-    const accounts = computed( () => {
-      if(walletState.currentLoggedInWallet){
-        if(walletState.currentLoggedInWallet.others){
-          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
-          return concatOther;
-        } else{
-          return walletState.currentLoggedInWallet.accounts;
-        }
-      } else{
-        return [];
-      }
-    });
 
     const moreThanOneAccount = computed(()=>{
       return accounts.value.length > 1;
@@ -340,11 +358,11 @@ export default {
     // get cosigner
     watch(getMultiSigCosigner, (n) => {
       // if it is a multisig
-      if(n.list.length > 0){
-        if(n.list.length > 1){
+      if(n.cosignerList.length > 0){
+        if(n.cosignerList.length > 1){
           cosigner.value = cosignerAddress.value;
         }else{
-          cosigner.value = n.list[0].address;
+          cosigner.value = fetchAccount(n.cosignerList[0].publicKey).address;
         }
       }else{
         cosigner.value = '';
@@ -361,6 +379,7 @@ export default {
     };
 
     return {
+      fetchAccount,
       accounts,
       moreThanOneAccount,
       currentSelectedName,

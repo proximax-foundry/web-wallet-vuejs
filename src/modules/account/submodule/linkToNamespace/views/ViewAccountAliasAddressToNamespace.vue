@@ -92,8 +92,7 @@
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class="mt-5"/>
-        <div class='font-semibold text-xs text-white'>Enter your password to continue</div>
-        <div class='font-semibold text-xxs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
+        <div class='font-semibold text-xs text-white mb-1.5'>Enter your password to continue</div>
         <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="pwdErrorMsg" v-model="walletPassword" icon="lock" :showError="showPwdError" :disabled="disableNamespaces"  />
         <div class="mt-3"></div>
         <button v-if="selectAction== 'Link' && !pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="alisesAddressToNamespaces" :disabled="disableCreate">Link to Namespace</button>

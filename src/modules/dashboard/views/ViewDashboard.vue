@@ -1024,8 +1024,8 @@ export default defineComponent({
       init();
     }
     else{
-      let readyWatcher = watch(AppState.isReady, (value) => {
-        if(value){
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
           init();
           readyWatcher();
         }
@@ -1036,7 +1036,7 @@ export default defineComponent({
       currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
       currentAccount.default = true;
       selectedAccount.value = currentAccount;
-      recentTransferTxn();
+      // recentTransferTxn();
       updateAccountTransactionCount();
       loadRecentTransactions();
       loadRecentTransferTransactions();

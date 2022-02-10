@@ -319,7 +319,7 @@ dashboard:
 transfer: 
   recipientPlaceholder: "Recipient / Namespace"
   maketransaction: "Make a transaction"
-  cosigner: "Cosigner"
+  cosigner: "Initiate by"
   nocosigner: "No eligible cosigner in this wallet"
   enteramount: "Enter Amount"
   selectmosaic: "Select Mosaic"

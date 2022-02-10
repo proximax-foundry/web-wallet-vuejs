@@ -26,9 +26,10 @@
         </div>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="text-right w-full">
-          <div v-if="getMultiSigCosigner.list.length > 0" class="inline-block">
+          <div v-if="getMultiSigCosigner.cosignerList.length > 0" class="inline-block">
             <div class="text-tsm text-left mt-3">{{$t('transfer.cosigner')}}:
-              <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.list[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
               <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
             </div>
           </div>
@@ -87,8 +88,7 @@
           <div class="font-bold uppercase">Total</div>
           <div v-html="splitCurrency(totalFeeFormatted)"></div>
         </div>
-        <div class='text-xs text-white mt-5'>Enter your password to continue</div>
-        <div class='text-xs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
+        <div class='text-xs text-white mt-5 mb-1.5'>Enter your password to continue</div>
         <PasswordInput :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="linkNamespace">{{ (selectAction=='link')?'Link to':'Unlink' }} Namespace</button>
         <div class="text-center">
@@ -119,6 +119,7 @@ import { useI18n } from 'vue-i18n';
 import { useToast } from "primevue/usetoast";
 import Tooltip from 'primevue/tooltip';
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
+import { multiSign } from '@/util/multiSignatory';
 
 export default {
   name: 'ViewServicesAssetsLinkToNamespace',
@@ -192,7 +193,7 @@ export default {
     });
 
     const showNoAsset = ref(false);
-    const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value) && !showNoAsset.value);
+    const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value) && !showNoAsset.value);
 
     const supply = ref('0');
 
@@ -243,22 +244,34 @@ export default {
 
     const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
 
-    const getMultiSigCosigner = computed(() => {
-      return AssetsUtils.getCosignerList(selectedAccAdd.value);
-    });
+    const fetchAccount = (publicKey) => {
+      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
+    };
 
-    const cosigner = ref('');
-    // get cosigner
-    // if it is a multisig
-    if(getMultiSigCosigner.value.list.length > 0){
-      if(getMultiSigCosigner.value.list.length > 1){
-        cosigner.value = cosignerAddress.value;
+    let cosigners = multiSign.getCosignerInWallet(account.publicKey);
+    let list = [];
+    cosigners.cosignerList.forEach( publicKey => {
+      list.push({
+        publicKey,
+        name: fetchAccount(publicKey).name,
+        balance: fetchAccount(publicKey).balance
+      });
+    });
+    cosigners.cosignerList = list;
+
+    const getMultiSigCosigner = ref(cosigners);
+
+    const cosigner = computed(() => {
+      if(getMultiSigCosigner.value.cosignerList.length > 0){
+        if(getMultiSigCosigner.value.cosignerList.length > 1){
+          return cosignerAddress.value;
+        }else{
+          return fetchAccount(getMultiSigCosigner.value.cosignerList[0].publicKey).address;
+        }
       }else{
-        cosigner.value = getMultiSigCosigner.value.list[0].address;
+        return '';
       }
-    }else{
-      cosigner.value = '';
-    }
+    });
 
     transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
     transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);

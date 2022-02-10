@@ -17,9 +17,10 @@
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="mt-4">
           <SelectInputAccount @select-account="changeSelection" v-model="selectedAccAdd" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
-          <div v-if="getMultiSigCosigner.list.length > 0">
+          <div v-if="getMultiSigCosigner.cosignerList.length > 0">
             <div class="text-tsm text-left mt-3">{{$t('transfer.cosigner')}}:
-              <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.list[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.cosignerList" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
               <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
             </div>
           </div>
@@ -29,7 +30,7 @@
               <TextInputTooltip :disabled="disableNamespaceName" placeholder="Name" :errorMessage="namespaceErrorMessage" v-model="namespaceName" v-debounce:1000="checkNamespace" icon="id-card-alt" :showError="showNamespaceNameError" class="w-full inline-block" toolTip="A namespace can have a maximium length of 16 alphanumerical characters while sub-namespaces can have a maximium length of 64 alphanumerical characters.<br><br>Three layers can be created. A namespace can have a subnamespace, and a subnamespace can have its own subnamespace (e.g., test1.test2.test3).<br><br>Certain phrases are already reserved." />
             </div>
             <div class="mb-5 lg:mb-0 lg:ml-2">
-              <DurationInputClean :disabled="disabledDuration" v-model="duration" :max="maxDurationInDays" placeholder="Duration (number of days)" :showError="showDurationErr" errorMessage="Required Field - Only Numbers (0 - 6)" :toolTip="`Maximum rental duration is<br>${maxDurationInDays === 365 ? '1 year ' : ''}(${maxDurationInDays} days).`" />
+              <DurationInputClean :disabled="disabledDuration" v-model="duration" :max="maxDurationInDays" placeholder="Duration (number of days)" @set-default-duration="setDefaultDuration" :showError="showDurationErr" errorMessage="Required Field - Only Numbers (0 - 6)" :toolTip="`Maximum rental duration is<br>${maxDurationInDays === 365 ? '1 year ' : ''}(${maxDurationInDays} days).`" />
             </div>
           </div>
         </div>
@@ -60,8 +61,7 @@
           <div class="font-bold uppercase">Total</div>
           <div v-html="splitCurrency(totalFeeFormatted)"></div>
         </div>
-        <div class='text-xs text-white mt-5'>Enter your password to continue</div>
-        <div class='text-xs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
+        <div class='text-xs text-white my-5'>Enter your password to continue</div>
         <PasswordInput :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="createNamespace">Register Namespace</button>
         <div class="text-center">
@@ -104,6 +104,7 @@ import { ChainUtils } from '@/util/chainUtils';
 import { TransactionUtils } from '@/util/transactionUtils';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
+import { multiSign } from '@/util/multiSignatory';
 
 export default {
   name: 'ViewServicesNamespaceCreate',
@@ -126,7 +127,7 @@ export default {
     const disableSelectNamespace = ref(false);
     const namespaceName = ref('');
     const showDurationErr = ref(false);
-    const duration = ref("1");
+    const duration = ref('1');
     const walletPassword = ref('');
     const err = ref('');
     const namespaceErrorMessage = ref('Fill in valid name');
@@ -216,7 +217,7 @@ export default {
 
     const isMultiSigBool = computed( () => isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
 
-    const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
+    const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
 
     const showNoBalance = computed(() => {
       if(isNotCosigner.value){
@@ -257,8 +258,24 @@ export default {
     const transactionFee = ref(0);
     const transactionFeeExact = ref(0);
 
+    const fetchAccount = (publicKey) => {
+      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
+    };
+
     const getMultiSigCosigner = computed(() => {
-      return NamespaceUtils.getCosignerList(selectedAccAdd.value);
+      // return AssetsUtils.getCosignerList(selectedAccAdd.value);
+      let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value).publicKey);
+      let list = [];
+      cosigners.cosignerList.forEach( publicKey => {
+        list.push({
+          publicKey,
+          name: fetchAccount(publicKey).name,
+          balance: fetchAccount(publicKey).balance
+        });
+      });
+
+      cosigners.cosignerList = list;
+      return cosigners;
     });
 
     const removeNamespace = () => {
@@ -324,12 +341,14 @@ export default {
     };
 
     watch(duration, (n) => {
-      if(n > maxDurationInDays){
+      if(parseInt(n) > maxDurationInDays){
         duration.value = `${maxDurationInDays}`;
-      }else if(n < 1){
-        duration.value = 1;
       }
     });
+
+    const setDefaultDuration = () => {
+      duration.value = '1';
+    }
 
     // calculate fees
     const totalFee = computed(() => {
@@ -373,11 +392,11 @@ export default {
     // get cosigner
     watch(getMultiSigCosigner, (n) => {
       // if it is a multisig
-      if(n.list.length > 0){
-        if(n.list.length > 1){
+      if(n.cosignerList.length > 0){
+        if(n.cosignerList.length > 1){
           cosigner.value = cosignerAddress.value;
         }else{
-          cosigner.value = n.list[0].address;
+          cosigner.value = fetchAccount(n.cosignerList[0].publicKey).address;
         }
       }else{
         cosigner.value = '';
@@ -514,6 +533,7 @@ export default {
       nsRef,
       maxDurationInDays,
       removeNamespace,
+      setDefaultDuration,
     }
   },
 

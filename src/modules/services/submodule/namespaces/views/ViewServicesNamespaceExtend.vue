@@ -26,9 +26,10 @@
         </div>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="text-right w-full">
-          <div v-if="getMultiSigCosigner.list.length > 0" class="inline-block">
+          <div v-if="getMultiSigCosigner.cosignerList.length > 0" class="inline-block">
             <div class="text-tsm text-left mt-3">{{$t('transfer.cosigner')}}:
-              <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.list[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
+              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.cosignerList" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
               <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
             </div>
           </div>
@@ -40,7 +41,7 @@
             <div class="text-black text-sm font-bold">{{ selectNamespace }}</div>
           </div>
         </div>
-        <DurationInputClean class="mt-5" :disabled="disabledDuration" v-model="duration" :max="maxDurationInDays" placeholder="Duration (number of days)" :showError="showDurationErr" errorMessage="Required Field - Only Numbers (0 - 6)" :toolTip="`Maximum rental duration is<br>${maxDurationInDays === 365 ? '1 year ' : ''}(${maxDurationInDays} days).`" />
+        <DurationInputClean class="mt-5" :disabled="disabledDuration" v-model="duration" @set-default-duration="setDefaultDuration" :max="maxDurationInDays" placeholder="Duration (number of days)" :showError="showDurationErr" errorMessage="Required Field - Only Numbers (0 - 6)" :toolTip="`Maximum rental duration is<br>${maxDurationInDays === 365 ? '1 year ' : ''}(${maxDurationInDays} days).`" />
         <div v-if="showMaxDaysLabel" class="text-xs inline-block text-gray-400">Maximum number of days for the extension of this namespace is {{ maxDurationInDays-numDaysleft }} day{{ (maxDurationInDays-numDaysleft)>1?'s':'' }}</div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
@@ -69,8 +70,7 @@
           <div class="font-bold uppercase">Total</div>
           <div v-html="splitCurrency(totalFeeFormatted)"></div>
         </div>
-        <div class='text-xs text-white mt-5'>Enter your password to continue</div>
-        <div class='text-xs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
+        <div class='text-xs text-white my-5'>Enter your password to continue</div>
         <PasswordInput :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="extendNamespace">Extend Duration</button>
         <div class="text-center">
@@ -98,6 +98,7 @@ import { useToast } from "primevue/usetoast";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
+import { multiSign } from '@/util/multiSignatory';
 
 export default {
   name: 'ViewServicesNamespaceExtend',
@@ -234,9 +235,7 @@ export default {
     watch(duration, (n) => {
       if(n > maxDurationInDays){
         duration.value = `${maxDurationInDays}`;
-      }else if(n < 1){
-        duration.value = 1;
-      }else{
+      }else {
         let remainingBlock = endBlock.value - block.value;
         let availableDays = 0;
         numDaysleft.value = Math.ceil(remainingBlock/(24 * 60 * 4));
@@ -253,6 +252,10 @@ export default {
         }
       }
     });
+
+    const setDefaultDuration = () => {
+      duration.value = '1';
+    }
 
     // calculate fees
     const totalFee = computed(() => {
@@ -291,17 +294,30 @@ export default {
       router.push({ name: "ViewServicesNamespace", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()}});
     };
 
-    const getMultiSigCosigner = computed(() => {
-      return NamespaceUtils.getCosignerList(selectedAccAdd.value);
-    });
+    const fetchAccount = (publicKey) => {
+      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
+    };
 
-    const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
+    let cosigners = multiSign.getCosignerInWallet(account.publicKey);
+    let list = [];
+    cosigners.cosignerList.forEach( publicKey => {
+      list.push({
+        publicKey,
+        name: fetchAccount(publicKey).name,
+        balance: fetchAccount(publicKey).balance
+      });
+    });
+    cosigners.cosignerList = list;
+
+    const getMultiSigCosigner = ref(cosigners);
+
+    const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
 
     const showNoBalance = computed(() => {
       if(isNotCosigner.value){
         return balanceNumber.value < (rentalFee.value + transactionFeeExact.value);
       }else{
-        console.log(balanceNumber.value)
+        // console.log(balanceNumber.value)
         return balanceNumber.value < (rentalFee.value + transactionFeeExact.value + lockFundTotalFee.value);
       }
     });
@@ -316,18 +332,17 @@ export default {
       }
     });
 
-    const cosigner = ref('');
     // get cosigner
-    watch(getMultiSigCosigner, (n) => {
-      // if it is a multisig
-      if(n.list.length > 0){
-        if(n.list.length > 1){
-          cosigner.value = cosignerAddress.value;
+    // if it is a multisig
+    const cosigner = computed(() => {
+      if(getMultiSigCosigner.value.cosignerList.length > 0){
+        if(getMultiSigCosigner.value.cosignerList.length > 1){
+          return cosignerAddress.value;
         }else{
-          cosigner.value = n.list[0].address;
+          return fetchAccount(getMultiSigCosigner.value.cosignerList[0].publicKey).address;
         }
       }else{
-        cosigner.value = '';
+        return '';
       }
     });
 
@@ -382,7 +397,8 @@ export default {
       svgString,
       Helper,
       currentNativeTokenName,
-      maxDurationInDays
+      maxDurationInDays,
+      setDefaultDuration,
     }
   },
 

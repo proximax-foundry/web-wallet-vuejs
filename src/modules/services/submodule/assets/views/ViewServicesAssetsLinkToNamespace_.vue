@@ -45,7 +45,7 @@
             </div>
             <div v-if="getMultiSigCosigner.list.length > 0">
               <div class="text-tsm text-left ml-4">Cosigner:
-                <span class="font-bold" v-if="getMultiSigCosigner.list.length == 1">{{ getMultiSigCosigner.list[0].name }} (Balance: {{ getMultiSigCosigner.list[0].balance }} {{currentNativeTokenName}}) <span v-if="getMultiSigCosigner.list[0].balance < lockFundTotalFee" class="error">- Insufficient balance</span></span>
+                <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} (Balance: {{ getMultiSigCosigner.cosignerList[0].balance }} {{currentNativeTokenName}}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- Insufficient balance</span></span>
                 <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
                 <div v-if="cosignerBalanceInsufficient" class="error">- Insufficient balance</div>
               </div>
@@ -171,7 +171,7 @@ export default {
     const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
 
     const showNoBalance = ref(false);
-    const isNotCosigner = computed(() => getMultiSigCosigner.value.list.length == 0 && isMultiSig(selectedAccAdd.value));
+    const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
 
     const accounts = computed( () => {
       if(walletState.currentLoggedInWallet){
@@ -191,8 +191,24 @@ export default {
     const transactionFee = ref('0.000000');
     const transactionFeeExact = ref(0);
 
+    const fetchAccount = (publicKey) => {
+      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
+    };
+
     const getMultiSigCosigner = computed(() => {
-      return AssetsUtils.getCosignerList(selectedAccAdd.value);
+      // return AssetsUtils.getCosignerList(selectedAccAdd.value);
+      let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value).publicKey);
+      let list = [];
+      cosigners.cosignerList.forEach( publicKey => {
+        list.push({
+          publicKey,
+          name: fetchAccount(publicKey).name,
+          balance: fetchAccount(publicKey).balance
+        });
+      });
+
+      cosigners.cosignerList = list;
+      return cosigners;
     });
 
     const changeSelection = (i) => {
@@ -321,11 +337,11 @@ export default {
     // get cosigner
     watch(getMultiSigCosigner, (n) => {
       // if it is a multisig
-      if(n.list.length > 0){
-        if(n.list.length > 1){
+      if(n.cosignerList.length > 0){
+        if(n.cosignerList.length > 1){
           cosigner.value = cosignerAddress.value;
         }else{
-          cosigner.value = n.list[0].address;
+          cosigner.value = n.cosignerList[0].address;
         }
       }else{
         cosigner.value = '';
