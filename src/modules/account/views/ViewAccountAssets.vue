@@ -15,6 +15,10 @@
         <MoreAccountOptions :address="address"/>
     </div>
     <div class='border-2 border-t-0  p-6'>
+        <div v-if="mosaics.length==0" class='text-blue-primary text-xs text-center font-semibold'>Nothing to show.</div>
+        <div class='text-txs w-9/12 ml-auto mr-auto text-gray-400 mt-1 text-center'>
+          <span v-if="mosaics.length==0">You do not own any assets.</span>
+        </div>
         <div v-for="(mosaic, index) in mosaics" :key="index">
             <img v-if="displayTokenName(mosaic.name).name=='XPX'" src="@/modules/account/img/proximax-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
             <img v-else-if="displayTokenName(mosaic.name).name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>

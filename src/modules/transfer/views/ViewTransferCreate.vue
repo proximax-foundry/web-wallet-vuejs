@@ -58,7 +58,7 @@
           <TransferInputClean v-if="selectedMosaic[index].id != 0" v-model="selectedMosaic[index].amount" :balance="getSelectedMosaicBalance[index]" placeholder="AMOUNT (ASSET)" type="text" :showError="showAssetBalanceErr[index]" :errorMessage="$t('accounts.insufficientbalance')" :decimal="mosaicSupplyDivisibility[index]"  />
         </div>
         <div>
-          <button class="my-2 font-semibold text-xs text-blue-primary outline-none focus:outline-none disabled:opacity-50" :disabled="addMosaicsButton" @click="displayMosaicsOption">
+          <button class="my-2 font-semibold text-xs text-blue-primary outline-none focus:outline-none disabled:opacity-50" :disabled="addMosaicsButton || mosaics.length==0" @click="displayMosaicsOption">
            + Add Assets
           </button>
         </div>
@@ -516,13 +516,14 @@ export default {
     ) ||  walletState.currentLoggedInWallet.others.find(
       (element) => element.name == selectedAccName.value)
     if (account.assets.length > 0) {
-      
       account.assets.forEach((i, index) => {
-        mosaicOption.push({
-          val: i.idHex,
-          text: (i.namespaceNames.length>0?i.namespaceNames:i.idHex) + " >"+t('services.balance') +": " +Helper.amountFormatterSimple(i.amount,i.divisibility),
-          id: index + 1,
-        });
+        if(i.namespaceNames!="prx.xpx"){
+          mosaicOption.push({
+            val: i.idHex,
+            text: (i.namespaceNames.length>0?i.namespaceNames:i.idHex) + " >"+t('services.balance') +": " +Helper.amountFormatterSimple(i.amount,i.divisibility),
+            id: index + 1,
+          });
+        }
       });
     }
     return mosaicOption;
