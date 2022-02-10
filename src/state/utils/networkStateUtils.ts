@@ -4,6 +4,7 @@ import { SessionService } from "../../models/stores/sessionService"
 import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainProfilePreferences } from "../../models/stores/"
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { BuildTransactions } from "@/util/buildTransactions";
+import { ChainUtils } from "@/util/chainUtils"
 
 const sessionNetworkName = "networkName";
 const sessionNetworkIndex = "network";
@@ -71,6 +72,7 @@ export class NetworkStateUtils{
     AppState.nativeToken.divisibility = chainProfile.network.currency.divisibility;
     AppState.nativeToken.label = chainProfile.network.currency.name;
     AppState.nativeToken.fullNamespace = chainProfile.network.currency.namespace;
+    AppState.networkType = ChainUtils.getNetworkType(chainProfile.network.type);
 
     const chainProfileConfig = new ChainProfileConfig(networkState.chainNetworkName);
 
