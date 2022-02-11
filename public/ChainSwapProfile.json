@@ -14,21 +14,24 @@
         "BSCScanUrl": "https://testnet.bscscan.com/tx/",
         "ETHScanUrl": "https://ropsten.etherscan.io/tx/",
         "BSCNetworkName": "BSC Testnet",
-        "ETHNetworkName": "Ropsten"
-      },
-      "timeOutTransactionNis1": 20000,
-      "nis1SwapData": {
-        "url": "https://bctestnetswap.xpxsirius.io:7890",
-        "urlExplorer": "http://testnet-explorer.nemtool.com/#/s_tx?hash=",
-        "networkType": 152,
-        "burnAddress": "TBF4LAZUEJMBIOC6J24D6ZGGXE5W775TX555CTTN",
-        "nodes": [
-          { "protocol": "https", "domain": "bctestnetswap.xpxsirius.io", "port": 7890 } 
-        ]
-      },
-      "nis1SwapAllowedMosaics": [
-        { "namespaceId": "xarcade", "name": "xar", "divisibility": 4 },
-        { "namespaceId": "prx", "name": "xpx", "divisibility": 6 }
-      ]
+        "ETHNetworkName": "Ropsten",
+
+        "nis1SwapData": {
+          
+          "timeOutTransactionNis1": 20000,
+          "url": "https://bctestnetswap.xpxsirius.io:7890",
+          "urlExplorer": "http://testnet-explorer.nemtool.com/#/s_tx?hash=",
+          "networkType": 152,
+          "burnAddress": "TBF4LAZUEJMBIOC6J24D6ZGGXE5W775TX555CTTN",
+          "nodes": [
+            { "protocol": "https", "domain": "bctestnetswap.xpxsirius.io", "port": 7890 }
+          ],
+          
+          "nis1SwapAllowedMosaics": [
+            { "namespaceId": "xarcade", "name": "xar", "divisibility": 4 },
+            { "namespaceId": "prx", "name": "xpx", "divisibility": 6 }
+          ]
+        }
+      }
     }
 }

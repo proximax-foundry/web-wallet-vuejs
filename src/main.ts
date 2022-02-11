@@ -34,8 +34,8 @@ import VWave from 'v-wave';
 import VueBlocksTree from 'vue3-blocks-tree';
 import 'vue3-blocks-tree/dist/vue3-blocks-tree.css';
 import chainProfileJson from '../public/chainProfile.json';
+import chainSwapProfileJson from '../public/chainSwapProfile.json';
 import themeConfigJson from '../public/themeConfig.json';
-
 
 library.add(
   fas,faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
@@ -165,12 +165,12 @@ const chainProfileIntegration = async () => {
       chainProfileStore.init();
       const chainProfileData = chainProfilesData[chainProfileName];
 
-      if(chainProfileData['swapData']){
-        let chainSwapConfig = new ChainSwapConfig(chainProfileName);
-        chainSwapConfig.updateConfig(chainProfileData['swapData']);
+      // if(chainProfileData['swapData']){
+      //   let chainSwapConfig = new ChainSwapConfig(chainProfileName);
+      //   chainSwapConfig.updateConfig(chainProfileData['swapData']);
 
-        chainSwapConfig.saveToLocalStorage();
-      }
+      //   chainSwapConfig.saveToLocalStorage();
+      // }
 
       if(chainProfileStore.getVersion() !== chainProfileData['version']){
 
@@ -208,8 +208,6 @@ const chainProfileIntegration = async () => {
         } catch (error) {
           console.log(error);
         }
-        
-       
       }
     }
 
@@ -223,6 +221,42 @@ const chainProfileIntegration = async () => {
 }
 
 chainProfileIntegration();
+
+const chainSwapIntegration = async () => {
+  try {
+    let networksInfo = {};
+    if(window.location.protocol == 'file:'){
+      networksInfo = chainSwapProfileJson;
+    }else{
+        networksInfo = await fetch('./chainSwapProfile.json', {
+        headers: {
+          'Cache-Control': 'no-store',
+          'Pragma' : 'no-cache'
+        }
+      }).then((res) => res.json()).then((networksInfo) => { return networksInfo });
+    }
+
+    const chainProfilesData = networksInfo;
+    const chainProfileNames = Object.keys(networksInfo);
+
+    for(const chainProfileName of chainProfileNames){
+      const chainProfileData = chainProfilesData[chainProfileName];
+
+      if(chainProfileData['swapData']){
+        let chainSwapConfig = new ChainSwapConfig(chainProfileName);
+        chainSwapConfig.updateConfig(chainProfileData['swapData']);
+
+        chainSwapConfig.saveToLocalStorage();
+      }
+    }
+  }catch (e) {
+    console.error(e);
+  }
+};
+
+chainSwapIntegration();
+
+
 
 // check from session when page refreshed
 if (!walletState.currentLoggedInWallet) {

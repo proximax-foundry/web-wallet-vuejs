@@ -51,20 +51,6 @@
         "hashRoute": "#/result/hash",
         "namespaceInfoRoute": "#/result/namespaceInfo",
         "assetInfoRoute": "#/result/assetInfo"
-      },
-      "swapData":{
-        "swap_XPX_ETH_URL": "https://bctestnet-swap-gateway.xpxsirius.io/eth",
-        "swap_XPX_BSC_URL": "https://bctestnet-swap-gateway.xpxsirius.io/bsc",
-        "swap_IN_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
-        "swap_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
-        "gasPriceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io/gas",
-        "priceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io",
-        "BSCChainId": 97,
-        "ETHChainId": 3,
-        "BSCScanUrl": "https://testnet.bscscan.com/tx/",
-        "ETHScanUrl": "https://ropsten.etherscan.io/tx/",
-        "BSCNetworkName": "BSC Testnet",
-        "ETHNetworkName": "Ropsten"
       }
     }
 }
