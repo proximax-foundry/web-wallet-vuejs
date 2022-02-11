@@ -1,5 +1,5 @@
 <template>
-    <img @click=" toggleModal =! toggleModal" src="@/modules/wallet/img/icon-delete.svg" class="opacity-0 group-hover:opacity-100 cursor-pointer inline">
+    <img @click=" toggleModal =! toggleModal" src="@/modules/wallet/img/icon-delete.svg" class=" cursor-pointer inline">
      <transition
           enter-active-class="animate__animated animate__fadeInDown"
           leave-active-class="animate__animated animate__fadeOutUp"
