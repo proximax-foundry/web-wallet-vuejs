@@ -23,11 +23,10 @@
           "urlExplorer": "http://testnet-explorer.nemtool.com/#/s_tx?hash=",
           "networkType": 152,
           "burnAddress": "TBF4LAZUEJMBIOC6J24D6ZGGXE5W775TX555CTTN",
-          "nodes": [
+          "nodes":[
             { "protocol": "https", "domain": "bctestnetswap.xpxsirius.io", "port": 7890 }
           ],
-          
-          "nis1SwapAllowedMosaics": [
+          "swapAllowedMosaics": [
             { "namespaceId": "xarcade", "name": "xar", "divisibility": 4 },
             { "namespaceId": "prx", "name": "xpx", "divisibility": 6 }
           ]

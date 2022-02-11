@@ -1,12 +1,10 @@
 import { StoreProperties } from "./storeProperties";
+import {
+    ServerConfig
+  } from 'nem-library';
 
-interface nodes{
-    protocol: string;
-    domain: string;
-    port: number;
-}
 
-interface nis1SwapAllowedMosaics{
+interface swapAllowedMosaics{
     namespaceId: string;
     name: string;
     divisibility: number;
@@ -18,8 +16,8 @@ interface nis1SwapData {
     urlExplorer: string;
     networkType: number;
     burnAddress:string;
-    nodes: Array<nodes>;
-    nis1SwapAllowedMosaics: Array<nis1SwapAllowedMosaics>;
+    nodes: ServerConfig[];
+    swapAllowedMosaics: Array<swapAllowedMosaics>;
 }
 
 // "nis1SwapData": {
@@ -53,17 +51,17 @@ export class ChainSwapConfig extends StoreProperties{
         networkType: 0,
         burnAddress: '',
         nodes: [{
-            protocol: '',
+            protocol: 'https',
             domain: '',
             port: 0
         }],
-        nis1SwapAllowedMosaics: [{
+        swapAllowedMosaics: [{
             namespaceId: '',
             name: '',
             divisibility: 0
         }]
     };
-    
+
 
     constructor(storeName: string){
         super(storeName + "_swapConfig");
