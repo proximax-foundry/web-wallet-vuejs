@@ -405,8 +405,8 @@ export default {
       init();
     }
     else{
-      let readyWatcher = watch(AppState.isReady, (value) => {
-        if(value){
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
           init();
           readyWatcher();
         }     
