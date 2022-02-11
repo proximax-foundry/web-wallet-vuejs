@@ -17,7 +17,16 @@
           <div class="mt-1 text-tsm font-bold">Deadline: {{ deadline }}</div>
         </div>
         <div class='w-full text-center py-5 text-tsm text-gray-500' v-else>
-          This partial transaction is invalid for this account <b>{{ currentName }}</b>
+          <div class="mt-10">
+            <div class='flex items-center border-t border-gray-200 py-2' v-for="cosigner, item in allTxnCosigners" :key="item">
+              <img src="@/modules/transaction/img/digital-signature-success.png" class="w-14 inline-block ml-2" v-if="isHasSigned(cosigner)">
+              <img src="@/modules/transaction/img/digital-signature-not-signed.png" class="w-14 inline-block ml-2" v-else>
+              <div class="text-left ml-3 inline-block">
+                <div class="uppercase text-blue-primary text-txs font-bold">{{ displayAccountLabel(cosigner) }} {{ isHasSigned(cosigner)?'(Signed)':'' }}</div>
+                <div class="uppercase text-xxs text-gray-500 mt-1">{{ displayAccountAddress(cosigner) }}</div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class='w-full text-center pb-10 pl-10 pr-10' v-if="isSigned || !invalidCosigner">
           <div class="mt-10">
