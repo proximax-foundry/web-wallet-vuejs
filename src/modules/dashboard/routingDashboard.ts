@@ -9,4 +9,14 @@ export const DashboardRoutes: RouteRecordRaw[] = [
       title: "Dashboard",
     }
   },
+
+  {
+    path: '/notification',
+    name: 'ViewNotification',
+    props: true,
+    component: () => import('@/modules/dashboard/views/ViewNotification.vue'),
+    meta: {
+      title: "Notification",
+    }
+  },
 ];

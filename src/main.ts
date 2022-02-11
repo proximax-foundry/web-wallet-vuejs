@@ -33,6 +33,10 @@ import i18n from './i18n';
 import VWave from 'v-wave';
 import VueBlocksTree from 'vue3-blocks-tree';
 import 'vue3-blocks-tree/dist/vue3-blocks-tree.css';
+import chainProfileJson from '../public/chainProfile.json';
+import themeConfigJson from '../public/themeConfig.json';
+
+
 library.add(
   fas,faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
   faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore, faFileExport, faFileImport, faArrowRight, faArrowCircleRight, faAngleRight, faAt, faEquals, faNotEqual, faLink, faUnlink, faExternalLinkAlt, faHashtag
@@ -62,12 +66,17 @@ AppStateUtils.addNewReadyStates('checkSession');
 
 const loadThemeConfig = async() => {
   try {
-    const config = await fetch('./themeConfig.json', {
-      headers: {
-        'Cache-Control': 'no-store',
-        'Pragma' : 'no-cache'
-      }
-    }).then((res) => res.json()).then((configInfo) => { return configInfo });
+    let config = {}
+    if(window.location.protocol == 'file:'){
+      config = themeConfigJson;
+    }else{
+      config = await fetch('./themeConfig.json', {
+        headers: {
+          'Cache-Control': 'no-store',
+          'Pragma' : 'no-cache'
+        }
+      }).then((res) => res.json()).then((configInfo) => { return configInfo });
+    }
 
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.updateConfig(config);
@@ -82,20 +91,25 @@ loadThemeConfig();
 
 const chainProfileIntegration = async () => {
   try {
-    const networksInfo = await fetch('./chainProfile.json', {
-      headers: {
-        'Cache-Control': 'no-store',
-        'Pragma' : 'no-cache'
-      }
-    }).then((res) => res.json()).then((networksInfo) => { return networksInfo });
+    let networksInfo = {};
+    if(window.location.protocol == 'file:'){
+      networksInfo = chainProfileJson;
+    }else{
+        networksInfo = await fetch('./chainProfile.json', {
+        headers: {
+          'Cache-Control': 'no-store',
+          'Pragma' : 'no-cache'
+        }
+      }).then((res) => res.json()).then((networksInfo) => { return networksInfo });
+    }
 
     const chainProfilesData = networksInfo;
     const chainProfileNames = Object.keys(networksInfo);
 
     const chainProfileNamesStore = ChainProfileNames.createDefault();
 
-    const chainNameArray: ChainProfileName[] = []; 
-    
+    const chainNameArray: ChainProfileName[] = [];
+
     for(let i = 0; i < chainProfileNames.length; ++i){
       chainNameArray.push({
         name: chainProfileNames[i],
