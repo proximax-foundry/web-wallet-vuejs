@@ -91,13 +91,13 @@
           <div class="text-xs  ml-auto">{{effectiveFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
-        <div v-if="isMultiSig(selectedAccAdd)" class='border-b-2 border-gray-600 my-2'/>
-        <div v-if="isMultiSig(selectedAccAdd)" class="flex  text-white">
+        <div v-if="isMultiSig(selectedAccAdd) && !isACT" class='border-b-2 border-gray-600 my-2'/>
+        <div v-if="isMultiSig(selectedAccAdd) && !isACT" class="flex  text-white">
           <div class='text-xs '>LockFund</div>
           <div class="text-xs  ml-auto">{{lockFundCurrency}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
-        <div v-if="isMultiSig(selectedAccAdd)" class="flex  text-white">
+        <div v-if="isMultiSig(selectedAccAdd)  && !isACT" class="flex  text-white">
           <div class='text-xs '>LockFund Tx Fee</div>
           <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
@@ -134,6 +134,7 @@ import TransferTextareaInput from "@/modules/transfer/components/TransferTextare
 import {
   createTransaction,
   makeTransaction,
+  enableACT
 } from "@/util/transfer"; //getMosaicsAllAccounts
 import AddContactModal from "@/modules/transfer/components/AddContactModal.vue";
 import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
@@ -366,7 +367,10 @@ export default {
         return {left:split[0], right:null}
       }
     })
-    
+    const isACT = computed(()=>{
+      let acc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==selectedAccAdd.value) ||  walletState.currentLoggedInWallet.others.find(acc=>acc.address==selectedAccAdd.value)
+      return enableACT(acc,getWalletCosigner.value.cosignerList.length)
+    })
    
     const moreThanOneAccount = computed(() => {
       return accounts.value.length> 1;
@@ -442,6 +446,7 @@ export default {
         walletPassword.value,
         selectedAccAdd.value,
         selectedCosign,
+        getWalletCosigner.value.cosignerList,
         encryptedMsg.value
       );
       if (!transferStatus) {
@@ -493,9 +498,9 @@ export default {
     }
   });
   const totalFee = computed(()=>{
-    if(!isMultiSig(selectedAccAdd.value)){
+    if(!isMultiSig(selectedAccAdd.value) || isMultiSig(selectedAccAdd.value) && isACT.value){
       return Math.round((Number(sendXPX.value) + effectiveFee.value)*1000000)/1000000
-    }if(isMultiSig(selectedAccAdd.value)){
+    }if(isMultiSig(selectedAccAdd.value) && !isACT.value){
       return Math.round((parseFloat(sendXPX.value) + effectiveFee.value + lockFundTxFee.value + lockFund.value)*1000000)/1000000
     }else{
       return 0
@@ -846,6 +851,7 @@ export default {
       walletName,
       checkNamespace,
       currentNativeTokenName,
+      isACT
     };
   },
 };
