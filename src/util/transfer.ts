@@ -23,6 +23,7 @@ import {
   TransactionBuilder,
   Password,
   AggregateTransaction,
+  NamespaceId,
 } from "tsjs-xpx-chain-sdk";
 import { BuildTransactions } from '@/util/buildTransactions';
 //line246
@@ -46,14 +47,6 @@ async function getAccInfo(address :string) :Promise<PublicAccount> {
   return accountInfo;
 }
 
-export const enableACT =(account: WalletAccount|OtherAccount, cosignerInWallet :number) :boolean =>{
-  let numApproval = account.multisigInfo.find(acc=>acc.level==0).minApproval
-  if(numApproval<=cosignerInWallet){
-    return true
-  }else{
-    return false
-  }
-}
 
 export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[], walletPassword :string, senderAccAddress :string, selectedCosigner :string, cosignerList :{publicKey :string}[],encryptedMsg :string) : Promise<boolean>  => {
   // verify password
@@ -132,46 +125,29 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
       .subscribe(() => {
         return true;
       }, err => console.error(err));
-  } else { // there is a cosigner, aggregate transaction
+  } else { // there is a cosigner, aggregate  bonded transaction
     const innerTxn = [transferTransaction.toAggregate(senderPublicAccount)];
+    const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn)
+    const aggregateBondedTransactionSigned = account.sign(aggregateBondedTransaction, hash);
+    const nativeTokenNamespace = networkState.currentNetworkProfile.network.currency.namespace;
+    const lockingAtomicFee = networkState.currentNetworkProfileConfig.lockedFundsPerAggregate ?? 0;
+    const hashLockTransaction = transactionBuilder.hashLock(
+      new Mosaic(new NamespaceId(nativeTokenNamespace), UInt64.fromUint(lockingAtomicFee)),
+      UInt64.fromUint(1000),
+      aggregateBondedTransactionSigned,
+    );
+    const hashLockTransactionSigned = account.sign(hashLockTransaction, hash)
+    let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(aggregateBondedTransactionSigned);
+    autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(hashLockTransactionSigned.hash);
+    autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
+    autoAnnounceSignedTx.type = AnnounceType.BONDED;
 
-    if(enableACT(senderAcc,cosignerList.length)){ //aggregate complete
-      const otherCosignAcc :Account[] = [] 
-      console.log(cosignerList)
-      let firstCosigner = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosignerList[0].publicKey) 
-      let cosignerPrivateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), firstCosigner.encrypted, firstCosigner.iv);
-      cosignerList.splice(0,1)
-      let firstCosignerAcc = Account.createFromPrivateKey(cosignerPrivateKey,networkType)
-      cosignerList.forEach(signer=>{
-        let signerAcc = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === signer.publicKey)
-        let signerPrivateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), signerAcc.encrypted, signerAcc.iv);
-        otherCosignAcc.push(Account.createFromPrivateKey(signerPrivateKey, networkType));
-      })
-      const aggregateCompleteTransaction = transactionBuilder.aggregateComplete(innerTxn)
-      const signedAggregateCompleteTx = firstCosignerAcc.signTransactionWithCosignatories(aggregateCompleteTransaction,otherCosignAcc,hash)
-      transactionHttp
-      .announce(signedAggregateCompleteTx)
-      .subscribe(() => {
-        return true;
-      }, err => console.error(err));
-    }else{ //aggregate bonded
-      const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn)
-   
-      const aggregateBondedTransactionSigned = account.sign(aggregateBondedTransaction, hash);
-      const hashLockTransaction = transactionBuilder.hashLock(new Mosaic(new MosaicId(environment.mosaicXpxInfo.id), UInt64.fromUint(Number(10000000))),UInt64.fromUint(environment.lockFundDuration),aggregateBondedTransactionSigned)
-      const hashLockTransactionSigned = account.sign(hashLockTransaction, hash)
-      
-      let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(aggregateBondedTransactionSigned);
-      autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(hashLockTransactionSigned.hash);
-      autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
-      autoAnnounceSignedTx.type = AnnounceType.BONDED;
-  
-      ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
-  
-      AppState.chainAPI.transactionAPI.announce(hashLockTransactionSigned);
-      AppState.isPendingTxnAnnounce = true;
-    }
+    ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
+
+    AppState.chainAPI.transactionAPI.announce(hashLockTransactionSigned);
+    AppState.isPendingTxnAnnounce = true;
   }
+  
   return Promise.resolve(true)
 }
 
