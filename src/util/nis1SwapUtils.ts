@@ -75,20 +75,6 @@ export class Nis1SwapUtils {
     };
   }
 
-  static fetchNis1Properties = async() => {
-    try {
-      return await fetch('./applicationConfig.json', {
-        headers: {
-          'Cache-Control': 'no-store',
-          'Pragma' : 'no-cache'
-        }
-      }).then((res) => res.json()).then((configInfo) => { return configInfo });
-    } catch (e) {
-      console.error(e);
-    }
-  }
-  
-
   // create Address for nis1
   static createAddressToString(address: string): Address {
     return new Address(address);
@@ -101,7 +87,6 @@ export class Nis1SwapUtils {
 
   // get nis1 account info
   static async getAccountInfo(address: Address) {
-    // const appSetting = await Nis1SwapUtils.fetchNis1Properties();
     try {
       let headers = {}
       let nis1Acc = await fetch(`${swapData.nis1SwapData.url}/account/get?address=${address.plain()}`, {
@@ -131,7 +116,6 @@ export class Nis1SwapUtils {
   }
 
   static getNIS1AccountBalance = async (publicKey: string) => {
-    // const appSetting = await Nis1SwapUtils.fetchNis1Properties();
     const nis1PublicAccount = Nis1SwapUtils.createPublicAccount(publicKey);
     const nis1AddressToSwap = Nis1SwapUtils.createAddressToString(nis1PublicAccount.address.pretty());
     const accountInfoOwnedSwap = await Nis1SwapUtils.getAccountInfo(nis1AddressToSwap);
@@ -177,7 +161,6 @@ export class Nis1SwapUtils {
   }
 
   static async createTransaction(message: PlainMessage, assetId: AssetId, quantity: number, decimal: number) {
-    // const appSetting = await Nis1SwapUtils.fetchNis1Properties();
     const assetHttp = new AssetHttp(swapData.nis1SwapData.nodes);
     const resultAssets: any = await assetHttp.getAssetTransferableWithAbsoluteAmount(assetId, quantity).toPromise();
 
@@ -214,7 +197,6 @@ export class Nis1SwapUtils {
 
   static async anounceTransaction(transaction: TransferTransaction | MultisigTransaction, account: Account, siriusAccount: PublicAccount):Promise<swapData> {
 
-    // const appSetting = await Nis1SwapUtils.fetchNis1Properties();
     const signedTransaction = account.signTransaction(transaction);
     let headers = {
       'Accept': 'application/json, text/plain, */*',
@@ -241,7 +223,6 @@ export class Nis1SwapUtils {
   static async validateBalanceAccounts(assetsFound: any, addressSigner: Address, unconfirmedTxn: Transaction[]) {
     let assetFoundQuantity = assetsFound.quantity;
 
-    // const appSetting = await Nis1SwapUtils.fetchNis1Properties();
     if (unconfirmedTxn.length > 0) {
       let unconfirmedTxnQuantity = 0;
       for (const item of unconfirmedTxn) {
