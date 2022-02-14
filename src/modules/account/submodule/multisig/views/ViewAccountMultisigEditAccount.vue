@@ -129,24 +129,24 @@
         </div>
         <div class="flex mt-4 text-white">
           <div class='text-xs '>Lockfund Fee</div>
-          <div class="text-xs  ml-auto">10.00</div>
+          <div class="text-xs  ml-auto">{{lockFundCurrency}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class="flex mt-0.5 text-white">
-          <div class='text-xs '>Transaction Fee</div>
-          <div class="text-xs  ml-auto">26.70</div>
+          <div class='text-xs '>LockFund Tx Fee</div>
+          <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
         <div class="flex  text-white">
           <div class='text-xs '>Aggregate Fee</div>
-          <div class="text-xs  ml-auto">19.5966</div>
+          <div class="text-xs  ml-auto">{{aggregateFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
         <div class="flex text-white">
           <div class=' font-bold text-xs '>TOTAL</div>
-          <div class="text-xs  ml-auto">56.2966</div>
+          <div class="text-xs  ml-auto">{{totalFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class="mt-5"/>
@@ -183,6 +183,8 @@ import { Helper } from '@/util/typeHelper';
 import { accountUtils } from '@/util/accountUtils';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
+import { TransactionUtils } from '@/util/transactionUtils';
+import { AppState } from '@/state/appState';
 export default {
   name: 'ViewMultisigEditAccount',
   components: {
@@ -196,7 +198,7 @@ export default {
   },
   setup(p){
     const {t} = useI18n();
-    const router = useRouter();
+    const router = useRouter(); 
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref('');
@@ -235,6 +237,25 @@ export default {
       }
       return account
     })
+    const lockFundCurrency = computed(() =>
+      Helper.convertToCurrency(
+        networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
+        networkState.currentNetworkProfile.network.currency.divisibility
+      )
+    );
+    const lockFundTxFee = computed(()=>{ 
+      if(networkState.currentNetworkProfile){ 
+        return Helper.convertToExact(TransactionUtils.getLockFundFee(AppState.networkType, networkState.currentNetworkProfile.generationHash), AppState.nativeToken.divisibility);
+      }
+      return 0;  
+    });
+    const aggregateFee = ref(0)
+    let updateAggregateFee=(publicKey,coSign,numApprove,numDelete,removeCosign)=>{
+      multiSign.getAggregateFee(publicKey,coSign,numApprove,numDelete,removeCosign).then(fee=>{
+       aggregateFee.value=fee
+     })
+    }
+    
     const cosignerAddress = cosigner => Address.createFromPublicKey(cosigner, networkState.currentNetworkProfile.network.type).plain().substr(-4)
     const cosignaturies = computed(()=>{
       let cosignaturies = []
@@ -258,6 +279,7 @@ export default {
       })
       return name
     },{deep:true})
+    updateAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value)
     const getWalletCosigner = () => {
       return multiSign.getCosignerInWallet(acc.value.publicKey)
     }
@@ -268,7 +290,7 @@ export default {
     }
     const isMultisig =computed(()=> multiSign.checkIsMultiSig(acc.value.address))
     const disableSend = computed(() => !(
-      isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) &&  err.value == ''|| err.value== t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name}) && (showAddressError.value.indexOf(true) == -1) && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
+      isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) &&  err.value == ''|| err.value== t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name}) && (showAddressError.value.indexOf(true) == -1) && (numDeleteUser.value >= 0) && (numApproveTransaction.value > 0)
     ));
     const disabledPassword = computed(() => !(!onPartial.value && isMultisig.value && !fundStatus.value && isCoSigner.value));
     const isCoSigner = computed(() => {
@@ -293,6 +315,12 @@ export default {
           }
           return status;
         });
+
+    
+    const totalFee = computed(()=>{
+        return  Helper.convertToExact(aggregateFee.value + parseInt(lockFundCurrency.value) + lockFundTxFee.value,0)
+    })
+
     const clear = () => {
       coSign.value = [];
       contactName.value=[];
@@ -348,7 +376,17 @@ export default {
         }
       }
     }, {deep:true});
-   
+    watch(() => [...showAddressError.value], (n) => {
+      if(n.every(value=>value==false)){
+        updateAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value)
+      }
+      
+    }, {deep:true});
+
+    watch(() => [removeCosign.value], (n) => {
+      updateAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value)
+    }, {deep:true});
+
     const contact = computed(() => {
       return multiSign.generateContact(acc.value.address,acc.value.name)
     });
@@ -460,6 +498,7 @@ export default {
     let deleteUserErrorMsg = 'Number of cosignatories for Delete users is more than number of cosignatories for this account';
     let approveTransactionErrMsg = 'Number of cosignatories for Approve transaction is more than number of cosignatories for this account';
     watch(numApproveTransaction, (n) => {
+      updateAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value)
       if(maxNumApproveTransaction.value == 0 && n > 1){
         err.value = approveTransactionErrMsg;
       }else if((n > maxNumApproveTransaction.value) && (n !=1 && maxNumApproveTransaction.value != 0 )){
@@ -481,6 +520,7 @@ export default {
       }
     }
     watch(numDeleteUser, (n) => {
+      updateAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value)
       if(maxNumDeleteUser.value == 0 && n > 1){
         err.value = deleteUserErrorMsg;
       }else if((n > maxNumDeleteUser.value) && (n !=1 && maxNumDeleteUser.value != 0 )){
@@ -583,7 +623,11 @@ export default {
       cosignaturies,
       cosignerAddress,
       otherAccount,
-      getCosigns
+      getCosigns,
+      lockFundCurrency,
+      lockFundTxFee,
+      aggregateFee,
+      totalFee
     };
   },
 }

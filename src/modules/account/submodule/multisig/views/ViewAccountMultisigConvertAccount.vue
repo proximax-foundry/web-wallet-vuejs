@@ -109,24 +109,24 @@
         </div>
         <div class="flex mt-4 text-white">
           <div class='text-xs '>Lockfund Fee</div>
-          <div class="text-xs  ml-auto">10.00</div>
+          <div class="text-xs  ml-auto">{{lockFundCurrency}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class="flex mt-0.5 text-white">
-          <div class='text-xs '>Transaction Fee</div>
-          <div class="text-xs  ml-auto">26.70</div>
+          <div class='text-xs '>LockFund Tx Fee</div>
+          <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
         <div class="flex  text-white">
           <div class='text-xs '>Aggregate Fee</div>
-          <div class="text-xs  ml-auto">19.5966</div>
+          <div class="text-xs  ml-auto">{{aggregateFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
         <div class="flex text-white">
           <div class=' font-bold text-xs '>TOTAL</div>
-          <div class="text-xs  ml-auto">56.2966</div>
+          <div class="text-xs  ml-auto">{{totalFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class="mt-5"/>
@@ -159,6 +159,8 @@ import {
 import { networkState } from '@/state/networkState';
 import {useI18n} from 'vue-i18n'
 import { Helper } from '@/util/typeHelper';
+import { AppState } from '@/state/appState';
+import { TransactionUtils } from '@/util/transactionUtils';
 export default {
   name: 'ViewConvertAccountMultisig',
   components: {
@@ -199,11 +201,34 @@ export default {
     let isMultisig = computed(()=>{
       return multiSign.checkIsMultiSig(acc.address)
     }) 
+     const lockFundCurrency = computed(() =>
+      Helper.convertToCurrency(
+        networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
+        networkState.currentNetworkProfile.network.currency.divisibility
+      )
+    );
+    const lockFundTxFee = computed(()=>{ 
+      if(networkState.currentNetworkProfile){ 
+        return Helper.convertToExact(TransactionUtils.getLockFundFee(AppState.networkType, networkState.currentNetworkProfile.generationHash), AppState.nativeToken.divisibility);
+      }
+      return 0;  
+    });
+    const aggregateFee = ref(0)
+    
      // get account details
     const acc =  walletState.currentLoggedInWallet.accounts.find(acc =>acc.name ===p.name) ;
     if(acc== undefined){
       router.push({ name: "ViewAccountDisplayAll"});
     }
+    let updateAggregateFee=(publicKey,coSign,numApprove,numDelete)=>{
+      multiSign.getAggregateFee(publicKey,coSign,numApprove,numDelete).then(fee=>{
+       aggregateFee.value=fee
+     })
+    }
+    updateAggregateFee(acc.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value)
+    const totalFee = computed(()=>{
+        return aggregateFee.value + lockFundCurrency.value + lockFundTxFee.value
+    })
     const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
     const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
     const accountBalance = computed(() => {
@@ -296,6 +321,14 @@ export default {
         }
       }
     }, {deep:true});
+
+    watch(() => [...showAddressError.value], (n) => {
+      if(n.every(value=>value==false)){
+        updateAggregateFee(acc.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value)
+      }
+      
+    }, {deep:true});
+    
     
  
     const addCoSig = () => {
@@ -333,6 +366,7 @@ export default {
     let deleteUserErrorMsg = 'Number of cosignatories for deletion approval is more than number of cosignatories for this account';
     let approveTransactionErrMsg = 'Number of cosignatories for transaction approval is more than number of cosignatories for this account';
     watch(numApproveTransaction, (n) => {
+      updateAggregateFee(acc.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value)
       if(maxNumApproveTransaction.value == 0 && n > 1){
         err.value = approveTransactionErrMsg;
       }else if((n > maxNumApproveTransaction.value) && (n !=1 && maxNumApproveTransaction.value != 0 )){
@@ -354,6 +388,7 @@ export default {
       }
     }
     watch(numDeleteUser, (n) => {
+      updateAggregateFee(acc.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value)
       if(maxNumDeleteUser.value == 0 && n > 1){
         err.value = deleteUserErrorMsg;
       }else if((n > maxNumDeleteUser.value) && (n !=1 && maxNumDeleteUser.value != 0 )){
@@ -457,6 +492,10 @@ export default {
       passwdPattern,
       validateApproval,
       validateDelete,
+      lockFundCurrency,
+      lockFundTxFee,
+      aggregateFee,
+      totalFee
     };
   },
 }
