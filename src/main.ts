@@ -33,9 +33,6 @@ import i18n from './i18n';
 import VWave from 'v-wave';
 import VueBlocksTree from 'vue3-blocks-tree';
 import 'vue3-blocks-tree/dist/vue3-blocks-tree.css';
-import chainProfileJson from '../public/chainProfile.json';
-import chainSwapProfileJson from '../public/chainSwapProfile.json';
-import themeConfigJson from '../public/themeConfig.json';
 
 library.add(
   fas,faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
@@ -66,18 +63,12 @@ AppStateUtils.addNewReadyStates('checkSession');
 
 const loadThemeConfig = async() => {
   try {
-    let config = {}
-    if(window.location.protocol == 'file:'){
-      config = themeConfigJson;
-    }else{
-      config = await fetch('./themeConfig.json', {
-        headers: {
-          'Cache-Control': 'no-store',
-          'Pragma' : 'no-cache'
-        }
-      }).then((res) => res.json()).then((configInfo) => { return configInfo });
-    }
-
+    let config = await fetch('./themeConfig.json', {
+      headers: {
+        'Cache-Control': 'no-store',
+        'Pragma' : 'no-cache'
+      }
+    }).then((res) => res.json()).then((configInfo) => { return configInfo });
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.updateConfig(config);
     themeConfig.saveToLocalStorage();
@@ -91,17 +82,12 @@ loadThemeConfig();
 
 const chainProfileIntegration = async () => {
   try {
-    let networksInfo = {};
-    if(window.location.protocol == 'file:'){
-      networksInfo = chainProfileJson;
-    }else{
-        networksInfo = await fetch('./chainProfile.json', {
-        headers: {
-          'Cache-Control': 'no-store',
-          'Pragma' : 'no-cache'
-        }
-      }).then((res) => res.json()).then((networksInfo) => { return networksInfo });
-    }
+      let networksInfo = await fetch('./chainProfile.json', {
+      headers: {
+        'Cache-Control': 'no-store',
+        'Pragma' : 'no-cache'
+      }
+    }).then((res) => res.json()).then((networksInfo) => { return networksInfo });
 
     const chainProfilesData = networksInfo;
     const chainProfileNames = Object.keys(networksInfo);
@@ -224,27 +210,22 @@ chainProfileIntegration();
 
 const chainSwapIntegration = async () => {
   try {
-    let networksInfo = {};
-    if(window.location.protocol == 'file:'){
-      networksInfo = chainSwapProfileJson;
-    }else{
-        networksInfo = await fetch('./chainSwapProfile.json', {
-        headers: {
-          'Cache-Control': 'no-store',
-          'Pragma' : 'no-cache'
-        }
-      }).then((res) => res.json()).then((networksInfo) => { return networksInfo });
-    }
+    let swapInfo = await fetch('./chainSwapProfile.json', {
+      headers: {
+        'Cache-Control': 'no-store',
+        'Pragma' : 'no-cache'
+      }
+    }).then((res) => res.json()).then((swapInfo) => { return swapInfo });
 
-    const chainProfilesData = networksInfo;
-    const chainProfileNames = Object.keys(networksInfo);
+    const chainSwapProfilesData = swapInfo;
+    const chainSwapProfileNames = Object.keys(swapInfo);
 
-    for(const chainProfileName of chainProfileNames){
-      const chainProfileData = chainProfilesData[chainProfileName];
+    for(const chainSwapProfileName of chainSwapProfileNames){
+      const chainSwapProfileData = chainSwapProfilesData[chainSwapProfileName];
 
-      if(chainProfileData['swapData']){
-        let chainSwapConfig = new ChainSwapConfig(chainProfileName);
-        chainSwapConfig.updateConfig(chainProfileData['swapData']);
+      if(chainSwapProfileData['swapData']){
+        let chainSwapConfig = new ChainSwapConfig(chainSwapProfileName);
+        chainSwapConfig.updateConfig(chainSwapProfileData['swapData']);
 
         chainSwapConfig.saveToLocalStorage();
       }
