@@ -70,19 +70,20 @@
             <div class="text-txs">Your account has transaction(s) on partial.</div>
           </div>
         </div>
-        <div v-if="!(!isLockFund&& isMultiSig)" class="flex mt-4 text-white">
-          <div class='text-xs '>Transaction Fee</div>
+        <div class="flex mt-4 text-white">
+          <div  v-if="!isMultiSig"  class='text-xs '>Transaction Fee</div>
+          <div  v-else  class='text-xs '>Aggregate Fee</div>
           <div class="text-xs  ml-auto">{{trxFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
-        <div v-if="isLockFund && isMultiSig" class="flex mt-4 text-white">
-          <div class='text-xs '>Lock Fund</div>
+        <div v-if="isMultiSig" class="flex mt-4 text-white">
+          <div class='text-xs '>LockFund</div>
           <div class="text-xs  ml-auto">{{lockFund}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
        <div v-if="isMultiSig" class="flex mt-4 text-white">
-          <div class='text-xs '>Aggregate Fee</div>
-          <div class="text-xs  ml-auto">{{aggregateFee}}</div>
+          <div class='text-xs '>LockFund TxFee</div>
+          <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
@@ -165,6 +166,8 @@ import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.
 import { multiSign } from '@/util/multiSignatory';
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import { listenerState } from '@/state/listenerState';
+import { AppState } from '@/state/appState';
+import { TransactionUtils } from '@/util/transactionUtils';
 export default {
   name: 'ViewAccountAliasAddressToNamespace_a',
 
@@ -192,7 +195,7 @@ export default {
         return { 
           name: acc.name,
           balance: acc.balance,
-          address: acc.address,
+          address: acc.address, 
           publicKey: acc.publicKey,
           isMultisig: acc.getDirectParentMultisig().length ? true: false,
           multisigInfo: acc.multisigInfo,
@@ -217,12 +220,12 @@ export default {
     });
     const acc = ref(totalAcc.value.find(acc=>acc.address==p.address))
     const onPartial = ref(false);
-     const checkIsPartial = ()=>{ 
-       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,networkState.currentNetworkProfile.network.type))
-       .then(onPartialBoolean => onPartial.value = onPartialBoolean)
-       .catch(err=>{
-         onPartial.value = false
-       })
+    const checkIsPartial = ()=>{ 
+      multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,networkState.currentNetworkProfile.network.type))
+      .then(onPartialBoolean => onPartial.value = onPartialBoolean)
+      .catch(err=>{
+        onPartial.value = false
+      })
     }
     checkIsPartial()
     const selectNamespaceRef = ref(null);
@@ -248,46 +251,27 @@ export default {
     const addressErrorMsg = ref("");    
     const passwordPattern = "^[^ ]{8,}$";
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
-    const addressPatternLong = "^[0-9A-Za-z-]{46}$";      
-    const lockFundTxFee = 0.0445;  
+    const addressPatternLong = "^[0-9A-Za-z-]{46}$";  
+    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))    
+    const lockFundTxFee = computed(()=>{ 
+      if(networkState.currentNetworkProfile){ 
+        return Helper.convertToExact(TransactionUtils.getLockFundFee(AppState.networkType, networkState.currentNetworkProfile.generationHash), AppState.nativeToken.divisibility);
+      }else{
+        return 0
+      }
+    })
     const toast = useToast();   
     const pwdErrorMsg = ref("");
     const walletName = walletState.currentLoggedInWallet.name;
     let txHash = ref('')
     let pending = ref(false)
     let recordAction = ref('')
-    let isLockFund = computed(()=>{
-      let enoughSigner = false
-      let count = acc.value.multisigInfo.find(acc=>acc.level==0).minApproval
-      if (count<=getCosignerList().length){
-        enoughSigner = true
-      }
-      return !enoughSigner
-    })
-    const trxFee = computed(()=>{
-      if(isLockFund.value){ //aggregate bonded
-        return 26.70
-      }if(!isLockFund.value && isMultiSig.value){ //aggregate complete
-        return 0
-      }else{
-        return 23.4
-      }
-    })
-    const aggregateFee = computed(()=>{
-      if(isLockFund.value){ //aggregate bonded
-        return 20.538754
-      }if(!isLockFund.value && isMultiSig.value){ //aggregate complete
-        return 30.3
-      }else{
-        return 0
-      }
-    })
+    
+    const trxFee = ref(0)
 
     const totalFee = computed(()=>{
-      if(isLockFund.value){ //aggregate bonded
-        return aggregateFee.value+lockFund.value + trxFee.value
-      }if(!isLockFund.value && isMultiSig.value){ //aggregate complete
-        return aggregateFee.value
+      if(isMultiSig.value){
+        return Math.round((parseInt(trxFee.value) + lockFund.value + lockFundTxFee.value)*1000000)/1000000
       }else{
         return trxFee.value
       }
@@ -296,7 +280,7 @@ export default {
     const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
     const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
 
-    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
+    
     
     const accountBalance = computed(() => {
        let accountBalance = 0
@@ -392,7 +376,7 @@ export default {
         namespaceAddress.value = Address.createFromRawAddress(namespacelist.linkedId).pretty();
       } else if(selectAction.value=="Link" && namespaceAddress.value!="" && namespacesValues!=null){
         let namespaceAdd = Address.createFromRawAddress(namespaceAddress.value).plain();
-        trxFee.value = Helper.amountFormatterSimple(accountUtils.getLinkAddressToNamespaceTransactionFee(namespaceAdd, selectNamespace.value, selectAction.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        trxFee.value = Helper.amountFormatterSimple(accountUtils.getLinkAddressToNamespaceTransactionFee(isMultiSig.value,namespaceAdd, selectNamespace.value, selectAction.value), networkState.currentNetworkProfile.network.currency.divisibility);
       } else {
         
       }
@@ -419,7 +403,7 @@ export default {
           
         } else{
           let namespaceAdd = Address.createFromRawAddress(namespaceAddressValue).plain();
-          trxFee.value = Helper.amountFormatterSimple(accountUtils.getLinkAddressToNamespaceTransactionFee(namespaceAdd, selectNamespace.value, selectAction.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          trxFee.value = Helper.amountFormatterSimple(accountUtils.getLinkAddressToNamespaceTransactionFee(isMultiSig.value,namespaceAdd, selectNamespace.value, selectAction.value), networkState.currentNetworkProfile.network.currency.divisibility);
           addressErrorMsg.value = "";
           showAddressError.value = false;
         }
@@ -523,9 +507,7 @@ export default {
       showPwdError,
       pwdErrorMsg,
       pending,
-      aggregateFee,
       totalFee,
-      isLockFund,
       onPartial
     };
   },
