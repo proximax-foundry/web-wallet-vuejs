@@ -250,8 +250,8 @@ export default {
       return 0;  
     });
     const aggregateFee = ref(0)
-    let updateAggregateFee=(publicKey,coSign,numApprove,numDelete,removeCosign)=>{
-      multiSign.getAggregateFee(publicKey,coSign,numApprove,numDelete,removeCosign).then(fee=>{
+    let updateAggregateFee=()=>{
+      multiSign.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value).then(fee=>{
        aggregateFee.value=fee
      })
     }
@@ -279,7 +279,7 @@ export default {
       })
       return name
     },{deep:true})
-    updateAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value)
+    updateAggregateFee()
     const getWalletCosigner = () => {
       return multiSign.getCosignerInWallet(acc.value.publicKey)
     }
@@ -318,7 +318,7 @@ export default {
 
     
     const totalFee = computed(()=>{
-        return  Helper.convertToExact(aggregateFee.value + parseInt(lockFundCurrency.value) + lockFundTxFee.value,0)
+        return  Math.round((aggregateFee.value + parseInt(lockFundCurrency.value) + lockFundTxFee.value)*1000000)/1000000 
     })
 
     const clear = () => {
@@ -384,7 +384,7 @@ export default {
     }, {deep:true});
 
     watch(() => [removeCosign.value], (n) => {
-      updateAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value)
+      updateAggregateFee()
     }, {deep:true});
 
     const contact = computed(() => {
@@ -498,7 +498,7 @@ export default {
     let deleteUserErrorMsg = 'Number of cosignatories for Delete users is more than number of cosignatories for this account';
     let approveTransactionErrMsg = 'Number of cosignatories for Approve transaction is more than number of cosignatories for this account';
     watch(numApproveTransaction, (n) => {
-      updateAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value)
+      updateAggregateFee()
       if(maxNumApproveTransaction.value == 0 && n > 1){
         err.value = approveTransactionErrMsg;
       }else if((n > maxNumApproveTransaction.value) && (n !=1 && maxNumApproveTransaction.value != 0 )){
@@ -520,7 +520,7 @@ export default {
       }
     }
     watch(numDeleteUser, (n) => {
-      updateAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value)
+      updateAggregateFee()
       if(maxNumDeleteUser.value == 0 && n > 1){
         err.value = deleteUserErrorMsg;
       }else if((n > maxNumDeleteUser.value) && (n !=1 && maxNumDeleteUser.value != 0 )){
