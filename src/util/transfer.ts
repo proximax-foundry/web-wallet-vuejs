@@ -126,9 +126,20 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
         return true;
       }, err => console.error(err));
   } else { // there is a cosigner, aggregate  bonded transaction
+    let cosignerAcc :Account[] =  []
+    cosignerList.forEach((signer) => {
+      const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === signer.publicKey)
+      let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
+      cosignerAcc.push(Account.createFromPrivateKey(privateKey, networkType));
+    });
+    let selectedWalletSigner = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==selectedCosigner) 
+    let selectedSignerPrivateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), selectedWalletSigner.encrypted, selectedWalletSigner.iv);
+    let selectedSignerAccount = Account.createFromPrivateKey(selectedSignerPrivateKey,networkType)
+    let index = cosignerAcc.findIndex(acc=>acc.address.plain()==selectedCosigner)
+    cosignerAcc.splice(index,1)
     const innerTxn = [transferTransaction.toAggregate(senderPublicAccount)];
     const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn)
-    const aggregateBondedTransactionSigned = account.sign(aggregateBondedTransaction, hash);
+    const aggregateBondedTransactionSigned = selectedSignerAccount.signTransactionWithCosignatories(aggregateBondedTransaction,cosignerAcc, hash);
     const nativeTokenNamespace = networkState.currentNetworkProfile.network.currency.namespace;
     const lockingAtomicFee = networkState.currentNetworkProfileConfig.lockedFundsPerAggregate ?? 0;
     const hashLockTransaction = transactionBuilder.hashLock(
@@ -136,7 +147,7 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
       UInt64.fromUint(1000),
       aggregateBondedTransactionSigned,
     );
-    const hashLockTransactionSigned = account.sign(hashLockTransaction, hash)
+    const hashLockTransactionSigned = selectedSignerAccount.sign(hashLockTransaction, hash)
     let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(aggregateBondedTransactionSigned);
     autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(hashLockTransactionSigned.hash);
     autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
