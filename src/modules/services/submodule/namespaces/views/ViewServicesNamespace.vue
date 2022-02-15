@@ -12,7 +12,7 @@
         <div class="border border-gray-200 filter drop-shadow-xl py-2 sm:py-14 px-2 sm:px-28 text-center bg-white">
           <img src="@/modules/services/submodule/namespaces/img/namespace_default.svg" class="inline-block h-18 w-18">
           <div class="text-gray-700 text-sm my-5">Looks like you don’t have any namespaces yet.</div>
-          <div class="text-gray-600 text-tsm my-5"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new>Namespaces</a> allow you to create an on-chain unique place for your business and your namespaces on the Sirius Chain.</div>
+          <div class="text-gray-600 text-tsm my-5"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new>Namespace</a> enables you to create on-chain unique and easy to remember names for your accounts and SDAs.</div>
           <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="bg-blue-primary py-2 px-7 rounded-lg text-white font-bold mt-4 inline-block">Register Namespace</router-link>
         </div>
         <div class="grid grid-cols-3 mt-16">

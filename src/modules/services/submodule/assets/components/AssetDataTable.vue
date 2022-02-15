@@ -201,36 +201,36 @@ export default{
     });
 
     const generateAssetDatatable = computed(() => {
-      let assets = [];
+      let accountAssets = [];
       if(filterAssets.value){
         let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == filterAssets.value)
         if(!account){
           account = walletState.currentLoggedInWallet.others.find(account => account.address == filterAssets.value)
         }
         account.assets.filter(asset => asset.owner === account.publicKey).forEach(asset => {
-          assets.push({asset, account});
+          accountAssets.push({asset, account});
         });
       }else{
         walletState.currentLoggedInWallet.accounts.forEach(account => {
           account.assets.filter(asset => asset.owner === account.publicKey).forEach(asset => {
-            assets.push({asset, account});
+            accountAssets.push({asset, account});
           });
         });
         walletState.currentLoggedInWallet.others.forEach(other => {
           other.assets.filter(asset => asset.owner === other.publicKey).forEach(asset => {
-            assets.push({asset, account:other});
+            accountAssets.push({asset, account:other});
           });
         });
       }
 
       let formattedAssets = [];
 
-      for(let i=0; i < assets.length; ++i){
+      for(let i=0; i < accountAssets.length; ++i){
         let namespaceAlias = [];
-        let assetId = assets[i].asset.idHex;
+        let assetId = accountAssets[i].asset.idHex;
 
         if(assetId != networkState.currentNetworkProfile.network.currency.assetId){
-          let namespaces = assets[i].account.findNamespaceNameByAsset(assetId);
+          let namespaces = accountAssets[i].account.findNamespaceNameByAsset(assetId);
           for(let j = 0; j < namespaces.length; ++j){
             let aliasData = {
               name: namespaces[j].name
@@ -242,12 +242,12 @@ export default{
           let data = {
             i: i,
             idHex: assetId,
-            owner: assets[i].asset.owner,
-            address: PublicAccount.createFromPublicKey(assets[i].asset.owner, networkState.currentNetworkProfile.network.type).address.pretty(),
-            amount: Helper.toCurrencyFormat(assets[i].asset.getExactAmount(), assets[i].asset.divisibility),
-            supply: Helper.toCurrencyFormat(assets[i].asset.getExactSupply(), assets[i].asset.divisibility),
+            owner: accountAssets[i].asset.owner,
+            address: PublicAccount.createFromPublicKey(accountAssets[i].asset.owner, networkState.currentNetworkProfile.network.type).address.pretty(),
+            amount: Helper.toCurrencyFormat(accountAssets[i].asset.getExactAmount(), accountAssets[i].asset.divisibility),
+            supply: Helper.toCurrencyFormat(accountAssets[i].asset.getExactSupply(), accountAssets[i].asset.divisibility),
             linkedNamespace: namespaceAlias,
-            height: assets[i].asset.height,
+            height: accountAssets[i].asset.height,
             explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
           };
           formattedAssets.push(data);

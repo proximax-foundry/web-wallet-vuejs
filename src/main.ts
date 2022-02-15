@@ -33,6 +33,7 @@ import i18n from './i18n';
 import VWave from 'v-wave';
 import VueBlocksTree from 'vue3-blocks-tree';
 import 'vue3-blocks-tree/dist/vue3-blocks-tree.css';
+
 library.add(
   fas,faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
   faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore, faFileExport, faFileImport, faArrowRight, faArrowCircleRight, faAngleRight, faAt, faEquals, faNotEqual, faLink, faUnlink, faExternalLinkAlt, faHashtag
@@ -62,13 +63,12 @@ AppStateUtils.addNewReadyStates('checkSession');
 
 const loadThemeConfig = async() => {
   try {
-    const config = await fetch('./themeConfig.json', {
+    let config = await fetch('./themeConfig.json', {
       headers: {
         'Cache-Control': 'no-store',
         'Pragma' : 'no-cache'
       }
     }).then((res) => res.json()).then((configInfo) => { return configInfo });
-
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.updateConfig(config);
     themeConfig.saveToLocalStorage();
@@ -82,7 +82,7 @@ loadThemeConfig();
 
 const chainProfileIntegration = async () => {
   try {
-    const networksInfo = await fetch('./chainProfile.json', {
+      let networksInfo = await fetch('./chainProfile.json', {
       headers: {
         'Cache-Control': 'no-store',
         'Pragma' : 'no-cache'
@@ -94,8 +94,8 @@ const chainProfileIntegration = async () => {
 
     const chainProfileNamesStore = ChainProfileNames.createDefault();
 
-    const chainNameArray: ChainProfileName[] = []; 
-    
+    const chainNameArray: ChainProfileName[] = [];
+
     for(let i = 0; i < chainProfileNames.length; ++i){
       chainNameArray.push({
         name: chainProfileNames[i],
@@ -151,12 +151,12 @@ const chainProfileIntegration = async () => {
       chainProfileStore.init();
       const chainProfileData = chainProfilesData[chainProfileName];
 
-      if(chainProfileData['swapData']){
-        let chainSwapConfig = new ChainSwapConfig(chainProfileName);
-        chainSwapConfig.updateConfig(chainProfileData['swapData']);
+      // if(chainProfileData['swapData']){
+      //   let chainSwapConfig = new ChainSwapConfig(chainProfileName);
+      //   chainSwapConfig.updateConfig(chainProfileData['swapData']);
 
-        chainSwapConfig.saveToLocalStorage();
-      }
+      //   chainSwapConfig.saveToLocalStorage();
+      // }
 
       if(chainProfileStore.getVersion() !== chainProfileData['version']){
 
@@ -194,8 +194,6 @@ const chainProfileIntegration = async () => {
         } catch (error) {
           console.log(error);
         }
-        
-       
       }
     }
 
@@ -209,6 +207,37 @@ const chainProfileIntegration = async () => {
 }
 
 chainProfileIntegration();
+
+const chainSwapIntegration = async () => {
+  try {
+    let swapInfo = await fetch('./chainSwapProfile.json', {
+      headers: {
+        'Cache-Control': 'no-store',
+        'Pragma' : 'no-cache'
+      }
+    }).then((res) => res.json()).then((swapInfo) => { return swapInfo });
+
+    const chainSwapProfilesData = swapInfo;
+    const chainSwapProfileNames = Object.keys(swapInfo);
+
+    for(const chainSwapProfileName of chainSwapProfileNames){
+      const chainSwapProfileData = chainSwapProfilesData[chainSwapProfileName];
+
+      if(chainSwapProfileData['swapData']){
+        let chainSwapConfig = new ChainSwapConfig(chainSwapProfileName);
+        chainSwapConfig.updateConfig(chainSwapProfileData['swapData']);
+
+        chainSwapConfig.saveToLocalStorage();
+      }
+    }
+  }catch (e) {
+    console.error(e);
+  }
+};
+
+chainSwapIntegration();
+
+
 
 // check from session when page refreshed
 if (!walletState.currentLoggedInWallet) {

@@ -1,36 +1,21 @@
 <template>
-<div class="sm:ml-0 xl:flex xl:justify-between pb-3">
-    <div v-if="walletState.currentLoggedInWallet" class="sm:ml-0 xl:ml-15 xl:mt-10 md:px-10 md:py-10">
-       <h1 class="text-lg md:text-xl xl:text-xl mb-5 ml-5 text-black xl:ml-5 sm:ml-0">{{$t('Header.wallet')}}</h1>
-       <template>
-      <!-- <p class="text-tsm sm:text-tsm text-white font-semibold">{{$t('wallets.description') }}.</p> -->
-       </template>
-      <div v-if="wallets.length == 0 && walletState.currentLoggedInWallet" class="h4 my-2 text-black sm:ml-0">
-        {{$t('wallets.walletvalidation')}}.
-      </div>
-       <div v-if="wallets.length == 0 && !walletState.currentLoggedInWallet" class="text-center h4 my-2 text-white sm:ml-0">
-        {{$t('wallets.walletvalidation')}}.
-      </div>
-      <div class="grid grid-cols-1 sm:ml-0 md:grid-cols-2 md:gap-6 xl:ml-5 xl:grid-cols-2 xl:gap-6" v-else>
-        <WalletTile :key="item.name" v-for="item in wallets" :wallet="item" />
-      </div>
-    </div>
-     <div v-else class="md:col-span-1 p-5 sm:pt-20 text-tsm md:text-sm text-gray-700">
-        <h1 class="text-lg xl:mt-10 xl:mb-5 md:text-xl sm:mb-5 text-white text-center">My Wallets</h1>
-        <div class="text-sm md:px-5 text-white xl:px-5 xl:mt-0 text-center">These are the Sirius Wallet available in the local storage of your device.</div>
-        <div class="grid grid-cols-1 md:mr-10 md:ml-20 md:mr-20 md:mt-8 sm:ml-20 sm:mr-20" >
-          <WalletTile :key="item.name" v-for="item in wallets" :wallet="item" />
+
+     <div :class="`${isLogin?'lg:ml-60':''} p-1 text-gray-700`">
+        <h1 :class="`${isLogin?'':'text-white'} text-lg xl:mt-10 xl:mb-5 md:text-xl sm:mb-5  text-center`">My Wallets</h1>
+        <div :class="`${isLogin?'':'text-white'} text-sm md:px-5 xl:px-5 xl:mt-0 text-center`">These are the Sirius Wallet available in the local storage of your device.</div>
+        <div class="mt-4" :key="item" v-for="item in wallets">
+          <WalletTile class="w-96 ml-auto mr-auto" :wallet="item" />
         </div>
-        <div class="mt-8 text-center w-full">
+        <div v-if="!isLogin" class="mt-8 text-center w-full">
           <div class="inline-block">
             <router-link :to="{ name : 'Home'}" class="flex items-center text-xs blue-btn py-4 px-10 ">Back to Home</router-link>
           </div>
         </div>
      </div>
-    <template>
-  
-    </template>
-</div>
+    
+
+
+
 </template>
 
 <script>
@@ -49,7 +34,9 @@ export default {
   setup(p) {
     
     const toast = useToast();
-    
+    const isLogin = computed(()=>{
+      return walletState.currentLoggedInWallet
+    })
     const wallets = computed(
       () =>{
         var wallet = walletState.wallets.filterByNetworkName(networkState.chainNetworkName);
@@ -60,11 +47,13 @@ export default {
     if(p.deleteWallet=='success'){
       toast.add({severity:'success', summary: 'Notification', detail: 'Wallet has been removed successfully', group: 'br', life: 5000});
     }
+    
 
     return {
       wallets,
       walletState,
-      networkState
+      networkState,
+      isLogin
     };
   },
 }

@@ -1,49 +1,32 @@
 <template>
-  <div>
+    <div class="my-2 flex items-center cursor-pointer" @click="toggleModal = !toggleModal"><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span class="text-xs font-bold" style="margin-top: 1px">Scan QR Code</span></div>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
     >
-      <div v-if="showModal" class="popup-outer-center flex z-50">
-        <div class="modal-popup-box-sm relative">
-          <div class="delete-position" style=" position: absolute; right: 15px;">
-            <font-awesome-icon icon="times" class="delete-icon-style" @click="closeModal();"></font-awesome-icon>
-          </div>
-          <div>
-            <h1 class="default-title font-bold my-5">{{ addressName }}</h1>
-            <div>
-              <img class="img-center" :src="qrDataString" width="250" >
-            </div>
-          </div>
+      <div v-if="toggleModal" class="popup-outer-lang fixed flex z-50">
+        <div class="modal-popup-box">
+          <div class="flex justify-center"><img :src="accountAddressQR" class="inline-block"></div>
+          <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-2' @click="toggleModal = !toggleModal;">Close</div>
         </div>
       </div>
     </transition>
-    <div @click="closeModal();" v-if="showModal" class="fixed inset-0 bg-opacity-90 bg-blue-primary"></div>
-  </div>
+    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-60 bg-gray-100 z-20"></div>
 </template>
-
 <script>
-import { getCurrentInstance } from "vue";
+import { ref } from "vue";
 
-export default{
+export default {
+    name: 'AddressQRModal',
+    props:{
+      accountAddressQR: String
+    },
+    setup(){
+      let toggleModal = ref(false)
 
-  name: 'AddressQRModal',
-  props: {
-    'showModal': Boolean,
-    'addressName': String,
-    'qrDataString': String
-  },
-  setup(p) {
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
-
-    const closeModal = () => {
-      emitter.emit("CLOSE_MODAL", false);
-    };
-
-    return {
-      closeModal
-    };
-  }
+     return{
+       toggleModal,
+     }
+    }
 }
 </script>

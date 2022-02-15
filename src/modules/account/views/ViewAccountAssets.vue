@@ -15,8 +15,14 @@
         <MoreAccountOptions :address="address"/>
     </div>
     <div class='border-2 border-t-0  p-6'>
+        <div v-if="mosaics.length==0" class='text-blue-primary text-xs text-center font-semibold'>Nothing to show.</div>
+        <div class='text-txs w-9/12 ml-auto mr-auto text-gray-400 mt-1 text-center'>
+          <span v-if="mosaics.length==0">You do not own any assets.</span>
+        </div>
         <div v-for="(mosaic, index) in mosaics" :key="index">
             <img v-if="displayTokenName(mosaic.name).name=='XPX'" src="@/modules/account/img/proximax-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
+            <img v-else-if="displayTokenName(mosaic.name).name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
+            <img v-else-if="displayTokenName(mosaic.name).name=='METX'" src="@/modules/account/img/metx-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
             <img v-else src="@/modules/dashboard/img/icon-sda.svg" class='inline-block h-6 w-6 mr-2 '>
             <div class = 'inline-block text-md font-bold '>{{splitBalance(mosaic.balance).left}} </div>
             <div class = 'inline-block text-md font-bold' v-if='splitBalance(mosaic.balance).right!=null'>.</div>
@@ -98,7 +104,7 @@ export default {
                 return {name:'XPX',registered:true}
             }else if (name=='prx.metx'){
                 return {name:'METX',registered:true}
-            }else if (name=='prx.xar'){
+            }else if (name=='xarcade.zar'){
                 return {name:'XAR',registered:true}
             }else{
                 return {name:name,registered:false}

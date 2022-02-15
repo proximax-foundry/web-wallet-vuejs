@@ -58,7 +58,7 @@
           <TransferInputClean v-if="selectedMosaic[index].id != 0" v-model="selectedMosaic[index].amount" :balance="getSelectedMosaicBalance[index]" placeholder="AMOUNT (ASSET)" type="text" :showError="showAssetBalanceErr[index]" :errorMessage="$t('accounts.insufficientbalance')" :decimal="mosaicSupplyDivisibility[index]"  />
         </div>
         <div>
-          <button class="my-2 font-semibold text-xs text-blue-primary outline-none focus:outline-none disabled:opacity-50" :disabled="addMosaicsButton" @click="displayMosaicsOption">
+          <button class="my-2 font-semibold text-xs text-blue-primary outline-none focus:outline-none disabled:opacity-50" :disabled="addMosaicsButton || mosaics.length==0" @click="displayMosaicsOption">
            + Add Assets
           </button>
         </div>
@@ -108,8 +108,7 @@
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class="mt-5"/>
-        <div class='font-semibold text-xs text-white'>Enter your password to continue</div>
-        <div class='font-semibold text-xxs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
+        <div class='font-semibold text-xs text-white mb-1.5'>Enter your password to continue</div>
         <PasswordInput  :placeholder="$t('accounts.inputpassword')" :errorMessage="$t('scriptvalues.enterpassword',{name: walletName })" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3" :disabled="disablePassword"/>
         <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" :disabled="disableCreate" @click="makeTransfer()">
             Transfer
@@ -517,13 +516,14 @@ export default {
     ) ||  walletState.currentLoggedInWallet.others.find(
       (element) => element.name == selectedAccName.value)
     if (account.assets.length > 0) {
-      
       account.assets.forEach((i, index) => {
-        mosaicOption.push({
-          val: i.idHex,
-          text: (i.namespaceNames.length>0?i.namespaceNames:i.idHex) + " >"+t('services.balance') +": " +Helper.amountFormatterSimple(i.amount,i.divisibility),
-          id: index + 1,
-        });
+        if(i.namespaceNames!="prx.xpx"){
+          mosaicOption.push({
+            val: i.idHex,
+            text: (i.namespaceNames.length>0?i.namespaceNames:i.idHex) + " >"+t('services.balance') +": " +Helper.amountFormatterSimple(i.amount,i.divisibility),
+            id: index + 1,
+          });
+        }
       });
     }
     return mosaicOption;

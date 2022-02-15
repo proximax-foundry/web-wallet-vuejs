@@ -7,7 +7,7 @@ switch(process.env.NODE_ENV){
         publicPath = '/web-wallet-vuejs'
         break;
     case 'production':
-        publicPath = '/'
+        publicPath = ''
         break;
     case 'development':
         publicPath = '/'

@@ -58,21 +58,21 @@
         <div class="sm:pl-2 xl:px-2 hidden md:inline-block">
           <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div">
             <div class="text-gray-400 text-txs mt-7 mb-2">WALLET ADDRESS</div>
-            <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center justify-between mb-10">
               <div id="address" class="font-bold outline-none break-all text-xs lg:text-tsm h-8" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
               <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4" @click="copy('address')">
             </div>
             <div class="flex justify-between w-full">
-              <div class="my-2 flex items-center"><a href="https://bctestnetfaucet.xpxsirius.io/#/" target=_new><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span class="text-xs font-bold" style="margin-top: 1px">Scan QR Code</span></a></div>
-              <div class="my-2 flex items-center"><img src="@/modules/dashboard/img/icon-multisig-blue.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">Convert to Multisig</div></div>
+              <AddressQRModal :accountAddressQR="addressQR" />
+              <router-link :to="{ name: 'ViewMultisigHome', params: { name: selectedAccountName }}" class="my-2 flex items-center" v-if="!isMultisig"><img src="@/modules/dashboard/img/icon-multisig-blue.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">Convert to Multisig</div></router-link>
             </div>
           </div>
         </div>
         <div class="pl-2 hidden xl:inline-block">
           <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-3 rounded-lg transaction-div text-white">
             <div class="text-txs mt-6 text-gray-400">Recent Transfers</div>
-            <div class="text-gray-400 text-tsm mt-6 mb-2 h-12" v-if="recentTransferTxnRow.length==0">No transactions in {{ selectedAccountName }}</div>
-            <div v-else class="mt-2">
+            <div class="text-gray-400 text-tsm mt-8 mb-3 h-12" v-if="recentTransferTxnRow.length==0">No transactions in {{ selectedAccountName }}</div>
+            <div v-else class="mt-3 h-16">
               <div v-for="txn in recentTransferTxnRow" :key="txn.hash" class="flex items-center justify-between mb-1">
                 <a class="flex items-center max-w-xs " :href="addressExplorerURL + '/' + txn.transferContactAddress" target=_new>
                   <div v-html="toSvg(txn.transferContactAddress, 20, jdenticonConfig)" class="mr-3 inline-block"></div>
@@ -81,7 +81,7 @@
                 <a class="text-tsm font-bold" :href="hashExplorerURL + '/' + txn.hash" target=_new><span :class="`${ (txn.amount[0] ==='-')?'text-red-500':'text-green-500' }`">{{ txn.amount }}</span> <span class="text-xxs font-normal">{{ currentNativeTokenName }}</span></a>
               </div>
             </div>
-            <router-link :to="{ name: 'ViewTransferCreate'}"  class="flex items-center mt-4"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
+            <router-link :to="{ name: 'ViewTransferCreate'}" class="flex items-center mt-5"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
           </div>
         </div>
       </div>
@@ -263,6 +263,7 @@ export default defineComponent({
     SecretTxnDataTable,
     DashboardAssetDataTable,
     DashboardNamespaceDataTable,
+    AddressQRModal,
   },
 
   setup(props){
@@ -495,7 +496,7 @@ export default defineComponent({
 
     const addressQR = computed(
       () => {
-        let qr = qrcode(10, 'H');
+        let qr = qrcode(15, 'H');
         qr.addData(selectedAccountAddress.value);
         qr.make();
         return qr.createDataURL();
@@ -648,12 +649,11 @@ export default defineComponent({
 
     allTxnQueryParams.updateFieldOrder(blockDescOrderSortingField);
     allTxnQueryParams.embedded = true;
-    // allTxnQueryParams.address = selectedAccountAddressPlain.value;
 
     let loadRecentTransactions = async()=>{
       let txnQueryParams = Helper.createTransactionQueryParams();
       txnQueryParams.pageSize = 1;
-      txnQueryParams.address = selectedAccountAddressPlain.value;
+      txnQueryParams.publicKey = selectedAccount.value.publicKey;
       txnQueryParams.embedded = true;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
@@ -666,37 +666,20 @@ export default defineComponent({
 
     let loadRecentTransferTransactions = async()=>{
       let txnQueryParams = Helper.createTransactionQueryParams();
-      txnQueryParams.pageSize = 1;
+      txnQueryParams.pageSize = 20;
       txnQueryParams.type = TransactionFilterTypes.getTransferTypes();
-      txnQueryParams.signerPublicKey = selectedAccountPublicKey.value;
+      txnQueryParams.publicKey = selectedAccount.value.publicKey;
       txnQueryParams.embedded = true;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
       let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
 
-      let txnQueryParams2 = Helper.createTransactionQueryParams();
-      txnQueryParams2.pageSize = 1;
-      txnQueryParams2.type = TransactionFilterTypes.getTransferTypes();
-      txnQueryParams2.recipientAddress = selectedAccountAddressPlain.value;
-      txnQueryParams2.embedded = true;
-      txnQueryParams2.updateFieldOrder(blockDescOrderSortingField);
-
-      let transactionSearchResult2 = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams2);
-
-      let tempTxns = [];
-
       if(transactionSearchResult.transactions.length){
         let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
 
-        tempTxns = formattedTxns;
+        recentTransferTransactions.value = formattedTxns;
+        recentTransferTxnRow.value = formatRecentTransfer(formattedTxns).slice(0, 3);
       }
-
-      if(transactionSearchResult2.transactions.length){
-        let formattedTxns2 = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult2.transactions);
-        tempTxns = tempTxns.concat(formattedTxns2);
-      }
-      
-      recentTransferTransactions.value = removeDuplicateTxn(tempTxns);
     };
 
     const reloadSearchTxns = () =>{
@@ -713,6 +696,7 @@ export default defineComponent({
     const searchTransaction = async(loadMore = false) =>{
 
       allTxnQueryParams.pageNumber = loadMore ? allTxnQueryParams.pageSize + 1 : 1;
+      allTxnQueryParams.publicKey = selectedAccount.value.publicKey;
       searchingTxn.value = true;
 
       let transactionSearchResult = await dashboardService.searchTxns(selectedTxnGroupType, allTxnQueryParams);
@@ -739,8 +723,6 @@ export default defineComponent({
           break;
       }
 
-      console.log(formattedTxns)
-
       if(loadMore){
         let tempTxns = searchedTransactions.value.concat(formattedTxns);
         searchedTransactions.value = removeDuplicateTxn(tempTxns);
@@ -757,62 +739,36 @@ export default defineComponent({
 
     const recentTransferTxnRow = ref([]);
 
-    const recentTransferTxn = async() => {
-      let txnQueryParams = Helper.createTransactionQueryParams();
-      txnQueryParams.pageSize = 1;
-      txnQueryParams.type = TransactionFilterTypes.getTransferTypes();
-      txnQueryParams.signerPublicKey = selectedAccountPublicKey.value;
-      txnQueryParams.embedded = true;
-      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
-
-      let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
-
-      let txnQueryParams2 = Helper.createTransactionQueryParams();
-      txnQueryParams2.pageSize = 1;
-      txnQueryParams2.type = TransactionFilterTypes.getTransferTypes();
-      txnQueryParams2.recipientAddress = selectedAccountAddressPlain.value;
-      txnQueryParams2.embedded = true;
-      txnQueryParams2.updateFieldOrder(blockDescOrderSortingField);
-
-      let transactionSearchResult2 = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams2);
-
-      let tempTxns = [];
-
-      if(transactionSearchResult.transactions.length){
-        let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
-
-        tempTxns = formattedTxns;
-      }
-
-      if(transactionSearchResult2.transactions.length){
-        let formattedTxns2 = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult2.transactions);
-        tempTxns = tempTxns.concat(formattedTxns2);
-      }
-
-      recentTransferTxnRow.value = formatRecentTransfer(removeDuplicateTxn(tempTxns).slice(0, 3));
-    };
-
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
     const jdenticonConfig = themeConfig.jdenticonConfig;
 
     const formatRecentTransfer = (transactions) => {
-      let TransferTxn = [];
-      transactions.forEach((txn) => {
+      let transferTxn = [];
+      let nativeTokenTxns = transactions.filter(txn => txn.amountTransfer > 0);
+
+      for(const txn of nativeTokenTxns){
         let formattedTransferTxn = {};
-        if(selectedAccountAddressPlain.value == txn.sender){
-          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToNamePretty(txn.recipient, true).substring(0, 20);
+        if(selectedAccountAddressPlain.value == txn.sender && selectedAccountAddressPlain.value == txn.recipient){
+          continue;
+        }
+        else if(selectedAccountAddressPlain.value == txn.sender){
+          formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToNamePretty(txn.recipient, true);
           formattedTransferTxn.transferContactAddress = txn.recipient;
-          formattedTransferTxn.amount = Helper.toCurrencyFormat(txn.amountTransfer, );
+          formattedTransferTxn.amount = '-' + Helper.toCurrencyFormat(txn.amountTransfer, AppState.nativeToken.divisibility);
         }else{
           formattedTransferTxn.transferContact = walletState.currentLoggedInWallet.convertAddressToNamePretty(txn.sender, true).substring(0, 30);
           formattedTransferTxn.transferContactAddress = txn.sender;
-          formattedTransferTxn.amount = '-' + Helper.toCurrencyFormat(txn.amountTransfer, 6);
+          formattedTransferTxn.amount = Helper.toCurrencyFormat(txn.amountTransfer, AppState.nativeToken.divisibility);
+        }
+        
+        if(formattedTransferTxn.transferContact.length > 20){
+            formattedTransferTxn.transferContact = formattedTransferTxn.transferContact.substring(0, 17) + "...";
         }
         formattedTransferTxn.hash = txn.hash;
-        TransferTxn.push(formattedTransferTxn);
-      });
-      return TransferTxn;
+        transferTxn.push(formattedTransferTxn);
+      }
+      return transferTxn;
     }
 
     const formatConfirmedTransaction = async(transactions)=>{
@@ -1062,15 +1018,14 @@ export default defineComponent({
       loadRecentTransactions();
       loadRecentTransferTransactions();
       updatePricing();
-      recentTransferTxn();
     }
 
     if(AppState.isReady){
       init();
     }
     else{
-      let readyWatcher = watch(AppState.isReady, (value) => {
-        if(value){
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
           init();
           readyWatcher();
         }
@@ -1081,7 +1036,7 @@ export default defineComponent({
       currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
       currentAccount.default = true;
       selectedAccount.value = currentAccount;
-      recentTransferTxn();
+      // recentTransferTxn();
       updateAccountTransactionCount();
       loadRecentTransactions();
       loadRecentTransferTransactions();
