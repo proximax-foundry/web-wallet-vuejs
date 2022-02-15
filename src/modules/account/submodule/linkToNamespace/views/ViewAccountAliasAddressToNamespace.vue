@@ -271,7 +271,7 @@ export default {
 
     const totalFee = computed(()=>{
       if(isMultiSig.value){
-        return Math.round((parseInt(trxFee.value) + lockFund.value + lockFundTxFee.value)*1000000)/1000000
+        return Math.round((parseFloat(trxFee.value) + lockFund.value + lockFundTxFee.value)*Math.pow(10,AppState.nativeToken.divisibility))/Math.pow(10,AppState.nativeToken.divisibility)
       }else{
         return trxFee.value
       }
