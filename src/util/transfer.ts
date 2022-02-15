@@ -194,7 +194,7 @@ const getMosaic =(amount :string, mosaic :{id :string ,amount :string}[]) :Mosai
   return mosaics
 }
 
-const calculate_aggregate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[]):number=> {
+const calculate_aggregate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[]):string=> {
   
   let mosaics = getMosaic(amount,mosaic)
   let transactionBuilder = AppState.buildTxn
@@ -202,10 +202,10 @@ const calculate_aggregate_fee = (message :string , amount :string, mosaic :{id :
     transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
   }
   let transferTransaction = transactionBuilder.transfer(Address.createFromRawAddress(test_address),PlainMessage.create(message),mosaics)
-  return transactionBuilder.aggregateBonded([transferTransaction.toAggregate(PublicAccount.createFromPublicKey(test_publicKey,AppState.networkType))]).maxFee.compact() /1000000
+  return  Helper.amountFormatterSimple(transactionBuilder.aggregateBonded([transferTransaction.toAggregate(PublicAccount.createFromPublicKey(test_publicKey,AppState.networkType))]).maxFee.compact(),AppState.nativeToken.divisibility )
 }
 
-const calculate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[]) :number=> {
+const calculate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[]) :string=> {
  /*  let mosaicsToSend = validateMosaicsToSend(amount, mosaic); */
   let transactionBuilder = AppState.buildTxn
   
@@ -213,7 +213,8 @@ const calculate_fee = (message :string , amount :string, mosaic :{id :string ,am
     transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
   }
   let mosaics = getMosaic(amount,mosaic)
-  return transactionBuilder.transfer(Address.createFromRawAddress(test_address),PlainMessage.create(message), mosaics).maxFee.compact()/1000000
+  
+  return Helper.amountFormatterSimple(transactionBuilder.transfer(Address.createFromRawAddress(test_address),PlainMessage.create(message), mosaics).maxFee.compact(), AppState.nativeToken.divisibility)
  
 }
 

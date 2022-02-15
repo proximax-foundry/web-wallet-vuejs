@@ -496,9 +496,9 @@ export default {
   });
   const totalFee = computed(()=>{
     if(!isMultiSig(selectedAccAdd.value) ){
-      return Math.round((parseFloat(sendXPX.value.replace(/,/g, '')) + effectiveFee.value)*1000000)/1000000
+      return Math.round((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value))*Math.pow(10,AppState.nativeToken.divisibility))/Math.pow(10,AppState.nativeToken.divisibility)
     }if(isMultiSig(selectedAccAdd.value) ){
-      return Math.round((parseFloat(sendXPX.value.replace(/,/g, '')) + effectiveFee.value + lockFundTxFee.value + lockFund.value)*1000000)/1000000
+      return Math.round((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value)*Math.pow(10,AppState.nativeToken.divisibility))/ Math.pow(10,AppState.nativeToken.divisibility)
     }else{
       return 0
     }
@@ -704,7 +704,6 @@ export default {
   watch(sendXPX, (n, o) => {
     if (n != o) {
       updateFee()
-      
     }
   });
   
