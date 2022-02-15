@@ -199,15 +199,19 @@ export class NotificationUtils {
     const notifications = NotificationUtils.getNotificationFromStorage();
     let newNotification = false;
     if(notifications.length > 0){
-      notifications.forEach(notification => {
-        let matchId = visitedNotification.find(noti => noti == notification.id);
-        if(!matchId){
-          newNotification = true;
-          return newNotification;
-        }
-      });
+      if(visitedNotification.length > 0){
+        notifications.forEach(notification => {
+          let matchId = visitedNotification.find(noti => noti == notification.id);
+          if(!matchId){
+            newNotification = true;
+            return newNotification;
+          }
+        });
+      }else{
+        newNotification = true;
+        return newNotification;
+      }
     }
-
     return newNotification;
   }
 
