@@ -1,4 +1,34 @@
 {
+    "Sirius Mainnet": {
+      "swapData":{
+        "swap_XPX_ETH_URL": "https://bctestnet-swap-gateway.xpxsirius.io/eth",
+        "swap_XPX_BSC_URL": "https://bctestnet-swap-gateway.xpxsirius.io/bsc",
+        "swap_IN_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
+        "swap_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
+        "gasPriceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io/gas",
+        "priceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io",
+        "BSCChainId": 97,
+        "ETHChainId": 3,
+        "BSCScanUrl": "https://testnet.bscscan.com/tx/",
+        "ETHScanUrl": "https://ropsten.etherscan.io/tx/",
+        "BSCNetworkName": "BSC Testnet",
+        "ETHNetworkName": "Ropsten",
+        "nis1SwapData": {
+          "timeOutTransactionNis1": 20000,
+          "url": "https://bctestnetswap.xpxsirius.io:7890",
+          "urlExplorer": "http://testnet-explorer.nemtool.com/#/s_tx?hash=",
+          "networkType": 152,
+          "burnAddress": "TBF4LAZUEJMBIOC6J24D6ZGGXE5W775TX555CTTN",
+          "nodes":[
+            { "protocol": "https", "domain": "bctestnetswap.xpxsirius.io", "port": 7890 }
+          ],
+          "swapAllowedMosaics": [
+            { "namespaceId": "xarcade", "name": "xar", "divisibility": 4 },
+            { "namespaceId": "prx", "name": "xpx", "divisibility": 6 }
+          ]
+        }
+      }
+    },
     "Sirius Testnet 1": {
     },
     "Sirius Testnet 2": {
@@ -15,9 +45,7 @@
         "ETHScanUrl": "https://ropsten.etherscan.io/tx/",
         "BSCNetworkName": "BSC Testnet",
         "ETHNetworkName": "Ropsten",
-
         "nis1SwapData": {
-          
           "timeOutTransactionNis1": 20000,
           "url": "https://bctestnetswap.xpxsirius.io:7890",
           "urlExplorer": "http://testnet-explorer.nemtool.com/#/s_tx?hash=",
