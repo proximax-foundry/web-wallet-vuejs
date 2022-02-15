@@ -14,6 +14,10 @@ const elements = {
     created_namespace: '.p-datatable-tbody > tr:nth-child(1) > td:nth-child(2) > span:nth-child(1)',
     created_namespaceid: 'span.uppercase',
     created_namespacetimestamp: '.text-yellow-500',
+    ellipsis: 'img.h-6:nth-child(1)',
+    namespace_tab: '.router-link-active',
+    namespace_link: '#multiselect > div.multiselect-input',
+    new_namespace: '#multiselect > div.multiselect-options > span.multiselect-option.is-pointed > span:nth-child(1)',
 
 }
 
@@ -44,11 +48,12 @@ const commands = {
         .click("@newroot_namespace")
         .setValue("@input_name", '\ue003')
         .setValue("@input_name", name)
+        .pause(3000)
         .setValue("@input_password", '\ue004')
         .isVisible('@error_emptypassword', callback = result => {
             this.assert.equal(result.value, true, "If wallet password has no input, an error is shown")
         })
-        .pause(5000)
+        .pause(5000)   
     },
 
     create_namespace(name, password){
@@ -67,6 +72,17 @@ const commands = {
         .assert.containsText('@created_namespace', name, 'Namespace is successfully created.')
         .assert.visible('@created_namespaceid', 'Namespace is successfully created with id')
         .assert.visible('@created_namespacetimestamp', 'Namespace is successfully created with timestamp')
+
+    },
+
+    link_namespace(){
+        return this
+        .click("@ellipsis")
+        .pause(3000)
+        .click("@namespace_tab")
+        .pause(5000)
+        .click("@namespace_link")
+        .click("@new_namespace")
 
     },
 

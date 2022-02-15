@@ -20,7 +20,7 @@ module.exports = {
         create
             .navigate()
             .navigate_createpkwallet(browser.launch_url)
-            .create_pkwallet(browser.launch_url, privatekey, name, password1)
+            .create_pkwallet(privatekey, name, password1)
 
         // sign in
         signin
@@ -32,7 +32,7 @@ module.exports = {
             .navigate_createnewaccount(browser.launch_url)
             .create_account(name, password1)
 
-        // // transfer 
+        // to transfer 
         // transfer
         //     .navigation_transfer(browser.launch_url)
         //     .create_transfer(amount, message, xpx, password1, password2)
@@ -45,11 +45,32 @@ module.exports = {
             .add_cosignatory()
             .scheme_validation()
             .invalid_password(password2)
-            .empty_password(browser.launch_url)
-        
-        // browser.sendKeys('xpath', "/html/body/div[1]/div/div/div[2]/div/div/div[2]/div[3]/div[1]/div[4]/div/div/div[2]/div[1]/input", browser.Keys.CONTROL + "v")
-            
+            .empty_password(browser.launch_url)            
 
-    }
+    },
+
+    "Insufficientxpx_test": function (browser) {
+
+        var create = browser.page.Createwallet()
+        var signin = browser.page.Signin()
+        var multisig = browser.page.Multisig()
+
+        // create wallet
+        create
+            .navigate()
+            .navigate_createnewwallet(browser.launch_url)
+            .create_wallet(name, password1)
+
+        // sign in
+        signin
+            .signin_dashboard(browser.launch_url, password1)
+
+        // multisig test
+        multisig
+            .navigation_multisig(browser.launch_url)
+            .insufficient_xpx()
+
+    },
+
 
 }

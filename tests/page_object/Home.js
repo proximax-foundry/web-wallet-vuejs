@@ -17,7 +17,7 @@ const elements = {
     name_title: '.p-datatable-thead > tr:nth-child(1) > th:nth-child(2) > div:nth-child(1) > span:nth-child(1)',
     txhash_title: '.p-datatable-thead > tr:nth-child(1) > th:nth-child(2) > div:nth-child(1) > span:nth-child(1)',
     account_popup: '.popup-outer > div:nth-child(1)',
-    copy_address: 'div.mb-8:nth-child(2) > img:nth-child(2)',
+    copy_address: '.mb-10 > img:nth-child(2)',
     transfer_xpx: 'a[href="#/create-transfer"] > div:nth-child(2)',          
     copy_successfulpopup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
     wallet_tab: 'a[href="#/wallets"]',

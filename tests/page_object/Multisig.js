@@ -19,6 +19,7 @@ const elements = {
     cancel_button: '.content-center',
     updatecosign_button: 'button.w-full',
     error_invalidpassword: '.error',
+    insufficient_amount: '.flex-cols > div:nth-child(1)',
 
 }
 
@@ -50,6 +51,14 @@ const commands = {
 
     },
 
+    insufficient_xpx(){
+        return this
+        .pause(1000)
+        .isVisible('@insufficient_amount', callback = result => {
+            this.assert.equal(result.value, true, "If user has insufficient xpx amount, an error is shown")
+        })
+    },
+
     empty_password(browser){
         return this
         .clearValue("@input_password")
@@ -60,6 +69,7 @@ const commands = {
         .click("@cancel_button")
         .assert.urlEquals(browser + 'multisig-settings/Primary', 'User is navigated back to multisig page')
         .pause(10000)
+        .end()
         
     },
 

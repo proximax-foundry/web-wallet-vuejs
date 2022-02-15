@@ -6,7 +6,7 @@ var invalidaddress = "VBE2LN-QYZS2P-ODPWSO-CARZXJ-3I3RUI-IK5PX5-PMO"
 var status = "INVALID"
 var amount = "0.1"
 var amount1 = "10000"
-var amount2 = "200000"
+var amount2 = "150000"
 
 module.exports = {
 
@@ -21,7 +21,7 @@ module.exports = {
         create
             .navigate()
             .navigate_createpkwallet(browser.launch_url)
-            .create_pkwallet(browser.launch_url, privatekey, name, password1)
+            .create_pkwallet(privatekey, name, password1)
 
         // sign in
         signin
