@@ -496,9 +496,9 @@ export default {
   });
   const totalFee = computed(()=>{
     if(!isMultiSig(selectedAccAdd.value) ){
-      return Math.round((Number(sendXPX.value) + effectiveFee.value)*1000000)/1000000
+      return Math.round((parseFloat(sendXPX.value.replace(/,/g, '')) + effectiveFee.value)*1000000)/1000000
     }if(isMultiSig(selectedAccAdd.value) ){
-      return Math.round((parseFloat(sendXPX.value) + effectiveFee.value + lockFundTxFee.value + lockFund.value)*1000000)/1000000
+      return Math.round((parseFloat(sendXPX.value.replace(/,/g, '')) + effectiveFee.value + lockFundTxFee.value + lockFund.value)*1000000)/1000000
     }else{
       return 0
     }
@@ -701,9 +701,23 @@ export default {
       updateFee()
     }
   });
+   const numFormatter = new Intl.NumberFormat('en-US', {
+  style: "decimal",
+  maximumFractionDigits: 6
+})
+  const toCurrencyFormat = (value, divisibility)=>{
+    
+        const exactValue = value;
+    
+        return new Intl.NumberFormat('en', { style: "decimal",maximumFractionDigits: divisibility }).format(exactValue);
+      }
   watch(sendXPX, (n, o) => {
     if (n != o) {
       updateFee()
+      /* console.log(Helper.toCurrencyFormat(n,6))
+      n = Helper.toCurrencyFormat(n,6) */
+      n = toCurrencyFormat(n.replace(/,/g,""),6) 
+      console.log(n)
     }
   });
   
