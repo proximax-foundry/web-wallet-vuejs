@@ -36,6 +36,7 @@ import { listenerState, AutoAnnounceSignedTransaction, HashAnnounceBlock, Announ
 import { AppState } from "@/state/appState";
 import { OtherAccount } from "@/models/otherAccount";
 import { BuildTransactions } from "./buildTransactions";
+import { Helper } from "./typeHelper";
 
 const walletKey = "sw";
 const generationHash = networkState.currentNetworkProfile.generationHash
@@ -107,7 +108,7 @@ const getPublicKey = (address :Address) :Promise<AccountInfo['publicKey']>=> {
   })
 }
 
-const getAggregateFee = async (publicKey :string,addedCosigners: string[],numApprove :number,numDelete :number,removeCosign? :string[]) :Promise<number>=>{
+const getAggregateFee = async (publicKey :string,addedCosigners: string[],numApprove :number,numDelete :number,removeCosign? :string[]) :Promise<string>=>{
   const acc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey) || walletState.currentLoggedInWallet.others.find(acc=>acc.publicKey==publicKey)
   const multisigCosignatory = []; 
   let cosignatory 
@@ -150,7 +151,7 @@ const getAggregateFee = async (publicKey :string,addedCosigners: string[],numApp
       relativeNumDeleteUser,
       multisigCosignatory
     )
-  return AppState.buildTxn.aggregateBonded([convertIntoMultisigTransaction.toAggregate(PublicAccount.createFromPublicKey(publicKey,networkType))]).maxFee.compact() /1000000
+  return Helper.amountFormatterSimple(AppState.buildTxn.aggregateBonded([convertIntoMultisigTransaction.toAggregate(PublicAccount.createFromPublicKey(publicKey,networkType))]).maxFee.compact(),AppState.nativeToken.divisibility)
   
 }
 
