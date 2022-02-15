@@ -12,8 +12,9 @@
             "name": "XPX",
             "namespace": "prx.xpx",
             "mosaicId": "",
-          "namespaceId": "bffb42a19116bdf6",
-          "divisibility": 6
+            "namespaceId": "bffb42a19116bdf6",
+            "divisibility": 6
+        }
       },
       "chainExplorer": {
         "url": "https://explorer.xpxsirius.io",
