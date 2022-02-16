@@ -107,22 +107,28 @@
           <div class="mb-8 font-bold uppercase text-txs">Create something new</div>
           <div class="flex flex-wrap">
             <div class="flex items-center w-80 mb-2">
-              <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
-              <div class="inline-block ml-2 dashboard-link">
+              <div class="w-12 h-12 inline-block">
+                <img src="@/assets/img/icon-header-namespace.svg" class="w-12 h-12">
+              </div>
+              <div class="inline-block ml-4 dashboard-link">
                 <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create Namespace</router-link>
                 <p class="text-txs w-60">Create an on-chain unique place for your business and your assets.</p>
               </div>
             </div>
             <div class="flex items-center w-80 mb-2">
-              <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
-              <div class="inline-block ml-2 dashboard-link">
+              <div class="w-12 h-12 inline-block">
+                <img src="@/assets/img/icon-header-asset.svg" class="w-12 h-12">
+              </div>
+              <div class="inline-block ml-4 dashboard-link">
                 <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create an Asset</router-link>
                 <p class="text-txs w-60">An asset could be a token that has a unique identifier and configurable properties.</p>
               </div>
             </div>
             <div class="flex items-center w-80 mb-2">
-              <div class="bg-gray-100 rounded-md w-12 h-12 inline-block"></div>
-              <div class="inline-block ml-2 dashboard-link">
+              <div class="w-12 h-12 inline-block">
+                <img src="@/assets/img/icon-header-account.svg" class="w-12 h-12">
+              </div>
+              <div class="inline-block ml-4 dashboard-link">
                 <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create New Account</router-link>
                 <p class="text-txs w-60">Create an on-chain unique place for your business and your assets.</p>
               </div>
@@ -132,10 +138,10 @@
         <div class="w-full md:w-1/2 mt-7 md:mt-0">
           <div class="mb-8 font-bold text-txs uppercase">Getting started guide</div>
           <div class="text-xs sm:text-tsm">
-            <div class="mb-2"><a href=#>Guide Overview <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-            <div class="mb-2"><a href=#>What is ProximaX Sirius Chain <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-            <div class="mb-2"><a href=#>What is Namespace <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-            <div class="mb-2"><a href=#>What is Asset <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/" target=_new>Guide Overview <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/getting-started/what-is-proximax-sirius-chain/" target=_new>What is ProximaX Sirius Chain <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new>What is Namespace <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new>What is Asset <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
           </div>
         </div>
       </div>
