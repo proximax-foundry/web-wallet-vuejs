@@ -72,21 +72,21 @@
               <div class="grid grid-cols-2">
                 <div>
                   <div class="p-2">
-                    <a class="mb-2 block text-blue-primary" href="#" target=_new>Getting Started<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/" target=_new>Getting Started<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
                     <div class="text-txs h-10">Everything you need to know about the Sirius Wallet</div>
                   </div>
                   <div class="p-2">
-                    <a class="mb-2 block text-blue-primary" href="#" target=_new>What is Sirius Chain?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/getting-started/what-is-proximax-sirius-chain/" target=_new>What is Sirius Chain?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
                     <div class="text-txs h-10">Start building apps on the ProximaX Sirius blockchain layer</div>
                   </div>
                 </div>
                 <div>
                   <div class="p-2">
-                    <a class="mb-2 block text-blue-primary" href="#" target=_new>What is Namespace?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new>What is Namespace?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
                     <div class="text-txs h-10">Create an on-chain unique place for your business and your assets</div>
                   </div>
                   <div class="p-2">
-                    <a class="mb-2 block text-blue-primary" href="#" target=_new>What is Asset?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new>What is Asset?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
                     <div class="text-txs h-10">Everything you need to know about the Sirius Wallet</div>
                   </div>
                 </div>
