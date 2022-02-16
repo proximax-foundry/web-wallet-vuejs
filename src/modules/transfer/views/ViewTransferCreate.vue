@@ -223,7 +223,7 @@ export default {
     
     const lockFundTxFee = computed(()=>{
       if(networkState.currentNetworkProfile){
-        return Helper.convertToExact(TransactionUtils.getLockFundFee(AppState.networkType, networkState.currentNetworkProfile.generationHash), networkState.currentNetworkProfile.network.currency.divisibility);
+        return Helper.convertToExact(TransactionUtils.getLockFundFee(), networkState.currentNetworkProfile.network.currency.divisibility);
       }
       return 0;  
     });
@@ -495,12 +495,19 @@ export default {
     }
   });
   const totalFee = computed(()=>{
+    let tokenDivisibility = AppState.nativeToken.divisibility
     if(!isMultiSig(selectedAccAdd.value) ){
-      return Math.trunc((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value))*Math.pow(10,AppState.nativeToken.divisibility))/Math.pow(10,AppState.nativeToken.divisibility)
-    }if(isMultiSig(selectedAccAdd.value) ){
-      return Math.trunc((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value)*Math.pow(10,AppState.nativeToken.divisibility))/ Math.pow(10,AppState.nativeToken.divisibility)
-    }else{
-      return 0
+      if(tokenDivisibility==0){
+        return Math.trunc(parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value))
+      }else{
+        return Math.round((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value))*Math.pow(10,tokenDivisibility))/Math.pow(10,tokenDivisibility)
+      }
+    }else if(isMultiSig(selectedAccAdd.value) ){
+      if(tokenDivisibility== 0){
+        return Math.trunc((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value))
+      }else{
+        return Math.round((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value)*Math.pow(10,tokenDivisibility))/ Math.pow(10,tokenDivisibility)
+      }
     }
   })
 

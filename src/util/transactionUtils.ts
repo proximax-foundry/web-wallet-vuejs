@@ -58,7 +58,8 @@ import {
   SignedTransaction,
   CosignatureSignedTransaction,
   TransactionGroupType,
-  TransactionSearch
+  TransactionSearch,
+  TransactionHash
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { walletState } from "../state/walletState";
@@ -389,14 +390,15 @@ export class TransactionUtils {
     return typeName;
   }
 
-  static getLockFundFee = (networkType: NetworkType, generationHash: string):number => {
+  static getLockFundFee = ()=> {
+    let networkType = AppState.networkType
     let txBuilder = AppState.buildTxn
     let tempAcc = Account.generateNewAccount(networkType);
     let txn = txBuilder.transfer(tempAcc.address, PlainMessage.create('hello'));
-    let abt = txBuilder.aggregateBonded([txn.toAggregate(tempAcc.publicAccount)])
-    let signedTxn = tempAcc.sign(abt, generationHash);
+    let abtType = txBuilder.aggregateBonded([txn.toAggregate(tempAcc.publicAccount)]).type
+    let txHash = new TransactionHash("0".repeat(64),abtType)
     
-    return txBuilder.hashLock(new Mosaic(new NamespaceId('prx.xpx'), UInt64.fromUint(10)), UInt64.fromUint(10), signedTxn).maxFee.compact();
+    return txBuilder.hashLock(new Mosaic(new NamespaceId('prx.xpx'), UInt64.fromUint(10)), UInt64.fromUint(10), txHash).maxFee.compact();
   }
 
   static castToAggregate(tx :Transaction){
