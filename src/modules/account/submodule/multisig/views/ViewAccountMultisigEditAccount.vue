@@ -318,7 +318,12 @@ export default {
 
     
     const totalFee = computed(()=>{
-        return  Math.round((parseFloat(aggregateFee.value) + parseFloat(lockFundCurrency.value) + lockFundTxFee.value)*Math.pow(10,AppState.nativeToken.divisibility))/Math.pow(10,AppState.nativeToken.divisibility)
+       let tokenDivisibility = AppState.nativeToken.divisibility
+      if(tokenDivisibility ==0){
+        return  Math.trunc(parseFloat(aggregateFee.value) + parseFloat(lockFundCurrency.value) + lockFundTxFee.value)
+      }else{
+        return Math.round((parseFloat(aggregateFee.value) + parseFloat(lockFundCurrency.value) + lockFundTxFee.value)*Math.pow(10,tokenDivisibility))/Math.pow(10,tokenDivisibility)
+      }
     })
 
     const clear = () => {
