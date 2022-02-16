@@ -45,12 +45,12 @@ export class NamespaceUtils {
  }
 
   static rootNamespaceTransaction = (networkType: NetworkType, generationHash: string, namespaceName: string, duration: number):RegisterNamespaceTransaction => {
-    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    let buildTransactions = AppState.buildTxn;
     return buildTransactions.registerRootNamespace(namespaceName, UInt64.fromUint(NamespaceUtils.calculateDuration(duration)));
   }
 
   static subNamespaceTransaction = (networkType: NetworkType, generationHash: string, rootNamespace: string, subNamespace: string):RegisterNamespaceTransaction => {
-    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    let buildTransactions = AppState.buildTxn;
     return buildTransactions.registersubNamespace(rootNamespace, subNamespace);
   }
 
@@ -241,7 +241,7 @@ export class NamespaceUtils {
   }
 
   static createRootNamespaceMultisig = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, namespaceName: string, duration: number, multiSigAddress:string) => {
-    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    let buildTransactions = AppState.buildTxn;
     let registerRootNamespaceTransaction = NamespaceUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
     const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
 
@@ -265,7 +265,7 @@ export class NamespaceUtils {
   }
 
   static createSubNamespaceMultisig = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, subNamespace: string, rootNamespace: string, multiSigAddress:string) => {
-    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    let buildTransactions = AppState.buildTxn;
     let registerSubNamespaceTransaction = NamespaceUtils.subNamespaceTransaction(networkType, generationHash, rootNamespace, subNamespace);
     const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
 
@@ -296,7 +296,7 @@ export class NamespaceUtils {
   }
 
   static extendNamespaceMultisig = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, namespaceName: string, duration: number, multiSigAddress:string) => {
-    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    let buildTransactions = AppState.buildTxn;
     let extendNamespaceTx = NamespaceUtils.rootNamespaceTransaction(networkType, generationHash, namespaceName, duration);
     const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
 

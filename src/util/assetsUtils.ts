@@ -55,7 +55,7 @@ interface assetSelectionInterface {
 export class AssetsUtils {
 
   static createAssetTransaction = (networkType: NetworkType, generationHash: string, owner:PublicAccount, supply: number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number, changeType:string):AggregateTransaction => {
-    const buildTransactions = new BuildTransactions(networkType, generationHash);
+    const buildTransactions = AppState.buildTxn
     const assetDefinition = buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(AssetsUtils.calculateDuration(duration)));
     const assetDefinitionTx = assetDefinition.toAggregate(owner);
     let supplyChangeType: MosaicSupplyType;
@@ -65,13 +65,13 @@ export class AssetsUtils {
   }
 
   static assetSupplyChangeTransaction = (networkType: NetworkType, generationHash: string, mosaidStringId: string, changeType: string, supply: number, divisibility:number):MosaicSupplyChangeTransaction => {
-    const buildTransactions = new BuildTransactions(networkType, generationHash);
+    const buildTransactions = AppState.buildTxn;
     let supplyChangeType: MosaicSupplyType = (changeType=='increase')?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
     return buildTransactions.buildMosaicSupplyChange(new MosaicId(mosaidStringId), supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(divisibility, supply)));
   }
 
   static linkAssetToNamespaceTransaction = (networkType: NetworkType, generationHash: string, mosaicIdString: string, namespaceString: string, linkType: string) :MosaicAliasTransaction => {
-    const buildTransactions = new BuildTransactions(networkType, generationHash);
+    const buildTransactions = AppState.buildTxn;
     let aliasActionType: AliasActionType;
     aliasActionType = (linkType=='link')?AliasActionType.Link:AliasActionType.Unlink;
     return buildTransactions.assetAlias( aliasActionType, new NamespaceId(namespaceString), new MosaicId(mosaicIdString));
@@ -245,7 +245,7 @@ export class AssetsUtils {
   }
 
   static createAssetMultiSig = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, owner:PublicAccount, supply:number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number, multiSigAddress: string) => {
-    const buildTransactions = new BuildTransactions(networkType, generationHash);
+    const buildTransactions = AppState.buildTxn;
     const assetDefinition = buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(AssetsUtils.calculateDuration(duration)));
     const assetDefinitionTx = assetDefinition.toAggregate(owner);
     let supplyChangeType: MosaicSupplyType;
@@ -280,7 +280,7 @@ export class AssetsUtils {
   }
 
   static changeAssetSupplyMultiSig = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, mosaicId: string, changeType: string, supply: number, divisibility: number, multiSigAddress: string) => {
-    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    let buildTransactions = AppState.buildTxn;
     let createAssetAggregateTransaction = AssetsUtils.assetSupplyChangeTransaction(networkType, generationHash, mosaicId, changeType, supply, divisibility);
     const account = AssetsUtils.getSenderAccount(selectedAddress, walletPassword);
 
@@ -311,7 +311,7 @@ export class AssetsUtils {
   }
 
   static linkedNamespaceToAssetMultiSig = (selectedAddress: string, walletPassword: string, networkType: NetworkType, generationHash: string, mosaicIdString: string, namespaceString: string, linkType: string, multiSigAddress: string) => {
-    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    let buildTransactions = AppState.buildTxn;
     const linkAssetToNamespaceTx = AssetsUtils.linkAssetToNamespaceTransaction(networkType, generationHash, mosaicIdString, namespaceString, linkType);
     const account = AssetsUtils.getSenderAccount(selectedAddress, walletPassword);
 

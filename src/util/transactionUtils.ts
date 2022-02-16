@@ -391,14 +391,17 @@ export class TransactionUtils {
   }
 
   static getLockFundFee = ()=> {
-    let networkType = AppState.networkType
     let txBuilder = AppState.buildTxn
-    let tempAcc = Account.generateNewAccount(networkType);
-    let txn = txBuilder.transfer(tempAcc.address, PlainMessage.create('hello'));
-    let abtType = txBuilder.aggregateBonded([txn.toAggregate(tempAcc.publicAccount)]).type
+    let abtType = TransactionType.AGGREGATE_BONDED
     let txHash = new TransactionHash("0".repeat(64),abtType)
-    
-    return txBuilder.hashLock(new Mosaic(new NamespaceId('prx.xpx'), UInt64.fromUint(10)), UInt64.fromUint(10), txHash).maxFee.compact();
+    const nativeTokenNamespace = AppState.nativeToken.fullNamespace
+    const lockingAtomicFee = networkState.currentNetworkProfileConfig.lockedFundsPerAggregate ?? 0;
+    const lockFundTx = txBuilder.hashLock(
+      new Mosaic(new NamespaceId(nativeTokenNamespace), UInt64.fromUint(lockingAtomicFee)),
+      UInt64.fromUint(1000),
+      txHash
+    );
+    return lockFundTx.maxFee.compact();
   }
 
   static castToAggregate(tx :Transaction){

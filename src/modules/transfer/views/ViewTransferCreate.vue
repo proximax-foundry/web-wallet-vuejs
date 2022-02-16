@@ -502,7 +502,7 @@ export default {
       }else{
         return Math.round((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value))*Math.pow(10,tokenDivisibility))/Math.pow(10,tokenDivisibility)
       }
-    }else if(isMultiSig(selectedAccAdd.value) ){
+    }else {
       if(tokenDivisibility== 0){
         return Math.trunc((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value))
       }else{
