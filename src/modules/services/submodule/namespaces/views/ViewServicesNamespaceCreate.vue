@@ -70,18 +70,14 @@
       </div>
     </div>
 
-    <div class="lg:grid lg:grid-cols-3 mt-10 lg:mt-16">
-      <div>
-        <a href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new class="text-blue-primary font-bold inline-block text-tsm">What is Namespace?</a>
+    <div class="sm:grid sm:grid-cols-2 mt-10 lg:mt-16">
+      <div class="mb-8 sm:pr-1">
+        <a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">What is Namespace?</a>
         <div class="text-gray-400 text-tsm my-3 sm:pr-2">A namespace starts with a name that you choose, similar to an internet domain name.</div>
       </div>
-      <div>
-        <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-blue-primary font-bold inline-block text-tsm">The complete guide about Namespace</router-link>
-        <div class="text-gray-400 text-tsm my-3">What is namespace? Refer to the complete guide on Namespace here.</div>
-      </div>
-      <div>
-        <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-blue-primary font-bold inline-block text-tsm">Give us feedback about your experience here</router-link>
-        <div class="text-gray-400 text-tsm my-3">Give us feedback about your experience here</div>
+      <div class="mb-8">
+        <a href="https://t.me/proximaxhelpdesk" target=_new class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">Give us feedback about your experience here</a>
+        <div class="text-gray-400 text-tsm my-3">We are eager to keep improving our products.</div>
       </div>
     </div>
   </div>
