@@ -260,7 +260,7 @@ export class AssetsUtils {
 
     const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, networkType);
 
-    const innerTxn = [assetDefinitionTx.toAggregate(multisigPublicAccount),assetSupplyChangeTx.toAggregate(multisigPublicAccount)];
+    const innerTxn = [assetDefinitionTx,assetSupplyChangeTx];
     const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
     const aggregateBondedTxSigned = account.sign(aggregateBondedTx, generationHash);
     let hashLockTx = buildTransactions.hashLock(
