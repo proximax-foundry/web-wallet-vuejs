@@ -70,6 +70,7 @@ import { BuildTransactions } from "../util/buildTransactions";
 import { Helper } from "./typeHelper";
 import { Duration } from "js-joda";
 import { faBreadSlice } from "@fortawesome/free-solid-svg-icons";
+import { AppState } from "@/state/appState";
 
 const networkAPIEndpoint = computed(() => ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
 const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
@@ -389,12 +390,13 @@ export class TransactionUtils {
   }
 
   static getLockFundFee = (networkType: NetworkType, generationHash: string):number => {
-    let buildTransactions = new BuildTransactions(networkType, generationHash);
+    let txBuilder = AppState.buildTxn
     let tempAcc = Account.generateNewAccount(networkType);
-    let txn = buildTransactions.transfer(tempAcc.address, PlainMessage.create('hello'));
-    let abt = buildTransactions.aggregateBonded([txn.toAggregate(tempAcc.publicAccount)])
+    let txn = txBuilder.transfer(tempAcc.address, PlainMessage.create('hello'));
+    let abt = txBuilder.aggregateBonded([txn.toAggregate(tempAcc.publicAccount)])
     let signedTxn = tempAcc.sign(abt, generationHash);
-    return buildTransactions.hashLock(new Mosaic(new NamespaceId('prx.xpx'), UInt64.fromUint(10)), UInt64.fromUint(10), signedTxn).maxFee.compact();
+    
+    return txBuilder.hashLock(new Mosaic(new NamespaceId('prx.xpx'), UInt64.fromUint(10)), UInt64.fromUint(10), signedTxn).maxFee.compact();
   }
 
   static castToAggregate(tx :Transaction){

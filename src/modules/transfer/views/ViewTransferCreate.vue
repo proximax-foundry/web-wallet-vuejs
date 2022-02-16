@@ -496,9 +496,9 @@ export default {
   });
   const totalFee = computed(()=>{
     if(!isMultiSig(selectedAccAdd.value) ){
-      return Math.round((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value))*Math.pow(10,AppState.nativeToken.divisibility))/Math.pow(10,AppState.nativeToken.divisibility)
+      return Math.trunc((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value))*Math.pow(10,AppState.nativeToken.divisibility))/Math.pow(10,AppState.nativeToken.divisibility)
     }if(isMultiSig(selectedAccAdd.value) ){
-      return Math.round((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value)*Math.pow(10,AppState.nativeToken.divisibility))/ Math.pow(10,AppState.nativeToken.divisibility)
+      return Math.trunc((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value)*Math.pow(10,AppState.nativeToken.divisibility))/ Math.pow(10,AppState.nativeToken.divisibility)
     }else{
       return 0
     }

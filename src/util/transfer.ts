@@ -81,10 +81,6 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
   }
   let transactionBuilder = AppState.buildTxn
 
-  if (networkType === NetworkType.PRIVATE || networkType === NetworkType.PRIVATE_TEST) {
-    transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
-  }
-
   let initiatorAcc :WalletAccount
   let senderAcc :WalletAccount | OtherAccount
   let senderPublicAccount :PublicAccount;
@@ -198,9 +194,6 @@ const calculate_aggregate_fee = (message :string , amount :string, mosaic :{id :
   
   let mosaics = getMosaic(amount,mosaic)
   let transactionBuilder = AppState.buildTxn
-  if (AppState.networkType === NetworkType.PRIVATE || AppState.networkType === NetworkType.PRIVATE_TEST) {
-    transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
-  }
   let transferTransaction = transactionBuilder.transfer(Address.createFromRawAddress(test_address),PlainMessage.create(message),mosaics)
   return  Helper.amountFormatterSimple(transactionBuilder.aggregateBonded([transferTransaction.toAggregate(PublicAccount.createFromPublicKey(test_publicKey,AppState.networkType))]).maxFee.compact(),AppState.nativeToken.divisibility )
 }
@@ -208,10 +201,6 @@ const calculate_aggregate_fee = (message :string , amount :string, mosaic :{id :
 const calculate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[]) :string=> {
  /*  let mosaicsToSend = validateMosaicsToSend(amount, mosaic); */
   let transactionBuilder = AppState.buildTxn
-  
-  if (AppState.networkType === NetworkType.PRIVATE || AppState.networkType === NetworkType.PRIVATE_TEST) {
-    transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
-  }
   let mosaics = getMosaic(amount,mosaic)
   
   return Helper.amountFormatterSimple(transactionBuilder.transfer(Address.createFromRawAddress(test_address),PlainMessage.create(message), mosaics).maxFee.compact(), AppState.nativeToken.divisibility)
