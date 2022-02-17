@@ -255,7 +255,7 @@ export default {
     const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))    
     const lockFundTxFee = computed(()=>{ 
       if(networkState.currentNetworkProfile){ 
-        return Helper.convertToExact(TransactionUtils.getLockFundFee(AppState.networkType, networkState.currentNetworkProfile.generationHash), AppState.nativeToken.divisibility);
+        return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
       }else{
         return 0
       }
@@ -270,8 +270,13 @@ export default {
     const trxFee = ref(0)
 
     const totalFee = computed(()=>{
+    let tokenDivisibility = AppState.nativeToken.divisibility
       if(isMultiSig.value){
-        return Math.round((parseFloat(trxFee.value) + lockFund.value + lockFundTxFee.value)*Math.pow(10,AppState.nativeToken.divisibility))/Math.pow(10,AppState.nativeToken.divisibility)
+        if(tokenDivisibility==0){
+          return Math.trunc(parseFloat(trxFee.value) + lockFund.value + lockFundTxFee.value)
+        }else{
+          return Math.round((parseFloat(trxFee.value) + lockFund.value + lockFundTxFee.value)*Math.pow(10,AppState.nativeToken.divisibility))/Math.pow(10,AppState.nativeToken.divisibility)
+        }
       }else{
         return trxFee.value
       }
