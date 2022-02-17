@@ -120,7 +120,7 @@
                 <img src="@/assets/img/icon-header-asset.svg" class="w-12 h-12">
               </div>
               <div class="inline-block ml-4 dashboard-link">
-                <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create an Asset</router-link>
+                <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create an Asset</router-link>
                 <p class="text-txs w-60">An asset could be a token that has a unique identifier and configurable properties.</p>
               </div>
             </div>
@@ -129,8 +129,8 @@
                 <img src="@/assets/img/icon-header-account.svg" class="w-12 h-12">
               </div>
               <div class="inline-block ml-4 dashboard-link">
-                <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create New Account</router-link>
-                <p class="text-txs w-60">Create an on-chain unique place for your business and your assets.</p>
+                <router-link :to="{ name : 'ViewAccountCreateSelectType'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create New Account</router-link>
+                <p class="text-txs w-60">A key pair (private and public key) associated with a mutable state stored on the Sirius Chain.</p>
               </div>
             </div>
           </div>
