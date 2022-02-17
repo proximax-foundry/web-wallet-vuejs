@@ -39,7 +39,7 @@
           <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
           <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
           <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
-          <div class='flex ml-auto gap-6 '>
+          <div v-if="networkType ==168 " class='flex ml-auto gap-6 '>
             <a  :href="topUpUrl" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
               <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
               <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
@@ -306,12 +306,13 @@ export default {
       }
       return mosaicOption;
     }); */
+    const networkType = computed(()=>{
+    return AppState.networkType
+    })
     const topUpUrl = computed(()=>{
-      if (AppState.networktype == 184){ 
-        return 'https://www.proximax.io/en/xpx'
-      }else if (AppState.networkType == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
+      if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
         return 'https://bctestnetfaucet.xpxsirius.io/#/'
-      }else if (AppState.networkType == 168 && networkState.chainNetworkName=='Sirius Testnet 2'){
+      }else if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 2'){
         return 'https://bctestnet2faucet.xpxsirius.io/#/'
       }else{
         return ''
@@ -359,6 +360,7 @@ export default {
       walletPasswdWalletPaper,
       verifyWalletPwWalletPaper,
       saveWalletPaper,
+      networkType
     };
   }
 };
