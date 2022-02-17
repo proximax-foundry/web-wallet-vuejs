@@ -205,7 +205,7 @@ export default {
     const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
     const lockFundTxFee = computed(()=>{ 
       if(networkState.currentNetworkProfile){ 
-        return Helper.convertToExact(TransactionUtils.getLockFundFee(AppState.networkType, networkState.currentNetworkProfile.generationHash), AppState.nativeToken.divisibility);
+        return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
       }
       return 0;  
     });
