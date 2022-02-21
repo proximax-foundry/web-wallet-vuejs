@@ -217,10 +217,9 @@ const getLinkAddressToNamespaceTransactionFee = (namespacesAddress: string, name
 }
 
 const announceTransaction = (signedTransaction:SignedTransaction) => {
-  const transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
-  transactionHttp
+  AppState.chainAPI.transactionAPI
     .announce(signedTransaction)
-    .subscribe(() => {
+    .then(() => {
         return true;
     }, err => console.error(err)); 
 }
