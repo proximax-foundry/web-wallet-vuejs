@@ -384,18 +384,15 @@ export default {
       }
     });
 
-    const cosigner = ref('');
-    // get cosigner
-    watch(getMultiSigCosigner, (n) => {
-      // if it is a multisig
-      if(n.cosignerList.length > 0){
-        if(n.cosignerList.length > 1){
-          cosigner.value = cosignerAddress.value;
+    const cosigner = computed(() => {
+      if(getMultiSigCosigner.value.cosignerList.length > 0){
+        if(getMultiSigCosigner.value.cosignerList.length > 1){
+          return cosignerAddress.value;
         }else{
-          cosigner.value = fetchAccount(n.cosignerList[0].publicKey).address;
+          return fetchAccount(getMultiSigCosigner.value.cosignerList[0].publicKey).address;
         }
       }else{
-        cosigner.value = '';
+        return '';
       }
     });
 
