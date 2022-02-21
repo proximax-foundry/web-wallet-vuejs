@@ -194,7 +194,7 @@ export default {
     });
     let onPartial = ref(false) 
     const checkIsPartial = ()=>{
-       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,networkState.currentNetworkProfile.network.type))
+       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType))
        .then(onPartialBoolean => onPartial.value = onPartialBoolean)
        .catch(err=>{
          onPartial.value = false
@@ -237,8 +237,8 @@ export default {
     })
 
    
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const accountDisplayBalance = computed(() => {
       if(walletState.currentLoggedInWallet){ 
         return Helper.toCurrencyFormat(accountBalance.value, currentNativeTokenDivisibility.value);
@@ -313,7 +313,7 @@ export default {
     const verifyDelegateAcc = async() => {
       const accountDetail = walletState.currentLoggedInWallet.accounts.find(account => account.address == accAddress.value);       
       if (accountDetail) {
-        const publicAccount = Helper.createPublicAccount(accountDetail.publicKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type)); 
+        const publicAccount = Helper.createPublicAccount(accountDetail.publicKey, ChainUtils.getNetworkType(AppState.networkType)); 
         const accountInfo = await chainAPICall.accountAPI.getAccountInfo(publicAccount.address);
      
         delegateAcc.value = accountInfo.linkedAccountKey;
@@ -337,7 +337,7 @@ export default {
 
     const createDelegate = async() => {
       if(privateKey.value!=""){
-        const networkType = networkState.currentNetworkProfile.network.type;
+        const networkType = AppState.networkType;
         const accountDetail = Account.createFromPrivateKey(privateKey.value, networkType);
         const accountAPIResponse = await accountUtils.getValidAccount(accountDetail.address.address);
         if(accountAPIResponse == true){        
@@ -348,7 +348,7 @@ export default {
           err.value = t('delegate.linkerror')
         }  
       }else{
-        const account = WalletUtils.generateNewAccount(ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+        const account = WalletUtils.generateNewAccount(ChainUtils.getNetworkType(AppState.networkType));
         if(account){
           AccPublicKey.value = account.publicKey;
          

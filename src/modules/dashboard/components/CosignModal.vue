@@ -122,7 +122,7 @@ export default{
         showError.value = false;
         let privateKey = WalletUtils.decryptPrivateKey(Helper.createPasswordInstance(walletPassword.value), accountDetail.encrypted, accountDetail.iv);
         
-        let account = Helper.createAccount(privateKey, networkState.currentNetworkProfile.network.type);
+        let account = Helper.createAccount(privateKey, AppState.networkType);
         context.emit("cosignTransaction", account);
       }
     }

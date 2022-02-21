@@ -124,6 +124,7 @@ import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { useToast } from "primevue/usetoast";
 import { ethers } from 'ethers';
 import { SwapUtils } from '@/util/swapUtils';
+import { AppState } from '@/state/appState';
 //import { ChainUtils } from "@/util/chainUtils";
 //import { ChainAPICall } from "@/models/REST/chainAPICall";
 //import { listenerState } from "@/state/listenerState";
@@ -142,7 +143,7 @@ export default {
   setup() {
     // check services
 
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const toast = useToast();
     const router = useRouter();
     const displayTimer = ref(true);
@@ -277,10 +278,10 @@ export default {
     );
     const amount = ref(0);
 
-    const xpxNamespace = networkState.currentNetworkProfile.network.currency.namespace;
+    const xpxNamespace = AppState.nativeToken.fullNamespace;
     const XpxAsset = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), 1);
 
-    const buildClass = new BuildTransactions(networkState.currentNetworkProfile.network.type);
+    const buildClass = new BuildTransactions(AppState.networkType);
     const transferBuilder = buildClass.transferBuilder();
     const aggregateBuilder = buildClass.aggregateCompleteBuilder();
 

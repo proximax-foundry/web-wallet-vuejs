@@ -15,7 +15,7 @@ import { OtherAccount } from "@/models/otherAccount";
 import { Namespace } from "@/models/namespace";
 import { AppState } from "@/state/appState";
 
-const networkType = networkState.currentNetworkProfile.network.type;
+const networkType = AppState.networkType;
 const Hash = networkState.currentNetworkProfile.generationHash;
 
 const verifyPublicKey = async(add: string):Promise<boolean> => {
@@ -195,7 +195,7 @@ const getAccountDetail = (senderAddress: string, walletPassword: string): Accoun
   const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accountAddress.plain());
   const passwordInstance = WalletUtils.createPassword(walletPassword);
   const privateKey = WalletUtils.decryptPrivateKey(passwordInstance, accountDetails.encrypted, accountDetails.iv);
-  const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+  const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(AppState.networkType));
   
   return account;
 }
@@ -274,7 +274,7 @@ const linkNamespaceToAddress = (isMultisig :boolean,cosigners: [], multisigAccou
     cosignerAcc.splice(0,1)
     const signedAggregateBondedTransaction = firstSigner.signTransactionWithCosignatories(aggreateBondedTx,cosignerAcc,Hash);
     signedTransaction = signedAggregateBondedTransaction
-    const nativeTokenNamespace = networkState.currentNetworkProfile.network.currency.namespace;
+    const nativeTokenNamespace = AppState.nativeToken.fullNamespace;
 
     const lockingAtomicFee = networkState.currentNetworkProfileConfig.lockedFundsPerAggregate ?? 0;
 
@@ -317,7 +317,7 @@ const createDelegatTransaction = (isMultisig :boolean,cosigners: [],multisigAcco
     cosignerAcc.splice(0,1)
     const signedAggregateBondedTransaction = firstSignerAcc.signTransactionWithCosignatories(aggregateBondedTx,cosignerAcc, Hash);
     signedTransaction = signedAggregateBondedTransaction
-    const nativeTokenNamespace = networkState.currentNetworkProfile.network.currency.namespace;
+    const nativeTokenNamespace = AppState.nativeToken.fullNamespace;
     
     const lockingAtomicFee = networkState.currentNetworkProfileConfig.lockedFundsPerAggregate ?? 0;
   

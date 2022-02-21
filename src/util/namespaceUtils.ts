@@ -221,7 +221,7 @@ export class NamespaceUtils {
     const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
     const encryptedPassword = WalletUtils.createPassword(walletPassword);
     let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
-    const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+    const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(AppState.networkType));
     return account;
   }
 
@@ -255,7 +255,7 @@ export class NamespaceUtils {
     const aggregateBondedTxSigned = account.sign(aggregateBondedTx, generationHash);
 
     let hashLockTx = buildTransactions.hashLock(
-      Helper.createAsset(networkState.currentNetworkProfile.network.currency.assetId, 10000000),
+      Helper.createAsset(AppState.nativeToken.assetId, 10000000),
       Helper.createUint64FromNumber(200),
       aggregateBondedTxSigned
     );
@@ -279,7 +279,7 @@ export class NamespaceUtils {
     const aggregateBondedTxSigned = account.sign(aggregateBondedTx, generationHash);
 
     let hashLockTx = buildTransactions.hashLock(
-      Helper.createAsset(networkState.currentNetworkProfile.network.currency.assetId, 10000000),
+      Helper.createAsset(AppState.nativeToken.assetId, 10000000),
       Helper.createUint64FromNumber(200),
       aggregateBondedTxSigned
     );
@@ -310,7 +310,7 @@ export class NamespaceUtils {
     const aggregateBondedTxSigned = account.sign(aggregateBondedTx, generationHash);
 
     let hashLockTx = buildTransactions.hashLock(
-      Helper.createAsset(networkState.currentNetworkProfile.network.currency.assetId, 10000000),
+      Helper.createAsset(AppState.nativeToken.assetId, 10000000),
       Helper.createUint64FromNumber(200),
       aggregateBondedTxSigned
     );

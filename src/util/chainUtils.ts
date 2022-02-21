@@ -9,10 +9,11 @@ import { NetworkConfig } from "../models/stores/chainProfileConfig";
 import { ChainAPICall } from "../models/REST/chainAPICall";
 import { networkState } from "../state/networkState";
 import { computed } from "vue";
+import { AppState } from "@/state/appState";
 
 const currentEndPoint = computed(() => networkState.selectedAPIEndpoint);
 const connectionPort = computed(() => networkState.currentNetworkProfile.httpPort);
-const currentNetworkType = computed(() => networkState.currentNetworkProfile.network.type);
+const currentNetworkType = computed(() => AppState.networkType);
 
 export class ChainUtils{
 

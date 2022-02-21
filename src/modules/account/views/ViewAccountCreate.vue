@@ -61,8 +61,8 @@ export default {
         } else { 
           // create account
           let password = WalletUtils.createPassword(walletPassword.value);
-          const account = WalletUtils.generateNewAccount(ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
-          const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, account.privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+          const account = WalletUtils.generateNewAccount(ChainUtils.getNetworkType(AppState.networkType));
+          const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, account.privateKey, ChainUtils.getNetworkType(AppState.networkType));
           
           let walletAccount = new WalletAccount(accountName.value, account.publicKey, account.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
           walletState.currentLoggedInWallet.accounts.push(walletAccount);

@@ -40,6 +40,7 @@ import { computed, defineComponent, ref } from 'vue';
 import { toSvg } from "jdenticon";
 import { Helper } from "@/util/typeHelper";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
+import { AppState } from '@/state/appState';
 
 export default defineComponent({
   emits:[
@@ -54,7 +55,7 @@ export default defineComponent({
 
   setup(p){
 
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 
     const toggleSelection = ref(false);
 

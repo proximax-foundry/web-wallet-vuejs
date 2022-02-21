@@ -167,7 +167,7 @@ async function convertAccount(coSign :string[], numApproveTransaction :number, n
     
     const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.name ===accountToConvertName)
    
-    const networkType = networkState.currentNetworkProfile.network.type
+    const networkType = AppState.networkType
     let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
     const accountToConvert = Account.createFromPrivateKey(privateKey, networkType);
 
@@ -230,7 +230,7 @@ async function convertAccount(coSign :string[], numApproveTransaction :number, n
       
       const signedAggregateBondedTransaction = accountToConvert.sign(aggregateBondedTransaction, generationHash);
   
-      const nativeTokenNamespace = networkState.currentNetworkProfile.network.currency.namespace;
+      const nativeTokenNamespace = AppState.nativeToken.fullNamespace;
      
       const lockingAtomicFee = networkState.currentNetworkProfileConfig.lockedFundsPerAggregate ?? 0;
    
@@ -506,7 +506,7 @@ async function modifyMultisigAccount(coSign :string[], removeCosign :string[], n
       aggregateBondedTransaction,coSigner,generationHash
     )
 
-    const nativeTokenNamespace = networkState.currentNetworkProfile.network.currency.namespace;
+    const nativeTokenNamespace = AppState.nativeToken.fullNamespace;
     const lockingAtomicFee = networkState.currentNetworkProfileConfig.lockedFundsPerAggregate ?? 0;
     const lockFundsTransaction = txBuilder.hashLock(
       new Mosaic(new NamespaceId(nativeTokenNamespace), UInt64.fromUint(lockingAtomicFee)),

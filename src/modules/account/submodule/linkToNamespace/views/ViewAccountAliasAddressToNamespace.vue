@@ -183,7 +183,7 @@ export default {
     const acc = ref(totalAcc.value.find(acc=>acc.address==p.address))
     const onPartial = ref(false);
     const checkIsPartial = ()=>{ 
-      multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,networkState.currentNetworkProfile.network.type))
+      multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType))
       .then(onPartialBoolean => onPartial.value = onPartialBoolean)
       .catch(err=>{
         onPartial.value = false
@@ -245,9 +245,6 @@ export default {
     })
     const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
     const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
-    const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
-
-    
     
     const accountBalance = computed(() => {
        let accountBalance = 0
@@ -258,8 +255,8 @@ export default {
        
        return accountBalance 
     })
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const accountDisplayBalance = computed(() => {
       if(walletState.currentLoggedInWallet){ 
         return Helper.toCurrencyFormat(accountBalance.value, currentNativeTokenDivisibility.value);
@@ -370,7 +367,7 @@ export default {
           
         } else{
           let namespaceAdd = Address.createFromRawAddress(namespaceAddressValue).plain();
-          trxFee.value = Helper.amountFormatterSimple(accountUtils.getLinkNamespaceToAddressTransactionFee(isMultiSig.value,namespaceAdd, selectNamespace.value, selectAction.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          trxFee.value = Helper.amountFormatterSimple(accountUtils.getLinkNamespaceToAddressTransactionFee(isMultiSig.value,namespaceAdd, selectNamespace.value, selectAction.value), AppState.nativeToken.divisibility);
           addressErrorMsg.value = "";
           showAddressError.value = false;
         }
@@ -457,7 +454,6 @@ export default {
       selectContact,
       disableContactSelection,
       namespaceAddress,
-      currencyName,
       lockFundTxFee,
       showAddressError,
       err,

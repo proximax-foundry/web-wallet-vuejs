@@ -157,6 +157,7 @@ import { SwapUtils } from '@/util/swapUtils';
 //import { ChainUtils } from "@/util/chainUtils";
 //import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { NetworkType } from "tsjs-xpx-chain-sdk";
+import { AppState } from '@/state/appState';
 //import { listenerState } from "@/state/listenerState";
 
 export default {
@@ -177,11 +178,11 @@ export default {
     const timerSecondsDisplay = computed(()=> timerSeconds.value % 60);
     const timerMinutes = computed(()=> Math.floor(timerSeconds.value / 60));
 
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 
     const timerInterval = setInterval(()=>{
       --timerSeconds.value;
-    }, 1000);
+    }, 1000); 
 
     const timerStop = watch(()=> timerSeconds.value, (newValue)=>{
 
@@ -282,10 +283,10 @@ export default {
     );
     const amount = ref(0);
 
-    const xpxNamespace = networkState.currentNetworkProfile.network.currency.namespace;
+    const xpxNamespace = AppState.nativeToken.fullNamespace;
     const XpxAsset = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), 1);
 
-    const buildClass = new BuildTransactions(networkState.currentNetworkProfile.network.type);
+    const buildClass = new BuildTransactions(AppState.networkType);
     const transferBuilder = buildClass.transferBuilder();
     const aggregateBuilder = buildClass.aggregateCompleteBuilder();
 
@@ -430,7 +431,7 @@ export default {
 
     const updateGasPrice = async ()=>{
 
-      if(networkState.currentNetworkProfile.network.type === NetworkType.TEST_NET){
+      if(AppState.networkType === NetworkType.TEST_NET){
         standardGasPriceInGwei.value = 10;
         fastGasPriceInGwei.value = 10;
         rapidGasPriceInGwei.value = 10;

@@ -78,13 +78,13 @@ export default{
     };
 
     const linkNewAcc = () =>{
-      const account = WalletUtils.generateNewAccount(ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+      const account = WalletUtils.generateNewAccount(ChainUtils.getNetworkType(AppState.networkType));
       emitter.emit('NEW ACCOUNT', account);
       toggleModal.value = !toggleModal.value;
     };
   
     const linkPrivateKey = async() =>{
-      const networkType = networkState.currentNetworkProfile.network.type;
+      const networkType = AppState.networkType;
       const accountDetail = Account.createFromPrivateKey(privateKey.value, networkType);
       console.log(accountDetail.address.address);
       const accountAPIResponse = await accountUtils.getValidAccount(accountDetail.address.address);

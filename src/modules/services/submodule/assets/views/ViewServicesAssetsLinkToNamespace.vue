@@ -120,6 +120,7 @@ import { useToast } from "primevue/usetoast";
 import Tooltip from 'primevue/tooltip';
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { multiSign } from '@/util/multiSignatory';
+import { AppState } from '@/state/appState';
 
 export default {
   name: 'ViewServicesAssetsLinkToNamespace',
@@ -139,7 +140,7 @@ export default {
     const toast = useToast();
     let maxAmount = 9999999999.999999;
 
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 
     const showSupplyErr = ref(false);
     const walletPassword = ref('');
@@ -153,9 +154,9 @@ export default {
     const cosignerBalanceInsufficient = ref(false);
     const cosignerAddress = ref('');
 
-    const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
-    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
-    const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
+    const currencyName = computed(() => AppState.nativeToken.label);
+    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
+    const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
 
     const lockFundTxFee = ref(0.0445);
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
@@ -205,7 +206,7 @@ export default {
     if(account != undefined){
       selectedAccName.value = account.name;
       selectedAccAdd.value = account.address;
-      balance.value = Helper.toCurrencyFormat(account.balance, networkState.currentNetworkProfile.network.currency.divisibility);
+      balance.value = Helper.toCurrencyFormat(account.balance, AppState.nativeToken.divisibility);
       balanceNumber.value = account.balance;
     }else{
       toast.add({severity:'error', detail: 'Addres is invalid', group: 'br', life: 3000});
@@ -242,7 +243,7 @@ export default {
     const transactionFee = ref('0.000000');
     const transactionFeeExact = ref(0);
 
-    const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, networkState.currentNetworkProfile.network.type));
+    const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, AppState.networkType));
 
     const fetchAccount = (publicKey) => {
       return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
@@ -273,8 +274,8 @@ export default {
       }
     });
 
-    transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
-    transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+    transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
+    transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
 
     const linkNamespace = () => {
       let assetId;
@@ -288,17 +289,17 @@ export default {
         assetId = account.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
       }
       if(cosigner.value){
-        AssetsUtils.linkedNamespaceToAssetMultiSig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value, selectedAccAdd.value);
+        AssetsUtils.linkedNamespaceToAssetMultiSig(cosigner.value, walletPassword.value, AppState.networkType, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value, selectedAccAdd.value);
       }else{
-        AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value );
+        AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, AppState.networkType, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value );
       }
       router.push({ name: "ViewServicesAssets", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()} });
     };
 
     watch(selectAction, (n) => {
       if(selectAsset.value){
-        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
-        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
+        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
         balanceNumber.value = (n=='increase'?maxAmount:parseFloat(assetSupply.value));
       }else{
         balanceNumber.value = (n=='increase'?maxAmount:0);
@@ -308,8 +309,8 @@ export default {
 
     watch(supply, (n) => {
       if(selectAsset.value){
-        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, n, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
-        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, n, assetDivisibility.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, n, assetDivisibility.value), AppState.nativeToken.divisibility);
+        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, n, assetDivisibility.value), AppState.nativeToken.divisibility);
       }
     });
 

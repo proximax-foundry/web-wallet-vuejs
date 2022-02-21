@@ -205,6 +205,7 @@ import {TransactionHttp, Mosaic, MosaicId, UInt64} from "tsjs-xpx-chain-sdk";
 import { NetworkStateUtils } from "@/state/utils/networkStateUtils";
 import { ChainUtils } from '@/util/chainUtils';
 import { BuildTransactions } from '@/util/buildTransactions';
+import { AppState } from '@/state/appState';
 
 
 export default { 
@@ -263,7 +264,7 @@ export default {
 
     const walletName = walletState.currentLoggedInWallet.name
     const currencyName = computed(
-      () => networkState.currentNetworkProfile.network.currency.name
+      () => AppState.nativeToken.label
     );
     /* chainNetwork.getCurrencyName() */
 
@@ -273,7 +274,7 @@ export default {
     const lockFund = computed(() =>
       Helper.convertToExact(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
-        networkState.currentNetworkProfile.network.currency.divisibility
+        AppState.nativeToken.divisibility
       )
     );
     /*  chainNetwork.getProfileConfig().lockedFundsPerAggregate */
@@ -281,7 +282,7 @@ export default {
     const lockFundCurrency = computed(() =>
       Helper.convertToCurrency(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
-        networkState.currentNetworkProfile.network.currency.divisibility
+        AppState.nativeToken.divisibility
       )
     );
     /*  chainNetwork.getProfileConfig().lockedFundsPerAggregate */
@@ -551,7 +552,7 @@ export default {
 
       let transactionBuilder = new BuildTransactions(NetworkType)
       
-      if (ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE || ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE_TEST) {
+      if (ChainUtils.getNetworkType(AppState.networkType) === NetworkType.PRIVATE || ChainUtils.getNetworkType(AppState.networkType) === NetworkType.PRIVATE_TEST) {
         transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
         //FeeCalculationStrategy.ZeroFeeCalculationStrategy
       }
@@ -683,7 +684,7 @@ export default {
 
       let mosaics = [];
       if (xpxAmount > 0) {
-        mosaics.push(new Mosaic(new MosaicId(networkState.currentNetworkProfile.network.currency.assetId), UInt64.fromUint(Number(xpxAmount))));
+        mosaics.push(new Mosaic(new MosaicId(AppState.nativeToken.assetId), UInt64.fromUint(Number(xpxAmount))));
       }
       if (selectedMosaic.value.length > 0) {
         selectedMosaic.value.forEach((mosaicSentInfo, index) => {

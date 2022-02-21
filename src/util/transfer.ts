@@ -65,7 +65,7 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
 
   let mosaics = [];
   if (xpxAmount > 0) {
-    mosaics.push(new Mosaic(new MosaicId(networkState.currentNetworkProfile.network.currency.assetId), UInt64.fromUint(Number(xpxAmount))));
+    mosaics.push(new Mosaic(new MosaicId(AppState.nativeToken.assetId), UInt64.fromUint(Number(xpxAmount))));
   }
   if (mosaicsSent.length > 0) {
     mosaicsSent.forEach((mosaicSentInfo, index) => {
@@ -136,7 +136,7 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
     const innerTxn = [transferTransaction.toAggregate(senderPublicAccount)];
     const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn)
     const aggregateBondedTransactionSigned = selectedSignerAccount.signTransactionWithCosignatories(aggregateBondedTransaction,cosignerAcc, hash);
-    const nativeTokenNamespace = networkState.currentNetworkProfile.network.currency.namespace;
+    const nativeTokenNamespace = AppState.nativeToken.fullNamespace;
     const lockingAtomicFee = networkState.currentNetworkProfileConfig.lockedFundsPerAggregate ?? 0;
     const hashLockTransaction = transactionBuilder.hashLock(
       new Mosaic(new NamespaceId(nativeTokenNamespace), UInt64.fromUint(lockingAtomicFee)),
@@ -174,7 +174,7 @@ const test_address = PublicAccount.createFromPublicKey(test_publicKey,AppState.n
 const getMosaic =(amount :string, mosaic :{id :string ,amount :string}[]) :Mosaic[]=>{
   let mosaics :Mosaic[]= []
   if (parseInt(amount) > 0) {
-    mosaics.push(new Mosaic(new MosaicId(networkState.currentNetworkProfile.network.currency.assetId), UInt64.fromUint(Number(amount))));
+    mosaics.push(new Mosaic(new MosaicId(AppState.nativeToken.assetId), UInt64.fromUint(Number(amount))));
   }
   if (mosaic.length > 0) {
     mosaic.forEach((mosaicSentInfo, index) => {

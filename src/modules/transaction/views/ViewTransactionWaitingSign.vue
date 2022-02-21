@@ -95,6 +95,7 @@ import { WalletUtils } from "@/util/walletUtils";
 import { useI18n } from 'vue-i18n';
 import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 import { TransactionUtils } from '@/util/transactionUtils';
+import { AppState } from '@/state/appState';
 
 export default {
   name: "ViewTransactionWaitingSign",
@@ -175,7 +176,7 @@ export default {
     })();
 
     const signAggTxn = (pswd) => {
-      const networkType = networkState.currentNetworkProfile.network.type;
+      const networkType = AppState.networkType;
       let privateKey = WalletUtils.decryptPrivateKey(new Password(pswd), currentAccount.encrypted, currentAccount.iv);
       const accountDetail = Account.createFromPrivateKey(privateKey, networkType);
       (async() => {

@@ -256,7 +256,7 @@ export default {
      })
     }
     
-    const cosignerAddress = cosigner => Address.createFromPublicKey(cosigner, networkState.currentNetworkProfile.network.type).plain().substr(-4)
+    const cosignerAddress = cosigner => Address.createFromPublicKey(cosigner, AppState.networkType).plain().substr(-4)
     const cosignaturies = computed(()=>{
       let cosignaturies = []
       acc.value.multisigInfo.filter(element=>element.level === 1).forEach(cosigner=> {
@@ -272,7 +272,7 @@ export default {
         if(wallet.accounts.find(acc=>acc.publicKey ===publicKey)){
           name.push(wallet.accounts.find(acc=>acc.publicKey ==publicKey).name)
         }else{
-          let address = Address.createFromPublicKey(publicKey,networkState.currentNetworkProfile.network.type).plain().substr(-4)
+          let address = Address.createFromPublicKey(publicKey,AppState.networkType).plain().substr(-4)
           name.push("Cosigner-" +address)
           console.log(name)
         }
@@ -404,8 +404,8 @@ export default {
        
        return accountBalance
     })
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const accountDisplayBalance = computed(() => {
       if(walletState.currentLoggedInWallet){
         return Helper.toCurrencyFormat(accountBalance.value, currentNativeTokenDivisibility.value);
@@ -562,7 +562,7 @@ export default {
     });
     // check if onPartial
     try {
-       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,networkState.currentNetworkProfile.network.type)).then(onPartialBoolean => onPartial.value = onPartialBoolean)
+       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)).then(onPartialBoolean => onPartial.value = onPartialBoolean)
     } catch (error) {
       
     }
