@@ -112,15 +112,15 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
   let transferTransaction = transactionBuilder.transfer(Address.createFromRawAddress(recipientAddress),msg,mosaics)
 
   const account = Account.createFromPrivateKey(privateKey, networkType);
-  const transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
 
   if (!selectedCosigner) { // no cosigner, normal transaction
     const signedTransaction = account.sign(transferTransaction, hash);
-    transactionHttp
-      .announce(signedTransaction)
-      .subscribe(() => {
-        return true;
-      }, err => console.error(err));
+    AppState.chainAPI.transactionAPI
+    .announce(signedTransaction)
+    .then(announcedTx=>{
+      console.log(announcedTx)
+    })
+    .catch(err=>console.log(err))
   } else { // there is a cosigner, aggregate  bonded transaction
     let cosignerAcc :Account[] =  []
     cosignerList.forEach((signer) => {
