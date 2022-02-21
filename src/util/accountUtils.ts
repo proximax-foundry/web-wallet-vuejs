@@ -356,13 +356,13 @@ const createDelegatTransaction = (isMultisig :boolean,cosigners: [],multisigAcco
 const getDelegateFee = (isMultisig: boolean) :number=>{
   let txBuilder = AppState.buildTxn
   let delegateAction = LinkAction.Link
-  let publicKey = '4D8D3EA771C44ACB7AE60B71C513DE137896A94ABA2FC985F6BBDB2331E910EA'
+  let publicKey = '0'.repeat(64)
   const delegateTransaction = txBuilder.accountLink(publicKey, delegateAction); 
   if(!isMultisig){
-    return delegateTransaction.maxFee.compact()/1000000
+    return delegateTransaction.maxFee.compact()/Math.pow(10,AppState.nativeToken.divisibility)
   }else{
     let innerTx = [delegateTransaction.toAggregate(PublicAccount.createFromPublicKey(publicKey,networkType))];
-    return  txBuilder.aggregateBonded(innerTx).maxFee.compact()/1000000;
+    return  txBuilder.aggregateBonded(innerTx).maxFee.compact()/Math.pow(10,AppState.nativeToken.divisibility);
   }
  
 }
