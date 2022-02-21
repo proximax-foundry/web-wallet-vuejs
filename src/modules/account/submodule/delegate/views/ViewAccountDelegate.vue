@@ -85,19 +85,24 @@
             <div class="text-txs">Your account has transaction(s) on partial.</div>
           </div>
         </div>
-        <div v-if="!(!isLockFund&& isMultisig)" class="flex mt-4 text-white">
+        <div v-if="!(isMultisig)" class="flex mt-4 text-white">
           <div class='text-xs '>Transaction Fee</div>
           <div class="text-xs  ml-auto">{{transactionFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
-        <div v-if="isLockFund && isMultisig" class="flex mt-4 text-white">
-          <div class='text-xs '>Lock Fund</div>
+        <div v-if="isMultisig" class="flex mt-4 text-white">
+          <div class='text-xs '>Aggregate Fee</div>
+          <div class="text-xs  ml-auto">{{transactionFee}}</div>
+          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+        </div>
+        <div v-if=" isMultisig" class="flex mt-4 text-white">
+          <div class='text-xs '>LockFund</div>
           <div class="text-xs  ml-auto">{{lockFund}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
-       <div v-if="isMultisig" class="flex mt-4 text-white">
-          <div class='text-xs '>Aggregate Fee</div>
-          <div class="text-xs  ml-auto">{{aggregateFee}}</div>
+        <div v-if=" isMultisig" class="flex mt-4 text-white">
+          <div class='text-xs '>LockFund TxFee</div>
+          <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
@@ -149,6 +154,7 @@ import { Account } from "tsjs-xpx-chain-sdk";
 import { listenerState } from '@/state/listenerState';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
+import { TransactionUtils } from '@/util/transactionUtils';
 
 export default {
   name: 'ViewAccountDelegate',
@@ -168,8 +174,6 @@ export default {
     let showPrivateKeyError = ref(true)
     const walletPassword = ref("");
     const showPasswdError = ref(false);
-    /* let showSuccess = ref(false) */
-    
     const err = ref(false); 
     const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
     const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
@@ -197,43 +201,27 @@ export default {
        })
     }
     checkIsPartial()
-    let isLockFund = computed(()=>{
-      let enoughSigner = false
-      let count = acc.value.multisigInfo.find(acc=>acc.level==0).minApproval
-      if (count<=getCosignerList().length){
-        enoughSigner = true
+   
+    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
+    const lockFundTxFee = computed(()=>{ 
+      if(networkState.currentNetworkProfile){ 
+        return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
       }
-      return !enoughSigner
-    })
-    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
+      return 0;  
+    });
     const isMultisig = computed(() => {
       let isMulti = acc.value.getDirectParentMultisig().length? true: false
       return isMulti;
     });  
     let transactionFee = computed(()=>{
-      if(isLockFund.value){ //aggregate bonded
-        return 26.70
-      }if(!isLockFund.value && isMultisig.value){ //aggregate complete
-        return 0
-      }else{
-        return 23.25
-      }
+      return accountUtils.getDelegateFee(isMultisig.value)
+      
     })
-    const aggregateFee = computed(()=>{
-      if(isLockFund.value){ //aggregate bonded
-        return 20.404515
-      }if(!isLockFund.value && isMultisig.value){ //aggregate complete
-        return 30.15
-      }else{
-        return 0
-      }
-    })
+    
 
     const totalFee = computed(()=>{
-      if(isLockFund.value){ //aggregate bonded
-        return aggregateFee.value+lockFund.value + transactionFee.value
-      }if(!isLockFund.value && isMultisig.value){ //aggregate complete
-        return aggregateFee.value
+      if(isMultisig.value){ //aggregate bonded
+        return transactionFee.value+lockFund.value + lockFundTxFee.value
       }else{
         return transactionFee.value
       }
@@ -449,11 +437,10 @@ export default {
       delegateValue,
       pending,
       isCosigner,
-      isLockFund,
       lockFund,
-      aggregateFee,
       transactionFee,
       totalFee,
+      lockFundTxFee,
       onPartial
     };
   },
