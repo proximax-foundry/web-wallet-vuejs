@@ -14,7 +14,6 @@ import { WalletAccount } from "@/models/walletAccount";
 import { OtherAccount } from "@/models/otherAccount";
 import { Namespace } from "@/models/namespace";
 import { AppState } from "@/state/appState";
-import { first } from "rxjs/operators";
 
 const networkType = networkState.currentNetworkProfile.network.type;
 const Hash = networkState.currentNetworkProfile.generationHash;
@@ -69,7 +68,7 @@ const checkAvailableContact = (recipient :string) :boolean=> {
   return (isInContacts || (wallet.accounts.find((element) => element.address ===recipient))  || (wallet.others.find((element) => element.address === recipient))) ? true : false;
 }
 
-const getNamespacesListByAddress = (address: string) :Namespace [] => {
+const getNamespaceListByAddress = (address: string) :Namespace [] => {
   let namespacelist = []; 
   if (walletState.currentLoggedInWallet.others.find(account => account.address === address)) {
     namespacelist = walletState.currentLoggedInWallet.others.find(account => account.address == address).namespaces.filter(namespace => namespace.active === true);
@@ -102,9 +101,9 @@ const getContact = () => {
   return contact;
 }
 
-const namespacesOption = (address: string, linkOption: string) => {
+const namespaceOption = (address: string, linkOption: string) => {
   let namespace = [];
-  let namespacelist = getNamespacesListByAddress(address);
+  let namespacelist = getNamespaceListByAddress(address);
   if (namespacelist.length > 0) {
     namespacelist.forEach((namespaceElement) => {
     const level = namespaceElement.name.split('.');
@@ -201,22 +200,22 @@ const getAccountDetail = (senderAddress: string, walletPassword: string): Accoun
   return account;
 }
 
-const linkAddressToNamespaceTransaction = (namespacesID: string, linkType: string, namespacesAddress: string) => {
+const linkNamespaceToAddressTransaction = (namespaceID: string, linkType: string, namespaceAddress: string) => {
   const transactionBuilder = AppState.buildTxn
-  const linktype = (linkType == 'Link') ? AliasActionType.Link : AliasActionType.Unlink;
-  const namespacesid = new NamespaceId(namespacesID);
-  const linkNamesapceAdd = Address.createFromRawAddress(namespacesAddress);
-  const namespaceTransaction= transactionBuilder.addressAlias(linktype, namespacesid, linkNamesapceAdd);
+  const tempLinkType = (linkType == 'Link') ? AliasActionType.Link : AliasActionType.Unlink;
+  const namespaceId = new NamespaceId(namespaceID);
+  const linkNamesapceAdd = Address.createFromRawAddress(namespaceAddress);
+  const namespaceTransaction= transactionBuilder.addressAlias(tempLinkType, namespaceId, linkNamesapceAdd);
   
   return namespaceTransaction;
 }
 
-const getLinkAddressToNamespaceTransactionFee = (isMultisig :boolean,namespacesAddress: string, namespaceId: string, linkType: string) :number => {
-  const linkAddressToNamespaceTx = linkAddressToNamespaceTransaction(namespaceId, linkType, namespacesAddress);
+const getLinkNamespaceToAddressTransactionFee = (isMultisig :boolean,namespaceAddress: string, namespaceId: string, linkType: string) :number => {
+  const linkAddressToNamespaceTx = linkNamespaceToAddressTransaction(namespaceId, linkType, namespaceAddress);
   if(!isMultisig){
     return linkAddressToNamespaceTx.maxFee.compact();
   }else{
-    let publicKey = '4D8D3EA771C44ACB7AE60B71C513DE137896A94ABA2FC985F6BBDB2331E910EA'
+    let publicKey = "0".repeat(64)
     const aggregateBondedTx = AppState.buildTxn.aggregateBonded([linkAddressToNamespaceTx.toAggregate(PublicAccount.createFromPublicKey(publicKey,networkType))])
     return aggregateBondedTx.maxFee.compact()
   }
@@ -250,8 +249,8 @@ const multiSigAnnouce = (aggregateTx:SignedTransaction, lockHashSigned:SignedTra
 }
 
 
-const linkAddressToNamespace = (isMultisig :boolean,cosigners: [], multisigAccount: WalletAccount | OtherAccount, walletPassword: string, namespacesID: string, linkType: string, namespacesAddress: string) :SignedTransaction=> {
-  const namespaceTransaction = linkAddressToNamespaceTransaction(namespacesID, linkType, namespacesAddress);
+const linkNamespaceToAddress = (isMultisig :boolean,cosigners: [], multisigAccount: WalletAccount | OtherAccount, walletPassword: string, namespaceID: string, linkType: string, namespaceAddress: string) :SignedTransaction=> {
+  const namespaceTransaction = linkNamespaceToAddressTransaction(namespaceID, linkType, namespaceAddress);
   const senderAddress = multisigAccount.address
   const senderAccount = getAccountDetail(senderAddress, walletPassword)
   let signedTransaction :SignedTransaction
@@ -397,13 +396,13 @@ export const accountUtils = readonly({
   checkAvailableContact,
   verifyAddress,
   verifyPublicKey,
-  getNamespacesListByAddress,
+  getNamespaceListByAddress,
   getContact,
   getMultisig,
   getCosignerList,
-  namespacesOption,
-  getLinkAddressToNamespaceTransactionFee,
-  linkAddressToNamespace,
+  namespaceOption,
+  getLinkNamespaceToAddressTransactionFee,
+  linkNamespaceToAddress,
   createDelegatTransaction,
   getValidAccount,
   //getAccInfo
