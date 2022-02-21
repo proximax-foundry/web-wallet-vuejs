@@ -2,16 +2,16 @@
   <div>
     <div class='flex cursor-pointer'>
       <img src='@/assets/img/chevron_left.svg'>
-      <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
+      <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
     </div>
     <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
       <AccountComponent :address="address" class="mb-10"/>
       <div class = 'flex text-xs font-semibold mt-5'>
-        <router-link :to="{name: 'ViewAccountDetails',params:{address:currentAccount.address}}" class= 'w-32 text-center '>Account Details</router-link>
-        <router-link :to="{name:'ViewAccountAssets', params: { address: currentAccount.address}}" class= 'w-18 text-center'>Assets</router-link>
-        <router-link :to="{name:'ViewMultisigHome', params: { name: currentAccount.name}}" class= 'w-18 text-center'>Multisig</router-link>
-        <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Scheme</div>
-        <router-link :to="{name:'ViewAccountSwap', params: { address: currentAccount.address}}" class= 'w-18 text-center'>Swap</router-link>
+        <router-link :to="{name: 'ViewAccountDetails',params:{address:currentAccount.address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
+        <router-link :to="{name:'ViewAccountAssets', params: { address: currentAccount.address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+        <router-link :to="{name:'ViewMultisigHome', params: { name: currentAccount.name}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
+        <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.scheme')}}</div>
+        <router-link :to="{name:'ViewAccountSwap', params: { address: currentAccount.address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
         <MoreAccountOptions :address="address"/>
       </div>
       <div class="overflow-auto w-full border-2  " :style="`${viewType2==1?' transform: rotate(180deg);':'' }`">
@@ -20,8 +20,8 @@
             <div class="flex flex-col justify-center p-1.5 h-20" :style="`${viewType2==1?' transform: rotate(180deg);':'' }width: 16.5rem`" >
               <div class="text-xs text-left text-blue-500 font-bold">{{data.name}}</div>
               <div class="flex gap-1">
-                <div :id="data.label" :copyValue="prettyAddress(data.label)" copySubject="Address" class="font-bold text-left text-xs mt-0.5">{{displayAddress(data.label)}}</div>
-                <font-awesome-icon icon="copy" title='Copy' @click="copy(data.label)" class="w-5 h-5 text-blue-primary cursor-pointer "></font-awesome-icon>
+                <div :id="data.label" :copyValue="prettyAddress(data.label)" :copySubject="$t('general.address')" class="font-bold text-left text-xs mt-0.5">{{displayAddress(data.label)}}</div>
+                <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy(data.label)" class="w-5 h-5 text-blue-primary cursor-pointer "></font-awesome-icon>
               </div>
               <div v-if="data.balance!=-1" class="flex">
                   <div class = 'text-xs font-bold '>{{splitBalance(data.balance).left}} </div>
@@ -31,13 +31,13 @@
                   <img src="@/modules/account/img/proximax-logo.svg" class='h-4 w-4 '>
               </div>
               <div class="flex gap-3">
-                  <div class="text-xxs text-gray-500">S:{{data.numApproveTx}}-of-{{data.children.length}}</div>
-                  <div class="text-xxs text-gray-500">D:{{data.numRemoval}}-of-{{data.children.length}}</div>
+                  <div class="text-xxs text-gray-500">{{$t('multisig.approvalScheme',{approval:data.numApproveTx,maxApproval:data.children.length})}}</div>
+                  <div class="text-xxs text-gray-500">{{$t('multisig.deletionScheme',{deletion:data.numRemoval,maxDeletion:data.children.length})}}</div>
                   <div class="flex gap-1 ml-auto">
-                      <div v-if='data.children.length>0' class = ' ml-auto bg-green-500 rounded-2xl' title='This is a multisig account'>
+                      <div v-if='data.children.length>0' class = ' ml-auto bg-green-500 rounded-2xl' :title="$t('general.multisigTitle')">
                       <img src="@/assets/img/icon-multisig.svg" class = 'h-4 w-5 mr-1' style= "transform: rotateY(180deg)" >
                       </div>
-                      <div v-if='data.children.length>0 && findAccountWithAddress(data.label)!=undefined'  class = 'p-0.5 bg-purple-500 rounded-2xl' title='You own this multisig account' >
+                      <div v-if='data.children.length>0 && findAccountWithAddress(data.label)!=undefined'  class = 'p-0.5 bg-purple-500 rounded-2xl' :title="$t('general.ownerTitle')" >
                       <img src="@/assets/img/icon-key.svg" class = 'h-3 w-3 mr-1' >
                       </div>
                   </div>
@@ -49,21 +49,21 @@
       <div class="font-semibold ">View Settings</div>
       <div>
         <input name = 'view-type' type='radio' value='0' v-model="viewType" :checked='true'>   
-        <label  class = 'text-left py-3 text-xs pl-4'> Horizontal</label>
+        <label  class = 'text-left py-3 text-xs pl-4'>{{$t('multisig.horizontal')}}</label>
       </div>
       <input name = 'view-type' type='radio' value='1' v-model="viewType" >   
-      <label  class = 'text-left py-3 text-xs pl-4'> Vertical</label>
+      <label  class = 'text-left py-3 text-xs pl-4'> {{$t('multisig.vertical')}}</label>
       <div>
         <input name = 'view-type-2' type='radio' value='0' v-model="viewType2" :checked='true'>   
-        <label v-if="viewType==0" class = 'text-left py-3 text-xs pl-4'> Right to left</label>
-        <label v-if="viewType==1" class = 'text-left py-3 text-xs pl-4'> Top to Bottom</label>
+        <label v-if="viewType==0" class = 'text-left py-3 text-xs pl-4'> {{$t('multisig.bottomToTop')}}</label>
+        <label v-if="viewType==1" class = 'text-left py-3 text-xs pl-4'> {{$t('multisig.topToBottom')}}</label>
       </div>
       <input name = 'view-type-2' type='radio' value='1' v-model="viewType2" >   
-      <label v-if="viewType==0" class = 'text-left py-3 text-xs pl-4'> Left to right</label>
-      <label v-if="viewType==1" class = 'text-left py-3 text-xs pl-4'> Bottom to Top</label>
+      <label v-if="viewType==0" class = 'text-left py-3 text-xs pl-4'> {{$t('multisig.leftToRight')}}</label>
+      <label v-if="viewType==1" class = 'text-left py-3 text-xs pl-4'> {{$t('multisig.rightToLeft')}}</label>
       <div>
         <input type="checkbox" @click="collapsable=!collapsable">
-        <label class = 'text-left py-3 text-xs pl-4'>Collapsible</label>
+        <label class = 'text-left py-3 text-xs pl-4'>{{$t('multisig.collapsible')}}</label>
       </div>
       
     </div>
@@ -82,6 +82,7 @@ import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.
 import { AppState } from '@/state/appState';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import { useI18n } from 'vue-i18n';
 export default {
   name:"ViewMultisigScheme",
   components:{
@@ -93,6 +94,7 @@ export default {
   },
 setup(p){
   const toast = useToast();
+  const {t} = useI18n();
   networkState.currentNetworkProfileConfig
   let levelOneGraph = []
   const wallet = walletState.currentLoggedInWallet 
@@ -239,7 +241,7 @@ setup(p){
     let copySubject = document.getElementById(id).getAttribute("copySubject");
     copyToClipboard(stringToCopy);
 
-    toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+    toast.add({severity:'info', detail: copySubject +' '+ t('general.copied'), group: 'br', life: 3000});
   };
   const prettyAddress = address => Address.createFromRawAddress(address).pretty()
   const viewType = ref(0)

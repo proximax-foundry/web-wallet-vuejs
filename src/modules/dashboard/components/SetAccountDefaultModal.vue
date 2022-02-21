@@ -10,26 +10,26 @@
             <img src="@/assets/img/delete.svg" class="w-5 inline-block cursor-pointer" @click="closeModal()">
           </div>
           <div>
-            <div class="mb-2 text-xs">{{$t('deletewallet.accountsavailable')}}:</div>
+            <div class="mb-2 text-xs">{{$t('home.accountsAvailable')}}:</div>
             <div style="max-height: 400px; overflow-y: auto">
               <div @click="setDefault(defaultAccount.name, 0)" class="flex text-left p-2 py-2 text-gray-800 bg-blue-50 hover:bg-yellow-50 cursor-pointer">
                 <div>
                   <div class="font-bold text-xs text-gray-700">{{ defaultAccount.name }}
-                    <span class="text-xxs font-normal ml-2 py-1 px-2 rounded bg-yellow-200" :class="`${ isMultiSig(defaultAccount)?'mb-1':'' }`">{{$t('accounts.default')}}</span>
-                    <span class="text-xxs font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(defaultAccount)">{{$t('accounts.multisig')}}</span>
+                    <span class="text-xxs font-normal ml-2 py-1 px-2 rounded bg-yellow-200" :class="`${ isMultiSig(defaultAccount)?'mb-1':'' }`">{{$t('general.default')}}</span>
+                    <span class="text-xxs font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(defaultAccount)">{{$t('general.multisig')}}</span>
                   </div>
                   <div class="text-xs mt-2 text-gray-400">{{ defaultAccount.address }}</div>
                 </div>
               </div>
               <div v-for="(account, index) in accounts" :key="index" @click="setDefault(account.name, 0)" class="flex text-left p-2 py-2 text-gray-800 hover:bg-yellow-50 cursor-pointer" :class="`${ (index%2==0)?'bg-gray-50':'bg-blue-50' }`">
                 <div>
-                  <div class="font-bold text-xs text-gray-700">{{ account.name }}<span class="text-xxs font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(account)">{{$t('accounts.multisig')}}</span></div>
+                  <div class="font-bold text-xs text-gray-700">{{ account.name }}<span class="text-xxs font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(account)">{{$t('general.multisig')}}</span></div>
                   <div class="text-xs mt-2 text-gray-400">{{ account.address }}</div>
                 </div>
               </div>
               <div v-for="(account, index) in otherAccounts" :key="index" class="flex text-left p-2 py-2 text-gray-700" :class="`${ (index%2==0)?'bg-gray-50':'bg-blue-50' }`">
                 <div>
-                  <div class="font-bold text-xs text-gray-300">{{ account.name }}<span class="text-xxs text-gray-400 font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(account)">{{$t('accounts.multisig')}}</span></div>
+                  <div class="font-bold text-xs text-gray-300">{{ account.name }}<span class="text-xxs text-gray-400 font-normal ml-2 py-1 px-2 rounded bg-blue-200" v-if="isMultiSig(account)">{{$t('general.multisig')}}</span></div>
                   <div class="text-xs mt-2 text-gray-300">{{ account.address }}</div>
                 </div>
               </div>

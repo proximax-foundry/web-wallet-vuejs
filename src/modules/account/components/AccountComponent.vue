@@ -7,21 +7,21 @@
                 <div class='flex '>
                     <div class = '  font-semibold text-md' v-if='showName'>{{ accountNameDisplay }}</div>
                     <input class='outline-none ml-4 font-semibold text-md'  v-model='accountName' v-if='!showName'/>
-                    <img src="@/modules/account/img/edit-icon.svg"  v-if='showName && !other_acc' @click='showName=!showName' title='Edit Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
-                    <img src="@/modules/account/img/edit-icon.svg"  v-if='!showName'  @click="changeName()" title='Confirm Account Name' class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
+                    <img src="@/modules/account/img/edit-icon.svg"  v-if='showName && !other_acc' @click='showName=!showName' :title="$t('account.editName')" class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
+                    <img src="@/modules/account/img/edit-icon.svg"  v-if='!showName'  @click="changeName()" :title="$t('account.confirmName')" class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
                 </div>
                 <div class= 'flex'>
-                    <div id="address" :copyValue="prettyAddress" copySubject="Address" class = 'text-xs font-semibold mt-1'>{{prettyAddress}} </div>
-                    <font-awesome-icon icon="copy" title='Copy' @click="copy('address')" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+                    <div id="address" :copyValue="prettyAddress" :copySubject="$t('general.address')" class = 'text-xs font-semibold mt-1'>{{prettyAddress}} </div>
+                    <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy('address')" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
                 </div>
                 <div class='flex gap-2'> 
-                    <div  v-if='isDefault' class = ' px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm'>
-                    <img src="@/modules/account/img/icon-pin.svg" class = 'h-4 w-4 ' title='This is your default account everytime you login'>
-                    <p class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is your default account everytime you login' >DEFAULT</p>
+                    <div  v-if='isDefault' class = ' px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm' :title="$t('general.defaultTitle')">
+                    <img src="@/modules/account/img/icon-pin.svg" class = 'h-4 w-4 ' >
+                    <p class = 'font-semibold text-white text-xxs pt-px cursor-default uppercase'  >{{$t('general.default')}}</p>
                     </div>
-                    <div v-if='isMultiSig' class = ' px-1 py-0.5 flex mt-0.5 bg-orange-primary rounded-sm '>
-                        <img v-if='isMultiSig' src="@/assets/img/icon-key.svg" class = 'h-4 w-4 mr-1' title='This is your default account everytime you login'>
-                        <p v-if='isMultiSig' class = 'font-semibold text-white text-xxs pt-px cursor-default' title='This is a multisig account' >MULTISIG</p>
+                    <div v-if='isMultiSig' class = ' px-1 py-0.5 flex mt-0.5 bg-orange-primary rounded-sm ' :title="$t('general.multisigTitle')">
+                        <img v-if='isMultiSig' src="@/assets/img/icon-key.svg" class = 'h-4 w-4 mr-1' >
+                        <p v-if='isMultiSig' class = 'font-semibold text-white text-xxs pt-px cursor-default uppercase' >{{$t('general.multisig')}}</p>
                     </div>
                 </div>
             </div>
@@ -91,12 +91,12 @@ setup(p){
           err.value=""
           err.value = "";
         } else if (exist_account || exist_other_account) {
-          err.value = t('scriptvalues.accountnametaken');
+          err.value = t('account.nameTaken');
         } else {
-          err.value = t('scriptvalues.accountnamevalidation');
+          err.value = t('account.failChangeName');
         }
       } else {
-        err.value = t('scriptvalues.inputaccountname');
+        err.value = t('account.nameEmpty');
       }
     };
     const copy = (id) =>{
@@ -104,7 +104,7 @@ setup(p){
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
 
-      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject +' '+ t('general.copied'), group: 'br', life: 3000});
     };
     
     return{

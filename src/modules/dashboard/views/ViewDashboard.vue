@@ -227,7 +227,6 @@ import DashboardNamespaceDataTable from '@/modules/dashboard/components/Dashboar
 import AddressQRModal from '@/modules/dashboard/components/AddressQRModal.vue';
 import MessageModal from '@/modules/dashboard/components/MessageModal.vue';
 import DecryptMessageModal from '@/modules/dashboard/components/DecryptMessageModal.vue';
-import CosignModal from '@/modules/dashboard/components/CosignModal.vue';
 import { copyToClipboard, getXPXcurrencyPrice } from '@/util/functions';
 import { Helper } from '@/util/typeHelper';
 // eslint-disable-next-line no-unused-vars

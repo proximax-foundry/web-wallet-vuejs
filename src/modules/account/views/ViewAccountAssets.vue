@@ -7,17 +7,17 @@
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
       <AccountComponent :address="address" class="mb-10"/>
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-        <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>Account Details</router-link>
-        <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Assets</div>
-        <router-link v-if="!isDelegate" :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
-        <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>Scheme</router-link>
-        <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>Swap</router-link>
+        <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
+        <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.asset',2)}}</div>
+        <router-link v-if="!isDelegate" :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
+        <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
+        <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
         <MoreAccountOptions :address="address"/>
     </div>
     <div class='border-2 border-t-0  p-6'>
-        <div v-if="mosaics.length==0" class='text-blue-primary text-xs text-center font-semibold'>Nothing to show.</div>
+        <div v-if="mosaics.length==0" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
         <div class='text-txs w-9/12 ml-auto mr-auto text-gray-400 mt-1 text-center'>
-          <span v-if="mosaics.length==0">You do not own any assets.</span>
+          <span v-if="mosaics.length==0">{{$t('account.noAssets')}}</span>
         </div>
         <div v-for="(mosaic, index) in mosaics" :key="index">
             <img v-if="displayTokenName(mosaic.name).name=='XPX'" src="@/modules/account/img/proximax-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
@@ -31,7 +31,7 @@
             <a v-else :href="explorerLink(mosaic.name)" target=_new><div  class="inline-block text-xs text-gray-400 font-semibold ml-2 hover:text-black cursor-pointer transition-all duration-200">{{mosaic.name}}</div></a>
             <router-link v-if="index==0" :to='{name:"ViewTransferCreate"}' class='cursor-pointer float-right'>
               <img src="@/assets/img/icon-transfer.svg" class="  inline-block w-5 h-5 mt-0.5  cursor-pointer mr-1">
-              <div class='inline-block text-xs mt-1 font-semibold '>Transfer {{currentNativeTokenName}}</div>
+              <div class='inline-block text-xs mt-1 font-semibold '>{{$t('general.transfer')}} {{currentNativeTokenName}}</div>
             </router-link>
             <div v-if="index != (mosaics.length - 1)" class='my-6 gray-line' ></div>
         </div>

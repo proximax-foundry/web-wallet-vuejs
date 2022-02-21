@@ -13,7 +13,7 @@
       <Column style="width: 250px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Name</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('general.name')}}</div>
             <div class="uppercase font-bold text-txs">{{data.name}}</div>
           </div>
         </template>
@@ -21,9 +21,9 @@
       <Column style="width: 250px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Expiration Timestamp Estimate</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.expirationEstimate')}}</div>
             <div class="uppercase font-bold text-txs" v-if="data.expiry">{{ data.expiry }} <div class="rounded-full w-2 h-2 inline-block ml-2" :class="data.expiring=='expired'?'bg-red-500':(data.expiring=='expiring'?'bg-yellow-500':'bg-green-500')"></div></div>
-            <div class="text-gray-300 text-xs" v-else>Fetching..</div>
+            <div class="text-gray-300 text-xs" v-else>{{$t('dashboard.fetching')}}</div>
           </div>
         </template>
       </Column>
@@ -34,29 +34,29 @@
           </div>
         </template>
       </Column>
-      <Column field="name" header="NAME" style="`wideScreen?'min-width: 160px'?'width: 160px'`" v-if="wideScreen">
+      <Column field="name" :header="$t('general.name')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 160px'?'width: 160px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-xs">{{data.name}}</span>
         </template>
       </Column>
-      <Column field="namespaceId" header="NAMESPACE ID" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="namespaceId" :header="$t('general.namespaceId')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-xs uppercase">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedId" header="LINKED ASSET / ADDRESS" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
+      <Column field="linkedId" :header="$t('general.linkedAssetAddress')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase text-xs" v-if="data.linkedId">{{ data.linkedId }}</span>
           <span class="text-xs" v-else>No linked asset</span>
         </template>
       </Column>
-      <Column field="linkType" header="EXPIRES" style="`wideScreen?'min-width: 150px'?'width: 150px'`" v-if="wideScreen">
+      <Column field="linkType" :header="$t('general.expires')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 150px'?'width: 150px'`" v-if="wideScreen">
         <template #body="{data}">
           <div class="data.expiryRelative text-xs" v-if="data.expiryRelative">{{ data.expiryRelative }}</div>
-          <div class="text-gray-300 text-xs" v-else>Fetching..</div>
+          <div class="text-gray-300 text-xs" v-else>{{$t('dashboard.fetching')}}</div>
         </template>
       </Column>
-      <Column field="Active" header="EXPIRATION TIMESTAMP ESTIMATE" style="`wideScreen?'min-width: 210px'?'width: 210px'`" v-if="wideScreen">
+      <Column field="Active" :header="$t('dashboard.expirationEstimate')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 210px'?'width: 210px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-xs" :class="data.expiring=='expired'?'text-red-500':(data.expiring=='expiring'?'text-yellow-500':'text-green-500')">{{ data.expiry }}</span>
         </template>
@@ -67,18 +67,18 @@
             <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
             <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div role="none" class="my-2">
-                <router-link :to="{ name: 'ViewServicesNamespaceExtend', params: { address: data.address, namespaceId: data.idHex } }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Extend Duration</router-link>
-                <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>View in Explorer<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
+                <router-link :to="{ name: 'ViewServicesNamespaceExtend', params: { address: data.address, namespaceId: data.idHex } }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.extendDuration')}}</router-link>
+                <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>{{$t('general.viewInExplorer')}}<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
               </div>
             </div>
           </div>
         </template>
       </Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('general.noRecord')}}
       </template>
       <template #loading>
-          {{$t('dashboard.loadingmessage')}}
+          {{$t('dashboard.loadingTx')}}
       </template>
     </DataTable>
   </div>
@@ -94,6 +94,7 @@ import { Helper } from '@/util/typeHelper';
 import { networkState } from "@/state/networkState";
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 import { WalletAccount } from '@/models/walletAccount';
+import { useI18n } from 'vue-i18n';
 
 export default{
   components: { DataTable, Column },
@@ -105,6 +106,7 @@ export default{
   },
 
   setup(props, context){
+    const {t} = useI18n()
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
       if(window.innerWidth < '1024'){
@@ -186,10 +188,10 @@ export default{
           let expiryRelativeTimeEstimate;
           if(currentBlockHeight){
             if(blockDifference > 0){
-              expiryRelativeTimeEstimate = 'In ' + relativeTime(expiryDay, expiryHour, expiryMin);
+              expiryRelativeTimeEstimate = t('general.in') +' '+ relativeTime(expiryDay, expiryHour, expiryMin);
             }else{
               if(expiryDate != '-'){
-                expiryRelativeTimeEstimate = 'Expired';
+                expiryRelativeTimeEstimate = t('general.expired');
               }else{
                 expiryRelativeTimeEstimate = '-';
               }
@@ -258,15 +260,15 @@ export default{
         timeDiff.months+=12;
       }
       if(timeDiff.years > 0){
-        return timeDiff.years + ' year' + ((timeDiff.years>1)?'s':'');
+        return timeDiff.years + ' ' + t('general.year',timeDiff.years);
       }else if(timeDiff.months > 0){
-        return timeDiff.months + ' month' + ((timeDiff.months>1)?'s':'');
+        return timeDiff.months + ' ' + t('general.month',timeDiff.months);
       }else if(timeDiff.days > 0){
-        return timeDiff.days + ' day' + ((timeDiff.days>1)?'s':'');
+        return timeDiff.days + ' ' + t('general.day',timeDiff.days);
       }else if(timeDiff.hours > 0){
-        return timeDiff.hours + ' hour' + ((timeDiff.hours>1)?'s':'');
+        return timeDiff.hours + ' ' + t('general.hour',timeDiff.hours);
       }else{
-        return timeDiff.mins + ' minute' + ((timeDiff.mins>1)?'s':'');
+        return timeDiff.mins + ' ' + t('general.minute',timeDiff.mins);
       }
     }
 

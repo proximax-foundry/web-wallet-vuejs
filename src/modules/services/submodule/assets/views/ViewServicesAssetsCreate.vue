@@ -110,7 +110,6 @@ export default {
     SupplyInputClean,
     NumberInputClean,
     SelectInputAccount,
-    /* AddCosignModal, */
   },
   setup(){
     const router = useRouter();

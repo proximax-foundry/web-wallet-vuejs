@@ -2,18 +2,18 @@
   <div>
     <div class='w-9/12 ml-auto mr-auto mt-5'>
       <div class ='flex text-xs font-semibold border-b-2 menu_title_div'>
-        <router-link :to="{ name: 'ViewServicesAddressBook' }" class= 'w-18 text-center border-b pb-3'>Details</router-link>
-        <router-link :to="{ name: 'ViewServicesAddressBookImport' }" class= 'w-18 text-center border-b pb-3'>Import</router-link>
-        <div class='w-18 text-center border-b-2 pb-3 border-yellow-500'>Export</div>
+        <router-link :to="{ name: 'ViewServicesAddressBook' }" class= 'w-18 text-center border-b pb-3'>{{$t('general.list')}}</router-link>
+        <router-link :to="{ name: 'ViewServicesAddressBookImport' }" class= 'w-18 text-center border-b pb-3'>{{$t('general.import')}}</router-link>
+        <div class='w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.export')}}</div>
       </div>
       <div class="mt-10">
-        <div class="text-md my-5 font-semibold">Export Addresses</div>
-        <div class="text-tsm">Export contacts for backup</div>
+        <div class="text-md my-5 font-semibold">{{$t('addressBook.exportContacts')}}</div>
+        <div class="text-tsm">{{$t('addressBook.exportBackUpContact')}}</div>
         <div class="mt-4"><SelectInputPluginClean v-model="filters['global'].value" placeholder="Group" :options="contactGroups" selectDefault="" class="w-60 inline-block mr-2" /></div>
       </div>
       <input v-model="filters['global'].value" type="text" class="hidden">
 
-      <div @click="exportCSV($event)" class="cursor-pointer mt-5 py-2 px-5 rounded-md w-36 bg-blue-primary text-white text-tsm drop-shadow-lg filter hover:bg-blue-600 transition-all duration-500"><img src="@/modules/services/submodule/addressbook/img/icon-upload.svg" class="inline-block mr-4 relative top-1">{{$t('accounts.export')}}</div>
+      <div @click="exportCSV($event)" class="cursor-pointer mt-5 py-2 px-5 rounded-md w-36 bg-blue-primary text-white text-tsm drop-shadow-lg filter hover:bg-blue-600 transition-all duration-500"><img src="@/modules/services/submodule/addressbook/img/icon-upload.svg" class="inline-block mr-4 relative top-1">{{$t('general.export')}}</div>
       <DataTable
         class="hidden"
         :value="list"
@@ -26,17 +26,17 @@
         paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
         currentPageReportTemplate=""
         :globalFilterFields="['group']">
-        <Column field="name" :header="$t('services.label')" headerStyle="width:30%">
+        <Column field="name" :header="$t('general.label')" headerStyle="width:30%">
           <template #body="{data}">
             {{data.name}}
           </template>
         </Column>
-        <Column field="address" :header="$t('services.accountaddress')" headerStyle="width:55%">
+        <Column field="address" :header="$t('general.address')" headerStyle="width:55%">
           <template #body="{data}">
             {{ Helper.createAddress(data.address).pretty() }}
           </template>
         </Column>
-        <Column field="group" header="Group" headerStyle="width:30%">
+        <Column field="group" :header="$t('general.group')" headerStyle="width:30%">
           <template #body="{data}">
             {{data.group}}
           </template>

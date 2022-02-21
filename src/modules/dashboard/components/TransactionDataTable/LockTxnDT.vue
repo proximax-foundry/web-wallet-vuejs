@@ -13,17 +13,17 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Tx Hash</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.txHash')}}</div>
             <div class="uppercase font-bold text-txs"><span class="text-txs" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span></div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Type</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.type')}}</div>
             <div class="flex items-center">
               <div class="uppercase font-bold text-txs mr-2">{{data.type}}</div>
             </div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">LockHash</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.lockHash')}}</div>
             <div class="flex items-center">
               <div class="font-bold text-txs" v-tooltip.right="data.lockHash">{{data.lockHash.substring(0, 20) }}...</div>
             </div>
@@ -33,60 +33,60 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div v-if="selectedGroupType === transactionGroupType.CONFIRMED">
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Timestamp</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.timestamp')}}</div>
             <div class="uppercase font-bold text-txs">{{ convertLocalTime(data.timestamp) }}</div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Duration</div>
-            <div class="uppercase font-bold text-txs" v-tooltip.bottom="'<tiptext>Approximately ' + durationTime(data.duration) + ' day' + ((durationTime(data.duration)>1)?'s':'') + '</tiptext>'">{{data.duration ? data.duration + ' block' + (data.duration>1?'s':'') : "-"}}</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('general.duration')}}</div>
+            <div class="uppercase font-bold text-txs" v-tooltip.bottom="'<tiptext>' + $t('general.approximately') + ' ' + durationTime(data.duration) + ' ' + $t('general.day',durationTime(data.duration)) + '</tiptext>'">{{data.duration ? data.duration + ' '+ $t('general.block',data.duration) : "-"}}</div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Refunded</div>
-            <div class="uppercase font-bold text-txs">{{ data.isRefunded ? "Yes" : "No" }}</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.refunded')}}</div>
+            <div class="uppercase font-bold text-txs">{{ data.isRefunded ? $t('general.yes') : $t('general.no') }}</div>
           </div>
         </template>
       </Column>
-      <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
+      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="timestamp" header="TIMESTAMP" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
+      <Column field="timestamp" :header="$t('dashboard.timestamp')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
           <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
       </Column>
-      <Column field="typeName" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
+      <Column field="typeName" :header="$t('dashboard.type')" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
-      <Column field="block" header="BLOCK" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
+      <Column field="block" :header="$t('general.block')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
           <div class="text-txs">{{ data.block }}</div>
         </template>
       </Column>
-      <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
+      <Column :header="$t('dashboard.txFee')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
           <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
-      <Column header="LOCK HASH" headerStyle="width:40px" v-if="wideScreen">
+      <Column :header="$t('dashboard.lockHash')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-tooltip.bottom="data.lockHash">{{data.lockHash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column header="DURATION" headerStyle="width:40px" v-if="wideScreen">
+      <Column :header="$t('general.duration')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-txs" v-tooltip.bottom="'<tiptext>Approximately ' + durationTime(data.duration) + ' day' + ((durationTime(data.duration)>1)?'s':'') + '</tiptext>'">{{data.duration ? data.duration + ' block' + (data.duration>1?'s':'') : "-"}}</span>
+          <span class="text-txs" v-tooltip.bottom="'<tiptext>' + $t('general.approximately') + ' ' + durationTime(data.duration) + ' ' + $t('general.day',durationTime(data.duration)) + '</tiptext>'">{{data.duration ? data.duration + ' '+ $t('general.block',data.duration) : "-"}}</span>
         </template>
       </Column>
-      <Column header="REFUNDED" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:40px">
+      <Column :header="$t('dashboard.refunded')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:40px;text-transform:uppercase">
         <template #body="{data}">
-          <span class="text-txs">{{ data.isRefunded ? "Yes" : "No" }}</span>
+          <span class="text-txs">{{ data.isRefunded ?  $t('general.yes') : $t('general.no')}}</span>
         </template>
       </Column>
-      <Column header="" headerStyle="width:50px">
+      <Column header="" headerStyle="width:50px;text-transform:uppercase">
         <template #body="{data}">
           <div class="flex justify-center">
             <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
@@ -94,10 +94,10 @@
         </template>
       </Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('general.noRecord')}}
       </template>
       <template #loading>
-          {{$t('dashboard.loadingmessage')}}
+          {{$t('dashboard.loadingTx')}}
       </template>
     </DataTable>
   </div>
