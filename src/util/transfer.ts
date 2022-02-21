@@ -167,8 +167,9 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
  * @memberof ViewTransferComponent
  */
 //random account info
-const test_address = "VAIHSS-J72IDB-S5FGEB-G5JHV6-6PNG3T-YDWMZV-FA27" 
-const test_publicKey = "18B87A14FD660B6F8AFCA0430BB9C668B15B7B14162C78048248B941F7ED93CE"
+
+const test_publicKey = "0".repeat(64)
+const test_address = PublicAccount.createFromPublicKey(test_publicKey,AppState.networkType).address.plain() 
 
 const getMosaic =(amount :string, mosaic :{id :string ,amount :string}[]) :Mosaic[]=>{
   let mosaics :Mosaic[]= []
