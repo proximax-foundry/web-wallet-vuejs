@@ -39,7 +39,7 @@
           <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
           <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
           <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
-          <div class='flex ml-auto gap-6 '>
+          <div v-if="networkType ==168 " class='flex ml-auto gap-6 '>
             <a  :href="topUpUrl" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
               <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
               <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
@@ -66,7 +66,7 @@
             <font-awesome-icon title='Copy' icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link mt-0.5 cursor-pointer " v-if="showPK"></font-awesome-icon>
             <font-awesome-icon icon="eye-slash" title='Hide Private Key' class="text-blue-link relative cursor-pointer mt-0.5 ml-1" @click="showPwPK = false; showPK = false" v-if="showPK"></font-awesome-icon>
           </div>
-          <p class = 'text-txs mt-2 text-gray-400'>{{$t('createsuccessful.warningtext1')}} {{$t('createsuccessful.warningtext2')}}</p>
+          <div class = 'text-txs mt-2 text-red-400 border px-1.5 py-2 border-red-400 rounded-md'>Make sure you store your private key in a safe place. Access to your digital assets cannot be recovered without it!</div>
       </div>
       <div class='my-6 gray-line' v-if="!other_acc "></div>
       <div class='flex'>
@@ -306,12 +306,13 @@ export default {
       }
       return mosaicOption;
     }); */
+    const networkType = computed(()=>{
+    return AppState.networkType
+    })
     const topUpUrl = computed(()=>{
-      if (AppState.networktype == 184){ 
-        return 'https://www.proximax.io/en/xpx'
-      }else if (AppState.networkType == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
+      if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
         return 'https://bctestnetfaucet.xpxsirius.io/#/'
-      }else if (AppState.networkType == 168 && networkState.chainNetworkName=='Sirius Testnet 2'){
+      }else if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 2'){
         return 'https://bctestnet2faucet.xpxsirius.io/#/'
       }else{
         return ''
@@ -359,6 +360,7 @@ export default {
       walletPasswdWalletPaper,
       verifyWalletPwWalletPaper,
       saveWalletPaper,
+      networkType
     };
   }
 };

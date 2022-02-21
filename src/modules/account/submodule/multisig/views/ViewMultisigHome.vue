@@ -32,7 +32,7 @@
         </div>
         <div v-if="!isMultisig" class='text-blue-primary text-xs text-center font-semibold'>Nothing to show.</div>
         <div class='flex text-txs w-9/12 ml-auto mr-auto text-gray-400 mt-1 text-center'>
-          <span v-if="!isMultisig">"{{acc.name}}" does not have any cosignatory accounts.When you add at least one (1) cosignatory, your account will automatically converted into multisig account.</span>
+          <span v-if="!isMultisig">"{{acc.name}}" does not have any cosignatory accounts.When you add at least one (1) cosignatory, your account will automatically be converted into a multisig account.</span>
         </div>
       </div>
       <router-link :to="{ name: isMultisig ? 'ViewMultisigEditAccount' : 'ViewMultisigConvertAccount', params: { name: acc.name}}" class="blue-btn py-2 px-2 ">Manage Cosignatories</router-link>

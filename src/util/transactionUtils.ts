@@ -58,7 +58,8 @@ import {
   SignedTransaction,
   CosignatureSignedTransaction,
   TransactionGroupType,
-  TransactionSearch
+  TransactionSearch,
+  TransactionHash
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { walletState } from "../state/walletState";
@@ -70,6 +71,7 @@ import { BuildTransactions } from "../util/buildTransactions";
 import { Helper } from "./typeHelper";
 import { Duration } from "js-joda";
 import { faBreadSlice } from "@fortawesome/free-solid-svg-icons";
+import { AppState } from "@/state/appState";
 
 const networkAPIEndpoint = computed(() => ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
 const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
@@ -388,13 +390,18 @@ export class TransactionUtils {
     return typeName;
   }
 
-  static getLockFundFee = (networkType: NetworkType, generationHash: string):number => {
-    let buildTransactions = new BuildTransactions(networkType, generationHash);
-    let tempAcc = Account.generateNewAccount(networkType);
-    let txn = buildTransactions.transfer(tempAcc.address, PlainMessage.create('hello'));
-    let abt = buildTransactions.aggregateBonded([txn.toAggregate(tempAcc.publicAccount)])
-    let signedTxn = tempAcc.sign(abt, generationHash);
-    return buildTransactions.hashLock(new Mosaic(new NamespaceId('prx.xpx'), UInt64.fromUint(10)), UInt64.fromUint(10), signedTxn).maxFee.compact();
+  static getLockFundFee = ()=> {
+    let txBuilder = AppState.buildTxn
+    let abtType = TransactionType.AGGREGATE_BONDED
+    let txHash = new TransactionHash("0".repeat(64),abtType)
+    const nativeTokenNamespace = AppState.nativeToken.fullNamespace
+    const lockingAtomicFee = networkState.currentNetworkProfileConfig.lockedFundsPerAggregate ?? 0;
+    const lockFundTx = txBuilder.hashLock(
+      new Mosaic(new NamespaceId(nativeTokenNamespace), UInt64.fromUint(lockingAtomicFee)),
+      UInt64.fromUint(1000),
+      txHash
+    );
+    return lockFundTx.maxFee.compact();
   }
 
   static castToAggregate(tx :Transaction){
