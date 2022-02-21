@@ -119,7 +119,6 @@ import { useToast } from "primevue/usetoast";
 import Tooltip from 'primevue/tooltip';
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { multiSign } from '@/util/multiSignatory';
-import { electronMassDependencies } from 'mathjs';
 import { AppState } from '@/state/appState';
 
 export default {
