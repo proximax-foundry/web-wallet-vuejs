@@ -46,6 +46,7 @@
 import { getCurrentInstance, ref } from "vue";
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
+import { AppState } from '@/state/appState';
 export default {
   name: 'ViewServicesStorageUploadFile',
   components: {
@@ -55,7 +56,7 @@ export default {
   },
 
   setup() {
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const fileType = ref('');

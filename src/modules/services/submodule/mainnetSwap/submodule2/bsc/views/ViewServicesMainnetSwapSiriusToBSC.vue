@@ -126,6 +126,7 @@ import { useToast } from "primevue/usetoast";
 import { ethers } from 'ethers';
 import { SwapUtils } from '@/util/swapUtils';
 import { NetworkType } from "tsjs-xpx-chain-sdk";
+import { AppState } from '@/state/appState';
 //import { ChainUtils } from "@/util/chainUtils";
 //import { ChainAPICall } from "@/models/REST/chainAPICall";
 //import { listenerState } from "@/state/listenerState";
@@ -141,8 +142,8 @@ export default {
     SelectInputAccountOutgoingSwap,
   },
 
-  setup() {
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+  setup() { 
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const toast = useToast();
     const router = useRouter();
     const displayTimer = ref(true);
@@ -277,10 +278,10 @@ export default {
     );
     const amount = ref(0);
 
-    const xpxNamespace = networkState.currentNetworkProfile.network.currency.namespace;
+    const xpxNamespace = AppState.nativeToken.fullNamespace; 
     const XpxAsset = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), 1);
 
-    const buildClass = new BuildTransactions(networkState.currentNetworkProfile.network.type);
+    const buildClass = AppState.buildTxn
     const transferBuilder = buildClass.transferBuilder();
     const aggregateBuilder = buildClass.aggregateCompleteBuilder();
 
@@ -425,7 +426,7 @@ export default {
 
     const updateGasPrice = async ()=>{
 
-      if(networkState.currentNetworkProfile.network.type === NetworkType.TEST_NET){
+      if(AppState.networkType === NetworkType.TEST_NET){
         standardGasPriceInGwei.value = 10;
         fastGasPriceInGwei.value = 10;
         rapidGasPriceInGwei.value = 10;

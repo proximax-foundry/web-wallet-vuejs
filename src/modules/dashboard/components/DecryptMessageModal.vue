@@ -45,6 +45,7 @@ import { Helper } from '@/util/typeHelper';
 import { WalletUtils } from '@/util/walletUtils';
 import { networkState } from '@/state/networkState';
 import { walletState } from '@/state/walletState';
+import { AppState } from '@/state/appState';
 
 export default{
 
@@ -132,9 +133,9 @@ export default{
       showError.value = false;
       let privateKey = WalletUtils.decryptPrivateKey(Helper.createPasswordInstance(walletPassword.value), accountDetail.encrypted, accountDetail.iv);
       
-      let account = Helper.createAccount(privateKey, networkState.currentNetworkProfile.network.type);
+      let account = Helper.createAccount(privateKey, AppState.networkType);
 
-      let decryptingPublicAccount = Helper.createPublicAccount(decryptingPublicKey.value, networkState.currentNetworkProfile.network.type)
+      let decryptingPublicAccount = Helper.createPublicAccount(decryptingPublicKey.value, AppState.networkType)
       
       try {
         let decryptedMessageInstance = account.decryptMessage(encryptedMsg, decryptingPublicAccount);

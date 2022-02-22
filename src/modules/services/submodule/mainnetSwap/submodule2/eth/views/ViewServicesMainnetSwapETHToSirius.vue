@@ -262,6 +262,7 @@ import { abi, SwapUtils } from '@/util/swapUtils';
 import { networkState } from '@/state/networkState';
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { Helper } from '@/util/typeHelper';
+import { AppState } from '@/state/appState';
 
 export default {
   name: 'ViewServicesMainnetSwapETHToSirius',
@@ -275,7 +276,7 @@ export default {
   setup() {
     let verifyingTxn;
 
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 
     const verifyMetaMaskPlugin = ref(true);
     if(!window.ethereum.isMetaMask){

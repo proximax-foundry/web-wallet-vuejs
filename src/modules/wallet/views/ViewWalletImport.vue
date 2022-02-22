@@ -31,6 +31,7 @@ import { networkState } from "@/state/networkState";
 import { WalletUtils } from '@/util/walletUtils';
 import { walletState } from '@/state/walletState';
 import SelectNetworkInput from '@/components/SelectNetworkInput.vue';
+import { AppState } from '@/state/appState';
 export default defineComponent({
   name: 'ViewWalletCreateSelection',
   components: {
@@ -41,7 +42,7 @@ export default defineComponent({
     const confirm = useConfirm();
     const toast = useToast();
     // comparing with default networktype 168 till multiple network selection interface is added
-    const selectedNetworkType = computed(()=> ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+    const selectedNetworkType = computed(()=> AppState.networkType);
     const selectedNetworkName = computed(()=> networkState.chainNetworkName);
     const walletFile = ref('');
     const readWalletBackup = (e) => {

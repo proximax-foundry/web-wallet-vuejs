@@ -95,6 +95,7 @@ import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { Helper } from '@/util/typeHelper';
 import { AssetsUtils } from '@/util/assetsUtils';
+import { AppState } from '@/state/appState';
 
 
 export default {
@@ -105,7 +106,7 @@ export default {
     // SelectInputNamespaceAsyncOptionPlugin,
   },
   setup(){
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const selectNamespaceRef = ref(null);
     const selectAssetRef = ref(null);
     const walletPassword = ref('');
@@ -141,10 +142,10 @@ export default {
     const cosignerBalanceInsufficient = ref(false);
     const cosignerAddress = ref('');
 
-    const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
+    const currencyName = computed(() => AppState.nativeToken.label);
 
-    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
-    const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
+    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
+    const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
 
     const lockFundTxFee = ref(0.0445);
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
@@ -167,7 +168,7 @@ export default {
 
     const selectedAccName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
     const selectedAccAdd = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
-    const balance = ref(Helper.toCurrencyFormat(walletState.currentLoggedInWallet.selectDefaultAccount().balance, networkState.currentNetworkProfile.network.currency.divisibility));
+    const balance = ref(Helper.toCurrencyFormat(walletState.currentLoggedInWallet.selectDefaultAccount().balance, AppState.nativeToken.divisibility));
     const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
 
     const showNoBalance = ref(false);
@@ -196,7 +197,6 @@ export default {
     };
 
     const getMultiSigCosigner = computed(() => {
-      // return AssetsUtils.getCosignerList(selectedAccAdd.value);
       let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value).publicKey);
       let list = [];
       cosigners.cosignerList.forEach( publicKey => {
@@ -262,9 +262,9 @@ export default {
         assetId = account?account.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId:other.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
       }
       if(cosigner.value){
-        AssetsUtils.linkedNamespaceToAssetMultiSig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value, selectedAccAdd.value);
+        AssetsUtils.linkedNamespaceToAssetMultiSig(cosigner.value, walletPassword.value, assetId, selectNamespace.value, selectAction.value, selectedAccAdd.value);
       }else{
-        AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value );
+        AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, assetId, selectNamespace.value, selectAction.value );
       }
       clearInput();
     };
@@ -279,8 +279,8 @@ export default {
     };
 
     const assetSelected = () => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getLinkAssetToNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectNamespace.value, selectAction.value ), networkState.currentNetworkProfile.network.currency.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getLinkAssetToNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectNamespace.value, selectAction.value), networkState.currentNetworkProfile.network.currency.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getLinkAssetToNamespaceTransactionFee( selectAsset.value, selectNamespace.value, selectAction.value ), AppState.nativeToken.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getLinkAssetToNamespaceTransactionFee( selectAsset.value, selectNamespace.value, selectAction.value), AppState.nativeToken.divisibility);
     };
 
     const setFormInput = (isValidate) => {

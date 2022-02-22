@@ -137,6 +137,7 @@ import { networkState } from "@/state/networkState";
 import { WalletAccount } from '@/models/walletAccount';
 import Tooltip from 'primevue/tooltip';
 import { PublicAccount } from 'tsjs-xpx-chain-sdk';
+import { AppState } from '@/state/appState';
 
 export default{
   components: { DataTable, Column, SelectInputPluginClean },
@@ -229,7 +230,7 @@ export default{
         let namespaceAlias = [];
         let assetId = accountAssets[i].asset.idHex;
 
-        if(assetId != networkState.currentNetworkProfile.network.currency.assetId){
+        if(assetId != AppState.nativeToken.assetId){
           let namespaces = accountAssets[i].account.findNamespaceNameByAsset(assetId);
           for(let j = 0; j < namespaces.length; ++j){
             let aliasData = {
@@ -243,7 +244,7 @@ export default{
             i: i,
             idHex: assetId,
             owner: accountAssets[i].asset.owner,
-            address: PublicAccount.createFromPublicKey(accountAssets[i].asset.owner, networkState.currentNetworkProfile.network.type).address.pretty(),
+            address: PublicAccount.createFromPublicKey(accountAssets[i].asset.owner, AppState.networkType).address.pretty(),
             amount: Helper.toCurrencyFormat(accountAssets[i].asset.getExactAmount(), accountAssets[i].asset.divisibility),
             supply: Helper.toCurrencyFormat(accountAssets[i].asset.getExactSupply(), accountAssets[i].asset.divisibility),
             linkedNamespace: namespaceAlias,

@@ -235,8 +235,8 @@ export default {
       }
         
     })
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const accountBalance = computed(() => {
       if(walletState.currentLoggedInWallet){
         return Helper.toCurrencyFormat(acc.balance, currentNativeTokenDivisibility.value);
@@ -427,7 +427,7 @@ export default {
       }
     });
     // check if onPartial
-    multiSign.onPartial(PublicAccount.createFromPublicKey(acc.publicKey,networkState.currentNetworkProfile.network.type)).then(verify=>
+    multiSign.onPartial(PublicAccount.createFromPublicKey(acc.publicKey,AppState.networkType)).then(verify=>
       onPartial.value = verify
     )
     

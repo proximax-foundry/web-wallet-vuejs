@@ -122,8 +122,8 @@ export default defineComponent({
       updateAccountTransactionCount();
     });
 
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
 
     let unconfirmedTransactions = ref([]);
     let partialTransactions = ref([]);

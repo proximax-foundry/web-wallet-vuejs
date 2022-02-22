@@ -164,7 +164,7 @@ export default {
     MosaicInput
   },
   setup() {
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const toggleContact = ref(false)
     const {t} = useI18n();
     const internalInstance = getCurrentInstance();
@@ -202,7 +202,7 @@ export default {
     const disablePassword = computed(() => disableAllInput.value);
     const cosignerBalanceInsufficient = ref(false);
     const namespace = ref('');
-    const networkType = networkState.currentNetworkProfile.network.type;
+    const networkType = AppState.networkType;
     const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
     const walletName = walletState.currentLoggedInWallet.name
     const currencyName = computed(
@@ -211,19 +211,19 @@ export default {
     const lockFund = computed(() =>
       Helper.convertToExact(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
-        networkState.currentNetworkProfile.network.currency.divisibility
+        AppState.nativeToken.divisibility
       )
     );
     const lockFundCurrency = computed(() =>
       Helper.convertToCurrency(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
-        networkState.currentNetworkProfile.network.currency.divisibility
+        AppState.nativeToken.divisibility
       )
     );
     
     const lockFundTxFee = computed(()=>{
       if(networkState.currentNetworkProfile){
-        return Helper.convertToExact(TransactionUtils.getLockFundFee(), networkState.currentNetworkProfile.network.currency.divisibility);
+        return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
       }
       return 0;  
     });
@@ -359,7 +359,7 @@ export default {
         }
       });
     const splitBalance = computed(()=>{
-      let accBalance = Helper.toCurrencyFormat(balance.value, networkState.currentNetworkProfile.network.currency.divisibility)
+      let accBalance = Helper.toCurrencyFormat(balance.value, AppState.nativeToken.divisibility)
       let split = accBalance.split(".")
       if (split[1]!=undefined){
         return {left:split[0],right:split[1]}
