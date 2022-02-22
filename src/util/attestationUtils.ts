@@ -247,11 +247,8 @@ export const preparePublicApostille = (rawFileContent :string,tag :string ,fileN
     
 
     
-    let transactionBuilder = new BuildTransactions( AppState.networkType)
+    let transactionBuilder = AppState.buildTxn
     // Zero fee is added
-    if (ChainUtils.getNetworkType(AppState.networkType) === NetworkType.PRIVATE || ChainUtils.getNetworkType(AppState.networkType) === NetworkType.PRIVATE_TEST) {
-        transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
-    }
     let transferTransaction = transactionBuilder.transfer(sinkAddress, PlainMessage.create(JSON.stringify(apostilleHash)))
     
     // console.log('TRANSACTION BUILDED ---> ', transferTransaction);
@@ -327,11 +324,8 @@ export const preparePublicApostille = (rawFileContent :string,tag :string ,fileN
     // Build the transfer type transaction
     // console.log('MY NETWORK --->', this.walletService.currentAccount.network);
     
-    let transactionBuilder = new BuildTransactions( AppState.networkType)
+    let transactionBuilder = AppState.buildTxn
     // Zero fee is added
-    if (ChainUtils.getNetworkType(AppState.networkType) === NetworkType.PRIVATE || ChainUtils.getNetworkType(AppState.networkType) === NetworkType.PRIVATE_TEST) {
-        transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
-    }
     let transferTransaction = transactionBuilder.transfer(Address.createFromRawAddress(dedicatedAccount.address.plain()), PlainMessage.create(JSON.stringify(apostilleHash)))
 
     

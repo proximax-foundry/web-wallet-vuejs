@@ -550,12 +550,7 @@ export default {
         []
       )
 
-      let transactionBuilder = new BuildTransactions(NetworkType)
-      
-      if (ChainUtils.getNetworkType(AppState.networkType) === NetworkType.PRIVATE || ChainUtils.getNetworkType(AppState.networkType) === NetworkType.PRIVATE_TEST) {
-        transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
-        //FeeCalculationStrategy.ZeroFeeCalculationStrategy
-      }
+      let transactionBuilder = AppState.buildTxn
       
       let accountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.name === selectedAccName.value);
       let privateKey = WalletUtils.decryptPrivateKey(walletPassword, accountDetails.encrypted, accountDetails.iv);

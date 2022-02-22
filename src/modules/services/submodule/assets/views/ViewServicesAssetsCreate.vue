@@ -145,8 +145,8 @@ export default {
 
     const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, AppState.networkType));
 
-    const transactionFee = ref( Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility));
-    const transactionFeeExact = ref(Helper.convertToExact(AssetsUtils.createAssetTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility));
+    const transactionFee = ref( Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility));
+    const transactionFeeExact = ref(Helper.convertToExact(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility));
 
     const rentalFee = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.mosaicRentalFee, AppState.nativeToken.divisibility) );
     const rentalFeeCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.mosaicRentalFee, AppState.nativeToken.divisibility) );
@@ -201,7 +201,6 @@ export default {
     };
 
     const getMultiSigCosigner = computed(() => {
-      // return AssetsUtils.getCosignerList(selectedAccAdd.value);
       let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value).publicKey);
       let list = [];
       cosigners.cosignerList.forEach( publicKey => {
@@ -269,23 +268,23 @@ export default {
     };
 
     watch(divisibility, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, n, defaultDuration.value, true), AppState.nativeToken.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, n, defaultDuration.value, true), AppState.nativeToken.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, n, defaultDuration.value, true), AppState.nativeToken.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, n, defaultDuration.value, true), AppState.nativeToken.divisibility);
     });
 
     watch(isMutable, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, n, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, n, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, n, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, n, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
     });
 
     watch(isTransferable, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, n, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, n, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, isMutable.value, n, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, isMutable.value, n, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
     });
 
     watch(supply, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, n, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, n, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, n, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
     });
 
     watch(durationOption, () => {
@@ -343,9 +342,9 @@ export default {
 
     const createAsset = () => {
       if(cosigner.value){
-        AssetsUtils.createAssetMultiSig( cosigner.value, walletPassword.value, AppState.networkType, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, selectedAccAdd.value); 
+        AssetsUtils.createAssetMultiSig( cosigner.value, walletPassword.value, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value); 
       }else{
-        AssetsUtils.createAsset( selectedAccAdd.value, walletPassword.value, AppState.networkType, networkState.currentNetworkProfile.generationHash, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value);
+        AssetsUtils.createAsset( selectedAccAdd.value, walletPassword.value, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value);
       }
       clearInput();
       router.push({ name: "ViewServicesAssets"});

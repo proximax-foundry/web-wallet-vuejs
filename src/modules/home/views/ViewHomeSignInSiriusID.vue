@@ -50,7 +50,7 @@ export default defineComponent({
     const {t} = useI18n();
     const toast = useToast();
     const selectedNetwork = computed(()=> networkState.chainNetwork);
-    const selectedNetworkType = computed(()=> ChainUtils.getNetworkType(AppState.networkType));
+    const selectedNetworkType = computed(()=> AppState.networkType);
     const selectedNetworkName = computed(()=> networkState.chainNetworkName );
     const err = ref("");
     const newWallet = ref();

@@ -84,13 +84,13 @@ export default {
           err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name}) ;
         } else {    
           // create account
-          const account = Account.createFromPrivateKey(privKey.value,ChainUtils.getNetworkType(AppState.networkType));
+          const account = Account.createFromPrivateKey(privKey.value,AppState.networkType);
           const verifyExistingAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.publicKey == account.publicKey);
           if (verifyExistingAccount) {
             err.value = t('scriptvalues.privatekeyexists');
           } else {          
             let password = WalletUtils.createPassword(walletPassword.value);
-            const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, privKey.value, ChainUtils.getNetworkType(AppState.networkType));
+            const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, privKey.value,AppState.networkType);
             let walletAccount = new WalletAccount(accountName.value, account.publicKey, account.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
             // code for NIS 1 checking
             // if(nis1Swap.value == true){

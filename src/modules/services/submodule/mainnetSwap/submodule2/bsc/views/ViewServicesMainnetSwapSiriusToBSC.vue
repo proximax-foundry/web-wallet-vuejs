@@ -281,7 +281,7 @@ export default {
     const xpxNamespace = AppState.nativeToken.fullNamespace; 
     const XpxAsset = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), 1);
 
-    const buildClass = new BuildTransactions(AppState.networkType);
+    const buildClass = AppState.buildTxn
     const transferBuilder = buildClass.transferBuilder();
     const aggregateBuilder = buildClass.aggregateCompleteBuilder();
 

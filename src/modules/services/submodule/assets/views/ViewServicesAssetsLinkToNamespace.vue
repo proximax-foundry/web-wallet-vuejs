@@ -274,8 +274,8 @@ export default {
       }
     });
 
-    transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
-    transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
+    transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
+    transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
 
     const linkNamespace = () => {
       let assetId;
@@ -289,17 +289,17 @@ export default {
         assetId = account.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
       }
       if(cosigner.value){
-        AssetsUtils.linkedNamespaceToAssetMultiSig(cosigner.value, walletPassword.value, AppState.networkType, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value, selectedAccAdd.value);
+        AssetsUtils.linkedNamespaceToAssetMultiSig(cosigner.value, walletPassword.value, assetId, selectNamespace.value, selectAction.value, selectedAccAdd.value);
       }else{
-        AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, AppState.networkType, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value );
+        AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, assetId, selectNamespace.value, selectAction.value );
       }
       router.push({ name: "ViewServicesAssets", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()} });
     };
 
     watch(selectAction, (n) => {
       if(selectAsset.value){
-        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
-        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
+        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
+        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
         balanceNumber.value = (n=='increase'?maxAmount:parseFloat(assetSupply.value));
       }else{
         balanceNumber.value = (n=='increase'?maxAmount:0);
@@ -309,8 +309,8 @@ export default {
 
     watch(supply, (n) => {
       if(selectAsset.value){
-        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, n, assetDivisibility.value), AppState.nativeToken.divisibility);
-        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectAction.value, n, assetDivisibility.value), AppState.nativeToken.divisibility);
+        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, selectAction.value, n, assetDivisibility.value), AppState.nativeToken.divisibility);
+        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, selectAction.value, n, assetDivisibility.value), AppState.nativeToken.divisibility);
       }
     });
 

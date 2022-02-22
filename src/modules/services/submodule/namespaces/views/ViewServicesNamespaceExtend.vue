@@ -229,8 +229,8 @@ export default {
 
     const transactionFee = ref('0');
     const transactionFeeExact = ref(0);
-    transactionFee.value = Helper.convertToCurrency(NamespaceUtils.getRootNamespaceTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectNamespace.value, duration.value), AppState.nativeToken.divisibility);
-    transactionFeeExact.value = Helper.convertToExact(NamespaceUtils.getRootNamespaceTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectNamespace.value, duration.value), AppState.nativeToken.divisibility);
+    transactionFee.value = Helper.convertToCurrency(NamespaceUtils.getRootNamespaceTransactionFee( selectNamespace.value, duration.value), AppState.nativeToken.divisibility);
+    transactionFeeExact.value = Helper.convertToExact(NamespaceUtils.getRootNamespaceTransactionFee( selectNamespace.value, duration.value), AppState.nativeToken.divisibility);
 
     let isMaxDuration = false;
     watch(duration, (n) => {
@@ -288,9 +288,9 @@ export default {
 
     const extendNamespace = () => {
       if(cosigner.value){
-        NamespaceUtils.extendNamespaceMultisig(cosigner.value, walletPassword.value, AppState.networkType, networkState.currentNetworkProfile.generationHash, selectNamespace.value, duration.value, selectedAccAdd.value);
+        NamespaceUtils.extendNamespaceMultisig(cosigner.value, walletPassword.value, selectNamespace.value, duration.value, selectedAccAdd.value);
       }else{
-        NamespaceUtils.extendNamespace(selectedAccAdd.value, walletPassword.value, AppState.networkType, networkState.currentNetworkProfile.generationHash, selectNamespace.value, duration.value);
+        NamespaceUtils.extendNamespace(selectedAccAdd.value, walletPassword.value, selectNamespace.value, duration.value);
       }
       router.push({ name: "ViewServicesNamespace", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()}});
     };

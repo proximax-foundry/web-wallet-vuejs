@@ -51,6 +51,7 @@ import { ChainUtils } from "@/util/chainUtils"
 import { WalletUtils } from "@/util/walletUtils";
 import { useI18n } from 'vue-i18n'
 import { accountUtils } from '@/util/accountUtils';
+import { AppState } from '@/state/appState';
 
 export default{
   name: 'SelectAccountTypeModal',
@@ -77,8 +78,8 @@ export default{
       err.value = '';
     };
 
-    const linkNewAcc = () =>{
-      const account = WalletUtils.generateNewAccount(ChainUtils.getNetworkType(AppState.networkType));
+    const linkNewAcc = () =>{ 
+      const account = WalletUtils.generateNewAccount(AppState.networkType);
       emitter.emit('NEW ACCOUNT', account);
       toggleModal.value = !toggleModal.value;
     };

@@ -313,7 +313,7 @@ export default {
     const verifyDelegateAcc = async() => {
       const accountDetail = walletState.currentLoggedInWallet.accounts.find(account => account.address == accAddress.value);       
       if (accountDetail) {
-        const publicAccount = Helper.createPublicAccount(accountDetail.publicKey, ChainUtils.getNetworkType(AppState.networkType)); 
+        const publicAccount = Helper.createPublicAccount(accountDetail.publicKey, AppState.networkType); 
         const accountInfo = await chainAPICall.accountAPI.getAccountInfo(publicAccount.address);
      
         delegateAcc.value = accountInfo.linkedAccountKey;
@@ -348,7 +348,7 @@ export default {
           err.value = t('delegate.linkerror')
         }  
       }else{
-        const account = WalletUtils.generateNewAccount(ChainUtils.getNetworkType(AppState.networkType));
+        const account = WalletUtils.generateNewAccount(AppState.networkType);
         if(account){
           AccPublicKey.value = account.publicKey;
          
@@ -359,7 +359,7 @@ export default {
         if (delegateAcc.value !== "0".repeat(64)) { //unlink
           const indexOtherAcc = walletState.currentLoggedInWallet.others.findIndex((other)=> other.publicKey === delegateAcc.value)
           if (indexOtherAcc > -1) {
-            let signedTx = accountUtils.createDelegatTransaction(isMultisig.value,cosigner,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
+            let signedTx = accountUtils.createDelegateTransaction(isMultisig.value,cosigner,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
             /* let signedTx = accountUtils.createDelegatTransaction(accAddress.value,walletPassword.value,AccPublicKey.value, LinkAction.Unlink);  */
             txHash.value = signedTx.hash.toUpperCase()
             
@@ -372,7 +372,7 @@ export default {
             err.value = t('delegate.linkerror2');
           }
         } else if (AccPublicKey.value != "" && (fromPk.value || fromNew.value)) { //link
-          let signedTx = accountUtils.createDelegatTransaction(isMultisig.value,cosigner,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
+          let signedTx = accountUtils.createDelegateTransaction(isMultisig.value,cosigner,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
            /* let signedTx = accountUtils.createDelegatTransaction(accAddress.value,walletPassword.value,AccPublicKey.value, LinkAction.Link);  */
           txHash.value = signedTx.hash.toUpperCase()
           walletPassword.value=""

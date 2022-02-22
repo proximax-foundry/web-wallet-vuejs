@@ -197,7 +197,6 @@ export default {
     };
 
     const getMultiSigCosigner = computed(() => {
-      // return AssetsUtils.getCosignerList(selectedAccAdd.value);
       let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value).publicKey);
       let list = [];
       cosigners.cosignerList.forEach( publicKey => {
@@ -263,9 +262,9 @@ export default {
         assetId = account?account.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId:other.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
       }
       if(cosigner.value){
-        AssetsUtils.linkedNamespaceToAssetMultiSig(cosigner.value, walletPassword.value, AppState.networkType, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value, selectedAccAdd.value);
+        AssetsUtils.linkedNamespaceToAssetMultiSig(cosigner.value, walletPassword.value, assetId, selectNamespace.value, selectAction.value, selectedAccAdd.value);
       }else{
-        AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, AppState.networkType, networkState.currentNetworkProfile.generationHash, assetId, selectNamespace.value, selectAction.value );
+        AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, assetId, selectNamespace.value, selectAction.value );
       }
       clearInput();
     };
@@ -280,8 +279,8 @@ export default {
     };
 
     const assetSelected = () => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getLinkAssetToNamespaceTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectNamespace.value, selectAction.value ), AppState.nativeToken.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getLinkAssetToNamespaceTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, selectAsset.value, selectNamespace.value, selectAction.value), AppState.nativeToken.divisibility);
+      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.getLinkAssetToNamespaceTransactionFee( selectAsset.value, selectNamespace.value, selectAction.value ), AppState.nativeToken.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getLinkAssetToNamespaceTransactionFee( selectAsset.value, selectNamespace.value, selectAction.value), AppState.nativeToken.divisibility);
     };
 
     const setFormInput = (isValidate) => {

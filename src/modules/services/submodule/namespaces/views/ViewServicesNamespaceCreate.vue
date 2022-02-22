@@ -182,8 +182,8 @@ export default {
 
     const lockFundTxFee = computed(()=>{
         if(networkState.currentNetworkProfile){
-          let networkType = ChainUtils.getNetworkType(AppState.networkType);
-          return Helper.convertToExact(TransactionUtils.getLockFundFee(networkType, networkState.currentNetworkProfile.generationHash), AppState.nativeToken.divisibility);
+          let networkType = AppState.networkType;
+          return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
         }
         return 0;  
     });
@@ -260,7 +260,6 @@ export default {
     };
 
     const getMultiSigCosigner = computed(() => {
-      // return AssetsUtils.getCosignerList(selectedAccAdd.value);
       let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value).publicKey);
       let list = [];
       cosigners.cosignerList.forEach( publicKey => {
@@ -299,7 +298,7 @@ export default {
         //root
         disabledDuration.value = false;
         if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
-          fee = NamespaceUtils.getRootNamespaceTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, namespaceName.value);
+          fee = NamespaceUtils.getRootNamespaceTransactionFee(namespaceName.value);
           transactionFee.value = Helper.convertToCurrency(fee, AppState.nativeToken.divisibility);
           transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
         }
@@ -308,7 +307,7 @@ export default {
         //subnamespace
         disabledDuration.value = true;
         if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
-          fee = NamespaceUtils.getSubNamespaceTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, namespaceName.value);
+          fee = NamespaceUtils.getSubNamespaceTransactionFee( namespaceNameSelected, namespaceName.value);
           transactionFee.value = Helper.convertToCurrency(fee, AppState.nativeToken.divisibility);
           transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
         }
@@ -323,15 +322,15 @@ export default {
       if(cosigner.value){
         // for multisig
         if(selectNamespace.value==='1'){
-          NamespaceUtils.createRootNamespaceMultisig(cosigner.value, walletPassword.value, AppState.networkType, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value, selectedAccAdd.value);
+          NamespaceUtils.createRootNamespaceMultisig(cosigner.value, walletPassword.value, namespaceName.value, duration.value, selectedAccAdd.value);
         }else{
-          NamespaceUtils.createSubNamespaceMultisig(cosigner.value, walletPassword.value, AppState.networkType, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value, selectedAccAdd.value);
+          NamespaceUtils.createSubNamespaceMultisig(cosigner.value, walletPassword.value, namespaceName.value, selectNamespace.value, selectedAccAdd.value);
         }
       }else{
         if(selectNamespace.value==='1'){
-          NamespaceUtils.createRootNamespace(selectedAccAdd.value, walletPassword.value, AppState.networkType, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value);
+          NamespaceUtils.createRootNamespace(selectedAccAdd.value, walletPassword.value, namespaceName.value, duration.value);
         }else{
-          NamespaceUtils.createSubNamespace(selectedAccAdd.value, walletPassword.value, AppState.networkType, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value);
+          NamespaceUtils.createSubNamespace(selectedAccAdd.value, walletPassword.value, namespaceName.value, selectNamespace.value);
         }
       }
       router.push({ name: "ViewServicesNamespace", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()} });
@@ -460,14 +459,14 @@ export default {
               
               //root
               if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
-                fee = NamespaceUtils.getRootNamespaceTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, namespaceName.value);
+                fee = NamespaceUtils.getRootNamespaceTransactionFee( namespaceName.value);
                 transactionFee.value = Helper.convertToCurrency(fee, AppState.nativeToken.divisibility);
                 transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
               }
             }else{
               //sub
               if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
-                fee = NamespaceUtils.getSubNamespaceTransactionFee(AppState.networkType, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value);
+                fee = NamespaceUtils.getSubNamespaceTransactionFee(namespaceName.value, selectNamespace.value);
                 transactionFee.value = Helper.convertToCurrency(fee, AppState.nativeToken.divisibility);
                 transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
               }
