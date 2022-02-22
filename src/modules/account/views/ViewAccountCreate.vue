@@ -27,6 +27,7 @@ import { ChainUtils } from '@/util/chainUtils';
 import { Helper } from '@/util/typeHelper';
 import { WalletAccount } from "@/models/walletAccount"
 import {useI18n} from 'vue-i18n'
+import { AppState } from '@/state/appState';
 
 export default {
   name: 'ViewAccountCreate',

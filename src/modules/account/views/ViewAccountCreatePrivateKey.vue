@@ -31,6 +31,7 @@ import { Account, Address, MosaicId, UInt64 } from "tsjs-xpx-chain-sdk";
 import {useI18n} from 'vue-i18n'
 import { Asset } from '@/models/asset';
 import { Reconstruct } from '@/models/wallets';
+import { AppState } from '@/state/appState';
 
 
 
