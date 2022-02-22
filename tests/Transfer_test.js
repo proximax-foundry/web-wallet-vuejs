@@ -20,6 +20,7 @@ module.exports = {
         // create wallet
         create
             .navigate()
+            .change_network()
             .navigate_createpkwallet(browser.launch_url)
             .create_pkwallet(privatekey, name, password1)
 

@@ -10,6 +10,7 @@ module.exports = {
         // to create wallet
         create
             .navigate()
+            .change_network()
             .navigate_createnewwallet(browser.launch_url)
             .create_wallet(name, password)
 
