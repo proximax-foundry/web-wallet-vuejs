@@ -86,18 +86,19 @@
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class="flex mt-0.5 text-white">
-          <div class='text-xs '>Transaction Fee</div>
+          <div v-if="!isMultiSig(selectedAccAdd)" class='text-xs '>Effective Fee</div>
+          <div v-else class='text-xs '>Aggregate Fee</div>
           <div class="text-xs  ml-auto">{{effectiveFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
-        <div v-if="isMultiSig(selectedAccAdd)" class='border-b-2 border-gray-600 my-2'/>
-        <div v-if="isMultiSig(selectedAccAdd)" class="flex  text-white">
+        <div v-if="isMultiSig(selectedAccAdd) " class='border-b-2 border-gray-600 my-2'/>
+        <div v-if="isMultiSig(selectedAccAdd) " class="flex  text-white">
           <div class='text-xs '>LockFund</div>
           <div class="text-xs  ml-auto">{{lockFundCurrency}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div v-if="isMultiSig(selectedAccAdd)" class="flex  text-white">
-          <div class='text-xs '>Transaction Fee</div>
+          <div class='text-xs '>LockFund Tx Fee</div>
           <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
@@ -133,6 +134,7 @@ import TransferTextareaInput from "@/modules/transfer/components/TransferTextare
 import {
   createTransaction,
   makeTransaction,
+  enableACT
 } from "@/util/transfer"; //getMosaicsAllAccounts
 import AddContactModal from "@/modules/transfer/components/AddContactModal.vue";
 import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
@@ -188,7 +190,7 @@ export default {
     const encryptedMsgDisable = ref(true);
     const toggleConfirm = ref(false);
     const forceSend = ref(false);
-    const effectiveFee = ref("22.650000");
+    
     const cosignAddress = ref("");
     const disableAllInput = ref(false);
     const disableRecipient = computed(() => disableAllInput.value);
@@ -199,7 +201,6 @@ export default {
     const disableMsgInput = computed(() => disableAllInput.value);
     const disablePassword = computed(() => disableAllInput.value);
     const cosignerBalanceInsufficient = ref(false);
-    const isSearchNamespace = ref(false);
     const namespace = ref('');
     const networkType = networkState.currentNetworkProfile.network.type;
     const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
@@ -220,7 +221,12 @@ export default {
       )
     );
     
-    const lockFundTxFee = ref(26.700000);
+    const lockFundTxFee = computed(()=>{
+      if(networkState.currentNetworkProfile){
+        return Helper.convertToExact(TransactionUtils.getLockFundFee(), networkState.currentNetworkProfile.network.currency.divisibility);
+      }
+      return 0;  
+    });
     const lockFundTotalFee = computed(
       () => lockFund.value + lockFundTxFee.value
     );
@@ -307,6 +313,16 @@ export default {
             selectedAccAdd.value
           )
         );
+
+    const effectiveFee = ref(isMultiSigBool.value?makeTransaction.calculate_aggregate_fee(
+      messageText.value,
+      sendXPX.value,
+      selectedMosaic.value
+    ) :makeTransaction.calculate_fee(
+      messageText.value,
+      sendXPX.value,
+      selectedMosaic.value
+    ))
     if (isMultiSigBool.value) {
       let cosigner = getWalletCosigner.value.cosignerList
       if (cosigner.length > 0) {
@@ -351,7 +367,7 @@ export default {
         return {left:split[0], right:null}
       }
     })
-    
+   
    
     const moreThanOneAccount = computed(() => {
       return accounts.value.length> 1;
@@ -427,6 +443,7 @@ export default {
         walletPassword.value,
         selectedAccAdd.value,
         selectedCosign,
+        getWalletCosigner.value.cosignerList,
         encryptedMsg.value
       );
       if (!transferStatus) {
@@ -463,7 +480,7 @@ export default {
         if (account.assets != undefined) {
           if (
             account.assets.length == 0 ||
-            mosaicsCreated.value.length == account.assets.length
+            mosaicsCreated.value.length == mosaics.value.length
           ) {
             return true;
           } else {
@@ -478,12 +495,19 @@ export default {
     }
   });
   const totalFee = computed(()=>{
-    if(!isMultiSig(selectedAccAdd.value)){
-      return Number(sendXPX.value) + Number(effectiveFee.value)
-    }if(isMultiSig(selectedAccAdd.value)){
-      return Helper.convertToCurrency((Number(sendXPX.value) + Number(effectiveFee.value) + lockFundTxFee.value + lockFund.value),0)
-    }else{
-      return 0
+    let tokenDivisibility = AppState.nativeToken.divisibility
+    if(!isMultiSig(selectedAccAdd.value) ){
+      if(tokenDivisibility==0){
+        return Math.trunc(parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value))
+      }else{
+        return Math.round((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value))*Math.pow(10,tokenDivisibility))/Math.pow(10,tokenDivisibility)
+      }
+    }else {
+      if(tokenDivisibility== 0){
+        return Math.trunc((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value))
+      }else{
+        return Math.round((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value)*Math.pow(10,tokenDivisibility))/ Math.pow(10,tokenDivisibility)
+      }
     }
   })
 
@@ -667,28 +691,32 @@ export default {
   const checkNamespace = async (nsId)=>{
     return await NamespaceUtils.getLinkedAddress(nsId, chainAPIEndpoint.value);
   }
+  const updateFee = ()=>{
+     effectiveFee.value = isMultiSig(selectedAccAdd.value)? makeTransaction.calculate_aggregate_fee(
+        messageText.value,
+        sendXPX.value,
+        selectedMosaic.value
+      ) : makeTransaction.calculate_fee(
+        messageText.value,
+        sendXPX.value,
+        selectedMosaic.value
+      );
+  }
   watch(selectedAccName, (n, o) => {
     if (n != o) {
       recipientInput.value = "";
+      updateFee()
     }
   });
   watch(sendXPX, (n, o) => {
     if (n != o) {
-      effectiveFee.value = makeTransaction.calculate_fee(
-        n,
-        sendXPX.value,
-        selectedMosaic.value
-      );
+      updateFee()
     }
   });
   
   watch(messageText, (n, o) => {
     if (n != o) {
-      effectiveFee.value = makeTransaction.calculate_fee(
-        n,
-        sendXPX.value,
-        selectedMosaic.value
-      );
+      updateFee()
       if (encryptedMsg.value && messageText.value) {
         remainingChar.value = TransactionUtils.getFakeEncryptedMessageSize(messageText.value);
       } else {
@@ -718,6 +746,7 @@ export default {
   });
 
    watch(() => [...selectedMosaic.value], (n) => {
+     updateFee()
       for(let i = 0; i < n.length; i++){
            if(n[i].amount> getMosaicBalanceById(n[i].id)){
           showAssetBalanceErr.value[i]= true

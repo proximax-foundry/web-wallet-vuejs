@@ -5,13 +5,25 @@
             <div class="uppercase font-light text-gray-500 text-txs text-left mb-2">{{ placeholder }}</div>
             <div class="flex w-full">
                 <img v-if="logo" src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
-                <input v-if="decimal==0" v-maska="'#*'" :disabled="disabled" class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-                <input v-else-if="decimal==1" v-maska="'#*.#'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-                <input v-else-if="decimal==2" v-maska="'#*.##'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-                <input v-else-if="decimal==3" v-maska="'#*.###'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-                <input v-else-if="decimal==4" v-maska="'#*.####'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-                <input v-else-if="decimal==5" v-maska="'#*.#####'" :disabled="disabled"  class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" :placeholder="placeholder" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-                <input v-else v-maska="'#*.######'" :disabled="disabled" class="supply_input" :value="modelValue" @input="$emit('update:modelValue', parseFloat($event.target.value).toString())" @keyup="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+               <AutoNumericVue 
+                :value="modelValue"
+                :disabled ='disabled'
+                class="supply_input"  
+                :options="{
+                  showWarnings : false,
+                  digitGroupSeparator: ',',
+                  decimalCharacter: '.',
+                  currencySymbol: '',
+                  allowDecimalPadding: false,
+                  decimalPlaces: decimal,
+                  roundingMethod: 'U',
+                  minimumValue: '0'
+                }"
+                @input="$emit('update:modelValue',parseFloat($event.target.value.replace(/,/g, '')).toString() )"
+                @keyup="checkBalance($event)"
+                @focus="$event.target.select()" 
+                @blur="blurInputText()"
+               ></AutoNumericVue>
             </div>
         </div>
     </div>
@@ -23,6 +35,7 @@
 import { ref } from 'vue';
 import { maska } from 'maska';
 import Tooltip from 'primevue/tooltip';
+import AutoNumericVue from 'autonumeric-vue/src/components/AutoNumericVue';
 export default{
   name:"TransferInputClean",
   directives: { maska, 'tooltip': Tooltip },
@@ -39,7 +52,9 @@ export default{
     balance: Number,
     toolTip: String,
   },
-
+  components:{
+    AutoNumericVue
+  },
   setup (props) {
     const formatMask = ref("'#*." + ('#')^props.decimal + "'");
     return {

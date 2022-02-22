@@ -68,7 +68,7 @@
             <font-awesome-icon title='Copy' icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link mt-0.5 cursor-pointer " v-if="toggleModal"></font-awesome-icon>
             <font-awesome-icon icon="eye-slash" title='Hide Private Key' class="text-blue-link relative cursor-pointer mt-0.5 ml-1" v-if="toggleModal" @click=" toggleModal = !toggleModal"></font-awesome-icon>
           </div>
-          <p class = 'text-txs mt-2 text-gray-400'>{{$t('createsuccessful.warningtext1')}} {{$t('createsuccessful.warningtext2')}}</p>
+          <div class = 'text-txs mt-2 text-red-400 border px-1.5 py-2 border-red-400 rounded-md'>Make sure you store your private key in a safe place. Access to your digital assets cannot be recovered without it!</div>
       </div>
       <div class='my-6 gray-line'></div>
       <div class='flex'>

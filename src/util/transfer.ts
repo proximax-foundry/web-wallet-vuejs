@@ -22,6 +22,8 @@ import {
   calculateFee,
   TransactionBuilder,
   Password,
+  AggregateTransaction,
+  NamespaceId,
 } from "tsjs-xpx-chain-sdk";
 import { BuildTransactions } from '@/util/buildTransactions';
 //line246
@@ -37,13 +39,16 @@ import { Helper } from "@/util/typeHelper";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { listenerState, AutoAnnounceSignedTransaction, HashAnnounceBlock, AnnounceType } from "@/state/listenerState";
 import { AppState } from "@/state/appState";
+import { WalletAccount } from "@/models/walletAccount";
+import { OtherAccount } from "@/models/otherAccount";
 
 async function getAccInfo(address :string) :Promise<PublicAccount> {
   let accountInfo = await WalletUtils.getAccInfo(address).then(accountinfo => accountinfo.publicAccount);
   return accountInfo;
 }
 
-export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[], walletPassword :string, senderAccAddress :string, cosigner :string, encryptedMsg :string) : Promise<boolean>  => {
+
+export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[], walletPassword :string, senderAccAddress :string, selectedCosigner :string, cosignerList :{publicKey :string}[],encryptedMsg :string) : Promise<boolean>  => {
   // verify password
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword)
   
@@ -53,7 +58,7 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
 
   const hash = networkState.currentNetworkProfile.generationHash
 
-  let networkType = networkState.currentNetworkProfile.network.type
+  let networkType =AppState.networkType
   const recipientAddress = recipient;
 
   let xpxAmount = parseFloat(sendXPX) * Math.pow(10, 6);
@@ -74,30 +79,24 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
       }
     });
   }
-  let transactionBuilder = new BuildTransactions(networkType)
-  /* let transactionBuilder = new TransactionBuilderFactory(); */
-  // calculate fee strategy
+  let transactionBuilder = AppState.buildTxn
 
-  if (ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE || ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE_TEST) {
-    transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
-    //FeeCalculationStrategy.ZeroFeeCalculationStrategy
-  }
-
-  // to get sender's private key
-  let accountDetails, multisigAccountDetails, multisigPublicAccount;
-  if (!cosigner) { // no cosigner, get private key from sender acc name
-    accountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.address === senderAccAddress);
+  let initiatorAcc :WalletAccount
+  let senderAcc :WalletAccount | OtherAccount
+  let senderPublicAccount :PublicAccount;
+  if (!selectedCosigner) { 
+    initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === senderAccAddress);
   } else {
-    // a multisig, get cosigner's private key
-    accountDetails = walletState.currentLoggedInWallet.accounts.find((element) => element.address === cosigner);
-    // get multisig account info
-    multisigAccountDetails = walletState.currentLoggedInWallet.others.find((element) => element.address=== senderAccAddress)? walletState.currentLoggedInWallet.others.find((element) => element.address=== senderAccAddress).publicKey :  walletState.currentLoggedInWallet.accounts.find((element) => element.address=== senderAccAddress).publicKey
-    multisigPublicAccount = PublicAccount.createFromPublicKey(multisigAccountDetails, networkType);
+    // initiator acc details
+    initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedCosigner);
+    //sender acc details
+    senderAcc =  walletState.currentLoggedInWallet.others.find((element) => element.address=== senderAccAddress) || walletState.currentLoggedInWallet.accounts.find((element) => element.address=== senderAccAddress) 
+    let publicKey =senderAcc.publicKey
+    senderPublicAccount = PublicAccount.createFromPublicKey(publicKey, networkType);
   }
 
-  /* console.log('Getting acc details from: ' + accountDetails.address); */
   
-  let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv)
+  let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), initiatorAcc.encrypted, initiatorAcc.iv)
 
 
   // sending encrypted message
@@ -113,49 +112,49 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
   let transferTransaction = transactionBuilder.transfer(Address.createFromRawAddress(recipientAddress),msg,mosaics)
 
   const account = Account.createFromPrivateKey(privateKey, networkType);
-  const transactionHttp = new TransactionHttp(NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint));
 
-  if (!cosigner) { // no cosigner, normal transaction
+  if (!selectedCosigner) { // no cosigner, normal transaction
     const signedTransaction = account.sign(transferTransaction, hash);
-    transactionHttp
-      .announce(signedTransaction)
-      .subscribe(() => {
-        return true;
-      }, err => console.error(err));
-  } else { // there is a cosigner, aggregate transaction
-    console.log('multisigPublicAccount');
-    console.log(multisigPublicAccount);
-    const innerTxn = [transferTransaction.toAggregate(multisigPublicAccount)];
-
+    AppState.chainAPI.transactionAPI
+    .announce(signedTransaction)
+    .then(announcedTx=>{
+      console.log(announcedTx)
+    })
+    .catch(err=>console.log(err))
+  } else { // there is a cosigner, aggregate  bonded transaction
+    let cosignerAcc :Account[] =  []
+    cosignerList.forEach((signer) => {
+      const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === signer.publicKey)
+      let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
+      cosignerAcc.push(Account.createFromPrivateKey(privateKey, networkType));
+    });
+    let selectedWalletSigner = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==selectedCosigner) 
+    let selectedSignerPrivateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), selectedWalletSigner.encrypted, selectedWalletSigner.iv);
+    let selectedSignerAccount = Account.createFromPrivateKey(selectedSignerPrivateKey,networkType)
+    let index = cosignerAcc.findIndex(acc=>acc.address.plain()==selectedCosigner)
+    cosignerAcc.splice(index,1)
+    const innerTxn = [transferTransaction.toAggregate(senderPublicAccount)];
     const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn)
-    console.log('aggregateBondedTransaction');
-    console.log(aggregateBondedTransaction);
-    // if (otherCosigners.length > 0) {
-    //   return cosignatoryAccount.signTransactionWithCosignatories(bondedCreated, otherCosigners, generationHash);
-    // }
-    const aggregateBondedTransactionSigned = account.sign(aggregateBondedTransaction, hash);
-    console.log('aggregateBondedTransactionSigned');
-    console.log(aggregateBondedTransactionSigned);
-    const hashLockTransaction = transactionBuilder.hashLock(new Mosaic(new MosaicId(environment.mosaicXpxInfo.id), UInt64.fromUint(Number(10000000))),UInt64.fromUint(environment.lockFundDuration),aggregateBondedTransactionSigned)
-    const hashLockTransactionSigned = account.sign(hashLockTransaction, hash);
+    const aggregateBondedTransactionSigned = selectedSignerAccount.signTransactionWithCosignatories(aggregateBondedTransaction,cosignerAcc, hash);
+    const nativeTokenNamespace = networkState.currentNetworkProfile.network.currency.namespace;
+    const lockingAtomicFee = networkState.currentNetworkProfileConfig.lockedFundsPerAggregate ?? 0;
+    const hashLockTransaction = transactionBuilder.hashLock(
+      new Mosaic(new NamespaceId(nativeTokenNamespace), UInt64.fromUint(lockingAtomicFee)),
+      UInt64.fromUint(1000),
+      aggregateBondedTransactionSigned,
+    );
+    const hashLockTransactionSigned = selectedSignerAccount.sign(hashLockTransaction, hash)
+    let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(aggregateBondedTransactionSigned);
+    autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(hashLockTransactionSigned.hash);
+    autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
+    autoAnnounceSignedTx.type = AnnounceType.BONDED;
 
-   
-      try {
-        let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(aggregateBondedTransactionSigned);
-        autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(hashLockTransactionSigned.hash);
-        autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
-        autoAnnounceSignedTx.type = AnnounceType.BONDED;
+    ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
 
-        ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
-
-        AppState.chainAPI.transactionAPI.announce(hashLockTransactionSigned);
-        AppState.isPendingTxnAnnounce = true;
-      } catch (error) {
-        console.log(error);
-      }
-      
-    
+    AppState.chainAPI.transactionAPI.announce(hashLockTransactionSigned);
+    AppState.isPendingTxnAnnounce = true;
   }
+  
   return Promise.resolve(true)
 }
 
@@ -167,31 +166,46 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
  * @param message
  * @memberof ViewTransferComponent
  */
+//random account info
+
+const test_publicKey = "0".repeat(64)
+const test_address = PublicAccount.createFromPublicKey(test_publicKey,AppState.networkType).address.plain() 
+
+const getMosaic =(amount :string, mosaic :{id :string ,amount :string}[]) :Mosaic[]=>{
+  let mosaics :Mosaic[]= []
+  if (parseInt(amount) > 0) {
+    mosaics.push(new Mosaic(new MosaicId(networkState.currentNetworkProfile.network.currency.assetId), UInt64.fromUint(Number(amount))));
+  }
+  if (mosaic.length > 0) {
+    mosaic.forEach((mosaicSentInfo, index) => {
+      if (parseInt(mosaicSentInfo.amount) > 0) {
+        mosaics.push(
+          new Mosaic(
+            new MosaicId(mosaicSentInfo.id),
+            UInt64.fromUint(Number(mosaicSentInfo.amount)))
+          )
+        }
+        
+      })
+    }
+  return mosaics
+}
+
+const calculate_aggregate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[]):string=> {
+  
+  let mosaics = getMosaic(amount,mosaic)
+  let transactionBuilder = AppState.buildTxn
+  let transferTransaction = transactionBuilder.transfer(Address.createFromRawAddress(test_address),PlainMessage.create(message),mosaics)
+  return  Helper.amountFormatterSimple(transactionBuilder.aggregateBonded([transferTransaction.toAggregate(PublicAccount.createFromPublicKey(test_publicKey,AppState.networkType))]).maxFee.compact(),AppState.nativeToken.divisibility )
+}
 
 const calculate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[]) :string=> {
-  let mosaicsToSend = validateMosaicsToSend(amount, mosaic);
-  let transactionBuilder = new BuildTransactions(networkState.currentNetworkProfile.network.type)
-  if (ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE || ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE_TEST) {
-    transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
-    //FeeCalculationStrategy.ZeroFeeCalculationStrategy
-  }
-  const x = TransferTransaction.calculateSize(PlainMessage.create(message).size(), mosaicsToSend.length);
-  const b = calculateFee(x, transactionBuilder.getFeeStrategy());
-  let fee;
-  if (parseInt(message, 10) > 0) {
-    fee = Helper.amountFormatterSimple(b.compact());
-  } else if (parseInt(message, 10) === 0 && mosaicsToSend.length === 0) {
-    if (transactionBuilder.getFeeStrategy() === FeeCalculationStrategy.ZeroFeeCalculationStrategy)
-      fee = '0.000000';
-    else {
-      fee = TransferTransaction.calculateSize(parseInt(message, 10), mosaicsToSend.length) * transactionBuilder.getFeeStrategy() / 1000000;
-      fee = fee.toString()
-      //fee = '0.037250';
-    }
-  } else {
-    fee = Helper.amountFormatterSimple(b.compact());
-  }
-  return fee;
+ /*  let mosaicsToSend = validateMosaicsToSend(amount, mosaic); */
+  let transactionBuilder = AppState.buildTxn
+  let mosaics = getMosaic(amount,mosaic)
+  
+  return Helper.amountFormatterSimple(transactionBuilder.transfer(Address.createFromRawAddress(test_address),PlainMessage.create(message), mosaics).maxFee.compact(), AppState.nativeToken.divisibility)
+ 
 }
 
 /**
@@ -260,6 +274,7 @@ const addZeros = (cant : number, amount :string = '0' ):string => {
 
 
 export const makeTransaction = readonly({
-  calculate_fee
+  calculate_fee,
+  calculate_aggregate_fee
 })
 
