@@ -17,6 +17,7 @@ module.exports = {
 
         create
             .navigate()
+            .change_network()
             .navigate_createnewwallet(browser.launch_url)
             .emptyinput_wallet()
             .different_password(name, password, password2)
@@ -39,6 +40,7 @@ module.exports = {
 
         create
             .navigate()
+            .change_network()
             .navigate_createpkwallet(browser.launch_url)
             .emptyinput_pkwallet()
             .different_password_pk(privatekey, name, password, password2)
@@ -59,6 +61,7 @@ module.exports = {
         var create = browser.page.Createwallet();
         create
             .navigate()
+            .change_network()
             .navigate_createbackupwallet(browser.launch_url)
     }
 
