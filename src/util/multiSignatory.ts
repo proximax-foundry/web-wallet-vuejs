@@ -20,9 +20,6 @@ import { OtherAccount } from "@/models/otherAccount";
 import { Helper } from "./typeHelper";
 import { ChainUtils } from "./chainUtils";
 
-const generationHash = networkState.currentNetworkProfile.generationHash
-const networkType = AppState.networkType
-
 function verifyContactPublicKey(address :string) :Promise<{status: boolean, publicKey: string}>{
   const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
   return new Promise((resolve) => {
@@ -95,13 +92,13 @@ const getAggregateFee = async (publicKey :string,addedCosigners: string[],numApp
   let cosignatory 
     for(let cosignKey of addedCosigners){
       if (cosignKey.length == 64) {
-        cosignatory = PublicAccount.createFromPublicKey(cosignKey, networkType);
+        cosignatory = PublicAccount.createFromPublicKey(cosignKey, AppState.networkType);
       } else if (cosignKey.length == 40 || cosignKey.length == 46) {
         let address = Address.createFromRawAddress(cosignKey);
 
         try {
           let publicKey = await getPublicKey(address);
-          cosignatory = PublicAccount.createFromPublicKey(publicKey, networkType);
+          cosignatory = PublicAccount.createFromPublicKey(publicKey, AppState.networkType);
         } catch (error) {
           console.log(error);
         }
@@ -117,7 +114,7 @@ const getAggregateFee = async (publicKey :string,addedCosigners: string[],numApp
         if(!cosignatory){
           cosignatory = []
         }
-        cosignatory[addedCosigners.length + index] = PublicAccount.createFromPublicKey(element, networkType);
+        cosignatory[addedCosigners.length + index] = PublicAccount.createFromPublicKey(element, AppState.networkType);
         multisigCosignatory.push(new MultisigCosignatoryModification(
           MultisigCosignatoryModificationType.Remove,
           cosignatory[addedCosigners.length + index],
@@ -125,7 +122,7 @@ const getAggregateFee = async (publicKey :string,addedCosigners: string[],numApp
       });
     }
     let txBuilder = AppState.buildTxn
-    let publicAcc = PublicAccount.createFromPublicKey(publicKey,networkType)
+    let publicAcc = PublicAccount.createFromPublicKey(publicKey,AppState.networkType)
     let relativeNumApproveTransaction = numApprove- acc.multisigInfo.find(element => element.level === 0).minApproval;
     let relativeNumDeleteUser = numDelete - acc.multisigInfo.find(element => element.level === 0).minRemoval
     let convertIntoMultisigTransaction = txBuilder.modifyMultisigAccountBuilder()
@@ -151,20 +148,20 @@ async function convertAccount(coSign :string[], numApproveTransaction :number, n
   
   const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.name ===accountToConvertName)
   
-  const networkType = AppState.networkType
+  
   let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
-  const accountToConvert = Account.createFromPrivateKey(privateKey, networkType);
+  const accountToConvert = Account.createFromPrivateKey(privateKey, AppState.networkType);
 
   let cosignatory 
   for(let cosignKey of coSign ){
     if (cosignKey.length == 64) {
-      cosignatory = PublicAccount.createFromPublicKey(cosignKey, networkType);
+      cosignatory = PublicAccount.createFromPublicKey(cosignKey, AppState.networkType);
     } else if (cosignKey.length == 40 || cosignKey.length == 46) {
       let address = Address.createFromRawAddress(cosignKey);
 
       try {
         let publicKey = await getPublicKey(address);
-        cosignatory = PublicAccount.createFromPublicKey(publicKey, networkType);
+        cosignatory = PublicAccount.createFromPublicKey(publicKey, AppState.networkType);
       } catch (error) {
         console.log(error);
       }
@@ -186,9 +183,9 @@ async function convertAccount(coSign :string[], numApproveTransaction :number, n
   .innerTransactions([convertIntoMultisigTransaction.toAggregate(accountToConvert.publicAccount)])
   .build()
   
-  const signedAggregateBondedTransaction = accountToConvert.sign(aggregateBondedTransaction, generationHash);
+  const signedAggregateBondedTransaction = accountToConvert.sign(aggregateBondedTransaction, networkState.currentNetworkProfile.generationHash);
   let lockFundsTransaction =  TransactionUtils.lockFundTx(signedAggregateBondedTransaction)
-  const lockFundsTransactionSigned = accountToConvert.sign(lockFundsTransaction, generationHash);
+  const lockFundsTransactionSigned = accountToConvert.sign(lockFundsTransaction, networkState.currentNetworkProfile.generationHash);
   TransactionUtils.announceLF_AND_addAutoAnnounceABT(lockFundsTransactionSigned,signedAggregateBondedTransaction)
       
   return verify
@@ -365,13 +362,13 @@ async function modifyMultisigAccount(coSign :string[], removeCosign :string[], n
   const cosignatory :PublicAccount[]=[] 
   for(let [index,cosignKey] of coSign.entries() ){
     if (cosignKey.length == 64) { 
-      cosignatory[index] = PublicAccount.createFromPublicKey(cosignKey, networkType);
+      cosignatory[index] = PublicAccount.createFromPublicKey(cosignKey, AppState.networkType);
     } else if (cosignKey.length == 40 || cosignKey.length == 46) {
       // option to accept address
       let address = Address.createFromRawAddress(cosignKey);
       try {
         let publicKey = await getPublicKey(address); 
-        cosignatory[index] = PublicAccount.createFromPublicKey(publicKey, networkType);
+        cosignatory[index] = PublicAccount.createFromPublicKey(publicKey, AppState.networkType);
       } catch (error) {
         console.log(error);
       }
@@ -384,7 +381,7 @@ async function modifyMultisigAccount(coSign :string[], removeCosign :string[], n
   }
 
   removeCosign.forEach((element, index) => {
-    cosignatory[coSign.length + index] = PublicAccount.createFromPublicKey(element, networkType);
+    cosignatory[coSign.length + index] = PublicAccount.createFromPublicKey(element, AppState.networkType);
     multisigCosignatory.push(new MultisigCosignatoryModification(
       MultisigCosignatoryModificationType.Remove,
       cosignatory[coSign.length + index],
@@ -405,22 +402,22 @@ async function modifyMultisigAccount(coSign :string[], removeCosign :string[], n
   cosigners.forEach((signer) => {
     const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.address === signer.address)
     let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
-    coSigner.push(Account.createFromPrivateKey(privateKey, networkType));
+    coSigner.push(Account.createFromPrivateKey(privateKey, AppState.networkType));
   });
-  let publicAcc = PublicAccount.createFromPublicKey(multisigAccount.publicKey,networkType)
+  let publicAcc = PublicAccount.createFromPublicKey(multisigAccount.publicKey,AppState.networkType)
   let aggregateBondedTransaction = txBuilder.aggregateBondedBuilder()
   .innerTransactions([modifyMultisigTransaction.toAggregate(publicAcc)])
   .build()
   
   let firstCosigner = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==coSigner[0].address.plain()) 
   let cosignerPrivateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), firstCosigner.encrypted, firstCosigner.iv);
-  let firstSignerAccount = Account.createFromPrivateKey(cosignerPrivateKey,networkType)
+  let firstSignerAccount = Account.createFromPrivateKey(cosignerPrivateKey,AppState.networkType)
   coSigner.splice(0,1)
   const signedAggregateBondedTransaction =  firstSignerAccount.signTransactionWithCosignatories(
-    aggregateBondedTransaction,coSigner,generationHash
+    aggregateBondedTransaction,coSigner,networkState.currentNetworkProfile.generationHash
   )
   const lockFundsTransaction = TransactionUtils.lockFundTx(signedAggregateBondedTransaction)
-  const lockFundsTransactionSigned = firstSignerAccount.sign(lockFundsTransaction, generationHash);
+  const lockFundsTransactionSigned = firstSignerAccount.sign(lockFundsTransaction, networkState.currentNetworkProfile.generationHash);
   TransactionUtils.announceLF_AND_addAutoAnnounceABT(lockFundsTransactionSigned,signedAggregateBondedTransaction)
 
   return verify

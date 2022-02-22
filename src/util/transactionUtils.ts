@@ -1,60 +1,17 @@
-import { readonly, computed } from "vue";
 import {
   Account,
-  Address,
-  Deadline,
   EncryptedMessage,
-  // NetworkCurrencyMosaic,
-  // FeeCalculationStrategy,
   Mosaic,
-  MosaicId,
   UInt64,
-  MosaicProperties,
-  MosaicSupplyType,
-  // MosaicService,
-  MosaicNonce,
   PlainMessage,
-  TransferTransaction,
-  TransactionHttp,
-  TransactionBuilderFactory,
   PublicAccount,
-  AccountHttp,
-  AccountInfo,
-  FeeCalculationStrategy,
-  NetworkType,
   NamespaceId,
   Transaction,
   TransactionType,
   AggregateTransaction,
   CosignatureTransaction,
   TransactionQueryParams,
-  AddressAliasTransaction,
-  AddExchangeOfferTransaction,
-  ChainConfigTransaction,
-  ChainUpgradeTransaction,
-  ExchangeOfferTransaction,
-  RemoveExchangeOfferTransaction,
-  AccountLinkTransaction,
-  LockFundsTransaction,
-  // ModifyMetadataTransaction,
-  AccountMetadataTransaction,
-  NamespaceMetadataTransaction,
-  MosaicMetadataTransaction,
-  AccountMosaicRestrictionModificationTransaction,
-  AccountOperationRestrictionModificationTransaction,
-  AccountAddressRestrictionModificationTransaction,
-  ModifyMultisigAccountTransaction,
-  MosaicAliasTransaction,
-  MosaicDefinitionTransaction,
-  MosaicSupplyChangeTransaction,
-  RegisterNamespaceTransaction,
-  SecretLockTransaction,
-  SecretProofTransaction,
   InnerTransaction,
-  ExchangeOfferType,
-  HashType,
-  RestrictionType,
-  AccountRestrictionModification,
   SignedTransaction,
   CosignatureSignedTransaction,
   TransactionGroupType,
@@ -63,14 +20,12 @@ import {
   HashLockTransaction,
   TransactionAnnounceResponse
 } from "tsjs-xpx-chain-sdk";
-import { ChainUtils } from "../util/chainUtils";
 import { AppState } from "@/state/appState";
 import { ChainConfigUtils } from "./chainConfigUtils";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { AnnounceType, AutoAnnounceSignedTransaction, HashAnnounceBlock } from "@/state/listenerState";
 import { networkState } from "@/state/networkState";
 
-const localNetworkType = computed(() => AppState.networkType);
 
 export const transactionTypeName = {
   transfer: {
@@ -214,7 +169,7 @@ export class TransactionUtils {
   }
 
   static getFakeEncryptedMessageSize(message: string): number{
-    return EncryptedMessage.create(message, PublicAccount.createFromPublicKey("0".repeat(64), localNetworkType.value), "0".repeat(64)).size();
+    return EncryptedMessage.create(message, PublicAccount.createFromPublicKey("0".repeat(64), AppState.networkType), "0".repeat(64)).size();
   }
 
   static getPlainMessageSize(message: string): number{
