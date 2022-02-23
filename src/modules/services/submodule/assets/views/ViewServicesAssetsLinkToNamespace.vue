@@ -255,7 +255,8 @@ export default {
       list.push({
         publicKey,
         name: fetchAccount(publicKey).name,
-        balance: fetchAccount(publicKey).balance
+        balance: fetchAccount(publicKey).balance,
+        address: fetchAccount(publicKey).address
       });
     });
     cosigners.cosignerList = list;
