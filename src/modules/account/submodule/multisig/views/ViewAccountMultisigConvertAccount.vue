@@ -89,9 +89,7 @@
             <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
             <div class="flex-cols">
                <div class="text-txs">Your account has insufficient amount of XPX. Please top up first before continue transacting on this page.</div>
-               <a v-if="networkState.chainNetwork == 0" class="text-xs text-blue-primary font-semibold underline " href="https://www.proximax.io/en/xpx" target="_blank">Top Up XPX<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
-               <a v-if="networkState.chainNetwork == 1" class="text-xs text-blue-primary font-semibold underline " href="https://bctestnetfaucet.xpxsirius.io/#/" target="_blank">Top Up XPX<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
-               <a v-if="networkState.chainNetwork == 2" class="text-xs text-blue-primary font-semibold underline " href="https://bctestnet2faucet.xpxsirius.io/#/" target="_blank">Top Up XPX<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
+               <a v-if="networkType ==168" class="text-xs text-blue-primary font-semibold underline " :href="topUpUrl" target="_blank">Top Up {{currentNativeTokenName}}<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
             </div>
           </div>
         </div>
@@ -198,9 +196,7 @@ export default {
     const toggleContact = ref([])
     const onPartial = ref(false);
     const space=ref(false)
-    let isMultisig = computed(()=>{
-      return multiSign.checkIsMultiSig(acc.address)
-    }) 
+   
      const lockFundCurrency = computed(() =>
       Helper.convertToCurrency(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
@@ -216,12 +212,16 @@ export default {
     const aggregateFee = ref(0)
     
      // get account details
-    const acc =  walletState.currentLoggedInWallet.accounts.find(acc =>acc.name ===p.name) ;
-    if(acc== undefined){
+    const acc = computed(()=>walletState.currentLoggedInWallet.accounts.find(acc =>acc.name ===p.name)) 
+    if(acc.value== undefined){
       router.push({ name: "ViewAccountDisplayAll"});
     }
+
+    let isMultisig = computed(()=>{
+      return multiSign.checkIsMultiSig(acc.value.address)
+    }) 
     let updateAggregateFee=()=>{
-      multiSign.getAggregateFee(acc.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value).then(fee=>{
+      multiSign.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value).then(fee=>{
        aggregateFee.value=fee
      })
     }
@@ -239,13 +239,13 @@ export default {
     const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const accountBalance = computed(() => {
       if(walletState.currentLoggedInWallet){
-        return Helper.toCurrencyFormat(acc.balance, currentNativeTokenDivisibility.value);
+        return Helper.toCurrencyFormat(acc.value.balance, currentNativeTokenDivisibility.value);
       }else{
         return 0
       }
     });
     const contact = computed(() => {
-      return multiSign.generateContact(acc.address,acc.name)
+      return multiSign.generateContact(acc.value.address,acc.value.name)
     });
      const splitBalance = computed(()=>{
       let split = accountBalance.value.split(".")
@@ -260,7 +260,7 @@ export default {
     ));
     const addCoSigButton = computed(() => {
       var status = false;
-      if(acc.balance >= 10.0445 && !onPartial.value){
+      if(acc.value.balance >= totalFee.value && !onPartial.value){
         for(var i = 0; i < coSign.value.length; i++){
           if(showAddressError.value[i] != ''){
             status = true;
@@ -287,7 +287,7 @@ export default {
       maxNumDeleteUser.value = 0;
     };
     const convertAccount = async() => {
-      let convertstatus = await multiSign.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.name, passwd.value);
+      let convertstatus = await multiSign.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.value.name, passwd.value);
       if(!convertstatus){
         err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
       }else{
@@ -303,7 +303,7 @@ export default {
       for(var i = 0; i < coSign.value.length; i++){
         if((coSign.value[i].length == 64) || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)){
           checkCosign(i)
-          if(coSign.value[i]==acc.address || coSign.value[i]==Helper.createAddress(acc.address).pretty() || coSign.value[i]==acc.publicKey ){
+          if(coSign.value[i]==acc.value.address || coSign.value[i]==Helper.createAddress(acc.value.address).pretty() || coSign.value[i]==acc.value.publicKey ){
             showAddressError.value[i] = true;
             err.value = "Cosigner cannot be this account itself"
           }
@@ -412,22 +412,8 @@ export default {
     });
     const disabledPassword = computed(() => (onPartial.value || isMultisig.value ));
    
-    setTimeout(()=> {
-      if(accountBalance.value < 10.0445){
-        fundStatus.value = true;
-      }else{
-        fundStatus.value = false;
-      }
-    }, 500);
-    watch(accountBalance, (n) => {
-      if(n < 10.0445){
-        fundStatus.value = true;
-      }else{
-        fundStatus.value = false;
-      }
-    });
     // check if onPartial
-    multiSign.onPartial(PublicAccount.createFromPublicKey(acc.publicKey,AppState.networkType)).then(verify=>
+    multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)).then(verify=>
       onPartial.value = verify
     )
     
@@ -464,6 +450,30 @@ export default {
         }
       });
     });
+
+    if(acc.value.balance<totalFee.value){
+        fundStatus.value = true
+      }
+    
+    watch(acc, (n) => {
+      if(n.balance<totalFee.value){
+        fundStatus.value = true
+      }else{
+        fundStatus.value = false
+      }
+    });
+
+    const topUpUrl = computed(()=>{
+      if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
+        return 'https://bctestnetfaucet.xpxsirius.io/#/'
+      }else if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 2'){
+        return 'https://bctestnet2faucet.xpxsirius.io/#/'
+      }else{
+        return ''
+      }
+    }) 
+
+    const networkType = computed(()=>AppState.networkType)
     return {
       networkState,
       toggleContact,
@@ -501,7 +511,9 @@ export default {
       lockFundCurrency,
       lockFundTxFee,
       aggregateFee,
-      totalFee
+      totalFee,
+      topUpUrl,
+      networkType
     };
   },
 }
