@@ -202,7 +202,7 @@ const getLinkNamespaceToAddressTransactionFee = (isMultisig :boolean,namespaceAd
   
 }
 
-const linkNamespaceToAddress = (isMultisig :boolean,cosigners: string[], multisigAccount: WalletAccount | OtherAccount, walletPassword: string, namespaceID: string, linkType: string, namespaceAddress: string) :SignedTransaction=> {
+const linkNamespaceToAddress = (selectedCosign :string,isMultisig :boolean,cosigners: string[], multisigAccount: WalletAccount | OtherAccount, walletPassword: string, namespaceID: string, linkType: string, namespaceAddress: string) :SignedTransaction=> {
   const namespaceTransaction = linkNamespaceToAddressTransaction(namespaceID, linkType, namespaceAddress);
   const senderAddress = multisigAccount.address
   const senderAccount = getAccountDetail(senderAddress, walletPassword)
@@ -221,18 +221,20 @@ const linkNamespaceToAddress = (isMultisig :boolean,cosigners: string[], multisi
       let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
       cosignerAcc.push(Account.createFromPrivateKey(privateKey, AppState.networkType));
     });
-    const aggreateBondedTx = TransactionUtils.aggregateBondedTx(innerTx)
-    const firstSigner = cosignerAcc[0]
-    const signedAggregateBondedTransaction = firstSigner.sign(aggreateBondedTx,networkState.currentNetworkProfile.generationHash);
+    const aggregateBondedTx = TransactionUtils.aggregateBondedTx(innerTx);
+    const initiatorAcc = cosignerAcc.find(acc=>acc.publicKey==selectedCosign)
+    let index = cosignerAcc.findIndex(acc=>acc.publicKey==selectedCosign)
+    cosignerAcc.splice(index,1)
+    const signedAggregateBondedTransaction = initiatorAcc.sign(aggregateBondedTx,networkState.currentNetworkProfile.generationHash);
     signedTransaction = signedAggregateBondedTransaction
     const lockFundsTransaction = TransactionUtils.lockFundTx(signedAggregateBondedTransaction)
-    const lockFundsTransactionSigned = firstSigner.sign(lockFundsTransaction, networkState.currentNetworkProfile.generationHash);
+    const lockFundsTransactionSigned = initiatorAcc.sign(lockFundsTransaction, networkState.currentNetworkProfile.generationHash);
     TransactionUtils.announceLF_AND_addAutoAnnounceABT(lockFundsTransactionSigned,signedAggregateBondedTransaction) 
-    
   }
   return signedTransaction
 }
-const createDelegateTransaction = (isMultisig :boolean,cosigners: string[],multisigAccount: WalletAccount, walletPassword: string, accPublicKey: string, delegateAction: LinkAction) :SignedTransaction=>{
+
+const createDelegateTransaction = (selectedCosign :string,isMultisig :boolean,cosigners: string[],multisigAccount: WalletAccount, walletPassword: string, accPublicKey: string, delegateAction: LinkAction) :SignedTransaction=>{
 
   const senderAddress = multisigAccount.address
   const senderAccount = getAccountDetail(senderAddress, walletPassword);
@@ -254,13 +256,14 @@ const createDelegateTransaction = (isMultisig :boolean,cosigners: string[],multi
     });
       
     const aggregateBondedTx = TransactionUtils.aggregateBondedTx(innerTx);
-    const firstSignerAcc = cosignerAcc[0]
-    cosignerAcc.splice(0,1)
-    const signedAggregateBondedTransaction = firstSignerAcc.signTransactionWithCosignatories(aggregateBondedTx,cosignerAcc, networkState.currentNetworkProfile.generationHash);
+    const initiatorAcc = cosignerAcc.find(acc=>acc.publicKey==selectedCosign)
+    let index = cosignerAcc.findIndex(acc=>acc.publicKey==selectedCosign)
+    cosignerAcc.splice(index,1)
+    const signedAggregateBondedTransaction =  initiatorAcc.signTransactionWithCosignatories(aggregateBondedTx,cosignerAcc, networkState.currentNetworkProfile.generationHash);
     
     signedTransaction = signedAggregateBondedTransaction
     const lockFundsTransaction = TransactionUtils.lockFundTx(signedAggregateBondedTransaction)
-    const lockFundsTransactionSigned = firstSignerAcc.sign(lockFundsTransaction, networkState.currentNetworkProfile.generationHash);
+    const lockFundsTransactionSigned = initiatorAcc.sign(lockFundsTransaction, networkState.currentNetworkProfile.generationHash);
     TransactionUtils.announceLF_AND_addAutoAnnounceABT(lockFundsTransactionSigned,signedAggregateBondedTransaction) 
 
   }

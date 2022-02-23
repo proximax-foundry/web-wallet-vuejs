@@ -350,7 +350,7 @@ function getCosignerInWallet(publicKey :string) :{hasCosigner:boolean,cosignerLi
 } */
 
 // modify multisig
-async function modifyMultisigAccount(coSign :string[], removeCosign :string[], numApproveTransaction :number, numDeleteUser :number, cosigners :{address :string}[] , multisigAccount :WalletAccount | OtherAccount, walletPassword :string) :Promise<boolean> {
+async function modifyMultisigAccount(selectedCosign: string,coSign :string[], removeCosign :string[], numApproveTransaction :number, numDeleteUser :number, cosigners :{address :string}[] , multisigAccount :WalletAccount | OtherAccount, walletPassword :string) :Promise<boolean> {
 
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPassword);
   if (! verify) {
@@ -409,15 +409,16 @@ async function modifyMultisigAccount(coSign :string[], removeCosign :string[], n
   .innerTransactions([modifyMultisigTransaction.toAggregate(publicAcc)])
   .build()
   
-  let firstCosigner = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==coSigner[0].address.plain()) 
-  let cosignerPrivateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), firstCosigner.encrypted, firstCosigner.iv);
-  let firstSignerAccount = Account.createFromPrivateKey(cosignerPrivateKey,AppState.networkType)
-  coSigner.splice(0,1)
-  const signedAggregateBondedTransaction =  firstSignerAccount.signTransactionWithCosignatories(
+  let initiator = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==selectedCosign) 
+  let initiatorPrivateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), initiator.encrypted, initiator.iv);
+  let initiatorAccount = Account.createFromPrivateKey(initiatorPrivateKey,AppState.networkType)
+  let index = coSigner.findIndex(acc=>acc.publicKey==selectedCosign)
+  coSigner.splice(index,1)
+  const signedAggregateBondedTransaction =  initiatorAccount.signTransactionWithCosignatories(
     aggregateBondedTransaction,coSigner,networkState.currentNetworkProfile.generationHash
   )
   const lockFundsTransaction = TransactionUtils.lockFundTx(signedAggregateBondedTransaction)
-  const lockFundsTransactionSigned = firstSignerAccount.sign(lockFundsTransaction, networkState.currentNetworkProfile.generationHash);
+  const lockFundsTransactionSigned = initiatorAccount.sign(lockFundsTransaction, networkState.currentNetworkProfile.generationHash);
   TransactionUtils.announceLF_AND_addAutoAnnounceABT(lockFundsTransactionSigned,signedAggregateBondedTransaction)
 
   return verify
