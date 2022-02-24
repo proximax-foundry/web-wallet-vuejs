@@ -2,45 +2,23 @@ import { readonly } from "vue";
 import {
   Account,
   Address,
-  Deadline,
   EncryptedMessage,
-  // NetworkCurrencyMosaic,
   Mosaic,
   MosaicId,
   UInt64,
-  MosaicProperties,
-  MosaicSupplyType,
-  FeeCalculationStrategy,
-  // MosaicService,
-  MosaicNonce,
   PlainMessage,
-  TransferTransaction,
-  TransactionHttp,
-  TransactionBuilderFactory,
   PublicAccount,
-  NetworkType,
-  calculateFee,
-  TransactionBuilder,
   Password,
-  AggregateTransaction,
-  NamespaceId,
 } from "tsjs-xpx-chain-sdk";
-import { BuildTransactions } from '@/util/buildTransactions';
-//line246
-// import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
-import { environment } from '@/environment/environment';
+
 import { networkState } from "@/state/networkState";
-import { NetworkStateUtils } from "@/state/utils/networkStateUtils";
 import { walletState } from "@/state/walletState";
-import { ChainUtils } from '@/util/chainUtils';
 import { WalletUtils } from '@/util/walletUtils'
 import { Helper } from "@/util/typeHelper";
-// const config = require("@/../config/config.json");
-import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
-import { listenerState, AutoAnnounceSignedTransaction, HashAnnounceBlock, AnnounceType } from "@/state/listenerState";
 import { AppState } from "@/state/appState";
 import { WalletAccount } from "@/models/walletAccount";
 import { OtherAccount } from "@/models/otherAccount";
+import { TransactionUtils } from "./transactionUtils";
 
 async function getAccInfo(address :string) :Promise<PublicAccount> {
   let accountInfo = await WalletUtils.getAccInfo(address).then(accountinfo => accountinfo.publicAccount);
@@ -61,11 +39,11 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
   let networkType =AppState.networkType
   const recipientAddress = recipient;
 
-  let xpxAmount = parseFloat(sendXPX) * Math.pow(10, 6);
+  let xpxAmount = parseFloat(sendXPX) * Math.pow(10, AppState.nativeToken.divisibility);
 
   let mosaics = [];
   if (xpxAmount > 0) {
-    mosaics.push(new Mosaic(new MosaicId(networkState.currentNetworkProfile.network.currency.assetId), UInt64.fromUint(Number(xpxAmount))));
+    mosaics.push(new Mosaic(new MosaicId(AppState.nativeToken.assetId), UInt64.fromUint(Number(xpxAmount))));
   }
   if (mosaicsSent.length > 0) {
     mosaicsSent.forEach((mosaicSentInfo, index) => {
@@ -109,18 +87,17 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
     msg = PlainMessage.create(messageText);
   }
 
-  let transferTransaction = transactionBuilder.transfer(Address.createFromRawAddress(recipientAddress),msg,mosaics)
+  let transferTransaction = transactionBuilder.transferBuilder()
+  .recipient(Address.createFromRawAddress(recipientAddress))
+  .mosaics(mosaics)
+  .message(msg)
+  .build()
 
   const account = Account.createFromPrivateKey(privateKey, networkType);
 
   if (!selectedCosigner) { // no cosigner, normal transaction
     const signedTransaction = account.sign(transferTransaction, hash);
-    AppState.chainAPI.transactionAPI
-    .announce(signedTransaction)
-    .then(announcedTx=>{
-      console.log(announcedTx)
-    })
-    .catch(err=>console.log(err))
+    TransactionUtils.announceTransaction(signedTransaction)
   } else { // there is a cosigner, aggregate  bonded transaction
     let cosignerAcc :Account[] =  []
     cosignerList.forEach((signer) => {
@@ -136,23 +113,10 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
     const innerTxn = [transferTransaction.toAggregate(senderPublicAccount)];
     const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn)
     const aggregateBondedTransactionSigned = selectedSignerAccount.signTransactionWithCosignatories(aggregateBondedTransaction,cosignerAcc, hash);
-    const nativeTokenNamespace = networkState.currentNetworkProfile.network.currency.namespace;
-    const lockingAtomicFee = networkState.currentNetworkProfileConfig.lockedFundsPerAggregate ?? 0;
-    const hashLockTransaction = transactionBuilder.hashLock(
-      new Mosaic(new NamespaceId(nativeTokenNamespace), UInt64.fromUint(lockingAtomicFee)),
-      UInt64.fromUint(1000),
-      aggregateBondedTransactionSigned,
-    );
+
+    const hashLockTransaction = TransactionUtils.lockFundTx(aggregateBondedTransactionSigned)
     const hashLockTransactionSigned = selectedSignerAccount.sign(hashLockTransaction, hash)
-    let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(aggregateBondedTransactionSigned);
-    autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(hashLockTransactionSigned.hash);
-    autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
-    autoAnnounceSignedTx.type = AnnounceType.BONDED;
-
-    ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
-
-    AppState.chainAPI.transactionAPI.announce(hashLockTransactionSigned);
-    AppState.isPendingTxnAnnounce = true;
+    TransactionUtils.announceLF_AND_addAutoAnnounceABT(hashLockTransactionSigned,aggregateBondedTransactionSigned)
   }
   
   return Promise.resolve(true)
@@ -174,7 +138,7 @@ const test_address = PublicAccount.createFromPublicKey(test_publicKey,AppState.n
 const getMosaic =(amount :string, mosaic :{id :string ,amount :string}[]) :Mosaic[]=>{
   let mosaics :Mosaic[]= []
   if (parseInt(amount) > 0) {
-    mosaics.push(new Mosaic(new MosaicId(networkState.currentNetworkProfile.network.currency.assetId), UInt64.fromUint(Number(amount))));
+    mosaics.push(new Mosaic(new MosaicId(AppState.nativeToken.assetId), UInt64.fromUint(Number(amount))));
   }
   if (mosaic.length > 0) {
     mosaic.forEach((mosaicSentInfo, index) => {
@@ -193,85 +157,32 @@ const getMosaic =(amount :string, mosaic :{id :string ,amount :string}[]) :Mosai
 
 const calculate_aggregate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[]):string=> {
   
-  let mosaics = getMosaic(amount,mosaic)
   let transactionBuilder = AppState.buildTxn
-  let transferTransaction = transactionBuilder.transfer(Address.createFromRawAddress(test_address),PlainMessage.create(message),mosaics)
-  return  Helper.amountFormatterSimple(transactionBuilder.aggregateBonded([transferTransaction.toAggregate(PublicAccount.createFromPublicKey(test_publicKey,AppState.networkType))]).maxFee.compact(),AppState.nativeToken.divisibility )
+  let mosaics = getMosaic(amount,mosaic)
+  let transferTransaction = transactionBuilder.transferBuilder()
+  .recipient(Address.createFromRawAddress(test_address))
+  .mosaics(mosaics)
+  .message(PlainMessage.create(message))
+  .build()
+  let innerTxn= [transferTransaction.toAggregate(PublicAccount.createFromPublicKey(test_publicKey,AppState.networkType))]
+  let aggregateBondedTx = transactionBuilder.aggregateBondedBuilder()
+  .innerTransactions(innerTxn)
+  .build()
+  return  Helper.amountFormatterSimple(aggregateBondedTx.maxFee.compact(),AppState.nativeToken.divisibility)
 }
 
 const calculate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[]) :string=> {
- /*  let mosaicsToSend = validateMosaicsToSend(amount, mosaic); */
+ 
   let transactionBuilder = AppState.buildTxn
   let mosaics = getMosaic(amount,mosaic)
-  
-  return Helper.amountFormatterSimple(transactionBuilder.transfer(Address.createFromRawAddress(test_address),PlainMessage.create(message), mosaics).maxFee.compact(), AppState.nativeToken.divisibility)
+  let transferTransaction = transactionBuilder.transferBuilder()
+  .recipient(Address.createFromRawAddress(test_address))
+  .mosaics(mosaics)
+  .message(PlainMessage.create(message))
+  .build()
+  return Helper.amountFormatterSimple(transferTransaction.maxFee.compact(), AppState.nativeToken.divisibility)
  
 }
-
-/**
- *
- *
- * @returns
- * @memberof CreateTransferComponent
- */
-const validateMosaicsToSend = (amountXpx :string, boxOtherMosaics :{id :string,amount :string}[]) :string[] | {id :string,amount :string}[]=> {
-  const mosaics = [];
-
-  if (amountXpx !== '' && amountXpx !== null && Number(amountXpx) !== 0) {
-    // console.log(amountXpx);
-    const arrAmount = amountXpx.toString().replace(/,/g, '').split('.');
-    let decimal;
-    let realAmount;
-
-    if (arrAmount.length < 2) {
-      decimal = addZeros(environment.mosaicXpxInfo.divisibility);
-    } else {
-      const arrDecimals = arrAmount[1].split('');
-      decimal = addZeros(environment.mosaicXpxInfo.divisibility - arrDecimals.length, arrAmount[1]);
-    }
-    realAmount = `${arrAmount[0]}${decimal}`;
-    mosaics.push({
-      id: environment.mosaicXpxInfo.id,
-      amount: realAmount
-    });
-  }
-
-  boxOtherMosaics.forEach(element => {
-    if (element.id !== '' && element.amount !== '' && Number(element.amount) !== 0) {
-      const arrAmount = element.amount.toString().replace(/,/g, '').split('.');
-      let realAmount;
-      realAmount = arrAmount[0];
-      mosaics.push({
-        id: element.id,
-        amount: realAmount
-      });
-    }
-  });
-  return mosaics;
-}
-
-/**
-   *
-   *
-   * @param {*} cant
-   * @param {string} [amount='0']
-   * @returns
-   * @memberof CreateTransferComponent
-   */
-const addZeros = (cant : number, amount :string = '0' ):string => {
-  const x = '0';
-  if (amount === '0') {
-    for (let index = 0; index < cant - 1; index++) {
-      amount += x;
-    }
-  } else {
-    for (let index = 0; index < cant; index++) {
-      amount += x;
-    }
-  }
-  return amount;
-}
-
 
 export const makeTransaction = readonly({
   calculate_fee,

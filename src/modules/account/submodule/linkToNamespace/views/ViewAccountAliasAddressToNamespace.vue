@@ -15,6 +15,23 @@
     </div>
     <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 px-6">
+         <div v-if="isMultiSig" class="text-left mt-2 mb-5 "> 
+            <div v-if="walletCosignerList.length > 0">
+              <div class="text-tsm">
+                {{$t('transfer.cosigner')}}:
+                <span class="font-bold" v-if="walletCosignerList.length == 1"> 
+                  {{ walletCosignerList[0].name }}
+                </span>
+                <span class="font-bold" v-else>
+                  <select class="" v-model="selectedCosignPublicKey">
+                    <option v-for="(element, item) in  walletCosignerList" :value="findAcc(element.publicKey).publicKey" :key="item">
+                      {{ element.name }} 
+                    </option>
+                  </select>
+                </span>
+              </div>
+            </div>
+          </div>
         <div v-if="selectAction== 'Link'" class="font-semibold ">Link to Namespace</div>
         <div v-if="selectAction== 'Unlink'" class="font-semibold ">Manage Linked Namespace</div>
         <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
@@ -44,13 +61,23 @@
         </div>
       </div>
       <div class='bg-navy-primary p-6 lg:col-span-1'>
-        <div class='font-semibold text-xxs text-blue-primary'>ACCOUNT CURRENT BALANCE</div>
+        <div v-if="!isMultiSig" class='font-semibold text-xxs text-blue-primary'>ACCOUNT CURRENT BALANCE</div>
+        <div v-else class='font-semibold text-xxs text-blue-primary'>INITIATOR CURRENT BALANCE</div>
         <div class='flex text-white'>
           <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
           <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
           <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
           <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
           <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
+        </div>
+        <div v-if="fundStatus" class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
+          <div class="flex gap-2">
+            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+            <div class="flex-cols">
+               <div class="text-txs">Your account has insufficient amount of {{currentNativeTokenName}}. Please top up first before continue transacting on this page.</div>
+               <a v-if="networkType ==168" class="text-xs text-blue-primary font-semibold underline " :href="topUpUrl" target="_blank">Top Up {{currentNativeTokenName}}<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
+            </div>
+          </div>
         </div>
         <div v-if="isMultiSig &&!isCosigner && !noNamespace" class="mt-2 bg-yellow-50 p-3 rounded-md mb-2" >
           <div class="flex items-center gap-2">
@@ -181,9 +208,12 @@ export default {
     
     });
     const acc = ref(totalAcc.value.find(acc=>acc.address==p.address))
+    const findAcc = (publicKey)=>{
+      return totalAcc.value.find(acc=>acc.publicKey==publicKey)
+    }
     const onPartial = ref(false);
     const checkIsPartial = ()=>{ 
-      multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,networkState.currentNetworkProfile.network.type))
+      multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType))
       .then(onPartialBoolean => onPartial.value = onPartialBoolean)
       .catch(err=>{
         onPartial.value = false
@@ -245,9 +275,6 @@ export default {
     })
     const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
     const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
-    const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
-
-    
     
     const accountBalance = computed(() => {
        let accountBalance = 0
@@ -258,15 +285,42 @@ export default {
        
        return accountBalance 
     })
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const accountDisplayBalance = computed(() => {
       if(walletState.currentLoggedInWallet){ 
-        return Helper.toCurrencyFormat(accountBalance.value, currentNativeTokenDivisibility.value);
+        if(!isMultiSig.value){
+           return Helper.toCurrencyFormat(accountBalance.value, currentNativeTokenDivisibility.value);
+        }else{
+          if(findAcc(selectedCosignPublicKey.value)){
+            return  Helper.toCurrencyFormat(findAcc(selectedCosignPublicKey.value).balance, currentNativeTokenDivisibility.value);
+          }else{
+            return '0'
+          }
+        }
       }else{
-        return 0 
+        return '0'
       }
     });
+
+    const fundStatus = computed(()=>{
+      var fundStatus = false
+      if(isMultiSig.value){
+        if(findAcc(selectedCosignPublicKey.value)){
+          if(findAcc(selectedCosignPublicKey.value).balance<totalFee.value){
+            fundStatus = true
+          }else{
+            fundStatus = false
+          }
+        }
+      }else{
+        if(accountBalance.value<totalFee.value){
+          fundStatus=true
+        }
+      }
+      return fundStatus
+    })
+
     const splitBalance = computed(()=>{
       let split = accountDisplayBalance.value.split(".")
       if (split[1]!=undefined){
@@ -277,7 +331,7 @@ export default {
     })
 
     const disableCreate = computed(() => {
-      return !(onPartial.value==false && walletPassword.value.match(passwordPattern) && selectAction.value != null && namespaceAddress.value != '' && selectNamespace.value != null && showAddressError.value ==false);
+      return !(onPartial.value==false && fundStatus.value == false && walletPassword.value.match(passwordPattern) && selectAction.value != null && namespaceAddress.value != '' && selectNamespace.value != null && showAddressError.value ==false);
     })
 
     const actionsOptions = computed(() => {
@@ -312,6 +366,17 @@ export default {
     const getCosignerList = () =>{
       return multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList;
     }
+
+    const walletCosignerList = computed(() =>{
+      let cosigners= getCosignerList()
+      let list =[]
+      cosigners.forEach(publicKey=>{
+        list.push({publicKey:publicKey,name:findAcc(publicKey).name,balance:findAcc(publicKey).balance })
+      })
+      return list
+    })
+
+    const selectedCosignPublicKey = ref(walletCosignerList.value[0]?walletCosignerList.value[0].publicKey:'')
 
     const isCosigner = computed(() =>{
       return (multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList.length>0)?true: false;
@@ -370,7 +435,7 @@ export default {
           
         } else{
           let namespaceAdd = Address.createFromRawAddress(namespaceAddressValue).plain();
-          trxFee.value = Helper.amountFormatterSimple(accountUtils.getLinkNamespaceToAddressTransactionFee(isMultiSig.value,namespaceAdd, selectNamespace.value, selectAction.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          trxFee.value = Helper.amountFormatterSimple(accountUtils.getLinkNamespaceToAddressTransactionFee(isMultiSig.value,namespaceAdd, selectNamespace.value, selectAction.value), AppState.nativeToken.divisibility);
           addressErrorMsg.value = "";
           showAddressError.value = false;
         }
@@ -387,17 +452,10 @@ export default {
       } else {
         let acc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address)? walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address) : walletState.currentLoggedInWallet.others.find(acc=>acc.address==p.address) 
         err.value = "";  
-        /* if(isCosigner.value == true && isMultiSig.value == true){ */
           const cosigner = getCosignerList();
-          /* accountUtils.linkAddressToNamespace(cosigner[0].address, walletPassword.value, selectNamespace.value, selectAction.value, namespaceAddress.value, currentAddress.value); */
           recordAction.value = selectAction.value
-          let signedTx = accountUtils.linkNamespaceToAddress(isMultiSig.value,cosigner,acc,walletPassword.value,selectNamespace.value, selectAction.value, namespaceAddress.value)
-          txHash.value = signedTx.hash.toUpperCase()
-         /*  toast.add({severity:'success', detail: 'Address Linked Successfully. Please Wait...', group: 'br', life: 10000});
-        } */ /* else if(isMultiSig.value == false){
-          accountUtils.linkAddressToNamespace(currentAddress.value, walletPassword.value, selectNamespace.value, selectAction.value, namespaceAddress.value, null);       
-          toast.add({severity:'success', detail: 'Address Linked Successfully. Please Wait...', group: 'br', life: 10000});
-        }      */     
+          let signedTx = accountUtils.linkNamespaceToAddress(selectedCosignPublicKey.value,isMultiSig.value,cosigner,acc,walletPassword.value,selectNamespace.value, selectAction.value, namespaceAddress.value)
+          txHash.value = signedTx.hash.toUpperCase()   
         clearInput();
         pending.value = true
       }
@@ -436,6 +494,19 @@ export default {
         checkIsPartial()
       }
     })
+    const networkType = computed(()=>AppState.networkType)
+
+    const topUpUrl = computed(()=>{
+      if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
+        return 'https://bctestnetfaucet.xpxsirius.io/#/'
+      }else if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 2'){
+        return 'https://bctestnet2faucet.xpxsirius.io/#/'
+      }else{
+        return ''
+      }
+    }) 
+
+    
     
     return {
       splitBalance,
@@ -457,7 +528,6 @@ export default {
       selectContact,
       disableContactSelection,
       namespaceAddress,
-      currencyName,
       lockFundTxFee,
       showAddressError,
       err,
@@ -475,7 +545,13 @@ export default {
       pwdErrorMsg,
       pending,
       totalFee,
-      onPartial
+      onPartial,
+      walletCosignerList,
+      selectedCosignPublicKey,
+      findAcc,
+      fundStatus,
+      topUpUrl,
+      networkType
     };
   },
 }

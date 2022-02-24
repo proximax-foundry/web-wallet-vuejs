@@ -174,6 +174,7 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import { copyKeyFunc } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import { AppState } from '@/state/appState';
 
 export default {
   name: 'ViewServicesVotingCreatePoll',
@@ -188,7 +189,7 @@ export default {
   },
 
   setup() {
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const toast = useToast();
     // const internalInstance = getCurrentInstance();
     // const emitter = internalInstance.appContext.config.globalProperties.emitter;

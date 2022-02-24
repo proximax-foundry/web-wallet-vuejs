@@ -17,6 +17,23 @@
     
     <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 pr-6">
+        <div class="text-left mt-2 mb-5 ml-6"> 
+            <div v-if="walletCosignerList.length > 0">
+              <div class="text-tsm">
+                {{$t('transfer.cosigner')}}:
+                <span class="font-bold" v-if="walletCosignerList.length == 1"> 
+                  {{ walletCosignerList[0].name }}
+                </span>
+                <span class="font-bold" v-else>
+                  <select class="" v-model="selectedCosignPublicKey">
+                    <option v-for="(element, item) in  walletCosignerList" :value="findAcc(element.publicKey).publicKey" :key="item">
+                      {{ element.name }} 
+                    </option>
+                  </select>
+                </span>
+              </div>
+            </div>
+          </div>
         <div class="text-xs font-semibold pl-6">Manage Cosignatories</div>
         <div class='pl-6'>
            <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
@@ -90,7 +107,7 @@
         </div>
       </div>
       <div class='bg-navy-primary p-6 lg:col-span-1'>
-        <div class='font-semibold text-xxs text-blue-primary'>ACCOUNT CURRENT BALANCE</div>
+        <div class='font-semibold text-xxs text-blue-primary'>INITIATOR CURRENT BALANCE</div>
         <div class='flex text-white'>
           <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
           <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
@@ -102,10 +119,8 @@
           <div class="flex gap-2">
             <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
             <div class="flex-cols">
-               <div class="text-txs">Your account has insufficient amount of XPX. Please top up first before continue transacting on this page.</div>
-               <a v-if="networkState.chainNetwork == 0" class="text-xs text-blue-primary font-semibold underline " href="https://www.proximax.io/en/xpx" target="_blank">Top Up XPX<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
-               <a v-if="networkState.chainNetwork == 1" class="text-xs text-blue-primary font-semibold underline " href="https://bctestnetfaucet.xpxsirius.io/#/" target="_blank">Top Up XPX<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
-               <a v-if="networkState.chainNetwork == 2" class="text-xs text-blue-primary font-semibold underline " href="https://bctestnet2faucet.xpxsirius.io/#/" target="_blank">Top Up XPX<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
+               <div class="text-txs">Your account has insufficient amount of {{currentNativeTokenName}}. Please top up first before continue transacting on this page.</div>
+               <a v-if="networkType ==168" class="text-xs text-blue-primary font-semibold underline " :href="topUpUrl" target="_blank">Top Up {{currentNativeTokenName}}<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
             </div>
           </div>
         </div>
@@ -163,22 +178,18 @@
 </template>
 
 <script>
-import { computed, ref, inject, watch, getCurrentInstance } from 'vue';
+import { computed, ref, watch, getCurrentInstance } from 'vue';
 import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import { multiSign } from '@/util/multiSignatory';
-import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
-import MultiSelectInputPlugin from '@/components/MultiSelectInputPlugin.vue';
 import { walletState } from '@/state/walletState';
 import {
     PublicAccount,Address
 } from "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
 import {useI18n} from 'vue-i18n'
-import { WalletAccount } from '@/models/walletAccount';
 import { Helper } from '@/util/typeHelper';
-import { accountUtils } from '@/util/accountUtils';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 import { TransactionUtils } from '@/util/transactionUtils';
@@ -216,11 +227,12 @@ export default {
     const onPartial = ref(false);
     const toggleContact = ref([])
     const showCosigners = ref(false);
-    const cosignAddress = ref('');
     const selectMainCosign = ref('');
     const selectOtherCosign = ref([]);
     const contactName = ref([])
-   
+     const findAcc = (publicKey)=>{
+      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
+    }
     // current wallet
     const wallet = walletState.currentLoggedInWallet;
     // get account details initialization
@@ -254,7 +266,7 @@ export default {
      })
     }
     
-    const cosignerAddress = cosigner => Address.createFromPublicKey(cosigner, networkState.currentNetworkProfile.network.type).plain().substr(-4)
+    const cosignerAddress = cosigner => Address.createFromPublicKey(cosigner, AppState.networkType).plain().substr(-4)
     const cosignaturies = computed(()=>{
       let cosignaturies = []
       acc.value.multisigInfo.filter(element=>element.level === 1).forEach(cosigner=> {
@@ -270,7 +282,7 @@ export default {
         if(wallet.accounts.find(acc=>acc.publicKey ===publicKey)){
           name.push(wallet.accounts.find(acc=>acc.publicKey ==publicKey).name)
         }else{
-          let address = Address.createFromPublicKey(publicKey,networkState.currentNetworkProfile.network.type).plain().substr(-4)
+          let address = Address.createFromPublicKey(publicKey,AppState.networkType).plain().substr(-4)
           name.push("Cosigner-" +address)
           console.log(name)
         }
@@ -281,7 +293,16 @@ export default {
     const getWalletCosigner = () => {
       return multiSign.getCosignerInWallet(acc.value.publicKey)
     }
-    
+    const walletCosignerList = computed(() =>{
+      let cosigners= getWalletCosigner()
+      let list =[]
+      cosigners.cosignerList.forEach(publicKey=>{
+        list.push({publicKey:publicKey,name:findAcc(publicKey).name,balance:findAcc(publicKey).balance })
+      })
+      return list
+    })
+    const selectedCosignPublicKey = ref(walletCosignerList.value[0]?walletCosignerList.value[0].publicKey:'')
+
     const otherAccount = wallet.accounts.find(element=>element.name ===p.name)? wallet.accounts : wallet.others
     if(acc.value == undefined){
       router.push({ name: "ViewAccountDisplayAll"});
@@ -298,7 +319,7 @@ export default {
     })
     const addCoSigButton = computed(() => {
           var status = false;
-          if(accountBalance.value >= 10.0445 && isCoSigner.value){
+          if(accountBalance.value >= totalFee.value && isCoSigner.value){
             for(var i = 0; i < coSign.value.length; i++){
               if(showAddressError.value[i] != ''){
                 status = true;
@@ -324,6 +345,8 @@ export default {
       }
     })
 
+    
+
     const clear = () => {
       coSign.value = [];
       contactName.value=[];
@@ -343,7 +366,7 @@ export default {
         signer.push({address: walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey).address})
       })
       console.log(signer)
-      let modifyStatus = await multiSign.modifyMultisigAccount(coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value, signer, acc.value, passwd.value);
+      let modifyStatus = await multiSign.modifyMultisigAccount(selectedCosignPublicKey.value,coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value, signer, acc.value, passwd.value);
        console.log(modifyStatus);
       if(!modifyStatus){
         err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
@@ -402,17 +425,21 @@ export default {
        
        return accountBalance
     })
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
-    const accountDisplayBalance = computed(() => {
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
+    const initiatorDisplayBalance = computed(() => {
       if(walletState.currentLoggedInWallet){
-        return Helper.toCurrencyFormat(accountBalance.value, currentNativeTokenDivisibility.value);
+        if(findAcc(selectedCosignPublicKey.value)){
+          return Helper.toCurrencyFormat(findAcc(selectedCosignPublicKey.value).balance, currentNativeTokenDivisibility.value);
+        }else{
+          return '0'
+        }
       }else{
-        return 0 
+        return '0' 
       }
     });
     const splitBalance = computed(()=>{
-      let split = accountDisplayBalance.value.split(".")
+      let split = initiatorDisplayBalance.value.split(".")
       if (split[1]!=undefined){
         return {left:split[0],right:split[1]}
       }else{
@@ -544,23 +571,10 @@ export default {
       let cosigner = getWalletCosigner();
       return cosigner;
     });
-    setTimeout(()=> {
-      if(accountBalance.value < 10.0445){
-        fundStatus.value = true;
-      }else{
-        fundStatus.value = false;
-      }
-    }, 500);
-    watch(accountBalance, (n) => {
-      if(n < 10.0445){
-        fundStatus.value = true;
-      }else{
-        fundStatus.value = false;
-      }
-    });
+   
     // check if onPartial
     try {
-       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,networkState.currentNetworkProfile.network.type)).then(onPartialBoolean => onPartial.value = onPartialBoolean)
+       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)).then(onPartialBoolean => onPartial.value = onPartialBoolean)
     } catch (error) {
       
     }
@@ -577,15 +591,38 @@ export default {
         }
       }
     }    
-    function pretty(address){
-      return address.replace(/([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{6})([a-zA-Z0-9]{4})/, "$1-$2-$3-$4-$5-$6-$7");
+    if(findAcc(selectedCosignPublicKey.value)){
+      if(findAcc(selectedCosignPublicKey.value).balance<totalFee.value){
+        fundStatus.value = true
+      }
     }
+    
+    
+    watch(selectedCosignPublicKey, (n) => {
+      if(findAcc(n).balance<totalFee.value){
+        fundStatus.value = true
+      }else{
+        fundStatus.value = false
+      }
+    });
+
+    const topUpUrl = computed(()=>{
+      if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
+        return 'https://bctestnetfaucet.xpxsirius.io/#/'
+      }else if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 2'){
+        return 'https://bctestnet2faucet.xpxsirius.io/#/'
+      }else{
+        return ''
+      }
+    }) 
+
+    const networkType = computed(()=>AppState.networkType)
+    
     return {
       cosignerName,
       contact,
       toggleContact,
       contactName,
-      accountDisplayBalance,
       splitBalance,
       currentNativeTokenName,
       err,
@@ -598,11 +635,11 @@ export default {
       accountNameDisplay,
       accountName,
       acc,
-      pretty,
       passwd,
       showPasswdError,
       showAddressError,
       addCoSig,
+      findAcc,
       coSign,
       addCoSigButton,
       deleteCoSigAddressInput,
@@ -620,7 +657,7 @@ export default {
       restoreFromRemovalList,
       checkRemoval,
       getWalletCosigner,
-      cosignAddress,
+      selectedCosignPublicKey,
       validateApproval,
       validateDelete,
       cosignaturies,
@@ -630,7 +667,10 @@ export default {
       lockFundCurrency,
       lockFundTxFee,
       aggregateFee,
-      totalFee
+      totalFee,
+      walletCosignerList,
+      topUpUrl,
+      networkType
     };
   },
 }

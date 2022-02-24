@@ -411,9 +411,9 @@ export default defineComponent({
     //   showCosignModal.value = false;
     // }
 
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
-    const currentNativeTokenId = computed(()=> networkState.currentNetworkProfile.network.currency.assetId);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
+    const currentNativeTokenId = computed(()=> AppState.nativeToken.assetId);
 
     const displyFaucet = computed(() => {
       return (AppState.networkType == 168)?true:false;
@@ -458,7 +458,7 @@ export default defineComponent({
       let multisigInfo = selectedAccount.value.multisigInfo.find((x)=> x.level === 0);
 
       if(multisigInfo){
-        return multisigInfo.getMultisigAccountsAddress(networkState.currentNetworkProfile.network.type);
+        return multisigInfo.getMultisigAccountsAddress(AppState.networkType);
       }
       else{
         return [];
@@ -627,7 +627,7 @@ export default defineComponent({
     const currencyConvert = ref('');
 
     const updatePricing = () =>{
-      if(networkState.currentNetworkProfile.network.currency.name === "XPX"){
+      if(AppState.nativeToken.label=== "XPX"){
         displayConvertion.value = true;
         getCurrencyPrice();
 

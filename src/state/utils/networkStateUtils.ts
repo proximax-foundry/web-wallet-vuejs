@@ -5,6 +5,7 @@ import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainProfilePrefer
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { BuildTransactions } from "@/util/buildTransactions";
 import { ChainUtils } from "@/util/chainUtils"
+import { FeeCalculationStrategy, NetworkType } from "tsjs-xpx-chain-sdk";
 
 const sessionNetworkName = "networkName";
 const sessionNetworkIndex = "network";
@@ -65,7 +66,6 @@ export class NetworkStateUtils{
     const chainProfile = new ChainProfile(networkState.chainNetworkName);
     chainProfile.init();
     networkState.currentNetworkProfile = chainProfile;
-    AppState.buildTxn = new BuildTransactions(chainProfile.network.type, chainProfile.generationHash);
     if(chainProfile.network.currency.assetId){
       AppState.nativeToken.assetId = chainProfile.network.currency.assetId;
     }
@@ -73,6 +73,12 @@ export class NetworkStateUtils{
     AppState.nativeToken.label = chainProfile.network.currency.name;
     AppState.nativeToken.fullNamespace = chainProfile.network.currency.namespace;
     AppState.networkType = ChainUtils.getNetworkType(chainProfile.network.type);
+    if(AppState.networkType === NetworkType.PRIVATE || AppState.networkType === NetworkType.PRIVATE_TEST){
+      AppState.buildTxn = new BuildTransactions(chainProfile.network.type, chainProfile.generationHash, FeeCalculationStrategy.ZeroFeeCalculationStrategy);
+    }
+    else{
+      AppState.buildTxn = new BuildTransactions(chainProfile.network.type, chainProfile.generationHash);
+    }
 
     const chainProfileConfig = new ChainProfileConfig(networkState.chainNetworkName);
 

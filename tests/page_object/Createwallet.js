@@ -41,9 +41,18 @@ const elements = {
     signin_here: 'form > div:nth-child(8) > a',
     signin_herepk: 'form > div:nth-child(10) > a',
     signin_herebackup: 'div.text-center:nth-child(9) > a:nth-child(1)',
+    select_network: 'form > fieldset > div:nth-child(1)',
+    testnet_1: 'form > fieldset > div:nth-child(2) > div:nth-child(1) > div:nth-child(3)',
 }
 
 const commands = {
+
+    change_network(){
+        return this
+        .pause(5000)
+        .click("@select_network")
+        .click("@testnet_1")
+    },
 
     navigate_mainpage(){
         return this

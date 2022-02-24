@@ -218,8 +218,8 @@ export default {
       });
     };
      
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
 
     const accountBalance = computed(
       () => {          
@@ -236,7 +236,7 @@ export default {
       }
     })
 
-    if(networkState.currentNetworkProfile.network.currency.name === "XPX"){
+    if(AppState.nativeToken.label=== "XPX"){
       getCurrencyPrice();
 
       watch(accountBalance, () => {

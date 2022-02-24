@@ -140,6 +140,7 @@ import {
 preparePublicApostille,preparePrivateApostille, downloadSignedFiles
 } from "@/util/attestationUtils"; 
 import { listenerState } from '@/state/listenerState';
+import { AppState } from '@/state/appState';
 export default {
   name: 'ViewServicesAttestationCreate',
 
@@ -154,7 +155,7 @@ export default {
     // const internalInstance = getCurrentInstance();
     // const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const {t} = useI18n();
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const uploadSource = ref('computer');
     const currentPage = ref(1);
     const disabledStorage = ref(true);

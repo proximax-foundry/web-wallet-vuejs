@@ -66,6 +66,7 @@ import NumberCardInput from '@/modules/services/submodule/siriusGift/components/
 import CardMessageInput from '@/modules/services/submodule/siriusGift/components/CardMessageInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
+import { AppState } from '@/state/appState';
 
 export default {
   name: 'ViewServicesSiriusGiftCreateGift',
@@ -78,7 +79,7 @@ export default {
   },
 
   setup() {
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const appStore = inject("appStore");

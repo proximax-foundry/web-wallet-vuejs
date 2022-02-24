@@ -225,6 +225,7 @@ import { ethers } from 'ethers';
 import { abi, SwapUtils } from '@/util/swapUtils';
 import { networkState } from '@/state/networkState';
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
+import { AppState } from '@/state/appState';
 
 export default {
   name: 'ViewServicesMainnetSwapETHToSirius_',
@@ -237,7 +238,7 @@ export default {
 
   setup() {
 
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 
     let verifyingTxn;
 

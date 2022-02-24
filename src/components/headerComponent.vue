@@ -302,9 +302,8 @@ export default defineComponent({
       }
       chainsNetworks.value = options;
     }, true);
-
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
 
     const chainsNetworkOption = computed(()=>{
 
@@ -341,7 +340,7 @@ export default defineComponent({
     //   );
     // }, 60000);
 
-    const currentNetworkType = computed(()=> networkState.currentNetworkProfile ? networkState.currentNetworkProfile.network.type : null);
+    const currentNetworkType = computed(()=> networkState.currentNetworkProfile ? AppState.networkType : null);
 
     const logout = () => {
       WalletStateUtils.doLogout();
@@ -579,7 +578,7 @@ export default defineComponent({
 
      watch(()=> confirmedTxLength.value, (newValue, oldValue)=>{
       if(newValue > oldValue){
-        WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
+        WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, AppState.nativeToken.assetId);
 
         let txLength = newValue - oldValue;
 

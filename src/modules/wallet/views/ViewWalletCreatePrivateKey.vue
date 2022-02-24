@@ -121,10 +121,9 @@ export default defineComponent({
   },
 
   setup(){
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const {t} = useI18n();
     const toast = useToast();
-    const selectedNetwork = computed(()=> ChainUtils.getNetworkType(networkState.chainNetwork));
     const selectedNetworkType = computed(()=> AppState.networkType);
     const selectedNetworkName = computed(()=> networkState.chainNetworkName );
     const err = ref("");
@@ -220,7 +219,6 @@ export default defineComponent({
       networkState,
       err,
       newWallet,
-      selectedNetwork,
       selectedNetworkName,
       selectedNetworkType,
       walletName,
