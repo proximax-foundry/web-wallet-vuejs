@@ -30,7 +30,7 @@
         <MoreAccountOptions :address="acc.address"/>
       </div>
       <div class='border-2 border-t-0 pb-6 px-6 pt-2'>
-        <div class = 'mt-4 text-xxs text-blue-primary font-semibold uppercase'>{{$t('account.currentBalance')}}</div>
+        <div class = 'mt-4 text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.currentBalance')}}</div>
         <div class='flex my-1'>
           <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
           <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>

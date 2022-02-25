@@ -8,11 +8,11 @@
             </div>
             <div v-if="textErr || showError" class="flex flex-col ml-auto justify-center ">
                 <img src="@/assets/img/icon-red-x.svg" class="h-5 w-5 mr-auto ml-auto">
-                <div class="text-xxs text-red-400 font-bold">INVALID</div>
+                <div class="text-xxs text-red-400 font-bold uppercase">{{$t('general.invalid')}}</div>
             </div>
             <div v-else class="flex flex-col ml-auto justify-center ">
                 <img src="@/assets/img/icon-green-tick.svg" class="h-5 w-5 mr-auto ml-auto">
-                <div class="text-xxs text-green-400 font-bold">VALID</div>
+                <div class="text-xxs text-green-400 font-bold uppercase">{{$t('general.valid')}}</div>
             </div>
         </div>
        

@@ -54,6 +54,7 @@ const verifyAddress = (currentAdd :string, add :string) => {
 const checkAvailableContact = (recipient :string) :boolean=> {
   const wallet = walletState.currentLoggedInWallet;
   let isInContacts = true;
+  recipient = Address.createFromRawAddress(recipient).plain()
   if (wallet.contacts != undefined) {
     isInContacts = wallet.contacts.find((element) => element.address == recipient)? true: false;
   }

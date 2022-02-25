@@ -46,7 +46,7 @@
           </template>
         </blocks-tree>
       </div>
-      <div class="font-semibold ">View Settings</div>
+      <div class="font-semibold ">{{$t('multisig.viewSettings')}}</div>
       <div>
         <input name = 'view-type' type='radio' value='0' v-model="viewType" :checked='true'>   
         <label  class = 'text-left py-3 text-xs pl-4'>{{$t('multisig.horizontal')}}</label>
@@ -55,12 +55,12 @@
       <label  class = 'text-left py-3 text-xs pl-4'> {{$t('multisig.vertical')}}</label>
       <div>
         <input name = 'view-type-2' type='radio' value='0' v-model="viewType2" :checked='true'>   
-        <label v-if="viewType==0" class = 'text-left py-3 text-xs pl-4'> {{$t('multisig.bottomToTop')}}</label>
+        <label v-if="viewType==0" class = 'text-left py-3 text-xs pl-4'> {{$t('multisig.rightToLeft')}}</label>
         <label v-if="viewType==1" class = 'text-left py-3 text-xs pl-4'> {{$t('multisig.topToBottom')}}</label>
       </div>
       <input name = 'view-type-2' type='radio' value='1' v-model="viewType2" >   
       <label v-if="viewType==0" class = 'text-left py-3 text-xs pl-4'> {{$t('multisig.leftToRight')}}</label>
-      <label v-if="viewType==1" class = 'text-left py-3 text-xs pl-4'> {{$t('multisig.rightToLeft')}}</label>
+      <label v-if="viewType==1" class = 'text-left py-3 text-xs pl-4'> {{$t('multisig.bottomToTop')}}</label>
       <div>
         <input type="checkbox" @click="collapsable=!collapsable">
         <label class = 'text-left py-3 text-xs pl-4'>{{$t('multisig.collapsible')}}</label>

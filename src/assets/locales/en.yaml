@@ -43,6 +43,7 @@ general:
   lockFund: Lock Fund 
   lockFundTxFee: Lock Fund Tx Fee 
   total: Total
+  insufficientBalance: Insufficient Balance 
   insufficientBalanceWarning: Your account has insufficient amount of {tokenName}. Please top up first before continue transacting on this page.
   topUp: Top Up {tokenName}
   accCurrentBalance: Account Current Balance 
@@ -51,6 +52,7 @@ general:
   month: Month | Months
   hour: Hour | Hours
   minute: Minute | Minutes
+  ownerAcc: Owner Account
   in: In   # Use Case: In 10 days, In 50 minutes
   message: Message 
   owner: "Owner"
@@ -134,16 +136,19 @@ general:
   search: "Search"
   estimateUSD: Estimate US$
   ntgToShow: "Nothing to show."
+  balance: Balance
   showAll: "Show All"
   addAccAddress: Add Account Address
   importFromAB: Import from Address Book
   contact: "Contact| Contacts"
   group: "Group"
   name: "Name"
+  save: Save
   nameRequired: "Name is required"
   enterPassword: "Enter Password"
   enterPasswordContinue: Enter your password to continue
   more: "More"
+  selectAccount: Select Account
   confirm: "Confirm"
   overview: "Overview"
   enable: "Enable"
@@ -392,6 +397,17 @@ namespace:
   selectAction: Select Action
   noNamespace: You have not created a namespace.
   unlinkNamespace: Unlink Namespace
-
+transfer:
+  newTransfer: New Transfer
+  transferPlaceholder: Transfer to (Wallet Address / Namespace)
+  assetAmount: Amount (Asset)
+  selectAsset: Select Asset
+  addAssets: Add Assets
+  transferAmount: Transfer Amount
+  enableEncryption: Enable Encryption 
+  transferFrom: Transfer From
+  addContacts: Do you want to save this address?
+  successfullySaved: Contact {name} successfully saved
+  proceedWithZero: "Are you sure to proceed with 0 amount?"
 
 
