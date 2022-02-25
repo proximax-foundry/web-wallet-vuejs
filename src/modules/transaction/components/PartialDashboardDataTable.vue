@@ -12,11 +12,11 @@
       <Column style="width: 250px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">TX HASH</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.txHash')}}</div>
             <div class="text-txs font-bold inline-block" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Deadline</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('general.deadline')}}</div>
             <div class="uppercase font-bold text-txs">{{ formatTime(data.deadline) }}</div>
           </div>
         </template>
@@ -24,24 +24,24 @@
       <Column style="width: 250px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">SENDER</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('general.sender')}}</div>
             <div class="uppercase font-bold text-txs" v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()">
               <a :href="getPublicKeyExplorerUrl(data.signer)" target="_blank">{{ data.signerAddress.substring(0, 20) }}</a>
             </div>
           </div>
         </template>
       </Column>
-      <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
+      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="formattedDeadline" header="Deadline" headerStyle="width:110px" v-if="wideScreen">
+      <Column field="formattedDeadline" :header="$t('general.deadline')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{Helper.formatDeadline(data.deadline)}}</span>
         </template>
       </Column>
-      <Column field="signer" header="INITIATOR" headerStyle="width:110px" v-if="wideScreen">
+      <Column field="signer" :header="$t('general.initiator')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <span v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()" class="truncate inline-block text-txs">
             <a :href="getPublicKeyExplorerUrl(data.signer)" target="_blank">
@@ -52,12 +52,12 @@
       </Column>
       <Column field="sign" header="" headerStyle="width:110px">
         <template #body="{data}">
-          <router-link :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" class="bg-orange-action text-white font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">Waiting for signature(s)</router-link>
+          <router-link :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" class="bg-orange-action text-white font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">{{$t('transaction.waitingSignature_s')}}</router-link>
           <!--<router-link :to="{ name: 'ViewTransactionWaitingSign', params: {txnHash: data.hash}}" v-else class="bg-orange-light text-orange-action font-bold text-xxs text-center p-3 flex items-center justify-center"><img src="@/modules/transaction/img/icon-sign.svg" class="mr-2">Waiting for Signature(s)</router-link>-->
         </template>
       </Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('general.noRecord')}}
       </template>
     </DataTable>
   </div>

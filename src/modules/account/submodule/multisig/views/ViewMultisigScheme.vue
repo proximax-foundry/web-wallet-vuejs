@@ -95,7 +95,6 @@ export default {
 setup(p){
   const toast = useToast();
   const {t} = useI18n();
-  networkState.currentNetworkProfileConfig
   let levelOneGraph = []
   const wallet = walletState.currentLoggedInWallet 
   const currentAccount = computed(()=>{

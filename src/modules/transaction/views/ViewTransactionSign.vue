@@ -2,23 +2,23 @@
   <div>
     <div class='flex cursor-pointer'>
       <img src='@/assets/img/chevron_left.svg'>
-      <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
+      <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
     </div>
     <div class='md:w-8/12 lg:w-10/12 xl:w-6/12 ml-2 mr-2 md:ml-auto md:mr-auto mt-5'>
       <div class='border-2 border-gray-200'>
         <div class='w-full text-center pt-10 pl-10 pr-10' v-if="isSigned">
-          <div class="text-xl">No action Required</div>
-          <div class="mt-5 text-tsm">You have already approved {{ innerTransactions.length>1?'these transactions':'this transaction' }}</div>
-          <div class="mt-1 text-tsm font-bold">Deadline: {{ deadline }}</div>
+          <div class="text-xl">{{$t('transaction.noActionRequired')}}</div>
+          <div class="mt-5 text-tsm">{{$t('transaction.haveApproved',innerTransactions.length)}} </div>
+          <div class="mt-1 text-tsm font-bold">{{$t('general.deadline')}}: {{ deadline }}</div>
         </div>
         <div class='w-full text-center pt-10 pl-10 pr-10' v-else-if="!invalidCosigner">
-          <div class="text-xl">Action Required</div>
-          <div class="mt-5 text-tsm">Would you like to approve this transaction? (Highlighted in yellow <div class="inline-block h-3 w-3 bg-yellow-300 ml-1"></div>)</div>
-          <div class="mt-1 text-tsm font-bold">Deadline: {{ deadline }}</div>
+          <div class="text-xl">{{$t('transaction.actionRequired')}}</div>
+          <div class="mt-5 text-tsm">{{$t('transaction.approveConfirmation',innerTransactions.length)}}  <div class="inline-block h-3 w-3 bg-yellow-300 ml-1"></div>)</div>
+          <div class="mt-1 text-tsm font-bold">{{$t('general.deadline')}}: {{ deadline }}</div>
         </div>
         <div class='w-full text-center pt-10 pl-10 pr-10' v-else>
-          <div class="text-xl">No action Required</div>
-          <div class="mt-1 text-tsm font-bold">Deadline: {{ deadline }}</div>
+          <div class="text-xl">{{$t('transaction.noActionRequired')}}</div>
+          <div class="mt-1 text-tsm font-bold">{{$t('general.deadline')}}: {{ deadline }}</div>
         </div>
         <div class='w-full text-center pb-10 pl-10 pr-10'>
           <div class="mt-10">
@@ -26,7 +26,7 @@
               <img src="@/modules/transaction/img/digital-signature-success.png" class="w-14 inline-block ml-2" v-if="isHasSigned(cosigner)">
               <img src="@/modules/transaction/img/digital-signature-not-signed.png" class="w-14 inline-block ml-2" v-else>
               <div class="text-left ml-3 inline-block">
-                <div class="uppercase text-blue-primary text-txs font-bold">{{ displayAccountLabel(cosigner) }} {{ isHasSigned(cosigner)?'(Signed)':'' }}</div>
+                <div class="uppercase text-blue-primary text-txs font-bold">{{ displayAccountLabel(cosigner) }} {{ isHasSigned(cosigner)?'('+$t('general.signed')+')':'' }}</div>
                 <div class="uppercase text-xxs text-gray-500 mt-1">{{ displayAccountAddress(cosigner) }}</div>
               </div>
             </div>
@@ -35,40 +35,40 @@
       </div>
       <div class='border-2 mt-5'>
         <div class="cursor-pointer flex justify-between p-3" @click="viewTxn = !viewTxn">
-          <div class="text-tsm">Transaction information</div>
-          <div class="text-xs text-blue-primary uppercase flex justify-evenly items-center">View<img src="@/modules/transaction/img/icon-down-caret.svg" class="ml-2 transition-all duration-200" :class="`${viewTxn?'rotate-180 transform':''}`"></div>
+          <div class="text-tsm">{{$t('transaction.txInfo')}}</div>
+          <div class="text-xs text-blue-primary uppercase flex justify-evenly items-center">{{$t('general.view')}}<img src="@/modules/transaction/img/icon-down-caret.svg" class="ml-2 transition-all duration-200" :class="`${viewTxn?'rotate-180 transform':''}`"></div>
         </div>
         <transition name="slide">
           <div class="p-3" :class="`${ innerTransactions.length>0?'border-t-2 border-gray-200':'' }`" v-if="viewTxn">
             <div class="my-4 text-sm">{{ txnTypeLabel }}</div>
             <div class="table_div pb-5" :class="`${ innerTransactions.length>0?'border-b-2 border-gray-200 mb-5':'' }`">
               <div>
-                <div>TX Hash</div>
+                <div>{{$t('dashboard.txHash')}}</div>
                 <div>{{ txnHash }}</div>
               </div>
               <div>
-                <div>Signer</div>
+                <div>{{$t('general.signer')}}</div>
                 <div>{{ signerAddress }}</div>
               </div>
             </div>
             <div v-if="innerTransactions.length > 0">
-              <div class="mt-10">Transaction{{ innerTransactions.length>1?'s':'' }} ({{ innerTransactions.length }})</div>
+              <div class="mt-10">{{$t('general.transaction',innerTransactions.length)}} ({{ innerTransactions.length }})</div>
               <div class="mt-3 border border-gray-200 p-1" v-for="(item, index) in innerTransactions" :key="index">
                 <div class="table_div" :class="innerRelatedList[index] ? 'highlighted' :''">
                   <div>
-                    <div>Type</div>
+                    <div>{{$t('dashboard.type')}}</div>
                     <div>{{ item.typeName }}</div>
                   </div>
                   <div>
-                    <div>Signer Public Key</div>
+                    <div>{{$t('transaction.signerPk')}}</div>
                     <div>{{ item.signer }}</div>
                   </div>
                   <div>
-                    <div>Signer</div>
+                    <div>{{$t('general.signer')}}</div>
                     <div>{{ convertName(item.signerAddressPlain) }}</div>
                   </div>
                   <div>
-                    <div>Fully signed</div>
+                    <div>{{$t('transaction.fullySigned')}}</div>
                     <div>{{ innerSignedList[index] }}</div>
                   </div>
                   <div v-for="(info, infoListindex) in item.infoList" :key="infoListindex">
@@ -76,25 +76,25 @@
                     <div>{{ info.short ? info.short : info.value }}</div>
                   </div>
                   <div v-if="item.infoGreenList.length > 0">
-                    <div v-if="item.legendType === InnerTxnLegendType.ADD_REMOVE" >Add</div>
-                    <div v-else-if="item.legendType === InnerTxnLegendType.TRUE_FALSE" >True</div>
-                    <div v-else-if="item.legendType === InnerTxnLegendType.BUY_SELL" >Buy</div>
-                    <div v-else-if="item.legendType === InnerTxnLegendType.ALLOW_BLOCK" >Allow</div>
+                    <div v-if="item.legendType === InnerTxnLegendType.ADD_REMOVE" >{{$t('general.add')}}</div>
+                    <div v-else-if="item.legendType === InnerTxnLegendType.TRUE_FALSE" >{{$t('general.true')}}</div>
+                    <div v-else-if="item.legendType === InnerTxnLegendType.BUY_SELL" >{{$t('transaction.buy')}}</div>
+                    <div v-else-if="item.legendType === InnerTxnLegendType.ALLOW_BLOCK" >{{$t('transaction.allow')}}</div>
                     <div>{{ item.infoGreenList.map(info => info.short ? info.short : info.value).join(", ") }}</div>
                   </div>
                   <div v-if="item.infoRedList.length > 0">
-                    <div v-if="item.legendType === InnerTxnLegendType.ADD_REMOVE" >Remove</div>
-                    <div v-else-if="item.legendType === InnerTxnLegendType.TRUE_FALSE" >False</div>
-                    <div v-else-if="item.legendType === InnerTxnLegendType.BUY_SELL" >Sell</div>
-                    <div v-else-if="item.legendType === InnerTxnLegendType.ALLOW_BLOCK" >Block</div>
+                    <div v-if="item.legendType === InnerTxnLegendType.ADD_REMOVE" >{{$t('general.remove')}}</div>
+                    <div v-else-if="item.legendType === InnerTxnLegendType.TRUE_FALSE" >{{$t('general.false')}}</div>
+                    <div v-else-if="item.legendType === InnerTxnLegendType.BUY_SELL" >{{$t('transaction.sell')}}</div>
+                    <div v-else-if="item.legendType === InnerTxnLegendType.ALLOW_BLOCK" >{{$t('transaction.block')}}</div>
                     <div>{{ item.infoRedList.map(info => info.short ? info.short : info.value).join(", ") }}</div>
                   </div>
                   <div v-if="item.infoInfoList.length > 0">
-                    <div>Info</div>
+                    <div>{{$t('general.info')}}</div>
                     <div>{{ item.infoInfoList.map(info => info.short ? info.short : info.value).join(", ") }}</div>
                   </div>
                   <div v-if="item.sdas.length > 0">
-                    <div>SDAs</div>
+                    <div>{{$t('general.sda',2)}}</div>
                     <div>{{ item.sdas.join("<br>") }}</div>
                   </div>
                 </div>
@@ -104,11 +104,11 @@
         </transition>
       </div>
       <div class="flex items-center h-14 lg:h-28 justify-center" v-if="!isSigned">
-        <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class="text-gray-600 bg-white px-5 py-2 lg:px-10 lg:py-3 rounded-md text-xs lg:text-tsm inline-block border-2 border-gray-200 mr-5">Do this later</router-link>
+        <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class="text-gray-600 bg-white px-5 py-2 lg:px-10 lg:py-3 rounded-md text-xs lg:text-tsm inline-block border-2 border-gray-200 mr-5">{{$t('transaction.doThisLater')}}</router-link>
         <CosignPasswordModal :transactionHash = 'txnHash' :disabled="invalidCosigner || isSigned" @return-password="signAggTxn" />
       </div>
       <div class="flex items-center h-14 lg:h-28 justify-center" v-else>
-        <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class="text-gray-600 bg-white px-5 py-2 lg:px-10 lg:py-3 rounded-md text-xs lg:text-tsm inline-block border-2 border-gray-200 mr-5">Close</router-link>
+        <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class="text-gray-600 bg-white px-5 py-2 lg:px-10 lg:py-3 rounded-md text-xs lg:text-tsm inline-block border-2 border-gray-200 mr-5">{{$t('general.close')}}</router-link>
       </div>
     </div>
   </div>
@@ -210,7 +210,7 @@ export default {
 
         deadline.value = Helper.formatDeadline(aggregateTxn.deadline.adjustedValue.compact());
 
-        txnTypeLabel.value = "Aggregate Bonded";
+        txnTypeLabel.value = t('transaction.aggregateBonded');
 
         let castedAggregateTxn = TransactionUtils.castToAggregate(aggregateTxn);     
       
@@ -233,7 +233,7 @@ export default {
           };
 
           if(extractedData.signerAddressPretty === thisSignerName){
-            innerSignersNameList.push("Signer");
+            innerSignersNameList.push(t('general.signer'));
           }
           else{
             innerSignersNameList.push(thisSignerName);
@@ -382,7 +382,7 @@ export default {
               aliasName = othersAccount.name;
           }
         }
-        return aliasName ? aliasName : 'Cosigner';
+        return aliasName ? aliasName : t('general.cosigner');
     }
 
     const convertName = (address) =>{
@@ -414,7 +414,7 @@ export default {
           router.push({ name : 'ViewTransactionStatus', params: {transactionType: 'partial' }});
       }
       else{
-        toast.add({severity: 'error', summary: "It's is still loading, please wait.", life: 2000, group: 'br'})
+        toast.add({severity: 'error', summary: t('transaction.waitForLoad'), life: 2000, group: 'br'})
       }
     }
 
