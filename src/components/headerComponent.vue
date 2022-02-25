@@ -68,7 +68,7 @@
               <img src="@/assets/img/icon-support-contact.svg" class="opacity-80 hover:opacity-100 inline-block h-4 w-4 lg:h-5 lg:w-5">
             </div>
             <div class="absolute z-20 w-96 text-left bg-gray-50 shadow-sm rounded-md right-0 p-2 text-tsm transition duration-200 block" style="top: 60px" v-if="isShowSupport" @mouseover="isShowSupport=true;isHoverSupportPanel=true;" @mouseout="hideSupportPanel">
-              <div class="font-bold p-2 text-txs">{{$t('home.beginnerGuide')}}</div>
+              <div class="font-bold p-2 text-txs uppercase">{{$t('home.beginnerGuide')}}</div>
               <div class="grid grid-cols-2">
                 <div>
                   <div class="p-2">

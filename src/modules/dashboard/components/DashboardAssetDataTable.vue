@@ -117,10 +117,10 @@
         </template>
       </Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('general.noRecord')}}
       </template>
       <template #loading>
-         {{$t('dashboard.loadingmessage')}}
+         {{$t('dashboard.loadingTx')}}
       </template>
     </DataTable>
   </div>

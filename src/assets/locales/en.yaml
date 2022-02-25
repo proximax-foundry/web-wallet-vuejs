@@ -21,9 +21,9 @@ home:
   siriusChain: "What is Sirius Chain?"
   siriusChainTitle: "Start building apps on the ProximaX Sirius blockchain layer"
   namespaceQues: "What is Namespace?"
-  namespaceAns: "Starts with a name that you choose, similar to an internet domain name"
+  namespaceAns: "Create an on-chain unique place for your business and your assets."
   assetQues: "What is Asset?"
-  assetAns: "Fixed assets on the Sirius Chain that can represent a set of multiple identical things"
+  assetAns: "An asset could be a token that has a unique identifier and configurable properties"
   contactTeam: "Contact our support team"
   switchDefault: "Your default account has switched to"
   quickAction: "Quick Action"
@@ -35,6 +35,18 @@ node:
   nodeList: "Node List"
   nodeUpdated: "Node updated"
 general:
+  cosigner: Cosigner
+  noCosigner: No eligible cosigner in this wallet
+  hasPartial: Your account has transaction(s) on partial.
+  transactionFee: Transaction Fee
+  aggregateFee: Aggregate Fee 
+  lockFund: Lock Fund 
+  lockFundTxFee: Lock Fund Tx Fee 
+  total: Total
+  insufficientBalanceWarning: Your account has insufficient amount of {tokenName}. Please top up first before continue transacting on this page.
+  topUp: Top Up {tokenName}
+  accCurrentBalance: Account Current Balance 
+  initiatorCurrentBalance: Initiator Current Balance 
   year: Year | Years
   month: Month | Months
   hour: Hour | Hours
@@ -48,7 +60,7 @@ general:
   multisigTitle: This is a multisig account
   label: "Label"
   addressBook: "Address Book"
-  transfer: "Transfer"
+  transfer: "Transfer {tokenName}"
   blockHeight: "Block Height"
   digitalAsset: "Digital Asset"
   namespace: "Namespace | Namespaces"
@@ -60,6 +72,7 @@ general:
   extendDuration: Extend Duration
   change: "Change"
   password: "Password"
+  initiateBy: Initiate by 
   back: "Back"
   cancel: "Cancel"
   network: "Network"
@@ -69,11 +82,14 @@ general:
   notification: "Notification | Notifications"
   listEmpty: "The list is empty."
   walletPasswordInvalid: "Password for wallet {name} is invalid"
+  invalidInput: Invalid Input
   next: "Next"
   close: "Close"
   create: "Create"
   new: "New"
   add: "Add"
+  valid: Valid 
+  invalid: Invalid 
   privateKey: "Private Key"
   publicKey: "Public Key"
   address: "Address"
@@ -97,8 +113,11 @@ general:
   modifySupply: Modify Supply 
   namespaceId: Namespace ID 
   linkedAssetAddress: Linked Asset/Address
+  linkSuccess: Linked Successfully 
+  unlinkSuccess: Unlinked Successfully
   expires: Expires
   expired: Expired
+  linkToNamespace: Link to Namespace
   createNew: "Create New"
   createNewAcc: "Create New Account"
   transaction: "Transaction | Transactions"
@@ -113,35 +132,45 @@ general:
   import: "Import"
   edit: "Edit"
   search: "Search"
+  estimateUSD: Estimate US$
   ntgToShow: "Nothing to show."
   showAll: "Show All"
+  addAccAddress: Add Account Address
+  importFromAB: Import from Address Book
   contact: "Contact| Contacts"
   group: "Group"
   name: "Name"
   nameRequired: "Name is required"
   enterPassword: "Enter Password"
+  enterPasswordContinue: Enter your password to continue
   more: "More"
   confirm: "Confirm"
   overview: "Overview"
   enable: "Enable"
   disable: "Disable"
+  enabled: Enabled 
+  disabled: Disabled 
   invalidPrivateKey: "Private Key Invalid"
   levy: Levy 
   levyAmount: Levy amount 
   recipient: Recipient 
+  waitConfirmTx: "Waiting for transaction to be confirmed..."
   sender: Sender 
   amount: Amount
   levyRecipient: Levy recipient 
   noRecord: No records found.
+  link: Link
+  unlink: Unlink 
+  currentBalance: Current Balance 
   linked: Linked 
   unlinked: Unlinked 
   sda: SDA 
   day: Day | Days
   approximately: Approximately
   sdaFull: Sirius Digital Asset 
-  linkToNamespace: "Link to Namespace"
   viewInExplorer: "View In Explorer"
   walletAddress: Wallet Address
+  convertMultisig: Convert to Multisig
 wallet:
   newWallet: "New Wallet"
   createWallet: "Create Wallet"
@@ -226,6 +255,7 @@ addressBook:
   removeContactFromAB: Remove Contact from Address book?
   removeContact: "Remove Contact"
 account:
+  accountCreated: Your account has been successfully created.
   namePlaceholder: "Name your account"
   enterAccountName: "Enter Account name"
   nameTaken: "Account name is already taken"
@@ -255,6 +285,14 @@ nis1:
   disableSwap: Disable NIS1 Swap with this account
   nis1Address: "NIS1 Address:"
 multisig:
+  approvalExceedMax: Number of cosignatories for deletion approval is more than number of cosignatories for this account
+  deletionExceedMax: Number of cosignatories for transaction approval is more than number of cosignatories for this account
+  approvalAtLeastOne: Number of cosignatories for transaction approval cannot be less than 1
+  deletionAtLeastOne: Number of cosignatories for deletion approval cannot be less than 1
+  duplicatedCosigner: Duplicated cosigner added
+  selectedAccErr: Cosigner cannot be this account itself
+  updateCosignatories: Update cosignatories
+  alreadyMultisig: Your account is already a multisig.
   approvalScheme: "S:{approval}-of-{maxApproval}" 
   deletionScheme: "D:{deletion}-of-{maxDeletion}" 
   viewSettings: "View Settings"
@@ -265,7 +303,32 @@ multisig:
   topToBottom: Top to Bottom 
   bottomToTop: Bottom to Top 
   collapsible: Collapsible 
+  accountCosignatories: Account Cosignatories 
+  noCosigner: "{name} does not have any cosignatory accounts.When you add at least one (1) cosignatory, your account will automatically be converted into a multisig account."
+  noMultisig: "{name} is not a cosignatory of any accounts."
+  manageCosignatories: Manage Cosignatories
+  cosignatoryOf: Cosignatory of 
+  addNewCosignatory: Add New Cosignatory
+  cosignatory: Cosignatory
+  addressOrPk: Address/Public Key
+  transactionsApproval: Transactions Approval
+  accountDeletionApproval: Account Deletion Approval 
+  ofCosignatories: "of {value} cosignatories" #multisig approval/removal scheme
 dashboard:
+  gettingStartedGuide: Getting Started Guide 
+  guideOverview: Guide Overview 
+  siriusChainQues: "What is ProximaX Sirius Chain?"
+  buyOffer: Buy Offer 
+  sellOffer: Sell Offer 
+  createSthNew: Create Something New
+  accDescription: A key pair (private and public key) associated with a mutable state stored on the Sirius Chain.
+  createNamespace: Create Namespace 
+  createAsset: Create an Asset
+  viewAll: View All
+  allTransactions: All Transactions
+  noTransactions: "No transactions in {acc}"
+  recentTransactions: Recent Transactions
+  recentTransfers: Recent Transfers 
   txHash: Tx Hash
   timestamp: Timestamp 
   type: Type 
@@ -278,6 +341,7 @@ dashboard:
   addingAcc: "Adding account:"
   removingAcc: "Removing account:"
   txFee: Tx Fee 
+  fetchingTx: Fetching Transactions
   loadingTx: "Loading transactions data...Please wait."
   assetId: "Asset ID"
   applyHeightDelta: Apply Height Delta
@@ -308,3 +372,26 @@ dashboard:
   myPersonalAcc: My Personal Account
   expirationEstimate: Expiration Timestamp Estimate
   fetching: "Fetching..."
+delegate: 
+  notLinked: Your account is not linked to a delegated account. 
+  selectAccToLink: Select Account to Link
+  newAcc: New Account
+  newAccSelected: New Account is selected as the linking account.
+  enterPk: Please fill in the private key of the linking account.
+  linked: "Your account is linked to a delegated account."
+  accDelegated: "Account Delegated"
+  publicKeyOfDelegate: Public Key of the Delegated Account
+  delegatePublicKey: Delegate Public Key
+  delegateAcc: Delegate Account
+  unlinkAcc: Unlink Account
+  privateKeyErr: Private key not fulfilled link account requirement
+  unlinkFail: Unlink failed
+namespace: 
+  manageNamespace: Manage Linked Namespace
+  selectNamespace: "Select Namespace"
+  selectAction: Select Action
+  noNamespace: You have not created a namespace.
+  unlinkNamespace: Unlink Namespace
+
+
+

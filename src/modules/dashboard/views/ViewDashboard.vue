@@ -8,7 +8,7 @@
               <div class="text-center my-2"><div class="inline-block"><span class="font-bold text-xl">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-md">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-xl">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-6 h-6 ml-3 relative" style="top: -6px;"></div>
               <div class="inline-block text-xs font-bold text-blue-primary cursor-pointer" @click="triggerSetDefaultModal">{{ selectedAccountName }}<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></div>
               <div class="mb-8">
-                <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddressShort }}</div>
+                <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" :copySubject="$t('general.address')">{{ selectedAccountAddressShort }}</div>
                 <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
               </div>
               <div>
@@ -18,7 +18,7 @@
                       <img src="@/modules/dashboard/img/icon-balance-white.svg" class="w-5 h-5">
                     </div>
                   </div><br>
-                  <div class="text-xxs text-gray-400 inline-block uppercase">Top Up</div>
+                  <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.topUp')}}</div>
                 </a>
                 <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center mx-2">
                   <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
@@ -26,7 +26,7 @@
                       <img src="@/modules/dashboard/img/icon-transfer-white.svg" class="w-5 h-5">
                     </div>
                   </div><br>
-                  <div class="text-xxs text-gray-400 inline-block uppercase">Transfer</div>
+                  <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.transfer')}}</div>
                 </router-link>
                 <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="inline-block text-center ml-2">
                   <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
@@ -34,7 +34,7 @@
                       <img src="@/modules/dashboard/img/icon-swap-white.svg" class="w-5 h-5">
                     </div>
                   </div><br>
-                  <div class="text-xxs text-gray-400 inline-block uppercase">Swap</div>
+                  <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.swap')}}</div>
                 </router-link>
               </div>
             </div>
@@ -43,35 +43,35 @@
         <div class="pr-2 hidden md:inline-block">
           <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded-lg balance-div flex flex-col justify-between bg-navy-primary text-white">
             <div class="mt-8">
-              <div class="text-gray-300 text-txs">CURRENT BALANCE</div>
+              <div class="text-gray-300 text-txs uppercase">{{$t('general.currentBalance')}}</div>
               <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
-              <div class="text-gray-300 text-txs mt-1">Estimate US$ {{ currencyConvert }}</div>
+              <div class="text-gray-300 text-txs mt-1">{{$t('general.estimateUSD')}} {{ currencyConvert }}</div>
             </div>
             <div class="flex justify-between mt-2">
               <div>
-                <a :href="faucetLink" class="flex items-center mb-3" target=_new v-if="faucetLink"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">Top Up</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></a>
+                <a :href="faucetLink" class="flex items-center mb-3" target=_new v-if="faucetLink"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">{{$t('general.topUp')}}</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></a>
               </div>
-              <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-swap.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold text-white" style="margin-top: 1px">Swap</div></router-link>
+              <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-swap.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold text-white" style="margin-top: 1px">{{$t('general.swap')}}</div></router-link>
             </div>
           </div>
         </div>
         <div class="sm:pl-2 xl:px-2 hidden md:inline-block">
           <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div">
-            <div class="text-gray-400 text-txs mt-7 mb-2">WALLET ADDRESS</div>
+            <div class="text-gray-400 text-txs mt-7 mb-2 uppercase">{{$t('general.walletAddress')}}</div>
             <div class="flex items-center justify-between mb-10">
-              <div id="address" class="font-bold outline-none break-all text-xs lg:text-tsm h-8" :copyValue="selectedAccountAddressPlain" copySubject="Address">{{ selectedAccountAddress }}</div>
-              <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4" @click="copy('address')">
+              <div id="address" class="font-bold outline-none break-all text-xs lg:text-tsm h-8" :copyValue="selectedAccountAddressPlain" :copySubject="$t('general.address')">{{ selectedAccountAddress }}</div>
+              <img src="@/modules/dashboard/img/icon-copy.svg" :title="$t('general.copy')" class="w-4 cursor-pointer ml-4" @click="copy('address')">
             </div>
             <div class="flex justify-between w-full">
               <AddressQRModal :accountAddressQR="addressQR" />
-              <router-link :to="{ name: 'ViewMultisigHome', params: { name: selectedAccountName }}" class="my-2 flex items-center" v-if="!isMultisig"><img src="@/modules/dashboard/img/icon-multisig-blue.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">Convert to Multisig</div></router-link>
+              <router-link :to="{ name: 'ViewMultisigHome', params: { name: selectedAccountName }}" class="my-2 flex items-center" v-if="!isMultisig"><img src="@/modules/dashboard/img/icon-multisig-blue.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">{{$t('general.convertMultisig')}}</div></router-link>
             </div>
           </div>
         </div>
         <div class="pl-2 hidden xl:inline-block">
           <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-3 rounded-lg transaction-div text-white">
-            <div class="text-txs mt-6 text-gray-400">Recent Transfers</div>
-            <div class="text-gray-400 text-tsm mt-8 mb-3 h-12" v-if="recentTransferTxnRow.length==0">No transactions in {{ selectedAccountName }}</div>
+            <div class="text-txs mt-6 text-gray-400 uppercase">{{$t('dashboard.recentTransfers')}}</div>
+            <div class="text-gray-400 text-tsm mt-8 mb-3 h-12" v-if="recentTransferTxnRow.length==0">{{$t('dashboard.noTransactions',{acc:selectedAccountName})}} </div>
             <div v-else class="mt-3 h-16">
               <div v-for="txn in recentTransferTxnRow" :key="txn.hash" class="flex items-center justify-between mb-1">
                 <a class="flex items-center max-w-xs " :href="addressExplorerURL + '/' + txn.transferContactAddress" target=_new>
@@ -81,7 +81,7 @@
                 <a class="text-tsm font-bold" :href="hashExplorerURL + '/' + txn.hash" target=_new><span :class="`${ (txn.amount[0] ==='-')?'text-red-500':'text-green-500' }`">{{ txn.amount }}</span> <span class="text-xxs font-normal">{{ currentNativeTokenName }}</span></a>
               </div>
             </div>
-            <router-link :to="{ name: 'ViewTransferCreate'}" class="flex items-center mt-5"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">Transfer {{currentNativeTokenName}}</div></router-link>
+            <router-link :to="{ name: 'ViewTransferCreate'}" class="flex items-center mt-5"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">{{$t('general.transfer',{tokenName: currentNativeTokenName})}}</div></router-link>
           </div>
         </div>
       </div>
@@ -89,30 +89,30 @@
 
     <div class="text-left px-2 sm:px-10 bg-gray-200">
       <div class="transition-all flex items-end">
-        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='overview'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='overview'">Overview</div>
-        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='asset'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='asset'">Assets</div>
-        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='namespace'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='namespace'">Namespaces</div>
-        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='transaction'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='transaction'">All Transactions</div>
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='overview'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='overview'">{{$t('general.overview')}}</div>
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='asset'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='asset'">{{$t('general.asset',2)}}</div>
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='namespace'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='namespace'">{{$t('general.namespace',2)}}</div>
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='transaction'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='transaction'">{{$t('dashboard.allTransactions')}}</div>
       </div>
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-if="displayBoard=='overview'">
-      <div class="text-txs text-gray-400"><b class="text-gray-700">ASSETS</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">View all</span>)</div>
+      <div class="text-txs text-gray-400"><b class="text-gray-700 uppercase">{{$t('general.asset',2)}}</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">{{$t('dashboard.viewAll')}}</span>)</div>
       <DashboardAssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
-      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">NAMESPACES</b> ({{ selectedAccountNamespaceCount }} - View all)</div>
+      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700 uppercase">{{$t('general.namespace',2)}}</b> ({{ selectedAccountNamespaceCount }} - {{$t('dashboard.viewAll')}})</div>
       <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" :account="selectedAccount" />
-      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700">RECENT TRANSACTIONS</b> ({{ accountConfirmedTxnsCount }} - View all)</div>
+      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700 uppercase">{{$t('dashboard.recentTransactions')}}</b> ({{ accountConfirmedTxnsCount }} - {{$t('dashboard.viewAll')}})</div>
       <MixedTxnDataTable :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="recentTransactions" @openDecryptMsg="openDecryptMsgModal"></MixedTxnDataTable>
       <div class="mt-10 md:flex ml-5 md:ml-0">
         <div class="w-full md:w-1/2">
-          <div class="mb-8 font-bold uppercase text-txs">Create something new</div>
+          <div class="mb-8 font-bold uppercase text-txs">{{$t('dashboard.createSthNew')}}</div>
           <div class="flex flex-wrap">
             <div class="flex items-center w-80 mb-2">
               <div class="w-12 h-12 inline-block">
                 <img src="@/assets/img/icon-header-namespace.svg" class="w-12 h-12">
               </div>
               <div class="inline-block ml-4 dashboard-link">
-                <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create Namespace</router-link>
-                <p class="text-txs w-60">Create an on-chain unique place for your business and your assets.</p>
+                <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">{{$t('dashboard.createNamespace')}}</router-link>
+                <p class="text-txs w-60">{{$t('home.namespaceAns')}}</p>
               </div>
             </div>
             <div class="flex items-center w-80 mb-2">
@@ -120,8 +120,8 @@
                 <img src="@/assets/img/icon-header-asset.svg" class="w-12 h-12">
               </div>
               <div class="inline-block ml-4 dashboard-link">
-                <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create an Asset</router-link>
-                <p class="text-txs w-60">An asset could be a token that has a unique identifier and configurable properties.</p>
+                <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">{{$t('dashboard.createAsset')}}</router-link>
+                <p class="text-txs w-60">{{$t('home.assetAns')}}</p>
               </div>
             </div>
             <div class="flex items-center w-80 mb-2">
@@ -129,19 +129,19 @@
                 <img src="@/assets/img/icon-header-account.svg" class="w-12 h-12">
               </div>
               <div class="inline-block ml-4 dashboard-link">
-                <router-link :to="{ name : 'ViewAccountCreateSelectType'}" class="text-tsm mb-1 relative top-1 text-blue-link">Create New Account</router-link>
-                <p class="text-txs w-60">A key pair (private and public key) associated with a mutable state stored on the Sirius Chain.</p>
+                <router-link :to="{ name : 'ViewAccountCreateSelectType'}" class="text-tsm mb-1 relative top-1 text-blue-link">{{$t('general.createNewAcc')}}</router-link>
+                <p class="text-txs w-60">{{$t('dashboard.accDescription')}}</p>
               </div>
             </div>
           </div>
         </div>
         <div class="w-full md:w-1/2 mt-7 md:mt-0">
-          <div class="mb-8 font-bold text-txs uppercase">Getting started guide</div>
+          <div class="mb-8 font-bold text-txs uppercase">{{$t('dashboard.gettingStartedGuide')}}</div>
           <div class="text-xs sm:text-tsm">
-            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/" target=_new>Guide Overview <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/getting-started/what-is-proximax-sirius-chain/" target=_new>What is ProximaX Sirius Chain <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new>What is Namespace <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new>What is Asset <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/" target=_new>{{$t('dashboard.guideOverview')}} <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/getting-started/what-is-proximax-sirius-chain/" target=_new>{{$t('dashboard.siriusChainQues')}}<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new>{{$t('home.namespaceQues')}} <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new>{{$t('home.assetQues')}} <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
           </div>
         </div>
       </div>
@@ -156,16 +156,16 @@
       <div class="flex justify-between items-center">
         <div>
           <div v-if="selectedTxnType === TransactionFilterType.ACCOUNT" class="flex items-center">
-            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">Account added</span>
-            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">Account removed</span>
+            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">{{$t('dashboard.accountAdded')}}</span>
+            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">{{$t('dashboard.accountRemoved')}}</span>
           </div>
           <div v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE" class="flex items-center">
-            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">Buy offer</span>
-            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">Sell offer</span>
+            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">{{$t('dashboard.buyOffer')}}</span>
+            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">{{$t('dashboard.sellOffer')}}</span>
           </div>
           <div v-if="selectedTxnType === TransactionFilterType.ASSET" class="flex items-center">
-            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">Enabled</span>
-            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">Disabled</span>
+            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">{{$t('general.enabled')}}</span>
+            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">{{$t('general.disabled')}}</span>
           </div>
         </div>
         <div class="bg-gray-50">
@@ -195,7 +195,7 @@
         <div class="border-t border-b border-gray-200 my-3 py-6 px-2">
           <div class="flex justify-center items-center border-gray-400">
             <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-navy-primary mr-2"></div>
-            Fetching transactions
+            {{$t('dashboard.fetchingTx')}}
           </div>
         </div>
       </div>
@@ -245,6 +245,7 @@ import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
 import {AppState} from '@/state/appState'
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   name: 'ViewDashboard',
@@ -272,6 +273,7 @@ export default defineComponent({
   },
 
   setup(props){
+    const {t} = useI18n();
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -620,7 +622,7 @@ export default defineComponent({
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
 
-      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject + ' ' +t('general.copied'), group: 'br', life: 3000});
     };
 
     // get USD conversion

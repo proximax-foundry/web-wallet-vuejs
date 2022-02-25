@@ -112,7 +112,7 @@ setup(p){
       return Address.createFromPublicKey(publicKey, networkType)
   }
   const label = length =>{
-    return length>0? 'MULTISIG-':'Cosigner-'
+    return length>0? t('general.multisig').toUpperCase() +'-': t('general.cosigner') +'-'
   }
   const findAccount = publicKey =>{
     return wallet.accounts.find(account=>account.address == convertAddress(publicKey).plain())

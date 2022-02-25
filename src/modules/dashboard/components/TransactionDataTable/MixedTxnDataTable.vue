@@ -59,7 +59,7 @@
           </div>
         </template>
       </Column>
-      <Column :header="$t('dashboard.inOut')" headerStyle="width:40px" v-if="wideScreen">
+      <Column :header="$t('dashboard.inOut')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div>
             <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block" v-if="data.in_out === true">
