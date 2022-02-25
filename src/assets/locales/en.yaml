@@ -35,6 +35,9 @@ node:
   nodeList: "Node List"
   nodeUpdated: "Node updated"
 general:
+  true: True
+  false: False 
+  signer: Signer
   cosigner: Cosigner
   noCosigner: No eligible cosigner in this wallet
   hasPartial: Your account has transaction(s) on partial.
@@ -48,6 +51,8 @@ general:
   topUp: Top Up {tokenName}
   accCurrentBalance: Account Current Balance 
   initiatorCurrentBalance: Initiator Current Balance 
+  initiator: Initiator 
+  deadline: Deadline
   year: Year | Years
   month: Month | Months
   hour: Hour | Hours
@@ -142,6 +147,7 @@ general:
   importFromAB: Import from Address Book
   contact: "Contact| Contacts"
   group: "Group"
+  signed: Signed
   name: "Name"
   save: Save
   nameRequired: "Name is required"
@@ -169,7 +175,7 @@ general:
   currentBalance: Current Balance 
   linked: Linked 
   unlinked: Unlinked 
-  sda: SDA 
+  sda: SDA | SDAs
   day: Day | Days
   approximately: Approximately
   sdaFull: Sirius Digital Asset 
@@ -212,6 +218,26 @@ wallet:
   confirmImport: "Confirm Import"
   importMsg: "You are about to import a wallet into {network}. Proceed ?"
 transaction:
+  aggregateBonded: Aggregate Bonded
+  waitForLoad: "It's is still loading, please wait."
+  approve: Approve
+  doThisLater: Do this later
+  allow: Allow
+  block: Block #prevent
+  buy: Buy
+  sell: Sell
+  fullySigned: Fully Signed
+  signerPk: Signer Public Key
+  txInfo: Transaction information
+  approveConfirmation: Would you like to approve this transaction? (Highlighted in yellow | Would you like to approve these transactions? (Highlighted in yellow
+  actionRequired: Action Required
+  noActionRequired: No Action Required
+  haveApproved: You have already approved this transaction | You have already approved these transactions
+  unconfirmedTx: Unconfirmed Transactions 
+  waitingSignatures: Waiting for signatures 
+  waitingSignature_s: Waiting for signature(s)
+  unconfirmedTxOf: Unconfirmed transactions of {name}
+  waitingSignaturesOf: Waiting for signatures of {name}
   inQueue: "transaction in waiting queue | transactions in waiting queue"
   dontRefresh: "Please do not refresh or log out"
   txAdded: "Transaction added | Transactions added"
