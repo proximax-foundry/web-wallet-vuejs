@@ -82,11 +82,11 @@
                 </div>
                 <div>
                   <div class="p-2">
-                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new>{{$t('home.namespaceQues')}}<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new>{{$t('general.namespaceQues')}}<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
                     <div class="text-txs h-10">{{$t('home.namespaceAns')}}</div>
                   </div>
                   <div class="p-2">
-                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new>{{$t('home.assetQues')}}<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new>{{$t('general.assetQues')}}<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
                     <div class="text-txs h-10">{{$t('home.assetAns')}}</div>
                   </div>
                 </div>

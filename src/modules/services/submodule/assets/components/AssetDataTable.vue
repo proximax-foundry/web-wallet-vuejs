@@ -14,18 +14,18 @@
       >
       <template #header>
         <div class="flex justify-between">
-          <span class="text-sm pt-1 text-gray-700 ml-2 lg:ml-7">{{$t('services.assets')}}</span>
+          <span class="text-sm pt-1 text-gray-700 ml-2 lg:ml-7">{{$t('general.asset',2)}}</span>
           <SelectInputPluginClean v-model="filterAssets" :options="listAccounts" :selectDefault="selectedAddress" class="w-48 lg:w-60 inline-block" />
         </div>
       </template>
       <Column style="width: 250px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Asset ID</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('general.assetId')}}</div>
             <div class="uppercase font-bold text-txs">{{data.idHex}}</div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Namespace</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('general.namespace')}}</div>
             <div class="uppercase font-bold text-txs">
               <div v-if="data.linkedNamespace.length > 0">
                 <div v-if="data.linkedNamespace.length == 1">
@@ -42,7 +42,7 @@
                   </div>
                 </div>
               </div>
-              <div v-else>no linked namespace</div>
+              <div v-else>{{$t('general.noLinkedNamespace')}}</div>
             </div>
           </div>
         </template>
@@ -50,23 +50,23 @@
       <Column style="width: 250px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Supply</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('general.supply')}}</div>
             <div class="uppercase font-bold text-txs">{{data.supply}}</div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">Amount</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">{{$t('general.amount')}}</div>
             <div class="uppercase font-bold text-txs">{{data.amount}}</div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">Block Height</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">{{$t('general.blockHeight')}}</div>
             <div class="uppercase font-bold text-txs">{{data.height}}</div>
           </div>
         </template>
       </Column>
       <Column style="width: 50px" v-if="wideScreen">
       </Column>
-      <Column field="assetId" :header="$t('dashboard.assetid')" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
+      <Column field="assetId" :header="$t('general.assetId')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase font-bold text-txs">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedNamespace" header="NAMESPACE" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="linkedNamespace" :header="$t('general.namespace')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <div v-if="data.linkedNamespace.length > 0">
             <div v-if="data.linkedNamespace.length == 1">
@@ -83,20 +83,20 @@
               </div>
             </div>
           </div>
-          <div v-else>no linked namespace</div>
+          <div v-else>{{$t('general.noLinkedNamespace')}}</div>
         </template>
       </Column>
-      <Column field="supply" header="SUPPLY" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="supply" :header="$t('general.supply')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase text-txs">{{data.supply}}</span>
         </template>
       </Column>
-      <Column field="amount" header="AMOUNT" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="amount" :header="$t('general.amount')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase font-bold text-txs">{{data.amount}}</span>
         </template>
       </Column>
-      <Column field="height" header="BLOCK HEIGHT" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="height" :header="$t('general.blockHeight')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.height}}</span>
         </template>
@@ -107,19 +107,19 @@
             <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
             <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div role="none" class="my-2">
-                <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.idHex, address: data.address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Modify Supply</router-link>
-                <router-link :to="{ name: 'ViewServicesAssetsLinkToNamespace', params: {assetId: data.idHex, address: data.address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Linked to namespace</router-link>
-                <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>View in Explorer<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
+                <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.idHex, address: data.address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
+                <router-link :to="{ name: 'ViewServicesAssetsLinkToNamespace', params: {assetId: data.idHex, address: data.address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.linkToNamespace')}}</router-link>
+                <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>{{$t('general.viewInExplorer')}}<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
               </div>
             </div>
           </div>
         </template>
       </Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('general.noRecord')}}
       </template>
       <template #loading>
-         {{$t('dashboard.loadingmessage')}}
+         {{$t('dashboard.loadingTx')}}
       </template>
     </DataTable>
   </div>

@@ -15,7 +15,7 @@
       <Column style="width: 250px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.assetId')}}</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('general.assetId')}}</div>
             <div class="uppercase font-bold text-txs">{{data.idHex}}</div>
           </div>
           <div>
@@ -36,7 +36,7 @@
                   </div>
                 </div>
               </div>
-              <div v-else>{{$t('dashboard.noLinkedNamespace')}}</div>
+              <div v-else>{{$t('general.noLinkedNamespace')}}</div>
             </div>
           </div>
         </template>
@@ -55,7 +55,7 @@
       </Column>
       <Column style="width: 50px" v-if="wideScreen">
       </Column>
-      <Column field="assetId" :header="$t('dashboard.assetId')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 200px'?'width: 200px'  ` " v-if="wideScreen">
+      <Column field="assetId" :header="$t('general.assetId')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 200px'?'width: 200px'  ` " v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase font-bold text-txs">{{data.idHex}}</span>
         </template>
@@ -77,7 +77,7 @@
               </div>
             </div>
           </div>
-          <div v-else>{{$t('dashboard.noLinkedNamespace')}}</div>
+          <div v-else>{{$t('general.noLinkedNamespace')}}</div>
         </template>
       </Column>
       <Column field="supply" :header="$t('general.supply')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">

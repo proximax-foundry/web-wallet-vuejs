@@ -140,8 +140,8 @@
           <div class="text-xs sm:text-tsm">
             <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/" target=_new>{{$t('dashboard.guideOverview')}} <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
             <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/getting-started/what-is-proximax-sirius-chain/" target=_new>{{$t('dashboard.siriusChainQues')}}<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new>{{$t('home.namespaceQues')}} <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new>{{$t('home.assetQues')}} <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new>{{$t('general.namespaceQues')}} <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
+            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new>{{$t('general.assetQues')}} <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
           </div>
         </div>
       </div>

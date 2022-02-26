@@ -23,7 +23,7 @@
             </div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.assetId')}}</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('general.assetId')}}</div>
             <div class="flex items-center">
               <div class="text-txs font-bold">{{ data.assetId }}{{ data.namespaceName ? `(${data.namespaceName})`: "" }}</div>
             </div>
@@ -86,7 +86,7 @@
         </template>
       </Column>
 
-      <Column :header="$t('dashboard.assetId')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('general.assetId')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-txs">{{ data.assetId }}{{ data.namespaceName ? `(${data.namespaceName})`: "" }}</div>
         </template>

@@ -63,7 +63,7 @@ export default defineComponent({
     const login = () => {
       var result = WalletUtils.verifyWalletPassword(selectedWallet.value, networkState.chainNetworkName, walletPassword.value);
       if (!result) {
-        err.value = t('signin.invalidpassword');
+        err.value = t('general.walletPasswordInvalid',{name:selectedWallet.value});
       } else {
         // let wallets = new Wallets();
         let wallet = walletState.wallets.filterByNetworkNameAndName(networkState.chainNetworkName, selectedWallet.value);

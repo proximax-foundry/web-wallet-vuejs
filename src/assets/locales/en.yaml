@@ -1,4 +1,23 @@
 --- 
+asset:
+  noAsset: Looks like you don’t have any assets yet.
+  assetDescription: An asset could be a token, but it could also be a collection of more specialized assets such as reward points, shares of stock, signatures, status flags, votes or even other currencies.
+  assetAns: Mosaics are part of what makes the Smart Asset System unique and flexible. They are fixed assets on the Sirius Chain that can represent a set of multiple identical things that do not change.
+  createAssets: Create Asset | Create Assets
+  supplyMsg1: Please input the supply here 
+  supplyMsg2: Maximum supply is 900T
+  supplyMsg3: "Example: 900,000,000,000,000"
+  divisibilityMsg1: Please input the dibisibility here 
+  divisibilityMsg2: Maximum divisibility is 6 
+  divisibilityMsg3: "Example: 0.000000"
+  divisibilityMsg4: Determines up to what decimal place the asset can be divided.
+  transferableMsg: If you tick "Transferable",asset can be transferred.
+  supplyMutableMsg: If you tick "Supply Mutable", supply can be changed.
+  modifyAssetSupply: Modify Asset Supply
+  assetCreatedBy: Asset created by
+  currentSupply: Current Supply 
+  modificationType: Modification Type
+  quantityOf: Quantity Of {value}
 home:
   home: "Home"
   title: "ProximaX Sirius Wallet"
@@ -20,9 +39,7 @@ home:
   allInfo: "Everything you need to know about the Sirius Wallet"
   siriusChain: "What is Sirius Chain?"
   siriusChainTitle: "Start building apps on the ProximaX Sirius blockchain layer"
-  namespaceQues: "What is Namespace?"
   namespaceAns: "Create an on-chain unique place for your business and your assets."
-  assetQues: "What is Asset?"
   assetAns: "An asset could be a token that has a unique identifier and configurable properties"
   contactTeam: "Contact our support team"
   switchDefault: "Your default account has switched to"
@@ -35,6 +52,15 @@ node:
   nodeList: "Node List"
   nodeUpdated: "Node updated"
 general:
+  requiredField: Required field
+  increase: Increase 
+  decrease: Decrease
+  rentalFee: Rental Fee
+  assetId: "Asset ID"
+  feedback: Give us feedback about your experience here 
+  feedbackDescription: We are eager to keep improving our products.
+  namespaceQues: "What is Namespace?"
+  assetQues: "What is Asset?"
   true: True
   false: False 
   signer: Signer
@@ -60,6 +86,7 @@ general:
   ownerAcc: Owner Account
   in: In   # Use Case: In 10 days, In 50 minutes
   message: Message 
+  noLinkedNamespace: No Linked Namespace
   owner: "Owner"
   ownerTitle: "You own this multisig account"
   default: "Default"
@@ -270,8 +297,8 @@ addressBook:
   newContactImported: "New Contact imported to Address book | New Contacts imported to Address book"
   newContactAdded: "New contact added to Address book"
   addressRequired: "Address Required"
-  nameExist: "Name is already exists in address book."
-  addressExist: "Address is already exists in address book."
+  nameExist: "Name already exists in address book."
+  addressExist: "Address already exists in address book."
   editContact: "Edit Contact"
   contactUpdated: "Contact info updated in Address book"
   work: "Work"
@@ -374,7 +401,6 @@ dashboard:
   txFee: Tx Fee 
   fetchingTx: Fetching Transactions
   loadingTx: "Loading transactions data...Please wait."
-  assetId: "Asset ID"
   applyHeightDelta: Apply Height Delta
   newVersion: New version
   upgradePeriod: Upgrade period
@@ -397,8 +423,7 @@ dashboard:
   hashType: Hash Type 
   secret: Secret 
   proof: Proof 
-  scanQR: Scan QR Code
-  noLinkedNamespace: No Linked Namespace 
+  scanQR: Scan QR Code 
   creator: Creator
   myPersonalAcc: My Personal Account
   expirationEstimate: Expiration Timestamp Estimate
