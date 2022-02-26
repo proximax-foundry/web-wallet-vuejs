@@ -138,6 +138,7 @@ import { WalletAccount } from '@/models/walletAccount';
 import Tooltip from 'primevue/tooltip';
 import { PublicAccount } from 'tsjs-xpx-chain-sdk';
 import { AppState } from '@/state/appState';
+import { useI18n } from 'vue-i18n';
 
 export default{
   components: { DataTable, Column, SelectInputPluginClean },
@@ -152,7 +153,7 @@ export default{
   },
 
   setup(props){
-
+    const {t} = useI18n();
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
       if(window.innerWidth < '1024'){
@@ -186,7 +187,7 @@ export default{
     const listAccounts = computed(() => {
       let accountOption = [];
       accountOption.push(
-        {value: '', label: 'Show all'},
+        {value: '', label: t('general.showALl')},
       );
       walletState.currentLoggedInWallet.accounts.forEach(account => {
         accountOption.push(

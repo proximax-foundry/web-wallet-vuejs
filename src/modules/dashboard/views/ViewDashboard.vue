@@ -111,7 +111,7 @@
                 <img src="@/assets/img/icon-header-namespace.svg" class="w-12 h-12">
               </div>
               <div class="inline-block ml-4 dashboard-link">
-                <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">{{$t('dashboard.createNamespace')}}</router-link>
+                <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">{{$t('general.createNamespace')}}</router-link>
                 <p class="text-txs w-60">{{$t('home.namespaceAns')}}</p>
               </div>
             </div>

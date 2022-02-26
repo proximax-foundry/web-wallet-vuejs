@@ -82,7 +82,7 @@ export default {
       uniqueGroupLabels.sort();
       let action = [];
       action.push(
-        {value: '', label: 'Show All'},
+        {value: '', label: t('general.showAll')},
       );
       uniqueGroupLabels.forEach(label => {
         action.push({value: label, label});
