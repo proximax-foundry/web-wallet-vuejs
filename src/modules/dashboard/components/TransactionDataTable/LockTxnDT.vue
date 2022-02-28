@@ -97,7 +97,7 @@
         {{$t('general.noRecord')}}
       </template>
       <template #loading>
-          {{$t('dashboard.loadingTx')}}
+          {{$t('dashboard.fetchingTx')}}
       </template>
     </DataTable>
   </div>

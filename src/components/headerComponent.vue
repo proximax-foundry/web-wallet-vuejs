@@ -648,7 +648,7 @@ export default defineComponent({
           toast.add({
             severity:'error', 
             summary: t('transaction.txError'), 
-            detail:  t('transaction.txErrMsg',{status:status,hash:hash}),
+            detail:  t('transaction.txErrMsg',[status,hash]),
             group: 'br', 
             life: 10000
           });

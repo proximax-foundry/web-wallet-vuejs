@@ -90,7 +90,7 @@
                     <div>{{ item.infoRedList.map(info => info.short ? info.short : info.value).join(", ") }}</div>
                   </div>
                   <div v-if="item.infoInfoList.length > 0">
-                    <div>{{$t('general.info')}}</div>
+                    <div>{{$t('dashboard.info')}}</div>
                     <div>{{ item.infoInfoList.map(info => info.short ? info.short : info.value).join(", ") }}</div>
                   </div>
                   <div v-if="item.sdas.length > 0">
