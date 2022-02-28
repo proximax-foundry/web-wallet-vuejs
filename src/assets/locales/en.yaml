@@ -638,7 +638,7 @@ transaction:
   txUnconfirmed: transaction in unconfirmed state | transactions in unconfirmed state
   unconfirmedTx: Unconfirmed Transactions
   unconfirmedTxOf: 'Unconfirmed transactions of {name}'
-  waitForLoad: 'It''s is still loading, please wait.'
+  waitForLoad: 'It is still loading, please wait.'
   waitingSignature_s: Waiting for signature(s)
   waitingSignatures: Waiting for signatures
   waitingSignaturesOf: 'Waiting for signatures of {name}'
