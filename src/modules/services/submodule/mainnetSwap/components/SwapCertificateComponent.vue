@@ -19,17 +19,17 @@
           </div>
           <div class="sm:col-span-4 text-left pl-2 flex">
             <div class="self-center">
-              <b class="text-xs font-bold text-blue-primary">{{ networkTerm }} Transaction Hash:</b>
+              <b class="text-xs font-bold text-blue-primary">{{ networkTerm }} {{$t('swap.transactionHash')}}:</b>
               <div class="break-all mt-1 flex"><a :href="swapLink" target=_new class="hover:underline self-center text-xs">{{ transactionHash }}<font-awesome-icon icon="external-link-alt" class="ml-1 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a></div>
               <div class="text-xs font-bold text-blue-primary inline-block mt-5" v-if="siriusTransactionHash">Sirius Transaction Hash:</div>
               <div class="break-all mt-1 flex" v-if="siriusTransactionHash"><a :href="xpxExplorer+siriusTransactionHash" target=_new class="hover:underline text-xs self-center">{{ siriusTransactionHash }}<font-awesome-icon icon="external-link-alt" class="text-blue-500 w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a></div>
               <div class="md:grid md:grid-cols-2">
                 <div class="mb-5">
-                  <div class="text-xs font-bold text-blue-primary mt-5">Sirius Account:</div>
+                  <div class="text-xs font-bold text-blue-primary mt-5">{{$t('swap.siriusAcc')}}:</div>
                   <div class="break-all mt-1 self-center text-xs flex">{{ siriusName }}</div>
                 </div>
                 <div class="mb-5">
-                  <div class="text-xs font-bold text-blue-primary mt-5">Swapped Amount:</div>
+                  <div class="text-xs font-bold text-blue-primary mt-5">{{$t('swap.swappedAmount')}}:</div>
                   <div class="break-all mt-1 self-center text-xs flex">{{ swappedAmount }}</div>
                 </div>
               </div>

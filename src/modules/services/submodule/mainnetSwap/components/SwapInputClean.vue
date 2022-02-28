@@ -11,11 +11,11 @@
         <input v-else-if="decimal==5" v-maska="'#*.#####'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
         <input v-else v-maska="'#*.######'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
       </div>
-      <button :disabled="disabled == true" class="cursor-pointer focus:outline-none text-blue-primary text-xs font-bold" @click="showRemark();$emit('clickedMaxAvailable', true);clearAllError()">Max. Amount</button>
+      <button :disabled="disabled == true" class="cursor-pointer focus:outline-none text-blue-primary text-xs font-bold" @click="showRemark();$emit('clickedMaxAvailable', true);clearAllError()">{{$t('swap.maxAmount')}}</button>
     </div>
     <div class="h-3 mb-2 error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div>
     <div class="h-3 mb-2 error error-text text-left" v-if="emptyErr">{{ emptyErrorMessage }}</div>
-    <div class="text-gray-600 text-xs mr-3 my-1 mb-5 text-left" v-if="isShowRemark==true && remarkOption">Maximum amount after deducting transaction fee <b>{{ transactionFee }} xpx</b> and gas fee <b>{{ gasFee }} xpx</b></div>
+    <div class="text-gray-600 text-xs mr-3 my-1 mb-5 text-left" v-if="isShowRemark==true && remarkOption">{{$t('swap.inputRemark1')}} <b>{{ transactionFee }} xpx</b> {{$t('swap.inputRemark2')}} <b>{{ gasFee }} xpx</b></div>
   </div>
 </template>
 

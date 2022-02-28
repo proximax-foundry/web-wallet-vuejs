@@ -2,104 +2,104 @@
   <div>
     <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
     <div class='mt-6 p-6 border filter shadow-lg text-center'>
-      <div class="text-md">Main Network Swap</div>
-      <div class="text-xs my-3 mb-5 sm:mb-10"><img src="@/modules/services/submodule/mainnetSwap/img/bsc.svg" class="mr-2 h-5 inline-block">Swap from BSC to Proximax Sirius Chain</div>
+      <div class="text-md">{{$t('swap.mainNetworkSwap')}}</div>
+      <div class="text-xs my-3 mb-5 sm:mb-10"><img src="@/modules/services/submodule/mainnetSwap/img/bsc.svg" class="mr-2 h-5 inline-block">{{$t('swap.swapSiriusToBsc')}}</div>
       <div class="flex my-10">
         <div class="flex-none">
           <div class="flex border border-gray-300 rounded-md filter shadow-md">
             <div class="flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-yellow-500':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-txs sm:text-sm font-bold" :class="`${ currentPage>=1?'text-white':'text-gray-400' }`">1</div></div>
-            <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('swap.transaction')}}</div>
+            <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('general.transaction')}}</div>
           </div>
         </div>
         <div class="flex-grow self-center md:mx-4 h-0.5 bg-gray-100"></div>
         <div class="flex-none">
           <div class="flex border border-gray-300 rounded-md filter shadow-md">
             <div class="flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-yellow-500':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-txs sm:text-sm font-bold" :class="`${ currentPage>=2?'text-white':'text-gray-400' }`">2</div></div>
-            <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('swap.certificate')}}</div>
+            <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('general.certificate')}}</div>
           </div>
         </div>
       </div>
       <div v-if="currentPage==1">
-        <div class="text-sm my-5 font-bold">Transaction Details</div>
+        <div class="text-sm my-5 font-bold">{{$t('general.transactionDetails')}}</div>
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <SelectInputAccountOutgoingSwap v-model="siriusAddress" placeholder="From Sirius Chain Account" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
+        <SelectInputAccountOutgoingSwap v-model="siriusAddress" :placeholder="$t('swap.fromSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
         <div class="relative">
           <div class="opacity-90 w-full h-full absolute z-10 bg-white" v-if="!siriusAddress"></div>
-          <SwapInputClean class="mt-5" :disabled="disableAmount" v-model="amount" :balance="selectedAccountBalance" :placeholder="currentNativeTokenName + ' Amount'" type="text" :showError="showAmountErr" :errorMessage="(selectedAccountBalance >= minBalanceAmount)?'Insufficient balance':'Balance is insufficient to cover transaction fee.'" emptyErrorMessage="Amount is empty" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" toolTip="XPX amount to swap to BEP20" />
-          <MetamaskAddressInput placeholder="BSC address receiving your swap" errorMessage="Valid BSC address is required" class="mt-5" :showError="showAddressErr" v-model="bscAddress" />
-          <div class="tex-center font-bold text-sm my-5">Transaction Fee (BSC BEP20 Network):</div>
+          <SwapInputClean class="mt-5" :disabled="disableAmount" v-model="amount" :balance="selectedAccountBalance" :placeholder="currentNativeTokenName +' '+ $t('general.amount')" type="text" :showError="showAmountErr" :errorMessage="(selectedAccountBalance >= minBalanceAmount)?$t('general.insufficientBalance'):$t('swap.failCoverTxFee')" :emptyErrorMessage="$t('swap.amountEmpty')" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" :toolTip="$t('swap.bscAmountMsg')" />
+          <MetamaskAddressInput :placeholder="$t('swap.bscAddress')" :errorMessage="$t('swap.bscAddressErr')" class="mt-5" :showError="showAddressErr" v-model="bscAddress" />
+          <div class="tex-center font-bold text-sm my-5">{{$t('general.transactionFee')}} ({{$t('swap.bsc')}} BEP20 {{$t('general.network')}}):</div>
           <div class="md:grid md:grid-cols-3 mb-4">
             <div class="md:col-span-1 mb-3">
               <div class="bscGasStrategy md:mr-6" :class="`${ (bscGasStrategy == 'standard')?'selected':'option' }`" @click="changeGasStrategy('standard')">
-                <p class="font-bold text-tsm">Standard</p>
+                <p class="font-bold text-tsm">{{$t('swap.standard')}}</p>
                 <div>BNB {{ standardGasPrice }}</div>
-                <div>{{ currentNativeTokenName }} {{ xpxAmountInStandardGasPrice }} = USD {{ standardGasPriceInUSD }}</div>
+                <div>{{ currentNativeTokenName }} {{ xpxAmountInStandardGasPrice }} = {{$t('general.usd')}} {{ standardGasPriceInUSD }}</div>
               </div>
             </div>
             <div class="md:col-span-1 mb-3">
               <div class="bscGasStrategy md:mx-3" :class="`${ (bscGasStrategy == 'fast')?'selected':'option' }`" @click="changeGasStrategy('fast')">
-                <p class="font-bold text-tsm">Fast</p>
+                <p class="font-bold text-tsm">{{$t('swap.fast')}}</p>
                 <div>BNB {{ fastGasPrice }}</div>
-                <div>{{ currentNativeTokenName }} {{ xpxAmountInFastGasPrice }} = USD {{ fastGasPriceInUSD }}</div>
+                <div>{{ currentNativeTokenName }} {{ xpxAmountInFastGasPrice }} = {{$t('general.usd')}} {{ fastGasPriceInUSD }}</div>
               </div>
             </div>
             <div class="md:col-span-1 mb-3">
               <div class="bscGasStrategy md:ml-6" :class="`${ (bscGasStrategy == 'rapid')?'selected':'option' }`" @click="changeGasStrategy('rapid')">
-                <p class="font-bold text-tsm">Rapid</p>
+                <p class="font-bold text-tsm">{{$t('swap.rapid')}}</p>
                 <div>BNB {{ rapidGasPrice }}</div>
-                <div>{{ currentNativeTokenName }} {{ xpxAmountInRapidGasPrice }} = USD {{ rapidGasPriceInUSD }}</div>
+                <div>{{ currentNativeTokenName }} {{ xpxAmountInRapidGasPrice }} = {{$t('general.usd')}} {{ rapidGasPriceInUSD }}</div>
               </div>
             </div>
           </div>
-          <div class="text-sm text-center mb-2 sm:mb-4">Fees are valid for: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
-          <div class="tex-center font-bold text-sm mb-2">Transaction Fee (Sirius Network):</div>
+          <div class="text-sm text-center mb-2 sm:mb-4">{{$t('swap.feesValidDuration')}}: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
+          <div class="tex-center font-bold text-sm mb-2">{{$t('general.transactionFee')}} ({{$t('swap.siriusNetwork')}}):</div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span>{{ txFeeDisplay }}</span> {{ currentNativeTokenName }}</div>
+            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('general.transactionFee')}}: <span>{{ txFeeDisplay }}</span> {{ currentNativeTokenName }}</div>
           </div>
-          <PasswordInputClean placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
+          <PasswordInputClean :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
           <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center">
           {{ amount }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 ml-4">
           </div>
           <div class="flex justify-center mt-3">
-            <div class="text-xs text-gray-600 mt-2 max-w-screen-md">Swap completion time will vary depending on the performance of the BSC network. The more BNB transaction fees you pay, the faster your swap will occur. Displayed BNB fees are valid for only three minutes due to the BSC network's fluctuating rates.</div>
+            <div class="text-xs text-gray-600 mt-2 max-w-screen-md">{{$t('swap.bscOutgoingMsg')}}</div>
           </div>
           <div class="mt-10 text-center">
-            <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">Maybe Later</button>
-            <button type="button" class="default-btn focus:outline-none disabled:opacity-50 mt-2" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?'Swap in progress. Please wait...':'Yes, Swap' }}</button>
-            <button class="default-btn focus:outline-none disabled:opacity-50 mt-2" v-if="canCheckStatus" @click="callTocheckSwapStatus">Check Swap Status</button>
+            <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">{{$t('general.later')}}</button>
+            <button type="button" class="default-btn focus:outline-none disabled:opacity-50 mt-2" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?$t('swap.swapInProgress'):$t('swap.confirmSwap') }}</button>
+            <button class="default-btn focus:outline-none disabled:opacity-50 mt-2" v-if="canCheckStatus" @click="callTocheckSwapStatus">{{$t('swap.checkSwapStatus')}}</button>
           </div>
         </div>
       </div>
       <div v-if="currentPage==2">
         <div>
-          <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
-          <div class="text-sm mb-7">The swap process has already started!</div>
-          <SwapCertificateComponent networkTerm="BSC" swapType="Out" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :swapQr="swapQr" :swapLink="swapLink" :siriusName="selectedAccountName" :swappedAmount="amount" :siriusAddress="Helper.createAddress(selectedAccountAddress).pretty()" :siriusTransactionHash="siriusTransactionHash" :xpxExplorer="xpxExplorerUrl" />
+          <h1 class="default-title font-bold mt-5 mb-2">{{$t('general.congratz')}}</h1>
+          <div class="text-sm mb-7">{{$t('swap.swapStarted')}}</div>
+          <SwapCertificateComponent :networkTerm="$t('swap.bsc')" swapType="Out" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :swapQr="swapQr" :swapLink="swapLink" :siriusName="selectedAccountName" :swappedAmount="amount" :siriusAddress="Helper.createAddress(selectedAccountAddress).pretty()" :siriusTransactionHash="siriusTransactionHash" :xpxExplorer="xpxExplorerUrl" />
           
-          <button type="button" class="w-40 hover:shadow-lg bg-blue-primary text-white text-xs hover:opacity-50 rounded font-bold px-4 py-3 border border-blue-primary outline-none mr-4 mt-6" @click="saveCertificate">Download Certificate</button>
+          <button type="button" class="w-40 hover:shadow-lg bg-blue-primary text-white text-xs hover:opacity-50 rounded font-bold px-4 py-3 border border-blue-primary outline-none mr-4 mt-6" @click="saveCertificate">{{$t('general.downloadCertificate')}}</button>
           <div class="mt-5">
-            <a :href="swapLink" target=_new class="underline self-center text-xs font-bold text-blue-primary">View Transaction in BcScan<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a><br>
-            <a :href="xpxExplorerUrl" target=_new class="underline self-center text-xs font-bold text-blue-primary">View Transaction in Explorer<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a>
+            <a :href="swapLink" target=_new class="underline self-center text-xs font-bold text-blue-primary">{{$t('swap.viewTxInBsc')}}<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a><br>
+            <a :href="xpxExplorerUrl" target=_new class="underline self-center text-xs font-bold text-blue-primary">{{$t('swap.viewTxInExplorer')}}<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a>
           </div>
-          <div class="md:mx-20 lg:mx-40 font-bold text-center text-tsm py-5 sm:py-10 mt-5 sm:mt-10 border-t border-gray-200">Swap Details</div>
+          <div class="md:mx-20 lg:mx-40 font-bold text-center text-tsm py-5 sm:py-10 mt-5 sm:mt-10 border-t border-gray-200">{{$t('swap.swapDetails')}}</div>
           <div class="md:mx-20 lg:mx-10 xl:mx-40 border-2 border-gray-200 mt-4 p-5 text-xs font-bold filter shadow-lg">
-            <div class="text-blue-primary mb-1">From: {{ selectedAccountName }}</div>
+            <div class="text-blue-primary mb-1">{{$t('general.from')}}: {{ selectedAccountName }}</div>
             <div class="break-all">{{ Helper.createAddress(selectedAccountAddress).pretty() }}</div>
-            <div class="mt-1">Swap Amount {{ amount }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
+            <div class="mt-1">{{$t('swap.swapAmount')}} {{ amount }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
             <div>
               <img src="@/modules/services/submodule/mainnetSwap/img/icon-dots.svg" class="inline-block h-8 my-2">
             </div>
-            <div class="text-blue-primary mb-1">To: MetaMask Account</div>
+            <div class="text-blue-primary mb-1">{{$t('general.to')}}: {{$t('swap.metmaskAcc')}}</div>
             <div>{{ bscAddress }}</div>
-            <div class="mt-1">Equivalent to {{ amount }} BEP20 XPX</div>
+            <div class="mt-1">{{$t('swap.equivalentTo')}} {{ amount }} BEP20 {{currentNativeTokenName}}</div>
           </div>
-          <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">Please download the certificate. It is needed in the event of an error. You can search the status of your BSC transaction using the above BSC Transaction Hash.</div>
+          <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">{{$t('swap.swapMsg3')}}</div>
           <label class="inline-flex items-center mb-5">
             <input type="checkbox" class="h-5 w-5 bg-blue-primary" value="true" v-model="savedCheck">
-            <span class="ml-2 cursor-pointer text-xs font-bold">I confirm that I have downloaded a copy of my certificate.</span>
+            <span class="ml-2 cursor-pointer text-xs font-bold">{{$t('swap.confirmDownloaded')}}</span>
           </label>
           <div class="sm:mt-5 text-center">
-            <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn mr-5 focus:outline-none w-40 inline-block mt-1" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
+            <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn mr-5 focus:outline-none w-40 inline-block mt-1" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">{{$t('general.done')}}</router-link>
           </div>
         </div>
       </div>
@@ -127,6 +127,7 @@ import { ethers } from 'ethers';
 import { SwapUtils } from '@/util/swapUtils';
 import { NetworkType } from "tsjs-xpx-chain-sdk";
 import { AppState } from '@/state/appState';
+import { useI18n } from 'vue-i18n';
 //import { ChainUtils } from "@/util/chainUtils";
 //import { ChainAPICall } from "@/models/REST/chainAPICall";
 //import { listenerState } from "@/state/listenerState";
@@ -143,6 +144,7 @@ export default {
   },
 
   setup() { 
+    const {t} = useI18n();
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const toast = useToast();
     const router = useRouter();
@@ -323,7 +325,7 @@ export default {
         buildTransaction();
       }
       catch(error){
-        addErrorToast("Service unavailable", "Unable to get sink address");
+        addErrorToast(t('swap.serviceUnavailable'),t('swap.failGetSink'));
         redirectToSelection();
       }
     }
@@ -572,7 +574,7 @@ export default {
           updateRemoteAddress();
           changeGasStrategy(bscGasStrategy.value);
           if((amount.value + gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
-            addErrorToast('Insufficient amount', 'Insufficient amount to perform swap', 5000);
+            addErrorToast(t('swap.insufficientAmount'), t('swap.swapInsufficientAmount'), 5000);
             return;
           }
           disableTimer();
@@ -580,7 +582,7 @@ export default {
           siriusTransactionHash.value = signedTransaction.hash;
           callSwapServer(signedTransaction.payload);
         } else {
-          err.value = "Wallet password is incorrect";
+          err.value = t('general.walletPasswordValidation',{name: walletState.currentLoggedInWallet.name});
           swapInProgress.value = false;
           isDisabledCancel.value = false;
         }
@@ -617,7 +619,7 @@ export default {
         }
         else if(response.status==400){
           const res = await response.json();
-          addErrorToast('Swap operation failed', res.data.message);
+          addErrorToast(t('swap.swapOperationFail'), res.data.message);
           swapInProgress.value = false;
           isDisabledCancel.value = false;
         }
@@ -631,21 +633,21 @@ export default {
           let errorMessage = res.data.message ? res.data.message : "";
           toast.add({
             severity:'warn',
-            summary: 'Service is unavailable',
-            detail: errorMessage ? errorMessage : 'Please try again later',
+            summary: t('swap.serviceUnavailable'),
+            detail: errorMessage ? errorMessage : t('swap.tryAgain'),
             group: 'br'
           });
           swapInProgress.value = false;
           isDisabledCancel.value = false;
         }
         else if(response.status==504){
-          addErrorToast('Swap request timed-out', 'Please check the status again');
+          addErrorToast(t('swap.timedOut'), t('swap.checkStatusAgain'));
           //swapInProgress.value = false;
           isDisabledCancel.value = false;
           canCheckStatus.value = true;
         }
       } catch (error) {
-        addErrorToast('Network error', 'Swap Server not found');
+        addErrorToast(t('swap.networkErr'), t('swap.serverNotFound'));
         swapInProgress.value = false;
         isDisabledCancel.value = false;
       }
@@ -663,7 +665,7 @@ export default {
         currentPage.value = 2;
       }
       else{
-        addErrorToast("Swap not found", "Swap not found for the current transaction ID");
+        addErrorToast(t('swap.swapNotFound'), t('swap.txIdNotFound'));
       }
     }
 

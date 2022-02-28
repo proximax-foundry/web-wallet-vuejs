@@ -7,7 +7,7 @@
       <div v-if="toggleModal" class="popup-outer-lang fixed flex z-50">
         <div class="modal-popup-box ">
           <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
-            <div class ='text-gray-700 text-center text-xs mt-2'>{{$t('nis1.n1s1Title')}}</div>
+            <div class ='text-gray-700 text-center text-xs mt-2'>{{$t('nis1.nis1Title')}}</div>
             <PasswordInput class = 'my-3' v-model= 'walletPasswd' :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')"/>
             <div @click="enableNIS1Swap()"  class = 'rounded-md bg-blue-primary cursor-pointer text-xs text-white font-semibold py-2 text-center ml-auto mr-auto w-7/12 disabled:opacity-50 disabled:cursor-auto' :disabled="disableSwap">{{$t('general.confirm')}}</div>
             <div class= 'text-center cursor-pointer font-semibold text-xs mt-2' @click="toggleModal = !toggleModal; walletPasswd=''">{{$t('general.cancel')}}</div>
@@ -60,7 +60,7 @@ export default {
             toggleModal.value = !toggleModal.value;
             emit('enable-nis1-swap', p.address);
         }else{
-            err.value = t('account.failSwap');
+            err.value = t('nis1.failSwap');
         }
       }else{
           let walletName = walletState.currentLoggedInWallet.name

@@ -104,7 +104,7 @@ export default {
                 return {name:'XPX',registered:true}
             }else if (name=='prx.metx'){
                 return {name:'METX',registered:true}
-            }else if (name=='xarcade.zar'){
+            }else if (name=='xarcade.xar'){
                 return {name:'XAR',registered:true}
             }else{
                 return {name:name,registered:false}

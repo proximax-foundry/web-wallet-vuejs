@@ -187,7 +187,7 @@ export default{
     const listAccounts = computed(() => {
       let accountOption = [];
       accountOption.push(
-        {value: '', label: t('general.showALl')},
+        {value: '', label: t('general.showAll')},
       );
       walletState.currentLoggedInWallet.accounts.forEach(account => {
         accountOption.push(

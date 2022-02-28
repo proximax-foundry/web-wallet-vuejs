@@ -1,6 +1,6 @@
 --- 
 asset:
-  noAsset: Looks like you don’t have any assets yet.
+  noAsset: "Looks like you don’t have any assets yet."
   assetDescription: An asset could be a token, but it could also be a collection of more specialized assets such as reward points, shares of stock, signatures, status flags, votes or even other currencies.
   assetAns: Mosaics are part of what makes the Smart Asset System unique and flexible. They are fixed assets on the Sirius Chain that can represent a set of multiple identical things that do not change.
   createAssets: Create Asset | Create Assets
@@ -52,6 +52,11 @@ node:
   nodeList: "Node List"
   nodeUpdated: "Node updated"
 general:
+  check: Check
+  done: Done
+  transactionDetails: Transaction Details
+  certificate: Certificate
+  selectOption: Select Option
   requiredField: Required field
   increase: Increase 
   decrease: Decrease
@@ -84,7 +89,8 @@ general:
   hour: Hour | Hours
   minute: Minute | Minutes
   ownerAcc: Owner Account
-  in: In   # Use Case: In 10 days, In 50 minutes
+  in: In   
+  out: Out
   message: Message 
   noLinkedAsset: No Linked Asset
   noLinkedNamespace: No Linked Namespace
@@ -108,6 +114,7 @@ general:
   change: "Change"
   password: "Password"
   initiateBy: Initiate by 
+  downloadCertificate: Download Certificate
   back: "Back"
   cancel: "Cancel"
   network: "Network"
@@ -120,9 +127,11 @@ general:
   invalidInput: Invalid Input
   next: "Next"
   close: "Close"
+  continue: Continue
   create: "Create"
   new: "New"
   add: "Add"
+  later: Later
   valid: Valid 
   invalid: Invalid 
   privateKey: "Private Key"
@@ -136,6 +145,7 @@ general:
   scheme: "Scheme"
   block: "Block | Blocks"
   swap: "Swap"
+  the: "the" #use case: sorry. please save the transaction hash, the signature and contact our helpdesk
   delegate: "Delegate"
   pkWarning: "Make sure you store your private key in a safe place. Access to your digital assets cannot be recovered without it!"
   downloadPaperWallet: "Download Paper Wallet"
@@ -153,6 +163,7 @@ general:
   unlinkSuccess: Unlinked Successfully
   expires: Expires
   expired: Expired
+  download: Download
   linkToNamespace: Link to Namespace
   createNew: "Create New"
   createNewAcc: "Create New Account"
@@ -164,10 +175,13 @@ general:
   supply: "Supply"
   duration: "Duration"
   transferable: Transferable 
+  from: From
+  to: To
   supplyMutable: Supply Mutable
   import: "Import"
   edit: "Edit"
   search: "Search"
+  usd: USD
   estimateUSD: Estimate US$
   ntgToShow: "Nothing to show."
   balance: Balance
@@ -330,7 +344,6 @@ account:
   confirmDelete: Confirm Account Deletion
   failDelete: "Unable to delete account"
   delegate: "Delegate Account"
-  failSwap: 'Unable to enable NIS1 swap for this account'
   myAcc: "My Accounts"
   multisigAcc: "Multisig Accounts"
   otherAcc: "Other Accounts"
@@ -339,11 +352,19 @@ account:
   accountDetails: "Account Details"
   noAssets: "You do not own any assets."
 nis1:
+  amountMsg: XAR or PRX amount to swap to XPX
+  fromNis1Acc: From NIS1 Account
+  failSwap: 'Unable to enable NIS1 swap for this account'
+  nis1: NIS1
+  nis1Acc: NIS1 Account
   nis1Swap: "NIS1 Swap"
   enableSwap: "Enable NIS1 Swap with this account"
-  n1s1Title: "Please enter password to enable NIS1 for this account."
+  nis1Title: "Please enter password to enable NIS1 for this account."
   disableSwap: Disable NIS1 Swap with this account
   nis1Address: "NIS1 Address:"
+  nis1ToSirius: NIS1 to Sirius Chain
+  nem: NEM 
+  swapNis1ToSirius: Swap from NIS1 to Proximax Sirius Chain
 multisig:
   approvalExceedMax: Number of cosignatories for deletion approval is more than number of cosignatories for this account
   deletionExceedMax: Number of cosignatories for transaction approval is more than number of cosignatories for this account
@@ -382,7 +403,6 @@ dashboard:
   sellOffer: Sell Offer 
   createSthNew: Create Something New
   accDescription: A key pair (private and public key) associated with a mutable state stored on the Sirius Chain.
-  
   createAsset: Create an Asset
   viewAll: View All
   allTransactions: All Transactions
@@ -478,5 +498,140 @@ transfer:
   addContacts: Do you want to save this address?
   successfullySaved: Contact {name} successfully saved
   proceedWithZero: "Are you sure to proceed with 0 amount?"
-
-
+swap: 
+  approveConnection: Please click on MetaMask extension to approve connection
+  selectNetworkToSwap: Please select {network} on MetaMask to swap
+  mainNetworkSwap: Main Network Swap
+  transactionHash: "{network} Transaction Hash"
+  standard: Standard
+  fast: Fast
+  inputInfo: Input Information
+  rapid: Rapid
+  bsc: BSC
+  xar: XAR 
+  sirius: Sirius
+  xpx: XPX
+  bscFull: Binance Smart Chain
+  siriusChain: Sirius Chain
+  siriusChainFull: Proximax Sirius Chain
+  checkSwapStatus: Check Swap Status
+  checkStatus: Check Status
+  swapBscToSirius: Swap from BSC to Proximax Sirius Chain
+  enterValidHash: Please enter valid transaction hash
+  swapSiriusToBsc: Swap from Proximax Sirius Chain to BSC 
+  bscToSirius: BSC to Sirius Chain 
+  siriusToBsc: Sirius Chain to BSC
+  failConnect: Unable to connect 
+  serviceUnavailable: Service unavailable
+  eth: ETH 
+  networkErr: Network Error
+  txNotFound: Transaction not found
+  serverNotFound: Swap Server not found
+  swapNotFound: Swap not found
+  txIdNotFound: Swap not found for the current transaction ID
+  tryAgain: Please try again later
+  timedOut: Swap request timed-out
+  checkStatusAgain: Please check the status again
+  ethFull: Ethereum 
+  siriusAcc: Sirius Account
+  ethToSirius: ETH to Sirius Chain 
+  siriusToEth: Sirius Chain to ETH
+  toSiriusAcc: To Sirius Chain Account
+  swapMsg: Swap process may take a few hours to complete. If you wish to proceed, you will receive a certificate containing your transaction hash for your records.
+  swapMsg2: Swap process may take a few hours to complete. Please save a copy of your certificate. It is needed in the event of an error.
+  swapMsg3: Please download the certificate. It is needed in the event of an error. You can search the status of your BSC transaction using the above BSC Transaction Hash.
+  confirmSwap: Confirm Swap
+  swapStarted: The swap process has already started!
+  swappedAmount: Swapped Amount
+  viewTxInBsc: View Transaction in BSCScan
+  viewTxInExplorer: View Transaction in Explorer
+  swapDetails: Swap Details
+  swapAmount: Swap AMount
+  equivalentTo: Equivalent to
+  confirmDownloaded: I confirm that I have downloaded a copy of my certificate.
+  validation: Validation
+  connect: Connect
+  connected: Connected
+  notConnected: Not connected
+  metamaskAcc: Metamask Account
+  fromMetamaskAddress: From MetaMask Address
+  noOtherExtension: Please make sure there is no other crypto wallet extension currently being enabled except
+  metamask: MetaMask
+  referTo: Refer to the #refer to the walkthrough for more details
+  walkthrough: walkthrough #refer to the walkthrough for more details
+  forMoreDetails: for more details. #refer to the walkthrough for more details
+  refreshMsg: Please refresh this page after disabling other wallet extensions.
+  insufficientAmount: Insufficient amount
+  swapInsufficientAmount: Insufficient amount to perform swap
+  swapInProgress: "Swap in progress. Please wait..."
+  insufficientTokenBalance: Insufficient token balance
+  minimum51: "(MINIMUM = 51 )"
+  inputMsg: BEP20 token amount to swap. Minimum 51 BEP20 amount is required as 50 will be deducted from the amount as transaction fee.
+  txFeeMsg: The fees for the transaction on Sirius Chain will be deducted from this amount, which is 50 {tokenName}
+  sendRequest: Send Request
+  step1: "Step 1: Send BEP20 {tokenName} to the escrow account"
+  sendingTx: Sending transaction to MetaMask
+  retry: Retry
+  checkStep4: "Step 4: Initiate swap"
+  cancelSwap: Cancel this swap
+  rejectMetamask: Approval in MetaMask is rejected 
+  waitingConfirmMetamask: Waiting for confirmation in MetaMask
+  signTx: Please sign transaction confirmation in MetaMask
+  checkTransaction: Checking transaction confirmation... 
+  checkingTransaction: Check transaction confirmation to proceed
+  validationWarning: One block confirmation needed to proceed.
+  validationWarning2: Do not change Gas Limit, Max Piority Fee or Max Fee.
+  validationWarning3: Confirmation might take up to 30 minutes, 1 hour or more due to high transaction volumes.
+  validationWarning4: Please do not close or refresh #separated as it needs to be bold
+  validationWarning5: this page until the swap process is complete and you have saved your certificate.
+  validationWarning6: View confirmation status on
+  notConfirmed: Transaction is not confirmed yet. Please check again in a moment.
+  txFailed: Transaction failed. Please try again with suggested gas price and gas limit.
+  step2: "Step 2: Validate your Sirius address"
+  sendingMsg: Sending message to MetaMask
+  messageSigned: "Message signed with signature:"
+  signatureHash: Signature hash
+  signature: Signature
+  step3: "Step 3: Initiate swap"
+  initiatingSwap: Initiating swap...
+  sendMsgFail: Unable to send message to swap service
+  swapInitiated: Swap has already been initiated earlier.
+  messageSent: Message sent to the swap service, swap initiated...
+  serverErrMsg1: Sorry. Please save the #sorry. please save the transaction hash, the signature and contact our helpdesk
+  serverErrMsg2: and contact our #sorry. please save the transaction hash, the signature and contact our helpdesk
+  bscScan: BSCScan
+  serviceDown: Swapping service is temporary not available. Please try again later
+  toMetamaskAddress: To MetaMask Address
+  maxAmount: Max. Amount
+  checkStep1: "Step 1: Check {network} transaction  status" 
+  checkingStatus: Checking {network} transaction status
+  txSuccessful: "{network} transaction is successful"
+  txInvalid: Transaction invalid
+  transactionPending: '{network} transaction is still pending. Please wait a few more moment'
+  pendingConfirmation: "Pending Confirmation: {number} of 12 confirmations"
+  checkStep2: "Step 2: Check swap status"
+  checkOutgoingStep2: "Step 2: Check BSC transaction status"
+  checkStep3: "Step 3: Validate your {network} address"
+  requestFromSwap: Requesting from swap service
+  swapSuccess: Swap is successful
+  swapSuccess2: Swap is already in progress or has been completed successfully.
+  inputRemark1: Maximum amount after deducting transaction fee 
+  inputRemark2: and gas fee
+  fromSiriusAcc: From Sirius Chain Account
+  failCoverTxFee: Balance is insufficient to cover transaction fee.
+  bscAmountMsg: XPX amount to swap to BEP20
+  amountEmpty: Amount is empty
+  bscAddressErr: Valid BSC address is required
+  bscAddress: BSC address receiving your swap
+  feesValidDuration: Fees are valid for
+  siriusNetwork: Sirius Network
+  failGetSink: Unable to get sink address
+  bscOutgoingMsg: Swap completion time will vary depending on the performance of the BSC network. The more BNB transaction fees you pay, the faster your swap will occur. Displayed BNB fees are valid for only three minutes due to the BSC network's fluctuating rates.
+  swapOperationFail: Swap operation failed
+  initiateSwap: Initiate swap
+  initiateSwapWithHash: Initiate swap with this {network} Transaction Hash
+  feeTooLow: Fees might be too low. Please do not change recommended fee in MetaMask.
+  hashNotFound: "{0} transaction hash is not found. Please initiate new swap from {0} to {1}" #0,1=network
+  hashNotFound2: BSC transaction hash is not found. Please contact our
+  hashInvalid: "{0} transaction hash is invalid. Please initiate new swap from {0} to {1}" #0,1=network
+  
