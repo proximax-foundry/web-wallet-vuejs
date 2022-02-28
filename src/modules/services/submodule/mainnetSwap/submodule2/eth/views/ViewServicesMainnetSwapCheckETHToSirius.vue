@@ -638,7 +638,7 @@ export default {
 
     const siriusAddressSelectedName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
 
-    watch(siriusAddressSelected, (newName) => {
+    watch(siriusAddressSelected, (newAddress) => {
       let accountSelected = walletState.currentLoggedInWallet.accounts.find(account => account.address == newAddress);
       if(!accountSelected){
         accountSelected = walletState.currentLoggedInWallet.others.find(account => account.address == newAddress);
