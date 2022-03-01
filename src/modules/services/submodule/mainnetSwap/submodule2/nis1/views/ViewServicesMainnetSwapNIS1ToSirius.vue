@@ -104,6 +104,7 @@ import { Nis1SwapUtils } from '@/util/nis1SwapUtils';
 import { SwapUtils } from '@/util/swapUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { Helper } from '@/util/typeHelper';
+import { AppState } from '@/state/appState';
 // import SelectInputAccount from '@/components/SelectInputAccount.vue';
 
 export default {
@@ -121,7 +122,7 @@ export default {
 
   setup() {
     const err = ref('');
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const currentPage = ref(1);
     const showPasswdError = ref(false);
     const walletPasswd = ref('');

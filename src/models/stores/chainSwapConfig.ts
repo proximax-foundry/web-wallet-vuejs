@@ -1,4 +1,31 @@
 import { StoreProperties } from "./storeProperties";
+import {
+    ServerConfig
+  } from 'nem-library';
+
+
+interface swapAllowedMosaics{
+    namespaceId: string;
+    name: string;
+    divisibility: number;
+}
+
+interface nis1SwapData {
+    timeOutTransactionNis1: number;
+    url: string;
+    urlExplorer: string;
+    networkType: number;
+    burnAddress:string;
+    nodes: ServerConfig[];
+    swapAllowedMosaics: Array<swapAllowedMosaics>;
+}
+
+// "nis1SwapData": {
+    
+//   "nis1SwapAllowedMosaics": [
+//     { "namespaceId": "xarcade", "name": "xar", "divisibility": 4 },
+//     { "namespaceId": "prx", "name": "xpx", "divisibility": 6 }
+//   ]
 
 export class ChainSwapConfig extends StoreProperties{
 
@@ -16,6 +43,25 @@ export class ChainSwapConfig extends StoreProperties{
 
     gasPriceConsultURL: string = "";
     priceConsultURL: string = "";
+
+    nis1SwapData:nis1SwapData = {
+        timeOutTransactionNis1: 0,
+        url: '',
+        urlExplorer: '',
+        networkType: 0,
+        burnAddress: '',
+        nodes: [{
+            protocol: 'https',
+            domain: '',
+            port: 0
+        }],
+        swapAllowedMosaics: [{
+            namespaceId: '',
+            name: '',
+            divisibility: 0
+        }]
+    };
+
 
     constructor(storeName: string){
         super(storeName + "_swapConfig");

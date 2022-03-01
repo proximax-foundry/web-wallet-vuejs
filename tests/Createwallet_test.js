@@ -10,8 +10,14 @@ module.exports = {
     
     "Create-wallet_test": (browser) => {
         var create = browser.page.Createwallet();
+
+        browser.fullscreenWindow(function(result) {
+            console.log(result);
+        });
+
         create
             .navigate()
+            .change_network()
             .navigate_createnewwallet(browser.launch_url)
             .emptyinput_wallet()
             .different_password(name, password, password2)
@@ -20,15 +26,21 @@ module.exports = {
             .password_length(name, shortpassword)
             .navigate_mainpage()
             .navigate_createnewwallet(browser.launch_url)
-            .create_wallet(browser.launch_url, name, password)
+            .create_wallet(name, password)
             .existing_name(name, password)
             .eye_icon()
     },
 
     "Create-pkwallet_test": (browser) => {
         var create = browser.page.Createwallet();
+
+        browser.fullscreenWindow(function(result) {
+            console.log(result);
+        });
+
         create
             .navigate()
+            .change_network()
             .navigate_createpkwallet(browser.launch_url)
             .emptyinput_pkwallet()
             .different_password_pk(privatekey, name, password, password2)
@@ -40,7 +52,7 @@ module.exports = {
             .invalid_privatekey(privatekey1)
             .navigate_mainpage()
             .navigate_createpkwallet(browser.launch_url)
-            .create_pkwallet(browser.launch_url, privatekey, name, password)
+            .create_pkwallet(privatekey, name, password)
             .existing_name_pk(privatekey, name, password)
             .eye_icon_pk()
     },
@@ -49,6 +61,7 @@ module.exports = {
         var create = browser.page.Createwallet();
         create
             .navigate()
+            .change_network()
             .navigate_createbackupwallet(browser.launch_url)
     }
 

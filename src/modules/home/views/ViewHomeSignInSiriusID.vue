@@ -34,6 +34,7 @@ import { networkState } from "@/state/networkState";
 import { walletState } from "@/state/walletState";
 import IntroTextComponent from "@/components/IntroTextComponent";
 import {useI18n} from 'vue-i18n'
+import { AppState } from '@/state/appState';
 
 export default defineComponent({
   name: 'ViewHomeSignInSiriusID',
@@ -49,7 +50,7 @@ export default defineComponent({
     const {t} = useI18n();
     const toast = useToast();
     const selectedNetwork = computed(()=> networkState.chainNetwork);
-    const selectedNetworkType = computed(()=> ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+    const selectedNetworkType = computed(()=> AppState.networkType);
     const selectedNetworkName = computed(()=> networkState.chainNetworkName );
     const err = ref("");
     const newWallet = ref();

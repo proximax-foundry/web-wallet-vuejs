@@ -116,6 +116,7 @@
 import { defineComponent, computed } from 'vue';
 import { ResultAuditInterface} from '@/util/attestationUtils';
 import { networkState } from "@/state/networkState";
+import { AppState } from '@/state/appState';
 export default defineComponent({
   name: 'AuditResultModal',
   props: ['auditResult'],
@@ -136,7 +137,7 @@ export default defineComponent({
     }
   },
   setup(){
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     return{
       currentNativeTokenName
     }

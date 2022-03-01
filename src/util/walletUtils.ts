@@ -156,13 +156,12 @@ export class WalletUtils {
     static fetchAccountInfoCurrentWalletAccounts(): false | Promise<AccountInfo[]> {
 
         const wallet = walletState.currentLoggedInWallet;
-        const networkTypeId = networkState.currentNetworkProfile!.network.type;
+        const networkType = AppState.networkType;
 
-        if (!wallet || !networkTypeId) {
+        if (!wallet || !networkType) {
             return false;
         }
-
-        const networkType = ChainUtils.getNetworkType(networkTypeId);
+        
         const addresses: Address[] = [];
         wallet.accounts.forEach((element: WalletAccount) => {
             addresses.push(Address.createFromPublicKey(element.publicKey, networkType));

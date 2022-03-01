@@ -263,6 +263,7 @@ import { Helper } from "@/util/typeHelper";
 import Tooltip from 'primevue/tooltip';
 import { TipType } from '../model/dashboardClasses'
 import SplitButton from 'primevue/splitbutton';
+import { AppState } from '@/state/appState';
 
 export default{
   components: { DataTable, Column, SplitButton },
@@ -307,7 +308,7 @@ export default{
 
     const hints = [hashHint, assetHint, pkHint, addressHint, nsHint, nsHint2, nsHint3].join('\n');
 
-    const currentNetworkType = computed(()=> networkState.currentNetworkProfile.network.type);
+    const currentNetworkType = computed(()=> AppState.networkType);
     const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
     const blockExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.blockRoute);
     const publicKeyExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.publicKeyRoute);

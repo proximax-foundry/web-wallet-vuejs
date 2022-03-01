@@ -47,6 +47,7 @@ import { toSvg } from "jdenticon";
 import { Helper } from "@/util/typeHelper";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { Nis1SwapUtils } from '@/util/nis1SwapUtils';
+import { AppState } from '@/state/appState';
 
 export default defineComponent({
   emits:[
@@ -62,7 +63,7 @@ export default defineComponent({
   setup(p, {emit}){
     const toggleSelection = ref(false);
 
-    // const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    // const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();

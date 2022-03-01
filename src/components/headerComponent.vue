@@ -72,21 +72,21 @@
               <div class="grid grid-cols-2">
                 <div>
                   <div class="p-2">
-                    <a class="mb-2 block text-blue-primary" href="#" target=_new>Getting Started<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/" target=_new>Getting Started<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
                     <div class="text-txs h-10">Everything you need to know about the Sirius Wallet</div>
                   </div>
                   <div class="p-2">
-                    <a class="mb-2 block text-blue-primary" href="#" target=_new>What is Sirius Chain?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/getting-started/what-is-proximax-sirius-chain/" target=_new>What is Sirius Chain?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
                     <div class="text-txs h-10">Start building apps on the ProximaX Sirius blockchain layer</div>
                   </div>
                 </div>
                 <div>
                   <div class="p-2">
-                    <a class="mb-2 block text-blue-primary" href="#" target=_new>What is Namespace?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new>What is Namespace?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
                     <div class="text-txs h-10">Create an on-chain unique place for your business and your assets</div>
                   </div>
                   <div class="p-2">
-                    <a class="mb-2 block text-blue-primary" href="#" target=_new>What is Asset?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new>What is Asset?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
                     <div class="text-txs h-10">Everything you need to know about the Sirius Wallet</div>
                   </div>
                 </div>
@@ -98,14 +98,14 @@
           </div>
           <div class="w-12 lg:w-16 flex flex-row items-center left-gray-line">
             <router-link :to="{name : 'ViewNotification'}" class="text-center w-full h-7 relative">
-              <span class="flex h-5 w-5 items-center justify-center absolute" style="right: 15px; top: -2px;" v-if="isNewNotification">
+              <span class="flex h-5 w-5 items-center justify-center absolute notification_counter" v-if="isNewNotification">
                 <span class="animate-ping absolute inline-flex rounded-full bg-blue-primary opacity-75 h-4 w-4"></span>
                 <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-primary"></span>
               </span>
-              <span class="flex items-center justify-center absolute" style="right: 15px; top: -2px;" v-else>
+              <span class="flex items-center justify-center absolute notification_counter" v-else>
                 <span class="relative inline-flex rounded-full z-20 h-4 w-4 bg-blue-primary text-xxs text-white items-center justify-center">{{ newNotificationCount }}</span>
               </span>
-              <div class="mt-1 h-7 w-3 lg:h-5 lg:w-5 inline-block">
+              <div class="mt-2 h-3 w-3 lg:mt-1 lg:h-5 lg:w-5 inline-block">
                 <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100">
               </div>
             </router-link>
@@ -302,9 +302,8 @@ export default defineComponent({
       }
       chainsNetworks.value = options;
     }, true);
-
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
 
     const chainsNetworkOption = computed(()=>{
 
@@ -341,7 +340,7 @@ export default defineComponent({
     //   );
     // }, 60000);
 
-    const currentNetworkType = computed(()=> networkState.currentNetworkProfile ? networkState.currentNetworkProfile.network.type : null);
+    const currentNetworkType = computed(()=> networkState.currentNetworkProfile ? AppState.networkType : null);
 
     const logout = () => {
       WalletStateUtils.doLogout();
@@ -579,7 +578,7 @@ export default defineComponent({
 
      watch(()=> confirmedTxLength.value, (newValue, oldValue)=>{
       if(newValue > oldValue){
-        WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
+        WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, AppState.nativeToken.assetId);
 
         let txLength = newValue - oldValue;
 
@@ -998,6 +997,10 @@ export default defineComponent({
   background-color: #ffffff;
 }
 
+.notification_counter{
+  right: 8px; top: -2px;
+}
+
 @screen lg {
   .header-height{
     @apply h-16;
@@ -1019,6 +1022,10 @@ export default defineComponent({
 
   .p-dropdown .p-dropdown-trigger {
     width: 30px;
+  }
+
+  .notification_counter{
+    right: 15px; top: -2px;
   }
 }
 

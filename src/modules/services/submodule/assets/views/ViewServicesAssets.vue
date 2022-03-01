@@ -15,18 +15,14 @@
           <div class="text-gray-600 text-tsm my-5">An asset could be a token, but it could also be a collection of more specialized assets such as reward points, shares of stock, signatures, status flags, votes or even other currencies.</div>
           <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="bg-blue-primary py-2 px-7 rounded-lg text-white font-bold mt-4 inline-block">Create assets</router-link>
         </div>
-        <div class="grid grid-cols-3 mt-16">
-          <div>
-            <a href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new class="text-blue-primary font-bold inline-block text-tsm">What is asset?</a>
-            <div class="text-gray-400 text-tsm my-3 sm:pr-2">Mosaics are part of what makes the Smart Asset System unique and flexible. They are fixed assets on the Sirius Chain that can represent a set of multiple identical things that do not change.</div>
+        <div class="sm:grid sm:grid-cols-2 mt-10 lg:mt-16">
+          <div class="mb-8">
+            <a href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm flex items-start">What is asset?</a>
+            <div class="text-gray-400 text-xs lg:text-tsm my-3 sm:pr-2">Mosaics are part of what makes the Smart Asset System unique and flexible. They are fixed assets on the Sirius Chain that can represent a set of multiple identical things that do not change.</div>
           </div>
-          <div>
-            <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="text-blue-primary font-bold inline-block text-tsm">The complete guide about Digital Asset</router-link>
-            <div class="text-gray-400 text-tsm my-3">What is asset?</div>
-          </div>
-          <div>
-            <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="text-blue-primary font-bold inline-block text-tsm">Give us feedback about your experience here</router-link>
-            <div class="text-gray-400 text-tsm my-3">Give us feedback about your experience here</div>
+          <div class="mb-8">
+            <a href="https://t.me/proximaxhelpdesk" target=_new class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">Give us feedback about your experience here</a>
+            <div class="text-gray-400 text-tsm my-3">We are eager to keep improving our products.</div>
           </div>
         </div>
       </div>
