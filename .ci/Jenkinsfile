@@ -81,6 +81,12 @@ pipeline {
                     sh 'rm dist/chainProfile.json'
                     sh 'cp $CHAIN_PROFILE dist/chainProfile.json'
                 }
+
+                configFileProvider(
+                    [configFile(fileId: 'testnet-chain-swap-profile', variable: 'CHAIN_SWAP_PROFILE')]) {
+                    sh 'rm dist/chainSwapProfile.json'
+                    sh 'cp $CHAIN_SWAP_PROFILE dist/chainSwapProfile.json'
+                }
                 
                 withCredentials([string(credentialsId: 'cloudfront_id', variable: 'CLOUDFRONT_ID'), 
                         string(credentialsId: 's3_bucket', variable: 'S3_BUCKET'),
