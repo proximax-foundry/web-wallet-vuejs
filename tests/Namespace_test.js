@@ -15,8 +15,9 @@ module.exports = {
         // create wallet
         create
             .navigate()
+            .change_network()
             .navigate_createpkwallet(browser.launch_url)
-            .create_pkwallet(browser.launch_url, privatekey, name, password)
+            .create_pkwallet(privatekey, name, password)
 
         // sign in
         signin
@@ -28,7 +29,10 @@ module.exports = {
             .invalid_name(shortname)
             .empty_password(namespace_input)
             // .create_namespace(namespace_input, password)
+            // .link_namespace()
 
-    }
+    },
+
+
 
 }

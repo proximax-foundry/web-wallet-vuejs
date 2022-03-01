@@ -15,13 +15,30 @@
     </div>
     <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 px-6">
+         <div v-if="isMultiSig" class="text-left mt-2 mb-5 "> 
+            <div v-if="walletCosignerList.length > 0">
+              <div class="text-tsm">
+                {{$t('transfer.cosigner')}}:
+                <span class="font-bold" v-if="walletCosignerList.length == 1"> 
+                  {{ walletCosignerList[0].name }}
+                </span>
+                <span class="font-bold" v-else>
+                  <select class="" v-model="selectedCosignPublicKey">
+                    <option v-for="(element, item) in  walletCosignerList" :value="findAcc(element.publicKey).publicKey" :key="item">
+                      {{ element.name }} 
+                    </option>
+                  </select>
+                </span>
+              </div>
+            </div>
+          </div>
         <div v-if="selectAction== 'Link'" class="font-semibold ">Link to Namespace</div>
         <div v-if="selectAction== 'Unlink'" class="font-semibold ">Manage Linked Namespace</div>
         <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <SelectInputPluginClean class="my-3 " placeholder="Select action" errorMessage="" v-model="selectAction" :options="actionsOptions" ref="selectActionRef" :disabled="disableNamespaces" selectDefault="Link" />
-        <SelectInputPluginClean placeholder="Select namespace" noOptionsText="No namespace created for this account" errorMessage="" ref="selectNamespaceRef" v-model="selectNamespace" :options="namespaceOptions" :disabled="disableNamespaces" />
+        <SelectInputPluginClean class="my-3 " placeholder="Select action" errorMessage="" v-model="selectAction" :options="actionsOptions" ref="selectActionRef" :disabled="disableNamespace" selectDefault="Link" />
+        <SelectInputPluginClean placeholder="Select namespace" noOptionsText="No namespace created for this account" errorMessage="" ref="selectNamespaceRef" v-model="selectNamespace" :options="namespaceOptions" :disabled="disableNamespace" />
         <div class="flex mt-3 gap-1">
-          <AddressInputClean placeholder="ADD ACCOUNT ADDRESS" v-model="namespaceAddress"  :errorMessage="addressErrorMsg" :showError="showAddressError" :disabled="disableNamespaces ||selectAction=='Unlink' || selectNamespace==null" />
+          <AddressInputClean placeholder="ADD ACCOUNT ADDRESS" v-model="namespaceAddress"  :errorMessage="addressErrorMsg" :showError="showAddressError" :disabled="disableNamespace ||selectAction=='Unlink' || selectNamespace==null" />
           <div v-if="selectNamespace!=null && selectAction =='Link'" @click="showContactSelection=!showContactSelection" class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 ' >
             <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
             <div class='text-xxs text-blue-primary font-semibold'>SELECT</div>
@@ -44,13 +61,23 @@
         </div>
       </div>
       <div class='bg-navy-primary p-6 lg:col-span-1'>
-        <div class='font-semibold text-xxs text-blue-primary'>ACCOUNT CURRENT BALANCE</div>
+        <div v-if="!isMultiSig" class='font-semibold text-xxs text-blue-primary'>ACCOUNT CURRENT BALANCE</div>
+        <div v-else class='font-semibold text-xxs text-blue-primary'>INITIATOR CURRENT BALANCE</div>
         <div class='flex text-white'>
           <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
           <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
           <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
           <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
           <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
+        </div>
+        <div v-if="fundStatus" class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
+          <div class="flex gap-2">
+            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+            <div class="flex-cols">
+               <div class="text-txs">Your account has insufficient amount of {{currentNativeTokenName}}. Please top up first before continue transacting on this page.</div>
+               <a v-if="networkType ==168" class="text-xs text-blue-primary font-semibold underline " :href="topUpUrl" target="_blank">Top Up {{currentNativeTokenName}}<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
+            </div>
+          </div>
         </div>
         <div v-if="isMultiSig &&!isCosigner && !noNamespace" class="mt-2 bg-yellow-50 p-3 rounded-md mb-2" >
           <div class="flex items-center gap-2">
@@ -70,19 +97,20 @@
             <div class="text-txs">Your account has transaction(s) on partial.</div>
           </div>
         </div>
-        <div v-if="!(!isLockFund&& isMultiSig)" class="flex mt-4 text-white">
-          <div class='text-xs '>Transaction Fee</div>
+        <div class="flex mt-4 text-white">
+          <div  v-if="!isMultiSig"  class='text-xs '>Transaction Fee</div>
+          <div  v-else  class='text-xs '>Aggregate Fee</div>
           <div class="text-xs  ml-auto">{{trxFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
-        <div v-if="isLockFund && isMultiSig" class="flex mt-4 text-white">
-          <div class='text-xs '>Lock Fund</div>
+        <div v-if="isMultiSig" class="flex mt-4 text-white">
+          <div class='text-xs '>LockFund</div>
           <div class="text-xs  ml-auto">{{lockFund}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
        <div v-if="isMultiSig" class="flex mt-4 text-white">
-          <div class='text-xs '>Aggregate Fee</div>
-          <div class="text-xs  ml-auto">{{aggregateFee}}</div>
+          <div class='text-xs '>LockFund TxFee</div>
+          <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
@@ -93,12 +121,12 @@
         </div>
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white mb-1.5'>Enter your password to continue</div>
-        <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="pwdErrorMsg" v-model="walletPassword" icon="lock" :showError="showPwdError" :disabled="disableNamespaces"  />
+        <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="pwdErrorMsg" v-model="walletPassword" icon="lock" :showError="showPwdError" :disabled="disableNamespace"  />
         <div class="mt-3"></div>
-        <button v-if="selectAction== 'Link' && !pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="alisesAddressToNamespaces" :disabled="disableCreate">Link to Namespace</button>
-        <button v-if="selectAction== 'Link'&& pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="alisesAddressToNamespaces" :disabled="disableCreate">Linking to Namespace...Please wait</button>
-        <button v-if="selectAction== 'Unlink' && !pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="alisesAddressToNamespaces" :disabled="disableCreate">Unlink Namespace</button>
-         <button v-if="selectAction== 'Unlink' &&pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="alisesAddressToNamespaces" :disabled="disableCreate">Unlinking to Namespace...Please wait</button>
+        <button v-if="selectAction== 'Link' && !pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="aliasAddressToNamespace" :disabled="disableCreate">Link to Namespace</button>
+        <button v-if="selectAction== 'Link'&& pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="aliasAddressToNamespace" :disabled="disableCreate">Linking to Namespace...Please wait</button>
+        <button v-if="selectAction== 'Unlink' && !pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="aliasAddressToNamespace" :disabled="disableCreate">Unlink Namespace</button>
+         <button v-if="selectAction== 'Unlink' &&pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="aliasAddressToNamespace" :disabled="disableCreate">Unlinking to Namespace...Please wait</button>
 
        <div class="text-center">
           <router-link :to="{name: 'ViewAccountDetails',params:{name:address}}" class="content-center text-xs text-white underline" >Cancel</router-link>
@@ -106,44 +134,6 @@
       </div>
     </div>
   </div>
-  <!-- <div class='mt-2 py-3 gray-line text-center px-0 lg:px-10 xl:px-60'>    
-    <div class="error error_box mb-2" v-if="err!=''">{{ err }}</div>
-    <SelectInputPlugin placeholder="Select action" errorMessage="" v-model="selectAction" :options="actionsOptions" ref="selectActionRef" :disabled="disableNamespaces" selectDefault="Link" />
-    <SelectInputPlugin placeholder="Select namespace" noOptionsText="No namespace created for this account" errorMessage="" ref="selectNamespaceRef" v-model="selectNamespace" :options="namespaceOptions" :disabled="disableNamespaces" />
-    <SelectInputPlugin v-if="showContactSelection" :placeholder="$t('accounts.contacts')" errorMessage="" ref="selectContactRef" v-model="selectContact" :options="contact" @show-selection="updateAdd" :disabled="disableContactSelection"/>
-    <div class="flex">
-      <div class="flex-grow mr-5">
-        <TextInput :placeholder="$t('createsuccessful.address')" :errorMessage="addressErrorMsg" :showError="showAddressError" v-model="namespaceAddress" icon="wallet" :disabled="disableNamespaces"/>
-      </div>
-      <div class="flex-none">
-        <div class="rounded-full bg-gray-300 w-14 h-14 cursor-pointer relative" style="top: -5px" @click="showContactSelection = !showContactSelection && !disableContactSelection"  >
-          <font-awesome-icon icon="id-card-alt" class="h-20 w-20 inline text-blue-primary absolute" style="top: -12px; left: 19px" > 
-          </font-awesome-icon>
-        </div>
-      </div>
-    </div>
-    <div class="rounded-2xl bg-gray-100 p-5 my-5">
-      <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('namespace.transactionfee')}} {{trxFee}} {{ currencyName }}</div>
-    </div>
-    <div class="p-4 rounded-xl bg-gray-100 mt-2 items-center w-full text-xs text-gray-800 mb-5" v-if="isMultiSig">
-      <div class="text-center">
-        <div class="inline-block">
-          <div class="flex">
-            <img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline-block mr-1 self-center">
-              <div class="inline-block self-center text-left">
-                <div>{{$t('accounts.lockfund')}}: {{ lockFundCurrency }} {{ currencyName }}</div>
-                <div>{{$t('accounts.unconfirmed')}}: {{ lockFundTxFee }} {{ currencyName }}</div>
-              </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <PasswordInput :placeholder="$t('signin.enterpassword')" :errorMessage="pwdErrorMsg" v-model="walletPassword" icon="lock" :showError="showPwdError" :disabled="disableNamespaces"  />
-    <div class="mt-10">
-      <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50 disabled:cursor-auto" :disabled="disableNamespaces" @click="clearInput()" >{{$t('signin.clear')}}</button>
-      <button type="submit" class="default-btn py-1 disabled:opacity-50 disabled:cursor-auto" @click="alisesAddressToNamespaces" :disabled="disableCreate">{{$t('welcome.create')}}</button>
-    </div>
-  </div> -->
 </div>
 </template>
 
@@ -165,6 +155,8 @@ import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.
 import { multiSign } from '@/util/multiSignatory';
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import { listenerState } from '@/state/listenerState';
+import { AppState } from '@/state/appState';
+import { TransactionUtils } from '@/util/transactionUtils';
 export default {
   name: 'ViewAccountAliasAddressToNamespace_a',
 
@@ -192,7 +184,7 @@ export default {
         return { 
           name: acc.name,
           balance: acc.balance,
-          address: acc.address,
+          address: acc.address, 
           publicKey: acc.publicKey,
           isMultisig: acc.getDirectParentMultisig().length ? true: false,
           multisigInfo: acc.multisigInfo,
@@ -216,13 +208,16 @@ export default {
     
     });
     const acc = ref(totalAcc.value.find(acc=>acc.address==p.address))
+    const findAcc = (publicKey)=>{
+      return totalAcc.value.find(acc=>acc.publicKey==publicKey)
+    }
     const onPartial = ref(false);
-     const checkIsPartial = ()=>{ 
-       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,networkState.currentNetworkProfile.network.type))
-       .then(onPartialBoolean => onPartial.value = onPartialBoolean)
-       .catch(err=>{
-         onPartial.value = false
-       })
+    const checkIsPartial = ()=>{ 
+      multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType))
+      .then(onPartialBoolean => onPartial.value = onPartialBoolean)
+      .catch(err=>{
+        onPartial.value = false
+      })
     }
     checkIsPartial()
     const selectNamespaceRef = ref(null);
@@ -248,55 +243,38 @@ export default {
     const addressErrorMsg = ref("");    
     const passwordPattern = "^[^ ]{8,}$";
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
-    const addressPatternLong = "^[0-9A-Za-z-]{46}$";      
-    const lockFundTxFee = 0.0445;  
+    const addressPatternLong = "^[0-9A-Za-z-]{46}$";  
+    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))    
+    const lockFundTxFee = computed(()=>{ 
+      if(networkState.currentNetworkProfile){ 
+        return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
+      }else{
+        return 0
+      }
+    })
     const toast = useToast();   
     const pwdErrorMsg = ref("");
     const walletName = walletState.currentLoggedInWallet.name;
     let txHash = ref('')
     let pending = ref(false)
     let recordAction = ref('')
-    let isLockFund = computed(()=>{
-      let enoughSigner = false
-      let count = acc.value.multisigInfo.find(acc=>acc.level==0).minApproval
-      if (count<=getCosignerList().length){
-        enoughSigner = true
-      }
-      return !enoughSigner
-    })
-    const trxFee = computed(()=>{
-      if(isLockFund.value){ //aggregate bonded
-        return 26.70
-      }if(!isLockFund.value && isMultiSig.value){ //aggregate complete
-        return 0
-      }else{
-        return 23.4
-      }
-    })
-    const aggregateFee = computed(()=>{
-      if(isLockFund.value){ //aggregate bonded
-        return 20.538754
-      }if(!isLockFund.value && isMultiSig.value){ //aggregate complete
-        return 30.3
-      }else{
-        return 0
-      }
-    })
+    
+    const trxFee = ref(0)
 
     const totalFee = computed(()=>{
-      if(isLockFund.value){ //aggregate bonded
-        return aggregateFee.value+lockFund.value + trxFee.value
-      }if(!isLockFund.value && isMultiSig.value){ //aggregate complete
-        return aggregateFee.value
+    let tokenDivisibility = AppState.nativeToken.divisibility
+      if(isMultiSig.value){
+        if(tokenDivisibility==0){
+          return Math.trunc(parseFloat(trxFee.value) + lockFund.value + lockFundTxFee.value)
+        }else{
+          return Math.round((parseFloat(trxFee.value) + lockFund.value + lockFundTxFee.value)*Math.pow(10,AppState.nativeToken.divisibility))/Math.pow(10,AppState.nativeToken.divisibility)
+        }
       }else{
         return trxFee.value
       }
     })
     const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
     const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
-    const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
-
-    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
     
     const accountBalance = computed(() => {
        let accountBalance = 0
@@ -307,15 +285,42 @@ export default {
        
        return accountBalance 
     })
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const accountDisplayBalance = computed(() => {
       if(walletState.currentLoggedInWallet){ 
-        return Helper.toCurrencyFormat(accountBalance.value, currentNativeTokenDivisibility.value);
+        if(!isMultiSig.value){
+           return Helper.toCurrencyFormat(accountBalance.value, currentNativeTokenDivisibility.value);
+        }else{
+          if(findAcc(selectedCosignPublicKey.value)){
+            return  Helper.toCurrencyFormat(findAcc(selectedCosignPublicKey.value).balance, currentNativeTokenDivisibility.value);
+          }else{
+            return '0'
+          }
+        }
       }else{
-        return 0 
+        return '0'
       }
     });
+
+    const fundStatus = computed(()=>{
+      var fundStatus = false
+      if(isMultiSig.value){
+        if(findAcc(selectedCosignPublicKey.value)){
+          if(findAcc(selectedCosignPublicKey.value).balance<totalFee.value){
+            fundStatus = true
+          }else{
+            fundStatus = false
+          }
+        }
+      }else{
+        if(accountBalance.value<totalFee.value){
+          fundStatus=true
+        }
+      }
+      return fundStatus
+    })
+
     const splitBalance = computed(()=>{
       let split = accountDisplayBalance.value.split(".")
       if (split[1]!=undefined){
@@ -326,7 +331,7 @@ export default {
     })
 
     const disableCreate = computed(() => {
-      return !(onPartial.value==false && walletPassword.value.match(passwordPattern) && selectAction.value != null && namespaceAddress.value != '' && selectNamespace.value != null && showAddressError.value ==false);
+      return !(onPartial.value==false && fundStatus.value == false && walletPassword.value.match(passwordPattern) && selectAction.value != null && namespaceAddress.value != '' && selectNamespace.value != null && showAddressError.value ==false);
     })
 
     const actionsOptions = computed(() => {
@@ -339,14 +344,14 @@ export default {
     const namespaceOptions = computed(() => {
       let namespace = [];
       if(selectAction.value != null){
-        namespace = accountUtils.namespacesOption(currentAddress.value, selectAction.value);
+        namespace = accountUtils.namespaceOption(currentAddress.value, selectAction.value);
       } 
       return namespace;
     });
 
     const noNamespace = computed(() => {
       if(walletState.currentLoggedInWallet){
-        if(accountUtils.getNamespacesListByAddress(currentAddress.value).length == 0){
+        if(accountUtils.getNamespaceListByAddress(currentAddress.value).length == 0){
           return true;
         }else {
           return false;
@@ -362,6 +367,17 @@ export default {
       return multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList;
     }
 
+    const walletCosignerList = computed(() =>{
+      let cosigners= getCosignerList()
+      let list =[]
+      cosigners.forEach(publicKey=>{
+        list.push({publicKey:publicKey,name:findAcc(publicKey).name,balance:findAcc(publicKey).balance })
+      })
+      return list
+    })
+
+    const selectedCosignPublicKey = ref(walletCosignerList.value[0]?walletCosignerList.value[0].publicKey:'')
+
     const isCosigner = computed(() =>{
       return (multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList.length>0)?true: false;
     });
@@ -371,7 +387,7 @@ export default {
       return disableContact;
     });
 
-    const disableNamespaces = computed(()=>{
+    const disableNamespace = computed(()=>{
       return (isCosigner.value == false && isMultiSig.value == true || noNamespace.value == true)?true:false;
     });
     
@@ -385,14 +401,14 @@ export default {
       }
     });
 
-    watch(selectNamespace,(namespacesValues)=>{   
-      const getnamespacelist = accountUtils.getNamespacesListByAddress(currentAddress.value);   
+    watch(selectNamespace,(namespaceValues)=>{   
+      const getnamespacelist = accountUtils.getNamespaceListByAddress(currentAddress.value);   
       const namespacelist = getnamespacelist.find(namespace => namespace.name === selectNamespace.value);
-      if(selectAction.value == 'Unlink' && namespacesValues !=null){
+      if(selectAction.value == 'Unlink' && namespaceValues !=null){
         namespaceAddress.value = Address.createFromRawAddress(namespacelist.linkedId).pretty();
-      } else if(selectAction.value=="Link" && namespaceAddress.value!="" && namespacesValues!=null){
+      } else if(selectAction.value=="Link" && namespaceAddress.value!="" && namespaceValues!=null){
         let namespaceAdd = Address.createFromRawAddress(namespaceAddress.value).plain();
-        trxFee.value = Helper.amountFormatterSimple(accountUtils.getLinkAddressToNamespaceTransactionFee(namespaceAdd, selectNamespace.value, selectAction.value), networkState.currentNetworkProfile.network.currency.divisibility);
+        trxFee.value = Helper.amountFormatterSimple(accountUtils.getLinkNamespaceToAddressTransactionFee(isMultiSig.value,namespaceAdd, selectNamespace.value, selectAction.value), AppState.nativeToken.divisibility);
       } else {
         
       }
@@ -419,7 +435,7 @@ export default {
           
         } else{
           let namespaceAdd = Address.createFromRawAddress(namespaceAddressValue).plain();
-          trxFee.value = Helper.amountFormatterSimple(accountUtils.getLinkAddressToNamespaceTransactionFee(namespaceAdd, selectNamespace.value, selectAction.value), networkState.currentNetworkProfile.network.currency.divisibility);
+          trxFee.value = Helper.amountFormatterSimple(accountUtils.getLinkNamespaceToAddressTransactionFee(isMultiSig.value,namespaceAdd, selectNamespace.value, selectAction.value), AppState.nativeToken.divisibility);
           addressErrorMsg.value = "";
           showAddressError.value = false;
         }
@@ -429,24 +445,17 @@ export default {
       } 
     });
    
-    const alisesAddressToNamespaces = () =>{
+    const aliasAddressToNamespace = () =>{
       if(!WalletUtils.verifyWalletPassword(walletName,networkState.chainNetworkName,walletPassword.value)){
         err.value = t('scriptvalues.walletpasswordvalidation',{name : walletName}) ;  
         walletPassword.value = "";
       } else {
         let acc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address)? walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address) : walletState.currentLoggedInWallet.others.find(acc=>acc.address==p.address) 
         err.value = "";  
-        /* if(isCosigner.value == true && isMultiSig.value == true){ */
           const cosigner = getCosignerList();
-          /* accountUtils.linkAddressToNamespace(cosigner[0].address, walletPassword.value, selectNamespace.value, selectAction.value, namespaceAddress.value, currentAddress.value); */
           recordAction.value = selectAction.value
-          let signedTx = accountUtils.linkAddressToNamespace(isMultiSig.value,cosigner,acc,walletPassword.value,selectNamespace.value, selectAction.value, namespaceAddress.value)
-          txHash.value = signedTx.hash.toUpperCase()
-         /*  toast.add({severity:'success', detail: 'Address Linked Successfully. Please Wait...', group: 'br', life: 10000});
-        } */ /* else if(isMultiSig.value == false){
-          accountUtils.linkAddressToNamespace(currentAddress.value, walletPassword.value, selectNamespace.value, selectAction.value, namespaceAddress.value, null);       
-          toast.add({severity:'success', detail: 'Address Linked Successfully. Please Wait...', group: 'br', life: 10000});
-        }      */     
+          let signedTx = accountUtils.linkNamespaceToAddress(selectedCosignPublicKey.value,isMultiSig.value,cosigner,acc,walletPassword.value,selectNamespace.value, selectAction.value, namespaceAddress.value)
+          txHash.value = signedTx.hash.toUpperCase()   
         clearInput();
         pending.value = true
       }
@@ -485,6 +494,19 @@ export default {
         checkIsPartial()
       }
     })
+    const networkType = computed(()=>AppState.networkType)
+
+    const topUpUrl = computed(()=>{
+      if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
+        return 'https://bctestnetfaucet.xpxsirius.io/#/'
+      }else if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 2'){
+        return 'https://bctestnet2faucet.xpxsirius.io/#/'
+      }else{
+        return ''
+      }
+    }) 
+
+    
     
     return {
       splitBalance,
@@ -493,7 +515,7 @@ export default {
       walletState, 
       clearInput,
       actionsOptions,
-      disableNamespaces,
+      disableNamespace,
       selectAction,
       walletPassword,
       disableCreate,
@@ -506,7 +528,6 @@ export default {
       selectContact,
       disableContactSelection,
       namespaceAddress,
-      currencyName,
       lockFundTxFee,
       showAddressError,
       err,
@@ -517,16 +538,20 @@ export default {
       selectNamespaceRef,
       selectActionRef,
       /* updateAdd, */
-      alisesAddressToNamespaces,
+      aliasAddressToNamespace,
       isCosigner,
       lockFund,
       showPwdError,
       pwdErrorMsg,
       pending,
-      aggregateFee,
       totalFee,
-      isLockFund,
-      onPartial
+      onPartial,
+      walletCosignerList,
+      selectedCosignPublicKey,
+      findAcc,
+      fundStatus,
+      topUpUrl,
+      networkType
     };
   },
 }

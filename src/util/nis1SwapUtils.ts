@@ -34,6 +34,10 @@ import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { nis1Account } from "@/models/nis1Account";
 import { WalletAccount } from "@/models/walletAccount";
+import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
+
+let swapData = new ChainSwapConfig(networkState.chainNetworkName);
+swapData.init();
 
 NEMLibrary.bootstrap(NetworkTypes.TEST_NET);
 
@@ -71,20 +75,6 @@ export class Nis1SwapUtils {
     };
   }
 
-  static fetchNis1Properties = async() => {
-    try {
-      return await fetch('./applicationConfig.json', {
-        headers: {
-          'Cache-Control': 'no-store',
-          'Pragma' : 'no-cache'
-        }
-      }).then((res) => res.json()).then((configInfo) => { return configInfo });
-    } catch (e) {
-      console.error(e);
-    }
-  }
-  
-
   // create Address for nis1
   static createAddressToString(address: string): Address {
     return new Address(address);
@@ -97,10 +87,9 @@ export class Nis1SwapUtils {
 
   // get nis1 account info
   static async getAccountInfo(address: Address) {
-    const appSetting = await Nis1SwapUtils.fetchNis1Properties();
     try {
       let headers = {}
-      let nis1Acc = await fetch(`${appSetting.nis1.url}/account/get?address=${address.plain()}`, {
+      let nis1Acc = await fetch(`${swapData.nis1SwapData.url}/account/get?address=${address.plain()}`, {
           method: 'GET',
           mode: 'cors',
           headers: headers,
@@ -127,7 +116,6 @@ export class Nis1SwapUtils {
   }
 
   static getNIS1AccountBalance = async (publicKey: string) => {
-    const appSetting = await Nis1SwapUtils.fetchNis1Properties();
     const nis1PublicAccount = Nis1SwapUtils.createPublicAccount(publicKey);
     const nis1AddressToSwap = Nis1SwapUtils.createAddressToString(nis1PublicAccount.address.pretty());
     const accountInfoOwnedSwap = await Nis1SwapUtils.getAccountInfo(nis1AddressToSwap);
@@ -138,9 +126,9 @@ export class Nis1SwapUtils {
       if(accountInfoOwnedSwap.meta.cosignatoryOf.length > 0){
         accountInfoOwnedSwap.meta.cosignatoryOf.forEach(async(multisig) => {
           const multisigAddress = Nis1SwapUtils.createAddressToString(multisig.address);
-          const multisigOwnedMosaic = await Nis1SwapUtils.getOwnedMosaics(multisigAddress, appSetting.nis1.nodes).pipe(first()).pipe((timeout(appSetting.timeOutTransactionNis1))).toPromise();
-          const mulisigMosaicsFound = multisigOwnedMosaic.filter(e => appSetting.swapAllowedMosaics.find(d => d.namespaceId === e.assetId.namespaceId && d.name === e.assetId.name));
-          const unconfirmedTxn = await Nis1SwapUtils.getUnconfirmedTransaction(nis1AddressToSwap, appSetting.nis1.nodes);
+          const multisigOwnedMosaic = await Nis1SwapUtils.getOwnedMosaics(multisigAddress, swapData.nis1SwapData.nodes).pipe(first()).pipe((timeout(swapData.nis1SwapData.timeOutTransactionNis1))).toPromise();
+          const mulisigMosaicsFound = multisigOwnedMosaic.filter(e => swapData.nis1SwapData.swapAllowedMosaics.find(d => d.namespaceId === e.assetId.namespaceId && d.name === e.assetId.name));
+          const unconfirmedTxn = await Nis1SwapUtils.getUnconfirmedTransaction(nis1AddressToSwap, swapData.nis1SwapData.nodes);
           mulisigMosaicsFound.forEach(async (mosaic) => {
             const amount = await Nis1SwapUtils.validateBalanceAccounts(mosaic, nis1AddressToSwap, unconfirmedTxn);
             if (mosaic.quantity - amount > 0) {
@@ -152,13 +140,14 @@ export class Nis1SwapUtils {
 
       let filteredAsset = [];
       if(disabledAsset.length > 0){
-        filteredAsset = appSetting.swapAllowedMosaics.filter(e => disabledAsset.find(d => d.namespaceId === e.assetId.namespaceId && d.name === e.assetId.name));
+        filteredAsset = swapData.nis1SwapData.swapAllowedMosaics.filter(e => disabledAsset.find(d => d.assetId.namespaceId === e.namespaceId && d.assetId.name === e.name));
       }else{
-        filteredAsset = appSetting.swapAllowedMosaics;
+        filteredAsset = swapData.nis1SwapData.swapAllowedMosaics;
       }
-      const ownedMosaic = await Nis1SwapUtils.getOwnedMosaics(nis1AddressToSwap, appSetting.nis1.nodes).pipe(first()).pipe((timeout(appSetting.timeOutTransactionNis1))).toPromise();
+      const ownedMosaic = await Nis1SwapUtils.getOwnedMosaics(nis1AddressToSwap, swapData.nis1SwapData.nodes).pipe(first()).pipe((timeout(swapData.nis1SwapData.timeOutTransactionNis1))).toPromise();
       mosaicsFound = ownedMosaic.filter(e => filteredAsset.find(d => d.namespaceId === e.assetId.namespaceId && d.name === e.assetId.name));
-      const unconfirmedTxn = await Nis1SwapUtils.getUnconfirmedTransaction(nis1AddressToSwap, appSetting.nis1.nodes);
+
+      const unconfirmedTxn = await Nis1SwapUtils.getUnconfirmedTransaction(nis1AddressToSwap, swapData.nis1SwapData.nodes);
       for (const element of mosaicsFound) {
         const amount = await Nis1SwapUtils.validateBalanceAccounts(element, nis1AddressToSwap, unconfirmedTxn);
         if (amount > 0) {
@@ -172,14 +161,13 @@ export class Nis1SwapUtils {
   }
 
   static async createTransaction(message: PlainMessage, assetId: AssetId, quantity: number, decimal: number) {
-    const appSetting = await Nis1SwapUtils.fetchNis1Properties();
-    const assetHttp = new AssetHttp(appSetting.nis1.nodes);
+    const assetHttp = new AssetHttp(swapData.nis1SwapData.nodes);
     const resultAssets: any = await assetHttp.getAssetTransferableWithAbsoluteAmount(assetId, quantity).toPromise();
 
     resultAssets['quantity'] = quantity * Math.pow(10, decimal);
     return TransferTransaction.createWithAssets(
       Nis1SwapUtils.createWithDeadline(),
-      new Address(appSetting.nis1.burnAddress),
+      new Address(swapData.nis1SwapData.burnAddress),
       [resultAssets],
       message
     );
@@ -209,13 +197,12 @@ export class Nis1SwapUtils {
 
   static async anounceTransaction(transaction: TransferTransaction | MultisigTransaction, account: Account, siriusAccount: PublicAccount):Promise<swapData> {
 
-    const appSetting = await Nis1SwapUtils.fetchNis1Properties();
     const signedTransaction = account.signTransaction(transaction);
     let headers = {
       'Accept': 'application/json, text/plain, */*',
       'Content-Type': 'application/json'
     };
-    let nis1Acc = await fetch(`${appSetting.nis1.url}/transaction/announce`, {
+    let nis1Acc = await fetch(`${swapData.nis1SwapData.url}/transaction/announce`, {
       method: 'post',
       mode: 'cors',
       body: JSON.stringify(signedTransaction),
@@ -228,7 +215,7 @@ export class Nis1SwapUtils {
       code: nis1Acc.code,
       message: nis1Acc.message,
       hash: nis1Acc.transactionHash.data,
-      link: appSetting.nis1.urlExplorer + nis1Acc.transactionHash.data,
+      link: swapData.nis1SwapData.urlExplorer + nis1Acc.transactionHash.data,
     }
     return returnData;
   }
@@ -236,20 +223,19 @@ export class Nis1SwapUtils {
   static async validateBalanceAccounts(assetsFound: any, addressSigner: Address, unconfirmedTxn: Transaction[]) {
     let assetFoundQuantity = assetsFound.quantity;
 
-    const appSetting = await Nis1SwapUtils.fetchNis1Properties();
     if (unconfirmedTxn.length > 0) {
       let unconfirmedTxnQuantity = 0;
       for (const item of unconfirmedTxn) {
         let mosaicUnconfirmedTxn = null;
         if (item.type === 257 && item['signer']['address']['value'] === addressSigner['value'] && item['_assets'].length > 0) {
-          mosaicUnconfirmedTxn = item['_assets'].find((e: AssetTransferable) => appSetting.swapAllowedMosaics.find(d =>
+          mosaicUnconfirmedTxn = item['_assets'].find((e: AssetTransferable) => swapData.nis1SwapData.swapAllowedMosaics.find(d =>
             d.namespaceId === e.assetId.namespaceId &&
             d.name === e.assetId.name &&
             assetsFound.assetId.namespaceId === e.assetId.namespaceId &&
             assetsFound.assetId.name === e.assetId.name
           ));
         } else if (item.type === 4100 && item['otherTransaction']['type'] === 257 && item['signer']['address']['value'] === addressSigner['value']) {
-          mosaicUnconfirmedTxn = item['otherTransaction']['_assets'].find((e: AssetTransferable) => appSetting.swapAllowedMosaics.find(d =>
+          mosaicUnconfirmedTxn = item['otherTransaction']['_assets'].find((e: AssetTransferable) => swapData.nis1SwapData.swapAllowedMosaics.find(d =>
             d.namespaceId === e.assetId.namespaceId &&
             d.name === e.assetId.name &&
             assetsFound.assetId.namespaceId === e.assetId.namespaceId &&

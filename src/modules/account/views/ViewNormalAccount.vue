@@ -47,7 +47,7 @@ export default {
     const showMenu = ref([]);
     
     
-    //WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
+    //WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, AppState.nativeToken.assetId);
     // get num of accounts
     const normalAcc = [].concat(walletState.currentLoggedInWallet.accounts)
     var num_acc = normalAcc.length;

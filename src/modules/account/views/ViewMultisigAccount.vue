@@ -47,7 +47,7 @@ export default {
     const showMenu = ref([]);
     
     
-    //WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, networkState.currentNetworkProfile.network.currency.assetId);
+    //WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, AppState.nativeToken.assetId);
     // get num of accounts
     const multisigAcc = [].concat(walletState.currentLoggedInWallet.others.filter(account=>account.type=="MULTISIG"),walletState.currentLoggedInWallet.accounts.filter(account=>account.getDirectParentMultisig().length>0))
     var num_acc = multisigAcc.length;

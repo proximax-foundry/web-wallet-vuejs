@@ -70,18 +70,14 @@
       </div>
     </div>
 
-    <div class="lg:grid lg:grid-cols-3 mt-10 lg:mt-16">
-      <div>
-        <a href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new class="text-blue-primary font-bold inline-block text-tsm">What is Namespace?</a>
+    <div class="sm:grid sm:grid-cols-2 mt-10 lg:mt-16">
+      <div class="mb-8 sm:pr-1">
+        <a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">What is Namespace?</a>
         <div class="text-gray-400 text-tsm my-3 sm:pr-2">A namespace starts with a name that you choose, similar to an internet domain name.</div>
       </div>
-      <div>
-        <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-blue-primary font-bold inline-block text-tsm">The complete guide about Namespace</router-link>
-        <div class="text-gray-400 text-tsm my-3">What is namespace? Refer to the complete guide on Namespace here.</div>
-      </div>
-      <div>
-        <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-blue-primary font-bold inline-block text-tsm">Give us feedback about your experience here</router-link>
-        <div class="text-gray-400 text-tsm my-3">Give us feedback about your experience here</div>
+      <div class="mb-8">
+        <a href="https://t.me/proximaxhelpdesk" target=_new class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">Give us feedback about your experience here</a>
+        <div class="text-gray-400 text-tsm my-3">We are eager to keep improving our products.</div>
       </div>
     </div>
   </div>
@@ -105,6 +101,7 @@ import { TransactionUtils } from '@/util/transactionUtils';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
 import { multiSign } from '@/util/multiSignatory';
+import { AppState } from '@/state/appState';
 
 export default {
   name: 'ViewServicesNamespaceCreate',
@@ -120,8 +117,8 @@ export default {
 
     const nsRef = ref(null);
 
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
 
     const disableNamespaceName = ref(false);
     const disableSelectNamespace = ref(false);
@@ -160,33 +157,33 @@ export default {
       }
       return namespace;
     });
-    const currencyName = computed(() => networkState.currentNetworkProfile.network.currency.name);
+    const currencyName = computed(() => AppState.nativeToken.label);
 
     const rentalFee = computed(()=> {
       if(selectNamespace.value){
         if(selectNamespace.value == '1'){
           if(duration.value > 0){
-            return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock * NamespaceUtils.calculateDuration(duration.value), networkState.currentNetworkProfile.network.currency.divisibility);
+            return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock * NamespaceUtils.calculateDuration(duration.value), AppState.nativeToken.divisibility);
           }else{
-            return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock, networkState.currentNetworkProfile.network.currency.divisibility);
+            return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock, AppState.nativeToken.divisibility);
           }
         }else{
-          return Helper.convertToExact(networkState.currentNetworkProfileConfig.childNamespaceRentalFee, networkState.currentNetworkProfile.network.currency.divisibility);
+          return Helper.convertToExact(networkState.currentNetworkProfileConfig.childNamespaceRentalFee, AppState.nativeToken.divisibility);
         }
       }else{
         return 0;
       }
     });
 
-    const rentalFeeCurrency = computed(()=> Helper.toCurrencyFormat(rentalFee.value, networkState.currentNetworkProfile.network.currency.divisibility));
+    const rentalFeeCurrency = computed(()=> Helper.toCurrencyFormat(rentalFee.value, AppState.nativeToken.divisibility));
 
-    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
-    const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility));
+    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
+    const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility));
 
     const lockFundTxFee = computed(()=>{
         if(networkState.currentNetworkProfile){
-          let networkType = ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type);
-          return Helper.convertToExact(TransactionUtils.getLockFundFee(networkType, networkState.currentNetworkProfile.generationHash), networkState.currentNetworkProfile.network.currency.divisibility);
+          let networkType = AppState.networkType;
+          return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
         }
         return 0;  
     });
@@ -212,7 +209,7 @@ export default {
 
     const selectedAccName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
     const selectedAccAdd = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
-    const balance = ref(Helper.toCurrencyFormat(walletState.currentLoggedInWallet.selectDefaultAccount().balance, networkState.currentNetworkProfile.network.currency.divisibility));
+    const balance = ref(Helper.toCurrencyFormat(walletState.currentLoggedInWallet.selectDefaultAccount().balance, AppState.nativeToken.divisibility));
     const balanceNumber = ref(walletState.currentLoggedInWallet.selectDefaultAccount().balance);
 
     const isMultiSigBool = computed( () => isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
@@ -263,14 +260,14 @@ export default {
     };
 
     const getMultiSigCosigner = computed(() => {
-      // return AssetsUtils.getCosignerList(selectedAccAdd.value);
       let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value).publicKey);
       let list = [];
       cosigners.cosignerList.forEach( publicKey => {
         list.push({
           publicKey,
           name: fetchAccount(publicKey).name,
-          balance: fetchAccount(publicKey).balance
+          balance: fetchAccount(publicKey).balance,
+          address: fetchAccount(publicKey).address
         });
       });
 
@@ -291,7 +288,7 @@ export default {
       nsRef.value.clearLabel();
       selectedAccName.value = account.name;
       selectedAccAdd.value = account.address;
-      balance.value = Helper.toCurrencyFormat(account.balance, networkState.currentNetworkProfile.network.currency.divisibility);
+      balance.value = Helper.toCurrencyFormat(account.balance, AppState.nativeToken.divisibility);
       balanceNumber.value = account.balance;
       currentSelectedName.value = account.name;
     }
@@ -302,18 +299,18 @@ export default {
         //root
         disabledDuration.value = false;
         if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
-          fee = NamespaceUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value);
-          transactionFee.value = Helper.convertToCurrency(fee, networkState.currentNetworkProfile.network.currency.divisibility);
-          transactionFeeExact.value = Helper.convertToExact(fee, networkState.currentNetworkProfile.network.currency.divisibility);
+          fee = NamespaceUtils.getRootNamespaceTransactionFee(namespaceName.value);
+          transactionFee.value = Helper.convertToCurrency(fee, AppState.nativeToken.divisibility);
+          transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
         }
       }else{
         duration.value = '0';
         //subnamespace
         disabledDuration.value = true;
         if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
-          fee = NamespaceUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceNameSelected, namespaceName.value);
-          transactionFee.value = Helper.convertToCurrency(fee, networkState.currentNetworkProfile.network.currency.divisibility);
-          transactionFeeExact.value = Helper.convertToExact(fee, networkState.currentNetworkProfile.network.currency.divisibility);
+          fee = NamespaceUtils.getSubNamespaceTransactionFee( namespaceNameSelected, namespaceName.value);
+          transactionFee.value = Helper.convertToCurrency(fee, AppState.nativeToken.divisibility);
+          transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
         }
       }
     };
@@ -326,15 +323,15 @@ export default {
       if(cosigner.value){
         // for multisig
         if(selectNamespace.value==='1'){
-          NamespaceUtils.createRootNamespaceMultisig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value, selectedAccAdd.value);
+          NamespaceUtils.createRootNamespaceMultisig(cosigner.value, walletPassword.value, namespaceName.value, duration.value, selectedAccAdd.value);
         }else{
-          NamespaceUtils.createSubNamespaceMultisig(cosigner.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value, selectedAccAdd.value);
+          NamespaceUtils.createSubNamespaceMultisig(cosigner.value, walletPassword.value, namespaceName.value, selectNamespace.value, selectedAccAdd.value);
         }
       }else{
         if(selectNamespace.value==='1'){
-          NamespaceUtils.createRootNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, duration.value);
+          NamespaceUtils.createRootNamespace(selectedAccAdd.value, walletPassword.value, namespaceName.value, duration.value);
         }else{
-          NamespaceUtils.createSubNamespace(selectedAccAdd.value, walletPassword.value, networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value);
+          NamespaceUtils.createSubNamespace(selectedAccAdd.value, walletPassword.value, namespaceName.value, selectNamespace.value);
         }
       }
       router.push({ name: "ViewServicesNamespace", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()} });
@@ -388,18 +385,15 @@ export default {
       }
     });
 
-    const cosigner = ref('');
-    // get cosigner
-    watch(getMultiSigCosigner, (n) => {
-      // if it is a multisig
-      if(n.cosignerList.length > 0){
-        if(n.cosignerList.length > 1){
-          cosigner.value = cosignerAddress.value;
+    const cosigner = computed(() => {
+      if(getMultiSigCosigner.value.cosignerList.length > 0){
+        if(getMultiSigCosigner.value.cosignerList.length > 1){
+          return cosignerAddress.value;
         }else{
-          cosigner.value = fetchAccount(n.cosignerList[0].publicKey).address;
+          return fetchAccount(getMultiSigCosigner.value.cosignerList[0].publicKey).address;
         }
       }else{
-        cosigner.value = '';
+        return '';
       }
     });
 
@@ -466,16 +460,16 @@ export default {
               
               //root
               if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
-                fee = NamespaceUtils.getRootNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value);
-                transactionFee.value = Helper.convertToCurrency(fee, networkState.currentNetworkProfile.network.currency.divisibility);
-                transactionFeeExact.value = Helper.convertToExact(fee, networkState.currentNetworkProfile.network.currency.divisibility);
+                fee = NamespaceUtils.getRootNamespaceTransactionFee( namespaceName.value);
+                transactionFee.value = Helper.convertToCurrency(fee, AppState.nativeToken.divisibility);
+                transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
               }
             }else{
               //sub
               if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
-                fee = NamespaceUtils.getSubNamespaceTransactionFee(networkState.currentNetworkProfile.network.type, networkState.currentNetworkProfile.generationHash, namespaceName.value, selectNamespace.value);
-                transactionFee.value = Helper.convertToCurrency(fee, networkState.currentNetworkProfile.network.currency.divisibility);
-                transactionFeeExact.value = Helper.convertToExact(fee, networkState.currentNetworkProfile.network.currency.divisibility);
+                fee = NamespaceUtils.getSubNamespaceTransactionFee(namespaceName.value, selectNamespace.value);
+                transactionFee.value = Helper.convertToCurrency(fee, AppState.nativeToken.divisibility);
+                transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
               }
             }
           }
@@ -534,6 +528,7 @@ export default {
       maxDurationInDays,
       removeNamespace,
       setDefaultDuration,
+      cosigner
     }
   },
 

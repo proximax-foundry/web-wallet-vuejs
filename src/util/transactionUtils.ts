@@ -1,78 +1,31 @@
-import { readonly, computed } from "vue";
 import {
   Account,
-  Address,
-  Deadline,
   EncryptedMessage,
-  // NetworkCurrencyMosaic,
-  // FeeCalculationStrategy,
   Mosaic,
-  MosaicId,
   UInt64,
-  MosaicProperties,
-  MosaicSupplyType,
-  // MosaicService,
-  MosaicNonce,
   PlainMessage,
-  TransferTransaction,
-  TransactionHttp,
-  TransactionBuilderFactory,
   PublicAccount,
-  AccountHttp,
-  AccountInfo,
-  FeeCalculationStrategy,
-  NetworkType,
   NamespaceId,
   Transaction,
   TransactionType,
   AggregateTransaction,
   CosignatureTransaction,
   TransactionQueryParams,
-  AddressAliasTransaction,
-  AddExchangeOfferTransaction,
-  ChainConfigTransaction,
-  ChainUpgradeTransaction,
-  ExchangeOfferTransaction,
-  RemoveExchangeOfferTransaction,
-  AccountLinkTransaction,
-  LockFundsTransaction,
-  // ModifyMetadataTransaction,
-  AccountMetadataTransaction,
-  NamespaceMetadataTransaction,
-  MosaicMetadataTransaction,
-  AccountMosaicRestrictionModificationTransaction,
-  AccountOperationRestrictionModificationTransaction,
-  AccountAddressRestrictionModificationTransaction,
-  ModifyMultisigAccountTransaction,
-  MosaicAliasTransaction,
-  MosaicDefinitionTransaction,
-  MosaicSupplyChangeTransaction,
-  RegisterNamespaceTransaction,
-  SecretLockTransaction,
-  SecretProofTransaction,
   InnerTransaction,
-  ExchangeOfferType,
-  HashType,
-  RestrictionType,
-  AccountRestrictionModification,
   SignedTransaction,
   CosignatureSignedTransaction,
   TransactionGroupType,
-  TransactionSearch
+  TransactionSearch,
+  TransactionHash,
+  HashLockTransaction,
+  TransactionAnnounceResponse
 } from "tsjs-xpx-chain-sdk";
-// import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
-import { walletState } from "../state/walletState";
-import { networkState } from "../state/networkState";
-import { ChainUtils } from "../util/chainUtils";
-import { WalletUtils } from "../util/walletUtils";
-import { ChainAPICall } from "../models/REST/chainAPICall";
-import { BuildTransactions } from "../util/buildTransactions";
-import { Helper } from "./typeHelper";
-import { Duration } from "js-joda";
-import { faBreadSlice } from "@fortawesome/free-solid-svg-icons";
+import { AppState } from "@/state/appState";
+import { ChainConfigUtils } from "./chainConfigUtils";
+import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
+import { AnnounceType, AutoAnnounceSignedTransaction, HashAnnounceBlock } from "@/state/listenerState";
+import { networkState } from "@/state/networkState";
 
-const networkAPIEndpoint = computed(() => ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
-const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
 
 export const transactionTypeName = {
   transfer: {
@@ -195,14 +148,6 @@ export const transactionTypeName = {
 
 export class TransactionUtils {
 
-  static async getAccInfo(address: Address): Promise<AccountInfo> {
-
-    const chainAPICall = new ChainAPICall(networkAPIEndpoint.value);
-
-    const accountInfo = await chainAPICall.accountAPI.getAccountInfo(address);
-    // console.log(publicKey);
-    return accountInfo;
-  }
 
   static getTransactionTypeNameByEnum(transactionType: TransactionType): string{
 
@@ -224,7 +169,7 @@ export class TransactionUtils {
   }
 
   static getFakeEncryptedMessageSize(message: string): number{
-    return EncryptedMessage.create(message, PublicAccount.createFromPublicKey("0".repeat(64), ChainUtils.getNetworkType(localNetworkType.value)), "0".repeat(64)).size();
+    return EncryptedMessage.create(message, PublicAccount.createFromPublicKey("0".repeat(64), AppState.networkType), "0".repeat(64)).size();
   }
 
   static getPlainMessageSize(message: string): number{
@@ -247,44 +192,45 @@ export class TransactionUtils {
 
   static async getTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]> {
 
-    let transactions = await ChainUtils.getAccountTransactions(publicAccount, queryParams);
+    let transactions = await AppState.chainAPI.accountAPI.transactions(publicAccount, queryParams);
 
     return transactions;
   }
 
   static async searchTransactions(txnGroupType: TransactionGroupType, queryParams?: TransactionQueryParams): Promise<TransactionSearch> {
 
-    let transactionsResult = await ChainUtils.searchTransactions(txnGroupType, queryParams);
+    let transactionsResult = await AppState.chainAPI.transactionAPI.searchTransactions(txnGroupType, queryParams);
 
     return transactionsResult;
   }
 
   static async getUnconfirmedTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]> {
 
-    let transactions = await ChainUtils.getAccountUnconfirmedTransactions(publicAccount, queryParams);
+    let transactions = await  AppState.chainAPI.accountAPI.unconfirmedTransactions(publicAccount, queryParams);
 
     return transactions;
   }
 
   static async getPartialTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]> {
 
-    let transactions = await ChainUtils.getAccountPartialTransactions(publicAccount, queryParams);
+    let transactions = await AppState.chainAPI.accountAPI.aggregateBondedTransactions(publicAccount, queryParams);
 
     return transactions;
   }
 
-  static announceTransaction(signedTx: SignedTransaction): void {
+  static announceTransaction(signedTx: SignedTransaction): Promise<TransactionAnnounceResponse>{
 
-    ChainUtils.announceTransaction(signedTx);
+    return AppState.chainAPI.transactionAPI.announce(signedTx);
   }
 
-  static announceBondedTransaction(signedTx: SignedTransaction): void {
+  static announceBondedTransaction(signedTx: SignedTransaction): Promise<TransactionAnnounceResponse> {
 
-    ChainUtils.announceBondedTransaction(signedTx);
+    return AppState.chainAPI.transactionAPI.announceAggregateBonded(signedTx);
   }
 
-  static announceCosignatureSignedTransaction(signedTx: CosignatureSignedTransaction) :void {
-    ChainUtils.announceCosignTransaction(signedTx);
+  static announceCosignatureSignedTransaction(signedTx: CosignatureSignedTransaction): Promise<TransactionAnnounceResponse>{
+
+    return AppState.chainAPI.transactionAPI.announceAggregateBondedCosignature(signedTx);
   }
 
   static getTransactionTypeName(type: number): string | null {
@@ -388,17 +334,42 @@ export class TransactionUtils {
     return typeName;
   }
 
-  static getLockFundFee = (networkType: NetworkType, generationHash: string):number => {
-    let buildTransactions = new BuildTransactions(networkType, generationHash);
-    let tempAcc = Account.generateNewAccount(networkType);
-    let txn = buildTransactions.transfer(tempAcc.address, PlainMessage.create('hello'));
-    let abt = buildTransactions.aggregateBonded([txn.toAggregate(tempAcc.publicAccount)])
-    let signedTxn = tempAcc.sign(abt, generationHash);
-    return buildTransactions.hashLock(new Mosaic(new NamespaceId('prx.xpx'), UInt64.fromUint(10)), UInt64.fromUint(10), signedTxn).maxFee.compact();
+  static aggregateBondedTx(innerTX :InnerTransaction[]) :AggregateTransaction{
+    let txBuilder = AppState.buildTxn;
+    return txBuilder.aggregateBonded(innerTX)
   }
+
+  static lockFundTx(signedABT :SignedTransaction | TransactionHash) :HashLockTransaction{
+    const nativeTokenNamespace = AppState.nativeToken.fullNamespace
+    const lockingAtomicFee = networkState.currentNetworkProfileConfig.lockedFundsPerAggregate ?? 0;
+    let txBuilder = AppState.buildTxn 
+    return txBuilder.hashLockBuilder()
+    .transactionHash(signedABT)
+    .duration(UInt64.fromUint(ChainConfigUtils.getABTMaxSafeDuration()))
+    .mosaic(new Mosaic(new NamespaceId(nativeTokenNamespace), UInt64.fromUint(lockingAtomicFee)))
+    .build()
+  }
+
+  static announceLF_AND_addAutoAnnounceABT ( lockFundTxSigned :SignedTransaction, signedAggregateBondedTx :SignedTransaction ) :void {
+    let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(signedAggregateBondedTx);
+    autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(lockFundTxSigned.hash);
+    autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
+    autoAnnounceSignedTx.type = AnnounceType.BONDED; 
+    AppState.chainAPI.transactionAPI.announce(lockFundTxSigned);
+    ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
+    AppState.isPendingTxnAnnounce = true;
+  }
+
+  static getLockFundFee() :number {
+    let abtType = TransactionType.AGGREGATE_BONDED
+    let txHash = new TransactionHash("0".repeat(64),abtType)
+    const lockFundTx = TransactionUtils.lockFundTx(txHash)
+    return lockFundTx.maxFee.compact();
+  }  
 
   static castToAggregate(tx :Transaction){
     return tx as AggregateTransaction;
   }
+  
 }
 

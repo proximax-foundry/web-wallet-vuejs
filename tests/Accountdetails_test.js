@@ -11,11 +11,16 @@ module.exports = {
         var signin = browser.page.Signin();
         var account = browser.page.Accountdetails();
 
+        browser.fullscreenWindow(function(result) {
+            console.log(result);
+        });
+
         // create wallet
         create
             .navigate()
+            .change_network()
             .navigate_createnewwallet(browser.launch_url)
-            .create_wallet(browser.launch_url, name, password)
+            .create_wallet(name, password)
 
         // sign in
         signin
@@ -40,11 +45,16 @@ module.exports = {
         var signin = browser.page.Signin();
         var account = browser.page.Accountdetails();
 
+        browser.fullscreenWindow(function(result) {
+            console.log(result);
+        });
+
         // create wallet
         create
             .navigate()
+            .change_network()
             .navigate_createnewwallet(browser.launch_url)
-            .create_wallet(browser.launch_url, name, password)
+            .create_wallet(name, password)
 
         // sign in
         signin

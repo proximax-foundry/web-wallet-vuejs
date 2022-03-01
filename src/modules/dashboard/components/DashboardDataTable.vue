@@ -102,6 +102,7 @@ import Tooltip from 'primevue/tooltip';
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";
+import { AppState } from '@/state/appState';
 
 export default defineComponent({
   components: {
@@ -131,8 +132,8 @@ export default defineComponent({
     const isShowConfirmed = p.type === "confirmed" ? true : false;
     const isShowUnconfirmed = p.type === "unconfirmed" ? true : false;
     const isShowPartial = p.type === "partial" ? true : false;
-
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     /*
     const filters = ref({
       'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
