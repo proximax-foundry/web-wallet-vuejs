@@ -14,7 +14,7 @@
       >
       <template #header>
         <div class="flex justify-between">
-          <span class="text-sm pt-1 text-gray-700 ml-2 lg:ml-7">{{$t('general.asset',2)}}</span>
+          <span class="text-sm pt-1 text-gray-700 ml-2 lg:ml-7">{{$t('general.asset',2)}} ({{getNameByAddress(filterAssets)==''?$t('asset.assetCreatedInWallet',{walletName: walletName}): $t('asset.assetCreatedByAcc',{accountName: getNameByAddress(filterAssets)}) }})</span>
           <SelectInputPluginClean v-model="filterAssets" :options="listAccounts" :selectDefault="selectedAddress" class="w-48 lg:w-60 inline-block" />
         </div>
       </template>
@@ -312,6 +312,27 @@ export default{
       currentNsMenu.value = 'empty';
     };
 
+    const getNameByAddress = address =>{
+      if(walletState.currentLoggedInWallet){
+        let foundAcc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address) || walletState.currentLoggedInWallet.others.find(acc=>acc.address==address)
+        if(foundAcc){
+          return foundAcc.name
+        }else{
+          return ''
+        }
+      }else{
+        return ''
+      }
+    }
+
+    const walletName = computed(()=>{
+      if(walletState.currentLoggedInWallet){
+        return walletState.currentLoggedInWallet.name
+      }else{
+        return ''
+      }
+    })
+
     return {
       borderColor,
       showMenu,
@@ -328,6 +349,8 @@ export default{
       generateAssetDatatable,
       selectedAddress,
       wideScreen,
+      getNameByAddress,
+      walletName
     }
   }
 }

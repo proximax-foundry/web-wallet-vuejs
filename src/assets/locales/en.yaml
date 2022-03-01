@@ -24,7 +24,6 @@ account:
 addressBook:
   addBackUpContact: Add contacts from a contact backup file
   addCustomGroup: Add Custom Group
-  addNewAddress: Add New Address
   addNewContact: Add New Contact
   addressBookMessage1: imported to address book
   addressBookMessage2: already exist in address book
@@ -59,11 +58,14 @@ asset:
     They are fixed assets on the Sirius Chain that can represent a set of
     multiple identical things that do not change.
   assetCreatedBy: Asset created by
+  assetCreatedByAcc: Sirius Digital Assets created by account {accountName}
+  assetCreatedInWallet: Sirius Digital Assets created in wallet {walletName}
   assetDescription: >-
     An asset could be a token, but it could also be a collection of more
     specialized assets such as reward points, shares of stock, signatures,
     status flags, votes or even other currencies.
   createAssets: Create Asset | Create Assets
+  createNewAsset: Create New Asset
   currentSupply: Current Supply
   divisibilityMsg1: Please input the dibisibility here
   divisibilityMsg2: Maximum divisibility is 6

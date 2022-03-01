@@ -89,7 +89,7 @@
             <div>
               <img src="@/modules/services/submodule/mainnetSwap/img/icon-dots.svg" class="inline-block h-8 my-2">
             </div>
-            <div class="text-blue-primary mb-1">{{$t('general.to')}}: {{$t('swap.metmaskAcc')}}</div>
+            <div class="text-blue-primary mb-1">{{$t('general.to')}}: {{$t('swap.metamaskAcc')}}</div>
             <div>{{ bscAddress }}</div>
             <div class="mt-1">{{$t('swap.equivalentTo')}} {{ amount }} BEP20 {{currentNativeTokenName}}</div>
           </div>
@@ -582,7 +582,7 @@ export default {
           siriusTransactionHash.value = signedTransaction.hash;
           callSwapServer(signedTransaction.payload);
         } else {
-          err.value = t('general.walletPasswordValidation',{name: walletState.currentLoggedInWallet.name});
+          err.value = t('general.walletPasswordInvalid',{name: walletState.currentLoggedInWallet.name});
           swapInProgress.value = false;
           isDisabledCancel.value = false;
         }

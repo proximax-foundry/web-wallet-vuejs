@@ -3,7 +3,7 @@
     <div class='ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
       <div v-if="assets.length > 0">
         <AssetDataTable class="mt-10 w-full" :key="walletState" :address="address"></AssetDataTable>
-        <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="mt-10 lg:mt-0 bg-blue-primary px-5 py-3 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-44"><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2"> Create New Asset</router-link>
+        <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="mt-10 lg:mt-0 bg-blue-primary px-5 py-3 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-44"><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2">{{$t('asset.createNewAsset')}}</router-link>
       </div>
       <div v-else class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
         <div class="flex justify-between text-sm mb-5">

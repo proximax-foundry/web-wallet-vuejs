@@ -8,7 +8,7 @@
           <div class="flex-none">
             <div class="flex border border-gray-300 rounded-md filter shadow-md">
               <div class="flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-yellow-500':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-txs sm:text-sm font-bold" :class="`${ currentPage>=1?'text-white':'text-gray-400' }`">1</div></div>
-              <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('swap.inputInformation')}}</div>
+              <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('swap.inputInfo')}}</div>
             </div>
           </div>
           <div class="flex-grow self-center md:mx-4 h-0.5 bg-gray-100"></div>
@@ -116,7 +116,7 @@
                 </div>
                 <div v-if="isInvalidSiriusTxnHash && step2" class="mt-2 text-sm text-gray-700">
                   {{$t('swap.hashNotFound',[$t('swap.sirius'),$t('swap.bsc')])}}
-                  <router-link :to="{ name: 'ViewServicesMainnetSwapEthOptions' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">{{$t('general.swap')}}</router-link>
+                  <router-link :to="{ name: 'ViewServicesMainnetSwapCheckBSCToSirius' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">{{$t('general.swap')}}</router-link>
                 </div>
               </div>
             </div>
