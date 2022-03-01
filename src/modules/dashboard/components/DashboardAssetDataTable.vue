@@ -189,14 +189,23 @@ export default{
         let assetId = assets[i].idHex;
 
         if(assetId != AppState.nativeToken.assetId){
-          let namespaces = account.findNamespaceNameByAsset(assetId);
+          let findAsset = account.assets.find((i) => i.idHex == assetId)
+          if(findAsset.namespaceNames[0]){
+            let splitNamespace = findAsset.namespaceNames[0].split('.')
+            splitNamespace.forEach(namespace=>{
+              namespaceAlias.push({name: namespace })
+            })
+          }
+          
+          
+         /*  let namespaces = account.findNamespaceNameByAsset(assetId);
           for(let j = 0; j < namespaces.length; ++j){
             let aliasData = {
               name: namespaces[j].name
             };
 
             namespaceAlias.push(aliasData);
-          }
+          } */
 
           let data = {
             i: i,
