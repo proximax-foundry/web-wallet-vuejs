@@ -148,16 +148,16 @@ export default {
       //get index of editing contact
       const contactIndex = walletState.currentLoggedInWallet.contacts.findIndex((contact) => Helper.createAddress(contact.address).pretty() == props.contactAddress);
       //contact list excluding editing contact itself
-      let tempContactList = wallet.contacts.filter(tempContact=>tempContact.name.toLowerCase()!=contact.name.toLowerCase()) 
-      let findNameInTempContact = tempContactList.find(contact=>contact.name.toLowerCase()==contactName.value.toLowerCase())
-      let findNameInAcc = wallet.accounts.find(acc=>acc.name.toLowerCase()==contactName.value.toLowerCase())
+      let tempContactList = wallet.contacts.filter(tempContact=>tempContact.name.toLowerCase()!=contact.name.toLowerCase().trim()) 
+      let findNameInTempContact = tempContactList.find(contact=>contact.name.toLowerCase()==contactName.value.toLowerCase().trim())
+      let findNameInAcc = wallet.accounts.find(acc=>acc.name.toLowerCase()==contactName.value.toLowerCase().trim())
       let findAddressInTempContact = tempContactList.find(contact=>Address.createFromRawAddress(contact.address).plain()== Address.createFromRawAddress(address.value).plain())
       if (findNameInTempContact!=undefined || findNameInAcc!=undefined){
         err.value = t('addressbook.namevalidation');
       }else if(findAddressInTempContact!=undefined){
         err.value = t('addressbook.addressvalidation');
       }else{
-        walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value, address: Address.createFromRawAddress(address.value).plain(), group: selectContactGroups.value });
+        walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value.trim(), address: Address.createFromRawAddress(address.value).plain(), group: selectContactGroups.value });
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         toast.add({severity:'info', summary: 'Address Book', detail: 'Contact info updated in Address Book', group: 'br', life: 5000});
         router.push({name: "ViewServicesAddressBook"});
