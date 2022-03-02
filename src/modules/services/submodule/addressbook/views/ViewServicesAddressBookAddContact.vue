@@ -120,7 +120,7 @@ export default {
 
       // check for existing account name in wallet
       const accountNameIndex = wallet.accounts.findIndex((account) => account.name.toLowerCase() == contactName.value.toLowerCase());
-      const contactAddIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.address == rawAddress.plain()):(-1);
+      const contactAddIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => Address.createFromRawAddress(contact.address).plain() == rawAddress.plain()):(-1);
       const contactNameIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.name.toLowerCase() == contactName.value.toLowerCase()):(-1);
 
       if(contactAddIndex >= 0){
