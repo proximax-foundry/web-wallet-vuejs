@@ -26,12 +26,12 @@ async function getAccInfo(address :string) :Promise<PublicAccount> {
 }
 
 
-export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[], walletPassword :string, senderAccAddress :string, selectedCosigner :string, cosignerList :{publicKey :string}[],encryptedMsg :string) : Promise<boolean>  => {
+export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[], walletPassword :string, senderAccAddress :string, selectedCosigner :string, encryptedMsg :string) : Promise<boolean>  => {
   // verify password
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword)
   
   if (!verify) {
-    return Promise.resolve(false);
+    return false
   }
 
   const hash = networkState.currentNetworkProfile.generationHash
@@ -99,27 +99,19 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
     const signedTransaction = account.sign(transferTransaction, hash);
     TransactionUtils.announceTransaction(signedTransaction)
   } else { // there is a cosigner, aggregate  bonded transaction
-    let cosignerAcc :Account[] =  []
-    cosignerList.forEach((signer) => {
-      const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === signer.publicKey)
-      let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
-      cosignerAcc.push(Account.createFromPrivateKey(privateKey, networkType));
-    });
     let selectedWalletSigner = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==selectedCosigner) 
     let selectedSignerPrivateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), selectedWalletSigner.encrypted, selectedWalletSigner.iv);
     let selectedSignerAccount = Account.createFromPrivateKey(selectedSignerPrivateKey,networkType)
-    let index = cosignerAcc.findIndex(acc=>acc.address.plain()==selectedCosigner)
-    cosignerAcc.splice(index,1)
     const innerTxn = [transferTransaction.toAggregate(senderPublicAccount)];
     const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn)
-    const aggregateBondedTransactionSigned = selectedSignerAccount.signTransactionWithCosignatories(aggregateBondedTransaction,cosignerAcc, hash);
+    const aggregateBondedTransactionSigned = selectedSignerAccount.sign(aggregateBondedTransaction, hash);
 
     const hashLockTransaction = TransactionUtils.lockFundTx(aggregateBondedTransactionSigned)
     const hashLockTransactionSigned = selectedSignerAccount.sign(hashLockTransaction, hash)
     TransactionUtils.announceLF_AND_addAutoAnnounceABT(hashLockTransactionSigned,aggregateBondedTransactionSigned)
   }
   
-  return Promise.resolve(true)
+  return true
 }
 
 
