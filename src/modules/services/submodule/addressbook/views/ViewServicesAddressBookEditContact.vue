@@ -151,7 +151,6 @@ export default {
       let findNameInTempContact = tempContactList.find(contact=>contact.name.toLowerCase()==contactName.value.toLowerCase())
       let findNameInAcc = wallet.accounts.find(acc=>acc.name.toLowerCase()==contactName.value.toLowerCase())
       let findAddressInTempContact = tempContactList.find(contact=>Address.createFromRawAddress(contact.address).plain()== Address.createFromRawAddress(address.value).plain())
-      console.log(findAddressInTempContact)
       if (findNameInTempContact!=undefined || findNameInAcc!=undefined){
         err.value = t('addressbook.namevalidation');
       }else if(findAddressInTempContact!=undefined){
