@@ -19,7 +19,7 @@ const commands = {
 
     navigation_assets(browser){
         return this
-        .pause(5000)
+        .pause(10000)
         .click("@assets_tab")
         .assert.urlEquals(browser + 'assets', 'User is navigated to assets page')
         .click("@createnew_asset")

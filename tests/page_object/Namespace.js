@@ -25,7 +25,7 @@ const commands = {
 
     navigate_namespace(browser){
         return this
-        .pause(1000)
+        .pause(10000)
         .click("@namespace")
         .click("@register_namespace")
         .assert.urlEquals(browser + 'create-namespace', 'User is navigated to create namespace page')

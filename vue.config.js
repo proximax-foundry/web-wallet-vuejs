@@ -20,7 +20,6 @@ module.exports = {
     assetsDir: './assets/',
     devServer: {
       host: 'localhost',
-      proxy: 'https://bctestnetswap.xpxsirius.io/',
     },
     pluginOptions: {
       i18n: {

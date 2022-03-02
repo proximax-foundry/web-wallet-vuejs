@@ -45,7 +45,7 @@ addressBook:
   groupValidation: Group name is not availble or already exist
   importAddress: Import Address
   importContacts: Import Contacts
-  nameExist: Name already exists in address book.
+  nameExist: Name already exists in account or address book.
   newContactAdded: New contact added to Address book
   newContactImported: New Contact imported to Address book | New Contacts imported to Address book
   removeContact: Remove Contact

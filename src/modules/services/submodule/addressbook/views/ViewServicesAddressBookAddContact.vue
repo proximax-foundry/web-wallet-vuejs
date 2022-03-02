@@ -115,13 +115,13 @@ export default {
     const SaveContact = () => {
       const rawAddress = Address.createFromRawAddress(address.value);
       // let addressBook = new AddressBook(contactName.value, rawAddress.address);
-      let addressBook = new AddressBook(contactName.value, rawAddress.plain(), selectContactGroups.value);
+      let addressBook = new AddressBook(contactName.value.trim(), rawAddress.plain(), selectContactGroups.value);
       const wallet = walletState.currentLoggedInWallet;
 
       // check for existing account name in wallet
-      const accountNameIndex = wallet.accounts.findIndex((account) => account.name.toLowerCase() == contactName.value.toLowerCase());
-      const contactAddIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.address == rawAddress.plain()):(-1);
-      const contactNameIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.name.toLowerCase() == contactName.value.toLowerCase()):(-1);
+      const accountNameIndex = wallet.accounts.findIndex((account) => account.name.toLowerCase()== contactName.value.toLowerCase().trim());
+      const contactAddIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => Address.createFromRawAddress(contact.address).plain() == rawAddress.plain()):(-1);
+      const contactNameIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.name.toLowerCase() == contactName.value.toLowerCase().trim()):(-1);
 
       if(contactAddIndex >= 0){
         err.value = t('addressBook.addressExist');

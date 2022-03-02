@@ -421,11 +421,10 @@ export default {
         }
       }
       if (WalletUtils.verifyWalletPassword(walletName,networkState.chainNetworkName,walletPassword.value)) {
-        let cosigner = getCosignerList()
         if (delegateAcc.value !== "0".repeat(64)) { //unlink
           const indexOtherAcc = walletState.currentLoggedInWallet.others.findIndex((other)=> other.publicKey === delegateAcc.value)
           if (indexOtherAcc > -1) {
-            let signedTx = accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,cosigner,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
+            let signedTx = accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
             txHash.value = signedTx.hash.toUpperCase()
             walletPassword.value=""
             unlinking.value=true
@@ -434,7 +433,7 @@ export default {
             err.value = t('delegate.unlinkFail');
           }
         } else if (AccPublicKey.value != "" && (fromPk.value || fromNew.value)) { //link
-          let signedTx = accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,cosigner,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
+          let signedTx = accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
           txHash.value = signedTx.hash.toUpperCase()
           walletPassword.value=""
           pending.value=true

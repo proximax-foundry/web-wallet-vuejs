@@ -433,7 +433,6 @@ export default {
         walletPassword.value,
         selectedAccAdd.value,
         selectedCosign,
-        getWalletCosigner.value.cosignerList,
         encryptedMsg.value
       );
       if (!transferStatus) {

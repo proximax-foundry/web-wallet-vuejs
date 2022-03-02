@@ -439,10 +439,9 @@ export default {
       } else {
         let acc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address)? walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address) : walletState.currentLoggedInWallet.others.find(acc=>acc.address==p.address) 
         err.value = "";  
-          const cosigner = getCosignerList();
-          recordAction.value = selectAction.value
-          let signedTx = accountUtils.linkNamespaceToAddress(selectedCosignPublicKey.value,isMultiSig.value,cosigner,acc,walletPassword.value,selectNamespace.value, selectAction.value, namespaceAddress.value)
-          txHash.value = signedTx.hash.toUpperCase()   
+        recordAction.value = selectAction.value
+        let signedTx = accountUtils.linkNamespaceToAddress(selectedCosignPublicKey.value,isMultiSig.value,acc,walletPassword.value,selectNamespace.value, selectAction.value, namespaceAddress.value)
+        txHash.value = signedTx.hash.toUpperCase()   
         clearInput();
         pending.value = true
       }

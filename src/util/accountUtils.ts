@@ -203,7 +203,7 @@ const getLinkNamespaceToAddressTransactionFee = (isMultisig :boolean,namespaceAd
   
 }
 
-const linkNamespaceToAddress = (selectedCosign :string,isMultisig :boolean,cosigners: string[], multisigAccount: WalletAccount | OtherAccount, walletPassword: string, namespaceID: string, linkType: string, namespaceAddress: string) :SignedTransaction=> {
+const linkNamespaceToAddress = (selectedCosign :string,isMultisig :boolean, multisigAccount: WalletAccount | OtherAccount, walletPassword: string, namespaceID: string, linkType: string, namespaceAddress: string) :SignedTransaction=> {
   const namespaceTransaction = linkNamespaceToAddressTransaction(namespaceID, linkType, namespaceAddress);
   const senderAddress = multisigAccount.address
   const senderAccount = getAccountDetail(senderAddress, walletPassword)
@@ -215,17 +215,10 @@ const linkNamespaceToAddress = (selectedCosign :string,isMultisig :boolean,cosig
     
     let multisigPublicAccount = PublicAccount.createFromPublicKey(multisigAccount.publicKey, AppState.networkType);
     let innerTx = [namespaceTransaction.toAggregate(multisigPublicAccount)];
-    
-    let cosignerAcc :Account[] = [];
-    cosigners.forEach((signer) => { 
-      const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === signer)
-      let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
-      cosignerAcc.push(Account.createFromPrivateKey(privateKey, AppState.networkType));
-    });
     const aggregateBondedTx = TransactionUtils.aggregateBondedTx(innerTx);
-    const initiatorAcc = cosignerAcc.find(acc=>acc.publicKey==selectedCosign)
-    let index = cosignerAcc.findIndex(acc=>acc.publicKey==selectedCosign)
-    cosignerAcc.splice(index,1)
+    const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === selectedCosign)
+    let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
+    let initiatorAcc = Account.createFromPrivateKey(privateKey, AppState.networkType)
     const signedAggregateBondedTransaction = initiatorAcc.sign(aggregateBondedTx,networkState.currentNetworkProfile.generationHash);
     signedTransaction = signedAggregateBondedTransaction
     const lockFundsTransaction = TransactionUtils.lockFundTx(signedAggregateBondedTransaction)
@@ -235,7 +228,7 @@ const linkNamespaceToAddress = (selectedCosign :string,isMultisig :boolean,cosig
   return signedTransaction
 }
 
-const createDelegateTransaction = (selectedCosign :string,isMultisig :boolean,cosigners: string[],multisigAccount: WalletAccount, walletPassword: string, accPublicKey: string, delegateAction: LinkAction) :SignedTransaction=>{
+const createDelegateTransaction = (selectedCosign :string,isMultisig :boolean,multisigAccount: WalletAccount, walletPassword: string, accPublicKey: string, delegateAction: LinkAction) :SignedTransaction=>{
 
   const senderAddress = multisigAccount.address
   const senderAccount = getAccountDetail(senderAddress, walletPassword);
@@ -248,19 +241,11 @@ const createDelegateTransaction = (selectedCosign :string,isMultisig :boolean,co
   }else{ //multisig account
     let multisigPublicAccount = PublicAccount.createFromPublicKey(multisigAccount.publicKey, AppState.networkType);
     let innerTx = [delegateTx.toAggregate(multisigPublicAccount)];
-    
-    let cosignerAcc :Account[] = [];
-    cosigners.forEach((signer) => { 
-      const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === signer)
-      let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
-      cosignerAcc.push(Account.createFromPrivateKey(privateKey, AppState.networkType));
-    });
-      
     const aggregateBondedTx = TransactionUtils.aggregateBondedTx(innerTx);
-    const initiatorAcc = cosignerAcc.find(acc=>acc.publicKey==selectedCosign)
-    let index = cosignerAcc.findIndex(acc=>acc.publicKey==selectedCosign)
-    cosignerAcc.splice(index,1)
-    const signedAggregateBondedTransaction =  initiatorAcc.signTransactionWithCosignatories(aggregateBondedTx,cosignerAcc, networkState.currentNetworkProfile.generationHash);
+    const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === selectedCosign)
+    let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
+    let initiatorAcc = Account.createFromPrivateKey(privateKey, AppState.networkType)
+    const signedAggregateBondedTransaction =  initiatorAcc.sign(aggregateBondedTx,networkState.currentNetworkProfile.generationHash);
     
     signedTransaction = signedAggregateBondedTransaction
     const lockFundsTransaction = TransactionUtils.lockFundTx(signedAggregateBondedTransaction)
