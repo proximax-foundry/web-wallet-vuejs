@@ -141,6 +141,7 @@ export default {
 
     const SaveContact = () => {
       const wallet = walletState.currentLoggedInWallet
+      console.log(address.value)
       if(!wallet){
         return;
       }
@@ -156,7 +157,7 @@ export default {
       }else if(findAddressInTempContact!=undefined){
         err.value = t('addressbook.addressvalidation');
       }else{
-        walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value, address: address.value, group: selectContactGroups.value });
+        walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value, address: Address.createFromRawAddress(address.value).plain(), group: selectContactGroups.value });
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         toast.add({severity:'info', summary: 'Address Book', detail: 'Contact info updated in Address Book', group: 'br', life: 5000});
         router.push({name: "ViewServicesAddressBook"});
