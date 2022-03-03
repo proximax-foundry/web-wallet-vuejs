@@ -309,7 +309,7 @@ export default{
           let expiryRelativeTimeEstimate;
           if(currentBlockHeight){
             if(blockDifference > 0){
-              expiryRelativeTimeEstimate = t('general.in') + ' '+ relativeTime(expiryDay, expiryHour, expiryMin);
+              expiryRelativeTimeEstimate = relativeTime(expiryDay, expiryHour, expiryMin);
             }else{
               if(expiryDate != '-'){
                 expiryRelativeTimeEstimate = t('general.expired');

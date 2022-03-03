@@ -172,7 +172,7 @@ export default defineComponent({
       let wallets = new Wallets();
 
       if(wallets.filterByNetworkNameAndName(selectedNetworkName.value, walletName.value)){
-        err.value = t('wallet.walletNameTaken');
+        err.value = t('wallet.walletNameExist');
       }else{
         let password = WalletUtils.createPassword(passwd.value);
 

@@ -8,7 +8,7 @@
     <AccountComponent :address="acc.address" class="mb-10"/>
     <div class = 'flex text-xs font-semibold border-b-2'>
       <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-      <router-link :to="{name:'ViewAccountAssets', params: { address: acc.address}}" class= 'w-18 text-center'>Assets</router-link>
+      <router-link :to="{name:'ViewAccountAssets', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
       <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.multisig')}}</div>
       <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
       <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
@@ -517,8 +517,8 @@ export default {
         e.preventDefault();
       }
     }
-    let deleteUserErrorMsg = t('multisig.approvalExceedMax');
-    let approveTransactionErrMsg = t('multisig.deletionExceedMax');
+    let deleteUserErrorMsg = t('multisig.deletionExceedMax');
+    let approveTransactionErrMsg = t('multisig.approvalExceedMax');
     watch(numApproveTransaction, (n) => {
       updateAggregateFee()
       if(maxNumApproveTransaction.value == 0 && n > 1){

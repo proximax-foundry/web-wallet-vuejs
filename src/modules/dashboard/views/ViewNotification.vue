@@ -21,7 +21,7 @@
                 <div v-html="toSvg(notification.address, 40, themeStyleConfig)" class="mr-2"></div>
                 <div class="text-gray-600 text-xs">
                   <div class="mb-1 text-sm text-gray-700 font-bold">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(notification.address, true) }}</div>
-                  Namespace <b>{{ notification.label }}</b> {{$t('notification.isExpiring',{time:NotificationUtils.relativeTime(notification.timestamp)})}} 
+                  {{$t('general.namespace')}} <b>{{ notification.label }}</b> {{$t('notification.isExpiring',{time:NotificationUtils.relativeTime(notification.timestamp)})}} 
                 </div>
               </router-link>
             </div>

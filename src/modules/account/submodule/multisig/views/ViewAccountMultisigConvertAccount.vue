@@ -368,8 +368,8 @@ export default {
         e.preventDefault();
       }
     }
-    let deleteUserErrorMsg = t('multisig.approvalExceedMax');
-    let approveTransactionErrMsg = t('multisig.deletionExceedMax');
+    let deleteUserErrorMsg = t('multisig.deletionExceedMax');
+    let approveTransactionErrMsg = t('multisig.approvalExceedMax');
     watch(numApproveTransaction, (n) => {
       updateAggregateFee()
       if(maxNumApproveTransaction.value == 0 && n > 1){

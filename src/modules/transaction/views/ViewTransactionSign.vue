@@ -86,7 +86,7 @@
                     <div v-if="item.legendType === InnerTxnLegendType.ADD_REMOVE" >{{$t('general.remove')}}</div>
                     <div v-else-if="item.legendType === InnerTxnLegendType.TRUE_FALSE" >{{$t('general.false')}}</div>
                     <div v-else-if="item.legendType === InnerTxnLegendType.BUY_SELL" >{{$t('transaction.sell')}}</div>
-                    <div v-else-if="item.legendType === InnerTxnLegendType.ALLOW_BLOCK" >{{$t('transaction.block')}}</div>
+                    <div v-else-if="item.legendType === InnerTxnLegendType.ALLOW_BLOCK" >{{$t('general.block')}}</div>
                     <div>{{ item.infoRedList.map(info => info.short ? info.short : info.value).join(", ") }}</div>
                   </div>
                   <div v-if="item.infoInfoList.length > 0">

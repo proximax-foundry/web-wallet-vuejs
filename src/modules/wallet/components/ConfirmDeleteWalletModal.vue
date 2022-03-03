@@ -14,7 +14,7 @@
               <div class="w-92">
                 <div class= 'text-center'>
                   <div class="mt-3">
-                    <PasswordInput class ='w-8/12 ml-auto mr-auto' placeholder="Password" :errorMessage="$t('general.passwordRequired')" v-model="walletPassword" icon="lock"/>
+                    <PasswordInput class ='w-8/12 ml-auto mr-auto' :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" v-model="walletPassword" icon="lock"/>
                     <button @click="deleteWallet(walletName)" class='red-btn px-4 py-3 font-semibold cursor-pointer text-center ml-auto mt-3 mr-auto w-8/12 disabled:opacity-50 disabled:cursor-auto' :disabled="disableDelete">{{$t('wallet.confirmDelete')}}</button>
                     <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-3' @click="toggleModal = !toggleModal;walletPassword='';err=''">{{$t('general.cancel')}}</div>
                   </div>

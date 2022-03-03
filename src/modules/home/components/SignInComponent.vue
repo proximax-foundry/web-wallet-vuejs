@@ -8,7 +8,7 @@
         <SelectWalletInput />
         <div class='mt-3'></div>
         <div class= 'text-center'>
-          <PasswordInput class = 'w-8/12 block ml-auto mr-auto' placeholder="Password" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+          <PasswordInput class = 'w-8/12 block ml-auto mr-auto' :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
         </div>
         <div class=" text-center mt-2">
           <button type="submit" class=" blue-btn bg-gray-primary py-2.5 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('home.signIn')}}</button>

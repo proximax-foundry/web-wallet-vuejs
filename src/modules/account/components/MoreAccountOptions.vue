@@ -8,7 +8,7 @@
     <div v-if="toggleModal" class="relative ">
     <div class='absolute border border-t-0 z-20 bg-white w-full p-3 '>
         <div  class="pb-2">
-            <router-link class="hover:bg-gray-100" v-if="!otherAccount(address)" :to="{ name: 'ViewAccountDelegate', params: { address: address }}">{{$t('account.delegate')}}</router-link>
+            <router-link class="hover:bg-gray-100" v-if="!otherAccount(address)" :to="{ name: 'ViewAccountDelegate', params: { address: address }}">{{$t('delegate.delegateAcc')}}</router-link>
             <div v-else class="text-gray-300">{{$t('account.delegate')}}</div>
         </div>
         <router-link class="hover:bg-gray-100" v-if="!otherAccount(address)" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">{{$t('general.linkToNamespace')}}</router-link>

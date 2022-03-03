@@ -12,6 +12,8 @@ import { WalletAccount } from '@/models/walletAccount';
 import { computed } from 'vue';
 import { listenerState } from '@/state/listenerState';
 import { SessionService } from '@/models/stores/sessionService';
+import i18n from '@/i18n';
+import { useI18n } from "vue-i18n";
 
 interface Notification {
   id: string,
@@ -111,10 +113,9 @@ const loadExpiringNamespace = (): Notification[] => {
   });
   return notifications;
 }
-
-
+const { t } = i18n.global;
 export class NotificationUtils {
-
+  
   static relativeTime = (timestamp:number) => {
     let current = new Date();
     let expired = new Date(timestamp);
@@ -147,15 +148,15 @@ export class NotificationUtils {
       timeDiff.months+=12;
     }
     if(timeDiff.years > 0){
-      return timeDiff.years + ' year' + ((timeDiff.years>1)?'s':'');
+      return timeDiff.years + ' ' + t('general.year',timeDiff.years);
     }else if(timeDiff.months > 0){
-      return timeDiff.months + ' month' + ((timeDiff.months>1)?'s':'');
+      return timeDiff.months + ' ' + t('general.month',timeDiff.months);
     }else if(timeDiff.days > 0){
-      return timeDiff.days + ' day' + ((timeDiff.days>1)?'s':'');
+      return timeDiff.days + ' ' + t('general.day',timeDiff.days);
     }else if(timeDiff.hours > 0){
-      return timeDiff.hours + ' hour' + ((timeDiff.hours>1)?'s':'');
+      return timeDiff.hours + ' ' + t('general.hour',timeDiff.hours);
     }else{
-      return timeDiff.mins + ' minute' + ((timeDiff.mins>1)?'s':'');
+      return timeDiff.mins + ' ' + t('general.minute',timeDiff.mins);
     }
   }
 

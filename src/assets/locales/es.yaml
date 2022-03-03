@@ -1,72 +1,691 @@
---- 
-home:
-  home: "Home"
-  title: "ProximaX Sirius Wallet"
-  titleDescription: "Build robust blockchain integrations that help you to get the most value out of the ProximaX Sirius platform."
-  selectLanguage: "Select Language"
-  version: "Version"
-  beta: "BETA"
-  helpdesk: "Helpdesk"
-  copyright: "Copyright 2022 ProximaX®. All rights reserved."
-  signIn: "Sign In"
-  selectWallet: "Select Wallet"
+account:
+  accDeletion: Account Deletion
+  accountCreated: Your account has been successfully created.
+  accountDetails: Account Details
+  confirmDelete: Confirm Account Deletion
+  confirmName: Confirm account name
+  deleteThis: Delete This Account
+  deleteTitle: This action will delete the account.
+  deleteWarning: Are you sure you want to delete this account?
+  editName: Edit account name
+  enterAccountName: Enter Account name
+  failChangeName: Fail to change account name
+  failCreate: Failed to create a new account
+  failDelete: Unable to delete account
+  multisigAcc: Multisig Accounts
+  myAcc: My Accounts
+  nameEmpty: Account name cannot be empty
+  namePlaceholder: Name your account
+  nameTaken: Account name is already taken
+  noAssets: You do not own any assets.
+  otherAcc: Other Accounts
+  privateKeyExist: Account with this Private Key is already in the wallet
+addressBook:
+  addBackUpContact: Add contacts from a contact backup file
+  addCustomGroup: Add Custom Group
+  addNewContact: Add New Contact
+  addressBookMessage1: imported to address book
+  addressBookMessage2: already exist in address book
+  addressBookMessage3: with invalid address
+  addressBookMessage4: not imported
+  addressBookTitle: You can add multiple wallet addresses to keep for your future transactions.
+  addressExist: Address already exists in address book.
+  addressRequired: Address Required
+  contactUpdated: Contact info updated in Address book
+  custom: Custom
+  customGroup: Custom Group
+  director: Director
+  editContact: Edit Contact
+  employee: Employee
+  exportBackUpContact: Export contacts for backup
+  exportContacts: Export Contacts
+  family: Family
+  friend: Friend
+  groupValidation: Group name is not availble or already exist
+  importAddress: Import Address
+  importContacts: Import Contacts
+  nameExist: Name already exists in account or address book.
+  newContactAdded: New contact added to Address book
+  newContactImported: New Contact imported to Address book | New Contacts imported to Address book
+  removeContact: Remove Contact
+  removeContactFromAB: Remove Contact from Address book?
+  saveAddress: Save Address
+  work: Work
+asset:
+  assetAns: >-
+    Mosaics are part of what makes the Smart Asset System unique and flexible.
+    They are fixed assets on the Sirius Chain that can represent a set of
+    multiple identical things that do not change.
+  assetCreatedBy: Asset created by
+  assetCreatedByAcc: Sirius Digital Assets created by account {accountName}
+  assetCreatedInWallet: Sirius Digital Assets created in wallet {walletName}
+  assetDescription: >-
+    An asset could be a token, but it could also be a collection of more
+    specialized assets such as reward points, shares of stock, signatures,
+    status flags, votes or even other currencies.
+  createAssets: Create Asset | Create Assets
+  createNewAsset: Create New Asset
+  currentSupply: Current Supply
+  divisibilityMsg1: Please input the divisibility here
+  divisibilityMsg2: Maximum divisibility is 6
+  divisibilityMsg3: 'Example: 0.000000'
+  divisibilityMsg4: Determines up to what decimal place the asset can be divided.
+  modificationType: Modification Type
+  modifyAssetSupply: Modify Asset Supply
+  noAsset: Looks like you do not have any assets yet.
+  quantityOf: 'Quantity Of {value}'
+  supplyMsg1: Please input the supply here
+  supplyMsg2: Maximum supply is 900T
+  supplyMsg3: 'Example: 900,000,000,000,000'
+  supplyMutableMsg: 'If you tick "Supply Mutable", supply can be changed.'
+  transferableMsg: 'If you tick "Transferable",asset can be transferred.'
+dashboard:
+  accDescription: >-
+    A key pair (private and public key) associated with a mutable state stored
+    on the Sirius Chain.
+  accountAdded: Account added
+  accountRemoved: Account removed
+  addingAcc: 'Adding account:'
+  allTransactions: All Transactions
+  applyHeightDelta: Apply Height Delta
+  approvalAndRemoval: Approval and Removal Delta
+  approvalDelta: Approval Delta
+  buyOffer: Buy Offer
+  createAsset: Create an Asset
+  createSthNew: Create Something New
+  creator: Creator
+  expirationEstimate: Expiration Timestamp Estimate
+  fetching: Fetching...
+  fetchingTx: Fetching Transactions
+  gettingStartedGuide: Getting Started Guide
+  guideOverview: Guide Overview
+  hashType: Hash Type
+  inOut: In/Out
+  info: Info
+  lockHash: Lock Hash
+  modification: Modification
+  myPersonalAcc: My Personal Account
+  newValue: New Value
+  newVersion: New version
+  noTransactions: 'No transactions in {acc}'
+  offer: Offer
+  oldValue: Old Value
+  parentNamespace: Parent Namespace
+  proof: Proof
+  recentTransactions: Recent Transactions
+  recentTransfers: Recent Transfers
+  refunded: Refunded
+  registerType: Register Type
+  remotePublicKey: Remote Public Key
+  removalDelta: Removal Delta
+  removingAcc: 'Removing account:'
+  restrictionType: Restriction Type
+  scanQR: Scan QR Code
+  scopedMetadataKey: Scoped Metadata Key
+  secret: Secret
+  sellOffer: Sell Offer
+  siriusChainQues: What is ProximaX Sirius Chain?
+  target: Target
+  timestamp: Timestamp
+  txAmount: Tx Amount
+  txFee: Tx Fee
+  txHash: Tx Hash
+  type: Type
+  upgradePeriod: Upgrade period
+  value: Value
+  valueChange: Value Change
+  viewAll: View All
+delegate:
+  accDelegated: Account Delegated
+  delegateAcc: Delegate Account
+  delegatePublicKey: Delegate Public Key
+  enterPk: Please fill in the private key of the linking account.
+  linked: Your account is linked to a delegated account.
+  newAcc: New Account
+  newAccSelected: New Account is selected as the linking account.
+  notLinked: Your account is not linked to a delegated account.
+  privateKeyErr: Private key not fulfilled link account requirement
+  publicKeyOfDelegate: Public Key of the Delegated Account
+  selectAccToLink: Select Account to Link
+  unlinkAcc: Unlink Account
+  unlinkFail: Unlink failed
 general:
-  current: "Current"
-  wallet: "Wallet | Wallets"
-  select: "Select"
-  change: "Change"
-  password: "Password"
-  back: "Back"
-  cancel: "Cancel"
-  network: "Network"
-  selectNetwork: "Select Network"
-  passwordRequired: "Password is required"
-  fromPrivateKey: "From a Private Key"
-  notification: "Notification | Notifications"
-  listEmpty: "The list is empty."
-  walletPasswordInvalid: "Password for wallet {name} is invalid"
-  next: "Next"
-  create: "Create"
-  new: "New"
-  privateKey: "Private Key"
-  publicKey: "Public Key"
-  address: "Address"
-  congratz: "Congratulations!"
-  pkWarning: "Make sure you store your private key in a safe place. Access to your digital assets cannot be recovered without it!"
-  downloadPaperWallet: "Download Paper Wallet"
-  copied: "copied"
-  copy: "Copy"
-  view: "View"
-  hide: "Hide"
+  accCurrentBalance: Account Current Balance
+  account: Account | Accounts
+  add: Add
+  addAccAddress: Add Account Address
+  address: Address
+  addressBook: Address Book
+  aggregateFee: Aggregate Fee
+  amount: Amount
+  approximately: Approximately
+  asset: Asset | Assets
+  assetId: Asset ID
+  assetQues: What is Asset?
+  back: Back
+  balance: Balance
+  block: Block | Blocks
+  blockHeight: Block Height
+  cancel: Cancel
+  certificate: Certificate
+  change: Change
+  check: Check
+  close: Close
+  confirm: Confirm
+  congratz: Congratulations!
+  contact: Contact| Contacts
+  continue: Continue
+  convertMultisig: Convert to Multisig
+  copied: copied
+  copy: Copy
+  cosigner: Cosigner
+  create: Create
+  createNamespace: Create Namespace
+  createNew: Create New
+  createNewAcc: Create New Account
+  current: Current
+  currentBalance: Current Balance
+  day: Day | Days
+  deadline: Deadline
+  decrease: Decrease
+  default: Default
+  defaultTitle: This is your default account everytime you login
+  delegate: Delegate
+  details: Details
+  digitalAsset: Digital Asset
+  disable: Disable
+  disabled: Disabled
+  divisibility: Divisibility
+  done: Done
+  download: Download
+  downloadCertificate: Download Certificate
+  downloadPaperWallet: Download Paper Wallet
+  duration: Duration
+  edit: Edit
+  enable: Enable
+  enabled: Enabled
+  enterPassword: Enter Password
+  enterPasswordContinue: Enter your password to continue
+  estimateUSD: Estimate US$
+  expired: Expired
+  expires: Expires
+  export: Export
+  extendDuration: Extend Duration
+  'false': false
+  feedback: Give us feedback about your experience here
+  feedbackDescription: We are eager to keep improving our products.
+  from: From
+  fromPrivateKey: From a Private Key
+  group: Group
+  hasPartial: Your account has transaction(s) on partial.
+  hide: Hide
+  hour: Hour | Hours
+  import: Import
+  importFromAB: Import from Address Book
+  in: In
+  increase: Increase
+  initiateBy: Initiate by
+  initiator: Initiator
+  initiatorCurrentBalance: Initiator Current Balance
+  insufficientBalance: Insufficient Balance
+  insufficientBalanceWarning: >-
+    Your account has insufficient amount of {tokenName}. Please top up first
+    before continue transacting on this page.
+  invalid: Invalid
+  invalidInput: Invalid Input
+  invalidPrivateKey: Private Key Invalid
+  label: Label
+  later: Later
+  levy: Levy
+  levyAmount: Levy amount
+  levyRecipient: Levy recipient
+  link: Link
+  linkSuccess: Linked Successfully
+  linkToNamespace: Link to Namespace
+  linked: Linked
+  linkedAssetAddress: Linked Asset/Address
+  list: List
+  listEmpty: The list is empty.
+  lockFund: Lock Fund
+  lockFundTxFee: Lock Fund Tx Fee
+  message: Message
+  minute: Minute | Minutes
+  modifySupply: Modify Supply
+  month: Month | Months
+  more: More
+  multisig: Multisig
+  multisigTitle: This is a multisig account
+  name: Name
+  nameRequired: Name is required
+  namespace: Namespace | Namespaces
+  namespaceId: Namespace ID
+  namespaceQues: What is Namespace?
+  network: Network
+  new: New
+  next: Next
+  'no': 'No'
+  noCosigner: No eligible cosigner in this wallet
+  noLinkedAsset: No Linked Asset
+  noLinkedNamespace: No Linked Namespace
+  noRecord: No records found.
+  nonce: Nonce
+  notification: Notification | Notifications
+  ntgToShow: Nothing to show.
+  out: Out
+  overview: Overview
+  owner: Owner
+  ownerAcc: Owner Account
+  ownerTitle: You own this multisig account
+  password: Password
+  passwordRequired: Password is required
+  pkWarning: >-
+    Make sure you store your private key in a safe place. Access to your digital
+    assets cannot be recovered without it!
+  privateKey: Private Key
+  publicKey: Public Key
+  recipient: Recipient
+  remove: Remove
+  rentalFee: Rental Fee
+  requiredField: Required field
+  save: Save
+  scheme: Scheme
+  sda: SDA | SDAs
+  sdaFull: Sirius Digital Asset
+  search: Search
+  select: Select
+  selectAccount: Select Account
+  selectCreationType: Select Creation Type
+  selectNetwork: Select Network
+  selectOption: Select Option
+  sender: Sender
+  showAll: Show All
+  signed: Signed
+  signer: Signer
+  supply: Supply
+  supplyMutable: Supply Mutable
+  swap: Swap
+  to: To
+  topUp: 'Top Up {tokenName}'
+  total: Total
+  transaction: Transaction | Transactions
+  transactionDetails: Transaction Details
+  transactionFee: Transaction Fee
+  transfer: 'Transfer {tokenName}'
+  transferable: Transferable
+  'true': true
+  unlink: Unlink
+  unlinkSuccess: Unlinked Successfully
+  unlinked: Unlinked
+  usd: USD
+  valid: Valid
+  view: View
+  viewInExplorer: View In Explorer
+  waitConfirmTx: Waiting for transaction to be confirmed...
+  wallet: Wallet | Wallets
+  walletAddress: Wallet Address
+  walletPasswordInvalid: 'Password for wallet {name} is invalid'
+  year: Year | Years
+  'yes': 'Yes'
+home:
+  accountDescription: Secure assets in new account
+  accountsAvailable: Accounts Available
+  allInfo: Everything you need to know about the Sirius Wallet
+  assetAns: >-
+    An asset could be a token that has a unique identifier and configurable
+    properties
+  assetDescription: Create your own unique token
+  beginnerGuide: Beginner's Guide
+  beta: BETA
+  contactTeam: Contact our support team
+  copyright: Copyright 2022 ProximaX®. All rights reserved.
+  gettingStarted: Getting Started
+  helpdesk: Helpdesk
+  home: Home
+  namespaceAns: Create an on-chain unique place for your business and your assets.
+  namespaceDescription: Create an on-chain unique space
+  navigate: Navigate
+  quickAction: Quick Action
+  selectLanguage: Select Language
+  selectWallet: Select Wallet
+  signIn: Sign In
+  signOut: Sign Out
+  siriusChain: What is Sirius Chain?
+  siriusChainTitle: Start building apps on the ProximaX Sirius blockchain layer
+  switchDefault: Your default account has switched to
+  title: ProximaX Sirius Wallet
+  titleDescription: >-
+    Build robust blockchain integrations that help you to get the most value out
+    of the ProximaX Sirius platform.
+  transferDescription: Send assets to another account
+  version: Version
+multisig:
+  accountCosignatories: Account Cosignatories
+  accountDeletionApproval: Account Deletion Approval
+  addNewCosignatory: Add New Cosignatory
+  addressOrPk: Address/Public Key
+  alreadyMultisig: Your account is already a multisig.
+  approvalAtLeastOne: Number of cosignatories for transaction approval cannot be less than 1
+  approvalExceedMax: >-
+    Number of cosignatories for transaction approval is more than number of
+    cosignatories for this account
+  approvalScheme: 'S:{approval}-of-{maxApproval}'
+  bottomToTop: Bottom to Top
+  collapsible: Collapsible
+  cosignatory: Cosignatory
+  cosignatoryOf: Cosignatory of
+  deletionAtLeastOne: Number of cosignatories for deletion approval cannot be less than 1
+  deletionExceedMax: >-
+    Number of cosignatories for deletion approval is more than number of
+      cosignatories for this account
+  deletionScheme: 'D:{deletion}-of-{maxDeletion}'
+  duplicatedCosigner: Duplicated cosigner added
+  horizontal: Horizontal
+  leftToRight: Left To Right
+  manageCosignatories: Manage Cosignatories
+  noCosigner: >-
+    {name} does not have any cosignatory accounts.When you add at least one (1)
+    cosignatory, your account will automatically be converted into a multisig
+    account.
+  noMultisig: '{name} is not a cosignatory of any accounts.'
+  ofCosignatories: 'of {value} cosignatories'
+  rightToLeft: Right to Left
+  selectedAccErr: Cosigner cannot be this account itself
+  topToBottom: Top to Bottom
+  transactionsApproval: Transactions Approval
+  updateCosignatories: Update cosignatories
+  vertical: Vertical
+  viewSettings: View Settings
+namespace:
+  duration: Duration (number of days)
+  durationMsg: Maximum rental duration is
+  durationMsg2: Maximum number of days for the extension of this namespace is
+  manageNamespace: Manage Linked Namespace
+  nameRegistered: Namespace have been registered
+  namespaceAns: >-
+    A namespace starts with a name that you choose, similar to an internet
+    domain name.
+  namespaceCreatedBy: Namespace created by
+  namespaceDescription: >-
+    Namespace enables you to create on-chain unique and easy to remember names
+    for your accounts and SDAs.
+  namespaceNameMsg1: >-
+    A namespace can have a maximium length of 16 alphanumerical characters while
+    sub-namespaces can have a maximium length of 64 alphanumerical characters.
+  namespaceNameMsg2: >-
+    Three layers can be created. A namespace can have a subnamespace, and a
+    subnamespace can have its own subnamespace (e.g., test1.test2.test3).
+  namespaceNameMsg3: Certain phrases are already reserved.
+  newRootNamespace: New Root Namespace
+  noNamespace: You have not created a namespace.
+  noNamespace2: Looks like you don’t have any namespaces yet.
+  registerNamespace: Register Namespace
+  registerNewNamespace: Register New Namespace
+  reservedName: Reserved namespace name
+  selectAction: Select Action
+  selectNamespace: Select Namespace
+  unlinkNamespace: Unlink Namespace
+  validName: Fill in a valid name
+nis1:
+  amountMsg: XAR or PRX amount to swap to XPX
+  disableSwap: Disable NIS1 Swap with this account
+  enableSwap: Enable NIS1 Swap with this account
+  failSwap: Unable to enable NIS1 swap for this account
+  fromNis1Acc: From NIS1 Account
+  nem: NEM
+  nis1: NIS1
+  nis1Acc: NIS1 Account
+  nis1Address: 'NIS1 Address:'
+  nis1Swap: NIS1 Swap
+  nis1Title: Please enter password to enable NIS1 for this account.
+  nis1ToSirius: NIS1 to Sirius Chain
+  swapNis1ToSirius: Swap from NIS1 to Proximax Sirius Chain
+node:
+  currentNode: Current Node
+  nodeList: Node List
+  nodeUpdated: Node updated
+  nodes: Nodes
+notification:
+  isExpiring: 'is expiring in {time}'
+  noNotification: No notification found
+  pendingSignature: 'has a transaction awaiting for signature(s) with deadline in {time}'
+swap:
+  amountEmpty: Amount is empty
+  approveConnection: Please click on MetaMask extension to approve connection
+  bsc: BSC
+  bscAddress: BSC address receiving your swap
+  bscAddressErr: Valid BSC address is required
+  bscAmountMsg: XPX amount to swap to BEP20
+  bscFull: Binance Smart Chain
+  bscOutgoingMsg: >-
+    Swap completion time will vary depending on the performance of the BSC
+    network. The more BNB transaction fees you pay, the faster your swap will
+    occur. Displayed BNB fees are valid for only three minutes due to the BSC
+    network's fluctuating rates.
+  bscScan: BSCScan
+  bscToSirius: BSC to Sirius Chain
+  cancelSwap: Cancel this swap
+  checkOutgoingStep2: 'Step 2: Check BSC transaction status'
+  checkStatus: Check Status
+  checkStatusAgain: Please check the status again
+  checkStep1: 'Step 1: Check {network} transaction  status'
+  checkStep2: 'Step 2: Check swap status'
+  checkStep3: 'Step 3: Validate your {network} address'
+  checkStep4: 'Step 4: Initiate swap'
+  checkSwapStatus: Check Swap Status
+  checkTransaction: Checking transaction confirmation...
+  checkingStatus: 'Checking {network} transaction status'
+  checkingTransaction: Check transaction confirmation to proceed
+  confirmDownloaded: I confirm that I have downloaded a copy of my certificate.
+  confirmSwap: Confirm Swap
+  connect: Connect
+  connected: Connected
+  enterValidHash: Please enter valid transaction hash
+  equivalentTo: Equivalent to
+  eth: ETH
+  ethFull: Ethereum
+  ethToSirius: ETH to Sirius Chain
+  failConnect: Unable to connect
+  failCoverTxFee: Balance is insufficient to cover transaction fee.
+  failGetSink: Unable to get sink address
+  fast: Fast
+  feeTooLow: Fees might be too low. Please do not change recommended fee in MetaMask.
+  feesValidDuration: Fees are valid for
+  forMoreDetails: for more details.
+  fromMetamaskAddress: From MetaMask Address
+  fromSiriusAcc: From Sirius Chain Account
+  hashInvalid: '{0} transaction hash is invalid. Please initiate new swap from {0} to {1}'
+  hashNotFound: '{0} transaction hash is not found. Please initiate new swap from {0} to {1}'
+  hashNotFound2: BSC transaction hash is not found. Please contact our
+  initiateSwap: Initiate swap
+  initiateSwapWithHash: 'Initiate swap with this {network} Transaction Hash'
+  initiatingSwap: Initiating swap...
+  inputInfo: Input Information
+  inputMsg: >-
+    BEP20 token amount to swap. Minimum 51 BEP20 amount is required as 50 will
+    be deducted from the amount as transaction fee.
+  inputRemark1: Maximum amount after deducting transaction fee
+  inputRemark2: and gas fee
+  insufficientAmount: Insufficient amount
+  insufficientTokenBalance: Insufficient token balance
+  mainNetworkSwap: Main Network Swap
+  maxAmount: Max. Amount
+  messageSent: 'Message sent to the swap service, swap initiated...'
+  messageSigned: 'Message signed with signature:'
+  metamask: MetaMask
+  metamaskAcc: Metamask Account
+  minimum51: (MINIMUM = 51 )
+  networkErr: Network Error
+  noOtherExtension: >-
+    Please make sure there is no other crypto wallet extension currently being
+    enabled except
+  notConfirmed: Transaction is not confirmed yet. Please check again in a moment.
+  notConnected: Not connected
+  pendingConfirmation: 'Pending Confirmation: {number} of 12 confirmations'
+  rapid: Rapid
+  referTo: Refer to the
+  refreshMsg: Please refresh this page after disabling other wallet extensions.
+  rejectMetamask: Approval in MetaMask is rejected
+  requestFromSwap: Requesting from swap service
+  retry: Retry
+  selectNetworkToSwap: 'Please select {network} on MetaMask to swap'
+  sendMsgFail: Unable to send message to swap service
+  sendRequest: Send Request
+  sendingMsg: Sending message to MetaMask
+  sendingTx: Sending transaction to MetaMask
+  serverErrMsg1: Sorry. Please save the
+  serverErrMsg2: and contact our
+  serverNotFound: Swap Server not found
+  serviceDown: Swapping service is temporary not available. Please try again later
+  serviceUnavailable: Service unavailable
+  signTx: Please sign transaction confirmation in MetaMask
+  signature: Signature
+  signatureHash: Signature hash
+  sirius: Sirius
+  siriusAcc: Sirius Account
+  siriusChain: Sirius Chain
+  siriusChainFull: Proximax Sirius Chain
+  siriusNetwork: Sirius Network
+  siriusToBsc: Sirius Chain to BSC
+  siriusToEth: Sirius Chain to ETH
+  standard: Standard
+  step1: 'Step 1: Send BEP20 {tokenName} to the escrow account'
+  step2: 'Step 2: Validate your Sirius address'
+  step3: 'Step 3: Initiate swap'
+  swapAmount: Swap AMount
+  swapBscToSirius: Swap from BSC to Proximax Sirius Chain
+  swapDetails: Swap Details
+  swapInProgress: Swap in progress. Please wait...
+  swapInitiated: Swap has already been initiated earlier.
+  swapInsufficientAmount: Insufficient amount to perform swap
+  swapMsg: >-
+    Swap process may take a few hours to complete. If you wish to proceed, you
+    will receive a certificate containing your transaction hash for your
+    records.
+  swapMsg2: >-
+    Swap process may take a few hours to complete. Please save a copy of your
+    certificate. It is needed in the event of an error.
+  swapMsg3: >-
+    Please download the certificate. It is needed in the event of an error. You
+    can search the status of your BSC transaction using the above BSC
+    Transaction Hash.
+  swapNotFound: Swap not found
+  swapOperationFail: Swap operation failed
+  swapSiriusToBsc: Swap from Proximax Sirius Chain to BSC
+  swapStarted: The swap process has already started!
+  swapSuccess: Swap is successful
+  swapSuccess2: Swap is already in progress or has been completed successfully.
+  swappedAmount: Swapped Amount
+  timedOut: Swap request timed-out
+  toMetamaskAddress: To MetaMask Address
+  toSiriusAcc: To Sirius Chain Account
+  transactionHash: '{network} Transaction Hash'
+  transactionPending: '{network} transaction is still pending. Please wait a few more moment'
+  tryAgain: Please try again later
+  txFailed: Transaction failed. Please try again with suggested gas price and gas limit.
+  txFeeMsg: >-
+    The fees for the transaction on Sirius Chain will be deducted from this
+    amount, which is 50 {tokenName}
+  txIdNotFound: Swap not found for the current transaction ID
+  txInvalid: Transaction invalid
+  txNotFound: Transaction not found
+  txSuccessful: '{network} transaction is successful'
+  validation: Validation
+  validationWarning: One block confirmation needed to proceed.
+  validationWarning2: 'Do not change Gas Limit, Max Piority Fee or Max Fee.'
+  validationWarning3: >-
+    Confirmation might take up to 30 minutes, 1 hour or more due to high
+    transaction volumes.
+  validationWarning4: Please do not close or refresh
+  validationWarning5: >-
+    this page until the swap process is complete and you have saved your
+    certificate.
+  validationWarning6: View confirmation status on
+  viewTxInBsc: View Transaction in BSCScan
+  viewTxInExplorer: View Transaction in Explorer
+  waitingConfirmMetamask: Waiting for confirmation in MetaMask
+  walkthrough: walkthrough
+  xar: XAR
+  xpx: XPX
+transaction:
+  actionRequired: Action Required
+  aggregateBonded: Aggregate Bonded
+  allow: Allow
+  approve: Approve
+  approveConfirmation: >-
+    Would you like to approve this transaction? (Highlighted in yellow） | Would
+    you like to approve these transactions? (Highlighted in yellow）
+  buy: Buy
+  cosignAdded: Cosignature added
+  cosignTxAdded: cosignature transaction added | cosignature transactions added
+  doThisLater: Do this later
+  dontRefresh: Please do not refresh or log out
+  fullySigned: Fully Signed
+  haveApproved: >-
+    You have already approved this transaction | You have already approved these
+    transactions
+  inQueue: transaction in waiting queue | transactions in waiting queue
+  noActionRequired: No Action Required
+  partialAdded: Partial transaction added | Partial transactions added
+  sell: Sell
+  signerPk: Signer Public Key
+  swapTx: Swap transaction confirmed | Swap transactions confirmed
+  txAdded: Transaction added | Transactions added
+  txConfirmed: Transaction confirmed | Transactions confirmed
+  txErrMsg: 'Status: {0} - Hash: {1}'
+  txError: Transaction Error
+  txInfo: Transaction information
+  txUnconfirmed: transaction in unconfirmed state | transactions in unconfirmed state
+  unconfirmedTx: Unconfirmed Transactions
+  unconfirmedTxOf: 'Unconfirmed transactions of {name}'
+  waitForLoad: 'It is still loading, please wait.'
+  waitingSignature_s: Waiting for signature(s)
+  waitingSignatures: Waiting for signatures
+  waitingSignaturesOf: 'Waiting for signatures of {name}'
+transfer:
+  addAssets: Add Assets
+  addContacts: Do you want to save this address?
+  assetAmount: Amount (Asset)
+  enableEncryption: Enable Encryption
+  newTransfer: New Transfer
+  proceedWithZero: Are you sure to proceed with 0 amount?
+  selectAsset: Select Asset
+  successfullySaved: 'Contact {name} successfully saved'
+  transferAmount: Transfer Amount
+  transferFrom: Transfer From
+  transferPlaceholder: Transfer to (Address / Namespace)
 wallet:
-  newWallet: "New Wallet"
-  createWallet: "Create Wallet"
-  myWallets: "My Wallets"
-  privateKeyDescription: "Restore your existing ProximaX Sirius Wallet, import a private key from another service or create a new wallet."
-  walletNameTaken: "Wallet name is already taken"
-  walletCreated: "Your wallet has been successfully created. "
-  continueLogIn: "Continue to Login"
-  walletsAvailable: "These are the Sirius Wallets available in the local storage of your device."
-  walletDeletion: "Wallet Deletion"
-  deleteMessage: "This action will delete the wallet."
-  deleteWarning: "Are you sure you want to delete this wallet?"
-  confirmDelete: "Confirm Wallet Deletion"
-  backHome: "Back to Home"
-  noWallet: "No Sirius Account yet?"
-  haveWallet: "Already have Sirius Account?"
-  createSiriusWallet: "Create a new Sirius Wallet"
-  fromBackUp: "From a Wallet Backup"
-  namePlaceholder: "Name your wallet"
-  nameErrMsg: "Enter Wallet Name"
-  passwordErrMsg: "Min. length 8, max. length 30"
-  confirmPasswordErrMsg: "Password doesn't match"
-  signInHere: "Sign In here"
-  enterPassword: "Enter New Password"
-  invalidPrivateKey: "Private Key Invalid"
-  confirmPassword: "Confirm New Password"
-  walletRemoved: "Wallet has been removed successfully"
-  numberOfAccounts: "Number of Accounts"
-navigationMenu:
-  signOut: "Sign Out"
-
-  
+  backHome: Back to Home
+  backUpDescription: 'If you have a previously backed up wallet, please import the file here.'
+  confirmDelete: Confirm Wallet Deletion
+  confirmImport: Confirm Import
+  confirmPassword: Confirm New Password
+  confirmPasswordErrMsg: Password doesn't match
+  continueLogIn: Continue to Login
+  createSiriusWallet: Create a new Sirius Wallet
+  createWallet: Create Wallet
+  deleteMessage: This action will delete the wallet.
+  deleteWarning: Are you sure you want to delete this wallet?
+  enterPassword: Enter New Password
+  fromBackUp: From a Wallet Backup
+  haveWallet: Already have Sirius Account?
+  importFail: Import failed. Invalid file.
+  importFile: Import File
+  importMsg: 'You are about to import a wallet into {network}. Proceed ?'
+  importSuccess: Import Successful
+  myWallets: My Wallets
+  nameErrMsg: Enter Wallet Name
+  namePlaceholder: Name your wallet
+  newWallet: New Wallet
+  noWallet: No Sirius Account yet?
+  numberOfAccounts: Number of Accounts
+  passwordErrMsg: 'Min. length 8, max. length 30'
+  privateKeyDescription: >-
+    Restore your existing ProximaX Sirius Wallet, import a private key from
+    another service or create a new wallet.
+  signInHere: Sign In here
+  unableImport: Unable to import wallet
+  walletCreated: 'Your wallet has been successfully created. '
+  walletDeletion: Wallet Deletion
+  walletNameExist: Wallet with same name already exist
+  walletRemoved: Wallet has been removed successfully
+  walletsAvailable: These are the Sirius Wallets available in the local storage of your device.

@@ -66,7 +66,7 @@
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
-        <div class="font-semibold text-xxs text-blue-primary">{{$t('general.accCurrentBalance')}}</div>
+        <div class="font-semibold text-xxs text-blue-primary uppercase">{{$t('general.accCurrentBalance')}}</div>
         <div class="flex text-gray-200 mb-5">
           <span v-html="splitCurrency(balance)"></span>
           <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
