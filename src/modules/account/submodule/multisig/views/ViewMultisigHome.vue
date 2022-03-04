@@ -31,7 +31,7 @@
           </div>
         </div>
         <div v-if="!isMultisig" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
-        <div class='flex text-txs w-9/12 ml-auto mr-auto text-gray-400 mt-1 text-center'>
+        <div class='flex text-txs w-9/12 ml-auto mr-auto text-gray-400 mt-1 text-center justify-center '>
           <span v-if="!isMultisig"> {{$t('multisig.noCosigner',{name:acc.name})}}</span>
         </div>
       </div>
