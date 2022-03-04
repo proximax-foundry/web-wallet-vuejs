@@ -85,6 +85,7 @@ dashboard:
   accountAdded: 添加账户
   accountRemoved: 移除账户
   addingAcc: '添加账户：'
+  aggregate: Aggregate
   allTransactions: 所有交易
   applyHeightDelta: Apply Height Delta
   approvalAndRemoval: Approval and Removal Delta
@@ -124,6 +125,7 @@ dashboard:
   secret: 秘密
   sellOffer: Sell Offer
   siriusChainQues: 什么是ProximaX天狼星链？
+  swapFee: Swap Fee
   target: 目标
   timestamp: 时间戳
   txAmount: 交易金额
@@ -606,23 +608,48 @@ swap:
   xar: XAR
   xpx: XPX
 transaction:
+  accountLink: Account Link 
+  accountMetadata: Account Metadata
   actionRequired: 需要采取行动
+  addExchangeOffer: Add Exchange Offer
+  addressAlias: Address Alias
   aggregateBonded: Aggregate Bonded
+  aggregateComplete: Aggregate Complete
   allow: 允许
   approve: 批准
   approveConfirmation: >-
      您是否愿意批准这项交易？(黄色高亮显示)
   buy: 购买
+  chainConfigure: Chain Configure
+  chainUpgrade: Chain Upgrade
   cosignAdded: 共轭签名已添加
   cosignTxAdded: 联署交易已添加|联署交易已添加
   doThisLater: 稍后再做
   dontRefresh: 请不要刷新或登出
+  exchangeOffer: Exchange Offer
   fullySigned: 已完全签署
   haveApproved: >-
     您已经批准了这项交易 | 您已经批准了这些交易
   inQueue: 等待队列中的交易 | 等待队列中的交易
+  modifyAccMetadata: Modify Account Metadata
+  modifyAddressRestriction: Modify Account Address Restriction
+  modifyMultisig: Modify Multisig Account
+  modifyNsMetadata: Modify Namespace Metadata
+  modifyOperationRestriction: Modify Operation Restriction
+  modifySdaLevy: Modify SDA Levy
+  modifySdaMetadata: Modify SDA Metadata
+  modifySdaRestriction: Modify Account SDA Restriction
+  namespaceMetadata: Namespace Metadata
   noActionRequired: 不需要采取行动
   partialAdded: 部分交易已添加 | 添加部分交易已添加
+  removeExchangeOffer: Remove Exchange Offer
+  removeSdaLevy: Remove SDA Levy
+  sdaAlias: SDA Alias
+  sdaDefinition: SDA Definition
+  sdaMetadata: SDA Metadata
+  sdaSupplyChange: SDA Supply Change
+  secretLock: Secret Lock
+  secretProof: Secret Proof
   sell: 出售
   signerPk: 签署人公钥
   swapTx: 互换交易确认 | 互换交易确认

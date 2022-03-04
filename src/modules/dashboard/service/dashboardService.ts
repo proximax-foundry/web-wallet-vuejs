@@ -112,6 +112,7 @@ import { ConfirmedTransferTransaction, UnconfirmedTransferTransaction, PartialTr
 } from "../model/transactions/transaction";
 import { Account as MyAccount } from "../../../models/account";
 import { AppState } from "@/state/appState";
+import i18n from "@/i18n";
 
 const namespaceIdFirstCharacterString = "89ABCDEF";
 const nativeTokenNamespaceId = computed(()=> new NamespaceId(AppState.nativeToken.fullNamespace).toHex());
@@ -149,6 +150,8 @@ export interface InnerTxnDetails{
     legendType: InnerTxnLegendType;
     sdas: string[];
 }
+
+const {t} = i18n.global 
 
 export class DashboardService {
 
@@ -3282,16 +3285,16 @@ export class DashboardService {
                if(messageData.type){
                     switch (messageData.type) {
                         case 'Swap':
-                            newType = 'Swap (nis1-XPX)';
+                            newType = t('general.swap') +' (nis1-XPX)';
                             break;
                         case 'Swap-bsc-xpx':
-                            newType = 'Swap (BSC-XPX)';
+                            newType = t('general.swap') +' (BSC-XPX)';
                             break;
                         case 'Swap-xpx-bsc':
-                            newType = 'Swap (XPX-BSC)';
+                            newType = t('general.swap') +' (XPX-BSC)';
                             break;
                         case 'Swap-xpx-bsc-fees':
-                            newType = 'Swap Fee (XPX-BSC)';
+                            newType = t('dashboard.swapFee') +' (XPX-BSC)';
                             break;
                         default:
                             break;

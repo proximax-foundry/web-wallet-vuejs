@@ -86,6 +86,7 @@ dashboard:
   accountAdded: Account added
   accountRemoved: Account removed
   addingAcc: 'Adding account:'
+  aggregate: Aggregate
   allTransactions: All Transactions
   applyHeightDelta: Apply Height Delta
   approvalAndRemoval: Approval and Removal Delta
@@ -125,6 +126,7 @@ dashboard:
   secret: Secret
   sellOffer: Sell Offer
   siriusChainQues: What is ProximaX Sirius Chain?
+  swapFee: Swap Fee
   target: Target
   timestamp: Timestamp
   txAmount: Tx Amount
@@ -607,25 +609,50 @@ swap:
   xar: XAR
   xpx: XPX
 transaction:
+  accountLink: Account Link 
+  accountMetadata: Account Metadata
   actionRequired: Action Required
+  addExchangeOffer: Add Exchange Offer
+  addressAlias: Address Alias
   aggregateBonded: Aggregate Bonded
+  aggregateComplete: Aggregate Complete
   allow: Allow
   approve: Approve
   approveConfirmation: >-
     Would you like to approve this transaction? (Highlighted in yellow） | Would
     you like to approve these transactions? (Highlighted in yellow）
   buy: Buy
+  chainConfigure: Chain Configure
+  chainUpgrade: Chain Upgrade
   cosignAdded: Cosignature added
   cosignTxAdded: cosignature transaction added | cosignature transactions added
   doThisLater: Do this later
   dontRefresh: Please do not refresh or log out
+  exchangeOffer: Exchange Offer
   fullySigned: Fully Signed
   haveApproved: >-
     You have already approved this transaction | You have already approved these
     transactions
   inQueue: transaction in waiting queue | transactions in waiting queue
+  modifyAccMetadata: Modify Account Metadata
+  modifyAddressRestriction: Modify Account Address Restriction
+  modifyMultisig: Modify Multisig Account
+  modifyNsMetadata: Modify Namespace Metadata
+  modifyOperationRestriction: Modify Operation Restriction
+  modifySdaLevy: Modify SDA Levy
+  modifySdaMetadata: Modify SDA Metadata
+  modifySdaRestriction: Modify Account SDA Restriction
+  namespaceMetadata: Namespace Metadata
   noActionRequired: No Action Required
   partialAdded: Partial transaction added | Partial transactions added
+  removeExchangeOffer: Remove Exchange Offer
+  removeSdaLevy: Remove SDA Levy
+  sdaAlias: SDA Alias
+  sdaDefinition: SDA Definition
+  sdaMetadata: SDA Metadata
+  sdaSupplyChange: SDA Supply Change
+  secretLock: Secret Lock
+  secretProof: Secret Proof
   sell: Sell
   signerPk: Signer Public Key
   swapTx: Swap transaction confirmed | Swap transactions confirmed
