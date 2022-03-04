@@ -210,7 +210,7 @@ general:
   estimateUSD: 估算美元
   expired: 已过期
   expires: 过期
-  export: 出口
+  export: 导出
   extendDuration: 延长期限
   'false': false
   feedback: 在这里给我们反馈您的经验
@@ -221,7 +221,7 @@ general:
   hasPartial: 您的账户有部分交易。
   hide: 隐藏
   hour: 小时 | 小时
-  import: 进口
+  import: 导入
   importFromAB: 从通讯录中导入
   in: 进
   increase: 增加
