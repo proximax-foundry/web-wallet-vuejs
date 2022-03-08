@@ -21,20 +21,8 @@
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Namespace</div>
             <div class="uppercase font-bold text-txs">
-              <div v-if="data.linkedNamespace.length > 0">
-                <div v-if="data.linkedNamespace.length == 1">
-                  <div v-for="namespace, item in data.linkedNamespace" :key="item">
-                    <div class="mb-1 text-txs">{{ namespace.name }}</div>
-                  </div>
-                </div>
-                <div v-else>
-                  <div class="mb-1 text-txs">{{ data.linkedNamespace[0].name }} <div class="inline-block border border-gray-300 p-1 rounded-sm ml-2 cursor-pointer" @click="showNsList(data.i)" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">+ <span class="font-bold">{{ data.linkedNamespace.length -1 }}</span></div></div>
-                  <div class="border p-3 w-28 border-gray-100 shadow-sm absolute bg-white" v-if="isNsListShow[data.i]" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">
-                    <div v-for="namespace, item in data.linkedNamespace.slice(1)" :key="item">
-                      {{ namespace.name }}
-                    </div>
-                  </div>
-                </div>
+              <div v-if="data.linkedNamespace">
+                <div class="mb-1 text-txs">{{ data.linkedNamespace}}</div>
               </div>
               <div v-else>no linked namespace</div>
             </div>
@@ -62,22 +50,10 @@
       </Column>
       <Column field="linkedNamespace" header="NAMESPACE" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
-          <div v-if="data.linkedNamespace.length > 0">
-            <div v-if="data.linkedNamespace.length == 1">
-              <div v-for="namespace, item in data.linkedNamespace" :key="item">
-                <div class="mb-1 text-txs">{{ namespace.name }}</div>
-              </div>
-            </div>
-            <div v-else>
-              <div class="mb-1 text-txs">{{ data.linkedNamespace[0].name }} <div class="inline-block border border-gray-300 p-1 rounded-sm ml-2 cursor-pointer" @click="showNsList(data.i)" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">+ <span class="font-bold">{{ data.linkedNamespace.length -1 }}</span></div></div>
-              <div class="border p-3 w-28 border-gray-100 shadow-sm absolute bg-white" v-if="isNsListShow[data.i]" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">
-                <div v-for="namespace, item in data.linkedNamespace.slice(1)" :key="item">
-                  {{ namespace.name }}
-                </div>
-              </div>
-            </div>
+          <div v-if="data.linkedNamespace">
+            <div class=" mb-1 text-txs text-txs">{{ data.linkedNamespace}}</div>
           </div>
-          <div v-else>no linked namespace</div>
+          <div v-else class=" text-txs">No Linked Namespace</div>
         </template>
       </Column>
       <Column field="supply" header="SUPPLY" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
@@ -185,17 +161,13 @@ export default{
       let formattedAssets = [];
 
       for(let i=0; i < assets.length; ++i){
-        let namespaceAlias = [];
+        let namespaceAlias = ""
         let assetId = assets[i].idHex;
 
         if(assetId != AppState.nativeToken.assetId){
-          let namespaces = account.findNamespaceNameByAsset(assetId);
-          for(let j = 0; j < namespaces.length; ++j){
-            let aliasData = {
-              name: namespaces[j].name
-            };
-
-            namespaceAlias.push(aliasData);
+          let findAsset = account.assets.find((i) => i.idHex == assetId)
+          if(findAsset.namespaceNames[0]){
+            namespaceAlias = findAsset.namespaceNames[0]
           }
 
           let data = {
