@@ -9,11 +9,10 @@ import { TimeUnit } from '@/models/const/timeUnit';
 export class ChainConfigUtils{
 
     static getABTMaxSafeDuration(): number{
-      let targetTime = networkState.currentNetworkProfileConfig.blockGenerationTargetTime;
-      let abtLifeTime = networkState.currentNetworkProfileConfig.maxBondedTransactionLifetime;
-
+      let targetTime = networkState.currentNetworkProfileConfig.blockGenerationTargetTime; 
       const targetTimeInSeconds = UnitConverter.configReturn(targetTime, TimeUnit.SECOND);
-      const abtLifeTimeInSeconds = UnitConverter.configReturn(abtLifeTime, TimeUnit.SECOND);
+
+      let abtLifeTimeInSeconds = ChainConfigUtils.getABTMinConfigSeconds();
 
       let safeMaxBlockDuration = Math.floor(abtLifeTimeInSeconds/targetTimeInSeconds) - 1;
 
@@ -21,12 +20,22 @@ export class ChainConfigUtils{
     }
 
     static getABTMaxSafeDeadline(): Deadline{
-      let abtLifeTime = networkState.currentNetworkProfileConfig.maxBondedTransactionLifetime;
-
-      const abtLifeTimeInSeconds = UnitConverter.configReturn(abtLifeTime, TimeUnit.SECOND);
+      let abtLifeTimeInSeconds = ChainConfigUtils.getABTMinConfigSeconds();
 
       let safeMaxDeadline = Deadline.createForBonded(abtLifeTimeInSeconds - 5, ChronoUnit.SECONDS);
 
       return safeMaxDeadline;
+    }
+
+    static getABTMinConfigSeconds(): number{
+      let abtMaxLifeTime = networkState.currentNetworkProfileConfig.maxBondedTransactionLifetime;
+      let lockFundsMaxDuration = networkState.currentNetworkProfileConfig.maxHashLockDuration;
+
+      const abtMaxLifeTimeInSeconds = UnitConverter.configReturn(abtMaxLifeTime, TimeUnit.SECOND);
+      const lockFundsDurationInSeconds = UnitConverter.configReturn(lockFundsMaxDuration, TimeUnit.SECOND);
+
+      let abtLifeTimeInSeconds = Math.min(abtMaxLifeTimeInSeconds, lockFundsDurationInSeconds);
+
+      return abtLifeTimeInSeconds;
     }
 }
