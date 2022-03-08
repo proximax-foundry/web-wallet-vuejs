@@ -294,7 +294,7 @@ export default {
         (element) => element.address == p.address
       ) ||  walletState.currentLoggedInWallet.others.find(
         (element) => element.address == p.address)
-      let filteredAsset = account.assets.filter(asset=>asset.namespaceNames[0]!='prx.xpx')
+      let filteredAsset = account.assets.filter(asset=>asset.namespaceNames[0]!=AppState.nativeToken.fullNamespace)
       
       if (filteredAsset.length > 0) {
         filteredAsset.forEach((i) => {
