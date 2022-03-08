@@ -213,7 +213,7 @@ general:
   expires: Expires
   export: Export
   extendDuration: Extend Duration
-  'false': false
+  'false': 'false'
   feedback: Give us feedback about your experience here
   feedbackDescription: We are eager to keep improving our products.
   from: From
@@ -314,7 +314,7 @@ general:
   transactionFee: Transaction Fee
   transfer: 'Transfer {tokenName}'
   transferable: Transferable
-  'true': true
+  'true': 'true'
   unlink: Unlink
   unlinkSuccess: Unlinked Successfully
   unlinked: Unlinked

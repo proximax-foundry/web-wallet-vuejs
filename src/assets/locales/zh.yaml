@@ -212,7 +212,7 @@ general:
   expires: 过期
   export: 导出
   extendDuration: 延长期限
-  'false': false
+  'false': 'false'
   feedback: 在这里给我们反馈您的经验
   feedbackDescription: 我们渴望不断改进我们的产品。
   from: 从
@@ -313,7 +313,7 @@ general:
   transactionFee: 交易费用
   transfer: '转账{tokenName}'
   transferable: 可转让
-  'true': true
+  'true': 'true'
   unlink: 解除链接
   unlinkSuccess: 成功解除链接
   unlinked: 未连接的
