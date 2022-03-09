@@ -2522,7 +2522,7 @@ export class DashboardService {
                         txn.namespaceName = nsNames[0].name;
                     }
 
-                    if(txn.namespaceName && txn.namespaceName === "prx.xpx"){
+                    if(txn.namespaceName && txn.namespaceName === AppState.nativeToken.fullNamespace){
                         txn.namespaceName = AppState.nativeToken.label;
                     }
 
@@ -2587,7 +2587,7 @@ export class DashboardService {
                         txn.namespaceName = nsNames[0].name;
                     }
 
-                    if(txn.namespaceName && txn.namespaceName === "prx.xpx"){
+                    if(txn.namespaceName && txn.namespaceName === AppState.nativeToken.fullNamespace){
                         txn.namespaceName = AppState.nativeToken.label;
                     }
 
@@ -2654,7 +2654,7 @@ export class DashboardService {
                         txn.namespaceName = nsNames[0].name;
                     }
 
-                    if(txn.namespaceName && txn.namespaceName === "prx.xpx"){
+                    if(txn.namespaceName && txn.namespaceName === AppState.nativeToken.fullNamespace){
                         txn.namespaceName = AppState.nativeToken.label;
                     }
 
@@ -3978,7 +3978,7 @@ export class DashboardService {
                 txnDetails.namespaceName = nsNames[0].name;
             }
 
-            if(txnDetails.namespaceName && txnDetails.namespaceName === "prx.xpx"){
+            if(txnDetails.namespaceName && txnDetails.namespaceName === AppState.nativeToken.fullNamespace){
                 txnDetails.namespaceName = AppState.nativeToken.label;
             }
 
@@ -4035,7 +4035,7 @@ export class DashboardService {
                 txnDetails.namespaceName = nsNames[0].name;
             }
 
-            if(txnDetails.namespaceName && txnDetails.namespaceName === "prx.xpx"){
+            if(txnDetails.namespaceName && txnDetails.namespaceName === AppState.nativeToken.fullNamespace){
                 txnDetails.namespaceName = AppState.nativeToken.label;
             }
 
