@@ -102,6 +102,7 @@ import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
+import { TransactionUtils } from '@/util/transactionUtils';
 
 export default {
   name: 'ViewServicesAssetsCreate',
@@ -153,7 +154,12 @@ export default {
     const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
     const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
 
-    const lockFundTxFee = ref(0.0445);
+    const lockFundTxFee = computed(()=>{
+      if(networkState.currentNetworkProfile){ 
+        return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
+      }
+      return 0;  
+    });
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
@@ -218,10 +224,13 @@ export default {
     const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
 
     const showNoBalance = computed(() => {
-      if(isNotCosigner.value){
-        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value);
+      if (!isMultiSig(selectedAccAdd.value)){
+        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value) 
+      }
+      else if(isNotCosigner.value){
+        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value) 
       }else{
-        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value + lockFundTotalFee.value);
+        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value + lockFundTotalFee.value)
       }
     });
 

@@ -536,7 +536,7 @@ export default {
       (element) => element.name == selectedAccName.value)
     if (account.assets.length > 0) {
       account.assets.forEach((i, index) => {
-        if(i.namespaceNames!="prx.xpx"){
+        if(i.namespaceNames!= AppState.nativeToken.fullNamespace){
           mosaicOption.push({
             val: i.idHex,
             text: (i.namespaceNames.length>0?i.namespaceNames:i.idHex) + " >"+t('general.balance') +": " +Helper.amountFormatterSimple(i.amount,i.divisibility),
