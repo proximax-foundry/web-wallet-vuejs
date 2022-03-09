@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="rounded-md bg-white flex border " >
-      <textarea :value="modelValue" :disabled="disabled==1" @input="countChar($event); $emit('update:modelValue', $event.target.value)" rows=2 class="  w-full text-gray-500 px-2 py-1 outline-none bg-white text-xs " :placeholder="placeholder" @click="clickInputText()" @blur="blurInputText()"></textarea>
+      <textarea :value="modelValue" :disabled="disabled==1" @input="countChar($event); $emit('update:modelValue', $event.target.value)" rows=2 class="  w-full text-gray-500 px-2 py-1 outline-none bg-white text-xs" :placeholder="placeholder.toUpperCase()" @click="clickInputText()" @blur="blurInputText()"></textarea>
       <div class="w-1 flex-none"></div>
     </div>
     <div class="float-right mt-1 text-tsm text-gray-800">{{remainingLength}}/{{limit}}</div>

@@ -4,18 +4,18 @@
     
     <div class='w-9/12 ml-auto mr-auto mt-5'>
       <div class ='flex text-xs font-semibold border-b-2 menu_title_div'>
-        <router-link :to="{ name: 'ViewServicesAddressBook' }" class= 'w-18 text-center border-b pb-3'>List</router-link>
-        <router-link :to="{ name: 'ViewServicesAddressBookImport' }" class= 'w-18 text-center border-b pb-3'>Import</router-link>
-        <router-link :to="{ name: 'ViewServicesAddressBookExport' }" class= 'w-18 text-center border-b pb-3'>Export</router-link>
+        <router-link :to="{ name: 'ViewServicesAddressBook' }" class= 'w-18 text-center border-b pb-3'>{{$t('general.list')}}</router-link>
+        <router-link :to="{ name: 'ViewServicesAddressBookImport' }" class= 'w-18 text-center border-b pb-3'>{{$t('general.import')}}</router-link>
+        <router-link :to="{ name: 'ViewServicesAddressBookExport' }" class= 'w-18 text-center border-b pb-3'>{{$t('general.export')}}</router-link>
       </div>
       <div class="border border-gray-100 p-5 filter drop-shadow-xl mt-10 bg-white">
-        <div class="text-md mb-5 font-semibold">Add New Contact</div>
+        <div class="text-md mb-5 font-semibold">{{$t('addressBook.addNewContact')}}</div>
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <div class='mt-2 py-3 text-center px-0 flex'>
-          <TextInputClean :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" class="w-52 inline-block mr-2" />
-          <TextInputClean :placeholder="$t('createsuccessful.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" class="w-96 inline-block mr-2" />
-          <SelectInputPluginClean v-model="selectContactGroups" placeholder="Group" :options="contactGroups" selectDefault="-none-" ref="selectGroupDropdown" class="w-60 inline-block mr-2" />
-          <button type="submit" class="default-btn py-1 disabled:opacity-50 h-12 flex items-center" :disabled="disableSave" @click="SaveContact()"><img src="@/modules/services/submodule/addressbook/img/icon-save.svg" class="inline-block mr-2">Save Address</button>
+          <TextInputClean :placeholder="$t('general.name')" :errorMessage="$t('general.nameRequired')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" class="w-52 inline-block mr-2" />
+          <TextInputClean :placeholder="$t('general.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" class="w-96 inline-block mr-2" />
+          <SelectInputPluginClean v-model="selectContactGroups" :placeholder="$t('general.group')" :options="contactGroups" selectDefault="-none-" ref="selectGroupDropdown" class="w-60 inline-block mr-2" />
+          <button type="submit" class="default-btn py-1 disabled:opacity-50 h-12 flex items-center" :disabled="disableSave" @click="SaveContact()"><img src="@/modules/services/submodule/addressbook/img/icon-save.svg" class="inline-block mr-2"> {{$t('addressBook.saveAddress')}}</button>
         </div>
       </div>
     </div>
@@ -63,12 +63,12 @@ export default {
     const action = ref([]);
     action.value.push(
       {value: '-none-', label: ' - '},
-      {value: 'Work', label: 'Work'},
-      {value: 'Friend', label: 'Friend'},
-      {value: 'Family', label: 'Family'},
-      {value: 'Employee', label: 'Employee'},
-      {value: 'Director', label: 'Director'},
-      {value: 'Custom', label: 'Custom'},
+      {value: 'Work', label: t('addressBook.work')},
+      {value: 'Friend', label: t('addressBook.friend')},
+      {value: 'Family', label: t('addressBook.family')},
+      {value: 'Employee', label: t('addressBook.employee')},
+      {value: 'Director', label: t('addressBook.director')},
+      {value: 'Custom', label: t('addressBook.custom')},
     );
     const contactGroups = computed(() => {
       return action.value;
@@ -90,7 +90,7 @@ export default {
 
     const addErr = computed(
       () => {
-        let addErrDefault = t('services.addressvalidation');
+        let addErrDefault = t('addressBook.addressRequired');
         return addMsg.value?addMsg.value:addErrDefault;
       }
     );
@@ -124,16 +124,16 @@ export default {
       const contactNameIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.name.toLowerCase() == contactName.value.toLowerCase().trim()):(-1);
 
       if(contactAddIndex >= 0){
-        err.value = t('addressbook.addressvalidation');
+        err.value = t('addressBook.addressExist');
       }else if( contactNameIndex >= 0 || accountNameIndex >= 0 ){
-        err.value = t('addressbook.namevalidation');
+        err.value = t('addressBook.nameExist');
       }else{
         walletState.currentLoggedInWallet.addAddressBook(addressBook);
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         err.value = '';
         contactName.value = '';
         address.value = '';
-        toast.add({severity:'info', summary: 'Address Book', detail: 'New contact added to Address Book', group: 'br', life: 5000});
+        toast.add({severity:'info', summary: t('general.addressBook'), detail: t('addressBook.newContactAdded'), group: 'br', life: 5000});
         router.push({ name: 'ViewServicesAddressBook' });
       }
     }

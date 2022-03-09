@@ -34,23 +34,6 @@ export const WalletRoutes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/delete-wallet-confirmed/:name',
-    name: 'ViewWalletDeleteConfirmation',
-    props: true,
-    component: () => import('@/modules/wallet/views/ViewWalletDeleteConfirmation.vue'),
-    meta: {
-      title: "Confirm remove wallet?",
-    }
-  },
-  {
-    path: '/export-wallet',
-    name: 'ViewWalletExport',
-    component: () => import('@/modules/wallet/views/ViewWalletExport.vue'),
-    meta: {
-      title: "Export wallet",
-    }
-  },
-  {
     path: '/backup-wallet',
     name: 'ViewWalletImport',
     component: () => import('@/modules/wallet/views/ViewWalletImport.vue'),

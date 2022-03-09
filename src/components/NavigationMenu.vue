@@ -14,14 +14,14 @@
             <img src="@/assets/img/navi/icon-default-account-drop-down.svg" class="h-6 w-6 cursor-pointer" @click="displayDefaultAccountMenu = true">
             <div v-if="displayDefaultAccountMenu" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div role="none" class="my-2">
-                <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Details</router-link>
-                <router-link :to="{ name: 'ViewAccountAssets', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Assets</router-link>
-                <router-link :to="{ name: 'ViewMultisigHome', params: { name: selectedAccountName }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Multisig</router-link>
-                <router-link :to="{ name: 'ViewMultisigScheme', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" v-if="isMultiSig" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Scheme</router-link>
-                <div :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" v-else class="block text-gray-300 transition duration-200 p-2 z-20">Scheme</div>
-                <router-link :to="{ name: 'ViewAccountSwap', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Swap</router-link>
-                <router-link :to="{ name: 'ViewAccountDelegate', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Delegate</router-link>
-                <router-link :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Namespace</router-link>
+                <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.details')}}</router-link>
+                <router-link :to="{ name: 'ViewAccountAssets', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.asset')}}</router-link>
+                <router-link :to="{ name: 'ViewMultisigHome', params: { name: selectedAccountName }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.multisig')}}</router-link>
+                <router-link :to="{ name: 'ViewMultisigScheme', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" v-if="isMultiSig" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.scheme')}}</router-link>
+                <div :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" v-else class="block text-gray-300 transition duration-200 p-2 z-20">{{$t('general.scheme')}}</div>
+                <router-link :to="{ name: 'ViewAccountSwap', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.swap')}}</router-link>
+                <router-link :to="{ name: 'ViewAccountDelegate', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.delegate')}}</router-link>
+                <router-link :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.namespace')}}</router-link>
               </div>
             </div>
           </div>
@@ -29,10 +29,10 @@
         <!-- <div @click="updateDefaultAccount(item.name)" v-for="(item) in accounts" :key="item.address" class="cursor-pointer link_block flex items-center"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div><span class="truncate overflow-hidden text-white">{{ item.name }}</span></div> -->
       </div>
       <!-- <router-link :to="{ name: 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" v-if="allAccountsCount > 5" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-4 w-4 inline-block mr-1 text-white">View all accounts</router-link> -->
-      <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="mt-2 block font-bold link_block text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-add.svg" class="h-4 w-4 inline-block relative mr-1">Create New Account</router-link>
+      <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="mt-2 block font-bold link_block text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-add.svg" class="h-4 w-4 inline-block relative mr-1">{{$t('general.createNewAcc')}}</router-link>
     </div>
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10 lg:px-5 3xl:px-10 text-gray-400 uppercase">Transactions</div>
+      <div class="my-3 px-10 lg:px-5 3xl:px-10 text-gray-400 uppercase">{{$t('general.transaction',2)}}</div>
       <div class="flex justify-start px-10 lg:px-5 3xl:px-10 mt-5">
         <router-link :to="{ name : 'ViewDashboard', params: {type: 'transaction' } }" class="relative mr-5"><div class="rounded-full h-8 w-8 flex items-center justify-center" style="background: #007CFF"><img src="@/assets/img/navi/icon-unconfirmed-transaction-white.svg" class="w-5 h-5"></div></router-link>
         <router-link :to="{ name : 'ViewTransactionStatus', params: {transactionType: 'unconfirmed' } }" class="relative mr-5"><div class="rounded-full h-8 w-8 flex items-center justify-center" style="background: #f3a91d"><img src="@/assets/img/navi/icon-unconfirmed-transaction-white.svg" class="w-5 h-5"></div><div class="absolute bg-gray-50 text-xxs rounded text-center" style="min-width: 15px; padding: 1px 2px; top: -5px; right: -8px;">{{ accountUnconfirmedTxnsCount }}</div></router-link>
@@ -40,22 +40,22 @@
       </div>
     </div>
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10 lg:px-5 3xl:px-10 text-gray-400 uppercase">Quick Action</div>
-      <router-link :to="{ name : 'ViewTransferCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-transfer.svg" class="h-3 w-3 inline-block relative mr-2">Transfer</router-link>
-      <router-link :to="{ name : 'ViewServicesNamespace'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">Namespace</router-link>
-      <router-link :to="{ name : 'ViewServicesAssets'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">Asset</router-link>
-      <router-link :to="{ name : 'ViewServicesMainnetSwap'}" class="link_block flex items-center text-white" @click="closeNavi" v-if="isDisplaySwap"><img src="@/assets/img/navi/icon-swap.svg" class="h-3 w-3 inline-block relative mr-2">Swap</router-link>
+      <div class="my-3 px-10 lg:px-5 3xl:px-10 text-gray-400 uppercase">{{$t('home.quickAction')}}</div>
+      <router-link :to="{ name : 'ViewTransferCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-transfer.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.transfer')}}</router-link>
+      <router-link :to="{ name : 'ViewServicesNamespace'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.namespace')}}</router-link>
+      <router-link :to="{ name : 'ViewServicesAssets'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.asset')}}</router-link>
+      <router-link :to="{ name : 'ViewServicesMainnetSwap'}" class="link_block flex items-center text-white" @click="closeNavi" v-if="isDisplaySwap"><img src="@/assets/img/navi/icon-swap.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.swap')}}</router-link>
       <!-- <router-link :to="{ name : 'ViewServices'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-services.svg" class="h-3 w-3 inline-block relative mr-2">Other Services</router-link> -->
     </div>
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10 lg:px-5 3xl:px-10 text-gray-400">NAVIGATE</div>
-      <router-link :to="{ name : 'ViewWallets'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-wallets.svg" class="h-3 w-3 inline-block relative mr-2">Wallets</router-link>
-      <router-link :to="{ name : 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-3 w-3 inline-block relative mr-2">Accounts</router-link>
-      <router-link :to="{ name : 'ViewServicesAddressBook'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-address-book.svg" class="h-3 w-3 inline-block relative mr-2">Address Book</router-link>
+      <div class="my-3 px-10 lg:px-5 3xl:px-10 text-gray-400 uppercase">{{$t('home.navigate')}}</div>
+      <router-link :to="{ name : 'ViewWallets'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-wallets.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.wallet',2)}}</router-link>
+      <router-link :to="{ name : 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.account',2)}}</router-link>
+      <router-link :to="{ name : 'ViewServicesAddressBook'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-address-book.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.addressBook')}}</router-link>
     </div>
     <div class="flex-grow"></div>
     <div class="flex-glow-0 w-60 border-t border-gray-700">
-      <a @click="logout()" class="signout_block flex items-center cursor-pointer text-white"><img src="@/assets/img/navi/icon-sign-out.svg" class="h-4 w-4 inline-block relative mr-2" @click="logout()">{{$t('Header.signout')}}</a>
+      <a @click="logout()" class="signout_block flex items-center cursor-pointer text-white"><img src="@/assets/img/navi/icon-sign-out.svg" class="h-4 w-4 inline-block relative mr-2" @click="logout()">{{$t('home.signOut')}}</a>
     </div>
   </div>
 </template>

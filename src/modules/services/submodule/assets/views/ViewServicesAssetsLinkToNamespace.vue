@@ -2,97 +2,97 @@
  <div>
   <div class="flex cursor-pointer mt-8 ml-8 lg:ml-0 lg:absolute">
     <img src='@/assets/img/chevron_left.svg'>
-    <router-link :to="{name: 'ViewServicesAssets'}" class='text-blue-primary text-xs mt-0.5'>Back</router-link>
+    <router-link :to="{name: 'ViewServicesAssets'}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
   </div>
   <div class='w-10/12 ml-auto mr-auto'>
     <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
       <div class="xl:col-span-2 p-6 lg:p-12">
         <div class="lg:flex lg:justify-between lg:items-center">
-          <div class='font-semibold mb-4 inline-block mt-1'>Link to Namespace</div>
+          <div class='font-semibold mb-4 inline-block mt-1'>{{$t('general.linkToNamespace')}}</div>
           <div class="flex items-center">
             <div v-html="svgString" class="inline-block" />
             <div class="ml-2">
-              <div class="text-blue-primary text-xxs font-bold uppercase mb-1">Asset created in</div>
+              <div class="text-blue-primary text-xxs font-bold uppercase mb-1">{{$t('asset.assetCreatedBy')}}</div>
               <div class="font-bold text-black text-sm">{{ selectedAccName }}</div>
             </div>
           </div>
         </div>
 
         <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
-          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('accounts.insufficientbalance')}}</div>
+          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
         </div>
         <div v-else-if="isNotCosigner" class="rounded-md bg-yellow-200 w-full p-2 flex items-center justify-center">
-          <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('accounts.cosigwarning2')}}</div>
+          <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.noCosigner')}}</div>
         </div>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="text-right w-full">
           <div v-if="getMultiSigCosigner.cosignerList.length > 0" class="inline-block">
-            <div class="text-tsm text-left mt-3">{{$t('transfer.cosigner')}}:
-              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
-              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
-              <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
+            <div class="text-tsm text-left mt-3">{{$t('general.initiateBy')}}:
+              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('general.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('general.insufficientBalance')}}</span></span>
+              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('general.balance')}}: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
+              <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('general.insufficientBalance')}}</div>
             </div>
           </div>
         </div>
         <div class="border border-blue-primary p-4 bg-blue-100 flex items-center rounded mt-5">
           <img src="@/modules/services/submodule/assets/img/icon-asset.svg">
           <div class="ml-1">
-            <div class="uppercase text-blue-primary font-semibold text-xxs">Asset ID</div>
+            <div class="uppercase text-blue-primary font-semibold text-xxs">{{$t('general.assetId')}}</div>
             <div class="text-black text-sm font-bold">{{ selectAsset }}</div>
           </div>
         </div>
         <div class="border border-gray-200 p-4 rounded mt-5">
           <div class="lg:grid lg:grid-cols-2">
             <div class="my-3">
-              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">CURRENT SUPPLY<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="'<tiptext>Maximum supply is 900T.<br>Example: 900,000,000,000,000</tiptext>'"></div>
+              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('asset.currentSupply')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="'<tiptext>'+$t('asset.supplyMsg2')+'<br>'+$t('asset.supplyMsg3')+'</tiptext>'"></div>
               <div class="text-black font-bold text-sm">{{ assetSupply }}</div>
             </div>
             <div class="my-3">
-              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">Divisibility<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="'<tiptext>Determines up to what decimal place the asset can be divided.<br><br>Maximum divisibility is 6.<br>Example: 0.000000</tiptext>'"></div>
+              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.divisibility')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="'<tiptext>' + $t('asset.divisibilityMsg4') + '<br><br>' + $t('asset.divisibilityMsg2') + '<br>' + $t('asset.divisibilityMsg3') + '</tiptext>'"></div>
               <div class="text-black font-bold text-sm">{{ assetDivisibility }}</div>
             </div>
             <div class="my-3">
-              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">Transferable<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="'<tiptext>If you tick \'Transferable\',<br>asset can be transferred.</tiptext>'"></div>
-              <div class="uppercase text-black font-bold text-sm">{{ assetTransferable?'Yes':'No' }}</div>
+              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.transferable')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="'<tiptext>'+ $t('asset.transferableMsg')+'</tiptext>'"></div>
+              <div class="uppercase text-black font-bold text-sm">{{ assetTransferable?$t('general.yes'):$t('general.no') }}</div>
             </div>
             <div class="my-3">
-              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">Supply Mutable<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="'<tiptext>If you tick \'Supply Mutable\',<br>supply can be changed.</tiptext>'"></div>
-              <div class="uppercase text-black font-bold text-sm">{{ assetMutable?'Yes':'No' }}</div>
+              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.supplyMutable')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="'<tiptext>'+ $t('asset.supplyMutableMsg')+'</tiptext>'"></div>
+              <div class="uppercase text-black font-bold text-sm">{{ assetMutable?$t('general.yes'):$t('general.no') }}</div>
             </div>
           </div>
         </div>
         <div class="lg:grid lg:grid-cols-2 mt-5">
-          <SelectLinkType title="modification type" class="lg:mr-4" v-model="selectAction" :disabled="disabledSelectAction" />
+          <SelectLinkType :title="$t('asset.modificationType')" class="lg:mr-4" v-model="selectAction" :disabled="disabledSelectAction" />
           <SelectInputNamespace :action="selectAction" v-model="selectNamespace" :address="selectedAccAdd" :assetId="selectAsset" />
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
-        <div class="font-semibold text-xxs text-blue-primary">ACCOUNT CURRENT BALANCE</div>
+        <div class="font-semibold text-xxs text-blue-primary">{{$t('general.accCurrentBalance')}}</div>
         <div class="flex text-gray-200 mb-5">
           <span v-html="splitCurrency(balance)"></span>
           <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
         </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-          <div class="font-semibold">Transaction Fee</div>
+          <div class="font-semibold">{{$t('general.transactionFee')}}</div>
           <div v-html="splitCurrency(transactionFee)"></div>
         </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-semibold">{{$t('accounts.lockfund')}}</div>
+          <div class="font-semibold">{{$t('general.lockFund')}}</div>
           <div v-html="splitCurrency(lockFundCurrency)"></div>
         </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-semibold">{{$t('accounts.unconfirmed')}}</div>
+          <div class="font-semibold">{{$t('general.lockFundTxFee')}}</div>
           <div v-html="splitCurrency(lockFundTxFee)"></div>
         </div>
         <div class="flex justify-between border-gray-600 text-white text-xs py-5">
-          <div class="font-bold uppercase">Total</div>
+          <div class="font-bold uppercase">{{$t('general.total')}}</div>
           <div v-html="splitCurrency(totalFeeFormatted)"></div>
         </div>
-        <div class='text-xs text-white mt-5 mb-1.5'>Enter your password to continue</div>
-        <PasswordInput :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
-        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="linkNamespace">{{ (selectAction=='link')?'Link to':'Unlink' }} Namespace</button>
+        <div class='text-xs text-white mt-5 mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
+        <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
+        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="linkNamespace">{{ (selectAction=='link')?$t('general.linkToNamespace'):t('namespace.unlinkNamespace') }}</button>
         <div class="text-center">
-          <router-link :to="{name: 'ViewServicesAssets'}" class='content-center text-xs text-white border-b-2 border-white'>Cancel</router-link>
+          <router-link :to="{name: 'ViewServicesAssets'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
         </div>
       </div>
     </div>
@@ -209,7 +209,6 @@ export default {
       balance.value = Helper.toCurrencyFormat(account.balance, AppState.nativeToken.divisibility);
       balanceNumber.value = account.balance;
     }else{
-      toast.add({severity:'error', detail: 'Addres is invalid', group: 'br', life: 3000});
       router.push({ name: "ViewServicesAssets" });
     }
 
@@ -235,7 +234,6 @@ export default {
         assetDivisibility.value = asset.divisibility;
         assetSupply.value = Helper.convertToCurrency(asset.supply, asset.divisibility);
       }else{
-        toast.add({severity:'error', detail: 'Asset ID is invalid', group: 'br', life: 3000});
         router.push({ name: "ViewServicesAssets" });
       }
     }
@@ -280,7 +278,7 @@ export default {
 
     const linkNamespace = () => {
       let assetId;
-      if(selectAction.value=='link'){
+    if(selectAction.value=='link'){ 
         assetId = selectAsset.value;
       }else{
         let account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == selectedAccAdd.value);

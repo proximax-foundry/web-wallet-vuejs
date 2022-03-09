@@ -16,14 +16,13 @@
           <div v-else class="font-bold text-blue-primary flex items-center">
               <div class="w-32 inline-block truncate">{{ wallet.name }}</div>
           </div>
-          <div v-if="isLogin" class="text-txs text-black-400">Accounts: <span>{{ wallet.accounts.length }}</span></div>
-            <div v-else class="text-txs pt-1 text-gray-400">Number of Accounts: <span>{{ wallet.accounts.length }}</span></div>
+          <div  class="text-txs pt-1 text-black-400">{{$t('wallet.numberOfAccounts')}}: <span>{{ wallet.accounts.length }}</span></div>
         </div>
         <div v-if="isLogin" class="xl:mr-3 xl:ml-0 text-xs font-bold">   
           <button class="bg-transparent font-bold py-2 ml-2 mr-2 rounded inline-flex items-center" @click="exportWallet(wallet.name)">
             <svg class="color-blue-primary" id="file_upload_black_24dp" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 20 20">
             <path d="M15.667,13.167v2.5h-10v-2.5H4v2.5a1.672,1.672,0,0,0,1.667,1.667h10a1.672,1.672,0,0,0,1.667-1.667v-2.5Zm-9.167-5L7.675,9.342l2.158-2.15V14H11.5V7.192l2.158,2.15,1.175-1.175L10.667,4Z" fill="#007cff"/></svg>
-            <span class="font-semibold text-txs">Export</span>
+            <span class="font-semibold text-txs">{{$t('general.export')}}</span>
           </button>
         </div>
         <div v-else class="xl:mr-1 xl:ml-5 text-xs font-bold">   
@@ -47,6 +46,7 @@ import { walletState } from '@/state/walletState';
 import CryptoJS from 'crypto-js';
 import ConfirmDeleteWalletModal from "@/modules/wallet/components/ConfirmDeleteWalletModal.vue";
 import { networkState } from "@/state/networkState";
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   name: 'WalletTile', 
@@ -62,6 +62,7 @@ export default defineComponent({
   
   setup(p){
     const showModal = ref(false);
+    const {t} = useI18n();
     const passwdPattern = "^[^ ]{8,}$";
     const walletPassword = ref("");
     const err = ref("");
@@ -80,7 +81,6 @@ export default defineComponent({
     const deleteWallet = (walletName) => {   
       var networkName = networkState.chainNetworkName;
       walletState.wallets.removeWalletByNetworkNameAndName(networkName, walletName);
-      console.log(walletName);
     };
 
     const exportWallet = (walletName) => {

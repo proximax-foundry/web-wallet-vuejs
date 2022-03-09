@@ -11,11 +11,11 @@
             <img src="@/assets/img/delete.svg" class="w-5 inline-block">
           </div>
           <div class="w-104">
-            <h1 class="default-title my-3 sm:my-5">Select language</h1>
+            <h1 class="default-title my-3 sm:my-5">{{$t('home.selectLanguage')}}</h1>
           </div>
           <div class="lang-option">
             <div v-for="(lang, item) in options" :key="item" class="flex justify-between border-gray-300 border-b py-3">
-              <div class="text-gray-800 text-xs">{{ lang.label }}</div><span v-if="lang.value == selected" class="text-gray-400 text-txs items-center flex">CURRENT</span><span class="cursor-pointer text-txs items-center flex text-blue-300" @click="changeLang(lang.value)" v-else>SELECT</span>
+              <div class="text-gray-800 text-xs">{{ lang.label }}</div><span v-if="lang.value == selected" class="text-gray-400 text-txs items-center font-semibold flex uppercase">{{$t('general.current')}}</span><span class="cursor-pointer text-txs items-center flex font-semibold text-blue-500 uppercase" @click="changeLang(lang.value)" v-else>{{$t('general.select')}}</span>
             </div>
           </div>
         </div>

@@ -9,13 +9,4 @@ export const HomeRoutes: RouteRecordRaw[] = [
       title: "Welcome to Sirius Web Wallet",
     }
   },
-  {
-    path: '/sirius-id',
-    name: 'ViewHomeSignInSiriusID',
-    props: true,
-    component: () => import('@/modules/home/views/ViewHomeSignInSiriusID.vue'),
-    meta: {
-      title: "Sign in with Sirius ID",
-    }
-  },
 ];

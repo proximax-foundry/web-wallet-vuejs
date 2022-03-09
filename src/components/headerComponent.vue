@@ -12,7 +12,7 @@
       <div class="flex-none lg:flex items-center lg:ml-4 hidden lg:visible">
         <img src="@/assets/img/icon-blockheight.svg" class="h-10 w-10 inline-block">
         <div class="ml-3">
-          <div class="uppercase text-txs text-gray-400">block height</div>
+          <div class="uppercase text-txs text-gray-400">{{$t('general.blockHeight')}}</div>
           <div class="text-md mt-1" :class="currentBlockHeight==0?'text-gray-300':'text-gray-800 font-bold'">{{ currentBlockHeight==0?'Fetching...':currentBlockHeight }}</div>
         </div>
       </div>
@@ -22,15 +22,15 @@
         <div class="flex flex-row h-full">
           <div class="flex-row items-center hidden lg:flex">
             <div class="text-center w-full h-6 pr-2 lg:pr-10 mt-2 relative">
-              <div class="cursor-pointer text-blue-primary text-tsm" @mouseover="setHoverCreateToTrue" @mouseout="setHoverCreateToFalse">+ New</div>
+              <div class="cursor-pointer text-blue-primary text-tsm" @mouseover="setHoverCreateToTrue" @mouseout="setHoverCreateToFalse">+{{$t('general.new')}}</div>
               <div class="absolute z-20 w-60 text-left mt-2 bg-gray-50 shadow-sm rounded-md right-0 p-2 text-xs transition duration-200 block" v-if="isShowCreate" @mouseover="isShowCreate=true;isHoverCreatePanel=true;" @mouseout="hideCreatePanel">
                 <router-link :to="{ name: 'ViewTransferCreate'}" class="hover:bg-gray-200 p-2 block">
                   <div class="inline-block mr-2">
                     <img src="@/assets/img/icon-transfer.svg">
                   </div>
                   <div class="inline-block">
-                    <div class="font-bold mb-1">Transfer</div>
-                    <div class="text-txs text-gray-400">Send XPX to another account</div>
+                    <div class="font-bold mb-1">{{$t('general.transfer')}}</div>
+                    <div class="text-txs text-gray-400">{{$t('home.transferDescription')}}</div>
                   </div>
                 </router-link>
                 <router-link :to="{ name: 'ViewServicesAssetsCreate'}" class="hover:bg-gray-200 p-2 block">
@@ -38,8 +38,8 @@
                     <img src="@/assets/img/icon-header-asset.svg">
                   </div>
                   <div class="inline-block">
-                    <div class="font-bold mb-1">Digital Asset</div>
-                    <div class="text-txs text-gray-400">Create your own unique token</div>
+                    <div class="font-bold mb-1">{{$t('general.digitalAsset')}}</div>
+                    <div class="text-txs text-gray-400">{{$t('home.assetDescription')}}</div>
                   </div>
                 </router-link>
                 <router-link :to="{ name: 'ViewServicesNamespaceCreate'}" class="hover:bg-gray-200 p-2 block">
@@ -47,8 +47,8 @@
                     <img src="@/assets/img/icon-header-namespace.svg">
                   </div>
                   <div class="inline-block">
-                    <div class="font-bold mb-1">Namespace</div>
-                    <div class="text-txs text-gray-400">Create an on-chain unique space</div>
+                    <div class="font-bold mb-1">{{$t('general.namespace')}}</div>
+                    <div class="text-txs text-gray-400">{{$t('home.namespaceDescription')}}</div>
                   </div>
                 </router-link>
                 <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="hover:bg-gray-200 p-2 block">
@@ -56,8 +56,8 @@
                     <img src="@/assets/img/icon-header-account.svg">
                   </div>
                   <div class="inline-block">
-                    <div class="font-bold mb-1">Account</div>
-                    <div class="text-txs text-gray-400">Secure {{ currentNativeTokenName }} in new account</div>
+                    <div class="font-bold mb-1">{{$t('general.account')}}</div>
+                    <div class="text-txs text-gray-400">{{$t('home.accountDescription')}}</div>
                   </div>
                 </router-link>
               </div>
@@ -68,31 +68,31 @@
               <img src="@/assets/img/icon-support-contact.svg" class="opacity-80 hover:opacity-100 inline-block h-4 w-4 lg:h-5 lg:w-5">
             </div>
             <div class="absolute z-20 w-96 text-left bg-gray-50 shadow-sm rounded-md right-0 p-2 text-tsm transition duration-200 block" style="top: 60px" v-if="isShowSupport" @mouseover="isShowSupport=true;isHoverSupportPanel=true;" @mouseout="hideSupportPanel">
-              <div class="font-bold p-2 text-txs">BEGINNER'S GUIDE</div>
+              <div class="font-bold p-2 text-txs uppercase">{{$t('home.beginnerGuide')}}</div>
               <div class="grid grid-cols-2">
                 <div>
                   <div class="p-2">
-                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/" target=_new>Getting Started<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
-                    <div class="text-txs h-10">Everything you need to know about the Sirius Wallet</div>
+                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/" target=_new>{{$t('home.gettingStarted')}}<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <div class="text-txs h-10">{{$t('home.allInfo')}}</div>
                   </div>
                   <div class="p-2">
-                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/getting-started/what-is-proximax-sirius-chain/" target=_new>What is Sirius Chain?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
-                    <div class="text-txs h-10">Start building apps on the ProximaX Sirius blockchain layer</div>
+                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/getting-started/what-is-proximax-sirius-chain/" target=_new>{{$t('home.siriusChain')}}<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <div class="text-txs h-10">{{$t('home.siriusChainTitle')}}</div>
                   </div>
                 </div>
                 <div>
                   <div class="p-2">
-                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new>What is Namespace?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
-                    <div class="text-txs h-10">Create an on-chain unique place for your business and your assets</div>
+                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new>{{$t('general.namespaceQues')}}<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <div class="text-txs h-10">{{$t('home.namespaceAns')}}</div>
                   </div>
                   <div class="p-2">
-                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new>What is Asset?<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
-                    <div class="text-txs h-10">Everything you need to know about the Sirius Wallet</div>
+                    <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new>{{$t('general.assetQues')}}<img src="@/assets/img/icon-open_in_new.svg" class="inline-block absolute -top-1 ml-2"></a>
+                    <div class="text-txs h-10">{{$t('home.assetAns')}}</div>
                   </div>
                 </div>
               </div>
               <div class="w-full p-2 pt-3 border-t border-gray-100">
-                <a href="https://t.me/proximaxhelpdesk" target=_new class="text-xs text-blue-primary">Contact our support team</a>
+                <a href="https://t.me/proximaxhelpdesk" target=_new class="text-xs text-blue-primary">{{$t('home.contactTeam')}}</a>
               </div>
             </div>
           </div>
@@ -137,10 +137,10 @@
       <div class="flex-grow"></div>
       <div class="flex-none self-center header-menu">
         <div class="w-20 inline-block ml-2 sm:ml-0" v-if="wideScreen">
-          <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block text-white">{{$t('Header.home')}}</router-link>
+          <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block text-white">{{$t('home.home')}}</router-link>
         </div>
         <div class="w-20 inline-block" v-if="wideScreen">
-          <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold text-white">{{$t('Header.wallet')}}</router-link>
+          <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold text-white">{{$t('general.wallet',2)}}</router-link>
         </div>
         <div class="text-center inline-block text-white">
           <selectLanguageModal :loginStatus="loginStatus"/>
@@ -149,10 +149,10 @@
     </div>
     <div v-if="!wideScreen && !loginStatus" class="py-1 text-center" style="background: #484A69">
       <div class="w-20 text-center inline-block text-gray-300">
-        <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block text-xs sm:text-sm">{{$t('Header.home')}}</router-link>
+        <router-link :to="{ name: 'Home'}" class="font-normal hover:font-bold inline-block text-xs sm:text-sm">{{$t('home.home')}}</router-link>
       </div>
       <div class="w-20 text-center inline-block text-gray-300">
-        <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold text-xs sm:text-sm">{{$t('Header.wallet')}}</router-link>
+        <router-link :to="{ name: 'ViewWallets'}" class="hover:font-bold text-xs sm:text-sm">{{$t('general.wallet',2)}}</router-link>
       </div>
     </div>
   </header>
@@ -263,7 +263,7 @@ export default defineComponent({
       // }
       walletState.currentLoggedInWallet.setDefaultAccountByName(data.name);
       walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
-      toast.add({severity:'success', summary: 'Default account has switched to' , detail: data.name, group: 'br', life: 3000});
+      toast.add({severity:'success', summary: t('home.switchDefault') , detail: data.name, group: 'br', life: 3000});
     }
 
     emitter.on('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', (payload) => {
@@ -538,8 +538,8 @@ export default defineComponent({
           toast.add(
               {
                 severity:'info', 
-                summary: `${newLength} Transaction${singularPluralText} in waiting queue`, 
-                detail: `Please do not refresh or logout`, 
+                summary: newLength +" "+ t('transaction.inQueue',newLength),
+                detail: t('transaction.dontRefresh'), 
                 group: 'tr'
               }
           );
@@ -567,8 +567,8 @@ export default defineComponent({
         toast.add(
           {
             severity:'warn', 
-            summary: `Transaction${singularPluralText} Added`, 
-            detail: `${txLength} transaction${singularPluralText} in unconfirmed state`, 
+            summary: t('transaction.txAdded',txLength), 
+            detail:  txLength+" "+t('transaction.txUnconfirmed',txLength),
             group: 'br', 
             life: 5000
           }
@@ -611,8 +611,8 @@ export default defineComponent({
         if(swapTransactionsCount){
           toast.add({
               severity:'success', 
-              summary: `Swap Transaction${singularPluralText} Confirmed`, 
-              detail: `${swapTransactionsCount} swap transaction${singularPluralText} confirmed`, 
+              summary: t('transaction.swapTx',swapTransactionsCount),
+              detail:  swapTransactionsCount+" "+t('transaction.swapTx',swapTransactionsCount),
               group: 'br', 
               life: 5000
           });
@@ -624,8 +624,8 @@ export default defineComponent({
           toast.add(
             {
               severity:'success', 
-              summary: `Transaction${singularPluralText} Confirmed`, 
-              detail: `${txLength} transaction${singularPluralText} confirmed`, 
+              summary:  t('transaction.txConfirmed',remainingTxLength),
+              detail: txLength + " "+ t('transaction.txConfirmed',remainingTxLength), 
               group: 'br', 
               life: 5000
           }
@@ -647,8 +647,8 @@ export default defineComponent({
           emitter.emit("TXN_ERROR", hash);
           toast.add({
             severity:'error', 
-            summary: `Transaction Error`, 
-            detail: `Status: ${status} - Hash: ${hash} `, 
+            summary: t('transaction.txError'), 
+            detail:  t('transaction.txErrMsg',[status,hash]),
             group: 'br', 
             life: 10000
           });
@@ -665,8 +665,8 @@ export default defineComponent({
         toast.add(
           {
             severity:'info', 
-            summary: `Transaction${singularPluralText} Cosignature Added`, 
-            detail: `${txLength} cosignature transaction${singularPluralText} added`, 
+            summary: t('transaction.cosignAdded'), 
+            detail: txLength + " " + t('transaction.cosignTxAdded',txLength),
             group: 'br', 
             life: 5000
           }
@@ -683,8 +683,8 @@ export default defineComponent({
         toast.add(
           {
             severity:'warn', 
-            summary: `Partial Transaction${singularPluralText} Added`, 
-            detail: `${txLength} partial transaction${singularPluralText} added`, 
+            summary: t('transaction.partialAdded',txLength), 
+            detail: txLength + " " + t('transaction.partialAdded',txLength), 
             group: 'br', 
             life: 5000
           }

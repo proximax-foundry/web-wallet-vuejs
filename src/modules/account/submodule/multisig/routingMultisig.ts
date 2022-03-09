@@ -26,4 +26,13 @@ export const MultisigRoutes = [
       title: "View Multisig Settings",
     }
   },
+  {
+    path: '/view-multisig-scheme/:address',
+    name: 'ViewMultisigScheme',
+    props: true,
+    component: () => import('@/modules/account/submodule/multisig/views/ViewMultisigScheme.vue'),
+    meta: {
+      title: "Multisig Scheme",
+    }
+  },
 ];
