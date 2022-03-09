@@ -156,35 +156,19 @@ setup(p){
     }
   }
 
-  //level3
-  const getGrandChildObject = (cosignaturies)  =>{
-    let tempArray = [] 
-    for(let i =0; i < cosignaturies.length; i ++){
-      tempArray.push( {
-        label: convertAddress(cosignaturies[i]).pretty(),
-        name: getAccountName(cosignaturies[i],findCosignLength(cosignaturies[i])),
-        balance:getBalance(cosignaturies[i]),
-        numApproveTx:getApproveTx(cosignaturies[i]),
-        numRemoval:getRemoval(cosignaturies[i]),
-        children: []})
-    }
-  return tempArray
-  }
-  //level2
+  //level1
   const getChildObject = (cosignaturies)  =>{
     let tempArray = []
     let cosigns = []
-    let tempArray2 = []
     for(let i =0; i < cosignaturies.length; i ++){
       cosigns = findCosign(cosignaturies[i])
-      tempArray2 = getGrandChildObject(cosigns)
       tempArray.push({
         label: convertAddress(cosignaturies[i]).pretty(),
         name: getAccountName(cosignaturies[i],findCosignLength(cosignaturies[i])),
         balance:getBalance(cosignaturies[i]),
         numApproveTx:getApproveTx(cosignaturies[i]),
         numRemoval:getRemoval(cosignaturies[i]),
-        children: tempArray2})
+        children: getChildObject(cosigns)}) //keep on looping to the end
     }
     return tempArray
   }
@@ -195,26 +179,9 @@ setup(p){
     balance:getBalance(multisigAccounts[0].publicKey),
     numApproveTx:getApproveTx(multisigAccounts[0].publicKey),
     numRemoval:getRemoval(multisigAccounts[0].publicKey),
-    children: multisigAccounts[0].cosignaturies
+    children: getChildObject(multisigAccounts[0].cosignaturies)
   }
-  //level 1
-  multisigAccounts[0].cosignaturies.forEach( (cosigner)=>{
-    let cosigns = []
-    let tempArray = []
-    cosigns = findCosign(cosigner)
-    tempArray =  getChildObject(cosigns)
-    levelOneGraph.push({
-      label: convertAddress(cosigner).pretty(), 
-      name: getAccountName(cosigner,findCosignLength(cosigner)),
-      balance:getBalance(cosigner),
-      numApproveTx:getApproveTx(cosigner),
-      numRemoval:getRemoval(cosigner),
-      children: tempArray
-    })
-    
-  })
-  //combine level 0,1,2,3
-  graph.children = levelOneGraph
+  
   
   let isMultisig = computed(()=>{
     return currentAccount.value.getDirectParentMultisig().length>0? true: false
