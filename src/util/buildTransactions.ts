@@ -159,7 +159,9 @@ export class BuildTransactions {
 
     aggregateBondedBuilder(): AggregateBondedTransactionBuilder {
 
-        return this.transactionBuilderFactory.aggregateBonded();
+        let abtDeadline = ChainConfigUtils.getABTMaxSafeDeadline();
+
+        return this.transactionBuilderFactory.aggregateBonded().deadline(abtDeadline);
     }
 
     aggregateComplete(innerTxn: InnerTransaction[]): AggregateTransaction {
