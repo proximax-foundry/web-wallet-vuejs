@@ -10,10 +10,10 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="closeConfirmModal();"></font-awesome-icon>
           </div>
           <div class="w-92">
-            <div class="text-center">{{$t('services.proceed')}}</div>
+            <div class="text-center">{{$t('transfer.proceedWithZero')}}</div>
             <div class="mt-3">
-              <div @click="proceedSend()"  class = 'blue-btn py-2  font-semibold cursor-pointer text-center ml-auto mr-auto w-7/12'>Confirm</div>
-              <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-2' @click="closeConfirmModal()">Cancel</div>
+              <div @click="proceedSend()"  class = 'blue-btn py-2  font-semibold cursor-pointer text-center ml-auto mr-auto w-7/12'>{{$t('general.confirm')}}</div>
+              <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-2' @click="closeConfirmModal()">{{$t('general.cancel')}}</div>
             </div>
           </div>
         </div>

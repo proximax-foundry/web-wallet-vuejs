@@ -2,16 +2,16 @@
   <div>
     <div class="pt-5 lg:pt-10 text-left px-2 sm:px-10 bg-gray-200">
       <div class="transition-all flex items-end">
-        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='unconfirmed'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='unconfirmed'">Unconfirmed Transactions</div>
-        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='partial'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='partial'">Waiting for Signatures</div>
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='unconfirmed'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='unconfirmed'">{{$t('transaction.unconfirmedTx')}}</div>
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='partial'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='partial'">{{$t('transaction.waitingSignatures')}}</div>
       </div>
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-if="displayBoard=='unconfirmed'">
-      <div class="text-xxs font-bold uppercase">Unconfirmed Transactions of <b>{{ selectedAccount.name }}</b> <span class="font-normal">({{ accountUnconfirmedTxnsCount }})</span></div>
+      <div class="text-xxs font-bold uppercase">{{$t('transaction.unconfirmedTxOf',{name:selectedAccount.name})}} <span class="font-normal">({{ accountUnconfirmedTxnsCount }})</span></div>
       <UnconfirmedTransactionDataTable />
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else>
-      <div class="text-xxs font-bold uppercase">Waiting for signatures of <b>{{selectedAccount.name}}</b> <span class="font-normal">({{ accountPartialTxnsCount }})</span></div>
+      <div class="text-xxs font-bold uppercase">{{$t('transaction.waitingSignaturesOf',{name:selectedAccount.name})}} <span class="font-normal">({{ accountPartialTxnsCount }})</span></div>
       <PartialDashboardDataTable />
     </div>
   </div>

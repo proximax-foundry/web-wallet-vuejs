@@ -2,82 +2,82 @@
  <div>
   <div class="flex cursor-pointer mt-8 ml-8 lg:ml-0 lg:absolute">
     <img src='@/assets/img/chevron_left.svg'>
-    <router-link :to="{name: 'ViewServicesNamespace'}" class='text-blue-primary text-xs mt-0.5'>Back</router-link>
+    <router-link :to="{name: 'ViewServicesNamespace'}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
   </div>
   <div class='w-10/12 ml-auto mr-auto'>
     <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
       <div class="xl:col-span-2 p-12">
-        <div class='font-semibold mb-4'>Create Namespace</div>
+        <div class='font-semibold mb-4'>{{$t('general.createNamespace')}}</div>
         <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
-          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('accounts.insufficientbalance')}}</div>
+          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
         </div>
         <div v-else-if="isNotCosigner" class="rounded-md bg-yellow-200 w-full p-2 flex items-center justify-center">
-          <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('accounts.cosigwarning2')}}</div>
+          <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.noCosigner')}}</div>
         </div>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="mt-4">
           <SelectInputAccount @select-account="changeSelection" v-model="selectedAccAdd" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
           <div v-if="getMultiSigCosigner.cosignerList.length > 0">
-            <div class="text-tsm text-left mt-3">{{$t('transfer.cosigner')}}:
-              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
-              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.cosignerList" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
-              <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
+            <div class="text-tsm text-left mt-3">{{$t('general.initiateBy')}}:
+              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('general.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('general.insufficientBalance')}}</span></span>
+              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.cosignerList" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('general.balance')}}: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
+              <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('general.insufficientBalance')}}</div>
             </div>
           </div>
           <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace" ref="nsRef" v-model="selectNamespace" :address="selectedAccAdd" class="mt-5" :disabled="disableSelectNamespace" />
           <div class="lg:grid lg:grid-cols-2 mt-5">
             <div class="mb-5 lg:mb-0 lg:mr-2">
-              <TextInputTooltip :disabled="disableNamespaceName" placeholder="Name" :errorMessage="namespaceErrorMessage" v-model="namespaceName" v-debounce:1000="checkNamespace" icon="id-card-alt" :showError="showNamespaceNameError" class="w-full inline-block" toolTip="A namespace can have a maximium length of 16 alphanumerical characters while sub-namespaces can have a maximium length of 64 alphanumerical characters.<br><br>Three layers can be created. A namespace can have a subnamespace, and a subnamespace can have its own subnamespace (e.g., test1.test2.test3).<br><br>Certain phrases are already reserved." />
+              <TextInputTooltip :disabled="disableNamespaceName" :placeholder="$t('general.name')" :errorMessage="namespaceErrorMessage" v-model="namespaceName" v-debounce:1000="checkNamespace" icon="id-card-alt" :showError="showNamespaceNameError" class="w-full inline-block" :toolTip="$t('namespace.namespaceNameMsg1') + '<br><br>' + $t('namespace.namespaceNameMsg2') + '<br><br>' + $t('namespace.namespaceNameMsg3')" />
             </div>
             <div class="mb-5 lg:mb-0 lg:ml-2">
-              <DurationInputClean :disabled="disabledDuration" v-model="duration" :max="maxDurationInDays" placeholder="Duration (number of days)" @set-default-duration="setDefaultDuration" :showError="showDurationErr" errorMessage="Required Field - Only Numbers (0 - 6)" :toolTip="`Maximum rental duration is<br>${maxDurationInDays === 365 ? '1 year ' : ''}(${maxDurationInDays} days).`" />
+              <DurationInputClean :disabled="disabledDuration" v-model="duration" :max="maxDurationInDays" :placeholder="$t('namespace.duration')" @set-default-duration="setDefaultDuration" :showError="showDurationErr" :toolTip="$t('namespace.durationMsg')+'<br>' +`${maxDurationInDays === 365 ? '1 ' + $t('general.year') : ''}` +' ('+`${maxDurationInDays}`+ $t('general.day',maxDurationInDays) +').'" />
             </div>
           </div>
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
-        <div class="font-semibold text-xxs text-blue-primary">ACCOUNT CURRENT BALANCE</div>
+        <div class="font-semibold text-xxs text-blue-primary uppercase">{{$t('general.accCurrentBalance')}}</div>
         <div class="flex text-gray-200 mb-5">
           <span v-html="splitCurrency(balance)"></span>
           <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
         </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-          <div class="font-semibold">Transaction Fee</div>
+          <div class="font-semibold">{{$t('general.transactionFee')}}</div>
           <div v-html="splitCurrency(transactionFee)"></div>
         </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-          <div class="font-semibold">Rental Fee</div>
+          <div class="font-semibold">{{$t('general.rentalFee')}}</div>
           <div v-html="splitCurrency(rentalFeeCurrency)"></div>
         </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-semibold">{{$t('accounts.lockfund')}}</div>
+          <div class="font-semibold">{{$t('general.lockFund')}}</div>
           <div v-html="splitCurrency(lockFundCurrency)"></div>
         </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-semibold">Lock Fund Tx Fee</div>
+          <div class="font-semibold">{{$t('general.lockFundTxFee')}}</div>
           <div v-html="splitCurrency(lockFundTxFee)"></div>
         </div>
         <div class="flex justify-between border-gray-600 text-white text-xs py-5">
-          <div class="font-bold uppercase">Total</div>
+          <div class="font-bold uppercase">{{$t('general.total')}}</div>
           <div v-html="splitCurrency(totalFeeFormatted)"></div>
         </div>
-        <div class='text-xs text-white my-5'>Enter your password to continue</div>
-        <PasswordInput :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
-        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="createNamespace">Register Namespace</button>
+        <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
+        <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
+        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="createNamespace">{{$t('namespace.registerNamespace')}}</button>
         <div class="text-center">
-          <button class="content-center text-xs text-white border-b-2 border-white" >Cancel</button>
+          <router-link :to="{name: 'ViewServicesNamespace'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
         </div>
       </div>
     </div>
 
     <div class="sm:grid sm:grid-cols-2 mt-10 lg:mt-16">
       <div class="mb-8 sm:pr-1">
-        <a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">What is Namespace?</a>
-        <div class="text-gray-400 text-tsm my-3 sm:pr-2">A namespace starts with a name that you choose, similar to an internet domain name.</div>
+        <a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">{{$t('general.namespaceQues')}}</a>
+        <div class="text-gray-400 text-tsm my-3 sm:pr-2">{{$t('namespace.namespaceAns')}}</div>
       </div>
       <div class="mb-8">
-        <a href="https://t.me/proximaxhelpdesk" target=_new class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">Give us feedback about your experience here</a>
-        <div class="text-gray-400 text-tsm my-3">We are eager to keep improving our products.</div>
+        <a href="https://t.me/proximaxhelpdesk" target=_new class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">{{$t('general.feedback')}}</a>
+        <div class="text-gray-400 text-tsm my-3">{{$t('general.feedbackDescription')}}</div>
       </div>
     </div>
   </div>
@@ -102,6 +102,7 @@ import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: 'ViewServicesNamespaceCreate',
@@ -114,7 +115,7 @@ export default {
   },
   setup(){
     const router = useRouter();
-
+    const {t} = useI18n();
     const nsRef = ref(null);
 
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
@@ -127,7 +128,7 @@ export default {
     const duration = ref('1');
     const walletPassword = ref('');
     const err = ref('');
-    const namespaceErrorMessage = ref('Fill in valid name');
+    const namespaceErrorMessage = ref(t('namespace.validName'));
     const currentSelectedName = ref('');
     const disabledPassword = ref(false);
     const disabledDuration = ref(false);
@@ -147,7 +148,7 @@ export default {
       let namespace = [];
       namespace.push({
         value: '1',
-        label: 'New Root Namespace',
+        label: t('namespace.newRootNamespace'),
         level: 0,
         disabled: false,
       });
@@ -411,7 +412,7 @@ export default {
     const isReservedRootNamespace = ()=>{
       if(selectNamespace.value === "1" && reservedRootNamespace.includes(namespaceName.value.trim())){
           showNamespaceNameError.value = true;
-          namespaceErrorMessage.value = "Reserved namespace name";
+          namespaceErrorMessage.value = t('namespace.reservedName');
 
           return true;
       }
@@ -425,7 +426,7 @@ export default {
         
           if(namespaceInfo.owner.address.plain !== selectedAccAdd.value){
             showNamespaceNameError.value = true;
-            namespaceErrorMessage.value = "Namespace have been registered";
+            namespaceErrorMessage.value = t('namespace.nameRegistered');
 
             return true;
           }
@@ -445,7 +446,7 @@ export default {
         else{
           showNamespaceNameError.value = namespaceName.value.match(namespacePattern)? false:true;
           if(showNamespaceNameError.value){
-            namespaceErrorMessage.value = "Fill in a valid name";
+            namespaceErrorMessage.value = t('namespace.validName');
           }
           else{
             let isNotOwner = await notRootNamespaceOwner();

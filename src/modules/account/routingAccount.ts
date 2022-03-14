@@ -58,15 +58,6 @@ export const AccountRoutes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/created-account',
-    name: 'ViewAccountCreated',
-    props: true,
-    component: () => import('@/modules/account/views/ViewAccountCreated.vue'),
-    meta: {
-      title: "Created account",
-    }
-  },
-  {
     path: '/import-account',
     name: 'ViewAccountCreatePrivateKey',
     component: () => import('@/modules/account/views/ViewAccountCreatePrivateKey.vue'),
@@ -84,30 +75,12 @@ export const AccountRoutes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/view-multisig-scheme/:address',
-    name: 'ViewMultisigScheme',
-    props: true,
-    component: () => import('@/modules/account/views/ViewMultisigScheme.vue'),
-    meta: {
-      title: "Multisig Scheme",
-    }
-  },
-  {
     path: '/swap-account/:address',
     name: 'ViewAccountSwap',
     props: true,
     component: () => import('@/modules/account/views/ViewAccountSwap.vue'),
     meta: {
       title: "NIS1 Swap",
-    }
-  },
-  {
-    path: '/delete-account/:name',
-    name: 'ViewAccountDelete',
-    props: true,
-    component: () => import('@/modules/account/views/ViewAccountDelete.vue'),
-    meta: {
-      title: "Delete account",
     }
   },
   {

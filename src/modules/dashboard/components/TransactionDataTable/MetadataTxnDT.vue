@@ -13,17 +13,17 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Tx Hash</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.txHash')}}</div>
             <div class="uppercase font-bold text-txs"><span class="text-txs" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span></div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Type</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.type')}}</div>
             <div class="flex items-center">
               <div class="uppercase font-bold text-txs">{{data.type}}</div>
             </div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Scoped Metadata Key</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.scopedMetadataKey')}}</div>
             <div class="flex items-center">
               <div class="font-bold text-txs">{{ data.scopedMetadataKey }}</div>
             </div>
@@ -33,11 +33,11 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div v-if="selectedGroupType === transactionGroupType.CONFIRMED">
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Timestamp</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.timestamp')}}</div>
             <div class="uppercase font-bold text-txs">{{ convertLocalTime(data.timestamp) }}</div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Target</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.target')}}</div>
             <span class="text-txs font-bold" v-if="data.metadataTypeName === 'Account'" v-tooltip.bottom="data.targetPublicKey">
               {{data.targetPublicKey.substring(0, 20) }}...
             </span>
@@ -49,42 +49,42 @@
             </span>
           </div>
           <div v-if="selectedGroupType !== transactionGroupType.CONFIRMED">
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Value</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.value')}}</div>
             <div><img src="@/modules/dashboard/img/icon-message.svg" v-if="data.valueChange" v-tooltip.left="'<tiptext>' + constructValueDisplay(data) + '</tiptext>'" class="inline-block"></div>
           </div>
         </template>
       </Column>
-      <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
+      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="timestamp" header="TIMESTAMP" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
+      <Column field="timestamp" :header="$t('dashboard.timestamp')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
           <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
       </Column>
-      <Column field="typeName" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
+      <Column field="typeName" :header="$t('dashboard.type')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
-      <Column field="block" header="BLOCK" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
+      <Column field="block" :header="$t('general.block')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
           <div class="text-txs">{{ data.block }}</div>
         </template>
       </Column>
-      <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
+      <Column :header="$t('dashboard.txFee')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
         <template #body="{data}">
           <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
-      <Column header="SCOPED METADATA KEY" headerStyle="width:110px" v-if="wideScreen">
+      <Column :header="$t('dashboard.scopedMetadataKey')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-txs">{{ data.scopedMetadataKey }}</div>
         </template>
       </Column>
-      <Column header="TARGET" headerStyle="width:60px" v-if="wideScreen">
+      <Column :header="$t('dashboard.target')" headerStyle="width:60px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-if="data.metadataTypeName === 'Account'" v-tooltip.bottom="data.targetPublicKey">
             {{data.targetPublicKey.substring(0, 20) }}...
@@ -97,7 +97,7 @@
           </span>
         </template>
       </Column>
-      <Column header="VALUE" v-if="selectedGroupType !== transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:40px">
+      <Column :header="$t('dashboard.value')" v-if="selectedGroupType !== transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:40px">
         <template #body="{data}">
           <div>
             <img src="@/modules/dashboard/img/icon-message.svg" v-if="data.valueChange" v-tooltip.left="'<tiptext>' + constructValueDisplay(data) + '</tiptext>'" class="inline-block">
@@ -112,10 +112,10 @@
         </template>
       </Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('general.noRecord')}}
       </template>
       <template #loading>
-          {{$t('dashboard.loadingmessage')}}
+          {{$t('dashboard.fetchingTx')}}
       </template>
     </DataTable>
   </div>
@@ -132,6 +132,7 @@ import Tooltip from 'primevue/tooltip';
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";
+import { useI18n } from 'vue-i18n';
 // import SplitButton from 'primevue/splitbutton';
 
 export default defineComponent({
@@ -151,6 +152,7 @@ export default defineComponent({
     'tooltip': Tooltip
   },
   setup(p, context){
+    const {t} = useI18n();
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
@@ -233,13 +235,13 @@ export default defineComponent({
       let display = "Size:" + (data.sizeChanged > 0 ? `+${data.sizeChanged}`: data.sizeChanged);
 
       if(data.oldValue){
-        display += `<br>Old Value: ${data.oldValue}`;
+        display += '<br>' + t('dashboard.oldValue') + ':' +' '+ data.oldValue ;
       }
       if(data.newValue){
-        display += `<br>New Value: ${data.newValue}`;
+        display += '<br>' + t('dashboard.newValue') + ':' +' '+ data.oldValue ;
       }
 
-      display += `<br>Value Change: ${data.valueChange}`;
+      display += '<br>' + t('dashboard.valueChange') + ':' +' '+ data.oldValue ;
       return display;
     }
 

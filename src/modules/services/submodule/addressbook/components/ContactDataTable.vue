@@ -2,15 +2,15 @@
   <div>
     <div class="xl:flex xl:justify-between pb-3 xl:pb-0">
       <div class="lg:flex lg:items-center lg:justify-items-start">
-        <div class='font-semibold mr-10 mb-4 lg:mb-0'>Address Book</div>
+        <div class='font-semibold mr-10 mb-4 lg:mb-0'>{{$t('general.addressBook')}}</div>
         <SelectInputPluginClean v-model="selectContactGroups" :options="contactGroups" selectDefault="" class="w-60 mr-4" />
         <div class="w-60 px-3 py-1 flex justify-between my-3 xl:my-0" :class="borderColor">
-          <input v-model="filters['global'].value" type="text" class="w-28 outline-none text-xs float-left" :placeholder="$t('services.search')" @click="clickInputText()" @blur="blurInputText()">
+          <input v-model="filters['global'].value" type="text" class="w-28 outline-none text-xs float-left" :placeholder="$t('general.search')" @click="clickInputText()" @blur="blurInputText()">
           <img src="@/modules/services/submodule/addressbook/img/icon-search_black.svg" class="inline-block">
         </div>
       </div>
-      <div class="block lg:inline-block mt-5 lg:mt-5 xl:mt-0">
-        <router-link :to="{ name: 'ViewServicesAddressBookAddContact' }"  class="bg-blue-primary text-gray-50 text-tsm px-5 py-3 rounded-lg hover:bg-blue-600 transition-all duration-300">+ Add New Address</router-link>
+      <div class="block inline-block mt-5 lg:mt-5 xl:mt-0">
+        <router-link :to="{ name: 'ViewServicesAddressBookAddContact' }"  class="bg-blue-primary text-gray-50 text-tsm px-3 py-3 rounded-lg hover:bg-blue-600 transition-all duration-300">+ {{$t('general.new')}}</router-link>
       </div>
     </div>
     <div class='mt-2 py-3 gray-line'>
@@ -42,7 +42,7 @@
               <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
               <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 <div role="none" class="my-2">
-                  <router-link :to="{ name: 'ViewServicesAddressBookEditContact' , params: { contactAddress: data.address }}" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Edit</router-link>
+                  <router-link :to="{ name: 'ViewServicesAddressBookEditContact' , params: { contactAddress: data.address }}" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.edit')}}</router-link>
                   <ConfirmDeleteContactModal :data="data" class="block" />
                 </div>
               </div>
@@ -51,8 +51,8 @@
         </Column>
         <template #empty>
           <div class="text-center my-5"><img src="@/modules/services/submodule/addressbook/img/open-book.svg" class="inline-block h-20 w-20"></div>
-          <div class="text-center text-blue-primary mb-2" style="font-size:15px">Nothing to show</div>
-          <div class="text-center text-gray-400" style="font-size:12px">You can add multiple wallet addresses to keep for your future transactions.</div>
+          <div class="text-center text-blue-primary mb-2" style="font-size:15px">{{$t('general.ntgToShow')}}</div>
+          <div class="text-center text-gray-400" style="font-size:12px">{{$t('addressBook.addressBookTitle')}}</div>
         </template>
       </DataTable>
     </div>
@@ -70,7 +70,7 @@ import { Helper } from "@/util/typeHelper";
 import { walletState } from '@/state/walletState';
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
-
+import {useI18n} from 'vue-i18n'
 export default{
   components: {
     SelectInputPluginClean,
@@ -81,6 +81,7 @@ export default{
   name: 'ContactDataTable',
 
   setup(){
+    const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const isMenuShow = ref([]);
@@ -155,7 +156,7 @@ export default{
       uniqueGroupLabels.sort();
       let action = [];
       action.push(
-        {value: '', label: 'Show All'},
+        {value: '', label: t('general.showAll')},
       );
       uniqueGroupLabels.forEach(label => {
         action.push({value: label, label});

@@ -230,7 +230,7 @@
             </div>
           </div>
           <div class="mt-10 text-center">
-            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()" v-if="isInitiateSwap && !swapStatus208">{{$t('createsuccessful.continue')}}</button>
+            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()" v-if="isInitiateSwap && !swapStatus208">{{$t('general.continue')}}</button>
             <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn focus:outline-none w-40 inline-block" :class="isDisabledValidate?'opacity-50':''" :is="isDisabledValidate?'span':'router-link'" tag="button" v-else>Done</router-link>
           </div>
         </div>
@@ -638,7 +638,7 @@ export default {
 
     const siriusAddressSelectedName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
 
-    watch(siriusAddressSelected, (newName) => {
+    watch(siriusAddressSelected, (newAddress) => {
       let accountSelected = walletState.currentLoggedInWallet.accounts.find(account => account.address == newAddress);
       if(!accountSelected){
         accountSelected = walletState.currentLoggedInWallet.others.find(account => account.address == newAddress);

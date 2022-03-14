@@ -3,7 +3,7 @@
   <div class="container mx-auto md:grid md:grid-cols-2 md:mt-10 lg:px-20 xl:px-40 gap-4 ">
     <IntroTextComponent />
     <div class="md:col-span-1 bg-white mx-5 md:mx-0 px-30 pt-1 md:pt-0 rounded-md">
-      <div class = 'text-center font-semibold mt-16 text-gray-700 text-lg'>Sign In</div>
+      <div class = 'text-center font-semibold mt-16 text-gray-700 text-lg'>{{$t('home.signIn')}}</div>
       <div class="px-5 text-gray-700 md:text-lg text-tsm mt-4">
         <SignInComponent />
       </div>
@@ -17,8 +17,8 @@
         </router-link>
       </div>
       </div> -->
-      <div class ='text-center text-xs mt-6 mb-1 '>No Sirius wallet account yet?</div>
-      <div class ="text-center  text-xs text-blue-link font-semibold"><router-link :to="{ name: 'ViewWalletCreateSelection' }">Create Account Wallet ></router-link></div>
+      <div class ='text-center text-xs mt-6 mb-1 '>{{$t('wallet.noWallet')}}</div>
+      <div class ="text-center  text-xs text-blue-link font-semibold"><router-link :to="{ name: 'ViewWalletCreateSelection' }">{{$t('wallet.createSiriusWallet')}} ></router-link></div>
       <div class = 'h-16 '></div>
     </div>
   </div>

@@ -2,79 +2,79 @@
  <div>
   <div class="flex cursor-pointer mt-8 ml-8 lg:ml-0 lg:absolute">
     <img src='@/assets/img/chevron_left.svg'>
-    <router-link :to="{name: 'ViewServicesNamespace'}" class='text-blue-primary text-xs mt-0.5'>Back</router-link>
+    <router-link :to="{name: 'ViewServicesNamespace'}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
   </div>
   <div class='w-10/12 ml-auto mr-auto'>
     <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
       <div class="xl:col-span-2 p-6 lg:p-12">
         <div class="lg:flex lg:justify-between lg:items-center">
-          <div class='font-semibold mb-4 inline-block mt-1'>Extend Duration</div>
+          <div class='font-semibold mb-4 inline-block mt-1'>{{$t('general.extendDuration')}}</div>
           <div class="flex items-center">
             <div v-html="svgString" class="inline-block" />
             <div class="ml-2">
-              <div class="text-blue-primary text-xxs font-bold uppercase mb-1">Namespace created in</div>
+              <div class="text-blue-primary text-xxs font-bold uppercase mb-1">{{$t('namespace.namespaceCreatedBy')}}</div>
               <div class="font-bold text-black text-sm">{{ selectedAccName }}</div>
             </div>
           </div>
         </div>
 
         <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
-          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('accounts.insufficientbalance')}}</div>
+          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
         </div>
         <div v-else-if="isNotCosigner" class="rounded-md bg-yellow-200 w-full p-2 flex items-center justify-center">
-          <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('accounts.cosigwarning2')}}</div>
+          <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.noCosigner')}}</div>
         </div>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="text-right w-full">
           <div v-if="getMultiSigCosigner.cosignerList.length > 0" class="inline-block">
-            <div class="text-tsm text-left mt-3">{{$t('transfer.cosigner')}}:
-              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('services.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('accounts.insufficientbalance')}}</span></span>
-              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.cosignerList" :value="cosigner.address" :key="item">{{ cosigner.name }} (Balance: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
-              <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('accounts.insufficientbalance')}}</div>
+            <div class="text-tsm text-left mt-3">{{$t('general.initiateBy')}}:
+              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('general.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('general.insufficientBalance')}}</span></span>
+              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.cosignerList" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('general.balance')}}: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
+              <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('general.insufficientBalance')}}</div>
             </div>
           </div>
         </div>
         <div class="border border-blue-primary p-4 bg-blue-100 flex items-center rounded mt-5">
           <img src="@/modules/services/submodule/namespaces/img/icon-namespace.svg">
           <div class="ml-1">
-            <div class="uppercase text-blue-primary font-semibold text-xxs">Namespace</div>
+            <div class="uppercase text-blue-primary font-semibold text-xxs">{{$t('general.namespace')}}</div>
             <div class="text-black text-sm font-bold">{{ selectNamespace }}</div>
           </div>
         </div>
-        <DurationInputClean class="mt-5" :disabled="disabledDuration" v-model="duration" @set-default-duration="setDefaultDuration" :max="maxDurationInDays" placeholder="Duration (number of days)" :showError="showDurationErr" errorMessage="Required Field - Only Numbers (0 - 6)" :toolTip="`Maximum rental duration is<br>${maxDurationInDays === 365 ? '1 year ' : ''}(${maxDurationInDays} days).`" />
-        <div v-if="showMaxDaysLabel" class="text-xs inline-block text-gray-400">Maximum number of days for the extension of this namespace is {{ maxDurationInDays-numDaysleft }} day{{ (maxDurationInDays-numDaysleft)>1?'s':'' }}</div>
+        <DurationInputClean class="mt-5" :disabled="disabledDuration" v-model="duration" @set-default-duration="setDefaultDuration" :max="maxDurationInDays" :placeholder="$t('namespace.duration')" :showError="showDurationErr"  :toolTip="$t('namespace.durationMsg')+'<br>' +`${maxDurationInDays === 365 ? '1 ' + $t('general.year') : ''}` +' ('+`${maxDurationInDays}`+ $t('general.day',maxDurationInDays) +').'" />
+        <div v-if="showMaxDaysLabel" class="text-xs inline-block text-gray-400">{{$t('namespace.durationMsg2')}} {{ maxDurationInDays-numDaysleft }} {{$t('general.day',maxDurationInDays-numDaysleft)}}</div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
-        <div class="font-semibold text-xxs text-blue-primary">ACCOUNT CURRENT BALANCE</div>
+        <div class="font-semibold text-xxs text-blue-primary">{{$t('general.accCurrentBalance')}}</div>
         <div class="flex text-gray-200 mb-5">
           <span v-html="splitCurrency(balance)"></span>
           <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
         </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-          <div class="font-semibold">Transaction Fee</div>
+          <div class="font-semibold">{{$t('general.transactionFee')}}</div>
           <div v-html="splitCurrency(transactionFee)"></div>
         </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-          <div class="font-semibold">Rental Fee</div>
+          <div class="font-semibold">{{$t('general.rentalFee')}}</div>
           <div v-html="splitCurrency(rentalFeeCurrency)"></div>
         </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-semibold">{{$t('accounts.lockfund')}}</div>
+          <div class="font-semibold">{{$t('general.lockFund')}}</div>
           <div v-html="splitCurrency(lockFundCurrency)"></div>
         </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-semibold">{{$t('accounts.unconfirmed')}}</div>
+          <div class="font-semibold">{{$t('general.lockFundTxFee')}}</div>
           <div v-html="splitCurrency(lockFundTxFee)"></div>
         </div>
         <div class="flex justify-between border-gray-600 text-white text-xs py-5">
-          <div class="font-bold uppercase">Total</div>
+          <div class="font-bold uppercase">{{$t('general.total')}}</div>
           <div v-html="splitCurrency(totalFeeFormatted)"></div>
         </div>
-        <div class='text-xs text-white my-5'>Enter your password to continue</div>
-        <PasswordInput :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
-        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="extendNamespace">Extend Duration</button>
+        <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
+        <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
+        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="extendNamespace">{{$t('general.extendDuration')}}</button>
         <div class="text-center">
-          <router-link :to="{name: 'ViewServicesNamespace'}" class='content-center text-xs text-white border-b-2 border-white'>Cancel</router-link>
+          <router-link :to="{name: 'ViewServicesNamespace'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
         </div>
       </div>
     </div>
@@ -100,6 +100,7 @@ import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
+import { TransactionUtils } from '@/util/transactionUtils';
 
 export default {
   name: 'ViewServicesNamespaceExtend',
@@ -165,8 +166,13 @@ export default {
     const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
     const lockFundCurrency = computed(()=> Helper.amountFormatterSimple(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
 
-    const lockFundTxFee = ref(0.0445);
-    const lockFundTxFeeCurrency = ref('0.044500');
+    const lockFundTxFee = computed(()=>{
+      if(networkState.currentNetworkProfile){ 
+        return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
+      }
+      return 0;  
+    });
+    const lockFundTxFeeCurrency = ref(lockFundTxFee.value.toString());
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
@@ -202,7 +208,6 @@ export default {
       balance.value = Helper.toCurrencyFormat(account.balance, AppState.nativeToken.divisibility);
       balanceNumber.value = account.balance;
     }else{
-      toast.add({severity:'error', detail: 'Addres is invalid', group: 'br', life: 3000});
       router.push({ name: "ViewServicesNamespace" });
     }
 
@@ -222,7 +227,6 @@ export default {
           selectNamespace.value = namespace.name;
         }
       }else{
-        toast.add({severity:'error', detail: 'Namespace ID is invalid', group: 'br', life: 3000});
         router.push({ name: "ViewServicesNamespace" });
       }
     }

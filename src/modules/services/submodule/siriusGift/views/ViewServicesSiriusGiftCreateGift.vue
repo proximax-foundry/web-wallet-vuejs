@@ -53,7 +53,7 @@
         </label>
         <div class="mt-10">
           <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50">{{$t('accounts.save')}}</button>
-          <button type="submit" class="default-btn py-1 focus:outline-none disabled:opacity-50" :disabled="!readCheck" @click="backtoPanel()">{{$t('createsuccessful.continue')}}</button>
+          <button type="submit" class="default-btn py-1 focus:outline-none disabled:opacity-50" :disabled="!readCheck" @click="backtoPanel()">{{$t('general.continue')}}</button>
         </div>
       </div>
     </div>

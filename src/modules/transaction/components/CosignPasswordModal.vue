@@ -1,5 +1,5 @@
 <template>
-    <button class="cursor-pointer text-white bg-blue-primary px-7 py-2 lg:px-12 lg:py-3 rounded-md text-xs lg:text-tsm inline-block font-bold border-2 border-blue-primary hover:opacity-80 transition-all duration-300 disabled:opacity-50" @click=" toggleModal = !toggleModal" :disabled="disabled">Approve</button>
+    <button class="cursor-pointer text-white bg-blue-primary px-7 py-2 lg:px-12 lg:py-3 rounded-md text-xs lg:text-tsm inline-block font-bold border-2 border-blue-primary hover:opacity-80 transition-all duration-300 disabled:opacity-50" @click=" toggleModal = !toggleModal" :disabled="disabled">{{$t('transaction.approve')}}</button>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -7,10 +7,10 @@
       <div v-if="toggleModal" class="popup-outer-lang fixed flex z-50">
         <div class="modal-popup-box text-center">
           <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
-          <div class="text-center mt-2 text-xs font-semibold">Enter Password</div>
-          <PasswordInput class="mt-3" v-model="walletPasswd" :placeholder="'Password'"/>
-          <button @click="verifyWalletPwPk()"  class="blue-btn py-2 font-semibold cursor-pointer text-center w-7/12 mt-5 inline-block">Confirm</button>
-          <div class= "text-center cursor-pointer text-xs font-semibold text-blue-link mt-2" @click="toggleModal = !toggleModal;walletPasswd=''">Cancel</div>
+          <div class="text-center mt-2 text-xs font-semibold">{{$t('general.enterPassword')}}</div>
+          <PasswordInput class="mt-3" v-model="walletPasswd" :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"/>
+          <button @click="verifyWalletPwPk()"  class="blue-btn py-2 font-semibold cursor-pointer text-center w-7/12 mt-5 inline-block">{{$t('general.confirm')}}</button>
+          <div class= "text-center cursor-pointer text-xs font-semibold text-blue-link mt-2" @click="toggleModal = !toggleModal;walletPasswd=''">{{$t('general.cancel')}}</div>
         </div>
       </div>
     </transition>

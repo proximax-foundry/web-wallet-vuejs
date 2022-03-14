@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="block hover:bg-gray-100 transition duration-200 p-2 z-20 cursor-pointer text-red-600" @click="openRemoveModal()">Remove</div>
+    <div class="block hover:bg-gray-100 transition duration-200 p-2 z-20 cursor-pointer text-red-600" @click="openRemoveModal()">{{$t('general.remove')}}</div>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -12,15 +12,15 @@
           </div>
           <div class="w-104 font-normal">
             <div class="error error_box" v-if="err!=''">{{ err }}</div>
-            <div class="mb-5"><span class="text-sm text-gray-700">{{$t('services.removecontact')}}</span></div>
+            <div class="mb-5"><span class="text-sm text-gray-700">{{$t('addressBook.removeContactFromAB')}}</span></div>
             <div class="flex justify-between rounded-xl mb-4 text-gray-600">
               <div class="w-full text-left">
                 <div class="text-xs mt-3">
-                  <div class="inline-block w-20 font-bold">{{$t('services.name')}}:</div>
+                  <div class="inline-block w-20 font-bold">{{$t('general.name')}}:</div>
                   <div class="inline-block">{{ data.name }}</div>
                 </div>
                 <div class="text-xs mt-3">
-                  <div class="inline-block w-20 font-bold">{{$t('createsuccessful.address')}}:</div>
+                  <div class="inline-block w-20 font-bold">{{$t('general.address')}}:</div>
                   <div class="inline-block mt-2">{{ data.address }}</div>
                 </div>
                 <div class="text-xs mt-3">
@@ -31,8 +31,8 @@
             </div>
             <fieldset class="w-full">
               <div class="text-center mt-5">
-                <div class="inline-block font-bold text-blue-primary mr-5 cursor-pointer" @click="closeRemoveModal">{{$t('deletewallet.cancel')}}</div>
-                <button type="submit" class="bg-red-primary text-white text-xs py-2 px-4 rounded-md" @click="deleteContact(data);">{{$t('services.removecontact2')}}</button>
+                <div class="inline-block font-bold text-blue-primary mr-5 cursor-pointer" @click="closeRemoveModal">{{$t('general.cancel')}}</div>
+                <button type="submit" class="bg-red-primary text-white text-xs py-2 px-4 rounded-md" @click="deleteContact(data);">{{$t('addressBook.removeContact')}}</button>
               </div>
             </fieldset>
           </div>

@@ -1,7 +1,7 @@
 <template>
   <div @click=" toggleModal = !toggleModal" class='flex ml-auto' >
     <img src='@/modules/account/img/delete-icon.svg' class='mt-3  w-3 h-3 cursor-pointer'>
-    <div class = 'pt-2.5 text-xs text-red-500 cursor-pointer ml-1 font-semibold'>Delete This Account</div>
+    <div class = 'pt-2.5 text-xs text-red-500 cursor-pointer ml-1 font-semibold'>{{$t('account.deleteThis')}}</div>
   </div>
   <transition
       enter-active-class="animate__animated animate__fadeInDown"
@@ -10,16 +10,16 @@
   <div v-if='toggleModal' class="popup-outer fixed flex z-50 text-black mt-10">
     <div class="modal-popup-box">
       <div class="error error_box mb-3 text-center" v-if="err!=''">{{ err }}</div>
-        <div class ='text-center mt-2 text-md font-normal'>Account Deletion</div>
+        <div class ='text-center mt-2 text-md font-normal'>{{$t('account.accDeletion')}}</div>
           <img src='@/modules/wallet/img/icon-delete-wallet.svg' class='ml-auto mr-auto'>
-          <div class ='text-black text-center text-xs mt-2 font-normal'>This action will delete the account.</div>
-          <div class ='font-bold text-center text-xs mt-2'>Are you sure you want to delete this account?</div>
+          <div class ='text-black text-center text-xs mt-2 font-normal'>{{$t('account.deleteTitle')}}</div>
+          <div class ='font-bold text-center text-xs mt-2'>{{$t('account.deleteWarning')}}</div>
           <div class="w-92">
             <div class= 'text-center'>
               <div class="mt-3">
-                <PasswordInput class ='w-8/12 ml-auto mr-auto' placeholder="Password"  v-model="walletPasswd" icon="lock"/>
-                <button @click="deleteAccount()" class='red-btn px-4 py-3 font-semibold cursor-pointer text-center ml-auto mt-3 mr-auto w-8/12 disabled:opacity-50 disabled:cursor-auto' :disabled="disableDelete">Confirm Account Deletion</button>
-                <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-3' @click="toggleModal = !toggleModal;walletPasswd='';err=''">Cancel</div>
+                <PasswordInput class ='w-8/12 ml-auto mr-auto' :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" v-model="walletPasswd" icon="lock"/>
+                <button @click="deleteAccount()" class='red-btn px-4 py-3 font-semibold cursor-pointer text-center ml-auto mt-3 mr-auto w-8/12 disabled:opacity-50 disabled:cursor-auto' :disabled="disableDelete">{{$t('account.confirmDelete')}}</button>
+                <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-3' @click="toggleModal = !toggleModal;walletPasswd='';err=''">{{$t('general.cancel')}}</div>
               </div>
             </div> 
         </div>
@@ -61,10 +61,11 @@ export default {
             walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
             router.push({ name: 'ViewAccountDisplayAll', params: {deleteAccount: 'success' } });
         }else{
-            err.value = t('scriptvalues.removeaccount');
+            err.value = t('account.failDelete');
         }
       }else{
-          err.value = "Wallet password is incorrect";
+          let walletName = walletState.currentLoggedInWallet.name
+          err.value = t('general.walletPasswordInvalid',{name: walletName});
       }
       
     };

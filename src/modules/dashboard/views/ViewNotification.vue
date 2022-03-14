@@ -3,7 +3,7 @@
     <div class='ml-2 mr-2 w-full lg:ml-auto lg:mr-auto mt-5'>
       <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
         <div class="flex justify-between text-sm mb-5">
-          <div><span class="text-gray-700">Notifications</span></div>
+          <div><span class="text-gray-700">{{$t('general.notification',2)}}</span></div>
         </div>
         <div v-if="notifications.length > 0">
           <div v-for="notification, index in notifications" :key="index">
@@ -12,7 +12,7 @@
                 <div v-html="toSvg(notification.address, 40, themeStyleConfig)" class="mr-2"></div>
                 <div class="text-gray-600 text-xs">
                   <div class="mb-1 text-sm text-gray-700 font-bold">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(notification.address, true) }}</div>
-                  {{ notification.label }} has a transaction awaiting for signature(s) with deadline in {{ NotificationUtils.relativeTime(notification.timestamp) }}
+                  {{ notification.label }} {{$t('notification.pendingSignature',{time:NotificationUtils.relativeTime(notification.timestamp)})}}
                 </div>
               </router-link>
             </div>
@@ -21,14 +21,14 @@
                 <div v-html="toSvg(notification.address, 40, themeStyleConfig)" class="mr-2"></div>
                 <div class="text-gray-600 text-xs">
                   <div class="mb-1 text-sm text-gray-700 font-bold">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(notification.address, true) }}</div>
-                  Namespace <b>{{ notification.label }}</b> is expiring in {{ NotificationUtils.relativeTime(notification.timestamp) }}
+                  {{$t('general.namespace')}} <b>{{ notification.label }}</b> {{$t('notification.isExpiring',{time:NotificationUtils.relativeTime(notification.timestamp)})}} 
                 </div>
               </router-link>
             </div>
           </div>
         </div>
         <div v-else class="text-xs text-gray-500">
-          No notification found
+          {{$t('notification.noNotification')}}
         </div>
       </div>
     </div>

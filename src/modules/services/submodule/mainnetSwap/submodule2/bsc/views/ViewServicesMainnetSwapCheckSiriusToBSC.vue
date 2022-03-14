@@ -2,13 +2,13 @@
   <div>
     <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
       <div class='mt-6 p-6 border filter shadow-lg text-center'>
-        <div class="text-md">Main Network Swap</div>
-        <div class="text-xs my-3 mb-5 sm:mb-10"><img src="@/modules/services/submodule/mainnetSwap/img/bsc.svg" class="mr-2 h-5 inline-block">Check swap from Proximax Sirius Chain to BSC </div>
+        <div class="text-md">{{$t('swap.mainNetworkSwap')}}</div>
+        <div class="text-xs my-3 mb-5 sm:mb-10"><img src="@/modules/services/submodule/mainnetSwap/img/bsc.svg" class="mr-2 h-5 inline-block">{{$t('general.check')}} {{$t('swap.swapSiriusToBsc')}} </div>
         <div class="flex my-10">
           <div class="flex-none">
             <div class="flex border border-gray-300 rounded-md filter shadow-md">
               <div class="flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-yellow-500':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-txs sm:text-sm font-bold" :class="`${ currentPage>=1?'text-white':'text-gray-400' }`">1</div></div>
-              <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">Input Information</div>
+              <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('swap.inputInfo')}}</div>
             </div>
           </div>
           <div class="flex-grow self-center md:mx-4 h-0.5 bg-gray-100"></div>
@@ -20,13 +20,13 @@
           </div>
         </div>
       <div v-if="currentPage==1">
-          <div class="text-lg my-7 font-bold">Check Swap Status</div>
-          <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">Please make sure there is no other crypto wallet extension currently being enabled except <b>MetaMask</b>.<div class="my-2">Refer to the <a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">walkthrough<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a> for more details.</div>Please refresh this page after disabling other wallet extensions.</div>
+          <div class="text-lg my-7 font-bold">{{$t('swap.checkSwapStatus')}}</div>
+          <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">{{$t('swap.noOtherExtension')}} <b>{{$t('swap.metamask')}}</b>.<div class="my-2">{{$t('swap.referTo')}}<a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">{{$t('swap.walkthrough')}}<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a>{{$t('swap.forMoreDetails')}}</div>{{$t('swap.refreshMsg')}}</div>
           <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
           <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-          <p class="font-bold text-xs text-left mb-1">Type</p>
+          <p class="font-bold text-xs text-left mb-1">{{$t('dashboard.type')}}</p>
           <div class="mb-5 mt-3 text-left">
-            <button class="border px-3 py-2 w-20 text-blue-primary font-bold rounded-l cursor-pointer hover:border-blue-primary hover:bg-blue-50 transition-all duration-200" @click="$router.push({name: 'ViewServicesMainnetSwapCheckBSCToSirius'})">In</button><button class="bg-blue-primary px-3 py-2 w-20 text-white font-bold rounded-r border border-blue-primary cursor-auto">Out</button> <span class="text-gray-500 ml-3 text-tsm">From Sirius to BSC</span>
+            <button class="border px-3 py-2 w-20 text-blue-primary font-bold rounded-l cursor-pointer hover:border-blue-primary hover:bg-blue-50 transition-all duration-200" @click="$router.push({name: 'ViewServicesMainnetSwapCheckBSCToSirius'})">{{$t('general.in')}}</button><button class="bg-blue-primary px-3 py-2 w-20 text-white font-bold rounded-r border border-blue-primary cursor-auto">{{$t('general.out')}}</button> <span class="text-gray-500 ml-3 text-tsm">{{$t('swap.siriusToBsc')}}</span>
           </div>
 
           <div class="mb-5 md:flex md:justify-between border border-gray-200 rounded">
@@ -36,8 +36,8 @@
               </div>
               <div class="text-left flex items-center">
                 <div>
-                  <div class="text-xxs uppercase text-blue-primary font-bold mb-1">From MetaMask Address</div>
-                  <div class="font-bold text-black text-tsm break-all mr-2">{{ isMetamaskConnected?(currentAccount?currentAccount:'Not connected'):'Not connected' }}</div>
+                  <div class="text-xxs uppercase text-blue-primary font-bold mb-1">{{$t('swap.fromMetamaskAddress')}}</div>
+                  <div class="font-bold text-black text-tsm break-all mr-2">{{ isMetamaskConnected?(currentAccount?currentAccount:$t('swap.connected')):$t('swap.notConnected')}}</div>
                 </div>
               </div>
             </div>
@@ -45,16 +45,16 @@
               <div class="border-l border-gray-200 text-green-500 font-semibold text-xxs w-16 lg:w-20 flex items-center justify-center uppercase" v-if="currentAccount">
                 <div>
                   <img src="@/modules/services/submodule/mainnetSwap/img/icon-connected.svg" class="inline-block">
-                  <div>Connected</div>
+                  <div>{{$t('swap.connected')}}</div>
                 </div>
               </div>
               <div class="border-l border-gray-200 text-blue-primary text-tsm font-bold w-16 lg:w-20 flex justify-center items-center">
                 <div v-if="isInstallMetamask">
-                  <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">Connect</div>
-                  <div class="cursor-pointer" @click="connectMetamask()" v-else>Change</div>
+                  <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">{{$t('swap.connect')}}</div>
+                  <div class="cursor-pointer" @click="connectMetamask()" v-else>{{$t('general.change')}}</div>
                 </div>
                 <div v-else>
-                  <a href="https://metamask.io/" target=_new>Download</a>
+                  <a href="https://metamask.io/" target=_new>{{$t('general.download')}}</a>
                 </div>
               </div>
             </div>
@@ -67,24 +67,24 @@
               </div>
               <div class="border-t border-gray-200 text-blue-primary text-tsm font-bold p-3">
                 <div v-if="isInstallMetamask">
-                  <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">Connect</div>
-                  <div class="cursor-pointer" @click="connectMetamask()" v-else>Change</div>
+                  <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">{{$t('swap.connect')}}</div>
+                  <div class="cursor-pointer" @click="connectMetamask()" v-else>{{$t('general.change')}}</div>
                 </div>
                 <div v-else>
-                  <a href="https://metamask.io/" target=_new>Download</a>
+                  <a href="https://metamask.io/" target=_new>{{$t('general.download')}}</a>
                 </div>
               </div>
             </div>
           </div>
-          <TextInputClean placeholder="Sirius Transaction Hash" errorMessage="Please key in valid transaction hash" v-model="siriusTxnHash" :showError="showTxnHashError" class="w-full" />
+          <TextInputClean :placeholder="$t('swap.transactionHash',{network:'SIRIUS'})" :errorMessage="$t('swap.enterValidHash')" v-model="siriusTxnHash" :showError="showTxnHashError" class="w-full" />
           <div class="mt-10 text-center">
-            <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
-            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledCheck" @click="sendRequest()">Check Status</button>
+            <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-5 focus:outline-none disabled:opacity-50">{{$t('general.cancel')}}</button>
+            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledCheck" @click="sendRequest()">{{$t('swap.checkStatus')}}</button>
           </div>
         </div>
         <div v-if="currentPage==2">
           <div class="text-lg my-7">
-            <div class="font-bold text-left text-xs md:text-sm" :class="step1?'text-gray-700':'text-gray-300'">Step 1: Check Sirius transaction status</div>
+            <div class="font-bold text-left text-xs md:text-sm" :class="step1?'text-gray-700':'text-gray-300'">{{$t('swap.checkStep1',{network: $t('swap.sirius')})}}</div>
             <div class="flex border-b border-gray-300 p-3">
               <div class="flex-none">
                 <div class=" rounded-full border w-6 h-6 transition-all duration-500" :class="step1?'border-blue-primary':'border-gray-300'">
@@ -93,7 +93,7 @@
                   </div>
                 </div>
               </div>
-              <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Checking transaction status</div>
+              <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">{{$t('swap.checkingStatus',{network: $t('swap.sirius')})}}</div>
             </div>
             <div class="flex border-b border-gray-300 p-3">
               <div class="flex-none">
@@ -105,22 +105,22 @@
                 </div>
               </div>
               <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
-                {{ isInvalidSiriusTxnHash?'Transaction is not found.':'Sirius transaction is successful:' }}
+                {{ isInvalidSiriusTxnHash?$t('swap.txNotFound'):$t('swap.txSuccessful',{network: $t('swap.sirius')}) }}
                 <div v-if="!isInvalidSiriusTxnHash && step2" class="mt-2">
                   <div v-if="siriusTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
-                    <a :href="siriusTxnLink" target=_new :class="isInvalidSiriusTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="siriusTx" :copyValue="siriusTxnHash" copySubject="Sirius transaction hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ siriusTxnHash }}</a>
+                    <a :href="siriusTxnLink" target=_new :class="isInvalidSiriusTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="siriusTx" :copyValue="siriusTxnHash" :copySubject="$t('swap.transactionHash',{network: $t('swap.sirius')})"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ siriusTxnHash }}</a>
                     <div class="flex-none">
                       <font-awesome-icon icon="copy" @click="copy('siriusTx')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step2"></font-awesome-icon>
                     </div>
                   </div>
                 </div>
                 <div v-if="isInvalidSiriusTxnHash && step2" class="mt-2 text-sm text-gray-700">
-                  Sirius transaction hash is not found in swap service. Please initiate new swap from {{ currentNativeTokenName }} to BSC
-                  <router-link :to="{ name: 'ViewServicesMainnetSwapEthOptions' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">Swap</router-link>
+                  {{$t('swap.hashNotFound',[$t('swap.sirius'),$t('swap.bsc')])}}
+                  <router-link :to="{ name: 'ViewServicesMainnetSwapCheckBSCToSirius' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">{{$t('general.swap')}}</router-link>
                 </div>
               </div>
             </div>
-            <div class="font-bold text-left text-xs md:text-sm mt-4" :class="step3?'text-gray-700':'text-gray-300'">Step 2: Check BSC transaction status</div>
+            <div class="font-bold text-left text-xs md:text-sm mt-4" :class="step3?'text-gray-700':'text-gray-300'">{{$t('swap.checkOutgoingStep2')}}</div>
             <div class="flex border-b border-gray-300 p-3">
               <div class="flex-none">
                 <div class=" rounded-full border w-6 h-6" :class="step3?'border-blue-primary':'border-gray-300'">
@@ -129,7 +129,7 @@
                   </div>
                 </div>
               </div>
-              <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Checking transaction status</div>
+              <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">{{$t('swap.checkingStatus',{network: $t('swap.bsc')})}}</div>
             </div>
             <div class="flex border-b border-gray-300 p-3">
               <div class="flex-none">
@@ -144,20 +144,20 @@
                 {{ txtRemoteTxnSummary }}
                 <div v-if="!isInvalidRemoteTxnHash && step4" class="mt-2">
                   <div v-if="remoteTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
-                    <a :href="remoteTxnLink" target=_new :class="isInvalidRemoteTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="remoteTx" :copyValue="remoteTxnHash" copySubject="BSC transaction hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ remoteTxnHash }}</a>
+                    <a :href="remoteTxnLink" target=_new :class="isInvalidRemoteTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="remoteTx" :copyValue="remoteTxnHash" :copySubject="$t('swap.transactionHash',{network: $t('swap.bsc')})"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ remoteTxnHash }}</a>
                     <div class="flex-none">
                       <font-awesome-icon icon="copy" @click="copy('remoteTx')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step4"></font-awesome-icon>
                     </div>
                   </div>
                 </div>
                 <div v-if="isInvalidRemoteTxnHash && step4" class="mt-2 text-xs md:text-sm text-gray-700">
-                  BSC transaction hash is not found. Please contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
+                  {{$t('swap.hashNotFound2')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">{{$t('home.helpdesk')}}</a>.
                 </div>
               </div>
             </div>
           </div>
           <div class="mt-10 text-center">
-            <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn focus:outline-none w-40 inline-block" :class="isDisabled?'opacity-50':''" :is="isDisabled?'span':'router-link'" tag="button">Done</router-link>
+            <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn focus:outline-none w-40 inline-block" :class="isDisabled?'opacity-50':''" :is="isDisabled?'span':'router-link'" tag="button">{{$t('general.done')}}</router-link>
           </div>
         </div>
       </div>
@@ -174,6 +174,7 @@ import { SwapUtils } from '@/util/swapUtils';
 import { networkState } from '@/state/networkState';
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { AppState } from '@/state/appState';
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: 'ViewServicesMainnetSwapCheckSiriusToBSC',
@@ -183,7 +184,7 @@ export default {
   },
 
   setup() {
-    
+    const {t} = useI18n()
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 
     const verifyMetaMaskPlugin = ref(true);
@@ -205,10 +206,10 @@ export default {
           custodian.value = fetchService.data.bscInfo.sinkAddress;
           serviceErr.value = '';
         }else{
-          serviceErr.value = 'Swapping service is temporary not available. Please try again later';
+          serviceErr.value = t('swap.serviceDown');
         }
       } catch (error) {
-        serviceErr.value = 'Swapping service is temporary not available. Please try again later';
+        serviceErr.value = t('swap.serviceDown');
       }
     })()
 
@@ -283,7 +284,7 @@ export default {
       if(ethereumChainId === parseInt(chainId)){
         err.value = '';
       }else{
-        err.value = 'Please select ' + ethereumNetworkName + ' on MetaMask to swap';
+        err.value = t('swap.selectNetworkToSwap',{network: ethereumNetworkName}) ;
       }
     }
     const connectMetamask = () => {
@@ -301,7 +302,7 @@ export default {
             console.log('Please connect to MetaMask.');
           } else {
             if(err.code == '-32002'){
-              serviceErr.value = 'Please click on MetaMask extension to approve connection';
+              serviceErr.value = t('swap.approveTransaction');
             }
           }
         });
@@ -321,7 +322,7 @@ export default {
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-      toast.add({severity:'info', summary: copySubject + ' copied', detail: stringToCopy , group: 'br', life: 3000});
+      toast.add({severity:'info', summary: copySubject + ' '+t('general.copied'), detail: stringToCopy , group: 'br', life: 3000});
     };
 
     const currentPage = ref(1);
@@ -426,15 +427,15 @@ export default {
     const txtRemoteTxnSummary  = computed(() => {
       if(isInvalidRemoteTxnHash.value){
         if(transactionNotFound.value){
-          return 'Transaction is not found';
+          return t('swap.txNotFound');
         }else{
-          return 'Transaction has failed';
+          return t('swap.txFailed');
         }
       }else{
         if(transactionPending.value){
-          return 'BSC transaction is still pending. Please wait a few more moment';
+          return t('swap.transactionPending',{network: t('swap.bsc')});
         }else{
-          return 'BSC transaction is successful';
+          return t('swap.txSuccessful',{network: t('swap.bsc')});
         }
       }
     });

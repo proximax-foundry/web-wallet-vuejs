@@ -13,11 +13,11 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Tx Hash</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.txHash')}}</div>
             <div class="uppercase font-bold text-txs"><span class="text-txs" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span></div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Type</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.type')}}</div>
             <div class="flex items-center">
               <div class="uppercase font-bold text-txs mr-2">{{data.type}}</div>
               <div>
@@ -31,50 +31,50 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div v-if="selectedGroupType === transactionGroupType.CONFIRMED">
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Timestamp</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.timestamp')}}p</div>
             <div class="uppercase font-bold text-txs">{{ convertLocalTime(data.timestamp) }}</div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Info</div>
-            <div class="inline-block bg-blue-200 text-blue-700 rounded py-1 text-txs font-bold px-1 my-1" v-if="data.applyHeightDelta">{{ `Apply Height Delta: ${data.applyHeightDelta}` }}</div>
-            <div class="inline-block bg-blue-200 text-blue-700 rounded py-1 text-txs font-bold px-1 my-1" v-if="data.newVersion">{{ `New version: ${data.newVersion}` }}</div>
-            <div class="inline-block bg-blue-200 text-blue-700 rounded py-1 text-txs font-bold px-1 my-1" v-if="data.upgradePeriod">{{ `Upgrade period: ${data.upgradePeriod}` }}</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.info')}}</div>
+            <div class="inline-block bg-blue-200 text-blue-700 rounded py-1 text-txs font-bold px-1 my-1" v-if="data.applyHeightDelta">{{$t('dashboard.applyHeightDelta')}}:{{data.applyHeightDelta}}</div>
+            <div class="inline-block bg-blue-200 text-blue-700 rounded py-1 text-txs font-bold px-1 my-1" v-if="data.newVersion">{{$t('dashboard.newVersion')}}:{{data.newVersion}}</div>
+            <div class="inline-block bg-blue-200 text-blue-700 rounded py-1 text-txs font-bold px-1 my-1" v-if="data.upgradePeriod">{{$t('dashboard.upgradePeriod')}}:{{data.upgradePeriod}}</div>
           </div>
         </template>
       </Column>
-      <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
+      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="timestamp" header="TIMESTAMP" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
+      <Column field="timestamp" :header="$t('dashboard.timestamp')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
           <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
       </Column>
-      <Column field="typeName" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
+      <Column field="typeName" :header="$t('dashboard.type')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
-      <Column field="block" header="BLOCK" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
+      <Column field="block" :header="$t('general.block')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
           <div class="text-txs">{{ data.block }}</div>
         </template>
       </Column>
-      <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
+      <Column :header="$t('dashboard.txFee')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
           <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
-      <Column header="INFO" headerStyle="width:40px" v-if="wideScreen">
+      <Column :header="$t('dashboard.info')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <span class="inline-block bg-blue-200 text-blue-700 rounded py-1 text-txs font-bold px-1 my-1 mx-1" v-if="data.applyHeightDelta">{{ `Apply Height Delta: ${data.applyHeightDelta}` }}</span>
-          <span class="inline-block bg-blue-200 text-blue-700 rounded py-1 text-txs font-bold px-1 my-1 mx-1" v-if="data.newVersion">{{ `New version: ${data.newVersion}` }}</span>
-          <span class="inline-block bg-blue-200 text-blue-700 rounded py-1 text-txs font-bold px-1 my-1 mx-1" v-if="data.upgradePeriod">{{ `Upgrade period: ${data.upgradePeriod}` }}</span>
+          <span class="inline-block bg-blue-200 text-blue-700 rounded py-1 text-txs font-bold px-1 my-1 mx-1" v-if="data.applyHeightDelta">{{$t('dashboard.applyHeightDelta')}}:{{data.applyHeightDelta}}</span>
+          <span class="inline-block bg-blue-200 text-blue-700 rounded py-1 text-txs font-bold px-1 my-1 mx-1" v-if="data.newVersion">{{$t('dashboard.newVersion')}}:{{data.newVersion}}</span>
+          <span class="inline-block bg-blue-200 text-blue-700 rounded py-1 text-txs font-bold px-1 my-1 mx-1" v-if="data.upgradePeriod">{{$t('dashboard.upgradePeriod')}}:{{data.upgradePeriod}}</span>
         </template>
       </Column>
-      <Column header="" headerStyle="width:50px">
+      <Column header="" headerStyle="width:50px;text-transform:uppercase">
         <template #body="{data}">
           <div class="flex justify-center">
             <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
@@ -82,10 +82,10 @@
         </template>
       </Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('general.noRecord')}}
       </template>
       <template #loading>
-          {{$t('dashboard.loadingmessage')}}
+          {{$t('dashboard.fetchingTx')}}
       </template>
     </DataTable>
   </div>
