@@ -44,13 +44,13 @@
         }
       },
       "chainExplorer": {
-        "url": "https://bctestnetexplorer.xpxsirius.io",
-        "blockRoute": "#/result/blockHeight",
-        "publicKeyRoute": "#/result/publicKey",
-        "addressRoute": "#/result/address",
-        "hashRoute": "#/result/hash",
-        "namespaceInfoRoute": "#/result/namespaceInfo",
-        "assetInfoRoute": "#/result/assetInfo"
+        "url": "https://proximax-foundry.github.io/web-explorer-vuejs",
+        "blockRoute": "#/block",
+        "publicKeyRoute": "#/account",
+        "addressRoute": "#/account",
+        "hashRoute": "#/tx",
+        "namespaceInfoRoute": "#/namespace",
+        "assetInfoRoute": "#/asset"
       }
     },
     "Sirius Testnet 2": {
@@ -71,13 +71,13 @@
         }
       },
       "chainExplorer": {
-        "url": "https://bctestnetexplorer.xpxsirius.io",
-        "blockRoute": "#/result/blockHeight",
-        "publicKeyRoute": "#/result/publicKey",
-        "addressRoute": "#/result/address",
-        "hashRoute": "#/result/hash",
-        "namespaceInfoRoute": "#/result/namespaceInfo",
-        "assetInfoRoute": "#/result/assetInfo"
+        "url": "https://proximax-foundry.github.io/web-explorer-vuejs",
+        "blockRoute": "#/block",
+        "publicKeyRoute": "#/account",
+        "addressRoute": "#/account",
+        "hashRoute": "#/tx",
+        "namespaceInfoRoute": "#/namespace",
+        "assetInfoRoute": "#/asset"
       }
     }
 }
