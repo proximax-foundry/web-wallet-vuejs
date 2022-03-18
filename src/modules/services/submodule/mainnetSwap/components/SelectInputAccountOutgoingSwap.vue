@@ -11,7 +11,7 @@
         </div>
       </div>
       <div class="flex">
-        <div class="text-xs mr-3" v-if="selectedAccount!=''">{{$t('general.balance')}} <span v-html="selectedAccountBalanceFormatted"></span> <span class="text-xxs">{{ currentNativeTokenName }}</span></div>
+        <div class="text-xs mr-3" v-if="selectedAccount!=''">{{$t('general.balance')}} <span v-html="selectedAccountBalanceFormatted"></span> <span class="text-xxs">{{metx?'METX': currentNativeTokenName }}</span></div>
         <div v-if='!toggleSelection && selectedAccount==""' class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
         <div v-if='!toggleSelection && selectedAccount!=""'  class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
         <img v-if='toggleSelection' @click="selectedAccount='';$emit('update:modelValue', '');" src="@/assets/img/delete.svg" class="h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto">
@@ -51,6 +51,7 @@ export default defineComponent({
     'modelValue',
     'selectDefault',
     'placeholder',
+    'metx'
   ],
 
   setup(p){
@@ -111,7 +112,7 @@ export default defineComponent({
       if(includeMultisig.value){
         accounts = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
       }else{
-        accounts = walletState.currentLoggedInWallet.accounts;
+        accounts = walletState.currentLoggedInWallet.accounts.filter(acc=>acc.getDirectParentMultisig().length==0)
       }
 
       accounts.forEach(account => {
@@ -144,7 +145,7 @@ export default defineComponent({
       }else{
         accounts = walletState.currentLoggedInWallet.accounts;
       }
-      selectedAccountBalance.value = accounts.find(account => account.address == accountAddress).balance;
+      selectedAccountBalance.value = p.metx? accounts.find(account => account.address == accountAddress).assets.find(asset=>asset.namespaceNames=='prx.metx')? accounts.find(account => account.address == accountAddress).assets.find(asset=>asset.namespaceNames=='prx.metx').amount/Math.pow(10,6) : 0 :accounts.find(account => account.address == accountAddress).balance;
       selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
       toggleSelection.value = !toggleSelection.value;
     };

@@ -5,7 +5,7 @@
     </clipPath>
   </defs>
   <g id="metx" clip-path="url(#clip-metx)">
-    <rect width="800" height="800" fill="#fff"/>
+    <rect width="800" height="800" fill="#ffffff00"/>
     <g id="Group_115" data-name="Group 115" transform="translate(122.461 79.998)">
       <path id="Path_3898" data-name="Path 3898" d="M361.52,0,188.943,99.667V202.445L361.52,301.966,534.1,202.445V99.667Z" transform="translate(-84.471)" fill="#9d0000"/>
       <path id="Path_3899" data-name="Path 3899" d="M188.943,710.881V813.658L361.52,913.324,534.1,813.658V710.881L361.52,611.36Z" transform="translate(-84.472 -273.322)" fill="#400"/>

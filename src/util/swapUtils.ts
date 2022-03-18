@@ -752,8 +752,13 @@ export class SwapUtils {
     return fetch(`${baseUrl}/gasprice/bsc`).then(res => res.json());
   }
 
-  static getOutgoing_SwapTransfer_URL = (baseUrl: string): string => {
-    return `${baseUrl}/transfer`;
+  static getOutgoing_SwapTransfer_URL = (baseUrl: string,tokenName?: string): string => {
+    if(tokenName){
+      return `${baseUrl}/transfer/${tokenName}`;
+    }else{
+      return `${baseUrl}/transfer`
+    }
+    
   }
 
   static getOutgoing_SwapCheckByTxID_URL = (baseUrl: string, txID: string): string => {
@@ -768,8 +773,8 @@ export class SwapUtils {
     return `${baseUrl}/expx/transfer`;
   }
 
-  static getIncoming_BSCSwapTransfer_URL = (baseUrl: string): string => {
-    return `${baseUrl}/bxpx/transfer`;
+  static getIncoming_BSCSwapTransfer_URL = (baseUrl: string,tokenName: string): string => {
+    return `${baseUrl}/bxpx/${tokenName}/transfer`;
   }
 
   static checkSwapService = (baseUrl: string): string => {
@@ -825,8 +830,8 @@ export class SwapUtils {
     return returnResponse;
   }
 
-  static fetchBSCServiceInfo = async (baseUrl: string) :Promise<paramResponse> => {
-    const response = await fetch(`${baseUrl}/bxpx/service-info`);
+  static fetchBSCServiceInfo = async (baseUrl: string,tokenName: string) :Promise<paramResponse> => {
+    const response = await fetch(`${baseUrl}/bxpx/${tokenName}/service-info`);
     let data = '';
     if(response.status == 200){
       data = await response.json();

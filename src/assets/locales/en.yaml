@@ -553,7 +553,7 @@ swap:
   step1: 'Step 1: Send BEP20 {tokenName} to the escrow account'
   step2: 'Step 2: Validate your Sirius address'
   step3: 'Step 3: Initiate swap'
-  swapAmount: Swap AMount
+  swapAmount: Swap Amount
   swapBscToSirius: Swap from BSC to Proximax Sirius Chain
   swapDetails: Swap Details
   swapInProgress: Swap in progress. Please wait...
