@@ -22,10 +22,11 @@
       <div v-if="currentPage==1">
         <div class="text-sm my-5 font-bold">{{$t('general.transactionDetails')}}</div>
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
+        <div class="error error_box mb-5" v-if="xpxFeeErr">{{$t('swap.failCoverTxFee')}}</div>
         <SelectInputAccountOutgoingSwap :metx='true' v-model="siriusAddress" :placeholder="$t('swap.fromSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
         <div class="relative">
           <div class="opacity-90 w-full h-full absolute z-10 bg-white" v-if="!siriusAddress"></div>
-          <SwapInputClean class="mt-5" :metx='true' :disabled="disableAmount" v-model="amount" :balance="selectedAccountBalance" :placeholder="'METX' +' '+ $t('general.amount')" type="text" :showError="showAmountErr" :errorMessage="(selectedAccountBalance >= minBalanceAmount)?$t('general.insufficientBalance'):$t('swap.failCoverTxFee')" :emptyErrorMessage="$t('swap.amountEmpty')" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()"  :toolTip="$t('swap.bscAmountMsg')" />
+          <SwapInputClean class="mt-5" :metx='true' :disabled="disableAmount" v-model="amount" :balance="selectedAccountBalance" :placeholder="'METX' +' '+ $t('general.amount')" type="text" :showError="showAmountErr" :errorMessage="$t('general.insufficientBalance')" :emptyErrorMessage="$t('swap.amountEmpty')" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()"  :toolTip="$t('swap.bscAmountMsg')" />
           <MetamaskAddressInput :placeholder="$t('swap.bscAddress')" :errorMessage="$t('swap.bscAddressErr')" class="mt-5" :showError="showAddressErr" v-model="bscAddress" />
           <div class="tex-center font-bold text-sm my-5">{{$t('general.transactionFee')}} ({{$t('swap.bsc')}} BEP20 {{$t('general.network')}}):</div>
           <div class="md:grid md:grid-cols-3 mb-4">
@@ -56,9 +57,10 @@
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('general.transactionFee')}}: <span>{{ txFeeDisplay }}</span> {{ currentNativeTokenName}}</div>
           </div>
+          <div class="mb-5">Total Transaction Fee: {{minBalanceAmount}} {{currentNativeTokenName}}</div>
           <PasswordInputClean :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
           <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center">
-          {{ amount }} METX <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 ml-4">
+          {{ amount }} METX <img src="@/modules/account/img/metx-logo.svg"  class="w-5 h-5 ml-4">
           </div>
           <div class="flex justify-center mt-3">
             <div class="text-xs text-gray-600 mt-2 max-w-screen-md">{{$t('swap.bscOutgoingMsg')}}</div>
@@ -350,6 +352,7 @@ export default {
                         .build();
 
       txFee.value = Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(), 6);
+      minBalanceAmount.value = txFee.value
     }
 
     let txFee = ref(0);
@@ -495,7 +498,21 @@ export default {
 
     const maxSwapAmount = ref(0);
     const minBalanceAmount = ref(0);
-
+    
+    const xpxFeeErr = computed(()=>{
+      if(selectedAccount.value){
+        console.log(selectedAccount.value)
+        console.log(minBalanceAmount.value)
+        if(selectedAccount.value.balance<minBalanceAmount.value){
+          return true
+        }else{
+          return false
+        }
+      }else{
+        return false
+      }
+      
+    })
     const changeGasStrategy = (feeStrategy)=>{
       bscGasStrategy.value = feeStrategy;
 
@@ -518,11 +535,11 @@ export default {
       message2.gasPrice = selectedGasPriceInGwei.value;
       message2.gasLimit = selectedGasLimit.value;
 
-      maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value - txFee.value - gasPriceInXPX.value, 6);
+      /* maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value - txFee.value - gasPriceInXPX.value, 6); */
       minBalanceAmount.value = Helper.convertNumberMinimumFormat(txFee.value + gasPriceInXPX.value, 6);
-      if(amount.value > maxSwapAmount.value){
+      /* if(amount.value > maxSwapAmount.value){
         amount.value = maxSwapAmount.value;
-      }
+      } */
 
       if(selectedAccount.value.balance <= minBalanceAmount.value){
         amount.value = 0;
@@ -530,7 +547,7 @@ export default {
 
       if(selectedAccount.value.balance <= minBalanceAmount.value){
         disableAmount.value = true;
-        showAmountErr.value = true;
+        /* showAmountErr.value = true; */
       }else{
         disableAmount.value = false;
         showAmountErr.value = false;
@@ -753,6 +770,7 @@ export default {
       siriusAddress,
       walletState,
       Helper,
+      xpxFeeErr
     };
   }
 }

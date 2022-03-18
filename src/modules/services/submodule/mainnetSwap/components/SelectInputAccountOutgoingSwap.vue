@@ -11,7 +11,22 @@
         </div>
       </div>
       <div class="flex">
-        <div class="text-xs mr-3" v-if="selectedAccount!=''">{{$t('general.balance')}} <span v-html="selectedAccountBalanceFormatted"></span> <span class="text-xxs">{{metx?'METX': currentNativeTokenName }}</span></div>
+        <div class="text-xs mr-3" v-if="selectedAccount!=''">
+           
+          <div class="flex gap-2">
+            {{$t('general.balance')}}
+            <div class="flex gap-2">
+              <div v-html="selectedAccountBalanceFormatted"></div> 
+              <div class="text-xs">{{metx?'METX': currentNativeTokenName }}</div> 
+            </div>
+            <div class="flex gap-2">
+              <div v-if="metx" v-html="selectedAccountBalanceFormatted2"></div> 
+              <div v-if="metx" class="text-xs">{{currentNativeTokenName }}</div>
+            </div>
+          </div>
+         
+         
+        </div>
         <div v-if='!toggleSelection && selectedAccount==""' class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
         <div v-if='!toggleSelection && selectedAccount!=""'  class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
         <img v-if='toggleSelection' @click="selectedAccount='';$emit('update:modelValue', '');" src="@/assets/img/delete.svg" class="h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto">
@@ -133,6 +148,7 @@ export default defineComponent({
     const selectedAccount = ref('');
     const selectedAddress = ref('');
     const selectedAccountBalance = ref(0);
+    const selectedAccountBalance2 = ref(0)
     // const selectedAddress = ref(p.selectDefault);
     // const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonConfig));
     const selectedImg = ref('');
@@ -146,6 +162,7 @@ export default defineComponent({
         accounts = walletState.currentLoggedInWallet.accounts;
       }
       selectedAccountBalance.value = p.metx? accounts.find(account => account.address == accountAddress).assets.find(asset=>asset.namespaceNames=='prx.metx')? accounts.find(account => account.address == accountAddress).assets.find(asset=>asset.namespaceNames=='prx.metx').amount/Math.pow(10,6) : 0 :accounts.find(account => account.address == accountAddress).balance;
+      selectedAccountBalance2.value = p.metx? accounts.find(account => account.address == accountAddress).balance :0
       selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
       toggleSelection.value = !toggleSelection.value;
     };
@@ -155,6 +172,10 @@ export default defineComponent({
       return '<span class="font-bold text-xs">' + balance[0] + '</span>' + (balance[1]?'.<span class="text-xxs">' + balance[1] + '</span>':'');
     });
 
+    const selectedAccountBalanceFormatted2 = computed(() => {
+      let balance = Helper.convertToCurrency(selectedAccountBalance2.value, 0).split('.');
+      return '<span class="font-bold text-xs">' + balance[0] + '</span>' + (balance[1]?'.<span class="text-xxs">' + balance[1] + '</span>':'');
+    });
     return {
       currentNativeTokenName,
       selectAccount,
@@ -166,7 +187,9 @@ export default defineComponent({
       toggleSelection,
       selectedAccount,
       jdenticonConfig,
-      toSvg
+      toSvg,
+      selectedAccountBalance2,
+      selectedAccountBalanceFormatted2
     };
   }
 })
