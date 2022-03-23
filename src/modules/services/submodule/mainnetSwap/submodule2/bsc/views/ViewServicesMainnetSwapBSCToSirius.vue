@@ -303,7 +303,7 @@ export default {
         if(fetchService.status==200){
           tokenAddress.value = fetchService.data.bscInfo.scAddress;
           custodian.value = fetchService.data.bscInfo.sinkAddress;
-          defaultXPXTxFee.value = parseInt(fetchService.data.siriusInfo.feeAmount);
+          defaultXPXTxFee.value = fetchService.data.siriusInfo.feeAmount/Math.pow(10,fetchService.data.siriusInfo.divisibility);
           serviceErr.value = '';
         }else{
           serviceErr.value = t('swap.serviceDown');
