@@ -761,6 +761,10 @@ export class SwapUtils {
     
   }
 
+  static checkTokenBalance = (url: string,tokenName: string): Promise<any>=> {
+    return fetch(`${url}/checkTokenBalance/${tokenName}`).then((res) => res.json()).then((data) => { return data });
+  }
+
   static getOutgoing_SwapCheckByTxID_URL = (baseUrl: string, txID: string): string => {
     return `${baseUrl}/swapByTx/${txID}`;
   }

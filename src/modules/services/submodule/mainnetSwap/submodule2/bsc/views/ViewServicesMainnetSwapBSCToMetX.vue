@@ -78,7 +78,7 @@
               </div>
             </div>
           </div>
-          <SupplyInputClean :disabled="disableAmount" v-model="amount" :balance="balance" :placeholder="'BEP20 ' + 'MetX'" type="text" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':amount>=minAmount?$t('swap.insufficientTokenBalance'):`Min. amount is ${minAmount}(${minAmount-1} MetX will deducted for transaction fee)`" :decimal="6"  />
+          <SupplyInputClean :disabled="disableAmount" v-model="amount" :balance="balance" :placeholder="'BEP20 ' + 'MetX'" type="text" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':amount>=minAmount?$t('swap.insufficientTokenBalance'):`Min. amount is ${minAmount}(${feeAmount} MetX will deducted for transaction fee)`" :decimal="tokenDivisibility"  />
           <div class="text-left">
             <SelectInputAccount v-model="siriusAddress" :placeholder="$t('swap.toSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
           </div>
@@ -294,17 +294,21 @@ export default {
     swapData.init();
 
     const minAmount = ref(0)
+    const feeAmount = ref(0)
+    const tokenDivisibility = ref(0)
     const custodian = ref('');
     const tokenAddress = ref('');
     
+
     (async() => {
       try {
         const fetchService = await SwapUtils.fetchBSCServiceInfo(swapData.swap_IN_SERVICE_URL,'MetX');
-        console.log(fetchService)
         if(fetchService.status==200){
           tokenAddress.value = fetchService.data.bscInfo.scAddress;
           custodian.value = fetchService.data.bscInfo.sinkAddress;
           serviceErr.value = '';
+          tokenDivisibility.value = fetchService.data.siriusInfo.divisibility
+          feeAmount.value = fetchService.data.siriusInfo.feeAmount/Math.pow(10,tokenDivisibility.value)
           minAmount.value = fetchService.data.siriusInfo.minAmount
         }else{
           serviceErr.value = t('swap.serviceDown');
@@ -465,7 +469,7 @@ export default {
             signer = provider.getSigner();
             const contract = new ethers.Contract(newTokenAddress, abi, signer);
             const tokenBalance = await contract.balanceOf(newCurrentAccount);
-            balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
+            balance.value = tokenBalance.toNumber()/Math.pow(10, tokenDivisibility.value);
           }catch(err) {
             balance.value = 0;
           }
@@ -518,7 +522,7 @@ export default {
     const serviceErr = ref('');
     const isDisabledSwap = computed(() =>
       // verify it has been connected to MetaMask too
-      !(amount.value > 0 && siriusAddress.value != '' && !err.value && (balance.value >= amount.value))
+      !(amount.value > 0 && siriusAddress.value != '' && !err.value && (balance.value >= amount.value) && amount.value>=minAmount.value)
     );
     const amount = ref('0');
 
@@ -531,8 +535,8 @@ export default {
     });
 
     const amountReceived = computed(() => {
-      if((amount.value - 1) >0 ){
-        return (amount.value - 1);
+      if(Math.round((amount.value - feeAmount.value)*Math.pow(10,AppState.nativeToken.divisibility))/Math.pow(10,AppState.nativeToken.divisibility) >0 ){
+        return Math.round((amount.value - feeAmount.value)*Math.pow(10,AppState.nativeToken.divisibility))/Math.pow(10,AppState.nativeToken.divisibility)
       }else{
         return 0;
       }
@@ -579,7 +583,7 @@ export default {
         };
         const receipt = await Contract.transfer(
           custodian.value,
-          ethers.utils.parseUnits(amount.value, 6),
+          ethers.utils.parseUnits(amount.value, tokenDivisibility.value),
           options,
         );
         validationHash.value = receipt.hash;
@@ -790,7 +794,9 @@ export default {
       amountReceived,
       Helper,
       siriusName,
-      minAmount
+      minAmount,
+      feeAmount,
+      tokenDivisibility
     };
   },
 }

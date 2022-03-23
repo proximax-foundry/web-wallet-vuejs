@@ -26,7 +26,7 @@
         <SelectInputAccountOutgoingSwap :metx='true' v-model="siriusAddress" :placeholder="$t('swap.fromSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
         <div class="relative">
           <div class="opacity-90 w-full h-full absolute z-10 bg-white" v-if="!siriusAddress"></div>
-          <SwapInputClean class="mt-5" :metx='true' :disabled="disableAmount" v-model="amount" :balance="selectedAccountBalance" :placeholder="'METX' +' '+ $t('general.amount')" type="text" :showError="showAmountErr" :errorMessage="$t('general.insufficientBalance')" :emptyErrorMessage="$t('swap.amountEmpty')" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()"  :toolTip="$t('swap.bscAmountMsg')" />
+          <SwapInputClean class="mt-5" :metx='true' :disabled="disableAmount" v-model="amount" :balance="selectedAccountBalance" :placeholder="'METX' +' '+ $t('general.amount')" type="text" :showError="showAmountErr" :errorMessage="$t('general.insufficientBalance')" :emptyErrorMessage="$t('swap.amountEmpty')" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()"  :toolTip="$t('swap.bscAmountMsg')" :decimal="tokenDivisibiliy"/>
           <MetamaskAddressInput :placeholder="$t('swap.bscAddress')" :errorMessage="$t('swap.bscAddressErr')" class="mt-5" :showError="showAddressErr" v-model="bscAddress" />
           <div class="tex-center font-bold text-sm my-5">{{$t('general.transactionFee')}} ({{$t('swap.bsc')}} BEP20 {{$t('general.network')}}):</div>
           <div class="md:grid md:grid-cols-3 mb-4">
@@ -154,7 +154,7 @@ export default {
     const timerSeconds = ref(180);
     const timerSecondsDisplay = computed(()=> timerSeconds.value % 60);
     const timerMinutes = computed(()=> Math.floor(timerSeconds.value / 60));
-
+    const tokenDivisibility = ref(0)
     const timerInterval = setInterval(()=>{
       --timerSeconds.value;
     }, 1000);
@@ -208,8 +208,8 @@ export default {
         (acc)=>{ 
           return { 
             name: acc.name,
-            balance: acc.assets.find(asset=>asset.namespaceNames=='prx.metx')? acc.assets.find(asset=>asset.namespaceNames=='prx.metx').amount : 0 ,
-            balanceDisplay: Helper.toCurrencyFormat(acc.balance, 6),
+            balance: acc.balance,
+            balanceDisplay: Helper.toCurrencyFormat(acc.balance, AppState.nativeToken.divisibility),
             type: "",
             address: Helper.createAddress(acc.address).pretty(),
             publicKey: acc.publicKey,
@@ -222,8 +222,8 @@ export default {
         (acc)=>{ 
           return { 
             name: acc.name,
-            balance: acc.assets.find(asset=>asset.namespaceNames=='prx.metx')? acc.assets.find(asset=>asset.namespaceNames=='prx.metx').amount : 0 ,
-            balanceDisplay: Helper.toCurrencyFormat(acc.balance, 6),
+            balance: acc.balance,
+            balanceDisplay: Helper.toCurrencyFormat(acc.balance, AppState.nativeToken.divisibility),
             type: "MULTISIG",
             address: Helper.createAddress(acc.address).pretty(),
             publicKey: acc.publicKey,
@@ -243,7 +243,7 @@ export default {
     });
 
     const siriusAddress = ref('');
-
+    
     watch(siriusAddress, (address) => {
       if(address){
         let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
@@ -252,9 +252,9 @@ export default {
         }
         selectedAccountName.value = account.name;
         selectedAccountAddress.value = account.address;
-        selectedAccountBalance.value = account.assets.find(asset=>asset.namespaceNames=='prx.metx')? account.assets.find(asset=>asset.namespaceNames=='prx.metx').amount/Math.pow(10,6) : 0
+        selectedAccountBalance.value = account.assets.find(asset=>asset.namespaceNames=='prx.metx')? account.assets.find(asset=>asset.namespaceNames=='prx.metx').amount/Math.pow(10,tokenDivisibility.value) : 0
         selectedAccountPublicKey.value = account.publicKey;
-        maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value , 6);
+        maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value , tokenDivisibility.value);
       }else{
         selectedAccountName.value = '';
         selectedAccountAddress.value = '';
@@ -315,15 +315,17 @@ export default {
     let xpxExplorerUrl = networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.hashRoute + '/';
     let sinkFundAddress;
     let sinkFeeAddress;
-
+    
+    /* AppState.chainAPI.assetAPI.getMosaic */
     const updateSinkAddress = async()=>{
       try{
         const swapServiceInfoURL = SwapUtils.getServiceInfoURL(swapServerUrl);
-
+        
         const serviceInfo = await SwapUtils.getOutgoingSwapServiceInfo(swapServiceInfoURL);
+        
         sinkFundAddress = serviceInfo.siriusInfo.sinkingFundAddress;
         sinkFeeAddress = serviceInfo.siriusInfo.sinkingFeeAddress;
-
+        tokenDivisibility.value = serviceInfo.swapTokens.find(token=>token.name=='metx').decimal
         buildTransaction();
       }
       catch(error){
@@ -351,13 +353,13 @@ export default {
                         .innerTransactions(Helper.createInnerTransaction([transferTx, feetransferTx], "0".repeat(64)))
                         .build();
 
-      txFee.value = Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(), 6);
+      txFee.value = Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(), AppState.nativeToken.divisibility);
       minBalanceAmount.value = txFee.value
     }
 
     let txFee = ref(0);
     const txFeeDisplay = computed(()=>{
-        return Helper.toCurrencyFormat(txFee.value, 6);
+        return Helper.toCurrencyFormat(txFee.value, AppState.nativeToken.divisibility);
     });
 
     const rebuildTranction = ()=>{
@@ -369,7 +371,7 @@ export default {
         swapAmount = amount.value;
       }
      
-      const swapAmountXPX = Helper.createAsset(Helper.createNamespaceId('prx.metx').toHex(), Helper.convertToAbsolute(swapAmount, 6));
+      const swapAmountXPX = Helper.createAsset(Helper.createNamespaceId('prx.metx').toHex(), Helper.convertToAbsolute(swapAmount, tokenDivisibility.value));
       const feeXpx = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), Helper.convertToAbsolute(gasPriceInXPX.value, AppState.nativeToken.divisibility));
       transferTx = transferBuilder.mosaics([swapAmountXPX])
                         .recipient(Helper.createAddress(sinkFundAddress))
@@ -411,15 +413,15 @@ export default {
     });
 
     const xpxAmountInStandardGasPrice = computed(()=>{
-      return Helper.convertNumberMinimumFormat((standardGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, 6);
+      return Helper.convertNumberMinimumFormat((standardGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, AppState.nativeToken.divisibility);
     });
 
     const xpxAmountInFastGasPrice = computed(()=>{
-      return Helper.convertNumberMinimumFormat((fastGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, 6);
+      return Helper.convertNumberMinimumFormat((fastGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, AppState.nativeToken.divisibility);
     });
 
     const xpxAmountInRapidGasPrice = computed(()=>{
-      return Helper.convertNumberMinimumFormat((rapidGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, 6);
+      return Helper.convertNumberMinimumFormat((rapidGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, AppState.nativeToken.divisibility);
     });
 
     const standardGasPriceInGwei = ref(0);
@@ -501,8 +503,6 @@ export default {
     
     const xpxFeeErr = computed(()=>{
       if(selectedAccount.value){
-        console.log(selectedAccount.value)
-        console.log(minBalanceAmount.value)
         if(selectedAccount.value.balance<minBalanceAmount.value){
           return true
         }else{
@@ -535,11 +535,8 @@ export default {
       message2.gasPrice = selectedGasPriceInGwei.value;
       message2.gasLimit = selectedGasLimit.value;
 
-      /* maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value - txFee.value - gasPriceInXPX.value, 6); */
-      minBalanceAmount.value = Helper.convertNumberMinimumFormat(txFee.value + gasPriceInXPX.value, 6);
-      /* if(amount.value > maxSwapAmount.value){
-        amount.value = maxSwapAmount.value;
-      } */
+      minBalanceAmount.value = Helper.convertNumberMinimumFormat(txFee.value + gasPriceInXPX.value, AppState.nativeToken.divisibility);
+     
 
       if(selectedAccount.value.balance <= minBalanceAmount.value){
         amount.value = 0;
@@ -596,10 +593,16 @@ export default {
             return;
           }
           disableTimer();
-          console.log(aggreateCompleteTransaction)
           let signedTransaction = SwapUtils.signTransaction(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
           siriusTransactionHash.value = signedTransaction.hash;
-          callSwapServer(signedTransaction.payload);
+          checkTokenBalance().then(balance=>{
+            if(amount.value<balance){
+              callSwapServer(signedTransaction.payload);
+            }else{
+              addErrorToast('Swap Server Error', 'Insufficient Balance from Swap Server', 5000);
+            }
+          })
+          
         } else {
           err.value = t('general.walletPasswordInvalid',{name: walletState.currentLoggedInWallet.name});
           swapInProgress.value = false;
@@ -607,7 +610,14 @@ export default {
         }
       }
     };
-
+    const checkTokenBalance = async() =>{
+      const response = await SwapUtils.checkTokenBalance(swapServerUrl,'metx')
+      if (response.status){
+        return response.tokenBalance
+      }else{
+        return 0
+      }
+    }
     // call swap server function
     const callSwapServer = async(payload) =>{
       const data = {
@@ -617,17 +627,15 @@ export default {
         }
       };
       let stringifyData = JSON.stringify(data);
-      console.log(data)
 
       try {
-        const response = await fetch(SwapUtils.getOutgoing_SwapTransfer_URL(swapServerUrl,'MetX'), {
+        const response = await fetch(SwapUtils.getOutgoing_SwapTransfer_URL(swapServerUrl,'metx'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: stringifyData, // body data type must match "Content-Type" header
         });
-        console.log(response.status)
         if(response.ok){
           const res = await response.json();
           certTransactionHash.value = res.data.txHash;
@@ -770,7 +778,8 @@ export default {
       siriusAddress,
       walletState,
       Helper,
-      xpxFeeErr
+      xpxFeeErr,
+      tokenDivisibility
     };
   }
 }
