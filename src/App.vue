@@ -23,7 +23,7 @@
     </Toast>
     <ConfirmDialog></ConfirmDialog>
     <headerComponent></headerComponent>
-    <div :class="login?`flex min-full-screen`:`min-h-screen sm:flex sm:items-center sm:justify-center`">
+    <div :class="login?`flex min-full-screen`:`min-h-screen sm:flex sm:items-center sm:justify-center`" ref="mainFrame">
       <NavigationMenu v-if="login" class="lg:mt-16 flex-shrink-0 bg-navy-primary text-left text-xs bg-navi z-20 overflow-y-auto fixed inset-y-0 left-0 transform lg:-translate-x-0 transition duration-200 ease-in-out" :class="`${isShowNavi?'-translate-x-0':'-translate-x-full'}`"></NavigationMenu>
       <div :class="`${ login?'inline-block flex-grow overflow-hidden':'sm:w-full'}`">
         <div :class="`${ login?'flex flex-col min-full-screen bg-white':''}`">
@@ -36,9 +36,8 @@
           </footer>
         </div>
       </div>
-      
     </div>
-    <div v-if="!login" class=" absolute bottom-0 w-full items-center px-2">
+    <div v-if="!login" class="w-full items-center px-2" :class="`${ overflowScreen?'relative':'absolute bottom-0' }`">
       <footer class="mx-auto h-12 mt-20 text-center  lg:flex text-txs lg:text-xs lg:justify-between container text-white pb-5">
         <div class="ml-2 sm:ml-0">{{$t('home.copyright')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-white hover:underline">{{$t('home.helpdesk')}}</a></div>
         <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span>{{$t('home.version')}} {{$t('home.beta')}} {{$t('home.version')}}{{ versioning }}</span></div>
@@ -48,7 +47,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, provide, watch, ref, reactive } from "vue";
+import { computed, defineComponent, getCurrentInstance, provide, watch, ref, reactive, onUnmounted, onMounted } from "vue";
 import selectLanguageModal from '@/modules/home/components/selectLanguageModal.vue';
 import packageData from "../package.json";
 import headerComponent from '@/components/headerComponent.vue'
@@ -79,6 +78,27 @@ export default defineComponent({
   setup() {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance!.appContext.config.globalProperties.emitter;
+
+    const overflowScreen = ref(false);
+    const mainFrame = ref(null);
+    let contentHeight = 0;
+    const screenResizeHandler = () => {
+      if(window.innerHeight < contentHeight){
+        overflowScreen.value = true;
+      }else{
+        overflowScreen.value = false;
+      }
+    };
+    screenResizeHandler();
+
+    onUnmounted(() => {
+      window.removeEventListener("resize", screenResizeHandler);
+    });
+
+    onMounted(() => {
+      contentHeight = mainFrame.value.clientHeight;
+      window.addEventListener("resize", screenResizeHandler);
+    });
 
     const isLoading = computed(()=>{ return !AppState.isReady});
 
@@ -124,7 +144,9 @@ export default defineComponent({
       versioning,
       currentRouteName,
       isShowNavi,
-      isLoading
+      isLoading,
+      overflowScreen,
+      mainFrame
     }
   }
 });
