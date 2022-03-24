@@ -1,7 +1,7 @@
 <template>
   <loading v-model:active="isLoading" :can-cancel="false"
         :is-full-page="true" />
-  <div class="flex flex-col justify-between md:min-h-screen bg-navy-primary" @click="clickEvent">
+  <div class="flex flex-col justify-between md:min-h-screen bg-navy-primary" @click="clickEvent" ref="mainFrame">
     <Toast position="top-left" group="tl" />
     <Toast position="top-right" group="tr" />
     <Toast position="center" group="center" />
@@ -23,7 +23,7 @@
     </Toast>
     <ConfirmDialog></ConfirmDialog>
     <headerComponent></headerComponent>
-    <div :class="login?`flex min-full-screen`:`min-h-screen sm:flex sm:items-center sm:justify-center`" ref="mainFrame">
+    <div :class="login?`flex min-full-screen`:`min-h-screen sm:flex sm:items-center sm:justify-center`">{{overflowScreen}}
       <NavigationMenu v-if="login" class="lg:mt-16 flex-shrink-0 bg-navy-primary text-left text-xs bg-navi z-20 overflow-y-auto fixed inset-y-0 left-0 transform lg:-translate-x-0 transition duration-200 ease-in-out" :class="`${isShowNavi?'-translate-x-0':'-translate-x-full'}`"></NavigationMenu>
       <div :class="`${ login?'inline-block flex-grow overflow-hidden':'sm:w-full'}`">
         <div :class="`${ login?'flex flex-col min-full-screen bg-white':''}`">
@@ -81,13 +81,26 @@ export default defineComponent({
 
     const overflowScreen = ref(false);
     const mainFrame = ref(null);
-    let contentHeight = 0;
-    const screenResizeHandler = () => {
-      if(window.innerHeight < contentHeight){
-        overflowScreen.value = true;
+    let contentHeight = ref(0);
+
+    const isOverflow = () => {
+      if(window.innerWidth > 768){
+        if(window.innerHeight < contentHeight.value){
+          overflowScreen.value = true;
+        }else{
+          overflowScreen.value = false;
+        }
       }else{
-        overflowScreen.value = false;
+        if(window.innerHeight < (contentHeight.value + 90)){
+          overflowScreen.value = true;
+        }else{
+          overflowScreen.value = false;
+        }
       }
+    }
+
+    const screenResizeHandler = () => {
+      isOverflow();
     };
     screenResizeHandler();
 
@@ -96,7 +109,8 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      contentHeight = mainFrame.value.clientHeight;
+      contentHeight.value = mainFrame.value.clientHeight;
+      isOverflow();
       window.addEventListener("resize", screenResizeHandler);
     });
 
