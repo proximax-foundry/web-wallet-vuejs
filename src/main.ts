@@ -18,6 +18,7 @@ import { NetworkStateUtils } from './state/utils/networkStateUtils';
 import { ChainUtils } from './util/chainUtils';
 import { ChainAPICall } from './models/REST/chainAPICall';
 import { AppStateUtils } from './state/utils/appStateUtils';
+import {WalletMigration} from './models/walletMigration';
 import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainSwapConfig, ThemeStyleConfig, ChainProfileName } from "./models/stores/"
 
 // Import Font Awesome Icons
@@ -60,6 +61,7 @@ app.component(VuePassword);
 AppStateUtils.addNewReadyStates('chainProfile');
 AppStateUtils.addNewReadyStates('theme');
 AppStateUtils.addNewReadyStates('checkSession');
+AppStateUtils.addNewReadyStates('walletMigration');
 
 const loadThemeConfig = async() => {
   try {
@@ -237,6 +239,16 @@ const chainSwapIntegration = async () => {
 
 chainSwapIntegration();
 
+const runWalletMigration = async () => {
+
+  let walletMigration = new WalletMigration();
+
+  walletMigration.runPatching();
+
+  AppStateUtils.setStateReady('walletMigration');
+}
+
+runWalletMigration();
 
 
 // check from session when page refreshed

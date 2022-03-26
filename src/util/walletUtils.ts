@@ -1078,13 +1078,16 @@ export class WalletUtils {
         }
     }
 
-    static initFixOldFormat(walletsToCheck: Wallets): void{
+    static initFixOldFormat(walletsToCheck: Wallets, networkName: string, networkType: NetworkType): void{
         let walletsInstance = new Wallets();
         let wallets: Wallet[] = [];
+        let prefix = networkType === NetworkType.MAIN_NET ? "sw-books-mainnet-" : "sw-books-testnet-";
+
 
         walletsToCheck.wallets.forEach((wallet)=>{
 
             let walletAccounts: WalletAccount[] = [];
+            let allWalletContacts: AddressBook[] = [];
 
             wallet.accounts.forEach((account)=>{
 
@@ -1095,12 +1098,24 @@ export class WalletUtils {
                 }
                 else{
                     let newWalletAccount = WalletUtils.createNewWalletAccountFromOldFormat(stringJSON);
-        
+                    newWalletAccount.fixAddress(networkType);
+
                     walletAccounts.push(newWalletAccount);
                 }
             });
 
             wallet.accounts = walletAccounts;
+            wallet.networkName = networkName;
+
+            let accountAddressBooks: any[] = JSON.parse(localStorage.getItem(prefix + wallet.name));
+
+            for(let i = 0; i < accountAddressBooks.length; ++i){
+                if(accountAddressBooks[i].walletContact){
+                    allWalletContacts.push(new AddressBook( accountAddressBooks[i].label, accountAddressBooks[i].value ,"-none-"));
+                }
+            }            
+                    
+            wallet.contacts = allWalletContacts;
             wallets.push(wallet);
         });
 
