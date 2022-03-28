@@ -1107,14 +1107,15 @@ export class WalletUtils {
             wallet.accounts = walletAccounts;
             wallet.networkName = networkName;
 
-            let accountAddressBooks: any[] = JSON.parse(localStorage.getItem(prefix + wallet.name));
+            if(localStorage.getItem(prefix + wallet.name)){
+                let accountAddressBooks: any[] = JSON.parse(localStorage.getItem(prefix + wallet.name));
 
-            for(let i = 0; i < accountAddressBooks.length; ++i){
-                if(accountAddressBooks[i].walletContact){
-                    allWalletContacts.push(new AddressBook( accountAddressBooks[i].label, accountAddressBooks[i].value ,"-none-"));
-                }
-            }            
-                    
+                for(let i = 0; i < accountAddressBooks.length; ++i){
+                    if(accountAddressBooks[i].walletContact){
+                        allWalletContacts.push(new AddressBook( accountAddressBooks[i].label, accountAddressBooks[i].value ,"-none-"));
+                    }
+                }       
+            }        
             wallet.contacts = allWalletContacts;
             wallets.push(wallet);
         });
