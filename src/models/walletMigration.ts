@@ -32,12 +32,14 @@ export class WalletMigration{
         }
 
         if(localStorage.getItem("sw-mainnet")){
+            WalletMigration.doLocalStorageBackup("sw", 1);
             let storedWallets: any = JSON.parse(localStorage.getItem("sw-mainnet"));
             let newWallet = new Wallets();
             newWallet.wallets = storedWallets;
             WalletUtils.initFixOldFormat(newWallet, networkState.availableNetworks[0], NetworkType.MAIN_NET);
         }
         else if(localStorage.getItem("sw-testnet")){
+            WalletMigration.doLocalStorageBackup("sw", 1);
             let storedWallets: any = JSON.parse(localStorage.getItem("sw-testnet"));
             let newWallet = new Wallets();
             newWallet.wallets = storedWallets;
@@ -57,6 +59,13 @@ export class WalletMigration{
         }
         else{
             return 0;
+        }
+    }
+
+    static doLocalStorageBackup(storageName: string, version: number){
+        if(localStorage.getItem(storageName)){
+            let backupData = localStorage.getItem(storageName);
+            localStorage.setItem(`pre${version}-${storageName}`, backupData);
         }
     }
 }
