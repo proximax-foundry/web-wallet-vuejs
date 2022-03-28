@@ -84,14 +84,6 @@ export const MainnetSwapRoutes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/swap-metx-bsc',
-    name: 'ViewServicesMainnetSwapMetxToBSC',
-    component: () => import('@/modules/services/submodule/mainnetSwap/submodule2/bsc/views/ViewServicesMainnetSwapMetxToBSC.vue'),
-    meta: {
-      title: "Swap Metx To BSC",
-    }
-  },
-  {
     path: '/swap-bsc-metx',
     name: 'ViewServicesMainnetSwapBSCToMetX',
     component: () => import('@/modules/services/submodule/mainnetSwap/submodule2/bsc/views/ViewServicesMainnetSwapBSCToMetX.vue'),

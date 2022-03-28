@@ -761,6 +761,10 @@ export class SwapUtils {
     
   }
 
+  static getSwapTokenList = (baseUrl: string): Promise<any> =>{
+    return fetch(`${baseUrl}/swapTokenList`).then(res => res.json());
+  }
+
   static checkTokenBalance = (url: string,tokenName: string): Promise<any>=> {
     return fetch(`${url}/checkTokenBalance/${tokenName}`).then((res) => res.json()).then((data) => { return data });
   }

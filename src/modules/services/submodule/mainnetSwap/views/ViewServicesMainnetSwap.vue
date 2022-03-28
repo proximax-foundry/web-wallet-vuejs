@@ -19,8 +19,7 @@
             <div class="bg-blue-100 border-blue-100 uppercase py-2 px-5 text-xxs">{{$t('general.selectOption')}}</div>
             <router-link :to="{ name: 'ViewServicesMainnetSwapBSCToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">{{$t('swap.bscToSirius')}}</router-link>
             <router-link :to="{ name: 'ViewServicesMainnetSwapBSCToMetX' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">BSC To MetX</router-link>
-            <div class="py-3 px-5 text-sm font-bold transition-all duration-500 flex justify-between" :class="`${!displayWaitMessage['bsc'] ?'cursor-pointer hover:bg-blue-500 hover:text-white':''}`" @click="gotoOutgoingPage('bsc')">{{ displayOutgoingBSCSwapLabel }}<div v-if="displayWaitMessage['bsc'] && !metx" style="border-top-color:transparent" class="inline-block ml-2 w-5 h-5 border-4 border-gray-700 border-solid rounded-full animate-spin"></div></div>
-            <div class="py-3 px-5 text-sm font-bold transition-all duration-500 flex justify-between" :class="`${!displayWaitMessage['bsc'] ?'cursor-pointer hover:bg-blue-500 hover:text-white':''}`" @click="isMetx(),gotoOutgoingPage('bsc')">{{ displayOutgoingBSCSwapLabel2 }}<div v-if="displayWaitMessage['bsc'] && metx" style="border-top-color:transparent" class="inline-block ml-2 w-5 h-5 border-4 border-gray-700 border-solid rounded-full animate-spin"></div></div>
+            <div class="py-3 px-5 text-sm font-bold transition-all duration-500 flex justify-between" :class="`${!displayWaitMessage['bsc'] ?'cursor-pointer hover:bg-blue-500 hover:text-white':''}`" @click="gotoOutgoingPage('bsc')">{{ displayOutgoingBSCSwapLabel }}<div v-if="displayWaitMessage['bsc'] " style="border-top-color:transparent" class="inline-block ml-2 w-5 h-5 border-4 border-gray-700 border-solid rounded-full animate-spin"></div></div>
             <router-link :to="{ name: 'ViewServicesMainnetSwapCheckBSCToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">{{$t('swap.checkStatus')}}</router-link>
           </div>
         </div>
@@ -140,22 +139,6 @@ export default {
       }
     });
 
-    const metx = ref(false)
-    const isMetx = ()=>{
-      metx.value = true
-    }
-
-    const displayOutgoingBSCSwapLabel2 = computed(() => {
-      let label = 'Metx To BSC';
-      if(displayConnectionMessage.value['bsc']){
-        return t('swap.failConnect');
-      }else if(displayErrorMessage.value['bsc']){
-        return t('swap.serviceUnavailable');
-      }else{
-        return label;
-      }
-    });
-
     const gotoOutgoingPage = async(coin)=> {
 
       if(isChecking.value[coin]){
@@ -196,12 +179,7 @@ export default {
           if(coin == 'eth'){
             router.push({ name: "ViewServicesMainnetSwapSiriusToETH"});
           }else if(coin == 'bsc'){
-            if(metx.value){
-              router.push({ name: "ViewServicesMainnetSwapMetxToBSC"});
-            }else{
-              router.push({ name: "ViewServicesMainnetSwapSiriusToBSC"});
-            }
-            
+            router.push({ name: "ViewServicesMainnetSwapSiriusToBSC"});
           }
         }else{
           displayWaitMessage.value[coin] = false;
@@ -229,9 +207,6 @@ export default {
       displayOutgoingETHSwapLabel,
       displayOutgoingBSCSwapLabel,
       displayOutgoingNIS1SwapLabel,
-      displayOutgoingBSCSwapLabel2,
-      isMetx,
-      metx
     }
   }
 }
