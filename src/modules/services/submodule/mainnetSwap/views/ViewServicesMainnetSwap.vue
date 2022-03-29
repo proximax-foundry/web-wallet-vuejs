@@ -18,7 +18,8 @@
           <div class="w-full text-left z-20 bg-white" v-if="open['bsc']">
             <div class="bg-blue-100 border-blue-100 uppercase py-2 px-5 text-xxs">{{$t('general.selectOption')}}</div>
             <router-link :to="{ name: 'ViewServicesMainnetSwapBSCToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">{{$t('swap.bscToSirius')}}</router-link>
-            <div class="py-3 px-5 text-sm font-bold transition-all duration-500 flex justify-between" :class="`${!displayWaitMessage['bsc']?'cursor-pointer hover:bg-blue-500 hover:text-white':''}`" @click="gotoOutgoingPage('bsc')">{{ displayOutgoingBSCSwapLabel }}<div v-if="displayWaitMessage['bsc']" style="border-top-color:transparent" class="inline-block ml-2 w-5 h-5 border-4 border-gray-700 border-solid rounded-full animate-spin"></div></div>
+            <router-link :to="{ name: 'ViewServicesMainnetSwapBSCToMetX' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">BSC To MetX</router-link>
+            <div class="py-3 px-5 text-sm font-bold transition-all duration-500 flex justify-between" :class="`${!displayWaitMessage['bsc'] ?'cursor-pointer hover:bg-blue-500 hover:text-white':''}`" @click="gotoOutgoingPage('bsc')">{{ displayOutgoingBSCSwapLabel }}<div v-if="displayWaitMessage['bsc'] " style="border-top-color:transparent" class="inline-block ml-2 w-5 h-5 border-4 border-gray-700 border-solid rounded-full animate-spin"></div></div>
             <router-link :to="{ name: 'ViewServicesMainnetSwapCheckBSCToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">{{$t('swap.checkStatus')}}</router-link>
           </div>
         </div>

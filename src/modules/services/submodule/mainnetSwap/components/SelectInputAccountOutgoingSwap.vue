@@ -11,7 +11,22 @@
         </div>
       </div>
       <div class="flex">
-        <div class="text-xs mr-3" v-if="selectedAccount!=''">{{$t('general.balance')}} <span v-html="selectedAccountBalanceFormatted"></span> <span class="text-xxs">{{ currentNativeTokenName }}</span></div>
+        <div class="text-xs mr-3" v-if="selectedAccount!=''">
+           
+          <div class="flex gap-2">
+            {{$t('general.balance')}}
+            <div class="flex gap-2">
+              <div v-html="selectedAccountBalanceFormatted"></div> 
+              <div class="text-xs uppercase">{{otherToken!='prx.xpx'?name: currentNativeTokenName }}</div> 
+            </div>
+            <div class="flex gap-2">
+              <div v-if="otherToken!='prx.xpx'" v-html="selectedAccountBalanceFormatted2"></div> 
+              <div v-if="otherToken!='prx.xpx'" class="text-xs">{{currentNativeTokenName }}</div>
+            </div>
+          </div>
+         
+         
+        </div>
         <div v-if='!toggleSelection && selectedAccount==""' class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
         <div v-if='!toggleSelection && selectedAccount!=""'  class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
         <img v-if='toggleSelection' @click="selectedAccount='';$emit('update:modelValue', '');" src="@/assets/img/delete.svg" class="h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto">
@@ -36,7 +51,7 @@
 import { networkState } from '@/state/networkState';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { walletState } from '@/state/walletState';
-import { computed, defineComponent, ref } from 'vue';
+import { watch, computed, defineComponent, ref, toRefs } from 'vue';
 import { toSvg } from "jdenticon";
 import { Helper } from "@/util/typeHelper";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
@@ -51,20 +66,21 @@ export default defineComponent({
     'modelValue',
     'selectDefault',
     'placeholder',
+    'otherToken',
+    'name'
   ],
 
   setup(p){
 
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
-
+  
     const toggleSelection = ref(false);
-
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
     let jdenticonConfig = themeConfig.jdenticonConfig;
-
+    const { otherToken } = toRefs(p)
     const includeMultisig = ref(false);
-
+    
     // const allAvailableAccounts = computed(()=>{
 
     //   if(!walletState.currentLoggedInWallet){
@@ -111,7 +127,7 @@ export default defineComponent({
       if(includeMultisig.value){
         accounts = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
       }else{
-        accounts = walletState.currentLoggedInWallet.accounts;
+        accounts = walletState.currentLoggedInWallet.accounts.filter(acc=>acc.getDirectParentMultisig().length==0)
       }
 
       accounts.forEach(account => {
@@ -132,6 +148,7 @@ export default defineComponent({
     const selectedAccount = ref('');
     const selectedAddress = ref('');
     const selectedAccountBalance = ref(0);
+    const selectedAccountBalance2 = ref(0)
     // const selectedAddress = ref(p.selectDefault);
     // const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonConfig));
     const selectedImg = ref('');
@@ -144,16 +161,35 @@ export default defineComponent({
       }else{
         accounts = walletState.currentLoggedInWallet.accounts;
       }
-      selectedAccountBalance.value = accounts.find(account => account.address == accountAddress).balance;
+      selectedAccountBalance.value = otherToken.value!='prx.xpx'? 
+      accounts.find(account => account.address == accountAddress).assets.find(asset=>asset.namespaceNames==otherToken.value)? 
+      accounts.find(account => account.address == accountAddress).assets.find(asset=>asset.namespaceNames==otherToken.value).amount/Math.pow(10,6) : 0 
+      :accounts.find(account => account.address == accountAddress).balance
+      selectedAccountBalance2.value = otherToken.value!='prx.xpx'? accounts.find(account => account.address == accountAddress).balance :0
       selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
       toggleSelection.value = !toggleSelection.value;
     };
-
+    watch(otherToken,n=>{
+      let accounts = walletState.currentLoggedInWallet.accounts;
+      if(accounts.find(account => account.address == selectedAddress.value)){
+        selectedAccountBalance.value = n!='prx.xpx'? 
+        accounts.find(account => account.address == selectedAddress.value).assets.find(asset=>asset.namespaceNames==n)? 
+        accounts.find(account => account.address == selectedAddress.value).assets.find(asset=>asset.namespaceNames==n).amount/Math.pow(10,6) : 0 
+        :accounts.find(account => account.address == selectedAddress.value).balance
+        selectedAccountBalance2.value = n!='prx.xpx'? accounts.find(account => account.address == selectedAddress.value).balance :0
+      }
+      
+    })
+    
     const selectedAccountBalanceFormatted = computed(() => {
       let balance = Helper.convertToCurrency(selectedAccountBalance.value, 0).split('.');
       return '<span class="font-bold text-xs">' + balance[0] + '</span>' + (balance[1]?'.<span class="text-xxs">' + balance[1] + '</span>':'');
     });
 
+    const selectedAccountBalanceFormatted2 = computed(() => {
+      let balance = Helper.convertToCurrency(selectedAccountBalance2.value, 0).split('.');
+      return '<span class="font-bold text-xs">' + balance[0] + '</span>' + (balance[1]?'.<span class="text-xxs">' + balance[1] + '</span>':'');
+    });
     return {
       currentNativeTokenName,
       selectAccount,
@@ -165,7 +201,9 @@ export default defineComponent({
       toggleSelection,
       selectedAccount,
       jdenticonConfig,
-      toSvg
+      toSvg,
+      selectedAccountBalance2,
+      selectedAccountBalanceFormatted2
     };
   }
 })

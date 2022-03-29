@@ -439,7 +439,7 @@ nis1:
   nis1Swap: NIS1互换
   nis1Title: 请输入密码，以便为此账户激活NIS1。
   nis1ToSirius: NIS1到天狼星链
-  swapNis1ToSirius: 从NIS1到Proximax天狼星链的互换
+  swapNis1ToSirius: 从NIS1到ProximaX天狼星链的互换
 node:
   currentNode: 当前节点
   nodeList: 节点列表
@@ -544,7 +544,7 @@ swap:
   sirius: Sirius
   siriusAcc: Sirius Account
   siriusChain: Sirius Chain
-  siriusChainFull: Proximax Sirius Chain
+  siriusChainFull: ProximaX Sirius Chain
   siriusNetwork: Sirius Network
   siriusToBsc: Sirius Chain to BSC
   siriusToEth: Sirius Chain to ETH
@@ -553,7 +553,7 @@ swap:
   step2: 'Step 2: Validate your Sirius address'
   step3: 'Step 3: Initiate swap'
   swapAmount: Swap AMount
-  swapBscToSirius: Swap from BSC to Proximax Sirius Chain
+  swapBscToSirius: Swap from BSC to ProximaX Sirius Chain
   swapDetails: Swap Details
   swapInProgress: Swap in progress. Please wait...
   swapInitiated: Swap has already been initiated earlier.
@@ -571,7 +571,7 @@ swap:
     Transaction Hash.
   swapNotFound: Swap not found
   swapOperationFail: Swap operation failed
-  swapSiriusToBsc: Swap from Proximax Sirius Chain to BSC
+  swapSiriusToBsc: Swap from ProximaX Sirius Chain to BSC
   swapStarted: The swap process has already started!
   swapSuccess: Swap is successful
   swapSuccess2: Swap is already in progress or has been completed successfully.
