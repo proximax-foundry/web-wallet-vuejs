@@ -145,7 +145,7 @@ import { useI18n } from 'vue-i18n';
 //import { listenerState } from "@/state/listenerState";
 
 export default {
-  name: 'ViewServicesMainnetSwapMetxToBSC',
+  name: 'ViewServicesMainnetSwapSiriusToBSC',
 
   components: {
     PasswordInputClean,
