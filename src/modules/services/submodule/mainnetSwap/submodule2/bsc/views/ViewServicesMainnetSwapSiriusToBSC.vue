@@ -29,7 +29,7 @@
         <div class="text-sm my-5 font-bold">{{$t('general.transactionDetails')}}</div>
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <div class="error error_box mb-5" v-if="xpxFeeErr">{{$t('swap.failCoverTxFee')}}</div>
-        <SelectInputAccountOutgoingSwap :otherToken='selectedToken.namespace' :name='selectedToken.name' v-model="siriusAddress" :placeholder="$t('swap.fromSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
+        <SelectInputAccountOutgoingSwap :otherToken='selectedToken.namespace' :name='selectedToken.name' v-model="siriusAddress" :placeholder="$t('swap.fromSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" :divisibility="tokenDivisibility"/>
         <div class="relative">
           <div class="opacity-90 w-full h-full absolute z-10 bg-white" v-if="!siriusAddress"></div>
           <SwapInputClean class="mt-5" :disabled="disableAmount" :remarkOption="selectedToken.name=='xpx'" v-model="amount" :balance="selectedAccountBalance" :placeholder="`${selectedToken.name}` +' '+ $t('general.amount')" type="text" :showError="showAmountErr" :errorMessage="$t('general.insufficientBalance')" :emptyErrorMessage="$t('swap.amountEmpty')" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()"  :toolTip="$t('swap.bscAmountMsg')" :decimal="tokenDivisibility"/>
@@ -269,7 +269,7 @@ export default {
           maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value , tokenDivisibility.value);
         }else{
           selectedAccountBalance.value = account.balance
-          maxSwapAmount.value = Helper.convertNumberMinimumFormat(account.balance - txFee.value - gasPriceInXPX.value, 6);
+          maxSwapAmount.value = Helper.convertNumberMinimumFormat(account.balance - txFee.value - gasPriceInXPX.value, tokenDivisibility.value);
         }
         
         selectedAccountPublicKey.value = account.publicKey;
