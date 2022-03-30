@@ -102,7 +102,7 @@
         <div v-if="currentPage==2">
           <div class="text-lg my-7">
             <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-            <div class="font-bold text-left text-xs md:text-sm" :class="step1?'text-gray-700':'text-gray-300'">{{$t('swap.step1',{tokenName: 'METX'})}}</div>
+            <div class="font-bold text-left text-xs md:text-sm" :class="step1?'text-gray-700':'text-gray-300'">{{$t('swap.step1',{tokenName: selectedToken.name.toUpperCase()})}}</div>
             <div class="flex border-b border-gray-300 p-3">
               <div class="flex-none">
                 <div class=" rounded-full border w-6 h-6 transition-all duration-500" :class="step1?'border-blue-primary':'border-gray-300'">
