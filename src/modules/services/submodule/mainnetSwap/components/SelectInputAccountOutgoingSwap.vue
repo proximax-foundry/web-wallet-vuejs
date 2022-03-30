@@ -115,9 +115,10 @@ export default defineComponent({
       }else{
         accounts = walletState.currentLoggedInWallet.accounts;
       }
+      let acc = accounts.find(account => account.address == accountAddress)
       otherTokenBalance.value = otherToken.value!='prx.xpx'? //if otherToken
-      accounts.find(account => account.address == accountAddress).assets.find(asset=>asset.idHex==otherTokenId.value)? //check if found otherToken
-      accounts.find(account => account.address == accountAddress).assets.find(asset=>asset.idHex==otherTokenId.value).amount/Math.pow(10,divisibility.value) : 0 //0 if not found
+      acc.assets.find(asset=>asset.idHex==otherTokenId.value)? //check if found otherToken
+      acc.assets.find(asset=>asset.idHex==otherTokenId.value).amount/Math.pow(10,divisibility.value) : 0 //0 if not found
       :0 //if xpx(doesnt matter, wont display)
 
       nativeTokenBalance.value = accounts.find(account => account.address == accountAddress).balance
@@ -126,10 +127,11 @@ export default defineComponent({
     };
     watch(otherToken,n=>{
       let accounts = walletState.currentLoggedInWallet.accounts;
-      if(accounts.find(account => account.address == selectedAddress.value)){
+      let acc = accounts.find(account => account.address == selectedAddress.value)
+      if(acc){
         otherTokenBalance.value = n!='prx.xpx'? 
-        accounts.find(account => account.address == selectedAddress.value).assets.find(asset=>asset.idHex==otherTokenId.value)? 
-        accounts.find(account => account.address == selectedAddress.value).assets.find(asset=>asset.idHex==otherTokenId.value).amount/Math.pow(10,divisibility.value) : 0 
+        acc.assets.find(asset=>asset.idHex==otherTokenId.value)? 
+        acc.assets.find(asset=>asset.idHex==otherTokenId.value).amount/Math.pow(10,divisibility.value) : 0 
         :0 //if xpx
         nativeTokenBalance.value = accounts.find(account => account.address == selectedAddress.value).balance
       }
