@@ -262,7 +262,7 @@ export default {
         selectedAccountAddress.value = account.address;
         
         if(selectedToken.value.name!="xpx"){
-          selectedAccountBalance.value = account.assets.find(asset=>asset.namespaceNames==selectedToken.value.namespace)? account.assets.find(asset=>asset.namespaceNames== selectedToken.value.namespace).amount/Math.pow(10,tokenDivisibility.value) : 0
+          selectedAccountBalance.value = account.assets.find(asset=>asset.idHex==selectedToken.value.assetId)? account.assets.find(asset=>asset.idHex==selectedToken.value.assetId).amount/Math.pow(10,tokenDivisibility.value) : 0
           maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value , tokenDivisibility.value);
         }else{//if xpx
           selectedAccountBalance.value = account.balance
@@ -285,7 +285,7 @@ export default {
           account = walletState.currentLoggedInWallet.others.find(account => account.address == siriusAddress.value);
         }
         if(token.name!="xpx"){
-        selectedAccountBalance.value = account.assets.find(asset=>asset.namespaceNames==selectedToken.value.namespace)? account.assets.find(asset=>asset.namespaceNames== selectedToken.value.namespace).amount/Math.pow(10,tokenDivisibility.value) : 0
+        selectedAccountBalance.value = account.assets.find(asset=>asset.idHex==selectedToken.value.assetId)? account.assets.find(asset=>asset.idHex==selectedToken.value.assetId).amount/Math.pow(10,tokenDivisibility.value) : 0
         maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value , tokenDivisibility.value);
         }else{
           selectedAccountBalance.value = account.balance
