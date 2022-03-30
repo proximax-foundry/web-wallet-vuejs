@@ -570,8 +570,8 @@ export default {
     });
 
     const amountReceived = computed(() => {
-      if(Math.round((amount.value - feeAmount.value)*Math.pow(10,AppState.nativeToken.divisibility))/Math.pow(10,AppState.nativeToken.divisibility) >0 ){
-        return Math.round((amount.value - feeAmount.value)*Math.pow(10,AppState.nativeToken.divisibility))/Math.pow(10,AppState.nativeToken.divisibility)
+      if(Math.round((amount.value - feeAmount.value)*Math.pow(10,tokenDivisibility.value))/Math.pow(10,tokenDivisibility.value) >0 ){
+        return Math.round((amount.value - feeAmount.value)*Math.pow(10,tokenDivisibility.value))/Math.pow(10,tokenDivisibility.value)
       }else{
         return 0;
       }
