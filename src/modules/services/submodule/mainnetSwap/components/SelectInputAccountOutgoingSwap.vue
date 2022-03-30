@@ -67,7 +67,8 @@ export default defineComponent({
     'selectDefault',
     'placeholder',
     'otherToken',
-    'name'
+    'name',
+    'divisibility'
   ],
 
   setup(p){
@@ -78,7 +79,7 @@ export default defineComponent({
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
     let jdenticonConfig = themeConfig.jdenticonConfig;
-    const { otherToken } = toRefs(p)
+    const { otherToken,divisibility } = toRefs(p)
     const includeMultisig = ref(false);
     
     // const allAvailableAccounts = computed(()=>{
@@ -163,7 +164,7 @@ export default defineComponent({
       }
       selectedAccountBalance.value = otherToken.value!='prx.xpx'? 
       accounts.find(account => account.address == accountAddress).assets.find(asset=>asset.namespaceNames==otherToken.value)? 
-      accounts.find(account => account.address == accountAddress).assets.find(asset=>asset.namespaceNames==otherToken.value).amount/Math.pow(10,6) : 0 
+      accounts.find(account => account.address == accountAddress).assets.find(asset=>asset.namespaceNames==otherToken.value).amount/Math.pow(10,divisibility.value) : 0 
       :accounts.find(account => account.address == accountAddress).balance
       selectedAccountBalance2.value = otherToken.value!='prx.xpx'? accounts.find(account => account.address == accountAddress).balance :0
       selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
@@ -174,7 +175,7 @@ export default defineComponent({
       if(accounts.find(account => account.address == selectedAddress.value)){
         selectedAccountBalance.value = n!='prx.xpx'? 
         accounts.find(account => account.address == selectedAddress.value).assets.find(asset=>asset.namespaceNames==n)? 
-        accounts.find(account => account.address == selectedAddress.value).assets.find(asset=>asset.namespaceNames==n).amount/Math.pow(10,6) : 0 
+        accounts.find(account => account.address == selectedAddress.value).assets.find(asset=>asset.namespaceNames==n).amount/Math.pow(10,divisibility.value) : 0 
         :accounts.find(account => account.address == selectedAddress.value).balance
         selectedAccountBalance2.value = n!='prx.xpx'? accounts.find(account => account.address == selectedAddress.value).balance :0
       }
