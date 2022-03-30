@@ -243,7 +243,7 @@
               <div>{{ Helper.createAddress(siriusAddress).pretty() }}</div>
               <div class="mt-1">{{$t('swap.equivalentTo')}} {{ amountReceived }} {{selectedToken.name.toUpperCase()}} 
               <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken.name=='metx'" class="w-3 h-3 ml-2 inline relative" style="top: -2px"> 
-              <img v-if="selectedToken.name=='xpx'" src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
+              <img v-else-if="selectedToken.name=='xpx'" src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
             </div>
             <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">{{$t('swap.swapMsg2')}}</div>
             <label class="inline-flex items-center mb-5">
@@ -274,7 +274,6 @@ import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
-import { MosaicId } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewServicesMainnetSwapBSCToSirius',
@@ -358,15 +357,15 @@ export default {
     const swapServerUrl = computed(()=>{
       
       if (selectedToken.value!=null){
-        console.log(SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL,selectedToken.value.name=='xpx'?'xpx':'MetX'))
-        return SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL,selectedToken.value.name=='xpx'?'xpx':'MetX')
+        console.log(SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL,selectedToken.value.name))
+        return SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL,selectedToken.value.name)
       }else{
         return ''
       }
     })
     
     watch(selectedToken,token=>{
-       SwapUtils.fetchBSCServiceInfo(swapData.swap_IN_SERVICE_URL,token.name=='xpx'?'xpx':'MetX').then(fetchService=>{
+       SwapUtils.fetchBSCServiceInfo(swapData.swap_IN_SERVICE_URL,token.name).then(fetchService=>{
           if(fetchService.status==200){
             tokenAddress.value = fetchService.data.bscInfo.scAddress;
             custodian.value = fetchService.data.bscInfo.sinkAddress;
