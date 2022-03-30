@@ -19,7 +19,7 @@
       </div> -->
       <div class ='text-center text-xs mt-6'>{{$t('wallet.noWallet')}}</div>
       <div class ="text-center  text-xs text-blue-link font-semibold"><router-link :to="{ name: 'ViewWalletCreateSelection' }">{{$t('wallet.createSiriusWallet')}} ></router-link></div>
-      <div class ='text-center text-xs text-blue-link font-semibold ' v-if="migrationUI && haveOldWallet"><div class="cursor-pointer" @click="oldWalletBackup" >Backup old wallet</div></div>
+      <div class ='text-center text-xs text-blue-link font-semibold ' v-if="migrationUI && haveOldWallet"><div class="cursor-pointer" @click="oldWalletBackup" >{{$t('wallet.backupOldWallet')}}</div></div>
       <div class = 'mt-1 h-16 '></div>
     </div>
   </div>
@@ -33,6 +33,7 @@ import IntroTextComponent from '@/components/IntroTextComponent.vue'
 import { networkState } from '@/state/networkState'
 import { computed } from 'vue';
 import CryptoJS from 'crypto-js';
+import {appSetting} from '@/config/appSetting';
 export default {
   name: 'Home',
   components: {
@@ -41,7 +42,7 @@ export default {
     IntroTextComponent,
   },
   setup(){
-    let migrationUI = true;
+    let migrationUI = appSetting.backupOldWallet;
     let haveOldWallet = false;
 
     let mainnetOldFormat = localStorage.getItem("sw-mainnet");

@@ -704,6 +704,7 @@ wallet:
   namePlaceholder: Name your wallet
   newWallet: New Wallet
   noWallet: No Sirius Account yet?
+  backupOldWallet: Backup old wallet
   numberOfAccounts: Number of Accounts
   passwordErrMsg: 'Min. length 8, max. length 30'
   privateKeyDescription: >-
