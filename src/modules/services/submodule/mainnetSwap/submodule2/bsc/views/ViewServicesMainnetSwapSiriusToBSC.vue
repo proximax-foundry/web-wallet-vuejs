@@ -29,7 +29,7 @@
         <div class="text-sm my-5 font-bold">{{$t('general.transactionDetails')}}</div>
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <div class="error error_box mb-5" v-if="xpxFeeErr">{{$t('swap.failCoverTxFee')}}</div>
-        <SelectInputAccountOutgoingSwap :otherToken='selectedToken.namespace' :name='selectedToken.name' v-model="siriusAddress" :placeholder="$t('swap.fromSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" :divisibility="tokenDivisibility"/>
+        <SelectInputAccountOutgoingSwap :otherToken='selectedToken.namespace' :otherTokenId='selectedToken.assetId' :name='selectedToken.name' v-model="siriusAddress" :placeholder="$t('swap.fromSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" :divisibility="tokenDivisibility"/>
         <div class="relative">
           <div class="opacity-90 w-full h-full absolute z-10 bg-white" v-if="!siriusAddress"></div>
           <SwapInputClean class="mt-5" :disabled="disableAmount" :remarkOption="selectedToken.name=='xpx'" v-model="amount" :balance="selectedAccountBalance" :placeholder="`${selectedToken.name}` +' '+ $t('general.amount')" type="text" :showError="showAmountErr" :errorMessage="$t('general.insufficientBalance')" :emptyErrorMessage="$t('swap.amountEmpty')" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()"  :toolTip="$t('swap.bscAmountMsg')" :decimal="tokenDivisibility"/>
@@ -132,7 +132,6 @@ import { networkState } from '@/state/networkState';
 import { WalletUtils } from "@/util/walletUtils";
 import { Helper } from "@/util/typeHelper";
 import { getCurrentPriceUSD } from "@/util/functions";
-import { BuildTransactions } from "@/util/buildTransactions";
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { useToast } from "primevue/usetoast";
 import { ethers } from 'ethers';
@@ -140,9 +139,7 @@ import { SwapUtils } from '@/util/swapUtils';
 import { MosaicId, NetworkType } from "tsjs-xpx-chain-sdk";
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
-//import { ChainUtils } from "@/util/chainUtils";
-//import { ChainAPICall } from "@/models/REST/chainAPICall";
-//import { listenerState } from "@/state/listenerState";
+
 
 export default {
   name: 'ViewServicesMainnetSwapMetxToBSC',
@@ -267,7 +264,7 @@ export default {
         if(selectedToken.value.name!="xpx"){
           selectedAccountBalance.value = account.assets.find(asset=>asset.namespaceNames==selectedToken.value.namespace)? account.assets.find(asset=>asset.namespaceNames== selectedToken.value.namespace).amount/Math.pow(10,tokenDivisibility.value) : 0
           maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value , tokenDivisibility.value);
-        }else{
+        }else{//if xpx
           selectedAccountBalance.value = account.balance
           maxSwapAmount.value = Helper.convertNumberMinimumFormat(account.balance - txFee.value - gasPriceInXPX.value, tokenDivisibility.value);
         }
