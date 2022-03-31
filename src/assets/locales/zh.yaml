@@ -702,7 +702,7 @@ wallet:
   newWallet: 新钱包
   noWallet: 还没有天狼星账户吗？
   numberOfAccounts: 账户数量
-  passwordErrMsg: '最小长度8，最大长度30'
+  passwordErrMsg: '最小长度8'
   privateKeyDescription: >-
     恢复你现有的ProximaX天狼星钱包，从其他服务中导入私钥或创建新的钱包。
   signInHere: 在此登录
