@@ -11,7 +11,22 @@
         </div>
       </div>
       <div class="flex">
-        <div class="text-xs mr-3" v-if="selectedAccount!=''">{{$t('general.balance')}} <span v-html="selectedAccountBalanceFormatted"></span> <span class="text-xxs">{{ currentNativeTokenName }}</span></div>
+        <div class="text-xs mr-3" v-if="selectedAccount!=''">
+           
+          <div class="flex gap-2">
+            {{$t('general.balance')}}
+            <div class="flex gap-2">
+              <div v-if="otherToken!='prx.xpx'" v-html="otherTokenBalanceFormatted"></div> 
+              <div v-if="otherToken!='prx.xpx'" class="text-xs uppercase">{{otherToken!='prx.xpx'?name: currentNativeTokenName }}</div> 
+            </div>
+            <div class="flex gap-2">
+              <div  v-html="nativeTokenBalanceFormatted"></div> 
+              <div  class="text-xs">{{currentNativeTokenName }}</div>
+            </div>
+          </div>
+         
+         
+        </div>
         <div v-if='!toggleSelection && selectedAccount==""' class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
         <div v-if='!toggleSelection && selectedAccount!=""'  class="text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
         <img v-if='toggleSelection' @click="selectedAccount='';$emit('update:modelValue', '');" src="@/assets/img/delete.svg" class="h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto">
@@ -36,7 +51,7 @@
 import { networkState } from '@/state/networkState';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { walletState } from '@/state/walletState';
-import { computed, defineComponent, ref } from 'vue';
+import { watch, computed, defineComponent, ref, toRefs } from 'vue';
 import { toSvg } from "jdenticon";
 import { Helper } from "@/util/typeHelper";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
@@ -51,59 +66,22 @@ export default defineComponent({
     'modelValue',
     'selectDefault',
     'placeholder',
+    'otherToken',
+    'otherTokenId',
+    'name',
+    'divisibility'
   ],
 
   setup(p){
 
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
-
+  
     const toggleSelection = ref(false);
-
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
     let jdenticonConfig = themeConfig.jdenticonConfig;
-
+    const { otherToken,divisibility,otherTokenId } = toRefs(p)
     const includeMultisig = ref(false);
-
-    // const allAvailableAccounts = computed(()=>{
-
-    //   if(!walletState.currentLoggedInWallet){
-    //     return [];
-    //   }
-
-    //   let accounts = walletState.currentLoggedInWallet.accounts.map(
-    //     (acc)=>{ 
-    //       return { 
-    //         name: acc.name,
-    //         balance: acc.balance,
-    //         balanceDisplay: Helper.toCurrencyFormat(acc.balance, 6),
-    //         type: "",
-    //         address: Helper.createAddress(acc.address).pretty(),
-    //         publicKey: acc.publicKey,
-    //         isMultisig: acc.getDirectParentMultisig().length ? true: false
-    //       };  
-    //     });
-
-    //   if(includeMultisig.value){
-    //     let otherAccounts = walletState.currentLoggedInWallet.others.filter((acc)=> acc.type === "MULTISIG").map(
-    //     (acc)=>{ 
-    //       return { 
-    //         name: acc.name,
-    //         balance: acc.balance,
-    //         balanceDisplay: Helper.toCurrencyFormat(acc.balance, 6),
-    //         type: "MULTISIG",
-    //         address: Helper.createAddress(acc.address).pretty(),
-    //         publicKey: acc.publicKey,
-    //         isMultisig: true
-    //       }; 
-    //     });
-
-    //     return accounts.concat(otherAccounts);
-    //   }
-    //   else{
-    //     return accounts;
-    //   }
-    // });
 
     const accounts = computed(() =>{
       var accountList = [];
@@ -111,7 +89,7 @@ export default defineComponent({
       if(includeMultisig.value){
         accounts = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
       }else{
-        accounts = walletState.currentLoggedInWallet.accounts;
+        accounts = walletState.currentLoggedInWallet.accounts.filter(acc=>acc.getDirectParentMultisig().length==0)
       }
 
       accounts.forEach(account => {
@@ -120,20 +98,13 @@ export default defineComponent({
           label: account.name,
         });
       });
-      // accountList.sort((a, b) => {
-      //   if (a.label > b.label) return 1;
-      //   if (a.label < b.label) return -1;
-      //   return 0;
-      // });
       return accountList;
     });
 
-    // const selectedAccount = ref(accounts.value.find(acc => acc.value == p.selectDefault).label);
     const selectedAccount = ref('');
     const selectedAddress = ref('');
-    const selectedAccountBalance = ref(0);
-    // const selectedAddress = ref(p.selectDefault);
-    // const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonConfig));
+    const otherTokenBalance = ref(0);
+    const nativeTokenBalance = ref(0)
     const selectedImg = ref('');
     const selectAccount = (accountName, accountAddress) => {
       selectedAccount.value = accountName;
@@ -144,28 +115,52 @@ export default defineComponent({
       }else{
         accounts = walletState.currentLoggedInWallet.accounts;
       }
-      selectedAccountBalance.value = accounts.find(account => account.address == accountAddress).balance;
+      let acc = accounts.find(account => account.address == accountAddress)
+      otherTokenBalance.value = otherToken.value!='prx.xpx'? //if otherToken
+      acc.assets.find(asset=>asset.idHex==otherTokenId.value)? //check if found otherToken
+      acc.assets.find(asset=>asset.idHex==otherTokenId.value).amount/Math.pow(10,divisibility.value) : 0 //0 if not found
+      :0 //if xpx(doesnt matter, wont display)
+
+      nativeTokenBalance.value = accounts.find(account => account.address == accountAddress).balance
       selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
       toggleSelection.value = !toggleSelection.value;
     };
-
-    const selectedAccountBalanceFormatted = computed(() => {
-      let balance = Helper.convertToCurrency(selectedAccountBalance.value, 0).split('.');
+    watch(otherToken,n=>{
+      let accounts = walletState.currentLoggedInWallet.accounts;
+      let acc = accounts.find(account => account.address == selectedAddress.value)
+      if(acc){
+        otherTokenBalance.value = n!='prx.xpx'? 
+        acc.assets.find(asset=>asset.idHex==otherTokenId.value)? 
+        acc.assets.find(asset=>asset.idHex==otherTokenId.value).amount/Math.pow(10,divisibility.value) : 0 
+        :0 //if xpx
+        nativeTokenBalance.value = accounts.find(account => account.address == selectedAddress.value).balance
+      }
+      
+    })
+    
+    const otherTokenBalanceFormatted = computed(() => {
+      let balance = Helper.convertToCurrency(otherTokenBalance.value, 0).split('.');
       return '<span class="font-bold text-xs">' + balance[0] + '</span>' + (balance[1]?'.<span class="text-xxs">' + balance[1] + '</span>':'');
     });
 
+    const nativeTokenBalanceFormatted = computed(() => {
+      let balance = Helper.convertToCurrency(nativeTokenBalance.value, 0).split('.');
+      return '<span class="font-bold text-xs">' + balance[0] + '</span>' + (balance[1]?'.<span class="text-xxs">' + balance[1] + '</span>':'');
+    });
     return {
       currentNativeTokenName,
       selectAccount,
       selectedAddress,
-      selectedAccountBalance,
-      selectedAccountBalanceFormatted,
+      otherTokenBalanceFormatted,
+      otherTokenBalance,
       selectedImg,
       accounts,
       toggleSelection,
       selectedAccount,
       jdenticonConfig,
-      toSvg
+      toSvg,
+      nativeTokenBalance,
+      nativeTokenBalanceFormatted
     };
   }
 })

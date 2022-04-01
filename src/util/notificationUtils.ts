@@ -200,7 +200,7 @@ export class NotificationUtils {
     const notifications = NotificationUtils.getNotificationFromStorage();
     let newNotification = false;
     if(notifications.length > 0){
-      if(visitedNotification.length > 0){
+      if(visitedNotification){
         notifications.forEach(notification => {
           let matchId = visitedNotification.find(noti => noti == notification.id);
           if(!matchId){

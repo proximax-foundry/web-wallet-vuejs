@@ -27,12 +27,6 @@
           </div>
         </div>
         <div v-if="currentPage==1">
-          <div class="text-sm my-5 font-bold">Select Asset</div>
-          <select class="" v-model="selectedToken">
-            <option v-for="(element, item) in  tokenList" :value="element" :key="item">
-              {{element.name.toUpperCase()}}
-            </option>
-          </select>
           <div class="text-lg my-7 font-bold">{{$t('general.transactionDetails')}}</div>
           <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">{{$t('swap.noOtherExtension')}} <b>{{$t('swap.metamask')}}</b>.<div class="my-2">{{$t('swap.referTo')}}<a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">{{$t('swap.walkthrough')}}<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a>{{$t('swap.forMoreDetails')}}</div>{{$t('swap.refreshMsg')}}</div>
           <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
@@ -84,16 +78,14 @@
               </div>
             </div>
           </div>
-          <SupplyInputClean :disabled="disableAmount" v-model="amount" :balance="balance" :placeholder="'BEP20 ' + `${selectedToken?selectedToken.name:''}`" type="text" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':amount>=minAmount?$t('swap.insufficientTokenBalance'):`Min. amount is ${minAmount}(${feeAmount} ${selectedToken.name.toUpperCase()} will deducted for transaction fee)`" :decimal="tokenDivisibility"  />
+          <SupplyInputClean :disabled="disableAmount" v-model="amount" :balance="balance" :placeholder="'BEP20 ' + 'MetX'" type="text" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':amount>=minAmount?$t('swap.insufficientTokenBalance'):`Min. amount is ${minAmount}(${feeAmount} MetX will deducted for transaction fee)`" :decimal="tokenDivisibility"  />
           <div class="text-left">
             <SelectInputAccount v-model="siriusAddress" :placeholder="$t('swap.toSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
           </div>
           <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center">
-            {{ amountReceived }} {{selectedToken?selectedToken.name.toUpperCase():''}}
-            <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken?selectedToken.name=='metx'?true:false:false" class=" w-5 h-5 ml-4"> 
-            <img v-if="selectedToken?selectedToken.name=='xpx'?true:false:false" src="@/modules/dashboard/img/icon-xpx.svg" class=" w-5 h-5 ml-4">
+            {{ amountReceived }}  METX <img src="@/modules/account/img/metx-logo.svg" class=" w-5 h-5 ml-4">
           </div>
-          <div class="my-4 text-xs">Total Amount of {{selectedToken?selectedToken.name.toUpperCase():''}} received after deducting transaction fee</div>
+          <div class="my-4 text-xs">Total Amount of METX received after deducting transaction fee</div>
           <div class="mt-10 text-center">
             <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-5 focus:outline-none disabled:opacity-50">{{$t('general.cancel')}}</button>
             <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="sendRequest()">{{$t('swap.sendRequest')}}</button>
@@ -102,7 +94,7 @@
         <div v-if="currentPage==2">
           <div class="text-lg my-7">
             <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-            <div class="font-bold text-left text-xs md:text-sm" :class="step1?'text-gray-700':'text-gray-300'">{{$t('swap.step1',{tokenName: selectedToken.name.toUpperCase()})}}</div>
+            <div class="font-bold text-left text-xs md:text-sm" :class="step1?'text-gray-700':'text-gray-300'">{{$t('swap.step1',{tokenName: 'METX'})}}</div>
             <div class="flex border-b border-gray-300 p-3">
               <div class="flex-none">
                 <div class=" rounded-full border w-6 h-6 transition-all duration-500" :class="step1?'border-blue-primary':'border-gray-300'">
@@ -235,15 +227,13 @@
             <div class="md:mx-20 lg:mx-10 xl:mx-40 border-2 border-gray-200 mt-4 p-5 text-xs font-bold filter shadow-lg">
               <div class="text-blue-primary mb-1">{{$t('general.from')}}: {{$t('swap.metamaskAcc')}}</div>
               <div class="break-all">{{ currentAccount }}</div>
-              <div class="mt-1">{{$t('swap.swapAmount')}}: {{ amount }} BEP20 {{selectedToken.name.toUpperCase()}}</div>
+              <div class="mt-1">{{$t('swap.swapAmount')}}: {{ amount }} BEP20 METX</div>
               <div>
                 <img src="@/modules/services/submodule/mainnetSwap/img/icon-dots.svg" class="inline-block h-8 my-2">
               </div>
               <div class="text-blue-primary mb-1">{{$t('general.to')}}: {{ siriusName }}</div>
               <div>{{ Helper.createAddress(siriusAddress).pretty() }}</div>
-              <div class="mt-1">{{$t('swap.equivalentTo')}} {{ amountReceived }} {{selectedToken.name.toUpperCase()}} 
-              <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken.name=='metx'" class="w-3 h-3 ml-2 inline relative" style="top: -2px"> 
-              <img v-else-if="selectedToken.name=='xpx'" src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
+              <div class="mt-1">{{$t('swap.equivalentTo')}} {{ amountReceived }} METX <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
             </div>
             <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">{{$t('swap.swapMsg2')}}</div>
             <label class="inline-flex items-center mb-5">
@@ -276,7 +266,7 @@ import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 
 export default {
-  name: 'ViewServicesMainnetSwapBSCToSirius',
+  name: 'ViewServicesMainnetSwapBSCToMetX',
 
   components: {
     SupplyInputClean,
@@ -308,24 +298,25 @@ export default {
     const tokenDivisibility = ref(0)
     const custodian = ref('');
     const tokenAddress = ref('');
-    const selectedToken = ref(null);
-    const tokenList = ref([])
-    const getBscSwapTokenList = async()=>{
     
-      let tokens = await SwapUtils.getSwapTokenList(swapData.swap_XPX_BSC_URL)
-      if(tokens){
-        
-        tokenList.value = tokens.map(token=>{
-          return {
-            name:token.name,
-            assetId: token.assetId,
-            contractAddress: token.contractAddress,
-            namespace: token.namespace,
-          }
-        })
-        selectedToken.value = tokenList.value[0] 
+
+    (async() => {
+      try {
+        const fetchService = await SwapUtils.fetchBSCServiceInfo(swapData.swap_IN_SERVICE_URL,'MetX');
+        if(fetchService.status==200){
+          tokenAddress.value = fetchService.data.bscInfo.scAddress;
+          custodian.value = fetchService.data.bscInfo.sinkAddress;
+          serviceErr.value = '';
+          tokenDivisibility.value = fetchService.data.siriusInfo.divisibility
+          feeAmount.value = fetchService.data.siriusInfo.feeAmount/Math.pow(10,tokenDivisibility.value)
+          minAmount.value = fetchService.data.siriusInfo.minAmount
+        }else{
+          serviceErr.value = t('swap.serviceDown');
+        }
+      } catch (error) {
+        serviceErr.value = t('swap.serviceDown');
       }
-    }
+    })()
 
     /* MetaMask integration */
     let bscNetworkName = swapData.BSCNetworkName;
@@ -342,7 +333,7 @@ export default {
     const disableRetrySwap = ref(false);
     const retrySwapButtonText = ref(t('swap.retry'));
     const bscScanUrl = swapData.BSCScanUrl;
-    
+    const swapServerUrl = SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL,'MetX');
     const transactionFailed = ref(false);
 
     const signatureMessage = computed(() => {
@@ -352,32 +343,7 @@ export default {
         return t('swap.signTx');
       }
     });
-    getBscSwapTokenList()
-    
-    const swapServerUrl = computed(()=>{
-      
-      if (selectedToken.value!=null){
-        console.log(SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL,selectedToken.value.name))
-        return SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL,selectedToken.value.name)
-      }else{
-        return ''
-      }
-    })
-    
-    watch(selectedToken,token=>{
-       SwapUtils.fetchBSCServiceInfo(swapData.swap_IN_SERVICE_URL,token.name).then(fetchService=>{
-          if(fetchService.status==200){
-            tokenAddress.value = fetchService.data.bscInfo.scAddress;
-            custodian.value = fetchService.data.bscInfo.sinkAddress;
-            serviceErr.value = '';
-            tokenDivisibility.value = fetchService.data.siriusInfo.divisibility
-            feeAmount.value = fetchService.data.siriusInfo.feeAmount/Math.pow(10,tokenDivisibility.value)
-            minAmount.value = fetchService.data.siriusInfo.minAmount
-          }else{
-            serviceErr.value = t('swap.serviceDown');
-          }
-        })
-    })
+
     let provider;
     let signer;
 
@@ -569,8 +535,8 @@ export default {
     });
 
     const amountReceived = computed(() => {
-      if(Math.round((amount.value - feeAmount.value)*Math.pow(10,tokenDivisibility.value))/Math.pow(10,tokenDivisibility.value) >0 ){
-        return Math.round((amount.value - feeAmount.value)*Math.pow(10,tokenDivisibility.value))/Math.pow(10,tokenDivisibility.value)
+      if(Math.round((amount.value - feeAmount.value)*Math.pow(10,AppState.nativeToken.divisibility))/Math.pow(10,AppState.nativeToken.divisibility) >0 ){
+        return Math.round((amount.value - feeAmount.value)*Math.pow(10,AppState.nativeToken.divisibility))/Math.pow(10,AppState.nativeToken.divisibility)
       }else{
         return 0;
       }
@@ -732,7 +698,7 @@ export default {
       disableRetrySwap.value = true;
       let stringifyData = JSON.stringify(swapServiceParam.value);
       try {
-        const response = await fetch(swapServerUrl.value, {
+        const response = await fetch(swapServerUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -830,9 +796,7 @@ export default {
       siriusName,
       minAmount,
       feeAmount,
-      tokenDivisibility,
-      tokenList,
-      selectedToken
+      tokenDivisibility
     };
   },
 }

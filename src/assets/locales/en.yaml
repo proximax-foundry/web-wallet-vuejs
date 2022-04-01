@@ -440,7 +440,7 @@ nis1:
   nis1Swap: NIS1 Swap
   nis1Title: Please enter password to enable NIS1 for this account.
   nis1ToSirius: NIS1 to Sirius Chain
-  swapNis1ToSirius: Swap from NIS1 to Proximax Sirius Chain
+  swapNis1ToSirius: Swap from NIS1 to ProximaX Sirius Chain
 node:
   currentNode: Current Node
   nodeList: Node List
@@ -545,7 +545,7 @@ swap:
   sirius: Sirius
   siriusAcc: Sirius Account
   siriusChain: Sirius Chain
-  siriusChainFull: Proximax Sirius Chain
+  siriusChainFull: ProximaX Sirius Chain
   siriusNetwork: Sirius Network
   siriusToBsc: Sirius Chain to BSC
   siriusToEth: Sirius Chain to ETH
@@ -553,8 +553,8 @@ swap:
   step1: 'Step 1: Send BEP20 {tokenName} to the escrow account'
   step2: 'Step 2: Validate your Sirius address'
   step3: 'Step 3: Initiate swap'
-  swapAmount: Swap AMount
-  swapBscToSirius: Swap from BSC to Proximax Sirius Chain
+  swapAmount: Swap Amount
+  swapBscToSirius: Swap from BSC to ProximaX Sirius Chain
   swapDetails: Swap Details
   swapInProgress: Swap in progress. Please wait...
   swapInitiated: Swap has already been initiated earlier.
@@ -572,7 +572,7 @@ swap:
     Transaction Hash.
   swapNotFound: Swap not found
   swapOperationFail: Swap operation failed
-  swapSiriusToBsc: Swap from Proximax Sirius Chain to BSC
+  swapSiriusToBsc: Swap from ProximaX Sirius Chain to BSC
   swapStarted: The swap process has already started!
   swapSuccess: Swap is successful
   swapSuccess2: Swap is already in progress or has been completed successfully.
@@ -704,8 +704,9 @@ wallet:
   namePlaceholder: Name your wallet
   newWallet: New Wallet
   noWallet: No Sirius Account yet?
+  backupOldWallet: Backup old wallet
   numberOfAccounts: Number of Accounts
-  passwordErrMsg: 'Min. length 8, max. length 30'
+  passwordErrMsg: 'Min. length 8'
   privateKeyDescription: >-
     Restore your existing ProximaX Sirius Wallet, import a private key from
     another service or create a new wallet.

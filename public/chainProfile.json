@@ -27,7 +27,7 @@
       }
     },
     "Sirius Testnet 1": {
-      "version": "0.0.4",
+      "version": "0.0.5",
       "apiNodes":[
           "bctestnet3.brimstone.xpxsirius.io"
       ],
@@ -44,17 +44,17 @@
         }
       },
       "chainExplorer": {
-        "url": "https://bctestnetexplorer.xpxsirius.io",
-        "blockRoute": "#/result/blockHeight",
-        "publicKeyRoute": "#/result/publicKey",
-        "addressRoute": "#/result/address",
-        "hashRoute": "#/result/hash",
-        "namespaceInfoRoute": "#/result/namespaceInfo",
-        "assetInfoRoute": "#/result/assetInfo"
+        "url": "https://proximax-foundry.github.io/web-explorer-vuejs",
+        "blockRoute": "#/block",
+        "publicKeyRoute": "#/account",
+        "addressRoute": "#/account",
+        "hashRoute": "#/tx",
+        "namespaceInfoRoute": "#/namespace",
+        "assetInfoRoute": "#/asset"
       }
     },
     "Sirius Testnet 2": {
-      "version": "0.0.4",
+      "version": "0.0.5",
       "apiNodes":[
           "api-2.testnet2.xpxsirius.io"
       ],
@@ -71,13 +71,13 @@
         }
       },
       "chainExplorer": {
-        "url": "https://bctestnetexplorer.xpxsirius.io",
-        "blockRoute": "#/result/blockHeight",
-        "publicKeyRoute": "#/result/publicKey",
-        "addressRoute": "#/result/address",
-        "hashRoute": "#/result/hash",
-        "namespaceInfoRoute": "#/result/namespaceInfo",
-        "assetInfoRoute": "#/result/assetInfo"
+        "url": "https://proximax-foundry.github.io/web-explorer-vuejs",
+        "blockRoute": "#/block",
+        "publicKeyRoute": "#/account",
+        "addressRoute": "#/account",
+        "hashRoute": "#/tx",
+        "namespaceInfoRoute": "#/namespace",
+        "assetInfoRoute": "#/asset"
       }
     }
 }
