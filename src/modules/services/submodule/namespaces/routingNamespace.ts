@@ -24,5 +24,16 @@ export const NamespaceRoutes = [
     meta: {
       title: "Extend Namespace",
     }
+    
+  },
+  {
+    path: '/add-namespace-metadata/:namespaceId/:address',
+    name: 'ViewServicesNamespaceMetadata',
+    props: true,
+    component: () => import('@/modules/services/submodule/namespaces/views/ViewServicesNamespaceMetadata.vue'),
+    meta: {
+      title: "Add Namesace Metadata",
+    }
+    
   },
 ];

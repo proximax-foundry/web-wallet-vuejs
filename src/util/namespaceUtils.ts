@@ -6,6 +6,11 @@ import {
   RegisterNamespaceTransaction,
   UInt64,
   MosaicId,
+  Deadline,
+  NamespaceMetadataTransaction,
+  MetadataQueryParams,
+  MetadataType,
+  KeyGenerator,
 } from "tsjs-xpx-chain-sdk";
 import { walletState } from "../state/walletState";
 import { networkState } from "../state/networkState";
@@ -15,6 +20,8 @@ import {  listenerState } from "@/state/listenerState";
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 import { AppState } from "@/state/appState";
 import { TransactionUtils } from "./transactionUtils";
+import { Helper } from "./typeHelper";
+import { WalletAccount } from "@/models/walletAccount";
 
 export class NamespaceUtils {
 
@@ -291,5 +298,66 @@ export class NamespaceUtils {
     let signedHashlock = account.sign(hashLockTx, networkState.currentNetworkProfile.generationHash);
     TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedHashlock,aggregateBondedTxSigned );
   }
+
+  static calculateMetadataAggregateFee = (namespaceId :string, oldValue: string, newValue: string) :number=>{
+    let fakePublicAcc = PublicAccount.createFromPublicKey('0'.repeat(64),AppState.networkType)
+    let accountMetadataTxn = NamespaceMetadataTransaction.create( 
+      Deadline.create(),  
+      fakePublicAcc,
+      new NamespaceId(namespaceId),
+      "myKey",
+      newValue,
+      oldValue,
+      AppState.networkType
+    );
+    let abtTx = AppState.buildTxn.aggregateBonded(
+      [accountMetadataTxn.toAggregate(fakePublicAcc)]
+    )
+    return abtTx.maxFee.compact()/Math.pow(10,AppState.nativeToken.divisibility)
+  }
+
+  static checkMetadataOldValue = async(namespaceId: string,scopedMetadataKey: string) :Promise<string>=>{
+    
+    let metadataQueryParams = new MetadataQueryParams();
+    metadataQueryParams.metadataType = MetadataType.NAMESPACE
+    metadataQueryParams.targetId = new NamespaceId(namespaceId)
+    metadataQueryParams.scopedMetadataKey = KeyGenerator.generateUInt64Key(scopedMetadataKey)
+    let oldValue = ""
+    let metadataSearchResult = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
+    if(metadataSearchResult.metadataEntries.length>0){
+      oldValue = metadataSearchResult.metadataEntries[0].value;
+    }
+    return oldValue
+  }
+
+  static namespaceMetadataTx =(ownerPublicKey:string,namespaceId: string,scopedMetadataKey: string,newValue: string,oldValue :string, walletPassword: string,initiator? :string)=>{
+    let ownerPublicAcc = PublicAccount.createFromPublicKey(ownerPublicKey,AppState.networkType)
+    let namespaceMetadataTxn = NamespaceMetadataTransaction.create(
+      Deadline.create(), 
+      ownerPublicAcc,
+      new NamespaceId(namespaceId),
+      scopedMetadataKey,
+      newValue,
+      oldValue,
+      AppState.networkType
+    );
+    let txBuilder = AppState.buildTxn
+    let abtTx = txBuilder.aggregateBonded(
+      [namespaceMetadataTxn.toAggregate(ownerPublicAcc) ]
+    )
+    let account = initiator? 
+    walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == initiator): //multisig
+    walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == ownerPublicKey) //normal
+    let encryptedPassword = WalletUtils.createPassword(walletPassword);
+    let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, account.encrypted, account.iv);
+    let signerAcc = Account.createFromPrivateKey(privateKey, AppState.networkType);
+    let signedAbtTransaction = signerAcc.sign(abtTx, networkState.currentNetworkProfile.generationHash);
+    let lockHashTx = TransactionUtils.lockFundTx(signedAbtTransaction)
+
+    let signedLockHashTransaction = signerAcc.sign(lockHashTx, networkState.currentNetworkProfile.generationHash);
+    
+    TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedLockHashTransaction,signedAbtTransaction) 
+  }
+  
 
 }
