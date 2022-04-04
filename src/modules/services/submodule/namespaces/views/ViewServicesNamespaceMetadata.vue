@@ -31,7 +31,7 @@
                         </span>
                         <span class="font-bold" v-else>
                         <select class="" v-model="selectedCosigner">
-                            <option v-for="(cosigner, item) in  cosigners" :value="cosigner.publicKey" :key="item">
+                            <option v-for="(cosigner, item) in  cosigners" :value="findAcc(cosigner.publicKey).publicKey" :key="item">
                             {{ cosigner.name }} 
                             </option>
                         </select>
@@ -235,15 +235,15 @@ export default {
                 return []
             }
         })
-        const selectedCosigner = ref(null)
+        const selectedCosigner = ref('')
         if(cosigners.value.length>0){
-            selectedCosigner.value = cosigners.value[0]
+            selectedCosigner.value = cosigners.value[0].publicKey
         }
         
         const balance = computed(()=>{
             if(isMultisig.value){
                 if(selectedCosigner.value){
-                    return selectedCosigner.value.balance
+                    return findAcc(selectedCosigner.value).balance
                 }else{
                     return 0
                 }
@@ -279,6 +279,10 @@ export default {
                 }
             
         })
+
+        const findAcc = (publicKey)=>{
+            return allAvailableAccounts.value.find(acc=>acc.publicKey==publicKey)
+        }
         const walletPassword = ref('')
         const checkOldValue = ()=>{
             try{
@@ -294,7 +298,7 @@ export default {
         const namespaceMetadataTx = ()=>{
             if(WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)){
                 if(isMultisig.value){
-                    NamespaceUtils.namespaceMetadataTx(account.value.publicKey,namespaceName.value,scopedMetadataKey.value,newValue.value,oldValue.value,walletPassword.value,selectedCosigner.value.publicKey)
+                    NamespaceUtils.namespaceMetadataTx(account.value.publicKey,namespaceName.value,scopedMetadataKey.value,newValue.value,oldValue.value,walletPassword.value,findAcc(selectedCosigner.value).publicKey)
                 }else{
                     NamespaceUtils.namespaceMetadataTx(account.value.publicKey,namespaceName.value,scopedMetadataKey.value,newValue.value,oldValue.value,walletPassword.value)
                 }
@@ -338,7 +342,9 @@ export default {
             checkOldValue,
             namespaceMetadataTx,
             disableAddBtn,
-            err
+            err,
+            selectedCosigner,
+            findAcc
         }
     }
 }
