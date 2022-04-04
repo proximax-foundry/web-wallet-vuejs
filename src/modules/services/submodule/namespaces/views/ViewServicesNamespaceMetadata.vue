@@ -14,6 +14,7 @@
                     </div>
                     <div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
                 </div>
+                 <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
                 <div class="flex items-center">
                     <div v-html="svgString" class="inline-block" />
                     <div class="ml-2">
@@ -48,7 +49,7 @@
                         <div class="text-black text-sm font-bold">{{ namespaceName }}</div>
                     </div>
                 </div>
-                <MetadataInput class="mt-5" v-model="scopedMetadataKey" placeholder="Scoped Metadata Key" v-debounce:1000="checkOldValue"/>
+                <MetadataInput class="mt-5" v-model="scopedMetadataKey" placeholder="Scoped Metadata Key" v-debounce:1000="checkOldValue" />
                 <MetadataInput class="mt-2" v-model="oldValue" :disabled="true" placeholder="Old Value"/>
                 <MetadataInput class="mt-2" v-model="newValue"  placeholder="New Value"/>
             </div>
@@ -123,6 +124,7 @@ import { TransactionUtils } from '@/util/transactionUtils';
 import { NamespaceUtils } from '@/util/namespaceUtils';
 import PasswordInput from "@/components/PasswordInput.vue";
 import { WalletUtils } from '@/util/walletUtils';
+import { useI18n } from 'vue-i18n';
 export default {
     name: "ViewServicesNamespaceMetadata",
     components:{
@@ -134,6 +136,7 @@ export default {
         namespaceId:String
     },
     setup(p){
+        const {t} = useI18n()
         const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
         const lockFund = computed(() =>
             Helper.convertToExact(
@@ -287,7 +290,7 @@ export default {
             }
             
         }
-
+        const err = ref('')
         const namespaceMetadataTx = ()=>{
             if(WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)){
                 if(isMultisig.value){
@@ -300,6 +303,8 @@ export default {
                 newValue.value=""
                 walletPassword.value=""
                 
+            }else{
+                err.value = t('general.walletPasswordInvalid',{name:walletState.currentLoggedInWallet.name})
             }
         }
         watch(oldValue,n=>{
@@ -307,6 +312,11 @@ export default {
         })
         watch(newValue,n=>{
             updateAggregateFee()
+        })
+        watch(scopedMetadataKey,n=>{
+            if(n==""){
+                oldValue.value = ""
+            }
         })
         return{
             svgString,
@@ -327,7 +337,8 @@ export default {
             showBalanceErr,
             checkOldValue,
             namespaceMetadataTx,
-            disableAddBtn
+            disableAddBtn,
+            err
         }
     }
 }
