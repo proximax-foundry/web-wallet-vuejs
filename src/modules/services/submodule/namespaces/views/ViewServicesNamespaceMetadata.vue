@@ -24,22 +24,22 @@
                 </div>
                  <div v-if="isMultisig" class="text-left mt-2 mb-5 ml-4"> 
                     <div v-if="cosigners.length > 0">
-                    <div class="text-tsm">
-                        {{$t('general.initiateBy')}}:
-                        <span class="font-bold" v-if="cosigners.length == 1"> 
-                        {{ cosigners[0].name }} 
-                        </span>
-                        <span class="font-bold" v-else>
-                        <select class="" v-model="selectedCosigner">
-                            <option v-for="(cosigner, item) in  cosigners" :value="findAcc(cosigner.publicKey).publicKey" :key="item">
-                            {{ cosigner.name }} 
-                            </option>
-                        </select>
-                        </span>
-                    </div>
+                        <div class="text-tsm">
+                            {{$t('general.initiateBy')}}:
+                            <span class="font-bold" v-if="cosigners.length == 1"> 
+                            {{ cosigners[0].name }} 
+                            </span>
+                            <span class="font-bold" v-else>
+                            <select class="" v-model="selectedCosigner">
+                                <option v-for="(cosigner, item) in  cosigners" :value="findAcc(cosigner.publicKey).publicKey" :key="item">
+                                {{ cosigner.name }} 
+                                </option>
+                            </select>
+                            </span>
+                        </div>
                     </div>
                     <div class="error" v-else>
-                    {{$t('general.initiateBy')}} 
+                    {{$t('general.noCosigner')}} 
                     </div>
                 </div>
                 <div class="border border-blue-primary p-4 bg-blue-100 flex items-center rounded mt-5">
