@@ -1,0 +1,82 @@
+name: deploy-testnet
+
+on: 
+  push:
+    tags: 
+      - release-v*
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node 16.x
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: '16'
+      
+      - name: Cache node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+          
+      - name: Installing Dependencies
+        run: npm install
+      
+      - name: build for testnet
+        run: npm run build
+      
+      - name: Archive artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: |
+            dist
+
+  deploy-testnet:
+    name: Deploy to testnet
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment:
+      name: testnet
+      url: 'https://bctestnetwallet.xpxsirius.io'
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Download artifact 
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+
+      - name: Apply Testnet Config
+        env:
+          CHAINPROFILE: ${{ secrets.CHAINPROFILE_JSON}}
+          CHAINSWAPPROFILE: ${{ secrets.CHAINSWAPPROFILE_JSON}}
+
+        run: |
+          rm chainProfile.json chainSwapProfile.json
+          echo $CHAINPROFILE > ./chainProfile.json
+          echo $CHAINSWAPPROFILE > ./chainSwapProfile.json
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Copy files to testnet website
+        env:
+          BUCKET: ${{ secrets.S3_BUCKET}}
+          CF_DIST_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          aws s3 sync --delete . s3://$BUCKET
+          aws cloudfront create-invalidation --distribution-id $CF_DIST_ID --path "/*"
