@@ -1,6 +1,6 @@
 import {WalletUtils} from "../util/walletUtils";
-import {Wallets} from "../models/wallets";
 import { AppState } from "../state/appState";
+import {ChainProfile} from "./stores/chainProfile"
 import {networkState} from "../state/networkState";
 import { NetworkType } from "tsjs-xpx-chain-sdk";
 
@@ -34,16 +34,20 @@ export class WalletMigration{
         if(localStorage.getItem("sw-mainnet")){
             WalletMigration.doLocalStorageBackup("sw", 1);
             let storedWallets: any = JSON.parse(localStorage.getItem("sw-mainnet"));
-            let newWallet = new Wallets();
-            newWallet.wallets = storedWallets;
-            WalletUtils.initFixOldFormat(newWallet, networkState.availableNetworks[0], NetworkType.MAIN_NET);
+            let networkName = WalletMigration.getFistChainProfileWithNetworkType(networkState.availableNetworks, NetworkType.MAIN_NET);
+            
+            if(networkName){
+                WalletUtils.initFixOldFormat(storedWallets, networkName, NetworkType.MAIN_NET);
+            }   
         }
         else if(localStorage.getItem("sw-testnet")){
             WalletMigration.doLocalStorageBackup("sw", 1);
             let storedWallets: any = JSON.parse(localStorage.getItem("sw-testnet"));
-            let newWallet = new Wallets();
-            newWallet.wallets = storedWallets;
-            WalletUtils.initFixOldFormat(newWallet, networkState.availableNetworks[0], NetworkType.TEST_NET);
+            let networkName = WalletMigration.getFistChainProfileWithNetworkType(networkState.availableNetworks, NetworkType.TEST_NET);
+
+            if(networkName){
+                WalletUtils.initFixOldFormat(storedWallets, networkName, NetworkType.TEST_NET);
+            }   
         }
 
         console.log("Patching v1 done");
@@ -67,5 +71,22 @@ export class WalletMigration{
             let backupData = localStorage.getItem(storageName);
             localStorage.setItem(`pre${version}-${storageName}`, backupData);
         }
+    }
+
+    static getFistChainProfileWithNetworkType(allNetworkName: string[], networkType: NetworkType){
+
+        let returnNetworkName = "";
+
+        for(let i = 0; i < allNetworkName.length; ++i){
+            const chainProfile = new ChainProfile(allNetworkName[i]);
+            chainProfile.init();
+
+            if(networkType === chainProfile.network.type){
+                returnNetworkName = allNetworkName[i];
+                break;
+            }
+        }
+
+        return returnNetworkName;
     }
 }
