@@ -1078,14 +1078,14 @@ export class WalletUtils {
         }
     }
 
-    static initFixOldFormat(walletsToCheck: Wallets, networkName: string, networkType: NetworkType): void{
+    static initFixOldFormat(oldWallets: oldWltFile[], networkName: string, networkType: NetworkType): void{
         let walletsInstance = new Wallets();
         let wallets: Wallet[] = [];
         let prefix = networkType === NetworkType.MAIN_NET ? "sw-books-mainnet-" : "sw-books-testnet-";
 
+        oldWallets.forEach((wallet)=>{
 
-        walletsToCheck.wallets.forEach((wallet)=>{
-
+            let newWallet = new Wallet(wallet.name, networkName, []);
             let walletAccounts: WalletAccount[] = [];
             let allWalletContacts: AddressBook[] = [];
 
@@ -1093,19 +1093,13 @@ export class WalletUtils {
 
                 let stringJSON = JSON.stringify(account);
 
-                if(WalletUtils.checkIsNewFormatAccountRaw(stringJSON)){
-                    walletAccounts.push(account);
-                }
-                else{
-                    let newWalletAccount = WalletUtils.createNewWalletAccountFromOldFormat(stringJSON);
-                    newWalletAccount.fixAddress(networkType);
+                let newWalletAccount = WalletUtils.createNewWalletAccountFromOldFormat(stringJSON);
+                newWalletAccount.fixAddress(networkType);
 
-                    walletAccounts.push(newWalletAccount);
-                }
+                walletAccounts.push(newWalletAccount);
             });
 
-            wallet.accounts = walletAccounts;
-            wallet.networkName = networkName;
+            newWallet.accounts = walletAccounts;
 
             if(localStorage.getItem(prefix + wallet.name)){
                 let accountAddressBooks: any[] = JSON.parse(localStorage.getItem(prefix + wallet.name));
@@ -1116,8 +1110,8 @@ export class WalletUtils {
                     }
                 }       
             }        
-            wallet.contacts = allWalletContacts;
-            wallets.push(wallet);
+            newWallet.contacts = allWalletContacts;
+            wallets.push(newWallet);
         });
 
         walletsInstance.wallets = wallets;
