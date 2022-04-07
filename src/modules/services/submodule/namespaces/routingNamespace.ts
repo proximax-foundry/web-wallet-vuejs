@@ -32,7 +32,7 @@ export const NamespaceRoutes = [
     props: true,
     component: () => import('@/modules/services/submodule/namespaces/views/ViewServicesNamespaceMetadata.vue'),
     meta: {
-      title: "Add Namesace Metadata",
+      title: "Add Namespace Metadata",
     }
     
   },

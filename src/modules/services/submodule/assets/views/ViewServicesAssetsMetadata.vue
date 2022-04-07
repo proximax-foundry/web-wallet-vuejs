@@ -2,12 +2,12 @@
   <div>
     <div class='flex cursor-pointer'>
         <img src='@/assets/img/chevron_left.svg'>
-        <router-link :to="{name: 'ViewServicesNamespace'}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
+        <router-link :to="{name: 'ViewServicesAssets'}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
     </div>
     <div class='w-10/12 ml-auto mr-auto'>
         <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
             <div class="xl:col-span-2 p-12">
-                <div class="font-semibold mb-4">Add Namespace Metadata</div>
+                <div class="font-semibold mb-4">Add Asset Metadata</div>
                 <div v-if="showBalanceErr" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
                     <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2">
                         <font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon>
@@ -18,7 +18,7 @@
                 <div class="flex items-center">
                     <div v-html="svgString" class="inline-block" />
                     <div class="ml-2">
-                    <div class="text-blue-primary text-xxs font-bold uppercase mb-1">{{$t('namespace.namespaceCreatedBy')}}</div>
+                    <div class="text-blue-primary text-xxs font-bold uppercase mb-1">{{$t('asset.assetCreatedBy')}}</div>
                     <div class="font-bold text-black text-sm">{{ accountName}}</div>
                     </div>
                 </div>
@@ -43,10 +43,10 @@
                     </div>
                 </div>
                 <div class="border border-blue-primary p-4 bg-blue-100 flex items-center rounded mt-5">
-                    <img src="@/modules/services/submodule/namespaces/img/icon-namespace.svg">
+                    <img src="@/modules/services/submodule/assets/img/icon-asset.svg">
                     <div class="ml-1">
-                        <div class="uppercase text-blue-primary font-semibold text-xxs">NAMESPACE</div>
-                        <div class="text-black text-sm font-bold">{{ namespaceName }}</div>
+                        <div class="uppercase text-blue-primary font-semibold text-xxs">ASSET ID</div>
+                        <div class="text-black text-sm font-bold">{{ assetId }}</div>
                     </div>
                 </div>
                 <MetadataInput class="mt-5" v-model="scopedMetadataKey" placeholder="Scoped Metadata Key" v-debounce:1000="checkOldValue" />
@@ -87,7 +87,7 @@
                 </div>
                 <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
                 <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"  v-model="walletPassword" icon="lock" class="mt-5 mb-3" />
-                <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="namespaceMetadataTx()" :disabled="disableAddBtn">
+                <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="assetMetadataTx()" :disabled="disableAddBtn">
                     Add Metadata
                 </button>
                 <div class="text-center">
@@ -95,18 +95,7 @@
                 </div>
             </div>
         </div>
-
-        <div class="sm:grid sm:grid-cols-2 mt-10 lg:mt-16">
-        <div class="mb-8 sm:pr-1">
-            <a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">{{$t('general.namespaceQues')}}</a>
-            <div class="text-gray-400 text-tsm my-3 sm:pr-2">{{$t('namespace.namespaceAns')}}</div>
-        </div>
-        <div class="mb-8">
-            <a href="https://t.me/proximaxhelpdesk" target=_new class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">{{$t('general.feedback')}}</a>
-            <div class="text-gray-400 text-tsm my-3">{{$t('general.feedbackDescription')}}</div>
-        </div>
-        </div>
-  </div>
+    </div>
   </div>
 </template>
 
@@ -121,10 +110,10 @@ import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
 import { networkState } from '@/state/networkState';
 import { TransactionUtils } from '@/util/transactionUtils';
-import { NamespaceUtils } from '@/util/namespaceUtils';
 import PasswordInput from "@/components/PasswordInput.vue";
 import { WalletUtils } from '@/util/walletUtils';
 import { useI18n } from 'vue-i18n';
+import { AssetsUtils } from '@/util/assetsUtils';
 export default {
     name: "ViewServicesNamespaceMetadata",
     components:{
@@ -133,7 +122,7 @@ export default {
     },
     props:{
         address: String,
-        namespaceId:String
+        assetId:String
     },
     setup(p){
         const {t} = useI18n()
@@ -197,15 +186,9 @@ export default {
                 return ''
             }
         })
-        const namespaceName = computed(()=>{
-            if(account.value){
-                return account.value.namespaces.find(namespace=>namespace.idHex==p.namespaceId).name
-            }else{
-                return ''
-            }
-        })
+       
         const updateAggregateFee = ()=>{
-            aggregateFee.value = NamespaceUtils.calculateMetadataAggregateFee(namespaceName.value,oldValue.value,newValue.value)
+            aggregateFee.value = AssetsUtils.calculateMetadataAggregateFee(p.assetId,oldValue.value,newValue.value)
         }
         updateAggregateFee()
         const isMultisig = computed(()=>{
@@ -286,7 +269,7 @@ export default {
         const walletPassword = ref('')
         const checkOldValue = ()=>{
             try{
-                NamespaceUtils.checkMetadataOldValue(namespaceName.value,scopedMetadataKey.value).then(returnedValue=>{
+                AssetsUtils.checkMetadataOldValue(p.assetId,scopedMetadataKey.value).then(returnedValue=>{
                 oldValue.value = returnedValue
             })
             }catch{
@@ -295,12 +278,12 @@ export default {
             
         }
         const err = ref('')
-        const namespaceMetadataTx = ()=>{
+        const assetMetadataTx = ()=>{
             if(WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)){
                 if(isMultisig.value){
-                    NamespaceUtils.namespaceMetadataTx(account.value.publicKey,namespaceName.value,scopedMetadataKey.value,newValue.value,oldValue.value,walletPassword.value,findAcc(selectedCosigner.value).publicKey)
+                    AssetsUtils.assetMetadataTx(account.value.publicKey,p.assetId,scopedMetadataKey.value,newValue.value,oldValue.value,walletPassword.value,findAcc(selectedCosigner.value).publicKey)
                 }else{
-                    NamespaceUtils.namespaceMetadataTx(account.value.publicKey,namespaceName.value,scopedMetadataKey.value,newValue.value,oldValue.value,walletPassword.value)
+                    AssetsUtils.assetMetadataTx(account.value.publicKey,p.assetId,scopedMetadataKey.value,newValue.value,oldValue.value,walletPassword.value)
                 }
                 scopedMetadataKey.value=""
                 oldValue.value = ""
@@ -325,7 +308,6 @@ export default {
         return{
             svgString,
             accountName,
-            namespaceName,
             scopedMetadataKey,
             oldValue,
             newValue,
@@ -340,7 +322,7 @@ export default {
             walletPassword,
             showBalanceErr,
             checkOldValue,
-            namespaceMetadataTx,
+            assetMetadataTx,
             disableAddBtn,
             err,
             selectedCosigner,

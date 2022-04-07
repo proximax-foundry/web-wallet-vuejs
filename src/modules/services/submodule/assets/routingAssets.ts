@@ -34,4 +34,13 @@ export const AssetsRoutes = [
       title: "Link to Namespace",
     }
   },
+  {
+    path: '/add-namespace-metadata/:assetId/:address',
+    name: 'ViewServicesAssetsMetadata',
+    props: true,
+    component: () => import('@/modules/services/submodule/assets/views/ViewServicesAssetsMetadata.vue'),
+    meta: {
+      title: "Add Asset Metadata",
+    }
+  },
 ];

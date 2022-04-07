@@ -10,6 +10,11 @@ import {
   AggregateTransaction,
   NamespaceId,
   MosaicSupplyChangeTransaction,
+  MosaicMetadataTransaction,
+  Deadline,
+  MetadataQueryParams,
+  MetadataType,
+  KeyGenerator,
 } from "tsjs-xpx-chain-sdk";
 import { walletState } from "../state/walletState";
 import { networkState } from "../state/networkState";
@@ -337,6 +342,66 @@ export class AssetsUtils {
       });
     }
     return namespacesArr;
+  }
+
+  static calculateMetadataAggregateFee = (assetId :string, oldValue: string, newValue: string) :number=>{
+    let fakePublicAcc = PublicAccount.createFromPublicKey('0'.repeat(64),AppState.networkType)
+    let mosaicMetadataTxn =  MosaicMetadataTransaction.create( 
+      Deadline.create(),  
+      fakePublicAcc,
+      new MosaicId(assetId),
+      "myKey",
+      newValue,
+      oldValue,
+      AppState.networkType
+    );
+    let abtTx = AppState.buildTxn.aggregateBonded(
+      [mosaicMetadataTxn.toAggregate(fakePublicAcc)]
+    )
+    return abtTx.maxFee.compact()/Math.pow(10,AppState.nativeToken.divisibility)
+  }
+
+  static checkMetadataOldValue = async(mosaicId: string,scopedMetadataKey: string) :Promise<string>=>{
+    
+    let metadataQueryParams = new MetadataQueryParams(); 
+    metadataQueryParams.metadataType = MetadataType.MOSAIC 
+    metadataQueryParams.targetId = new MosaicId(mosaicId) 
+    metadataQueryParams.scopedMetadataKey = KeyGenerator.generateUInt64Key(scopedMetadataKey)
+    let oldValue = ""
+    let metadataSearchResult = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
+    if(metadataSearchResult.metadataEntries.length>0){
+      oldValue = metadataSearchResult.metadataEntries[0].value;
+    }
+    return oldValue
+  }
+
+  static assetMetadataTx =(ownerPublicKey:string,mosaicId: string,scopedMetadataKey: string,newValue: string,oldValue :string, walletPassword: string,initiator? :string)=>{
+    let ownerPublicAcc = PublicAccount.createFromPublicKey(ownerPublicKey,AppState.networkType)
+    let mosaicMetadataTxn = MosaicMetadataTransaction.create(
+      Deadline.create(), 
+      ownerPublicAcc,
+      new MosaicId(mosaicId),
+      scopedMetadataKey,
+      newValue,
+      oldValue,
+      AppState.networkType
+    );
+    let txBuilder = AppState.buildTxn
+    let abtTx = txBuilder.aggregateBonded(
+      [mosaicMetadataTxn.toAggregate(ownerPublicAcc) ]
+    )
+    let account = initiator? 
+    walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == initiator): //multisig
+    walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == ownerPublicKey) //normal
+    let encryptedPassword = WalletUtils.createPassword(walletPassword);
+    let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, account.encrypted, account.iv);
+    let signerAcc = Account.createFromPrivateKey(privateKey, AppState.networkType);
+    let signedAbtTransaction = signerAcc.sign(abtTx, networkState.currentNetworkProfile.generationHash);
+    let lockHashTx = TransactionUtils.lockFundTx(signedAbtTransaction)
+
+    let signedLockHashTransaction = signerAcc.sign(lockHashTx, networkState.currentNetworkProfile.generationHash);
+    
+    TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedLockHashTransaction,signedAbtTransaction) 
   }
 }
 
