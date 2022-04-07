@@ -301,7 +301,7 @@ export class NamespaceUtils {
 
   static calculateMetadataAggregateFee = (namespaceId :string, oldValue: string, newValue: string) :number=>{
     let fakePublicAcc = PublicAccount.createFromPublicKey('0'.repeat(64),AppState.networkType)
-    let accountMetadataTxn = NamespaceMetadataTransaction.create( 
+    let namespaceMetadataTxn = NamespaceMetadataTransaction.create( 
       Deadline.create(),  
       fakePublicAcc,
       new NamespaceId(namespaceId),
@@ -311,7 +311,7 @@ export class NamespaceUtils {
       AppState.networkType
     );
     let abtTx = AppState.buildTxn.aggregateBonded(
-      [accountMetadataTxn.toAggregate(fakePublicAcc)]
+      [namespaceMetadataTxn.toAggregate(fakePublicAcc)]
     )
     return abtTx.maxFee.compact()/Math.pow(10,AppState.nativeToken.divisibility)
   }
