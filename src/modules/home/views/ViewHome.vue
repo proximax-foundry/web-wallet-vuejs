@@ -34,6 +34,8 @@ import { networkState } from '@/state/networkState'
 import { computed } from 'vue';
 import CryptoJS from 'crypto-js';
 import {appSetting} from '@/config/appSetting';
+import { WalletUtils } from '@/util/walletUtils';
+import { NetworkType } from 'tsjs-xpx-chain-sdk';
 export default {
   name: 'Home',
   components: {
@@ -75,9 +77,12 @@ export default {
 
       let wltData = JSON.parse(mainnetOldFormat ? mainnetOldFormat: testnetOldFormat);
       let wltDataRaw = mainnetOldFormat ? mainnetOldFormat : testnetOldFormat; 
+      let addressBookPrefix = backupType === 1 ? "sw-books-mainnet-" : "sw-books-testnet-";
 
       for(let i = 0; i < wltData.length; ++i){
-        let wltRaw = JSON.stringify(wltData[i]);
+        let allAddressBook = WalletUtils.oldFormatCollectAddressBook(wltData[i].name, addressBookPrefix);
+        let newWallet = WalletUtils.oldFormatToNewFormat(wltData[i], "", backupType === 1 ? NetworkType.MAIN_NET: NetworkType.TEST_NET, allAddressBook);
+        let wltRaw = JSON.stringify(newWallet);
         let wltBackup = CryptoJS.enc.Utf8.parse(wltRaw);
         let file = CryptoJS.enc.Base64.stringify(wltBackup);
         const blob = new Blob([file], { type: '' });
