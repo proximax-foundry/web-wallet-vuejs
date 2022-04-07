@@ -35,7 +35,7 @@ export const AssetsRoutes = [
     }
   },
   {
-    path: '/add-namespace-metadata/:assetId/:address',
+    path: '/add-assets-metadata/:assetId/:address',
     name: 'ViewServicesAssetsMetadata',
     props: true,
     component: () => import('@/modules/services/submodule/assets/views/ViewServicesAssetsMetadata.vue'),

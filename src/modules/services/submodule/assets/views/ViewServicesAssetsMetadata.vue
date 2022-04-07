@@ -115,7 +115,7 @@ import { WalletUtils } from '@/util/walletUtils';
 import { useI18n } from 'vue-i18n';
 import { AssetsUtils } from '@/util/assetsUtils';
 export default {
-    name: "ViewServicesNamespaceMetadata",
+    name: "ViewServicesAssetMetadata",
     components:{
         MetadataInput,
         PasswordInput
