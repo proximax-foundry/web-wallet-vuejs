@@ -271,6 +271,9 @@ function checkHasMultiSig(accountAddress :string) :boolean{
 
 
 function getCosignerInWallet(publicKey :string) :{hasCosigner:boolean,cosignerList:string[]}{
+  if(!walletState.currentLoggedInWallet){
+    return {hasCosigner:false,cosignerList:[]}
+  }
   let accounts = walletState.currentLoggedInWallet.accounts.map(
     (acc)=>{ 
       return { 

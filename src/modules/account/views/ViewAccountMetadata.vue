@@ -5,14 +5,14 @@
         <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
     </div>
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
-        <AccountComponent :address="account.address" class="mb-10"/>
+        <AccountComponent :address="address" class="mb-10"/>
         <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-        <router-link :to="{name: 'ViewAccountDetails',params:{address:account.address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-        <router-link :to="{name:'ViewAccountAssets', params: { address: account.address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-        <router-link :to="{name:'ViewMultisigHome', params: { name: account.name}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-        <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: account.address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
-        <router-link :to="{name:'ViewAccountSwap', params: { address: account.address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
-        <MoreAccountOptions :address="account.address" :selected="true"/>
+        <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
+        <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+        <router-link :to="{name:'ViewMultisigHome', params: { name: account?account.name:account}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
+        <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
+        <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
+        <MoreAccountOptions :address="address" :selected="true"/>
         </div>
         <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
             <div class="lg:col-span-2 py-6 px-6">
@@ -45,7 +45,7 @@
                         <div v-html="svgString"  />
                         <div class="flex flex-col gap-0.5">
                             <div class="uppercase text-xxs text-blue-primary">Selected Account</div>
-                            <div class="font-semibold">{{account.name}}</div>
+                            <div class="font-semibold">{{account?account.name:account}}</div>
                         </div>
                     </div>
                 </div>
@@ -209,9 +209,9 @@ export default {
         })
         
         const cosigners = computed(()=>{
-            if(multiSign.getCosignerInWallet(account.value.publicKey).cosignerList.length){
+            if(multiSign.getCosignerInWallet(accountPublicKey.value).cosignerList.length){
                 if(allAvailableAccounts.value){
-                    return multiSign.getCosignerInWallet(account.value.publicKey).cosignerList.map(cosigner=>{
+                    return multiSign.getCosignerInWallet(accountPublicKey.value).cosignerList.map(cosigner=>{
                         let foundCosigner = allAvailableAccounts.value.find(acc=>acc.publicKey==cosigner)
                         return{
                             name: foundCosigner.name,
