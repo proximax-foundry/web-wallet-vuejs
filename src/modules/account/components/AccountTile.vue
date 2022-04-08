@@ -48,6 +48,8 @@
               <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">{{$t('general.delegate')}}</div>
               <router-link v-if="!otherAccount(account.address) ||( otherAccount(account.address) && multisig_add!='')" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: account.address}}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.namespace')}}</router-link>
               <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">{{$t('general.namespace')}}</div>
+              <router-link v-if="!otherAccount(account.address) ||( otherAccount(account.address) && multisig_add!='')" :to="{ name: 'ViewAccountMetadata', params: { address: account.address}}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Metadata</router-link>
+              <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">Metadata</div>
             </div>
           </div>
         </div>

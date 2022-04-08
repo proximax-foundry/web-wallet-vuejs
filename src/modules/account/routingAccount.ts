@@ -92,6 +92,15 @@ export const AccountRoutes: RouteRecordRaw[] = [
       title: "Account Assets",
     }
   },
+  {
+    path: '/add-account-metadata/:address',
+    name: 'ViewAccountMetadata',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccountMetadata.vue'),
+    meta: {
+      title: "Account Metadata",
+    }
+  },
   ...DelegateRoutes,
   ...LinkToNamespaceRoutes,
   ...MultisigRoutes,

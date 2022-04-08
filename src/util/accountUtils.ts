@@ -1,6 +1,6 @@
 import { walletState } from "@/state/walletState";
 import { readonly } from "vue";
-import { Address, Account, SignedTransaction,PublicAccount, LinkAction, NamespaceId, AliasActionType, Password, AddressAliasTransaction, AccountLinkTransaction} from "tsjs-xpx-chain-sdk";
+import { Address, Account, SignedTransaction,PublicAccount, LinkAction, NamespaceId, AliasActionType, Password, AddressAliasTransaction, AccountLinkTransaction, Deadline, AccountMetadataTransaction, MetadataQueryParams, MetadataType, KeyGenerator} from "tsjs-xpx-chain-sdk";
 import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from "@/util/chainUtils";
 import { networkState } from "@/state/networkState";
@@ -295,6 +295,63 @@ const getValidAccount = async (address: string): Promise<boolean> => {
   return returnResponse;
 }
 
+const calculateMetadataAggregateFee = ( oldValue: string, newValue: string) :number=>{
+  let fakePublicAcc = PublicAccount.createFromPublicKey('0'.repeat(64),AppState.networkType)
+  let namespaceMetadataTxn = AccountMetadataTransaction.create( 
+    Deadline.create(),  
+    fakePublicAcc,
+    "myKey",
+    newValue,
+    oldValue,
+    AppState.networkType
+  );
+  let abtTx = AppState.buildTxn.aggregateBonded(
+    [namespaceMetadataTxn.toAggregate(fakePublicAcc)]
+  )
+  return abtTx.maxFee.compact()/Math.pow(10,AppState.nativeToken.divisibility)
+}
+
+const checkMetadataOldValue = async(publicKey: string,scopedMetadataKey: string) :Promise<string>=>{
+  let targetPublicAccount = PublicAccount.createFromPublicKey(publicKey,AppState.networkType)
+  let metadataQueryParams = new MetadataQueryParams(); 
+  metadataQueryParams.metadataType = MetadataType.ACCOUNT
+  metadataQueryParams.targetKey = targetPublicAccount 
+  metadataQueryParams.scopedMetadataKey = KeyGenerator.generateUInt64Key(scopedMetadataKey)
+  let oldValue = ""
+  let metadataSearchResult = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
+  if(metadataSearchResult.metadataEntries.length>0){
+    oldValue = metadataSearchResult.metadataEntries[0].value;
+  }
+  return oldValue
+}
+
+const accountMetadataTx =(ownerPublicKey:string,scopedMetadataKey: string,newValue: string,oldValue :string, walletPassword: string,initiator? :string)=>{
+  let ownerPublicAcc = PublicAccount.createFromPublicKey(ownerPublicKey,AppState.networkType)
+  let namespaceMetadataTxn = AccountMetadataTransaction.create( 
+    Deadline.create(), 
+    ownerPublicAcc,
+    scopedMetadataKey,
+    newValue,
+    oldValue,
+    AppState.networkType
+  );
+  let txBuilder = AppState.buildTxn
+  let abtTx = txBuilder.aggregateBonded(
+    [namespaceMetadataTxn.toAggregate(ownerPublicAcc) ]
+  )
+  let account = initiator? 
+  walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == initiator): //multisig
+  walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == ownerPublicKey) //normal
+  let encryptedPassword = WalletUtils.createPassword(walletPassword);
+  let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, account.encrypted, account.iv);
+  let signerAcc = Account.createFromPrivateKey(privateKey, AppState.networkType);
+  let signedAbtTransaction = signerAcc.sign(abtTx, networkState.currentNetworkProfile.generationHash);
+  let lockHashTx = TransactionUtils.lockFundTx(signedAbtTransaction)
+
+  let signedLockHashTransaction = signerAcc.sign(lockHashTx, networkState.currentNetworkProfile.generationHash);
+  
+  TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedLockHashTransaction,signedAbtTransaction) 
+}
 
 export const accountUtils = readonly({
   checkAvailableContact,
@@ -308,7 +365,10 @@ export const accountUtils = readonly({
   linkNamespaceToAddress,
   createDelegateTransaction,
   getValidAccount,
-  getDelegateFee
+  getDelegateFee,
+  calculateMetadataAggregateFee,
+  checkMetadataOldValue,
+  accountMetadataTx
   //getAccInfo
   //getAccInfoFromPrivateKey
 });
