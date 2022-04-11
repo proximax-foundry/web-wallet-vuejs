@@ -203,7 +203,7 @@ export default {
     const namespace = ref('');
     const networkType = AppState.networkType;
     const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
-    const walletName = walletState.currentLoggedInWallet.name
+    const walletName = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.name : ''
     const currencyName = computed(
       () => networkState.currentNetworkProfile.network.currency.name
     );
@@ -242,10 +242,10 @@ export default {
     
     
     const selectedAccName = ref(
-      walletState.currentLoggedInWallet.selectDefaultAccount().name
+      walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount().name : ''
     );
     const selectedAccAdd = ref(
-      walletState.currentLoggedInWallet.selectDefaultAccount().address
+      walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount().address : ''
     );
     const findAcc = (publicKey)=>{
       return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
