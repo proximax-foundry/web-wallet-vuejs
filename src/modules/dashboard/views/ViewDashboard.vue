@@ -752,8 +752,8 @@ export default defineComponent({
 
     const formatRecentTransfer = (transactions) => {
       let transferTxn = [];
-      let nativeTokenTxns = transactions.filter(txn => txn.amountTransfer > 0);
-
+      let nativeTokenTxns = transactions.filter(txn => txn.amountTransfer >= 0);
+      
       for(const txn of nativeTokenTxns){
         let formattedTransferTxn = {};
         if(selectedAccountAddressPlain.value == txn.sender && selectedAccountAddressPlain.value == txn.recipient){
