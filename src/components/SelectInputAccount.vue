@@ -54,7 +54,7 @@ export default defineComponent({
 
     const accounts = computed(() =>{
       var accountList = [];
-      const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+      const concatOther = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others): []
       concatOther.forEach(account => {
         accountList.push({
           value: account.address,
@@ -69,7 +69,7 @@ export default defineComponent({
       return accountList;
     });
 
-    const selectedAccount = ref(accounts.value.find(acc => acc.value == p.selectDefault).label);
+    const selectedAccount = ref(accounts.value.length>0?accounts.value.find(acc => acc.value == p.selectDefault).label:'');
     const selectedAddress = ref(p.selectDefault);
     const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonConfig));
     const selectAccount = (accountName, accountAddress) => {

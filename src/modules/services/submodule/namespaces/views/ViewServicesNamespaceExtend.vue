@@ -360,6 +360,14 @@ export default {
       }
     })
 
+    cosignerAddress.value = getMultiSigCosigner.value.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:''
+    
+    watch(getMultiSigCosigner,n=>{
+      if(n.cosignerList.length>0){
+        cosignerAddress.value = n.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:''
+      }
+    })
+
     const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
 
     const showNoBalance = computed(() => {
