@@ -124,6 +124,9 @@ export default{
 
   setup(props, context){
     const {t} = useI18n();
+    const currentNetworkProfile = computed(()=>{
+      return networkState.currentNetworkProfile
+    })
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
       if(window.innerWidth < '1024'){
@@ -331,7 +334,7 @@ export default{
             expiring: expiryStatus,
             expiryRelative: expiryRelativeTimeEstimate,
             expiry: currentBlockHeight.value?expiryDate:'',
-            explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].namespace.idHex,
+            explorerLink: currentNetworkProfile.value? currentNetworkProfile.value.chainExplorer.url:'' + '/' + currentNetworkProfile.value?currentNetworkProfile.value.chainExplorer.namespaceInfoRoute : '' + '/' + namespaces[i].namespace.idHex,
             address: Helper.createAddress(namespaces[i].account.address).pretty(),
             icon: toSvg(namespaces[i].account.address, 30, themeConfig.jdenticonConfig)
           };
@@ -384,11 +387,11 @@ export default{
       currentMenu.value = 'e';
     };
 
-    const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
-    const publicKeyExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.publicKeyRoute);
-    const addressExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.addressRoute);
-    const namespaceExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute);
-    const assetExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.assetInfoRoute);
+    const explorerBaseURL = computed(()=> currentNetworkProfile.value?currentNetworkProfile.value.chainExplorer.url:'');
+    const publicKeyExplorerURL = computed(()=> currentNetworkProfile.value?currentNetworkProfile.value.chainExplorer.publicKeyRoute:'');
+    const addressExplorerURL = computed(()=> currentNetworkProfile.value?currentNetworkProfile.value.chainExplorer.addressRoute:'');
+    const namespaceExplorerURL = computed(()=> currentNetworkProfile.value?currentNetworkProfile.value.chainExplorer.namespaceInfoRoute:'');
+    const assetExplorerURL = computed(()=> currentNetworkProfile.value?currentNetworkProfile.value.chainExplorer.assetInfoRoute:'');
 
     return {
       addressExplorerURL,
