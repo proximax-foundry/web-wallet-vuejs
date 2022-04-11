@@ -109,6 +109,7 @@ import { toSvg } from "jdenticon";
 import Tooltip from 'primevue/tooltip';
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { useI18n } from 'vue-i18n';
+import { AppState } from '@/state/appState';
 
 export default{
   components: { DataTable, Column, SelectInputPluginClean },
@@ -124,9 +125,6 @@ export default{
 
   setup(props, context){
     const {t} = useI18n();
-    const currentNetworkProfile = computed(()=>{
-      return networkState.currentNetworkProfile
-    })
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
       if(window.innerWidth < '1024'){
@@ -334,7 +332,7 @@ export default{
             expiring: expiryStatus,
             expiryRelative: expiryRelativeTimeEstimate,
             expiry: currentBlockHeight.value?expiryDate:'',
-            explorerLink: currentNetworkProfile.value? currentNetworkProfile.value.chainExplorer.url:'' + '/' + currentNetworkProfile.value?currentNetworkProfile.value.chainExplorer.namespaceInfoRoute : '' + '/' + namespaces[i].namespace.idHex,
+            explorerLink: AppState.isReady?networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].namespace.idHex : '',
             address: Helper.createAddress(namespaces[i].account.address).pretty(),
             icon: toSvg(namespaces[i].account.address, 30, themeConfig.jdenticonConfig)
           };
@@ -387,11 +385,11 @@ export default{
       currentMenu.value = 'e';
     };
 
-    const explorerBaseURL = computed(()=> currentNetworkProfile.value?currentNetworkProfile.value.chainExplorer.url:'');
-    const publicKeyExplorerURL = computed(()=> currentNetworkProfile.value?currentNetworkProfile.value.chainExplorer.publicKeyRoute:'');
-    const addressExplorerURL = computed(()=> currentNetworkProfile.value?currentNetworkProfile.value.chainExplorer.addressRoute:'');
-    const namespaceExplorerURL = computed(()=> currentNetworkProfile.value?currentNetworkProfile.value.chainExplorer.namespaceInfoRoute:'');
-    const assetExplorerURL = computed(()=> currentNetworkProfile.value?currentNetworkProfile.value.chainExplorer.assetInfoRoute:'');
+    const explorerBaseURL = computed(()=> AppState.isReady?networkState.currentNetworkProfile.chainExplorer.url:'');
+    const publicKeyExplorerURL = computed(()=> AppState.isReady?networkState.currentNetworkProfile.chainExplorer.publicKeyRoute:'');
+    const addressExplorerURL = computed(()=> AppState.isReady?networkState.currentNetworkProfile.chainExplorer.addressRoute:'');
+    const namespaceExplorerURL = computed(()=> AppState.isReady?networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute:'');
+    const assetExplorerURL = computed(()=> AppState.isReady?networkState.currentNetworkProfile.chainExplorer.assetInfoRoute:'');
 
     return {
       addressExplorerURL,
