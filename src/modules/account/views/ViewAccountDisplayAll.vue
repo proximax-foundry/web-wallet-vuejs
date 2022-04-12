@@ -97,7 +97,9 @@ export default {
 
     
     const accountStructure = computed(()=>{
-     
+      if(!walletState.currentLoggedInWallet){
+        return []
+      }
       let accountStructure = {normalAcc:[],multisig:[]}
       
       totalAcc.value.forEach(account=>{
