@@ -230,6 +230,9 @@ function getMultisigAccountGraphInfo(address :string) :Promise<MultisigAccountGr
 function checkIsMultiSig(accountAddress :string) :boolean{
     /* let account = walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress)?walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress):  walletState.currentLoggedInWallet.others.find(element=>element.address ===accountAddress) */
     let wallet = walletState.currentLoggedInWallet
+    if(!wallet){
+      return false
+    }
     let account
       if (wallet.accounts.find(element => element.address ===accountAddress) === undefined && wallet.others.find(element => element.address ===accountAddress) === undefined){
         account = null
@@ -250,6 +253,9 @@ function checkIsMultiSig(accountAddress :string) :boolean{
 function checkHasMultiSig(accountAddress :string) :boolean{
   /* let account = walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress)?walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress):  walletState.currentLoggedInWallet.others.find(element=>element.address ===accountAddress) */
   let wallet = walletState.currentLoggedInWallet
+  if(!wallet){
+    return false
+  }
   let account
     if (wallet.accounts.find(element => element.address ===accountAddress) === undefined && wallet.others.find(element => element.address ===accountAddress) === undefined){
       account = null
