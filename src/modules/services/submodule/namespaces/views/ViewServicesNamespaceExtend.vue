@@ -26,7 +26,7 @@
         </div>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="text-right w-full">
-          <div v-if="getMultiSigCosigner.cosignerList.length > 0" class="inline-block">
+          <div v-if="getMultiSigCosigner?getMultiSigCosigner.cosignerList.length:0 > 0" class="inline-block">
             <div class="text-tsm text-left mt-3">{{$t('general.initiateBy')}}:
               <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('general.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('general.insufficientBalance')}}</span></span>
               <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.cosignerList" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('general.balance')}}: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
@@ -197,6 +197,7 @@ export default {
       }
       return 0;  
     });
+    const isNotCosigner = computed(() => (getMultiSigCosigner.value?getMultiSigCosigner.value.cosignerList.length: 0) == 0 && isMultiSig(selectedAccAdd.value));
     const lockFundTxFeeCurrency = ref(lockFundTxFee.value.toString());
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
@@ -207,8 +208,12 @@ export default {
     const isMultiSig = (address) => {
       if(walletState.currentLoggedInWallet){
         const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address) || walletState.currentLoggedInWallet.others.find((account) => account.address == address);
-        const isMulti = account.getDirectParentMultisig().length>0?true:false
-        return isMulti
+        if(account){
+          const isMulti = account.getDirectParentMultisig().length>0?true:false
+          return isMulti
+        }else{
+          return false
+        }
       }else{
         return false
       }
@@ -342,6 +347,9 @@ export default {
     };
 
     const getMultiSigCosigner = computed(()=>{
+      if(!account.value){
+        return
+      }
       if(networkState.currentNetworkProfileConfig){
         let cosigners = multiSign.getCosignerInWallet(account.value?account.value.publicKey:'');
         let list = [];
@@ -360,15 +368,18 @@ export default {
       }
     })
 
-    cosignerAddress.value = getMultiSigCosigner.value.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:''
+    cosignerAddress.value = getMultiSigCosigner.value?getMultiSigCosigner.value.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:'':''
     
     watch(getMultiSigCosigner,n=>{
-      if(n.cosignerList.length>0){
-        cosignerAddress.value = n.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:''
+      if(n){
+        if(n.cosignerList.length>0){
+          cosignerAddress.value = n.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:''
+        }
       }
+      
     })
 
-    const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
+    
 
     const showNoBalance = computed(() => {
       if(isNotCosigner.value){

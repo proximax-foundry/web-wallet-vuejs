@@ -192,8 +192,12 @@ export default {
     const isMultiSig = (address) => {
       if(walletState.currentLoggedInWallet){
         const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address) || walletState.currentLoggedInWallet.others.find((account) => account.address == address);
-        const isMulti = account.getDirectParentMultisig().length>0?true:false
-        return isMulti
+        if(account){
+          const isMulti = account.getDirectParentMultisig().length>0?true:false
+          return isMulti
+        }else{
+          return false
+        }
       }else{
         return false
       }
@@ -217,7 +221,7 @@ export default {
 
     let account = computed(()=>{
       if(walletState.currentLoggedInWallet){
-        return walletState.currentLoggedInWallet.accounts.find(account => account.address == selectedAccAdd.value) || walletState.currentLoggedInWallet.others.find(account => account.address == plainAddress);
+        return walletState.currentLoggedInWallet.accounts.find(account => account.address == selectedAccAdd.value) || walletState.currentLoggedInWallet.others.find(account => account.address == selectedAccAdd.value);
       }else{
         return null
       }
@@ -262,6 +266,9 @@ export default {
     };
 
     const getMultiSigCosigner = computed(()=>{
+      if(!account.value){
+        return {hasCosigner:false,cosignerList: []}
+      }
       if(networkState.currentNetworkProfileConfig){
         let cosigners = multiSign.getCosignerInWallet(account.value?account.value.publicKey:'');
         let list = [];
