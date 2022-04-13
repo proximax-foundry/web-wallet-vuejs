@@ -46,30 +46,50 @@ props:{
 setup(p){
     const {t} = useI18n();
     const toast = useToast();
-    let acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
-    const other_acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
-    if(!acc){
-      if(other_acc)
-      {
-        acc = other_acc;
+    const acc = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return null
       }
-    }
+      let acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address) || walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
+      if(!acc){
+        return null
+      }
+      return acc
+    })
+   const other_acc = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
+     return walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
+   })
     let err = ref("")
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig'); 
-    const prettyAddress = Helper.createAddress(acc.address).pretty();
+    const prettyAddress = Helper.createAddress(p.address).pretty();
     themeConfig.init();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const isDefault = (acc.default == true) ? true: false
+    const isDefault = computed(()=> {
+      if(!acc.value){
+        return false
+      }
+      return acc.value.default?true: false
+    })
     const isMultiSig = computed(() => {
-      let isMulti = acc.getDirectParentMultisig().length? true: false
+      if(!acc.value){
+        return false
+      }
+      let isMulti = acc.value.getDirectParentMultisig().length? true: false
       return isMulti;
-    });  
-    const accountName = ref(acc.name);
+    }); 
+    const accountName = ref('');
+    accountName.value = acc.value?acc.value.name: ''
     const accountNameDisplay = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return ''
+      }
       return walletState.currentLoggedInWallet.convertAddressToName(p.address,true)
     });
-    const svgString = ref(toSvg(acc.address, 100, themeConfig.jdenticonConfig));    
+    const svgString = ref(toSvg(p.address, 100, themeConfig.jdenticonConfig));    
     const showName = ref(true);
     const changeName = () => {
       if (accountName.value.trim()) {

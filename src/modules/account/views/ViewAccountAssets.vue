@@ -61,6 +61,9 @@ export default {
         const wallet = walletState.currentLoggedInWallet 
         const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
         const acc= computed(()=>{
+            if(!wallet){
+                return null
+            }
             let currentAccount=wallet.accounts.find(account=> account.address == p.address)
             if (currentAccount!=undefined){
             return currentAccount
@@ -69,17 +72,23 @@ export default {
             }
         })
         const isMultiSig = computed(() => {
+            if(!acc.value){
+                return false
+            }
             let isMulti = acc.value.getDirectParentMultisig().length? true: false
             return isMulti;
         });  
-        const isDelegate = computed(()=>{
+        let isDelegate = ()=>{
+            if(!walletState.currentLoggedInWallet){
+                return false
+            }
             let account = walletState.currentLoggedInWallet.others.find(acc=>acc.address==p.address)
             if(account){
                 return account.type=="DELEGATE"?true:false
             }else{
                 return false
             }
-        })
+        }
         const mosaics = computed(() => {
             var mosaicOption = [];
             if(!walletState.currentLoggedInWallet){
@@ -119,6 +128,9 @@ export default {
             }
         }
         const explorerLink = assetId=>{ 
+            if(!networkState.currentNetworkProfile){
+                return ''
+            }
             return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
         }
         return{

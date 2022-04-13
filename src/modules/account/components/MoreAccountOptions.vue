@@ -30,9 +30,26 @@ props:{
 },
 setup(p){
     let toggleModal = ref(false)
-    const account = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address)
-    const other_acc = walletState.currentLoggedInWallet.others.find(acc=>acc.address==p.address)
+    const account = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
+      let acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address) || walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
+      if(!acc){
+        return null
+      }
+      return acc
+    })
+    const other_acc = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
+      return walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
+    })
     const otherAccount = (address) => {
+    if(!walletState.currentLoggedInWallet){
+      return null
+    }
       return walletState.currentLoggedInWallet.others.find(others => others.address == address);
     };
     return{

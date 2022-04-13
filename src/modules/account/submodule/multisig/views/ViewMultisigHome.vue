@@ -76,7 +76,7 @@ import { useI18n } from 'vue-i18n';
 export default {
     name: "ViewMultisigHome",
     props: {
-        name: String
+        address: String
     },
     components:{
       AccountComponent,
@@ -85,8 +85,8 @@ export default {
     setup(p){
       const {t} = useI18n()
       const toast = useToast();
-      var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.name == p.name);
-      const other_acc = walletState.currentLoggedInWallet.others.filter(accounts=>accounts.type === "MULTISIG").find((add) => add.name == p.name);
+      var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
+      const other_acc = walletState.currentLoggedInWallet.others.filter(accounts=>accounts.type === "MULTISIG").find((add) => add.name == p.address);
       if(!acc){
           if(other_acc)
           {
