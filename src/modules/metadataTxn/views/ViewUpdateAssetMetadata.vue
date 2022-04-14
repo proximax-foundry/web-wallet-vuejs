@@ -463,6 +463,7 @@ export default {
       }
       let mosaicMetadataTransaction = txnBuilder
       .targetPublicKey(targetPublicAccount.value)
+      .targetMosaicId(targetAsset)
       .scopedMetadataKey(UInt64.fromHex(tempHexData))
       .value(newValue.value)
       .oldValue(oldValue.value)
@@ -561,7 +562,7 @@ export default {
       updateAggregateFee()
     })
     watch(newValue,n=>{
-      txnBuilder.oldValue(n) 
+      txnBuilder.value(n) 
       buildMetadataTxn()
       buildAggregateTxn()
       updateAggregateFee()

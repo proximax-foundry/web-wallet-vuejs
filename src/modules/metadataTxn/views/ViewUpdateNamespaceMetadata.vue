@@ -475,6 +475,7 @@ export default {
       }
       let namespaceMetadataTransaction = txnBuilder
       .targetPublicKey(targetPublicAccount.value)
+      .targetNamespaceId(targetNamespace)
       .scopedMetadataKey(UInt64.fromHex(tempHexData))
       .value(newValue.value)
       .oldValue(oldValue.value)
@@ -558,13 +559,31 @@ export default {
       }
     });
 
-  const splitBalance = computed(()=>{
+    const splitBalance = computed(()=>{
       let accBalance = Helper.toCurrencyFormat(balance.value, AppState.nativeToken.divisibility)
       let split = accBalance.split(".")
       if (split[1]!=undefined){
         return {left:split[0],right:split[1]}
       }else{
         return {left:split[0], right:null}
+      }
+    })
+
+    watch(oldValue,n=>{
+      txnBuilder.oldValue(n) 
+      buildMetadataTxn()
+      buildAggregateTxn()
+      updateAggregateFee()
+    })
+    watch(newValue,n=>{
+      txnBuilder.value(n) 
+      buildMetadataTxn()
+      buildAggregateTxn()
+      updateAggregateFee()
+    })
+    watch(inputScopedMetadataKey,n=>{
+      if(n==""){
+        oldValue.value = ""
       }
     })
 
