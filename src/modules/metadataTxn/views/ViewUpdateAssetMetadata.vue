@@ -101,7 +101,7 @@
                     Update Asset Metadata
                 </button>
                 <div class="text-center">
-                <router-link :to="{name: 'ViewServicesNamespace'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
+                <router-link :to="{name: 'ViewServicesAssets'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
                 </div>
             </div>
         </div>
@@ -110,35 +110,22 @@
 </template>
 <script lang="ts">
 import { Helper } from "@/util/typeHelper";
-import { computed, ref, getCurrentInstance, watch, effect } from "vue";
-import TextInput from "@/components/TextInput.vue";
+import { computed, ref, watch } from "vue";
 import PasswordInput from "@/components/PasswordInput.vue";
-import SelectInputPlugin from "@/components/SelectInputPlugin.vue";
-import MosaicInput from "@/modules/transfer/components/MosaicInput.vue";
-import SupplyInput from "@/components/SupplyInput.vue";
-import TransferTextareaInput from "@/modules/transfer/components/TransferTextareaInput.vue";
-import AddContactModal from "@/modules/transfer/components/AddContactModal.vue";
-import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
 import {useI18n} from 'vue-i18n'
 import { multiSign } from "@/util/multiSignatory";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
-import { accountUtils } from "@/util/accountUtils";
 import { TransactionUtils } from "@/util/transactionUtils";
 import { WalletUtils } from "@/util/walletUtils";
-import { ChainUtils } from '@/util/chainUtils';
-import { NamespaceUtils } from '@/util/namespaceUtils';
-import SelectInputSender from "@/modules/transfer/components/SelectInputSender.vue";
-import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
-import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
 import { AppState } from '@/state/appState';
 import MetadataInput from '@/modules/metadataTxn/components/MetadataInput.vue'
 import { 
-  Address, PublicAccount, Convert, MosaicMetadataTransactionBuilder, 
+  Convert, MosaicMetadataTransactionBuilder, 
   AggregateTransaction, AggregateBondedTransactionBuilder, UInt64,
   MetadataQueryParams, MetadataType, MosaicMetadataTransaction,
   MosaicId,
-  KeyGenerator,Account
+  Account
 } from 'tsjs-xpx-chain-sdk';
 import { WalletAccount } from '@/models/walletAccount';
 import { OtherAccount } from '@/models/otherAccount';
@@ -150,14 +137,12 @@ export default {
   props:{
     targetId: String,
     scopedMetadataKey: String,
-    
   },
   components: {
     MetadataInput,
     PasswordInput,
   },
   setup(props) { 
-    
     let targetAssetSelectable = ref(true);
     let scopedMetadataKeySelectable = ref(true);
     let scopedMetadataKeyType = ref(1);
@@ -326,8 +311,7 @@ export default {
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const {t} = useI18n();
     const walletPassword = ref("");
-    const err = ref("");
-    const cosignerBalanceInsufficient = ref(false);
+    const err = ref('');
     const walletName = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.name : ''
     
     const lockFund = computed(() =>{
@@ -447,7 +431,7 @@ export default {
         let hexValue = Convert.utf8ToHex(inputScopedMetadataKey.value)
         tempHexData = hexValue + "00".repeat((16-hexValue.length)/2)
       }else{ //hex
-        tempHexData = inputScopedMetadataKey.value + "00".repeat((16-inputScopedMetadataKey.value.length)/2)
+        tempHexData = "00".repeat((16-inputScopedMetadataKey.value.length)/2) + inputScopedMetadataKey.value 
       }
       let metadataQueryParams = new MetadataQueryParams();
       metadataQueryParams.targetId = targetAsset;
@@ -469,12 +453,13 @@ export default {
         err.value = t('general.walletPasswordInvalid',{name: walletName})
         return
       }
+      
       let tempHexData = ''
       if(scopedMetadataKeyType.value==1){ //utf8
         let hexValue = Convert.utf8ToHex(inputScopedMetadataKey.value)
         tempHexData = hexValue + "00".repeat((16-hexValue.length)/2)
       }else{ //hex
-        tempHexData = inputScopedMetadataKey.value + "00".repeat((16-inputScopedMetadataKey.value.length)/2)
+        tempHexData = "00".repeat((16-inputScopedMetadataKey.value.length)/2)+inputScopedMetadataKey.value 
       }
       let mosaicMetadataTransaction = txnBuilder
       .targetPublicKey(targetPublicAccount.value)
@@ -498,6 +483,8 @@ export default {
       oldValue.value = ""
       newValue.value=""
       walletPassword.value=""
+      
+      
     }
 
     const totalFee = computed(()=>{
@@ -594,7 +581,6 @@ export default {
       accounts,
       updateMetadata,
       targetAccIsMultisig,
-      cosignerBalanceInsufficient,
       lockFundCurrency,
       lockFund,
       aggregateFee,
@@ -618,38 +604,3 @@ export default {
   },
 };
 </script>
-<style scoped lang="scss">
-.slide-enter-active {
-  -moz-transition-duration: 1s;
-  -webkit-transition-duration: 1s;
-  -o-transition-duration: 1s;
-  transition-duration: 1s;
-  -moz-transition-timing-function: ease-in-out;
-  -webkit-transition-timing-function: ease-in-out;
-  -o-transition-timing-function: ease-in-out;
-  transition-timing-function: ease-in-out;
-}
-.slide-leave-active {
-  -moz-transition-duration: 1s;
-  -webkit-transition-duration: 1s;
-  -o-transition-duration: 1s;
-  transition-duration: 1s;
-  -moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-  -webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-  -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-  transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-}
-.slide-enter-to,
-.slide-leave-from {
-  max-height: 1000px;
-  overflow: hidden;
-}
-.slide-enter-from,
-.slide-leave-to {
-  overflow: hidden;
-  max-height: 0;
-}
-.optionDiv:hover {
-  background: #d9ebff;
-}
-</style>
