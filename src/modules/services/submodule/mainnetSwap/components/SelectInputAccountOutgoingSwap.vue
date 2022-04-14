@@ -16,12 +16,12 @@
           <div class="flex gap-2">
             {{$t('general.balance')}}
             <div class="flex gap-2">
-              <div v-html="selectedAccountBalanceFormatted"></div> 
-              <div class="text-xs uppercase">{{otherToken!='prx.xpx'?name: currentNativeTokenName }}</div> 
+              <div v-if="otherToken!='prx.xpx'" v-html="otherTokenBalanceFormatted"></div> 
+              <div v-if="otherToken!='prx.xpx'" class="text-xs uppercase">{{otherToken!='prx.xpx'?name: currentNativeTokenName }}</div> 
             </div>
             <div class="flex gap-2">
-              <div v-if="otherToken!='prx.xpx'" v-html="selectedAccountBalanceFormatted2"></div> 
-              <div v-if="otherToken!='prx.xpx'" class="text-xs">{{currentNativeTokenName }}</div>
+              <div  v-html="nativeTokenBalanceFormatted"></div> 
+              <div  class="text-xs">{{currentNativeTokenName }}</div>
             </div>
           </div>
          
@@ -67,7 +67,9 @@ export default defineComponent({
     'selectDefault',
     'placeholder',
     'otherToken',
-    'name'
+    'otherTokenId',
+    'name',
+    'divisibility'
   ],
 
   setup(p){
@@ -78,48 +80,8 @@ export default defineComponent({
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
     let jdenticonConfig = themeConfig.jdenticonConfig;
-    const { otherToken } = toRefs(p)
+    const { otherToken,divisibility,otherTokenId } = toRefs(p)
     const includeMultisig = ref(false);
-    
-    // const allAvailableAccounts = computed(()=>{
-
-    //   if(!walletState.currentLoggedInWallet){
-    //     return [];
-    //   }
-
-    //   let accounts = walletState.currentLoggedInWallet.accounts.map(
-    //     (acc)=>{ 
-    //       return { 
-    //         name: acc.name,
-    //         balance: acc.balance,
-    //         balanceDisplay: Helper.toCurrencyFormat(acc.balance, 6),
-    //         type: "",
-    //         address: Helper.createAddress(acc.address).pretty(),
-    //         publicKey: acc.publicKey,
-    //         isMultisig: acc.getDirectParentMultisig().length ? true: false
-    //       };  
-    //     });
-
-    //   if(includeMultisig.value){
-    //     let otherAccounts = walletState.currentLoggedInWallet.others.filter((acc)=> acc.type === "MULTISIG").map(
-    //     (acc)=>{ 
-    //       return { 
-    //         name: acc.name,
-    //         balance: acc.balance,
-    //         balanceDisplay: Helper.toCurrencyFormat(acc.balance, 6),
-    //         type: "MULTISIG",
-    //         address: Helper.createAddress(acc.address).pretty(),
-    //         publicKey: acc.publicKey,
-    //         isMultisig: true
-    //       }; 
-    //     });
-
-    //     return accounts.concat(otherAccounts);
-    //   }
-    //   else{
-    //     return accounts;
-    //   }
-    // });
 
     const accounts = computed(() =>{
       var accountList = [];
@@ -136,21 +98,13 @@ export default defineComponent({
           label: account.name,
         });
       });
-      // accountList.sort((a, b) => {
-      //   if (a.label > b.label) return 1;
-      //   if (a.label < b.label) return -1;
-      //   return 0;
-      // });
       return accountList;
     });
 
-    // const selectedAccount = ref(accounts.value.find(acc => acc.value == p.selectDefault).label);
     const selectedAccount = ref('');
     const selectedAddress = ref('');
-    const selectedAccountBalance = ref(0);
-    const selectedAccountBalance2 = ref(0)
-    // const selectedAddress = ref(p.selectDefault);
-    // const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonConfig));
+    const otherTokenBalance = ref(0);
+    const nativeTokenBalance = ref(0)
     const selectedImg = ref('');
     const selectAccount = (accountName, accountAddress) => {
       selectedAccount.value = accountName;
@@ -161,49 +115,52 @@ export default defineComponent({
       }else{
         accounts = walletState.currentLoggedInWallet.accounts;
       }
-      selectedAccountBalance.value = otherToken.value!='prx.xpx'? 
-      accounts.find(account => account.address == accountAddress).assets.find(asset=>asset.namespaceNames==otherToken.value)? 
-      accounts.find(account => account.address == accountAddress).assets.find(asset=>asset.namespaceNames==otherToken.value).amount/Math.pow(10,6) : 0 
-      :accounts.find(account => account.address == accountAddress).balance
-      selectedAccountBalance2.value = otherToken.value!='prx.xpx'? accounts.find(account => account.address == accountAddress).balance :0
+      let acc = accounts.find(account => account.address == accountAddress)
+      otherTokenBalance.value = otherToken.value!='prx.xpx'? //if otherToken
+      acc.assets.find(asset=>asset.idHex==otherTokenId.value)? //check if found otherToken
+      acc.assets.find(asset=>asset.idHex==otherTokenId.value).amount/Math.pow(10,divisibility.value) : 0 //0 if not found
+      :0 //if xpx(doesnt matter, wont display)
+
+      nativeTokenBalance.value = accounts.find(account => account.address == accountAddress).balance
       selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
       toggleSelection.value = !toggleSelection.value;
     };
     watch(otherToken,n=>{
       let accounts = walletState.currentLoggedInWallet.accounts;
-      if(accounts.find(account => account.address == selectedAddress.value)){
-        selectedAccountBalance.value = n!='prx.xpx'? 
-        accounts.find(account => account.address == selectedAddress.value).assets.find(asset=>asset.namespaceNames==n)? 
-        accounts.find(account => account.address == selectedAddress.value).assets.find(asset=>asset.namespaceNames==n).amount/Math.pow(10,6) : 0 
-        :accounts.find(account => account.address == selectedAddress.value).balance
-        selectedAccountBalance2.value = n!='prx.xpx'? accounts.find(account => account.address == selectedAddress.value).balance :0
+      let acc = accounts.find(account => account.address == selectedAddress.value)
+      if(acc){
+        otherTokenBalance.value = n!='prx.xpx'? 
+        acc.assets.find(asset=>asset.idHex==otherTokenId.value)? 
+        acc.assets.find(asset=>asset.idHex==otherTokenId.value).amount/Math.pow(10,divisibility.value) : 0 
+        :0 //if xpx
+        nativeTokenBalance.value = accounts.find(account => account.address == selectedAddress.value).balance
       }
       
     })
     
-    const selectedAccountBalanceFormatted = computed(() => {
-      let balance = Helper.convertToCurrency(selectedAccountBalance.value, 0).split('.');
+    const otherTokenBalanceFormatted = computed(() => {
+      let balance = Helper.convertToCurrency(otherTokenBalance.value, 0).split('.');
       return '<span class="font-bold text-xs">' + balance[0] + '</span>' + (balance[1]?'.<span class="text-xxs">' + balance[1] + '</span>':'');
     });
 
-    const selectedAccountBalanceFormatted2 = computed(() => {
-      let balance = Helper.convertToCurrency(selectedAccountBalance2.value, 0).split('.');
+    const nativeTokenBalanceFormatted = computed(() => {
+      let balance = Helper.convertToCurrency(nativeTokenBalance.value, 0).split('.');
       return '<span class="font-bold text-xs">' + balance[0] + '</span>' + (balance[1]?'.<span class="text-xxs">' + balance[1] + '</span>':'');
     });
     return {
       currentNativeTokenName,
       selectAccount,
       selectedAddress,
-      selectedAccountBalance,
-      selectedAccountBalanceFormatted,
+      otherTokenBalanceFormatted,
+      otherTokenBalance,
       selectedImg,
       accounts,
       toggleSelection,
       selectedAccount,
       jdenticonConfig,
       toSvg,
-      selectedAccountBalance2,
-      selectedAccountBalanceFormatted2
+      nativeTokenBalance,
+      nativeTokenBalanceFormatted
     };
   }
 })

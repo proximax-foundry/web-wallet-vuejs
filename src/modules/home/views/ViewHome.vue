@@ -19,7 +19,7 @@
       </div> -->
       <div class ='text-center text-xs mt-6'>{{$t('wallet.noWallet')}}</div>
       <div class ="text-center  text-xs text-blue-link font-semibold"><router-link :to="{ name: 'ViewWalletCreateSelection' }">{{$t('wallet.createSiriusWallet')}} ></router-link></div>
-      <div class ='text-center text-xs text-blue-link font-semibold ' v-if="migrationUI && haveOldWallet"><div class="cursor-pointer" @click="oldWalletBackup" >Backup old wallet</div></div>
+      <div class ='text-center text-xs text-blue-link font-semibold ' v-if="migrationUI && haveOldWallet"><div class="cursor-pointer" @click="oldWalletBackup" >{{$t('wallet.backupOldWallet')}}</div></div>
       <div class = 'mt-1 h-16 '></div>
     </div>
   </div>
@@ -33,6 +33,9 @@ import IntroTextComponent from '@/components/IntroTextComponent.vue'
 import { networkState } from '@/state/networkState'
 import { computed } from 'vue';
 import CryptoJS from 'crypto-js';
+import {appSetting} from '@/config/appSetting';
+import { WalletUtils } from '@/util/walletUtils';
+import { NetworkType } from 'tsjs-xpx-chain-sdk';
 export default {
   name: 'Home',
   components: {
@@ -41,7 +44,7 @@ export default {
     IntroTextComponent,
   },
   setup(){
-    let migrationUI = true;
+    let migrationUI = appSetting.backupOldWallet;
     let haveOldWallet = false;
 
     let mainnetOldFormat = localStorage.getItem("sw-mainnet");
@@ -74,9 +77,12 @@ export default {
 
       let wltData = JSON.parse(mainnetOldFormat ? mainnetOldFormat: testnetOldFormat);
       let wltDataRaw = mainnetOldFormat ? mainnetOldFormat : testnetOldFormat; 
+      let addressBookPrefix = backupType === 1 ? "sw-books-mainnet-" : "sw-books-testnet-";
 
       for(let i = 0; i < wltData.length; ++i){
-        let wltRaw = JSON.stringify(wltData[i]);
+        let allAddressBook = WalletUtils.oldFormatCollectAddressBook(wltData[i].name, addressBookPrefix);
+        let newWallet = WalletUtils.oldFormatToNewFormat(wltData[i], "", backupType === 1 ? NetworkType.MAIN_NET: NetworkType.TEST_NET, allAddressBook);
+        let wltRaw = JSON.stringify(newWallet);
         let wltBackup = CryptoJS.enc.Utf8.parse(wltRaw);
         let file = CryptoJS.enc.Base64.stringify(wltBackup);
         const blob = new Blob([file], { type: '' });
