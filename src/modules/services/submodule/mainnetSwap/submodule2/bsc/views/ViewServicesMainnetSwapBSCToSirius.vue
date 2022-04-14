@@ -372,7 +372,7 @@ export default {
             serviceErr.value = '';
             tokenDivisibility.value = fetchService.data.siriusInfo.divisibility
             feeAmount.value = fetchService.data.siriusInfo.feeAmount/Math.pow(10,tokenDivisibility.value)
-            minAmount.value = fetchService.data.siriusInfo.minAmount
+            minAmount.value = fetchService.data.siriusInfo.minAmount/tokenDivisibility.value
           }else{
             serviceErr.value = t('swap.serviceDown');
           }
