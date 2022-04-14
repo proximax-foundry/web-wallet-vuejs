@@ -1,83 +1,112 @@
 <template>
-<div>
-  <AddContactModal :toggleModal="togglaAddContact" :saveAddress="recipientInput" />
-  <ConfirmSendModal :toggleModal="toggleConfirm" />
-  <div class='w-10/12 ml-auto mr-auto mt-5'>
-    <div class="border filter shadow-lg lg:grid lg:grid-cols-3" >
-      <div class="lg:col-span-2 py-6 px-6">
-        <div class="text-sm font-semibold ">{{$t('transfer.newTransfer')}}</div>
-        <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <div class="mt-4"/>
-        <SelectInputSender  v-model="selectedAccAdd" :selectDefault="selectedAccAdd"/>
-        <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4"> 
-            <div v-if="getWalletCosigner.cosignerList.length > 0">
-              <div class="text-tsm">
-                {{$t('general.initiateBy')}}:
-                <span class="font-bold" v-if="getWalletCosigner.cosignerList.length == 1"> 
-                  {{ getWalletCosigner.cosignerList[0].name }} ({{$t('general.balance')}}:{{  getWalletCosigner.cosignerList[0].balance }} {{ currentNativeTokenName }})
-                </span>
-                <span class="font-bold" v-else>
-                  <select class="" v-model="cosignAddress">
-                    <option v-for="(element, item) in  getWalletCosigner.cosignerList" :value="findAcc(element.publicKey).address" :key="item">
-                      {{ element.name }} ({{$t('general.balance')}}: {{ element.balance }} {{ currentNativeTokenName }})
-                    </option>
-                  </select>
-                </span>
-                <div v-if="cosignerBalanceInsufficient" class="error">
-                  {{$t('general.insufficientBalance')}}
+  <div>
+    <div class='flex cursor-pointer'>
+        <img src='@/assets/img/chevron_left.svg'>
+        <router-link :to="{name: 'ViewServicesAssets'}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
+    </div>
+    <div class='w-10/12 ml-auto mr-auto'>
+        <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
+            <div class="xl:col-span-2 p-12">
+                <div class="font-semibold mb-4">Update Asset Metadata</div>
+                <div v-if="showBalanceErr" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
+                    <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2">
+                        <font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon>
+                    </div>
+                    <div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
                 </div>
-              </div>
+                 <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
+                <div class="flex items-center">
+                    <div v-html="svgString" class="inline-block" />
+                    <div class="ml-2">
+                    <div class="text-blue-primary text-xxs font-bold uppercase mb-1">{{$t('asset.assetCreatedBy')}}</div>
+                    <div class="font-bold text-black text-sm">{{ accountName}}</div>
+                    </div>
+                </div>
+                 <div v-if="targetAccIsMultisig" class="text-left mt-2 mb-5 ml-4"> 
+                    <div v-if="cosigners.length > 0">
+                        <div class="text-tsm">
+                            {{$t('general.initiateBy')}}:
+                            <span class="font-bold" v-if="cosigners.length == 1"> 
+                            {{ cosigners[0].name }} 
+                            </span>
+                            <span class="font-bold" v-else>
+                            <select class="" v-model="selectedCosigner">
+                                <option v-for="(cosigner, item) in  cosigners" :value="findAcc(cosigner.publicKey).publicKey" :key="item">
+                                {{ cosigner.name }} 
+                                </option>
+                            </select>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="error" v-else>
+                    {{$t('general.noCosigner')}} 
+                    </div>
+                </div>
+                <div class="border border-blue-primary p-4 bg-blue-100 flex items-center rounded mt-5">
+                    <img src="@/modules/services/submodule/assets/img/icon-asset.svg">
+                    <div class="ml-1">
+                        <div class="uppercase text-blue-primary font-semibold text-xxs">ASSET ID</div>
+                        <div class="text-black text-sm font-bold">{{ targetId }}</div>
+                    </div>
+                </div>
+                <MetadataInput :hex="scopedMetadataKeyType==2" class="mt-5" v-model="inputScopedMetadataKey" placeholder="Scoped Metadata Key" v-debounce:1000="checkOldValue" :toolTip="`${scopedMetadataKeyType==1?'Accepts 8 characters':'Accepts 16 hexadecimals'}`" :showError="showScopedKeyErr" :errorMessage="`${scopedMetadataKeyType==1?'Exceeded 8 characters':inputScopedMetadataKey.length>16?'Exceeded 16 hexadecimals':'Input needs to be even number'}`" />
+                <div class="flex gap-3 ">
+                    <div class="flex gap-2">
+                        <input type="radio" id="regular" value="1" v-model="scopedMetadataKeyType">
+                        <label for="regular">Regular</label>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="radio" id="hexa" value="2" v-model="scopedMetadataKeyType">
+                        <label for="hexa">Hexadecimal</label>
+                    </div>
+                </div>
+                <MetadataInput class="mt-2" v-model="oldValue" :disabled="true" placeholder="Old Value"/>
+                <MetadataInput class="mt-2" v-model="newValue"  placeholder="New Value"/>
             </div>
-            <div class="error" v-else>
-             {{$t('general.initiateBy')}} 
+            <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
+                <div v-if="!targetAccIsMultisig" class='font-semibold text-xxs text-blue-primary uppercase'>{{$t('general.accCurrentBalance')}}</div>
+                <div v-else class='font-semibold text-xxs text-blue-primary uppercase'>{{$t('general.initiatorCurrentBalance')}}</div>
+                <div class="flex my-1 text-white">
+                    <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
+                    <div class = 'text-md font-bold ' v-if='splitBalance.right!=null'>.</div>
+                    <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
+                    <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
+                    <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
+                </div>
+                <div class="flex  text-white">
+                    <div class='text-xs '>{{$t('general.lockFund')}}</div>
+                    <div class="text-xs  ml-auto">{{lockFund}}</div>
+                    <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+                </div>
+                <div class="flex  text-white">
+                    <div class='text-xs '>{{$t('general.lockFundTxFee')}}</div>
+                    <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
+                    <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+                </div>
+                <div class='border-b-2 border-gray-600 my-2'/>
+                <div class="flex  text-white">
+                    <div class='text-xs '>{{$t('general.aggregateFee')}}</div>
+                    <div class="text-xs  ml-auto">{{aggregateFee}}</div>
+                    <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+                </div>
+                <div class='border-b-2 border-gray-600 my-2'/>
+                <div class="flex  text-white">
+                    <div class='text-xs '>{{$t('general.total')}}</div>
+                    <div class="text-xs  ml-auto">{{totalFee}}</div>
+                    <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+                </div>
+                <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
+                <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"  v-model="walletPassword" icon="lock" class="mt-5 mb-3" />
+                <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="updateMetadata()" :disabled="disableAddBtn">
+                    Update Asset Metadata
+                </button>
+                <div class="text-center">
+                <router-link :to="{name: 'ViewServicesNamespace'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
+                </div>
             </div>
-          </div>
-      </div>
-      <div class='bg-navy-primary p-6 lg:col-span-1'>
-        <div class='font-semibold text-xxs text-blue-primary uppercase'>{{$t('general.accCurrentBalance')}}</div>
-        <div class="flex my-1 text-white">
-          <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
-          <div class = 'text-md font-bold ' v-if='splitBalance.right!=null'>.</div>
-          <div class='text-xs mt-2 font-bold'>{{splitBalance.right}}</div>
-          <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
-          <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
         </div>
-        <div class="flex mt-0.5 text-white">
-          <div v-if="!isMultiSig(selectedAccAdd)" class='text-xs '>{{$t('general.transactionFee')}}</div>
-          <div v-else class='text-xs '>{{$t('general.aggregateFee')}}</div>
-          <div class="text-xs  ml-auto">{{effectiveFee}}</div>
-          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-        </div>
-        <div v-if="isMultiSig(selectedAccAdd) " class='border-b-2 border-gray-600 my-2'/>
-        <div v-if="isMultiSig(selectedAccAdd) " class="flex  text-white">
-          <div class='text-xs '>{{$t('general.lockFund')}}</div>
-          <div class="text-xs  ml-auto">{{lockFundCurrency}}</div>
-          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-        </div>
-        <div v-if="isMultiSig(selectedAccAdd)" class="flex  text-white">
-          <div class='text-xs '>{{$t('general.lockFundTxFee')}}</div>
-          <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
-          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-        </div>
-        <div class='border-b-2 border-gray-600 my-2'/>
-        <div class="flex text-white">
-          <div class=' font-bold text-xs uppercase'>{{$t('general.total')}}</div>
-          <div class="text-xs  ml-auto">{{totalFee}}</div>
-          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-        </div>
-        <div class="mt-5"/>
-        <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3" :disabled="disablePassword"/>
-        <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" :disabled="disableCreate" @click="updateMetadata()">
-            Update Asset Metadata
-          </button>
-        <div class="text-center">
-          <router-link :to="{name: 'ViewDashboard'}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
-        </div>
-      </div>
     </div>
   </div>
-</div>
 </template>
 <script lang="ts">
 import { Helper } from "@/util/typeHelper";
@@ -103,76 +132,89 @@ import SelectInputSender from "@/modules/transfer/components/SelectInputSender.v
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
 import { AppState } from '@/state/appState';
+import MetadataInput from '@/modules/metadataTxn/components/MetadataInput.vue'
 import { 
   Address, PublicAccount, Convert, MosaicMetadataTransactionBuilder, 
   AggregateTransaction, AggregateBondedTransactionBuilder, UInt64,
   MetadataQueryParams, MetadataType, MosaicMetadataTransaction,
-  MosaicId
+  MosaicId,
+  KeyGenerator,Account
 } from 'tsjs-xpx-chain-sdk';
+import { WalletAccount } from '@/models/walletAccount';
+import { OtherAccount } from '@/models/otherAccount';
+import { ThemeStyleConfig } from '@/models/stores';
+import { toSvg } from 'jdenticon';
+
 export default { 
   name: "ViewUpdateAssetMetadata",
   props:{
     targetId: String,
     scopedMetadataKey: String,
+    
   },
   components: {
-    SelectInputSender,
+    MetadataInput,
     PasswordInput,
-    AddContactModal,
-    ConfirmSendModal
   },
-  setup(props) {
+  setup(props) { 
+    
     let targetAssetSelectable = ref(true);
     let scopedMetadataKeySelectable = ref(true);
     let scopedMetadataKeyType = ref(1);
-    let targetPublicAccount: PublicAccount = null;
+    let targetPublicAccount = ref(null);
     let targetAsset: MosaicId = null;
     let targetAccIsMultisig = ref(false);
     let scopedMetadataKeyHex = "";
     let inputScopedMetadataKey = ref("");
-    let selectedAcc = null;
-    let selectedAsset = ref("");
+    let selectedAcc = ref<WalletAccount | OtherAccount>(null);
     let txnBuilder: MosaicMetadataTransactionBuilder;
     let aggregateTxnBuilder: AggregateBondedTransactionBuilder;
     let metadataTxn: MosaicMetadataTransaction;
     let aggregateTxn: AggregateTransaction;
     const oldValue = ref("");
     const newValue = ref("");
-
+    const themeConfig :any = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.init();
+    const svgString = computed(()=>toSvg(selectedAcc.value?selectedAcc.value.address:'', 40, themeConfig.jdenticonConfig))
+    const accountName = computed(()=>selectedAcc.value?walletState.currentLoggedInWallet.convertAddressToName(selectedAcc.value.address,true):'')
     const handleParamTargetId = async ()=>{
       if(props.targetId && props.targetId.length === 16 && Convert.isHexString(props.targetId)){
         targetAssetSelectable.value = false;
 
         let assetId = new MosaicId(props.targetId);
-        selectedAsset.value = props.targetId;
         targetAsset = assetId;
         txnBuilder.targetMosaicId(targetAsset);
 
         let assetInfo = await AppState.chainAPI.assetAPI.getMosaic(assetId);
-        targetPublicAccount = assetInfo.owner;
-        txnBuilder.targetPublicKey(targetPublicAccount);
-
-        let selectedAcc = walletState.currentLoggedInWallet.accounts.find(acc=> acc.publicKey === assetInfo.owner.publicKey);
-
-        if(selectedAcc){
-          let directParent = selectedAcc.getDirectParentMultisig();
-          if(directParent.length){
-            targetAccIsMultisig.value = true;
-          }
+        targetPublicAccount.value = assetInfo.owner;
+        txnBuilder.targetPublicKey(targetPublicAccount.value);
+        if(!walletState.currentLoggedInWallet){
+          return
         }
-        else{
-          let selectedAcc = walletState.currentLoggedInWallet.others.find(acc=> acc.publicKey === assetInfo.owner.publicKey);
-
-          if(selectedAcc){
-            
-            let directParent = selectedAcc.getDirectParentMultisig();
-            if(directParent.length){
-              targetAccIsMultisig.value = true;
-            }
-          }
+        selectedAcc.value = walletState.currentLoggedInWallet.accounts.find(acc=> acc.publicKey === assetInfo.owner.publicKey) || walletState.currentLoggedInWallet.others.find(acc=> acc.publicKey === assetInfo.owner.publicKey);
+        if(selectedAcc.value){
+          targetAccIsMultisig.value = selectedAcc.value.getDirectParentMultisig().length? true: false
         }
       }
     }
+    const otherAcc = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+          return null
+      }
+      if(targetPublicAccount.value){
+        return walletState.currentLoggedInWallet.others.find(acc=> acc.publicKey === targetPublicAccount.value.publicKey)
+      }
+      return null
+    })
+
+    watch(otherAcc,async(n)=>{
+      if(n){
+        selectedAcc.value = walletState.currentLoggedInWallet.accounts.find(acc=> acc.publicKey === targetPublicAccount.value.publicKey) || walletState.currentLoggedInWallet.others.find(acc=> acc.publicKey === targetPublicAccount.value.publicKey);
+        if(selectedAcc.value){
+          targetAccIsMultisig.value = selectedAcc.value.getDirectParentMultisig().length? true: false
+        }
+      }
+    },{deep:true})
 
     const handleParamScopedMetadataKey = ()=>{
       if(props.scopedMetadataKey){
@@ -181,11 +223,13 @@ export default {
         inputScopedMetadataKey.value = props.scopedMetadataKey;
 
         if(props.scopedMetadataKey.length === 16 && Convert.isHexString(props.scopedMetadataKey)){
+          scopedMetadataKeyType.value = 2;
           scopedMetadataKeyHex = props.scopedMetadataKey;
           txnBuilder.scopedMetadataKey(UInt64.fromHex(scopedMetadataKeyHex));
-          scopedMetadataKeyType.value = 2;
+          
         }
         else{
+          scopedMetadataKeyType.value = 1;
           let tempHexData = Convert.utf8ToHex(props.scopedMetadataKey);
           const hexDataBytes = tempHexData.length / 2;
 
@@ -195,7 +239,7 @@ export default {
             }
             scopedMetadataKeyHex = tempHexData;
             txnBuilder.scopedMetadataKey(UInt64.fromHex(scopedMetadataKeyHex));
-            scopedMetadataKeyType.value = 1;
+            
           }
         }
 
@@ -220,8 +264,9 @@ export default {
         if(searchResults.metadataEntries.length){
             oldValue.value = searchResults.metadataEntries[0].value;
         }
-        txnBuilder.oldValue(oldValue.value);
+        
       }
+      txnBuilder.oldValue(oldValue.value);
     }
 
     const metadataTxnAssignNewValue = () =>{
@@ -244,13 +289,13 @@ export default {
 
     const buildAggregateTxn = ()=>{
       if(metadataTxn){
-        aggregateTxn = aggregateTxnBuilder.innerTransactions([metadataTxn.toAggregate(targetPublicAccount)]).build();
+        aggregateTxn = aggregateTxnBuilder.innerTransactions([metadataTxn.toAggregate(targetPublicAccount.value)]).build();
       }
     }
 
     const updateAggregateFee = ()=>{
       if(aggregateTxn){
-        effectiveFee.value = Helper.convertToCurrency(aggregateTxn.maxFee.compact(), AppState.nativeToken.divisibility);
+        aggregateFee.value = aggregateTxn.maxFee.compact()/Math.pow(10,AppState.nativeToken.divisibility)
       } 
     }
     
@@ -263,8 +308,9 @@ export default {
       buildMetadataTxn();
       buildAggregateTxn();
       updateAggregateFee();
+      
     }
-
+   
     if(AppState.isReady){
       init();
     }
@@ -278,36 +324,30 @@ export default {
     }
 
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
-    const toggleContact = ref(false)
     const {t} = useI18n();
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const walletPassword = ref("");
     const err = ref("");
-    const showMenu = ref(false);
-    const toggleConfirm = ref(false);
-    const forceSend = ref(false);
-    
-    const cosignAddress = ref("");
-    const disableAllInput = ref(false);
-    const disablePassword = computed(() => disableAllInput.value);
     const cosignerBalanceInsufficient = ref(false);
-    const walletName = walletState.currentLoggedInWallet.name
-    const currencyName = computed(
-      () => networkState.currentNetworkProfile.network.currency.name
-    );
-    const lockFund = computed(() =>
-      Helper.convertToExact(
+    const walletName = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.name : ''
+    
+    const lockFund = computed(() =>{
+      if(!networkState.currentNetworkProfileConfig){
+        return 0
+      }
+      return Helper.convertToExact(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
         AppState.nativeToken.divisibility
       )
-    );
-    const lockFundCurrency = computed(() =>
-      Helper.convertToCurrency(
+    });
+    const lockFundCurrency = computed(() =>{
+      if(!networkState.currentNetworkProfileConfig){
+        return 0
+      }
+      return Helper.convertToCurrency(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
         AppState.nativeToken.divisibility
       )
-    );
+    });
     
     const lockFundTxFee = computed(()=>{
       if(networkState.currentNetworkProfile){
@@ -315,26 +355,48 @@ export default {
       }
       return 0;  
     });
-    const lockFundTotalFee = computed(
-      () => lockFund.value + lockFundTxFee.value
-    );
 
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
-    
-    
-    const selectedAccName = ref(
-      walletState.currentLoggedInWallet.selectDefaultAccount().name
-    );
-    const selectedAccAdd = ref(
-      walletState.currentLoggedInWallet.selectDefaultAccount().address
-    );
-    const findAcc = (publicKey)=>{
-      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
-    }
+    const showScopedKeyErr = computed(()=>{
+      if(scopedMetadataKeyType.value==1){ //regular
+        let tempHexData = Convert.utf8ToHex(inputScopedMetadataKey.value);
+        let hexDataBytes = tempHexData.length / 2;
+        if(hexDataBytes>8){
+            return true
+        }else{
+            return false
+        }
+      }else{ //hexa
+        if((inputScopedMetadataKey.value.length>16) ){
+          return true
+        }
+        else if(inputScopedMetadataKey.value.length%2===1){
+          return true
+        }
+        else{
+          return false
+        }
+      }
+    })
 
-    const findAccWithAddress = address =>{
-      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)
+    const showBalanceErr = computed(()=>{
+            
+      if(balance.value<totalFee.value){
+          return true
+      }else{
+          return false
+      }
+        
+    })
+    const disableAddBtn = computed(()=>{
+        return (showScopedKeyErr.value==true ||inputScopedMetadataKey.value==''||newValue.value==''||!walletPassword.value.match(passwdPattern)||showBalanceErr.value==true)
+    })
+    const findAcc = (publicKey)=>{
+      if(!walletState.currentLoggedInWallet){
+        return
+      }
+      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
     }
     
     const accounts = computed(()=>{
@@ -366,110 +428,136 @@ export default {
         return accounts.concat(otherAccounts);
       
     });
-     const getWalletCosigner = computed(() =>{
-      let cosigners= multiSign.getCosignerInWallet(accounts.value.find(acc=>acc.address==selectedAccAdd.value).publicKey)
-      let list =[]
-      
-      cosigners.cosignerList.forEach(publicKey=>{
-        list.push({publicKey:publicKey,name:findAcc(publicKey).name,balance:findAcc(publicKey).balance })
-      })
-      cosigners.cosignerList = list
-      return cosigners
+
+    const aggregateFee = ref(0);
+    watch(scopedMetadataKeyType,n=>{
+      checkOldValue()
+      if(n==2){
+        if(!Convert.isHexString(inputScopedMetadataKey.value)){
+          inputScopedMetadataKey.value = ''
+        }
+      }
     })
-    
-    const isMultiSig = (address) => {
-      const account = accounts.value.find(
-        (account) => account.address === address
-      );
-      let isMulti = false;
-     
-      if (account != undefined) {
-        isMulti = account.isMultisig;
+    const checkOldValue = async()=>{
+      if(showScopedKeyErr.value || inputScopedMetadataKey.value.length==0){
+        return
       }
-      return isMulti;
-    };
-    const isMultiSigBool = ref(
-          isMultiSig(
-            selectedAccAdd.value
-          )
-        );
-
-    const effectiveFee = ref("0");
-     
-    const clearInput = () => {
-      walletPassword.value = "";
-      emitter.emit("CLEAR_SELECT", 0);
-    };
-  
-  const updateMetadata = async() => {   
-      // let selectedCosign;
-      // if (isMultiSigBool.value) {
-        
-      //   let selectedCosignList = getWalletCosigner.value.cosignerList;
-      //   if (selectedCosignList.length > 1) {
-      //     selectedCosign = cosignAddress.value;
-      //   } else {
-      //     selectedCosign = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==selectedCosignList[0].publicKey).address
-      //   }
-      // }
-      // let transferStatus = await createTransaction(
-      //   recipientInput.value.toUpperCase(),
-      //   sendXPX.value,
-      //   messageText.value,
-      //   selectedMosaic.value,
-      //   mosaicSupplyDivisibility.value,
-      //   walletPassword.value,
-      //   selectedAccAdd.value,
-      //   selectedCosign,
-      //   encryptedMsg.value
-      // );
-      // if (!transferStatus) {
-      //   err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
-      // } else {
-        
-      //   err.value = "";
-       
-      //   if (!accountUtils.checkAvailableContact(recipientInput.value)) {
-          
-      //     // add new contact
-      //     togglaAddContact.value = true;
-      //   } else {
-      //     clearInput();
-      //   }
-      //   forceSend.value = false;
-      // }
-  }
-
-  const totalFee = computed(()=>{
-    let tokenDivisibility = AppState.nativeToken.divisibility
-    if(!isMultiSig(selectedAccAdd.value) ){
-      if(tokenDivisibility==0){
-        return Math.trunc(parseFloat(effectiveFee.value))
-      }else{
-        return Math.round((parseFloat(effectiveFee.value))*Math.pow(10,tokenDivisibility))/Math.pow(10,tokenDivisibility)
+      let tempHexData = ''
+      if(scopedMetadataKeyType.value==1){ //utf8
+        let hexValue = Convert.utf8ToHex(inputScopedMetadataKey.value)
+        tempHexData = hexValue + "00".repeat((16-hexValue.length)/2)
+      }else{ //hex
+        tempHexData = inputScopedMetadataKey.value + "00".repeat((16-inputScopedMetadataKey.value.length)/2)
       }
-    }else {
-      if(tokenDivisibility== 0){
-        return Math.trunc((parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value))
+      let metadataQueryParams = new MetadataQueryParams();
+      metadataQueryParams.targetId = targetAsset;
+      metadataQueryParams.metadataType = MetadataType.MOSAIC;
+      metadataQueryParams.scopedMetadataKey = UInt64.fromHex(tempHexData);
+      let searchResults = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams);
+      if(searchResults.metadataEntries.length){
+        oldValue.value = searchResults.metadataEntries[0].value;
       }else{
-        return Math.round((parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value)*Math.pow(10,tokenDivisibility))/ Math.pow(10,tokenDivisibility)
+        oldValue.value = ""
       }
     }
-  })
+    
+    const updateMetadata = () => {   
+      if(!walletState.currentLoggedInWallet){
+        return
+      }
+      if(!WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)){
+        err.value = t('general.walletPasswordInvalid',{name: walletName})
+        return
+      }
+      let tempHexData = ''
+      if(scopedMetadataKeyType.value==1){ //utf8
+        let hexValue = Convert.utf8ToHex(inputScopedMetadataKey.value)
+        tempHexData = hexValue + "00".repeat((16-hexValue.length)/2)
+      }else{ //hex
+        tempHexData = inputScopedMetadataKey.value + "00".repeat((16-inputScopedMetadataKey.value.length)/2)
+      }
+      let mosaicMetadataTransaction = txnBuilder
+      .targetPublicKey(targetPublicAccount.value)
+      .scopedMetadataKey(UInt64.fromHex(tempHexData))
+      .value(newValue.value)
+      .oldValue(oldValue.value)
+      .calculateDifferences()
+      .build()
+      let abtTx = aggregateTxn = aggregateTxnBuilder.innerTransactions([mosaicMetadataTransaction.toAggregate(targetPublicAccount.value)]).build()
+      let signer = targetAccIsMultisig.value? 
+      walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosigner.value):
+      walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == targetPublicAccount.value.publicKey) 
+      let encryptedPassword = WalletUtils.createPassword(walletPassword.value);
+      let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, signer.encrypted, signer.iv);
+      let signerAcc = Account.createFromPrivateKey(privateKey, AppState.networkType);
+      let signedAbtTransaction = signerAcc.sign(abtTx, networkState.currentNetworkProfile.generationHash);
+      let lockHashTx = TransactionUtils.lockFundTx(signedAbtTransaction)
+      let signedLockHashTransaction = signerAcc.sign(lockHashTx, networkState.currentNetworkProfile.generationHash);
+      TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedLockHashTransaction,signedAbtTransaction) 
+      inputScopedMetadataKey.value=""
+      oldValue.value = ""
+      newValue.value=""
+      walletPassword.value=""
+    }
 
-  const balance = computed(() => {
-        if (walletState.currentLoggedInWallet) {
-          if (accounts.value.find((element) => element.address === selectedAccAdd.value) == undefined){
-            return 0 
-          }else{
-            return accounts.value.find((element) => element.address === selectedAccAdd.value).balance
-          }
-        } else {
-          return 0;
+    const totalFee = computed(()=>{
+      let tokenDivisibility = AppState.nativeToken.divisibility
+      if(tokenDivisibility==0){
+          return Math.trunc(lockFund.value+lockFundTxFee.value+aggregateFee.value)
+      }else{
+          return Math.round((lockFund.value+lockFundTxFee.value+aggregateFee.value)*Math.pow(10,tokenDivisibility))/Math.pow(10,tokenDivisibility)
+      }
+    })
+    const cosigners = computed(()=>{
+      if(!walletState.currentLoggedInWallet || !targetPublicAccount.value){
+        return []
+      }
+      if(multiSign.getCosignerInWallet(targetPublicAccount.value.publicKey).cosignerList.length){
+        if(accounts.value){
+          return multiSign.getCosignerInWallet(targetPublicAccount.value.publicKey).cosignerList.map(cosigner=>{
+            let foundCosigner = accounts.value.find(acc=>acc.publicKey==cosigner)
+            return{
+              name: foundCosigner.name,
+              publicKey:cosigner,
+              balance:foundCosigner.balance
+            }
+          })
+        }else{
+          return []
         }
-      });
+      }else{
+        return []
+      }
+    })
+    const selectedCosigner = ref('')
+    if(cosigners.value.length>0){
+        selectedCosigner.value = cosigners.value[0].publicKey
+    }
+    watch(()=>cosigners,n=>{
+      if(n.value.length){
+        selectedCosigner.value = cosigners.value[0].publicKey
+      }
+    },{deep:true})
+    const balance = computed(() => {
+      if (!walletState.currentLoggedInWallet) {
+        return 0
+      }
+      if(targetAccIsMultisig.value){
+        if(selectedCosigner.value){
+            return findAcc(selectedCosigner.value).balance
+        }else{
+            return 0
+        }
+    }else{
+        if(selectedAcc.value){
+            return selectedAcc.value.balance
+        }else{
+            return 0
+        }
+      }
+    });
 
-  const splitBalance = computed(()=>{
+    const splitBalance = computed(()=>{
       let accBalance = Helper.toCurrencyFormat(balance.value, AppState.nativeToken.divisibility)
       let split = accBalance.split(".")
       if (split[1]!=undefined){
@@ -479,52 +567,53 @@ export default {
       }
     })
 
-  emitter.on("select-account", (address) => {
-    selectedAccName.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)? walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address).name : walletState.currentLoggedInWallet.others.find(acc=>acc.address==address).name
-    selectedAccAdd.value = address;
-  });
-  
-    
-  
-  // confirm modal
-  emitter.on("CLOSE_CONFIRM_SEND_MODAL", (payload) => {
-    toggleConfirm.value = payload;
-  });
-  emitter.on("CONFIRM_PROCEED_SEND", (payload) => {
-    if (payload) {
-      forceSend.value = payload;
-      toggleConfirm.value = false;
-      updateMetadata();
-    }
-  });
+    watch(oldValue,n=>{
+      txnBuilder.oldValue(n) 
+      buildMetadataTxn()
+      buildAggregateTxn()
+      updateAggregateFee()
+    })
+    watch(newValue,n=>{
+      txnBuilder.oldValue(n) 
+      buildMetadataTxn()
+      buildAggregateTxn()
+      updateAggregateFee()
+    })
+    watch(inputScopedMetadataKey,n=>{
+      if(n==""){
+        oldValue.value = ""
+      }
+    })
+
     return {
       findAcc,
       totalFee,
-      toggleContact,
-      showMenu,
-      selectedAccName,
-      selectedAccAdd,
       err,
       walletPassword,
-      clearInput,
       showPasswdError,
       accounts,
       updateMetadata,
-      toggleConfirm,
-      isMultiSig,
-      isMultiSigBool,
-      effectiveFee,
-      cosignAddress,
-      getWalletCosigner,
-      disablePassword,
+      targetAccIsMultisig,
       cosignerBalanceInsufficient,
       lockFundCurrency,
-      currencyName,
+      lockFund,
+      aggregateFee,
       lockFundTxFee,
-      lockFundTotalFee,
       splitBalance,
       walletName,
       currentNativeTokenName,
+      oldValue,
+      newValue,
+      cosigners,
+      scopedMetadataKeyType,
+      svgString,
+      accountName,
+      disableAddBtn,
+      showBalanceErr,
+      showScopedKeyErr,
+      inputScopedMetadataKey,
+      checkOldValue,
+      selectedCosigner
     };
   },
 };
