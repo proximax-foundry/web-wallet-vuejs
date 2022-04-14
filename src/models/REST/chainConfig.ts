@@ -1,6 +1,7 @@
 import { 
     ChainConfigHttp, ChainConfig
 } from "tsjs-xpx-chain-sdk";
+import {RequestAuth} from './auth';
 
 export class ChainConfigAPI {
 
@@ -11,7 +12,8 @@ export class ChainConfigAPI {
     }
 
     getChainConfig(height: number): Promise<ChainConfig>{
-        return this.chainConfigHttp.getChainConfig(height).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.chainConfigHttp.getChainConfig(height, authHeader).toPromise();
     }
 
 }
