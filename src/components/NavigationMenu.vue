@@ -22,6 +22,7 @@
                 <router-link :to="{ name: 'ViewAccountSwap', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.swap')}}</router-link>
                 <router-link :to="{ name: 'ViewAccountDelegate', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.delegate')}}</router-link>
                 <router-link :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.namespace')}}</router-link>
+                <router-link :to="{ name: 'ViewUpdateAccountMetadata', params: { targetPublicKey: selectedAccountPublicKey }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Metadata</router-link>
               </div>
             </div>
           </div>
@@ -136,6 +137,10 @@ export default{
 
     const selectedAccountAddress = computed(() => {
       return selectedAccount.value.address;
+    })
+
+    const selectedAccountPublicKey = computed(() => {
+      return selectedAccount.value.publicKey;
     })
 
     const isMultiSig = computed(() => {
@@ -311,6 +316,7 @@ export default{
       selectedAccountAddress,
       triggerSetDefaultModal,
       isMultiSig,
+      selectedAccountPublicKey
     };
   }
 }
