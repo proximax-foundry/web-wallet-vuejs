@@ -66,8 +66,11 @@ export default {
       () => !privKey.value.match(privKeyPattern) && privKey.value!=""
     );
 
-    const walletName = walletState.currentLoggedInWallet.name
+    const walletName = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.name:''
     const create = async() => {
+      if(!walletState.currentLoggedInWallet){
+        return
+      }
     const verifyExistingAccountName = walletState.currentLoggedInWallet.accounts.find((element) => element.name == accountName.value);
       if(!verifyExistingAccountName) {
         var result = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPassword.value);

@@ -48,7 +48,8 @@ export default {
 
     // generate group labels
     const groupList = ref([]);
-    if(walletState.currentLoggedInWallet.contacts != undefined){
+    if(walletState.currentLoggedInWallet){
+      if(walletState.currentLoggedInWallet.contacts != undefined){
       if(walletState.currentLoggedInWallet.contacts.length > 0){
         walletState.currentLoggedInWallet.contacts.forEach((contact) => {
           if(contact.group != undefined){
@@ -57,6 +58,8 @@ export default {
         });
       }
     }
+    }
+    
 
     const {groups} = toRefs(props);
     const addCustomGroup = () => {

@@ -18,6 +18,7 @@
         <AccountTile :key="index" :account="item" v-for="(item, index) in accounts" />
       </div>
     </div>
+    <div class="mb-36"/>
   </div>
 </template>
 <script>
@@ -97,7 +98,9 @@ export default {
 
     
     const accountStructure = computed(()=>{
-     
+      if(!walletState.currentLoggedInWallet){
+        return []
+      }
       let accountStructure = {normalAcc:[],multisig:[]}
       
       totalAcc.value.forEach(account=>{
