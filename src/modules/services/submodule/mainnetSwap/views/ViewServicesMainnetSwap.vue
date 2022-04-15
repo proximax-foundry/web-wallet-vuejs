@@ -91,7 +91,8 @@ export default {
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
 
-    const baseURL = swapData.swap_XPX_ETH_URL;
+    const ethURL = swapData.swap_XPX_ETH_URL;
+    const bscURL = swapData.swap_XPX_BSC_URL;
     const priceURL = swapData.priceConsultURL;
     const router = useRouter();
     const isOutgoingOptionDisabled = ref([]);
@@ -153,7 +154,12 @@ export default {
       displayErrorMessage.value[coin] = false;
 
       try {
-        const response = await fetch(SwapUtils.checkSwapService(baseURL));
+        const response = null
+        if(coin == 'eth'){
+          response = await fetch(SwapUtils.checkSwapService(ethURL));
+        }else if(coin == 'bsc'){
+          response = await fetch(SwapUtils.checkSwapService(bscURL));
+        }
         const priceResponse = await fetch(SwapUtils.checkSwapPrice(priceURL));
         const priceData = await priceResponse.json();
 
