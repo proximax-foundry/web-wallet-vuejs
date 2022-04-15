@@ -78,21 +78,27 @@ export default {
       const open = ref([]);
       open.value['nis1', 'eth', 'bsc'] = false;
       let type = ['nis1', 'eth', 'bsc'];
-      const openMenu = (coinType) => {
-        if(coinType == 'nis1' && !isOutgoingOptionDisabled.value['nis1']){
+      const openMenu = (remoteNetworkType) => {
+        if(remoteNetworkType == 'nis1' && !isOutgoingOptionDisabled.value['nis1']){
           open.value['nis1'] = !open.value['nis1'];
-        }else if(coinType == 'eth' && !isOutgoingOptionDisabled.value['eth']){
+        }else if(remoteNetworkType == 'eth' && !isOutgoingOptionDisabled.value['eth']){
           open.value['eth'] = !open.value['eth'];
-        }else if(coinType == 'bsc' && !isOutgoingOptionDisabled.value['bsc']){
+        }else if(remoteNetworkType == 'bsc' && !isOutgoingOptionDisabled.value['bsc']){
           open.value['bsc'] = !open.value['bsc'];
         }
       };
 
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
-
-    const ethURL = swapData.swap_XPX_ETH_URL;
-    const bscURL = swapData.swap_XPX_BSC_URL;
+    const getBaseURL = remoteNetwork =>{
+      if(remoteNetwork=='bsc'){
+        return swapData.swap_XPX_BSC_URL;
+      }else if(remoteNetwork=='eth'){
+        return swapData.swap_XPX_ETH_URL;
+      }else{
+        return ''
+      }
+    }
     const priceURL = swapData.priceConsultURL;
     const router = useRouter();
     const isOutgoingOptionDisabled = ref([]);
@@ -139,64 +145,59 @@ export default {
       }
     });
 
-    const gotoOutgoingPage = async(coin)=> {
+    const gotoOutgoingPage = async(remoteNetwork)=> {
 
-      if(isChecking.value[coin]){
+      if(isChecking.value[remoteNetwork]){
         return;
       }
-      isOutgoingOptionDisabled.value[coin] = true;
+      isOutgoingOptionDisabled.value[remoteNetwork] = true;
       // outgoingText.value = "Getting your accounts. Please wait";
 
-      isChecking.value[coin] = true;
+      isChecking.value[remoteNetwork] = true;
 
-      displayWaitMessage.value[coin] = true;
-      displayConnectionMessage.value[coin] = false;
-      displayErrorMessage.value[coin] = false;
+      displayWaitMessage.value[remoteNetwork] = true;
+      displayConnectionMessage.value[remoteNetwork] = false;
+      displayErrorMessage.value[remoteNetwork] = false;
 
       try {
-        const response = null
-        if(coin == 'eth'){
-          response = await fetch(SwapUtils.checkSwapService(ethURL));
-        }else if(coin == 'bsc'){
-          response = await fetch(SwapUtils.checkSwapService(bscURL));
-        }
+        const response = await fetch(SwapUtils.checkSwapService(getBaseURL(remoteNetwork)));
         const priceResponse = await fetch(SwapUtils.checkSwapPrice(priceURL));
         const priceData = await priceResponse.json();
-
-        isChecking.value[coin] = false;
+        
+        isChecking.value[remoteNetwork] = false;
         let priceDataExternalCoin
-        if(coin == 'eth'){
+        if(remoteNetwork == 'eth'){
           priceDataExternalCoin = priceData.eth;
-        }else if(coin == 'bsc'){
+        }else if(remoteNetwork == 'bsc'){
           priceDataExternalCoin = priceData.bsc;
         }
 
         if(priceData.xpx === 0 || priceDataExternalCoin === 0){
-          displayWaitMessage.value[coin] = false;
-          displayErrorMessage.value[coin] = true;
-          isOutgoingOptionDisabled.value[coin] = false;
+          displayWaitMessage.value[remoteNetwork] = false;
+          displayErrorMessage.value[remoteNetwork] = true;
+          isOutgoingOptionDisabled.value[remoteNetwork] = false;
           return;
         }
 
         if(response.status == 200 && priceResponse.status == 200){
-          displayErrorMessage.value[coin] = false;
-          displayWaitMessage.value[coin] = false;
-          if(coin == 'eth'){
+          displayErrorMessage.value[remoteNetwork] = false;
+          displayWaitMessage.value[remoteNetwork] = false;
+          if(remoteNetwork == 'eth'){
             router.push({ name: "ViewServicesMainnetSwapSiriusToETH"});
-          }else if(coin == 'bsc'){
+          }else if(remoteNetwork == 'bsc'){
             router.push({ name: "ViewServicesMainnetSwapSiriusToBSC"});
           }
         }else{
-          displayWaitMessage.value[coin] = false;
-          displayErrorMessage.value[coin] = true;
+          displayWaitMessage.value[remoteNetwork] = false;
+          displayErrorMessage.value[remoteNetwork] = true;
           isOutgoingOptionDisabled.value = false;
         }
       } catch (error) {
-        displayWaitMessage.value[coin] = false;
-        displayErrorMessage.value[coin] = false;
-        displayConnectionMessage.value[coin] = true;
-        isOutgoingOptionDisabled.value[coin] = false;
-        isChecking.value[coin] = false;
+        displayWaitMessage.value[remoteNetwork] = false;
+        displayErrorMessage.value[remoteNetwork] = false;
+        displayConnectionMessage.value[remoteNetwork] = true;
+        isOutgoingOptionDisabled.value[remoteNetwork] = false;
+        isChecking.value[remoteNetwork] = false;
       }
     }
 
