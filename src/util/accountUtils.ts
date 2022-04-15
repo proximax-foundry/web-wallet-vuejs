@@ -62,6 +62,9 @@ const checkAvailableContact = (recipient :string) :boolean=> {
 }
 
 const getNamespaceListByAddress = (address: string) :Namespace [] => {
+  if(!walletState.currentLoggedInWallet){
+    return []
+  }
   let namespacelist = []; 
   if (walletState.currentLoggedInWallet.others.find(account => account.address === address)) {
     namespacelist = walletState.currentLoggedInWallet.others.find(account => account.address == address).namespaces.filter(namespace => namespace.active === true);
@@ -72,6 +75,9 @@ const getNamespaceListByAddress = (address: string) :Namespace [] => {
 }
 
 const getContact = () => {
+  if(!walletState.currentLoggedInWallet){
+    return []
+  }
   const wallet = walletState.currentLoggedInWallet;
     let contact = [];
     wallet.accounts.forEach((element) => {
@@ -230,12 +236,11 @@ const linkNamespaceToAddress = (selectedCosign :string,isMultisig :boolean, mult
 
 const createDelegateTransaction = (selectedCosign :string,isMultisig :boolean,multisigAccount: WalletAccount, walletPassword: string, accPublicKey: string, delegateAction: LinkAction) :SignedTransaction=>{
 
-  const senderAddress = multisigAccount.address
-  const senderAccount = getAccountDetail(senderAddress, walletPassword);
   let delegateTx = delegateTransaction(accPublicKey,delegateAction)
-   
   let signedTransaction :SignedTransaction
   if (!isMultisig){ //normal account
+    const senderAddress = multisigAccount.address
+    const senderAccount = getAccountDetail(senderAddress, walletPassword);
     signedTransaction = senderAccount.sign(delegateTx, networkState.currentNetworkProfile.generationHash);
     TransactionUtils.announceTransaction(signedTransaction);
   }else{ //multisig account
