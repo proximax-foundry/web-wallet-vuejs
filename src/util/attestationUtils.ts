@@ -17,6 +17,7 @@ import { listenerState } from '@/state/listenerState';
 import { BlockAPI } from '@/models/REST/block';
 import { transactionTypeName, TransactionUtils } from './transactionUtils';
 import { Helper } from '@/util/typeHelper';
+import { AppState } from '@/state/appState';
 export class Verifier {
     static Hash: any;
 
@@ -240,17 +241,14 @@ export const preparePublicApostille = (rawFileContent :string,tag :string ,fileN
     // Create an account from my private key
     const accountDetails = walletState.currentLoggedInWallet.selectDefaultAccount()
     let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv)
-    const myAccount = Account.createFromPrivateKey(privateKey, networkState.currentNetworkProfile.network.type);
+    const myAccount = Account.createFromPrivateKey(privateKey, AppState.networkType);
     // Arm the transaction type transfer
     // console.log('MY NETWORK --->', this.walletService.currentAccount.network);
     
 
     
-    let transactionBuilder = new BuildTransactions( networkState.currentNetworkProfile.network.type)
+    let transactionBuilder = AppState.buildTxn
     // Zero fee is added
-    if (ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE || ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE_TEST) {
-        transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
-    }
     let transferTransaction = transactionBuilder.transfer(sinkAddress, PlainMessage.create(JSON.stringify(apostilleHash)))
     
     // console.log('TRANSACTION BUILDED ---> ', transferTransaction);
@@ -302,7 +300,7 @@ export const preparePublicApostille = (rawFileContent :string,tag :string ,fileN
     }
     const accountDetails = walletState.currentLoggedInWallet.selectDefaultAccount()
     const privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv)
-    const ownerAccount = Account.createFromPrivateKey(privateKey, networkState.currentNetworkProfile.network.type);
+    const ownerAccount = Account.createFromPrivateKey(privateKey, AppState.networkType);
     // create an encrypted hash
     const hash = encryptData(file.toString());
     // The string contentHash is converted to byte
@@ -322,15 +320,12 @@ export const preparePublicApostille = (rawFileContent :string,tag :string ,fileN
     // Take the first 32 UINT8 to get the private key
     const dedicatedPrivateKey = Convert.uint8ToHex(fileNameHashSign.slice(0, 32));
     // Create an account from the dedicatedPrivateKey to send a transaction with apostilleHash message
-    const dedicatedAccount = Account.createFromPrivateKey(dedicatedPrivateKey, networkState.currentNetworkProfile.network.type);
+    const dedicatedAccount = Account.createFromPrivateKey(dedicatedPrivateKey, AppState.networkType);
     // Build the transfer type transaction
     // console.log('MY NETWORK --->', this.walletService.currentAccount.network);
     
-    let transactionBuilder = new BuildTransactions( networkState.currentNetworkProfile.network.type)
+    let transactionBuilder = AppState.buildTxn
     // Zero fee is added
-    if (ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE || ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type) === NetworkType.PRIVATE_TEST) {
-        transactionBuilder.setFeeStrategy(FeeCalculationStrategy.ZeroFeeCalculationStrategy) ;
-    }
     let transferTransaction = transactionBuilder.transfer(Address.createFromRawAddress(dedicatedAccount.address.plain()), PlainMessage.create(JSON.stringify(apostilleHash)))
 
     

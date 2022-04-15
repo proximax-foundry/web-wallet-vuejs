@@ -1,24 +1,32 @@
 <template>
-    <div @click=" toggleModal = !toggleModal" class='flex ml-auto' >
-      <img src='@/modules/account/img/delete-icon.svg' class='mt-3  w-3 h-3 cursor-pointer'>
-      <div class = 'pt-2.5 text-xs text-red-500 cursor-pointer ml-1 font-semibold'>Delete This Account</div>
-    </div>
-    <transition
+  <div @click=" toggleModal = !toggleModal" class='flex ml-auto' >
+    <img src='@/modules/account/img/delete-icon.svg' class='mt-3  w-3 h-3 cursor-pointer'>
+    <div class = 'pt-2.5 text-xs text-red-500 cursor-pointer ml-1 font-semibold'>{{$t('account.deleteThis')}}</div>
+  </div>
+  <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
-    >
-      <div v-if="toggleModal" class="popup-outer-lang fixed flex z-50">
-        <div class="modal-popup-box ">
-          <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
-            <div class= 'ml-auto mr-auto mt-2 text-xs  font-semibold' style='width:70%'>Are you sure you want to delete this account?</div>
-            <div class ='text-red-700  text-center text-txs mt-2'>For security purpose, this is required before completely deleting your account.</div>
-            <PasswordInput class = 'my-3' v-model= 'walletPasswd' :placeholder="'Password'"/>
-            <div @click="deleteAccount()"  class = 'rounded-md bg-red-700 cursor-pointer text-xs text-white font-semibold py-2 text-center ml-auto mr-auto w-7/12'>Confirm Deletion</div>
-            <div class= 'text-center cursor-pointer font-semibold text-xs text-blue-link mt-2' @click="toggleModal = !toggleModal;walletPasswd=''">Cancel</div>
-          </div>
+  >
+  <div v-if='toggleModal' class="popup-outer fixed flex z-50 text-black mt-10">
+    <div class="modal-popup-box">
+      <div class="error error_box mb-3 text-center" v-if="err!=''">{{ err }}</div>
+        <div class ='text-center mt-2 text-md font-normal'>{{$t('account.accDeletion')}}</div>
+          <img src='@/modules/wallet/img/icon-delete-wallet.svg' class='ml-auto mr-auto'>
+          <div class ='text-black text-center text-xs mt-2 font-normal'>{{$t('account.deleteTitle')}}</div>
+          <div class ='font-bold text-center text-xs mt-2'>{{$t('account.deleteWarning')}}</div>
+          <div class="w-92">
+            <div class= 'text-center'>
+              <div class="mt-3">
+                <PasswordInput class ='w-8/12 ml-auto mr-auto' :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" v-model="walletPasswd" icon="lock"/>
+                <button @click="deleteAccount()" class='red-btn px-4 py-3 font-semibold cursor-pointer text-center ml-auto mt-3 mr-auto w-8/12 disabled:opacity-50 disabled:cursor-auto' :disabled="disableDelete">{{$t('account.confirmDelete')}}</button>
+                <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-3' @click="toggleModal = !toggleModal;walletPasswd='';err=''">{{$t('general.cancel')}}</div>
+              </div>
+            </div> 
+        </div>
       </div>
-    </transition>
-    <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-60 bg-gray-100 z-20"></div>
+  </div>
+  </transition>
+  <div @click="toggleModal = !toggleModal" v-if="toggleModal" class="fixed inset-0 bg-opacity-60 z-20 bg-gray-100"></div>
 </template>
 <script>
 import PasswordInput from '@/components/PasswordInput.vue';
@@ -26,7 +34,7 @@ import { walletState } from '@/state/walletState';
 import { networkState } from '@/state/networkState';
 import { WalletUtils } from '@/util/walletUtils';
 import { Account } from '@/models/account';
-import {  ref} from "vue";
+import {  ref,computed} from "vue";
 import {useI18n} from 'vue-i18n'
 import { useRouter } from "vue-router";
 export default {
@@ -42,6 +50,8 @@ export default {
       const router = useRouter();
       let toggleModal = ref(false)
       let walletPasswd = ref('')
+      const passwdPattern = "^[^ ]{8,}$";
+      const disableDelete = computed(() => !(walletPasswd.value.match(passwdPattern)));
       let err = ref('')
       const deleteAccount = () => {
       const accountIndex = walletState.currentLoggedInWallet.accounts.findIndex((element) => element.name == p.account.name);
@@ -51,10 +61,11 @@ export default {
             walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
             router.push({ name: 'ViewAccountDisplayAll', params: {deleteAccount: 'success' } });
         }else{
-            err.value = t('scriptvalues.removeaccount');
+            err.value = t('account.failDelete');
         }
       }else{
-          err.value = "Wallet password is incorrect";
+          let walletName = walletState.currentLoggedInWallet.name
+          err.value = t('general.walletPasswordInvalid',{name: walletName});
       }
       
     };
@@ -62,7 +73,8 @@ export default {
       deleteAccount,
       toggleModal,
       err,
-      walletPasswd
+      walletPasswd,
+      disableDelete
     }
     }
 }

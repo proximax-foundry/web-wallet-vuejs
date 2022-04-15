@@ -53,7 +53,7 @@
         </label>
         <div class="mt-10">
           <button type="button" class="default-btn mr-5 focus:outline-none disabled:opacity-50">{{$t('accounts.save')}}</button>
-          <button type="submit" class="default-btn py-1 focus:outline-none disabled:opacity-50" :disabled="!readCheck" @click="backtoPanel()">{{$t('createsuccessful.continue')}}</button>
+          <button type="submit" class="default-btn py-1 focus:outline-none disabled:opacity-50" :disabled="!readCheck" @click="backtoPanel()">{{$t('general.continue')}}</button>
         </div>
       </div>
     </div>
@@ -66,6 +66,7 @@ import NumberCardInput from '@/modules/services/submodule/siriusGift/components/
 import CardMessageInput from '@/modules/services/submodule/siriusGift/components/CardMessageInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
+import { AppState } from '@/state/appState';
 
 export default {
   name: 'ViewServicesSiriusGiftCreateGift',
@@ -78,7 +79,7 @@ export default {
   },
 
   setup() {
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const appStore = inject("appStore");

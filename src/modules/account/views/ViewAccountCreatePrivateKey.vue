@@ -1,16 +1,20 @@
 <template>
   <div>
+    <div class='flex cursor-pointer'>
+      <img src='@/assets/img/chevron_left.svg'>
+      <router-link :to='{name:"ViewAccountCreateSelectType"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
+    </div>
     <div class='border w-8/12 ml-auto mr-auto mt-6 filter shadow-lg'>
-      <div class='text-lg text-center font-bold mt-10'>Create New Account</div>
-      <div class='text-blue-primary text-xs text-center font-bold'>From Private Key</div>
+      <div class='text-lg text-center font-bold mt-10'> {{$t('general.createNewAcc')}}</div>
+      <div class='text-blue-primary text-xs text-center font-bold '>{{$t('general.fromPrivateKey')}}</div>
       <div class="error error_box mb-2 w-8/12 ml-auto mr-auto" v-if="err!=''">{{ err }}</div>
       <div class="w-8/12 ml-auto mr-auto mt-3">
-        <PasswordInput :placeholder="$t('createprivatekeywallet.privatekey')" :errorMessage="$t('createprivatekeywallet.invalidprivatekey')" icon="key" :showError="showPkError" v-model="privKey"  />
-        <TextInput class="mt-3" placeholder="Name your account" :errorMessage="$t('createwallet.inputwalletname')" v-model="accountName" icon="wallet" />
-        <PasswordInput class="mt-3" placeholder="Enter Wallet Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPassword"  />
+        <PasswordInput :placeholder="$t('general.privateKey')" :errorMessage="$t('general.invalidPrivateKey')" icon="key" :showError="showPkError" v-model="privKey"  />
+        <TextInput class="mt-3" :placeholder="$t('account.namePlaceholder')" :errorMessage="$t('account.enterAccountName')" v-model="accountName" icon="wallet" />
+        <PasswordInput class="mt-3" :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" icon="lock" v-model="walletPassword"  />
       </div>
       <div class="flex justify-center mt-3">
-        <button type="submit" class="blue-btn py-2 px-8 disabled:opacity-50" @click='create()' :disabled="disableCreate">{{$t('welcome.create')}}</button>
+        <button type="submit" class="blue-btn py-2 px-8 disabled:opacity-50" @click='create()' :disabled="disableCreate">{{$t('general.create')}}</button>
       </div>
       <div class='mt-10'></div>   
     </div>
@@ -31,6 +35,7 @@ import { Account, Address, MosaicId, UInt64 } from "tsjs-xpx-chain-sdk";
 import {useI18n} from 'vue-i18n'
 import { Asset } from '@/models/asset';
 import { Reconstruct } from '@/models/wallets';
+import { AppState } from '@/state/appState';
 
 
 
@@ -62,34 +67,23 @@ export default {
     );
 
     const walletName = walletState.currentLoggedInWallet.name
-    /* let recreateAsset = (tempAsset) =>{
-        let newAsset = new Asset(tempAsset.idHex, tempAsset.divisibility, tempAsset.supplyMutable, tempAsset.transferable, tempAsset.owner);
-        newAsset.amount = tempAsset.amount ? tempAsset.amount : 0;
-        newAsset.duration = tempAsset.duration ? tempAsset.duration : null;
-        newAsset.expirationBlock = tempAsset.expirationBlock ? tempAsset.expirationBlock : null;
-        newAsset.namespaceId = tempAsset.namespaceId ? tempAsset.namespaceId : [];
-        newAsset.owner = tempAsset.owner ? tempAsset.owner : null;
-        newAsset.supply = tempAsset.supply ? tempAsset.supply : 0;
-
-        return newAsset;
-    } */
     const create = async() => {
     const verifyExistingAccountName = walletState.currentLoggedInWallet.accounts.find((element) => element.name == accountName.value);
       if(!verifyExistingAccountName) {
         var result = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPassword.value);
         if (result == -1) {
-          err.value = t('scriptvalues.createaccountfail');
+          err.value = t('account.failCreate');
         } else if (result == 0) {
-          err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name}) ;
+          err.value = t('general.walletPasswordInvalid',{name : walletName}) ;
         } else {    
           // create account
-          const account = Account.createFromPrivateKey(privKey.value,ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+          const account = Account.createFromPrivateKey(privKey.value,AppState.networkType);
           const verifyExistingAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.publicKey == account.publicKey);
           if (verifyExistingAccount) {
-            err.value = t('scriptvalues.privatekeyexists');
+            err.value = t('account.privateKeyExist');
           } else {          
             let password = WalletUtils.createPassword(walletPassword.value);
-            const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, privKey.value, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+            const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, privKey.value,AppState.networkType);
             let walletAccount = new WalletAccount(accountName.value, account.publicKey, account.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
             // code for NIS 1 checking
             // if(nis1Swap.value == true){
@@ -105,7 +99,7 @@ export default {
           }
         } 
       } else {
-        err.value = t('scriptvalues.accountnametaken');
+        err.value = t('account.nameTaken');
       }
     };
     return{

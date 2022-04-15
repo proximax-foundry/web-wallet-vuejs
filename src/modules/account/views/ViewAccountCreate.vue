@@ -1,15 +1,18 @@
 <template>
 <div>
+  <div class='flex cursor-pointer'>
+    <img src='@/assets/img/chevron_left.svg'>
+    <router-link :to='{name:"ViewAccountCreateSelectType"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
+  </div>
   <div class='border w-8/12 ml-auto mr-auto mt-6 filter shadow-lg'>
-    <div class='text-lg text-center font-bold mt-10'>Create New Account</div>
-    <div class='text-blue-primary text-xs text-center font-bold'>Creating New</div>
+    <div class='text-lg text-center font-bold mt-10'>{{$t('general.createNewAcc')}}</div>
     <div class="error error_box mb-2 w-8/12 ml-auto mr-auto" v-if="err!=''">{{ err }}</div>
     <div class="w-8/12 ml-auto mr-auto mt-3">
-      <TextInput placeholder="Name your account" :errorMessage="$t('createwallet.inputwalletname')" v-model="accountName" icon="wallet" />
-      <PasswordInput class="mt-3" placeholder="Enter Wallet Password" :errorMessage="$t('createwallet.passwordvalidation')" :showError="showPasswdError" icon="lock" v-model="walletPassword"  />
+      <TextInput :placeholder="$t('account.namePlaceholder')" :errorMessage="$t('account.enterAccountName')" v-model="accountName" icon="wallet" />
+      <PasswordInput class="mt-3" :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" icon="lock" v-model="walletPassword"  />
     </div>
     <div class="flex justify-center">
-      <button type="submit" class="mt-3 blue-btn py-2 px-8 disabled:opacity-50" @click='create()' :disabled="disableCreate">{{$t('welcome.create')}}</button>
+      <button type="submit" class="mt-3 blue-btn py-2 px-8 disabled:opacity-50" @click='create()' :disabled="disableCreate">{{$t('general.create')}}</button>
     </div>
     <div class='mt-10'></div>   
   </div>
@@ -27,6 +30,7 @@ import { ChainUtils } from '@/util/chainUtils';
 import { Helper } from '@/util/typeHelper';
 import { WalletAccount } from "@/models/walletAccount"
 import {useI18n} from 'vue-i18n'
+import { AppState } from '@/state/appState';
 
 export default {
   name: 'ViewAccountCreate',
@@ -55,25 +59,23 @@ export default {
       if(!verifyExistingAccountName){
         var result = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPassword.value);
         if (result == -1) {
-          err.value = t('scriptvalues.createaccountfail');
+          err.value = t('account.failCreate');
         } else if (result == 0) {
-          err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
+          err.value = t('general.walletPasswordInvalid',{name : walletName});
         } else { 
           // create account
           let password = WalletUtils.createPassword(walletPassword.value);
-          const account = WalletUtils.generateNewAccount(ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
-          const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, account.privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+          const account = WalletUtils.generateNewAccount(AppState.networkType);
+          const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, account.privateKey, AppState.networkType);
           
           let walletAccount = new WalletAccount(accountName.value, account.publicKey, account.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
           walletState.currentLoggedInWallet.accounts.push(walletAccount);
-
-          const address = Helper.createAddress(account.address.address);
           walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
           router.push({ name: "ViewAccountDetails", params: {address: account.address.address,accountCreated: true}});
 
         }
       }else{
-        err.value =  t('scriptvalues.accountnametaken');
+        err.value =  t('account.nameTaken');
         console.log(verifyExistingAccountName);
       }
     };

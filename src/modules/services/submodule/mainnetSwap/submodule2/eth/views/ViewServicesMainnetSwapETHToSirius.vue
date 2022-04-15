@@ -211,7 +211,7 @@
             </div>
           </div>
           <div class="mt-10 text-center">
-            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()">{{$t('createsuccessful.continue')}}</button>
+            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()">{{$t('general.continue')}}</button>
           </div>
         </div>
         <div v-if="currentPage==3">
@@ -262,6 +262,7 @@ import { abi, SwapUtils } from '@/util/swapUtils';
 import { networkState } from '@/state/networkState';
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { Helper } from '@/util/typeHelper';
+import { AppState } from '@/state/appState';
 
 export default {
   name: 'ViewServicesMainnetSwapETHToSirius',
@@ -275,7 +276,7 @@ export default {
   setup() {
     let verifyingTxn;
 
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 
     const verifyMetaMaskPlugin = ref(true);
     if(!window.ethereum.isMetaMask){

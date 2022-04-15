@@ -52,6 +52,7 @@ export class AutoAnnounceSignedTransaction{
     type: AnnounceType = AnnounceType.NORMAL;
     confirmAnnounced: boolean = false;
     announced: boolean = false;
+    checkCount: number = 0;
 
     constructor(signedTx: SignedTransaction){
         this.signedTransaction = signedTx;

@@ -8,6 +8,7 @@ const elements = {
     createnew_backup: 'div.radio-toolbar.text-center > label:nth-child(6)',
     createsuccessful_popup: '.popup-outer-create-wallet > div:nth-child(1)',
     close: 'a.mt-4',
+    continuelogin: 'a.ml-auto > div:nth-child(1)',
     next: 'a[href="#/create-wallet"]',
     pknext: 'a[href="#/import-wallet"]',
     backupnext: 'a[href="#/backup-wallet"]',
@@ -40,9 +41,18 @@ const elements = {
     signin_here: 'form > div:nth-child(8) > a',
     signin_herepk: 'form > div:nth-child(10) > a',
     signin_herebackup: 'div.text-center:nth-child(9) > a:nth-child(1)',
+    select_network: 'form > fieldset > div:nth-child(1)',
+    testnet_1: 'form > fieldset > div:nth-child(2) > div:nth-child(1) > div:nth-child(3)',
 }
 
 const commands = {
+
+    change_network(){
+        return this
+        .pause(5000)
+        .click("@select_network")
+        .click("@testnet_1")
+    },
 
     navigate_mainpage(){
         return this
@@ -148,7 +158,7 @@ const commands = {
     },
 
     // create wallet with valid name and password
-    create_wallet(browser, name, password){
+    create_wallet(name, password){
         return this
         .click("@input_walletname")
         .setValue("@input_walletname", name)
@@ -156,13 +166,14 @@ const commands = {
         .setValue("@input_confirmpassword", password)
         .click("@create")
         .pause(1000)
-        .assert.visible('@createsuccessful_popup', 'Wallet is successfully created when wallet name, password and confirm password are valid')
-        .click("@close")
-        .assert.urlEquals(browser, 'When close is clicked, user is navigated back to main page.')
+        .click("@continuelogin")
+        // .assert.visible('@createsuccessful_popup', 'Wallet is successfully created when wallet name, password and confirm password are valid')
+        // .click("@close")
+        // .assert.urlEquals(browser, 'When close is clicked, user is navigated back to main page.')
     },
 
     // create wallet from pk with valid pk, name and password
-    create_pkwallet(browser, privatekey, name, password){
+    create_pkwallet(privatekey, name, password){
         return this
         .click("@input_privatekey")
         .setValue("@input_privatekey", privatekey)
@@ -171,9 +182,10 @@ const commands = {
         .setValue("@input_pkconfirmpassword", password)
         .click("@create")
         .pause(1000)
-        .assert.visible('@createsuccessful_popup', 'Wallet is successfully created from private key when private key, wallet name, password and confirm password are valid')
-        .click("@close")
-        .assert.urlEquals(browser, 'When close is clicked, user is navigated back to main page.')
+        .click("@continuelogin")
+        // .assert.visible('@createsuccessful_popup', 'Wallet is successfully created from private key when private key, wallet name, password and confirm password are valid')
+        // .click("@close")
+        // .assert.urlEquals(browser, 'When close is clicked, user is navigated back to main page.')
     },
 
     // checks if wallet name has existed before

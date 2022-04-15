@@ -51,6 +51,7 @@ const commands = {
         .isVisible('@error_wrongpassword', callback = result => {
             this.assert.equal(result.value, true, "If password is wrong, error is shown")
         })
+
     },
 
     eye_icon(){

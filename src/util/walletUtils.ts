@@ -30,9 +30,6 @@ import {AppState} from "@/state/appState";
 
 const config = require("@/../config/config.json");
 
-const localNetworkType = computed(() => ChainUtils.getNetworkType(AppState.networkType));
-const chainAPICall = computed(()=> AppState.chainAPI);
-
 export class WalletUtils {
 
     static verifyWalletPassword(name: string, networkName: string, password: string): boolean{
@@ -71,11 +68,12 @@ export class WalletUtils {
             }
             else{
                 if (!ChainUtils.isPrivateKeyValid(common.privateKey)) {
+                    console.log("Not valid private key");
                     return false;
                 }
                 else{
-                    const checkingAddress = Account.createFromPrivateKey(common.privateKey, localNetworkType.value).address.plain();
-                    
+                    const checkingAddress = Account.createFromPrivateKey(common.privateKey, AppState.networkType).address.plain();
+
                     if(checkingAddress !== account.address){
                         return false;
                     }
@@ -108,7 +106,7 @@ export class WalletUtils {
         return new Promise(async (resolve) => {
             const accountsInfo = await WalletUtils.fetchAccountInfoCurrentWalletAccounts();
 
-            const nativeNetworkMosaicId = await chainAPICall.value.namespaceAPI.getLinkedMosaicId(nativeTokenNamespace);
+            const nativeNetworkMosaicId = await AppState.chainAPI.namespaceAPI.getLinkedMosaicId(nativeTokenNamespace);
 
             if (accountsInfo) {
                 const accInfo: AccountInfo[] = accountsInfo as AccountInfo[];
@@ -133,7 +131,7 @@ export class WalletUtils {
                             }
                         }
 
-                        chainAPICall.value.assetAPI.getMosaics(mosaicList).then((mosaicInfo) => {
+                        AppState.chainAPI.assetAPI.getMosaics(mosaicList).then((mosaicInfo) => {
                             mosaicInfo.forEach((asset) => {
                                 const newAsset = new Asset(asset.mosaicId.toHex(), asset.divisibility, asset.isSupplyMutable(), asset.isTransferable(), asset.owner.publicKey);
                                 newAsset.supply = asset.supply.compact();
@@ -158,13 +156,12 @@ export class WalletUtils {
     static fetchAccountInfoCurrentWalletAccounts(): false | Promise<AccountInfo[]> {
 
         const wallet = walletState.currentLoggedInWallet;
-        const networkTypeId = networkState.currentNetworkProfile!.network.type;
+        const networkType = AppState.networkType;
 
-        if (!wallet || !networkTypeId) {
+        if (!wallet || !networkType) {
             return false;
         }
-
-        const networkType = ChainUtils.getNetworkType(networkTypeId);
+        
         const addresses: Address[] = [];
         wallet.accounts.forEach((element: WalletAccount) => {
             addresses.push(Address.createFromPublicKey(element.publicKey, networkType));
@@ -181,7 +178,7 @@ export class WalletUtils {
 
         return new Promise((resolve, reject) => {
             try {
-                chainAPICall.value.accountAPI.getAccountsInfo(addresses).then(accountInfo => {
+                AppState.chainAPI.accountAPI.getAccountsInfo(addresses).then(accountInfo => {
                     resolve(accountInfo);
                 }).catch((error) => {
                     console.warn(error);
@@ -354,7 +351,7 @@ export class WalletUtils {
 
         const endpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, chainProfile.httpPort);
 
-        return chainAPICall.value.transactionAPI.announceAggregateBondedCosignature(
+        return AppState.chainAPI.transactionAPI.announceAggregateBondedCosignature(
             account.signCosignatureTransaction(cosignatureTransaction)
         );
     }
@@ -685,7 +682,7 @@ export class WalletUtils {
 
         const address = Helper.createAddress(walletAccount.address);
 
-        const graphInfo = await chainAPICall.value.accountAPI.getMultisigAccountGraphInfo(address);
+        const graphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(address);
 
         let multisigInfos: MultisigInfo[] = [];
 
@@ -716,7 +713,7 @@ export class WalletUtils {
 
         const address = Helper.createAddress(addressInString);
 
-        const graphInfo = await chainAPICall.value.accountAPI.getMultisigAccountGraphInfo(address);
+        const graphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(address);
 
         let multisigInfos: MultisigInfo[] = [];
 
@@ -762,7 +759,7 @@ export class WalletUtils {
                     continue;
                 }
 
-                let publicAccount = Helper.createPublicAccount(publicKeys[y], localNetworkType.value) 
+                let publicAccount = Helper.createPublicAccount(publicKeys[y], AppState.networkType) 
 
                 let address = publicAccount.address.plain();
 
@@ -786,12 +783,12 @@ export class WalletUtils {
 
             let account = wallet.accounts[i];
 
-            let publicAccount = Helper.createPublicAccount(account.publicKey, localNetworkType.value) 
+            let publicAccount = Helper.createPublicAccount(account.publicKey, AppState.networkType) 
 
             let accountInfo;
 
             try {
-                accountInfo = await chainAPICall.value.accountAPI.getAccountInfo(publicAccount.address);
+                accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(publicAccount.address);
             } catch (error) {
                 continue;
             }
@@ -800,7 +797,7 @@ export class WalletUtils {
 
                 tempLinkedList.push(accountInfo.linkedAccountKey);
 
-                let linkedPublicAccount = Helper.createPublicAccount(accountInfo.linkedAccountKey, localNetworkType.value);
+                let linkedPublicAccount = Helper.createPublicAccount(accountInfo.linkedAccountKey, AppState.networkType);
 
                 let newAddress = linkedPublicAccount.address.plain();
                 let stripedAddress = newAddress.substr(-4);
@@ -812,7 +809,7 @@ export class WalletUtils {
                 }
             }
 
-            let namespaceInfos = await chainAPICall.value.namespaceAPI.getNamespacesFromAccount(publicAccount.address);
+            let namespaceInfos = await AppState.chainAPI.namespaceAPI.getNamespacesFromAccount(publicAccount.address);
 
             let namespaces: Namespace[] = [];
             let tempNamespaceIds: NamespaceId[] = [];
@@ -852,7 +849,7 @@ export class WalletUtils {
                 namespaces.push(newNamespace);
             }
 
-            let namespaceNames = await chainAPICall.value.namespaceAPI.getNamespacesName(tempNamespaceIds);
+            let namespaceNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(tempNamespaceIds);
 
             for(let i = 0; i < namespaceNames.length; ++i){
                 let existingNamespace = namespaces.find((ns)=> ns.idHex === namespaceNames[i].namespaceId.toHex())
@@ -877,13 +874,13 @@ export class WalletUtils {
                     assets.push(newAsset);
                 }
                 else{
-                    let assetInfo = await chainAPICall.value.assetAPI.getMosaic(mosaic.id);
+                    let assetInfo = await AppState.chainAPI.assetAPI.getMosaic(mosaic.id);
                     let newTempAsset = new Asset(mosaicIdHex, assetInfo.divisibility, assetInfo.isSupplyMutable(), assetInfo.isTransferable(), assetInfo.owner.publicKey);
                     newTempAsset.duration = assetInfo.duration.compact();
                     newTempAsset.supply = assetInfo.supply.compact();
                     newTempAsset.height = assetInfo.height.compact();
 
-                    let assetNames = await chainAPICall.value.assetAPI.getMosaicsNames([mosaic.id])
+                    let assetNames = await AppState.chainAPI.assetAPI.getMosaicsNames([mosaic.id])
 
                     if(assetNames[0].names.length){
                         newTempAsset.namespaceNames = assetNames[0].names.map(nsName => nsName.name);
@@ -912,11 +909,11 @@ export class WalletUtils {
 
             let otherAccount = wallet.others[i];
 
-            let publicAccount = Helper.createPublicAccount(otherAccount.publicKey, localNetworkType.value) 
+            let publicAccount = Helper.createPublicAccount(otherAccount.publicKey, AppState.networkType) 
 
-            let accountInfo = await chainAPICall.value.accountAPI.getAccountInfo(publicAccount.address);
+            let accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(publicAccount.address);
 
-            let namespaceInfos = await chainAPICall.value.namespaceAPI.getNamespacesFromAccount(publicAccount.address);
+            let namespaceInfos = await AppState.chainAPI.namespaceAPI.getNamespacesFromAccount(publicAccount.address);
 
             let namespaces: Namespace[] = [];
             let tempNamespaceIds: NamespaceId[] = [];
@@ -956,7 +953,7 @@ export class WalletUtils {
                 namespaces.push(newNamespace);
             }
 
-            let namespaceNames = await chainAPICall.value.namespaceAPI.getNamespacesName(tempNamespaceIds);
+            let namespaceNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(tempNamespaceIds);
 
             for(let i = 0; i < namespaceNames.length; ++i){
                 let existingNamespace = namespaces.find((ns)=> ns.idHex === namespaceNames[i].namespaceId.toHex())
@@ -982,13 +979,13 @@ export class WalletUtils {
                     otherAccount.addAsset(newAsset);
                 }
                 else{
-                    let assetInfo = await chainAPICall.value.assetAPI.getMosaic(mosaic.id);
+                    let assetInfo = await AppState.chainAPI.assetAPI.getMosaic(mosaic.id);
 
                     let newTempAsset = new Asset(mosaicIdHex, assetInfo.divisibility, assetInfo.isSupplyMutable(), assetInfo.isTransferable(), assetInfo.owner.publicKey);
                     newTempAsset.duration = assetInfo.duration.compact();
                     newTempAsset.supply = assetInfo.supply.compact();
 
-                    let assetNames = await chainAPICall.value.assetAPI.getMosaicsNames([mosaic.id])
+                    let assetNames = await AppState.chainAPI.assetAPI.getMosaicsNames([mosaic.id])
 
                     if(assetNames[0].names.length){
                         newTempAsset.namespaceNames = assetNames[0].names.map(nsName => nsName.name);
@@ -1055,20 +1052,19 @@ export class WalletUtils {
         await WalletUtils.updateOtherAccountDetails(wallet);
 
         try {
-            let mosaicId = await ChainUtils.getLinkedMosaicId(Helper.createNamespaceId(networkProfile.network.currency.namespace));
+            let assetId = await ChainUtils.getLinkedMosaicId(Helper.createNamespaceId(networkProfile.network.currency.namespace));
 
-            networkProfile.network.currency.assetId = mosaicId.toHex();
+            AppState.nativeToken.assetId = assetId.toHex();
+            networkProfile.network.currency.assetId = assetId.toHex();
             networkProfile.saveToLocalStorage();
 
-            WalletUtils.updateAllAccountBalance(wallet, mosaicId.toHex());
+            WalletUtils.updateAllAccountBalance(wallet, assetId.toHex());
         } catch (error) {
             console.log(error);   
         }
 
         walletState.wallets.saveMyWalletOnlytoLocalStorage(wallet);
         wallet.isReady = true;
-
-        console.log(wallet);
     }
 
     static updateAllAccountBalance(wallet: Wallet, assetId: string): void{
@@ -1082,35 +1078,73 @@ export class WalletUtils {
         }
     }
 
-    static initFixOldFormat(walletsToCheck: Wallets): void{
+    static initFixOldFormat(oldWallets: oldWltFile[], networkName: string, networkType: NetworkType): void{
         let walletsInstance = new Wallets();
         let wallets: Wallet[] = [];
+        let prefix = networkType === NetworkType.MAIN_NET ? "sw-books-mainnet-" : "sw-books-testnet-";
 
-        walletsToCheck.wallets.forEach((wallet)=>{
+        oldWallets.forEach((wallet)=>{
 
+            let newWallet = new Wallet(wallet.name, networkName, []);
             let walletAccounts: WalletAccount[] = [];
 
             wallet.accounts.forEach((account)=>{
 
                 let stringJSON = JSON.stringify(account);
 
-                if(WalletUtils.checkIsNewFormatAccountRaw(stringJSON)){
-                    walletAccounts.push(account);
-                }
-                else{
-                    let newWalletAccount = WalletUtils.createNewWalletAccountFromOldFormat(stringJSON);
-        
-                    walletAccounts.push(newWalletAccount);
-                }
+                let newWalletAccount = WalletUtils.createNewWalletAccountFromOldFormat(stringJSON);
+                newWalletAccount.fixAddress(networkType);
+
+                walletAccounts.push(newWalletAccount);
             });
 
-            wallet.accounts = walletAccounts;
-            wallets.push(wallet);
+            newWallet.accounts = walletAccounts;
+
+            let allWalletContacts: AddressBook[] = WalletUtils.oldFormatCollectAddressBook(wallet.name, prefix);
+            
+            newWallet.contacts = allWalletContacts;
+            wallets.push(newWallet);
         });
 
         walletsInstance.wallets = wallets;
         walletsInstance.savetoLocalStorage();
         WalletStateUtils.refreshWallets();
+    }
+
+    static oldFormatCollectAddressBook(walletName: string, prefix: string): AddressBook[]{
+        let allWalletContacts: AddressBook[] = [];
+
+        if(localStorage.getItem(prefix + walletName)){
+            let accountAddressBooks: any[] = JSON.parse(localStorage.getItem(prefix + walletName));
+
+            for(let i = 0; i < accountAddressBooks.length; ++i){
+                // if(accountAddressBooks[i].walletContact){
+                    allWalletContacts.push(new AddressBook( accountAddressBooks[i].label, accountAddressBooks[i].value ,"-none-"));
+                // }
+            }       
+        }
+
+        return allWalletContacts;
+    }
+
+    static oldFormatToNewFormat(oldWallet: oldWltFile, networkName: string, networkType: NetworkType, contacts: AddressBook[]): Wallet{
+        let walletAccounts: WalletAccount[] = [];
+
+        oldWallet.accounts.forEach((account)=>{
+
+            let stringJSON = JSON.stringify(account);
+
+            let newWalletAccount = WalletUtils.createNewWalletAccountFromOldFormat(stringJSON);
+            newWalletAccount.fixAddress(networkType);
+
+            walletAccounts.push(newWalletAccount);
+        });
+
+        let newWallet = new Wallet(oldWallet.name, networkName, walletAccounts);
+
+        newWallet.contacts = contacts;
+
+        return newWallet;
     }
 
     static addNewWallet(allWallets: Wallets, password: Password, walletName: string, networkName: string, networkType: NetworkType): tempNewWalletInterface{

@@ -7,7 +7,7 @@
         </div>
         <div class="text-left flex items-center">
           <div class="block">
-            <div class="text-xxs uppercase text-blue-primary font-bold">To MetaMask Address</div>
+            <div class="text-xxs uppercase text-blue-primary font-bold">{{$t('swap.toMetamaskAddress')}}</div>
             <input :disabled="disabled" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" type="text" size="80" class="placeholder bg-white" :placeholder="placeholder" @click="clickInputText()" @focus="focusInputText()" @blur="blurInputText()">            
           </div>
         </div>

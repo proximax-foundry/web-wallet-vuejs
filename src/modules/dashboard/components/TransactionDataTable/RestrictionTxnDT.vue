@@ -13,11 +13,11 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Tx Hash</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.txHash')}}</div>
             <div class="uppercase font-bold text-txs"><span class="text-txs" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span></div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Type</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.type')}}</div>
             <div class="flex items-center">
               <div class="uppercase font-bold text-txs mr-2">{{data.type}}</div>
             </div>
@@ -27,15 +27,15 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div v-if="selectedGroupType === transactionGroupType.CONFIRMED">
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Timestamp</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.timestamp')}}</div>
             <div class="uppercase font-bold text-txs">{{ convertLocalTime(data.timestamp) }}</div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Restiriction Type</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.restrictionType')}}</div>
             <div class="font-bold text-txs">{{ data.restrictionTypeOutput }}</div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Modification</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.modification')}}</div>
             <div>
               <div v-bind:key="restrictMod.value" v-for="restrictMod in data.modification">
                 <div class="break-all inline-block bg-green-200 font-bold text-green-700 text-txs rounded py-1 px-2 my-1" v-if="restrictMod.action === 'Add'">
@@ -49,37 +49,37 @@
           </div>
         </template>
       </Column>
-      <Column field="hash" header="TX HASH" headerStyle="width:50px" v-if="wideScreen">
+      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:50px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="timestamp" header="TIMESTAMP" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
+      <Column field="timestamp" :header="$t('dashboard.timestamp')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
           <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
       </Column>
-      <Column field="typeName" header="TYPE" headerStyle="width:150px" v-if="wideScreen">
+      <Column field="typeName" :header="$t('dashboard.type')" headerStyle="width:150px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
-      <Column field="block" header="BLOCK" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:70px">
+      <Column field="block" :header="$t('general.block')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:70px;text-transform:uppercase">
         <template #body="{data}">
           <div class="text-txs">{{ data.block }}</div>
         </template>
       </Column>
-      <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:70px">
+      <Column :header="$t('dashboard.txFee')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:70px;text-transform:uppercase">
         <template #body="{data}">
           <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
-      <Column header="Restriction Type" headerStyle="width:70px" v-if="wideScreen">
+      <Column :header="$t('dashboard.restrictionType')" headerStyle="width:70px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-txs">{{ data.restrictionTypeOutput }}</div>
         </template>
       </Column>
-      <Column header="MODIFICATION" headerStyle="width:110px" v-if="wideScreen">
+      <Column :header="$t('dashboard.modification')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div v-bind:key="restrictMod.value" v-for="restrictMod in data.modification">
             <div class="break-all inline-block bg-green-200 font-bold text-green-700 text-txs rounded py-1 px-2 my-1 mx-1" v-if="restrictMod.restrictionTypeOutput === 'Add'">
@@ -99,10 +99,10 @@
         </template>
       </Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('general.noRecord')}}
       </template>
       <template #loading>
-          {{$t('dashboard.loadingmessage')}}
+          {{$t('dashboard.fetchingTx')}}
       </template>
     </DataTable>
   </div>

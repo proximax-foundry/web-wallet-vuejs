@@ -2,15 +2,16 @@
 <div>
   <div class='flex cursor-pointer'>
     <img src='@/assets/img/chevron_left.svg'>
-    <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
+    <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
   </div>
   <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
     <AccountComponent :address="acc.address" class="mb-10"/>
     <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-      <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>Account Details</router-link>
-      <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
-      <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>Scheme</router-link>
-      <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>Swap</router-link>
+      <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
+      <router-link :to="{name:'ViewAccountAssets', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+      <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
+      <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
+      <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
       <MoreAccountOptions :address="acc.address" :selected="true"/>
     </div>
     <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
@@ -18,54 +19,72 @@
         <div class='pl-6'>
            <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
         </div>
+         <div v-if="isMultisig" class="text-left mt-2 mb-5 ml-6"> 
+            <div v-if="walletCosignerList.length > 0">
+              <div class="text-tsm">
+                {{$t('general.initiateBy')}}:
+                <span class="font-bold" v-if="walletCosignerList.length == 1"> 
+                  {{ walletCosignerList[0].name }}
+                </span>
+                <span class="font-bold" v-else>
+                  <select class="" v-model="selectedCosignPublicKey">
+                    <option v-for="(element, item) in  walletCosignerList" :value="findAcc(element.publicKey).publicKey" :key="item">
+                      {{ element.name }} 
+                    </option>
+                  </select>
+                </span>
+              </div>
+            </div>
+          </div>
         <div v-if="!delegateValue">
-          <div class="text-xs font-semibold pl-6">Delegate</div>
-          <div class="text-xxs pl-6 mt-2">Your account is not linked to a delegated account.</div>
+          <div class="text-xs font-semibold pl-6">{{$t('general.delegate')}}</div>
+          <div class="text-xxs pl-6 mt-2">{{$t('delegate.notLinked')}}</div>
           <div class="mt-4"></div>
           <div class="ml-6 my-7 gray-line"/>
-          <button v-if="!toggleSelection" @click="toggleSelection=!toggleSelection" class='ml-6 w-44 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto' >Select Account to Link</button>
+          <button v-if="!toggleSelection" @click="toggleSelection=!toggleSelection" class='ml-6 w-44 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto' >{{$t('delegate.selectAccToLink')}}</button>
           <div v-if="toggleSelection && !fromNew && !fromPk">
-            <div class='pl-6 text-xs font-semibold'>Select Account Type</div>
+            <div class='pl-6 text-xs font-semibold'>{{$t('general.selectCreationType')}}</div>
             <div class='mt-3'></div>
             <div class='flex gap-2 ml-6'>
               <div class='border p-6 w-44 cursor-pointer'  @click="fromNew=true">
                 <img src="@/modules/wallet/img/icon-add-new.svg" class="ml-auto mr-auto mt-4 mb-3 h-12 w-12 ">
-                <div class='text-center text-xs font-semibold'>Create New</div>
+                <div class='text-center text-xs font-semibold'>{{$t('general.createNew')}}</div>
               </div>
               <div class='border p-6 w-44 cursor-pointer' @click="fromPk=true">
                 <img src="@/modules/wallet/img/icon-private-key.svg" class=" ml-auto mr-auto mt-4 mb-3 h-12 w-12 ">
-                <div class='text-center text-xs font-semibold'>From Private Key</div>
+                <div class='text-center text-xs font-semibold'>{{$t('general.fromPrivateKey')}}</div>
               </div>
             </div> 
           </div>
           <div v-if="fromPk" class="pl-6">
-            <div class="text-xs font-semibold">From Private Key</div>
-            <div class="text-xxs mt-2">Please fill in the private key of the linking account.</div>
-            <PkInputClean placeholder="PRIVATE KEY" class="my-3" v-model="privateKey" errorMessage="Invalid Private Key" :showError="showPrivateKeyError" />
-            <div class="text-xs text-blue-primary font-semibold cursor-pointer" @click="fromPk=!fromPk">Back</div>
+            <div class="text-xs font-semibold">{{$t('general.fromPrivateKey')}}</div>
+            <div class="text-xxs mt-2">{{$t('delegate.enterPk')}}</div>
+            <PkInputClean :placeholder="$t('general.privateKey')" class="my-3" v-model="privateKey" :showError="showPrivateKeyError" />
+            <div class="text-xs text-blue-primary font-semibold cursor-pointer" @click="fromPk=!fromPk">{{$t('general.back')}}</div>
           </div>
           <div v-if="fromNew" class="pl-6">
-            <div class="text-xs font-semibold">New Account</div>
-            <div class="text-xxs my-2">New Account is selected as the linking account.</div>
-             <div class="text-xs text-blue-primary font-semibold cursor-pointer" @click="fromNew=!fromNew">Back</div>
+            <div class="text-xs font-semibold">{{$t('delegate.newAcc')}}</div>
+            <div class="text-xxs my-2">{{$t('delegate.newAccSelected')}}</div>
+             <div class="text-xs text-blue-primary font-semibold cursor-pointer" @click="fromNew=!fromNew">{{$t('general.back')}}</div>
           </div>
         </div>
         <div v-else>
-          <div class="text-xs font-semibold pl-6">Account Delegated</div>
+          <div class="text-xs font-semibold pl-6">{{$t('delegate.accDelegated')}}</div>
           <div class="ml-6 px-3 py-2 mt-3 bg-green-100">
             <img src='@/assets/img/icon-blue-tick.svg' class='h-3 w-3 inline-block mr-2'>
-            <div class="text-xs  mt-2 inline-block">Your account is linked to a delegated account.</div>
+            <div class="text-xs  mt-2 inline-block">{{$t('delegate.linked')}}</div>
           </div>
           
           <div class="border border-blue-300 rounded-md ml-6 p-3 mt-3 bg-blue-50">
-            <div class="text-xs inline-block">Public Key of the Delegated Account</div>
-            <font-awesome-icon icon="copy" @click="copy('delegatePublicKey')" title='Copy' class="inline-block float-right mt-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
-            <div class="text-xs mt-0.5 font-semibold" id="delegatePublicKey" :copyValue="delegateAcc" copySubject="Delegate Public Key">{{delegateAcc}}</div>
+            <div class="text-xs inline-block">{{$t('delegate.publicKeyOfDelegate')}}</div>
+            <font-awesome-icon icon="copy" @click="copy('delegatePublicKey')" :title="$t('general.copy')" class="inline-block float-right mt-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+            <div class="text-xs mt-0.5 font-semibold" id="delegatePublicKey" :copyValue="delegateAcc" :copySubject="$t('delegate.delegatePublicKey')">{{delegateAcc}}</div>
           </div>
         </div>
       </div>
       <div class='bg-navy-primary p-6 lg:col-span-1'>
-        <div class='font-semibold text-xxs text-blue-primary'>ACCOUNT CURRENT BALANCE</div>
+        <div v-if="!isMultisig" class='font-semibold text-xxs text-blue-primary uppercase'>{{$t('general.accCurrentBalance')}}</div>
+        <div v-else class='font-semibold text-xxs text-blue-primary uppercase'>{{$t('general.initiatorCurrentBalance')}}</div>
         <div class='flex text-white'>
           <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
           <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
@@ -73,51 +92,63 @@
           <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
           <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
         </div>
+        <div v-if="fundStatus" class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
+          <div class="flex gap-2">
+            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+            <div class="flex-cols">
+               <div class="text-txs">{{$t('general.insufficientBalanceWarning',{tokenName:currentNativeTokenName})}}</div>
+               <a v-if="networkType ==168" class="text-xs text-blue-primary font-semibold underline " :href="topUpUrl" target="_blank">{{$t('general.topUp',{tokenName: currentNativeTokenName})}}<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
+            </div>
+          </div>
+        </div>
         <div v-if="isMultisig && !isCosigner " class="mt-2 bg-yellow-50 p-3 rounded-md mb-2" >
           <div class="flex items-center gap-2">
             <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-            <div class="text-txs">No eligible cosigner in this wallet.</div>
+            <div class="text-txs">{{$t('general.noCosigner')}}</div>
           </div>
         </div>
         <div v-if="onPartial " class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
           <div class="flex gap-2">
             <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-            <div class="text-txs">Your account has transaction(s) on partial.</div>
+            <div class="text-txs">{{$t('general.hasPartial')}}</div>
           </div>
         </div>
-        <div v-if="!(!isLockFund&& isMultisig)" class="flex mt-4 text-white">
-          <div class='text-xs '>Transaction Fee</div>
+        <div v-if="!(isMultisig)" class="flex mt-4 text-white">
+          <div class='text-xs '>{{$t('general.transactionFee')}}</div>
           <div class="text-xs  ml-auto">{{transactionFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
-        <div v-if="isLockFund && isMultisig" class="flex mt-4 text-white">
-          <div class='text-xs '>Lock Fund</div>
+        <div v-if="isMultisig" class="flex mt-4 text-white">
+          <div class='text-xs '>{{$t('general.aggregateFee')}}</div>
+          <div class="text-xs  ml-auto">{{transactionFee}}</div>
+          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
+        </div>
+        <div v-if=" isMultisig" class="flex mt-4 text-white">
+          <div class='text-xs '>{{$t('general.lockFund')}}</div>
           <div class="text-xs  ml-auto">{{lockFund}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
-       <div v-if="isMultisig" class="flex mt-4 text-white">
-          <div class='text-xs '>Aggregate Fee</div>
-          <div class="text-xs  ml-auto">{{aggregateFee}}</div>
+        <div v-if=" isMultisig" class="flex mt-4 text-white">
+          <div class='text-xs '>{{$t('general.lockFundTxFee')}}</div>
+          <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
         <div class="flex text-white">
-          <div class=' font-bold text-xs '>TOTAL</div>
+          <div class=' font-bold text-xs uppercase'>{{$t('general.total')}}</div>
           <div class="text-xs  ml-auto">{{totalFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class="mt-5"/>
-        <div class='font-semibold text-xs text-white'>Enter your password to continue</div>
-        <div class='font-semibold text-xxs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
-        <PasswordInput  :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="walletPassword" />
+        <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
+        <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" />
         <div class="mt-3">
-          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="delegateValue && !unlinking" :disabled="disableLinkBtn">Unlink Account</button>
-          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  v-if="delegateValue && unlinking" :disabled="true">Unlinking Account...Please wait</button>
-          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="!delegateValue && !pending" :disabled="disableLinkBtn">Delegate Account</button>
-          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  v-if="!delegateValue && pending" :disabled="true">Waiting for transaction to be confirmed...</button>
+          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="delegateValue && !unlinking" :disabled="disableLinkBtn">{{$t('delegate.unlinkAcc')}}</button>
+          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="!delegateValue && !pending" :disabled="disableLinkBtn">{{$t('delegate.delegateAcc')}}</button>
+          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  v-if="(pending | unlinking)" :disabled="true">{{$t('general.waitConfirmTx')}}</button>
         </div>
         <div class="text-center">
-          <router-link :to="{name: 'ViewAccountDetails',params:{name:address}}" class="content-center text-xs text-white underline" >Cancel</router-link>
+          <router-link :to="{name: 'ViewAccountDetails',params:{name:address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
         </div>
       </div>
     </div>
@@ -132,24 +163,22 @@ import PkInputClean from '@/modules/account/submodule/delegate/components/PkInpu
 import { walletState } from '@/state/walletState';
 import { WalletUtils } from "@/util/walletUtils";
 import { networkState } from "@/state/networkState";
-//import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { ChainAPICall } from "@/models/REST/chainAPICall"
 import { ChainUtils } from "@/util/chainUtils"
 import { Helper } from "@/util/typeHelper";
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
-//import { BuildTransactions } from "@/util/buildTransactions";
 import { LinkAction, PublicAccount } from "tsjs-xpx-chain-sdk";
 import { useI18n } from 'vue-i18n';
 import { accountUtils } from "@/util/accountUtils";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
-import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import { Account } from "tsjs-xpx-chain-sdk";
 import { listenerState } from '@/state/listenerState';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
+import { TransactionUtils } from '@/util/transactionUtils';
 
 export default {
   name: 'ViewAccountDelegate',
@@ -169,8 +198,6 @@ export default {
     let showPrivateKeyError = ref(true)
     const walletPassword = ref("");
     const showPasswdError = ref(false);
-    /* let showSuccess = ref(false) */
-    
     const err = ref(false); 
     const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
     const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
@@ -186,55 +213,51 @@ export default {
      const getCosignerList = () =>{
       return multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList;
     }
-     const isCosigner = computed(() =>{
+    const findAcc = (publicKey)=>{
+      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
+    }
+    const walletCosignerList = computed(() =>{
+      let cosigners= getCosignerList()
+      let list =[]
+      cosigners.forEach(publicKey=>{
+        list.push({publicKey:publicKey,name:findAcc(publicKey).name,balance:findAcc(publicKey).balance })
+      })
+      return list
+    })
+    const isCosigner = computed(() =>{
       return (multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList.length>0)?true: false;
     });
+    const selectedCosignPublicKey = ref(walletCosignerList.value[0]?walletCosignerList.value[0].publicKey:'')
     let onPartial = ref(false) 
     const checkIsPartial = ()=>{
-       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,networkState.currentNetworkProfile.network.type))
+       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType))
        .then(onPartialBoolean => onPartial.value = onPartialBoolean)
        .catch(err=>{
          onPartial.value = false
        })
     }
     checkIsPartial()
-    let isLockFund = computed(()=>{
-      let enoughSigner = false
-      let count = acc.value.multisigInfo.find(acc=>acc.level==0).minApproval
-      if (count<=getCosignerList().length){
-        enoughSigner = true
+   
+    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
+    const lockFundTxFee = computed(()=>{ 
+      if(networkState.currentNetworkProfile){ 
+        return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
       }
-      return !enoughSigner
-    })
-    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, networkState.currentNetworkProfile.network.currency.divisibility))
+      return 0;  
+    });
     const isMultisig = computed(() => {
       let isMulti = acc.value.getDirectParentMultisig().length? true: false
       return isMulti;
     });  
     let transactionFee = computed(()=>{
-      if(isLockFund.value){ //aggregate bonded
-        return 26.70
-      }if(!isLockFund.value && isMultisig.value){ //aggregate complete
-        return 0
-      }else{
-        return 23.25
-      }
+      return accountUtils.getDelegateFee(isMultisig.value)
+      
     })
-    const aggregateFee = computed(()=>{
-      if(isLockFund.value){ //aggregate bonded
-        return 20.404515
-      }if(!isLockFund.value && isMultisig.value){ //aggregate complete
-        return 30.15
-      }else{
-        return 0
-      }
-    })
+    
 
     const totalFee = computed(()=>{
-      if(isLockFund.value){ //aggregate bonded
-        return aggregateFee.value+lockFund.value + transactionFee.value
-      }if(!isLockFund.value && isMultisig.value){ //aggregate complete
-        return aggregateFee.value
+      if(isMultisig.value){ //aggregate bonded
+        return transactionFee.value+lockFund.value + lockFundTxFee.value
       }else{
         return transactionFee.value
       }
@@ -250,15 +273,42 @@ export default {
     })
 
    
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const accountDisplayBalance = computed(() => {
       if(walletState.currentLoggedInWallet){ 
-        return Helper.toCurrencyFormat(accountBalance.value, currentNativeTokenDivisibility.value);
+        if(!isMultisig.value){
+           return Helper.toCurrencyFormat(accountBalance.value, currentNativeTokenDivisibility.value);
+        }else{
+          if(findAcc(selectedCosignPublicKey.value)){
+            return  Helper.toCurrencyFormat(findAcc(selectedCosignPublicKey.value).balance, currentNativeTokenDivisibility.value);
+          }else{
+            return '0'
+          }
+        }
       }else{
-        return 0 
+        return '0'
       }
     });
+    const fundStatus = computed(()=>{
+      var fundStatus = false
+      if(isMultisig.value){
+        if(findAcc(selectedCosignPublicKey.value)){
+          if(findAcc(selectedCosignPublicKey.value).balance<totalFee.value){
+            fundStatus = true
+          }else{
+            fundStatus = false
+          }
+        }
+      }else{
+        if(accountBalance.value<totalFee.value){
+          fundStatus=true
+        }
+      }
+      return fundStatus
+    })
+
+
     const splitBalance = computed(()=>{
       let split = accountDisplayBalance.value.split(".")
       if (split[1]!=undefined){
@@ -267,7 +317,6 @@ export default {
         return {left:split[0], right:null}
       }
     })
-    
     watch(privateKey,n=>{
       if(!n.match(privKeyPattern)){
         showPrivateKeyError.value = true
@@ -291,6 +340,10 @@ export default {
     let unlinking = ref(false)
     const disableLinkBtn = computed(() => {
       if(onPartial.value){
+        return true
+      }else if(fundStatus.value){
+        return true
+      }else if(isCosigner.value == false && isMultisig.value == true ){
         return true
       }else if(!fromNew.value && !fromPk.value && !delegateValue.value){
         return true
@@ -320,13 +373,13 @@ export default {
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject + ' '+ t('general.copied'), group: 'br', life: 3000});
     };
 
     const verifyDelegateAcc = async() => {
       const accountDetail = walletState.currentLoggedInWallet.accounts.find(account => account.address == accAddress.value);       
       if (accountDetail) {
-        const publicAccount = Helper.createPublicAccount(accountDetail.publicKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type)); 
+        const publicAccount = Helper.createPublicAccount(accountDetail.publicKey, AppState.networkType); 
         const accountInfo = await chainAPICall.accountAPI.getAccountInfo(publicAccount.address);
      
         delegateAcc.value = accountInfo.linkedAccountKey;
@@ -350,7 +403,7 @@ export default {
 
     const createDelegate = async() => {
       if(privateKey.value!=""){
-        const networkType = networkState.currentNetworkProfile.network.type;
+        const networkType = AppState.networkType;
         const accountDetail = Account.createFromPrivateKey(privateKey.value, networkType);
         const accountAPIResponse = await accountUtils.getValidAccount(accountDetail.address.address);
         if(accountAPIResponse == true){        
@@ -358,35 +411,29 @@ export default {
             AccPublicKey.value = accountDetail.publicKey;
           }      
         } else {          
-          err.value = t('delegate.linkerror')
+          err.value = t('delegate.privateKeyErr')
         }  
       }else{
-        const account = WalletUtils.generateNewAccount(ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+        const account = WalletUtils.generateNewAccount(AppState.networkType);
         if(account){
           AccPublicKey.value = account.publicKey;
          
         }
       }
       if (WalletUtils.verifyWalletPassword(walletName,networkState.chainNetworkName,walletPassword.value)) {
-        let cosigner = getCosignerList()
         if (delegateAcc.value !== "0".repeat(64)) { //unlink
           const indexOtherAcc = walletState.currentLoggedInWallet.others.findIndex((other)=> other.publicKey === delegateAcc.value)
           if (indexOtherAcc > -1) {
-            let signedTx = accountUtils.createDelegatTransaction(isMultisig.value,cosigner,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
-            /* let signedTx = accountUtils.createDelegatTransaction(accAddress.value,walletPassword.value,AccPublicKey.value, LinkAction.Unlink);  */
+            let signedTx = accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
             txHash.value = signedTx.hash.toUpperCase()
-            
-            /* toast.add({severity:'success', summary: 'Notification', detail: 'Unlink Successfully', group: 'br', life: 5000});   */          
-            /* router.push({ name: "ViewAccountDisplayAll" }); */
             walletPassword.value=""
             unlinking.value=true
             err.value=""
           } else {
-            err.value = t('delegate.linkerror2');
+            err.value = t('delegate.unlinkFail');
           }
         } else if (AccPublicKey.value != "" && (fromPk.value || fromNew.value)) { //link
-          let signedTx = accountUtils.createDelegatTransaction(isMultisig.value,cosigner,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
-           /* let signedTx = accountUtils.createDelegatTransaction(accAddress.value,walletPassword.value,AccPublicKey.value, LinkAction.Link);  */
+          let signedTx = accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
           txHash.value = signedTx.hash.toUpperCase()
           walletPassword.value=""
           pending.value=true
@@ -395,7 +442,7 @@ export default {
           
         }
       } else {
-        err.value = t('scriptvalues.walletpasswordvalidation',{name : walletName});
+        err.value = t('generak.walletPasswordInvalid',{name : walletName});
       }
     };
     
@@ -407,7 +454,7 @@ export default {
           unlinking.value = false
           txHash.value=""
           pending.value=false
-          toast.add({severity:'success', summary: 'Notification', detail: delegateValue.value? 'Unlinked Successfully' :'Linked Successfully', group: 'br', life: 5000})
+          toast.add({severity:'success', summary: t('general.notification'), detail: delegateValue.value? t('general.unlinkSuccess') : t('general.linkSuccess'), group: 'br', life: 5000})
           /* showSuccess.value=true */
         }
         verifyDelegateAcc()
@@ -421,10 +468,20 @@ export default {
       }
     })
     
+    const topUpUrl = computed(()=>{
+      if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
+        return 'https://bctestnetfaucet.xpxsirius.io/#/'
+      }else if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 2'){
+        return 'https://bctestnet2faucet.xpxsirius.io/#/'
+      }else{
+        return ''
+      }
+    }) 
+
+    const networkType = computed(()=>AppState.networkType)
     
 
     return {
-      /* showSuccess, */
       unlinking,
       showPrivateKeyError,
       privateKey,
@@ -450,12 +507,17 @@ export default {
       delegateValue,
       pending,
       isCosigner,
-      isLockFund,
       lockFund,
-      aggregateFee,
       transactionFee,
       totalFee,
-      onPartial
+      lockFundTxFee,
+      onPartial,
+      walletCosignerList,
+      selectedCosignPublicKey,
+      findAcc,
+      fundStatus,
+      topUpUrl,
+      networkType
     };
   },
 }

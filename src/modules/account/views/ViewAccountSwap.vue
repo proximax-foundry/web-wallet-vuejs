@@ -2,26 +2,28 @@
   <div>
     <div class='flex cursor-pointer'>
       <img src='@/assets/img/chevron_left.svg'>
-      <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
+      <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
     </div>
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
       <AccountComponent :address="acc.address" class="mb-10" />
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-        <router-link :to="{name: 'ViewAccountDetails',params:{address: acc.address}}" class= 'w-32 text-center '>Account Details</router-link>
-        <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
-        <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
-        <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Swap</div>
+        <router-link :to="{name: 'ViewAccountDetails',params:{address: acc.address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
+         <router-link :to="{name:'ViewAccountAssets', params: { name: acc.address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+        <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
+        <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
+        <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.swap')}}</div>
+        <MoreAccountOptions :address="acc.address"/>
       </div>
-      <div class='my-7 font-semibold'>NIS1 Swap</div>
+      <div class='my-7 font-semibold'>{{$t('nis1.nis1Swap')}}</div>
       <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
       <div v-if="!boolNIS1Enabled">
-        <div class="text-xs">Enable NIS1 Swap with this account</div>
+        <div class="text-xs">{{$t('nis1.enableSwap')}}</div>
         <SwapAccountModal :address="address" @enable-nis1-swap="enableNis1" />
       </div>
       <div v-else>
-        <div class="text-xs">Disable NIS1 Swap with this account</div>
-        <div class="text-xs mt-2">NIS1 Address: <span>{{ nis1Address }}</span></div>
-        <div class="bg-gray-200 text-black text-xs px-5 py-2 rounded cursor-pointer mt-5 inline-block" @click="disableNIS1Swap">Disable</div>
+        <div class="text-xs">{{$t('nis1.disableSwap')}}</div>
+        <div class="text-xs mt-2">{{$t('nis1.nis1Address')}} <span>{{ nis1Address }}</span></div>
+        <div class="bg-gray-200 text-black text-xs px-5 py-2 rounded cursor-pointer mt-5 inline-block" @click="disableNIS1Swap">{{$t('general.disable')}}</div>
       </div>
     </div>
 </div>
@@ -46,12 +48,13 @@ import qrcode from 'qrcode-generator';
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import SwapAccountModal from '@/modules/account/components/SwapAccountModal.vue'
-
+import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 export default {
   name: "ViewAccountSwap",
   components: {
     AccountComponent,
-    SwapAccountModal
+    SwapAccountModal,
+    MoreAccountOptions
   },
   props: {
     address: String,

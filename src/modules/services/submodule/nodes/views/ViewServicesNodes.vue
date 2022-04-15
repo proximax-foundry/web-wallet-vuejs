@@ -3,17 +3,17 @@
     <div class="ml-2 mr-2 w-full lg:ml-auto lg:mr-auto mt-5">
       <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
         <div class="flex justify-between text-sm mb-5">
-          <div><span class="text-gray-700">{{$t('services.nodes')}}</span></div>
+          <div><span class="text-gray-700">{{$t('node.nodes')}}</span></div>
         </div>
         <div class="border border-gray-200 filter drop-shadow-xl py-2 sm:py-14 px-2 sm:px-28 text-center bg-white">
 
           <div class="border border-gray-200 px-2 py-1 h-12">
-            <div class="uppercase text-gray-400 font-light text-txs text-left mb-2">{{ $t('services.blockheight') }}</div>
+            <div class="uppercase text-gray-400 font-light text-txs text-left mb-2">{{ $t('general.blockHeight') }}</div>
             <input disabled="true" v-model="blockHeight" type="text" class="text_input">
           </div>
 
           <div class="border border-gray-200 px-2 py-1 h-12 mt-5">
-            <div class="uppercase text-gray-400 font-light text-txs text-left mb-2">{{ $t('services.currentnode') }}</div>
+            <div class="uppercase text-gray-400 font-light text-txs text-left mb-2">{{ $t('node.currentNode') }}</div>
             <input disabled="true" v-model="currentNode" type="text" class="text_input">
           </div>
 
@@ -59,6 +59,7 @@ import { networkState } from '@/state/networkState';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { walletState } from '@/state/walletState';
 import {WalletUtils} from '@/util/walletUtils';
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: 'ViewServicesNodes',
@@ -69,11 +70,12 @@ export default {
 
   setup() {
     const toast = useToast();
+    const {t} = useI18n()
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showSelectTitle = ref(true);
     const borderColor = ref('border border-gray-300');
-    const placeholder = ref('Node list');
+    const placeholder = t('node.nodeList');
     const canDeselect = ref(false);
     const maxHeight = ref(200);
     const selected = ref('');
@@ -96,7 +98,7 @@ export default {
         NetworkStateUtils.updateChainNode(endpoint);
         WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
         emitter.emit('listener:reconnect');
-        toast.add({severity:'success', summary: 'Services', detail: 'Node updated', group: 'br', life: 5000});
+        toast.add({severity:'success', summary: t('nodes.nodes'), detail: t('node.nodeUpdated'), group: 'br', life: 5000});
       }
     };
 

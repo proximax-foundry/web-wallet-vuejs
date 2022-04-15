@@ -7,6 +7,7 @@ import { networkState } from '@/state/networkState';
 import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
+import { AppState } from '@/state/appState';
 
 export const abi = [
   {
@@ -725,29 +726,12 @@ export class SwapUtils {
     doc.save('swap_certificate.pdf');
   }
 
-  /*
-  static announceTx = (selectedAddress: string, walletPassword: string, aggreateCompleteTransaction: AggregateTransaction) :string => {
-    const accAddress = Address.createFromRawAddress(selectedAddress);
-    // console.log(accAddress)
-    const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
-    const encryptedPassword = WalletUtils.createPassword(walletPassword);
-    let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
-    const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
-    // console.log(aggreateCompleteTransaction);
-    let signedTx = account.sign(aggreateCompleteTransaction, networkState.currentNetworkProfile.generationHash);
-    let apiEndpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
-    let chainAPICall = new ChainAPICall(apiEndpoint);
-    chainAPICall.transactionAPI.announce(signedTx);
-    return signedTx.hash;
-  }
-  */
-
   static signTransaction(selectedAddress: string, walletPassword: string, aggreateCompleteTransaction: AggregateTransaction) :SignedTransaction {
     const accAddress = Address.createFromRawAddress(selectedAddress);
     const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
     const encryptedPassword = WalletUtils.createPassword(walletPassword);
     let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
-    const account = Account.createFromPrivateKey(privateKey, ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type));
+    const account = Account.createFromPrivateKey(privateKey, AppState.networkType);
     let signedTx = account.sign(aggreateCompleteTransaction, networkState.currentNetworkProfile.generationHash);
     return signedTx;
   }
@@ -768,8 +752,21 @@ export class SwapUtils {
     return fetch(`${baseUrl}/gasprice/bsc`).then(res => res.json());
   }
 
-  static getOutgoing_SwapTransfer_URL = (baseUrl: string): string => {
-    return `${baseUrl}/transfer`;
+  static getOutgoing_SwapTransfer_URL = (baseUrl: string,tokenName?: string): string => {
+    if(tokenName){
+      return `${baseUrl}/transfer/${tokenName}`;
+    }else{
+      return `${baseUrl}/transfer`
+    }
+    
+  }
+
+  static getSwapTokenList = (baseUrl: string): Promise<any> =>{
+    return fetch(`${baseUrl}/swapTokenList`).then(res => res.json());
+  }
+
+  static checkTokenBalance = (url: string,tokenName: string): Promise<any>=> {
+    return fetch(`${url}/checkTokenBalance/${tokenName}`).then((res) => res.json()).then((data) => { return data });
   }
 
   static getOutgoing_SwapCheckByTxID_URL = (baseUrl: string, txID: string): string => {
@@ -784,8 +781,8 @@ export class SwapUtils {
     return `${baseUrl}/expx/transfer`;
   }
 
-  static getIncoming_BSCSwapTransfer_URL = (baseUrl: string): string => {
-    return `${baseUrl}/bxpx/transfer`;
+  static getIncoming_BSCSwapTransfer_URL = (baseUrl: string,tokenName: string): string => {
+    return `${baseUrl}/bxpx/${tokenName}/transfer`;
   }
 
   static checkSwapService = (baseUrl: string): string => {
@@ -841,8 +838,8 @@ export class SwapUtils {
     return returnResponse;
   }
 
-  static fetchBSCServiceInfo = async (baseUrl: string) :Promise<paramResponse> => {
-    const response = await fetch(`${baseUrl}/bxpx/service-info`);
+  static fetchBSCServiceInfo = async (baseUrl: string,tokenName: string) :Promise<paramResponse> => {
+    const response = await fetch(`${baseUrl}/bxpx/${tokenName}/service-info`);
     let data = '';
     if(response.status == 200){
       data = await response.json();

@@ -2,21 +2,22 @@
  <div>
   <div class='flex cursor-pointer'>
     <img src='@/assets/img/chevron_left.svg'>
-    <router-link :to="{name: 'ViewMultisigHome',params:{name:acc.name}}" class='text-blue-primary text-xs mt-0.5'>Back</router-link>
+    <router-link :to="{name: 'ViewMultisigHome',params:{name:acc.name}}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
   </div>
   <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
   <AccountComponent :address="acc.address" class="mb-10"/>
     <div class = 'flex text-xs font-semibold border-b-2'>
-      <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-32 text-center '>Account Details</router-link>
-      <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Multisig</div>
-      <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
-      <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
+      <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
+      <router-link :to="{name:'ViewAccountAssets', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+      <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.multisig')}}</div>
+      <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
+      <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
       <MoreAccountOptions :address="acc.address"/>
     </div>
     
     <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 pr-6">
-        <div class="text-xs font-semibold pl-6">Manage Cosignatories</div>
+        <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
         <div class='pl-6'>
            <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
         </div>
@@ -25,24 +26,24 @@
           <div v-for="(coSignAddress, index) in coSign" :key="index" >
             <div class="flex">
               <img  src="@/modules/account/submodule/multisig/img/icon-delete-red.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
-              <TextInput class='w-5/12 mr-2 ' :placeholder="`Cosignatory${index+1}`"  v-model="contactName[index]" :disabled="true"  />
-              <TextInput class='w-7/12 mr-2 ' placeholder="Address/Public Key" errorMessage="Invalid Input" :showError="showAddressError[index]" v-model="coSign[index]" />
+              <TextInput class='w-5/12 mr-2 ' :placeholder="$t('multisig.cosignatory') + `${index+1}`"  v-model="contactName[index]" :disabled="true"  />
+              <TextInput class='w-7/12 mr-2 ' :placeholder="$t('multisig.addressOrPk')" :errorMessage="$t('general.invalidInput')" :showError="showAddressError[index]" v-model="coSign[index]" />
               <div v-if="showAddressError[index]==true " class="mt-16"/>
               <div @click="toggleContact[index]=!toggleContact[index]" class=' border  cursor-pointer flex flex-col justify-center  p-2' style="height:2.66rem">
                 <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
-                <div class='text-xxs text-blue-primary font-semibold'>SELECT</div>
+                <div class='text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.select')}}</div>
               </div>
             </div>
             
             <div v-if="toggleContact[index]" class="pl-6 ">
               <div class=" border">
-                <div class='text-xxs text-gray-300 font-semibold py-2 px-2'>IMPORT FROM ADDRESS BOOK</div>
+                <div class='text-xxs text-gray-300 font-semibold py-2 px-2 uppercase'>{{$t('general.importFromAB')}}</div>
                 <div v-for="(item, number) in contact" :key="number" class="cursor-pointer">
                   <div @click="contactName[index]=item.label;coSign[index]=item.value;toggleContact[index]=false" class="flex justify-center">
                     <div v-if="number%2==0" class="text-xs py-2 bg-gray-100 pl-2 w-full">{{item.label}}</div>
                     <div v-if="number%2==1" class="text-xs py-2 pl-2 w-full">{{item.label}}</div>
-                    <div v-if="number%2==0" class="ml-auto pr-2 text-xxs py-2 font-semibold text-blue-primary bg-gray-100">SELECT</div>
-                    <div v-if="number%2==1" class="ml-auto mr-2 text-xxs py-2 font-semibold text-blue-primary">SELECT</div>
+                    <div v-if="number%2==0" class="ml-auto pr-2 text-xxs py-2 font-semibold text-blue-primary bg-gray-100 uppercase">{{$t('general.select')}}</div>
+                    <div v-if="number%2==1" class="ml-auto mr-2 text-xxs py-2 font-semibold text-blue-primary uppercase">{{$t('general.select')}}</div>
                   </div>
                 </div>
               </div>
@@ -50,32 +51,32 @@
 
           </div>
        </div>
-        <button class="pl-6 font-semibold text-xs mt-1 text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">+ Add New Cosignatory</button>
+        <button class="pl-6 font-semibold text-xs mt-1 text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">+{{$t('multisig.addNewCosignatory')}}</button>
         <div class="ml-6 my-7 gray-line"/> 
-        <div class="pl-6 text-xs font-semibold mb-3">Scheme</div>
+        <div class="pl-6 text-xs font-semibold mb-3">{{$t('general.scheme')}}</div>
         <div class='flex gap-2 pl-6'>
           <div class="border w-6/12">
-          <div class="border-b-2 text-xxs text-center py-1">TRANSACTIONS APPROVAL</div>
+          <div class="border-b-2 text-xxs text-center py-1 uppercase">{{$t('multisig.transactionsApproval')}}</div>
             <div class='flex justify-around'>
               <button class="text-blue-primary disabled:opacity-50" @click="numApproveTransaction--" :disabled="numApproveTransaction<=0">-</button>
               <input type="number" class=" w-4 outline-none text-xs font-bold" :min=0 @keypress="validateApproval" :max="maxNumApproveTransaction" v-model="numApproveTransaction" >
               <button class="text-blue-primary disabled:opacity-50" :disabled="numApproveTransaction>=maxNumApproveTransaction " @click="numApproveTransaction++">+</button>
             </div>
-            <div class="text-xxs border-t-2 text-center py-1">OF {{maxNumApproveTransaction}} COSIGNATORIES</div>
+            <div class="text-xxs border-t-2 text-center py-1 uppercase">{{$t('multisig.ofCosignatories',{value:maxNumApproveTransaction})}}</div>
           </div>
           <div class="border w-6/12">
-            <div class="border-b-2 text-xxs text-center py-1">ACCOUNT DELETION APPROVAL</div>
+            <div class="border-b-2 text-xxs text-center py-1 uppercase">{{$t('multisig.accountDeletionApproval')}}</div>
             <div class='flex justify-around'>
               <button class="text-blue-primary disabled:opacity-50" @click="numDeleteUser--" :disabled="numDeleteUser<=0">-</button>
               <input type="number" class=" w-4 outline-none text-xs font-bold" :min=0 @keypress="validateDelete" :max="maxNumDeleteUser" v-model="numDeleteUser" >
               <button class="text-blue-primary disabled:opacity-50" :disabled="numDeleteUser>=maxNumDeleteUser " @click="numDeleteUser++">+</button>
             </div>
-            <div class="text-xxs border-t-2 text-center py-1">OF {{maxNumDeleteUser}} COSIGNATORIES</div>
+            <div class="text-xxs border-t-2 text-center py-1 uppercase">{{$t('multisig.ofCosignatories',{value:maxNumDeleteUser})}}</div>
           </div>
         </div>
       </div>
       <div class='bg-navy-primary p-6 lg:col-span-1'>
-        <div class='font-semibold text-xxs text-blue-primary'>ACCOUNT CURRENT BALANCE</div>
+        <div class='font-semibold text-xxs text-blue-primary uppercase'>{{$t('general.accCurrentBalance')}}</div>
         <div class='flex text-white'>
           <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
           <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
@@ -87,54 +88,51 @@
           <div class="flex gap-2">
             <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
             <div class="flex-cols">
-               <div class="text-txs">Your account has insufficient amount of XPX. Please top up first before continue transacting on this page.</div>
-               <a v-if="networkState.chainNetwork == 0" class="text-xs text-blue-primary font-semibold underline " href="https://www.proximax.io/en/xpx" target="_blank">Top Up XPX<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
-               <a v-if="networkState.chainNetwork == 1" class="text-xs text-blue-primary font-semibold underline " href="https://bctestnetfaucet.xpxsirius.io/#/" target="_blank">Top Up XPX<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
-               <a v-if="networkState.chainNetwork == 2" class="text-xs text-blue-primary font-semibold underline " href="https://bctestnet2faucet.xpxsirius.io/#/" target="_blank">Top Up XPX<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
+               <div class="text-txs">{{$t('general.insufficientBalanceWarning',{tokenName:currentNativeTokenName})}}</div>
+               <a v-if="networkType ==168" class="text-xs text-blue-primary font-semibold underline " :href="topUpUrl" target="_blank">{{$t('general.topUp',{tokenName: currentNativeTokenName})}}<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
             </div>
           </div>
         </div>
         <div v-if="onPartial" class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
           <div class="flex gap-2">
             <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-            <div class="text-txs">Your account has transaction(s) on partial.</div>
+            <div class="text-txs">{{$t('general.hasPartial')}}</div>
           </div>
         </div>
         <div v-if="isMultisig" class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
           <div class="flex gap-2">
             <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-            <div class="text-txs">Your account is already a multisig.</div>
+            <div class="text-txs">{{$t('multisig.alreadyMultisig')}}</div>
           </div>
         </div>
         <div class="flex mt-4 text-white">
-          <div class='text-xs '>Lockfund Fee</div>
-          <div class="text-xs  ml-auto">10.00</div>
+          <div class='text-xs '>{{$t('general.lockFund')}}</div>
+          <div class="text-xs  ml-auto">{{lockFundCurrency}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class="flex mt-0.5 text-white">
-          <div class='text-xs '>Transaction Fee</div>
-          <div class="text-xs  ml-auto">26.70</div>
+          <div class='text-xs '>{{$t('general.lockFundTxFee')}}</div>
+          <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
         <div class="flex  text-white">
-          <div class='text-xs '>Aggregate Fee</div>
-          <div class="text-xs  ml-auto">19.5966</div>
+          <div class='text-xs '>{{$t('general.aggregateFee')}}</div>
+          <div class="text-xs  ml-auto">{{aggregateFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
         <div class="flex text-white">
-          <div class=' font-bold text-xs '>TOTAL</div>
-          <div class="text-xs  ml-auto">56.2966</div>
+          <div class=' font-bold text-xs uppercase'>{{$t('general.total')}}</div>
+          <div class="text-xs  ml-auto">{{totalFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class="mt-5"/>
-        <div class='font-semibold text-xs text-white'>Enter your password to continue</div>
-        <div class='font-semibold text-xxs text-gray-400 mt-0.5 mb-1.5' >For security, this is required before proceeding to payment.</div>
-        <PasswordInput  :placeholder="$t('signin.enterpassword')" errorMessage="Wallet password is required" :showError="showPasswdError" v-model="passwd" :disabled="disabledPassword" />
-        <div class="mt-3"><button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="convertAccount()" :disabled="disableSend">Update Cosignatories</button></div>
+        <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
+        <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="passwd" :disabled="disabledPassword" />
+        <div class="mt-3"><button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="convertAccount()" :disabled="disableSend">{{$t('multisig.updateCosignatories')}}</button></div>
         <div class="text-center">
-          <router-link :to="{name: 'ViewMultisigHome',params:{name:acc.name}}" class="content-center text-xs text-white underline" >Cancel</router-link>
+          <router-link :to="{name: 'ViewMultisigHome',params:{name:acc.name}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
         </div>
       </div>
     </div>
@@ -147,7 +145,6 @@ import { computed, ref, inject, watch, getCurrentInstance } from 'vue';
 import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
-import AddCosignModal from '@/modules/account/submodule/multisig/components/AddCosignModal.vue';
 import { multiSign } from '@/util/multiSignatory';
 import { walletState } from '@/state/walletState';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
@@ -159,6 +156,8 @@ import {
 import { networkState } from '@/state/networkState';
 import {useI18n} from 'vue-i18n'
 import { Helper } from '@/util/typeHelper';
+import { AppState } from '@/state/appState';
+import { TransactionUtils } from '@/util/transactionUtils';
 export default {
   name: 'ViewConvertAccountMultisig',
   components: {
@@ -196,25 +195,56 @@ export default {
     const toggleContact = ref([])
     const onPartial = ref(false);
     const space=ref(false)
-    let isMultisig = computed(()=>{
-      return multiSign.checkIsMultiSig(acc.address)
-    }) 
+   
+     const lockFundCurrency = computed(() =>
+      Helper.convertToCurrency(
+        networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
+        AppState.nativeToken.divisibility
+      )
+    );
+    const lockFundTxFee = computed(()=>{ 
+      if(networkState.currentNetworkProfile){ 
+        return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
+      }
+      return 0;  
+    });
+    const aggregateFee = ref(0)
+    
      // get account details
-    const acc =  walletState.currentLoggedInWallet.accounts.find(acc =>acc.name ===p.name) ;
-    if(acc== undefined){
+    const acc = computed(()=>walletState.currentLoggedInWallet.accounts.find(acc =>acc.name ===p.name)) 
+    if(acc.value== undefined){
       router.push({ name: "ViewAccountDisplayAll"});
     }
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+
+    let isMultisig = computed(()=>{
+      return multiSign.checkIsMultiSig(acc.value.address)
+    }) 
+    let updateAggregateFee=()=>{
+      multiSign.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value).then(fee=>{
+       aggregateFee.value=fee
+     })
+    }
+    updateAggregateFee()
+    const totalFee = computed(()=>{
+      let tokenDivisibility = AppState.nativeToken.divisibility
+      if(tokenDivisibility ==0){
+        return  Math.trunc(parseFloat(aggregateFee.value) + parseFloat(lockFundCurrency.value) + lockFundTxFee.value)
+      }else{
+        return Math.round((parseFloat(aggregateFee.value) + parseFloat(lockFundCurrency.value) + lockFundTxFee.value)*Math.pow(10,tokenDivisibility))/Math.pow(10,tokenDivisibility)
+      }
+        
+    })
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const accountBalance = computed(() => {
       if(walletState.currentLoggedInWallet){
-        return Helper.toCurrencyFormat(acc.balance, currentNativeTokenDivisibility.value);
+        return Helper.toCurrencyFormat(acc.value.balance, currentNativeTokenDivisibility.value);
       }else{
         return 0
       }
     });
     const contact = computed(() => {
-      return multiSign.generateContact(acc.address,acc.name)
+      return multiSign.generateContact(acc.value.address,acc.value.name)
     });
      const splitBalance = computed(()=>{
       let split = accountBalance.value.split(".")
@@ -225,11 +255,11 @@ export default {
       }
     })
     const disableSend = computed(() => !(
-      !isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) && coSign.value.length > 0  &&  (err.value == '' || (err.value == t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name}))) && (showAddressError.value.every(value => value == false)) == true && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
+      !isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) && coSign.value.length > 0  &&  (err.value == '' || (err.value == t('general.walletpasswordInvalid',{name : walletState.currentLoggedInWallet.name}))) && (showAddressError.value.every(value => value == false)) == true && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
     ));
     const addCoSigButton = computed(() => {
       var status = false;
-      if(acc.balance >= 10.0445 && !onPartial.value){
+      if(acc.value.balance >= totalFee.value && !onPartial.value){
         for(var i = 0; i < coSign.value.length; i++){
           if(showAddressError.value[i] != ''){
             status = true;
@@ -256,9 +286,9 @@ export default {
       maxNumDeleteUser.value = 0;
     };
     const convertAccount = async() => {
-      let convertstatus = await multiSign.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.name, passwd.value);
+      let convertstatus = await multiSign.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.value.name, passwd.value);
       if(!convertstatus){
-        err.value = t('scriptvalues.walletpasswordvalidation',{name : walletState.currentLoggedInWallet.name});
+        err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
         err.value = '';
@@ -272,9 +302,9 @@ export default {
       for(var i = 0; i < coSign.value.length; i++){
         if((coSign.value[i].length == 64) || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)){
           checkCosign(i)
-          if(coSign.value[i]==acc.address || coSign.value[i]==Helper.createAddress(acc.address).pretty() || coSign.value[i]==acc.publicKey ){
+          if(coSign.value[i]==acc.value.address || coSign.value[i]==Helper.createAddress(acc.value.address).pretty() || coSign.value[i]==acc.value.publicKey ){
             showAddressError.value[i] = true;
-            err.value = "Cosigner cannot be this account itself"
+            err.value = t('multisig.selectedAccErr')
           }
           else if(!coSign.value[i].match(publicKeyPattern) && (coSign.value[i].length == 64)){
             showAddressError.value[i] = true;
@@ -286,7 +316,7 @@ export default {
             showAddressError.value[i] = false;
             const unique = Array.from(new Set(n));
             if(unique.length != n.length){
-              err.value = t('scriptvalues.cosignerexists');
+              err.value = t('multisig.duplicatedCosigner');
             }else{
               err.value = '';
             }
@@ -296,6 +326,14 @@ export default {
         }
       }
     }, {deep:true});
+
+    watch(() => [...showAddressError.value], (n) => {
+      if(n.every(value=>value==false)){
+        updateAggregateFee()
+      }
+      
+    }, {deep:true});
+    
     
  
     const addCoSig = () => {
@@ -330,15 +368,16 @@ export default {
         e.preventDefault();
       }
     }
-    let deleteUserErrorMsg = 'Number of cosignatories for deletion approval is more than number of cosignatories for this account';
-    let approveTransactionErrMsg = 'Number of cosignatories for transaction approval is more than number of cosignatories for this account';
+    let deleteUserErrorMsg = t('multisig.deletionExceedMax');
+    let approveTransactionErrMsg = t('multisig.approvalExceedMax');
     watch(numApproveTransaction, (n) => {
+      updateAggregateFee()
       if(maxNumApproveTransaction.value == 0 && n > 1){
         err.value = approveTransactionErrMsg;
       }else if((n > maxNumApproveTransaction.value) && (n !=1 && maxNumApproveTransaction.value != 0 )){
         err.value = approveTransactionErrMsg;
       }else if(maxNumApproveTransaction.value>0 && n<=0){
-        err.value = "Number of cosignatories for transaction approval cannot be less than 1"
+        err.value = t('multisig.approvalAtLeastOne')
       }else{
         // check again for num delete user
         if((numDeleteUser.value > maxNumDeleteUser.value) && (numDeleteUser.value !=1 && maxNumDeleteUser.value != 0 )){
@@ -354,12 +393,13 @@ export default {
       }
     }
     watch(numDeleteUser, (n) => {
+      updateAggregateFee()
       if(maxNumDeleteUser.value == 0 && n > 1){
         err.value = deleteUserErrorMsg;
       }else if((n > maxNumDeleteUser.value) && (n !=1 && maxNumDeleteUser.value != 0 )){
         err.value = deleteUserErrorMsg;
       }else if(maxNumDeleteUser.value>0 && n<=0){
-        err.value = "Number of cosignatories for deletion approval cannot be less than 1"
+        err.value = t('multisig.deletionAtLeastOne')
       }else{
         // check again for num approval transaction
         if((numApproveTransaction.value > maxNumApproveTransaction.value) && (numApproveTransaction.value !=1 && maxNumApproveTransaction.value != 0 )){
@@ -371,22 +411,8 @@ export default {
     });
     const disabledPassword = computed(() => (onPartial.value || isMultisig.value ));
    
-    setTimeout(()=> {
-      if(accountBalance.value < 10.0445){
-        fundStatus.value = true;
-      }else{
-        fundStatus.value = false;
-      }
-    }, 500);
-    watch(accountBalance, (n) => {
-      if(n < 10.0445){
-        fundStatus.value = true;
-      }else{
-        fundStatus.value = false;
-      }
-    });
     // check if onPartial
-    multiSign.onPartial(PublicAccount.createFromPublicKey(acc.publicKey,networkState.currentNetworkProfile.network.type)).then(verify=>
+    multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)).then(verify=>
       onPartial.value = verify
     )
     
@@ -403,26 +429,31 @@ export default {
         }
       }
     }
+   
+
+    if(acc.value.balance<totalFee.value){
+        fundStatus.value = true
+      }
     
-    // check if this address has cosigner
-    emitter.on('ADD_CONTACT_COSIGN', payload => {
-      multiSign.verifyContactPublicKey(payload.address).then((res)=>{
-        if(res.status){
-          // add into cosig
-          coSign.value[payload.index] = res.publicKey;
-          selectedAddresses.value.push(payload.address);
-        }else{
-          // display warning
-          setTimeout(()=> {
-            emitter.emit('NOTIFICATION', {
-              status: true,
-              message: t('scriptvalues.publickeyvalidation'),
-              notificationType: 'warn'
-            });
-          }, 500);
-        }
-      });
+    watch(acc, (n) => {
+      if(n.balance<totalFee.value){
+        fundStatus.value = true
+      }else{
+        fundStatus.value = false
+      }
     });
+
+    const topUpUrl = computed(()=>{
+      if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
+        return 'https://bctestnetfaucet.xpxsirius.io/#/'
+      }else if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 2'){
+        return 'https://bctestnet2faucet.xpxsirius.io/#/'
+      }else{
+        return ''
+      }
+    }) 
+
+    const networkType = computed(()=>AppState.networkType)
     return {
       networkState,
       toggleContact,
@@ -457,6 +488,12 @@ export default {
       passwdPattern,
       validateApproval,
       validateDelete,
+      lockFundCurrency,
+      lockFundTxFee,
+      aggregateFee,
+      totalFee,
+      topUpUrl,
+      networkType
     };
   },
 }

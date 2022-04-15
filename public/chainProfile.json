@@ -1,6 +1,33 @@
 {
+    "Sirius Mainnet": {
+      "version": "0.7.0",
+      "apiNodes":[
+          "betelgeuse.xpxsirius.io"
+      ],
+      "httpPort": 3000,
+      "generationHash": "10540AD3A1BF46B1A05D8B1CF0252BC9FB2E0B53CFD748262B0CE341CEAFEB6B",
+      "network":{
+        "type": 184,
+        "currency":{
+            "name": "XPX",
+            "namespace": "prx.xpx",
+            "mosaicId": "",
+            "namespaceId": "bffb42a19116bdf6",
+            "divisibility": 6
+        }
+      },
+      "chainExplorer": {
+        "url": "https://explorer.xpxsirius.io",
+        "blockRoute": "#/result/blockHeight",
+        "publicKeyRoute": "#/result/publicKey",
+        "addressRoute": "#/result/address",
+        "hashRoute": "#/result/hash",
+        "namespaceInfoRoute": "#/result/namespaceInfo",
+        "assetInfoRoute": "#/result/assetInfo"
+      }
+    },
     "Sirius Testnet 1": {
-      "version": "0.0.3",
+      "version": "0.0.5",
       "apiNodes":[
           "bctestnet3.brimstone.xpxsirius.io"
       ],
@@ -17,17 +44,17 @@
         }
       },
       "chainExplorer": {
-        "url": "https://bctestnetexplorer.xpxsirius.io",
-        "blockRoute": "#/result/blockHeight",
-        "publicKeyRoute": "#/result/publicKey",
-        "addressRoute": "#/result/address",
-        "hashRoute": "#/result/hash",
-        "namespaceInfoRoute": "#/result/namespaceInfo",
-        "assetInfoRoute": "#/result/assetInfo"
+        "url": "https://proximax-foundry.github.io/web-explorer-vuejs",
+        "blockRoute": "#/block",
+        "publicKeyRoute": "#/account",
+        "addressRoute": "#/account",
+        "hashRoute": "#/tx",
+        "namespaceInfoRoute": "#/namespace",
+        "assetInfoRoute": "#/asset"
       }
     },
     "Sirius Testnet 2": {
-      "version": "0.0.3",
+      "version": "0.0.5",
       "apiNodes":[
           "api-2.testnet2.xpxsirius.io"
       ],
@@ -44,27 +71,13 @@
         }
       },
       "chainExplorer": {
-        "url": "https://bctestnetexplorer.xpxsirius.io",
-        "blockRoute": "#/result/blockHeight",
-        "publicKeyRoute": "#/result/publicKey",
-        "addressRoute": "#/result/address",
-        "hashRoute": "#/result/hash",
-        "namespaceInfoRoute": "#/result/namespaceInfo",
-        "assetInfoRoute": "#/result/assetInfo"
-      },
-      "swapData":{
-        "swap_XPX_ETH_URL": "https://bctestnet-swap-gateway.xpxsirius.io/eth",
-        "swap_XPX_BSC_URL": "https://bctestnet-swap-gateway.xpxsirius.io/bsc",
-        "swap_IN_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
-        "swap_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
-        "gasPriceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io/gas",
-        "priceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io",
-        "BSCChainId": 97,
-        "ETHChainId": 3,
-        "BSCScanUrl": "https://testnet.bscscan.com/tx/",
-        "ETHScanUrl": "https://ropsten.etherscan.io/tx/",
-        "BSCNetworkName": "BSC Testnet",
-        "ETHNetworkName": "Ropsten"
+        "url": "https://proximax-foundry.github.io/web-explorer-vuejs",
+        "blockRoute": "#/block",
+        "publicKeyRoute": "#/account",
+        "addressRoute": "#/account",
+        "hashRoute": "#/tx",
+        "namespaceInfoRoute": "#/namespace",
+        "assetInfoRoute": "#/asset"
       }
     }
 }

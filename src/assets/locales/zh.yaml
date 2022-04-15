@@ -1,488 +1,715 @@
----
-Footer: 
-  text: "如果您有任何疑问或困惑， 请随时联系我们的"
-  link: "服务台"
-Header: 
-  version: "版本"
-  home: "主页"
-  wallet: "钱包"
-  walletTitle: "我的钱包"
-  totalbalance: "总余额"
-  signout: "登出"
-  network: "网络"
-  settings: "设置"
-  customize: "自定义"
-  siriuswallet: "ProximaX天狼星钱包"
-NavigationMenu:  
-  Dashboard: "主页面"
-  Transfer: "转账"
-  Accounts: "账号"
-  Services: "服务"
-welcome: 
-  titledescription: "连接到Proximax天狼星平台的安全接口"
-  blockchain: "区块链"
-  blockchaindescription: "多重签名、聚合交易、跨链、元数据"
-  storage: "存储"
-  storagedescription: "任何类型文件的P2P分散式存储"
-  streaming: "流媒体"
-  streamingdescription: "用于视频和聊天的P2P分散式流媒体。"
-  supercontracts: "超合同"
-  supercontractdescription: "易于修改的数字合同"
-  signin: "登入"
-  signinwithsiriusid: "使用SiriusID登入"
-  create: "创建"
-signin: 
-  selectwallet: "选择钱包"
-  enterpassword: "输入钱包密码"
-  passwordrequired: "请输入密码"
-  clear: "清空"
-  invalidpassword: "密码错误"
-siriusid: 
-  qr: "使用您的SiriusID应用程序扫描这个QR码，即可登录您的钱包"
-  close: "当您从SiriusID应用程序登录时，这个弹出窗口将自动关闭"
-  install: "没有此应用程序？可从以下商店下载"
-createwallet: 
-  creationtype: "选择钱包创建类型"
-  newwallet: "新钱包"
-  fromprivatekey: "使用私密密钥"
-  fromwalletbackup: "钱包备份"
-  import: "导入"
-  network: "网路"
-  createwallet: "创建钱包"
-  walletname: "钱包名称"
-  inputwalletname: "输入钱包名称"
-  inputpassword: "输入新密码"
-  passwordvalidation: "密码最小长度为8，最大长度为30"
-  confirmpassword: "确认新密码"
-  doesntmatch: "密码不一致"
-createprivatekeywallet: 
-  title: "恢复您现有的ProximaX 天狼星钱包，从其他服务中导入私钥，或者现在就创建一个新的钱包!"
-  privatekey: "私密密钥"
-  invalidprivatekey: "私钥无效"
-createsuccessful: 
-  congratz: "恭喜!"
-  congratztext: "您的钱包已成功创建"
-  address: "地址"
-  public: "公钥"
-  private: "私密密钥"
-  warningtext1: "确保您把私密密钥存放在一个安全的地方"
-  warningtext2: "如果发生人为错误或系统故障， 我们无法帮助您恢复钱包或访问数字资产"
-  show: "显示"
-  hide: "隐藏"
-  savewalletpaper: "储存钱包为备份"
-  continue: "继续"
-wallets: 
-  description: "这些是你设备的本地存储中可用的{network}钱包"
-  walletvalidation: "找不到任何钱包"
-  removewallet: "钱包已成功被删除"
-  account: "帐号"
-  failremovewallet: "删除账号失败"
-deletewallet: 
-  deletemessage: "将从您的设备中删除"
-  warning: "警告！"
-  warningmessage: "这个动作将删除这个钱包且不能被撤消。如果你没有保存你的私密密钥，将永久失去对这个钱包中的账号访问。"
-  deleteconsent: "我已经阅读了警告，了解后果，并希望继续进行。"
-  delete: "立即删除"
-  cancel: "取消"
-  wallettodelete: "选择删除的钱包"
-  accountsavailable: "钱包里存有的帐号"
-  question: "你是否想永久删除这个天狼星钱包？"
-  goback: "回去"
-  proceed: "继续"
-accounts: 
-  default: "默认"
-  makedefault: "选择为默认"
-  export: "导出"
-  delete: "删除"
-  multisig: "多重签名"
-  createaccount: "创建新帐号"
-  details: "详情"
-  viewall: "查看所有账号"
-  viewall2: "查看所有"
-  name: "帐号名称"
-  namevalidation: "帐号名称是必需的"
-  publickey: "公钥"
-  inputpassword: "输入钱包密码"
-  passwordvalidation: "钱包密码是必需的"
-  submit: "提交"
-  swap: "交换此私密密钥"
-  enable: "启动"
-  save: "保存"
-  creationtype: "选择创建类型"
-  new: "新钱包"
-  fromprivatekey: "使用私密密钥"
-  back: "回去"
-  importaccount: "导入帐号"
-  question: "你是否想永久删除这个账号?"
-  convertmultisig: "转换为多重签名账号"
-  editmultisig: "编辑多重签名账号"
-  cosignerinwallet: "此钱包里的共同签署人"
-  cosignaturyaccount: "此账号里的共同签署人"
-  removing: "正在移除"
-  restore: “恢复"
-  cosigwarning1: "这个账号不在属于此钱包"
-  cosigwarning2: "您不是此账号的共同签署人"
-  cosigwarning3: "需要一个有效的共同签署人来编辑这个账户"
-  insufficientbalance: "余额不足"
-  balancedescription: "需要 {value} 来支付锁定基金"
-  ismultisig: "是多重签名帐号"
-  partial: "局部"
-  partialdescription: "局部里有交易"
-  scheme: "方案"
-  approvetransactions: "批准交易"
-  deleteusers: "删除用户"
-  schemedescription: " /{value} 个共同签署人"
-  cosigmessage: "添加至少一个共同签署人"
-  cosigplaceholder: "共同签署人的公钥"
-  addressvalidation: "需要有效的共同签署人公钥"
-  addcosig: "增加共同签署人"
-  contacts: "联络人"
-  unconfirmed: "未经确认/建议的费用"
-  lockfund: "锁定基金"
-  send: "发送"
-services: 
-  nis1: "NIS1"
-  eth: "ETH"
-  bsc: "BSC"
-  addressbook: "地址簿"
-  addcontacts: "添加联系人"
-  name: "名字"
-  namevalidation: "名字不能为空"
-  assets: "资产"
-  selectasset: "选择资产"
-  noasset: "此账号没资产"
-  quantityoption: "增加/减少的数量"
-  addminus: "增加/减少"
-  increase: "增加"
-  decrease: "减少"
-  mosaics: "镶嵌物"
-  balance: "余额"
-  rentalfee: "租金"
-  transferable: "可转让"
-  supplymutable: "供应可变"
-  divisibility: "可分割性"
-  supply: "供应"
-  maximumdivisibility: "最大可分割性为"
-  maximumsupply: "最大供应为"
-  example: "例如"
-  supplymessage: "如果你勾选'供应可变'，供应可以改变"
-  transferablemessage: "如果你勾选了'可转让'，镶嵌物可以被转让"
-  norecord: "没有发现记录"
-  label: "标签"
-  accountaddress: "帐号地址"
-  action: "行动"
-  search: "搜索"
-  list: "列表"
-  addnewcontact: "添加新联系人"
-  exportwallet: "导出钱包"
-  deletewallet: "删除钱包"
-  nodes: "节点"
-  blockheight: "区块高度"
-  currentnode: "当前节点"
-  nodelist: "节点列表"
-  addcontact: "你是否要保存这个地址?"
-  no: "否"
-  yes: "是"
-  contact: "联系人"
-  successfullysaved: "已成功保存"
-  editcontact: "编辑联系人"
-  addressvalidation: "需要有效的地址"
-  removecontact: "从地址簿中删除该联系人？"
-  removecontact2: "删除联系人"
-  wallet: "钱包"
-  accountdescription: "管理您的帐号"
-  restrictions: "限制"
-  metadata: "元数据v"
-  delegate: "受委托"
-  linktonamespace: "链接到命名空间"
-  namespaces: "命名空间"
-  namespacedescription: "创建命名空间和子命名空间"
-  register: "注册"
-  extendduration: "延长期限"
-  modifysupply: "修改供应"
-  mosaicsdescription: "创建具有自定义属性的数字表征"
-  mainnetswap: "与Mainnet互换"
-  swapdescription: "从NEM到Sirius的互换"
-  transferassets: "转移资产"
-  addressbookdescription: "为地址分配标签"
-  walletsdescription: "管理您的钱包"
-  changepassword: "更改密码"
-  transactiondescription: "浏览所有交易"
-  explorer: "浏览"
-  nodesdescription: "增加以及编辑节点"
-  attestation: "证明"
-  attestdescription: "对存在和起源的证明"
-  attest: "证明"
-  audit: "审核"
-  notifications: "通知"
-  notificationdescription: "检查有关您的账号的提醒和信息"
-  voting: "投票"
-  votedescription: "建立、投票和查看结果"
-  vote: "投票"
-  createpoll: "建立投票"
-  viewresults: "查看结果"
-  storagedescription: "上传和下载你的文件并对其进行加密"
-  files: "文件"
-  uploadfile: "上传文件"
-  sendshare: "发送/分享"
-  siriusgift: "Sirius 礼品"
-  siriusgiftdescription: "创建一个可兑换的礼物"
-  redeem: "兑换"
-  aggregatetransactions: "多重交易"
-  aggregatedescription: "将多个交易合并为一个交易"
-  complete: "完成"
-  bonded: "待签"
-  crosschainswap: " 跨链互换 "
-  crosschaindescription: "公网和私网之间的原子交叉链互换"
-  secredlock: "安全锁"
-  secredproof: "保管证明"
-  invoice: "发票"
-  invoicedescription: "创建和管理发票"
-  supercontractsdescription: "创建并执行数字合同义务的逻辑流程"
-  status: "状态"
-  chat: "聊天"
-  chatdescription: "加密的实时聊天"
-  start: "开始"
-  videoconferencing: "视频会议"
-  videoconferencingdescription: "加密的实时视频会议"
-  schedule: "时间表"
-  proceed: "你确定要用0.000000的金额吗？"
-  allservices: "所有服务"
-  assetmessage: "这个账户没有任何可以修改供应的资产."
-  properties: "产权"
-  filemessage: "文件必须是证明格式的，以便进行审计"
-  fileexample: "Filename --Apostille TX 2c8b443e97b2636a4b9cce8de65aef6ad12cd360f54b7bac31c52cb04cddc753 --Date YYYY-MM-DD.pdf"
-  fileforprocessing: "需要进行处理的文件"
-  file: "文件"
-  mycomputer: "我的电脑"
-  saveinsirius: "存在天狼星存储"
-  siriusstorage: "天狼星存储"
-  next: "下一步"
-  txexplorer: "交易探索器"
-  upload: "上传"
-dashboard: 
-  otherassets: "其他资产"
-  othercosignaturies: "其他共同签署人"
-  othercosigners: "其他共同签署人"
-  usd: "美元"
-  fee: "费用"
-  transactions: "交易"
-  transactioninfo: "交易信息"
-  effectivefee: "有效费用"
-  height: "高度"
-  type: "种类"
-  from: "发送人"
-  to: "接收人"
-  message: "信息"
-  amount: "数量"
-  signer: "签署人"
-  signature: "签名"
-  hash: "散列"
-  inout: "进/出"
-  sender: "发送人"
-  recipient: "接收人"
-  block: "区块"
-  aggregatebonded: "待签多重合约"
-  duration: "持续时间"
-  transactionhash: "交易散列"
-  deadline: "最后期限"
-  actionrequired: "所需行动"
-  signeraccount: "共同签署账户签字人"
-  signerbelow: "在下面签名的共同签署人账户"
-  approvetocontinue: "批准继续"
-  aggregateid: "多重合约id"
-  signeraddress: "签署人地址"
-  signerpublickey: "签署人公钥"
-  minimumapproval: "最低限度的批准数"
-  minimumremoval: "最低限度的移除数"
-  cosigmodify: "多重签署人的修改"
-  cosig: "共同签署人"
-  mosaicid: "镶嵌物id"
-  version: "版本"
-  increase: "增加"
-  transactionreceived: "已收到的交易"
-  transactionsent: "已发送的交易"
-  encryptedmessage: "加密的信息"
-  decrypt: "解密"
-  decryptmessage: "解密信息"
-  hidemessage: "隐藏信息"
-  recipientplaceholder: "接收人的地址或公钥"
-  showmessage: "显示信息"
-  loadingmessage: "正在加载交易数据...请稍等。"
-  linktype: "连接类型"
-  assetidaddress: "资产ID/地址"
-  active: "活跃"
-  owner: "持有者"
-  assetid: "资产ID"
-  alias: "别名"
-  quantity: "数量"
-transfer: 
-  recipientPlaceholder: "Recipient / Namespace"
-  maketransaction: "进行交易"
-  cosigner: "共同签署人"
-  nocosigner: "这个钱包里没有合格的共同签署人"
-  enteramount: "输入数量"
-  selectmosaic: "选择镶嵌物"
-  addmosaics: "增加镶嵌物"
-  regular: "普通"
-  hexadecimal: "16进制"
-  encrypted: "已解密"
-  invalidrecipient: "收件人无效"
-  owneraccount: "账号持有者"
-scriptvalues: 
-  walletnametaken: "钱包名称已被占用"
-  walletstoragefull: "无法创建钱包。你的设备存储可能已满"
-  walletpasswordvalidation: "钱包{name}的密码错误"
-  createaccountfail: "创建帐号失败"
-  privatekeyexists: "拥有次私密密钥的账号已在钱包里"
-  cosignerexists: "已有共同签署人"
-  publickeyvalidation: "此地址没有公钥"
-  confirmtransaction: "交易已确认"
-  accountnametaken: "帐号名称已被占用"
-  accountnamevalidation: "更改帐号名称失败"
-  inputaccountname: "请输入帐号名称"
-  walletimporttext1: "钱包已成功添加"
-  walletimporttext2: "网络无效"
-  walletimporttext3: "钱包已存在"
-  walletimporttext4: "钱包无效"
-  walletimporttext5: "无法添加钱包"
-  removeaccount: "无法移除账号"
-  enterpassword: "请输入钱包{name}的密码"
-  requiredfield: "须填写此资料"
-  multisigpasswordvalidation: "转换为多重签名账号时需要钱包密码"
+account:
+  accDeletion: 删除账户
+  accountCreated: 您的账户已成功创建。
+  accountDetails: 账户详情
+  confirmDelete: 确认删除账户
+  confirmName: 确认账户名称
+  deleteThis: 删除此账户
+  deleteTitle: 这一行动将删除此账户。
+  deleteWarning: 你确定要删除这个账户吗？
+  editName: 编辑账户名称
+  enterAccountName: 输入账户名称
+  failChangeName: 更改账户名称失败
+  failCreate: 创建新账户失败
+  failDelete: 无法删除账户
+  multisigAcc: 多重认证账户
+  myAcc: 我的账户
+  nameEmpty:  账户名称不能为空
+  namePlaceholder: 为您的账户命名
+  nameTaken: 账户名称已被占用
+  noAssets: 你不拥有任何资产。
+  otherAcc: 其他账户
+  privateKeyExist: 拥有此私钥的账户已经在钱包里了
+addressBook:
+  addBackUpContact: 从联系人备份文件中添加联系人
+  addCustomGroup: 添加自定义组
+  addNewContact: 添加新的联系人
+  addressBookMessage1: 导入到通讯录
+  addressBookMessage2: 已经存在于通讯录中
+  addressBookMessage3: 有无效的地址
+  addressBookMessage4: 未导入
+  addressBookTitle: 您可以添加多个钱包地址，为未来的交易保留。
+  addressExist: 地址已经存在于通讯录中
+  addressRequired: 请填写地址
+  contactUpdated: 通讯录中的联系信息已更新
+  custom: 自定义
+  customGroup: 自定义组
+  director: 经理
+  editContact: 编辑联系人
+  employee: 员工
+  exportBackUpContact: 导出联系人以进行备份
+  exportContacts: 导出联系人
+  family: 家人
+  friend: 朋友
+  groupValidation: 群组名称不可用或已经存在
+  importAddress: 导入地址
+  importContacts: 导入联系人
+  nameExist: 名字已经存在于账户或通讯录中
+  newContactAdded: 新联系人已加入到通讯录中
+  newContactImported: 新的联系人已被导入到通讯录 | 新的联系人已被导入到通讯录
+  removeContact: 移除联系人
+  removeContactFromAB: 从通讯录中删除联系人？
+  saveAddress: 保存地址
+  work: 工作
+asset:
+  assetAns: >-
+    镶嵌物是使智能资产系统独特和灵活的一部分。
+    它们是天狼星链上的固定资产，可以代表一套
+    多个相同，并且不会改变的东西。
+  assetCreatedBy: 资产创建者
+  assetCreatedByAcc: 账户{accountName}所创建的天狼星数字资产
+  assetCreatedInWallet: 在钱包{walletName}中创建的天狼星数字资产
+  assetDescription: >-
+    资产可以是一个代币，但它也可以是更专业的资产集合，如奖励积分、股票、签名、状态标志、
+    投票或甚至其他货币。
+  createAssets: 创建资产 | 创建资产
+  createNewAsset: 创建新资产
+  currentSupply: 当前供应
+  divisibilityMsg1: 请在此输入可分性
+  divisibilityMsg2: 最大可分性为6
+  divisibilityMsg3: '例如：0.000000'
+  divisibilityMsg4: 决定资产可以被分割到小数点后的哪一位。
+  modificationType: 修改类型
+  modifyAssetSupply: 修改资产供应
+  noAsset: 看起来你还没有任何资产。
+  quantityOf: '数量为{value}'
+  supplyMsg1: 请在此输入供应量
+  supplyMsg2: 最大供应量为900兆
+  supplyMsg3: '例如：900,000,000,000,000'
+  supplyMutableMsg: 如果你勾选 "供应可变"，供应可以改变。
+  transferableMsg: 如果你勾选 "可转让"，资产就可以转让。
+dashboard:
+  accDescription: >-
+    A key pair (private and public key) associated with a mutable state stored
+    on the Sirius Chain.
+  accountAdded: 添加账户
+  accountRemoved: 移除账户
+  addingAcc: '添加账户：'
+  aggregate: Aggregate
+  allTransactions: 所有交易
+  applyHeightDelta: Apply Height Delta
+  approvalAndRemoval: Approval and Removal Delta
+  approvalDelta: Approval Delta
+  buyOffer: Buy Offer
+  createAsset: 创建一个资产
+  createSthNew: 创造新东西
+  creator: 创造者
+  expirationEstimate: 过期时间戳估计
+  fetching: 获取中...
+  fetchingTx: 获取交易中
+  gettingStartedGuide: 入门指南
+  guideOverview: 指南概述
+  hashType: 散列类型
+  inOut: 进/出
+  info: 信息
+  lockHash: Lock Hash
+  modification: 修改
+  myPersonalAcc: 我的个人账户
+  newValue: 新价值
+  newVersion: 新版本
+  noTransactions: '{acc}中没有交易'
+  offer: 提供
+  oldValue: 旧价值
+  parentNamespace: 母名称空间
+  proof: 证明
+  recentTransactions: 最近的交易
+  recentTransfers: 最近的转账交易
+  refunded: Refunded
+  registerType: 注册类型
+  remotePublicKey: 远程公钥
+  removalDelta: Removal Delta
+  removingAcc: '移除账户：'
+  restrictionType: 限制类型
+  scanQR: 扫描QR码
+  scopedMetadataKey: Scoped Metadata Key
+  secret: 秘密
+  sellOffer: Sell Offer
+  siriusChainQues: 什么是ProximaX天狼星链？
+  swapFee: Swap Fee
+  target: 目标
+  timestamp: 时间戳
+  txAmount: 交易金额
+  txFee: 交易费用
+  txHash: 交易散列
+  type: 种类
+  upgradePeriod: 升级期
+  value: 价值
+  valueChange: 价值变化
+  viewAll: 查看全部
 delegate:
-  selectacctype: "选择账号类型"
-  newaccount: "新账号"
-  select: "选择"
-  confirm: "确认"
-  linkmessage: "请填写链接账号的私钥."
-  delegate: "受委托"
-  linkmessage2: "你的账号与一个受委托的账号相连"
-  linkwarning: "你的账号没有与一个委托账号相联系"
-  linkingaccount: "连接账号:"
-  linkaccount: "连接新账号"
-  noneselected: "没有选择"
-  unlinkaccount: "取消连接账号"
-  delegatepublic: "被委托账号的公钥"
-  entervalidpk: "请输入有效的私钥"
-  linkerror: "私钥不符合连接账号要求"
-  linkerror2: "解除连接失败"
+  accDelegated: 账户委托
+  delegateAcc: 委托账户
+  delegatePublicKey: 委托账户公钥
+  enterPk: 请填写链接账户的私钥。
+  linked: 你的账户与一个受委托的账户相连。
+  newAcc: 新账户
+  newAccSelected: 新账户被选为链接账户。
+  notLinked: 你的账户没有与一个委托的账户相联系。
+  privateKeyErr: 私钥未满足链接账户要求
+  publicKeyOfDelegate: 委托账户的公钥
+  selectAccToLink: 选择要链接的账户
+  unlinkAcc: 解除链接账户
+  unlinkFail: 解除链接失败
+general:
+  accCurrentBalance: 账面余额
+  account: 账户 | 账户
+  add: 添加
+  addAccAddress: 添加账户地址
+  address: 地址
+  addressBook: 通讯录
+  aggregateFee: Aggregate Fee
+  amount:  数量
+  approximately: 大约
+  asset:  资产 | 资产
+  assetId: 资产ID
+  assetQues: 什么是资产？
+  back: 返回
+  balance: 余额
+  block: 区块 | 区块
+  blockHeight: 区块高度
+  cancel: 取消
+  certificate: 证明书
+  change: 更改
+  check: 检查
+  close: 关闭
+  confirm: 确认
+  congratz: 恭喜!
+  contact: 通讯录
+  continue:  继续
+  convertMultisig: 转换为多重认证账户
+  copied: 已复制
+  copy: 复制
+  cosigner: 签署人
+  create: 创建
+  createNamespace: 创建命名空间
+  createNew: 创建新的
+  createNewAcc: 创建新账户
+  current: 目前
+  currentBalance: 当前余额
+  day: 日 | 日
+  deadline: 最后期限
+  decrease: 减少
+  default: 默认
+  defaultTitle: 这是你每次登录时的默认账户
+  delegate: 委托
+  details: 详细内容
+  digitalAsset: 数字资产
+  disable: 禁用
+  disabled: 已禁用
+  divisibility: 可分性
+  done: 已完成
+  download: 下载
+  downloadCertificate: 下载证书
+  downloadPaperWallet: 下载纸钱包
+  duration: 时间
+  edit: 编辑
+  enable: 激活
+  enabled: 已激活
+  enterPassword: 输入密码
+  enterPasswordContinue: 输入您的密码以继续
+  estimateUSD: 估算美元
+  expired: 已过期
+  expires: 过期
+  export: 导出
+  extendDuration: 延长期限
+  'false': 'false'
+  feedback: 在这里给我们反馈您的经验
+  feedbackDescription: 我们渴望不断改进我们的产品。
+  from: 从
+  fromPrivateKey: 来自私钥 
+  group: 组
+  hasPartial: 您的账户有部分交易。
+  hide: 隐藏
+  hour: 小时 | 小时
+  import: 导入
+  importFromAB: 从通讯录中导入
+  in: 进
+  increase: 增加
+  initiateBy: 发起人为
+  initiator: 发起人
+  initiatorCurrentBalance: 发起人当前余额
+  insufficientBalance: 余额不足
+  insufficientBalanceWarning: >-
+    您的账户没有足够的{tokenName}数额。请先充值
+    然后再继续在此页面进行交易。
+  invalid: 无效
+  invalidInput: 无效输入
+  invalidPrivateKey: 私钥无效
+  label: 标签
+  later: 以后
+  levy: Levy
+  levyAmount: Levy amount
+  levyRecipient: Levy recipient
+  link: 链接
+  linkSuccess: 成功链接
+  linkToNamespace: 链接到名称空间
+  linked: 已链接
+  linkedAssetAddress: 已链接的资产/地址
+  list: 列表
+  listEmpty: 列表为空。
+  lockFund: 押金
+  lockFundTxFee: 押金手续费
+  message: 信息
+  minute: 分钟 | 分钟
+  modifySupply: 修改供应
+  month: 月|月
+  more: 更多
+  multisig: 多重认证
+  multisigTitle: 这是一个多重认证账户
+  name: 名称
+  nameRequired: 请填写名称
+  namespace: 命名空间 | 命名空间
+  namespaceId: 命名空间ID
+  namespaceQues: 什么是名称空间？
+  network: 网络
+  new: 新
+  next: 下一个
+  'no': '否'
+  noCosigner: 这个钱包里没有合格的签署人
+  noLinkedAsset: 没有关联资产
+  noLinkedNamespace: 没有链接命名空间
+  noRecord: 没有发现记录。
+  nonce: Nonce
+  notification: 通知 | 通知
+  ntgToShow: 没有什么可显示的。
+  out: 出
+  overview: 概述
+  owner: 拥有者
+  ownerAcc: 我的账户
+  ownerTitle: 你拥有这个多重认证账户
+  password: 密码
+  passwordRequired: 请输入密码
+  pkWarning: >-
+    确保你把你的私钥存放在一个安全的地方。
+    没有它就无法恢复对您数字资产的访问!
+  privateKey: 私钥
+  publicKey: 公钥
+  recipient: 收件人
+  remove: 移除
+  rentalFee: 租用费
+  requiredField: 必须填写
+  save: 储存
+  scheme: 方案
+  sda: 数字资产 | 数字资产
+  sdaFull: 天狼星数字资产
+  search: 搜索
+  select: 选择
+  selectAccount: 选择账户
+  selectCreationType: 选择创建类型
+  selectNetwork: 选择网络
+  selectOption: 选择选项
+  sender: 寄件人
+  showAll: 显示全部
+  signed: 已签名
+  signer: 签名者
+  supply: 供应
+  supplyMutable: 供给可变
+  swap: 互换
+  to: 致
+  topUp: '充值{tokenName}'
+  total: 共计
+  transaction: 交易 | 交易
+  transactionDetails: 交易详情
+  transactionFee: 交易费用
+  transfer: '转账{tokenName}'
+  transferable: 可转让
+  'true': 'true'
+  unlink: 解除链接
+  unlinkSuccess: 成功解除链接
+  unlinked: 未连接的
+  usd: 美元
+  valid: 有效
+  view: 查看
+  viewInExplorer: View In Explorer
+  waitConfirmTx: 等待交易被确认...
+  wallet: 钱包 | 钱包
+  walletAddress: 钱包地址
+  walletPasswordInvalid: '钱包{name}的密码无效' 
+  year: 年|年
+  'yes': '是'
+home:
+  accountDescription: 在新账户中确保资产安全
+  accountsAvailable: 可用账户
+  allInfo: 关于天狼星钱包你需要知道的一切
+  assetAns: >-
+    An asset could be a token that has a unique identifier and configurable
+    properties
+  assetDescription: Create your own unique token
+  beginnerGuide: 初学者指南
+  beta: BETA
+  contactTeam: 联系我们的支持团队
+  copyright: Copyright 2022 ProximaX®. All rights reserved.
+  gettingStarted: 入门
+  helpdesk: 服务台
+  home: 首页
+  namespaceAns: Create an on-chain unique place for your business and your assets.
+  namespaceDescription: Create an on-chain unique space
+  navigate: 导航
+  quickAction: 快速行动
+  selectLanguage: 选择语言
+  selectWallet: 选择钱包
+  signIn: 登入
+  signOut: 登出
+  siriusChain: 什么是天狼星链？
+  siriusChainTitle: 开始在ProximaX天狼星区块链层上构建应用程序
+  switchDefault: 你的默认账户已切换为
+  title: ProximaX天狼星钱包
+  titleDescription: >-
+    建立强大的区块链集成，帮助您获得ProximaX天狼星平台的最大
+    价值。
+  transferDescription: 发送资产到另一个账户
+  version: 版本
+multisig:
+  accountCosignatories: 账户的签署人
+  accountDeletionApproval: 账户移除审批
+  addNewCosignatory: 添加新的签署人
+  addressOrPk: 地址/公钥
+  alreadyMultisig: 你的账户已经是一个多重认证账户
+  approvalAtLeastOne: 交易审批的签署人数量不能少于1人
+  approvalExceedMax: >-
+    批准交易的签署人数量超过了此账户的
+    签署人
+  approvalScheme: '审批交易:{approval}-{maxApproval}'
+  bottomToTop: 从下到上
+  collapsible: 可折叠
+  cosignatory: 签署人
+  cosignatoryOf: 负责签署的账户
+  deletionAtLeastOne: 批准删除的签署人的数量不能少于1人
+  deletionExceedMax: >-
+    批准删除账户的签署人数量超过了此账户的
+    签署人
+  deletionScheme: '移除账户:{deletion}-{maxDeletion}'
+  duplicatedCosigner: 添加了重复的签署人
+  horizontal: 横向
+  leftToRight: 从左到右
+  manageCosignatories: 管理签署人
+  noCosigner: >-
+    {name}没有任何签署人。当您添加至少一（1）个签署人
+    时，您的账户将自动转换为一个多重认证的
+    帐户。
+  noMultisig: '{name}不是任何账户的签署人。'
+  ofCosignatories: '/{value} 签署人'
+  rightToLeft: 从右到左
+  selectedAccErr: 签署人不能是这个账户本身
+  topToBottom: 从上到下
+  transactionsApproval: 交易审批
+  updateCosignatories: 更新共同签署人
+  vertical: 竖向
+  viewSettings: 观看设置
 namespace:
-  namespaceid: "命名空间ID"
-  namespacemessage: "你没有创建一个命名空间"
-  transactionfee: "交易费用:"
-  namespacemessage2: " 一个命名空间的最大长度为16个字母数字字符，而子命名空间的最大长度为64个字母数字字符"
-  namespacemessage3: "可以创建三个层次。一个命名空间可以有一个子命名空间，而一个子命名空间可以有自己的子命名空间（例如，test1.test2.test3）"
-  namespacemessage4: " 某些短语已被保留"
-  namespacemessage5: " 最长租期为1年（365天）"
-  extend: "延长"
-addressbook:
-  addressbookmessage1: "导入到通讯录"
-  addressbookmessage2: "已经存在于地址簿中"
-  addressbookmessage3: "无效的地址"
-  addressbookmessage4: "未导入"
-  editcontact: "编辑该联系人"
-  addressvalidation: "地址已经存在于账号或地址簿中。"
-  namevalidation: "名称已经存在于账户或地址簿中。."
+  duration: 时间（天数）
+  durationMsg: 最长租期为
+  durationMsg2: 此命名空间延期的最长天数为
+  manageNamespace: 管理已链接的名称空间
+  nameRegistered: 名称空间已被注册
+  namespaceAns: >-
+    命名空间以你选择的名称开始，类似于互联网上的
+    域名。
+  namespaceCreatedBy: 命名空间的创建者
+  namespaceDescription: >-
+    命名空间使你能够在链上为你的账户和SDA创建独特
+    和容易记得的名称
+  namespaceNameMsg1: >-
+    一个命名空间的最大长度为16个字母数字字符，而子命名空间
+    的最大长度为64个字母数字字符。
+  namespaceNameMsg2: >-
+    可以创建三个层次。一个命名空间可以有一个子命名空间，而一个
+    子命名空间可以有自己的子命名空间（例如，test1.test2.test3）。
+  namespaceNameMsg3: 某些短语已经被保留。
+  newRootNamespace: 新的根名称空间
+  noNamespace: 你还没有创建一个命名空间。
+  noNamespace2: 看起来你还没有任何命名空间。
+  registerNamespace: 注册名称空间
+  registerNewNamespace: 注册新的命名空间
+  reservedName: 此命名空间名称已被保留
+  selectAction: 选择操作
+  selectNamespace: 选择命名空间
+  unlinkNamespace: 解除链接名称空间
+  validName: 填写一个有效的名字
+nis1:
+  amountMsg: 将XAR或PRX金额换成XPX
+  disableSwap: 禁用此账户的NIS1互换功能
+  enableSwap: 激活此账户的NIS1互换功能
+  failSwap: 无法为此账户激活NIS1互换功能
+  fromNis1Acc: 从NIS1账户
+  nem: NEM
+  nis1: NIS1
+  nis1Acc: NIS1账户
+  nis1Address: 'NIS1地址:'
+  nis1Swap: NIS1互换
+  nis1Title: 请输入密码，以便为此账户激活NIS1。
+  nis1ToSirius: NIS1到天狼星链
+  swapNis1ToSirius: 从NIS1到ProximaX天狼星链的互换
+node:
+  currentNode: 当前节点
+  nodeList: 节点列表
+  nodeUpdated: 节点已更新
+  nodes: 节点
+notification:
+  isExpiring: '将在{time}内到期'
+  noNotification: 没有发现通知
+  pendingSignature: '有一个交易正在等待签名，最后期限为{time}'
 swap:
-  ethfull: "Ethereum (ETH)"
-  bscfull: "Binance Smart Chain (BSC)"
-  siriusaccount: "天狼星账号"
-  swap: "互换"
-  certificate: "证明书"
-  swaptime: "互换时间戳"
-  swapid: "互换ID"
-  note: "注意事项"
-  swapmessage: "互换过程可能需要几个小时才能完成。"
-  swapmessage2: "如果你想继续，你会收到一份包含你的交易散列的证书，供你记录。"
-  maxamount: "最高金额"
-  gasmessage: "扣除交易费后的最高金额"
-  gasmessage2: "和天然气费"
-  selectoption: "选择选项"
-  optionmessage: "请选择一个选项"
-  outcome: "外发交易"
-  income: "入账交易"
-  bsc2sirius: "From BSC to Sirius"
-  sirius2bsc: "From Sirius to BSC"
-  transaction: "交易"
-  validation: "审定"
-  txdetails: "交易详情"
-  frommetamask: "来自： Metamask地址"
-  notconnected: "未连接"
-  connectmetamask: "连接到Metamask"
-  tosirius: "致： 天狼星地址"
-  sendrequest: "发送请求"
-  metamaskmessage: "正在向Metamask转移"
-  metamaskmessage2: "等待您对Metamask的批准"
-  metamaskmessage3: "转移已验证"
-  metamaskmessage4: "向Metamask发送交易ID信息"
-  metamaskmessage5: "信息已验证"
-  metamaskmessage6: "领取你的XPX"
-  metamaskmessage7: "正在进行互换"
-  metamaskmessage8: "互换过程已经开始"
-  certmessage: "保存一份你的证书的副本。在出现错误的情况下需要它。"
-  certconsent: "我确认我已经保存了一份证书的副本"
-  done: "已完成"
-  siriusaccountlist: "这是您在这个钱包中可用的天狼星账户的列表"
-  selectsiriusaccount: "请选择一个天狼星账号"
-  accountname: "帐户名称"
-  siriusaddress: "天狼星地址"
-  siriusbalance: "天狼星余额"
-  bsctxfee: "交易费(BSC BEP20网络)"
-  later: "也许以后"
-  confirmswap: "是的，互换"
-  change: "更改"
-  sirius2eth: "从天狼星到ETH"
-  eth2sirius: "从ETH到天狼星"
-  ethtxfee: "交易费用（ETH网络)"
-  standard: "标准（5分钟)"
-  fast: "快速（2分钟)"
-  trader: "交易员(尽快)"
-  nis1accountlist: “这是你在这个钱包中可用的导入的NIS1账户的列表"
-  selectnis1account: "请选择一个NIS1账户"
-  nis1address: "NIS1地址"
-  nis1balance: "NIS1余额"
-  nis1accountselected: "选择的NIS1账户"
-  swapamount: "互换金额"
-gift:
-  siriusgift: "天狼星礼物"
-  generate: "Generate"
-  generategift: "生成"
-  giftmessage: "礼品卡已准备好"
-  giftmessage2: "Make sure you download the file"
-  giftmessage3: "请确保你下载文件"
-download:
-  yourfile: "你的文件"
-  isready: "可以下载了"
-  download: "下载"
-vote:
-  votingcertificate: "表决证书"
-  polltitle: "投票标题"
-  sent: "已发送"
-  view: "查看"
-  option: "选项"
-  result: "结果"
-  statistic: "统计资料"
-  uniquevoter: "独特的选民"
-  options: "选择"
-  option1: "选项 1"
-  option2: "选项 2"
-  option3: "选项 3"
-  total: "共计l"
-  vote: "投票表决"
-  refresh: "刷新"
-  voting: "投票表决"
-  createpoll: "创建投票"
-  voteoptions: "投票选择"
-  activate: "激活"
-  sendprivate: "发送到私人投票索引"
-  title: "标题"
-  allowmultiple: "允许多重响应"
-  addoptions: "添加选项"
-  polladdress: "投票索引地址"
-  enddate: "结束日期"
-  optionslist: "选项列表"
-  edit: "编辑"
-  voteresults: "投票/结果"
-  votemessage: "你没有投这个票"
-  finish: "完成"
+  amountEmpty: Amount is empty
+  approveConnection: Please click on MetaMask extension to approve connection
+  bsc: BSC
+  bscAddress: BSC address receiving your swap
+  bscAddressErr: Valid BSC address is required
+  bscAmountMsg: XPX amount to swap to BEP20
+  bscFull: Binance Smart Chain
+  bscOutgoingMsg: >-
+    Swap completion time will vary depending on the performance of the BSC
+    network. The more BNB transaction fees you pay, the faster your swap will
+    occur. Displayed BNB fees are valid for only three minutes due to the BSC
+    network's fluctuating rates.
+  bscScan: BSCScan
+  bscToSirius: BSC to Sirius Chain
+  cancelSwap: Cancel this swap
+  checkOutgoingStep2: 'Step 2: Check BSC transaction status'
+  checkStatus: Check Status
+  checkStatusAgain: Please check the status again
+  checkStep1: 'Step 1: Check {network} transaction  status'
+  checkStep2: 'Step 2: Check swap status'
+  checkStep3: 'Step 3: Validate your {network} address'
+  checkStep4: 'Step 4: Initiate swap'
+  checkSwapStatus: Check Swap Status
+  checkTransaction: Checking transaction confirmation...
+  checkingStatus: 'Checking {network} transaction status'
+  checkingTransaction: Check transaction confirmation to proceed
+  confirmDownloaded: I confirm that I have downloaded a copy of my certificate.
+  confirmSwap: Confirm Swap
+  connect: Connect
+  connected: Connected
+  enterValidHash: Please enter valid transaction hash
+  equivalentTo: Equivalent to
+  eth: ETH
+  ethFull: Ethereum
+  ethToSirius: ETH to Sirius Chain
+  failConnect: Unable to connect
+  failCoverTxFee: Balance is insufficient to cover transaction fee.
+  failGetSink: Unable to get sink address
+  fast: Fast
+  feeTooLow: Fees might be too low. Please do not change recommended fee in MetaMask.
+  feesValidDuration: Fees are valid for
+  forMoreDetails: for more details.
+  fromMetamaskAddress: From MetaMask Address
+  fromSiriusAcc: From Sirius Chain Account
+  hashInvalid: '{0} transaction hash is invalid. Please initiate new swap from {0} to {1}'
+  hashNotFound: '{0} transaction hash is not found. Please initiate new swap from {0} to {1}'
+  hashNotFound2: BSC transaction hash is not found. Please contact our
+  initiateSwap: Initiate swap
+  initiateSwapWithHash: 'Initiate swap with this {network} Transaction Hash'
+  initiatingSwap: Initiating swap...
+  inputInfo: Input Information
+  inputMsg: >-
+    BEP20 token amount to swap. Minimum 51 BEP20 amount is required as 50 will
+    be deducted from the amount as transaction fee.
+  inputRemark1: Maximum amount after deducting transaction fee
+  inputRemark2: and gas fee
+  insufficientAmount: Insufficient amount
+  insufficientTokenBalance: Insufficient token balance
+  mainNetworkSwap: Main Network Swap
+  maxAmount: Max. Amount
+  messageSent: 'Message sent to the swap service, swap initiated...'
+  messageSigned: 'Message signed with signature:'
+  metamask: MetaMask
+  metamaskAcc: Metamask Account
+  minimum51: (MINIMUM = 51 )
+  networkErr: Network Error
+  noOtherExtension: >-
+    Please make sure there is no other crypto wallet extension currently being
+    enabled except
+  notConfirmed: Transaction is not confirmed yet. Please check again in a moment.
+  notConnected: Not connected
+  pendingConfirmation: 'Pending Confirmation: {number} of 12 confirmations'
+  rapid: Rapid
+  referTo: Refer to the
+  refreshMsg: Please refresh this page after disabling other wallet extensions.
+  rejectMetamask: Approval in MetaMask is rejected
+  requestFromSwap: Requesting from swap service
+  retry: Retry
+  selectNetworkToSwap: 'Please select {network} on MetaMask to swap'
+  sendMsgFail: Unable to send message to swap service
+  sendRequest: Send Request
+  sendingMsg: Sending message to MetaMask
+  sendingTx: Sending transaction to MetaMask
+  serverErrMsg1: Sorry. Please save the
+  serverErrMsg2: and contact our
+  serverNotFound: Swap Server not found
+  serviceDown: Swapping service is temporary not available. Please try again later
+  serviceUnavailable: Service unavailable
+  signTx: Please sign transaction confirmation in MetaMask
+  signature: Signature
+  signatureHash: Signature hash
+  sirius: Sirius
+  siriusAcc: Sirius Account
+  siriusChain: Sirius Chain
+  siriusChainFull: ProximaX Sirius Chain
+  siriusNetwork: Sirius Network
+  siriusToBsc: Sirius Chain to BSC
+  siriusToEth: Sirius Chain to ETH
+  standard: Standard
+  step1: 'Step 1: Send BEP20 {tokenName} to the escrow account'
+  step2: 'Step 2: Validate your Sirius address'
+  step3: 'Step 3: Initiate swap'
+  swapAmount: Swap AMount
+  swapBscToSirius: Swap from BSC to ProximaX Sirius Chain
+  swapDetails: Swap Details
+  swapInProgress: Swap in progress. Please wait...
+  swapInitiated: Swap has already been initiated earlier.
+  swapInsufficientAmount: Insufficient amount to perform swap
+  swapMsg: >-
+    Swap process may take a few hours to complete. If you wish to proceed, you
+    will receive a certificate containing your transaction hash for your
+    records.
+  swapMsg2: >-
+    Swap process may take a few hours to complete. Please save a copy of your
+    certificate. It is needed in the event of an error.
+  swapMsg3: >-
+    Please download the certificate. It is needed in the event of an error. You
+    can search the status of your BSC transaction using the above BSC
+    Transaction Hash.
+  swapNotFound: Swap not found
+  swapOperationFail: Swap operation failed
+  swapSiriusToBsc: Swap from ProximaX Sirius Chain to BSC
+  swapStarted: The swap process has already started!
+  swapSuccess: Swap is successful
+  swapSuccess2: Swap is already in progress or has been completed successfully.
+  swappedAmount: Swapped Amount
+  timedOut: Swap request timed-out
+  toMetamaskAddress: To MetaMask Address
+  toSiriusAcc: To Sirius Chain Account
+  transactionHash: '{network} Transaction Hash'
+  transactionPending: '{network} transaction is still pending. Please wait a few more moment'
+  tryAgain: Please try again later
+  txFailed: Transaction failed. Please try again with suggested gas price and gas limit.
+  txFeeMsg: >-
+    The fees for the transaction on Sirius Chain will be deducted from this
+    amount, which is 50 {tokenName}
+  txIdNotFound: Swap not found for the current transaction ID
+  txInvalid: Transaction invalid
+  txNotFound: Transaction not found
+  txSuccessful: '{network} transaction is successful'
+  validation: Validation
+  validationWarning: One block confirmation needed to proceed.
+  validationWarning2: 'Do not change Gas Limit, Max Piority Fee or Max Fee.'
+  validationWarning3: >-
+    Confirmation might take up to 30 minutes, 1 hour or more due to high
+    transaction volumes.
+  validationWarning4: Please do not close or refresh
+  validationWarning5: >-
+    this page until the swap process is complete and you have saved your
+    certificate.
+  validationWarning6: View confirmation status on
+  viewTxInBsc: View Transaction in BSCScan
+  viewTxInExplorer: View Transaction in Explorer
+  waitingConfirmMetamask: Waiting for confirmation in MetaMask
+  walkthrough: walkthrough
+  xar: XAR
+  xpx: XPX
+transaction:
+  accountLink: Account Link 
+  accountMetadata: Account Metadata
+  actionRequired: 需要采取行动
+  addExchangeOffer: Add Exchange Offer
+  addressAlias: Address Alias
+  aggregateBonded: Aggregate Bonded
+  aggregateComplete: Aggregate Complete
+  allow: 允许
+  approve: 批准
+  approveConfirmation: >-
+     您是否愿意批准这项交易？(黄色高亮显示)
+  buy: 购买
+  chainConfigure: Chain Configure
+  chainUpgrade: Chain Upgrade
+  cosignAdded: 共轭签名已添加
+  cosignTxAdded: 联署交易已添加|联署交易已添加
+  doThisLater: 稍后再做
+  dontRefresh: 请不要刷新或登出
+  exchangeOffer: Exchange Offer
+  fullySigned: 已完全签署
+  haveApproved: >-
+    您已经批准了这项交易 | 您已经批准了这些交易
+  inQueue: 等待队列中的交易 | 等待队列中的交易
+  modifyAccMetadata: Modify Account Metadata
+  modifyAddressRestriction: Modify Account Address Restriction
+  modifyMultisig: Modify Multisig Account
+  modifyNsMetadata: Modify Namespace Metadata
+  modifyOperationRestriction: Modify Operation Restriction
+  modifySdaLevy: Modify SDA Levy
+  modifySdaMetadata: Modify SDA Metadata
+  modifySdaRestriction: Modify Account SDA Restriction
+  namespaceMetadata: Namespace Metadata
+  noActionRequired: 不需要采取行动
+  partialAdded: 部分交易已添加 | 添加部分交易已添加
+  removeExchangeOffer: Remove Exchange Offer
+  removeSdaLevy: Remove SDA Levy
+  sdaAlias: SDA Alias
+  sdaDefinition: SDA Definition
+  sdaMetadata: SDA Metadata
+  sdaSupplyChange: SDA Supply Change
+  secretLock: Secret Lock
+  secretProof: Secret Proof
+  sell: 出售
+  signerPk: 签署人公钥
+  swapTx: 互换交易确认 | 互换交易确认
+  txAdded: 交易已添加 | 交易已添加
+  txConfirmed: 交易已确认| 交易已确认
+  txErrMsg: '状况：{0} - 散列：{1}'
+  txError: 交易错误
+  txInfo: 交易信息
+  txUnconfirmed: 交易已处于未确认状态|交易已处于未确认状态
+  unconfirmedTx: 未确认的交易
+  unconfirmedTxOf: '未确认的{name}的交易'
+  waitForLoad: '仍在加载中，请等待。'
+  waitingSignature_s: 等待签署中
+  waitingSignatures: 等待签署中
+  waitingSignaturesOf: '等待{name}的签名' 
+transfer:
+  addAssets: 添加资产
+  addContacts: 你想保存这个地址吗？
+  assetAmount: 数额(资产)
+  enableEncryption: 启用加密功能
+  newTransfer: 新转账
+  proceedWithZero: 你确定要以0金额进行吗？
+  selectAsset: 选择资产
+  successfullySaved: '联系人{name}成功保存'
+  transferAmount: 转账数额
+  transferFrom: 转自
+  transferPlaceholder: 转到（地址/名称空间）。
+wallet:
+  backHome: 返回首页
+  backUpDescription: '如果你有一个以前备份的钱包，请在这里导入文件。'
+  confirmDelete: 确认删除钱包
+  confirmImport: 确认导入
+  confirmPassword: 确认新密码
+  confirmPasswordErrMsg: 密码不匹配
+  continueLogIn: 继续登录
+  createSiriusWallet: 创建新天狼星钱包
+  createWallet: 创建钱包
+  deleteMessage: 此行动将删除钱包。
+  deleteWarning: 你确定要删除这个钱包吗？
+  enterPassword: 输入新密码
+  fromBackUp: 从钱包备份
+  haveWallet: 已经有了天狼星账户？
+  importFail: 导入失败。无效文件。
+  importFile: 导入文件
+  importMsg: '你即将导入一个钱包到{network}。是否继续？'
+  importSuccess: 导入成功
+  myWallets: 我的钱包
+  nameErrMsg: 输入钱包名称
+  namePlaceholder: 请输入钱包名称
+  newWallet: 新钱包
+  noWallet: 还没有天狼星账户吗？
+  backupOldWallet: 备份旧ProximaX天狼星钱包
+  numberOfAccounts: 账户数量
+  passwordErrMsg: '最小长度8'
+  privateKeyDescription: >-
+    恢复你现有的ProximaX天狼星钱包，从其他服务中导入私钥或创建新的钱包。
+  signInHere: 在此登录
+  unableImport: 无法导入钱包
+  walletCreated: '你的钱包已经成功创建。'
+  walletDeletion: 删除钱包
+  walletNameExist: 已有同名的钱包
+  walletRemoved: 钱包已被成功删除
+  walletsAvailable: 这些是你设备的本地存储中可用的天狼星钱包。

@@ -15,28 +15,16 @@
       <Column style="width: 250px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Asset ID</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('general.assetId')}}</div>
             <div class="uppercase font-bold text-txs">{{data.idHex}}</div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Namespace</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('general.namespace')}}</div>
             <div class="uppercase font-bold text-txs">
-              <div v-if="data.linkedNamespace.length > 0">
-                <div v-if="data.linkedNamespace.length == 1">
-                  <div v-for="namespace, item in data.linkedNamespace" :key="item">
-                    <div class="mb-1 text-txs">{{ namespace.name }}</div>
-                  </div>
-                </div>
-                <div v-else>
-                  <div class="mb-1 text-txs">{{ data.linkedNamespace[0].name }} <div class="inline-block border border-gray-300 p-1 rounded-sm ml-2 cursor-pointer" @click="showNsList(data.i)" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">+ <span class="font-bold">{{ data.linkedNamespace.length -1 }}</span></div></div>
-                  <div class="border p-3 w-28 border-gray-100 shadow-sm absolute bg-white" v-if="isNsListShow[data.i]" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">
-                    <div v-for="namespace, item in data.linkedNamespace.slice(1)" :key="item">
-                      {{ namespace.name }}
-                    </div>
-                  </div>
-                </div>
+              <div v-if="data.linkedNamespace">
+                <div class="mb-1 text-txs">{{ data.linkedNamespace}}</div>
               </div>
-              <div v-else>no linked namespace</div>
+              <div v-else class=" text-txs">{{$t('general.noLinkedNamespace')}}</div>
             </div>
           </div>
         </template>
@@ -44,60 +32,48 @@
       <Column style="width: 250px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Supply</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('general.supply')}}</div>
             <div class="uppercase font-bold text-txs">{{data.supply}}</div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">Amount</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">{{$t('general.amount')}}</div>
             <div class="uppercase font-bold text-txs">{{data.amount}}</div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">Block Height</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">{{$t('general.blockHeight')}}</div>
             <div class="uppercase font-bold text-txs">{{data.height}}</div>
           </div>
         </template>
       </Column>
       <Column style="width: 50px" v-if="wideScreen">
       </Column>
-      <Column field="assetId" :header="$t('dashboard.assetid')" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
+      <Column field="assetId" :header="$t('general.assetId')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 200px'?'width: 200px'  ` " v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase font-bold text-txs">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedNamespace" header="NAMESPACE" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="linkedNamespace" :header="$t('general.namespace')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
-          <div v-if="data.linkedNamespace.length > 0">
-            <div v-if="data.linkedNamespace.length == 1">
-              <div v-for="namespace, item in data.linkedNamespace" :key="item">
-                <div class="mb-1 text-txs">{{ namespace.name }}</div>
-              </div>
-            </div>
-            <div v-else>
-              <div class="mb-1 text-txs">{{ data.linkedNamespace[0].name }} <div class="inline-block border border-gray-300 p-1 rounded-sm ml-2 cursor-pointer" @click="showNsList(data.i)" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">+ <span class="font-bold">{{ data.linkedNamespace.length -1 }}</span></div></div>
-              <div class="border p-3 w-28 border-gray-100 shadow-sm absolute bg-white" v-if="isNsListShow[data.i]" @mouseover="hoverOverNsList(data.i)" @mouseout="hoverOutNsList">
-                <div v-for="namespace, item in data.linkedNamespace.slice(1)" :key="item">
-                  {{ namespace.name }}
-                </div>
-              </div>
-            </div>
+          <div v-if="data.linkedNamespace">
+            <div class=" mb-1 text-txs text-txs">{{ data.linkedNamespace}}</div>
           </div>
-          <div v-else>no linked namespace</div>
+          <div v-else class=" text-txs">{{$t('general.noLinkedNamespace')}}</div>
         </template>
       </Column>
-      <Column field="supply" header="SUPPLY" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="supply" :header="$t('general.supply')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase text-txs">{{data.supply}}</span>
         </template>
       </Column>
-      <Column field="amount" header="AMOUNT" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="amount" :header="$t('general.amount')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase font-bold text-txs">{{data.amount}}</span>
         </template>
       </Column>
-      <Column field="creator" header="CREATOR" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="creator" :header="$t('dashboard.creator')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
-          <span class="uppercase font-bold text-txs">{{ data.owner == currentPublicKey ? 'yes': 'no'}}</span>
-          <img v-if="data.owner == currentPublicKey" src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer" v-tooltip.bottom="'<tiptitle>WALLET ADDRESS</tiptitle><tiptext>' + data.address + '</tiptext><tipbottom>MY PERSONAL ACCOUNT <img src=&quot;/icons/icon-personal-blue.png&quot;></tipbottom>'">
-          <img v-else src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer" v-tooltip.bottom="'<tiptitle>WALLET ADDRESS</tiptitle><tiptext>' + data.address + '</tiptext>'">
+          <span class="uppercase font-bold text-txs">{{ data.owner == currentPublicKey ? $t('general.yes'): $t('general.no')}}</span>
+          <img v-if="data.owner == currentPublicKey" src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer" v-tooltip.bottom="'<tiptitle>' + $t('general.walletAddress') +'</tiptitle><tiptext>' + data.address + '</tiptext><tipbottom>'+ $t('dashboard.myPersonalAcc') +'<img src=&quot;/icons/icon-personal-blue.png&quot;></tipbottom>'">
+          <img v-else src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer " v-tooltip.bottom="'<tiptitle>'+ $t('general.walletAddress') +'</tiptitle><tiptext>' + data.address + '</tiptext>'">
         </template>
       </Column>
-      <Column field="height" header="BLOCK HEIGHT" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="height" :header="$t('general.blockHeight')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.height}}</span>
         </template>
@@ -108,19 +84,19 @@
             <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
             <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div role="none" class="my-2">
-                <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.idHex, address: data.address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Modify Supply</router-link>
-                <router-link :to="{ name: 'ViewServicesAssetsLinkToNamespace', params: {assetId: data.idHex, address: data.address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Linked to namespace</router-link>
-                <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>View in Explorer<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
+                <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.idHex, address: data.address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
+                <router-link :to="{ name: 'ViewServicesAssetsLinkToNamespace', params: {assetId: data.idHex, address: data.address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.linkToNamespace')}}</router-link>
+                <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>{{$t('general.viewInExplorer')}}<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
               </div>
             </div>
           </div>
         </template>
       </Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('general.noRecord')}}
       </template>
       <template #loading>
-         {{$t('dashboard.loadingmessage')}}
+         {{$t('dashboard.fetchingTx')}}
       </template>
     </DataTable>
   </div>
@@ -135,6 +111,7 @@ import { networkState } from "@/state/networkState";
 import { WalletAccount } from '@/models/walletAccount';
 import Tooltip from 'primevue/tooltip';
 import { PublicAccount } from 'tsjs-xpx-chain-sdk';
+import { AppState } from '@/state/appState';
 
 export default{
   components: { DataTable, Column },
@@ -184,24 +161,20 @@ export default{
       let formattedAssets = [];
 
       for(let i=0; i < assets.length; ++i){
-        let namespaceAlias = [];
+        let namespaceAlias = ""
         let assetId = assets[i].idHex;
 
-        if(assetId != networkState.currentNetworkProfile.network.currency.assetId){
-          let namespaces = account.findNamespaceNameByAsset(assetId);
-          for(let j = 0; j < namespaces.length; ++j){
-            let aliasData = {
-              name: namespaces[j].name
-            };
-
-            namespaceAlias.push(aliasData);
+        if(assetId != AppState.nativeToken.assetId){
+          let findAsset = account.assets.find((i) => i.idHex == assetId)
+          if(findAsset.namespaceNames[0]){
+            namespaceAlias = findAsset.namespaceNames[0]
           }
 
           let data = {
             i: i,
             idHex: assetId,
             owner: assets[i].owner,
-            address: PublicAccount.createFromPublicKey(assets[i].owner, networkState.currentNetworkProfile.network.type).address.pretty(),
+            address: PublicAccount.createFromPublicKey(assets[i].owner, AppState.networkType).address.pretty(),
             amount: Helper.toCurrencyFormat(assets[i].getExactAmount(), assets[i].divisibility),
             supply: Helper.toCurrencyFormat(assets[i].getExactSupply(), assets[i].divisibility),
             linkedNamespace: namespaceAlias,

@@ -8,30 +8,30 @@
             </font-awesome-icon>
           </div>
           <div class="w-104" v-if="isAddContactQues && !isSuccessAdded">
-            <h1 class="text-md text-center my-5">{{$t('services.addcontact')}}</h1>
-            <div type="button" class="blue-btn py-2  font-semibold cursor-pointer text-center ml-auto mr-auto w-7/12" @click="proceed()">{{$t('services.yes')}}</div>
-            <div type="button" class="text-center cursor-pointer text-xs font-semibold text-blue-link mt-2" @click="closeModal()">{{$t('services.no')}}</div>
+            <h1 class="text-md text-center my-5">{{$t('transfer.addContacts')}}</h1>
+            <div type="button" class="blue-btn py-2  font-semibold cursor-pointer text-center ml-auto mr-auto w-7/12" @click="proceed()">{{$t('general.yes')}}</div>
+            <div type="button" class="text-center cursor-pointer text-xs font-semibold text-blue-link mt-2" @click="closeModal()">{{$t('general.no')}}</div>
           </div>
           <div class="w-104" v-if="!isAddContactQues && !isSuccessAdded">
             <h1 class="default-title font-bold mt-4 text-center">
-              {{$t('services.addcontacts')}}
+              {{$t('transfer.addContacts')}}
             </h1>
             <form @submit.prevent="create" class="mt-4">
               <fieldset class="w-full">
                 <div class="error error_box mb-5" v-if="err != ''">
                   {{ err }}
                 </div>
-                <TextInput class="mb-3" :placeholder="$t('services.name')" :errorMessage="$t('services.namevalidation')" v-model="contactName" icon="id-card-alt" :showError="showNameErr"/>
-                <TextInput :placeholder="$t('createsuccessful.address')" v-model="address" icon="wallet" :showError="showAddErr" :disabled="true"/>
+                <TextInput class="mb-3" :placeholder="$t('general.name')" :errorMessage="$t('general.nameRequired')" v-model="contactName" icon="id-card-alt" :showError="showNameErr"/>
+                <TextInput :placeholder="$t('general.address')" v-model="address" icon="wallet" :showError="showAddErr" :disabled="true"/>
                 <div class="mt-4 text-center">
                   <!-- <button type="button" class="default-btn mr-5 focus:outline-none" @click="clearInput()">
                     {{$t('signin.clear')}}
                   </button> -->
                   <button type="submit" class="blue-btn py-2  font-semibold cursor-pointer text-center ml-auto mr-auto w-7/12" :disabled="disableSave" @click="SaveContact()">
-                    {{$t('accounts.save')}}
+                    {{$t('general.save')}}
                   </button>
                   <div class="text-center cursor-pointer text-xs font-semibold text-blue-link mt-2" :disabled="disableSave" @click="isAddContactQues=true">
-                    Cancel
+                    {{$t('general.cancel')}}
                   </div>
                 </div>
               </fieldset>
@@ -39,7 +39,7 @@
           </div>
           <div class="w-104" v-if="isSuccessAdded">
             <h1 class="text-md my-5">
-             {{$t('services.contact')}} <b>{{ contactName }}</b> {{$t('services.successfullysaved')}}
+            {{$t('transfer.successfullySaved',{name:contactName})}}
             </h1>
           </div>
         </div>
@@ -58,6 +58,7 @@ import { computed, ref, watch, getCurrentInstance, inject } from "vue";
 import TextInput from "@/components/TextInput.vue";
 import { walletState } from "@/state/walletState";
 import { AddressBook } from "@/models/addressBook";
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: "SignInModal",
@@ -67,6 +68,7 @@ export default {
   },
 
   setup(p) {
+    const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const contactName = ref("");
@@ -92,19 +94,18 @@ export default {
 
     const SaveContact = () => {
       if (contactName.value !== ''&& address.value !== ''){
-      walletState.currentLoggedInWallet.addAddressBook(
-        new AddressBook(contactName.value, address.value)
-      );
+        let contact = walletState.currentLoggedInWallet.contacts
+        if(contact.find(item=>item.name==contactName.value)){
+          err.value = t('addressBook.nameExist')
+        }else{
+          walletState.currentLoggedInWallet.addAddressBook(
+            new AddressBook(contactName.value, address.value,'-none-')
+          );
 
-      err.value = "";
-      isSuccessAdded.value = true;
-      setTimeout(() => {
-        contactName.value = "";
-        emitter.emit("CLOSE_CONTACT_MODAL", false);
-        isAddContactQues.value = true;
-        isSuccessAdded.value = false;
-      }, 2500);
-    }
+          err.value = "";
+          isSuccessAdded.value = true;
+        }
+      }
     };
 
     const clearInput = () => (contactName.value = "");

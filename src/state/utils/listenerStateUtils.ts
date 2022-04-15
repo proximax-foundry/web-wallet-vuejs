@@ -77,7 +77,7 @@ export class ListenerStateUtils {
             listenerState.confirmedTransactions.push(addressConfirmedTransactions);
         }
 
-        ListenerStateUtils.updateAutoAnnounceByConfirmedHash(transaction.transactionInfo.hash, transaction.transactionInfo.height.compact());
+        //ListenerStateUtils.updateAutoAnnounceByConfirmedHash(transaction.transactionInfo.hash, transaction.transactionInfo.height.compact());
         // console.log("Confirm Added");
         // console.log("Hash: "+ transaction.transactionInfo.hash);
         // console.log("Address: "+ address.plain());
@@ -111,7 +111,7 @@ export class ListenerStateUtils {
         // console.log("Address: "+ address.plain());
         listenerState.allUnconfirmedTransactionsHash.push(transaction.transactionInfo.hash);
 
-        ListenerStateUtils.updateAutoAnnounceByConfirmedHash(transaction.transactionInfo.hash);
+        //ListenerStateUtils.updateAutoAnnounceByConfirmedHash(transaction.transactionInfo.hash);
 
         ListenerStateUtils.fireRecountUnconfirmed();
     }
@@ -181,7 +181,7 @@ export class ListenerStateUtils {
             listenerState.aggregateBondedTransaction.push(addressAggregateTransaction);
         }
 
-        ListenerStateUtils.updateAutoAnnounceByConfirmedHash(transaction.transactionInfo.hash);
+        //ListenerStateUtils.updateAutoAnnounceByConfirmedHash(transaction.transactionInfo.hash);
 
         listenerState.allAggregateBondedTransactionHash.push(transaction.transactionInfo.hash);
 

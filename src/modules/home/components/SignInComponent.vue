@@ -8,10 +8,10 @@
         <SelectWalletInput />
         <div class='mt-3'></div>
         <div class= 'text-center'>
-          <PasswordInput class = 'w-8/12 block ml-auto mr-auto' placeholder="Password" :errorMessage="$t('signin.passwordrequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
+          <PasswordInput class = 'w-8/12 block ml-auto mr-auto' :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
         </div>
         <div class=" text-center mt-2">
-          <button type="submit" class=" blue-btn bg-gray-primary py-2.5 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('welcome.signin')}}</button>
+          <button type="submit" class=" blue-btn bg-gray-primary py-2.5 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('home.signIn')}}</button>
         </div>
       </fieldset>
     </form>
@@ -62,10 +62,8 @@ export default defineComponent({
     })
     const login = () => {
       var result = WalletUtils.verifyWalletPassword(selectedWallet.value, networkState.chainNetworkName, walletPassword.value);
-      if (result == -1) {
-        err.value = "Invalid wallet name";
-      } else if (result == 0) {
-        err.value = t('signin.invalidpassword');
+      if (!result) {
+        err.value = t('general.walletPasswordInvalid',{name:selectedWallet.value});
       } else {
         // let wallets = new Wallets();
         let wallet = walletState.wallets.filterByNetworkNameAndName(networkState.chainNetworkName, selectedWallet.value);

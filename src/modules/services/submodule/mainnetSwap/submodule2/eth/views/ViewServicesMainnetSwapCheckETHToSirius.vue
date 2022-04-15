@@ -230,7 +230,7 @@
             </div>
           </div>
           <div class="mt-10 text-center">
-            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()" v-if="isInitiateSwap && !swapStatus208">{{$t('createsuccessful.continue')}}</button>
+            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()" v-if="isInitiateSwap && !swapStatus208">{{$t('general.continue')}}</button>
             <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn focus:outline-none w-40 inline-block" :class="isDisabledValidate?'opacity-50':''" :is="isDisabledValidate?'span':'router-link'" tag="button" v-else>Done</router-link>
           </div>
         </div>
@@ -282,6 +282,7 @@ import { abi, SwapUtils } from '@/util/swapUtils';
 import { networkState } from '@/state/networkState';
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { Helper } from '@/util/typeHelper';
+import { AppState } from '@/state/appState';
 
 export default {
   name: 'ViewServicesMainnetSwapCheckETHToSirius',
@@ -571,7 +572,7 @@ export default {
       }
     };
 
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 
     const txtRemoteTransactionErrorMsg = computed(() => {
       if(isDisplayFeeLowRemark.value){
@@ -637,7 +638,7 @@ export default {
 
     const siriusAddressSelectedName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
 
-    watch(siriusAddressSelected, (newName) => {
+    watch(siriusAddressSelected, (newAddress) => {
       let accountSelected = walletState.currentLoggedInWallet.accounts.find(account => account.address == newAddress);
       if(!accountSelected){
         accountSelected = walletState.currentLoggedInWallet.others.find(account => account.address == newAddress);
@@ -734,8 +735,8 @@ export default {
           const data = await response.json();
           isInvalidSwapService.value = false;
           siriusTxnHash.value = data.siriusSwapInfo.status.hash;
-          amount.value = Helper.convertToCurrency(data.siriusSwapInfo.amount, networkState.currentNetworkProfile.network.currency.divisibility);
-          amountReceived.value = Helper.amountFormatterSimple(data.siriusSwapInfo.amount, networkState.currentNetworkProfile.network.currency.divisibility) - 50;
+          amount.value = Helper.convertToCurrency(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility);
+          amountReceived.value = Helper.amountFormatterSimple(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility) - 50;
           siriusAddress.value = data.siriusSwapInfo.recipient;
           transactionHash.value = data.remoteTxnHash;
           swapTimestamp.value = data.timestamp;

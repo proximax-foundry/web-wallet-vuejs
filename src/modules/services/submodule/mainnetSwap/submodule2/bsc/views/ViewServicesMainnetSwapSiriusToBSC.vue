@@ -2,104 +2,116 @@
   <div>
     <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
     <div class='mt-6 p-6 border filter shadow-lg text-center'>
-      <div class="text-md">Main Network Swap</div>
-      <div class="text-xs my-3 mb-5 sm:mb-10"><img src="@/modules/services/submodule/mainnetSwap/img/bsc.svg" class="mr-2 h-5 inline-block">Swap from BSC to Proximax Sirius Chain</div>
+      <div class="text-md">{{$t('swap.mainNetworkSwap')}}</div>
+      <div class="text-xs my-3 mb-5 sm:mb-10"><img src="@/modules/services/submodule/mainnetSwap/img/bsc.svg" class="mr-2 h-5 inline-block">{{$t('swap.swapSiriusToBsc')}}</div>
       <div class="flex my-10">
         <div class="flex-none">
           <div class="flex border border-gray-300 rounded-md filter shadow-md">
             <div class="flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-yellow-500':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-txs sm:text-sm font-bold" :class="`${ currentPage>=1?'text-white':'text-gray-400' }`">1</div></div>
-            <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('swap.transaction')}}</div>
+            <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('general.transaction')}}</div>
           </div>
         </div>
         <div class="flex-grow self-center md:mx-4 h-0.5 bg-gray-100"></div>
         <div class="flex-none">
           <div class="flex border border-gray-300 rounded-md filter shadow-md">
             <div class="flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-yellow-500':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-txs sm:text-sm font-bold" :class="`${ currentPage>=2?'text-white':'text-gray-400' }`">2</div></div>
-            <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('swap.certificate')}}</div>
+            <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('general.certificate')}}</div>
           </div>
         </div>
       </div>
       <div v-if="currentPage==1">
-        <div class="text-sm my-5 font-bold">Transaction Details</div>
+        <div class="text-sm my-5 font-bold">Select Asset</div>
+        <select class="" v-model="selectedToken">
+          <option v-for="(element, item) in  tokenList" :value="element" :key="item">
+            {{element.name.toUpperCase()}}
+          </option>
+        </select>
+        <div class="text-sm my-5 font-bold">{{$t('general.transactionDetails')}}</div>
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <SelectInputAccountOutgoingSwap v-model="siriusAddress" placeholder="From Sirius Chain Account" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
+        <div class="error error_box mb-5" v-if="xpxFeeErr">{{$t('swap.failCoverTxFee')}}</div>
+        <SelectInputAccountOutgoingSwap :otherToken='selectedToken.namespace' :otherTokenId='selectedToken.assetId' :name='selectedToken.name' v-model="siriusAddress" :placeholder="$t('swap.fromSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" :divisibility="tokenDivisibility"/>
         <div class="relative">
           <div class="opacity-90 w-full h-full absolute z-10 bg-white" v-if="!siriusAddress"></div>
-          <SwapInputClean class="mt-5" :disabled="disableAmount" v-model="amount" :balance="selectedAccountBalance" :placeholder="currentNativeTokenName + ' Amount'" type="text" :showError="showAmountErr" :errorMessage="(selectedAccountBalance >= minBalanceAmount)?'Insufficient balance':'Balance is insufficient to cover transaction fee.'" emptyErrorMessage="Amount is empty" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()" :remarkOption="true" toolTip="XPX amount to swap to BEP20" />
-          <MetamaskAddressInput placeholder="BSC address receiving your swap" errorMessage="Valid BSC address is required" class="mt-5" :showError="showAddressErr" v-model="bscAddress" />
-          <div class="tex-center font-bold text-sm my-5">Transaction Fee (BSC BEP20 Network):</div>
+          <SwapInputClean class="mt-5" :disabled="disableAmount" :remarkOption="selectedToken.name=='xpx'" v-model="amount" :balance="selectedAccountBalance" :placeholder="`${selectedToken.name}` +' '+ $t('general.amount')" type="text" :showError="showAmountErr" :errorMessage="$t('general.insufficientBalance')" :emptyErrorMessage="$t('swap.amountEmpty')" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()"  :toolTip="$t('swap.bscAmountMsg')" :decimal="tokenDivisibility"/>
+          <MetamaskAddressInput :placeholder="$t('swap.bscAddress')" :errorMessage="$t('swap.bscAddressErr')" class="mt-5" :showError="showAddressErr" v-model="bscAddress" />
+          <div class="tex-center font-bold text-sm my-5">{{$t('general.transactionFee')}} ({{$t('swap.bsc')}} BEP20 {{$t('general.network')}}):</div>
           <div class="md:grid md:grid-cols-3 mb-4">
             <div class="md:col-span-1 mb-3">
               <div class="bscGasStrategy md:mr-6" :class="`${ (bscGasStrategy == 'standard')?'selected':'option' }`" @click="changeGasStrategy('standard')">
-                <p class="font-bold text-tsm">Standard</p>
+                <p class="font-bold text-tsm">{{$t('swap.standard')}}</p>
                 <div>BNB {{ standardGasPrice }}</div>
-                <div>{{ currentNativeTokenName }} {{ xpxAmountInStandardGasPrice }} = USD {{ standardGasPriceInUSD }}</div>
+                <div>XPX {{ xpxAmountInStandardGasPrice }} = {{$t('general.usd')}} {{ standardGasPriceInUSD }}</div>
               </div>
             </div>
             <div class="md:col-span-1 mb-3">
               <div class="bscGasStrategy md:mx-3" :class="`${ (bscGasStrategy == 'fast')?'selected':'option' }`" @click="changeGasStrategy('fast')">
-                <p class="font-bold text-tsm">Fast</p>
+                <p class="font-bold text-tsm">{{$t('swap.fast')}}</p>
                 <div>BNB {{ fastGasPrice }}</div>
-                <div>{{ currentNativeTokenName }} {{ xpxAmountInFastGasPrice }} = USD {{ fastGasPriceInUSD }}</div>
+                <div>XPX {{ xpxAmountInFastGasPrice }} = {{$t('general.usd')}} {{ fastGasPriceInUSD }}</div>
               </div>
             </div>
             <div class="md:col-span-1 mb-3">
               <div class="bscGasStrategy md:ml-6" :class="`${ (bscGasStrategy == 'rapid')?'selected':'option' }`" @click="changeGasStrategy('rapid')">
-                <p class="font-bold text-tsm">Rapid</p>
+                <p class="font-bold text-tsm">{{$t('swap.rapid')}}</p>
                 <div>BNB {{ rapidGasPrice }}</div>
-                <div>{{ currentNativeTokenName }} {{ xpxAmountInRapidGasPrice }} = USD {{ rapidGasPriceInUSD }}</div>
+                <div>XPX {{ xpxAmountInRapidGasPrice }} = {{$t('general.usd')}} {{ rapidGasPriceInUSD }}</div>
               </div>
             </div>
           </div>
-          <div class="text-sm text-center mb-2 sm:mb-4">Fees are valid for: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
-          <div class="tex-center font-bold text-sm mb-2">Transaction Fee (Sirius Network):</div>
+          <div class="text-sm text-center mb-2 sm:mb-4">{{$t('swap.feesValidDuration')}}: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
+          <div class="tex-center font-bold text-sm mb-2">{{$t('general.transactionFee')}} ({{$t('swap.siriusNetwork')}}):</div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">Transaction Fee: <span>{{ txFeeDisplay }}</span> {{ currentNativeTokenName }}</div>
+            <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('general.transactionFee')}}: <span>{{ txFeeDisplay }}</span> {{ currentNativeTokenName}}</div>
           </div>
-          <PasswordInputClean placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
-          <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center">
-          {{ amount }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 ml-4">
+          <div class="mb-5">Total Transaction Fee: {{minBalanceAmount}} {{currentNativeTokenName}}</div>
+          <PasswordInputClean :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
+          <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center uppercase">
+            {{ amount }} {{selectedToken.name}} 
+            <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken.name=='metx'" class="w-5 h-5 ml-4"> 
+            <img v-if="selectedToken.name=='xpx'" src="@/modules/account/img/proximax-logo.svg" class='w-5 h-5 ml-4'>
           </div>
           <div class="flex justify-center mt-3">
-            <div class="text-xs text-gray-600 mt-2 max-w-screen-md">Swap completion time will vary depending on the performance of the BSC network. The more BNB transaction fees you pay, the faster your swap will occur. Displayed BNB fees are valid for only three minutes due to the BSC network's fluctuating rates.</div>
+            <div class="text-xs text-gray-600 mt-2 max-w-screen-md">{{$t('swap.bscOutgoingMsg')}}</div>
           </div>
           <div class="mt-10 text-center">
-            <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">Maybe Later</button>
-            <button type="button" class="default-btn focus:outline-none disabled:opacity-50 mt-2" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?'Swap in progress. Please wait...':'Yes, Swap' }}</button>
-            <button class="default-btn focus:outline-none disabled:opacity-50 mt-2" v-if="canCheckStatus" @click="callTocheckSwapStatus">Check Swap Status</button>
+            <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">{{$t('general.later')}}</button>
+            <button type="button" class="default-btn focus:outline-none disabled:opacity-50 mt-2" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?$t('swap.swapInProgress'):$t('swap.confirmSwap') }}</button>
+            <button class="default-btn focus:outline-none disabled:opacity-50 mt-2" v-if="canCheckStatus" @click="callTocheckSwapStatus">{{$t('swap.checkSwapStatus')}}</button>
           </div>
         </div>
       </div>
       <div v-if="currentPage==2">
         <div>
-          <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
-          <div class="text-sm mb-7">The swap process has already started!</div>
-          <SwapCertificateComponent networkTerm="BSC" swapType="Out" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :swapQr="swapQr" :swapLink="swapLink" :siriusName="selectedAccountName" :swappedAmount="amount" :siriusAddress="Helper.createAddress(selectedAccountAddress).pretty()" :siriusTransactionHash="siriusTransactionHash" :xpxExplorer="xpxExplorerUrl" />
+          <h1 class="default-title font-bold mt-5 mb-2">{{$t('general.congratz')}}</h1>
+          <div class="text-sm mb-7">{{$t('swap.swapStarted')}}</div>
+          <SwapCertificateComponent :networkTerm="$t('swap.bsc')" swapType="Out" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="certTransactionHash" :swapQr="swapQr" :swapLink="swapLink" :siriusName="selectedAccountName" :swappedAmount="amount" :siriusAddress="Helper.createAddress(selectedAccountAddress).pretty()" :siriusTransactionHash="siriusTransactionHash" :xpxExplorer="xpxExplorerUrl" />
           
-          <button type="button" class="w-40 hover:shadow-lg bg-blue-primary text-white text-xs hover:opacity-50 rounded font-bold px-4 py-3 border border-blue-primary outline-none mr-4 mt-6" @click="saveCertificate">Download Certificate</button>
+          <button type="button" class="w-40 hover:shadow-lg bg-blue-primary text-white text-xs hover:opacity-50 rounded font-bold px-4 py-3 border border-blue-primary outline-none mr-4 mt-6" @click="saveCertificate">{{$t('general.downloadCertificate')}}</button>
           <div class="mt-5">
-            <a :href="swapLink" target=_new class="underline self-center text-xs font-bold text-blue-primary">View Transaction in BcScan<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a><br>
-            <a :href="xpxExplorerUrl" target=_new class="underline self-center text-xs font-bold text-blue-primary">View Transaction in Explorer<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a>
+            <a :href="swapLink" target=_new class="underline self-center text-xs font-bold text-blue-primary">{{$t('swap.viewTxInBsc')}}<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a><br>
+            <a :href="xpxExplorerUrl" target=_new class="underline self-center text-xs font-bold text-blue-primary">{{$t('swap.viewTxInExplorer')}}<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a>
           </div>
-          <div class="md:mx-20 lg:mx-40 font-bold text-center text-tsm py-5 sm:py-10 mt-5 sm:mt-10 border-t border-gray-200">Swap Details</div>
+          <div class="md:mx-20 lg:mx-40 font-bold text-center text-tsm py-5 sm:py-10 mt-5 sm:mt-10 border-t border-gray-200">{{$t('swap.swapDetails')}}</div>
           <div class="md:mx-20 lg:mx-10 xl:mx-40 border-2 border-gray-200 mt-4 p-5 text-xs font-bold filter shadow-lg">
-            <div class="text-blue-primary mb-1">From: {{ selectedAccountName }}</div>
+            <div class="text-blue-primary mb-1">{{$t('general.from')}}: {{ selectedAccountName }}</div>
             <div class="break-all">{{ Helper.createAddress(selectedAccountAddress).pretty() }}</div>
-            <div class="mt-1">Swap Amount {{ amount }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
+            <div class="mt-1 ">{{$t('swap.swapAmount')}} {{ amount }} {{selectedToken.name.toUpperCase()}} 
+              <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken.name=='metx'" class="w-3 h-3 ml-2 inline relative" style="top: -2px"> 
+              <img v-if="selectedToken.name=='xpx'" src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
             <div>
               <img src="@/modules/services/submodule/mainnetSwap/img/icon-dots.svg" class="inline-block h-8 my-2">
             </div>
-            <div class="text-blue-primary mb-1">To: MetaMask Account</div>
+            <div class="text-blue-primary mb-1">{{$t('general.to')}}: {{$t('swap.metamaskAcc')}}</div>
             <div>{{ bscAddress }}</div>
-            <div class="mt-1">Equivalent to {{ amount }} BEP20 XPX</div>
+            <div class="mt-1 ">{{$t('swap.equivalentTo')}} {{ amount }} BEP20 {{selectedToken.name.toUpperCase()}}</div>
           </div>
-          <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">Please download the certificate. It is needed in the event of an error. You can search the status of your BSC transaction using the above BSC Transaction Hash.</div>
+          <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">{{$t('swap.swapMsg3')}}</div>
           <label class="inline-flex items-center mb-5">
             <input type="checkbox" class="h-5 w-5 bg-blue-primary" value="true" v-model="savedCheck">
-            <span class="ml-2 cursor-pointer text-xs font-bold">I confirm that I have downloaded a copy of my certificate.</span>
+            <span class="ml-2 cursor-pointer text-xs font-bold">{{$t('swap.confirmDownloaded')}}</span>
           </label>
           <div class="sm:mt-5 text-center">
-            <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn mr-5 focus:outline-none w-40 inline-block mt-1" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
+            <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn mr-5 focus:outline-none w-40 inline-block mt-1" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">{{$t('general.done')}}</router-link>
           </div>
         </div>
       </div>
@@ -120,18 +132,17 @@ import { networkState } from '@/state/networkState';
 import { WalletUtils } from "@/util/walletUtils";
 import { Helper } from "@/util/typeHelper";
 import { getCurrentPriceUSD } from "@/util/functions";
-import { BuildTransactions } from "@/util/buildTransactions";
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { useToast } from "primevue/usetoast";
 import { ethers } from 'ethers';
 import { SwapUtils } from '@/util/swapUtils';
-import { NetworkType } from "tsjs-xpx-chain-sdk";
-//import { ChainUtils } from "@/util/chainUtils";
-//import { ChainAPICall } from "@/models/REST/chainAPICall";
-//import { listenerState } from "@/state/listenerState";
+import { MosaicId, NetworkType } from "tsjs-xpx-chain-sdk";
+import { AppState } from '@/state/appState';
+import { useI18n } from 'vue-i18n';
+
 
 export default {
-  name: 'ViewServicesMainnetSwapSiriusToBSC',
+  name: 'ViewServicesMainnetSwapMetxToBSC',
 
   components: {
     PasswordInputClean,
@@ -141,19 +152,19 @@ export default {
     SelectInputAccountOutgoingSwap,
   },
 
-  setup() {
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+  setup() { 
+    const {t} = useI18n();
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const toast = useToast();
     const router = useRouter();
     const displayTimer = ref(true);
     const timerSeconds = ref(180);
     const timerSecondsDisplay = computed(()=> timerSeconds.value % 60);
     const timerMinutes = computed(()=> Math.floor(timerSeconds.value / 60));
-
     const timerInterval = setInterval(()=>{
       --timerSeconds.value;
     }, 1000);
-
+    const selectedToken = ref('')
     const timerStop = watch(()=> timerSeconds.value, (newValue)=>{
 
       if(newValue <= 0){
@@ -161,6 +172,7 @@ export default {
         redirectToSelection();
       }
     });
+
 
     const disableTimer = () =>{
       timerStop();
@@ -192,7 +204,6 @@ export default {
           changeGasStrategy(bscGasStrategy.value);
         }
     };
-
     const allAvailableAccounts = computed(()=>{
 
       if(!walletState.currentLoggedInWallet){
@@ -204,7 +215,7 @@ export default {
           return { 
             name: acc.name,
             balance: acc.balance,
-            balanceDisplay: Helper.toCurrencyFormat(acc.balance, 6),
+            balanceDisplay: Helper.toCurrencyFormat(acc.balance, AppState.nativeToken.divisibility),
             type: "",
             address: Helper.createAddress(acc.address).pretty(),
             publicKey: acc.publicKey,
@@ -218,7 +229,7 @@ export default {
           return { 
             name: acc.name,
             balance: acc.balance,
-            balanceDisplay: Helper.toCurrencyFormat(acc.balance, 6),
+            balanceDisplay: Helper.toCurrencyFormat(acc.balance, AppState.nativeToken.divisibility),
             type: "MULTISIG",
             address: Helper.createAddress(acc.address).pretty(),
             publicKey: acc.publicKey,
@@ -238,6 +249,8 @@ export default {
     });
 
     const siriusAddress = ref('');
+    
+   
 
     watch(siriusAddress, (address) => {
       if(address){
@@ -247,14 +260,38 @@ export default {
         }
         selectedAccountName.value = account.name;
         selectedAccountAddress.value = account.address;
-        selectedAccountBalance.value = account.balance;
+        
+        if(selectedToken.value.name!="xpx"){
+          selectedAccountBalance.value = account.assets.find(asset=>asset.idHex==selectedToken.value.assetId)? account.assets.find(asset=>asset.idHex==selectedToken.value.assetId).amount/Math.pow(10,tokenDivisibility.value) : 0
+          maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value , tokenDivisibility.value);
+        }else{//if xpx
+          selectedAccountBalance.value = account.balance
+          maxSwapAmount.value = Helper.convertNumberMinimumFormat(account.balance - txFee.value - gasPriceInXPX.value, tokenDivisibility.value);
+        }
+        
         selectedAccountPublicKey.value = account.publicKey;
-        maxSwapAmount.value = Helper.convertNumberMinimumFormat(account.balance - txFee.value - gasPriceInXPX.value, 6);
+        
       }else{
         selectedAccountName.value = '';
         selectedAccountAddress.value = '';
         selectedAccountBalance.value = '';
         selectedAccountPublicKey.value = '';
+      }
+    });
+    watch(selectedToken, (token) => {
+      if(token!=''&&siriusAddress.value!=''){
+        let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == siriusAddress.value);
+        if(!account){
+          account = walletState.currentLoggedInWallet.others.find(account => account.address == siriusAddress.value);
+        }
+        if(token.name!="xpx"){
+        selectedAccountBalance.value = account.assets.find(asset=>asset.idHex==selectedToken.value.assetId)? account.assets.find(asset=>asset.idHex==selectedToken.value.assetId).amount/Math.pow(10,tokenDivisibility.value) : 0
+        maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value , tokenDivisibility.value);
+        }else{
+          selectedAccountBalance.value = account.balance
+          
+          maxSwapAmount.value = Helper.convertNumberMinimumFormat(account.balance - txFee.value - gasPriceInXPX.value, tokenDivisibility.value);
+        }
       }
     });
 
@@ -277,10 +314,10 @@ export default {
     );
     const amount = ref(0);
 
-    const xpxNamespace = networkState.currentNetworkProfile.network.currency.namespace;
+    const xpxNamespace = AppState.nativeToken.fullNamespace; 
     const XpxAsset = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), 1);
-
-    const buildClass = new BuildTransactions(networkState.currentNetworkProfile.network.type);
+    const metxAsset = Helper.createAsset(Helper.createNamespaceId('prx.metx').toHex(), 1);
+    const buildClass = AppState.buildTxn
     const transferBuilder = buildClass.transferBuilder();
     const aggregateBuilder = buildClass.aggregateCompleteBuilder();
 
@@ -305,36 +342,58 @@ export default {
     swapData.init();
 
     let swapServerUrl = swapData.swap_XPX_BSC_URL;
+    
     let bscScanUrl = swapData.BSCScanUrl;
     let xpxExplorerUrl = networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.hashRoute + '/';
     let sinkFundAddress;
     let sinkFeeAddress;
+    let tokenList = ref([])
+    
+    const tokenDivisibility = ref(0)
 
+    const getBscSwapTokenList = async()=>{
+      
+      let tokens = await SwapUtils.getSwapTokenList(swapServerUrl)
+      if(tokens){
+        
+        tokenList.value = tokens.map(token=>{
+          return {
+            name:token.name,
+            assetId: token.assetId,
+            contractAddress: token.contractAddress,
+            namespace: token.namespace,
+          }
+        })
+        selectedToken.value = tokenList.value[0]
+        AppState.chainAPI.assetAPI.getMosaic(new MosaicId(selectedToken.value.assetId)).then(mosaic=>{
+          tokenDivisibility.value =  mosaic.properties.divisibility
+        })
+      }
+    }
+    
     const updateSinkAddress = async()=>{
       try{
         const swapServiceInfoURL = SwapUtils.getServiceInfoURL(swapServerUrl);
-
+        
         const serviceInfo = await SwapUtils.getOutgoingSwapServiceInfo(swapServiceInfoURL);
-
         sinkFundAddress = serviceInfo.siriusInfo.sinkingFundAddress;
         sinkFeeAddress = serviceInfo.siriusInfo.sinkingFeeAddress;
-
         buildTransaction();
       }
       catch(error){
-        addErrorToast("Service unavailable", "Unable to get sink address");
+        addErrorToast(t('swap.serviceUnavailable'),t('swap.failGetSink'));
         redirectToSelection();
       }
     }
 
     updateSinkAddress();
-
+    getBscSwapTokenList()
     let aggreateCompleteTransaction;
     let transferTx;
     let feetransferTx;
 
     const buildTransaction = ()=>{
-      transferTx = transferBuilder.mosaics([XpxAsset])
+      transferTx = transferBuilder.mosaics([metxAsset])
                         .recipient(Helper.createAddress(sinkFundAddress))
                         .message(Helper.createPlainMessage(JSON.stringify(message1)))
                         .build();
@@ -346,12 +405,13 @@ export default {
                         .innerTransactions(Helper.createInnerTransaction([transferTx, feetransferTx], "0".repeat(64)))
                         .build();
 
-      txFee.value = Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(), 6);
+      txFee.value = Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(), AppState.nativeToken.divisibility);
+      minBalanceAmount.value = txFee.value
     }
 
     let txFee = ref(0);
     const txFeeDisplay = computed(()=>{
-        return Helper.toCurrencyFormat(txFee.value, 6);
+        return Helper.toCurrencyFormat(txFee.value, AppState.nativeToken.divisibility);
     });
 
     const rebuildTranction = ()=>{
@@ -362,8 +422,9 @@ export default {
       else{
         swapAmount = amount.value;
       }
-      const swapAmountXPX = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), Helper.convertToAbsolute(swapAmount, 6));
-      const feeXpx = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), Helper.convertToAbsolute(gasPriceInXPX.value, 6));
+     
+      const swapAmountXPX = Helper.createAsset(Helper.createNamespaceId(selectedToken.value.namespace).toHex(), Helper.convertToAbsolute(swapAmount, tokenDivisibility.value));
+      const feeXpx = Helper.createAsset(Helper.createNamespaceId(xpxNamespace).toHex(), Helper.convertToAbsolute(gasPriceInXPX.value, AppState.nativeToken.divisibility));
       transferTx = transferBuilder.mosaics([swapAmountXPX])
                         .recipient(Helper.createAddress(sinkFundAddress))
                         .message(Helper.createPlainMessage(JSON.stringify(message1)))
@@ -376,7 +437,7 @@ export default {
                         .innerTransactions(Helper.createInnerTransaction([transferTx, feetransferTx], selectedAccountPublicKey.value))
                         .build();
 
-      txFee.value = Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(), 6);
+      txFee.value = Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(),  AppState.nativeToken.divisibility);
     }
 
     const standardGasPrice = computed(()=>{
@@ -404,15 +465,15 @@ export default {
     });
 
     const xpxAmountInStandardGasPrice = computed(()=>{
-      return Helper.convertNumberMinimumFormat((standardGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, 6);
+      return Helper.convertNumberMinimumFormat((standardGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, AppState.nativeToken.divisibility);
     });
 
     const xpxAmountInFastGasPrice = computed(()=>{
-      return Helper.convertNumberMinimumFormat((fastGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, 6);
+      return Helper.convertNumberMinimumFormat((fastGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, AppState.nativeToken.divisibility);
     });
 
     const xpxAmountInRapidGasPrice = computed(()=>{
-      return Helper.convertNumberMinimumFormat((rapidGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, 6);
+      return Helper.convertNumberMinimumFormat((rapidGasPriceInUSD.value/ currentXPX_USD.value) * feeMultiply, AppState.nativeToken.divisibility);
     });
 
     const standardGasPriceInGwei = ref(0);
@@ -425,7 +486,7 @@ export default {
 
     const updateGasPrice = async ()=>{
 
-      if(networkState.currentNetworkProfile.network.type === NetworkType.TEST_NET){
+      if(AppState.networkType === NetworkType.TEST_NET){
         standardGasPriceInGwei.value = 10;
         fastGasPriceInGwei.value = 10;
         rapidGasPriceInGwei.value = 10;
@@ -479,6 +540,18 @@ export default {
       amount.value = maxSwapAmount.value;
     };
 
+    watch(selectedToken,n=>{
+      if(amount.value>maxSwapAmount.value){
+        updateAmountToMax()
+      }
+      AppState.chainAPI.assetAPI.getMosaic(new MosaicId(n.assetId)).then(mosaic=>{
+        tokenDivisibility.value =  mosaic.properties.divisibility
+      
+      })
+    })
+
+    
+
     const savedCheck = ref(false);
 
     const bscGasStrategy = ref('');
@@ -491,7 +564,19 @@ export default {
 
     const maxSwapAmount = ref(0);
     const minBalanceAmount = ref(0);
-
+   
+    const xpxFeeErr = computed(()=>{
+      if(selectedAccount.value){
+        if(selectedAccount.value.balance<minBalanceAmount.value){
+          return true
+        }else{
+          return false
+        }
+      }else{
+        return false
+      }
+      
+    })
     const changeGasStrategy = (feeStrategy)=>{
       bscGasStrategy.value = feeStrategy;
 
@@ -514,11 +599,8 @@ export default {
       message2.gasPrice = selectedGasPriceInGwei.value;
       message2.gasLimit = selectedGasLimit.value;
 
-      maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value - txFee.value - gasPriceInXPX.value, 6);
-      minBalanceAmount.value = Helper.convertNumberMinimumFormat(txFee.value + gasPriceInXPX.value, 6);
-      if(amount.value > maxSwapAmount.value){
-        amount.value = maxSwapAmount.value;
-      }
+      minBalanceAmount.value = Helper.convertNumberMinimumFormat(txFee.value + gasPriceInXPX.value, AppState.nativeToken.divisibility);
+     
 
       if(selectedAccount.value.balance <= minBalanceAmount.value){
         amount.value = 0;
@@ -526,7 +608,7 @@ export default {
 
       if(selectedAccount.value.balance <= minBalanceAmount.value){
         disableAmount.value = true;
-        showAmountErr.value = true;
+        /* showAmountErr.value = true; */
       }else{
         disableAmount.value = false;
         showAmountErr.value = false;
@@ -534,7 +616,23 @@ export default {
 
       rebuildTranction();
     }
-
+     watch(gasPriceInXPX,price=>{
+       let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == siriusAddress.value);
+        if(!account){
+          account = walletState.currentLoggedInWallet.others.find(account => account.address == siriusAddress.value);
+        }
+      if(selectedToken.value.name!="xpx"){
+        maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value , tokenDivisibility.value);
+        if(amount.value>maxSwapAmount.value){
+          updateAmountToMax()
+        }
+      }else{
+        maxSwapAmount.value = Helper.convertNumberMinimumFormat(account.balance - txFee.value - price, AppState.nativeToken.divisibility);
+        if(amount.value>maxSwapAmount.value){
+          updateAmountToMax()
+        }
+      }
+    })
     // watch to fix latency in updating gas price & xpx
     watch(standardGasLimit, () => {
       if(currentPage.value==2){
@@ -571,21 +669,35 @@ export default {
           updateRemoteAddress();
           changeGasStrategy(bscGasStrategy.value);
           if((amount.value + gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
-            addErrorToast('Insufficient amount', 'Insufficient amount to perform swap', 5000);
+            addErrorToast(t('swap.insufficientAmount'), t('swap.swapInsufficientAmount'), 5000);
             return;
           }
           disableTimer();
           let signedTransaction = SwapUtils.signTransaction(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
           siriusTransactionHash.value = signedTransaction.hash;
-          callSwapServer(signedTransaction.payload);
+          checkTokenBalance().then(balance=>{
+            if(amount.value<balance){
+              callSwapServer(signedTransaction.payload);
+            }else{
+              addErrorToast('Swap Server Error', 'Insufficient Balance from Swap Server', 5000);
+            }
+          })
+          
         } else {
-          err.value = "Wallet password is incorrect";
+          err.value = t('general.walletPasswordInvalid',{name: walletState.currentLoggedInWallet.name});
           swapInProgress.value = false;
           isDisabledCancel.value = false;
         }
       }
     };
-
+    const checkTokenBalance = async() =>{
+      const response = await SwapUtils.checkTokenBalance(swapServerUrl,selectedToken.value.name)
+      if (response.status){
+        return response.tokenBalance
+      }else{
+        return 0
+      }
+    }
     // call swap server function
     const callSwapServer = async(payload) =>{
       const data = {
@@ -597,14 +709,13 @@ export default {
       let stringifyData = JSON.stringify(data);
 
       try {
-        const response = await fetch(SwapUtils.getOutgoing_SwapTransfer_URL(swapServerUrl), {
+        const response = await fetch(SwapUtils.getOutgoing_SwapTransfer_URL(swapServerUrl,selectedToken.value.name), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: stringifyData, // body data type must match "Content-Type" header
         });
-
         if(response.ok){
           const res = await response.json();
           certTransactionHash.value = res.data.txHash;
@@ -616,7 +727,7 @@ export default {
         }
         else if(response.status==400){
           const res = await response.json();
-          addErrorToast('Swap operation failed', res.data.message);
+          addErrorToast(t('swap.swapOperationFail'), res.data.message);
           swapInProgress.value = false;
           isDisabledCancel.value = false;
         }
@@ -630,21 +741,21 @@ export default {
           let errorMessage = res.data.message ? res.data.message : "";
           toast.add({
             severity:'warn',
-            summary: 'Service is unavailable',
-            detail: errorMessage ? errorMessage : 'Please try again later',
+            summary: t('swap.serviceUnavailable'),
+            detail: errorMessage ? errorMessage : t('swap.tryAgain'),
             group: 'br'
           });
           swapInProgress.value = false;
           isDisabledCancel.value = false;
         }
         else if(response.status==504){
-          addErrorToast('Swap request timed-out', 'Please check the status again');
+          addErrorToast(t('swap.timedOut'), t('swap.checkStatusAgain'));
           //swapInProgress.value = false;
           isDisabledCancel.value = false;
           canCheckStatus.value = true;
         }
       } catch (error) {
-        addErrorToast('Network error', 'Swap Server not found');
+        addErrorToast(t('swap.networkErr'), t('swap.serverNotFound'));
         swapInProgress.value = false;
         isDisabledCancel.value = false;
       }
@@ -662,7 +773,7 @@ export default {
         currentPage.value = 2;
       }
       else{
-        addErrorToast("Swap not found", "Swap not found for the current transaction ID");
+        addErrorToast(t('swap.swapNotFound'), t('swap.txIdNotFound'));
       }
     }
 
@@ -747,6 +858,10 @@ export default {
       siriusAddress,
       walletState,
       Helper,
+      xpxFeeErr,
+      tokenDivisibility,
+      tokenList,
+      selectedToken,
     };
   }
 }

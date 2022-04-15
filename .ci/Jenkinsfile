@@ -81,6 +81,12 @@ pipeline {
                     sh 'rm dist/chainProfile.json'
                     sh 'cp $CHAIN_PROFILE dist/chainProfile.json'
                 }
+
+                configFileProvider(
+                    [configFile(fileId: 'testnet-chain-swap-profile', variable: 'CHAIN_SWAP_PROFILE')]) {
+                    sh 'rm dist/chainSwapProfile.json'
+                    sh 'cp $CHAIN_SWAP_PROFILE dist/chainSwapProfile.json'
+                }
                 
                 withCredentials([string(credentialsId: 'cloudfront_id', variable: 'CLOUDFRONT_ID'), 
                         string(credentialsId: 's3_bucket', variable: 'S3_BUCKET'),
@@ -102,7 +108,84 @@ pipeline {
                 success {
                 slackSend channel: '#devops',
                     color: 'good',
-                    message: "Branch *${env.GIT_BRANCH}* build of *${currentBuild.fullDisplayName}* completed successfully :100:\nDeployed to http://wallet.testnet2.xpxsirius.io"
+                    message: "Branch *${env.GIT_BRANCH}* build of *${currentBuild.fullDisplayName}* completed successfully :100:\nDeployed to http://wallet-testnet2.xpxsirius.io"
+                }
+                failure {
+                slackSend channel: '#devops',
+                    color: 'bad',
+                    message: "Branch *${env.GIT_BRANCH}* of *${currentBuild.fullDisplayName}* FAILED :scream:"
+                }
+            }
+        }
+
+        stage('Promotion to Mainnet') {
+            when {
+                tag 'v*'
+            }
+            steps {
+                slackSend channel: '#devops',
+                    color: 'warning',
+                    message: "*${currentBuild.fullDisplayName}* is awaiting user input confirmation for Mainnet deployment"
+                script {
+                    timeout(time: 6, unit: 'HOURS') {
+                    env.DEPLOY_TO_MAINNET = input message: "User Input Required",
+                    parameters: [choice(name: 'Deploy to Mainnet', choices: 'no\nyes', description: 'Choose yes if you want to deploy to Mainnet')]
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Mainnet') {
+            agent any
+            when {
+                environment name: 'DEPLOY_TO_MAINNET', value: 'yes'
+            }
+
+            steps {
+                echo 'Copy Artifact'
+                step([
+                    $class: 'CopyArtifact',
+                    filter: "${ARTIFACT}",
+                    projectName: "/${env.JOB_NAME}",
+                    selector: [$class: 'SpecificBuildSelector', buildNumber: "${env.BUILD_NUMBER}"]
+                ])
+                
+                echo 'Extract Artifact'
+                sh "tar -xvf ${ARTIFACT}"
+
+                configFileProvider(
+                    [configFile(fileId: 'mainnet-chain-profile', variable: 'CHAIN_PROFILE')]) {
+                    sh 'rm dist/chainProfile.json'
+                    sh 'cp $CHAIN_PROFILE dist/chainProfile.json'
+                }
+
+                configFileProvider(
+                    [configFile(fileId: 'mainnet-chain-swap-profile', variable: 'CHAIN_SWAP_PROFILE')]) {
+                    sh 'rm dist/chainSwapProfile.json'
+                    sh 'cp $CHAIN_SWAP_PROFILE dist/chainSwapProfile.json'
+                }
+                
+                withCredentials([string(credentialsId: 'mainnet_cloudfront_id', variable: 'CLOUDFRONT_ID'), 
+                        string(credentialsId: 'mainnet_s3_bucket', variable: 'S3_BUCKET'),
+                        string(credentialsId: 'aws_region', variable: 'AWS_REGION')]){
+                    withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${AWS_REGION}") {
+                        echo 'Deleting old files'
+                        s3Delete bucket: "${S3_BUCKET}", path: './'
+
+                        echo 'Uploading new files'
+                        s3Upload bucket: "${S3_BUCKET}", acl: 'Private', file: 'dist/', sseAlgorithm: 'AES256'
+                        
+                        echo 'Invalidating CloudFront'
+                        cfInvalidate distribution: "${CLOUDFRONT_ID}", paths: ['/*']
+                    }
+                }
+            }
+            
+            post {
+                success {
+                slackSend channel: '#devops',
+                    color: 'good',
+                    message: "Branch *${env.GIT_BRANCH}* build of *${currentBuild.fullDisplayName}* completed successfully :100:\nDeployed to http://web-wallet.xpxsirius.io"
                 }
                 failure {
                 slackSend channel: '#devops',

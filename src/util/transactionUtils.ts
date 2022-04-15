@@ -1,208 +1,155 @@
-import { readonly, computed } from "vue";
 import {
   Account,
-  Address,
-  Deadline,
   EncryptedMessage,
-  // NetworkCurrencyMosaic,
-  // FeeCalculationStrategy,
   Mosaic,
-  MosaicId,
   UInt64,
-  MosaicProperties,
-  MosaicSupplyType,
-  // MosaicService,
-  MosaicNonce,
   PlainMessage,
-  TransferTransaction,
-  TransactionHttp,
-  TransactionBuilderFactory,
   PublicAccount,
-  AccountHttp,
-  AccountInfo,
-  FeeCalculationStrategy,
-  NetworkType,
   NamespaceId,
   Transaction,
   TransactionType,
   AggregateTransaction,
   CosignatureTransaction,
   TransactionQueryParams,
-  AddressAliasTransaction,
-  AddExchangeOfferTransaction,
-  ChainConfigTransaction,
-  ChainUpgradeTransaction,
-  ExchangeOfferTransaction,
-  RemoveExchangeOfferTransaction,
-  AccountLinkTransaction,
-  LockFundsTransaction,
-  // ModifyMetadataTransaction,
-  AccountMetadataTransaction,
-  NamespaceMetadataTransaction,
-  MosaicMetadataTransaction,
-  AccountMosaicRestrictionModificationTransaction,
-  AccountOperationRestrictionModificationTransaction,
-  AccountAddressRestrictionModificationTransaction,
-  ModifyMultisigAccountTransaction,
-  MosaicAliasTransaction,
-  MosaicDefinitionTransaction,
-  MosaicSupplyChangeTransaction,
-  RegisterNamespaceTransaction,
-  SecretLockTransaction,
-  SecretProofTransaction,
   InnerTransaction,
-  ExchangeOfferType,
-  HashType,
-  RestrictionType,
-  AccountRestrictionModification,
   SignedTransaction,
   CosignatureSignedTransaction,
   TransactionGroupType,
-  TransactionSearch
+  TransactionSearch,
+  TransactionHash,
+  HashLockTransaction,
+  TransactionAnnounceResponse
 } from "tsjs-xpx-chain-sdk";
-// import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
-import { walletState } from "../state/walletState";
-import { networkState } from "../state/networkState";
-import { ChainUtils } from "../util/chainUtils";
-import { WalletUtils } from "../util/walletUtils";
-import { ChainAPICall } from "../models/REST/chainAPICall";
-import { BuildTransactions } from "../util/buildTransactions";
-import { Helper } from "./typeHelper";
-import { Duration } from "js-joda";
-import { faBreadSlice } from "@fortawesome/free-solid-svg-icons";
+import { AppState } from "@/state/appState";
+import { ChainConfigUtils } from "./chainConfigUtils";
+import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
+import { AnnounceType, AutoAnnounceSignedTransaction, HashAnnounceBlock } from "@/state/listenerState";
+import { networkState } from "@/state/networkState";
+import i18n from "@/i18n";
 
-const networkAPIEndpoint = computed(() => ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
-const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
 
+const {t} = i18n.global
 export const transactionTypeName = {
   transfer: {
     id: TransactionType.TRANSFER,
-    name: 'Transfer'
+    name: t('general.transfer')
   },
   registerNameSpace: {
     id: TransactionType.REGISTER_NAMESPACE,
-    name: 'Register Namespace'
+    name: t('namespace.registerNamespace')
   },
   mosaicDefinition: {
     id: TransactionType.MOSAIC_DEFINITION,
-    name: 'SDA Definition'
+    name: t('transaction.sdaDefinition')
   },
   mosaicSupplyChange: {
     id: TransactionType.MOSAIC_SUPPLY_CHANGE,
-    name: 'SDA Supply Change'
+    name: t('transaction.sdaSupplyChange')
   },
   modifyMultisigAccount: {
     id: TransactionType.MODIFY_MULTISIG_ACCOUNT,
-    name: 'Modify Multisig Account'
+    name: t('transaction.modifyMultisig')
   },
   aggregateComplete: {
     id: TransactionType.AGGREGATE_COMPLETE,
-    name: 'Aggregate Complete'
+    name: t('transaction.aggregateComplete')
   },
   aggregateBonded: {
     id: TransactionType.AGGREGATE_BONDED,
-    name: 'Aggregate Bonded'
+    name: t('transaction.aggregateBonded')
   },
   mosaicAlias: {
     id: TransactionType.MOSAIC_ALIAS,
-    name: 'SDA Alias'
+    name: t('transaction.sdaAlias')
   },
   addressAlias: {
     id: TransactionType.ADDRESS_ALIAS,
-    name: 'Address Alias'
+    name: t('transaction.addressAlias')
   },
   lock: {
     id: TransactionType.LOCK,
-    name: 'LockFund'
+    name: t('general.lockFund')
   },
   accountLink: {
     id: TransactionType.LINK_ACCOUNT,
-    name: 'Account Link'
+    name: t('transaction.accountLink')
   },
   exchangeOffer: {
     id: TransactionType.EXCHANGE_OFFER,
-    name: 'Exchange Offer'
+    name: t('transaction.exchangeOffer')
   },
   addExchangeOffer: {
     id: TransactionType.ADD_EXCHANGE_OFFER,
-    name: 'Add Exchange Offer'
+    name: t('transaction.addExchangeOffer')
   },
   removeExchangeOffer: {
     id: TransactionType.REMOVE_EXCHANGE_OFFER,
-    name: 'Remove Exchange Offer'
+    name: t('transaction.removeExchangeOffer')
   },
   modifyAccountMetadata: {
     id: TransactionType.MODIFY_ACCOUNT_METADATA,
-    name: 'Modify Account Metadata'
+    name: t('transaction.modifyAccMetadata')
   },
   modifyMosaicMetadata: {
     id: TransactionType.MODIFY_MOSAIC_METADATA,
-    name: 'Modify SDA Metadata'
+    name: t('transaction.modifySdaMetadata')
   },
   modifyNamespaceMetadata: {
     id: TransactionType.MODIFY_NAMESPACE_METADATA,
-    name: 'Modify Namespace Metadata'
+    name: t('transaction.modifyNsMetadata')
   },
   modifyAccountRestrictionAddress: {
     id: TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS,
-    name: 'Modify Account Address Restriction'
+    name: t('transaction.modifyAddressRestriction')
   },
   modifyAccountRestrictionMosaic: {
     id: TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC,
-    name: 'Modify Account SDA Restriction'
+    name: t('transaction.modifySdaRestriction')
   },
   modifyAccountRestrictionOperation: {
     id: TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION,
-    name: 'Modify Account Operation Restriction'
+    name: t('transaction.modifyOperationRestriction')
   },
   chainConfigure: {
     id: TransactionType.CHAIN_CONFIGURE,
-    name: 'Chain Configure'
+    name: t('transaction.chainConfigure')
   },
   chainUpgrade: {
     id: TransactionType.CHAIN_UPGRADE,
-    name: 'Chain Upgrade'
+    name: t('transaction.chainUpgrade')
   },
   secretLock: {
     id: TransactionType.SECRET_LOCK,
-    name: "Secret Lock"
+    name: t('transaction.secretLock')
   },
   secretProof: {
     id: TransactionType.SECRET_PROOF,
-    name: "Secret Proof"
+    name: t('transaction.secretProof')
   },
   modifyAccountMetadata_v2: {
     id: TransactionType.ACCOUNT_METADATA_V2,
-    name: "Account Metadata"
+    name:t('transaction.accountMetadata')
   },
   modifyMosaicMetadata_v2: {
     id: TransactionType.MOSAIC_METADATA_V2,
-    name: "SDA Metadata"
+    name: t('transaction.sdaMetadata')
   },
   modifyNamespaceMetadata_v2: {
     id: TransactionType.NAMESPACE_METADATA_V2,
-    name: "Namespace Metadata"
+    name: t('transaction.namespaceMetadata')
   },
   modifyMosaicLevy: {
     id: TransactionType.MODIFY_MOSAIC_LEVY,
-    name: "Modify SDA Levy"
+    name: t('transaction.modifySdaLevy')
   },
   removeRemoveLevy: {
     id: TransactionType.REMOVE_MOSAIC_LEVY,
-    name: "Remove SDA Levy"
+    name: t('transaction.removeSdaLevy')
   }
 };
 
 export class TransactionUtils {
 
-  static async getAccInfo(address: Address): Promise<AccountInfo> {
-
-    const chainAPICall = new ChainAPICall(networkAPIEndpoint.value);
-
-    const accountInfo = await chainAPICall.accountAPI.getAccountInfo(address);
-    // console.log(publicKey);
-    return accountInfo;
-  }
 
   static getTransactionTypeNameByEnum(transactionType: TransactionType): string{
 
@@ -224,7 +171,7 @@ export class TransactionUtils {
   }
 
   static getFakeEncryptedMessageSize(message: string): number{
-    return EncryptedMessage.create(message, PublicAccount.createFromPublicKey("0".repeat(64), ChainUtils.getNetworkType(localNetworkType.value)), "0".repeat(64)).size();
+    return EncryptedMessage.create(message, PublicAccount.createFromPublicKey("0".repeat(64), AppState.networkType), "0".repeat(64)).size();
   }
 
   static getPlainMessageSize(message: string): number{
@@ -247,44 +194,45 @@ export class TransactionUtils {
 
   static async getTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]> {
 
-    let transactions = await ChainUtils.getAccountTransactions(publicAccount, queryParams);
+    let transactions = await AppState.chainAPI.accountAPI.transactions(publicAccount, queryParams);
 
     return transactions;
   }
 
   static async searchTransactions(txnGroupType: TransactionGroupType, queryParams?: TransactionQueryParams): Promise<TransactionSearch> {
 
-    let transactionsResult = await ChainUtils.searchTransactions(txnGroupType, queryParams);
+    let transactionsResult = await AppState.chainAPI.transactionAPI.searchTransactions(txnGroupType, queryParams);
 
     return transactionsResult;
   }
 
   static async getUnconfirmedTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]> {
 
-    let transactions = await ChainUtils.getAccountUnconfirmedTransactions(publicAccount, queryParams);
+    let transactions = await  AppState.chainAPI.accountAPI.unconfirmedTransactions(publicAccount, queryParams);
 
     return transactions;
   }
 
   static async getPartialTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]> {
 
-    let transactions = await ChainUtils.getAccountPartialTransactions(publicAccount, queryParams);
+    let transactions = await AppState.chainAPI.accountAPI.aggregateBondedTransactions(publicAccount, queryParams);
 
     return transactions;
   }
 
-  static announceTransaction(signedTx: SignedTransaction): void {
+  static announceTransaction(signedTx: SignedTransaction): Promise<TransactionAnnounceResponse>{
 
-    ChainUtils.announceTransaction(signedTx);
+    return AppState.chainAPI.transactionAPI.announce(signedTx);
   }
 
-  static announceBondedTransaction(signedTx: SignedTransaction): void {
+  static announceBondedTransaction(signedTx: SignedTransaction): Promise<TransactionAnnounceResponse> {
 
-    ChainUtils.announceBondedTransaction(signedTx);
+    return AppState.chainAPI.transactionAPI.announceAggregateBonded(signedTx);
   }
 
-  static announceCosignitureSignedTransaction(signedTx: CosignatureSignedTransaction) :void {
-    ChainUtils.announceCosignTransaction(signedTx);
+  static announceCosignatureSignedTransaction(signedTx: CosignatureSignedTransaction): Promise<TransactionAnnounceResponse>{
+
+    return AppState.chainAPI.transactionAPI.announceAggregateBondedCosignature(signedTx);
   }
 
   static getTransactionTypeName(type: number): string | null {
@@ -388,13 +336,42 @@ export class TransactionUtils {
     return typeName;
   }
 
-  static getLockFundFee = (networkType: NetworkType, generationHash: string):number => {
-    let buildTransactions = new BuildTransactions(networkType, generationHash);
-    let tempAcc = Account.generateNewAccount(networkType);
-    let txn = buildTransactions.transfer(tempAcc.address, PlainMessage.create('hello'));
-    let abt = buildTransactions.aggregateBonded([txn.toAggregate(tempAcc.publicAccount)])
-    let signedTxn = tempAcc.sign(abt, generationHash);
-    return buildTransactions.hashLock(new Mosaic(new NamespaceId('prx.xpx'), UInt64.fromUint(10)), UInt64.fromUint(10), signedTxn).maxFee.compact();
+  static aggregateBondedTx(innerTX :InnerTransaction[]) :AggregateTransaction{
+    let txBuilder = AppState.buildTxn;
+    return txBuilder.aggregateBonded(innerTX)
   }
+
+  static lockFundTx(signedABT :SignedTransaction | TransactionHash) :HashLockTransaction{
+    const nativeTokenNamespace = AppState.nativeToken.fullNamespace
+    const lockingAtomicFee = networkState.currentNetworkProfileConfig.lockedFundsPerAggregate ?? 0;
+    let txBuilder = AppState.buildTxn 
+    return txBuilder.hashLockBuilder()
+    .transactionHash(signedABT)
+    .duration(UInt64.fromUint(ChainConfigUtils.getABTMaxSafeDuration()))
+    .mosaic(new Mosaic(new NamespaceId(nativeTokenNamespace), UInt64.fromUint(lockingAtomicFee)))
+    .build()
+  }
+
+  static announceLF_AND_addAutoAnnounceABT ( lockFundTxSigned :SignedTransaction, signedAggregateBondedTx :SignedTransaction ) :void {
+    let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(signedAggregateBondedTx);
+    autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(lockFundTxSigned.hash);
+    autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
+    autoAnnounceSignedTx.type = AnnounceType.BONDED; 
+    AppState.chainAPI.transactionAPI.announce(lockFundTxSigned);
+    ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
+    AppState.isPendingTxnAnnounce = true;
+  }
+
+  static getLockFundFee() :number {
+    let abtType = TransactionType.AGGREGATE_BONDED
+    let txHash = new TransactionHash("0".repeat(64),abtType)
+    const lockFundTx = TransactionUtils.lockFundTx(txHash)
+    return lockFundTx.maxFee.compact();
+  }  
+
+  static castToAggregate(tx :Transaction){
+    return tx as AggregateTransaction;
+  }
+  
 }
 

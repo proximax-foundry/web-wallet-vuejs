@@ -2,7 +2,7 @@
   <div>
     <div class='flex cursor-pointer'>
       <img src='@/assets/img/chevron_left.svg'>
-      <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
+      <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
     </div>
     
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
@@ -13,73 +13,58 @@
             <img src='@/assets/img/icon-green-tick.svg' class='h-10 w-10 pt-3 mr-2 '>
             <div class="flex flex-col w-full">
               <div class="flex">
-                <div class="text-xs text-green-500 font-semibold pt-3">Congratulations!</div>
+                <div class="text-xs text-green-500 font-semibold pt-3">{{$t('general.congratz')}}</div>
                 <img  @click="showModal=false" src="@/assets/img/delete.svg" class="w-5 ml-auto mr-1 cursor-pointer">
               </div>
-              <div class="text-xxs mt-1">Your wallet has been successfully created. Make sure you store your private key in a safe place. Access to your digital assets cannot be recovered without it.</div>
+              <div class="text-xxs mt-1">{{$t('account.accountCreated')}}{{$t('general.pkWarning')}}</div>
             </div>
           </div>
         </div>
       </div>
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-        <div class= 'w-32 text-center border-b-2 pb-3 border-yellow-500'>Account Details</div>
-        <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>Multisig</router-link>
-        <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>Scheme</router-link>
-        <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>Swap</router-link>
+        <div class= 'w-32 text-center border-b-2 pb-3 border-yellow-500'>{{$t('account.accountDetails')}}</div>
+        <router-link v-if="!isDelegate()" :to="{name:'ViewAccountAssets', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+        <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
+        <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
+        <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
         <MoreAccountOptions :address="acc.address"/>
       </div>
       <div class='border-2 border-t-0 pb-6 px-6 pt-2'>
-        <img src="@/modules/account/img/icon-info.svg" class='h-4 w-4 ml-auto' 
-        :title="'Top up your account balance to a maximum of 100,000 test-' + currentNativeTokenName + ' every 24 hours.'">
-        <div class = 'text-xxs text-blue-primary font-semibold'>CURRENT BALANCE</div>
+        <div class = 'mt-4 text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.currentBalance')}}</div>
         <div class='flex my-1'>
           <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
           <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
           <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
           <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
           <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
-          <div class='flex ml-auto gap-6 '>
-            <!-- <router-link :to='{name:"ViewTransferCreate"}' class='flex cursor-pointer'>
-              <img src="@/assets/img/icon-transfer.svg" class=" w-5 h-5 mt-0.5  cursor-pointer mr-1">
-              <div class='text-xs mt-1 font-semibold '>Transfer {{currentNativeTokenName}}</div>
-            </router-link> -->
-            <!-- <a v-if="networkState.chainNetwork == 0" href="https://www.proximax.io/en/xpx" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
+          <div v-if="networkType ==168 " class='flex ml-auto gap-6 '>
+            <a  :href="topUpUrl" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
               <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
-              <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
+              <div class='text-xs mt-0.5 font-semibold text-white'>{{$t('general.topUp',{tokenName: currentNativeTokenName})}}</div>
               <img src="@/modules/dashboard/img/icon-link-new-white.svg" class='h-5 w-5  cursor-pointer '>
-            </a> -->
-            <a v-if="networkState.chainNetwork == 0" href="https://bctestnetfaucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
-              <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
-              <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
-              <img src="@/modules/dashboard/img/icon-link-new-white.svg" class='h-3 w-3 mt-1 ml-1 cursor-pointer '>
-            </a>
-            <a v-if="networkState.chainNetwork == 1" href="https://bctestnet2faucet.xpxsirius.io/#/" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
-              <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
-              <div class='text-xs mt-0.5 font-semibold text-white'>Top up {{currentNativeTokenName}}</div>
-              <img src="@/modules/dashboard/img/icon-link-new-white.svg" class='h-3 w-3 mt-1 ml-1 cursor-pointer '>
             </a>
           </div>
         </div>
-        <div class = 'text-txs text-gray-400 '>Estimate US$ {{currencyConvert}}</div>
+        <div class = 'text-txs text-gray-400 '>{{$t('general.estimateUSD')}} {{currencyConvert}}</div>
         <div class='my-6 gray-line'></div>
-        <div class = 'text-xxs text-blue-primary mt-2 font-semibold'>PUBLIC KEY</div>
+        <div class = 'text-xxs text-blue-primary mt-2 font-semibold uppercase'>{{$t('general.publicKey')}}</div>
         <div class= 'flex'>
-          <div id="public" class="text-xs font-semibold mt-1 break-all" :copyValue="acc.publicKey" copySubject="Public Key">{{acc.publicKey}}</div>
-          <font-awesome-icon icon="copy" @click="copy('public')" title='Copy' class="ml-2 mt-0.5 pb-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+          <div id="public" class="text-xs font-semibold mt-1 break-all" :copyValue="acc.publicKey" :copySubject="$t('general.publicKey')">{{acc.publicKey}}</div>
+          <font-awesome-icon icon="copy" @click="copy('public')" :title="$t('general.copy')" class="ml-2 mt-0.5 pb-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
         </div>
         <div v-if='!other_acc' class='my-6 gray-line'></div>
         <div v-if='!other_acc' >
-          <div class = 'text-xxs text-blue-primary mt-0.5 font-semibold'>PRIVATE KEY</div>
+          <div class = 'text-xxs text-blue-primary mt-0.5 font-semibold uppercase'>{{$t('general.privateKey')}}</div>
           <div class='flex '>
             <div v-if="!showPwPK && !showPK" class='break-all font-semibold'>****************************************************************</div>
             <PkPasswordModal v-if="!showPwPK && !showPK" :account = 'acc' />
           </div>
           <div class='flex'>
-            <div id="private" class="text-xs mt-1 font-semibold break-all" type="text" :copyValue="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
-            <font-awesome-icon title='Copy' icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link mt-0.5 cursor-pointer " v-if="showPK"></font-awesome-icon>
+            <div id="private" class="text-xs mt-1 font-semibold break-all" type="text" :copyValue="privateKey" :copySubject="$t('general.privateKey')" v-if="showPK">{{privateKey}}</div>
+            <font-awesome-icon :title="$t('general.copy')" icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link mt-0.5 cursor-pointer " v-if="showPK"></font-awesome-icon>
             <font-awesome-icon icon="eye-slash" title='Hide Private Key' class="text-blue-link relative cursor-pointer mt-0.5 ml-1" @click="showPwPK = false; showPK = false" v-if="showPK"></font-awesome-icon>
           </div>
-          <p class = 'text-txs mt-2 text-gray-400'>{{$t('createsuccessful.warningtext1')}} {{$t('createsuccessful.warningtext2')}}</p>
+          <div class = 'text-txs mt-2 text-red-400 border px-1.5 py-2 border-red-400 rounded-md'>{{$t('general.pkWarning')}}</div>
       </div>
       <div class='my-6 gray-line' v-if="!other_acc "></div>
       <div class='flex'>
@@ -113,6 +98,7 @@ import PdfPasswordModal from '@/modules/account/components/PdfPasswordModal.vue'
 import DeleteAccountModal from '@/modules/account/components/DeleteAccountModal.vue'
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
+import { AppState } from '@/state/appState';
 
 export default {
   name: "ViewAccountDetails",
@@ -182,7 +168,7 @@ export default {
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
 
-      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject +' ' + t('general.copied'), group: 'br', life: 3000});
     };
 
     
@@ -192,26 +178,6 @@ export default {
     });  
 
    
-
-    const verifyWalletPwPk = () => {
-      if (walletPasswd.value == "") {
-        err.value = "Please insert wallet password to show Private Key";
-        showPK.value = false;
-        showPwPK.value = false;
-      } else{
-        if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPasswd.value)) {
-          // pw is correct
-          const passwordInstance = WalletUtils.createPassword(walletPasswd.value);
-          const walletPrivateKey = WalletUtils.decryptPrivateKey(passwordInstance,acc.encrypted,acc.iv);
-          privateKey.value = walletPrivateKey.toUpperCase();
-          showPK.value = true;
-          err.value = "";
-        } else {
-          showPK.value = false;
-          err.value = "Wallet password is incorrect";
-        }
-      }
-    };
 
     const verifyWalletPwSwap = () => {
       if (walletPasswdSwap.value == "") {
@@ -230,8 +196,8 @@ export default {
       });
     };
      
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
-    const currentNativeTokenDivisibility = computed(()=> networkState.currentNetworkProfile.network.currency.divisibility);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
 
     const accountBalance = computed(
       () => {          
@@ -248,7 +214,7 @@ export default {
       }
     })
 
-    if(networkState.currentNetworkProfile.network.currency.name === "XPX"){
+    if(AppState.nativeToken.label=== "XPX"){
       getCurrencyPrice();
 
       watch(accountBalance, () => {
@@ -256,20 +222,6 @@ export default {
       });
     }
 
-    const verifyWalletPwWalletPaper = () => {
-      if (walletPasswdWalletPaper.value == "") {
-        err.value = "Please insert wallet password to save paper wallet";
-        showWalletPaperPw.value = false;
-      } else{
-        if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPasswdWalletPaper.value)) {
-          // pw is correct
-          showSavePaperWallet.value = true;
-          // walletPasswdWalletPaper.value = false;
-        } else {
-          err.value = "Wallet password is incorrect";
-        }
-      }
-    };
 
     const generateQR = (url, size = 2, margin = 0) => {
       const qr = qrcode(10, 'H');
@@ -296,6 +248,20 @@ export default {
       doc.text(prettyAddress, 146, 164, { maxWidth: 132 });
       doc.save('Your_Paper_Wallet');
     }
+
+    const networkType = computed(()=>{
+    return AppState.networkType
+    })
+    const topUpUrl = computed(()=>{
+      if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
+        return 'https://bctestnetfaucet.xpxsirius.io/#/'
+      }else if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 2'){
+        return 'https://bctestnet2faucet.xpxsirius.io/#/'
+      }else{
+        return ''
+      }
+    }) 
+
     emitter.on("revealPK", (e) => {
       showPK.value = e;
     });
@@ -308,6 +274,7 @@ export default {
    
 
     return {
+      topUpUrl,
       networkState,
       showModal,
       splitBalance,
@@ -320,7 +287,6 @@ export default {
       showPK,
       showPwPK,
       showPasswdError,
-      verifyWalletPwPk,
       walletPasswd,
       walletPasswdSwap,
       showPwSwap,
@@ -333,8 +299,8 @@ export default {
       showWalletPaperPw,
       showSavePaperWallet,
       walletPasswdWalletPaper,
-      verifyWalletPwWalletPaper,
       saveWalletPaper,
+      networkType
     };
   }
 };

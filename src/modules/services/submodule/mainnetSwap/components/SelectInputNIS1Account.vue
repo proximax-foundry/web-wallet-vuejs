@@ -7,11 +7,11 @@
         <div class="flex flex-col ml-2 text-left">
           <div class="text-blue-primary font-semibold text-xxs uppercase" style="line-height: 9px;">{{ placeholder?placeholder:'Account' }}</div>
           <div v-if='selectedAccount!=""' class="mt-1 text-tsm font-bold text-left">{{selectedAccount}}</div>
-          <div v-else class="text-tsm font-bold mt-1 text-left">Select Account</div>
+          <div v-else class="text-tsm font-bold mt-1 text-left">{{$t('general.selectAccount')}}</div>
         </div>
       </div>
       <div class="sm:flex ml-8 mt-2 sm:ml-0 sm:mt-0 text-left sm:text-right">
-        <div class="text-xs mr-3" v-if="selectedAccount!=''">Balance: <span v-html="selectedAccountBalanceFormatted"></span></div>
+        <div class="text-xs mr-3" v-if="selectedAccount!=''">{{$t('general.balance')}}: <span v-html="selectedAccountBalanceFormatted"></span></div>
         <div v-if='!toggleSelection && selectedAccount==""' class="hidden sm:block text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
         <div v-if='!toggleSelection && selectedAccount!=""'  class="hidden sm:block text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto"><img src="@/modules/services/submodule/mainnetSwap/img/icon-caret-down.svg"></div>
         <img v-if='toggleSelection' @click="selectedAccount='';$emit('update:modelValue', '');" src="@/assets/img/delete.svg" class="hidden sm:block h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto">
@@ -25,14 +25,14 @@
   </div>
   <div class='relative'>
   <div v-if='toggleSelection' class='absolute border border-t-0 w-full z-50 bg-white max-h-40 overflow-auto px-3 filter drop-shodow-xl'>
-    <div v-if='accounts.length>0' class="pl-2 pt-4 text-xxs text-gray-400 text-left">SELECT ACCOUNT</div>
-    <div v-else class='text-xxs pt-2 pl-2 pb-2' >The list is empty.</div>
+    <div v-if='accounts.length>0' class="pl-2 pt-4 text-xxs text-gray-400 text-left uppercase">{{$t('general.selectAccount')}}</div>
+    <div v-else class='text-xxs pt-2 pl-2 pb-2' >{{$t('general.listEmpty')}}</div>
     <div v-for='(items,index) in accounts' :key="items" class="px-2 py-3 flex cursor-pointer items-center" @click="selectAccount(items.label, items.value, items.disabled);" :class='`${(index != accounts.length - 1)?"border-b border-gray-200":""}`'>
       <div v-html="toSvg(items.value, 20, jdenticonConfig)"></div>
       <div class='text-xs ml-2 font-semibold' :class="`${ items.disabled?'text-gray-400':'' }`">{{items.label}}</div>
-      <div v-if='items.label!=selectedAccount && !items.disabled' class='cursor-pointer text-blue-primary text-xxs mt-0.5 ml-auto font-semibold'>SELECT</div>
-      <div v-else-if="items.disabled" class='text-gray-400 text-xxs mt-0.5 ml-auto'>DISABLED</div>
-      <div v-else class='text-gray-500 text-xxs mt-0.5 ml-auto'>CURRENT</div>
+      <div v-if='items.label!=selectedAccount && !items.disabled' class='cursor-pointer text-blue-primary text-xxs mt-0.5 ml-auto font-semibold uppercase'>{{$t('general.select')}}</div>
+      <div v-else-if="items.disabled" class='text-gray-400 text-xxs mt-0.5 ml-auto uppercase'>{{$t('general.disabled')}}</div>
+      <div v-else class='text-gray-500 text-xxs mt-0.5 ml-auto uppercase'>{{$t('general.current')}}</div>
     </div>
   </div>
   </div>
@@ -47,6 +47,7 @@ import { toSvg } from "jdenticon";
 import { Helper } from "@/util/typeHelper";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { Nis1SwapUtils } from '@/util/nis1SwapUtils';
+import { AppState } from '@/state/appState';
 
 export default defineComponent({
   emits:[
@@ -62,7 +63,7 @@ export default defineComponent({
   setup(p, {emit}){
     const toggleSelection = ref(false);
 
-    // const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    // const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();

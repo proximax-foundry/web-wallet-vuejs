@@ -2,13 +2,13 @@
   <div>
     <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
       <div class='mt-6 p-6 border filter shadow-lg text-center'>
-        <div class="text-md">Main Network Swap</div>
-        <div class="text-xs my-3 mb-5 sm:mb-10"><img src="@/modules/services/submodule/mainnetSwap/img/bsc.svg" class="mr-2 h-5 inline-block">Check swap from BSC to Proximax Sirius Chain</div>
+        <div class="text-md">{{$t('swap.mainNetworkSwap')}}</div>
+        <div class="text-xs my-3 mb-5 sm:mb-10"><img src="@/modules/services/submodule/mainnetSwap/img/bsc.svg" class="mr-2 h-5 inline-block">{{$t('general.check')}} {{$t('swap.swapBscToSirius')}}</div>
         <div class="flex my-10">
           <div class="flex-none">
             <div class="flex border border-gray-300 rounded-md filter shadow-md">
               <div class="flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-yellow-500':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-txs sm:text-sm font-bold" :class="`${ currentPage>=1?'text-white':'text-gray-400' }`">1</div></div>
-              <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">Input Information</div>
+              <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('swap.inputInfo')}}</div>
             </div>
           </div>
           <div class="flex-grow self-center md:mx-4 h-0.5 bg-gray-100"></div>
@@ -20,13 +20,13 @@
           </div>
         </div>
         <div v-if="currentPage==1">
-          <div class="text-lg my-7 font-bold">Check Swap Status</div>
-          <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">Please make sure there is no other crypto wallet extension currently being enabled except <b>MetaMask</b>.<div class="my-2">Refer to the <a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">walkthrough<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a> for more details.</div>Please refresh this page after disabling other wallet extensions.</div>
+          <div class="text-lg my-7 font-bold">{{$t('swap.checkSwapStatus')}}</div>
+          <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">{{$t('swap.noOtherExtension')}} <b>{{$t('swap.metamask')}}</b>.<div class="my-2">{{$t('swap.referTo')}}<a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">{{$t('swap.walkthrough')}}<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a>{{$t('swap.forMoreDetails')}}</div>{{$t('swap.refreshMsg')}}</div>
           <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
           <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-          <p class="font-bold text-xs text-left mb-1">Type</p>
+          <p class="font-bold text-xs text-left mb-1">{{$t('dashboard.type')}}</p>
           <div class="mb-5 mt-3 text-left">
-            <button class="bg-blue-primary px-3 py-2 w-20 text-white font-bold rounded-l border border-blue-primary cursor-auto">In</button><button class="border px-3 py-2 w-20 text-blue-primary font-bold rounded-r cursor-pointer hover:border-blue-primary hover:bg-blue-50 transition-all duration-200" @click="$router.push({name: 'ViewServicesMainnetSwapCheckSiriusToBSC'})">Out</button> <span class="text-gray-500 ml-3 text-tsm">From BSC to Sirius</span>
+            <button class="bg-blue-primary px-3 py-2 w-20 text-white font-bold rounded-l border border-blue-primary cursor-auto">{{$t('general.in')}}</button><button class="border px-3 py-2 w-20 text-blue-primary font-bold rounded-r cursor-pointer hover:border-blue-primary hover:bg-blue-50 transition-all duration-200" @click="$router.push({name: 'ViewServicesMainnetSwapCheckSiriusToBSC'})">{{$t('general.out')}}</button> <span class="text-gray-500 ml-3 text-tsm">{{$t('swap.bscToSirius')}}</span>
           </div>
           <div class="mb-5 md:flex md:justify-between border border-gray-200 rounded">
             <div class="flex justify-left">
@@ -35,8 +35,8 @@
               </div>
               <div class="text-left flex items-center">
                 <div>
-                  <div class="text-xxs uppercase text-blue-primary font-bold mb-1">From MetaMask Address</div>
-                  <div class="font-bold text-black text-tsm break-all mr-2">{{ isMetamaskConnected?(currentAccount?currentAccount:'Not connected'):'Not connected' }}</div>
+                  <div class="text-xxs uppercase text-blue-primary font-bold mb-1">{{$t('swap.fromMetamaskAddress')}}</div>
+                  <div class="font-bold text-black text-tsm break-all mr-2">{{ isMetamaskConnected?(currentAccount?currentAccount:$t('swap.connected')):$t('swap.notConnected') }}</div>
                 </div>
               </div>
             </div>
@@ -44,16 +44,16 @@
               <div class="border-l border-gray-200 text-green-500 font-semibold text-xxs w-16 lg:w-20 flex items-center justify-center uppercase" v-if="currentAccount">
                 <div>
                   <img src="@/modules/services/submodule/mainnetSwap/img/icon-connected.svg" class="inline-block">
-                  <div>Connected</div>
+                  <div>{{$t('swap.connected')}}</div>
                 </div>
               </div>
               <div class="border-l border-gray-200 text-blue-primary text-tsm font-bold w-16 lg:w-20 flex justify-center items-center">
                 <div v-if="isInstallMetamask">
-                  <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">Connect</div>
-                  <div class="cursor-pointer" @click="connectMetamask()" v-else>Change</div>
+                  <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">{{$t('swap.connect')}}</div>
+                  <div class="cursor-pointer" @click="connectMetamask()" v-else>{{$t('general.change')}}</div>
                 </div>
                 <div v-else>
-                  <a href="https://metamask.io/" target=_new>Download</a>
+                  <a href="https://metamask.io/" target=_new>{{$t('general.download')}}</a>
                 </div>
               </div>
             </div>
@@ -61,30 +61,30 @@
               <div class="border-t border-gray-200 text-green-500 font-semibold text-xxs uppercase p-2" v-if="currentAccount">
                 <div class="flex items-center justify-center">
                   <img src="@/modules/services/submodule/mainnetSwap/img/icon-connected.svg" class="inline-block mr-2 w-4 h-4">
-                  Connected
+                  {{$t('swap.connected')}}
                 </div>
               </div>
               <div class="border-t border-gray-200 text-blue-primary text-tsm font-bold p-3">
                 <div v-if="isInstallMetamask">
-                  <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">Connect</div>
-                  <div class="cursor-pointer" @click="connectMetamask()" v-else>Change</div>
+                  <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">{{$t('swap.connect')}}</div>
+                  <div class="cursor-pointer" @click="connectMetamask()" v-else>{{$t('general.change')}}</div>
                 </div>
                 <div v-else>
-                  <a href="https://metamask.io/" target=_new>Download</a>
+                  <a href="https://metamask.io/" target=_new>{{$t('general.download')}}</a>
                 </div>
               </div>
             </div>
           </div>
-          <TextInputClean placeholder="BSC Transaction Hash" errorMessage="Please key in valid transaction hash" :showError="showTxnHashError" v-model="remoteTxnHash" class="w-full" />
+          <TextInputClean :placeholder="'BSC '+ $t('swap.transactionHash')" :errorMessage="$t('swap.enterValidHash')" :showError="showTxnHashError" v-model="remoteTxnHash" class="w-full" />
           <div class="mt-10 text-center">
-            <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
-            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledCheck" @click="checkStatus">Check Status</button>
+            <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-5 focus:outline-none disabled:opacity-50">{{$t('general.cancel')}}</button>
+            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledCheck" @click="checkStatus">{{$t('swap.checkStatus')}}</button>
           </div>
         </div>
         <div v-if="currentPage==2">
           <div class="text-lg my-7">
             <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-            <div class="font-bold text-left text-xs md:text-sm" :class="step1?'text-gray-700':'text-gray-300'">Step 1: Check transaction status</div>
+            <div class="font-bold text-left text-xs md:text-sm" :class="step1?'text-gray-700':'text-gray-300'">{{$t('swap.checkStep1',{network: $t('swap.bsc')})}}</div>
             <div class="flex border-b border-gray-300 p-3">
               <div class="flex-none">
                 <div class=" rounded-full border w-6 h-6 transition-all duration-500" :class="step1?'border-blue-primary':'border-gray-300'">
@@ -93,7 +93,7 @@
                   </div>
                 </div>
               </div>
-              <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">Checking BSC transaction status<div class="text-tsm text-gray-500 my-3" v-if="transactionPending">Pending confirmation: {{ numConfirmation }} of 12 confirmations</div></div>
+              <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step1?'text-gray-700':'text-gray-300'">{{$t('swap.checkingStatus',{network: $t('swap.bsc')})}}<div class="text-tsm text-gray-500 my-3" v-if="transactionPending">{{$t('swap.pendingConfirmation',{number: numConfirmation})}} </div></div>
             </div>
             <div class="flex border-b border-gray-300 p-3">
               <div class="flex-none">
@@ -105,10 +105,10 @@
                 </div>
               </div>
               <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step2?'text-gray-700':'text-gray-300'">
-                {{ isInvalidRemoteTxnHash?(transactionNotFound?'Transaction is not found':'Transaction has failed.'):'BSC Transaction is successful:' }}
+                {{ isInvalidRemoteTxnHash?(transactionNotFound? $t('swap.txNotFound'):$t('swap.txFailed')):$t('swap.txSuccessful',{network: $t('swap.bsc')}) }}
                 <div v-if="!isInvalidRemoteTxnHash && step2" class="mt-2">
                   <div v-if="remoteTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
-                    <a :href="remoteTxnLink" target=_new :class="isInvalidRemoteTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="validateTransfer" :copyValue="remoteTxnHash" copySubject="Transfer hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ remoteTxnHash }}</a>
+                    <a :href="remoteTxnLink" target=_new :class="isInvalidRemoteTxnHash?'text-gray-300':'text-blue-primary'" class="flex-grow break-all text-tsm self-center hover:underline" id="validateTransfer" :copyValue="remoteTxnHash" :copySubject="$t('swap.transactionHash')"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ remoteTxnHash }}</a>
                     <div class="flex-none">
                       <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step2"></font-awesome-icon>
                     </div>
@@ -116,11 +116,11 @@
                 </div>
                 <div v-if="isInvalidRemoteTxnHash && step2" class="mt-2 text-sm text-gray-700">
                   {{ txtRemoteTransactionErrorMsg }}
-                  <router-link :to="{ name: 'ViewServicesMainnetSwapBSCToSirius' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">Swap</router-link>
+                  <router-link :to="{ name: 'ViewServicesMainnetSwapBSCToSirius' }" class="bg-blue-primary text-white py-2 px-5 rounded-2xl w-24 block text-center my-3 font-bold">{{$t('general.swap')}}</router-link>
                 </div>
               </div>
             </div>
-            <div class="font-bold text-left text-xs md:text-sm mt-4" :class="step3?'text-gray-700':'text-gray-300'">Step 2: Check swap status</div>
+            <div class="font-bold text-left text-xs md:text-sm mt-4" :class="step3?'text-gray-700':'text-gray-300'">{{$t('swap.checkStep2')}}</div>
             <div class="flex border-b border-gray-300 p-3">
               <div class="flex-none">
                 <div class=" rounded-full border w-6 h-6" :class="step3?'border-blue-primary':'border-gray-300'">
@@ -129,7 +129,7 @@
                   </div>
                 </div>
               </div>
-              <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">Requesting from swap service</div>
+              <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step3?'text-gray-700':'text-gray-300'">{{$t('swap.requestFromSwap')}}</div>
             </div>
             <div class="flex border-b border-gray-300 p-3">
               <div class="flex-none">
@@ -141,36 +141,36 @@
                 </div>
               </div>
               <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step4?'text-gray-700':'text-gray-300'">
-                {{ (isInvalidSwapCheck && step4)?(isCheckSwapStatusNotFound?'Transaction is not found in swap service:':'Transaction is invalid in the swap service:'):'Swap is successful:' }}
+                {{ (isInvalidSwapCheck && step4)?(isCheckSwapStatusNotFound?$t('swap.txNotFound'):$t('swap.txInvalid')):$t('swap.swapSuccess') }}
                 <div v-if="!isInvalidSwapCheck && step4" class="mt-2">
                   <div v-if="siriusTxnHash" class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex">
-                    <a :href="siriusTxnLink" target=_new class="text-blue-primary flex-grow break-all text-tsm self-center hover:underline" id="validateTransfer" :copyValue="remoteTxnHash" copySubject="Transfer hash"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ siriusTxnHash }}</a>
+                    <a :href="siriusTxnLink" target=_new class="text-blue-primary flex-grow break-all text-tsm self-center hover:underline" id="validateTransfer" :copyValue="remoteTxnHash" :copySubject="$t('swap.transactionHash')"><font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block mr-2"></font-awesome-icon>{{ siriusTxnHash }}</a>
                     <div class="flex-none">
                       <font-awesome-icon icon="copy" @click="copy('validateTransfer')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step4"></font-awesome-icon>
                     </div>
                   </div>
-                  <div class="text-gray-600 mt-3 text-tsm ml-2">Swap is already in progress or has been completed successfully.</div>
+                  <div class="text-gray-600 mt-3 text-tsm ml-2">{{$t('swap.swapSuccess2')}}</div>
                 </div>
                 <div v-if="isInvalidSwapCheck && step4">
                   <div class="sm:flex my-4">
-                    <button :disabled="isInitiateSwap" @click="displayInitiateSwapPanel" class="sm:flex-none justify-start sm:justify-end bg-blue-primary h-15 w-40 rounded mr-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-3 sm:mt-0 disabled:opacity-50 self-center" type="button">Initiate swap</button>
+                    <button :disabled="isInitiateSwap" @click="displayInitiateSwapPanel" class="sm:flex-none justify-start sm:justify-end bg-blue-primary h-15 w-40 rounded mr-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-3 sm:mt-0 disabled:opacity-50 self-center" type="button">{{$t('swap.initiateSwap')}}</button>
                     <div class="py-2 sm:flex-grow text-tsm">
-                      <div class="mb-1">Initiative swap with this BSC Transaction Hash</div>
+                      <div class="mb-1">{{$t('swap.initiateSwapWithHash',{network: $t('swap.bsc')})}}</div>
                     </div>
                   </div>
                 </div>
                 <div v-if="isInitiateSwap">
                   <div class="sm:flex justify-between">
                     <div class="w-full">
-                      <SelectInputAccount v-model="siriusAddressSelected" placeholder="To Sirius Chain Account" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
+                      <SelectInputAccount v-model="siriusAddressSelected" :placeholder="$t('swap.toSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
                     </div>
-                    <button :disabled="!siriusAddressSelected || !disableConfirmAddressSelection" @click="confirmAddress" class="sm:flex-none justify-start sm:justify-end bg-blue-primary h-15 w-40 rounded-3xl sm:ml-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-3 sm:mt-2 disabled:opacity-50 self-center" type="button">Confirm</button>
+                    <button :disabled="!siriusAddressSelected || !disableConfirmAddressSelection" @click="confirmAddress" class="sm:flex-none justify-start sm:justify-end bg-blue-primary h-15 w-40 rounded-3xl sm:ml-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-3 sm:mt-2 disabled:opacity-50 self-center" type="button">{{$t('general.confirm')}}</button>
                   </div>
                 </div>
               </div>
             </div>
             <div v-if="isInitiateSwap">
-              <div class="font-bold text-left text-xs md:text-sm mt-4" :class="step5?'text-gray-700':'text-gray-300'">Step 3: Validate your Sirius address</div>
+              <div class="font-bold text-left text-xs md:text-sm mt-4" :class="step5?'text-gray-700':'text-gray-300'">{{$t('swap.checkStep3',{network: $t('swap.sirius')})}}</div>
               <div class="flex border-b border-gray-300 p-3">
                 <div class="flex-none">
                   <div class=" rounded-full border w-6 h-6" :class="step5?'border-blue-primary':'border-gray-300'">
@@ -179,7 +179,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">Sending message to MetaMask</div>
+                <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step5?'text-gray-700':'text-gray-300'">{{$t('swap.sendingMsg')}}</div>
               </div>
               <div class="flex border-b border-gray-300 p-3">
                 <div class="flex-none">
@@ -193,7 +193,7 @@
                 <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step6?'text-gray-700':'text-gray-300'">
                   {{ signatureMessage }}
                   <div v-if="isInvalidSignedMeta" class="mt-5">
-                    <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg w-24" @click="getSigned">Retry</button>
+                    <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg w-24" @click="getSigned">{{$t('swap.retry')}}</button>
                   </div>
                 </div>
               </div>
@@ -205,9 +205,9 @@
                     </div>
                   </div>
                 </div>
-                <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step7?'text-gray-700':'text-gray-300'">Message signed with signature: <div class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex" v-if="messageHash && step7"><div :class="step7?'text-gray-500':'text-gray-300'" class="text-tsm break-all flex-grow" id="validateMessage" :copyValue="messageHash" copySubject="Signature hash">{{ messageHash }}</div><div class="flex-none"><font-awesome-icon icon="copy" @click="copy('validateMessage')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step7"></font-awesome-icon></div></div></div>
+                <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step7?'text-gray-700':'text-gray-300'">{{$t('swap.messageSigned')}} <div class="bg-yellow-100 py-2 px-5 mt-1 rounded-xl flex" v-if="messageHash && step7"><div :class="step7?'text-gray-500':'text-gray-300'" class="text-tsm break-all flex-grow" id="validateMessage" :copyValue="messageHash" :copySubject="$t('swap.signatureHash')">{{ messageHash }}</div><div class="flex-none"><font-awesome-icon icon="copy" @click="copy('validateMessage')" class="w-5 h-5 text-blue-primary cursor-pointer self-center ml-3 absoltue top-2 hover:opacity-90 duration-800 transition-all" v-if="step7"></font-awesome-icon></div></div></div>
               </div>
-              <div class="font-bold text-left text-xs md:text-sm mt-4" :class="step8?'text-gray-700':'text-gray-300'">Step 4: Initiate swap</div>
+              <div class="font-bold text-left text-xs md:text-sm mt-4" :class="step8?'text-gray-700':'text-gray-300'">{{$t('swap.checkStep4')}}</div>
               <div class="flex border-b border-gray-300 p-3">
                 <div class="flex-none">
                   <div class=" rounded-full border w-6 h-6" :class="isInvalidSwapService?'border-red-primary':(step8?'border-blue-primary':'border-gray-300')">
@@ -218,50 +218,50 @@
                   </div>
                 </div>
                 <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500" :class="step8?'text-gray-700':'text-gray-300'">
-                  {{ isInvalidSwapService?'Unable to send message to swap service':(swapStatus208?'Swap has already been initiated earlier.':'Message sent to the swap service, swap initiated...') }}
+                  {{ isInvalidSwapService?$t('swap.sendMsgFail'):(swapStatus208?$t('swap.swapInitiated'):$t('swap.messageSent')) }}
                   <div v-if="isInvalidSwapService && swapServerErrIndex <= 3" class="mt-5">
                     <button  type="button" class="bg-blue-primary rounded-3xl mr-5 focus:outline-none text-tmd py-2 px-4 text-white hover:shadow-lg disabled:opacity-50" @click="afterSigned" :disabled="disableRetrySwap">{{ retrySwapButtonText }}</button>
                   </div>
                   <div v-if="swapServerErrIndex > 3" class="mt-5 text-tsm sm:text-sm">
-                    Sorry. Please save the <b>transaction hash</b>, the <b>signature</b> and contact our <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">helpdesk</a>.
+                    {{$t('swap.serverErrMsg1')}}<b>{{$t('swap.transactionHash')}}</b>,<b>{{$t('swap.signature')}}</b> {{$t('swap.serverErrMsg2')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary font-bold underline">{{$t('home.helpdesk')}}</a>.
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="mt-10 text-center">
-            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()" v-if="isInitiateSwap && !swapStatus208">{{$t('createsuccessful.continue')}}</button>
-            <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn focus:outline-none w-40 inline-block" :class="isDisabledValidate?'opacity-50':''" :is="isDisabledValidate?'span':'router-link'" tag="button" v-else>Done</router-link>
+            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()" v-if="isInitiateSwap && !swapStatus208">{{$t('general.continue')}}</button>
+            <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn focus:outline-none w-40 inline-block" :class="isDisabledValidate?'opacity-50':''" :is="isDisabledValidate?'span':'router-link'" tag="button" v-else>{{$t('general.done')}}</router-link>
           </div>
         </div>
         <div v-if="currentPage==3">
           <div>
-            <h1 class="default-title font-bold mt-5 mb-2">Congratulations!</h1>
-            <div class="text-tsm mb-7">The swap process has already started!</div>
-            <swap-certificate-component networkTerm="BSC" swapType="In" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="transactionHash" :siriusName="siriusAddressSelectedName" :swappedAmount="amount" :siriusAddress="Helper.createAddress(siriusAddressSelected).pretty()" :swapQr="swapQr" :swapLink="remoteTxnLink" />
-            <button type="button" class="w-40 hover:shadow-lg bg-blue-primary text-white text-xs hover:opacity-50 rounded font-bold px-4 py-3 border border-blue-primary outline-none mr-4 mt-6" @click="saveCertificate">Download Certificate</button>
+            <h1 class="default-title font-bold mt-5 mb-2">{{$t('general.congratz')}}</h1>
+            <div class="text-tsm mb-7">{{$t('swap.swapStarted')}}</div>
+            <swap-certificate-component :networkTerm="$t('swap.bsc')" swapType="In" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="transactionHash" :siriusName="siriusAddressSelectedName" :swappedAmount="amount" :siriusAddress="Helper.createAddress(siriusAddressSelected).pretty()" :swapQr="swapQr" :swapLink="remoteTxnLink" />
+            <button type="button" class="w-40 hover:shadow-lg bg-blue-primary text-white text-xs hover:opacity-50 rounded font-bold px-4 py-3 border border-blue-primary outline-none mr-4 mt-6" @click="saveCertificate">{{$t('general.downloadCertificate')}}</button>
             <div class="mt-3">
-              <a :href="remoteTxnLink" target=_new class="underline self-center text-xs font-bold text-blue-primary">View Transaction<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a>
+              <a :href="remoteTxnLink" target=_new class="underline self-center text-xs font-bold text-blue-primary">{{$t('swap.viewTxInExplorer')}}<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a>
             </div>
-            <div class="md:mx-20 lg:mx-40 font-bold text-center text-tsm py-5 sm:py-10 mt-5 sm:mt-10 border-t border-gray-200">Swap Details</div>
+            <div class="md:mx-20 lg:mx-40 font-bold text-center text-tsm py-5 sm:py-10 mt-5 sm:mt-10 border-t border-gray-200">{{$t('swap.swapDetails')}}</div>
             <div class="md:mx-20 lg:mx-10 xl:mx-40 border-2 border-gray-200 mt-4 p-5 text-xs font-bold filter shadow-lg">
-              <div class="text-blue-primary mb-1">From: MetaMask Account</div>
+              <div class="text-blue-primary mb-1">{{$t('general.from')}}: {{$t('swap.metamaskAcc')}}</div>
               <div class="break-all">{{ currentAccount }}</div>
-              <div class="mt-1">Swap Amount {{ amount }}</div>
+              <div class="mt-1">{{$t('swap.swapAmount')}} {{ amount }}</div>
               <div>
                 <img src="@/modules/services/submodule/mainnetSwap/img/icon-dots.svg" class="inline-block h-8 my-2">
               </div>
-              <div class="text-blue-primary mb-1">To: {{ siriusAddressSelectedName }}</div>
+              <div class="text-blue-primary mb-1">{{$t('general.to')}}: {{ siriusAddressSelectedName }}</div>
               <div>{{ Helper.createAddress(siriusAddress).pretty() }}</div>
-              <div class="mt-1">Equivalent to {{ amountReceived }} of {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
+              <div class="mt-1">{{$t('swap.equivalentTo')}} {{ amountReceived }} of {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
             </div>
-            <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">Swap process may take a few hours to complete. Please save a copy of your certificate. It is needed in the event of an error.</div>
+            <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">{{$t('swap.swapMsg2')}}</div>
             <label class="inline-flex items-center mb-5">
               <input type="checkbox" class="h-5 w-5 bg-blue-primary" value="true" v-model="savedCheck">
-              <span class="ml-2 cursor-pointer text-xs font-bold">I confirm that I have downloaded a copy of my certificate.</span>
+              <span class="ml-2 cursor-pointer text-xs font-bold">{{$t('swap.confirmDownloaded')}}</span>
             </label>
             <div class="sm:mt-5 text-center">
-              <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn mr-5 focus:outline-none w-40 inline-block mt-1" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">Done</router-link>
+              <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn mr-5 focus:outline-none w-40 inline-block mt-1" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">{{$t('general.done')}}</router-link>
             </div>
           </div>
         </div>
@@ -282,6 +282,8 @@ import { abi, SwapUtils } from '@/util/swapUtils';
 import { networkState } from '@/state/networkState';
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { Helper } from '@/util/typeHelper';
+import { AppState } from '@/state/appState';
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: 'ViewServicesMainnetSwapCheckBSCToSirius',
@@ -294,7 +296,7 @@ export default {
 
   setup() {
     let verifyingTxn;
-
+    const {t} = useI18n();
     const verifyMetaMaskPlugin = ref(true);
     if(!window.ethereum.isMetaMask){
       verifyMetaMaskPlugin.value = false;
@@ -315,17 +317,17 @@ export default {
 
     (async() => {
       try {
-        const fetchService = await SwapUtils.fetchBSCServiceInfo(swapData.swap_IN_SERVICE_URL);
+        const fetchService = await SwapUtils.fetchBSCServiceInfo(swapData.swap_IN_SERVICE_URL,'xpx');
         if(fetchService.status==200){
           tokenAddress.value = fetchService.data.bscInfo.scAddress;
           custodian.value = fetchService.data.bscInfo.sinkAddress;
           // defaultXPXTxFee.value = parseInt(fetchService.data.siriusInfo.feeAmount);
           serviceErr.value = '';
         }else{
-          serviceErr.value = 'Swapping service is temporary not available. Please try again later';
+          serviceErr.value = t('swap.serviceDown');
         }
       } catch (error) {
-        serviceErr.value = 'Swapping service is temporary not available. Please try again later';
+        serviceErr.value = t('swap.serviceDown');
       }
     })()
 
@@ -344,7 +346,7 @@ export default {
     const isInvalidSignedMeta = ref(false);
     const isInvalidSwapService = ref(false);
     const disableRetrySwap = ref(false);
-    const retrySwapButtonText = ref('Retry');
+    const retrySwapButtonText = ref(t('swap.retry'));
 
     const isInvalidRemoteTxnHash = ref(false);
     const isPendingRemoteTxnHash = ref(false);
@@ -424,7 +426,7 @@ export default {
       if(ethereumChainId === parseInt(chainId)){
         err.value = '';
       }else{
-        err.value = 'Please select ' + ethereumNetworkName + ' on MetaMask to swap';
+        err.value = t('swap.selectNetworkToSwap',{name: ethereumNetworkName});
       }
     }
 
@@ -443,7 +445,7 @@ export default {
             console.log('Please connect to MetaMask.');
           } else {
             if(err.code == '-32002'){
-              serviceErr.value = 'Please click on MetaMask extension to approve connection';
+              serviceErr.value = t('swap.approveConnection');
             }
           }
         });
@@ -473,7 +475,7 @@ export default {
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-      toast.add({severity:'info', summary: copySubject + ' copied', detail: stringToCopy , group: 'br', life: 3000});
+      toast.add({severity:'info', summary: copySubject + ' ' + t('general.copied'), detail: stringToCopy , group: 'br', life: 3000});
     };
 
     const currentPage = ref(1);
@@ -571,16 +573,16 @@ export default {
       }
     };
 
-    const currentNativeTokenName = computed(()=> networkState.currentNetworkProfile.network.currency.name);
+    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 
     const txtRemoteTransactionErrorMsg = computed(() => {
       if(isDisplayFeeLowRemark.value){
-        return 'Fees might be too low. Please do not change recommended fee in MetaMask.';
+        return t('swap.feeTooLow');
       }else{
         if(transactionNotFound.value){
-          return 'BSC transaction hash is not found. Please initiate new swap from BSC to ' + currentNativeTokenName.value;
+          return t('swap.hashNotFound',[t('swap.bsc'),t('swap.sirius')])
         }else{
-          return 'BSC transaction hash is invalid. Please initiate new swap from BSC to ' + currentNativeTokenName.value;
+          return t('swap.hashInvalid',[t('swap.bsc'),t('swap.sirius')])
         }
       }
     });
@@ -637,7 +639,7 @@ export default {
 
     const siriusAddressSelectedName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
 
-    watch(siriusAddressSelected, (newName) => {
+    watch(siriusAddressSelected, (newAddress) => {
       let accountSelected = walletState.currentLoggedInWallet.accounts.find(account => account.address == newAddress);
       if(!accountSelected){
         accountSelected = walletState.currentLoggedInWallet.others.find(account => account.address == newAddress);
@@ -668,9 +670,9 @@ export default {
 
     const signatureMessage = computed(() => {
       if(isInvalidSignedMeta.value){ // when user rejects signature on MetaMask
-        return 'Approval on MetaMask is rejected';
+        return t('swap.rejectMetamask');
       }else{
-        return 'Please sign transaction confirmation in MetaMask';
+        return t('swap.signTx');
       }
     });
 
@@ -719,7 +721,7 @@ export default {
     const afterSigned = async () => {
       step7.value = true;
       step8.value = true;
-      retrySwapButtonText.value = 'Initiating swap...';
+      retrySwapButtonText.value = t('swap.initiatingSwap');
       disableRetrySwap.value = true;
       let stringifyData = JSON.stringify(swapServiceParam.value);
       try {
@@ -734,8 +736,8 @@ export default {
           const data = await response.json();
           isInvalidSwapService.value = false;
           siriusTxnHash.value = data.siriusSwapInfo.status.hash;
-          amount.value = Helper.convertToCurrency(data.siriusSwapInfo.amount, networkState.currentNetworkProfile.network.currency.divisibility);
-          amountReceived.value = Helper.amountFormatterSimple(data.siriusSwapInfo.amount, networkState.currentNetworkProfile.network.currency.divisibility) - 50;
+          amount.value = Helper.convertToCurrency(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility);
+          amountReceived.value = Helper.amountFormatterSimple(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility) - 50;
           siriusAddress.value = data.siriusSwapInfo.recipient;
           transactionHash.value = data.remoteTxnHash;
           swapTimestamp.value = data.timestamp;
@@ -750,13 +752,13 @@ export default {
         }else{
           isInvalidSwapService.value = true;
           ++swapServerErrIndex.value;
-          retrySwapButtonText.value = 'Retry';
+          retrySwapButtonText.value = t('swap.retry');
           disableRetrySwap.value = false;
         }
       } catch (error) {
         isInvalidSwapService.value = true;
         ++swapServerErrIndex.value;
-        retrySwapButtonText.value = 'Retry';
+        retrySwapButtonText.value = t('swap.retry');
         disableRetrySwap.value = false;
       }
     };

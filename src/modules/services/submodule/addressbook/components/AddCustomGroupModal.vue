@@ -5,11 +5,11 @@
     >
       <div v-if="toggleModal" class="popup-outer-lang fixed flex z-50">
         <div class="modal-popup-box text-center">
-          <div class= 'ml-auto mr-auto mt-2 text-xs  font-semibold' style='width:62%'>Add Custom Group</div>
+          <div class= 'ml-auto mr-auto mt-2 text-xs  font-semibold' style='width:62%'>{{$t('addressBook.addCustomGroup')}}</div>
           <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
-          <input type="text" v-model="customGroup" placeholder="Custom group" class="border border-gray-300 p-3 my-5 text-tsm text-center focus:outline-none" />
-          <button class='rounded-md cursor-pointer text-xs text-white py-2 text-center ml-auto mr-auto btn-default bg-blue-primary w-14 mb-2 disabled:opacity-50' @click="addCustomGroup" :disabled="disableAdd">Add</button>
-          <div class='text-center cursor-pointer font-semibold text-xs text-gray-500 mt-2' @click="closePanel">Cancel</div>
+          <input type="text" v-model="customGroup" :placeholder="$t('addressBook.customGroup')" class="border border-gray-300 p-3 my-5 text-tsm text-center focus:outline-none" />
+          <button class='rounded-md cursor-pointer text-xs text-white py-2 text-center ml-auto mr-auto btn-default bg-blue-primary w-14 mb-2 disabled:opacity-50' @click="addCustomGroup" :disabled="disableAdd">{{$t('general.add')}}</button>
+          <div class='text-center cursor-pointer font-semibold text-xs text-gray-500 mt-2' @click="closePanel">{{$t('general.cancel')}}</div>
         </div>
       </div>
     </transition>
@@ -62,7 +62,7 @@ export default {
     const addCustomGroup = () => {
       // check existing group
       if(groups.value.find( (({value}) => value.toLowerCase() === customGroup.value.toLowerCase())) || groupList.value.includes(customGroup.value.toLowerCase())){
-        err.value = 'Group name is not availble or already exist';
+        err.value = t('addressBook.groupValidation');
       }else{
         emitter.emit('ADD_CUSTOM_GROUP', customGroup.value);
         customGroup.value = '';

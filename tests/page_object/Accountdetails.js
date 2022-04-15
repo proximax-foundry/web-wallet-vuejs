@@ -133,7 +133,7 @@ const commands = {
         .click("@download_button")
         .click("@input_password_wp")
         .setValue("@input_password_wp", password)
-        .pause(2000)
+        .pause(5000)
         .click("@password_eyeicon_wp")
         .assert.elementPresent('@password_eyeicon_wp', "When eye icon is clicked, password field is unmasked")
         .pause(1000)

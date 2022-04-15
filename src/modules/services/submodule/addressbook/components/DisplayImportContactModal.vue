@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div @click="toggleModal = !toggleModal" class="cursor-pointer mt-5 py-2 px-5 rounded-md bg-blue-primary text-white text-tsm drop-shadow-lg filter hover:bg-blue-600 transition-all duration-500"><img src="@/modules/services/submodule/addressbook/img/icon-download.svg" class="inline-block mr-4 relative top-1">{{$t('createwallet.import')}}</div>
+    <div @click="toggleModal = !toggleModal" class="cursor-pointer mt-5 py-2 px-5 rounded-md bg-blue-primary text-white text-tsm drop-shadow-lg filter hover:bg-blue-600 transition-all duration-500"><img src="@/modules/services/submodule/addressbook/img/icon-download.svg" class="inline-block mr-4 relative top-1">{{$t('general.import')}}</div>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -11,12 +11,12 @@
             <font-awesome-icon icon="times" class="delete-icon-style" @click="toggleModal = !toggleModal; closeModel()"></font-awesome-icon>
           </div>
           <div class="w-104">
-            <h1 class="default-title font-bold mt-0 mb-5">{{$t('createwallet.import')}} {{$t('createsuccessful.address')}}</h1>
-              <div class="bg-blue-200 text-left text-sm p-2 rounded-lg text-gray-800 mb-2" v-if="contactAdded > 0">{{ contactAdded }} {{$t('services.contact')}}{{ (contactAdded>1)?'s':'' }} {{$t('addressbook.addressbookmessage1')}}</div>
-              <div class="bg-yellow-200 text-left text-sm p-2 rounded-lg text-gray-800 mb-2" v-if="contactExisted > 0">{{ contactExisted }} {{$t('services.contact')}}{{ (contactExisted>1)?'s':'' }} {{$t('addressbook.addressbookmessage2')}}</div>
-              <div class="bg-red-200 text-left text-sm p-2 rounded-lg text-gray-800 mb-2" v-if="contactInvalidAddress.length > 0">{{ contactInvalidAddress.length }} {{$t('services.contact')}}{{ (contactInvalidAddress.length > 1)?'s':'' }} {{$t('addressbook.addressbookmessage3')}}</div>
+            <h1 class="default-title font-bold mt-0 mb-5">{{$t('addressBook.importAddress')}}</h1>
+              <div class="bg-blue-200 text-left text-sm p-2 rounded-lg text-gray-800 mb-2" v-if="contactAdded > 0">{{ contactAdded }} {{$t('general.contact',contactAdded)}} {{$t('addressBook.addressBookMessage1')}}</div>
+              <div class="bg-yellow-200 text-left text-sm p-2 rounded-lg text-gray-800 mb-2" v-if="contactExisted > 0">{{ contactExisted }} {{$t('general.contact',contactExisted)}} {{$t('addressBook.addressBookMessage2')}}</div>
+              <div class="bg-red-200 text-left text-sm p-2 rounded-lg text-gray-800 mb-2" v-if="contactInvalidAddress.length > 0">{{ contactInvalidAddress.length }} {{$t('general.contact',contactInvalidAddress.length)}} {{$t('addressBook.addressBookMessage3')}}</div>
               <div v-if="contactInvalidAddress.length > 0" class="text-left text-gray-800 mt-5">
-                <div class="font-bold mb-2">{{$t('services.contact')}}{{ (contactInvalidAddress.length > 1)?'s':'' }} {{$t('addressbook.addressbookmessage4')}}:</div>
+                <div class="font-bold mb-2">{{$t('general.contact',contactInvalidAddress.length)}} {{$t('addressBook.addressBookMessage4')}}:</div>
                 <div v-for="contact, index in contactInvalidAddress" :key="index" class="text-left mb-2">
                   <div class="inline-block mr-3 w-40">{{contact.label}}</div>
                   <div class="inline-block">{{contact.address}}</div>
@@ -159,7 +159,7 @@ export default{
             walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
             contactAdded.value = addContact.length;
             emitter.emit('REFRESH_CONTACT_LIST', true);
-            toast.add({severity:'info', summary: 'Address Book', detail: 'New contact' + ((contactAdded.value>1)?'s':'') + ' imported to Address Book', group: 'br', life: 5000});
+            toast.add({severity:'info', summary: t('general.addressBook'), detail: t('addressBook.newContactImported',contactAdded.value) , group: 'br', life: 5000});
           }
           contactInvalidAddress.value = errContact;
         },

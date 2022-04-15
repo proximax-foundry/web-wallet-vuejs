@@ -4,6 +4,8 @@ import { SessionService } from "../../models/stores/sessionService"
 import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainProfilePreferences } from "../../models/stores/"
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { BuildTransactions } from "@/util/buildTransactions";
+import { ChainUtils } from "@/util/chainUtils"
+import { FeeCalculationStrategy, NetworkType } from "tsjs-xpx-chain-sdk";
 
 const sessionNetworkName = "networkName";
 const sessionNetworkIndex = "network";
@@ -64,10 +66,19 @@ export class NetworkStateUtils{
     const chainProfile = new ChainProfile(networkState.chainNetworkName);
     chainProfile.init();
     networkState.currentNetworkProfile = chainProfile;
-    AppState.buildTxn = new BuildTransactions(chainProfile.network.type, chainProfile.generationHash);
+    if(chainProfile.network.currency.assetId){
+      AppState.nativeToken.assetId = chainProfile.network.currency.assetId;
+    }
     AppState.nativeToken.divisibility = chainProfile.network.currency.divisibility;
     AppState.nativeToken.label = chainProfile.network.currency.name;
     AppState.nativeToken.fullNamespace = chainProfile.network.currency.namespace;
+    AppState.networkType = ChainUtils.getNetworkType(chainProfile.network.type);
+    if(AppState.networkType === NetworkType.PRIVATE || AppState.networkType === NetworkType.PRIVATE_TEST){
+      AppState.buildTxn = new BuildTransactions(chainProfile.network.type, chainProfile.generationHash, FeeCalculationStrategy.ZeroFeeCalculationStrategy);
+    }
+    else{
+      AppState.buildTxn = new BuildTransactions(chainProfile.network.type, chainProfile.generationHash);
+    }
 
     const chainProfileConfig = new ChainProfileConfig(networkState.chainNetworkName);
 
@@ -123,14 +134,18 @@ export class NetworkStateUtils{
   static buildAPIEndpointURL(url: string): string{
     const portNumber = networkState.currentNetworkProfile ? networkState.currentNetworkProfile.httpPort : 3000;
 
-    return location.protocol=='https:' ? `https://${url}` : `http://${url}:${portNumber}`;
+    const protocols = ["https:", "file:"];
+
+    return protocols.includes(location.protocol) ? `https://${url}` : `http://${url}:${portNumber}`;
   }
 
   static buildWSEndpointURL(url: string): string{
 
     const portNumber = networkState.currentNetworkProfile ? networkState.currentNetworkProfile.httpPort : 3000;
 
-    return location.protocol=='https:' ? `wss://${url}` : `ws://${url}:${portNumber}`;
+    const protocols = ["https:", "file:"];
+
+    return protocols.includes(location.protocol) ? `wss://${url}` : `ws://${url}:${portNumber}`;
   }
 
   static setLocalDefaultNetwork(networkName: string): void{

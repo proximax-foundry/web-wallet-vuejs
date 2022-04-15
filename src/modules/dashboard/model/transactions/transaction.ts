@@ -4,6 +4,7 @@ export * from "./commonTransaction";
 export * from "./confirmed/confirmed";
 export * from "./unconfirmed/unconfirmed";
 export * from "./partial/partial";
+export * from "./inner/inner";
 export * from "./restrictionModification";
 export * from "./transactionFilterType";
 export * from "./exchangeOffer";

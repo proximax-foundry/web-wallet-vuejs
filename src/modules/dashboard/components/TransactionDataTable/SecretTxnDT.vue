@@ -13,11 +13,11 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Tx Hash</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.txHash')}}</div>
             <div class="uppercase font-bold text-txs"><span class="text-txs" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span></div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Type</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.type')}}</div>
             <div class="flex items-center">
               <div class="uppercase font-bold text-txs mr-2">{{data.type}}</div>
               <div>
@@ -27,7 +27,7 @@
             </div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5" v-if="data.recipient != '' && data.recipient != null">Receipient</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5" v-if="data.recipient != '' && data.recipient != null">{{$t('general.recipient')}}</div>
             <div v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" class="truncate inline-block font-bold text-txs">
               <a :href="getAddressExplorerUrl(data.recipient)" target="_blank">
                 {{ data.recipient }}
@@ -39,21 +39,21 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div v-if="selectedGroupType === transactionGroupType.CONFIRMED">
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Timestamp</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.timestamp')}}</div>
             <div class="uppercase font-bold text-txs">{{ convertLocalTime(data.timestamp) }}</div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Hash Type</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.hashType')}}</div>
             <div class="uppercase font-bold text-txs">{{ data.hashType }}</div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Info</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.info')}}</div>
             <span class="inline-block bg-blue-200 text-blue-700 rounded py-1 px-2 my-1 text-txs font-bold" v-if="data.duration">{{ `Duration: ${data.duration} blocks` }}</span>
             <span v-else>-</span>
           </div>
         </template>
       </Column>
-      <Column header="IN/OUT" headerStyle="width:30px" v-if="wideScreen">
+      <Column :header="$t('dashboard.inOut')" headerStyle="width:30px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="ml-2" v-if="data.recipient">
             <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block w-6" v-if="isRecipient(data.recipient, currentAddress)">
@@ -61,22 +61,22 @@
           </div>
         </template>
       </Column>
-      <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
+      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="timestamp" header="TIMESTAMP" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
+      <Column field="timestamp" :header="$t('dashboard.timestamp')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
           <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
       </Column>
-      <Column field="typeName" header="TYPE" headerStyle="width:70px" v-if="wideScreen">
+      <Column field="typeName" :header="$t('dashboard.type')" headerStyle="width:70px" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
-      <Column field="block" header="BLOCK" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:70px">
+      <Column field="block" :header="$t('general.block')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:70px;text-transform:uppercase">
         <template #body="{data}">
           <div class="text-txs">{{ data.block }}</div>
         </template>
@@ -91,47 +91,47 @@
           </span>
         </template>
       </Column> -->
-      <Column field="recipient" header="RECIPIENT" headerStyle="width:110px" v-if="wideScreen">
+      <Column field="recipient" :header="$t('general.recipient')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" class="truncate inline-block text-txs">
             <a :href="getAddressExplorerUrl(data.recipient)" target="_blank">
-              {{ data.recipient }}
+              {{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.recipient) }}
             </a>
           </span>
         </template>
       </Column>
-      <Column header="TX FEE" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:80px">
+      <Column :header="$t('dashboard.txFee')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:80pxwidth:40px;text-transform:uppercase">
         <template #body="{data}">
           <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
-      <Column header="HASH TYPE" headerStyle="width:40px" v-if="wideScreen">
+      <Column :header="$t('dashboard.hashType')" headerStyle="width:40pxwidth:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-txs">{{ data.hashType }}</div>
         </template>
       </Column>
-      <Column header="SECRET" headerStyle="width:40px" v-if="wideScreen">
+      <Column :header="$t('dashboard.secret')" headerStyle="width:40pxwidth:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="flex justify-center">
             <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>Secret</tiptitle><tiptext>' + data.secret + '</tiptext>'" class="inline-block">
           </div>
         </template>
       </Column>
-      <Column header="Proof" headerStyle="width:40px" v-if="wideScreen">
+      <Column :header="$t('dashboard.proof')" headerStyle="width:40pxwidth:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="flex justify-center">
             <img src="@/modules/dashboard/img/icon-message.svg" v-if="data.proof" v-tooltip.left="'<tiptitle>Proof</tiptitle><tiptext>' + data.proof + '</tiptext>'" class="inline-block">
           </div>
         </template>
       </Column>
-      <Column header="SDA" headerStyle="width:30px; text-align:center;" v-if="wideScreen">
+      <Column :header="$t('dashboard.sda')" headerStyle="width:30px; text-align:center;width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="flex justify-center">
-            <img src="@/modules/dashboard/img/icon-sda.svg" v-if="data.assetId" class="inline-block" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + constructSDA(data.assetId, data.amount, data.namespaceName) + '</tiptext>'">
+            <img src="@/modules/dashboard/img/icon-sda.svg" v-if="data.assetId" class="inline-block" v-tooltip.left="'<tiptitle>'+ $t('general.sdaFull')+ '</tiptitle><tiptext>' + constructSDA(data.assetId, data.amount, data.namespaceName) + '</tiptext>'">
           </div>
         </template>
       </Column>
-      <Column header="Info" headerStyle="width:40px" v-if="wideScreen">
+      <Column :header="$t('dashboard.info')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <!-- <span class="inline-block bg-blue-500 text-white py-1 px-1 my-1 mx-1">{{ `Hash Type: ${data.hashType}` }}</span> -->
           <span class="inline-block bg-blue-200 text-blue-700 rounded py-1 px-2 my-1 mx-1 text-txs font-bold" v-if="data.duration">{{ `Duration: ${data.duration} blocks` }}</span>
@@ -146,10 +146,10 @@
         </template>
       </Column>
       <template #empty>
-        {{$t('services.norecord')}}
+        {{$t('general.noRecord')}}
       </template>
       <template #loading>
-        {{$t('dashboard.loadingmessage')}}
+        {{$t('dashboard.fetchingTx')}}
       </template>
     </DataTable>
   </div>
@@ -166,6 +166,7 @@ import Tooltip from 'primevue/tooltip';
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";
+import { walletState } from "@/state/walletState";
 // import SplitButton from 'primevue/splitbutton';
 
 export default defineComponent({
@@ -302,6 +303,7 @@ export default defineComponent({
       constructSDA,
       wideScreen,
       Helper,
+      walletState,
     }
   }
 })
