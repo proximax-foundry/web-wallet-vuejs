@@ -163,7 +163,7 @@ export default {
     
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const prettyAddress = ''
+    var prettyAddress = ''
     try {
       prettyAddress = Helper.createAddress(acc.value?acc.value.address:'').pretty();
     } catch (error) {
