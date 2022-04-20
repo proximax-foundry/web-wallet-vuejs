@@ -33,7 +33,7 @@
           <router-view class="mt-12 sm:mt-0 flex-grow px-2 pt-5 sm:p-0" v-else></router-view>
           <footer class="md:ml-60 md:h-9 mt-10 text-center sm:text-justify sm:flex text-txs md:text-xs sm:justify-between text-gray-700 px-10 flex-grow-0" v-if="login">
             <div class="ml-2 sm:ml-0">{{$t('home.copyright')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary hover:underline">{{$t('home.helpdesk')}}</a> <selectLanguageModal class="inline-block" /></div>
-            <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span>{{$t('home.version')}} {{$t('home.beta')}} {{$t('home.version')}}{{ versioning }}</span></div>
+            <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span> {{$t('home.version')}}{{ versioning }}</span></div>
           </footer>
         </div>
       </div>
@@ -41,7 +41,7 @@
     <div v-if="!login" class="w-full items-center px-2" :class="`${ overflowScreen?'relative':'absolute bottom-0' }`">
       <footer class="mx-auto h-12 mt-20 text-center  lg:flex text-txs lg:text-xs lg:justify-between container text-white pb-5">
         <div class="ml-2 sm:ml-0">{{$t('home.copyright')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-white hover:underline">{{$t('home.helpdesk')}}</a></div>
-        <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span>{{$t('home.version')}} {{$t('home.beta')}} {{$t('home.version')}}{{ versioning }}</span></div>
+        <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span> {{$t('home.version')}}{{ versioning }}</span></div>
       </footer>
     </div>
   </div>
