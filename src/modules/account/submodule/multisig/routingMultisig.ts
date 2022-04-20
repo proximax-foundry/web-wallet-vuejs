@@ -1,6 +1,6 @@
 export const MultisigRoutes = [
   {
-    path: '/convert-account-multisign/:name?',
+    path: '/convert-account-multisign/:address?',
     name: 'ViewMultisigConvertAccount',
     props: true,
     component: () => import('@/modules/account/submodule/multisig/views/ViewAccountMultisigConvertAccount.vue'),
@@ -9,7 +9,7 @@ export const MultisigRoutes = [
     }
   },
   {
-    path: '/edit-account-multisign/:name',
+    path: '/edit-account-multisign/:address',
     name: 'ViewMultisigEditAccount',
     props: true,
     component: () => import('@/modules/account/submodule/multisig/views/ViewAccountMultisigEditAccount.vue'),
@@ -18,7 +18,7 @@ export const MultisigRoutes = [
     }
   },
   {
-    path: '/multisig-settings/:name',
+    path: '/multisig-settings/:address',
     name: 'ViewMultisigHome',
     props: true,
     component: () => import('@/modules/account/submodule/multisig/views/ViewMultisigHome.vue'),

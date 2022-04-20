@@ -1087,7 +1087,6 @@ export class WalletUtils {
 
             let newWallet = new Wallet(wallet.name, networkName, []);
             let walletAccounts: WalletAccount[] = [];
-            let allWalletContacts: AddressBook[] = [];
 
             wallet.accounts.forEach((account)=>{
 
@@ -1101,15 +1100,8 @@ export class WalletUtils {
 
             newWallet.accounts = walletAccounts;
 
-            if(localStorage.getItem(prefix + wallet.name)){
-                let accountAddressBooks: any[] = JSON.parse(localStorage.getItem(prefix + wallet.name));
-
-                for(let i = 0; i < accountAddressBooks.length; ++i){
-                    if(accountAddressBooks[i].walletContact){
-                        allWalletContacts.push(new AddressBook( accountAddressBooks[i].label, accountAddressBooks[i].value ,"-none-"));
-                    }
-                }       
-            }        
+            let allWalletContacts: AddressBook[] = WalletUtils.oldFormatCollectAddressBook(wallet.name, prefix);
+            
             newWallet.contacts = allWalletContacts;
             wallets.push(newWallet);
         });
@@ -1117,6 +1109,42 @@ export class WalletUtils {
         walletsInstance.wallets = wallets;
         walletsInstance.savetoLocalStorage();
         WalletStateUtils.refreshWallets();
+    }
+
+    static oldFormatCollectAddressBook(walletName: string, prefix: string): AddressBook[]{
+        let allWalletContacts: AddressBook[] = [];
+
+        if(localStorage.getItem(prefix + walletName)){
+            let accountAddressBooks: any[] = JSON.parse(localStorage.getItem(prefix + walletName));
+
+            for(let i = 0; i < accountAddressBooks.length; ++i){
+                // if(accountAddressBooks[i].walletContact){
+                    allWalletContacts.push(new AddressBook( accountAddressBooks[i].label, accountAddressBooks[i].value ,"-none-"));
+                // }
+            }       
+        }
+
+        return allWalletContacts;
+    }
+
+    static oldFormatToNewFormat(oldWallet: oldWltFile, networkName: string, networkType: NetworkType, contacts: AddressBook[]): Wallet{
+        let walletAccounts: WalletAccount[] = [];
+
+        oldWallet.accounts.forEach((account)=>{
+
+            let stringJSON = JSON.stringify(account);
+
+            let newWalletAccount = WalletUtils.createNewWalletAccountFromOldFormat(stringJSON);
+            newWalletAccount.fixAddress(networkType);
+
+            walletAccounts.push(newWalletAccount);
+        });
+
+        let newWallet = new Wallet(oldWallet.name, networkName, walletAccounts);
+
+        newWallet.contacts = contacts;
+
+        return newWallet;
     }
 
     static addNewWallet(allWallets: Wallets, password: Password, walletName: string, networkName: string, networkType: NetworkType): tempNewWalletInterface{

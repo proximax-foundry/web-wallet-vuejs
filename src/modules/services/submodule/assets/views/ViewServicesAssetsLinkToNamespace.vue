@@ -28,8 +28,8 @@
         <div class="text-right w-full">
           <div v-if="getMultiSigCosigner.cosignerList.length > 0" class="inline-block">
             <div class="text-tsm text-left mt-3">{{$t('general.initiateBy')}}:
-              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('general.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('general.insufficientBalance')}}</span></span>
-              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.list" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('general.balance')}}: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
+              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('general.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{currentNativeTokenName}}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('general.insufficientBalance')}}</span></span>
+              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.cosignerList" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('general.balance')}}: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
               <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('general.insufficientBalance')}}</div>
             </div>
           </div>
@@ -67,7 +67,7 @@
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
-        <div class="font-semibold text-xxs text-blue-primary">{{$t('general.accCurrentBalance')}}</div>
+        <div class="font-semibold text-xxs text-blue-primary uppercase">{{$t('general.accCurrentBalance')}}</div>
         <div class="flex text-gray-200 mb-5">
           <span v-html="splitCurrency(balance)"></span>
           <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
@@ -90,7 +90,7 @@
         </div>
         <div class='text-xs text-white mt-5 mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
-        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="linkNamespace">{{ (selectAction=='link')?$t('general.linkToNamespace'):t('namespace.unlinkNamespace') }}</button>
+        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="linkNamespace">{{ (selectAction=='link')?$t('general.linkToNamespace'):$t('namespace.unlinkNamespace') }}</button>
         <div class="text-center">
           <router-link :to="{name: 'ViewServicesAssets'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
         </div>
@@ -156,8 +156,20 @@ export default {
     const cosignerAddress = ref('');
 
     const currencyName = computed(() => AppState.nativeToken.label);
-    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
-    const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
+    const lockFund = computed(()=>{
+      if(networkState.currentNetworkProfileConfig){
+        return Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility)
+      }else{
+        return 0
+      }
+    })
+    const lockFundCurrency = computed(()=> {
+      if(networkState.currentNetworkProfileConfig){
+        return Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility)
+      }else{
+        return 0
+      }
+    })
 
     const lockFundTxFee = computed(()=>{
       if(networkState.currentNetworkProfile){ 
@@ -173,21 +185,24 @@ export default {
     ));
 
     const selectedAccName = ref('');
-    const selectedAccAdd = ref('');
+    const selectedAccAdd = ref(Helper.createAddress(props.address).plain());
     const balance = ref('');
     const balanceNumber = ref(maxAmount);
 
     const isMultiSig = (address) => {
-      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
-      const other = walletState.currentLoggedInWallet.others.find((account) => account.address == address);
-      let isMulti = false;
-      const accountDirectParent = account?account.getDirectParentMultisig():[];
-      const otherDirectParent = other?other.getDirectParentMultisig():[];
-      if((accountDirectParent.length + otherDirectParent.length) > 0){
-        isMulti = true;
+      if(walletState.currentLoggedInWallet){
+        const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address) || walletState.currentLoggedInWallet.others.find((account) => account.address == address);
+        if(account){
+          const isMulti = account.getDirectParentMultisig().length>0?true:false
+          return isMulti
+        }else{
+          return false
+        }
+      }else{
+        return false
       }
-      return isMulti;
     };
+
 
     const isMultiSigBool = ref(isMultiSig(selectedAccAdd.value));
 
@@ -204,24 +219,25 @@ export default {
 
     const supply = ref('0');
 
-    let account = walletState.currentLoggedInWallet.accounts.find((account) => Helper.createAddress(account.address).pretty() == props.address);
-    if(!account){
-      account = walletState.currentLoggedInWallet.others.find((account) => Helper.createAddress(account.address).pretty() == props.address);
-    }
+    let account = computed(()=>{
+      if(walletState.currentLoggedInWallet){
+        return walletState.currentLoggedInWallet.accounts.find(account => account.address == selectedAccAdd.value) || walletState.currentLoggedInWallet.others.find(account => account.address == selectedAccAdd.value);
+      }else{
+        return null
+      }
+    })
 
-    if(account != undefined){
-      selectedAccName.value = account.name;
-      selectedAccAdd.value = account.address;
-      balance.value = Helper.toCurrencyFormat(account.balance, AppState.nativeToken.divisibility);
-      balanceNumber.value = account.balance;
-    }else{
-      router.push({ name: "ViewServicesAssets" });
+    if(account.value){
+      selectedAccName.value = account.value.name;
+      selectedAccAdd.value = account.value.address;
+      balance.value = Helper.toCurrencyFormat(account.value.balance, AppState.nativeToken.divisibility);
+      balanceNumber.value = account.value.balance;
     }
 
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
 
-    const svgString = ref(toSvg(Helper.createAddress(selectedAccAdd.value).pretty(), 40, themeConfig.jdenticonConfig));
+    const svgString = ref(toSvg(props.address, 40, themeConfig.jdenticonConfig));
 
     const selectAsset = ref('');
     const assetDivisibility = ref(0);
@@ -231,41 +247,46 @@ export default {
     const selectAction = ref('link');
     const selectNamespace = ref('');
 
-    if(account || other){
-      let asset = account.assets.find( asset => asset.idHex === props.assetId);
+    if(account.value){
+      let asset = account.value.assets.find( asset => asset.idHex === props.assetId);
       if(asset != undefined){
         selectAsset.value = asset.idHex;
         assetTransferable.value = asset.transferable;
         assetMutable.value = asset.supplyMutable;
         assetDivisibility.value = asset.divisibility;
         assetSupply.value = Helper.convertToCurrency(asset.supply, asset.divisibility);
-      }else{
-        router.push({ name: "ViewServicesAssets" });
       }
     }
 
     const transactionFee = ref('0.000000');
     const transactionFeeExact = ref(0);
 
-    const ownerPublicAccount = ref(WalletUtils.createPublicAccount(walletState.currentLoggedInWallet.selectDefaultAccount().publicKey, AppState.networkType));
-
     const fetchAccount = (publicKey) => {
       return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
     };
 
-    let cosigners = multiSign.getCosignerInWallet(account.publicKey);
-    let list = [];
-    cosigners.cosignerList.forEach( publicKey => {
-      list.push({
-        publicKey,
-        name: fetchAccount(publicKey).name,
-        balance: fetchAccount(publicKey).balance,
-        address: fetchAccount(publicKey).address
-      });
-    });
-    cosigners.cosignerList = list;
-
-    const getMultiSigCosigner = ref(cosigners);
+    const getMultiSigCosigner = computed(()=>{
+      if(!account.value){
+        return {hasCosigner:false,cosignerList: []}
+      }
+      if(networkState.currentNetworkProfileConfig){
+        let cosigners = multiSign.getCosignerInWallet(account.value?account.value.publicKey:'');
+        let list = [];
+        cosigners.cosignerList.forEach( publicKey => {
+          list.push({
+            publicKey,
+            name: fetchAccount(publicKey).name,
+            balance: fetchAccount(publicKey).balance,
+            address: fetchAccount(publicKey).address
+          });
+        });
+        cosigners.cosignerList = list;
+        
+        return{hasCosigner:cosigners.hasCosigner,cosignerList:cosigners.cosignerList}
+      }else{
+        return {hasCosigner:false,cosignerList: []}
+      }
+    })
 
     const cosigner = computed(() => {
       if(getMultiSigCosigner.value.cosignerList.length > 0){
@@ -279,12 +300,29 @@ export default {
       }
     });
 
-    transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
-    transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
+    cosignerAddress.value = getMultiSigCosigner.value.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:''
+    
+    watch(getMultiSigCosigner,n=>{
+      if(n.cosignerList.length>0){
+        cosignerAddress.value = n.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:''
+      }
+    })
+    try {
+      transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, selectAction.value, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
+    } catch (error) {
+      console.log(error)
+    }
+   
 
     const linkNamespace = () => {
+      let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
+      if(!verifyPassword){
+        err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
+        return
+      }
       let assetId;
-    if(selectAction.value=='link'){ 
+      if(selectAction.value=='link'){ 
         assetId = selectAsset.value;
       }else{
         let account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == selectedAccAdd.value);

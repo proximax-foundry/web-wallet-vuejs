@@ -6,7 +6,7 @@
     </div>
     
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
-      <AccountComponent :address="acc.address" class="mb-10"/>
+      <AccountComponent :address="address" class="mb-10"/>
        <div v-if="showModal" class="mb-8">
         <div class="border border-green-300 pl-6 pb-3 bg-green-50">
           <div class="flex items-center gap-3">
@@ -23,11 +23,11 @@
       </div>
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
         <div class= 'w-32 text-center border-b-2 pb-3 border-yellow-500'>{{$t('account.accountDetails')}}</div>
-        <router-link v-if="!isDelegate()" :to="{name:'ViewAccountAssets', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-        <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-        <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
-        <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
-        <MoreAccountOptions :address="acc.address"/>
+        <router-link v-if="!isDelegate()" :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+        <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
+        <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
+        <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
+        <MoreAccountOptions :address="address"/>
       </div>
       <div class='border-2 border-t-0 pb-6 px-6 pt-2'>
         <div class = 'mt-4 text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.currentBalance')}}</div>
@@ -49,7 +49,7 @@
         <div class='my-6 gray-line'></div>
         <div class = 'text-xxs text-blue-primary mt-2 font-semibold uppercase'>{{$t('general.publicKey')}}</div>
         <div class= 'flex'>
-          <div id="public" class="text-xs font-semibold mt-1 break-all" :copyValue="acc.publicKey" :copySubject="$t('general.publicKey')">{{acc.publicKey}}</div>
+          <div id="public" class="text-xs font-semibold mt-1 break-all" :copyValue="acc?acc.publicKey:''" :copySubject="$t('general.publicKey')">{{acc?acc.publicKey:''}}</div>
           <font-awesome-icon icon="copy" @click="copy('public')" :title="$t('general.copy')" class="ml-2 mt-0.5 pb-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
         </div>
         <div v-if='!other_acc' class='my-6 gray-line'></div>
@@ -120,10 +120,12 @@ export default {
     const router = useRouter();
     const showModal = ref(false)
     // get account details
-    var acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
-    const other_acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
+    
 
     let isDelegate = ()=>{
+      if(!walletState.currentLoggedInWallet){
+        return false
+      }
       let account = walletState.currentLoggedInWallet.others.find(acc=>acc.address==p.address)
       if(account){
         return account.type=="DELEGATE"?true:false
@@ -131,25 +133,42 @@ export default {
         return false
       }
     }
-    
-    if(!acc){
-      if(other_acc)
-      {
-        acc = other_acc;
+    const acc = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return null
       }
-    }
+      let acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address) || walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
+      if(!acc){
+        return null
+      }
+      return acc
+    })
+   const other_acc = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
+     return walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
+   })
     
     if(p.accountCreated){
       showModal.value= true
     }
-    const isDefault = (acc.default == true) ? true: false
-    if (acc === -1) {
-      router.push({name: "ViewAccountDisplayAll"});
-    }
+    const isDefault = computed(()=> {
+      if(!acc.value){
+        return false
+      }
+      return acc.value.default?true: false
+    })
+    
     
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const prettyAddress = Helper.createAddress(acc.address).pretty();
+    const prettyAddress = ''
+    try {
+      prettyAddress = Helper.createAddress(acc.value?acc.value.address:'').pretty();
+    } catch (error) {
+      
+    } 
     const err = ref(false);
     
     
@@ -173,7 +192,10 @@ export default {
 
     
     const isMultiSig = computed(() => {
-      let isMulti = acc.getDirectParentMultisig().length? true: false
+      if(!acc.value){
+        return false
+      }
+      let isMulti = acc.value.getDirectParentMultisig().length? true: false
       return isMulti;
     });  
 
@@ -190,9 +212,12 @@ export default {
     
     const currencyConvert = ref('');
      const getCurrencyPrice = () => {
-      let balance = acc.balance;
+      if(!acc.value){
+        return 
+      }
+      let balance = acc.value.balance;
       getXPXcurrencyPrice(balance).then((total) => {
-        currencyConvert.value = Helper.toCurrencyFormat(total, 6);
+        currencyConvert.value = Helper.toCurrencyFormat(total, AppState.nativeToken.divisibility);
       });
     };
      
@@ -201,7 +226,10 @@ export default {
 
     const accountBalance = computed(
       () => {          
-        return Helper.toCurrencyFormat(acc.balance, currentNativeTokenDivisibility.value);
+        if(!acc.value){
+          return "0"
+        }
+        return Helper.toCurrencyFormat(acc.value.balance, currentNativeTokenDivisibility.value);
       }
     );
 
@@ -238,7 +266,7 @@ export default {
 
       // QR Code Address
       const passwordInstance = WalletUtils.createPassword(password);
-      const walletPrivateKey = WalletUtils.decryptPrivateKey(passwordInstance,acc.encrypted,acc.iv);
+      const walletPrivateKey = WalletUtils.decryptPrivateKey(passwordInstance,acc.value.encrypted,acc.value.iv);
       let privateKey = walletPrivateKey.toUpperCase();
       doc.addImage(generateQR(privateKey, 1, 0), 151.5, 105);
 

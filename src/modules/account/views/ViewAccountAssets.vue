@@ -9,7 +9,7 @@
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
         <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
         <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.asset',2)}}</div>
-        <router-link v-if="!isDelegate" :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
+        <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
         <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
         <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
         <MoreAccountOptions :address="address"/>
@@ -61,6 +61,9 @@ export default {
         const wallet = walletState.currentLoggedInWallet 
         const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
         const acc= computed(()=>{
+            if(!wallet){
+                return null
+            }
             let currentAccount=wallet.accounts.find(account=> account.address == p.address)
             if (currentAccount!=undefined){
             return currentAccount
@@ -69,18 +72,25 @@ export default {
             }
         })
         const isMultiSig = computed(() => {
+            if(!acc.value){
+                return false
+            }
             let isMulti = acc.value.getDirectParentMultisig().length? true: false
             return isMulti;
         });  
-        const isDelegate = computed(()=>{
+        let isDelegate = ()=>{
+            if(!walletState.currentLoggedInWallet){
+                return false
+            }
             let account = walletState.currentLoggedInWallet.others.find(acc=>acc.address==p.address)
             if(account){
                 return account.type=="DELEGATE"?true:false
             }else{
                 return false
             }
-        })
+        }
         const mosaics = computed(() => {
+            
             var mosaicOption = [];
             if(!walletState.currentLoggedInWallet){
                 return mosaicOption;
@@ -89,7 +99,9 @@ export default {
                 (element) => element.address == p.address
             ) ||  walletState.currentLoggedInWallet.others.find(
                 (element) => element.address == p.address)
-            
+            if(!account){
+                return mosaicOption
+            }
             account.assets.forEach((i) => {
             mosaicOption.push({
                 name: (i.namespaceNames.length>0?i.namespaceNames[0]:i.idHex),
@@ -119,6 +131,9 @@ export default {
             }
         }
         const explorerLink = assetId=>{ 
+            if(!networkState.currentNetworkProfile){
+                return ''
+            }
             return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
         }
         return{

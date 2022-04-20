@@ -104,6 +104,9 @@ export default{
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
     const formattedContacts = computed(() => {
+      if(!walletState.currentLoggedInWallet){
+        return []
+      }
       let contracts = []
       if(walletState.currentLoggedInWallet.contacts != undefined){
         if(walletState.currentLoggedInWallet.contacts.length > 0){

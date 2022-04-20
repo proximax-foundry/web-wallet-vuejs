@@ -51,18 +51,23 @@ setup(p){
     themeConfig.init();
     let jdenticonConfig = themeConfig.jdenticonConfig;
     const accounts = computed(() =>{
-      var accountList = [];
-      const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
-      concatOther.forEach(account => {
-        accountList.push({
-          value: account.address,
-          label: walletState.currentLoggedInWallet.convertAddressToName(account.address,true)
+      if(walletState.currentLoggedInWallet){
+        var accountList = [];
+        const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+        concatOther.forEach(account => {
+          accountList.push({
+            value: account.address,
+            label: walletState.currentLoggedInWallet.convertAddressToName(account.address,true)
+          });
         });
-      });
+        
+        return accountList;
+      }else{
+        return []
+      }
       
-      return accountList;
     });
-    const selectedAccount = ref(accounts.value.find(acc => acc.value == p.selectDefault).label);
+    const selectedAccount = ref(accounts.value.length?accounts.value.find(acc => acc.value == p.selectDefault).label:'');
     const selectedAddress = ref(p.selectDefault);
     const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonConfig));
     const selectAccount = (accountName, accountAddress) => {

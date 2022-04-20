@@ -21,7 +21,7 @@
                 <div v-html="toSvg(notification.address, 40, themeStyleConfig)" class="mr-2"></div>
                 <div class="text-gray-600 text-xs">
                   <div class="mb-1 text-sm text-gray-700 font-bold">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(notification.address, true) }}</div>
-                  {{$t('general.namespace')}} <b>{{ notification.label }}</b> {{$t('notification.isExpiring',{time:NotificationUtils.relativeTime(notification.timestamp)})}} 
+                  {{$t('general.namespace')}} <b>{{ notification.label }}</b> <span v-if="currentTimestamp() > notification.timestamp">has expired</span><span v-else>{{$t('notification.isExpiring',{time:NotificationUtils.relativeTime(notification.timestamp)})}}</span>
                 </div>
               </router-link>
             </div>
@@ -80,6 +80,11 @@ export default {
       emitter.emit("DEFAULT_ACCOUNT_SWITCHED", name);
     }
 
+    const currentTimestamp = () => {
+      let current = new Date();
+      return current.getTime();
+    }
+
     const init = async() =>{
       iniNotification();
     }
@@ -104,6 +109,7 @@ export default {
       themeStyleConfig,
       toSvg,
       walletState,
+      currentTimestamp,
     }
   },
 
