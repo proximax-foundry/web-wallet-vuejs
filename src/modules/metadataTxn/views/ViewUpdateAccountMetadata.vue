@@ -49,6 +49,17 @@
                         </div>
                     </div>
                 </div>
+                <div class="mt-2" v-if="existingScopedMetadataKeys.length" >
+                  <div @click="showKeys = !showKeys" class="text-blue-primary text-xs cursor-pointer mb-1.5">Select Existing Scoped Metadata Key (Hexadecimal)</div>
+                  <div v-for="(metadata,index) in existingScopedMetadataKeys" :key="index" >
+                    <div v-if="showKeys" class="flex justify-center cursor-pointer" @click="scopedMetadataKeyType=2,inputScopedMetadataKey=metadata,checkOldValue(),showKeys = false">
+                      <div v-if="index%2==0" class="text-xs py-2 bg-gray-100 pl-2 w-full">{{metadata}}</div>
+                      <div v-if="index%2==1" class="text-xs py-2 pl-2 w-full">{{metadata}}</div>
+                      <div v-if="index%2==0" class="ml-auto pr-2 text-xxs py-2 font-semibold uppercase text-blue-primary bg-gray-100">{{$t('general.select')}}</div>
+                      <div v-if="index%2==1" class="ml-auto mr-2 text-xxs py-2 font-semibold uppercase text-blue-primary">{{$t('general.select')}}</div>
+                    </div>
+                  </div>
+                </div>
                 <MetadataInput :hex="scopedMetadataKeyType==2" class="mt-5" v-model="inputScopedMetadataKey" placeholder="Scoped Metadata Key" v-debounce:1000="checkOldValue" :toolTip="`${scopedMetadataKeyType==1?'Accepts 8 characters':'Accepts 16 hexadecimals'}`" :showError="showScopedKeyErr" :errorMessage="`${scopedMetadataKeyType==1?'Exceeded 8 characters':inputScopedMetadataKey.length>16?'Exceeded 16 hexadecimals':'Input needs to be even number'}`" />
                 <div class="flex gap-3 ">
                     <div class="flex gap-2">
@@ -145,6 +156,7 @@ export default {
     
   },
   setup(props) {
+    let showKeys = ref(false)
     let targetPublicKeySelectable = ref(true);
     let scopedMetadataKeySelectable = ref(true);
     let scopedMetadataKeyType = ref(1);
@@ -163,6 +175,17 @@ export default {
     themeConfig.init();
     const svgString = computed(()=>toSvg(selectedAcc.value?selectedAcc.value.address:'', 40, themeConfig.jdenticonConfig))
     const accountName = computed(()=>selectedAcc.value?walletState.currentLoggedInWallet.convertAddressToName(selectedAcc.value.address,true):'')
+    const existingScopedMetadataKeys = ref([])
+    const fetchExistingKey = ()=>{
+      let metadataQueryParams = new MetadataQueryParams()
+      metadataQueryParams.metadataType = MetadataType.ACCOUNT
+      metadataQueryParams.targetKey = targetPublicAccount.value
+      AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams).then(metadata=>{
+        metadata.metadataEntries.forEach(metadataEntry=>{
+           existingScopedMetadataKeys.value.push(metadataEntry.scopedMetadataKey.toHex())
+        })
+      })
+    }
     const accountAddress = computed(()=>selectedAcc.value?selectedAcc.value.address:'0'.repeat(40))
     const handleParamTargetPublicKey = ()=>{
       if(props.targetPublicKey.length === 64 && Convert.isHexString(props.targetPublicKey)){
@@ -292,6 +315,7 @@ export default {
       buildMetadataTxn();
       buildAggregateTxn();
       updateAggregateFee();
+      fetchExistingKey()
     }
 
     if(AppState.isReady){
@@ -599,7 +623,9 @@ export default {
       showScopedKeyErr,
       inputScopedMetadataKey,
       checkOldValue,
-      selectedCosigner
+      selectedCosigner,
+      showKeys,
+      existingScopedMetadataKeys
     };
   },
 };

@@ -2,7 +2,7 @@
   <div>
     <div class='flex cursor-pointer'>
         <img src='@/assets/img/chevron_left.svg'>
-        <router-link :to="{name: 'ViewServicesAssets'}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
+        <router-link :to="{name: 'ViewServicesNamespace'}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
     </div>
     <div class='w-10/12 ml-auto mr-auto'>
         <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
@@ -43,11 +43,22 @@
                     </div>
                 </div>
                 <div class="border border-blue-primary p-4 bg-blue-100 flex items-center rounded mt-5">
-                    <img src="@/modules/services/submodule/namespaces/img/icon-namespace.svg">
-                    <div class="ml-1">
-                        <div class="uppercase text-blue-primary font-semibold text-xxs">NAMESPACE ID</div>
-                        <div class="text-black text-sm font-bold">{{ targetId }}</div>
+                  <img src="@/modules/services/submodule/namespaces/img/icon-namespace.svg">
+                  <div class="ml-1">
+                      <div class="uppercase text-blue-primary font-semibold text-xxs">NAMESPACE</div>
+                      <div class="text-black text-sm font-bold">{{ namespaceName }}</div>
+                  </div>
+                </div>
+                <div class="mt-2" v-if="existingScopedMetadataKeys.length" >
+                  <div @click="showKeys = !showKeys" class="text-blue-primary text-xs cursor-pointer mb-1.5">Select Existing Scoped Metadata Key (Hexadecimal)</div>
+                  <div v-for="(metadata,index) in existingScopedMetadataKeys" :key="index" >
+                    <div v-if="showKeys" class="flex justify-center cursor-pointer" @click="scopedMetadataKeyType=2,inputScopedMetadataKey=metadata,checkOldValue(),showKeys = false">
+                      <div v-if="index%2==0" class="text-xs py-2 bg-gray-100 pl-2 w-full">{{metadata}}</div>
+                      <div v-if="index%2==1" class="text-xs py-2 pl-2 w-full">{{metadata}}</div>
+                      <div v-if="index%2==0" class="ml-auto pr-2 text-xxs py-2 font-semibold uppercase text-blue-primary bg-gray-100">{{$t('general.select')}}</div>
+                      <div v-if="index%2==1" class="ml-auto mr-2 text-xxs py-2 font-semibold uppercase text-blue-primary">{{$t('general.select')}}</div>
                     </div>
+                  </div>
                 </div>
                 <MetadataInput :hex="scopedMetadataKeyType==2" class="mt-5" v-model="inputScopedMetadataKey" placeholder="Scoped Metadata Key" v-debounce:1000="checkOldValue" :toolTip="`${scopedMetadataKeyType==1?'Accepts 8 characters':'Accepts 16 hexadecimals'}`" :showError="showScopedKeyErr" :errorMessage="`${scopedMetadataKeyType==1?'Exceeded 8 characters':inputScopedMetadataKey.length>16?'Exceeded 16 hexadecimals':'Input needs to be even number'}`" />
                 <div class="flex gap-3 ">
@@ -60,7 +71,7 @@
                         <label for="hexa">Hexadecimal</label>
                     </div>
                 </div>
-                <MetadataInput class="mt-2" v-model="oldValue" :disabled="true" placeholder="Old Value"/>
+                <MetadataInput class="mt-2" v-model="oldValue" :disabled="true" placeholder="Current Value"/>
                 <MetadataInput class="mt-2" v-model="newValue"  placeholder="New Value"/>
             </div>
             <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
@@ -110,17 +121,15 @@
 </template>
 <script lang="ts">
 import { Helper } from "@/util/typeHelper";
-import { computed, ref, getCurrentInstance, watch} from "vue";
+import { computed, ref, watch} from "vue";
 import PasswordInput from "@/components/PasswordInput.vue";
 import {useI18n} from 'vue-i18n'
 import { multiSign } from "@/util/multiSignatory";
 import { walletState } from "@/state/walletState";
-
 import { TransactionUtils } from "@/util/transactionUtils";
-
 import { AppState } from '@/state/appState';
 import { 
-  Address, PublicAccount, Convert, NamespaceMetadataTransactionBuilder, 
+  Convert, NamespaceMetadataTransactionBuilder, 
   AggregateTransaction, AggregateBondedTransactionBuilder, UInt64,
   MetadataQueryParams, MetadataType, NamespaceMetadataTransaction,
   NamespaceId,
@@ -142,9 +151,9 @@ export default {
   components: {
     MetadataInput,
     PasswordInput,
-   
   },
   setup(props) {
+    let showKeys = ref(false)
     let targetNamespaceSelectable = ref(true);
     let scopedMetadataKeySelectable = ref(true);
     let scopedMetadataKeyType = ref(1);
@@ -164,6 +173,17 @@ export default {
     themeConfig.init();
     const svgString = computed(()=>toSvg(selectedAcc.value?selectedAcc.value.address:'', 40, themeConfig.jdenticonConfig))
     const accountName = computed(()=>selectedAcc.value?walletState.currentLoggedInWallet.convertAddressToName(selectedAcc.value.address,true):'')
+    const existingScopedMetadataKeys = ref([])
+    const fetchExistingKey = ()=>{
+      let metadataQueryParams = new MetadataQueryParams()
+      metadataQueryParams.metadataType = MetadataType.NAMESPACE
+      metadataQueryParams.targetId = targetNamespace
+      AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams).then(metadata=>{
+        metadata.metadataEntries.forEach(metadataEntry=>{
+           existingScopedMetadataKeys.value.push(metadataEntry.scopedMetadataKey.toHex())
+        })
+      })
+    }
     const handleParamTargetId = async ()=>{
       if(props.targetId.length === 16 && Convert.isHexString(props.targetId)){
         targetNamespaceSelectable.value = false;
@@ -194,6 +214,13 @@ export default {
           targetAccIsMultisig.value = selectedAcc.value.getDirectParentMultisig().length? true: false
         }
     }
+    const namespaceName = computed(()=>{
+      if(!selectedAcc.value){
+        return ''
+      }
+      let foundNamespace = selectedAcc.value.namespaces.find(namespace=>namespace.idHex==props.targetId)
+      return foundNamespace.name
+    })
     const otherAcc = computed(()=>{
       if(!walletState.currentLoggedInWallet){
           return null
@@ -306,6 +333,7 @@ export default {
       buildMetadataTxn();
       buildAggregateTxn();
       updateAggregateFee();
+      fetchExistingKey()
     }
 
     if(AppState.isReady){
@@ -615,7 +643,10 @@ export default {
       showScopedKeyErr,
       inputScopedMetadataKey,
       checkOldValue,
-      selectedCosigner
+      selectedCosigner,
+      namespaceName,
+      existingScopedMetadataKeys,
+      showKeys
     };
   },
 };
