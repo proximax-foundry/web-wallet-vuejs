@@ -62,17 +62,20 @@ export default {
 
     // get namespaces
     const namespaces = ref([]);
-    walletState.currentLoggedInWallet.accounts.forEach(account => {
-      account.namespaces.forEach(ns => {
-        namespaces.value.push(ns);
+    if(walletState.currentLoggedInWallet){
+      walletState.currentLoggedInWallet.accounts.forEach(account => {
+        account.namespaces.forEach(ns => {
+          namespaces.value.push(ns);
+        });
       });
-    });
 
-    walletState.currentLoggedInWallet.others.forEach(account => {
-      account.namespaces.forEach(ns => {
-        namespaces.value.push(ns);
+      walletState.currentLoggedInWallet.others.forEach(account => {
+        account.namespaces.forEach(ns => {
+          namespaces.value.push(ns);
+        });
       });
-    });
+    }
+    
 
     emitter.on("TXN_CONFIRMED", txLength => {
       setTimeout(() => {

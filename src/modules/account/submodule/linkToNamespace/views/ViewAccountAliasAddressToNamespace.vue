@@ -8,8 +8,8 @@
     <AccountComponent :address="address" class="mb-10"/>
     <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
       <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-      <router-link :to="{name:'ViewAccountAssets', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-      <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
+      <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+      <router-link :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
       <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
       <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
       <MoreAccountOptions :address="address" :selected="true"/>
@@ -128,7 +128,7 @@
         <button v-if="selectAction== 'Unlink' && !pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="aliasAddressToNamespace" :disabled="disableCreate">{{$t('namespace.unlinkNamespace')}}</button>
          <button v-if="pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="aliasAddressToNamespace" :disabled="disableCreate">{{$t('general.waitConfirmTx')}}</button>
        <div class="text-center">
-          <router-link :to="{name: 'ViewAccountDetails',params:{name:address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
+          <router-link :to="{name: 'ViewAccountDetails',params:{address: address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
         </div>
       </div>
     </div>
@@ -204,12 +204,24 @@ export default {
       return accounts.concat(otherAccounts);
     
     });
-    const acc = ref(totalAcc.value.find(acc=>acc.address==p.address))
+    const acc = computed(()=>{
+        if(!walletState.currentLoggedInWallet){
+          return null
+        }
+        let acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address) || walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
+        if(!acc){
+          return null
+        }
+        return acc
+      })
     const findAcc = (publicKey)=>{
       return totalAcc.value.find(acc=>acc.publicKey==publicKey)
     }
     const onPartial = ref(false);
     const checkIsPartial = ()=>{ 
+      if(!acc.value){
+        return
+      }
       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType))
       .then(onPartialBoolean => onPartial.value = onPartialBoolean)
       .catch(err=>{
@@ -240,7 +252,12 @@ export default {
     const passwordPattern = "^[^ ]{8,}$";
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";  
-    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))    
+    const lockFund = computed(()=> {
+      if(!networkState.currentNetworkProfileConfig){
+        return 0
+      }
+      return Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility)
+    })   
     const lockFundTxFee = computed(()=>{ 
       if(networkState.currentNetworkProfile){ 
         return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
@@ -249,7 +266,7 @@ export default {
       }
     })
     const toast = useToast();   
-    const walletName = walletState.currentLoggedInWallet.name;
+    const walletName = walletState.currentLoggedInWallet? walletState.currentLoggedInWallet.name:''
     let txHash = ref('')
     let pending = ref(false)
     let recordAction = ref('')
@@ -272,13 +289,10 @@ export default {
     const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
     
     const accountBalance = computed(() => {
-       let accountBalance = 0
-       if (acc.value == undefined){
-         return 0
-       }
-        accountBalance = acc.value.balance
-       
-       return accountBalance 
+      if(!acc.value){
+        return 0
+      }
+      return acc.value.balance
     })
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
@@ -359,6 +373,9 @@ export default {
     
    
     const getCosignerList = () =>{
+      if(!acc.value){
+        return []
+      }
       return multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList;
     }
 
@@ -373,7 +390,16 @@ export default {
 
     const selectedCosignPublicKey = ref(walletCosignerList.value[0]?walletCosignerList.value[0].publicKey:'')
 
+    watch(walletCosignerList,n=>{
+      if(n.length){
+         selectedCosignPublicKey.value = n[0]?n[0].publicKey:''
+      }
+    },{deep:true})
+
     const isCosigner = computed(() =>{
+      if(!acc.value){
+        return false
+      }
       return (multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList.length>0)?true: false;
     });
 
