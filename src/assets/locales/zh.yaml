@@ -352,10 +352,9 @@ home:
   siriusChain: 什么是天狼星链？
   siriusChainTitle: 开始在ProximaX天狼星区块链层上构建应用程序
   switchDefault: 你的默认账户已切换为
-  title: ProximaX天狼星钱包
+  title: ProximaX Sirius Wallet 1.0
   titleDescription: >-
-    建立强大的区块链集成，帮助您获得ProximaX天狼星平台的最大
-    价值。
+    A highly secure and intuitive wallet and gateway to the ProximaX Sirius platform
   transferDescription: 发送资产到另一个账户
   version: 版本
 multisig:
