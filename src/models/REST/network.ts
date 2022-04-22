@@ -1,6 +1,7 @@
 import { 
     NetworkHttp, NetworkType
 } from "tsjs-xpx-chain-sdk";
+import {RequestAuth} from './auth';
 
 export class NetworkAPI {
 
@@ -11,6 +12,7 @@ export class NetworkAPI {
     }
 
     getNetworkType(): Promise<NetworkType>{
-        return this.networkHttp.getNetworkType().toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.networkHttp.getNetworkType(authHeader).toPromise();
     }
 }

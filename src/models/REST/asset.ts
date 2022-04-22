@@ -2,6 +2,7 @@ import {
     MosaicHttp, NetworkHttp,
     MosaicId, MosaicInfo, MosaicNames, RichlistEntry, PageQueryParams, MosaicLevy
 } from "tsjs-xpx-chain-sdk";
+import {RequestAuth} from './auth';
 
 export class AssetAPI {
 
@@ -12,22 +13,27 @@ export class AssetAPI {
     }
 
     getMosaic(mosaicId: MosaicId): Promise<MosaicInfo>{
-        return this.mosaicHttp.getMosaic(mosaicId).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.mosaicHttp.getMosaic(mosaicId, authHeader).toPromise();
     }
 
     getMosaicRichlist(mosaicId: MosaicId, queryParams?: PageQueryParams): Promise<RichlistEntry[]>{
-        return this.mosaicHttp.getMosaicRichlist(mosaicId, queryParams).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.mosaicHttp.getMosaicRichlist(mosaicId, queryParams, authHeader).toPromise();
     }
 
     getMosaics(mosaicIds: MosaicId[]): Promise<MosaicInfo[]>{
-        return this.mosaicHttp.getMosaics(mosaicIds).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.mosaicHttp.getMosaics(mosaicIds, authHeader).toPromise();
     }
 
     getMosaicsNames(mosaicIds: MosaicId[]): Promise<MosaicNames[]>{
-        return this.mosaicHttp.getMosaicsNames(mosaicIds).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.mosaicHttp.getMosaicsNames(mosaicIds, authHeader).toPromise();
     }
 
     getMosaicLevy(mosaicId: MosaicId): Promise<MosaicLevy>{
-        return this.mosaicHttp.getMosaicLevy(mosaicId).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.mosaicHttp.getMosaicLevy(mosaicId, authHeader).toPromise();
     }
 }

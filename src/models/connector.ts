@@ -7,6 +7,7 @@ import { Subscription } from "rxjs"
 import { ListenerType } from "./const/listenerType"
 import { ListenerStateUtils } from "../state/utils/listenerStateUtils";
 import { watch } from "vue";
+import {RequestAuth} from './REST/auth';
 
 const secondsToCheck = 25;
 //const secondsInterval = 20;
@@ -32,6 +33,13 @@ export class Connector{
     startListen(): void{
         this.isRequestConnect = true;
         this.refreshTimer();
+        let authHeader = RequestAuth.getAuthHeader();
+  
+        if(authHeader && authHeader.headers){
+            let queryString = Object.keys(authHeader.headers).map(key => key + '=' + authHeader.headers[key]).join('&');
+            this.listener = new Listener(this.endpoint, WebSocket, queryString);
+        }
+        
         this.listener.open().then(()=>{
             //this.startWatcher();
             this.startIntervalCheck();
@@ -163,6 +171,7 @@ class ListenerHandler{
 
     static handleNewBlock(newBlock: BlockInfo): void{
 
+        console.log(newBlock);
         ListenerStateUtils.addBlock(newBlock);
     }
 
