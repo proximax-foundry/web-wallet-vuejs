@@ -64,12 +64,15 @@ setup(p){
    })
     let err = ref("")
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig'); 
-    var prettyAddress = ''
-    try {
-      prettyAddress = Helper.createAddress(p.address).pretty()
-    } catch (e) {
-      console.log(e)
-    } 
+    const prettyAddress = computed(()=>{
+      if(p.address){
+        try {
+           return Helper.createAddress(p.address).pretty()
+        } catch (error) {
+        }
+      }
+      return ''
+    })
     themeConfig.init();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;

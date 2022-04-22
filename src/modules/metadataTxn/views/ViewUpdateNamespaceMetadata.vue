@@ -49,7 +49,7 @@
                       <div class="text-black text-sm font-bold">{{ namespaceName }}</div>
                   </div>
                 </div>
-                <div class="mt-2" v-if="existingScopedMetadataKeys.length" >
+                <div class="mt-2" v-if="existingScopedMetadataKeys.length && scopedMetadataKeySelectable" >
                   <div @click="showKeys = !showKeys" class="text-blue-primary text-xs cursor-pointer mb-1.5">Select Existing Scoped Metadata Key (Hexadecimal)</div>
                   <div v-for="(metadata,index) in existingScopedMetadataKeys" :key="index" >
                     <div v-if="showKeys" class="flex justify-center cursor-pointer" @click="scopedMetadataKeyType=2,inputScopedMetadataKey=metadata,checkOldValue(),showKeys = false">
@@ -60,14 +60,14 @@
                     </div>
                   </div>
                 </div>
-                <MetadataInput :hex="scopedMetadataKeyType==2" class="mt-5" v-model="inputScopedMetadataKey" placeholder="Scoped Metadata Key" v-debounce:1000="checkOldValue" :toolTip="`${scopedMetadataKeyType==1?'Accepts 8 characters':'Accepts 16 hexadecimals'}`" :showError="showScopedKeyErr" :errorMessage="`${scopedMetadataKeyType==1?'Exceeded 8 characters':inputScopedMetadataKey.length>16?'Exceeded 16 hexadecimals':'Input needs to be even number'}`" />
+                <MetadataInput :hex="scopedMetadataKeyType==2" class="mt-5" :disabled="!scopedMetadataKeySelectable" v-model="inputScopedMetadataKey" placeholder="Scoped Metadata Key" v-debounce:1000="checkOldValue" :toolTip="`${scopedMetadataKeyType==1?'Accepts 8 characters':'Accepts 16 hexadecimals'}`" :showError="showScopedKeyErr" :errorMessage="`${scopedMetadataKeyType==1?'Exceeded 8 characters':inputScopedMetadataKey.length>16?'Exceeded 16 hexadecimals':'Input needs to be even number'}`" />
                 <div class="flex gap-3 ">
                     <div class="flex gap-2">
-                        <input type="radio" id="regular" value="1" v-model="scopedMetadataKeyType">
+                        <input :disabled="!scopedMetadataKeySelectable" type="radio" id="regular" value="1" v-model="scopedMetadataKeyType">
                         <label for="regular">Regular</label>
                     </div>
                     <div class="flex gap-2">
-                        <input type="radio" id="hexa" value="2" v-model="scopedMetadataKeyType">
+                        <input :disabled="!scopedMetadataKeySelectable" type="radio" id="hexa" value="2" v-model="scopedMetadataKeyType">
                         <label for="hexa">Hexadecimal</label>
                     </div>
                 </div>
@@ -154,7 +154,6 @@ export default {
   },
   setup(props) {
     let showKeys = ref(false)
-    let targetNamespaceSelectable = ref(true);
     let scopedMetadataKeySelectable = ref(true);
     let scopedMetadataKeyType = ref(1);
     let targetPublicAccount = ref(null);
@@ -186,7 +185,6 @@ export default {
     }
     const handleParamTargetId = async ()=>{
       if(props.targetId.length === 16 && Convert.isHexString(props.targetId)){
-        targetNamespaceSelectable.value = false;
         let uint64Id = UInt64.fromHex(props.targetId);
         let namespaceId = new NamespaceId([uint64Id.lower, uint64Id.higher]);
         targetNamespace = namespaceId;
@@ -218,8 +216,12 @@ export default {
       if(!selectedAcc.value){
         return ''
       }
-      let foundNamespace = selectedAcc.value.namespaces.find(namespace=>namespace.idHex==props.targetId)
-      return foundNamespace.name
+      if(props.targetId.length==16 && Convert.isHexString(props.targetId)){
+        let foundNamespace = selectedAcc.value.namespaces.find(namespace=>namespace.idHex==props.targetId)
+        return foundNamespace.name
+      }
+      return props.targetId
+     
     })
     const otherAcc = computed(()=>{
       if(!walletState.currentLoggedInWallet){
@@ -266,8 +268,6 @@ export default {
             
           }
         }
-
-        scopedMetadataKeySelectable.value = false;
       }
     }
 
@@ -296,16 +296,6 @@ export default {
 
     const metadataTxnAssignNewValue = () =>{
       txnBuilder.value(newValue.value);
-    }
-
-    const setNewScopedKey = () =>{
-      if(scopedMetadataKeySelectable.value)
-        txnBuilder.scopedMetadataKey(UInt64.fromHex(scopedMetadataKeyHex));
-    }
-
-    const setNewTargetNamespace = () =>{
-      if(targetNamespaceSelectable.value)
-        txnBuilder.targetNamespaceId(targetNamespace);
     }
 
     const buildMetadataTxn = ()=>{
@@ -646,7 +636,8 @@ export default {
       selectedCosigner,
       namespaceName,
       existingScopedMetadataKeys,
-      showKeys
+      showKeys,
+      scopedMetadataKeySelectable
     };
   },
 };

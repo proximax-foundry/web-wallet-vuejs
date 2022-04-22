@@ -49,7 +49,7 @@
                         <div class="text-black text-sm font-bold">{{ targetId }}</div>
                     </div>
                 </div>
-                <div class="mt-2" v-if="existingScopedMetadataKeys.length" >
+                <div class="mt-2" v-if="existingScopedMetadataKeys.length && scopedMetadataKeySelectable" >
                   <div @click="showKeys = !showKeys" class="text-blue-primary text-xs cursor-pointer mb-1.5">Select Existing Scoped Metadata Key (Hexadecimal)</div>
                   <div v-for="(metadata,index) in existingScopedMetadataKeys" :key="index" >
                     <div v-if="showKeys" class="flex justify-center cursor-pointer" @click="scopedMetadataKeyType=2,inputScopedMetadataKey=metadata,checkOldValue(),showKeys = false">
@@ -60,14 +60,14 @@
                     </div>
                   </div>
                 </div>
-                <MetadataInput :hex="scopedMetadataKeyType==2" class="mt-5" v-model="inputScopedMetadataKey" placeholder="Scoped Metadata Key" v-debounce:1000="checkOldValue" :toolTip="`${scopedMetadataKeyType==1?'Accepts 8 characters':'Accepts 16 hexadecimals'}`" :showError="showScopedKeyErr" :errorMessage="`${scopedMetadataKeyType==1?'Exceeded 8 characters':inputScopedMetadataKey.length>16?'Exceeded 16 hexadecimals':'Input needs to be even number'}`" />
+                <MetadataInput :hex="scopedMetadataKeyType==2" :disabled="!scopedMetadataKeySelectable" class="mt-5" v-model="inputScopedMetadataKey" placeholder="Scoped Metadata Key" v-debounce:1000="checkOldValue" :toolTip="`${scopedMetadataKeyType==1?'Accepts 8 characters':'Accepts 16 hexadecimals'}`" :showError="showScopedKeyErr" :errorMessage="`${scopedMetadataKeyType==1?'Exceeded 8 characters':inputScopedMetadataKey.length>16?'Exceeded 16 hexadecimals':'Input needs to be even number'}`" />
                 <div class="flex gap-3 ">
                     <div class="flex gap-2">
-                        <input type="radio" id="regular" value="1" v-model="scopedMetadataKeyType">
+                        <input :disabled="!scopedMetadataKeySelectable" type="radio" id="regular" value="1" v-model="scopedMetadataKeyType">
                         <label for="regular">Regular</label>
                     </div>
                     <div class="flex gap-2">
-                        <input type="radio" id="hexa" value="2" v-model="scopedMetadataKeyType">
+                        <input :disabled="!scopedMetadataKeySelectable" type="radio" id="hexa" value="2" v-model="scopedMetadataKeyType">
                         <label for="hexa">Hexadecimal</label>
                     </div>
                 </div>
@@ -155,7 +155,6 @@ export default {
   },
   setup(props) { 
     let showKeys = ref(false)
-    let targetAssetSelectable = ref(true);
     let scopedMetadataKeySelectable = ref(true);
     let scopedMetadataKeyType = ref(1);
     let targetPublicAccount = ref(null);
@@ -187,8 +186,6 @@ export default {
     }
     const handleParamTargetId = async ()=>{
       if(props.targetId && props.targetId.length === 16 && Convert.isHexString(props.targetId)){
-        targetAssetSelectable.value = false;
-
         let assetId = new MosaicId(props.targetId);
         targetAsset = assetId;
         txnBuilder.targetMosaicId(targetAsset);
@@ -250,8 +247,6 @@ export default {
             
           }
         }
-
-        scopedMetadataKeySelectable.value = false;
       }
     }
 
@@ -279,16 +274,6 @@ export default {
 
     const metadataTxnAssignNewValue = () =>{
       txnBuilder.value(newValue.value);
-    }
-
-    const setNewScopedKey = () =>{
-      if(scopedMetadataKeySelectable.value)
-        txnBuilder.scopedMetadataKey(UInt64.fromHex(scopedMetadataKeyHex));
-    }
-
-    const setNewTargetAsset = () =>{
-      if(targetAssetSelectable.value)
-        txnBuilder.targetMosaicId(targetAsset);
     }
 
     const buildMetadataTxn = ()=>{
@@ -625,7 +610,8 @@ export default {
       checkOldValue,
       selectedCosigner,
       existingScopedMetadataKeys,
-      showKeys
+      showKeys,
+      scopedMetadataKeySelectable
     };
   },
 };

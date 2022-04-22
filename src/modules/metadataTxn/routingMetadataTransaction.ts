@@ -26,5 +26,14 @@ export const MetadataTransactionRoutes: RouteRecordRaw[] = [
     meta: {
       title: "Update Account Metadata",
     }
+  },
+  {
+    path: '/view-metadata/:address',
+    name: 'ViewMetadata',
+    props: true,
+    component: () => import('@/modules/metadataTxn/views/ViewMetadata.vue'),
+    meta: {
+      title: "View Metadata",
+    }
   }
 ];
