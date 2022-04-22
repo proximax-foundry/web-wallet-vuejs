@@ -19,18 +19,36 @@ export class ChainUtils{
 
     static buildWSEndpoint(endpoint :string, port: number | undefined){
 
-      if(!port)
-        port = 3000;
+      const protocols = ["https:", "file:"];
 
-      return location.protocol=='https:' ? `wss://${endpoint}` : `ws://${endpoint}:${port}`;
+      let requestProtocol = "ws";
+      let usePort = port;
+
+      if(protocols.includes(location.protocol)){
+        requestProtocol = "wss";
+        usePort = 0;
+      }
+
+      return `${requestProtocol}://${endpoint}${usePort ? ":" + usePort : ""}`;
+
+      // return location.protocol=='https:' ? `wss://${endpoint}` : `ws://${endpoint}:${port}`;
     }
 
     static buildAPIEndpoint(endpoint :string, port: number | undefined){
 
-      if(!port)
-        port = 3000;
+      const protocols = ["https:", "file:"];
 
-      return location.protocol=='https:' ? `https://${endpoint}` : `http://${endpoint}:${port}`;
+      let requestProtocol = "http";
+      let usePort = port;
+
+      if(protocols.includes(location.protocol)){
+        requestProtocol = "https";
+        usePort = 0;
+      }
+
+      return `${requestProtocol}://${endpoint}${usePort ? ":" + usePort : ""}`;
+
+      //return location.protocol=='https:' ? `https://${endpoint}` : `http://${endpoint}:${port}`;
     }
 
     static async getChainConfig(chainHeight: number, chainConfigHttp: ChainConfigHttp): Promise<NetworkConfig | string>{
