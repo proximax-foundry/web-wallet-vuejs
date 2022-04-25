@@ -9,10 +9,11 @@
             <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
                 <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
                 <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+                <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Metadata</div>
                 <router-link :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
                 <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
                 <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
-                <MoreAccountOptions :address="address" :selected="true"/>
+                <MoreAccountOptions :address="address" :selected="false"/>
             </div>
             <div class="border-2 border-t-0 filter shadow-lg px-6" >
                 <select class=" my-4" v-model="filterSelection">
@@ -83,14 +84,11 @@
 <script setup lang='ts'>
 import { AppState } from "@/state/appState"
 import { walletState } from "@/state/walletState"
-import { MetadataQueryParams, MetadataType, MosaicId, NamespaceId, PublicAccount } from "tsjs-xpx-chain-sdk"
-import { computed, defineComponent, ref, watch } from "vue"
+import { Convert, MetadataQueryParams, MetadataType, MosaicId, NamespaceId, PublicAccount } from "tsjs-xpx-chain-sdk"
+import { computed, ref, watch } from "vue"
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
-    defineComponent({
-        AccountComponent,
-        MoreAccountOptions
-    })
+
     const props = defineProps({
         address: String
     })
@@ -126,13 +124,13 @@ import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.
         let fetchMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
         fetchMetadata.metadataEntries.forEach(metadataEntry=>{
             accountMetadata.value.push({
-                scopedMetadataKey: metadataEntry.scopedMetadataKey.toHex(),
+                scopedMetadataKey: convertUtf8(metadataEntry.scopedMetadataKey.toHex()),
                 value: metadataEntry.value
             })
         })
     }
 
-    const fetchNamespaceMetadata = ()=>{
+    const fetchNamespaceMetadata = async()=>{
         if(!acc.value){
             return
         }
@@ -147,7 +145,7 @@ import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.
             let fetchMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
             fetchMetadata.metadataEntries.forEach(metadataEntry=>{
                 namespaceMetadata.value.push({
-                    scopedMetadataKey: metadataEntry.scopedMetadataKey.toHex(),
+                    scopedMetadataKey: convertUtf8(metadataEntry.scopedMetadataKey.toHex()) ,
                     id: namespace,
                     value: metadataEntry.value
                 })
@@ -175,7 +173,7 @@ import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.
             let fetchMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
             fetchMetadata.metadataEntries.forEach(metadataEntry=>{
                 assetMetadata.value.push({
-                    scopedMetadataKey: metadataEntry.scopedMetadataKey.toHex(),
+                    scopedMetadataKey: convertUtf8(metadataEntry.scopedMetadataKey.toHex()),
                     name: asset.name.length?asset.name:asset.id,
                     id: asset.id,
                     value: metadataEntry.value
@@ -183,10 +181,33 @@ import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.
             })
         })
     }
-     const init = async ()=>{
+    const isASCII = (string :string)=> {
+        return /^[\x00-\x7F]*$/.test(string);
+    }
+
+    const removeDoubleZero = (string :string) =>{
+        let isZero = string.endsWith('00')
+        if(isZero){
+            string = string.substring(0, string.length - 2);
+            string = removeDoubleZero(string)
+        }
+        return string
+    }
+
+    const convertUtf8 = (scopedMetadataKey :string)=>{
+        scopedMetadataKey =  removeDoubleZero(scopedMetadataKey )
+        let utf8 = Convert.decodeHexToUtf8(scopedMetadataKey )
+        if(isASCII(utf8)){
+            scopedMetadataKey  = utf8
+        }
+        return scopedMetadataKey
+        
+    }
+     const init = async() =>{
         fetchAccountMetadata()
         fetchNamespaceMetadata()
         fetchAssetMetadata()
+        
     }
    
     if(AppState.isReady){
@@ -200,6 +221,8 @@ import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.
         }
       });
     }
+
+    
 
 
 </script>
