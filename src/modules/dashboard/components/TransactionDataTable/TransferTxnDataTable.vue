@@ -128,6 +128,7 @@
         <template #body="{data}">
           <div>
             <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>'" class="inline-block" v-if="data.message && data.messageType !== 1">
+            <img src="@/modules/dashboard/img/enrypted_message_logo.jpg" v-tooltip.left="'<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>'" class="inline-block" v-else-if="data.message !== 1 && data.messageType !== 0">
             <div v-else class="w-full text-center">-</div>
           </div>
         </template>
