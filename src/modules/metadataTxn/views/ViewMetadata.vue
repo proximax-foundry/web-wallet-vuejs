@@ -191,11 +191,11 @@ import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.
             return
         }
         let assets :{id:string,name:string}[] = [] 
-        acc.value.assets.forEach(namespace=>{
-            if(namespace.owner==acc.value.publicKey){
+        acc.value.assets.forEach(asset=>{
+            if(asset.owner==acc.value.publicKey){
                 assets.push({
-                    id:namespace.idHex,
-                    name:namespace.namespaceNames[0]??''
+                    id:asset.idHex,
+                    name:asset.namespaceNames[0]??''
                 })
             }
         })
