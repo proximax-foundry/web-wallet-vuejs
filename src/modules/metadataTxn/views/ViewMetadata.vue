@@ -28,14 +28,24 @@
                     </div>
                     <div v-for="(metadata,index) in accountMetadata" :key="index">
                          <div class="grid grid-cols-2 text-xs mb-2">
-                            <div>{{metadata.scopedMetadataKey}}</div>
+                            <div>
+                                <div class="flex">
+                                    <div>{{metadata.scopedMetadataKeyHex}}</div>
+                                    <div class="ml-3 text-gray-400 font-semibold" v-if="metadata.scopedMetadataKeyUtf8">hex</div>
+                                </div>
+                                <div class="flex" v-if="metadata.scopedMetadataKeyUtf8">
+                                    <div>{{metadata.scopedMetadataKeyUtf8}}</div>
+                                    <div class="ml-3 text-gray-400 font-semibold">utf-8</div>
+                                </div>
+                            </div>
                             <div class="break-all">
                                 {{metadata.value}} 
-                                <router-link :to="{name: 'ViewUpdateAccountMetadata',params:{targetPublicKey:acc?acc.publicKey:'0'.repeat(64),scopedMetadataKey:metadata.scopedMetadataKey}}">
+                                <router-link :to="{name: 'ViewUpdateAccountMetadata',params:{targetPublicKey:acc?acc.publicKey:'0'.repeat(64),scopedMetadataKey:metadata.scopedMetadataKeyUtf8?metadata.scopedMetadataKeyUtf8:metadata.scopedMetadataKeyHex}}">
                                     <img src="@/modules/account/img/edit-icon.svg" title="Update Metadata" class="inline-block w-3 h-3 text-black cursor-pointer  ml-1" >
                                 </router-link>
                             </div>
                         </div>
+                        <div v-if="index != (accountMetadata.length - 1)" class='my-2 gray-line' ></div>
                     </div>
                 </div>
                 <div v-else-if="filterSelection==1">
@@ -46,15 +56,25 @@
                     </div>
                     <div v-for="(metadata,index) in namespaceMetadata" :key="index">
                         <div class="grid grid-cols-3 text-xs mb-2">
-                            <div>{{metadata.scopedMetadataKey}}</div>
+                            <div>
+                                <div class="flex">
+                                    <div>{{metadata.scopedMetadataKeyHex}}</div>
+                                    <div class="ml-3 text-gray-400 font-semibold" v-if="metadata.scopedMetadataKeyUtf8">hex</div>
+                                </div>
+                                <div class="flex" v-if="metadata.scopedMetadataKeyUtf8">
+                                    <div>{{metadata.scopedMetadataKeyUtf8}}</div>
+                                    <div class="ml-3 text-gray-400 font-semibold">utf-8</div>
+                                </div>
+                            </div>
                             <div>{{metadata.id}}</div>
                             <div class="break-all">
                                 {{metadata.value}}
-                                 <router-link :to="{name: 'ViewUpdateNamespaceMetadata',params:{targetId:metadata.id,scopedMetadataKey:metadata.scopedMetadataKey}}">
+                                 <router-link :to="{name: 'ViewUpdateNamespaceMetadata',params:{targetId:metadata.id,scopedMetadataKey:metadata.scopedMetadataKeyUtf8?metadata.scopedMetadataKeyUtf8:metadata.scopedMetadataKeyHex}}">
                                     <img src="@/modules/account/img/edit-icon.svg" title="Update Metadata" class="inline-block w-3 h-3 text-black cursor-pointer  ml-1" >
                                 </router-link>
                             </div>
                         </div>
+                        <div v-if="index != (namespaceMetadata.length - 1)" class='my-2 gray-line' ></div>
                     </div>
                 </div>
                 <div v-else>
@@ -65,17 +85,28 @@
                     </div>
                     <div v-for="(metadata,index) in assetMetadata" :key="index">
                         <div class="grid grid-cols-3 text-xs mb-2">
-                            <div>{{metadata.scopedMetadataKey}}</div>
+                            <div>
+                                <div class="flex">
+                                    <div>{{metadata.scopedMetadataKeyHex}}</div>
+                                    <div class="ml-3 text-gray-400 font-semibold" v-if="metadata.scopedMetadataKeyUtf8">hex</div>
+                                </div>
+                                <div class="flex" v-if="metadata.scopedMetadataKeyUtf8">
+                                    <div>{{metadata.scopedMetadataKeyUtf8}}</div>
+                                    <div class="ml-3 text-gray-400 font-semibold">utf-8</div>
+                                </div>
+                            </div>
                             <div>{{metadata.name}}</div>
                             <div class="break-all">
                                 {{metadata.value}}
-                                <router-link :to="{name: 'ViewUpdateAssetMetadata',params:{targetId:metadata.id,scopedMetadataKey:metadata.scopedMetadataKey}}">
+                                <router-link :to="{name: 'ViewUpdateAssetMetadata',params:{targetId:metadata.id,scopedMetadataKey:metadata.scopedMetadataKeyUtf8?metadata.scopedMetadataKeyUtf8:metadata.scopedMetadataKeyHex}}">
                                     <img src="@/modules/account/img/edit-icon.svg" title="Update Metadata" class="inline-block w-3 h-3 text-black cursor-pointer  ml-1" >
                                 </router-link>
                             </div>
                         </div>
+                        <div v-if="index != (assetMetadata.length - 1)" class='my-2 gray-line' ></div>
                     </div>
                 </div>
+                <router-link :to="{name: 'ViewUpdateAccountMetadata',params:{targetPublicKey:acc?acc.publicKey:'0'.repeat(64)}}"><button  class="my-4 blue-btn py-3 px-3 " >Create New Account Metadata</button></router-link>
             </div>
         </div>
     </div>
@@ -111,9 +142,9 @@ import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.
         }
         return acc.value.getDirectParentMultisig().length>0
     })
-    const accountMetadata = ref<{scopedMetadataKey:string,value:string}[]>([])
-    const namespaceMetadata = ref<{scopedMetadataKey:string,id:string,value:string}[]>([])
-    const assetMetadata = ref<{scopedMetadataKey:string,name:string,id:string,value:string}[]>([])
+    const accountMetadata = ref<{scopedMetadataKeyUtf8:string,scopedMetadataKeyHex: string,value:string}[]>([])
+    const namespaceMetadata = ref<{scopedMetadataKeyUtf8:string,scopedMetadataKeyHex: string, id:string,value:string}[]>([])
+    const assetMetadata = ref<{scopedMetadataKeyUtf8:string,scopedMetadataKeyHex: string,name:string,id:string,value:string}[]>([])
     const fetchAccountMetadata = async()=>{
         if(!acc.value){
             return
@@ -124,7 +155,8 @@ import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.
         let fetchMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
         fetchMetadata.metadataEntries.forEach(metadataEntry=>{
             accountMetadata.value.push({
-                scopedMetadataKey: convertUtf8(metadataEntry.scopedMetadataKey.toHex()),
+                scopedMetadataKeyUtf8: metadataEntry.scopedMetadataKey.toHex() == convertUtf8(metadataEntry.scopedMetadataKey.toHex())?null:convertUtf8(metadataEntry.scopedMetadataKey.toHex()),
+                scopedMetadataKeyHex: metadataEntry.scopedMetadataKey.toHex() ,
                 value: metadataEntry.value
             })
         })
@@ -145,7 +177,8 @@ import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.
             let fetchMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
             fetchMetadata.metadataEntries.forEach(metadataEntry=>{
                 namespaceMetadata.value.push({
-                    scopedMetadataKey: convertUtf8(metadataEntry.scopedMetadataKey.toHex()) ,
+                    scopedMetadataKeyUtf8: metadataEntry.scopedMetadataKey.toHex() == convertUtf8(metadataEntry.scopedMetadataKey.toHex())?null:convertUtf8(metadataEntry.scopedMetadataKey.toHex()),
+                    scopedMetadataKeyHex: metadataEntry.scopedMetadataKey.toHex() ,
                     id: namespace,
                     value: metadataEntry.value
                 })
@@ -173,7 +206,8 @@ import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.
             let fetchMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
             fetchMetadata.metadataEntries.forEach(metadataEntry=>{
                 assetMetadata.value.push({
-                    scopedMetadataKey: convertUtf8(metadataEntry.scopedMetadataKey.toHex()),
+                    scopedMetadataKeyUtf8: metadataEntry.scopedMetadataKey.toHex() == convertUtf8(metadataEntry.scopedMetadataKey.toHex())?null:convertUtf8(metadataEntry.scopedMetadataKey.toHex()),
+                    scopedMetadataKeyHex: metadataEntry.scopedMetadataKey.toHex() ,
                     name: asset.name.length?asset.name:asset.id,
                     id: asset.id,
                     value: metadataEntry.value
@@ -222,11 +256,4 @@ import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.
       });
     }
 
-    
-
-
 </script>
-
-<style>
-
-</style>

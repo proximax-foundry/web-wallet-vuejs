@@ -60,18 +60,39 @@
                     </div>
                   </div>
                 </div>
-                <MetadataInput :hex="scopedMetadataKeyType==2" :disabled="!scopedMetadataKeySelectable" class="mt-5" v-model="inputScopedMetadataKey" placeholder="Scoped Metadata Key" v-debounce:1000="checkOldValue" :toolTip="`${scopedMetadataKeyType==1?'Accepts 8 characters':'Accepts 16 hexadecimals'}`" :showError="showScopedKeyErr" :errorMessage="`${scopedMetadataKeyType==1?'Exceeded 8 characters':inputScopedMetadataKey.length>16?'Exceeded 16 hexadecimals':'Input needs to be even number'}`" />
-                <div class="flex gap-3 ">
-                    <div class="flex gap-2">
-                        <input :disabled="!scopedMetadataKeySelectable" type="radio" id="regular" value="1" v-model="scopedMetadataKeyType">
-                        <label for="regular">Regular</label>
-                    </div>
-                    <div class="flex gap-2">
-                        <input :disabled="!scopedMetadataKeySelectable" type="radio" id="hexa" value="2" v-model="scopedMetadataKeyType">
-                        <label for="hexa">Hexadecimal</label>
-                    </div>
+                <div v-if="scopedMetadataKeySelectable">
+                  <MetadataInput :hex="scopedMetadataKeyType==2" class="mt-5" v-model="inputScopedMetadataKey"  placeholder="Scoped Metadata Key" v-debounce:1000="checkOldValue" :toolTip="`${scopedMetadataKeyType==1?'Accepts 8 characters':'Accepts 16 hexadecimals'}`" :showError="showScopedKeyErr" :errorMessage="`${scopedMetadataKeyType==1?'Exceeded 8 characters':inputScopedMetadataKey.length>16?'Exceeded 16 hexadecimals':'Input needs to be even number'}`" />
+                  <div class="flex gap-3 ">
+                      <div class="flex gap-2">
+                          <input  type="radio" id="regular" value="1" v-model="scopedMetadataKeyType">
+                          <label for="regular">UTF-8</label>
+                      </div>
+                      <div class="flex gap-2">
+                          <input  type="radio" id="hexa" value="2" v-model="scopedMetadataKeyType">
+                          <label for="hexa">Hexadecimal</label>
+                      </div>
+                  </div>
+                  <MetadataInput class="mt-2" v-model="oldValue" :disabled="true" placeholder="Current Value"/>
                 </div>
-                <MetadataInput class="mt-2" v-model="oldValue" :disabled="true" placeholder="Old Value"/>
+                <div class="my-3" v-else>
+                  <div class="border border-blue-300 rounded-md p-3 mt-3 bg-blue-50">
+                    <div class="flex flex-col gap-0.5">
+                        <div class="uppercase text-xxs text-blue-primary">Selected Scoped Metadata Key</div>
+                        <div class="flex">
+                          <div class="font-semibold" >{{scopedMetadataKey}}</div>
+                          <div class="ml-3 text-gray-400 font-semibold">{{scopedMetadataKeyType==1?"UTF-8":"HEX"}}</div>
+                        </div>
+                        <div class="flex">
+                          <div class="font-semibold" v-if="scopedMetadataKeyType==1">{{scopedMetadataKeyHex}}</div>
+                          <div v-if="scopedMetadataKeyType==1" class="ml-3 text-gray-400 font-semibold">HEX</div>
+                        </div>
+                    </div>
+                  </div>
+                  <div class="border border-blue-300 rounded-md p-3 mt-3 bg-blue-50">
+                    <div class="uppercase text-xxs text-blue-primary">CURRENT VALUE</div>
+                    <div class="font-semibold">{{oldValue}}</div>
+                  </div>
+                </div>
                 <MetadataInput class="mt-2" v-model="newValue"  placeholder="New Value"/>
             </div>
             <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
@@ -160,7 +181,7 @@ export default {
     let targetPublicAccount = ref(null);
     let targetAsset: MosaicId = null;
     let targetAccIsMultisig = ref(false);
-    let scopedMetadataKeyHex = "";
+    let scopedMetadataKeyHex = ref("");
     let inputScopedMetadataKey = ref("");
     let selectedAcc = ref<WalletAccount | OtherAccount>(null);
     let txnBuilder: MosaicMetadataTransactionBuilder;
@@ -229,8 +250,8 @@ export default {
 
         if(props.scopedMetadataKey.length === 16 && Convert.isHexString(props.scopedMetadataKey)){
           scopedMetadataKeyType.value = 2;
-          scopedMetadataKeyHex = props.scopedMetadataKey;
-          txnBuilder.scopedMetadataKey(UInt64.fromHex(scopedMetadataKeyHex));
+          scopedMetadataKeyHex.value = props.scopedMetadataKey;
+          txnBuilder.scopedMetadataKey(UInt64.fromHex(scopedMetadataKeyHex.value));
           
         }
         else{
@@ -242,8 +263,8 @@ export default {
             if((tempHexData.length/2) < 8){
               tempHexData = tempHexData + "00".repeat(8 - hexDataBytes);
             }
-            scopedMetadataKeyHex = tempHexData;
-            txnBuilder.scopedMetadataKey(UInt64.fromHex(scopedMetadataKeyHex));
+            scopedMetadataKeyHex.value = tempHexData;
+            txnBuilder.scopedMetadataKey(UInt64.fromHex(scopedMetadataKeyHex.value));
             
           }
         }
@@ -256,12 +277,12 @@ export default {
     }
 
     const loadCurrentMetadataValue = async () =>{
-      if(targetAsset && scopedMetadataKeyHex){
+      if(targetAsset && scopedMetadataKeyHex.value){
 
         let metadataQueryParams = new MetadataQueryParams();
         metadataQueryParams.targetId = targetAsset;
         metadataQueryParams.metadataType = MetadataType.MOSAIC;
-        metadataQueryParams.scopedMetadataKey = UInt64.fromHex(scopedMetadataKeyHex);
+        metadataQueryParams.scopedMetadataKey = UInt64.fromHex(scopedMetadataKeyHex.value);
 
         let searchResults = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams);
         if(searchResults.metadataEntries.length){
@@ -611,7 +632,8 @@ export default {
       selectedCosigner,
       existingScopedMetadataKeys,
       showKeys,
-      scopedMetadataKeySelectable
+      scopedMetadataKeySelectable,
+      scopedMetadataKeyHex
     };
   },
 };
