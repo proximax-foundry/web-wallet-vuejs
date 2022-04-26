@@ -75,9 +75,9 @@
                   <MetadataInput class="mt-2" v-model="oldValue" :disabled="true" placeholder="Current Value"/>
                 </div>
                 <div class="my-3" v-else>
-                  <div class="border border-blue-300 rounded-md p-3 mt-3 bg-blue-50">
+                  <div class="border border-blue-primary p-4 bg-blue-100 rounded mt-5">
                     <div class="flex flex-col gap-0.5">
-                        <div class="uppercase text-xxs text-blue-primary">Selected Scoped Metadata Key</div>
+                        <div class="uppercase text-xxs font-semibold text-blue-primary">Selected Scoped Metadata Key</div>
                         <div class="flex">
                           <div class="font-semibold" >{{scopedMetadataKey}}</div>
                           <div class="ml-3 text-gray-400 font-semibold">{{scopedMetadataKeyType==1?"UTF-8":"HEX"}}</div>
@@ -88,8 +88,8 @@
                         </div>
                     </div>
                   </div>
-                  <div class="border border-blue-300 rounded-md p-3 mt-3 bg-blue-50">
-                    <div class="uppercase text-xxs text-blue-primary">CURRENT VALUE</div>
+                  <div class="border border-blue-primary p-4 bg-blue-100 rounded mt-5">
+                    <div class="uppercase text-xxs text-blue-primary font-semibold">CURRENT VALUE</div>
                     <div class="font-semibold">{{oldValue}}</div>
                   </div>
                 </div>
