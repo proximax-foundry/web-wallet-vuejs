@@ -164,12 +164,15 @@ export default {
     
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    var prettyAddress = ''
-    try {
-      prettyAddress = Helper.createAddress(acc.value?acc.value.address:'').pretty();
-    } catch (error) {
-      
-    } 
+    const prettyAddress = computed(()=>{
+      if(p.address){
+        try {
+           return Helper.createAddress(p.address).pretty()
+        } catch (error) {
+        }
+      }
+      return ''
+    })
     const err = ref(false);
     
     
@@ -274,7 +277,7 @@ export default {
       // Addres number
       doc.setFontSize(8);
       doc.setTextColor('#000000');
-      doc.text(prettyAddress, 146, 164, { maxWidth: 132 });
+      doc.text(prettyAddress.value, 146, 164, { maxWidth: 132 });
       doc.save('Your_Paper_Wallet');
     }
 
@@ -324,7 +327,6 @@ export default {
       verifyWalletPwSwap,
       copy,
       privateKey,
-      prettyAddress,
       showWalletPaperPw,
       showSavePaperWallet,
       walletPasswdWalletPaper,
