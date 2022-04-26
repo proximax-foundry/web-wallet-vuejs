@@ -2,6 +2,7 @@ import {
     NamespaceHttp, NetworkHttp, MosaicId,
     Address, QueryParams, NamespaceId, NamespaceName, NamespaceInfo
 } from "tsjs-xpx-chain-sdk";
+import {RequestAuth} from './auth';
 
 export class NamespaceAPI {
 
@@ -12,26 +13,32 @@ export class NamespaceAPI {
     }
 
     getLinkedAddress(namespaceId: NamespaceId): Promise<Address>{
-        return this.namespaceHttp.getLinkedAddress(namespaceId).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.namespaceHttp.getLinkedAddress(namespaceId, authHeader).toPromise();
     }
 
     getLinkedMosaicId(namespaceId: NamespaceId): Promise<MosaicId>{
-        return this.namespaceHttp.getLinkedMosaicId(namespaceId).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.namespaceHttp.getLinkedMosaicId(namespaceId, authHeader).toPromise();
     }
 
     getNamespace(namespaceId: NamespaceId): Promise<NamespaceInfo>{
-        return this.namespaceHttp.getNamespace(namespaceId).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.namespaceHttp.getNamespace(namespaceId, authHeader).toPromise();
     }
 
     getNamespacesFromAccount(address: Address, queryParams?: QueryParams): Promise<NamespaceInfo[]>{
-        return this.namespaceHttp.getNamespacesFromAccount(address, queryParams).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.namespaceHttp.getNamespacesFromAccount(address, queryParams, authHeader).toPromise();
     }
 
     getNamespacesFromAccounts(addresses: Address[], queryParams?: QueryParams): Promise<NamespaceInfo[]>{
-        return this.namespaceHttp.getNamespacesFromAccounts(addresses, queryParams).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.namespaceHttp.getNamespacesFromAccounts(addresses, queryParams, authHeader).toPromise();
     }
 
     getNamespacesName(namespaceIds: NamespaceId[]): Promise<NamespaceName[]>{
-        return this.namespaceHttp.getNamespacesName(namespaceIds).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.namespaceHttp.getNamespacesName(namespaceIds, authHeader).toPromise();
     }
 }

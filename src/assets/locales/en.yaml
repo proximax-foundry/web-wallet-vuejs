@@ -337,7 +337,6 @@ home:
     properties
   assetDescription: Create your own unique token
   beginnerGuide: Beginner's Guide
-  beta: BETA
   contactTeam: Contact our support team
   copyright: Copyright 2022 ProximaX®. All rights reserved.
   gettingStarted: Getting Started
@@ -354,10 +353,9 @@ home:
   siriusChain: What is Sirius Chain?
   siriusChainTitle: Start building apps on the ProximaX Sirius blockchain layer
   switchDefault: Your default account has switched to
-  title: ProximaX Sirius Wallet
+  title: ProximaX Sirius Wallet 1.0
   titleDescription: >-
-    Build robust blockchain integrations that help you to get the most value out
-    of the ProximaX Sirius platform.
+    A highly secure and intuitive wallet and gateway to the ProximaX Sirius platform
   transferDescription: Send assets to another account
   version: Version
 multisig:

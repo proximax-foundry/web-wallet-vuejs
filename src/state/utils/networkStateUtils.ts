@@ -110,7 +110,9 @@ export class NetworkStateUtils{
         networkState.selectedAPIEndpoint = "";
       }
     }
-    SessionService.setNumber('nodePort', networkState.currentNetworkProfile?.httpPort || 3000);
+    let portNumber = networkState.currentNetworkProfile?.httpPort;
+
+    SessionService.setNumber('nodePort', portNumber !== null ? portNumber : 3000);
     SessionService.setRaw('selectedChainNode', networkState.selectedAPIEndpoint);
 
     AppState.nodeFullURL = NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint);
@@ -132,20 +134,16 @@ export class NetworkStateUtils{
   }
 
   static buildAPIEndpointURL(url: string): string{
-    const portNumber = networkState.currentNetworkProfile ? networkState.currentNetworkProfile.httpPort : 3000;
+    const portNumber = networkState.currentNetworkProfile !== null ? networkState.currentNetworkProfile.httpPort : 3000;
 
-    const protocols = ["https:", "file:"];
-
-    return protocols.includes(location.protocol) ? `https://${url}` : `http://${url}:${portNumber}`;
+    return ChainUtils.buildAPIEndpoint(url, portNumber);
   }
 
   static buildWSEndpointURL(url: string): string{
 
-    const portNumber = networkState.currentNetworkProfile ? networkState.currentNetworkProfile.httpPort : 3000;
+    const portNumber = networkState.currentNetworkProfile !== null ? networkState.currentNetworkProfile.httpPort : 3000;
 
-    const protocols = ["https:", "file:"];
-
-    return protocols.includes(location.protocol) ? `wss://${url}` : `ws://${url}:${portNumber}`;
+    return ChainUtils.buildWSEndpoint(url, portNumber);
   }
 
   static setLocalDefaultNetwork(networkName: string): void{

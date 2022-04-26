@@ -5,6 +5,8 @@ on:
     workflows: ['deploy-stg']                     # runs after deploy-stg workflow
     types:
       - completed
+    branches:
+      - develop 
 
 jobs:
   # This workflow contains a single job called "test"

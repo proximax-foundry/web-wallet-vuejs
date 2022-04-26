@@ -182,7 +182,7 @@ export default{
             expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
           }else{
             expiryDate = '-';
-            expiryStatus = 'valid';
+            // expiryStatus = 'valid';
           }
 
           let expiryRelativeTimeEstimate;
