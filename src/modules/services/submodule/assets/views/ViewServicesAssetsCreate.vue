@@ -103,6 +103,8 @@ import { WalletUtils } from '@/util/walletUtils';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
+import { UnitConverter } from '@/util/unitConverter';
+import { TimeUnit } from '@/models/const/timeUnit';
 
 export default {
   name: 'ViewServicesAssetsCreate',
@@ -137,10 +139,14 @@ export default {
     const durationCheckDisabled = ref(false);
     const cosignerBalanceInsufficient = ref(false);
     const cosignerAddress = ref('');
+    const supply = ref('0');
 
     const currencyName = computed(() => AppState.nativeToken.label);
 
-    const defaultDuration = ref(10 * 365);
+    const maxDuration = computed(()=>{
+      return networkState.currentNetworkProfileConfig ? 
+      Math.floor(UnitConverter.configReturn(networkState.currentNetworkProfileConfig.maxNamespaceDuration, TimeUnit.DAY)) : 0;
+    });
     const ownerPublicAccount = ref('')
     try {
       ownerPublicAccount.value = WalletUtils.createPublicAccount(walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount().publicKey:'', AppState.networkType)
@@ -150,8 +156,8 @@ export default {
     const transactionFee = ref('')
     const transactionFeeExact = ref(0)
     try {
-      transactionFee.value =  Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
+      transactionFee.value =  Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value), AppState.nativeToken.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value), AppState.nativeToken.divisibility);
     } catch (error) {
       console.log(error)
     }
@@ -212,8 +218,6 @@ export default {
     const balance = ref(Helper.toCurrencyFormat(defaultAcc?defaultAcc.balance:0, AppState.nativeToken.divisibility));
     const balanceNumber = ref(defaultAcc?defaultAcc.balance:0);
     const isMultiSigBool =ref(isMultiSig(defaultAcc?defaultAcc.address:''));
-
-    const supply = ref('0');
 
     const accounts = computed( () => {
       if(walletState.currentLoggedInWallet){
@@ -308,25 +312,7 @@ export default {
       isMutable.value = false;
     };
 
-    watch(divisibility, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, n, defaultDuration.value, true), AppState.nativeToken.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, n, defaultDuration.value, true), AppState.nativeToken.divisibility);
-    });
-
-    watch(isMutable, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, n, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, n, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
-    });
-
-    watch(isTransferable, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, isMutable.value, n, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, isMutable.value, n, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
-    });
-
-    watch(supply, (n) => {
-      transactionFee.value = Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, n, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, n, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value, true), AppState.nativeToken.divisibility);
-    });
+    /*
 
     watch(durationOption, () => {
       duration.value = '1';
@@ -345,6 +331,7 @@ export default {
         showDurationErr.value = false;
       }
     });
+    */
 
     // calculate fees
     const totalFee = computed(() => {
@@ -388,9 +375,9 @@ export default {
         return
       }
       if(cosigner.value){
-        AssetsUtils.createAssetMultiSig( cosigner.value, walletPassword.value, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value); 
+        AssetsUtils.createAssetMultiSig( cosigner.value, walletPassword.value, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value); 
       }else{
-        AssetsUtils.createAsset( selectedAccAdd.value, walletPassword.value, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value, defaultDuration.value);
+        AssetsUtils.createAsset( selectedAccAdd.value, walletPassword.value, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value);
       }
       clearInput();
       router.push({ name: "ViewServicesAssets"});
