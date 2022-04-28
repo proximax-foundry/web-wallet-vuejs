@@ -69,6 +69,8 @@
       <div class='my-6 gray-line' v-if="!other_acc "></div>
       <div class='flex'>
         <PdfPasswordModal v-if='!other_acc' />
+        <router-link :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}"><div  class="ml-3 blue-btn cursor-pointer py-3 px-3 ">{{$t('general.linkToNamespace')}}</div></router-link>
+        <router-link :to="{ name: 'ViewAccountDelegate', params: { address: address}}"><div  class="ml-3 blue-btn cursor-pointer py-3 px-3 ">{{$t('delegate.delegateAcc')}}</div></router-link>
         <DeleteAccountModal v-if="!isDefault && !other_acc " :account ='acc' />
       </div>
       </div>

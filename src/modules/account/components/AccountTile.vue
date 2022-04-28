@@ -31,26 +31,9 @@
         </div>
       </div>
       <div class="ml-auto mt-auto mb-auto ">
-        <img src="@/assets/img/navi/icon-default-account-drop-down.svg" class=" h-6 w-6 cursor-pointer" @mouseover="isHover = true" @mouseout="isHover = false"  @click="displayDefaultAccountMenu = true" >
-        <div class="relative"  @mouseover="isHover = true" @mouseout="isHover = false">
-          <div v-if="displayDefaultAccountMenu"  class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-            <div role="none" class="my-2">
-              <router-link :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.details')}}</router-link>
-              <router-link v-if="!otherAccount(account.address) ||( otherAccount(account.address) && multisig_add!='')" :to="{name:'ViewAccountAssets', params: { address: account.address}}" class= 'block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs'>{{$t('general.asset',2)}}</router-link>
-              <div  v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">{{$t('general.asset',2)}}</div>
-              <router-link v-if="!otherAccount(account.address) ||( otherAccount(account.address) && multisig_add!='')" :to="{ name: 'ViewMultisigHome', params: { address: account.address}}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.multisig')}}</router-link>
-              <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">{{$t('general.multisig')}}</div>
-              <router-link  :to="{ name: 'ViewMultisigScheme', params: { address: account.address}}" @click="displayDefaultAccountMenu = false" v-if="isMultiSig" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.scheme')}}</router-link>
-              <div  v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">{{$t('general.scheme')}}</div>
-              <router-link v-if="isNormalAcc" :to="{ name: 'ViewAccountSwap', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.swap')}}</router-link>
-              <div  v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">{{$t('general.swap')}}</div>
-              <router-link v-if="!otherAccount(account.address) ||( otherAccount(account.address) && multisig_add!='')" :to="{ name: 'ViewAccountDelegate', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.delegate')}}</router-link>
-              <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">{{$t('general.delegate')}}</div>
-              <router-link v-if="!otherAccount(account.address) ||( otherAccount(account.address) && multisig_add!='')" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: account.address}}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.namespace')}}</router-link>
-              <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">{{$t('general.namespace')}}</div>
-            </div>
-          </div>
-        </div>
+        <router-link :to="{ name: 'ViewAccountDetails', params: { address: account.address }}"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">
+          <img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class=" h-6 w-6 cursor-pointer" >
+        </router-link>
       </div>
     </div>
   </div>
