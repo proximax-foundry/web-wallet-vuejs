@@ -71,7 +71,7 @@ export default {
       {value: 'Director', label: t('addressBook.director')},
     );
 
-    if(walletState.currentLoggedInWallet.contacts != undefined){
+    if(walletState.currentLoggedInWallet){
       if(walletState.currentLoggedInWallet.contacts.length > 0){
         walletState.currentLoggedInWallet.contacts.forEach(contact => {
           if(!defaultGroups.includes(contact.group)){
