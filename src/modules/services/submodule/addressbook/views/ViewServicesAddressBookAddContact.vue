@@ -71,21 +71,23 @@ export default {
       {value: 'Director', label: t('addressBook.director')},
     );
 
-    if(walletState.currentLoggedInWallet.contacts.length > 0){
-      walletState.currentLoggedInWallet.contacts.forEach(contact => {
-        if(!defaultGroups.includes(contact.group)){
-          customGroup.push(contact.group);
-        }
-      })
+    if(walletState.currentLoggedInWallet.contacts != undefined){
+      if(walletState.currentLoggedInWallet.contacts.length > 0){
+        walletState.currentLoggedInWallet.contacts.forEach(contact => {
+          if(!defaultGroups.includes(contact.group)){
+            customGroup.push(contact.group);
+          }
+        })
 
-      let uniqueCustomGroups = [...new Set(customGroup)];
-      if(uniqueCustomGroups.length > 0){
-        uniqueCustomGroups.sort();
-        uniqueCustomGroups.forEach((group) => {
-          action.value.push(
-            { value: group, label: group },
-          );
-        });
+        let uniqueCustomGroups = [...new Set(customGroup)];
+        if(uniqueCustomGroups.length > 0){
+          uniqueCustomGroups.sort();
+          uniqueCustomGroups.forEach((group) => {
+            action.value.push(
+              { value: group, label: group },
+            );
+          });
+        }
       }
     }
 
