@@ -170,8 +170,7 @@ class ListenerHandler{
     }
 
     static handleNewBlock(newBlock: BlockInfo): void{
-
-        console.log(newBlock);
+        
         ListenerStateUtils.addBlock(newBlock);
     }
 

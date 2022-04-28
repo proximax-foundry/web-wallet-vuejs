@@ -27,14 +27,12 @@ interface assetSelectionInterface {
 
 export class AssetsUtils {
 
-  static createAssetTransaction = (owner:PublicAccount, supply: number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number, changeType:string):AggregateTransaction => {
-    const buildTransactions = AppState.buildTxn
-    const assetDefinition = buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(AssetsUtils.calculateDuration(duration)));
+  static createAssetTransaction = (owner:PublicAccount, supply: number, supplyMutable: boolean, transferable:boolean, divisibility: number, durationInDays?: number):AggregateTransaction => {
+    const assetDefinition = AppState.buildTxn.mosaicDefinition(owner, supplyMutable, transferable, divisibility, durationInDays ? UInt64.fromUint(AssetsUtils.calculateDuration(durationInDays)): undefined);
     const assetDefinitionTx = assetDefinition.toAggregate(owner);
-    let supplyChangeType: MosaicSupplyType;
-    supplyChangeType = (changeType=='increase')?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
-    const assetSupplyChangeTx = buildTransactions.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(divisibility, supply))).toAggregate(owner);
-    return buildTransactions.aggregateComplete([assetDefinitionTx, assetSupplyChangeTx]);
+    let supplyChangeType: MosaicSupplyType = MosaicSupplyType.Increase;
+    const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(divisibility, supply))).toAggregate(owner);
+    return AppState.buildTxn.aggregateComplete([assetDefinitionTx, assetSupplyChangeTx]);
   }
 
   static assetSupplyChangeTransaction = ( mosaidStringId: string, changeType: string, supply: number, divisibility:number):MosaicSupplyChangeTransaction => {
@@ -50,8 +48,8 @@ export class AssetsUtils {
     return buildTransactions.assetAlias( aliasActionType, new NamespaceId(namespaceString), new MosaicId(mosaicIdString));
   };
 
-  static createAssetTransactionFee = (owner:PublicAccount, supply: number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number, changeType: string) :number => {
-    const createAssetTransaction = AssetsUtils.createAssetTransaction(owner, supply, supplyMutable, transferable, divisibility, duration, changeType);
+  static createAssetTransactionFee = (owner:PublicAccount, supply: number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration?: number) :number => {
+    const createAssetTransaction = AssetsUtils.createAssetTransaction(owner, supply, supplyMutable, transferable, divisibility, duration);
     return createAssetTransaction.maxFee.compact();
   };
 
@@ -183,23 +181,22 @@ export class AssetsUtils {
     return account;
   }
 
-  static createAsset = (selectedAddress: string, walletPassword: string, owner:PublicAccount, supply:number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number) => {
-    let createAssetAggregateTransaction = AssetsUtils.createAssetTransaction( owner, supply, supplyMutable, transferable, divisibility, duration, 'increase');
+  static createAsset = (selectedAddress: string, walletPassword: string, owner:PublicAccount, supply:number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration?: number) => {
+    let createAssetAggregateTransaction = AssetsUtils.createAssetTransaction( owner, supply, supplyMutable, transferable, divisibility, duration);
     const account = AssetsUtils.getSenderAccount(selectedAddress, walletPassword);
     let signedTx = account.sign(createAssetAggregateTransaction, networkState.currentNetworkProfile.generationHash);
     TransactionUtils.announceTransaction(signedTx);
   }
 
-  static createAssetMultiSig = (selectedAddress: string, walletPassword: string, owner:PublicAccount, supply:number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration: number) => {
-    const buildTransactions = AppState.buildTxn;
-    const assetDefinition = buildTransactions.mosaicDefinition(owner, supplyMutable, transferable, divisibility, UInt64.fromUint(AssetsUtils.calculateDuration(duration)));
+  static createAssetMultiSig = (selectedAddress: string, walletPassword: string, owner:PublicAccount, supply:number, supplyMutable: boolean, transferable:boolean, divisibility: number, durationInDays?: number) => {
+    const assetDefinition = AppState.buildTxn.mosaicDefinition(owner, supplyMutable, transferable, divisibility, durationInDays ? UInt64.fromUint(AssetsUtils.calculateDuration(durationInDays)): undefined);
     const assetDefinitionTx = assetDefinition.toAggregate(owner);
     let supplyChangeType: MosaicSupplyType;
     supplyChangeType = MosaicSupplyType.Increase;
-    const assetSupplyChangeTx = buildTransactions.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(divisibility, supply))).toAggregate(owner);
+    const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(divisibility, supply))).toAggregate(owner);
     const account = AssetsUtils.getSenderAccount(selectedAddress, walletPassword);
     const innerTxn = [assetDefinitionTx,assetSupplyChangeTx];
-    const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
+    const aggregateBondedTx = AppState.buildTxn.aggregateBonded(innerTxn);
     const aggregateBondedTxSigned = account.sign(aggregateBondedTx, networkState.currentNetworkProfile.generationHash);
     let hashLockTx = TransactionUtils.lockFundTx(aggregateBondedTxSigned)
     let signedHashlock = account.sign(hashLockTx, networkState.currentNetworkProfile.generationHash);
