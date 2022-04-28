@@ -7,11 +7,11 @@
     <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
       <AccountComponent :address="address" class="mb-10"/>
       <div class = 'flex text-xs font-semibold mt-5'>
-        <router-link :to="{name: 'ViewAccountDetails',params:{address:currentAccount.address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-        <router-link :to="{name:'ViewAccountAssets', params: { address: currentAccount.address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-        <router-link :to="{name:'ViewMultisigHome', params: { name: currentAccount.name}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
+        <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
+        <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+        <router-link :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
         <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.scheme')}}</div>
-        <router-link :to="{name:'ViewAccountSwap', params: { address: currentAccount.address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
+        <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
         <MoreAccountOptions :address="address"/>
       </div>
       <div class="overflow-auto w-full border-2  " :style="`${viewType2==1?' transform: rotate(180deg);':'' }`">
@@ -95,20 +95,32 @@ export default {
 setup(p){
   const toast = useToast();
   const {t} = useI18n();
-  let levelOneGraph = []
   const wallet = walletState.currentLoggedInWallet 
   const currentAccount = computed(()=>{
-    let currentAccount=wallet.accounts.find(account=> account.address == p.address)
-    if (currentAccount!=undefined){
-      return currentAccount
+    if(!wallet){
+      return null
+    }
+    let currentAccount=wallet.accounts.find(account=> account.address == p.address) || wallet.others.filter(accounts=>accounts.type === "MULTISIG").find(account=>account.address == p.address)
+    if (!currentAccount){
+      return null
     }else{
-      return wallet.others.filter(accounts=>accounts.type === "MULTISIG").find(account=>account.address == p.address)
+      return currentAccount
     }
   })
-  const multisigAccounts = currentAccount.value.multisigInfo.filter(accounts=>accounts.level>=0 || accounts.publicKey == currentAccount.value.publicKey)
+  const multisigAccounts = computed(()=>{
+    if(!currentAccount.value){
+      return []
+    }
+    return currentAccount.value.multisigInfo.filter(accounts=>accounts.level>=0 )
+  })
   const networkType = AppState.networkType
   const convertAddress = publicKey =>{
-      return Address.createFromPublicKey(publicKey, networkType)
+      let address = Address.createFromPublicKey(publicKey, networkType)
+      try {
+        return address
+      } catch (err) {
+        
+      }
   }
   const label = length =>{
     return length>0? t('general.multisig').toUpperCase() +'-': t('general.cosigner') +'-'
@@ -127,7 +139,7 @@ setup(p){
     
   }
   const findCosignLength = publicKey =>{
-    return multisigAccounts.find(account=>account.publicKey == publicKey).cosignaturies.length
+    return multisigAccounts.value.find(account=>account.publicKey == publicKey).cosignaturies.length
   };
 
   const findAccountWithAddress = address =>{
@@ -136,15 +148,15 @@ setup(p){
   }
 
   const findCosign = publicKey =>{
-    return multisigAccounts.find(account=>account.publicKey == publicKey).cosignaturies
+    return multisigAccounts.value.find(account=>account.publicKey == publicKey).cosignaturies
   }
 
   const getApproveTx = publicKey=>{
-    return multisigAccounts.find(account=>account.publicKey == publicKey).minApproval
+    return multisigAccounts.value.find(account=>account.publicKey == publicKey).minApproval
   }
 
     const getRemoval = publicKey=>{
-    return multisigAccounts.find(account=>account.publicKey == publicKey).minRemoval
+    return multisigAccounts.value.find(account=>account.publicKey == publicKey).minRemoval
   }
 
   const getBalance = publicKey=>{
@@ -174,16 +186,44 @@ setup(p){
   }
   //level 0 (selected account)
   let graph = {
-    label: convertAddress(multisigAccounts[0].publicKey).pretty(), 
-    name: getAccountName(multisigAccounts[0].publicKey,multisigAccounts[0].cosignaturies.length),
-    balance:getBalance(multisigAccounts[0].publicKey),
-    numApproveTx:getApproveTx(multisigAccounts[0].publicKey),
-    numRemoval:getRemoval(multisigAccounts[0].publicKey),
-    children: getChildObject(multisigAccounts[0].cosignaturies)
+    label: '', 
+    name: '',
+    balance: 0,
+    numApproveTx: 0,
+    numRemoval: 0,
+    children: []
   }
+  if(multisigAccounts.value[0]){
+    graph = {
+      label: convertAddress(multisigAccounts.value[0].publicKey).pretty(), 
+      name: getAccountName(multisigAccounts.value[0].publicKey,multisigAccounts.value[0].cosignaturies.length),
+      balance:getBalance(multisigAccounts.value[0].publicKey),
+      numApproveTx:getApproveTx(multisigAccounts.value[0].publicKey),
+      numRemoval:getRemoval(multisigAccounts.value[0].publicKey),
+      children: getChildObject(multisigAccounts.value[0].cosignaturies)
+    }
+  }
+
+  watch(()=>currentAccount,n=>{
+    if(!multisigAccounts.value[0]){
+      return
+    }
+    graph = {
+      label: convertAddress(multisigAccounts.value[0].publicKey).pretty(), 
+      name: getAccountName(multisigAccounts.value[0].publicKey,multisigAccounts.value[0].cosignaturies.length),
+      balance:getBalance(multisigAccounts.value[0].publicKey),
+      numApproveTx:getApproveTx(multisigAccounts.value[0].publicKey),
+      numRemoval:getRemoval(multisigAccounts.value[0].publicKey),
+      children: getChildObject(multisigAccounts.value[0].cosignaturies)
+    }
+  },{deep:true})
+  
   
   
   let isMultisig = computed(()=>{
+    if(!currentAccount.value){
+      return false
+    }
     return currentAccount.value.getDirectParentMultisig().length>0? true: false
   })
   let displayAddress = address=>{
@@ -209,7 +249,13 @@ setup(p){
 
     toast.add({severity:'info', detail: copySubject +' '+ t('general.copied'), group: 'br', life: 3000});
   };
-  const prettyAddress = address => Address.createFromRawAddress(address).pretty()
+  const prettyAddress = address => {
+    try {
+      return Address.createFromRawAddress(address).pretty()
+    } catch (error) {
+      
+    }
+  }
   const viewType = ref(0)
   const viewType2 = ref(1)
   const collapsable = ref(false)

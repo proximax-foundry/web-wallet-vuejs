@@ -26,7 +26,7 @@
         </div>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="text-right w-full">
-          <div v-if="getMultiSigCosigner.cosignerList.length > 0" class="inline-block">
+          <div v-if="getMultiSigCosigner?getMultiSigCosigner.cosignerList.length:0 > 0" class="inline-block">
             <div class="text-tsm text-left mt-3">{{$t('general.initiateBy')}}:
               <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('general.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}) <span v-if="getMultiSigCosigner.cosignerList[0].balance < lockFundTotalFee" class="error">- {{$t('general.insufficientBalance')}}</span></span>
               <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.cosignerList" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('general.balance')}}: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
@@ -101,6 +101,8 @@ import { TimeUnit } from '@/models/const/timeUnit';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
+import { WalletUtils } from '@/util/walletUtils';
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: 'ViewServicesNamespaceExtend',
@@ -113,6 +115,7 @@ export default {
     address: String,
   },
   setup(props){
+    const { t } = useI18n();
     const router = useRouter();
     const toast = useToast();
     const namespaceSelect = ref(null);
@@ -133,14 +136,20 @@ export default {
     const endBlock = ref(0);
     const numDaysleft = ref(0);
     const showMaxDaysLabel = ref(false);
-    const maxDurationInDays = Math.floor(UnitConverter.configReturn(networkState.currentNetworkProfileConfig.maxNamespaceDuration, TimeUnit.DAY));
+    const maxDurationInDays = computed(()=>{
+      if(networkState.currentNetworkProfileConfig){
+        return Math.floor(UnitConverter.configReturn(networkState.currentNetworkProfileConfig.maxNamespaceDuration, TimeUnit.DAY))
+      }else{
+        return 0
+      }
+    })
 
     const blockListener = computed(()=> listenerState.currentBlock);
 
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 
     (async() => {
-      const endpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort);
+      const endpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?networkState.currentNetworkProfile.httpPort:3000);
       const chainAPICall = new ChainAPICall(endpoint);
       block.value = await chainAPICall.chainAPI.getBlockchainHeight();
     })();
@@ -154,17 +163,33 @@ export default {
 
     const currencyName = computed(() => AppState.nativeToken.label);
     const rentalFee = computed(()=> {
-      if(duration.value > 0){
-        return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock * NamespaceUtils.calculateDuration(duration.value), AppState.nativeToken.divisibility);
+      if(networkState.currentNetworkProfileConfig){
+        if(duration.value > 0){
+          return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock * NamespaceUtils.calculateDuration(duration.value), AppState.nativeToken.divisibility);
+        }else{
+          return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock, AppState.nativeToken.divisibility);
+        }
       }else{
-        return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock, AppState.nativeToken.divisibility);
+        return 0
       }
     });
 
     const rentalFeeCurrency = computed(()=> Helper.toCurrencyFormat(rentalFee.value, 6) );
 
-    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
-    const lockFundCurrency = computed(()=> Helper.amountFormatterSimple(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
+    const lockFund = computed(()=> {
+      if(networkState.currentNetworkProfileConfig){
+        return Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility)
+      }else{
+        return 0
+      }
+    })
+    const lockFundCurrency = computed(()=>{
+      if(networkState.currentNetworkProfileConfig){
+        return Helper.amountFormatterSimple(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility)
+      }else{
+        return 0
+      }
+    })
 
     const lockFundTxFee = computed(()=>{
       if(networkState.currentNetworkProfile){ 
@@ -172,6 +197,7 @@ export default {
       }
       return 0;  
     });
+    const isNotCosigner = computed(() => (getMultiSigCosigner.value?getMultiSigCosigner.value.cosignerList.length: 0) == 0 && isMultiSig(selectedAccAdd.value));
     const lockFundTxFeeCurrency = ref(lockFundTxFee.value.toString());
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
@@ -180,44 +206,55 @@ export default {
     ));
 
     const isMultiSig = (address) => {
-      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
-      const other = walletState.currentLoggedInWallet.others.find((account) => account.address == address);
-      let isMulti = false;
-      const accountDirectParent = account?account.getDirectParentMultisig():[];
-      const otherDirectParent = other?other.getDirectParentMultisig():[];
-      if((accountDirectParent.length + otherDirectParent.length) > 0){
-        isMulti = true;
+      if(walletState.currentLoggedInWallet){
+        const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address) || walletState.currentLoggedInWallet.others.find((account) => account.address == address);
+        if(account){
+          const isMulti = account.getDirectParentMultisig().length>0?true:false
+          return isMulti
+        }else{
+          return false
+        }
+      }else{
+        return false
       }
-      return isMulti;
     };
 
     const selectedAccName = ref('');
     const selectedAccAdd = ref('');
     const balance = ref('');
     const balanceNumber = ref('');
-    const isMultiSigBool = ref(isMultiSig(walletState.currentLoggedInWallet.selectDefaultAccount().address));
+    const defaultAcc = computed(()=>{
+      if(walletState.currentLoggedInWallet){
+        return walletState.currentLoggedInWallet.selectDefaultAccount()
+      }else{
+        return null
+      }
+    })
+    const isMultiSigBool = ref(defaultAcc.value? isMultiSig(defaultAcc.value.address) : false)
 
-    let account = walletState.currentLoggedInWallet.accounts.find((account) => Helper.createAddress(account.address).pretty() == props.address);
-    if(!account){
-      account = walletState.currentLoggedInWallet.others.find((account) => Helper.createAddress(account.address).pretty() == props.address);
-    }
+    const plainAddress = Helper.createAddress(props.address).plain()
+    let account = computed(()=>{
+      if(walletState.currentLoggedInWallet){
+        return walletState.currentLoggedInWallet.accounts.find(account => account.address == plainAddress) || walletState.currentLoggedInWallet.others.find(account => account.address == plainAddress);
+      }else{
+        return null
+      }
+    })
 
-    if(account != undefined){
-      selectedAccName.value = account.name;
-      selectedAccAdd.value = account.address;
-      balance.value = Helper.toCurrencyFormat(account.balance, AppState.nativeToken.divisibility);
-      balanceNumber.value = account.balance;
-    }else{
-      router.push({ name: "ViewServicesNamespace" });
+    if(account.value){
+      selectedAccName.value = account.value.name;
+      selectedAccAdd.value = account.value.address;
+      balance.value = Helper.toCurrencyFormat(account.value.balance, AppState.nativeToken.divisibility);
+      balanceNumber.value = account.value.balance;
     }
 
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
 
-    const svgString = ref(toSvg(Helper.createAddress(selectedAccAdd.value).pretty(), 40, themeConfig.jdenticonConfig));
+    const svgString = ref(toSvg(props.address, 40, themeConfig.jdenticonConfig));
 
-    if(account){
-      let namespace = account.namespaces.find( namespace => namespace.idHex === props.namespaceId);
+    if(account.value){
+      let namespace = account.value.namespaces.find( namespace => namespace.idHex === props.namespaceId);
       if(namespace != undefined){
         endBlock.value = namespace.endHeight;
         const nsElement = namespace.name.split('.');
@@ -226,26 +263,27 @@ export default {
         }else{
           selectNamespace.value = namespace.name;
         }
-      }else{
-        router.push({ name: "ViewServicesNamespace" });
       }
     }
-
+    
     const transactionFee = ref('0');
     const transactionFeeExact = ref(0);
-    transactionFee.value = Helper.convertToCurrency(NamespaceUtils.getRootNamespaceTransactionFee( selectNamespace.value, duration.value), AppState.nativeToken.divisibility);
-    transactionFeeExact.value = Helper.convertToExact(NamespaceUtils.getRootNamespaceTransactionFee( selectNamespace.value, duration.value), AppState.nativeToken.divisibility);
+    try{
+      transactionFee.value = Helper.convertToCurrency(NamespaceUtils.getRootNamespaceTransactionFee( selectNamespace.value, duration.value), AppState.nativeToken.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(NamespaceUtils.getRootNamespaceTransactionFee( selectNamespace.value, duration.value), AppState.nativeToken.divisibility);
+    }catch{e=>console.log(e)}
+    
 
     let isMaxDuration = false;
     watch(duration, (n) => {
-      if(n > maxDurationInDays){
-        duration.value = `${maxDurationInDays}`;
+      if(n > maxDurationInDays.value){
+        duration.value = maxDurationInDays.value;
       }else {
         let remainingBlock = endBlock.value - block.value;
         let availableDays = 0;
         numDaysleft.value = Math.ceil(remainingBlock/(24 * 60 * 4));
-        if((parseInt(n) + numDaysleft.value) > maxDurationInDays){
-          availableDays = maxDurationInDays - numDaysleft.value;
+        if((parseInt(n) + numDaysleft.value) > maxDurationInDays.value){
+          availableDays = maxDurationInDays.value - numDaysleft.value;
           duration.value = availableDays.toString();
           showMaxDaysLabel.value = true;
           isMaxDuration = true;
@@ -265,7 +303,7 @@ export default {
     // calculate fees
     const totalFee = computed(() => {
       // if multisig
-      if(isMultiSig(selectedAccAdd.value)){
+      if(isMultiSig(Helper.createAddress(props.address).plain())){
         return parseFloat(lockFundTotalFee.value) + rentalFee.value + transactionFeeExact.value;
       }else{
         return rentalFee.value + transactionFeeExact.value;
@@ -291,6 +329,11 @@ export default {
     });
 
     const extendNamespace = () => {
+      let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
+      if(!verifyPassword){
+        err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
+        return
+      }
       if(cosigner.value){
         NamespaceUtils.extendNamespaceMultisig(cosigner.value, walletPassword.value, selectNamespace.value, duration.value, selectedAccAdd.value);
       }else{
@@ -303,21 +346,40 @@ export default {
       return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
     };
 
-    let cosigners = multiSign.getCosignerInWallet(account.publicKey);
-    let list = [];
-    cosigners.cosignerList.forEach( publicKey => {
-      list.push({
-        publicKey,
-        name: fetchAccount(publicKey).name,
-        balance: fetchAccount(publicKey).balance,
-        address: fetchAccount(publicKey).address
-      });
-    });
-    cosigners.cosignerList = list;
+    const getMultiSigCosigner = computed(()=>{
+      if(!account.value){
+        return
+      }
+      if(networkState.currentNetworkProfileConfig){
+        let cosigners = multiSign.getCosignerInWallet(account.value?account.value.publicKey:'');
+        let list = [];
+        cosigners.cosignerList.forEach( publicKey => {
+          list.push({
+            publicKey,
+            name: fetchAccount(publicKey).name,
+            balance: fetchAccount(publicKey).balance,
+            address: fetchAccount(publicKey).address
+          });
+        });
+        cosigners.cosignerList = list;
+        return{hasCosigner:cosigners.hasCosigner,cosignerList:cosigners.cosignerList}
+      }else{
+        return {hasCosigner:false,cosignerList: []}
+      }
+    })
 
-    const getMultiSigCosigner = ref(cosigners);
+    cosignerAddress.value = getMultiSigCosigner.value?getMultiSigCosigner.value.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:'':''
+    
+    watch(getMultiSigCosigner,n=>{
+      if(n){
+        if(n.cosignerList.length>0){
+          cosignerAddress.value = n.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:''
+        }
+      }
+      
+    })
 
-    const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
+    
 
     const showNoBalance = computed(() => {
       if(isNotCosigner.value){

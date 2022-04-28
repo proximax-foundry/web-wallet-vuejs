@@ -64,20 +64,24 @@ export default {
     const selectContactGroups = ref('');
 
     // load particulars
-    const contact = walletState.currentLoggedInWallet.contacts.find((contact) => Helper.createAddress(contact.address).pretty() == props.contactAddress);
-    if(!contact){
-      router.push({name: "ViewServicesAddressBook"});
+    var contact = null
+    if(walletState.currentLoggedInWallet){
+      contact = walletState.currentLoggedInWallet.contacts.find((contact) => Helper.createAddress(contact.address).pretty() == props.contactAddress);
     }
-    const contactName = ref(contact.name);
-    const address = ref(Helper.createAddress(contact.address).pretty());
+    
+    const contactName = ref(contact?contact.name:'');
+    const address = ref(props.contactAddress)
 
     const contactGroupsList = ref([]);
-    walletState.currentLoggedInWallet.contacts.forEach((contact) => {
+    if(walletState.currentLoggedInWallet){
+      walletState.currentLoggedInWallet.contacts.forEach((contact) => {
       contactGroupsList.value.push(contact.group);
     });
+    }
+    
 
     onMounted(() => {
-      selectGroupDropdown.value.select(contact.group);
+      selectGroupDropdown.value.select(contact?contact.group:[]);
     });
 
     function uniqueValue(value, index, self) {
@@ -141,7 +145,6 @@ export default {
 
     const SaveContact = () => {
       const wallet = walletState.currentLoggedInWallet
-      console.log(address.value)
       if(!wallet){
         return;
       }

@@ -6,6 +6,7 @@ import {
     AggregateTransaction, Transaction, 
     AccountRestrictionsInfo, AccountNames, TransactionQueryParams
 } from "tsjs-xpx-chain-sdk";
+import {RequestAuth} from './auth';
 
 export class AccountAPI {
 
@@ -16,62 +17,63 @@ export class AccountAPI {
     }
 
     getAccountInfo(address: Address): Promise<AccountInfo>{
-        return this.accountHttp.getAccountInfo(address).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.accountHttp.getAccountInfo(address, authHeader).toPromise();
     }
 
     aggregateBondedTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<AggregateTransaction[]>{
-
-        return this.accountHttp.aggregateBondedTransactions(publicAccount, queryParams).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.accountHttp.aggregateBondedTransactions(publicAccount, true, queryParams, authHeader).toPromise();
     }
 
     getAccountRestrictions(address: Address): Promise<AccountRestrictionsInfo>{
-
-        return this.accountHttp.getAccountRestrictions(address).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.accountHttp.getAccountRestrictions(address, authHeader).toPromise();
     }
 
     getAccountRestrictionsFromAccounts(addresses: Address[]): Promise<AccountRestrictionsInfo[]>{
-
-        return this.accountHttp.getAccountRestrictionsFromAccounts(addresses).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.accountHttp.getAccountRestrictionsFromAccounts(addresses, authHeader).toPromise();
     }
 
     getAccountsInfo(addresses: Address[]): Promise<AccountInfo[]>{
-
-        return this.accountHttp.getAccountsInfo(addresses).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.accountHttp.getAccountsInfo(addresses, authHeader).toPromise();
     }
     
     getAccountsNames(addresses: Address[]): Promise<AccountNames[]>{
-
-        return this.accountHttp.getAccountsNames(addresses).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.accountHttp.getAccountsNames(addresses, authHeader).toPromise();
     }
 
     getMultisigAccountGraphInfo(address: Address): Promise<MultisigAccountGraphInfo>{
-
-        return this.accountHttp.getMultisigAccountGraphInfo(address).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.accountHttp.getMultisigAccountGraphInfo(address, authHeader).toPromise();
     }
 
     getMultisigAccountInfo(address: Address): Promise<MultisigAccountInfo>{
-
-        return this.accountHttp.getMultisigAccountInfo(address).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.accountHttp.getMultisigAccountInfo(address, authHeader).toPromise();
     }
 
     transactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]>{
-
-        return this.accountHttp.transactions(publicAccount, queryParams).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.accountHttp.transactions(publicAccount, queryParams, authHeader).toPromise();
     }
 
     incomingTransactions(accountId: Address | PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]>{
-
-        return this.accountHttp.incomingTransactions(accountId, queryParams).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.accountHttp.incomingTransactions(accountId, queryParams, authHeader).toPromise();
     }
 
     outgoingTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]>{
-
-        return this.accountHttp.outgoingTransactions(publicAccount, queryParams).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.accountHttp.outgoingTransactions(publicAccount, queryParams, authHeader).toPromise();
     }
 
     unconfirmedTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]>{
-
-        return this.accountHttp.unconfirmedTransactions(publicAccount, queryParams).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.accountHttp.unconfirmedTransactions(publicAccount, queryParams, authHeader).toPromise();
     }
 }
 

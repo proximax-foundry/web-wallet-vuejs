@@ -5,14 +5,14 @@
     <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
   </div>
   <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
-    <AccountComponent :address="acc.address" class="mb-10"/>
+    <AccountComponent :address="address" class="mb-10"/>
     <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
       <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-      <router-link :to="{name:'ViewAccountAssets', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-      <router-link :to="{name:'ViewMultisigHome', params: { name: acc.name}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
+      <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+      <router-link :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
       <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
       <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
-      <MoreAccountOptions :address="acc.address" :selected="true"/>
+      <MoreAccountOptions :address="address" :selected="true"/>
     </div>
     <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 pr-6">
@@ -148,7 +148,7 @@
           <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  v-if="(pending | unlinking)" :disabled="true">{{$t('general.waitConfirmTx')}}</button>
         </div>
         <div class="text-center">
-          <router-link :to="{name: 'ViewAccountDetails',params:{name:address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
+          <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
         </div>
       </div>
     </div>
@@ -206,14 +206,26 @@ export default {
     let txHash = ref("")
     let pending =ref(false)
     let toggleSelection = ref(false)
-    const acc =  computed(()=>{
-      let account = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address)
-      return account
+    const acc = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
+      let acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address) || walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
+      if(!acc){
+        return null
+      }
+      return acc
     })
-     const getCosignerList = () =>{
+    const getCosignerList = () =>{
+      if(!acc.value){
+        return []
+      }
       return multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList;
     }
     const findAcc = (publicKey)=>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
       return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
     }
     const walletCosignerList = computed(() =>{
@@ -225,11 +237,23 @@ export default {
       return list
     })
     const isCosigner = computed(() =>{
+      if(!acc.value){
+        return false
+      }
       return (multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList.length>0)?true: false;
     });
     const selectedCosignPublicKey = ref(walletCosignerList.value[0]?walletCosignerList.value[0].publicKey:'')
+    
+    watch(walletCosignerList,n=>{
+      if(n.length){
+         selectedCosignPublicKey.value = n[0]?n[0].publicKey:''
+      }
+    },{deep:true})
     let onPartial = ref(false) 
     const checkIsPartial = ()=>{
+       if(!acc.value){
+        return 
+      }
        multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType))
        .then(onPartialBoolean => onPartial.value = onPartialBoolean)
        .catch(err=>{
@@ -238,7 +262,12 @@ export default {
     }
     checkIsPartial()
    
-    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
+    const lockFund = computed(()=> {
+      if(!networkState.currentNetworkProfileConfig){
+        return 0
+      }
+      return Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility)
+    })
     const lockFundTxFee = computed(()=>{ 
       if(networkState.currentNetworkProfile){ 
         return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
@@ -246,6 +275,9 @@ export default {
       return 0;  
     });
     const isMultisig = computed(() => {
+      if(!acc.value){
+        return false
+      }
       let isMulti = acc.value.getDirectParentMultisig().length? true: false
       return isMulti;
     });  
@@ -263,13 +295,10 @@ export default {
       }
     })
     const accountBalance = computed(() => {
-       let accountBalance = 0
-       if (acc.value == undefined){
-         return 0
-       }
-        accountBalance = acc.value.balance
-       
-       return accountBalance
+      if(!acc.value){
+        return 0
+      }
+      return acc.value.balance
     })
 
    
@@ -336,14 +365,10 @@ export default {
     const internalInstance = getCurrentInstance();
     const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
     const emitter = internalInstance.appContext.config.globalProperties.emitter;    
-    const walletName = walletState.currentLoggedInWallet.name;
+    const walletName = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.name:''
     let unlinking = ref(false)
     const disableLinkBtn = computed(() => {
-      if(onPartial.value){
-        return true
-      }else if(fundStatus.value){
-        return true
-      }else if(isCosigner.value == false && isMultisig.value == true ){
+      if(onPartial.value || fundStatus.value || (!isCosigner.value && isMultisig) ){
         return true
       }else if(!fromNew.value && !fromPk.value && !delegateValue.value){
         return true
@@ -377,9 +402,12 @@ export default {
     };
 
     const verifyDelegateAcc = async() => {
-      const accountDetail = walletState.currentLoggedInWallet.accounts.find(account => account.address == accAddress.value);       
-      if (accountDetail) {
-        const publicAccount = Helper.createPublicAccount(accountDetail.publicKey, AppState.networkType); 
+      if(!acc.value){
+        return 
+      }
+           
+      if (acc.value) {
+        const publicAccount = Helper.createPublicAccount(acc.value.publicKey, AppState.networkType); 
         const accountInfo = await chainAPICall.accountAPI.getAccountInfo(publicAccount.address);
      
         delegateAcc.value = accountInfo.linkedAccountKey;
@@ -388,6 +416,9 @@ export default {
     };
 
     verifyDelegateAcc();
+    watch(()=>acc,n=>{
+      verifyDelegateAcc()
+    },{deep:true})
 
     const delegateValue = computed(()=>{
       let delegateBoolean = false
@@ -422,16 +453,11 @@ export default {
       }
       if (WalletUtils.verifyWalletPassword(walletName,networkState.chainNetworkName,walletPassword.value)) {
         if (delegateAcc.value !== "0".repeat(64)) { //unlink
-          const indexOtherAcc = walletState.currentLoggedInWallet.others.findIndex((other)=> other.publicKey === delegateAcc.value)
-          if (indexOtherAcc > -1) {
-            let signedTx = accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
-            txHash.value = signedTx.hash.toUpperCase()
-            walletPassword.value=""
-            unlinking.value=true
-            err.value=""
-          } else {
-            err.value = t('delegate.unlinkFail');
-          }
+          let signedTx = accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
+          txHash.value = signedTx.hash.toUpperCase()
+          walletPassword.value=""
+          unlinking.value=true
+          err.value=""
         } else if (AccPublicKey.value != "" && (fromPk.value || fromNew.value)) { //link
           let signedTx = accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
           txHash.value = signedTx.hash.toUpperCase()
@@ -442,7 +468,7 @@ export default {
           
         }
       } else {
-        err.value = t('generak.walletPasswordInvalid',{name : walletName});
+        err.value = t('general.walletPasswordInvalid',{name : walletName});
       }
     };
     

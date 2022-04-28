@@ -850,6 +850,9 @@ export class DashboardService {
                         txn.oldValue = assetMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
                     }
+                    else{
+                        txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
+                    }
 
                 } catch (error) {
                     
@@ -881,6 +884,9 @@ export class DashboardService {
                         txn.oldValue = nsMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
                     }
+                    else{
+                        txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
+                    }
                     
                 } catch (error) {
                     
@@ -903,6 +909,9 @@ export class DashboardService {
                     if(nsMetadataEntry){
                         txn.oldValue = nsMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+                    }
+                    else{
+                        txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
                     }
                 } catch (error) {
                     
@@ -1020,6 +1029,9 @@ export class DashboardService {
                         txn.oldValue = assetMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
                     }
+                    else{
+                        txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
+                    }
                     
                 } catch (error) {
                     
@@ -1051,6 +1063,9 @@ export class DashboardService {
                         txn.oldValue = nsMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
                     }
+                    else{
+                        txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
+                    }
                     
                 } catch (error) {
                     
@@ -1073,6 +1088,9 @@ export class DashboardService {
                     if(nsMetadataEntry){
                         txn.oldValue = nsMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+                    }
+                    else{
+                        txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
                     }
                 } catch (error) {
                     
@@ -3731,6 +3749,9 @@ export class DashboardService {
                 txnDetails.oldValue = nsMetadataEntry.value;
                 txnDetails.newValue = DashboardService.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
             }
+            else{
+                txnDetails.newValue = DashboardService.applyValueChange("", txnDetails.valueChange, txnDetails.sizeChanged);
+            }
         } catch (error) {
             
         }
@@ -3817,6 +3838,9 @@ export class DashboardService {
             if(nsMetadataEntry){
                 txnDetails.oldValue = nsMetadataEntry.value;
                 txnDetails.newValue = DashboardService.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
+            }
+            else{
+                txnDetails.newValue = DashboardService.applyValueChange("", txnDetails.valueChange, txnDetails.sizeChanged);
             }
             
         } catch (error) {
@@ -3905,6 +3929,9 @@ export class DashboardService {
             if(assetMetadataEntry){
                 txnDetails.oldValue = assetMetadataEntry.value;
                 txnDetails.newValue = DashboardService.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
+            }
+            else{
+                txnDetails.newValue = DashboardService.applyValueChange("", txnDetails.valueChange, txnDetails.sizeChanged);
             }
             
         } catch (error) {
@@ -5134,7 +5161,7 @@ export class DashboardService {
 
                 if(assetDefFormat.duration){
                     let assetDurationInfo: TxnDetails = {
-                        type: MsgType.INFO,
+                        type: MsgType.NONE,
                         label: "Duration",
                         value: assetDefFormat.duration
                     };
@@ -5163,14 +5190,14 @@ export class DashboardService {
                 let assetInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Asset",
-                    value: assetSupplyFormat.assetId + assetSupplyFormat.namespaceName ? ` (${assetSupplyFormat.namespaceName})` : ''
+                    value: assetSupplyFormat.assetId + (assetSupplyFormat.namespaceName ? ` (${assetSupplyFormat.namespaceName})` : '')
                 };
 
                 infos.push(assetInfo);
 
                 let assetSupplyInfo: TxnDetails = {
-                    type: MsgType.INFO,
-                    label: "Asset",
+                    type: MsgType.NONE,
+                    label: "Delta",
                     value: assetSupplyFormat.supplyDelta > 0 ? `+${assetSupplyFormat.supplyDelta}` : assetSupplyFormat.supplyDelta
                 };
 

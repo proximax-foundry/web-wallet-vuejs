@@ -2,17 +2,17 @@
 <div>
   <div class='flex cursor-pointer'>
     <img src='@/assets/img/chevron_left.svg'>
-    <router-link :to="{name: 'ViewMultisigHome',params:{name:acc.name}}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
+    <router-link :to="{name: 'ViewMultisigHome',params:{address:address}}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
   </div>
   <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5 '>
-    <AccountComponent :address="acc.address" class="mb-10"/>
+    <AccountComponent :address="address" class="mb-10"/>
     <div class = 'flex text-xs font-semibold border-b-2'>
-      <router-link :to="{name: 'ViewAccountDetails',params:{address:acc.address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-      <router-link :to="{name:'ViewAccountAssets', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+      <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
+      <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
       <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.multisig')}}</div>
-      <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
-      <router-link :to="{name:'ViewAccountSwap', params: { address: acc.address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
-      <MoreAccountOptions :address="acc.address"/>
+      <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
+      <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
+      <MoreAccountOptions :address="address"/>
     </div>
     
     <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
@@ -26,7 +26,7 @@
                 </span>
                 <span class="font-bold" v-else>
                   <select class="" v-model="selectedCosignPublicKey">
-                    <option v-for="(element, item) in  walletCosignerList" :value="findAcc(element.publicKey).publicKey" :key="item">
+                    <option v-for="(element, item) in  walletCosignerList" :value="findAcc(element.publicKey)?findAcc(element.publicKey).publicKey:''" :key="item">
                       {{ element.name }} 
                     </option>
                   </select>
@@ -163,7 +163,7 @@
         <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"  v-model="passwd" :disabled="disabledPassword" />
         <div class="mt-3"><button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="modifyAccount()" :disabled="disableSend">{{$t('multisig.updateCosignatories')}}</button></div>
         <div class="text-center">
-          <router-link :to="{name: 'ViewMultisigHome',params:{name:acc.name}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
+          <router-link :to="{name: 'ViewMultisigHome',params:{address:address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
         </div>
       </div>
     </div>
@@ -197,7 +197,7 @@ export default {
     MoreAccountOptions
   },
   props: {
-    name: String,
+    address: String,
   },
   setup(p){
     const {t} = useI18n();
@@ -206,8 +206,7 @@ export default {
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref('');
     const fundStatus = ref(false);
-    const accountName = ref(p.name);
-    const accountNameDisplay = ref(p.name);
+    
     const passwd = ref('');
     const passwdPattern = "^[^ ]{8,}$";
     const publicKeyPattern = "^[0-9A-Fa-f]{64}$";
@@ -224,22 +223,26 @@ export default {
     const selectOtherCosign = ref([]);
     const contactName = ref([])
      const findAcc = (publicKey)=>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
       return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
     }
     // current wallet
     const wallet = walletState.currentLoggedInWallet;
     // get account details initialization
-    const acc =  computed(()=>{
-      let account
-      if (wallet.accounts.find(element => element.name ===p.name) === undefined && wallet.others.find(element => element.name ===p.name) === undefined){
-        return null
-      } else if (wallet.accounts.find(element => element.name ===p.name) === undefined){
-        account = wallet.others.find(element => element.name ===p.name) 
-      } else if (wallet.others.find(element => element.name ===p.name) === undefined){
-        account = wallet.accounts.find(element => element.name ===p.name)
-      }
-      return account
-    })
+    const acc = computed(()=>{
+        if(!walletState.currentLoggedInWallet){
+          return null
+        }
+        let acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address) || walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
+        if(!acc){
+          return null
+        }
+        return acc
+      })
+    const accountName = ref(acc.value?acc.value.name:'');
+    const accountNameDisplay = ref(acc.value?acc.value.name:'');
     const lockFundCurrency = computed(() =>
       Helper.convertToCurrency(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
@@ -254,6 +257,9 @@ export default {
     });
     const aggregateFee = ref(0)
     let updateAggregateFee=()=>{
+      if(!acc.value){
+        return
+      }
       multiSign.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value).then(fee=>{
        aggregateFee.value=fee
      })
@@ -261,15 +267,21 @@ export default {
     
     const cosignerAddress = cosigner => Address.createFromPublicKey(cosigner, AppState.networkType).plain().substr(-4)
     const cosignaturies = computed(()=>{
+      if(!acc.value){
+        return []
+      }
       let cosignaturies = []
       acc.value.multisigInfo.filter(element=>element.level === 1).forEach(cosigner=> {
             cosignaturies.push(cosigner.publicKey) 
           })
           return cosignaturies     
   })
-    const numApproveTransaction = ref(acc.value.multisigInfo.find(acc=>acc.level==0).minApproval);
-    const numDeleteUser = ref(acc.value.multisigInfo.find(acc=>acc.level==0).minRemoval);
+    const numApproveTransaction = ref(acc.value?acc.value.multisigInfo.find(acc=>acc.level==0).minApproval:0);
+    const numDeleteUser = ref(acc.value?acc.value.multisigInfo.find(acc=>acc.level==0).minRemoval:0);
     const cosignerName = computed(()=>{
+      if(!wallet){
+        return []
+      }
       let name = []
       cosignaturies.value.forEach(publicKey=>{
         if(wallet.accounts.find(acc=>acc.publicKey ===publicKey)){
@@ -277,16 +289,21 @@ export default {
         }else{
           let address = Address.createFromPublicKey(publicKey,AppState.networkType).plain().substr(-4)
           name.push(t('general.cosigner')+'-' +address)
-          console.log(name)
         }
       })
       return name
     },{deep:true})
     updateAggregateFee()
     const getWalletCosigner = () => {
+      if(!acc.value){
+        return {hasCosigner:false , cosignerList: []}
+      }
       return multiSign.getCosignerInWallet(acc.value.publicKey)
     }
     const walletCosignerList = computed(() =>{
+      if(!walletState.currentLoggedInWallet){
+        return []
+      }
       let cosigners= getWalletCosigner()
       let list =[]
       cosigners.cosignerList.forEach(publicKey=>{
@@ -295,19 +312,24 @@ export default {
       return list
     })
     const selectedCosignPublicKey = ref(walletCosignerList.value[0]?walletCosignerList.value[0].publicKey:'')
-
-    const otherAccount = wallet.accounts.find(element=>element.name ===p.name)? wallet.accounts : wallet.others
-    if(acc.value == undefined){
-      router.push({ name: "ViewAccountDisplayAll"});
-    }
-    const isMultisig =computed(()=> multiSign.checkIsMultiSig(acc.value.address))
+    
+    watch(walletCosignerList,n=>{
+      if(n.length){
+         selectedCosignPublicKey.value = n[0]?n[0].publicKey:''
+      }
+    },{deep:true})
+    
+    const isMultisig =computed(()=> {
+      if(!acc.value){
+        return false
+      }
+      return multiSign.checkIsMultiSig(acc.value.address)
+    })
     const disableSend = computed(() => !(
-      isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) &&  err.value == ''|| err.value== t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name}) && (showAddressError.value.indexOf(true) == -1) && (numDeleteUser.value >= 0) && (numApproveTransaction.value > 0)
+      isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) &&  err.value == ''|| err.value== t('general.walletPasswordInvalid',{name : wallet?wallet.name:''}) && (showAddressError.value.indexOf(true) == -1) && (numDeleteUser.value >= 0) && (numApproveTransaction.value > 0)
     ));
     const disabledPassword = computed(() => !(!onPartial.value && isMultisig.value && !fundStatus.value && isCoSigner.value));
     const isCoSigner = computed(() => {
-      
-       
       return getWalletCosigner().hasCosigner;
     })
     const addCoSigButton = computed(() => {
@@ -337,8 +359,6 @@ export default {
         return Math.round((parseFloat(aggregateFee.value) + parseFloat(lockFundCurrency.value) + lockFundTxFee.value)*Math.pow(10,tokenDivisibility))/Math.pow(10,tokenDivisibility)
       }
     })
-
-    
 
     const clear = () => {
       coSign.value = [];
@@ -407,16 +427,16 @@ export default {
     }, {deep:true});
 
     const contact = computed(() => {
+      if(!acc.value){
+        return []
+      }
       return multiSign.generateContact(acc.value.address,acc.value.name)
     });
     const accountBalance = computed(() => {
-       let accountBalance = 0
-       if (acc.value == undefined){
+       if (!acc.value ){
          return 0
        }
-        accountBalance = acc.value.balance
-       
-       return accountBalance
+       return acc.value.balance
     })
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
@@ -480,17 +500,14 @@ export default {
     const maxNumDeleteUser = computed( () => {
       return getCosigns() - removeCosign.value.length + coSign.value.length;
     });
-    function getCosigns(){
-      const account = acc.value;
-      if (account != undefined){
-         return account.getDirectParentMultisig().length
+    const getCosigns =()=>{
+      if (acc.value){
+         return acc.value.getDirectParentMultisig().length
       }else{
         return 0
       }
-     
     }
-    /* numApproveTransaction.value =  acc.multisigInfo.find(acc=> acc.level === 0).minApproval;
-    numDeleteUser.value = acc.multisigInfo.find(acc => acc.level === 0).minRemoval; */
+    
     // refecth min number for both scheme if there is changes in max num for both approval and deletion
     watch(maxNumApproveTransaction, (n,o) => {
       if(n<o){
@@ -591,6 +608,9 @@ export default {
     
     
     watch(selectedCosignPublicKey, (n) => {
+      if(!findAcc(n)){
+        return
+      }
       if(findAcc(n).balance<totalFee.value){
         fundStatus.value = true
       }else{
@@ -653,7 +673,6 @@ export default {
       validateDelete,
       cosignaturies,
       cosignerAddress,
-      otherAccount,
       getCosigns,
       lockFundCurrency,
       lockFundTxFee,

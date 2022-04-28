@@ -1,6 +1,7 @@
 import { 
     ChainHttp, BlockchainScore, 
 } from "tsjs-xpx-chain-sdk";
+import {RequestAuth} from './auth';
 
 export class ChainAPI {
 
@@ -11,10 +12,12 @@ export class ChainAPI {
     }
 
     getBlockchainHeight(): Promise<number>{
-        return this.chainHttp.getBlockchainHeight().toPromise().then((blockNum)=> blockNum.compact());
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.chainHttp.getBlockchainHeight(authHeader).toPromise().then((blockNum)=> blockNum.compact());
     }
 
     getBlockchainScore(): Promise<BlockchainScore>{
-        return this.chainHttp.getBlockchainScore().toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.chainHttp.getBlockchainScore(authHeader).toPromise();
     }
 }

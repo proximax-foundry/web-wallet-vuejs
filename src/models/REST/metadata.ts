@@ -3,6 +3,7 @@ import {
     MosaicId, NamespaceId, MetadataQueryParams,
     MetadataEntry, MetadataSearch
 } from "tsjs-xpx-chain-sdk";
+import {RequestAuth} from './auth';
 
 export class MetadataAPI {
 
@@ -18,14 +19,17 @@ export class MetadataAPI {
      *
      */
     getMetadata(compositeHash: string): Promise<MetadataEntry>{
-        return this.metadataHttp.getMetadata(compositeHash).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.metadataHttp.getMetadata(compositeHash, authHeader).toPromise();
     }
 
     getMetadatas(compositeHashes: string[]): Promise<MetadataEntry[]>{
-        return this.metadataHttp.getMetadatas(compositeHashes).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.metadataHttp.getMetadatas(compositeHashes, authHeader).toPromise();
     }
 
     searchMetadatas(metadataQueryParams: MetadataQueryParams): Promise<MetadataSearch>{
-        return this.metadataHttp.searchMetadata(metadataQueryParams).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.metadataHttp.searchMetadata(metadataQueryParams, authHeader).toPromise();
     }
 }

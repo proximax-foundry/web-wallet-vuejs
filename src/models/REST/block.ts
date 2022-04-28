@@ -3,6 +3,7 @@ import {
     LimitType, 
     MerkleProofInfo, BlockInfo, Transaction, Statement
 } from "tsjs-xpx-chain-sdk";
+import {RequestAuth} from './auth';
 
 export class BlockAPI {
 
@@ -13,19 +14,23 @@ export class BlockAPI {
     }
 
     getBlockByHeight(height: number): Promise<BlockInfo>{
-        return this.blockHttp.getBlockByHeight(height).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.blockHttp.getBlockByHeight(height, authHeader).toPromise();
     }
     
     getBlockReceipts(height: number): Promise<Statement>{
-        return this.blockHttp.getBlockReceipts(height).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.blockHttp.getBlockReceipts(height, authHeader).toPromise();
     }
 
     getBlockTransactions(height: number): Promise<Transaction[]>{
-        return this.blockHttp.getBlockTransactions(height).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.blockHttp.getBlockTransactions(height, undefined, authHeader).toPromise();
     }
 
     getBlocksByHeightWithLimit(height: number, limitType?:LimitType): Promise<BlockInfo[]>{
-        return this.blockHttp.getBlocksByHeightWithLimit(height, limitType).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.blockHttp.getBlocksByHeightWithLimit(height, limitType, authHeader).toPromise();
     }
 
     /**
@@ -33,7 +38,8 @@ export class BlockAPI {
      * @param hash - The hash of the receipt statement or resolution.
      */
     getMerkleReceipts(height: number, hash: string): Promise<MerkleProofInfo>{
-        return this.blockHttp.getMerkleReceipts(height, hash).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.blockHttp.getMerkleReceipts(height, hash, authHeader).toPromise();
     }
 
     /**
@@ -41,6 +47,7 @@ export class BlockAPI {
      * @param hash - The hash of the transaction.
      */
     getMerkleTransaction(height: number, hash: string): Promise<MerkleProofInfo>{
-        return this.blockHttp.getMerkleTransaction(height, hash).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.blockHttp.getMerkleTransaction(height, hash, authHeader).toPromise();
     }
 }

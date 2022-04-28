@@ -64,7 +64,7 @@
             </div>
             <div class="flex justify-between w-full">
               <AddressQRModal :accountAddressQR="addressQR" />
-              <router-link :to="{ name: 'ViewMultisigHome', params: { name: selectedAccountName }}" class="my-2 flex items-center" v-if="!isMultisig"><img src="@/modules/dashboard/img/icon-multisig-blue.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">{{$t('general.convertMultisig')}}</div></router-link>
+              <router-link :to="{ name: 'ViewMultisigHome', params: { address: selectedAccountAddressPlain }}" class="my-2 flex items-center" v-if="!isMultisig"><img src="@/modules/dashboard/img/icon-multisig-blue.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">{{$t('general.convertMultisig')}}</div></router-link>
             </div>
           </div>
         </div>

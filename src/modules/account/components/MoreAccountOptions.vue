@@ -8,8 +8,8 @@
     <div v-if="toggleModal" class="relative ">
     <div class='absolute border border-t-0 z-20 bg-white w-full p-3 '>
         <div  class="pb-2">
-            <router-link class="hover:bg-gray-100" v-if="!otherAccount(address)" :to="{ name: 'ViewAccountDelegate', params: { address: address }}">{{$t('delegate.delegateAcc')}}</router-link>
-            <div v-else class="text-gray-300">{{$t('account.delegate')}}</div>
+            <router-link class="hover:bg-gray-100" v-if="!(otherAccount(address) && other_acc.type =='DELEGATE')" :to="{ name: 'ViewAccountDelegate', params: { address: address }}">{{$t('delegate.delegateAcc')}}</router-link>
+            <div v-else class="text-gray-300">{{$t('delegate.delegateAcc')}}</div>
         </div>
         <router-link class="hover:bg-gray-100" v-if="!otherAccount(address)" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">{{$t('general.linkToNamespace')}}</router-link>
         <router-link class="hover:bg-gray-100" v-else-if="otherAccount(address) && other_acc.type =='MULTISIG'" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">{{$t('general.linkToNamespace')}}</router-link>
@@ -30,9 +30,26 @@ props:{
 },
 setup(p){
     let toggleModal = ref(false)
-    const account = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address)
-    const other_acc = walletState.currentLoggedInWallet.others.find(acc=>acc.address==p.address)
+    const account = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
+      let acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address) || walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
+      if(!acc){
+        return null
+      }
+      return acc
+    })
+    const other_acc = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
+      return walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
+    })
     const otherAccount = (address) => {
+    if(!walletState.currentLoggedInWallet){
+      return null
+    }
       return walletState.currentLoggedInWallet.others.find(others => others.address == address);
     };
     return{
