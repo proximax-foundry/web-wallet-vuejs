@@ -45,6 +45,13 @@ export default{
       }
     },
   },
+  watch:{
+    modelValue(n){
+      if(!(/^[\x00-\x7F]+$/.test(n))){ //test if string is ascii
+        this.$emit('update:modelValue', '')
+      }
+    }
+  },
   emits:[
     'update:modelValue'
   ],

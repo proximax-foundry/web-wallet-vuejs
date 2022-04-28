@@ -49,19 +49,19 @@
                       <div class="text-black text-sm font-bold">{{ namespaceName }}</div>
                   </div>
                 </div>
-                <div class="mt-2" v-if="existingScopedMetadataKeys.length && scopedMetadataKeySelectable" >
-                  <div @click="showKeys = !showKeys" class="text-blue-primary text-xs cursor-pointer mb-1.5">Select Existing Scoped Metadata Key (Hexadecimal)</div>
+               <div class="mt-2" v-if="existingScopedMetadataKeys.length && scopedMetadataKeySelectable" >
+                  <div @click="showKeys = !showKeys" class="text-blue-primary text-xs cursor-pointer mb-1.5">Select Existing Scoped Metadata Key</div>
                   <div v-for="(metadata,index) in existingScopedMetadataKeys" :key="index" >
-                    <div v-if="showKeys" class="flex justify-center cursor-pointer" @click="scopedMetadataKeyType=2,inputScopedMetadataKey=metadata,checkOldValue(),showKeys = false">
-                      <div v-if="index%2==0" class="text-xs py-2 bg-gray-100 pl-2 w-full">{{metadata}}</div>
-                      <div v-if="index%2==1" class="text-xs py-2 pl-2 w-full">{{metadata}}</div>
+                    <div v-if="showKeys" class="flex justify-center cursor-pointer" @click="scopedMetadataKeyType=metadata.type,inputScopedMetadataKey=metadata.value,checkOldValue(),showKeys = false">
+                      <div v-if="index%2==0" class="text-xs py-2 bg-gray-100 pl-2 w-full">{{metadata.value}}</div>
+                      <div v-if="index%2==1" class="text-xs py-2 pl-2 w-full">{{metadata.value}}</div>
                       <div v-if="index%2==0" class="ml-auto pr-2 text-xxs py-2 font-semibold uppercase text-blue-primary bg-gray-100">{{$t('general.select')}}</div>
                       <div v-if="index%2==1" class="ml-auto mr-2 text-xxs py-2 font-semibold uppercase text-blue-primary">{{$t('general.select')}}</div>
                     </div>
                   </div>
                 </div>
                 <div v-if="scopedMetadataKeySelectable">
-                  <MetadataInput :hex="scopedMetadataKeyType==2" class="mt-5" v-model="inputScopedMetadataKey"  placeholder="Scoped Metadata Key" v-debounce:1000="checkOldValue" :toolTip="`${scopedMetadataKeyType==1?'Accepts 8 characters':'Accepts 16 hexadecimals'}`" :showError="showScopedKeyErr" :errorMessage="`${scopedMetadataKeyType==1?'Exceeded 8 characters':inputScopedMetadataKey.length>16?'Exceeded 16 hexadecimals':'Input needs to be even number'}`" />
+                  <MetadataInput :hex="scopedMetadataKeyType==2" class="mt-5" v-model="inputScopedMetadataKey"  placeholder="Scoped Metadata Key" v-debounce:1000="checkOldValue" :toolTip="`${scopedMetadataKeyType==1?'Accepts up to 8 bytes':'Accepts 16 hexadecimals'}`" :showError="showScopedKeyErr" :errorMessage="`${scopedMetadataKeyType==1?'Exceeded 8 bytes':inputScopedMetadataKey.length>16?'Exceeded 16 hexadecimals':'Input needs to be even number'}`" />
                   <div class="flex gap-3 ">
                       <div class="flex gap-2">
                           <input  type="radio" id="regular" value="1" v-model="scopedMetadataKeyType">
@@ -178,7 +178,7 @@ export default {
     let scopedMetadataKeySelectable = ref(true);
     let scopedMetadataKeyType = ref(1);
     let targetPublicAccount = ref(null);
-    let targetNamespace: NamespaceId = null;
+    let targetNamespace = ref(null);
     let targetAccIsMultisig = ref(false);
     let scopedMetadataKeyHex = ref("");
     let inputScopedMetadataKey = ref("");
@@ -194,13 +194,39 @@ export default {
     const svgString = computed(()=>toSvg(selectedAcc.value?selectedAcc.value.address:'', 40, themeConfig.jdenticonConfig))
     const accountName = computed(()=>selectedAcc.value?walletState.currentLoggedInWallet.convertAddressToName(selectedAcc.value.address,true):'')
     const existingScopedMetadataKeys = ref([])
+
+    const isASCII = (string :string)=> {
+        return /^[\x00-\x7F]*$/.test(string);
+    }
+
+    const removeDoubleZero = (string :string) =>{
+        let isZero = string.endsWith('00')
+        if(isZero){
+            string = string.substring(0, string.length - 2);
+            string = removeDoubleZero(string)
+        }
+        return string
+    }
+
+    const convertUtf8 = (scopedMetadataKey :string)=>{
+        scopedMetadataKey =  removeDoubleZero(scopedMetadataKey )
+        let utf8 = Convert.decodeHexToUtf8(scopedMetadataKey )
+        if(isASCII(utf8)){
+            scopedMetadataKey  = utf8
+        }
+        return scopedMetadataKey
+        
+    }
     const fetchExistingKey = ()=>{
       let metadataQueryParams = new MetadataQueryParams()
       metadataQueryParams.metadataType = MetadataType.NAMESPACE
-      metadataQueryParams.targetId = targetNamespace
+      metadataQueryParams.targetId = targetNamespace.value
       AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams).then(metadata=>{
         metadata.metadataEntries.forEach(metadataEntry=>{
-           existingScopedMetadataKeys.value.push(metadataEntry.scopedMetadataKey.toHex())
+           existingScopedMetadataKeys.value.push({
+              value: metadataEntry.scopedMetadataKey.toHex() == convertUtf8(metadataEntry.scopedMetadataKey.toHex())?metadataEntry.scopedMetadataKey.toHex(): convertUtf8(metadataEntry.scopedMetadataKey.toHex()),
+              type: metadataEntry.scopedMetadataKey.toHex() == convertUtf8(metadataEntry.scopedMetadataKey.toHex())? 2: 1
+           })
         })
       })
     }
@@ -208,20 +234,20 @@ export default {
       if(props.targetId.length === 16 && Convert.isHexString(props.targetId)){
         let uint64Id = UInt64.fromHex(props.targetId);
         let namespaceId = new NamespaceId([uint64Id.lower, uint64Id.higher]);
-        targetNamespace = namespaceId;
-        txnBuilder.targetNamespaceId(targetNamespace);
+        targetNamespace.value = namespaceId;
+        txnBuilder.targetNamespaceId(targetNamespace.value);
       }
       else{
         try {
           let namespaceId = new NamespaceId(props.targetId);
-          targetNamespace = namespaceId;
-          txnBuilder.targetNamespaceId(targetNamespace);
+          targetNamespace.value = namespaceId;
+          txnBuilder.targetNamespaceId(targetNamespace.value);
         } catch (error) {
           return;
         }
       }
 
-      let namespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespace(targetNamespace);
+      let namespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespace(targetNamespace.value);
       targetPublicAccount.value = namespaceInfo.owner;
       txnBuilder.targetPublicKey(targetPublicAccount);
 
@@ -298,10 +324,10 @@ export default {
     }
 
     const loadCurrentMetadataValue = async () =>{
-      if(targetNamespace && scopedMetadataKeyHex){
+      if(targetNamespace.value && scopedMetadataKeyHex.value){
 
         let metadataQueryParams = new MetadataQueryParams();
-        metadataQueryParams.targetId = targetNamespace;
+        metadataQueryParams.targetId = targetNamespace.value;
         metadataQueryParams.metadataType = MetadataType.NAMESPACE;
         metadataQueryParams.scopedMetadataKey = UInt64.fromHex(scopedMetadataKeyHex.value);
 
@@ -485,7 +511,7 @@ export default {
         tempHexData = "00".repeat((16-inputScopedMetadataKey.value.length)/2) + inputScopedMetadataKey.value 
       }
       let metadataQueryParams = new MetadataQueryParams();
-      metadataQueryParams.targetId = targetNamespace;
+      metadataQueryParams.targetId = targetNamespace.value;
       metadataQueryParams.metadataType = MetadataType.NAMESPACE;
       metadataQueryParams.scopedMetadataKey = UInt64.fromHex(tempHexData);
       let searchResults = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams);
@@ -514,7 +540,7 @@ export default {
       }
       let namespaceMetadataTransaction = txnBuilder
       .targetPublicKey(targetPublicAccount.value)
-      .targetNamespaceId(targetNamespace)
+      .targetNamespaceId(targetNamespace.value)
       .scopedMetadataKey(UInt64.fromHex(tempHexData))
       .value(newValue.value)
       .oldValue(oldValue.value)
