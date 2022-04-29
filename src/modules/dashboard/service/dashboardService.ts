@@ -2710,6 +2710,8 @@ export class DashboardService {
         let txnHash = transactionInfo instanceof AggregateTransactionInfo ? 
             transactionInfo.aggregateHash : transactionInfo.hash;
 
+        let initiator = txn.signer.publicKey;
+
         let formattedTxn = new PartialTransaction(txnHash);
         formattedTxn.type = TransactionUtils.getTransactionTypeName(txn.type);
         formattedTxn.maxFee = transactionInfo instanceof AggregateTransactionInfo ? 
@@ -2725,6 +2727,7 @@ export class DashboardService {
                 let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
                 
                 deadline = aggregateTxn.deadline.adjustedValue.compact();
+                initiator = aggregateTxn.signer.publicKey;
             } catch (error) {
                     
             }   
@@ -2733,6 +2736,7 @@ export class DashboardService {
             deadline = txn.deadline.adjustedValue.compact();
         }
         formattedTxn.deadline = deadline;
+        formattedTxn.initiator = initiator;
 
         if(txn.type === TransactionType.AGGREGATE_BONDED || txn.type === TransactionType.AGGREGATE_COMPLETE){
             let aggregateTxn = txn as AggregateTransaction;
@@ -2751,6 +2755,8 @@ export class DashboardService {
         let txnHash = transactionInfo instanceof AggregateTransactionInfo ? 
             transactionInfo.aggregateHash : transactionInfo.hash;
 
+        let initiator = txn.signer.publicKey;
+
         let formattedTxn = new UnconfirmedTransaction(txnHash);
         formattedTxn.type = TransactionUtils.getTransactionTypeName(txn.type);
         formattedTxn.maxFee = transactionInfo instanceof AggregateTransactionInfo ? 
@@ -2758,7 +2764,7 @@ export class DashboardService {
 
         formattedTxn.signer = txn.signer.publicKey;
         formattedTxn.signerAddress = txn.signer.address.plain();
-
+        
         let deadline = null;
 
         if(transactionInfo instanceof AggregateTransactionInfo){
@@ -2766,6 +2772,7 @@ export class DashboardService {
                 let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
                 
                 deadline = aggregateTxn.deadline.adjustedValue.compact();
+                initiator = aggregateTxn.signer.publicKey;
             } catch (error) {
 
             }   
@@ -2775,6 +2782,7 @@ export class DashboardService {
         }
 
         formattedTxn.deadline = deadline;
+        formattedTxn.initiator = initiator;
 
         return formattedTxn;
     }
@@ -2788,9 +2796,11 @@ export class DashboardService {
         let blockHeight: number = 0;
         let txnBytes: number = 0;
         let deadline = null;
+        let initiator = txn.signer.publicKey;
 
         if(transactionInfo instanceof AggregateTransactionInfo){
-            //let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
+            let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
+            initiator = aggregateTxn.signer.publicKey;
             blockHeight = transactionInfo.height.compact();
             //txnBytes = aggregateTxn.serialize().length / 2;
             //deadline = aggregateTxn.deadline.adjustedValue.compact();
@@ -2827,6 +2837,7 @@ export class DashboardService {
 
         formattedTxn.signer = txn.signer.publicKey;
         formattedTxn.signerAddress = txn.signer.address.plain();
+        formattedTxn.initiator = initiator;
 
         formattedTxn.fee = DashboardService.convertToExactNativeAmount(fee);
 
