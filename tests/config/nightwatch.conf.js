@@ -29,7 +29,7 @@ module.exports = {
       screenshots: {
         enabled: true,
         path: 'screens',
-        on_failure: true
+        on_failure: false
       },
 
       desiredCapabilities: {
