@@ -1,12 +1,9 @@
 name: test-wallet
 
 on:
- workflow_run:
-    workflows: ['deploy-stg']                     # runs after deploy-stg workflow
-    types:
-      - completed
-    branches:
-      - develop 
+  push:
+    branches: 
+      - fix-automated-tests #change to develop branch after tests is working
 
 jobs:
   # This workflow contains a single job called "test"
