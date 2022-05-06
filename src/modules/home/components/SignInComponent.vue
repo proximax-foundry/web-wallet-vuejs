@@ -10,7 +10,10 @@
         <div class= 'text-center'>
           <PasswordInput class = 'w-8/12 block ml-auto mr-auto' :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" />
         </div>
-        <div class=" text-center mt-2">
+        <div class='text-center mt-3' v-if="needAPIKey">
+          <HiddenInput class = 'w-8/12 block ml-auto mr-auto' placeholder="API key" :errorMessage="apikeyError" :showError="showAPIKeyError" v-model="apikeyInput" icon="lock" />
+        </div>
+        <div class="text-center mt-2">
           <button type="submit" class=" blue-btn bg-gray-primary py-2.5 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('home.signIn')}}</button>
         </div>
       </fieldset>
@@ -25,6 +28,7 @@ import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import SelectNetworkInput from '@/components/SelectNetworkInput.vue';
 import SelectWalletInput from '@/components/SelectWalletInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
+import HiddenInput from '@/components/HiddenInput.vue';
 import { networkState } from "@/state/networkState";
 import { walletState } from '@/state/walletState';
 import { WalletUtils } from '@/util/walletUtils';
@@ -50,6 +54,24 @@ export default defineComponent({
     const selectedWallet = ref("");
     const showPasswdError = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
+    const showAPIKeyError = ref(false);
+    const needAPIKey = computed(()=>{
+      
+      if(networkState.currentNetworkProfile){
+        if(networkState.currentNetworkProfile.secured){
+          if(showAPIKeyError.value){
+            return true;
+          }
+          else if(!networkState.currentNetworkProfile.apikey){
+            return true;
+          }
+        }
+      }
+
+      return false;
+    });
+    const apikeyInput = ref('');
+    const apikeyError = ref('API key required'); 
     const disableSignin = computed(
       () => !(
         walletPassword.value.match(passwdPattern) &&
@@ -60,8 +82,59 @@ export default defineComponent({
     emitter.on('select-wallet',(wallet)=>{
       selectedWallet.value=wallet
     })
-    const login = () => {
-      var result = WalletUtils.verifyWalletPassword(selectedWallet.value, networkState.chainNetworkName, walletPassword.value);
+    const login = async () => {
+      
+      if(needAPIKey.value && apikeyInput.value === ""){
+        showAPIKeyError.value = true;
+        apikeyError.value = "API Key required";
+        return;
+      }
+      else if(needAPIKey.value){
+        let lockingTime = localStorage.getItem("locking_time");
+        if(lockingTime){
+          let currentTime = new Date().getTime();
+          console.log(currentTime);
+          if(currentTime < parseInt(lockingTime) + (5 * 60 * 1000) ){
+            showAPIKeyError.value = true;
+            apikeyError.value = "too many failed attempt. Please try again in few minutes";
+            return;
+          }
+          else{
+            localStorage.removeItem("locking_time");
+          }
+        }
+
+        networkState.currentNetworkProfile.apikey = apikeyInput.value;
+        let apiKeyOK = await NetworkStateUtils.updateNetworkConfig();
+
+        console.log(apiKeyOK);
+
+        if(apiKeyOK){
+          sessionStorage.setItem("secured_auth", apikeyInput.value);
+        }
+        else{
+          showAPIKeyError.value = true;
+          apikeyError.value = "API Key not valid";
+          let tryCount = parseInt(localStorage.getItem("login_locking_retry") | "0");  
+          console.log(tryCount);       
+          tryCount = tryCount + 1;
+
+          if(tryCount >= 3){
+            localStorage.setItem("locking_time", new Date().getTime().toString())
+            localStorage.removeItem("login_locking_retry");
+          }
+          else{
+            localStorage.setItem("login_locking_retry", tryCount.toString());
+          }
+          
+          return;
+        }
+      }
+
+      showAPIKeyError.value = false;
+
+      var result = WalletUtils.verifyWalletPassword(selectedWallet.value, networkState.chainNetworkName, walletPassword.value);   
+      
       if (!result) {
         err.value = t('general.walletPasswordInvalid',{name:selectedWallet.value});
       } else {
@@ -83,13 +156,18 @@ export default defineComponent({
       disableSignin,
       login,
       selectedNetwork,
+      needAPIKey,
+      apikeyInput,
+      apikeyError,
+      showAPIKeyError
     };
   },
 
   components: {
     PasswordInput,
     SelectNetworkInput,
-    SelectWalletInput
+    SelectWalletInput,
+    HiddenInput
    /*  Dropdown */
   }
 });
