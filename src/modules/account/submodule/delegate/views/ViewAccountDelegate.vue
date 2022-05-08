@@ -6,13 +6,12 @@
   </div>
   <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
     <AccountComponent :address="address" class="mb-10"/>
-    <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-      <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
+    <div class = 'flex text-xs font-semibold border-b-2 menu_title_div '>
+      <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center border-b-2 pb-3 border-yellow-500'>{{$t('account.accountDetails')}}</router-link>
       <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+      <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
       <router-link :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
       <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
-      <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
-      <MoreAccountOptions :address="address" :selected="true"/>
     </div>
     <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 pr-6">
@@ -173,7 +172,6 @@ import { LinkAction, PublicAccount } from "tsjs-xpx-chain-sdk";
 import { useI18n } from 'vue-i18n';
 import { accountUtils } from "@/util/accountUtils";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
-import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 import { Account } from "tsjs-xpx-chain-sdk";
 import { listenerState } from '@/state/listenerState';
 import { multiSign } from '@/util/multiSignatory';
@@ -184,7 +182,6 @@ export default {
   name: 'ViewAccountDelegate',
   components: {
     AccountComponent,
-    MoreAccountOptions,
     PasswordInput,
     PkInputClean
   },

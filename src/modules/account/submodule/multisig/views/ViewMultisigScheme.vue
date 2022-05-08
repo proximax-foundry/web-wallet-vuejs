@@ -12,8 +12,6 @@
         <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
         <router-link :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
         <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.scheme')}}</div>
-        <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
-        <MoreAccountOptions :address="address"/>
       </div>
       <div class="overflow-auto w-full border-2  " :style="`${viewType2==1?' transform: rotate(180deg);':'' }`">
         <blocks-tree :data="graph" :horizontal="viewType==0"  :collapsable="collapsable" :props="{label: 'label', name: 'name', balance: 'balance', numApproveTx:'numApproveTx',numRemoval:'numRemoval',children: 'children'}">
@@ -74,12 +72,10 @@
 <script lang="ts">
 import { walletState } from '@/state/walletState'
 import { watch, ref, computed, getCurrentInstance, reactive } from "vue";
-
 import { networkState } from '@/state/networkState';
 import { Address, PublicAccount } from 'tsjs-xpx-chain-sdk';
 import { Helper } from '@/util/typeHelper';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
-import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 import { AppState } from '@/state/appState';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
@@ -87,8 +83,7 @@ import { useI18n } from 'vue-i18n';
 export default {
   name:"ViewMultisigScheme",
   components:{
-    AccountComponent,
-    MoreAccountOptions
+    AccountComponent
   },
   props: {
     address: String,

@@ -12,8 +12,6 @@
       <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
       <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.multisig')}}</div>
       <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
-      <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
-      <MoreAccountOptions :address="address"/>
     </div>
     
     <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
@@ -186,7 +184,6 @@ import { networkState } from '@/state/networkState';
 import {useI18n} from 'vue-i18n'
 import { Helper } from '@/util/typeHelper';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
-import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 import { TransactionUtils } from '@/util/transactionUtils';
 import { AppState } from '@/state/appState';
 export default {
@@ -194,8 +191,7 @@ export default {
   components: {
     PasswordInput,
     TextInput,
-    AccountComponent,
-    MoreAccountOptions
+    AccountComponent
   },
   props: {
     address: String,

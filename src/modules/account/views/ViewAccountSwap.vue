@@ -13,7 +13,6 @@
         <router-link :to="{name:'ViewMultisigHome', params: {address:address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
         <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
         <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.swap')}}</div>
-        <MoreAccountOptions :address="address"/>
       </div>
       <div v-if="acc && !isMultiSig">
         <div class='my-7 font-semibold'>{{$t('nis1.nis1Swap')}}</div>
@@ -55,13 +54,11 @@ import qrcode from 'qrcode-generator';
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import SwapAccountModal from '@/modules/account/components/SwapAccountModal.vue'
-import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 export default {
   name: "ViewAccountSwap",
   components: {
     AccountComponent,
-    SwapAccountModal,
-    MoreAccountOptions
+    SwapAccountModal
   },
   props: {
     address: String,

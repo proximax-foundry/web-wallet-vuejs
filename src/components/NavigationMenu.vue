@@ -10,22 +10,9 @@
             </div>
             <div class="truncate text-white">{{ selectedAccountName }}</div>
           </router-link>
-          <div @mouseover="hoverOverSetDefaultMenu" @mouseout="hoverOutSetDefaultMenu" class="relative">
-            <img src="@/assets/img/navi/icon-default-account-drop-down.svg" class="h-6 w-6 cursor-pointer" @click="displayDefaultAccountMenu = true">
-            <div v-if="displayDefaultAccountMenu" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-              <div role="none" class="my-2">
-                <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.details')}}</router-link>
-                <router-link :to="{ name: 'ViewAccountAssets', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.asset')}}</router-link>
-                <router-link :to="{ name: 'ViewMultisigHome', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.multisig')}}</router-link>
-                <router-link :to="{ name: 'ViewMultisigScheme', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" v-if="isMultiSig" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.scheme')}}</router-link>
-                <div :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" v-else class="block text-gray-300 transition duration-200 p-2 z-20">{{$t('general.scheme')}}</div>
-                <router-link :to="{ name: 'ViewAccountSwap', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.swap')}}</router-link>
-                <router-link :to="{ name: 'ViewAccountDelegate', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.delegate')}}</router-link>
-                <router-link :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: selectedAccountAddress }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.namespace')}}</router-link>
-                <router-link :to="{ name: 'ViewUpdateAccountMetadata', params: { targetPublicKey: selectedAccountPublicKey }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Metadata</router-link>
-              </div>
-            </div>
-          </div>
+          <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}"  class="block p-2 z-20 text-xs">
+            <img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class=" h-6 w-6 cursor-pointer " >
+          </router-link>
         </div>
         <!-- <div @click="updateDefaultAccount(item.name)" v-for="(item) in accounts" :key="item.address" class="cursor-pointer link_block flex items-center"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div><span class="truncate overflow-hidden text-white">{{ item.name }}</span></div> -->
       </div>

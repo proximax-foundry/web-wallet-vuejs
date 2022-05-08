@@ -12,8 +12,6 @@
         <router-link v-if="!isDelegate()" :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
         <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
         <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
-        <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
-        <MoreAccountOptions :address="address"/>
     </div>
     <div class='border-2 border-t-0  p-6'>
         <div v-if="mosaics.length==0" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
@@ -44,7 +42,6 @@
 <script>
 import { watch, ref, computed, getCurrentInstance } from "vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
-import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 import { walletState } from '@/state/walletState';
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
@@ -52,8 +49,7 @@ import { networkState } from '@/state/networkState';
 export default {
     name:'ViewAccountAssets',
     components:{
-        AccountComponent,
-        MoreAccountOptions
+        AccountComponent
     },
     props:{
         address: String,

@@ -9,10 +9,9 @@
         <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
         <router-link :to="{name: 'ViewAccountDetails',params:{address:accountAddress}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
         <router-link :to="{name:'ViewAccountAssets', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+        <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Metadata</router-link>
         <router-link :to="{name:'ViewMultisigHome', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
         <router-link v-if="targetAccIsMultisig" :to="{name:'ViewMultisigScheme', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
-        <router-link :to="{name:'ViewAccountSwap', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
-        <MoreAccountOptions :address="accountAddress" :selected="true"/>
         </div>
         <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
             <div class="lg:col-span-2 py-6 px-6">
@@ -134,7 +133,7 @@
                     Update Account Metadata
                 </button>
                 <div class="text-center">
-                    <router-link :to="{name: 'ViewDashboard'}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
+                    <router-link :to="{name: 'ViewMetadata', params: { address: accountAddress}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
                 </div>
             </div>
         </div>
@@ -152,7 +151,6 @@ import { networkState } from "@/state/networkState";
 import { TransactionUtils } from "@/util/transactionUtils";
 import { AppState } from '@/state/appState';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
-import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 import MetadataInput from '@/modules/metadataTxn/components/MetadataInput.vue'
 import { 
   PublicAccount, Convert, AccountMetadataTransactionBuilder, 
@@ -172,7 +170,6 @@ export default {
   },
   components: {
     AccountComponent,
-    MoreAccountOptions,
     MetadataInput,
     PasswordInput,
     
