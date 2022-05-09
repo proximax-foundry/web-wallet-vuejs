@@ -13,19 +13,63 @@
         <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
         <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
     </div>
-    <div class='border-2 border-t-0  p-6'>
+    <div class='border-2 border-t-0 px-6 py-3'>
         <div v-if="mosaics.length==0" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
-        <div class='text-txs w-9/12 ml-auto mr-auto text-gray-400 mt-1 text-center'>
-          <span v-if="mosaics.length==0">{{$t('account.noAssets')}}</span>
+        <div v-if="mosaics.length==0" class='text-txs w-9/12 ml-auto mr-auto text-gray-400 text-center'>
+          <span >{{$t('account.noAssets')}}</span>
+        </div>
+        <div v-else class="grid grid-cols-6 text-gray-400 font-semibold text-xs uppercase mb-2">
+            <div>ID</div>
+            <div class="col-span-2">Namespace</div>
+            <div class="col-span-2">Balance</div>
+            <div>Creator</div>
         </div>
         <div v-for="(mosaic, index) in mosaics" :key="index">
+            <div class="grid grid-cols-6 text-xs mb-2">
+                <a :href="explorerLink(mosaic.id)" target=_new><div  class="inline-block text-xs mt-1.5 cursor-pointer transition-all duration-200">{{mosaic.id}}</div></a>
+                <div class="col-span-2 ">
+                    <img v-if="displayTokenName(mosaic.name).name=='XPX'" src="@/modules/account/img/proximax-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
+                    <img v-else-if="displayTokenName(mosaic.name).name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
+                    <img v-else-if="displayTokenName(mosaic.name).name=='METX'" src="@/modules/account/img/metx-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
+                    <div v-else-if="mosaic.name=='-'"/>
+                    <img v-else  src="@/modules/dashboard/img/icon-sda.svg" class='inline-block h-6 w-6 mr-2 '>
+                    <div v-if="displayTokenName(mosaic.name).registered" class="inline-block text-xs ml-2 mt-1">{{displayTokenName(mosaic.name).name}}</div>
+                    <div v-else class="inline-block text-xs ml-2 cursor-pointer mt-1">{{mosaic.name}}</div>
+                </div>
+                <div class="col-span-2">
+                    <div class = 'inline-block text-md  '>{{splitBalance(mosaic.balance).left}} </div>
+                    <div class = 'inline-block text-md ' v-if='splitBalance(mosaic.balance).right!=null'>.</div>
+                    <div class= ' inline-block text-xs mt-1.5 '>{{splitBalance(mosaic.balance).right}}</div>
+                </div>
+
+                <div class="mt-1.5">
+                    <div class="flex">
+                        <div>{{mosaic.isCreator}}</div>
+                        <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2" @mouseover="isHover[index] = true" @mouseout="isHover[index] = false" @click="toggleMenu=!toggleMenu">
+                        <div v-if="toggleMenu && isHover[index]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" >
+                            <div class="my-2" >
+                                <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: mosaic.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
+                                <router-link :to="{ name: 'ViewServicesAssetsLinkToNamespace', params: {assetId: mosaic.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.linkToNamespace')}}</router-link>
+                                <router-link :to="{ name: 'ViewUpdateAssetMetadata', params: {targetId: mosaic.id} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Update Metadata</router-link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-if="index != (mosaics.length - 1)" class='my-2 gray-line' ></div>
+        </div>
+        <div class="flex mt-3" >
+            <router-link :to="{ name: 'ViewTransferCreate'}"><div  class="w-18 blue-btn cursor-pointer py-3 px-3 ">{{$t('general.transfer')}}</div></router-link>
+            <router-link :to="{ name: 'ViewServicesMainnetSwap'}"><div  class="w-14 ml-3 blue-btn cursor-pointer py-3 px-3 ">{{$t('general.swap')}}</div></router-link>
+            <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="ml-3 bg-blue-primary px-5 py-3 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-44"><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2">{{$t('asset.createNewAsset')}}</router-link>
+        </div>
+        
+        <!-- <div v-for="(mosaic, index) in mosaics" :key="index">
             <img v-if="displayTokenName(mosaic.name).name=='XPX'" src="@/modules/account/img/proximax-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
             <img v-else-if="displayTokenName(mosaic.name).name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
             <img v-else-if="displayTokenName(mosaic.name).name=='METX'" src="@/modules/account/img/metx-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
             <img v-else src="@/modules/dashboard/img/icon-sda.svg" class='inline-block h-6 w-6 mr-2 '>
-            <div class = 'inline-block text-md font-bold '>{{splitBalance(mosaic.balance).left}} </div>
-            <div class = 'inline-block text-md font-bold' v-if='splitBalance(mosaic.balance).right!=null'>.</div>
-            <div class='inline-block text-xs mt-1.5 font-bold'>{{splitBalance(mosaic.balance).right}}</div>
+            
             <div v-if="displayTokenName(mosaic.name).registered" class="inline-block text-md font-bold ml-2">{{displayTokenName(mosaic.name).name}}</div>
             <a v-else :href="explorerLink(mosaic.name)" target=_new><div  class="inline-block text-xs text-gray-400 font-semibold ml-2 hover:text-black cursor-pointer transition-all duration-200">{{mosaic.name}}</div></a>
             <router-link v-if="index==0" :to='{name:"ViewTransferCreate"}' class='cursor-pointer float-right'>
@@ -33,7 +77,7 @@
               <div class='inline-block text-xs mt-1 font-semibold '>{{$t('general.transfer')}} {{currentNativeTokenName}}</div>
             </router-link>
             <div v-if="index != (mosaics.length - 1)" class='my-6 gray-line' ></div>
-        </div>
+        </div> -->
     </div>
     </div>
   </div>
@@ -101,13 +145,21 @@ export default {
             }
             account.assets.forEach((i) => {
             mosaicOption.push({
-                name: (i.namespaceNames.length>0?i.namespaceNames[0]:i.idHex),
-                balance: Helper.amountFormatterSimple(i.amount,i.divisibility)
+                id: i.idHex,
+                name: (i.namespaceNames.length>0?i.namespaceNames[0]:'-'),
+                balance: Helper.amountFormatterSimple(i.amount,i.divisibility),
+                isCreator: acc.value? (i.owner == acc.value.publicKey?'Yes':'No'):'No'
             });
             });
             
             return mosaicOption;
         });
+
+        const toggleMenu = ref(false)
+        const isHover = ref([])
+        for(let i = 0;i>mosaics.value.length;i++){
+            isHover.value.push(false)
+        }
         const displayTokenName = name =>{
             if (name=='prx.xpx'){
                 return {name:'XPX',registered:true}
@@ -141,7 +193,9 @@ export default {
             displayTokenName,
             splitBalance,
             explorerLink,
-            currentNativeTokenName
+            currentNativeTokenName,
+            toggleMenu,
+            isHover
         }
     }
 }
