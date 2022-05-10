@@ -14,7 +14,7 @@ const elements = {
     copy_privatekey: 'div.border-2:nth-child(3) > div:nth-child(9) > div:nth-child(3) > svg:nth-child(2) > path:nth-child(2)',
     confirm_button_pk: 'div.blue-btn:nth-child(3)',
     confirm_button_wp: 'div.blue-btn:nth-child(3)',
-    cancel_button_pk: 'div.cursor-pointer:nth-child(5)',
+    cancel_button_pk: 'div.cursor-pointer:nth-child(4)',
     cancel_button_wp: 'div.cursor-pointer:nth-child(5)',
     delete_successfulpopup: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
     download_button: '.blue-btn',
@@ -70,7 +70,6 @@ const commands = {
         .assert.elementPresent('@error_existingname',' When account name is already taken, error is shown')
         .click("@back")
         .click("@account_ellipsis")
-        .click("@details_selection")
 
     },
 
@@ -127,7 +126,6 @@ const commands = {
         .pause(1000)
         .click("@back")
         .click("@account_ellipsis")
-        .click("@details_selection")
         .click("@download_button")
         .click("@input_password_wp")
         .setValue("@input_password_wp", password)
@@ -162,7 +160,6 @@ const commands = {
         .click("@cancel_button_pk")
         .click("@back")
         .click("@account_ellipsis")
-        .click("@details_selection")
         .click("@view_privatekey")
         .click("@input_password")
         .setValue("@input_password", password2)
@@ -173,7 +170,6 @@ const commands = {
         .click("@cancel_button_pk")
         .click("@back")
         .click("@account_ellipsis")
-        .click("@details_selection")
         .click("@view_privatekey")
         .click("@input_password")
         .setValue("@input_password", password1)
