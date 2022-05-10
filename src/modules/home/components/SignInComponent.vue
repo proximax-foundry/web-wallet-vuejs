@@ -14,7 +14,7 @@
           <HiddenInput class = 'w-8/12 block ml-auto mr-auto' placeholder="API key" :errorMessage="apikeyError" :showError="showAPIKeyError" v-model="apikeyInput" icon="lock" />
         </div>
         <div class="text-center mt-2">
-          <button type="submit" class=" blue-btn bg-gray-primary py-2.5 w-8/12 disabled:opacity-50" :disabled="disableSignin">{{$t('home.signIn')}}</button>
+          <button type="submit" class=" blue-btn bg-gray-primary py-2.5 w-8/12 disabled:opacity-50" :disabled="disableSignin || passwordCorrectPattern">{{$t('home.signIn')}}</button>
         </div>
       </fieldset>
     </form>
@@ -72,7 +72,8 @@ export default defineComponent({
     });
     const apikeyInput = ref('');
     const apikeyError = ref('API key required'); 
-    const disableSignin = computed(
+    const disableSignin = ref(false); 
+    const passwordCorrectPattern = computed(
       () => !(
         walletPassword.value.match(passwdPattern) &&
         selectedWallet.value != ''
@@ -91,9 +92,8 @@ export default defineComponent({
       }
       else if(needAPIKey.value){
         let lockingTime = localStorage.getItem("locking_time");
+        let currentTime = new Date().getTime();
         if(lockingTime){
-          let currentTime = new Date().getTime();
-          console.log(currentTime);
           if(currentTime < parseInt(lockingTime) + (5 * 60 * 1000) ){
             showAPIKeyError.value = true;
             apikeyError.value = "too many failed attempt. Please try again in few minutes";
@@ -104,19 +104,33 @@ export default defineComponent({
           }
         }
 
+        let loginAttemptTime = localStorage.getItem("last_login_attempt");
+
+        if(loginAttemptTime){
+          if(currentTime > parseInt(loginAttemptTime) + (5 * 60 * 1000) ){
+            localStorage.removeItem("login_locking_retry");
+          }
+        }
+
+        localStorage.setItem("last_login_attempt", currentTime.toString());
+
         networkState.currentNetworkProfile.apikey = apikeyInput.value;
+        disableSignin.value = true;
+
         let apiKeyOK = await NetworkStateUtils.updateNetworkConfig();
 
-        console.log(apiKeyOK);
+        disableSignin.value = false;
 
         if(apiKeyOK){
           sessionStorage.setItem("secured_auth", apikeyInput.value);
+          if(localStorage.getItem("login_locking_retry")){
+            localStorage.removeItem("login_locking_retry");
+          }
         }
         else{
           showAPIKeyError.value = true;
           apikeyError.value = "API Key not valid";
-          let tryCount = parseInt(localStorage.getItem("login_locking_retry") | "0");  
-          console.log(tryCount);       
+          let tryCount = parseInt(localStorage.getItem("login_locking_retry") | "0");     
           tryCount = tryCount + 1;
 
           if(tryCount >= 3){
@@ -154,6 +168,7 @@ export default defineComponent({
       selectedWallet,
       showPasswdError,
       disableSignin,
+      passwordCorrectPattern,
       login,
       selectedNetwork,
       needAPIKey,
