@@ -37,16 +37,14 @@
                     <div v-else class="inline-block text-xs ml-2 cursor-pointer mt-1">{{mosaic.name}}</div>
                 </div>
                 <div class="col-span-2">
-                    <div class = 'inline-block text-md  '>{{splitBalance(mosaic.balance).left}} </div>
-                    <div class = 'inline-block text-md ' v-if='splitBalance(mosaic.balance).right!=null'>.</div>
-                    <div class= ' inline-block text-xs mt-1.5 '>{{splitBalance(mosaic.balance).right}}</div>
+                    <div class="mt-1.5">{{mosaic.balance}}</div>
                 </div>
 
                 <div class="mt-1.5">
                     <div class="flex">
                         <div>{{mosaic.isCreator}}</div>
-                        <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2" @mouseover="isHover[index] = true" @mouseout="isHover[index] = false" @click="toggleMenu=!toggleMenu">
-                        <div v-if="toggleMenu && isHover[index]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" >
+                        <img v-if="mosaic.isCreator == 'Yes'" src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2" @mouseover="isHover[index] = true" @mouseout="isHover[index] = false" @click="toggleMenu[index]=!toggleMenu[index]">
+                        <div v-if="toggleMenu[index]==true" class="mt-5 pop-option inline-block w-32 absolute rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" >
                             <div class="my-2" >
                                 <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: mosaic.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
                                 <router-link :to="{ name: 'ViewServicesAssetsLinkToNamespace', params: {assetId: mosaic.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.linkToNamespace')}}</router-link>
@@ -155,10 +153,11 @@ export default {
             return mosaicOption;
         });
 
-        const toggleMenu = ref(false)
+        const toggleMenu = ref([])
         const isHover = ref([])
-        for(let i = 0;i>mosaics.value.length;i++){
+        for(let i = 0;i<mosaics.value.length;i++){
             isHover.value.push(false)
+            toggleMenu.value.push(false)
         }
         const displayTokenName = name =>{
             if (name=='prx.xpx'){
@@ -185,6 +184,36 @@ export default {
             }
             return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
         }
+        const internalInstance = getCurrentInstance();
+        const emitter = internalInstance.appContext.config.globalProperties.emitter;
+        emitter.on('PAGE_CLICK', () => {
+           if(isHover.value.every(value=>value==false) && toggleMenu.value.includes(true)){
+                for(let i=0;i<toggleMenu.value.length;i++){
+                    toggleMenu.value[i] = false
+                }
+            } else if(isHover.value.includes(true) && toggleMenu.value.includes(true)){
+                let hoverIndexes = []
+                let menuIndexes = []
+                isHover.value.filter((elem, index)=>{
+                    if(elem == true) {
+                        hoverIndexes.push(index);
+                    }
+                });
+                toggleMenu.value.filter((elem, index)=>{
+                    if(elem == true) {
+                        menuIndexes.push(index);
+                    }
+                });
+                console.log(hoverIndexes,menuIndexes)
+                if(hoverIndexes!=menuIndexes){
+                    for(let i=0;i<toggleMenu.value.length;i++){
+                        toggleMenu.value[i] = false
+                    }
+                    toggleMenu.value[hoverIndexes[0]] = true
+                }
+            } 
+
+        });
         return{
             acc,
             isDelegate,
