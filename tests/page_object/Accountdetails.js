@@ -1,6 +1,6 @@
 const elements = {
 
-    account_ellipsis: 'img.h-6:nth-child(1)',
+    account_ellipsis: 'div.link_block > a:nth-child(1) > div:nth-child(2)',
     details_selection: 'a.block:nth-child(1)',
     accountdetails_tab: 'div.w-32:nth-child(1)', 
     accountname_value: 'div.justify-center:nth-child(2) > div:nth-child(1) > div:nth-child(1)',
@@ -46,7 +46,6 @@ const commands = {
     navigate_accountdetails(){
         return this
         .click("@account_ellipsis")
-        .click("@details_selection")
         .isVisible('@accountdetails_tab', callback = result => {
             this.assert.equal(result.value, true, "If account is clicked, user is navigated to account details page")
         })
@@ -201,7 +200,7 @@ module.exports = {
     elements: elements,
     commands: commands,
     url: function () {
-      return '${this.api.launchUrl}'
+      return this.api.launchUrl
     }
   
   }
