@@ -23,7 +23,7 @@ const elements = {
     enter_passwordpopup: 'div.popup-outer-lang:nth-child(3) > div:nth-child(1)',
     error_emptyname: '.text-red-500',
     error_existingname: '.text-red-500',
-    error_emptypassword_pk: 'div.error:nth-child(1)',
+    error_emptypassword_pk: 'div.error:nth-child(2)',
     error_emptypassword_wp: 'div.error:nth-child(1)',
     error_wrongpassword_pk: '.error',
     error_wrongpassword_wp: '.error',
@@ -78,7 +78,6 @@ const commands = {
         return this
         .click("@back")
         .click("@account_ellipsis")
-        .click("@details_selection")
         .click("@edit_nameicon")
         .assert.elementPresent('@input_accountname', 'When edit button is clicked, account name field is open for edit.')
         .click("@input_accountname")
@@ -86,7 +85,7 @@ const commands = {
         .setValue("@input_accountname", name)
         .click("@edit_nameicon")
         .pause(2000)
-        .assert.containsText('@accountname_value', name, 'Account name has successfully edited.')
+        .assert.textContains('@accountname_value', name, 'Account name has successfully edited.')
     
     },
 
