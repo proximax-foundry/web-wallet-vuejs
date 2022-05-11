@@ -9,6 +9,7 @@
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
         <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
         <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.asset',2)}}</div>
+        <router-link v-if="!isDelegate()" :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
         <router-link v-if="!isDelegate()" :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
         <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
         <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
@@ -18,16 +19,16 @@
         <div v-if="mosaics.length==0" class='text-txs w-9/12 ml-auto mr-auto text-gray-400 text-center'>
           <span >{{$t('account.noAssets')}}</span>
         </div>
-        <div v-else class="grid grid-cols-6 text-gray-400 font-semibold text-xs uppercase mb-2">
-            <div>ID</div>
+        <div v-else class="grid grid-cols-7 text-gray-400 font-semibold text-xs uppercase mb-2">
+            <div class="col-span-2">ID</div>
             <div class="col-span-2">Namespace</div>
             <div class="col-span-2">Balance</div>
             <div>Creator</div>
         </div>
         <div v-for="(mosaic, index) in mosaics" :key="index">
-            <div class="grid grid-cols-6 text-xs mb-2">
-                <a :href="explorerLink(mosaic.id)" target=_new><div  class="inline-block text-xs mt-1.5 cursor-pointer transition-all duration-200">{{mosaic.id}}</div></a>
-                <div class="col-span-2 ">
+            <div class="grid grid-cols-7 text-xs my-4">
+                <a :href="explorerLink(mosaic.id)" target=_new class="col-span-2"><div  class="inline-block text-xs mt-1.5 cursor-pointer transition-all duration-200 break-all pr-7 ">{{mosaic.id}}</div></a>
+                <div class="col-span-2 break-all pr-7 ">
                     <img v-if="displayTokenName(mosaic.name).name=='XPX'" src="@/modules/account/img/proximax-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
                     <img v-else-if="displayTokenName(mosaic.name).name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
                     <img v-else-if="displayTokenName(mosaic.name).name=='METX'" src="@/modules/account/img/metx-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
@@ -36,14 +37,17 @@
                     <div v-if="displayTokenName(mosaic.name).registered" class="inline-block text-xs ml-2 mt-1">{{displayTokenName(mosaic.name).name}}</div>
                     <div v-else class="inline-block text-xs ml-2 cursor-pointer mt-1">{{mosaic.name}}</div>
                 </div>
-                <div class="col-span-2">
+                <div class="col-span-2 break-all pr-7 ">
                     <div class="mt-1.5">{{mosaic.balance}}</div>
                 </div>
 
                 <div class="mt-1.5">
                     <div class="flex">
-                        <div>{{mosaic.isCreator}}</div>
-                        <img v-if="mosaic.isCreator == 'Yes'" src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2" @mouseover="isHover[index] = true" @mouseout="isHover[index] = false" @click="toggleMenu[index]=!toggleMenu[index]">
+                        <div class="ml-2.5">
+                            <img v-if="mosaic.isCreator" src="@/assets/img/icon-green-tick.svg" class="h-5 w-5">
+                            <img v-else src="@/assets/img/icon-red-x.svg" class="h-5 w-5">
+                        </div>
+                        <img v-if="mosaic.isCreator" src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2 mt-0.5" @mouseover="isHover[index] = true" @mouseout="isHover[index] = false" @click="toggleMenu[index]=!toggleMenu[index]">
                         <div v-if="toggleMenu[index]==true" class="mt-5 pop-option inline-block w-32 absolute rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" >
                             <div class="my-2" >
                                 <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: mosaic.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
@@ -57,25 +61,10 @@
             <div v-if="index != (mosaics.length - 1)" class='my-2 gray-line' ></div>
         </div>
         <div class="flex mt-3" >
-            <router-link :to="{ name: 'ViewTransferCreate'}"><div  class="w-18 blue-btn cursor-pointer py-3 px-3 ">{{$t('general.transfer')}}</div></router-link>
-            <router-link :to="{ name: 'ViewServicesMainnetSwap'}"><div  class="w-14 ml-3 blue-btn cursor-pointer py-3 px-3 ">{{$t('general.swap')}}</div></router-link>
-            <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="ml-3 bg-blue-primary px-5 py-3 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-44"><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2">{{$t('asset.createNewAsset')}}</router-link>
+            <router-link :to="{ name: 'ViewTransferCreate'}" class=" bg-blue-primary px-5 py-2 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-24 "><img src="@/assets/img/icon-transfer-white.svg" class="  inline-block w-4 h-4 mt-0.5  cursor-pointer mr-1">{{$t('general.transfer')}}</router-link>
+            <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="ml-3 bg-blue-primary px-5 py-2 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-20 "><img src="@/assets/img/navi/icon-swap.svg" class="h-5 w-5 pt-0.5 inline-block relative mr-1">{{$t('general.swap')}}</router-link>
+            <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="ml-3 bg-blue-primary px-5 py-2 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-44"><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2">{{$t('asset.createNewAsset')}}</router-link>
         </div>
-        
-        <!-- <div v-for="(mosaic, index) in mosaics" :key="index">
-            <img v-if="displayTokenName(mosaic.name).name=='XPX'" src="@/modules/account/img/proximax-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
-            <img v-else-if="displayTokenName(mosaic.name).name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
-            <img v-else-if="displayTokenName(mosaic.name).name=='METX'" src="@/modules/account/img/metx-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
-            <img v-else src="@/modules/dashboard/img/icon-sda.svg" class='inline-block h-6 w-6 mr-2 '>
-            
-            <div v-if="displayTokenName(mosaic.name).registered" class="inline-block text-md font-bold ml-2">{{displayTokenName(mosaic.name).name}}</div>
-            <a v-else :href="explorerLink(mosaic.name)" target=_new><div  class="inline-block text-xs text-gray-400 font-semibold ml-2 hover:text-black cursor-pointer transition-all duration-200">{{mosaic.name}}</div></a>
-            <router-link v-if="index==0" :to='{name:"ViewTransferCreate"}' class='cursor-pointer float-right'>
-              <img src="@/assets/img/icon-transfer.svg" class="  inline-block w-5 h-5 mt-0.5  cursor-pointer mr-1">
-              <div class='inline-block text-xs mt-1 font-semibold '>{{$t('general.transfer')}} {{currentNativeTokenName}}</div>
-            </router-link>
-            <div v-if="index != (mosaics.length - 1)" class='my-6 gray-line' ></div>
-        </div> -->
     </div>
     </div>
   </div>
@@ -146,7 +135,7 @@ export default {
                 id: i.idHex,
                 name: (i.namespaceNames.length>0?i.namespaceNames[0]:'-'),
                 balance: Helper.amountFormatterSimple(i.amount,i.divisibility),
-                isCreator: acc.value? (i.owner == acc.value.publicKey?'Yes':'No'):'No'
+                isCreator: acc.value? (i.owner == acc.value.publicKey? true:false):false
             });
             });
             
@@ -204,7 +193,6 @@ export default {
                         menuIndexes.push(index);
                     }
                 });
-                console.log(hoverIndexes,menuIndexes)
                 if(hoverIndexes!=menuIndexes){
                     for(let i=0;i<toggleMenu.value.length;i++){
                         toggleMenu.value[i] = false

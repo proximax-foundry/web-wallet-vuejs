@@ -4,7 +4,6 @@
       <img src='@/assets/img/chevron_left.svg'>
       <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
     </div>
-    
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
       <AccountComponent :address="address" class="mb-10"/>
        <div v-if="showModal" class="mb-8">
@@ -24,6 +23,7 @@
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
         <div class= 'w-32 text-center border-b-2 pb-3 border-yellow-500'>{{$t('account.accountDetails')}}</div>
         <router-link v-if="!isDelegate()" :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+        <router-link v-if="!isDelegate()" :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
         <router-link v-if="!isDelegate()" :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
         <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
         <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
@@ -60,18 +60,13 @@
             <font-awesome-icon :title="$t('general.copy')" icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link mt-0.5 cursor-pointer " v-if="showPK"></font-awesome-icon>
             <PkPasswordModal v-if="!showPwPK && !showPK" :account = 'acc' />
           </div>
-          <!-- <div class='flex'>
-            <div id="private" class="text-xs mt-1 font-semibold break-all" type="text" :copyValue="privateKey" :copySubject="$t('general.privateKey')" v-if="showPK">{{privateKey}}</div>
-            <font-awesome-icon :title="$t('general.copy')" icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link mt-0.5 cursor-pointer " v-if="showPK"></font-awesome-icon>
-            <font-awesome-icon icon="eye-slash" title='Hide Private Key' class="text-blue-link relative cursor-pointer mt-0.5 ml-1" @click="showPwPK = false; showPK = false" v-if="showPK"></font-awesome-icon>
-          </div> -->
           <div class = 'text-txs mt-2 text-red-400 border px-1.5 py-2 border-red-400 rounded-md'>{{$t('general.pkWarning')}}</div>
       </div>
       <div class='my-6 gray-line' v-if="!other_acc "></div>
       <div class='flex'>
         <PdfPasswordModal v-if='!other_acc' />
-        <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}"><div  class="ml-3 blue-btn cursor-pointer py-3 px-3 ">{{$t('general.linkToNamespace')}}</div></router-link>
-        <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address}}"><div  class="ml-3 blue-btn cursor-pointer py-3 px-3 ">{{$t('delegate.delegateAcc')}}</div></router-link>
+        <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}" class="ml-3 blue-btn cursor-pointer py-3 px-3" ><img src="@/assets/img/link-icon.svg" class = 'h-4 w-4 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('general.linkToNamespace')}}</router-link>
+        <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address}}" class="ml-3 blue-btn cursor-pointer py-3 px-3"><img src="@/assets/img/icon-multisig.svg" class = 'h-3 w-3 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('delegate.delegateAcc')}}</router-link>
         <DeleteAccountModal v-if="!isDefault && !other_acc " :account ='acc' />
       </div>
       </div>
