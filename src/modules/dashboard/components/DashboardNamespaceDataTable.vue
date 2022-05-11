@@ -95,6 +95,7 @@ import { networkState } from "@/state/networkState";
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 import { WalletAccount } from '@/models/walletAccount';
 import { useI18n } from 'vue-i18n';
+import { AppState } from '@/state/appState';
 
 export default{
   components: { DataTable, Column },
@@ -137,9 +138,59 @@ export default{
 
     onMounted(() => {
       window.addEventListener("resize", screenResizeHandler);
-      accountNamespaces.value = generateDatatable(namespaces.value, currentBlockHeight.value, account.value);
     });
+    const calculateExpiryDate = (day, hour, min) => {
+      let current = new Date();
+      current.setTime(current.getTime() + (day * 24 * 60 * 60 * 1000 ));
+      current.setTime(current.getTime() + (hour * 60 * 60 * 1000));
+      current.setTime(current.getTime() + (min * 60 * 1000));
+      return current;
+    }
 
+    const relativeTime = (day, hour, min) => {
+      let current = new Date();
+      let expiry = calculateExpiryDate(day, hour, min);
+      let timeDiff = {
+        years: expiry.getFullYear() - current.getFullYear(),
+        months: expiry.getMonth() - current.getMonth(),
+        days: expiry.getDate()  - current.getDate(),
+        hours: expiry.getHours() - current.getHours(),
+        mins: expiry.getMinutes() - current.getMinutes(),
+      }
+
+      if (timeDiff.mins < 0) {
+        timeDiff.hours--;
+        timeDiff.mins += 60;
+      }
+      if (timeDiff.hours < 0) {
+        timeDiff.days--;
+        timeDiff.hours += 24;
+      }
+      if (timeDiff.days < 0) {
+        timeDiff.months--;
+        // days = days left in current's month,
+        //   plus days that have passed in expiry's month
+        var copyCurrent = new Date(current.getTime());
+        copyCurrent.setDate(32);
+        timeDiff.days = 32-current.getDate()-copyCurrent.getDate()+expiry.getDate();
+      }
+      if (timeDiff.months < 0) {
+        timeDiff.years--;
+        timeDiff.months+=12;
+      }
+      if(timeDiff.years > 0){
+        return timeDiff.years + ' ' + t('general.year',timeDiff.years);
+      }else if(timeDiff.months > 0){
+        return timeDiff.months + ' ' + t('general.month',timeDiff.months);
+      }else if(timeDiff.days > 0){
+        return timeDiff.days + ' ' + t('general.day',timeDiff.days);
+      }else if(timeDiff.hours > 0){
+        return timeDiff.hours + ' ' + t('general.hour',timeDiff.hours);
+      }else{
+        return timeDiff.mins + ' ' + t('general.minute',timeDiff.mins);
+      }
+    }
+    
     const generateDatatable = (namespaces, currentBlockHeight, account) => {
       let formattedNamespaces = [];
 
@@ -220,57 +271,23 @@ export default{
       return formattedNamespaces;
     }
 
-    const calculateExpiryDate = (day, hour, min) => {
-      let current = new Date();
-      current.setTime(current.getTime() + (day * 24 * 60 * 60 * 1000 ));
-      current.setTime(current.getTime() + (hour * 60 * 60 * 1000));
-      current.setTime(current.getTime() + (min * 60 * 1000));
-      return current;
+    const init =() => {
+      accountNamespaces.value = generateDatatable(namespaces.value, currentBlockHeight.value, account.value);
     }
 
-    const relativeTime = (day, hour, min) => {
-      let current = new Date();
-      let expiry = calculateExpiryDate(day, hour, min);
-      let timeDiff = {
-        years: expiry.getFullYear() - current.getFullYear(),
-        months: expiry.getMonth() - current.getMonth(),
-        days: expiry.getDate()  - current.getDate(),
-        hours: expiry.getHours() - current.getHours(),
-        mins: expiry.getMinutes() - current.getMinutes(),
-      }
 
-      if (timeDiff.mins < 0) {
-        timeDiff.hours--;
-        timeDiff.mins += 60;
-      }
-      if (timeDiff.hours < 0) {
-        timeDiff.days--;
-        timeDiff.hours += 24;
-      }
-      if (timeDiff.days < 0) {
-        timeDiff.months--;
-        // days = days left in current's month,
-        //   plus days that have passed in expiry's month
-        var copyCurrent = new Date(current.getTime());
-        copyCurrent.setDate(32);
-        timeDiff.days = 32-current.getDate()-copyCurrent.getDate()+expiry.getDate();
-      }
-      if (timeDiff.months < 0) {
-        timeDiff.years--;
-        timeDiff.months+=12;
-      }
-      if(timeDiff.years > 0){
-        return timeDiff.years + ' ' + t('general.year',timeDiff.years);
-      }else if(timeDiff.months > 0){
-        return timeDiff.months + ' ' + t('general.month',timeDiff.months);
-      }else if(timeDiff.days > 0){
-        return timeDiff.days + ' ' + t('general.day',timeDiff.days);
-      }else if(timeDiff.hours > 0){
-        return timeDiff.hours + ' ' + t('general.hour',timeDiff.hours);
-      }else{
-        return timeDiff.mins + ' ' + t('general.minute',timeDiff.mins);
-      }
+    if(AppState.isReady){ 
+      init();
     }
+    else{
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
+          init();
+          readyWatcher();
+        }
+      });
+      }
+    
 
     const showMenu = (i) => {
       currentMenu.value = i;
