@@ -11,9 +11,14 @@
             <router-link class="hover:bg-gray-100" v-if="!(otherAccount(address) && other_acc.type =='DELEGATE')" :to="{ name: 'ViewAccountDelegate', params: { address: address }}">{{$t('delegate.delegateAcc')}}</router-link>
             <div v-else class="text-gray-300">{{$t('delegate.delegateAcc')}}</div>
         </div>
-        <router-link class="hover:bg-gray-100" v-if="!otherAccount(address)" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">{{$t('general.linkToNamespace')}}</router-link>
-        <router-link class="hover:bg-gray-100" v-else-if="otherAccount(address) && other_acc.type =='MULTISIG'" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">{{$t('general.linkToNamespace')}}</router-link>
-        <div  v-else class="text-gray-300">{{$t('general.linkToNamespace')}}</div>
+        <div class="pb-2">
+          <router-link class="hover:bg-gray-100" v-if="!otherAccount(address)" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">{{$t('general.linkToNamespace')}}</router-link>
+          <router-link class="hover:bg-gray-100" v-else-if="otherAccount(address) && other_acc.type =='MULTISIG'" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">{{$t('general.linkToNamespace')}}</router-link>
+           <div  v-else class="text-gray-300">{{$t('general.linkToNamespace')}}</div>
+        </div>
+        <router-link class="hover:bg-gray-100" v-if="!otherAccount(address)" :to="{ name: 'ViewUpdateAccountMetadata', params: { targetPublicKey: publicKey}}">Update Metadata</router-link>
+        <router-link class="hover:bg-gray-100" v-else-if="otherAccount(address) && other_acc.type =='MULTISIG'" :to="{ name: 'ViewUpdateAccountMetadata', params: { targetPublicKey: publicKey}}">Update Metadata</router-link>
+        <div  v-else class="text-gray-300">Update Metadata</div>
     </div>
     </div>
 </div>
@@ -40,6 +45,9 @@ setup(p){
       }
       return acc
     })
+    const publicKey = computed(()=>{
+      return account.value?account.value.publicKey:'0'.repeat(64)
+    })
     const other_acc = computed(()=>{
       if(!walletState.currentLoggedInWallet){
         return null
@@ -56,7 +64,8 @@ setup(p){
         toggleModal,
         otherAccount,
         account,
-        other_acc
+        other_acc,
+        publicKey
     }
 }
 }

@@ -11,7 +11,7 @@
               <router-link :to="{ name : 'ViewTransactionStatus', params: {transactionType: 'partial' } }" @click="updateDefaultAccount(notification.address)" class="flex items-center border border-gray-100 w-full p-5 mb-3 text-tsm hover:bg-blue-50 transition-all duration-300">
                 <div v-html="toSvg(notification.address, 40, themeStyleConfig)" class="mr-2"></div>
                 <div class="text-gray-600 text-xs">
-                  <div class="mb-1 text-sm text-gray-700 font-bold">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(notification.address, true) }}</div>
+                  <div class="mb-1 text-sm text-gray-700 font-bold">{{ walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.convertAddressToNamePretty(notification.address, true):'' }}</div>
                   {{ notification.label }} {{$t('notification.pendingSignature',{time:NotificationUtils.relativeTime(notification.timestamp)})}}
                 </div>
               </router-link>
@@ -72,10 +72,13 @@ export default {
     }
 
     const updateDefaultAccount = (address) => {
+      if(!walletState.currentLoggedInWallet){
+        return
+      }
       walletState.currentLoggedInWallet.setDefaultAccountByAddress(address);
-      const name = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
+      var name = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
       if(!name){
-        name = walletState.currentLoggedInWallet.others.find(account => account.address == address);
+        name = ''
       }
       emitter.emit("DEFAULT_ACCOUNT_SWITCHED", name);
     }

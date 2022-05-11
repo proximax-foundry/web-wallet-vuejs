@@ -76,6 +76,7 @@
             <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div role="none" class="my-2">
                 <router-link :to="{ name: 'ViewServicesNamespaceExtend', params: { address: data.address, namespaceId: data.idHex } }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.extendDuration')}}</router-link>
+                <router-link :to="{ name: 'ViewUpdateNamespaceMetadata', params: { targetId: data.idHex } }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Update Metadata</router-link>
                 <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>{{$t('general.viewInExplorer')}}<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
               </div>
             </div>
