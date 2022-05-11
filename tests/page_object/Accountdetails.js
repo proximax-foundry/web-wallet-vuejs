@@ -6,7 +6,7 @@ const elements = {
     accountname_value: 'div.justify-center:nth-child(2) > div:nth-child(1) > div:nth-child(1)',
     change_default: '.font-txs > img:nth-child(1)',
     new_account: 'div.p-2:nth-child(2)',
-    back: 'a[href="#/dashboard"]',
+    back: 'a.text-blue-primary:nth-child(2)',
     copy_address: 'div.justify-center:nth-child(2) > div:nth-child(2) > svg:nth-child(2) > path:nth-child(2)',
     copyaddress_popup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
     copy_publickey: '.pb-1 > path:nth-child(2)',
@@ -168,6 +168,7 @@ const commands = {
             this.assert.equal(result.value, true, "If user enters wrong wallet password, an error is shown")
         })
         .click("@cancel_button_pk")
+        .moveToElement("@back",100,40)
         .click("@back")
         .click("@account_ellipsis")
         .click("@view_privatekey")
