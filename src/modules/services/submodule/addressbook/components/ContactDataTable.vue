@@ -1,16 +1,16 @@
 <template>
   <div>
+    <div class='font-semibold mr-10 mb-4'>{{$t('general.addressBook')}}</div>
     <div class="xl:flex xl:justify-between pb-3 xl:pb-0">
-      <div class="lg:flex lg:items-center lg:justify-items-start">
-        <div class='font-semibold mr-10 mb-4 lg:mb-0'>{{$t('general.addressBook')}}</div>
-        <SelectInputPluginClean v-model="selectContactGroups" :options="contactGroups" selectDefault="" class="w-60 mr-4" />
-        <div class="w-60 px-3 py-1 flex justify-between my-3 xl:my-0" :class="borderColor">
+      <div class="md:flex md:items-center md:justify-items-start">
+        <SelectInputPluginClean v-model="selectContactGroups" :options="contactGroups" selectDefault="" class="w-full md:w-60 mr-4" />
+        <div class="w-full md:w-60 px-3 py-1 flex justify-between mb-3 mt-3 md:mt-0 md:mb-0" :class="borderColor">
           <input v-model="filters['global'].value" type="text" class="w-28 outline-none text-xs float-left" :placeholder="$t('general.search')" @click="clickInputText()" @blur="blurInputText()">
           <img src="@/modules/services/submodule/addressbook/img/icon-search_black.svg" class="inline-block">
         </div>
       </div>
-      <div class="block inline-block mt-5 lg:mt-5 xl:mt-0">
-        <router-link :to="{ name: 'ViewServicesAddressBookAddContact' }"  class="bg-blue-primary text-gray-50 text-tsm px-3 py-3 rounded-lg hover:bg-blue-600 transition-all duration-300">+ {{$t('general.new')}}</router-link>
+      <div class="mt-5 lg:mt-5 xl:mt-0">
+        <router-link :to="{ name: 'ViewServicesAddressBookAddContact' }" class="default-btn transition-all duration-300" style="padding: auto 3px">+ {{$t('general.new')}}</router-link>
       </div>
     </div>
     <div class='mt-2 py-3 gray-line'>

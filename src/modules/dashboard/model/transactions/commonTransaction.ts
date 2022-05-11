@@ -7,6 +7,7 @@ export class CommonTransaction{
     signerAddress: string = "";
     signerName: string = "";
     deadline: number | null = null;
+    initiator: string | null = null;
   
     constructor(txnHash: string){
       this.hash = txnHash;

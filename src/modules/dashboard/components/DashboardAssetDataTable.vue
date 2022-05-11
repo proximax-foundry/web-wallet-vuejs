@@ -153,9 +153,10 @@ export default{
     });
 
     onMounted(() => {
-      accountAssets.value = generateAssetDatatable(assets.value, account.value);
       window.addEventListener("resize", screenResizeHandler);
     });
+
+    
 
     const generateAssetDatatable = (assets, account) => {
       let formattedAssets = [];
@@ -189,6 +190,22 @@ export default{
       }
       return formattedAssets;
     }
+
+    const init = ()=>{
+       accountAssets.value = generateAssetDatatable(assets.value, account.value);
+    }
+
+    if(AppState.isReady){
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
+          init();
+          readyWatcher();
+        }
+      });
+      }
 
     const borderColor = ref('border border-gray-400');
 

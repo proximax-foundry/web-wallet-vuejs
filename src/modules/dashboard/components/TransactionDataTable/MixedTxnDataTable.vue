@@ -126,6 +126,7 @@
         <template #body="{data}">
           <div>
             <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>'" class="inline-block" v-if="data.message && data.messageType !== 1">
+            <DecryptMessageModal v-if="data.message && data.messageType !== 0"  :messageTypeTitle="data.messageTypeTitle" :message="data.message" :recipientAddress="data.recipient" :initiator="data.initiator"/>
             <div v-else class="w-full text-center">-</div>
           </div>
         </template>
@@ -159,12 +160,14 @@ import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";
 import { walletState } from "@/state/walletState";
+import DecryptMessageModal from "@/modules/dashboard/components/DecryptMessageModal.vue"
 // import SplitButton from 'primevue/splitbutton';
 
 export default {
   components: {
     DataTable,
     Column,
+    DecryptMessageModal
     // SplitButton
   },
   name: 'MixedTxnDataTable',
@@ -195,7 +198,6 @@ export default {
     onMounted(() => {
       window.addEventListener("resize", screenResizeHandler);
     });
-
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const borderColor = ref('border border-gray-400');

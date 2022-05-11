@@ -850,6 +850,9 @@ export class DashboardService {
                         txn.oldValue = assetMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
                     }
+                    else{
+                        txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
+                    }
 
                 } catch (error) {
                     
@@ -881,6 +884,9 @@ export class DashboardService {
                         txn.oldValue = nsMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
                     }
+                    else{
+                        txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
+                    }
                     
                 } catch (error) {
                     
@@ -903,6 +909,9 @@ export class DashboardService {
                     if(nsMetadataEntry){
                         txn.oldValue = nsMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+                    }
+                    else{
+                        txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
                     }
                 } catch (error) {
                     
@@ -1020,6 +1029,9 @@ export class DashboardService {
                         txn.oldValue = assetMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
                     }
+                    else{
+                        txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
+                    }
                     
                 } catch (error) {
                     
@@ -1051,6 +1063,9 @@ export class DashboardService {
                         txn.oldValue = nsMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
                     }
+                    else{
+                        txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
+                    }
                     
                 } catch (error) {
                     
@@ -1073,6 +1088,9 @@ export class DashboardService {
                     if(nsMetadataEntry){
                         txn.oldValue = nsMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+                    }
+                    else{
+                        txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
                     }
                 } catch (error) {
                     
@@ -2692,6 +2710,8 @@ export class DashboardService {
         let txnHash = transactionInfo instanceof AggregateTransactionInfo ? 
             transactionInfo.aggregateHash : transactionInfo.hash;
 
+        let initiator = txn.signer.publicKey;
+
         let formattedTxn = new PartialTransaction(txnHash);
         formattedTxn.type = TransactionUtils.getTransactionTypeName(txn.type);
         formattedTxn.maxFee = transactionInfo instanceof AggregateTransactionInfo ? 
@@ -2707,6 +2727,7 @@ export class DashboardService {
                 let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
                 
                 deadline = aggregateTxn.deadline.adjustedValue.compact();
+                initiator = aggregateTxn.signer.publicKey;
             } catch (error) {
                     
             }   
@@ -2715,6 +2736,7 @@ export class DashboardService {
             deadline = txn.deadline.adjustedValue.compact();
         }
         formattedTxn.deadline = deadline;
+        formattedTxn.initiator = initiator;
 
         if(txn.type === TransactionType.AGGREGATE_BONDED || txn.type === TransactionType.AGGREGATE_COMPLETE){
             let aggregateTxn = txn as AggregateTransaction;
@@ -2733,6 +2755,8 @@ export class DashboardService {
         let txnHash = transactionInfo instanceof AggregateTransactionInfo ? 
             transactionInfo.aggregateHash : transactionInfo.hash;
 
+        let initiator = txn.signer.publicKey;
+
         let formattedTxn = new UnconfirmedTransaction(txnHash);
         formattedTxn.type = TransactionUtils.getTransactionTypeName(txn.type);
         formattedTxn.maxFee = transactionInfo instanceof AggregateTransactionInfo ? 
@@ -2740,7 +2764,7 @@ export class DashboardService {
 
         formattedTxn.signer = txn.signer.publicKey;
         formattedTxn.signerAddress = txn.signer.address.plain();
-
+        
         let deadline = null;
 
         if(transactionInfo instanceof AggregateTransactionInfo){
@@ -2748,6 +2772,7 @@ export class DashboardService {
                 let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
                 
                 deadline = aggregateTxn.deadline.adjustedValue.compact();
+                initiator = aggregateTxn.signer.publicKey;
             } catch (error) {
 
             }   
@@ -2757,6 +2782,7 @@ export class DashboardService {
         }
 
         formattedTxn.deadline = deadline;
+        formattedTxn.initiator = initiator;
 
         return formattedTxn;
     }
@@ -2770,9 +2796,11 @@ export class DashboardService {
         let blockHeight: number = 0;
         let txnBytes: number = 0;
         let deadline = null;
+        let initiator = txn.signer.publicKey;
 
         if(transactionInfo instanceof AggregateTransactionInfo){
-            //let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
+            let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
+            initiator = aggregateTxn.signer.publicKey;
             blockHeight = transactionInfo.height.compact();
             //txnBytes = aggregateTxn.serialize().length / 2;
             //deadline = aggregateTxn.deadline.adjustedValue.compact();
@@ -2809,6 +2837,7 @@ export class DashboardService {
 
         formattedTxn.signer = txn.signer.publicKey;
         formattedTxn.signerAddress = txn.signer.address.plain();
+        formattedTxn.initiator = initiator;
 
         formattedTxn.fee = DashboardService.convertToExactNativeAmount(fee);
 
@@ -3731,6 +3760,9 @@ export class DashboardService {
                 txnDetails.oldValue = nsMetadataEntry.value;
                 txnDetails.newValue = DashboardService.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
             }
+            else{
+                txnDetails.newValue = DashboardService.applyValueChange("", txnDetails.valueChange, txnDetails.sizeChanged);
+            }
         } catch (error) {
             
         }
@@ -3817,6 +3849,9 @@ export class DashboardService {
             if(nsMetadataEntry){
                 txnDetails.oldValue = nsMetadataEntry.value;
                 txnDetails.newValue = DashboardService.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
+            }
+            else{
+                txnDetails.newValue = DashboardService.applyValueChange("", txnDetails.valueChange, txnDetails.sizeChanged);
             }
             
         } catch (error) {
@@ -3905,6 +3940,9 @@ export class DashboardService {
             if(assetMetadataEntry){
                 txnDetails.oldValue = assetMetadataEntry.value;
                 txnDetails.newValue = DashboardService.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
+            }
+            else{
+                txnDetails.newValue = DashboardService.applyValueChange("", txnDetails.valueChange, txnDetails.sizeChanged);
             }
             
         } catch (error) {
@@ -5134,7 +5172,7 @@ export class DashboardService {
 
                 if(assetDefFormat.duration){
                     let assetDurationInfo: TxnDetails = {
-                        type: MsgType.INFO,
+                        type: MsgType.NONE,
                         label: "Duration",
                         value: assetDefFormat.duration
                     };
@@ -5163,14 +5201,14 @@ export class DashboardService {
                 let assetInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Asset",
-                    value: assetSupplyFormat.assetId + assetSupplyFormat.namespaceName ? ` (${assetSupplyFormat.namespaceName})` : ''
+                    value: assetSupplyFormat.assetId + (assetSupplyFormat.namespaceName ? ` (${assetSupplyFormat.namespaceName})` : '')
                 };
 
                 infos.push(assetInfo);
 
                 let assetSupplyInfo: TxnDetails = {
-                    type: MsgType.INFO,
-                    label: "Asset",
+                    type: MsgType.NONE,
+                    label: "Delta",
                     value: assetSupplyFormat.supplyDelta > 0 ? `+${assetSupplyFormat.supplyDelta}` : assetSupplyFormat.supplyDelta
                 };
 

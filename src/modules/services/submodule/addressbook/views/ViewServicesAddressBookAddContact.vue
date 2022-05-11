@@ -1,8 +1,6 @@
 <template>
-
   <div>
-    
-    <div class='w-9/12 ml-auto mr-auto mt-5'>
+    <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
       <div class ='flex text-xs font-semibold border-b-2 menu_title_div'>
         <router-link :to="{ name: 'ViewServicesAddressBook' }" class= 'w-18 text-center border-b pb-3'>{{$t('general.list')}}</router-link>
         <router-link :to="{ name: 'ViewServicesAddressBookImport' }" class= 'w-18 text-center border-b pb-3'>{{$t('general.import')}}</router-link>
@@ -11,11 +9,11 @@
       <div class="border border-gray-100 p-5 filter drop-shadow-xl mt-10 bg-white">
         <div class="text-md mb-5 font-semibold">{{$t('addressBook.addNewContact')}}</div>
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <div class='mt-2 py-3 text-center px-0 flex'>
-          <TextInputClean :placeholder="$t('general.name')" :errorMessage="$t('general.nameRequired')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" class="w-52 inline-block mr-2" />
-          <TextInputClean :placeholder="$t('general.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" class="w-96 inline-block mr-2" />
-          <SelectInputPluginClean v-model="selectContactGroups" :placeholder="$t('general.group')" :options="contactGroups" selectDefault="-none-" ref="selectGroupDropdown" class="w-60 inline-block mr-2" />
-          <button type="submit" class="default-btn py-1 disabled:opacity-50 h-12 flex items-center" :disabled="disableSave" @click="SaveContact()"><img src="@/modules/services/submodule/addressbook/img/icon-save.svg" class="inline-block mr-2"> {{$t('addressBook.saveAddress')}}</button>
+        <div class='mt-2 py-3 px-0 md:flex'>
+          <TextInputClean :placeholder="$t('general.name')" :errorMessage="$t('general.nameRequired')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" class="w-full md:w-52 inline-block mr-2" />
+          <TextInputClean :placeholder="$t('general.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" class="w-full md:w-96 inline-block mr-2" />
+          <SelectInputPluginClean v-model="selectContactGroups" :placeholder="$t('general.group')" :options="contactGroups" selectDefault="-none-" ref="selectGroupDropdown" class="w-full md:w-60 inline-block mr-2" />
+          <button type="submit" class="mt-5 md:mt-0 default-btn py-1 disabled:opacity-50 h-12 flex items-center" :disabled="disableSave" @click="SaveContact()"><img src="@/modules/services/submodule/addressbook/img/icon-save.svg" class="inline-block mr-2"> {{$t('addressBook.saveAddress')}}</button>
         </div>
       </div>
     </div>
@@ -60,6 +58,9 @@ export default {
     const router = useRouter();
     const selectContactGroups = ref('');
 
+    const defaultGroups = ['-none-', 'Work', 'Friend', 'Family', 'Employee', 'Director'];
+    let customGroup = [];
+
     const action = ref([]);
     action.value.push(
       {value: '-none-', label: ' - '},
@@ -68,6 +69,29 @@ export default {
       {value: 'Family', label: t('addressBook.family')},
       {value: 'Employee', label: t('addressBook.employee')},
       {value: 'Director', label: t('addressBook.director')},
+    );
+
+    if(walletState.currentLoggedInWallet){
+      if(walletState.currentLoggedInWallet.contacts.length > 0){
+        walletState.currentLoggedInWallet.contacts.forEach(contact => {
+          if(!defaultGroups.includes(contact.group)){
+            customGroup.push(contact.group);
+          }
+        })
+
+        let uniqueCustomGroups = [...new Set(customGroup)];
+        if(uniqueCustomGroups.length > 0){
+          uniqueCustomGroups.sort();
+          uniqueCustomGroups.forEach((group) => {
+            action.value.push(
+              { value: group, label: group },
+            );
+          });
+        }
+      }
+    }
+
+    action.value.push(
       {value: 'Custom', label: t('addressBook.custom')},
     );
     const contactGroups = computed(() => {
