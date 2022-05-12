@@ -1,11 +1,11 @@
-import {appSetting} from '@/config/appSetting';
+import {networkState} from '@/state/networkState';
 import {RequestOptions} from 'tsjs-xpx-chain-sdk';
 
 export class RequestAuth {
 
     static getApiKeyHeader(): RequestOptions | undefined{
-        if(appSetting.restApiKey){
-            return new RequestOptions({apikey: appSetting.restApiKey});
+        if(networkState.currentNetworkProfile.apikey){
+            return new RequestOptions({apikey: networkState.currentNetworkProfile.apikey});
         }
         else{
             return undefined;
@@ -13,7 +13,7 @@ export class RequestAuth {
     }
 
     static getAuthHeader(): RequestOptions | undefined{
-        if(appSetting.restApiKey){
+        if(networkState.currentNetworkProfile.apikey){
             return RequestAuth.getApiKeyHeader();
         }
         else{

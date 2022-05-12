@@ -552,10 +552,6 @@ export default defineComponent({
     watch(()=> currentBlockHeight.value, async()=>{
 
       listener.value.refreshTimer();
-      let notification = await NotificationUtils.getNotification();
-      newNotificationCount.value = notification.length;
-      isNewNotification.value = NotificationUtils.highlightNewNotification();
-
     });
 
      watch(()=> unconfirmedTxLength.value, (newValue, oldValue)=>{
@@ -645,13 +641,15 @@ export default defineComponent({
           let status = listenerState.allTransactionStatus[lastIndex - i].status;
           let hash = listenerState.allTransactionStatus[lastIndex - i].hash;
           emitter.emit("TXN_ERROR", hash);
-          toast.add({
-            severity:'error', 
-            summary: t('transaction.txError'), 
-            detail:  t('transaction.txErrMsg',[status,hash]),
-            group: 'br', 
-            life: 10000
-          });
+          if(AppState.trackingTxnHash.includes(hash)){
+            toast.add({
+              severity:'error', 
+              summary: t('transaction.txError'), 
+              detail:  t('transaction.txErrMsg',[status,hash]),
+              group: 'br', 
+              life: 10000
+            });
+          }
         }
       }
      });
