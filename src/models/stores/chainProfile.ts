@@ -9,6 +9,8 @@ export class ChainProfile extends StoreProperties{
     httpPort: number = 3000;
     generationHash: string = "";
     network: Network = Network.createDefault();
+    secured: boolean = false;
+    apikey: string = ""; 
     chainExplorer: ChainExplorer = ChainExplorer.createDefault();
 
     constructor(storeName: string){

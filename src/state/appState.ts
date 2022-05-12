@@ -20,7 +20,8 @@ interface appStateInterface {
     wsNodeFullURL: string;
     readyStates: Map<string, boolean>
     isReady: boolean,
-    isPendingTxnAnnounce: boolean
+    isPendingTxnAnnounce: boolean,
+    trackingTxnHash: string[]
 }
 
 export const AppState = reactive<appStateInterface>({
@@ -38,5 +39,6 @@ export const AppState = reactive<appStateInterface>({
     wsNodeFullURL: '',
     readyStates: new Map(),
     isReady: false,
-    isPendingTxnAnnounce: false
+    isPendingTxnAnnounce: false,
+    trackingTxnHash: []
   });

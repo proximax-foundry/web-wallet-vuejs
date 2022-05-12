@@ -258,8 +258,6 @@ export default{
     //   closeNavi();
     // }
 
-    updateAccountTransactionCount();
-
     const init = ()=>{
       updateAccountTransactionCount();
     }

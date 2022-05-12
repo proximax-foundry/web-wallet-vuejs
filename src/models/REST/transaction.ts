@@ -5,6 +5,7 @@ import {
     TransactionQueryParams, TransactionType, TransactionSearch, TransactionCount
 } from "tsjs-xpx-chain-sdk";
 import {RequestAuth} from './auth';
+import {AppState} from '../../state/appState';
 
 export class TransactionAPI {
 
@@ -15,11 +16,19 @@ export class TransactionAPI {
     }
 
     announce(signedTransaction: SignedTransaction): Promise<TransactionAnnounceResponse>{
+        let txnHash = signedTransaction.hash;
+        if(!AppState.trackingTxnHash.includes(txnHash)){
+            AppState.trackingTxnHash.push(txnHash);
+        }
         let authHeader = RequestAuth.getAuthHeader();
         return this.transactionHttp.announce(signedTransaction, authHeader).toPromise();
     }
 
     announceAggregateBonded(signedTransaction: SignedTransaction): Promise<TransactionAnnounceResponse>{
+        let txnHash = signedTransaction.hash;
+        if(!AppState.trackingTxnHash.includes(txnHash)){
+            AppState.trackingTxnHash.push(txnHash);
+        }
         let authHeader = RequestAuth.getAuthHeader();
         return this.transactionHttp.announceAggregateBonded(signedTransaction, authHeader).toPromise();
     }
