@@ -21,12 +21,12 @@ dynamic_configuration = {
           "secured": false,
           "chainExplorer": {
             "url": "https://explorer.xpxsirius.io",
-            "blockRoute": "#/result/blockHeight",
-            "publicKeyRoute": "#/result/publicKey",
-            "addressRoute": "#/result/address",
-            "hashRoute": "#/result/hash",
-            "namespaceInfoRoute": "#/result/namespaceInfo",
-            "assetInfoRoute": "#/result/assetInfo"
+            "blockRoute": "#/block",
+            "publicKeyRoute": "#/account",
+            "addressRoute": "#/account",
+            "hashRoute": "#/tx",
+            "namespaceInfoRoute": "#/namespace",
+            "assetInfoRoute": "#/asset"
           }
         },
         "Sirius Testnet 1": {
