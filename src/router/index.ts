@@ -6,6 +6,7 @@ import { WalletRoutes } from '@/modules/wallet/routingWallet';
 import { AccountRoutes } from '@/modules/account/routingAccount';
 import { ServiceRoutes  } from '@/modules/services/routingService';
 import { TransactionRoutes  } from '@/modules/transaction/routingTransaction';
+import { MetadataTransactionRoutes  } from '@/modules/metadataTxn/routingMetadataTransaction';
 
 const routes: RouteRecordRaw[] = [
   ...HomeRoutes,
@@ -15,6 +16,7 @@ const routes: RouteRecordRaw[] = [
   ...AccountRoutes,
   ...ServiceRoutes,
   ...TransactionRoutes,
+  ...MetadataTransactionRoutes
 ]
 
 const router = createRouter({

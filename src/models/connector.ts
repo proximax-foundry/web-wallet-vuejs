@@ -9,7 +9,7 @@ import { ListenerStateUtils } from "../state/utils/listenerStateUtils";
 import { watch } from "vue";
 import {RequestAuth} from './REST/auth';
 
-const secondsToCheck = 25;
+const secondsToCheck = 28;
 //const secondsInterval = 20;
 
 export class Connector{

@@ -24,6 +24,7 @@
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
         <div class= 'w-32 text-center border-b-2 pb-3 border-yellow-500'>{{$t('account.accountDetails')}}</div>
         <router-link v-if="!isDelegate()" :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+        <router-link v-if="!isDelegate()" :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
         <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
         <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
         <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
@@ -163,12 +164,15 @@ export default {
     
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const prettyAddress = ''
-    try {
-      prettyAddress = Helper.createAddress(acc.value?acc.value.address:'').pretty();
-    } catch (error) {
-      
-    } 
+    const prettyAddress = computed(()=>{
+      if(p.address){
+        try {
+           return Helper.createAddress(p.address).pretty()
+        } catch (error) {
+        }
+      }
+      return ''
+    })
     const err = ref(false);
     
     
@@ -273,7 +277,7 @@ export default {
       // Addres number
       doc.setFontSize(8);
       doc.setTextColor('#000000');
-      doc.text(prettyAddress, 146, 164, { maxWidth: 132 });
+      doc.text(prettyAddress.value, 146, 164, { maxWidth: 132 });
       doc.save('Your_Paper_Wallet');
     }
 
@@ -323,7 +327,6 @@ export default {
       verifyWalletPwSwap,
       copy,
       privateKey,
-      prettyAddress,
       showWalletPaperPw,
       showSavePaperWallet,
       walletPasswdWalletPaper,

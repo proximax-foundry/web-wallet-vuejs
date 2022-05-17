@@ -128,6 +128,7 @@
         <template #body="{data}">
           <div>
             <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>'" class="inline-block" v-if="data.message && data.messageType !== 1">
+            <DecryptMessageModal v-if="data.message && data.messageType !== 0"  :messageTypeTitle="data.messageTypeTitle" :message="data.message" :recipientAddress="data.recipient" :initiator="data.initiator"/>
             <div v-else class="w-full text-center">-</div>
           </div>
         </template>
@@ -161,12 +162,14 @@ import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";
 import { walletState } from "@/state/walletState";
+import  DecryptMessageModal from "@/modules/dashboard/components/DecryptMessageModal.vue"
 // import SplitButton from 'primevue/splitbutton';
 
 export default defineComponent({
   components: {
     DataTable,
     Column,
+    DecryptMessageModal
     // SplitButton
   },
   name: 'TransferTxnDataTable',
@@ -204,7 +207,6 @@ export default defineComponent({
     const showTransactionModel = ref(false);
     const filterText = ref("");
     const transactionGroupType = Helper.getTransactionGroupType();
-    
     const nativeTokenName = computed(()=> networkState.currentNetworkProfile?.network.currency.name);
 
     const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
@@ -217,6 +219,10 @@ export default defineComponent({
 
     const dynamicModelComponentDisplay = ref('TransferTransactionModal');
 
+    emitter.on("CLOSE_MODAL", payload => {
+      showTransactionModel.value = payload;
+    });
+    
     const clickInputText = () => {
       borderColor.value = 'border border-white-100 drop-shadow';
     };
@@ -224,8 +230,6 @@ export default defineComponent({
     const blurInputText = () => {
       borderColor.value = 'border border-gray-400';
     };
-
-    console.log(p.currentAddress)
 
     const filterAccount = ref({
       'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
