@@ -168,7 +168,7 @@ const commands = {
             this.assert.equal(result.value, true, "If user enters wrong wallet password, an error is shown")
         })
         .click("@cancel_button_pk")
-        .moveToElement("@back",100,40)
+        .moveToElement("@back",110,40)
         .click("@back")
         .click("@account_ellipsis")
         .click("@view_privatekey")
