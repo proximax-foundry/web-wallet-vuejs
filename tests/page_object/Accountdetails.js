@@ -158,6 +158,7 @@ const commands = {
             this.assert.equal(result.value, true, 'If password field has no input, it will show an error')
         })
         .click("@cancel_button_pk")
+        .pause(5000)
         .click("@back")
         .click("@account_ellipsis")
         .click("@view_privatekey")
