@@ -14,7 +14,7 @@ const elements = {
     copy_privatekey: 'div.border-2:nth-child(3) > div:nth-child(9) > div:nth-child(3) > svg:nth-child(2) > path:nth-child(2)',
     confirm_button_pk: 'div.blue-btn:nth-child(3)',
     confirm_button_wp: 'div.blue-btn:nth-child(3)',
-    cancel_button_pk: 'div.cursor-pointer:nth-child(4)',
+    cancel_button_pk: 'div.text-center:nth-child(4)',
     cancel_button_wp: 'div.cursor-pointer:nth-child(5)',
     delete_successfulpopup: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
     download_button: '.blue-btn',
@@ -168,7 +168,6 @@ const commands = {
             this.assert.equal(result.value, true, "If user enters wrong wallet password, an error is shown")
         })
         .click("@cancel_button_pk")
-        .moveToElement("@back",110,40)
         .click("@back")
         .click("@account_ellipsis")
         .click("@view_privatekey")
