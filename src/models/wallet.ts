@@ -3,7 +3,7 @@ import { AddressBook } from './addressBook';
 import { OtherAccount } from './otherAccount';
 import { Address } from 'tsjs-xpx-chain-sdk';
 import { Helper } from '@/util/typeHelper';
-
+import {Label} from './label'
 export class Wallet{
 
     name: string;
@@ -12,6 +12,7 @@ export class Wallet{
     others: OtherAccount[] = [];
     contacts: AddressBook[] = [];
     isReady: boolean = false;
+    label: Label[] = [];
 
     constructor(name: string, networkName: string, accounts: WalletAccount[]){
         this.name = name;
@@ -88,6 +89,14 @@ export class Wallet{
 
     removeAddressBook(index: number): void{
         this.contacts.splice(index, 1);
+    }
+
+    addLabel(label: Label): void{
+        this.label.push(label);
+    }
+
+    removeLabel(index: number): void{
+        this.label.splice(index, 1);
     }
 
     updateAddressBook(index: number, addressBook: AddressBook): void{

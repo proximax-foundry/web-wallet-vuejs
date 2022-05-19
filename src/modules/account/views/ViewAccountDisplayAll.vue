@@ -8,9 +8,10 @@
         <router-link :to="{ name: 'ViewOtherAccount'}" class="text-center " style="width:8rem">{{$t('account.otherAcc')}}</router-link>
       </div>
     </div>
-    <div class='my-4 w-11/12 ml-auto mr-auto '>
+    <div class='my-4 w-11/12 ml-auto mr-auto flex justify-between'>
+      <LabelComponent />
       <router-link :to="{name:'ViewAccountCreateSelectType'}" >
-          <div class="float-right mb-4 text-center w-44 text-white bg-blue-primary rounded-md font-semibold text-xs p-2">+ {{$t('general.createNewAcc')}}</div>
+        <div class="ml-auto text-center w-44 text-white bg-blue-primary rounded-md font-semibold text-xs p-2">+ {{$t('general.createNewAcc')}}</div>
       </router-link>
     </div>
     <div class='mt-2 py-3 '>
@@ -26,11 +27,12 @@ import { computed } from "vue";
 import AccountTile from '@/modules/account/components/AccountTile.vue';
 import { walletState } from '@/state/walletState';
 import { AppState } from '@/state/appState';
-
+import LabelComponent from'@/modules/account/components/LabelComponent.vue'
 export default {
   name:"ViewAccountDisplayAll",
   components: {
     AccountTile,
+    LabelComponent
   },
 
   setup() {
