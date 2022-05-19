@@ -14,10 +14,11 @@ const elements = {
     copy_privatekey: 'div.border-2:nth-child(3) > div:nth-child(6) > svg:nth-child(2) > path:nth-child(2)',
     confirm_button_pk: 'div.blue-btn:nth-child(3)',
     confirm_button_wp: 'div.blue-btn:nth-child(3)',
+    confirm_button_wp_2: 'div.blue-btn:nth-child(4)',
     cancel_button_pk: 'div.text-center:nth-child(4)',
     cancel_button_pk_2:'div.cursor-pointer:nth-child(5)',
     cancel_button_wp: 'div.text-center:nth-child(4)',
-    cancel_button_wp_2: 'div.cursor-pointer:nth-child(5)',
+    cancel_button_wp_2:'div.cursor-pointer:nth-child(5)',
     delete_successfulpopup: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
     download_button: '.blue-btn',
     download_passwordpopup: '.z-50 > div:nth-child(1)',
@@ -140,7 +141,8 @@ const commands = {
         .click("@download_button")
         .click("@input_password_wp")
         .setValue("@input_password_wp", password)
-        .click("@confirm_button_wp")
+        .click("@confirm_button_wp_2")
+        .waitForElementVisible("@wallet_paper")
         .assert.elementPresent('@wallet_paper', "If wallet password is correct, wallet paper will be shown")
         .end()
     },

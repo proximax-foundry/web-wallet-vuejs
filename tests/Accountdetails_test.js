@@ -14,14 +14,6 @@ module.exports = {
         browser.fullscreenWindow(function(result) {
             console.log(result);
         });
-
-        browser.timeouts('script', 60000, function(result) {
-            console.log(result);
-          });
-        
-          browser.timeouts(function(result) {
-            console.log('timeouts', result);
-          });
           
         // create wallet
         create
