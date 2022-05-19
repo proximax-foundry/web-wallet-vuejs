@@ -11,11 +11,13 @@ const elements = {
     copyaddress_popup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
     copy_publickey: '.pb-1 > path:nth-child(2)',
     copypublickey_popup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    copy_privatekey: 'div.border-2:nth-child(3) > div:nth-child(9) > div:nth-child(3) > svg:nth-child(2) > path:nth-child(2)',
+    copy_privatekey: 'div.border-2:nth-child(3) > div:nth-child(6) > svg:nth-child(2) > path:nth-child(2)',
     confirm_button_pk: 'div.blue-btn:nth-child(3)',
     confirm_button_wp: 'div.blue-btn:nth-child(3)',
     cancel_button_pk: 'div.text-center:nth-child(4)',
-    cancel_button_wp: 'div.cursor-pointer:nth-child(5)',
+    cancel_button_pk_2:'div.cursor-pointer:nth-child(5)',
+    cancel_button_wp: 'div.text-center:nth-child(4)',
+    cancel_button_wp_2: 'div.cursor-pointer:nth-child(5)',
     delete_successfulpopup: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
     download_button: '.blue-btn',
     download_passwordpopup: '.z-50 > div:nth-child(1)',
@@ -24,16 +26,16 @@ const elements = {
     error_emptyname: '.text-red-500',
     error_existingname: '.text-red-500',
     error_emptypassword_pk: 'div.error:nth-child(2)',
-    error_emptypassword_wp: 'div.error:nth-child(1)',
+    error_emptypassword_wp: 'div.error:nth-child(2)',
     error_wrongpassword_pk: '.error',
     error_wrongpassword_wp: '.error',
     input_accountname: '.outline-none',
     input_password: 'input.w-full',
     input_password_wp: 'input.w-full',
     password_eyeicon_pk: '.text-gray-500 > path:nth-child(1)',
-    password_eyeicon_wp: '.text-gray-500 > path:nth-child(1)',
+    wallet_paper: '#outerContainer',
     private_key: '#private',
-    private_keyhidden: 'div.border-2:nth-child(3) > div:nth-child(9) > div:nth-child(2) > div:nth-child(1)',    
+    private_keyhidden: 'div.border-2:nth-child(3) > div:nth-child(8) > div:nth-child(2) > div:nth-child(1)',    
     pk_successfulpopup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
     hide_privatekey: 'svg.svg-inline--fa:nth-child(3) > path:nth-child(2)',
     view_privatekey: '.fa-eye > path:nth-child(2)',
@@ -128,22 +130,19 @@ const commands = {
         .click("@account_ellipsis")
         .click("@download_button")
         .click("@input_password_wp")
-        .setValue("@input_password_wp", password)
-        .pause(5000)
-        .click("@password_eyeicon_wp")
-        .assert.elementPresent('@password_eyeicon_wp', "When eye icon is clicked, password field is unmasked")
-        .pause(1000)
-        .click("@confirm_button_wp")
-        .pause(5000)
-        .click("@download_button")
         .setValue("@input_password_wp", password2)
         .click("@confirm_button_wp")
         .isVisible('@error_wrongpassword_wp', callback = result => {
             this.assert.equal(result.value, true, "If user enters wrong wallet password, an error is shown")
         })
-        .click("@cancel_button_wp")
+        .click("@cancel_button_wp_2")
         .pause(5000)
-        
+        .click("@download_button")
+        .click("@input_password_wp")
+        .setValue("@input_password_wp", password)
+        .click("@confirm_button_wp")
+        .assert.elementPresent('@wallet_paper', "If wallet password is correct, wallet paper will be shown")
+        .end()
     },
 
     show_privatekey(password1, password2){
@@ -168,7 +167,10 @@ const commands = {
         .isVisible('@error_wrongpassword_pk', callback = result => {
             this.assert.equal(result.value, true, "If user enters wrong wallet password, an error is shown")
         })
-        .click("@cancel_button_pk")
+        .pause(5000)
+        .waitForElementVisible("@cancel_button_pk_2")
+        .click("@cancel_button_pk_2")
+        .waitForElementVisible("@back")
         .click("@back")
         .click("@account_ellipsis")
         .click("@view_privatekey")
