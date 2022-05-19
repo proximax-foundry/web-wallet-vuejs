@@ -12,10 +12,12 @@
       <router-link :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
       <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
       <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.multisig')}}</div>
-      <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
     </div>
-    
     <div class=' p-6 border-2 border-t-0 filter shadow-lg'>
+      <div v-if="isMultisig" class="flex cursor-pointer">
+        <div class="border-2 border-blue-primary p-1 mb-3 w-16 text-white bg-blue-primary text-xs text-center font-semibold ">{{$t('general.multisig')}}</div>
+        <router-link :to="{name:'ViewMultisigScheme', params: { address: address}}" class="border-2 border-blue-primary p-1 mb-3 w-16 text-blue-primary text-xs text-center font-semibold ">{{$t('general.scheme')}}</router-link>
+      </div>
       <div class='text-xs font-semibold'>{{$t('multisig.accountCosignatories')}}</div>
       <div class='border p-4 my-3 '>
        <div class="flex flex-col gap-2">

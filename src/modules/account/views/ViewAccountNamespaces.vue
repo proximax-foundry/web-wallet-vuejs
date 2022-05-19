@@ -12,7 +12,6 @@
         <div class= 'w-24 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.namespace',2)}}</div>
         <router-link v-if="!isDelegate()" :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
         <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-        <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
       </div>
       <div class="border-2 border-t-0 filter shadow-lg px-6 py-3" >
         <div v-if="namespaces.length==0" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
@@ -48,7 +47,7 @@
           </div>
           <div v-if="index != (namespaces.length - 1)" class='my-2 gray-line' ></div>
         </div>
-        <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class=" bg-blue-primary px-5 py-3 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-60 "><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2">{{$t('namespace.registerNewNamespace')}}</router-link>
+        <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class=" bg-blue-primary py-3 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-52 "><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2">{{$t('namespace.registerNewNamespace')}}</router-link>
       </div>
         
     </div>
