@@ -9,10 +9,10 @@
         <div class="absolute border-t-0 w-52 border bg-white ">
             <div class="flex flex-col max-h-44 overflow-auto">
                 <div v-for="(label,index) in labels" :key="index">
-                    <div class="flex cursor-pointer p-2 hover:bg-blue-300 ">
+                    <div @click="!isHover?filteredList[index]=!filteredList[index]:''" :class="`${filteredList[index]?'bg-blue-300 flex cursor-pointer p-2 hover:bg-blue-300 ':'flex cursor-pointer p-2 hover:bg-blue-300 '}`">
                         <img src="@/modules/account/img/label.svg" class="w-4 h-4 mr-3"/>
                         <div class="text-xs mt-0.5">{{label.name}}</div>
-                        <img @click="removeLabel(index)" title="Remove label" src='@/modules/account/img/delete-icon-black.svg' class='ml-auto w-3 h-3 cursor-pointer mt-0.5'>
+                        <img  @mouseover="isHover = true" @mouseout="isHover = false" @click="removeLabel(index)" title="Remove label" src='@/modules/account/img/delete-icon-black.svg' class='ml-auto w-3 h-3 cursor-pointer mt-0.5'>
                     </div>
                 </div>
                 <div @click="toggleModal=true;toggleSelection=false" class="text-xs cursor-pointer flex gap-3 p-2 hover:bg-blue-300 ">
@@ -20,7 +20,6 @@
                     <div>Create Label</div>
                 </div>
             </div>
-            
         </div>
     </div>
 </div>
@@ -45,16 +44,20 @@ export default {
 
 <script setup lang="ts">
 import TextInputClean from '@/components/TextInputClean.vue';
-import { computed, ref } from 'vue'
+import { computed, getCurrentInstance, ref, watch } from 'vue'
 import { walletState } from '@/state/walletState';
 import { Label } from '@/models/label';
 import { useToast } from 'primevue/usetoast';
 
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const toast = useToast();
     const toggleSelection = ref(false)
     const toggleModal = ref(false)
+    const isHover = ref(false)
     const err = ref('')
     const labelName = ref('')
+    const filteredList = ref<boolean[]>([])
     const labels = computed(()=>{
       if(!walletState.currentLoggedInWallet){
         return []
@@ -62,6 +65,27 @@ import { useToast } from 'primevue/usetoast';
         return walletState.currentLoggedInWallet.label
       }
     })
+    for(let i=0;i<labels.value.length;i++){
+        filteredList.value.push(false)
+    }
+    watch(labels,(n,o)=>{
+        if(n.length==o.length){
+            return
+        }
+        filteredList.value = []
+        for(let i=0;i<n.length;i++){
+            filteredList.value.push(false)
+        }
+    },{deep:true})
+    watch(filteredList,n=>{
+        let labelNames :string[] = []
+        n.forEach((filteredLabel,index)=>{
+            if(filteredLabel){
+                labelNames.push(labels.value[index].name)
+            }
+        })
+        emitter.emit('filterByLabel',labelNames)
+    },{deep:true})
     const createLabel = async()=>{
         if(!walletState.currentLoggedInWallet){
             return 

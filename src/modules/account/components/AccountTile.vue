@@ -30,6 +30,11 @@
           </div>
         </div>
       </div>
+        <div class="absolute flex invisible 2xl:visible pt-4" style="padding-left: 39.3rem;">
+          <div v-for="(label,index) in labels" :key="index" >
+            <div v-if="label.isLabeled" class="text-xs mr-3 border bg-gray-300 rounded-md p-1">{{label.name}}</div>
+          </div>
+        </div>
       <div class="ml-auto mt-auto mb-auto  ">
         <img src="@/assets/img/navi/icon-default-account-drop-down.svg" class=" h-6 w-6 cursor-pointer" @mouseover="isHover = true" @mouseout="isHover = false"  @click="displayDefaultAccountMenu = true" >
         <div class="relative"  @mouseover="isHover = true" @mouseout="isHover = false">
