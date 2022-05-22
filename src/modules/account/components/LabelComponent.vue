@@ -69,9 +69,6 @@ import { useToast } from 'primevue/usetoast';
         filteredList.value.push(false)
     }
     watch(labels,(n,o)=>{
-        if(n.length==o.length){
-            return
-        }
         filteredList.value = []
         for(let i=0;i<n.length;i++){
             filteredList.value.push(false)
@@ -84,6 +81,7 @@ import { useToast } from 'primevue/usetoast';
                 labelNames.push(labels.value[index].name)
             }
         })
+        console.log(labelNames)
         emitter.emit('filterByLabel',labelNames)
     },{deep:true})
     const createLabel = async()=>{
@@ -106,6 +104,7 @@ import { useToast } from 'primevue/usetoast';
         labelName.value = ""
         toast.add({severity:'info', summary: 'Label', detail: 'New Label is Created', group: 'br', life: 5000});
         toggleModal.value = false
+        console.log(labels.value)
     }
 
     const removeLabel = async(index)=>{
@@ -115,6 +114,7 @@ import { useToast } from 'primevue/usetoast';
         walletState.currentLoggedInWallet.removeLabel(index)
         await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
         toast.add({severity:'info', summary: 'Label', detail: 'Label is removed', group: 'br', life: 5000});
+        console.log(labels.value)
     }
 
 </script>

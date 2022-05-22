@@ -174,10 +174,12 @@ export default {
             let filteredAcc = []
             labelNames.value.forEach(name=>{
               let findLabel = walletState.currentLoggedInWallet.label.find(label=>label.name==name)
-              findLabel.address.forEach(address=>{
-                let findAcc = concatOther.find(acc=>acc.address==address)
-                filteredAcc.push(findAcc)
-              })
+              if(findLabel){
+                findLabel.address.forEach(address=>{
+                  let findAcc = concatOther.find(acc=>acc.address==address)
+                  filteredAcc.push(findAcc)
+                })
+              }
             })
             filteredAcc =  Array.from(new Set(filteredAcc))
             if(labelNames.value.length){
@@ -190,10 +192,13 @@ export default {
             let filteredAcc = []
             labelNames.value.forEach(name=>{
               let findLabel = walletState.currentLoggedInWallet.label.find(label=>label.name==name)
-              findLabel.address.forEach(address=>{
-                let findAcc = accounts.find(acc=>acc.address==address)
-                filteredAcc.push(findAcc)
-              })
+              if(findLabel){
+                findLabel.address.forEach(address=>{
+                  let findAcc = accounts.find(acc=>acc.address==address)
+                  filteredAcc.push(findAcc)
+                })
+              }
+              
             })
             filteredAcc =  Array.from(new Set(filteredAcc))
             if(labelNames.value.length){
