@@ -92,6 +92,16 @@ export const AccountRoutes: RouteRecordRaw[] = [
       title: "Account Assets",
     }
   },
+  {
+    path: '/view-namespaces/:address',
+    name: 'ViewAccountNamespaces',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccountNamespaces.vue'),
+    meta: {
+      title: "Account Namespaces",
+    }
+  },
+  
   ...DelegateRoutes,
   ...LinkToNamespaceRoutes,
   ...MultisigRoutes,

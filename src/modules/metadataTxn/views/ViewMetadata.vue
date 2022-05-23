@@ -9,11 +9,9 @@
             <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
                 <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
                 <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+                <router-link :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
                 <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Metadata</div>
                 <router-link :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-                <router-link v-if="isMultisig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
-                <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
-                <MoreAccountOptions :address="address" :selected="false"/>
             </div>
             <div class="border-2 border-t-0 filter shadow-lg px-6" >
                 <select class=" my-4" v-model="filterSelection">
@@ -130,7 +128,6 @@ import { walletState } from "@/state/walletState"
 import { Convert, MetadataQueryParams, MetadataType, MosaicId, NamespaceId, PublicAccount } from "tsjs-xpx-chain-sdk"
 import { computed, ref, watch } from "vue"
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
-import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 
     const props = defineProps({
         address: String
