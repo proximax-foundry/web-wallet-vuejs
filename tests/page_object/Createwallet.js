@@ -10,7 +10,7 @@ const elements = {
     close: 'a.mt-4',
     continuelogin: 'a.ml-auto > div:nth-child(1)',
     next: 'a[href="#/create-wallet"]',
-    pknext: 'a[href="#/import-wallet"]',
+    pknext: '.mt-3',
     backupnext: 'a[href="#/backup-wallet"]',
     input_walletname: 'div:nth-child(1) > div > input',
     input_pkwalletname: 'form > div:nth-child(7) > div:nth-child(2) > div:nth-child(1) > input',
@@ -39,7 +39,7 @@ const elements = {
     error_invalidpk: 'form > div:nth-child(7) > div:nth-child(1) > div.error.error-password.text-left.my-2',
     error_pkduplicatename: 'form > div:nth-child(4) > div',
     signin_here: 'form > div:nth-child(8) > a',
-    signin_herepk: 'form > div:nth-child(10) > a',
+    signin_herepk: 'div.text-center:nth-child(10) > a:nth-child(1)',
     signin_herebackup: 'div.text-center:nth-child(9) > a:nth-child(1)',
     select_network: 'form > fieldset > div:nth-child(1)',
     testnet_1: 'form > fieldset > div:nth-child(2) > div:nth-child(1) > div:nth-child(3)',
@@ -68,12 +68,12 @@ const commands = {
         return this
         .pause(8000)
         .click("@createnew")
-        .pause(5000)
+        .pause(10000)
         .assert.urlEquals(browser + 'create', 'Create acc wallet is clicked, user is navigated to wallet selection type.')
         .click("@createnew_wallet")
         .waitForElementVisible("@next")
         .click("@next")
-        .pause(5000)
+        .pause(15000)
         .assert.urlEquals(browser + 'create-wallet', 'When next is clicked, user is navigated to create new wallet screen.')
         .click("@signin_here")
         .assert.urlEquals(browser, 'When sign in here is clicked, user is navigated back to the main page for sign in.')
@@ -87,11 +87,16 @@ const commands = {
         return this
         .pause(8000)
         .click("@createnew")
+        .pause(10000)
         .assert.urlEquals(browser + 'create', 'Create acc wallet is clicked, user is navigated to wallet selection type.')
         .click("@createnew_frompk")
+        .pause(10000)
         .click("@pknext")
+        .pause(15000)
         .assert.urlEquals(browser + 'import-wallet', 'When next is clicked, user is navigated to create pk wallet screen.')
+        .pause(10000)
         .click("@signin_herepk")
+        .pause(15000)
         .assert.urlEquals(browser, 'When sign in here is clicked, user is navigated back to the main page for sign in.')
         .click("@createnew")
         .click("@createnew_frompk")

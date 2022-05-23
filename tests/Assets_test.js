@@ -8,9 +8,13 @@ module.exports = {
 
     "Assets_test": function (browser) {
 
-        var create = browser.page.Createwallet()
-        var signin = browser.page.Signin()
-        var asset = browser.page.Assets()
+        var create = browser.page.Createwallet();
+        var signin = browser.page.Signin();
+        var asset = browser.page.Assets();
+
+        browser.fullscreenWindow(function(result) {
+            console.log(result);
+        });
 
         // create wallet
         create
@@ -27,7 +31,7 @@ module.exports = {
         asset
             .navigation_assets(browser.launch_url)
             .empty_password()
-            // .create_asset(supply, divisibility, password)
+            .create_asset(supply, divisibility, password)
 
     }
 
