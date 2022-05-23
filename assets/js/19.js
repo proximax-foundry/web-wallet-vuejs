@@ -1752,17 +1752,6 @@ eval("module.exports = __webpack_require__.p + \"assets/img/icon-balance-white.3
 
 /***/ }),
 
-/***/ "./src/modules/dashboard/img/icon-blue-chevron-right.svg":
-/*!***************************************************************!*\
-  !*** ./src/modules/dashboard/img/icon-blue-chevron-right.svg ***!
-  \***************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-eval("module.exports = __webpack_require__.p + \"assets/img/icon-blue-chevron-right.5486f3ac.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/icon-blue-chevron-right.svg?");
-
-/***/ }),
-
 /***/ "./src/modules/dashboard/img/icon-copy.svg":
 /*!*************************************************!*\
   !*** ./src/modules/dashboard/img/icon-copy.svg ***!
