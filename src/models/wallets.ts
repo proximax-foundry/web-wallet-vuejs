@@ -198,7 +198,7 @@ class Reconstruct{
                 contacts.push(Reconstruct.recreateAddressBook(tempContact));
             }
             let labels :Label[] = []
-            if(JSON_Wallets[i].labels.length){
+            if(JSON_Wallets[i].labels){
                 for(let k =0; k < JSON_Wallets[i].labels.length; ++k){
                     let tempLabel = JSON_Wallets[i].labels[k];
                     labels.push(Reconstruct.recreateLabel(tempLabel));
