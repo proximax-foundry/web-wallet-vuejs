@@ -27,6 +27,7 @@ import { TransactionUtils } from "./transactionUtils"
 import { Account as NEM_Account, NetworkTypes, NEMLibrary } from "nem-library";
 import { AddressBook } from "@/models/addressBook"
 import {AppState} from "@/state/appState";
+import { Label } from "@/models/label"
 
 const config = require("@/../config/config.json");
 
@@ -548,6 +549,18 @@ export class WalletUtils {
                     let group = wltFile.contacts[i].group ? wltFile.contacts[i].group : '';
                     let newAddressBook = new AddressBook(wltFile.contacts[i].name, wltFile.contacts[i].address, group);
                     newWallet.addAddressBook(newAddressBook);
+                }
+            } catch (error) {
+                
+            }
+        }
+
+        if(Array.isArray(wltFile.label)){
+            try {
+                for(let i=0; i < wltFile.label.length; ++i){
+                   
+                    let newLabel = new Label(wltFile.label[i].name, wltFile.label[i].address);
+                    newWallet.addLabel(newLabel);
                 }
             } catch (error) {
                 
