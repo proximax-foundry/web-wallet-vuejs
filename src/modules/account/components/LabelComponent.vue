@@ -16,7 +16,7 @@
                     </div>
                 </div>
                 <div @click="toggleModal=true;toggleSelection=false" class="text-xs cursor-pointer flex gap-3 p-2 hover:bg-blue-300 ">
-                    <img src="@/assets/img/icon-plus-black.svg" class="w-3 h-3 mr-1">
+                    <font-awesome-icon icon="plus" class="w-3 h-3 mr-1"/>
                     <div>Create Label</div>
                 </div>
             </div>
