@@ -555,11 +555,11 @@ export class WalletUtils {
             }
         }
 
-        if(Array.isArray(wltFile.label)){
+        if(Array.isArray(wltFile.labels)){
             try {
-                for(let i=0; i < wltFile.label.length; ++i){
+                for(let i=0; i < wltFile.labels.length; ++i){
                    
-                    let newLabel = new Label(wltFile.label[i].name, wltFile.label[i].address);
+                    let newLabel = new Label(wltFile.labels[i].name, wltFile.labels[i].addresses);
                     newWallet.addLabel(newLabel);
                 }
             } catch (error) {

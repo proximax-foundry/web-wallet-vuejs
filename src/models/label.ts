@@ -1,18 +1,18 @@
 export class Label{
 
     name: string;
-    address: string[];
+    addresses: string[];
 
     constructor(name: string, address:string[]){
         this.name = name;
-        this.address = address;
+        this.addresses = address;
     }
 
     addAddress(address: string){
-        this.address.push(address)
+        this.addresses.push(address)
     }
 
     removeAddress(index: number): void{
-        this.address.splice(index, 1);
+        this.addresses.splice(index, 1);
     }
 }

@@ -198,18 +198,17 @@ class Reconstruct{
                 contacts.push(Reconstruct.recreateAddressBook(tempContact));
             }
             let labels :Label[] = []
-
-            for(let k =0; k < JSON_Wallets[i].label.length; ++k){
-                let tempLabel = JSON_Wallets[i].label[k];
-
-                labels.push(Reconstruct.recreateLabel(tempLabel));
+            if(JSON_Wallets[i].labels.length){
+                for(let k =0; k < JSON_Wallets[i].labels.length; ++k){
+                    let tempLabel = JSON_Wallets[i].labels[k];
+                    labels.push(Reconstruct.recreateLabel(tempLabel));
+                }
             }
-
-
+            
             let newWallet = new Wallet(JSON_Wallets[i].name, JSON_Wallets[i].networkName, accounts);
             newWallet.others = otherAccounts;
             newWallet.contacts = contacts;
-            newWallet.label = labels;
+            newWallet.labels = labels;
             wallets.push(newWallet);
         }
 
@@ -278,7 +277,7 @@ class Reconstruct{
     }
 
     static recreateLabel(label: Label): Label{
-        return new Label(label.name, label.address);
+        return new Label(label.name, label.addresses);
     }
 
     static recreateOtherAccount(tempAccount: OtherAccount): OtherAccount{

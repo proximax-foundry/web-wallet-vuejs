@@ -173,9 +173,9 @@ export default {
             const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
             let filteredAcc = []
             labelNames.value.forEach(name=>{
-              let findLabel = walletState.currentLoggedInWallet.label.find(label=>label.name==name)
+              let findLabel = walletState.currentLoggedInWallet.labels.find(label=>label.name==name)
               if(findLabel){
-                findLabel.address.forEach(address=>{
+                findLabel.addresses.forEach(address=>{
                   let findAcc = concatOther.find(acc=>acc.address==address)
                   filteredAcc.push(findAcc)
                 })
@@ -191,9 +191,9 @@ export default {
             const accounts =  walletState.currentLoggedInWallet.accounts;
             let filteredAcc = []
             labelNames.value.forEach(name=>{
-              let findLabel = walletState.currentLoggedInWallet.label.find(label=>label.name==name)
+              let findLabel = walletState.currentLoggedInWallet.labels.find(label=>label.name==name)
               if(findLabel){
-                findLabel.address.forEach(address=>{
+                findLabel.addresses.forEach(address=>{
                   let findAcc = accounts.find(acc=>acc.address==address)
                   filteredAcc.push(findAcc)
                 })
@@ -204,7 +204,7 @@ export default {
             if(labelNames.value.length){
               return filteredAcc
             }else{
-              return concatOther
+              return accounts
             }
           }
         } else{

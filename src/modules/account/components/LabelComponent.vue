@@ -10,9 +10,9 @@
             <div class="flex flex-col max-h-44 overflow-auto">
                 <div v-for="(label,index) in labels" :key="index">
                     <div @click="!isHover?filteredList[index]=!filteredList[index]:''" :class="`${filteredList[index]?'bg-blue-300 flex cursor-pointer p-2 hover:bg-blue-300 ':'flex cursor-pointer p-2 hover:bg-blue-300 '}`">
-                        <img src="@/modules/account/img/label.svg" class="w-4 h-4 mr-3"/>
+                        <font-awesome-icon icon="tag" class="w-4 h-4 mr-3 thin"/>
                         <div class="text-xs mt-0.5">{{label.name}}</div>
-                        <img  @mouseover="isHover = true" @mouseout="isHover = false" @click="removeLabel(index)" title="Remove label" src='@/modules/account/img/delete-icon-black.svg' class='ml-auto w-3 h-3 cursor-pointer mt-0.5'>
+                        <font-awesome-icon icon="trash" @mouseover="isHover = true" @mouseout="isHover = false" @click="removeLabel(index)" title="Remove label" class='ml-auto w-3 h-3 cursor-pointer mt-0.5'/>
                     </div>
                 </div>
                 <div @click="toggleModal=true;toggleSelection=false" class="text-xs cursor-pointer flex gap-3 p-2 hover:bg-blue-300 ">
@@ -62,7 +62,7 @@ import { useToast } from 'primevue/usetoast';
       if(!walletState.currentLoggedInWallet){
         return []
       }else{
-        return walletState.currentLoggedInWallet.label
+        return walletState.currentLoggedInWallet.labels
       }
     })
     for(let i=0;i<labels.value.length;i++){
@@ -95,7 +95,7 @@ import { useToast } from 'primevue/usetoast';
             err.value = 'Label name cannot be empty.'
             return
         }
-        let findExistingLabel = walletState.currentLoggedInWallet.label.find(label=>label.name==labelName.value)
+        let findExistingLabel = walletState.currentLoggedInWallet.labels.find(label=>label.name==labelName.value)
         if(findExistingLabel){
             err.value = 'Label is already existed in wallet.'
             return

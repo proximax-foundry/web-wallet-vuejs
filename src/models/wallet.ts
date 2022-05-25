@@ -12,7 +12,7 @@ export class Wallet{
     others: OtherAccount[] = [];
     contacts: AddressBook[] = [];
     isReady: boolean = false;
-    label: Label[] = [];
+    labels: Label[] = [];
 
     constructor(name: string, networkName: string, accounts: WalletAccount[]){
         this.name = name;
@@ -92,11 +92,11 @@ export class Wallet{
     }
 
     addLabel(label: Label): void{
-        this.label.push(label);
+        this.labels.push(label);
     }
 
     removeLabel(index: number): void{
-        this.label.splice(index, 1);
+        this.labels.splice(index, 1);
     }
 
     updateAddressBook(index: number, addressBook: AddressBook): void{

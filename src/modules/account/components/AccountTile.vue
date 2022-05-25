@@ -56,7 +56,7 @@
   </div>
 </template>
 
-<script>
+<script >
 import { computed, getCurrentInstance, ref } from "vue";
 import CryptoJS from 'crypto-js';
 import { copyToClipboard } from '@/util/functions';
@@ -84,9 +84,9 @@ export default{
         return []
       }else{
         let labels = []
-        walletState.currentLoggedInWallet.label.forEach(label=>{
+        walletState.currentLoggedInWallet.labels.forEach(label=>{
           let isLabeled = false
-          if(label.address.includes(p.account.address)){
+          if(label.addresses.includes(p.account.address)){
             isLabeled = true
           }
           labels.push({
@@ -102,19 +102,19 @@ export default{
       if(!walletState.currentLoggedInWallet){
         return
       }
-      let label = walletState.currentLoggedInWallet.label.find(label=>label.name==name)
+      let label = walletState.currentLoggedInWallet.labels.find(label=>label.name==name)
       let address = Address.createFromRawAddress(p.account.address).plain()
       if(!label){
         return
       }
-      let index = label.address.findIndex(add=>add==address)
+      let index = label.addresses.findIndex(add=>add==address)
       if (index>=0){
         label.removeAddress(index)
         await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
         toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is removed as ' + name , group: 'br', life: 5000});
         return
       }
-      label.address.push(address)
+      label.addresses.push(address)
       await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
       toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is added as ' + name , group: 'br', life: 5000});
     }
