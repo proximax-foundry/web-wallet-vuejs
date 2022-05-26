@@ -4,7 +4,7 @@ import {RequestOptions} from 'tsjs-xpx-chain-sdk';
 export class RequestAuth {
 
     static getApiKeyHeader(): RequestOptions | undefined{
-        if(networkState.currentNetworkProfile.apikey){
+        if(networkState.currentNetworkProfile && networkState.currentNetworkProfile.apikey){
             return new RequestOptions({apikey: networkState.currentNetworkProfile.apikey});
         }
         else{
@@ -13,7 +13,7 @@ export class RequestAuth {
     }
 
     static getAuthHeader(): RequestOptions | undefined{
-        if(networkState.currentNetworkProfile.apikey){
+        if(networkState.currentNetworkProfile && networkState.currentNetworkProfile.apikey){
             return RequestAuth.getApiKeyHeader();
         }
         else{

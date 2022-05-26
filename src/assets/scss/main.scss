@@ -645,3 +645,7 @@ body{
     top: 2px;
   }
 }
+
+@font-face {font-family: "Password";
+  src: url("../font/password.ttf") format("truetype"), /* chrome firefox opera Safari, Android, iOS 4.2+*/
+}
