@@ -8,6 +8,7 @@ import { MultisigInfo } from './multisigInfo';
 import { nis1Account } from './nis1Account';
 import { AddressBook } from './addressBook';
 import { WalletAcountType } from './const/otherAccountType';
+import { Label } from './label';
 
 const walletKey = "sw";
 const walletUpdateTimeKey = "sw_updated"
@@ -196,11 +197,18 @@ class Reconstruct{
 
                 contacts.push(Reconstruct.recreateAddressBook(tempContact));
             }
-
+            let labels :Label[] = []
+            if(JSON_Wallets[i].labels){
+                for(let k =0; k < JSON_Wallets[i].labels.length; ++k){
+                    let tempLabel = JSON_Wallets[i].labels[k];
+                    labels.push(Reconstruct.recreateLabel(tempLabel));
+                }
+            }
+            
             let newWallet = new Wallet(JSON_Wallets[i].name, JSON_Wallets[i].networkName, accounts);
             newWallet.others = otherAccounts;
             newWallet.contacts = contacts;
-
+            newWallet.labels = labels;
             wallets.push(newWallet);
         }
 
@@ -266,6 +274,10 @@ class Reconstruct{
         }
         let newAddressBook = new AddressBook(addressBook.name, addressBook.address, group);
         return newAddressBook;
+    }
+
+    static recreateLabel(label: Label): Label{
+        return new Label(label.name, label.addresses);
     }
 
     static recreateOtherAccount(tempAccount: OtherAccount): OtherAccount{
