@@ -109,7 +109,7 @@
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <div class="flex gap-2">
           <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3 w-full" :disabled="disablePassword"/>
-          <img src="@/assets/img/qr-scan.svg" class="w-12 h-12 mt-4 cursor-pointer" >
+          <TxnQrModal v-if="!disableGenerateQr" :txnQr="qr"/>
         </div>
         <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" :disabled="disableCreate" @click="makeTransfer()">
             {{$t('general.transfer')}}
@@ -134,9 +134,10 @@ import TransferTextareaInput from "@/modules/transfer/components/TransferTextare
 import {
   createTransaction,
   makeTransaction,
-  enableACT
+  createTxnQr
 } from "@/util/transfer"; //getMosaicsAllAccounts
 import AddContactModal from "@/modules/transfer/components/AddContactModal.vue";
+import TxnQrModal from "@/modules/transfer/components/TxnQrModal.vue";
 import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
 import {useI18n} from 'vue-i18n'
 import { multiSign } from "@/util/multiSignatory";
@@ -163,11 +164,13 @@ export default {
     PasswordInput,
     AddContactModal,
     ConfirmSendModal,
-    MosaicInput
+    MosaicInput,
+    TxnQrModal
   },
   setup() {
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const toggleContact = ref(false)
+    const qr = ref('')
     const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -412,6 +415,16 @@ export default {
   const updateAdd = (e) => {
     recipientInput.value = e;
   };
+
+  const generateQr = ()=>{
+    qr.value = createTxnQr(
+      recipientInput.value.toUpperCase(),
+      sendXPX.value,
+      selectedMosaic.value,
+      mosaicSupplyDivisibility.value,
+      messageText.value
+    )
+  }
   const makeTransfer = async() => {
     if (sendXPX.value == "0" && !forceSend.value) {
       toggleConfirm.value = true;
@@ -527,6 +540,18 @@ export default {
         !showBalanceErr.value
       );
     });
+
+    const disableGenerateQr = computed(() => {
+      return !(
+        !encryptedMsg.value &&
+        !showAddressError.value &&
+        recipientInput.value.length > 0  &&
+        (showAssetBalanceErr.value.every(value => value == false)) &&
+        !showBalanceErr.value
+      );
+    });
+
+    
 
   const mosaics = computed(() => {
     var mosaicOption = [];
@@ -780,6 +805,10 @@ export default {
       makeTransfer();
     }
   });
+
+  emitter.on('generateQr',()=>{
+    generateQr()
+  })
     return {
       showAssetBalanceErr,
       findAcc,
@@ -850,6 +879,9 @@ export default {
       walletName,
       checkNamespace,
       currentNativeTokenName,
+      qr,
+      disableGenerateQr,
+      generateQr,
     };
   },
 };

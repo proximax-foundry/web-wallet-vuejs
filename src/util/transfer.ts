@@ -19,12 +19,48 @@ import { AppState } from "@/state/appState";
 import { WalletAccount } from "@/models/walletAccount";
 import { OtherAccount } from "@/models/otherAccount";
 import { TransactionUtils } from "./transactionUtils";
+import qrcode from 'qrcode-generator';
 
 async function getAccInfo(address :string) :Promise<PublicAccount> {
   let accountInfo = await WalletUtils.getAccInfo(address).then(accountinfo => accountinfo.publicAccount);
   return accountInfo;
 }
 
+export const createTxnQr = (recipientAddress :string,sendXPX :string,mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[],messageText :string) :string=>{
+  let transactionBuilder = AppState.buildTxn
+  let xpxAmount = parseFloat(sendXPX) * Math.pow(10, AppState.nativeToken.divisibility)
+  let mosaics = [];
+  if (xpxAmount > 0) {
+    mosaics.push(new Mosaic(new MosaicId(AppState.nativeToken.assetId), UInt64.fromUint(Number(xpxAmount))));
+  }
+  if (mosaicsSent.length > 0) {
+    mosaicsSent.forEach((mosaicSentInfo, index) => {
+      if (mosaicSentInfo.amount > 0) {
+        mosaics.push(
+          new Mosaic(
+            new MosaicId(mosaicSentInfo.id),
+            UInt64.fromUint(Number(mosaicSentInfo.amount * Math.pow(10, mosaicDivisibility[index])))
+          )
+        );
+      }
+    });
+  }
+  let msg = PlainMessage.create(messageText);
+  let transferTransaction = transactionBuilder.transferBuilder()
+  .recipient(Address.createFromRawAddress(recipientAddress))
+  .mosaics(mosaics)
+  .message(msg)
+  .build()
+  const qr = qrcode(0, 'H');
+  let data = {
+    payload:transferTransaction.serialize(),
+    callbackUrl: null
+  }
+  qr.addData(JSON.stringify(data));
+  qr.make();
+  return qr.createSvgTag()
+  
+}
 
 export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[], walletPassword :string, senderAccAddress :string, selectedCosigner :string, encryptedMsg :string) : Promise<boolean>  => {
   // verify password
