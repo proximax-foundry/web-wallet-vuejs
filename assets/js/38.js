@@ -24,17 +24,6 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 
 /***/ }),
 
-/***/ "./src/assets/img/icon-green-tick.svg":
-/*!********************************************!*\
-  !*** ./src/assets/img/icon-green-tick.svg ***!
-  \********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-eval("module.exports = __webpack_require__.p + \"assets/img/icon-green-tick.c68845ee.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/icon-green-tick.svg?");
-
-/***/ }),
-
 /***/ "./src/assets/img/icon-red-x.svg":
 /*!***************************************!*\
   !*** ./src/assets/img/icon-red-x.svg ***!

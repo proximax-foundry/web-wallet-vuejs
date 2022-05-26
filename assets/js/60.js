@@ -94,14 +94,14 @@ eval("module.exports = __webpack_require__.p + \"assets/img/proximax-logo.cb656a
 
 /***/ }),
 
-/***/ "./src/modules/services/submodule/assets/img/icon-asset.svg":
-/*!******************************************************************!*\
-  !*** ./src/modules/services/submodule/assets/img/icon-asset.svg ***!
-  \******************************************************************/
+/***/ "./src/modules/services/submodule/namespaces/img/icon-namespace.svg":
+/*!**************************************************************************!*\
+  !*** ./src/modules/services/submodule/namespaces/img/icon-namespace.svg ***!
+  \**************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/icon-asset.40e1e8d4.svg\";\n\n//# sourceURL=webpack:///./src/modules/services/submodule/assets/img/icon-asset.svg?");
+eval("module.exports = __webpack_require__.p + \"assets/img/icon-namespace.8f06d34d.svg\";\n\n//# sourceURL=webpack:///./src/modules/services/submodule/namespaces/img/icon-namespace.svg?");
 
 /***/ })
 
