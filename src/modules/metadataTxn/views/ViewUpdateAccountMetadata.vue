@@ -9,10 +9,9 @@
         <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
         <router-link :to="{name: 'ViewAccountDetails',params:{address:accountAddress}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
         <router-link :to="{name:'ViewAccountAssets', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+        <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Metadata</router-link>
         <router-link :to="{name:'ViewMultisigHome', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
         <router-link v-if="targetAccIsMultisig" :to="{name:'ViewMultisigScheme', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
-        <router-link :to="{name:'ViewAccountSwap', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
-        <MoreAccountOptions :address="accountAddress" :selected="true"/>
         </div>
         <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
             <div class="lg:col-span-2 py-6 px-6">
@@ -106,17 +105,17 @@
                     <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
                     <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
                 </div>
-                <div class="flex  text-white">
+                <div v-if="targetAccIsMultisig" class="flex  text-white">
                     <div class='text-xs '>{{$t('general.lockFund')}}</div>
                     <div class="text-xs  ml-auto">{{lockFund}}</div>
                     <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
                 </div>
-                <div class="flex  text-white">
+                <div v-if="targetAccIsMultisig" class="flex  text-white">
                     <div class='text-xs '>{{$t('general.lockFundTxFee')}}</div>
                     <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
                     <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
                 </div>
-                <div class='border-b-2 border-gray-600 my-2'/>
+                <div v-if="targetAccIsMultisig" class='border-b-2 border-gray-600 my-2'/>
                 <div class="flex  text-white">
                     <div class='text-xs '>{{$t('general.aggregateFee')}}</div>
                     <div class="text-xs  ml-auto">{{aggregateFee}}</div>
@@ -134,7 +133,7 @@
                     Update Account Metadata
                 </button>
                 <div class="text-center">
-                    <router-link :to="{name: 'ViewDashboard'}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
+                    <router-link :to="{name: 'ViewMetadata', params: { address: accountAddress}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
                 </div>
             </div>
         </div>
@@ -152,7 +151,6 @@ import { networkState } from "@/state/networkState";
 import { TransactionUtils } from "@/util/transactionUtils";
 import { AppState } from '@/state/appState';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
-import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 import MetadataInput from '@/modules/metadataTxn/components/MetadataInput.vue'
 import { 
   PublicAccount, Convert, AccountMetadataTransactionBuilder, 
@@ -172,7 +170,6 @@ export default {
   },
   components: {
     AccountComponent,
-    MoreAccountOptions,
     MetadataInput,
     PasswordInput,
     
@@ -493,24 +490,30 @@ export default {
       }else{ //hex
         tempHexData = "00".repeat((16-inputScopedMetadataKey.value.length)/2)+inputScopedMetadataKey.value 
       }
-      let mosaicMetadataTransaction = txnBuilder
+      let accountMetadataTransaction = txnBuilder
       .targetPublicKey(targetPublicAccount.value)
       .scopedMetadataKey(UInt64.fromHex(tempHexData))
       .value(newValue.value)
       .oldValue(oldValue.value)
       .calculateDifferences()
       .build()
-      let abtTx = aggregateTxn = aggregateTxnBuilder.innerTransactions([mosaicMetadataTransaction.toAggregate(targetPublicAccount.value)]).build()
+      let aggregateTx = targetAccIsMultisig.value?
+      aggregateTxnBuilder.innerTransactions([accountMetadataTransaction.toAggregate(targetPublicAccount.value)]).build():
+      AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([accountMetadataTransaction.toAggregate(targetPublicAccount.value)]).build()
       let signer = targetAccIsMultisig.value? 
       walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosigner.value):
       walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == props.targetPublicKey) 
       let encryptedPassword = WalletUtils.createPassword(walletPassword.value);
       let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, signer.encrypted, signer.iv);
       let signerAcc = Account.createFromPrivateKey(privateKey, AppState.networkType);
-      let signedAbtTransaction = signerAcc.sign(abtTx, networkState.currentNetworkProfile.generationHash);
-      let lockHashTx = TransactionUtils.lockFundTx(signedAbtTransaction)
-      let signedLockHashTransaction = signerAcc.sign(lockHashTx, networkState.currentNetworkProfile.generationHash);
-      TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedLockHashTransaction,signedAbtTransaction) 
+      let signedAggregateTransaction = signerAcc.sign(aggregateTx, networkState.currentNetworkProfile.generationHash);
+      if(targetAccIsMultisig.value){
+        let lockHashTx = TransactionUtils.lockFundTx(signedAggregateTransaction)
+        let signedLockHashTransaction = signerAcc.sign(lockHashTx, networkState.currentNetworkProfile.generationHash);
+        TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedLockHashTransaction,signedAggregateTransaction) 
+      }else{
+        TransactionUtils.announceTransaction(signedAggregateTransaction)
+      }
       inputScopedMetadataKey.value=""
       oldValue.value = ""
       newValue.value=""
@@ -519,10 +522,14 @@ export default {
     const aggregateFee = ref(0);
     const totalFee = computed(()=>{
       let tokenDivisibility = AppState.nativeToken.divisibility
-      if(tokenDivisibility==0){
+      if(targetAccIsMultisig.value){
+        if(tokenDivisibility==0){
           return Math.trunc(lockFund.value+lockFundTxFee.value+aggregateFee.value)
-      }else{
+        }else{
           return Math.round((lockFund.value+lockFundTxFee.value+aggregateFee.value)*Math.pow(10,tokenDivisibility))/Math.pow(10,tokenDivisibility)
+        }
+      }else{
+        return aggregateFee.value
       }
     })
 
@@ -660,7 +667,7 @@ export default {
       showKeys,
       existingScopedMetadataKeys,
       scopedMetadataKeySelectable,
-      scopedMetadataKeyHex
+      scopedMetadataKeyHex,
     };
   },
 };

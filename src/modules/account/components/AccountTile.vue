@@ -5,7 +5,7 @@
       <div class="flex flex-col  ">
         <div class="text-blue-primary font-bold text-xs mb-0.5">{{accountName}}</div>
         <div class="flex justify-around">
-          <div :id="account.address" class="text-xs font-bold mt-0.5 mr-2" :copyValue="prettyAddress(account.address)" :copySubject="$t('general.address')">{{prettyAddress(account.address)}}</div>
+          <div :id="account.address" :title="prettyAddress(account.address)" class="text-xs font-bold mt-0.5 mr-2 overflow-hidden md:overflow-visible truncate md:text-clip w-44 md:w-full" :copyValue="prettyAddress(account.address)" :copySubject="$t('general.address')">{{prettyAddress(account.address)}}</div>
           <font-awesome-icon icon="copy" @click="copy(account.address)" class="w-5 h-5 text-blue-primary cursor-pointer inline-block"></font-awesome-icon>
         </div>
         <div class="flex">
@@ -21,7 +21,7 @@
             <p class = 'font-semibold text-white text-xxs pt-px cursor-default uppercase' >{{$t('general.default')}}</p>
           </div>
           <div v-if='isMultiSig' class = 'px-1 py-0.5 flex items-center bg-green-500 rounded-sm ' :title="$t('general.multisigTitle')">
-            <img src="@/assets/img/icon-multisig.svg" class = 'h-3 w-3 mr-1' style= "transform: rotateY(180deg)" >
+            <img src="@/assets/img/icon-multisig.svg" class = 'h-3 w-3 mr-1'  >
             <p  class = 'font-semibold text-white text-xxs pt-px cursor-default uppercase'  >{{$t('general.multisig')}}</p>
           </div>
           <div v-if='isMultiSig && !otherAccount(account.address)' class = 'px-1 py-0.5 flex items-center bg-purple-500 rounded-sm' :title="$t('general.ownerTitle')" >
@@ -30,26 +30,25 @@
           </div>
         </div>
       </div>
-      <div class="ml-auto mt-auto mb-auto ">
+        <div class="absolute flex invisible 2xl:visible pt-4" style="margin-left: 39.3rem;">
+          <div v-for="(label,index) in labels" :key="index" >
+            <div v-if="label.isLabeled" class="text-xs mr-3 border bg-gray-300 rounded-md p-1">{{label.name}}</div>
+          </div>
+        </div>
+      <div class="ml-auto mt-auto mb-auto  ">
         <img src="@/assets/img/navi/icon-default-account-drop-down.svg" class=" h-6 w-6 cursor-pointer" @mouseover="isHover = true" @mouseout="isHover = false"  @click="displayDefaultAccountMenu = true" >
         <div class="relative"  @mouseover="isHover = true" @mouseout="isHover = false">
           <div v-if="displayDefaultAccountMenu"  class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
             <div role="none" class="my-2">
               <router-link :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.details')}}</router-link>
-              <router-link v-if="!otherAccount(account.address) ||( otherAccount(account.address) && multisig_add!='')" :to="{name:'ViewAccountAssets', params: { address: account.address}}" class= 'block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs'>{{$t('general.asset',2)}}</router-link>
-              <div  v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">{{$t('general.asset',2)}}</div>
-              <router-link v-if="!otherAccount(account.address) ||( otherAccount(account.address) && multisig_add!='')" :to="{ name: 'ViewMultisigHome', params: { address: account.address}}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.multisig')}}</router-link>
-              <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">{{$t('general.multisig')}}</div>
-              <router-link  :to="{ name: 'ViewMultisigScheme', params: { address: account.address}}" @click="displayDefaultAccountMenu = false" v-if="isMultiSig" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.scheme')}}</router-link>
-              <div  v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">{{$t('general.scheme')}}</div>
-              <router-link v-if="isNormalAcc" :to="{ name: 'ViewAccountSwap', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.swap')}}</router-link>
-              <div  v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">{{$t('general.swap')}}</div>
-              <router-link v-if="!otherAccount(account.address) ||( otherAccount(account.address) && multisig_add!='')" :to="{ name: 'ViewAccountDelegate', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.delegate')}}</router-link>
-              <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">{{$t('general.delegate')}}</div>
-              <router-link v-if="!otherAccount(account.address) ||( otherAccount(account.address) && multisig_add!='')" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: account.address}}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.namespace')}}</router-link>
-              <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">{{$t('general.namespace')}}</div>
-              <router-link v-if="!otherAccount(account.address) ||( otherAccount(account.address) && multisig_add!='')" :to="{ name: 'ViewUpdateAccountMetadata', params: { targetPublicKey: account.publicKey}}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">Metadata</router-link>
-              <div v-else class="block text-gray-300 transition duration-200 p-2 z-20 text-xs">Metadata</div>
+              <hr class="solid">
+              <div class="p-2 z-20 text-xs text-gray-400">Change Labels</div>
+              <div v-for="(label,index) in labels" :key="index">
+                <div @click="updateLabel(label.name)"  class="flex justify-between p-2 cursor-pointer ">
+                  <div class=" text-xs ">{{label.name}}</div>
+                  <img v-if="label.isLabeled" src="@/assets/img/icon-green-tick.svg" class="h-4 w-4 " >
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -58,7 +57,7 @@
   </div>
 </template>
 
-<script>
+<script >
 import { computed, getCurrentInstance, ref } from "vue";
 import CryptoJS from 'crypto-js';
 import { copyToClipboard } from '@/util/functions';
@@ -70,6 +69,7 @@ import {toSvg} from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { AppState} from '@/state/appState';
 import { useI18n } from 'vue-i18n';
+import { Address } from 'tsjs-xpx-chain-sdk';
 
 export default{
   name: 'AccountTile',
@@ -80,6 +80,45 @@ export default{
     const multisig_add = ref("");
     const displayDefaultAccountMenu = ref(false)
     // const accountName = ref(p.account.name);
+    const labels = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return []
+      }else{
+        let labels = []
+        walletState.currentLoggedInWallet.labels.forEach(label=>{
+          let isLabeled = false
+          if(label.addresses.includes(p.account.address)){
+            isLabeled = true
+          }
+          labels.push({
+            name:label.name,
+            isLabeled:isLabeled
+          })
+        })
+        return labels
+      }
+    })
+
+    const updateLabel = async(name) =>{
+      if(!walletState.currentLoggedInWallet){
+        return
+      }
+      let label = walletState.currentLoggedInWallet.labels.find(label=>label.name==name)
+      let address = Address.createFromRawAddress(p.account.address).plain()
+      if(!label){
+        return
+      }
+      let index = label.addresses.findIndex(add=>add==address)
+      if (index>=0){
+        label.removeAddress(index)
+        await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
+        toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is removed as ' + name , group: 'br', life: 5000});
+        return
+      }
+      label.addresses.push(address)
+      await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
+      toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is added as ' + name , group: 'br', life: 5000});
+    }
 
     const accountName = computed(() => {
       // check if address is in adress book
@@ -173,7 +212,9 @@ export default{
       displayDefaultAccountMenu,
       multisig_add,
       isHover,
-      isNormalAcc
+      isNormalAcc,
+      labels,
+      updateLabel
     }
   },
 }

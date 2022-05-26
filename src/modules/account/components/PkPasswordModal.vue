@@ -1,11 +1,12 @@
 <template>
-    <font-awesome-icon  icon="eye" title='View Private Key' class="text-blue-link relative cursor-pointer ml-1"  @click=" toggleModal = !toggleModal"></font-awesome-icon>
+    <!-- <font-awesome-icon  icon="eye" title='View Private Key' class="text-blue-link relative cursor-pointer ml-1"  ></font-awesome-icon> -->
+    <font-awesome-icon :title="$t('general.copy')" icon="copy" class="ml-2 pb-1 w-5 h-5 text-blue-link mt-0.5 cursor-pointer " @click=" toggleModal = !toggleModal"></font-awesome-icon>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
     >
       <div v-if="toggleModal" class="popup-outer-lang fixed flex z-50">
-        <div class="modal-popup-box ">
+        <div class="modal-popup-box "> 
           <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
             <div class= 'text-center mt-2 text-xs font-semibold'>{{$t('general.enterPassword')}}</div>
             <PasswordInput class = 'my-3' v-model= 'walletPasswd' :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')"/>
