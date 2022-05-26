@@ -91,6 +91,7 @@ import { useToast } from 'primevue/usetoast';
         if(!walletState.currentLoggedInWallet){
             return 
         }
+        labelName.value = labelName.value.trim()
         if(labelName.value == ""){
             err.value = 'Label name cannot be empty.'
             return
