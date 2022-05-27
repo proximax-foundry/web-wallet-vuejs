@@ -422,7 +422,8 @@ export default {
       sendXPX.value,
       selectedMosaic.value,
       mosaicSupplyDivisibility.value,
-      messageText.value
+      messageText.value,
+      encryptedMsg.value
     )
   }
   const makeTransfer = async() => {
@@ -543,7 +544,6 @@ export default {
 
     const disableGenerateQr = computed(() => {
       return !(
-        !encryptedMsg.value &&
         !showAddressError.value &&
         recipientInput.value.length > 0  &&
         (showAssetBalanceErr.value.every(value => value == false)) &&

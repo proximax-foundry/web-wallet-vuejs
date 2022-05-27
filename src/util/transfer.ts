@@ -26,7 +26,7 @@ async function getAccInfo(address :string) :Promise<PublicAccount> {
   return accountInfo;
 }
 
-export const createTxnQr = (recipientAddress :string,sendXPX :string,mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[],messageText :string) :string=>{
+export const createTxnQr = (recipientAddress :string,sendXPX :string,mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[],messageText :string,encryptedMsg:string) :string=>{
   let transactionBuilder = AppState.buildTxn
   let xpxAmount = parseFloat(sendXPX) * Math.pow(10, AppState.nativeToken.divisibility)
   let mosaics = [];
@@ -54,6 +54,7 @@ export const createTxnQr = (recipientAddress :string,sendXPX :string,mosaicsSent
   const qr = qrcode(0, 'H');
   let data = {
     payload:transferTransaction.serialize(),
+    encrypted: encryptedMsg?true: false,
     callbackUrl: null
   }
   qr.addData(JSON.stringify(data));
