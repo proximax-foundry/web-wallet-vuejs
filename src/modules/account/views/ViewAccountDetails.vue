@@ -3,7 +3,6 @@
     <div class='flex cursor-pointer'>
       <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'><img src="@/assets/img/chevron_left.svg" class="w-5 inline-block">{{$t('general.back')}}</router-link>
     </div>
-
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
       <AccountComponent :address="address" class="mb-10"/>
        <div v-if="showModal" class="mb-8">
@@ -23,10 +22,10 @@
       <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
         <div class= 'w-32 text-center border-b-2 pb-3 border-yellow-500'>{{$t('account.accountDetails')}}</div>
         <router-link v-if="!isDelegate()" :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+        <router-link v-if="!isDelegate()" :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
+        <router-link v-if="!isDelegate()" :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
         <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-        <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
-        <router-link :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
-        <MoreAccountOptions :address="address"/>
+        <router-link v-if="!isDelegate()" :to="{name:'ViewAccountSwap', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.swap')}}</router-link>
       </div>
       <div class='border-2 border-t-0 pb-6 px-6 pt-2'>
         <div class = 'mt-4 text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.currentBalance')}}</div>
@@ -56,18 +55,17 @@
           <div class = 'text-xxs text-blue-primary mt-0.5 font-semibold uppercase'>{{$t('general.privateKey')}}</div>
           <div class='flex '>
             <div v-if="!showPwPK && !showPK" class='break-all font-semibold'>****************************************************************</div>
-            <PkPasswordModal v-if="!showPwPK && !showPK" :account = 'acc' />
-          </div>
-          <div class='flex'>
-            <div id="private" class="text-xs mt-1 font-semibold break-all" type="text" :copyValue="privateKey" :copySubject="$t('general.privateKey')" v-if="showPK">{{privateKey}}</div>
+            <div id="private" class="font-semibold break-all" type="text" :copyValue="privateKey" :copySubject="$t('general.privateKey')" v-if="showPK">****************************************************************</div>
             <font-awesome-icon :title="$t('general.copy')" icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link mt-0.5 cursor-pointer " v-if="showPK"></font-awesome-icon>
-            <font-awesome-icon icon="eye-slash" title='Hide Private Key' class="text-blue-link relative cursor-pointer mt-0.5 ml-1" @click="showPwPK = false; showPK = false" v-if="showPK"></font-awesome-icon>
+            <PkPasswordModal v-if="!showPwPK && !showPK" :account = 'acc' />
           </div>
           <div class = 'text-txs mt-2 text-red-400 border px-1.5 py-2 border-red-400 rounded-md'>{{$t('general.pkWarning')}}</div>
       </div>
       <div class='my-6 gray-line' v-if="!other_acc "></div>
       <div class='flex'>
         <PdfPasswordModal v-if='!other_acc' />
+        <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}" class="ml-3 blue-btn cursor-pointer py-3 px-3" ><img src="@/assets/img/link-icon.svg" class = 'h-4 w-4 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('general.linkToNamespace')}}</router-link>
+        <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address}}" class="ml-3 blue-btn cursor-pointer py-3 px-3"><img src="@/assets/img/icon-multisig.svg" class = 'h-3 w-3 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('delegate.delegateAcc')}}</router-link>
         <DeleteAccountModal v-if="!isDefault && !other_acc " :account ='acc' />
       </div>
       </div>
@@ -81,7 +79,6 @@ import { watch, ref, computed, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import TextInput from "@/components/TextInput.vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
-import MoreAccountOptions from "@/modules/account/components/MoreAccountOptions.vue";
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { walletState } from "@/state/walletState";
@@ -106,8 +103,7 @@ export default {
     PkPasswordModal,
     PdfPasswordModal,
     DeleteAccountModal,
-    AccountComponent,
-    MoreAccountOptions
+    AccountComponent
   },
   props: {
     address: String,
@@ -132,6 +128,7 @@ export default {
         return false
       }
     }
+
     const acc = computed(()=>{
       if(!walletState.currentLoggedInWallet){
         return null
@@ -162,12 +159,15 @@ export default {
     
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const prettyAddress = ''
-    try {
-      prettyAddress = Helper.createAddress(acc.value?acc.value.address:'').pretty();
-    } catch (error) {
-      
-    } 
+    const prettyAddress = computed(()=>{
+      if(p.address){
+        try {
+           return Helper.createAddress(p.address).pretty()
+        } catch (error) {
+        }
+      }
+      return ''
+    })
     const err = ref(false);
     
     
@@ -272,7 +272,7 @@ export default {
       // Addres number
       doc.setFontSize(8);
       doc.setTextColor('#000000');
-      doc.text(prettyAddress, 146, 164, { maxWidth: 132 });
+      doc.text(prettyAddress.value, 146, 164, { maxWidth: 132 });
       doc.save('Your_Paper_Wallet');
     }
 
@@ -295,6 +295,7 @@ export default {
     emitter.on("pkValue", (e) => {
       privateKey.value = e
     });
+    
     emitter.on("unlockWalletPaper", (e) => {
       saveWalletPaper(e)
     });
@@ -322,7 +323,6 @@ export default {
       verifyWalletPwSwap,
       copy,
       privateKey,
-      prettyAddress,
       showWalletPaperPw,
       showSavePaperWallet,
       walletPasswdWalletPaper,

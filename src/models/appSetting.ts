@@ -1,5 +1,9 @@
+import { ChainProfile, ChainSwapConfig } from "./stores";
+
 export class AppSetting{
 
     backupOldWallet: boolean = true;
-    restApiKey: string = "";
+    theme: any;
+    chainSwap: ChainSwapConfig[] = [];
+    chainProfile: ChainProfile[] = [];
 }

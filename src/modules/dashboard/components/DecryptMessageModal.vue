@@ -1,44 +1,38 @@
 <template>
-  <div>
-    <transition
-      enter-active-class="animate__animated animate__fadeInDown"
-      leave-active-class="animate__animated animate__fadeOutUp"
-    >
-      <div v-if="showModal" class="popup-outer fixed flex z-50">
-        <div class="modal-popup-box">
-          <div class="delete-position" style=" position: absolute; right: 15px;">
-            <font-awesome-icon icon="times" class="delete-icon-style" @click="closeModal();"></font-awesome-icon>
-          </div>
-          <div>
-            <h3 class="default-title font-bold my-5 text-left">Decrypt message: </h3>
-            <div v-if="cannotDecrypt">
-              Unable to decrypt message with selected account
-            </div>
-            <div v-else>
-              <div v-if="showError" class="mt-1 mb-1">{{ errorMessage }}</div>
-              <PasswordInput placeholder="Enter Wallet Password to Decrypt" errorMessage="Password Required" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="w-full" />
-              <div v-if="manualPublicKey">
-                  <TextInput placeholder="Public Key Used To Decrypt" errorMessage="Public key required" v-model="decryptingPublicKey" icon="id-card-alt" :showError="showPublicKeyErr" class="w-full" />
-              </div>
-              <div class="text-center w-full">
-                <button type="button" class="small-default-btn disabled:opacity-50" :disabled="disableDecrypt" @click="decryptMessage()">Decrypt</button>
-              </div>
-              
-              <div class="text-left" v-if="decryptedMessage.length">
-                <div>Decrypted message: </div>
-                <div>{{ decryptedMessage }} </div>
-              </div>
-            </div>
+    <img src="@/modules/dashboard/img/encrypted-icon-message.svg" v-tooltip.left="'<tiptitle>' + messageTypeTitle + '</tiptitle><tiptext>' + message + '</tiptext>'" class=" cursor-pointer w-6 h-6 inline-block" @click="showModal = true" >
+      <div v-if="showModal && showPassword" class="popup-outer fixed flex z-50">
+        <div class="modal-popup-box ">
+          <div >
+            <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
+            <div class= 'text-center mt-2 text-xs font-semibold'>Decrypt Message</div>
+            <PasswordInput class = 'my-3' v-model= 'walletPassword' :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')"/>
+            <div @click="decryptMessage()"  class = 'blue-btn font-semibold py-2 cursor-pointer text-center ml-auto mr-auto w-7/12 disabled:opacity-50 disabled:cursor-auto' :disabled="disableDecrypt">{{$t('general.confirm')}}</div>
+            <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-2' @click="closeModal()">{{$t('general.cancel')}}</div>
           </div>
         </div>
       </div>
-    </transition>
-    <div @click="closeModal();" v-if="showModal" class="fixed inset-0 bg-opacity-90 bg-blue-primary"></div>
-  </div>
+      <div v-else-if="showModal && showPassword == false" class="popup-outer fixed flex z-50">
+        <div class="modal-popup-box ">
+          <div>Decrypted Message: </div>
+          <div>{{decryptedMessage}}</div>
+           <div @click="closeModal()"  class = 'blue-btn font-semibold py-2 mt-3 cursor-pointer text-center ml-auto mr-auto w-7/12' >{{$t('general.close')}}</div>
+        </div>
+      </div>
+    <div @click="closeModal" v-if="showModal" class="fixed inset-0 bg-opacity-60 z-20"></div>
 </template>
 
-<script>
-import { getCurrentInstance, ref } from "vue";
+<script lang="ts">
+import Tooltip  from 'primevue/tooltip';
+export default {
+  name: 'DecryptMessageModal',
+  directives: {
+    'tooltip': Tooltip
+  }
+}
+</script>
+
+<script setup lang="ts">
+import { getCurrentInstance, ref, computed, watch } from "vue";
 import TextInput from '@/components/TextInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { Helper } from '@/util/typeHelper';
@@ -46,130 +40,93 @@ import { WalletUtils } from '@/util/walletUtils';
 import { networkState } from '@/state/networkState';
 import { walletState } from '@/state/walletState';
 import { AppState } from '@/state/appState';
+import { EncryptedMessage } from "tsjs-xpx-chain-sdk";
+import { useI18n } from 'vue-i18n';
 
-export default{
+  
+const p =defineProps({
+  messageTypeTitle: String,
+  message: String || null,
+  recipientAddress:String || null,
+  initiator: String || null
+})
+const showModal = ref(false)
+const {t} = useI18n();
+const showPassword = ref(true) 
+const internalInstance = getCurrentInstance();
+const emitter = internalInstance.appContext.config.globalProperties.emitter;
+const err = ref('')
+const walletPassword = ref('');
+const decryptedMessage = ref('');
+const recipientPublicKey = ref('')
+let encryptedMsg = Helper.createEncryptedMessageFromEncoded(p.message); 
+const fetchPublicKey = ()=>{
+  if(!p.recipientAddress){
+    return
+  }
+  let recipientAddress = Helper.createAddress(p.recipientAddress)
+  AppState.chainAPI.accountAPI.getAccountInfo(recipientAddress)
+  .then(accInfo=>{
+    recipientPublicKey.value = accInfo.publicKey
+  })
+}
+const passwdPattern = "^[^ ]{8,}$";
+const disableDecrypt = computed(()=>!(walletPassword.value.match(passwdPattern)))
+const showPasswdError = ref(false)
 
-  name: 'MessageModal',
-  props: {
-    'showModal': Boolean,
-    'message': String,
-    'selectedAccountPublicKey': String,
-    'publicKeyToUse': String,
-    'manualPublicKey': Boolean,
-    'initialSignerPublicKey': String,
-    'isInitialSender': Boolean
-  },
-  components: {
-    TextInput,
-    PasswordInput,
-  },
-  setup(p, context) {
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const showPasswdError = ref(false);
-    const disableDecrypt = ref(false);
-    const showError = ref(false);
-    const showPublicKeyErr = ref(false);
-    const errorMessage = ref('');
-    //const manualPublicKey = ref(false);
-    const walletPassword = ref('');
-    const cannotDecrypt = ref(false);
-    const decryptedMessage = ref('');
-    let accountDetail = {};
-    let encryptedMsg = Helper.createEncryptedMessageFromEncoded(p.message);
-    let decryptingPublicKey = ref(p.publicKeyToUse);
-    const isRecipient = ref(false);
+const closeModal = () => {
+  walletPassword.value = ""
+  decryptedMessage.value = ""
+  showPassword.value = true
+  err.value = ""
+  showModal.value = false
+};
 
-    // console.log(p.isInitialSender);
-    // console.log(p.initialSignerPublicKey);
+const recipientAcc = computed(()=>{
+  if(!walletState.currentLoggedInWallet){
+    return null
+  }
+  
+  let acc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==recipientPublicKey.value) 
+  return acc?acc:null
+})
 
-    if(p.isInitialSender){
-      accountDetail = walletState.currentLoggedInWallet.accounts.find((acc) => acc.publicKey === p.initialSignerPublicKey);
-      
-      // console.log(accountDetail);
-      if(!accountDetail){
-        cannotDecrypt.value = true;
-      }
-    }
-    else{
-      accountDetail = walletState.currentLoggedInWallet.accounts.find((acc) => acc.publicKey === p.publicKeyToUse);
-
-      decryptingPublicKey = ref(p.initialSignerPublicKey);
-      
-      if(!accountDetail){
-        cannotDecrypt.value = true;
-      }
-    }
-
-    const closeModal = () => {
-      emitter.emit("CLOSE_MODAL", false);
-    };
-
-    const decryptMessage = () =>{
-      showError.value = false;
-      showPasswdError.value = false;
-
-      // console.log(decryptingPublicKey.value);
-
-      if(decryptingPublicKey.value.length !== 64){
-        showError.value = true;
-        errorMessage.value = "Invalid Public Key length"
-        return;
-      }
-
-      if(walletPassword.value === "" || walletPassword.value === undefined){
-          showPasswdError.value = true;
-          return;
-      }
-
-      let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword.value)
-
-      if (!verify) {
-        showError.value = true;
-        errorMessage.value = "Invalid Password"
-        return;
-      }
-
-      showError.value = false;
-      let privateKey = WalletUtils.decryptPrivateKey(Helper.createPasswordInstance(walletPassword.value), accountDetail.encrypted, accountDetail.iv);
-      
-      let account = Helper.createAccount(privateKey, AppState.networkType);
-
-      let decryptingPublicAccount = Helper.createPublicAccount(decryptingPublicKey.value, AppState.networkType)
-      
-      try {
-        let decryptedMessageInstance = account.decryptMessage(encryptedMsg, decryptingPublicAccount);
-        
-        if(decryptedMessageInstance.payload === ""){
-          showError.value = true;
-          errorMessage.value = "Error when trying to decrypt"
-        }
-        else{
-          decryptedMessage.value = decryptedMessageInstance.payload;
-        }
-
-      } catch (error) {
-        showError.value = true;
-        errorMessage.value = "Unable to decrypt"
-      }
-      
-      //context.emit("decryptMessage", account);
-    }
-
-    return {
-      closeModal,
-      showPasswdError,
-      errorMessage,
-      showError,
-      //manualPublicKey,
-      showPublicKeyErr,
-      walletPassword,
-      decryptMessage,
-      decryptedMessage,
-      cannotDecrypt,
-      decryptingPublicKey,
-      disableDecrypt
-    };
+const decryptMessage = () =>{
+  if(!recipientAcc.value){
+    return
+  }
+  let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword.value)
+  if (!verify) {
+    
+    err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
+    return;
+  }
+  err.value = ''
+  let privateKey = WalletUtils.decryptPrivateKey(Helper.createPasswordInstance(walletPassword.value), recipientAcc.value.encrypted, recipientAcc.value.iv);
+  let initiatorPublicAccount = Helper.createPublicAccount(p.initiator, AppState.networkType)
+  let decryptedMsg =EncryptedMessage.decrypt(encryptedMsg,privateKey,initiatorPublicAccount).payload
+  if(decryptedMsg=== ""){
+    err.value = "Error when trying to decrypt"
+  }
+  else{
+    showPassword.value=false
+    decryptedMessage.value = EncryptedMessage.decrypt(encryptedMsg,privateKey,initiatorPublicAccount).payload
   }
 }
+
+  const init = ()=>{
+    fetchPublicKey()  
+  }
+
+    if(AppState.isReady){
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
+          init();
+          readyWatcher();
+        }
+      });
+    }
 </script>
