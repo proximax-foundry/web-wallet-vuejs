@@ -73,6 +73,7 @@ export class NetworkStateUtils{
     AppState.nativeToken.label = chainProfile.network.currency.name;
     AppState.nativeToken.fullNamespace = chainProfile.network.currency.namespace;
     AppState.networkType = ChainUtils.getNetworkType(chainProfile.network.type);
+    AppState.trackingTxnHash = [];
     if(AppState.networkType === NetworkType.PRIVATE || AppState.networkType === NetworkType.PRIVATE_TEST){
       AppState.buildTxn = new BuildTransactions(chainProfile.network.type, chainProfile.generationHash, FeeCalculationStrategy.ZeroFeeCalculationStrategy);
     }
@@ -172,5 +173,44 @@ export class NetworkStateUtils{
 
   static updateLastAccessNetworkName(networkName: string): void{
     localStorage.setItem(lastAccessNetworkName, networkName);
+  }
+
+  static async updateNetworkConfig(){
+    if(AppState.chainAPI === null){
+      return false;
+    }
+
+    try {
+      let chainAPICall = AppState.chainAPI as ChainAPICall;
+
+      const chainHeight = await chainAPICall.chainAPI.getBlockchainHeight();
+    
+      const config = await ChainUtils.getChainConfig(chainHeight, chainAPICall.chainConfigAPI);
+    
+      const chainProfileConfigStore = new ChainProfileConfig(networkState.chainNetworkName);
+    
+      chainProfileConfigStore.init();
+    
+      if (typeof config !== "string") {
+          config.chainHeight = chainHeight;
+          chainProfileConfigStore.updateConfig(config);
+          chainProfileConfigStore.saveToLocalStorage();
+          networkState.currentNetworkProfileConfig = chainProfileConfigStore;
+          return true;
+      }
+      else{
+        return false;
+      }
+    } catch (error) {
+      return false;
+    }
+  }
+
+  static checkSession(){
+    const sessionNetworkAuth = SessionService.getRaw("secured_auth");
+
+    if(sessionNetworkAuth){
+      networkState.currentNetworkProfile.apikey = sessionNetworkAuth;
+    }
   }
 }

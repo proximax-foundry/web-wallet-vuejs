@@ -157,7 +157,7 @@ general:
   addAccAddress: 添加账户地址
   address: 地址
   addressBook: 通讯录
-  aggregateFee: Aggregate Fee
+  aggregateFee: Aggregate Tx Fee
   amount:  数量
   approximately: 大约
   asset:  资产 | 资产

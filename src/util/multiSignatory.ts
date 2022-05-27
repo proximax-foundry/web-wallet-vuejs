@@ -300,6 +300,9 @@ function getCosignerInWallet(publicKey :string) :{hasCosigner:boolean,cosignerLi
 
     let totalAcc = accounts.concat(otherAccounts);
     let foundAcc = totalAcc.find(acc=>acc.publicKey==publicKey) 
+    if(!foundAcc){
+      return {hasCosigner:false,cosignerList: []}
+    }
     let allTopCosignerList = []
     totalAcc.forEach(acc=>{
       if (!acc.isMultisig && acc.multisigInfo.filter(acc=>acc.level==-1).length>0){
