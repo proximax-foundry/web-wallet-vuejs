@@ -3,7 +3,8 @@ name: test-wallet
 on:
   push:
     branches: 
-      - fix-automated-tests #change to develop branch after tests is working
+      - fix-automated-tests #remove this branch when fixed
+      - develop
 
 jobs:
   # This workflow contains a single job called "test"
