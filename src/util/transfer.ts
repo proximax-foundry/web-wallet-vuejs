@@ -46,6 +46,9 @@ export const createTxnQr = (recipientAddress :string,sendXPX :string,mosaicsSent
     });
   }
   let msg = PlainMessage.create(messageText);
+  if(encryptedMsg){
+    msg = PlainMessage.create(encryptedMsg)
+  }
   let transferTransaction = transactionBuilder.transferBuilder()
   .recipient(Address.createFromRawAddress(recipientAddress))
   .mosaics(mosaics)
