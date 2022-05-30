@@ -159,7 +159,10 @@
         </div>
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"  v-model="passwd" :disabled="disabledPassword" />
+         <div class="flex gap-2">
+          <PasswordInput  class="w-full mt-5 mb-3" :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" v-model="passwd" :disabled="disabledPassword" />
+          <TxnQrModal v-if="!disableGenerateQr" :txnQr="qr"/>
+        </div>
         <div class="mt-3"><button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="modifyAccount()" :disabled="disableSend">{{$t('multisig.updateCosignatories')}}</button></div>
         <div class="text-center">
           <router-link :to="{name: 'ViewMultisigHome',params:{address:address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
@@ -177,6 +180,7 @@ import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import { multiSign } from '@/util/multiSignatory';
 import { walletState } from '@/state/walletState';
+import TxnQrModal from "@/components/TxnQrModal.vue";
 import {
     PublicAccount,Address
 } from "tsjs-xpx-chain-sdk"
@@ -191,7 +195,8 @@ export default {
   components: {
     PasswordInput,
     TextInput,
-    AccountComponent
+    AccountComponent,
+    TxnQrModal
   },
   props: {
     address: String,
@@ -203,7 +208,11 @@ export default {
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref('');
     const fundStatus = ref(false);
-    
+    const qr = ref('')
+    const generateQR = () =>{
+      multiSign.editMultisigQr(acc.value,coSign.value,removeCosign.value, numApproveTransaction.value, numDeleteUser.value)
+      .then(returnedQr=> qr.value = returnedQr)
+    }
     const passwd = ref('');
     const passwdPattern = "^[^ ]{8,}$";
     const publicKeyPattern = "^[0-9A-Fa-f]{64}$";
@@ -323,7 +332,10 @@ export default {
       return multiSign.checkIsMultiSig(acc.value.address)
     })
     const disableSend = computed(() => !(
-      isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) &&  err.value == ''|| err.value== t('general.walletPasswordInvalid',{name : wallet?wallet.name:''}) && (showAddressError.value.indexOf(true) == -1) && (numDeleteUser.value >= 0) && (numApproveTransaction.value > 0)
+      isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) &&  (showAddressError.value.every(value => value == false)) == true && (numDeleteUser.value >= 0) && (numApproveTransaction.value > 0)
+    ));
+    const disableGenerateQr = computed(() => !(
+      isMultisig.value && !onPartial.value && err.value =='' && showAddressError.value.every(value => value == false) == true && (numDeleteUser.value >= 0) && (numApproveTransaction.value > 0)
     ));
     const disabledPassword = computed(() => !(!onPartial.value && isMultisig.value && !fundStatus.value && isCoSigner.value));
     const isCoSigner = computed(() => {
@@ -626,6 +638,9 @@ export default {
     }) 
 
     const networkType = computed(()=>AppState.networkType)
+    emitter.on('generateQr',e=>{
+      generateQR()
+    })
     
     return {
       cosignerName,
@@ -677,7 +692,9 @@ export default {
       totalFee,
       walletCosignerList,
       topUpUrl,
-      networkType
+      networkType,
+      qr,
+      disableGenerateQr
     };
   },
 }

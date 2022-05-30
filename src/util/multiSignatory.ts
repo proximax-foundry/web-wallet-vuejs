@@ -10,6 +10,7 @@ import {
   Password,
   MultisigAccountGraphInfo,
 } from "tsjs-xpx-chain-sdk";
+import qrcode from 'qrcode-generator';
 import { WalletUtils } from "@/util/walletUtils";
 import { walletState } from '@/state/walletState'
 import { networkState } from "@/state/networkState"; 
@@ -135,6 +136,49 @@ const getAggregateFee = async (publicKey :string,addedCosigners: string[],numApp
     .build()
   return Helper.amountFormatterSimple(aggregateBondedTx.maxFee.compact(),AppState.nativeToken.divisibility)
   
+}
+
+const convertMultisigQr = async (coSign :string[], numApproveTransaction :number, numDeleteUser :number,accPublicKey :string ) :Promise<string> =>{
+  const multisigCosignatory = [];
+  let cosignatory :PublicAccount
+  for(let cosignKey of coSign ){
+    if (cosignKey.length == 64) {
+      cosignatory = PublicAccount.createFromPublicKey(cosignKey, AppState.networkType);
+    } else if (cosignKey.length == 40 || cosignKey.length == 46) {
+      let address = Address.createFromRawAddress(cosignKey);
+
+      try {
+        let publicKey = await getPublicKey(address);
+        cosignatory = PublicAccount.createFromPublicKey(publicKey, AppState.networkType);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    multisigCosignatory.push(new MultisigCosignatoryModification(
+      MultisigCosignatoryModificationType.Add,
+      cosignatory,
+    ));
+  }
+
+  const txBuilder = AppState.buildTxn
+  const convertIntoMultisigTransaction = txBuilder.modifyMultisigAccountBuilder()
+  .minApprovalDelta(numApproveTransaction)
+  .minRemovalDelta(numDeleteUser)
+  .modifications(multisigCosignatory)
+  .build()
+  
+  const aggregateBondedTransaction = txBuilder.aggregateBondedBuilder()
+  .innerTransactions([convertIntoMultisigTransaction.toAggregate(PublicAccount.createFromPublicKey(accPublicKey,AppState.networkType))])
+  .build()
+  const qr = qrcode(0, 'H');
+  let data = {
+    payload:aggregateBondedTransaction.serialize(),
+    callbackUrl: null
+  }
+  qr.addData(JSON.stringify(data));
+  qr.make();
+  return qr.createSvgTag()
 }
 
 /* coSign: array() */
@@ -361,6 +405,59 @@ function getCosignerInWallet(publicKey :string) :{hasCosigner:boolean,cosignerLi
   }
 } */
 
+const editMultisigQr = async (multisigAccount :WalletAccount | OtherAccount,coSign :string[],removeCosign :string[], numApproveTransaction :number, numDeleteUser :number ) :Promise<string> =>{
+  const multisigCosignatory = [];
+  let cosignatory :PublicAccount
+  for(let cosignKey of coSign ){
+    if (cosignKey.length == 64) {
+      cosignatory = PublicAccount.createFromPublicKey(cosignKey, AppState.networkType);
+    } else if (cosignKey.length == 40 || cosignKey.length == 46) {
+      let address = Address.createFromRawAddress(cosignKey);
+
+      try {
+        let publicKey = await getPublicKey(address);
+        cosignatory = PublicAccount.createFromPublicKey(publicKey, AppState.networkType);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    multisigCosignatory.push(new MultisigCosignatoryModification(
+      MultisigCosignatoryModificationType.Add,
+      cosignatory,
+    ));
+  }
+  removeCosign.forEach((element, index) => {
+    cosignatory[coSign.length + index] = PublicAccount.createFromPublicKey(element, AppState.networkType);
+    multisigCosignatory.push(new MultisigCosignatoryModification(
+      MultisigCosignatoryModificationType.Remove,
+      cosignatory[coSign.length + index],
+    ));
+  });
+
+  let relativeNumApproveTransaction = numApproveTransaction - multisigAccount.multisigInfo.find(element => element.level === 0).minApproval;
+  let relativeNumDeleteUser = numDeleteUser - multisigAccount.multisigInfo.find(element => element.level === 0).minRemoval
+  let publicAcc = PublicAccount.createFromPublicKey(multisigAccount.publicKey,AppState.networkType)
+  const txBuilder = AppState.buildTxn
+  const modifyMultisigTransaction = txBuilder.modifyMultisigAccountBuilder()
+  .minApprovalDelta(relativeNumApproveTransaction)
+  .minRemovalDelta(relativeNumDeleteUser)
+  .modifications(multisigCosignatory)
+  .build()
+  
+  const aggregateBondedTransaction = txBuilder.aggregateBondedBuilder()
+  .innerTransactions([modifyMultisigTransaction.toAggregate(publicAcc)])
+  .build()
+  const qr = qrcode(0, 'H');
+  let data = {
+    payload:aggregateBondedTransaction.serialize(),
+    callbackUrl: null
+  }
+  qr.addData(JSON.stringify(data));
+  qr.make();
+  return qr.createSvgTag()
+}
+
 // modify multisig
 async function modifyMultisigAccount(selectedCosign: string,coSign :string[], removeCosign :string[], numApproveTransaction :number, numDeleteUser :number, multisigAccount :WalletAccount | OtherAccount, walletPassword :string) :Promise<boolean> {
 
@@ -447,5 +544,7 @@ export const multiSign = readonly({
   getMultisigAccountGraphInfo,
   modifyMultisigAccount,
   getAggregateFee,
+  convertMultisigQr,
+  editMultisigQr
   /* enableACT */
 });

@@ -128,7 +128,10 @@
         </div>
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="passwd" :disabled="disabledPassword" />
+        <div class="flex gap-2">
+          <PasswordInput  class="w-full mt-5 mb-3" :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="passwd" :disabled="disabledPassword" />
+          <TxnQrModal v-if="!disableGenerateQr" :txnQr="qr"/>
+        </div>
         <div class="mt-3"><button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="convertAccount()" :disabled="disableSend">{{$t('multisig.updateCosignatories')}}</button></div>
         <div class="text-center">
           <router-link :to="{name: 'ViewMultisigHome',params:{address:address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
@@ -139,8 +142,9 @@
 </div>
 </template>
 
-<script>
+<script >
 import { computed, ref, inject, watch, getCurrentInstance } from 'vue';
+import TxnQrModal from "@/components/TxnQrModal.vue";
 import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
@@ -161,7 +165,8 @@ export default {
   components: {
     PasswordInput,
     TextInput,
-    AccountComponent
+    AccountComponent,
+    TxnQrModal 
   },
   props: {
     address: String,
@@ -173,7 +178,7 @@ export default {
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref('');
     const fundStatus = ref(false);
-    
+    const qr = ref('')
     const passwd = ref('');
     const showPasswdError = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
@@ -191,7 +196,13 @@ export default {
     const toggleContact = ref([])
     const onPartial = ref(false);
     const space=ref(false)
-   
+    const generateQR = () =>{
+      multiSign.convertMultisigQr(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.value.publicKey)
+      .then(returnedQr=> qr.value = returnedQr)
+    }
+    const disableGenerateQr = computed(() => !(
+      !isMultisig.value && !onPartial.value &&  coSign.value.length > 0  &&  (err.value == '' || (err.value == t('general.walletpasswordInvalid',{name : walletState.currentLoggedInWallet.name}))) && (showAddressError.value.every(value => value == false)) == true && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
+    ));
      const lockFundCurrency = computed(() =>
       Helper.convertToCurrency(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
@@ -473,8 +484,10 @@ export default {
         return ''
       }
     }) 
-
     const networkType = computed(()=>AppState.networkType)
+    emitter.on('generateQr',e=>{
+      generateQR()
+    })
     return {
       networkState,
       toggleContact,
@@ -514,7 +527,9 @@ export default {
       aggregateFee,
       totalFee,
       topUpUrl,
-      networkType
+      networkType,
+      qr,
+      disableGenerateQr
     };
   },
 }
