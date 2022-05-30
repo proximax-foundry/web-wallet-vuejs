@@ -137,7 +137,7 @@ import {
   createTxnQr
 } from "@/util/transfer"; //getMosaicsAllAccounts
 import AddContactModal from "@/modules/transfer/components/AddContactModal.vue";
-import TxnQrModal from "@/modules/transfer/components/TxnQrModal.vue";
+import TxnQrModal from "@/components/TxnQrModal.vue";
 import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
 import {useI18n} from 'vue-i18n'
 import { multiSign } from "@/util/multiSignatory";
