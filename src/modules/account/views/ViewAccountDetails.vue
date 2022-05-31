@@ -55,9 +55,12 @@
           <div class = 'text-xxs text-blue-primary mt-0.5 font-semibold uppercase'>{{$t('general.privateKey')}}</div>
           <div class='flex '>
             <div v-if="!showPwPK && !showPK" class='break-all font-semibold'>****************************************************************</div>
-            <div id="private" class="font-semibold break-all" type="text" :copyValue="privateKey" :copySubject="$t('general.privateKey')" v-if="showPK">****************************************************************</div>
-            <font-awesome-icon :title="$t('general.copy')" icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link mt-0.5 cursor-pointer " v-if="showPK"></font-awesome-icon>
             <PkPasswordModal v-if="!showPwPK && !showPK" :account = 'acc' />
+          </div>
+          <div class='flex'>
+            <div id="private" class="text-xs mt-1 font-semibold break-all" type="text" :copyValue="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
+            <font-awesome-icon title='Copy' icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link cursor-pointer " v-if="showPK"></font-awesome-icon>
+            <font-awesome-icon icon="eye-slash" title='Hide Private Key' class="text-blue-link relative cursor-pointer ml-1" @click="showPwPK = false; showPK = false" v-if="showPK"></font-awesome-icon>
           </div>
           <div class = 'text-txs mt-2 text-red-400 border px-1.5 py-2 border-red-400 rounded-md'>{{$t('general.pkWarning')}}</div>
       </div>
