@@ -332,10 +332,10 @@ export default {
       return multiSign.checkIsMultiSig(acc.value.address)
     })
     const disableSend = computed(() => !(
-      isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) &&  (showAddressError.value.every(value => value == false)) == true && (numDeleteUser.value >= 0) && (numApproveTransaction.value > 0)
+      isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) &&  (showAddressError.value.every(value => value == false)) == true && (numDeleteUser.value >= 0) && (numApproveTransaction.value >= 0) && (err.value =="" ||  err.value== t('general.walletPasswordInvalid',{name:wallet.name}))
     ));
     const disableGenerateQr = computed(() => !(
-      isMultisig.value && !onPartial.value && err.value =='' && showAddressError.value.every(value => value == false) == true && (numDeleteUser.value >= 0) && (numApproveTransaction.value > 0)
+      isMultisig.value && !onPartial.value && (err.value =="" ||  err.value== t('general.walletPasswordInvalid',{name:wallet.name})) && showAddressError.value.every(value => value == false) == true && (numDeleteUser.value >= 0) && (numApproveTransaction.value >= 0)
     ));
     const disabledPassword = computed(() => !(!onPartial.value && isMultisig.value && !fundStatus.value && isCoSigner.value));
     const isCoSigner = computed(() => {
