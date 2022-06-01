@@ -24,7 +24,7 @@
         </div>
         <br>
         <br>
-       <!--  <div class="border inline-block w-full shadow-md filter" :class="`${open['nis1']?'border-blue-500':'border-gray-200'}`" style="top: 0px;" @click="openMenu('nis1')">
+        <div class="border inline-block w-full shadow-md filter" :class="`${open['nis1']?'border-blue-500':'border-gray-200'}`" style="top: 0px;" @click="openMenu('nis1')">
           <div class="flex items-center w-full px-5 h-20 cursor-pointer hover:bg-blue-50 transition-all duration-500" :class="`${open['nis1']?'bg-blue-50':'bg-white'}`">
             <img src="@/modules/services/submodule/mainnetSwap/img/nem.svg" class="float-left">
             <div class="text-left pl-5">
@@ -36,7 +36,7 @@
             <div class="bg-blue-100 border-blue-100 uppercase py-2 px-5 text-xxs">{{$t('general.selectOption')}}</div>
             <router-link :to="{ name: 'ViewServicesMainnetSwapNIS1ToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">{{$t('nis1.nis1ToSirius')}}</router-link>
           </div>
-        </div> -->
+        </div>
         <br>
         <template>
        <!--  <div class="border inline-block w-full mt-4 rounded shadow-md filter" :class="`${open['eth']?'border-blue-500':'border-gray-200'}`" style="top: 95px;" @click="openMenu('eth')">
