@@ -9,14 +9,14 @@
         </div>
         <div v-if='!toggleSelection && selectedNamespace==""' class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>{{$t('general.select')}}</div>
         <div v-if='!toggleSelection && selectedNamespace!=""'  class='text-xxs ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>{{$t('general.change')}}</div>
-        <img v-if='toggleSelection' @click='selectedNamespace=""' src="@/assets/img/delete.svg" class='h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>
+        <img v-if='toggleSelection' @click="$emit('update:modelValue', ''),selectedNamespace=''" src="@/assets/img/delete.svg" class='h-5 w-5 ml-auto cursor-pointer text-blue-primary font-semibold mt-auto mb-auto'>
       </div>
     </div>
     <div class='relative'>
       <div v-if='toggleSelection' class='absolute border border-t-0 w-full z-50 bg-white max-h-40 overflow-auto px-3 filter drop-shodow-xl'>
         <div v-if='namespaces.length > 0' class="pl-2 pt-4 text-xxs text-gray-400 uppercase">{{$t('namespace.selectNamespace')}}</div>
         <div v-else class='text-xxs pt-2 pl-2 pb-2' >{{$t('general.listEmpty')}}</div>
-        <div v-for='(item,index) in namespaces' :key="index" class="px-2 py-3 flex items-center" @click="selectNamespace(item);$emit('update:modelValue', selectedNamespace);" :class='[(index != namespaces.length - 1)?"border-b border-gray-200":"", (!item.disabled)?"cursor-pointer":""]'>
+        <div v-for='(item,index) in namespaces' :key="index" class="px-2 py-3 flex items-center" @click="item.disabled?'':selectNamespace(item);$emit('update:modelValue', selectedNamespace)" :class='[(index != namespaces.length - 1)?"border-b border-gray-200":"", (!item.disabled)?"cursor-pointer":""]'>
           <div class='text-xs truncate' :class="(!item.disabled)?'text-black font-semibold':'text-gray-300'">{{item.label}}</div>
           <div v-if='item.label!=selectedNamespace && !item.disabled' class='cursor-pointer text-blue-primary text-xxs mt-0.5 ml-auto font-semibold uppercase'>{{$t('general.select')}}</div>
           <div v-else-if="item.disabled" class='text-gray-300 text-xxs mt-0.5 ml-auto uppercase'>{{$t('general.disabled')}}</div>
@@ -32,7 +32,7 @@ import { Address } from "tsjs-xpx-chain-sdk";
 import { networkState } from '@/state/networkState';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { walletState } from '@/state/walletState';
-import { computed, defineComponent, ref, watch, getCurrentInstance } from 'vue';
+import { computed, defineComponent, ref, watch, getCurrentInstance, toRefs } from 'vue';
 import { AssetsUtils } from '@/util/assetsUtils';
 
 export default defineComponent({
@@ -51,13 +51,15 @@ export default defineComponent({
     const toggleSelection = ref(false);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-
+    const {action} = toRefs(props)
     const selectedNamespace = ref('');
     const selectNamespace = (ns) => {
       selectedNamespace.value = ns.value;
       toggleSelection.value = !toggleSelection.value;
     };
-
+    watch(action,n=>{
+      selectedNamespace.value = ''
+    })
     const namespaces = computed(() => {
       return AssetsUtils.listActiveNamespacesToLink(props.assetId, Address.createFromRawAddress(props.address).plain(), props.action);
     });

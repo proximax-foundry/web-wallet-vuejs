@@ -87,8 +87,11 @@
           <div class="font-bold uppercase">{{$t('general.total')}}</div>
           <div v-html="splitCurrency(totalFeeFormatted)"></div>
         </div>
-        <div class='text-xs text-white mt-5 mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
+        <div class='text-xs text-white mt-1'>{{$t('general.enterPasswordContinue')}}</div>
+        <div class="flex gap-2">
+          <PasswordInput class="w-full mt-5" :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
+          <TxnQrModal v-if="!disableGenerateQr" :txnQr="qr"/>
+        </div>
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableModify" @click="modifyAsset">{{$t('asset.modifyAssetSupply')}}</button>
         <div class="text-center">
           <router-link :to="{name: 'ViewServicesAssets'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
@@ -99,7 +102,7 @@
 </div>
 </template>
 <script>
-import { computed, ref, watch } from 'vue';
+import { computed, getCurrentInstance, ref, watch } from 'vue';
 import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInputClean from '@/components/SupplyInputClean.vue';
@@ -121,7 +124,8 @@ import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
-
+import TxnQrModal from "@/components/TxnQrModal.vue";
+import { PublicAccount } from 'tsjs-xpx-chain-sdk';
 export default {
   name: 'ViewServicesAssetsModifySupplyChange',
   directives: { 'tooltip': Tooltip },
@@ -129,6 +133,7 @@ export default {
     PasswordInput,
     SupplyInputClean,
     SelectModificationType,
+    TxnQrModal
   },
   props: {
     assetId: String,
@@ -139,9 +144,26 @@ export default {
     const router = useRouter();
     const toast = useToast();
     let maxAmount = 9999999999.999999;
-
+    const qr = ref('')
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
-
+    const disableGenerateQr = computed(()=>!(
+      (supply.value > 0) && !showSupplyErr.value && !showNoBalance.value & !isNotCosigner.value
+    ))
+    const generateQr = ()=>{
+      qr.value = AssetsUtils.modifyAssetSupplyQr(
+        isMultiSig(selectedAccAdd.value),
+        selectAsset.value,
+        selectIncreaseDecrease.value, 
+        supply.value, 
+        assetDivisibility.value,
+        PublicAccount.createFromPublicKey(selectedAccPublicKey.value,AppState.networkType)
+       )
+    }
+    const internalInstance = getCurrentInstance();  
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+     emitter.on('generateQr',()=>{
+      generateQr()
+    })
     const showSupplyErr = ref(false);
     const walletPassword = ref('');
     const err = ref('');
@@ -449,6 +471,8 @@ export default {
       splitCurrency,
       Helper,
       svgString,
+      qr,
+      disableGenerateQr
     }
   },
 

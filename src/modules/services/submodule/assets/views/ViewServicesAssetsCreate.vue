@@ -56,12 +56,15 @@
           <div class="font-semibold">{{$t('general.lockFundTxFee')}}</div>
           <div v-html="splitCurrency(lockFundTxFee)"></div>
         </div>
-        <div class="flex justify-between border-gray-600 text-white text-xs py-5">
+        <div class="flex justify-between border-gray-600 text-white text-xs pt-5 pb-3">
           <div class="font-bold uppercase">{{$t('general.total')}}</div>
           <div v-html="splitCurrency(totalFeeFormatted)"></div>
         </div>
-        <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
+        <div class='text-xs text-white mt-3 mb-1'>{{$t('general.enterPasswordContinue')}}</div>
+        <div class="flex gap-2">
+          <PasswordInput class="w-full mt-5 mb-1" :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
+          <TxnQrModal v-if="!disableGenerateQr" :txnQr="qr"/>
+        </div>
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="createAsset">{{$t('asset.createAssets')}}</button>
         <div class="text-center">
           <router-link :to="{name: 'ViewServicesAssets'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
@@ -84,7 +87,7 @@
 </template>
 
 <script>
-import { computed, ref, watch } from 'vue';
+import { computed, getCurrentInstance, ref, watch } from 'vue';
 import { useRouter } from "vue-router";
 import SelectInputAccount from '@/components/SelectInputAccount.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
@@ -105,6 +108,7 @@ import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
+import TxnQrModal from "@/components/TxnQrModal.vue";
 
 export default {
   name: 'ViewServicesAssetsCreate',
@@ -114,10 +118,11 @@ export default {
     SupplyInputClean,
     NumberInputClean,
     SelectInputAccount,
+    TxnQrModal
   },
   setup(){
     const router = useRouter();
-
+    const qr = ref('')
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const showSupplyErr = ref(false);
@@ -201,6 +206,10 @@ export default {
 
     const disableCreate = computed(() => !(
       walletPassword.value.match(passwdPattern) && (divisibility.value != '') && (supply.value > 0) && (!showSupplyErr.value) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value)
+    ));
+
+    const disableGenerateQr = computed(() => !(
+      (divisibility.value != '') && (supply.value > 0) && (!showSupplyErr.value) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value)
     ));
 
     const isMultiSig = (address) => {
@@ -383,6 +392,10 @@ export default {
       router.push({ name: "ViewServicesAssets"});
     };
 
+    const generateQr = ()=>{
+      qr.value = AssetsUtils.createAssetQr(cosigner.value?true:false,ownerPublicAccount.value,supply.value, isMutable.value, isTransferable.value, divisibility.value)
+    }
+
     const cosigner = computed(() => {
       if(getMultiSigCosigner.value.cosignerList.length > 0){
         if(getMultiSigCosigner.value.cosignerList.length > 1){
@@ -410,6 +423,11 @@ export default {
         return '<span class="font-semibold text-sm">' + split[0] + '</span> <span class="font-semibold text-xs">' + currentNativeTokenName.value + '</span>';
       }
     };
+    const internalInstance = getCurrentInstance();  
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+     emitter.on('generateQr',()=>{
+      generateQr()
+    })
 
     return {
       fetchAccount,
@@ -461,7 +479,9 @@ export default {
       Helper,
       splitCurrency,
       updateSupplyErr,
-      defaultAcc
+      defaultAcc,
+      qr,
+      disableGenerateQr
     }
   },
 }

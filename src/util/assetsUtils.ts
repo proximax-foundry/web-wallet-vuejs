@@ -18,7 +18,7 @@ import { Helper } from "./typeHelper";
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 import { AppState } from "@/state/appState";
 import { TransactionUtils } from "./transactionUtils";
-
+import qrcode from 'qrcode-generator';
 interface assetSelectionInterface {
   label: string,
   value: string,
@@ -188,6 +188,30 @@ export class AssetsUtils {
     TransactionUtils.announceTransaction(signedTx);
   }
 
+  static createAssetQr = ( isMultisig :boolean,owner:PublicAccount, supply:number, supplyMutable: boolean, transferable:boolean, divisibility: number, duration?: number) :string =>{
+    let createAssetAggregateTransaction :AggregateTransaction
+    if(!isMultisig){
+      createAssetAggregateTransaction = AssetsUtils.createAssetTransaction( owner, supply, supplyMutable, transferable, divisibility, duration);
+    }else{
+      const assetDefinition = AppState.buildTxn.mosaicDefinition(owner, supplyMutable, transferable, divisibility, duration? UInt64.fromUint(AssetsUtils.calculateDuration(duration)): undefined);
+      const assetDefinitionTx = assetDefinition.toAggregate(owner);
+      let supplyChangeType: MosaicSupplyType;
+      supplyChangeType = MosaicSupplyType.Increase;
+      const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(divisibility, supply))).toAggregate(owner);
+      const innerTxn = [assetDefinitionTx,assetSupplyChangeTx];
+      createAssetAggregateTransaction = AppState.buildTxn.aggregateBonded(innerTxn);
+    }
+    
+    const qr = qrcode(0, 'H');
+    let data = {
+      payload: createAssetAggregateTransaction.serialize(),
+      callbackUrl: null
+    }
+    qr.addData(JSON.stringify(data));
+    qr.make();
+    return qr.createSvgTag()
+  }
+
   static createAssetMultiSig = (selectedAddress: string, walletPassword: string, owner:PublicAccount, supply:number, supplyMutable: boolean, transferable:boolean, divisibility: number, durationInDays?: number) => {
     const assetDefinition = AppState.buildTxn.mosaicDefinition(owner, supplyMutable, transferable, divisibility, durationInDays ? UInt64.fromUint(AssetsUtils.calculateDuration(durationInDays)): undefined);
     const assetDefinitionTx = assetDefinition.toAggregate(owner);
@@ -201,6 +225,26 @@ export class AssetsUtils {
     let hashLockTx = TransactionUtils.lockFundTx(aggregateBondedTxSigned)
     let signedHashlock = account.sign(hashLockTx, networkState.currentNetworkProfile.generationHash);
     TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedHashlock,aggregateBondedTxSigned);
+  }
+
+  static modifyAssetSupplyQr = (isMultisig:boolean,mosaicId: string, changeType: string, supply: number, divisibility: number,owner: PublicAccount) :string =>{
+    let modifyAssetSupplyTxn :AggregateTransaction | MosaicSupplyChangeTransaction
+    if(!isMultisig){
+      modifyAssetSupplyTxn = AssetsUtils.assetSupplyChangeTransaction(mosaicId, changeType, supply, divisibility);
+    }else{
+      let buildTransactions = AppState.buildTxn;
+      let createAssetAggregateTransaction = AssetsUtils.assetSupplyChangeTransaction( mosaicId, changeType, supply, divisibility);
+      const innerTxn = [createAssetAggregateTransaction.toAggregate(owner)];
+      modifyAssetSupplyTxn = buildTransactions.aggregateBonded(innerTxn);
+    }
+    const qr = qrcode(0, 'H');
+    let data = {
+      payload: modifyAssetSupplyTxn.serialize(),
+      callbackUrl: null
+    }
+    qr.addData(JSON.stringify(data));
+    qr.make();
+    return qr.createSvgTag()
   }
 
   static changeAssetSupply = (selectedAddress: string, walletPassword: string, mosaicId: string, changeType: string, supply: number, divisibility: number) => {
@@ -224,6 +268,26 @@ export class AssetsUtils {
     let hashLockTx = TransactionUtils.lockFundTx(aggregateBondedTxSigned)
     let signedHashlock = account.sign(hashLockTx, networkState.currentNetworkProfile.generationHash);
     TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedHashlock,aggregateBondedTxSigned );
+  }
+
+  static linkedNamespaceToAssetQr =(isMultisig :boolean,mosaicIdString: string, namespaceString: string, linkType: string, owner :PublicAccount) =>{
+    let linkAssetToNamespaceTx :MosaicAliasTransaction | AggregateTransaction
+    if(!isMultisig){
+      linkAssetToNamespaceTx = AssetsUtils.linkAssetToNamespaceTransaction(mosaicIdString, namespaceString, linkType);
+    }else{
+      let buildTransactions = AppState.buildTxn;
+      let aggregateTxn = AssetsUtils.linkAssetToNamespaceTransaction(mosaicIdString, namespaceString, linkType);
+      const innerTxn = [aggregateTxn.toAggregate(owner)];
+      linkAssetToNamespaceTx = buildTransactions.aggregateBonded(innerTxn);
+    }
+    const qr = qrcode(0, 'H');
+    let data = {
+      payload: linkAssetToNamespaceTx.serialize(),
+      callbackUrl: null
+    }
+    qr.addData(JSON.stringify(data));
+    qr.make();
+    return qr.createSvgTag()
   }
 
   static linkedNamespaceToAsset = (selectedAddress: string, walletPassword: string, mosaicIdString: string, namespaceString: string, linkType: string) => {
