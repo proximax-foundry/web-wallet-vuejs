@@ -17,7 +17,6 @@ import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 import { AppState } from "@/state/appState";
 import { TransactionUtils } from "./transactionUtils";
 import qrcode from 'qrcode-generator';
-import { bitOr } from "mathjs";
 export class NamespaceUtils {
 
   static async getLinkedMosaic(namespaceId: NamespaceId, endpoint: string): Promise<MosaicId>{
