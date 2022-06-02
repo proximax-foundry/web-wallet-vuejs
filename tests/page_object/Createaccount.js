@@ -4,14 +4,14 @@ const elements = {
     account_detailstab: '.w-32',
     close: '.mt-4',
     create: '.blue-btn',
-    create_account: 'a.block',
+    create_account: 'a[href="#/select-type-creation-account"]',
     createnew_account: 'a.border:nth-child(1)',
     createnew_frompk: 'a.border:nth-child(2)',
     createsuccessful_popup: '.popup-outer-create-wallet > div:nth-child(1)',
     input_accountname: 'input.bg-white',
     input_accountname_pk: 'input.bg-white',
     input_walletpassword: 'input.w-full',
-    input_walletpassword_pk: 'div.w-8\/12:nth-child(3) > div:nth-child(3) > div:nth-child(1)',
+    input_walletpassword_pk: 'div.w-8\ /12:nth-child(3) > div:nth-child(3) > div',
     input_privatekey: 'div.bg-white.py-2.border.flex.justify-between > input.w-full.text-placeholder.text-left.ml-2',
     home_icon: 'div.text-center.w-full.h-7 > a[href="#/dashboard"] > img',
     empty_accountname: '.error-text',
@@ -79,7 +79,7 @@ const commands = {
         .isVisible('@empty_accountname_pk', callback = (result) => {
             this.assert.equal(result.value, true, 'If account name has no input, error is shown')
         })
-        .pause(10000)
+        .waitForElementVisible("@input_walletpassword_pk")
         .setValue("@input_walletpassword_pk", "\ue004")
         .isVisible('@empty_walletpassword_pk', callback = (result) => {
             this.assert.equal(result.value, true, 'If wallet password has no input, error is shown')

@@ -12,10 +12,6 @@ module.exports = {
         var signin = browser.page.Signin();
         var asset = browser.page.Assets();
 
-        browser.fullscreenWindow(function(result) {
-            console.log(result);
-        });
-
         // create wallet
         create
             .navigate()

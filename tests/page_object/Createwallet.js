@@ -95,6 +95,7 @@ const commands = {
         .pause(15000)
         .assert.urlEquals(browser + 'import-wallet', 'When next is clicked, user is navigated to create pk wallet screen.')
         .pause(10000)
+        .waitForElementVisible("@signin_herepk")
         .click("@signin_herepk")
         .pause(15000)
         .assert.urlEquals(browser, 'When sign in here is clicked, user is navigated back to the main page for sign in.')

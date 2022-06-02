@@ -88,18 +88,17 @@ const commands = {
         .click("@ellipsis_icon")
         .click("@edit_button")
         .click("@input_name_filled")
-        .setValue("@input_name_filled", browser.Keys.CLEAR)
-        .click("@save_address")
-        .isVisible('@error_emptyname', callback = (result) => {
-            this.assert.equal(result.value, true, 'If name field has no input, an error is shown')
-        })
+        .clearValue("@input_name_filled")
+        .setValue("@input_name_filled",'\ue004')
         .click("@input_address_filled")
         .clearValue("@input_address_filled")
         .setValue("@input_address_filled", address2)
         .isVisible('@error_invalidaddress', callback = (result) => {
             this.assert.equal(result.value, true, 'If address is invalid, an error is shown')
         })
-
+        .isVisible('@error_emptyname', callback = (result) => {
+            this.assert.equal(result.value, true, 'If name field has no input, an error is shown')
+        })
     },
 
     invalid_address(address1, address2, address3){

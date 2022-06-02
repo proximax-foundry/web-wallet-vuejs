@@ -6,12 +6,12 @@ const elements = {
     accountname_value: 'div.justify-center:nth-child(2) > div:nth-child(1) > div:nth-child(1)',
     change_default: '.font-txs > img:nth-child(1)',
     new_account: 'div.p-2:nth-child(2)',
-    back: 'a.text-blue-primary:nth-child(2)',
+    back: 'a[href="#/dashboard"]',
     copy_address: 'div.justify-center:nth-child(2) > div:nth-child(2) > svg:nth-child(2) > path:nth-child(2)',
     copyaddress_popup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
     copy_publickey: '.pb-1 > path:nth-child(2)',
     copypublickey_popup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    copy_privatekey: 'div.border-2:nth-child(3) > div:nth-child(6) > svg:nth-child(2) > path:nth-child(2)',
+    copy_privatekey: 'div.border-2:nth-child(3) > div:nth-child(8) > div:nth-child(2) > svg:nth-child(2) > path',
     confirm_button_pk: 'div.blue-btn:nth-child(3)',
     confirm_button_wp: 'div.blue-btn:nth-child(3)',
     confirm_button_wp_2: 'div.blue-btn:nth-child(4)',
@@ -35,12 +35,11 @@ const elements = {
     input_password_wp: 'input.w-full',
     password_eyeicon_pk: '.text-gray-500 > path:nth-child(1)',
     wallet_paper: '#outerContainer',
-    private_key: '#private',
     private_keyhidden: 'div.border-2:nth-child(3) > div:nth-child(8) > div:nth-child(2) > div:nth-child(1)',    
     pk_successfulpopup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    hide_privatekey: 'svg.svg-inline--fa:nth-child(3) > path:nth-child(2)',
-    view_privatekey: '.fa-eye > path:nth-child(2)',
     transfer_button: 'div.flex:nth-child(5) > a:nth-child(1) > div:nth-child(2)',
+    //view_privatekey: '.fa-eye > path:nth-child(2)',
+    //private_key: '#private',
 
 }
 
@@ -149,7 +148,7 @@ const commands = {
 
     show_privatekey(password1, password2){
         return this
-        .click("@view_privatekey")
+        .click("@copy_privatekey")
         .isVisible('@enter_passwordpopup', callback = (result) => {
             this.assert.equal(result.value, true, 'If user clicks to view private key, it will prompt for user to enter password')
         })
@@ -162,7 +161,7 @@ const commands = {
         .pause(5000)
         .click("@back")
         .click("@account_ellipsis")
-        .click("@view_privatekey")
+        .click("@copy_privatekey")
         .click("@input_password")
         .setValue("@input_password", password2)
         .click("@confirm_button_pk")
@@ -175,20 +174,16 @@ const commands = {
         .waitForElementVisible("@back")
         .click("@back")
         .click("@account_ellipsis")
-        .click("@view_privatekey")
+        .click("@copy_privatekey")
         .click("@input_password")
         .setValue("@input_password", password1)
         .click("@password_eyeicon_pk")
         .assert.elementPresent('@password_eyeicon_pk', "When eye icon is clicked, private key field is unmasked")
         .click("@confirm_button_pk")
-        .assert.elementPresent('@private_key','If wallet password is correct, private key is revealed')
         .click("@copy_privatekey")
         .isVisible('@pk_successfulpopup', callback = result => {
             this.assert.equal(result.value, true, "If user clicks to copy private key, a notification is shown")
         })
-        .pause(5000)
-        .click("@hide_privatekey")
-        .assert.elementPresent('@private_keyhidden', 'When hide private key button is clicked, private key field is masked again.')
 
     },
     
