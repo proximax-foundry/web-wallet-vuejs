@@ -383,7 +383,7 @@ export default {
       qr.value = accountUtils.delegateTxnQr(
         isMultisig.value,
         PublicAccount.createFromPublicKey(acc.value?acc.value.publicKey:'0'.repeat(64),AppState.networkType),
-        AccPublicKey.value,
+        linkAction == LinkAction.Link?AccPublicKey.value:delegateAcc.value,
         linkAction
       )
     }
