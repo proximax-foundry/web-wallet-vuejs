@@ -140,7 +140,10 @@
         </div>
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" />
+        <div class="flex gap-2">
+          <PasswordInput  class="mt-5 w-full" :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" />
+          <TxnQrModal v-if="!disableGenerateQr" :txnQr="qr"/>
+        </div>
         <div class="mt-3">
           <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="delegateValue && !unlinking" :disabled="disableLinkBtn">{{$t('delegate.unlinkAcc')}}</button>
           <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="!delegateValue && !pending" :disabled="disableLinkBtn">{{$t('delegate.delegateAcc')}}</button>
@@ -177,13 +180,14 @@ import { listenerState } from '@/state/listenerState';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
-
+import TxnQrModal from "@/components/TxnQrModal.vue";
 export default {
   name: 'ViewAccountDelegate',
   components: {
     AccountComponent,
     PasswordInput,
-    PkInputClean
+    PkInputClean,
+    TxnQrModal
   },
   props: {
     address: String,
@@ -196,6 +200,7 @@ export default {
     const walletPassword = ref("");
     const showPasswdError = ref(false);
     const err = ref(false); 
+    const qr =ref('')
     const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
     const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
     let fromNew = ref(false)
@@ -351,7 +356,37 @@ export default {
       }
     })
     //const delegateValue = ref(false);
-    
+    const generateQr = async() =>{
+      if(privateKey.value!=""){
+        const networkType = AppState.networkType;
+        const accountDetail = Account.createFromPrivateKey(privateKey.value, networkType);
+        const accountAPIResponse = await accountUtils.getValidAccount(accountDetail.address.address);
+        if(accountAPIResponse == true){        
+          if(accountDetail){
+            AccPublicKey.value = accountDetail.publicKey;
+          }      
+        } else {          
+          err.value = t('delegate.privateKeyErr')
+        }  
+      }else{
+        const account = WalletUtils.generateNewAccount(AppState.networkType);
+        if(account){
+          AccPublicKey.value = account.publicKey;
+        }
+      }
+      let linkAction
+      if(delegateAcc.value !== "0".repeat(64)){
+        linkAction = LinkAction.Unlink
+      }else{
+        linkAction = LinkAction.Link
+      }
+      qr.value = accountUtils.delegateTxnQr(
+        isMultisig.value,
+        PublicAccount.createFromPublicKey(acc.value?acc.value.publicKey:'0'.repeat(64),AppState.networkType),
+        AccPublicKey.value,
+        linkAction
+      )
+    }
     const delegateAcc = ref('');
     const AccPublicKey = ref("");
     const AccPrivateKey = ref("")
@@ -361,7 +396,10 @@ export default {
     const passwdPattern = "^[^ ]{8,}$";
     const internalInstance = getCurrentInstance();
     const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;    
+    const emitter = internalInstance.appContext.config.globalProperties.emitter; 
+    emitter.on('generateQr',()=>{
+      generateQr()
+    })   
     const walletName = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.name:''
     let unlinking = ref(false)
     const disableLinkBtn = computed(() => {
@@ -383,6 +421,25 @@ export default {
         }
       }else if(fromPk.value){
         if(walletPassword.value.match(passwdPattern) && showPrivateKeyError.value==false){
+          return false
+        }else{
+          return true
+        }
+      }else{
+        return true
+      }
+    });
+    const disableGenerateQr = computed(() => {
+      if(onPartial.value || fundStatus.value || (!isCosigner.value && isMultisig.value) ){
+        return true
+      }else if(!fromNew.value && !fromPk.value && !delegateValue.value){
+        return true
+      }else if(delegateValue.value){
+        return false
+      }else if(fromNew.value){
+        return false
+      }else if(fromPk.value){
+        if (showPrivateKeyError.value==false){
           return false
         }else{
           return true
@@ -540,7 +597,9 @@ export default {
       findAcc,
       fundStatus,
       topUpUrl,
-      networkType
+      networkType,
+      qr,
+      disableGenerateQr
     };
   },
 }

@@ -1,6 +1,6 @@
 import { walletState } from "@/state/walletState";
 import { readonly } from "vue";
-import { Address, Account, SignedTransaction,PublicAccount, LinkAction, NamespaceId, AliasActionType, Password, AddressAliasTransaction, AccountLinkTransaction} from "tsjs-xpx-chain-sdk";
+import { Address, Account, SignedTransaction,PublicAccount, LinkAction, NamespaceId, AliasActionType, Password, AddressAliasTransaction, AccountLinkTransaction, AggregateTransaction} from "tsjs-xpx-chain-sdk";
 import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from "@/util/chainUtils";
 import { networkState } from "@/state/networkState";
@@ -9,7 +9,7 @@ import { OtherAccount } from "@/models/otherAccount";
 import { Namespace } from "@/models/namespace";
 import { AppState } from "@/state/appState";
 import { TransactionUtils } from "./transactionUtils";
-
+import qrcode from 'qrcode-generator';
 const verifyPublicKey = async(add: string):Promise<boolean> => {
   const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
    let verify = new Promise<boolean>((resolve,reject)=>{ 
@@ -262,6 +262,25 @@ const createDelegateTransaction = (selectedCosign :string,isMultisig :boolean,mu
   return signedTransaction
 }
 
+const delegateTxnQr = (isMultisig :boolean,selectedAcc: PublicAccount, accPublicKey: string, delegateAction :LinkAction) :string =>{
+  let delegateTx :AccountLinkTransaction | AggregateTransaction
+  delegateTx = delegateTransaction(accPublicKey,delegateAction)
+  if(isMultisig){
+    let innerTx = delegateTx.toAggregate(selectedAcc)
+    let txnBuilder = AppState.buildTxn
+    delegateTx = txnBuilder.aggregateBonded([innerTx])
+  }
+  const qr = qrcode(0, 'H');
+  let data = {
+    payload: delegateTx.serialize(),
+    callbackUrl: null
+  }
+  qr.addData(JSON.stringify(data));
+  qr.make();
+  
+  return qr.createSvgTag()
+}
+
 const getDelegateFee = (isMultisig: boolean) :number=>{
   let txBuilder = AppState.buildTxn
   let delegateAction = LinkAction.Link
@@ -313,7 +332,8 @@ export const accountUtils = readonly({
   linkNamespaceToAddress,
   createDelegateTransaction,
   getValidAccount,
-  getDelegateFee
+  getDelegateFee,
+  delegateTxnQr
   //getAccInfo
   //getAccInfoFromPrivateKey
 });
