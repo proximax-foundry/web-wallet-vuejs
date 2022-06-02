@@ -20,6 +20,7 @@ const commands = {
         .click("@select_wallet")
         .click("@input_password")
         .setValue("@input_password", password)
+        .pause(1000)
         .click("@sign_in")
         .assert.urlEquals(browser + 'dashboard', 'User is successfully signed in with valid wallet name and password')
     },

@@ -15,9 +15,13 @@ module.exports = {
 
     "AddressBook_test": function (browser) {
 
-        var create = browser.page.Createwallet()
-        var signin = browser.page.Signin()
-        var addressbook = browser.page.Addressbook()
+        var create = browser.page.Createwallet();
+        var signin = browser.page.Signin();
+        var addressbook = browser.page.Addressbook();
+
+        browser.fullscreenWindow(function(result) {
+            console.log(result);
+        });
 
         // create wallet
         create

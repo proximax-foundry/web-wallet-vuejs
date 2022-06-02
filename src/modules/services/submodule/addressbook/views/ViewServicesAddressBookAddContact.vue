@@ -137,6 +137,10 @@ export default {
     });
 
     const SaveContact = () => {
+      if (contactName.value == ' ') {
+          err.value = t('general.nameRequired');
+          return
+      }
       const rawAddress = Address.createFromRawAddress(address.value);
       // let addressBook = new AddressBook(contactName.value, rawAddress.address);
       let addressBook = new AddressBook(contactName.value.trim(), rawAddress.plain(), selectContactGroups.value);

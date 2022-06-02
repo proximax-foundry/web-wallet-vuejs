@@ -365,7 +365,7 @@ export default {
     const walletName = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.name:''
     let unlinking = ref(false)
     const disableLinkBtn = computed(() => {
-      if(onPartial.value || fundStatus.value || (!isCosigner.value && isMultisig) ){
+      if(onPartial.value || fundStatus.value || (!isCosigner.value && isMultisig.value) ){
         return true
       }else if(!fromNew.value && !fromPk.value && !delegateValue.value){
         return true
