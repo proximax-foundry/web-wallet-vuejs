@@ -407,16 +407,16 @@ function getCosignerInWallet(publicKey :string) :{hasCosigner:boolean,cosignerLi
 
 const editMultisigQr = async (multisigAccount :WalletAccount | OtherAccount,coSign :string[],removeCosign :string[], numApproveTransaction :number, numDeleteUser :number ) :Promise<string> =>{
   const multisigCosignatory = [];
-  let cosignatory :PublicAccount
-  for(let cosignKey of coSign ){
-    if (cosignKey.length == 64) {
-      cosignatory = PublicAccount.createFromPublicKey(cosignKey, AppState.networkType);
+  const cosignatory :PublicAccount[]=[] 
+  for(let [index,cosignKey] of coSign.entries() ){
+    if (cosignKey.length == 64) { 
+      cosignatory[index] = PublicAccount.createFromPublicKey(cosignKey, AppState.networkType);
     } else if (cosignKey.length == 40 || cosignKey.length == 46) {
+      // option to accept address
       let address = Address.createFromRawAddress(cosignKey);
-
       try {
-        let publicKey = await getPublicKey(address);
-        cosignatory = PublicAccount.createFromPublicKey(publicKey, AppState.networkType);
+        let publicKey = await getPublicKey(address); 
+        cosignatory[index] = PublicAccount.createFromPublicKey(publicKey, AppState.networkType);
       } catch (error) {
         console.log(error);
       }
@@ -424,9 +424,10 @@ const editMultisigQr = async (multisigAccount :WalletAccount | OtherAccount,coSi
 
     multisigCosignatory.push(new MultisigCosignatoryModification(
       MultisigCosignatoryModificationType.Add,
-      cosignatory,
+      cosignatory[index],
     ));
   }
+
   removeCosign.forEach((element, index) => {
     cosignatory[coSign.length + index] = PublicAccount.createFromPublicKey(element, AppState.networkType);
     multisigCosignatory.push(new MultisigCosignatoryModification(
