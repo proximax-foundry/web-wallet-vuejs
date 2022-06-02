@@ -62,7 +62,10 @@
           <div v-html="splitCurrency(totalFeeFormatted)"></div>
         </div>
         <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
+        <div class="flex gap-2">
+          <PasswordInput class="w-full mt-5" :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
+          <TxnQrModal v-if="!disableGenerateQr" :txnQr="qr"/>
+        </div>
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="createNamespace">{{$t('namespace.registerNamespace')}}</button>
         <div class="text-center">
           <router-link :to="{name: 'ViewServicesNamespace'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
@@ -85,7 +88,7 @@
 </template>
 
 <script>
-import { computed, ref, watch } from 'vue';
+import { computed, getCurrentInstance, ref, watch } from 'vue';
 import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextInputTooltip from '@/components/TextInputTooltip.vue';
@@ -104,7 +107,8 @@ import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { WalletUtils } from '@/util/walletUtils';
-
+import TxnQrModal from "@/components/TxnQrModal.vue";
+import { PublicAccount } from 'tsjs-xpx-chain-sdk';
 export default {
   name: 'ViewServicesNamespaceCreate',
   components: {
@@ -112,13 +116,14 @@ export default {
     TextInputTooltip,
     DurationInputClean,
     SelectInputAccount,
-    SelectInputParentNamespace
+    SelectInputParentNamespace,
+    TxnQrModal
   },
   setup(){
     const router = useRouter();
     const {t} = useI18n();
     const nsRef = ref(null);
-
+    const qr = ref('')
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
 
@@ -220,6 +225,10 @@ export default {
       walletPassword.value.match(passwdPattern) && namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value) && !showNamespaceNameError.value && selectNamespace.value
     ));
 
+    const disableGenerateQr = computed(() => !(
+      namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value) && !showNamespaceNameError.value && selectNamespace.value
+    ));
+
     const isMultiSig = (address) => {
       if(walletState.currentLoggedInWallet){
         const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address) || walletState.currentLoggedInWallet.others.find((account) => account.address == address);
@@ -232,6 +241,7 @@ export default {
     const defaultAcc = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount(): null
     const selectedAccName = ref(defaultAcc?defaultAcc.name:'');
     const selectedAccAdd = ref(defaultAcc?defaultAcc.address:'');
+    const selectedAccPublicKey = ref(defaultAcc?defaultAcc.publicKey:'');
     const balance = ref(Helper.toCurrencyFormat(defaultAcc?defaultAcc.balance:0, AppState.nativeToken.divisibility));
     const balanceNumber = ref(defaultAcc?defaultAcc.balance:0);
 
@@ -316,6 +326,7 @@ export default {
       nsRef.value.clearLabel();
       selectedAccName.value = account.name;
       selectedAccAdd.value = account.address;
+      selectedAccPublicKey.value = account.publicKey
       balance.value = Helper.toCurrencyFormat(account.balance, AppState.nativeToken.divisibility);
       balanceNumber.value = account.balance;
       currentSelectedName.value = account.name;
@@ -369,6 +380,14 @@ export default {
       }
       router.push({ name: "ViewServicesNamespace", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()} });
     };
+
+    const generateQr = ()=>{
+      if(selectNamespace.value==='1'){
+        qr.value = NamespaceUtils.createRootNamespaceQr(isMultiSig(selectedAccAdd.value),PublicAccount.createFromPublicKey(selectedAccPublicKey.value,AppState.networkType), namespaceName.value, duration.value);
+      }else{
+        qr.value = NamespaceUtils.createSubNamespaceQr(isMultiSig(selectedAccAdd.value),PublicAccount.createFromPublicKey(selectedAccPublicKey.value,AppState.networkType), selectNamespace.value,namespaceName.value);
+      }
+    }
 
     watch(duration, (n) => {
       if(parseInt(n) > maxDurationInDays.value){
@@ -524,6 +543,11 @@ export default {
         }
       }
     }
+    const internalInstance = getCurrentInstance(); 
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    emitter.on('generateQr',()=>{
+      generateQr()
+    })
 
     return {
       Helper,
@@ -577,7 +601,9 @@ export default {
       removeNamespace,
       setDefaultDuration,
       cosigner,
-      defaultAcc
+      defaultAcc,
+      qr,
+      disableGenerateQr
     }
   },
 

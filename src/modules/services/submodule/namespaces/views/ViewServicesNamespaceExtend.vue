@@ -71,7 +71,11 @@
           <div v-html="splitCurrency(totalFeeFormatted)"></div>
         </div>
         <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
+        <div class="flex gap-2">
+           <PasswordInput class="w-full mt-5" :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
+          <TxnQrModal v-if="!disableGenerateQr" :txnQr="qr"/>
+        </div>
+       
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="extendNamespace">{{$t('general.extendDuration')}}</button>
         <div class="text-center">
           <router-link :to="{name: 'ViewServicesNamespace'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
@@ -82,7 +86,7 @@
 </div>
 </template>
 <script>
-import { computed, ref, watch } from 'vue';
+import { computed, getCurrentInstance, ref, watch } from 'vue';
 import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import DurationInputClean from '@/modules/services/submodule/namespaces/components/DurationInputClean.vue';
@@ -103,12 +107,15 @@ import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { useI18n } from 'vue-i18n';
+import { PublicAccount } from 'tsjs-xpx-chain-sdk';
+import TxnQrModal from "@/components/TxnQrModal.vue";
 
 export default {
   name: 'ViewServicesNamespaceExtend',
   components: {
     PasswordInput,
     DurationInputClean,
+    TxnQrModal
   },
   props: {
     namespaceId: String,
@@ -118,6 +125,7 @@ export default {
     const { t } = useI18n();
     const router = useRouter();
     const toast = useToast();
+    const qr = ref('')
     const namespaceSelect = ref(null);
     const showDurationErr = ref(false);
     const duration = ref("1");
@@ -202,7 +210,11 @@ export default {
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value)
+      walletPassword.value.match(passwdPattern) && (!showMaxDaysLabel.value) && (!showNoBalance.value) && (!isNotCosigner.value)
+    ));
+
+    const disableGenerateQr = computed(() => !(
+       (!showMaxDaysLabel.value) && (!showNoBalance.value) && (!isNotCosigner.value)
     ));
 
     const isMultiSig = (address) => {
@@ -221,6 +233,7 @@ export default {
 
     const selectedAccName = ref('');
     const selectedAccAdd = ref('');
+    const selectedAccPublicKey = ref('')
     const balance = ref('');
     const balanceNumber = ref('');
     const defaultAcc = computed(()=>{
@@ -244,6 +257,7 @@ export default {
     if(account.value){
       selectedAccName.value = account.value.name;
       selectedAccAdd.value = account.value.address;
+      selectedAccPublicKey.value = account.value.publicKey;
       balance.value = Helper.toCurrencyFormat(account.value.balance, AppState.nativeToken.divisibility);
       balanceNumber.value = account.value.balance;
     }
@@ -342,6 +356,15 @@ export default {
       router.push({ name: "ViewServicesNamespace", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()}});
     };
 
+    const generateQr = ()=>{
+      qr.value = NamespaceUtils.extendNamespaceQr(
+        isMultiSig(selectedAccAdd.value), 
+        PublicAccount.createFromPublicKey(selectedAccPublicKey.value,AppState.networkType), 
+        selectNamespace.value, 
+        duration.value
+      )
+    }
+
     const fetchAccount = (publicKey) => {
       return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
     };
@@ -423,6 +446,12 @@ export default {
       }
     };
 
+    const internalInstance = getCurrentInstance();  
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    emitter.on('generateQr',()=>{
+      generateQr()
+    })
+
     return {
       namespaceSelect,
       selectedAccName,
@@ -467,6 +496,8 @@ export default {
       currentNativeTokenName,
       maxDurationInDays,
       setDefaultDuration,
+      qr,
+      disableGenerateQr
     }
   },
 

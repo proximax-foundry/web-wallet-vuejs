@@ -125,11 +125,8 @@
 <script >
 import { Helper } from "@/util/typeHelper";
 import { computed, ref, getCurrentInstance, watch, effect } from "vue";
-import TextInput from "@/components/TextInput.vue";
 import PasswordInput from "@/components/PasswordInput.vue";
-import SelectInputPlugin from "@/components/SelectInputPlugin.vue";
 import MosaicInput from "@/modules/transfer/components/MosaicInput.vue";
-import SupplyInput from "@/components/SupplyInput.vue";
 import TransferTextareaInput from "@/modules/transfer/components/TransferTextareaInput.vue";
 import {
   createTransaction,
@@ -145,14 +142,12 @@ import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { accountUtils } from "@/util/accountUtils";
 import { TransactionUtils } from "@/util/transactionUtils";
-import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from '@/util/chainUtils';
 import { NamespaceUtils } from '@/util/namespaceUtils';
 import SelectInputSender from "@/modules/transfer/components/SelectInputSender.vue";
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
 import { AppState } from '@/state/appState';
-import { PublicAccount } from 'nem-library';
 import { Address } from 'tsjs-xpx-chain-sdk';
 export default { 
   name: "ViewTransferCreate",

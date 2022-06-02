@@ -6,6 +6,7 @@ import {
   RegisterNamespaceTransaction,
   UInt64,
   MosaicId,
+  AggregateTransaction,
 } from "tsjs-xpx-chain-sdk";
 import { walletState } from "../state/walletState";
 import { networkState } from "../state/networkState";
@@ -15,7 +16,8 @@ import {  listenerState } from "@/state/listenerState";
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 import { AppState } from "@/state/appState";
 import { TransactionUtils } from "./transactionUtils";
-
+import qrcode from 'qrcode-generator';
+import { bitOr } from "mathjs";
 export class NamespaceUtils {
 
   static async getLinkedMosaic(namespaceId: NamespaceId, endpoint: string): Promise<MosaicId>{
@@ -213,6 +215,48 @@ export class NamespaceUtils {
     return account;
   }
 
+  static createRootNamespaceQr = (isMultisig :boolean, owner :PublicAccount,namespaceName: string, duration: number) :string=>{
+    let registerRootNamespaceTransaction :RegisterNamespaceTransaction | AggregateTransaction
+    if(!isMultisig){
+      registerRootNamespaceTransaction = NamespaceUtils.rootNamespaceTransaction(namespaceName, duration);
+    }else{
+      let innerTxn = registerRootNamespaceTransaction.toAggregate(owner)
+      let txnBuilder = AppState.buildTxn
+      registerRootNamespaceTransaction = txnBuilder.aggregateBonded([innerTxn])
+    }
+    const qr = qrcode(0, 'H');
+    let data = {
+      payload: registerRootNamespaceTransaction.serialize(),
+      callbackUrl: null
+    }
+    qr.addData(JSON.stringify(data));
+    qr.make();
+    return qr.createSvgTag()
+    
+  }
+
+  static createSubNamespaceQr = (isMultisig :boolean, owner :PublicAccount,rootNamespace: string, subNamespace :string) :string=>{
+    let registerSubNamespaceTransaction :RegisterNamespaceTransaction | AggregateTransaction
+    
+    registerSubNamespaceTransaction = NamespaceUtils.subNamespaceTransaction( rootNamespace, subNamespace);
+    if(isMultisig){
+      let innerTxn = registerSubNamespaceTransaction.toAggregate(owner)
+      let txnBuilder = AppState.buildTxn
+      registerSubNamespaceTransaction = txnBuilder.aggregateBonded([innerTxn])
+    }
+    
+    const qr = qrcode(0, 'H');
+    let data = {
+      payload: registerSubNamespaceTransaction.serialize(),
+      callbackUrl: null
+    }
+    qr.addData(JSON.stringify(data));
+    qr.make();
+    
+    return qr.createSvgTag()
+    
+  }
+
   static createRootNamespace = (selectedAddress: string, walletPassword: string,  namespaceName: string, duration: number) => {
     let registerRootNamespaceTransaction = NamespaceUtils.rootNamespaceTransaction( namespaceName, duration);
     const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
@@ -264,6 +308,25 @@ export class NamespaceUtils {
     let hashLockTx = TransactionUtils.lockFundTx(aggregateBondedTxSigned)
     let signedHashlock = account.sign(hashLockTx, networkState.currentNetworkProfile.generationHash);
     TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedHashlock,aggregateBondedTxSigned );
+  }
+
+  static extendNamespaceQr = (isMultisig :boolean, owner: PublicAccount ,namespaceName: string, duration: number )=>{
+    let extendNamespaceTx :RegisterNamespaceTransaction | AggregateTransaction 
+    extendNamespaceTx = NamespaceUtils.rootNamespaceTransaction( namespaceName, duration);
+    if(isMultisig){
+      let innerTxn = extendNamespaceTx.toAggregate(owner)
+      let txnBuilder = AppState.buildTxn
+      extendNamespaceTx = txnBuilder.aggregateBonded([innerTxn])
+    }
+    const qr = qrcode(0, 'H');
+    let data = {
+      payload: extendNamespaceTx.serialize(),
+      callbackUrl: null
+    }
+    qr.addData(JSON.stringify(data));
+    qr.make();
+    
+    return qr.createSvgTag()
   }
 
   static extendNamespace = (selectedAddress: string, walletPassword: string, namespaceName: string, duration: number) => {
