@@ -21,32 +21,11 @@ module.exports = {
 
   webdriver: {},
 
-  beforeEach: function (browser, done) {
-    require('nightwatch-video-recorder').start(browser, done)
-  },
-  afterEach: function (browser, done) {
-    require('nightwatch-video-recorder').stop(browser, done)
-  },
-
   test_settings: {
     default: {
       disable_error_log: false,
       launch_url: 'https://proximax-foundry.github.io/web-wallet-vuejs/#/',
 
-      videos: {
-        fileName: "Assets_test", // Required field
-        nameAfterTest: true,
-        ext: ".mp4",
-        enabled: true,
-        deleteOnSuccess: false,
-        dir: "screens/video",
-        resolution: "1440x900",
-        fps: 15,
-        hostname: "localhost",
-        display: "0",
-        pixelFormat: "yuv420p"
-      },
-      
       screenshots: {
         enabled: true,
         path: 'screens',
