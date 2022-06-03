@@ -128,7 +128,10 @@
                     <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
                 </div>
                 <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
-                <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"  v-model="walletPassword" icon="lock" class="mt-5 mb-3" />
+                <div class="flex gap-2">
+                    <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"  v-model="walletPassword" icon="lock" class="mt-5 mb-3 w-full" />
+                    <TxnQrModal v-if="!disableGenerateQr" :txnQr="QR"/>
+                </div>
                 <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="updateMetadata()" :disabled="disableAddBtn">
                     Update Asset Metadata
                 </button>
@@ -142,7 +145,7 @@
 </template>
 <script lang="ts">
 import { Helper } from "@/util/typeHelper";
-import { computed, ref, watch } from "vue";
+import { computed, getCurrentInstance, ref, watch } from "vue";
 import PasswordInput from "@/components/PasswordInput.vue";
 import {useI18n} from 'vue-i18n'
 import { multiSign } from "@/util/multiSignatory";
@@ -156,13 +159,14 @@ import {
   Convert, MosaicMetadataTransactionBuilder, 
   AggregateTransaction, AggregateBondedTransactionBuilder, UInt64,
   MetadataQueryParams, MetadataType, MosaicMetadataTransaction,
-  MosaicId,
-  Account
+  MosaicId,Account, AggregateCompleteTransactionBuilder
 } from 'tsjs-xpx-chain-sdk';
 import { WalletAccount } from '@/models/walletAccount';
 import { OtherAccount } from '@/models/otherAccount';
 import { ThemeStyleConfig } from '@/models/stores';
 import { toSvg } from 'jdenticon';
+import qrcode from 'qrcode-generator';
+import TxnQrModal from "@/components/TxnQrModal.vue";
 
 export default { 
   name: "ViewUpdateAssetMetadata",
@@ -173,6 +177,7 @@ export default {
   components: {
     MetadataInput,
     PasswordInput,
+    TxnQrModal
   },
   setup(props) { 
     let showKeys = ref(false)
@@ -431,6 +436,10 @@ export default {
     const disableAddBtn = computed(()=>{
         return (showScopedKeyErr.value==true ||inputScopedMetadataKey.value==''||newValue.value==''||!walletPassword.value.match(passwdPattern)||showBalanceErr.value==true)
     })
+
+    const disableGenerateQr = computed(()=>{
+        return (showScopedKeyErr.value==true ||inputScopedMetadataKey.value==''||newValue.value==''||showBalanceErr.value==true)
+    })
     const findAcc = (publicKey)=>{
       if(!walletState.currentLoggedInWallet){
         return
@@ -498,6 +507,40 @@ export default {
       }else{
         oldValue.value = ""
       }
+    }
+
+    const QR = ref('')
+    const generateQr = () =>{
+      let tempHexData = ''
+      if(scopedMetadataKeyType.value==1){ //utf8
+        let hexValue = Convert.utf8ToHex(inputScopedMetadataKey.value)
+        tempHexData = hexValue + "00".repeat((16-hexValue.length)/2)
+      }else{ //hex
+        tempHexData = "00".repeat((16-inputScopedMetadataKey.value.length)/2)+inputScopedMetadataKey.value 
+      }
+      let mosaicMetadataTransaction :AggregateBondedTransactionBuilder | AggregateCompleteTransactionBuilder
+      let innerTxn = txnBuilder
+      .targetPublicKey(targetPublicAccount.value)
+      .targetMosaicId(targetAsset)
+      .scopedMetadataKey(UInt64.fromHex(tempHexData))
+      .value(newValue.value)
+      .oldValue(oldValue.value)
+      .calculateDifferences()
+      .build()
+      .toAggregate(targetPublicAccount.value)
+      mosaicMetadataTransaction = AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([innerTxn])
+      if(targetAccIsMultisig.value){
+        mosaicMetadataTransaction = AppState.buildTxn.aggregateBondedBuilder().innerTransactions([innerTxn])
+      }
+
+      const qr = qrcode(0, 'H');
+      let data = {
+        payload: mosaicMetadataTransaction.build().serialize(),
+        callbackUrl: null
+      }
+      qr.addData(JSON.stringify(data));
+      qr.make();
+      QR.value = qr.createSvgTag()
     }
     
     const updateMetadata = () => {   
@@ -638,6 +681,11 @@ export default {
         oldValue.value = ""
       }
     })
+    const internalInstance = getCurrentInstance(); 
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    emitter.on('generateQr',()=>{
+      generateQr()
+    })
 
     return {
       findAcc,
@@ -670,7 +718,9 @@ export default {
       existingScopedMetadataKeys,
       showKeys,
       scopedMetadataKeySelectable,
-      scopedMetadataKeyHex
+      scopedMetadataKeyHex,
+      disableGenerateQr,
+      QR
     };
   },
 };

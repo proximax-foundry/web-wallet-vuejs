@@ -9,7 +9,7 @@
         <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
         <router-link :to="{name: 'ViewAccountDetails',params:{address:accountAddress}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
         <router-link :to="{name:'ViewAccountAssets', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-        <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Metadata</router-link>
+        <router-link :to="{name:'ViewMetadata', params: { address: accountAddress}}" class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Metadata</router-link>
         <router-link :to="{name:'ViewMultisigHome', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
         <router-link v-if="targetAccIsMultisig" :to="{name:'ViewMultisigScheme', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
         </div>
@@ -128,7 +128,10 @@
                     <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
                 </div>
                 <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
-                <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"  v-model="walletPassword" icon="lock" class="mt-5 mb-3" />
+                <div class="flex gap-2">
+                    <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"  v-model="walletPassword" icon="lock" class="mt-5 mb-3 w-full" />
+                    <TxnQrModal v-if="!disableGenerateQr" :txnQr="QR"/>
+                </div>
                 <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="updateMetadata()" :disabled="disableAddBtn">
                     Update Account Metadata
                 </button>
@@ -155,13 +158,15 @@ import MetadataInput from '@/modules/metadataTxn/components/MetadataInput.vue'
 import { 
   PublicAccount, Convert, AccountMetadataTransactionBuilder, 
   AggregateTransaction, AggregateBondedTransactionBuilder, UInt64,
-  MetadataQueryParams, MetadataType, AccountMetadataTransaction, Account
+  MetadataQueryParams, MetadataType, AccountMetadataTransaction, Account, AggregateCompleteTransactionBuilder
 } from 'tsjs-xpx-chain-sdk';
 import { WalletAccount } from '@/models/walletAccount';
 import { OtherAccount } from '@/models/otherAccount';
 import { toSvg } from 'jdenticon';
 import { ThemeStyleConfig } from '@/models/stores';
 import { WalletUtils } from '@/util/walletUtils';
+import qrcode from 'qrcode-generator';
+import TxnQrModal from "@/components/TxnQrModal.vue";
 export default { 
   name: "ViewUpdateAccountMetadata",
   props:{
@@ -172,6 +177,7 @@ export default {
     AccountComponent,
     MetadataInput,
     PasswordInput,
+    TxnQrModal
     
   },
   setup(props) {
@@ -407,6 +413,10 @@ export default {
         return (showScopedKeyErr.value==true ||inputScopedMetadataKey.value==''||newValue.value==''||!walletPassword.value.match(passwdPattern)||showBalanceErr.value==true)
     })
 
+    const disableGenerateQr = computed(()=>{
+        return (showScopedKeyErr.value==true ||inputScopedMetadataKey.value==''||newValue.value==''||showBalanceErr.value==true)
+    })
+
     const findAcc = (publicKey)=>{
       if(!walletState.currentLoggedInWallet){
         return
@@ -474,6 +484,39 @@ export default {
         oldValue.value = ""
       }
     }
+    const QR = ref('')
+    const generateQr = () =>{
+      let tempHexData = ''
+      if(scopedMetadataKeyType.value==1){ //utf8
+        let hexValue = Convert.utf8ToHex(inputScopedMetadataKey.value)
+        tempHexData = hexValue + "00".repeat((16-hexValue.length)/2)
+      }else{ //hex
+        tempHexData = "00".repeat((16-inputScopedMetadataKey.value.length)/2)+inputScopedMetadataKey.value 
+      }
+      let accountMetadataTransaction :AggregateBondedTransactionBuilder | AggregateCompleteTransactionBuilder
+      let innerTxn = txnBuilder
+      .targetPublicKey(targetPublicAccount.value)
+      .scopedMetadataKey(UInt64.fromHex(tempHexData))
+      .value(newValue.value)
+      .oldValue(oldValue.value)
+      .calculateDifferences()
+      .build()
+      .toAggregate(targetPublicAccount.value)
+      accountMetadataTransaction = AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([innerTxn])
+      if(targetAccIsMultisig.value){
+        accountMetadataTransaction = AppState.buildTxn.aggregateBondedBuilder().innerTransactions([innerTxn])
+      }
+
+      const qr = qrcode(0, 'H');
+      let data = {
+        payload: accountMetadataTransaction.build().serialize(),
+        callbackUrl: null
+      }
+      qr.addData(JSON.stringify(data));
+      qr.make();
+      QR.value = qr.createSvgTag()
+    }
+    
     const updateMetadata = async() => {   
        if(!walletState.currentLoggedInWallet){
         return
@@ -635,6 +678,11 @@ export default {
         }
       });
     }
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    emitter.on('generateQr',()=>{
+      generateQr()
+    })
     return {
       findAcc,
       totalFee,
@@ -668,6 +716,8 @@ export default {
       existingScopedMetadataKeys,
       scopedMetadataKeySelectable,
       scopedMetadataKeyHex,
+      disableGenerateQr,
+      QR
     };
   },
 };
