@@ -234,6 +234,25 @@ const linkNamespaceToAddress = (selectedCosign :string,isMultisig :boolean, mult
   return signedTransaction
 }
 
+const linkNamespaceToAddressQr = (isMultisig :boolean, selectedAcc :PublicAccount, namespaceID: string, linkType: string, namespaceAddress :string ):string=>{
+  let namespaceTransaction :AddressAliasTransaction | AggregateTransaction
+  namespaceTransaction = linkNamespaceToAddressTransaction(namespaceID, linkType, namespaceAddress);
+  if(isMultisig){
+    let innerTx = namespaceTransaction.toAggregate(selectedAcc)
+    let txnBuilder = AppState.buildTxn
+    namespaceTransaction= txnBuilder.aggregateBonded([innerTx])
+  }
+  const qr = qrcode(0, 'H');
+  let data = {
+    payload: namespaceTransaction .serialize(),
+    callbackUrl: null
+  }
+  qr.addData(JSON.stringify(data));
+  qr.make();
+  
+  return qr.createSvgTag()
+}
+
 const createDelegateTransaction = (selectedCosign :string,isMultisig :boolean,multisigAccount: WalletAccount, walletPassword: string, accPublicKey: string, delegateAction: LinkAction) :SignedTransaction=>{
 
   let delegateTx = delegateTransaction(accPublicKey,delegateAction)
@@ -333,7 +352,8 @@ export const accountUtils = readonly({
   createDelegateTransaction,
   getValidAccount,
   getDelegateFee,
-  delegateTxnQr
+  delegateTxnQr,
+  linkNamespaceToAddressQr
   //getAccInfo
   //getAccInfoFromPrivateKey
 });

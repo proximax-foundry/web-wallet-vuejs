@@ -121,7 +121,11 @@
         </div>
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" v-model="walletPassword" icon="lock"  :disabled="disableNamespace"  />
+        <div class="flex gap-2">
+          <PasswordInput class="w-full mt-5" :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" v-model="walletPassword" icon="lock"  :disabled="disableNamespace"  />
+          <TxnQrModal v-if="!disableGenerateQr" :txnQr="qr"/>
+        </div>
+        
         <div class="mt-3"></div>
         <button v-if="selectAction== 'Link' && !pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="aliasAddressToNamespace" :disabled="disableCreate">{{$t('general.linkToNamespace')}}</button>
         <button v-if="selectAction== 'Unlink' && !pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="aliasAddressToNamespace" :disabled="disableCreate">{{$t('namespace.unlinkNamespace')}}</button>
@@ -144,7 +148,7 @@ import { walletState } from "@/state/walletState";
 import { WalletUtils } from "@/util/walletUtils";
 import { useToast } from "primevue/usetoast";
 import { Address, PublicAccount } from "tsjs-xpx-chain-sdk";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, getCurrentInstance } from "vue";
 import { Helper } from "@/util/typeHelper";
 import { useI18n } from 'vue-i18n'
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
@@ -153,6 +157,7 @@ import AddressInputClean from "@/modules/transfer/components/AddressInputClean.v
 import { listenerState } from '@/state/listenerState';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
+import TxnQrModal from "@/components/TxnQrModal.vue";
 export default {
   name: 'ViewAccountAliasAddressToNamespace',
 
@@ -160,7 +165,8 @@ export default {
     PasswordInput,
     SelectInputPluginClean,
     AccountComponent,
-    AddressInputClean
+    AddressInputClean,
+    TxnQrModal
   },
   props: {
     address: String,
@@ -168,6 +174,9 @@ export default {
   
   setup(p) {
     const { t } = useI18n();
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter; 
+    
     const totalAcc = computed(()=>{
 
     if(!walletState.currentLoggedInWallet){
@@ -235,6 +244,7 @@ export default {
     const selectNamespace = ref("");
     const walletPassword = ref("");
     const selectAction = ref("");
+    const qr = ref('')
     const isMultiSig = computed(() => {
       let isMultisig = false;
       if(walletState.currentLoggedInWallet){
@@ -338,6 +348,10 @@ export default {
 
     const disableCreate = computed(() => {
       return !(onPartial.value==false && fundStatus.value == false && walletPassword.value.match(passwordPattern) && selectAction.value != null && namespaceAddress.value != '' && selectNamespace.value != null && showAddressError.value ==false);
+    })
+
+    const disableGenerateQr = computed(() => {
+      return !(onPartial.value==false && fundStatus.value == false  && selectAction.value != null && namespaceAddress.value != '' && selectNamespace.value != null && showAddressError.value ==false);
     })
 
     const actionsOptions = computed(() => {
@@ -470,6 +484,22 @@ export default {
       }
     }
 
+    const generateQr = ()=>{
+      let acc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address)?
+      walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address) :
+      walletState.currentLoggedInWallet.others.find(acc=>acc.address==p.address) 
+      qr.value = accountUtils.linkNamespaceToAddressQr(
+        isMultiSig.value,
+        PublicAccount.createFromPublicKey(acc.publicKey,AppState.networkType),
+        selectNamespace.value,
+        selectAction.value,
+        namespaceAddress.value
+      )
+    }
+    emitter.on('generateQr',()=>{
+      generateQr()
+    })
+
     const clearInput = () => {
       showContactSelection.value = false;
       selectNamespaceRef.value.clear();
@@ -556,7 +586,9 @@ export default {
       findAcc,
       fundStatus,
       topUpUrl,
-      networkType
+      networkType,
+      qr,
+      disableGenerateQr
     };
   },
 }
