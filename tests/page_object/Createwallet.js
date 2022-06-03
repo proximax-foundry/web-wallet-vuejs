@@ -49,31 +49,31 @@ const commands = {
 
     change_network(){
         return this
-        .pause(5000)
+        .pause(2000)
         .click("@select_network")
         .click("@testnet_1")
     },
 
     navigate_mainpage(){
         return this
-        .pause(5000)
+        .pause(2000)
         .waitForElementVisible("@back")
         .click("@back")
-        .pause(5000)
+        .pause(2000)
         .click("@back")
     },
 
     // create new wallet navigation
     navigate_createnewwallet(browser){
         return this
-        .pause(8000)
+        .pause(5000)
         .click("@createnew")
-        .pause(10000)
+        .pause(2000)
         .assert.urlEquals(browser + 'create', 'Create acc wallet is clicked, user is navigated to wallet selection type.')
         .click("@createnew_wallet")
         .waitForElementVisible("@next")
         .click("@next")
-        .pause(15000)
+        .pause(4000)
         .assert.urlEquals(browser + 'create-wallet', 'When next is clicked, user is navigated to create new wallet screen.')
         .click("@signin_here")
         .assert.urlEquals(browser, 'When sign in here is clicked, user is navigated back to the main page for sign in.')
@@ -85,19 +85,19 @@ const commands = {
     // create pk wallet navigation
     navigate_createpkwallet(browser){
         return this
-        .pause(8000)
+        .pause(5000)
         .click("@createnew")
-        .pause(10000)
+        .pause(2000)
         .assert.urlEquals(browser + 'create', 'Create acc wallet is clicked, user is navigated to wallet selection type.')
         .click("@createnew_frompk")
-        .pause(10000)
+        .pause(2000)
         .click("@pknext")
-        .pause(15000)
+        .pause(4000)
         .assert.urlEquals(browser + 'import-wallet', 'When next is clicked, user is navigated to create pk wallet screen.')
-        .pause(10000)
+        .pause(2000)
         .waitForElementVisible("@signin_herepk")
         .click("@signin_herepk")
-        .pause(15000)
+        .pause(2000)
         .assert.urlEquals(browser, 'When sign in here is clicked, user is navigated back to the main page for sign in.')
         .click("@createnew")
         .click("@createnew_frompk")
@@ -107,7 +107,7 @@ const commands = {
     // create backup wallet navigation
     navigate_createbackupwallet(browser){
         return this
-        .pause(8000)
+        .pause(5000)
         .click("@createnew")
         .assert.urlEquals(browser + 'create', 'Create acc wallet is clicked, user is navigated to wallet selection type.')
         .click("@createnew_backup")
