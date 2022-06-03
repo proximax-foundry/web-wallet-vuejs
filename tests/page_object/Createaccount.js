@@ -11,7 +11,7 @@ const elements = {
     input_accountname: 'input.bg-white',
     input_accountname_pk: 'input.bg-white',
     input_walletpassword: 'input.w-full',
-    input_walletpassword_pk: 'div.w-8\ /12:nth-child(3) > div:nth-child(3) > div',
+    input_walletpassword_pk: 'div.ml-auto.mr-auto.mt-3 > div:nth-child(3) > div > input',
     input_privatekey: 'div.bg-white.py-2.border.flex.justify-between > input.w-full.text-placeholder.text-left.ml-2',
     home_icon: 'div.text-center.w-full.h-7 > a[href="#/dashboard"] > img',
     empty_accountname: '.error-text',
@@ -24,8 +24,8 @@ const elements = {
     error_invalidpk: '.error',
     wrong_walletpassword: '.error',
     password_eyeicon: '.svg-inline--fa',
-    password_eyeicon_pk: 'div.w-8\/12:nth-child(3) > div:nth-child(3) > div:nth-child(1) > svg:nth-child(2) > path:nth-child(1)',
-    privatekey_eyeicon: 'div.bg-white.py-2.border.flex.justify-between > svg:nth-child(2) > path:nth-child(1)',
+    password_eyeicon_pk: 'div.ml-auto.mr-auto.mt-3 > div:nth-child(3) > div > svg',
+    privatekey_eyeicon: 'div.bg-white.py-2.border.flex.justify-between > svg',
     public_key: '#public',
     private_key: 'div.break-all.font-semibold',
 
@@ -120,6 +120,7 @@ const commands = {
 
     eye_icon_pk(){
         return this
+        .pause(4000)
         .click('@privatekey_eyeicon')
         .assert.elementPresent('@privatekey_eyeicon', "When eye icon is clicked, private key field is unmasked")
         .click('@privatekey_eyeicon')
@@ -164,7 +165,7 @@ const commands = {
         .setValue("@input_accountname_pk", name)
         .setValue("@input_walletpassword_pk", password)
         .click("@create")
-        .pause(10000)
+        .pause(1000)
         .isVisible('@account_detailstab', callback = (result) => {
             this.assert.equal(result.value, true, 'If account is successfully created, user is navigated to the newly created account details page')
         })
