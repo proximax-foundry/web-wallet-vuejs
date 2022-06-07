@@ -11,7 +11,7 @@
         "currency":{
             "name": "XPX",
             "namespace": "prx.xpx",
-            "mosaicId": "",
+            "assetId": "",
             "namespaceId": "bffb42a19116bdf6",
             "divisibility": 6
         }
@@ -39,7 +39,7 @@
         "currency":{
             "name": "XPX",
             "namespace": "prx.xpx",
-            "mosaicId": "",
+            "assetId": "",
             "namespaceId": "bffb42a19116bdf6",
             "divisibility": 6
         }
@@ -67,7 +67,7 @@
         "currency":{
             "name": "XPX",
             "namespace": "prx.xpx",
-            "mosaicId": "",
+            "assetId": "",
             "namespaceId": "bffb42a19116bdf6",
             "divisibility": 6
         }
