@@ -11,7 +11,7 @@ const elements = {
     input_accountname: 'input.bg-white',
     input_accountname_pk: 'input.bg-white',
     input_walletpassword: 'input.w-full',
-    input_walletpassword_pk: 'div.flex.flex-col.min-full-screen.bg-white > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > input',
+    input_walletpassword_pk: 'div.w-8\/12:nth-child(3) > div:nth-child(3) > div:nth-child(1)',
     input_privatekey: 'div.bg-white.py-2.border.flex.justify-between > input.w-full.text-placeholder.text-left.ml-2',
     home_icon: 'div.text-center.w-full.h-7 > a[href="#/dashboard"] > img',
     empty_accountname: '.error-text',
@@ -24,7 +24,7 @@ const elements = {
     error_invalidpk: '.error',
     wrong_walletpassword: '.error',
     password_eyeicon: '.svg-inline--fa',
-    password_eyeicon_pk: 'div.flex.flex-col.min-full-screen.bg-white > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > div:nth-child(3) > div:nth-child(1) > svg:nth-child(2) > path',
+    password_eyeicon_pk: 'div.w-8\/12:nth-child(3) > div:nth-child(3) > div:nth-child(1) > svg:nth-child(2) > path:nth-child(1)',
     privatekey_eyeicon: 'div.bg-white.py-2.border.flex.justify-between > svg:nth-child(2) > path:nth-child(1)',
     public_key: '#public',
     private_key: 'div.break-all.font-semibold',
@@ -79,6 +79,7 @@ const commands = {
         .isVisible('@empty_accountname_pk', callback = (result) => {
             this.assert.equal(result.value, true, 'If account name has no input, error is shown')
         })
+        .pause(10000)
         .setValue("@input_walletpassword_pk", "\ue004")
         .isVisible('@empty_walletpassword_pk', callback = (result) => {
             this.assert.equal(result.value, true, 'If wallet password has no input, error is shown')
@@ -163,7 +164,7 @@ const commands = {
         .setValue("@input_accountname_pk", name)
         .setValue("@input_walletpassword_pk", password)
         .click("@create")
-        .pause(1000)
+        .pause(10000)
         .isVisible('@account_detailstab', callback = (result) => {
             this.assert.equal(result.value, true, 'If account is successfully created, user is navigated to the newly created account details page')
         })

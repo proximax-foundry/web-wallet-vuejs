@@ -11,10 +11,14 @@ module.exports = {
 
     "Multisig_test": function (browser) {
 
-        var create = browser.page.Createwallet()
-        var signin = browser.page.Signin()
-        var multisig = browser.page.Multisig()
-        var account = browser.page.Createaccount()
+        var create = browser.page.Createwallet();
+        var signin = browser.page.Signin();
+        var multisig = browser.page.Multisig();
+        var account = browser.page.Createaccount();
+
+        browser.fullscreenWindow(function(result) {
+            console.log(result);
+        });
 
         // create wallet
         create

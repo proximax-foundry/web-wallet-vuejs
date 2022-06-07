@@ -9,6 +9,10 @@ module.exports = {
       var create = browser.page.Createwallet();
       var signin = browser.page.Signin();
       var home = browser.page.Home();
+
+      browser.fullscreenWindow(function(result) {
+        console.log(result);
+    });
       
       // create wallet
       create

@@ -14,7 +14,7 @@ module.exports = {
         browser.fullscreenWindow(function(result) {
             console.log(result);
         });
-
+          
         // create wallet
         create
             .navigate()
