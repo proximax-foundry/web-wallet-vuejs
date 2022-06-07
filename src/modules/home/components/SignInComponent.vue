@@ -84,7 +84,8 @@ export default defineComponent({
       selectedWallet.value=wallet
     })
     const login = async () => {
-      
+      let networkConfigUpdated = false;
+
       if(needAPIKey.value && apikeyInput.value === ""){
         showAPIKeyError.value = true;
         apikeyError.value = "API Key required";
@@ -122,6 +123,7 @@ export default defineComponent({
         disableSignin.value = false;
 
         if(apiKeyOK){
+          networkConfigUpdated = true;
           sessionStorage.setItem("secured_auth", apikeyInput.value);
           if(localStorage.getItem("login_locking_retry")){
             localStorage.removeItem("login_locking_retry");
@@ -142,10 +144,7 @@ export default defineComponent({
           }
           
           return;
-        }
-        
-      }else{
-          await NetworkStateUtils.updateNetworkConfig();
+        } 
       }
 
       showAPIKeyError.value = false;
@@ -156,6 +155,10 @@ export default defineComponent({
         err.value = t('general.walletPasswordInvalid',{name:selectedWallet.value});
       } else {
         // let wallets = new Wallets();
+        if(!networkConfigUpdated){
+          await NetworkStateUtils.updateNetworkConfig();
+        }
+
         let wallet = walletState.wallets.filterByNetworkNameAndName(networkState.chainNetworkName, selectedWallet.value);
         //WalletUtils.refreshAllAccountDetails(wallet, networkState.currentNetworkProfile);
         WalletStateUtils.updateLoggedIn(wallet);
