@@ -143,6 +143,9 @@ export default defineComponent({
           
           return;
         }
+        
+      }else{
+          await NetworkStateUtils.updateNetworkConfig();
       }
 
       showAPIKeyError.value = false;

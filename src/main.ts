@@ -94,9 +94,11 @@ const loadThemeConfig = async () => {
 const chainProfileIntegration = async () => {
   try {
     let networksInfo: ChainProfile[];
+    let isLocalAccess = false;
 
     if (location.protocol === "file:") {
       networksInfo = appSetting.chainProfile;
+      isLocalAccess = true;
     }
     else {
       networksInfo = await fetch('./chainProfile.json', {
@@ -156,11 +158,16 @@ const chainProfileIntegration = async () => {
         chainProfileStore.httpPort = chainProfileData['httpPort'];
         chainProfileStore.network = chainProfileData['network'];
 
-        chainProfileStore.saveToLocalStorage();
-
-        if(chainProfileData['apikey']){
-          chainProfileStore.apikey = chainProfileData['apikey'];
+        if(isLocalAccess){
+          if(chainProfileData['apikey']){
+            chainProfileStore.apikey = chainProfileData['apikey'];
+          }
+          else{
+            chainProfileStore.apikey = "";
+          }
         }
+
+        chainProfileStore.saveToLocalStorage();
 
         if(!chainProfileStore.secured || (chainProfileStore.apikey && chainProfileStore.secured)){
           const endpoint = ChainUtils.buildAPIEndpoint(chainProfileStore.apiNodes[0], chainProfileStore.httpPort);
