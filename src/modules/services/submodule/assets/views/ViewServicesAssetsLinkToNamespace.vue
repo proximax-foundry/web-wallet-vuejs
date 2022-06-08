@@ -340,14 +340,8 @@ export default {
     };
 
     watch(selectAction, (n) => {
-      if(selectAsset.value){
-        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
-        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
-        balanceNumber.value = (n=='increase'?maxAmount:parseFloat(assetSupply.value));
-      }else{
-        balanceNumber.value = (n=='increase'?maxAmount:0);
-      }
-      showSupplyErr.value = supply.value>balanceNumber.value;
+      transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
     });
 
     watch(supply, (n) => {
