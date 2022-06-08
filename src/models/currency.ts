@@ -22,7 +22,7 @@ export class Currency{
         return {
             name: this.name,
             namespace: this.namespace,
-            mosaicId: this.assetId,
+            assetId: this.assetId,
             namespaceId: this.namespaceId,
             divisibility: this.divisibility
         };
