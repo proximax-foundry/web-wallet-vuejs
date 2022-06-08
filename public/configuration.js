@@ -13,7 +13,7 @@ dynamic_configuration = {
             "currency":{
                 "name": "XPX",
                 "namespace": "prx.xpx",
-                "mosaicId": "",
+                "assetId": "",
                 "namespaceId": "bffb42a19116bdf6",
                 "divisibility": 6
             }
@@ -41,7 +41,7 @@ dynamic_configuration = {
             "currency":{
                 "name": "XPX",
                 "namespace": "prx.xpx",
-                "mosaicId": "",
+                "assetId": "",
                 "namespaceId": "bffb42a19116bdf6",
                 "divisibility": 6
             }
@@ -69,7 +69,7 @@ dynamic_configuration = {
             "currency":{
                 "name": "XPX",
                 "namespace": "prx.xpx",
-                "mosaicId": "",
+                "assetId": "",
                 "namespaceId": "bffb42a19116bdf6",
                 "divisibility": 6
             }
