@@ -51,7 +51,7 @@ function generateContact(selected :string,name: string) :{value: string,label:st
     }else{
       contact.push({
         value: element.publicKey,
-        label: element.name + ' - Owner account',
+        label: wallet.convertAddressToName(element.address,true)+ ' - Owner account',
       });
     }
       
