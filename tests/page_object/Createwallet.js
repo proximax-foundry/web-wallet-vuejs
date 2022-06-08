@@ -105,6 +105,19 @@ const commands = {
         .click("@pknext")
     },
 
+    navigate_createpkwallet2(browser){
+        return this
+        .pause(5000)
+        .click("@createnew")
+        .pause(2000)
+        .assert.urlEquals(browser + 'create', 'Create acc wallet is clicked, user is navigated to wallet selection type.')
+        .click("@createnew_frompk")
+        .pause(2000)
+        .click("@pknext")
+        .pause(2000)
+        .assert.urlEquals(browser + 'import-wallet', 'When next is clicked, user is navigated to create pk wallet screen.')
+    },
+
     // create backup wallet navigation
     navigate_createbackupwallet(browser){
         return this
@@ -191,7 +204,7 @@ const commands = {
         .setValue("@input_pkpassword", password)
         .setValue("@input_pkconfirmpassword", password)
         .click("@create")
-        .pause(1000)
+        .pause(3000)
         .click("@continuelogin")
         // .assert.visible('@createsuccessful_popup', 'Wallet is successfully created from private key when private key, wallet name, password and confirm password are valid')
         // .click("@close")

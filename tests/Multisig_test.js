@@ -17,11 +17,15 @@ module.exports = {
         var multisig = browser.page.Multisig();
         var account = browser.page.Createaccount();
 
+        browser.fullscreenWindow(function(result) {
+            console.log(result);
+        });
+
         // create wallet
         create
             .navigate()
             .change_network()
-            .navigate_createpkwallet(browser.launch_url)
+            .navigate_createpkwallet2(browser.launch_url)
             .create_pkwallet(privatekey, name, password1)
 
         // sign in
@@ -57,11 +61,15 @@ module.exports = {
         var signin = browser.page.Signin()
         var multisig = browser.page.Multisig()
 
+        browser.fullscreenWindow(function(result) {
+            console.log(result);
+        });
+
         // create wallet
         create
             .navigate()
             .change_network()
-            .navigate_createpkwallet(browser.launch_url)
+            .navigate_createpkwallet2(browser.launch_url)
             .create_pkwallet(privatekey2, name, password1)
 
         // sign in

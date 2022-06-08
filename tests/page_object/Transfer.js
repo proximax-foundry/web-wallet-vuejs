@@ -83,7 +83,7 @@ const commands = {
         .isVisible('@transaction_successful', callback = result => {
             this.assert.equal(result.value, true, "A notification is shown after the transaction is processed")
         })
-        .pause(40000)
+        .pause(4000)
     },
 
     transfer_asset(amount1, amount2){

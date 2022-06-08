@@ -12,11 +12,15 @@ module.exports = {
         var signin = browser.page.Signin();
         var asset = browser.page.Assets();
 
+        browser.fullscreenWindow(function(result) {
+            console.log(result);
+        });
+
         // create wallet
         create
             .navigate()
             .change_network()
-            .navigate_createpkwallet(browser.launch_url)
+            .navigate_createpkwallet2(browser.launch_url)
             .create_pkwallet(forasset, name, password)
 
         // sign in
