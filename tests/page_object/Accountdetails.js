@@ -20,7 +20,7 @@ const elements = {
     cancel_button_wp: 'div.text-center:nth-child(4)',
     cancel_button_wp_2:'div.cursor-pointer:nth-child(5)',
     delete_successfulpopup: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    download_button: '.blue-btn',
+    download_button: '.blue-btn',    
     download_passwordpopup: '.z-50 > div:nth-child(1)',
     edit_nameicon: 'img.w-4:nth-child(2)',
     enter_passwordpopup: 'div.popup-outer-lang:nth-child(3) > div:nth-child(1)',
@@ -34,7 +34,7 @@ const elements = {
     input_password: 'input.w-full',
     input_password_wp: 'input.w-full',
     password_eyeicon_pk: '.text-gray-500 > path:nth-child(1)',
-    wallet_paper: '.textLayer',
+    wallet_paper: '#outerContainer',
     private_keyhidden: 'div.border-2:nth-child(3) > div:nth-child(8) > div:nth-child(2) > div:nth-child(1)',    
     pk_successfulpopup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
     transfer_button: 'div.flex:nth-child(5) > a:nth-child(1) > div:nth-child(2)',
@@ -142,7 +142,6 @@ const commands = {
         .setValue("@input_password_wp", password)
         .pause(1000)
         .click("@confirm_button_wp_2")
-        .pause(5000)
         .waitForElementVisible("@wallet_paper")
         .assert.elementPresent('@wallet_paper', "If wallet password is correct, wallet paper will be shown")
         .end()
