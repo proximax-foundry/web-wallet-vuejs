@@ -2,7 +2,7 @@ dynamic_configuration = {
     backupOldWallet: true,
     chainProfile: {
         "Sirius Mainnet": {
-          "version": "0.7.0",
+          "version": "0.7.1",
           "apiNodes":[
               "betelgeuse.xpxsirius.io"
           ],
@@ -13,7 +13,7 @@ dynamic_configuration = {
             "currency":{
                 "name": "XPX",
                 "namespace": "prx.xpx",
-                "mosaicId": "",
+                "assetId": "",
                 "namespaceId": "bffb42a19116bdf6",
                 "divisibility": 6
             }
@@ -30,7 +30,7 @@ dynamic_configuration = {
           }
         },
         "Sirius Testnet 1": {
-          "version": "0.0.5",
+          "version": "0.0.6",
           "apiNodes":[
               "bctestnet3.brimstone.xpxsirius.io"
           ],
@@ -41,7 +41,7 @@ dynamic_configuration = {
             "currency":{
                 "name": "XPX",
                 "namespace": "prx.xpx",
-                "mosaicId": "",
+                "assetId": "",
                 "namespaceId": "bffb42a19116bdf6",
                 "divisibility": 6
             }
@@ -58,7 +58,7 @@ dynamic_configuration = {
           }
         },
         "Sirius Testnet 2": {
-          "version": "0.0.5",
+          "version": "0.0.6",
           "apiNodes":[
               "api-2.testnet2.xpxsirius.io"
           ],
@@ -69,7 +69,7 @@ dynamic_configuration = {
             "currency":{
                 "name": "XPX",
                 "namespace": "prx.xpx",
-                "mosaicId": "",
+                "assetId": "",
                 "namespaceId": "bffb42a19116bdf6",
                 "divisibility": 6
             }

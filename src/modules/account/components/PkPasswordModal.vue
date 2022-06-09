@@ -1,6 +1,5 @@
 <template>
-    <!-- <font-awesome-icon  icon="eye" title='View Private Key' class="text-blue-link relative cursor-pointer ml-1"  ></font-awesome-icon> -->
-    <font-awesome-icon :title="$t('general.copy')" icon="copy" class="ml-2 pb-1 w-5 h-5 text-blue-link mt-0.5 cursor-pointer " @click=" toggleModal = !toggleModal"></font-awesome-icon>
+    <font-awesome-icon  icon="eye" title='View Private Key' class="text-blue-link relative cursor-pointer ml-1"  @click=" toggleModal = !toggleModal"></font-awesome-icon>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
