@@ -19,7 +19,7 @@ const commands = {
 
     navigation_assets(browser){
         return this
-        .pause(10000)
+        .pause(5000)
         .click("@assets_tab")
         .assert.urlEquals(browser + 'assets', 'User is navigated to assets page')
         .click("@createnew_asset")
@@ -38,10 +38,6 @@ const commands = {
 
     create_asset(supply, divisibility, password){
         return this
-        .pause(5000)
-        .click("@back")
-        .pause(1000)
-        .click("@createnew_asset")
         .click("@input_supply")
         .setValue("@input_supply", supply)
         .click("@input_divisibility")
