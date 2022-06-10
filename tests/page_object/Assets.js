@@ -29,7 +29,6 @@ const commands = {
     empty_password(){
         return this
         .pause(5000)
-        .click("@input_password")
         .setValue("@input_password", '\ue004')
         .isVisible('@error_emptypassword', callback = result => {
             this.assert.equal(result.value, true, "If user does not enter password, an error is shown")
