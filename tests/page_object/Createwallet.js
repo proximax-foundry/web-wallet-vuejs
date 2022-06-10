@@ -341,6 +341,7 @@ const commands = {
 module.exports = {
     elements: elements,
     commands: commands,
-    url: 'https://proximax-foundry.github.io/web-wallet-vuejs/#/',
-
+    url: function () {
+        return this.api.launchUrl
+    }
 }

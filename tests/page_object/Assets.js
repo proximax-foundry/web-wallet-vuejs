@@ -24,6 +24,7 @@ const commands = {
         .assert.urlEquals(browser + 'assets', 'User is navigated to assets page')
         .click("@createnew_asset")
         .assert.urlEquals(browser + 'create-asset', 'User is navigated to create asset page')
+        .pause(5000)
     },
 
     empty_password(){
