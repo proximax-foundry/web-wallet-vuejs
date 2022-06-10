@@ -1,13 +1,13 @@
 <template>
   <div>
-    <div class='mt-4 w-11/12 ml-auto mr-auto border-b-2 '>
+    <!-- <div class='mt-4 w-11/12 ml-auto mr-auto border-b-2 '>
       <div class = 'flex text-xxs md:text-xs font-semibold '>
         <div class= 'w-18 text-center border-b-2 pb-4 lg:pb-3 border-yellow-500'>{{$t('general.overview')}}</div>
         <router-link :to="{ name: 'ViewNormalAccount'}"  class=" w-28 text-center "  style="width:6.5rem">{{$t('account.myAcc')}}</router-link>
         <router-link :to="{ name: 'ViewMultisigAccount'}" class="text-center " style="width:9rem">{{$t('account.multisigAcc')}}</router-link>
         <router-link :to="{ name: 'ViewOtherAccount'}" class="text-center " style="width:8rem">{{$t('account.otherAcc')}}</router-link>
       </div>
-    </div>
+    </div> -->
     <div class='my-4 w-11/12 ml-auto mr-auto flex justify-between'>
       <LabelComponent />
       <div class="absolute invisible 2xl:visible text-gray-500 mt-1" style="margin-left: 40rem;">Labels</div>

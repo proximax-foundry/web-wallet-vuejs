@@ -9,9 +9,9 @@
     <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
       <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center border-b-2 pb-3 border-yellow-500'>{{$t('account.accountDetails')}}</router-link>
       <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+      <router-link :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
       <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
       <router-link :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-      <router-link v-if="isMultiSig" :to="{name:'ViewMultisigScheme', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
     </div>
     <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 px-6">
