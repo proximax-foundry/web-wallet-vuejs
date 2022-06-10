@@ -53,7 +53,7 @@ const commands = {
     invalid_address(address, status){
         return this
         .setValue("@receiver_acc", address)
-        .assert.containsText('@invalid_icon', status, 'Wallet address is invalid.')
+        .assert.textContains('@invalid_icon', status, 'Wallet address is invalid.')
         .clearValue("@receiver_acc")
 
     },
@@ -71,6 +71,7 @@ const commands = {
             this.assert.equal(result.value, true, "If user enters wrong password, an error is shown")
         })
         .clearValue("@input_password")
+        .click("@input_password")
         .setValue("@input_password", password1)
         // masked password function
         .click("@password_eyeicon")
@@ -82,7 +83,7 @@ const commands = {
         .isVisible('@transaction_successful', callback = result => {
             this.assert.equal(result.value, true, "A notification is shown after the transaction is processed")
         })
-        .pause(40000)
+        .pause(4000)
     },
 
     transfer_asset(amount1, amount2){
