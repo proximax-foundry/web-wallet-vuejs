@@ -36,10 +36,6 @@ const commands = {
 
     create_asset(supply, divisibility, password){
         return this
-        .pause(5000)
-        .click("@back")
-        .pause(1000)
-        .click("@createnew_asset")
         .click("@input_supply")
         .setValue("@input_supply", supply)
         .click("@input_divisibility")
