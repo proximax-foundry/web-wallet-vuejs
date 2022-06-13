@@ -128,7 +128,7 @@ import { walletState } from "@/state/walletState"
 import { Convert, MetadataQueryParams, MetadataType, MosaicId, NamespaceId, PublicAccount } from "tsjs-xpx-chain-sdk"
 import { computed, ref, watch } from "vue"
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
-
+import isValidUTF8 from 'utf-8-validate';
     const props = defineProps({
         address: String
     })
@@ -224,9 +224,6 @@ import AccountComponent from "@/modules/account/components/AccountComponent.vue"
             })
         })
     }
-    const isASCII = (string :string)=> {
-        return /^[\x00-\x7F]*$/.test(string);
-    }
 
     const removeDoubleZero = (string :string) =>{
         let isZero = string.endsWith('00')
@@ -239,9 +236,9 @@ import AccountComponent from "@/modules/account/components/AccountComponent.vue"
 
     const convertUtf8 = (scopedMetadataKey :string)=>{
         scopedMetadataKey =  removeDoubleZero(scopedMetadataKey )
-        let utf8 = Convert.decodeHexToUtf8(scopedMetadataKey )
-        if(isASCII(utf8)){
-            scopedMetadataKey  = utf8
+        let bytes = Convert.hexToUint8(scopedMetadataKey );
+        if(isValidUTF8(bytes)){
+            scopedMetadataKey  = Convert.decodeHexToUtf8(scopedMetadataKey)
         }
         return scopedMetadataKey
         
