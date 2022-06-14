@@ -1,5 +1,4 @@
 const elements = {
-
     back: 'a.text-blue-primary:nth-child(2)',
     assets_tab: 'a[href="#/assets"]',
     createnew_asset: 'a[href="#/create-asset"]',
@@ -12,7 +11,6 @@ const elements = {
     createasset_button: '.mt-3',
     transaction_confirmpopup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
     asset_id: '.p-datatable-tbody > tr:nth-child(1) > td:nth-child(2) > span:nth-child(1)',
-
 }
 
 const commands = {
@@ -20,12 +18,12 @@ const commands = {
     navigation_assets(browser){
         return this
         .pause(10000)
+        .pause(5000)
         .click("@assets_tab")
         .assert.urlEquals(browser + 'assets', 'User is navigated to assets page')
         .click("@createnew_asset")
         .assert.urlEquals(browser + 'create-asset', 'User is navigated to create asset page')
     },
-
     empty_password(){
         return this
         .pause(5000)
@@ -38,10 +36,6 @@ const commands = {
 
     create_asset(supply, divisibility, password){
         return this
-        .pause(5000)
-        .click("@back")
-        .pause(1000)
-        .click("@createnew_asset")
         .click("@input_supply")
         .setValue("@input_supply", supply)
         .click("@input_divisibility")
@@ -56,19 +50,14 @@ const commands = {
         })
         .pause(30000)
         .assert.visible('@asset_id', 'Asset is successfully created with id')
-
-
     },
     
-
 }
 
 module.exports = {
-
     elements: elements,
     commands: commands,
     url: function () {
         return '${this.api.launchUrl}'
     }
-
 }

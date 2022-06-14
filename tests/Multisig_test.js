@@ -2,6 +2,7 @@ var name = "Selenium"
 var password1 = "abcd1234"
 var password2 = "abcd12345"
 var privatekey = "43C2BAD9E1768A57D8D432CDCE1B69DB491090D0F84D9239AD1ACE164D545145"
+var privatekey2 = "1A752B9514FBF5EABACB7C8EA78F61A4D44F693287DDF8428C8C787F59B46D39"
 var amount = "1000"
 var message = "this is 1000 xpx"
 var xpx = "27.450000"
@@ -24,7 +25,7 @@ module.exports = {
         create
             .navigate()
             .change_network()
-            .navigate_createpkwallet(browser.launch_url)
+            .navigate_createpkwallet2(browser.launch_url)
             .create_pkwallet(privatekey, name, password1)
 
         // sign in
@@ -60,12 +61,16 @@ module.exports = {
         var signin = browser.page.Signin()
         var multisig = browser.page.Multisig()
 
+        browser.fullscreenWindow(function(result) {
+            console.log(result);
+        });
+
         // create wallet
         create
             .navigate()
             .change_network()
-            .navigate_createnewwallet(browser.launch_url)
-            .create_wallet(name, password1)
+            .navigate_createpkwallet2(browser.launch_url)
+            .create_pkwallet(privatekey2, name, password1)
 
         // sign in
         signin
@@ -73,7 +78,7 @@ module.exports = {
 
         // multisig test
         multisig
-            .navigation_multisig(browser.launch_url)
+            .navigation_multisig_2(browser.launch_url)
             .insufficient_xpx()
 
     },

@@ -8,7 +8,7 @@ var privatekey1 = '9FB0AC3CE2E5A1A8092EB7B73861F38DFE07768E6AD421CE14AE79B3203D8
 
 module.exports = {
 
-    /*"Create-account_test": function (browser) {
+    "Create-account_test": function (browser) {
 
         var create = browser.page.Createwallet();
         var signin = browser.page.Signin();
@@ -39,7 +39,7 @@ module.exports = {
             .create_account(name, password)
             .existing_name(name, password)
             
-    },*/
+    },
 
     "Create-account-frompk_test": function (browser) {
 

@@ -108,13 +108,9 @@ import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectLinkType from '@/modules/services/submodule/assets/components/SelectLinkType.vue';
 import SelectInputNamespace from '@/modules/services/submodule/assets/components/SelectInputNamespace.vue';
-import { ChainProfileConfig } from "@/models/stores/";
-import { Wallet } from "@/models/wallet";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
-import { Currency } from "@/models/currency";
 import { Helper } from '@/util/typeHelper';
-import { ChainUtils } from '@/util/chainUtils';
 import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { toSvg } from "jdenticon";
@@ -145,15 +141,11 @@ export default {
     const {t} = useI18n();
     const router = useRouter();
     const toast = useToast();
-    let maxAmount = 9999999999.999999;
     const qr = ref('')
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
-
-    const showSupplyErr = ref(false);
     const walletPassword = ref('');
     const err = ref('');
     const disabledPassword = ref(false);
-    const disabledSupply = ref(false);
     const disabledSelectAction = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
@@ -194,7 +186,7 @@ export default {
     const selectedAccAdd = ref(Helper.createAddress(props.address).plain());
     const selectedAccPublicKey = ref('')
     const balance = ref('');
-    const balanceNumber = ref(maxAmount);
+    const balanceNumber = ref(0);
 
     const isMultiSig = (address) => {
       if(walletState.currentLoggedInWallet){
@@ -221,8 +213,7 @@ export default {
       }
     });
 
-    const showNoAsset = ref(false);
-    const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value) && !showNoAsset.value);
+    const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
 
     const supply = ref('0');
 
@@ -379,14 +370,8 @@ export default {
     };
 
     watch(selectAction, (n) => {
-      if(selectAsset.value){
-        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
-        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
-        balanceNumber.value = (n=='increase'?maxAmount:parseFloat(assetSupply.value));
-      }else{
-        balanceNumber.value = (n=='increase'?maxAmount:0);
-      }
-      showSupplyErr.value = supply.value>balanceNumber.value;
+      transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
     });
 
     watch(supply, (n) => {
@@ -429,14 +414,6 @@ export default {
       }
     });
 
-    watch(showNoAsset, (n) => {
-      if(n){
-        setFormInput(true);
-      }else{
-        setFormInput(false);
-      }
-    });
-
     watch(showNoBalance, (n) => {
       if(n){
         setFormInput(true);
@@ -473,15 +450,12 @@ export default {
       lockFundCurrency,
       lockFundTotalFee,
       totalFeeFormatted,
-      showNoAsset,
-      showSupplyErr,
       err,
       walletPassword,
       disableCreate,
       showPasswdError,
       supply,
       disabledPassword,
-      disabledSupply,
       currencyName,
       isMultiSig,
       isMultiSigBool,
