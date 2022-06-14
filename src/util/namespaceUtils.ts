@@ -226,6 +226,7 @@ export class NamespaceUtils {
     const qr = qrcode(0, 'H');
     let data = {
       payload: registerRootNamespaceTransaction.serialize(),
+      type:'sign',
       callbackUrl: null
     }
     qr.addData(JSON.stringify(data));
@@ -247,6 +248,7 @@ export class NamespaceUtils {
     const qr = qrcode(0, 'H');
     let data = {
       payload: registerSubNamespaceTransaction.serialize(),
+      type:'sign',
       callbackUrl: null
     }
     qr.addData(JSON.stringify(data));
@@ -320,6 +322,7 @@ export class NamespaceUtils {
     const qr = qrcode(0, 'H');
     let data = {
       payload: extendNamespaceTx.serialize(),
+      type:'sign',
       callbackUrl: null
     }
     qr.addData(JSON.stringify(data));

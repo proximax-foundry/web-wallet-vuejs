@@ -57,6 +57,7 @@ export const createTxnQr = (recipientAddress :string,sendXPX :string,mosaicsSent
   const qr = qrcode(0, 'H');
   let data = {
     payload:transferTransaction.serialize(),
+    type:'sign',
     encrypted: encryptedMsg?true: false,
     callbackUrl: null
   }

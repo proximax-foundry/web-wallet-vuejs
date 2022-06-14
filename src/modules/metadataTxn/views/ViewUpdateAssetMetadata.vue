@@ -536,6 +536,7 @@ export default {
       const qr = qrcode(0, 'H');
       let data = {
         payload: mosaicMetadataTransaction.build().serialize(),
+        type:'sign',
         callbackUrl: null
       }
       qr.addData(JSON.stringify(data));

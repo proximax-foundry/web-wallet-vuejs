@@ -510,6 +510,7 @@ export default {
       const qr = qrcode(0, 'H');
       let data = {
         payload: accountMetadataTransaction.build().serialize(),
+        type:'sign',
         callbackUrl: null
       }
       qr.addData(JSON.stringify(data));

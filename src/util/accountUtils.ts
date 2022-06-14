@@ -245,6 +245,7 @@ const linkNamespaceToAddressQr = (isMultisig :boolean, selectedAcc :PublicAccoun
   const qr = qrcode(0, 'H');
   let data = {
     payload: namespaceTransaction .serialize(),
+    type:'sign',
     callbackUrl: null
   }
   qr.addData(JSON.stringify(data));
@@ -292,6 +293,7 @@ const delegateTxnQr = (isMultisig :boolean,selectedAcc: PublicAccount, accPublic
   const qr = qrcode(0, 'H');
   let data = {
     payload: delegateTx.serialize(),
+    type:'sign',
     callbackUrl: null
   }
   qr.addData(JSON.stringify(data));

@@ -174,6 +174,7 @@ const convertMultisigQr = async (coSign :string[], numApproveTransaction :number
   const qr = qrcode(0, 'H');
   let data = {
     payload:aggregateBondedTransaction.serialize(),
+    type:'sign',
     callbackUrl: null
   }
   qr.addData(JSON.stringify(data));
@@ -452,6 +453,7 @@ const editMultisigQr = async (multisigAccount :WalletAccount | OtherAccount,coSi
   const qr = qrcode(0, 'H');
   let data = {
     payload:aggregateBondedTransaction.serialize(),
+    type:'sign',
     callbackUrl: null
   }
   qr.addData(JSON.stringify(data));

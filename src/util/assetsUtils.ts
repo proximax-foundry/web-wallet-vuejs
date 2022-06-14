@@ -205,6 +205,7 @@ export class AssetsUtils {
     const qr = qrcode(0, 'H');
     let data = {
       payload: createAssetAggregateTransaction.serialize(),
+      type:'sign',
       callbackUrl: null
     }
     qr.addData(JSON.stringify(data));
@@ -240,6 +241,7 @@ export class AssetsUtils {
     const qr = qrcode(0, 'H');
     let data = {
       payload: modifyAssetSupplyTxn.serialize(),
+      type:'sign',
       callbackUrl: null
     }
     qr.addData(JSON.stringify(data));
@@ -283,6 +285,7 @@ export class AssetsUtils {
     const qr = qrcode(0, 'H');
     let data = {
       payload: linkAssetToNamespaceTx.serialize(),
+      type:'sign',
       callbackUrl: null
     }
     qr.addData(JSON.stringify(data));
