@@ -1,4 +1,3 @@
-import { NetworkTypes } from 'nem-library';
 import { NetworkType } from 'tsjs-xpx-chain-sdk';
 import { ChronoUnit } from 'js-joda';
 
@@ -92,16 +91,6 @@ export const environment = {
   },
   attestation: {
     address_public_test: 'VDYN53-XXEGKK-3XHQYE-K6ZBMN-JPXN57-ZBHXA3-AW55'
-  },
-  nis1: {
-    url: 'https://bctestnetswap.xpxsirius.io:7890',
-    // url: 'http://192.168.3.217:7890',
-    urlExplorer: 'http://testnet-explorer.nemtool.com/#/s_tx?hash=',
-    networkType: NetworkTypes.TEST_NET,
-    burnAddress: 'TBF4LAZUEJMBIOC6J24D6ZGGXE5W775TX555CTTN',
-    nodes: [
-      { protocol: 'https', domain: 'bctestnetswap.xpxsirius.io', port: 7890 } 
-    ],
   },
   swapAccount: {
     addressAccountMultisig: 'VAWOEOWTABXR7O3ZAK2XNA5GIBNE6PZIXDAFDWBU',

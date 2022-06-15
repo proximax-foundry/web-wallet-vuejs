@@ -24,7 +24,6 @@ import { OtherAccount } from "@/models/otherAccount";
 import { Namespace } from "@/models/namespace";
 import { Account as myAccount } from "@/models/account";
 import { TransactionUtils } from "./transactionUtils"
-import { Account as NEM_Account, NetworkTypes, NEMLibrary } from "nem-library";
 import { AddressBook } from "@/models/addressBook"
 import {AppState} from "@/state/appState";
 import { Label } from "@/models/label"
@@ -1013,23 +1012,6 @@ export class WalletUtils {
                 }
             }
         }
-    }
-
-    
-    static createNis1AccountWithPrivateKey(privateKey: string, isTestnet: boolean = false) {
-        NEMLibrary.reset();
-        let networkType: NetworkTypes;
-        if (isTestnet) {
-            networkType = NetworkTypes.TEST_NET;
-        }
-        else {
-            networkType = NetworkTypes.MAIN_NET;
-        }
-        NEMLibrary.bootstrap(networkType);
-        let tempAccount = NEM_Account.createWithPrivateKey(privateKey);
-        let publicKey = tempAccount.publicKey;
-        let new_nis1Account = new nis1Account(tempAccount.address.plain(), publicKey)
-        return new_nis1Account;
     }
 
     static async confirmedTransactionRefresh(wallet: Wallet, currencyMosaicId: string): Promise<void>{
