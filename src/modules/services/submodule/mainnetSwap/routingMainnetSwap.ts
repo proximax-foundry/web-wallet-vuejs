@@ -9,14 +9,6 @@ export const MainnetSwapRoutes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/swap-nis1',
-    name: 'ViewServicesMainnetSwapNIS1ToSirius',
-    component: () => import('@/modules/services/submodule/mainnetSwap/submodule2/nis1/views/ViewServicesMainnetSwapNIS1ToSirius.vue'),
-    meta: {
-      title: "NIS1",
-    }
-  },
-  {
     path: '/swap-sirius-eth',
     name: 'ViewServicesMainnetSwapSiriusToETH',
     component: () => import('@/modules/services/submodule/mainnetSwap/submodule2/eth/views/ViewServicesMainnetSwapSiriusToETH.vue'),
