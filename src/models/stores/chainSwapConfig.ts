@@ -1,12 +1,5 @@
 import { StoreProperties } from "./storeProperties";
 
-interface swapAllowedMosaics{
-    namespaceId: string;
-    name: string;
-    divisibility: number;
-}
-
-
 // "nis1SwapData": {
     
 //   "nis1SwapAllowedMosaics": [
