@@ -28,6 +28,7 @@
         </div>
         <div v-if="currentPage==1">
           <div class="text-lg my-7 font-bold">Transaction Details</div>
+          <div class="error error_box mb-5" v-if="!isInstallMetamask">{{$t('swap.noMetamask')}}</div>
           <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">Please make sure there is no other crypto wallet extension currently being enabled except <b>MetaMask</b>.<div class="my-2">Refer to the <a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">walkthrough<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a> for more details.</div>Please refresh this page after disabling other wallet extensions.</div>
           <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
           <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
