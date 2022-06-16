@@ -298,8 +298,10 @@ export default {
     let verifyingTxn;
     const {t} = useI18n();
     const verifyMetaMaskPlugin = ref(true);
-    if(!window.ethereum.isMetaMask){
-      verifyMetaMaskPlugin.value = false;
+    if(window.ethereum){
+      if(!window.ethereum.isMetaMask){
+        verifyMetaMaskPlugin.value = false;
+      }
     }
 
     onBeforeUnmount(() => {

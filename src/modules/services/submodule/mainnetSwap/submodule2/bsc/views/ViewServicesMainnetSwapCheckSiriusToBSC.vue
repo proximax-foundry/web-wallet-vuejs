@@ -188,8 +188,10 @@ export default {
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 
     const verifyMetaMaskPlugin = ref(true);
-    if(!window.ethereum.isMetaMask){
-      verifyMetaMaskPlugin.value = false;
+    if(window.ethereum){
+      if(!window.ethereum.isMetaMask){
+        verifyMetaMaskPlugin.value = false;
+      }
     }
 
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
