@@ -148,7 +148,7 @@ import SelectInputSender from "@/modules/transfer/components/SelectInputSender.v
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
 import { AppState } from '@/state/appState';
-import { PublicAccount } from 'nem-library';
+
 import { Address } from 'tsjs-xpx-chain-sdk';
 export default { 
   name: "ViewTransferCreate",

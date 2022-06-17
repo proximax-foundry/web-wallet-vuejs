@@ -14,33 +14,6 @@ export const AccountRoutes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/view-my-accounts',
-    name: 'ViewNormalAccount',
-    props: true,
-    component: () => import('@/modules/account/views/ViewNormalAccount.vue'),
-    meta: {
-      title: "View normal accounts",
-    }
-  },
-  {
-    path: '/view-multisig-accounts',
-    name: 'ViewMultisigAccount',
-    props: true,
-    component: () => import('@/modules/account/views/ViewMultisigAccount.vue'),
-    meta: {
-      title: "View multisig accounts",
-    }
-  },
-  {
-    path: '/view-other-accounts',
-    name: 'ViewOtherAccount',
-    props: true,
-    component: () => import('@/modules/account/views/ViewOtherAccount.vue'),
-    meta: {
-      title: "View other accounts",
-    }
-  },
-  {
     path: '/select-type-creation-account',
     name: 'ViewAccountCreateSelectType',
     props: true,

@@ -34,7 +34,6 @@
     "maska": "^1.4.1",
     "mathjs": "^10.0.2",
     "mitt": "^2.1.0",
-    "nem-library": "^2.0.0-RC4",
     "postcss": "^7.0.36",
     "postcss-custom-properties": "^10.0.0",
     "postcss-nested": "^4.2.3",
