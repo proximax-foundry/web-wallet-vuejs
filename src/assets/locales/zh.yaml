@@ -514,7 +514,7 @@ swap:
   metamaskAcc: Metamask Account
   minimum51: (MINIMUM = 51 )
   networkErr: Network Error
-  noMetamask: Metamask is not installed
+  noMetamask: MetaMask is not installed
   noOtherExtension: >-
     Please make sure there is no other crypto wallet extension currently being
     enabled except
