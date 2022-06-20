@@ -117,10 +117,13 @@ export default {
                 return false
             }
         }
-        const publicAccount = PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)
+        const publicAccount = PublicAccount.createFromPublicKey(acc.value?acc.value.publicKey:'0'.repeat(64),AppState.networkType)
 
         const noBalanceMosaics = ref([])
         const fetchNoBalanceMosaics = async()=>{
+            if(!acc.value){
+                return 
+            }
             let txnAPI = AppState.chainAPI.transactionAPI
             let txnQueryParams = new TransactionQueryParams
             txnQueryParams.embedded = true
