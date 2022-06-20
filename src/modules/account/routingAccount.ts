@@ -65,6 +65,24 @@ export const AccountRoutes: RouteRecordRaw[] = [
       title: "Account Namespaces",
     }
   },
+  {
+    path: '/view-transactions/:address',
+    name: 'ViewAccountConfirmedTransactions',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccountConfirmedTransactions.vue'),
+    meta: {
+      title: "Account Confirmed Transactions",
+    }
+  },
+  {
+    path: '/view-pending-transactions/:address',
+    name: 'ViewAccountPendingTransactions',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccountPendingTransactions.vue'),
+    meta: {
+      title: "Account Pending Transactions",
+    }
+  },
   
   ...DelegateRoutes,
   ...LinkToNamespaceRoutes,
