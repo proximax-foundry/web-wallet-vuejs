@@ -24,7 +24,7 @@
             <div class="col-span-2">Balance</div>
             <div>Creator</div>
         </div>
-        <div v-for="(mosaic, index) in mosaics" :key="index">
+        <div v-for="(mosaic, index) in allMosaics" :key="index">
             <div class="grid grid-cols-7 text-xs my-4">
                 <a :href="explorerLink(mosaic.id)" target=_new class="col-span-2"><div  class="inline-block text-xs mt-1.5 cursor-pointer transition-all duration-200 break-all pr-7 ">{{mosaic.id}}</div></a>
                 <div class="col-span-2 break-all pr-7 ">
@@ -57,7 +57,7 @@
                     </div>
                 </div>
             </div>
-            <div v-if="index != (mosaics.length - 1)" class='my-2 gray-line' ></div>
+            <div v-if="index != (allMosaics.length - 1)" class='my-2 gray-line' ></div>
         </div>
         <div class="flex mt-3" >
             <router-link :to="{ name: 'ViewTransferCreate'}" class=" bg-blue-primary px-5 py-2 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-24 "><img src="@/assets/img/icon-transfer-white.svg" class="  inline-block w-4 h-4 mt-0.5  cursor-pointer mr-1">{{$t('general.transfer')}}</router-link>
@@ -70,12 +70,13 @@
 </template>
 
 <script>
-import { watch, ref, computed, getCurrentInstance } from "vue";
+import { watch, ref, computed, getCurrentInstance, onMounted } from "vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import { walletState } from '@/state/walletState';
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { networkState } from '@/state/networkState';
+import { MosaicId, PublicAccount, TransactionGroupType, TransactionQueryParams, TransactionType } from 'tsjs-xpx-chain-sdk';
 export default {
     name:'ViewAccountAssets',
     components:{
@@ -116,6 +117,48 @@ export default {
                 return false
             }
         }
+        const publicAccount = PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)
+
+        const noBalanceMosaics = ref([])
+        const fetchNoBalanceMosaics = async()=>{
+            let txnAPI = AppState.chainAPI.transactionAPI
+            let txnQueryParams = new TransactionQueryParams
+            txnQueryParams.embedded = true
+            txnQueryParams.type = [TransactionType.MOSAIC_DEFINITION]
+            txnQueryParams.publicKey = publicAccount
+            let searchedTxn = await txnAPI.searchTransactions(TransactionGroupType.CONFIRMED,txnQueryParams)
+            searchedTxn.transactions.forEach(async(txn)=>{
+                let mosaicId = new MosaicId([txn.mosaicId.id.lower,txn.mosaicId.id.higher])
+                let findAsset =  acc.value.assets.find(asset=>asset.idHex == mosaicId.id.toHex())
+                if(!findAsset){
+                    
+                    noBalanceMosaics.value.push({
+                        id: mosaicId.id.toHex(),
+                        balance: 0,
+                        isCreator: true
+                    });
+                }
+            })
+            let mosaicIds = []
+            noBalanceMosaics.value.forEach(mosaic=>{
+                mosaicIds.push(new MosaicId(mosaic.id))
+            })
+            let mosaicNames = await AppState.chainAPI.assetAPI.getMosaicsNames(mosaicIds)
+            noBalanceMosaics.value.forEach((mosaic,index)=>{
+                mosaic.name = mosaicNames[index].names.length>0?mosaicNames[index].names[0].namespaceId.fullName:'-'
+            })
+
+        }
+        if(AppState.isReady){
+            fetchNoBalanceMosaics();
+        }else{
+            let readyWatcher = watch(AppState, (value) => {
+                if(value.isReady){
+                fetchNoBalanceMosaics();
+                readyWatcher();
+                }
+            });
+        }
         const mosaics = computed(() => {
             
             var mosaicOption = [];
@@ -139,7 +182,12 @@ export default {
             });
             
             return mosaicOption;
+
         });
+
+        const allMosaics = computed(()=>{
+            return mosaics.value.concat(noBalanceMosaics.value)
+        })
 
         const toggleMenu = ref([])
         const isHover = ref([])
@@ -202,6 +250,7 @@ export default {
 
         });
         return{
+            allMosaics,
             acc,
             isDelegate,
             isMultiSig,
