@@ -14,8 +14,8 @@
         <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
     </div>
     <div class='border-2 border-t-0 px-6 py-3'>
-        <div v-if="mosaics.length==0" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
-        <div v-if="mosaics.length==0" class='text-txs w-9/12 ml-auto mr-auto text-gray-400 text-center'>
+        <div v-if="allMosaics.length==0" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
+        <div v-if="allMosaics.length==0" class='text-txs w-9/12 ml-auto mr-auto text-gray-400 text-center'>
           <span >{{$t('account.noAssets')}}</span>
         </div>
         <div v-else class="grid grid-cols-7 text-gray-400 font-semibold text-xs uppercase mb-2">
@@ -24,7 +24,9 @@
             <div class="col-span-2">Balance</div>
             <div>Creator</div>
         </div>
-        <div v-for="(mosaic, index) in mosaics" :key="index">
+        <input v-if="noBalanceMosaics.length" id="hideBalance" type="checkbox" v-model="isHideZeroBalance">
+        <label v-if="noBalanceMosaics.length" class="text-xs ml-2 text-gray-400 font-semibold" for="hideBalance">Hide 0 Balances</label>
+        <div v-for="(mosaic, index) in allMosaics" :key="index">
             <div class="grid grid-cols-7 text-xs my-4">
                 <a :href="explorerLink(mosaic.id)" target=_new class="col-span-2"><div  class="inline-block text-xs mt-1.5 cursor-pointer transition-all duration-200 break-all pr-7 ">{{mosaic.id}}</div></a>
                 <div class="col-span-2 break-all pr-7 ">
@@ -46,7 +48,7 @@
                             <img v-if="mosaic.isCreator" src="@/assets/img/icon-green-tick.svg" class="h-5 w-5">
                             <img v-else src="@/assets/img/icon-red-x.svg" class="h-5 w-5">
                         </div>
-                        <img v-if="mosaic.isCreator" src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2 mt-0.5" @mouseover="isHover[index] = true" @mouseout="isHover[index] = false" @click="toggleMenu[index]=!toggleMenu[index]">
+                        <img v-if="mosaic.isCreator && mosaic.balance!=0" src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2 mt-0.5" @mouseover="isHover[index] = true" @mouseout="isHover[index] = false" @click="toggleMenu[index]=!toggleMenu[index]">
                         <div v-if="toggleMenu[index]==true" class="mt-5 pop-option inline-block w-36 absolute rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" >
                             <div class="my-2" >
                                 <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: mosaic.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
@@ -57,7 +59,7 @@
                     </div>
                 </div>
             </div>
-            <div v-if="index != (mosaics.length - 1)" class='my-2 gray-line' ></div>
+            <div v-if="index != (allMosaics.length - 1)" class='my-2 gray-line' ></div>
         </div>
         <div class="flex mt-3" >
             <router-link :to="{ name: 'ViewTransferCreate'}" class=" bg-blue-primary px-5 py-2 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-24 "><img src="@/assets/img/icon-transfer-white.svg" class="  inline-block w-4 h-4 mt-0.5  cursor-pointer mr-1">{{$t('general.transfer')}}</router-link>
@@ -70,12 +72,13 @@
 </template>
 
 <script>
-import { watch, ref, computed, getCurrentInstance } from "vue";
+import { watch, ref, computed, getCurrentInstance, onMounted } from "vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import { walletState } from '@/state/walletState';
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { networkState } from '@/state/networkState';
+import { MosaicId, PublicAccount, TransactionGroupType, TransactionQueryParams, TransactionType } from 'tsjs-xpx-chain-sdk';
 export default {
     name:'ViewAccountAssets',
     components:{
@@ -116,6 +119,49 @@ export default {
                 return false
             }
         }
+        const publicAccount = PublicAccount.createFromPublicKey(acc.value?acc.value.publicKey:'0'.repeat(64),AppState.networkType)
+        const noBalanceMosaics = ref([])
+        const fetchNoBalanceMosaics = async()=>{
+            if(!acc.value){
+                return 
+            }
+            let txnAPI = AppState.chainAPI.transactionAPI
+            let txnQueryParams = new TransactionQueryParams
+            txnQueryParams.embedded = true
+            txnQueryParams.type = [TransactionType.MOSAIC_DEFINITION]
+            txnQueryParams.publicKey = publicAccount
+            let searchedTxn = await txnAPI.searchTransactions(TransactionGroupType.CONFIRMED,txnQueryParams)
+            searchedTxn.transactions.forEach(async(txn)=>{
+                let mosaicId = new MosaicId([txn.mosaicId.id.lower,txn.mosaicId.id.higher])
+                let findAsset =  acc.value.assets.find(asset=>asset.idHex == mosaicId.id.toHex())
+                if(!findAsset){
+                    
+                    noBalanceMosaics.value.push({
+                        id: mosaicId.id.toHex(),
+                        balance: 0,
+                        isCreator: true
+                    });
+                }
+            })
+            let mosaicIds = []
+            noBalanceMosaics.value.forEach(mosaic=>{
+                mosaicIds.push(new MosaicId(mosaic.id))
+            })
+            let mosaicNames = await AppState.chainAPI.assetAPI.getMosaicsNames(mosaicIds)
+            noBalanceMosaics.value.forEach((mosaic,index)=>{
+                mosaic.name = mosaicNames[index].names.length>0?mosaicNames[index].names[0].namespaceId.fullName:'-'
+            })
+        }
+        if(AppState.isReady){
+            fetchNoBalanceMosaics();
+        }else{
+            let readyWatcher = watch(AppState, (value) => {
+                if(value.isReady){
+                fetchNoBalanceMosaics();
+                readyWatcher();
+                }
+            });
+        }
         const mosaics = computed(() => {
             
             var mosaicOption = [];
@@ -140,7 +186,14 @@ export default {
             
             return mosaicOption;
         });
-
+        const isHideZeroBalance = ref(false)
+        const allMosaics = computed(()=>{
+            if(!isHideZeroBalance.value){
+                return mosaics.value.concat(noBalanceMosaics.value)
+            }else{
+                return mosaics.value
+            }
+        })
         const toggleMenu = ref([])
         const isHover = ref([])
         for(let i = 0;i<mosaics.value.length;i++){
@@ -199,9 +252,11 @@ export default {
                     toggleMenu.value[hoverIndexes[0]] = true
                 }
             } 
-
         });
         return{
+            noBalanceMosaics,
+            isHideZeroBalance,
+            allMosaics,
             acc,
             isDelegate,
             isMultiSig,
@@ -218,5 +273,4 @@ export default {
 </script>
 
 <style>
-
 </style>
