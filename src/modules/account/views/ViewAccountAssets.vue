@@ -46,7 +46,7 @@
                             <img v-if="mosaic.isCreator" src="@/assets/img/icon-green-tick.svg" class="h-5 w-5">
                             <img v-else src="@/assets/img/icon-red-x.svg" class="h-5 w-5">
                         </div>
-                        <img v-if="mosaic.isCreator" src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2 mt-0.5" @mouseover="isHover[index] = true" @mouseout="isHover[index] = false" @click="toggleMenu[index]=!toggleMenu[index]">
+                        <img v-if="mosaic.isCreator && mosaic.balance!=0" src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2 mt-0.5" @mouseover="isHover[index] = true" @mouseout="isHover[index] = false" @click="toggleMenu[index]=!toggleMenu[index]">
                         <div v-if="toggleMenu[index]==true" class="mt-5 pop-option inline-block w-36 absolute rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" >
                             <div class="my-2" >
                                 <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: mosaic.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
