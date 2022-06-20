@@ -26,13 +26,12 @@
 <script setup lang='ts'>
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import PendingDataTable from "@/modules/account/components/PendingDataTable.vue"
-import { TransactionFilterTypes } from "@/modules/dashboard/model/transactions/transactionFilterType";
 import { DashboardService } from "@/modules/dashboard/service/dashboardService";
 import { AppState } from "@/state/appState";
 import { listenerState } from "@/state/listenerState";
 import { walletState } from "@/state/walletState";
 import { Helper } from "@/util/typeHelper";
-import { SignedTransaction, TransactionMapping } from "tsjs-xpx-chain-sdk";
+import { TransactionMapping } from "tsjs-xpx-chain-sdk";
 import { computed, ref, watch } from "vue";
 
     const props = defineProps({

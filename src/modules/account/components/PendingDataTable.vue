@@ -174,11 +174,7 @@ import { AppState } from '@/state/appState';
     onUnmounted(() => {
       window.removeEventListener("resize", screenResizeHandler);
     });
-    const blockExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.blockRoute);
-    const addressExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.addressRoute);
     const hashExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.hashRoute);
-    const namespaceExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute);
-    const assetExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.assetInfoRoute);
     const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
     const publicKeyExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.publicKeyRoute);
     const getPublicKeyExplorerUrl = (publicKey :string) :string=>{
@@ -190,9 +186,6 @@ import { AppState } from '@/state/appState';
     const gotoHashExplorer = (hash)=>{
       window.open(explorerBaseURL.value + hashExplorerURL.value + "/" + hash, "_blank");
     }
-    const formatTime = (timestamp :number) :string => {
-      return Helper.formatDeadline(timestamp);
-    } 
 
     const checkOtherAsset = (assets) => {
       if(assets){
