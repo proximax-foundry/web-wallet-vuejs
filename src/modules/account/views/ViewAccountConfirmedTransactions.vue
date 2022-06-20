@@ -1,0 +1,253 @@
+<template>
+<div>
+    <div class='flex cursor-pointer'>
+        <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'><img src="@/assets/img/chevron_left.svg" class="w-5 inline-block">{{$t('general.back')}}</router-link>
+    </div>
+    <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
+        <AccountComponent :address="address" class="mb-10"/>
+        <div class = 'flex text-txs md:text-xs font-semibold border-b-2 menu_title_div'>
+            <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
+            <router-link  :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
+            <router-link  :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
+            <router-link  :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
+            <router-link  :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
+            <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.transaction',2)}}</div>
+        </div>
+        <div class="flex my-2  gap-5 flex-none text-xs md:text-sm">
+            <div class="border border-black rounded-md text-white py-2 px-4" style="background: #007CFF">Confirmed</div>
+            <router-link :to="{name:'ViewAccountPendingTransactions', params: { address: address}}" class="border opacity-60 hover:opacity-100 cursor-pointer border-black rounded-md text-white py-2 px-5" style="background: #f3a91d">Pending</router-link>
+        </div>
+        <div class="bg-white px-2 " >
+            <div class="flex justify-between items-center">
+                <div>
+                <div v-if="selectedTxnType === TransactionFilterType.ACCOUNT" class="flex items-center">
+                    <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">{{$t('dashboard.accountAdded')}}</span>
+                    <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">{{$t('dashboard.accountRemoved')}}</span>
+                </div>
+                <div v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE" class="flex items-center">
+                    <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">{{$t('dashboard.buyOffer')}}</span>
+                    <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">{{$t('dashboard.sellOffer')}}</span>
+                </div>
+                <div v-if="selectedTxnType === TransactionFilterType.ASSET" class="flex items-center">
+                    <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">{{$t('general.enabled')}}</span>
+                    <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">{{$t('general.disabled')}}</span>
+                </div>
+                </div>
+                <div class="bg-gray-50">
+                <select v-model="selectedTxnType" @change="changeSearchTxnType" class="border border-gray-200 px-2 py-1 focus:outline-none">
+                    <option value="all" class="text-sm">All</option>
+                    <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm">{{ txnType.label}}</option>
+                </select>
+                </div>
+            </div>
+            <div v-if="boolIsTxnFetched">
+                <MixedTxnDataTable v-if="selectedTxnType === 'all'" :selectedGroupType="transactionGroupType.CONFIRMED"  :transactions="searchedTransactions" :currentAddress="accAddress"></MixedTxnDataTable>
+                <TransferTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.TRANSFER" :selectedGroupType="transactionGroupType.CONFIRMED"  :transactions="searchedTransactions" :currentAddress="accAddress"></TransferTxnDataTable>
+                <AccountTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ACCOUNT" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></AccountTxnDataTable>
+                <AggregateTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.AGGREGATE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></AggregateTxnDataTable>
+                <AliasTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ALIAS" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></AliasTxnDataTable>
+                <AssetTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ASSET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></AssetTxnDataTable>
+                <ChainTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.CHAIN" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></ChainTxnDataTable>
+                <ExchangeTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></ExchangeTxnDataTable>
+                <LinkTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LINK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></LinkTxnDataTable>
+                <LockTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LOCK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></LockTxnDataTable>
+                <MetadataTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.METADATA" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></MetadataTxnDataTable>
+                <NamespaceTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.NAMESPACE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></NamespaceTxnDataTable>
+                <RestrictionTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></RestrictionTxnDataTable>
+                <SecretTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.SECRET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></SecretTxnDataTable>
+            </div>
+            <div v-else class="border-t border-b border-gray-200 text-gray-400 text-xs mt-10">
+                <div class="border-t border-b border-gray-200 my-3 py-6 px-2">
+                    <div class="flex justify-center items-center border-gray-400">
+                        <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-navy-primary mr-2"></div>
+                        {{$t('dashboard.fetchingTx')}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</template>
+
+<script setup lang='ts'>
+import AccountComponent from "@/modules/account/components/AccountComponent.vue";
+import { TransactionFilterType, TransactionFilterTypes } from "@/modules/dashboard/model/transactions/transactionFilterType";
+import { DashboardService } from "@/modules/dashboard/service/dashboardService";
+import { walletState } from "@/state/walletState";
+import { Helper } from "@/util/typeHelper";
+import { computed, ref, watch } from "vue";
+import MixedTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/MixedTxnDataTable.vue';
+import TransferTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/TransferTxnDataTable.vue';
+import AccountTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AccountTxnDT.vue';
+import AggregateTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AggregateTxnDT.vue';
+import AliasTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AliasTxnDT.vue';
+import AssetTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AssetTxnDT.vue';
+import ChainTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/ChainTxnDT.vue';
+import ExchangeTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/ExchangeTxnDT.vue';
+import LinkTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/LinkTxnDT.vue';
+import LockTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/LockTxnDT.vue';
+import MetadataTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/MetadataTxnDT.vue';
+import NamespaceTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/NamespaceTxnDT.vue';
+import RestrictionTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/RestrictionTxnDT.vue';
+import SecretTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/SecretTxnDT.vue';
+import { AppState } from "@/state/appState";
+import { Transaction } from "tsjs-xpx-chain-sdk";
+
+    const props = defineProps({
+        address: String
+    })
+    let selectedTxnType = ref("all") 
+    let transactionGroupType = Helper.getTransactionGroupType()
+    let selectedTxnGroupType = transactionGroupType.CONFIRMED; 
+    const searchedTransactions = ref([]); 
+    let boolIsTxnFetched = ref(false);
+    let allTxnQueryParams = Helper.createTransactionQueryParams();
+    let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
+    allTxnQueryParams.updateFieldOrder(blockDescOrderSortingField);
+
+    let txnTypeList = Object.entries(TransactionFilterType).map(([label, value])=>({label, value}));
+    const acc = computed(()=>{
+        if(!walletState.currentLoggedInWallet){
+            return null
+        }
+        let acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == props.address) || walletState.currentLoggedInWallet.others.find((add) => add.address == props.address);
+        if(!acc){
+            return null
+        }
+        return acc
+    })
+    const accAddress = computed(()=> acc.value?acc.value.address:'');
+    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, acc.value);
+    const formatConfirmedTransaction = async(transactions :Transaction[])=>{
+
+        let formattedTxns = [];
+        allTxnQueryParams.embedded = true;
+        switch(selectedTxnType.value){ 
+        case TransactionFilterType.TRANSFER:
+            formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactions);
+            break;
+        case TransactionFilterType.ACCOUNT:
+            formattedTxns = await dashboardService.formatConfirmedAccountTransaction(transactions);
+            break;
+        case TransactionFilterType.AGGREGATE:
+            formattedTxns = await dashboardService.formatConfirmedAggregateTransaction(transactions);
+            break;
+        case TransactionFilterType.RESTRICTION:
+            formattedTxns = await dashboardService.formatConfirmedRestrictionTransaction(transactions);
+            break;
+        case TransactionFilterType.SECRET:
+            formattedTxns = await dashboardService.formatConfirmedSecretTransaction(transactions);
+            break;
+        case TransactionFilterType.ALIAS:
+            formattedTxns = await dashboardService.formatConfirmedAliasTransaction(transactions);
+            break;
+        case TransactionFilterType.ASSET:
+            formattedTxns = await dashboardService.formatConfirmedAssetTransaction(transactions);
+            break;
+        case TransactionFilterType.METADATA:
+            formattedTxns = await dashboardService.formatConfirmedMetadataTransaction(transactions);
+            break;
+        case TransactionFilterType.CHAIN:
+            formattedTxns = await dashboardService.formatConfirmedChainTransaction(transactions);
+            break;
+        case TransactionFilterType.EXCHANGE:
+            formattedTxns = await dashboardService.formatConfirmedExchangeTransaction(transactions);
+            break;
+        case TransactionFilterType.LINK:
+            formattedTxns = await dashboardService.formatConfirmedLinkTransaction(transactions);
+            break;
+        case TransactionFilterType.LOCK:
+            formattedTxns = await dashboardService.formatConfirmedLockTransaction(transactions);
+            break;
+        case TransactionFilterType.NAMESPACE:
+            formattedTxns = await dashboardService.formatConfirmedNamespaceTransaction(transactions);
+            break;
+        default:
+            allTxnQueryParams.embedded = false;
+            formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactions);
+            break;
+        }
+
+        return formattedTxns;
+    }
+
+    const changeSearchTxnType = () =>{
+      boolIsTxnFetched.value = false;
+      searchedTransactions.value = [];
+      let txnFilterGroup = selectedTxnType.value; 
+      switch (txnFilterGroup) {
+        case TransactionFilterType.TRANSFER:
+          allTxnQueryParams.type = TransactionFilterTypes.getTransferTypes();
+          break;
+        case TransactionFilterType.ACCOUNT:
+          allTxnQueryParams.type = TransactionFilterTypes.getAccountTypes();
+          break;
+        case TransactionFilterType.ASSET:
+          allTxnQueryParams.type = TransactionFilterTypes.getAssetTypes();
+          break;
+        case TransactionFilterType.ALIAS:
+          allTxnQueryParams.type = TransactionFilterTypes.getAliasTypes();
+          break;
+        case TransactionFilterType.NAMESPACE:
+          allTxnQueryParams.type = TransactionFilterTypes.getNamespaceTypes();
+          break;
+        case TransactionFilterType.METADATA:
+          allTxnQueryParams.type = TransactionFilterTypes.getMetadataTypes();
+          break;
+        case TransactionFilterType.CHAIN:
+          allTxnQueryParams.type = TransactionFilterTypes.getChainTypes();
+          break;
+        case TransactionFilterType.EXCHANGE:
+          allTxnQueryParams.type = TransactionFilterTypes.getExchangeTypes();
+          break;
+        case TransactionFilterType.AGGREGATE:
+          allTxnQueryParams.type = TransactionFilterTypes.getAggregateTypes();
+          break;
+        case TransactionFilterType.LINK:
+          allTxnQueryParams.type = TransactionFilterTypes.getLinkTypes();
+          break;
+        case TransactionFilterType.LOCK:
+          allTxnQueryParams.type = TransactionFilterTypes.getLockTypes();
+          break;
+        case TransactionFilterType.SECRET:
+          allTxnQueryParams.type = TransactionFilterTypes.getSecretTypes();
+          break;
+        case TransactionFilterType.RESTRICTION:
+          allTxnQueryParams.type = TransactionFilterTypes.getRestrictionTypes();
+          break;
+        default:
+          allTxnQueryParams.type = undefined;
+          break;
+      }
+
+      searchTransaction();
+    }
+
+    const searchTransaction = async() =>{
+
+        allTxnQueryParams.pageNumber = 1;
+        allTxnQueryParams.publicKey = acc.value.publicKey;
+        let transactionSearchResult = await dashboardService.searchTxns(selectedTxnGroupType, allTxnQueryParams);
+        let formattedTxns = await formatConfirmedTransaction(transactionSearchResult.transactions);
+        searchedTransactions.value = formattedTxns;
+        
+        boolIsTxnFetched.value = true;
+    }
+    const init = ()=>{
+      searchTransaction()
+    }
+
+    if(AppState.isReady){ 
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
+          init();
+          readyWatcher();
+        }
+      });
+    }
+
+</script>
+
