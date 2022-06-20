@@ -14,8 +14,8 @@
         <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
     </div>
     <div class='border-2 border-t-0 px-6 py-3'>
-        <div v-if="mosaics.length==0" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
-        <div v-if="mosaics.length==0" class='text-txs w-9/12 ml-auto mr-auto text-gray-400 text-center'>
+        <div v-if="allMosaics.length==0" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
+        <div v-if="allMosaics.length==0" class='text-txs w-9/12 ml-auto mr-auto text-gray-400 text-center'>
           <span >{{$t('account.noAssets')}}</span>
         </div>
         <div v-else class="grid grid-cols-7 text-gray-400 font-semibold text-xs uppercase mb-2">
@@ -24,6 +24,8 @@
             <div class="col-span-2">Balance</div>
             <div>Creator</div>
         </div>
+        <input v-if="noBalanceMosaics.length" id="hideBalance" type="checkbox" v-model="isHideZeroBalance">
+        <label v-if="noBalanceMosaics.length" class="text-xs ml-2 text-gray-400 font-semibold" for="hideBalance">Hide 0 Balances</label>
         <div v-for="(mosaic, index) in allMosaics" :key="index">
             <div class="grid grid-cols-7 text-xs my-4">
                 <a :href="explorerLink(mosaic.id)" target=_new class="col-span-2"><div  class="inline-block text-xs mt-1.5 cursor-pointer transition-all duration-200 break-all pr-7 ">{{mosaic.id}}</div></a>
@@ -187,9 +189,13 @@ export default {
             return mosaicOption;
 
         });
-
+        const isHideZeroBalance = ref(false)
         const allMosaics = computed(()=>{
-            return mosaics.value.concat(noBalanceMosaics.value)
+            if(!isHideZeroBalance.value){
+                return mosaics.value.concat(noBalanceMosaics.value)
+            }else{
+                return mosaics.value
+            }
         })
 
         const toggleMenu = ref([])
@@ -253,6 +259,8 @@ export default {
 
         });
         return{
+            noBalanceMosaics,
+            isHideZeroBalance,
             allMosaics,
             acc,
             isDelegate,
