@@ -31,7 +31,7 @@ module.exports = {
         path: 'screens',
         on_failure: true
       },
-
+      
       desiredCapabilities: {
         browserName : 'firefox'
       },
@@ -258,4 +258,6 @@ function loadServices() {
   try {
     Services.geckodriver = require('geckodriver');
   } catch (err) {}
+
+
 }

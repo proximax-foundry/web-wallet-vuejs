@@ -1,6 +1,6 @@
 {
   "name": "web-wallet-vuejs",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -46,6 +46,7 @@
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.3",
     "tsjs-xpx-chain-sdk": "^0.9.10",
     "tslib": "^2.3.1",
+    "utf-8-validate": "^5.0.9",
     "v-tooltip": "^4.0.0-alpha.1",
     "v-wave": "^1.2.8",
     "vue": "^3.2.31",

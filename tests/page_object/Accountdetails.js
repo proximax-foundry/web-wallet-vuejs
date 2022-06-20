@@ -6,12 +6,12 @@ const elements = {
     accountname_value: 'div.justify-center:nth-child(2) > div:nth-child(1) > div:nth-child(1)',
     change_default: '.font-txs > img:nth-child(1)',
     new_account: 'div.p-2:nth-child(2)',
-    back: 'a.text-blue-primary:nth-child(2)',
+    back: 'a[href="#/dashboard"]',
     copy_address: 'div.justify-center:nth-child(2) > div:nth-child(2) > svg:nth-child(2) > path:nth-child(2)',
     copyaddress_popup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
     copy_publickey: '.pb-1 > path:nth-child(2)',
     copypublickey_popup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    copy_privatekey: 'div.border-2:nth-child(3) > div:nth-child(6) > svg:nth-child(2) > path:nth-child(2)',
+    copy_privatekey: 'div.border-2:nth-child(3) > div:nth-child(8) > div:nth-child(3) > svg:nth-child(2) > path:nth-child(2)',
     confirm_button_pk: 'div.blue-btn:nth-child(3)',
     confirm_button_wp: 'div.blue-btn:nth-child(3)',
     confirm_button_wp_2: 'div.blue-btn:nth-child(4)',
@@ -20,7 +20,7 @@ const elements = {
     cancel_button_wp: 'div.text-center:nth-child(4)',
     cancel_button_wp_2:'div.cursor-pointer:nth-child(5)',
     delete_successfulpopup: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    download_button: '.blue-btn',
+    download_button: '.blue-btn',    
     download_passwordpopup: '.z-50 > div:nth-child(1)',
     edit_nameicon: 'img.w-4:nth-child(2)',
     enter_passwordpopup: 'div.popup-outer-lang:nth-child(3) > div:nth-child(1)',
@@ -35,12 +35,11 @@ const elements = {
     input_password_wp: 'input.w-full',
     password_eyeicon_pk: '.text-gray-500 > path:nth-child(1)',
     wallet_paper: '#outerContainer',
-    private_key: '#private',
     private_keyhidden: 'div.border-2:nth-child(3) > div:nth-child(8) > div:nth-child(2) > div:nth-child(1)',    
     pk_successfulpopup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    hide_privatekey: 'svg.svg-inline--fa:nth-child(3) > path:nth-child(2)',
-    view_privatekey: '.fa-eye > path:nth-child(2)',
     transfer_button: 'div.flex:nth-child(5) > a:nth-child(1) > div:nth-child(2)',
+    view_privatekey: '.fa-eye > path:nth-child(2)',
+    private_key: '#private',
 
 }
 
@@ -141,6 +140,7 @@ const commands = {
         .click("@download_button")
         .click("@input_password_wp")
         .setValue("@input_password_wp", password)
+        .pause(1000)
         .click("@confirm_button_wp_2")
         .waitForElementVisible("@wallet_paper")
         .assert.elementPresent('@wallet_paper', "If wallet password is correct, wallet paper will be shown")
@@ -181,14 +181,13 @@ const commands = {
         .click("@password_eyeicon_pk")
         .assert.elementPresent('@password_eyeicon_pk', "When eye icon is clicked, private key field is unmasked")
         .click("@confirm_button_pk")
-        .assert.elementPresent('@private_key','If wallet password is correct, private key is revealed')
+        .isVisible('@private_key', callback = result => {
+            this.assert.equal(result.value, true, "If user enters correct wallet password, the private key is shown")
+        })
         .click("@copy_privatekey")
         .isVisible('@pk_successfulpopup', callback = result => {
             this.assert.equal(result.value, true, "If user clicks to copy private key, a notification is shown")
         })
-        .pause(5000)
-        .click("@hide_privatekey")
-        .assert.elementPresent('@private_keyhidden', 'When hide private key button is clicked, private key field is masked again.')
 
     },
     
@@ -200,7 +199,7 @@ module.exports = {
     elements: elements,
     commands: commands,
     url: function () {
-      return this.api.launchUrl
+        return '${this.api.launchUrl}'
     }
   
   }
