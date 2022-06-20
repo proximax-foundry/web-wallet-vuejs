@@ -32,13 +32,13 @@ import { AppState } from "@/state/appState";
 import { listenerState } from "@/state/listenerState";
 import { walletState } from "@/state/walletState";
 import { Helper } from "@/util/typeHelper";
-import { TransactionMapping, TransactionType, TransferTransaction } from "tsjs-xpx-chain-sdk";
+import { SignedTransaction, TransactionMapping } from "tsjs-xpx-chain-sdk";
 import { computed, ref, watch } from "vue";
 
     const props = defineProps({
         address: String
     })
-    const transactions = ref([]); 
+    
 
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
     const acc = computed(()=>{
@@ -51,6 +51,12 @@ import { computed, ref, watch } from "vue";
         }
         return acc
     }) 
+    const unconfirmedTxns = ref([])
+    const partialTxns = ref([])
+    const inQueueTxns = ref([])
+    const transactions = computed(()=>{
+        return unconfirmedTxns.value.concat(inQueueTxns.value).concat(partialTxns.value)
+    }) 
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, acc.value);
     let transactionGroupType = Helper.getTransactionGroupType();
     let loadUnconfirmedTransactions = async()=>{
@@ -62,7 +68,7 @@ import { computed, ref, watch } from "vue";
         let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.UNCONFIRMED, txnQueryParams);
         let formattedTxns = await dashboardService.formatUnconfirmedMixedTxns(transactionSearchResult.transactions);
         //groupType = 'unconfirmed'
-        transactions.value = formattedTxns 
+        unconfirmedTxns.value = formattedTxns
     }
 
     let loadPartialTransactions = async() => {
@@ -73,23 +79,41 @@ import { computed, ref, watch } from "vue";
         let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.PARTIAL, txnQueryParams);
         let formattedTxns = await dashboardService.formatPartialMixedTxns(transactionSearchResult.transactions);
         //groupType = 'partial'
-        transactions.value = transactions.value.concat(formattedTxns)
+        partialTxns.value  = formattedTxns
     };
 
-    let loadInQueueTransactions = async()=>{
+    let loadInQueueTransactions = ()=>{
         let txns = []
-        listenerState.autoAnnounceSignedTransaction.forEach(async(tx)=>{
-            txns.push(TransactionMapping.createFromPayload(tx.signedTransaction.payload)) 
+        listenerState.autoAnnounceSignedTransaction.forEach((tx)=>{
+            let txn = TransactionMapping.createFromPayload(tx.signedTransaction.payload)
+            txns.push({
+                type: 'Aggregate Bonded',
+                hash: tx.signedTransaction.hash,
+                deadline: txn.deadline.value,
+                groupType: 'In Queue',
+                recipient: '',
+                sender: '',
+                amount: '',
+                message: '',
+                sda: ''
+            })
         })
-       
+        inQueueTxns.value =txns
     }
-
+    
+    const txnStates = [
+        listenerState.unconfirmedTransactions,
+        listenerState.autoAnnounceSignedTransaction,
+        listenerState.confirmedTransactions
+    ]
+    watch([...txnStates],()=>{
+        init()
+    })
     const init = async()=>{
-      await loadUnconfirmedTransactions()
-      await loadPartialTransactions()
-      loadInQueueTransactions()
+        await loadUnconfirmedTransactions()
+        await loadPartialTransactions()
+        loadInQueueTransactions()
     }
-
     if(AppState.isReady){  
       init();
     }

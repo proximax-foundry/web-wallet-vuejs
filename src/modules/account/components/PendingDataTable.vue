@@ -118,12 +118,13 @@
       </Column>
       <Column headerStyle="width:50px">
         <template #body="{data}">
-            <img v-if="data.groupType=='unconfirmed'" src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
+            <!-- <img v-if="data.groupType=='unconfirmed'" src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer"> -->
+            <div v-if="data.groupType=='unconfirmed'" class="cursor-pointer">Unconfirmed</div>
             <router-link v-else-if="data.groupType=='partial'" :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" class="bg-orange-action text-white font-bold text-xxs text-center p-3 flex items-center justify-center">
                 <img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">
                 {{$t('transaction.waitingSignature_s')}}
             </router-link>
-            <div v-if="!data.groupType">In Queue</div>
+            <div v-if="data.groupType=='In Queue'">In Queue</div>
         </template>
       </Column>
       <template #empty>
