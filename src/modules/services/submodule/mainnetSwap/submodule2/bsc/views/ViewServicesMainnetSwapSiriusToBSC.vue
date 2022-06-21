@@ -684,10 +684,10 @@ export default {
           let signedTransaction = SwapUtils.signTransaction(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
           siriusTransactionHash.value = signedTransaction.hash;
           checkTokenBalance().then(balance=>{
-            if(amount.value<balance){
+            if(amount.value<=balance){
               callSwapServer(signedTransaction.payload);
             }else{
-              addErrorToast('Swap Server Error', 'Insufficient Balance from Swap Server', 5000);
+              addErrorToast('Swap Server Error', 'Insufficient Balance from Funding Account', 5000);
             }
           })
           
