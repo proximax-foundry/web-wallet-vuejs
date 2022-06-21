@@ -27,6 +27,8 @@ import { Helper } from "@/util/typeHelper";
 import { TransactionMapping } from "tsjs-xpx-chain-sdk";
 import { computed, ref, watch } from "vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
+import { TransactionUtils } from "@/util/transactionUtils";
+
     const props = defineProps({
         address: String
     })
@@ -52,9 +54,12 @@ import AccountTabs from "@/modules/account/components/AccountTabs.vue";
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, acc.value);
     let transactionGroupType = Helper.getTransactionGroupType();
     let loadUnconfirmedTransactions = async()=>{
+        if(!acc.value){
+            return
+        }
         let txnQueryParams = Helper.createTransactionQueryParams(); 
         txnQueryParams.pageSize = 1;
-        txnQueryParams.address = acc.value?acc.value.address:'';
+        txnQueryParams.address = acc.value.address
         txnQueryParams.embedded = true;
         txnQueryParams.updateFieldOrder(blockDescOrderSortingField); 
         let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.UNCONFIRMED, txnQueryParams);
@@ -64,10 +69,13 @@ import AccountTabs from "@/modules/account/components/AccountTabs.vue";
     }
 
     let loadPartialTransactions = async() => {
+        if(!acc.value){
+            return
+        }
         let dashboardService = new DashboardService(walletState.currentLoggedInWallet, acc.value);
         let txnQueryParams = Helper.createTransactionQueryParams();
         txnQueryParams.pageSize = 100;
-        txnQueryParams.address = acc.value?acc.value.address:'';
+        txnQueryParams.address = acc.value.address
         let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.PARTIAL, txnQueryParams);
         let formattedTxns = await dashboardService.formatPartialMixedTxns(transactionSearchResult.transactions);
         //groupType = 'partial'
@@ -75,20 +83,27 @@ import AccountTabs from "@/modules/account/components/AccountTabs.vue";
     };
 
     let loadInQueueTransactions = ()=>{
+        if(!acc.value){
+            return
+        }
         let txns = []
         listenerState.autoAnnounceSignedTransaction.forEach((tx)=>{
             let txn = TransactionMapping.createFromPayload(tx.signedTransaction.payload)
-            txns.push({
-                type: 'Aggregate Bonded',
-                hash: tx.signedTransaction.hash,
-                deadline: txn.deadline.value,
-                groupType: 'In Queue',
-                recipient: '',
-                sender: '',
-                amount: '',
-                message: '',
-                sda: ''
-            })
+            let aggregateTxn = TransactionUtils.castToAggregate(txn)
+            if (aggregateTxn.innerTransactions.find(tx=>tx.signer.address.plain()==props.address)!=undefined ||
+            tx.signedTransaction.signer == acc.value.publicKey){
+                txns.push({
+                    type: 'Aggregate Bonded',
+                    hash: tx.signedTransaction.hash,
+                    deadline: txn.deadline.value,
+                    groupType: 'In Queue',
+                    recipient: '',
+                    sender: '',
+                    amount: '',
+                    message: '',
+                    sda: ''
+                })
+            }
         })
         inQueueTxns.value =txns
     }
