@@ -668,9 +668,17 @@ export default {
           err.value = "";
           updateRemoteAddress();
           changeGasStrategy(bscGasStrategy.value);
-          if((amount.value + gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
-            addErrorToast(t('swap.insufficientAmount'), t('swap.swapInsufficientAmount'), 5000);
-            return;
+          
+          if(selectedToken.value.name=='metx'){
+            if((gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
+              addErrorToast(t('swap.insufficientAmount'), t('swap.swapInsufficientAmount'), 5000);
+              return;
+            }
+          }else if(selectedToken.value.name=='xpx'){
+            if((amount.value + gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
+              addErrorToast(t('swap.insufficientAmount'), t('swap.swapInsufficientAmount'), 5000);
+              return;
+            }
           }
           disableTimer();
           let signedTransaction = SwapUtils.signTransaction(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
