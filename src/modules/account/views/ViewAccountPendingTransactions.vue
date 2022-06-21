@@ -5,14 +5,7 @@
     </div>
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
         <AccountComponent :address="address" class="mb-10"/>
-        <div class = 'flex text-txs md:text-xs font-semibold border-b-2 menu_title_div'>
-            <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-            <router-link  :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-            <router-link  :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
-            <router-link  :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
-            <router-link  :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-            <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.transaction',2)}}</div>
-        </div>
+        <AccountTabs :address='address' selected='txn' />
          <div class="flex my-2  gap-5 flex-none text-xs md:text-sm">
             <router-link :to="{name:'ViewAccountConfirmedTransactions', params: { address: address}}" class="border opacity-60 hover:opacity-100 cursor-pointer border-black rounded-md text-white py-2 px-4" style="background: #007CFF">Confirmed</router-link>
             <div  class="border border-black rounded-md text-white py-2 px-5" style="background: #f3a91d">Pending</div>
@@ -33,7 +26,7 @@ import { walletState } from "@/state/walletState";
 import { Helper } from "@/util/typeHelper";
 import { TransactionMapping } from "tsjs-xpx-chain-sdk";
 import { computed, ref, watch } from "vue";
-
+import AccountTabs from "@/modules/account/components/AccountTabs.vue";
     const props = defineProps({
         address: String
     })

@@ -6,14 +6,7 @@
   </div>
   <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
   <AccountComponent :address="address" class="mb-10"/>
-    <div class = 'flex text-xs font-semibold border-b-2'>
-      <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-      <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-      <router-link :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
-      <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
-      <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.multisig')}}</div>
-    </div>
-    
+    <AccountTabs :address="address" selected="multisig"/>
     <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 pr-6">
         <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
@@ -147,6 +140,7 @@ import TextInput from '@/components/TextInput.vue'
 import { multiSign } from '@/util/multiSignatory';
 import { walletState } from '@/state/walletState';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
+import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import {
   Address,
     PublicAccount
@@ -161,7 +155,8 @@ export default {
   components: {
     PasswordInput,
     TextInput,
-    AccountComponent
+    AccountComponent,
+    AccountTabs
   },
   props: {
     address: String,
