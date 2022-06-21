@@ -14,7 +14,10 @@
         <template #body="{data}">
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.txHash')}}</div>
-            <div class="uppercase font-bold text-txs"><span class="text-txs" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span></div>
+            <div class=" uppercase font-bold text-txs">
+              <span class="text-txs text-blue-primary cursor-pointer" v-if="data.groupType!='In Queue'"  @click="gotoHashExplorer(data.hash)" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span>
+              <span class="text-txs" v-else v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span>
+            </div>
           </div>
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.type')}}</div>
@@ -65,7 +68,8 @@
       </Column>
       <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
+          <span v-if="data.groupType!='In Queue'" @click="gotoHashExplorer(data.hash)" class="cursor-pointer text-txs text-blue-primary" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
+          <span v-else class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
       <Column field="type" :header="$t('dashboard.type')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
