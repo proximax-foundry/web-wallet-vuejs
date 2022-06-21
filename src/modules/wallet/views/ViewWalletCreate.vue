@@ -44,7 +44,7 @@
               <div class = 'font-semibold text-md'>{{accName}}</div>
             </div>
             <div class= 'flex'>
-              <div id="address" :copyValue="$t('general.address')" copySubject="Address" class = 'text-xs font-semibold mt-1'>{{address}} </div>
+              <div id="address" :copyValue="address" copySubject="Address" class = 'text-xs font-semibold mt-1'>{{address}} </div>
               <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy('address')" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
             </div>
           </div>
