@@ -669,13 +669,13 @@ export default {
           updateRemoteAddress();
           changeGasStrategy(bscGasStrategy.value);
           
-          if(selectedToken.value.name=='metx'){
-            if((gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
+          if(selectedToken.value.name=='xpx'){
+            if((amount.value + gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
               addErrorToast(t('swap.insufficientAmount'), t('swap.swapInsufficientAmount'), 5000);
               return;
             }
-          }else if(selectedToken.value.name=='xpx'){
-            if((amount.value + gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
+          }else{
+            if((gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
               addErrorToast(t('swap.insufficientAmount'), t('swap.swapInsufficientAmount'), 5000);
               return;
             }
