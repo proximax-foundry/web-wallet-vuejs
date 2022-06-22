@@ -60,7 +60,7 @@
           </button>
         </div>
         <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" :errorMessage="$t('general.insufficientBalance')" :decimal="6"  :disabled="disableSupply"/>
-        <TransferTextareaInput :placeholder="$t('general.message')" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
+        <TransferTextareaInput :placeholder="$t('general.message')" :errorMessage="$t('general.limitExceed')" v-model="messageText" :remainingChar="remainingChar" :showError="showLimitErr"   :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
           <label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">
@@ -239,6 +239,7 @@ export default {
     const showAddressError = ref(true);
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
+    const showLimitErr = ref(false);
     
     
     const selectedAccName = ref(
@@ -715,6 +716,12 @@ export default {
       } else {
         remainingChar.value = TransactionUtils.getPlainMessageSize(messageText.value);
       }
+    if (messageText.value.length > messageLimit.value) {
+      showLimitErr.value = true;
+    }
+    else {
+      showLimitErr.value = false;
+      }
     }
   });
   const getMosaicBalanceById = (id) =>{
@@ -847,6 +854,7 @@ export default {
       walletName,
       checkNamespace,
       currentNativeTokenName,
+      showLimitErr
     };
   },
 };
