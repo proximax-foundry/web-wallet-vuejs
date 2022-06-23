@@ -1083,7 +1083,7 @@ export class WalletUtils {
             let newWallet = new Wallet(wallet.name, networkName, []);
             let walletAccounts: WalletAccount[] = [];
 
-            wallet.accounts.forEach((account)=>{
+            wallet.accounts.filter(acc => acc.encrypted).forEach((account)=>{
 
                 let stringJSON = JSON.stringify(account);
 
@@ -1125,7 +1125,7 @@ export class WalletUtils {
     static oldFormatToNewFormat(oldWallet: oldWltFile, networkName: string, networkType: NetworkType, contacts: AddressBook[]): Wallet{
         let walletAccounts: WalletAccount[] = [];
 
-        oldWallet.accounts.forEach((account)=>{
+        oldWallet.accounts.filter(acc => acc.encrypted).forEach((account)=>{
 
             let stringJSON = JSON.stringify(account);
 
