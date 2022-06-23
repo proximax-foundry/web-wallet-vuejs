@@ -490,7 +490,7 @@ export class WalletUtils {
 
         const walletAccounts: WalletAccount[] = [];
 
-        wltFile.accounts.forEach((account)=>{
+        wltFile.accounts.filter(acc => acc.encrypted).forEach((account)=>{
             const walletAccount = new WalletAccount(account.name, 
                 account.publicAccount.publicKey, account.publicAccount.address.address, account.algo, 
                 account.encrypted, account.iv);
