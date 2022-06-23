@@ -522,7 +522,9 @@ export default {
         !showAddressError.value &&
         recipientInput.value.length > 0  &&
         (showAssetBalanceErr.value.every(value => value == false)) &&
-        !showBalanceErr.value
+        !showBalanceErr.value &&
+        !showLimitErr.value
+
       );
     });
 
