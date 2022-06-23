@@ -1,7 +1,7 @@
 var name = "Selenium"
 var password = "abcd1234"
 var password2 = 'abcd12345'
-
+var label ="friend"
 
 module.exports = {
 
@@ -34,6 +34,9 @@ module.exports = {
             .existing_name(name)
             .show_privatekey(password, password2)
             .copy_instances()
+            .navigate_account()
+            .create_label(label)
+            .add_label()
 
     },
 
