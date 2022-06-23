@@ -83,6 +83,15 @@ export const AccountRoutes: RouteRecordRaw[] = [
       title: "Account Pending Transactions",
     }
   },
+  {
+    path: '/view-collectibles/:address',
+    name: 'ViewAccountCollectibles',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccountCollectibles.vue'),
+    meta: {
+      title: "Account Collectibles",
+    }
+  },
   
   ...DelegateRoutes,
   ...LinkToNamespaceRoutes,

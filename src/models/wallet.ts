@@ -24,6 +24,18 @@ export class Wallet{
         this.accounts[index] = WalletAccount;
     }
 
+    duplicateEmptySelf(){
+        let emptiedAccounts = this.accounts.map((x)=>{
+            x.assets = [];
+            x.namespaces = [];
+            x.multisigInfo = [];
+
+            return x;
+            // x.nis1Account = null;
+        });
+        return new Wallet(this.name,this.networkName, emptiedAccounts); 
+    }
+
     removeAccount(accountName: string): void{
         const index = this.accounts.findIndex((account)=> account.name == accountName);
 
