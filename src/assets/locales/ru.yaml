@@ -241,6 +241,7 @@ general:
   levy: Levy
   levyAmount: Levy amount
   levyRecipient: Levy recipient
+  limitExceed: Exceeding Message Limit
   link: Link
   linkSuccess: Linked Successfully
   linkToNamespace: Link to Namespace

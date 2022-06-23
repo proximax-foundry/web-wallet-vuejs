@@ -240,6 +240,7 @@ general:
   levy: Levy
   levyAmount: Levy amount
   levyRecipient: Levy recipient
+  limitExceed: Exceeding Message Limit
   link: 链接
   linkSuccess: 成功链接
   linkToNamespace: 链接到名称空间
