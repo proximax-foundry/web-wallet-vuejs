@@ -53,9 +53,10 @@ addressBook:
   work: Work
 asset:
   assetAns: >-
-    Mosaics are part of what makes the Smart Asset System unique and flexible.
-    They are fixed assets on the Sirius Chain that can represent a set of
-    multiple identical things that do not change.
+    An asset is called Sirius Digital Asset (SDA) in our ecosystem. 
+    Assets represent anything that needs to be quantified and/or named. 
+    Each SDA group can have a quantity range from 1 to a maximum of 10^16 units (without decimals). 
+    Each SDA group can optionally be given a name.
   assetCreatedBy: Asset created by
   assetCreatedByAcc: Sirius Digital Assets created by account {accountName}
   assetCreatedInWallet: Sirius Digital Assets created in wallet {walletName}
@@ -163,7 +164,7 @@ general:
   approximately: Approximately
   asset: Asset | Assets
   assetId: Asset ID
-  assetQues: What is Asset?
+  assetQues: What is an Asset?
   back: Back
   balance: Balance
   block: Block | Blocks
