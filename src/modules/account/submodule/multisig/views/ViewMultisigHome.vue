@@ -6,13 +6,7 @@
   </div>
   <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
     <AccountComponent :address="address" class="mb-10"/>
-    <div class="flex text-xs font-semibold border-b-2 menu_title_div">
-      <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-      <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-      <router-link :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
-      <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
-      <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.multisig')}}</div>
-    </div>
+    <AccountTabs :address="address" selected="multisig"/>
     <div class=' p-6 border-2 border-t-0 filter shadow-lg'>
       <div v-if="isMultisig" class="flex cursor-pointer">
         <div class="border-2 border-blue-primary p-1 mb-3 w-16 text-white bg-blue-primary text-xs text-center font-semibold ">{{$t('general.multisig')}}</div>
@@ -72,6 +66,7 @@ import { multiSign } from '@/util/multiSignatory';
 import {Address, PublicAccount} from  "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
+import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 export default {
@@ -80,7 +75,8 @@ export default {
         address: String
     },
     components:{
-      AccountComponent
+      AccountComponent,
+      AccountTabs
     },
     setup(p){
       const {t} = useI18n()
