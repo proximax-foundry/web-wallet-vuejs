@@ -718,7 +718,7 @@ export default {
       } else {
         remainingChar.value = TransactionUtils.getPlainMessageSize(messageText.value);
       }
-    if (messageText.value.length > messageLimit.value) {
+    if (messageText.value.length > messageLimit.value || remainingChar.value > messageLimit.value) {
       showLimitErr.value = true;
     }
     else {
@@ -741,9 +741,21 @@ export default {
     if (n) {
       if (messageText.value) {
         remainingChar.value = TransactionUtils.getFakeEncryptedMessageSize(messageText.value);
+    if (messageText.value.length > messageLimit.value || remainingChar.value > messageLimit.value) {
+      showLimitErr.value = true;
+    }
+    else {
+      showLimitErr.value = false;
+       }
       }
     } else {
       remainingChar.value = TransactionUtils.getPlainMessageSize(messageText.value);
+          if (messageText.value.length > messageLimit.value || remainingChar.value > messageLimit.value) {
+      showLimitErr.value = true;
+    }
+    else {
+      showLimitErr.value = false;
+      }
     }
   });
 
