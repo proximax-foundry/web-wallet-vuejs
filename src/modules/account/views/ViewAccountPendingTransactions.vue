@@ -116,10 +116,15 @@ import { TransactionUtils } from "@/util/transactionUtils";
     watch([...txnStates],()=>{
         init()
     })
+
+    const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
+    watch(aggregateBondedTxLength,()=>{
+        init()
+    })
     const init = async()=>{
         await loadUnconfirmedTransactions()
-        await loadPartialTransactions()
         loadInQueueTransactions()
+        loadPartialTransactions()
     }
     if(AppState.isReady){  
       init();
