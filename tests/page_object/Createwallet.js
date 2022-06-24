@@ -49,7 +49,7 @@ const commands = {
 
     change_network(){
         return this
-        .pause(5000)
+        .pause(4000)
         .click("@select_network")
         .click("@testnet_1")
     },

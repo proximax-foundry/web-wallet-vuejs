@@ -1,5 +1,6 @@
 const elements = {
 
+    accounts: 'a[href="#/view-all-accounts"]',
     account_ellipsis: 'div.link_block > a:nth-child(1) > div:nth-child(2)',
     details_selection: 'a.block:nth-child(1)',
     accountdetails_tab: 'div.w-32:nth-child(1)', 
@@ -19,6 +20,12 @@ const elements = {
     cancel_button_pk_2:'div.cursor-pointer:nth-child(5)',
     cancel_button_wp: 'div.text-center:nth-child(4)',
     cancel_button_wp_2:'div.cursor-pointer:nth-child(5)',
+    cancel_label:'div.cursor-pointer:nth-child(5)',
+    create_label:'.max-h-44',
+    create_labelpopup:'.popup-outer > div:nth-child(1)',
+    confirm_label:'.blue-btn',
+    delete_label:'div.max-h-44:nth-child(1) > div:nth-child(1) > div:nth-child(1) > svg:nth-child(3)',
+    delete_labelsuccessfulpopup:'.p-toast-summary',
     delete_successfulpopup: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
     download_button: '.blue-btn',    
     download_passwordpopup: '.z-50 > div:nth-child(1)',
@@ -28,11 +35,21 @@ const elements = {
     error_existingname: '.text-red-500',
     error_emptypassword_pk: 'div.error:nth-child(2)',
     error_emptypassword_wp: 'div.error:nth-child(2)',
+    error_emptylabel:'.error',
     error_wrongpassword_pk: '.error',
     error_wrongpassword_wp: '.error',
     input_accountname: '.outline-none',
+    input_label: '.text_input',
     input_password: 'input.w-full',
     input_password_wp: 'input.w-full',
+    addlabel_successfulpopup:'div.p-toast:nth-child(9) > div',
+    labelfilter_account:'div.gap-2:nth-child(1)',
+    label:'.my-2 > div:nth-child(4) > div:nth-child(1) > div',
+    label_dropdown:'.max-h-44 > div',
+    label_more: 'div.ml-auto:nth-child(4) > img',
+    label_successfulpopup: 'div.p-toast:nth-child(9) > div',
+    label_tab:'.w-52',
+    removelabel_successfulpopup:'div.p-toast:nth-child(9) > div',
     password_eyeicon_pk: '.text-gray-500 > path:nth-child(1)',
     wallet_paper: '#outerContainer',
     private_keyhidden: 'div.border-2:nth-child(3) > div:nth-child(8) > div:nth-child(2) > div:nth-child(1)',    
@@ -69,7 +86,7 @@ const commands = {
         .setValue('@input_accountname','\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003')
         .setValue("@input_accountname", name)
         .click("@edit_nameicon")
-        .assert.elementPresent('@error_existingname',' When account name is already taken, error is shown')
+        .assert.elementPresent('@error_existingname','When account name is already taken, error is shown')
         .click("@back")
         .click("@account_ellipsis")
 
@@ -101,7 +118,6 @@ const commands = {
             this.assert.equal(result.value, true, 'If user clicks to copy public key, a notification is shown')
         })
         .pause(1000)
-        .end()
     },
 
     transfer_xpx(browser){
@@ -190,6 +206,68 @@ const commands = {
         })
 
     },
+
+    navigate_account(){
+        return this
+        .click("@accounts")
+        .waitForElementVisible("@label_tab")
+        .isVisible('@label_tab', callback = result => {
+            this.assert.equal(result.value, true, "If account is clicked, user is navigated to accounts page")
+        })
+
+    },
+
+    create_label(name){
+        return this
+        .click("@label_tab")
+        .isVisible('@create_label', callback = result => {
+            this.assert.equal(result.value, true, "If label is clicked, label dropdown is shown")
+        })
+        .click("@create_label")
+        .isVisible('@create_labelpopup', callback = (result) => {
+            this.assert.equal(result.value, true, 'If user clicks to create label, a create label popup will come up')
+        })
+        .click("@confirm_label")
+        .isVisible('@error_emptylabel', callback = (result) => {
+            this.assert.equal(result.value, true, 'If label field has no input, it will show an error')
+        })
+        .click("@cancel_label")
+        .click("@label_tab")
+        .click("@create_label")
+        .click("@input_label")
+        .setValue("@input_label", name)
+        .click("@confirm_label")
+        .isVisible('@label_successfulpopup', callback = result => {
+            this.assert.equal(result.value, true, "When label is successfully created, a notification is shown")
+        })
+
+    },
+
+    add_label(){
+        return this
+        .click("@label_more")
+        .click("@label")
+        .isVisible('@addlabel_successfulpopup', callback = result => {
+            this.assert.equal(result.value, true, "When label is successfully added to account, a notification is shown")
+        })
+        .click("@label_tab")
+        .click("@label_dropdown")
+        .isVisible('@labelfilter_account', callback = result => {
+            this.assert.equal(result.value, true, "When specific label is clicked, account will be filtered following the highlighted label")
+        })
+        .click("@label_more")
+        .click("@label")
+        .isVisible('@removelabel_successfulpopup', callback = result => {
+            this.assert.equal(result.value, true, "When label is successfully removed from account, a notification is shown")
+        })
+        .click("@delete_label")
+        .isVisible('@delete_labelsuccessfulpopup', callback = result => {
+            this.assert.equal(result.value, true, "When label is successfully removed, a notification is shown")
+        .end()
+        })
+
+    },
+
     
 }
 
