@@ -367,7 +367,7 @@ export default {
           NamespaceUtils.createSubNamespace(selectedAccAdd.value, walletPassword.value, namespaceName.value, selectNamespace.value);
         }
       }
-      router.push({ name: "ViewServicesNamespace", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()} });
+      router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
     };
 
     watch(duration, (n) => {

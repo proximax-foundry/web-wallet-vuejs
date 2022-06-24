@@ -111,7 +111,8 @@ import { TransactionUtils } from "@/util/transactionUtils";
     const txnStates = [
         listenerState.unconfirmedTransactions,
         listenerState.autoAnnounceSignedTransaction,
-        listenerState.confirmedTransactions
+        listenerState.confirmedTransactions,
+        
     ]
     watch([...txnStates],()=>{
         init()
@@ -123,8 +124,8 @@ import { TransactionUtils } from "@/util/transactionUtils";
     })
     const init = async()=>{
         await loadUnconfirmedTransactions()
+        await loadPartialTransactions()
         loadInQueueTransactions()
-        loadPartialTransactions()
     }
     if(AppState.isReady){  
       init();

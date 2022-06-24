@@ -158,6 +158,7 @@ import { toSvg } from 'jdenticon';
 import { ThemeStyleConfig } from '@/models/stores';
 import { WalletUtils } from '@/util/walletUtils';
 import isValidUTF8 from 'utf-8-validate';
+import { useRouter } from 'vue-router';
 export default { 
   name: "ViewUpdateAccountMetadata",
   props:{
@@ -171,6 +172,7 @@ export default {
     AccountTabs
   },
   setup(props) {
+    const router = useRouter()
     let showKeys = ref(false)
     let scopedMetadataKeySelectable = ref(true);
     let scopedMetadataKeyType = ref(1);
@@ -510,6 +512,7 @@ export default {
       oldValue.value = ""
       newValue.value=""
       walletPassword.value=""
+      router.push({ name: "ViewAccountPendingTransactions",params:{address:targetPublicAccount.value.address.plain()} })
     }
     const aggregateFee = ref(0);
     const totalFee = computed(()=>{

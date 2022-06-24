@@ -380,7 +380,7 @@ export default {
         AssetsUtils.createAsset( selectedAccAdd.value, walletPassword.value, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value);
       }
       clearInput();
-      router.push({ name: "ViewServicesAssets"});
+      router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
     };
 
     const cosigner = computed(() => {

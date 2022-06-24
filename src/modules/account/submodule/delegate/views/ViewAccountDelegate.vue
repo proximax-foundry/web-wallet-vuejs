@@ -136,9 +136,8 @@
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" />
         <div class="mt-3">
-          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="delegateValue && !unlinking" :disabled="disableLinkBtn">{{$t('delegate.unlinkAcc')}}</button>
-          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="!delegateValue && !pending" :disabled="disableLinkBtn">{{$t('delegate.delegateAcc')}}</button>
-          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  v-if="(pending | unlinking)" :disabled="true">{{$t('general.waitConfirmTx')}}</button>
+          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="delegateValue " :disabled="disableLinkBtn">{{$t('delegate.unlinkAcc')}}</button>
+          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="!delegateValue " :disabled="disableLinkBtn">{{$t('delegate.delegateAcc')}}</button>
         </div>
         <div class="text-center">
           <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
@@ -191,12 +190,8 @@ export default {
     const walletPassword = ref("");
     const showPasswdError = ref(false);
     const err = ref(false); 
-    const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
-    const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
     let fromNew = ref(false)
     let fromPk = ref(false)
-    let txHash = ref("")
-    let pending =ref(false)
     let toggleSelection = ref(false)
     const acc = computed(()=>{
       if(!walletState.currentLoggedInWallet){
@@ -358,7 +353,6 @@ export default {
     const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
     const emitter = internalInstance.appContext.config.globalProperties.emitter;    
     const walletName = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.name:''
-    let unlinking = ref(false)
     const disableLinkBtn = computed(() => {
       if(onPartial.value || fundStatus.value || (!isCosigner.value && isMultisig.value) ){
         return true
@@ -445,46 +439,21 @@ export default {
       }
       if (WalletUtils.verifyWalletPassword(walletName,networkState.chainNetworkName,walletPassword.value)) {
         if (delegateAcc.value !== "0".repeat(64)) { //unlink
-          let signedTx = accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
-          txHash.value = signedTx.hash.toUpperCase()
+          accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
           walletPassword.value=""
-          unlinking.value=true
           err.value=""
         } else if (AccPublicKey.value != "" && (fromPk.value || fromNew.value)) { //link
-          let signedTx = accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
-          txHash.value = signedTx.hash.toUpperCase()
+          accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
           walletPassword.value=""
-          pending.value=true
           err.value=""
         } else {
           
         }
+        router.push({ name: "ViewAccountPendingTransactions",params:{address:p.address} })
       } else {
         err.value = t('general.walletPasswordInvalid',{name : walletName});
       }
     };
-    
-    
-
-    watch(confirmedTxLength, (n, o) => {
-      if (n != o){
-        if(listenerState.allConfirmedTransactionsHash.find(hash=> hash ==txHash.value)){
-          unlinking.value = false
-          txHash.value=""
-          pending.value=false
-          toast.add({severity:'success', summary: t('general.notification'), detail: delegateValue.value? t('general.unlinkSuccess') : t('general.linkSuccess'), group: 'br', life: 5000})
-          /* showSuccess.value=true */
-        }
-        verifyDelegateAcc()
-        checkIsPartial()
-      }
-    })
-
-    watch(aggregateBondedTxLength, (n, o) => {
-      if (n != o){
-        checkIsPartial()
-      }
-    })
     
     const topUpUrl = computed(()=>{
       if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
@@ -500,7 +469,6 @@ export default {
     
 
     return {
-      unlinking,
       showPrivateKeyError,
       privateKey,
       fromNew,
@@ -523,7 +491,6 @@ export default {
       err,
       walletName,
       delegateValue,
-      pending,
       isCosigner,
       lockFund,
       transactionFee,
