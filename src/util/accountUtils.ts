@@ -209,7 +209,7 @@ const getLinkNamespaceToAddressTransactionFee = (isMultisig :boolean,namespaceAd
   
 }
 
-const linkNamespaceToAddress = (selectedCosign :string,isMultisig :boolean, multisigAccount: WalletAccount | OtherAccount, walletPassword: string, namespaceID: string, linkType: string, namespaceAddress: string) :SignedTransaction=> {
+const linkNamespaceToAddress = (selectedCosign :string,isMultisig :boolean, multisigAccount: WalletAccount | OtherAccount, walletPassword: string, namespaceID: string, linkType: string, namespaceAddress: string) :void=> {
   const namespaceTransaction = linkNamespaceToAddressTransaction(namespaceID, linkType, namespaceAddress);
   const senderAddress = multisigAccount.address
   const senderAccount = getAccountDetail(senderAddress, walletPassword)
@@ -226,12 +226,10 @@ const linkNamespaceToAddress = (selectedCosign :string,isMultisig :boolean, mult
     let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
     let initiatorAcc = Account.createFromPrivateKey(privateKey, AppState.networkType)
     const signedAggregateBondedTransaction = initiatorAcc.sign(aggregateBondedTx,networkState.currentNetworkProfile.generationHash);
-    signedTransaction = signedAggregateBondedTransaction
     const lockFundsTransaction = TransactionUtils.lockFundTx(signedAggregateBondedTransaction)
     const lockFundsTransactionSigned = initiatorAcc.sign(lockFundsTransaction, networkState.currentNetworkProfile.generationHash);
     TransactionUtils.announceLF_AND_addAutoAnnounceABT(lockFundsTransactionSigned,signedAggregateBondedTransaction) 
   }
-  return signedTransaction
 }
 
 const createDelegateTransaction = (selectedCosign :string,isMultisig :boolean,multisigAccount: WalletAccount, walletPassword: string, accPublicKey: string, delegateAction: LinkAction) :SignedTransaction=>{

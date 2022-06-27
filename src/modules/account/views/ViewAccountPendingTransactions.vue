@@ -111,9 +111,15 @@ import { TransactionUtils } from "@/util/transactionUtils";
     const txnStates = [
         listenerState.unconfirmedTransactions,
         listenerState.autoAnnounceSignedTransaction,
-        listenerState.confirmedTransactions
+        listenerState.confirmedTransactions,
+        
     ]
     watch([...txnStates],()=>{
+        init()
+    })
+
+    const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
+    watch(aggregateBondedTxLength,()=>{
         init()
     })
     const init = async()=>{

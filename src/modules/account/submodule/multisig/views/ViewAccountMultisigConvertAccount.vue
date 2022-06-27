@@ -304,6 +304,7 @@ export default {
         // var audio = new Audio(require('@/assets/audio/ding.ogg'));
         // audio.play();
         clear();
+        router.push({ name: "ViewAccountPendingTransactions",params:{address:p.address} })
       } 
     };
     watch(() => [...coSign.value], (n) => {
