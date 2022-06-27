@@ -292,6 +292,7 @@ export default defineComponent({
       return options;
     });
 
+    /*
     watch(()=> networkState.availableNetworks, (availableNetworks)=>{
       let options = [];
 
@@ -302,6 +303,7 @@ export default defineComponent({
       }
       chainsNetworks.value = options;
     }, true);
+    */
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
 

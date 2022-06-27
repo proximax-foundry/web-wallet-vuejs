@@ -32,7 +32,7 @@ export class Wallets {
 
         try {
             if(tempWallets){
-                this.wallets = Reconstruct.reconstruct(JSON.parse(tempWallets));
+                this.wallets = Reconstruct.reconstructAll(JSON.parse(tempWallets));
             }
             else{
                 this.wallets = [];
@@ -57,7 +57,13 @@ export class Wallets {
     }
 
     savetoLocalStorage(): void{
-        localStorage.setItem(walletKey, JSON.stringify(this.wallets));
+        let tempWallet = new Wallets();
+        // tempWallet.fetchFromLocalStorage();
+        tempWallet.wallets = this.wallets.map(wallet => {
+            let tempWallet = wallet.createEmptifyVersion();
+            return tempWallet;
+        });
+        localStorage.setItem(walletKey, JSON.stringify(tempWallet.wallets));
         this.updateTime = new Date().getTime();
         localStorage.setItem(walletUpdateTimeKey, this.updateTime.toString());
     }
@@ -65,10 +71,11 @@ export class Wallets {
     saveMyWalletOnlytoLocalStorage(myWallet: Wallet): void{
 
         let newWalletsInstance = new Wallets();
+        // newWalletsInstance.fetchFromLocalStorage();
 
         let walletIndex = newWalletsInstance.wallets.findIndex((wallet)=> wallet.name === myWallet.name && wallet.networkName === myWallet.networkName)
 
-        newWalletsInstance.wallets[walletIndex] = myWallet;
+        newWalletsInstance.wallets[walletIndex] = myWallet.createEmptifyVersion();
 
         localStorage.setItem(walletKey, JSON.stringify(newWalletsInstance.wallets));
         this.updateTime = new Date().getTime();
@@ -110,7 +117,7 @@ export class Wallets {
 
 class Reconstruct{
 
-    static reconstruct(JSON_Wallets: Wallet[]): Wallet[]{
+    static reconstructAll(JSON_Wallets: Wallet[]): Wallet[]{
 
         let wallets: Wallet[] = [];
 
@@ -125,29 +132,29 @@ class Reconstruct{
                 let newWalletAccount = Reconstruct.recreateWalletAccount(tempAccount);
 
                 newWalletAccount.assets = [];
-
+    
                 for(let x =0; x < tempAccount.assets.length; ++x){
                     let tempAsset = tempAccount.assets[x];
                     
                     newWalletAccount.addAsset(Reconstruct.recreateAsset(tempAsset));
                 }
-
+                
                 newWalletAccount.namespaces = [];
-
+            
                 for(let x =0; x < tempAccount.namespaces.length; ++x){
                     let tempNamespace = tempAccount.namespaces[x];
 
                     newWalletAccount.addNamespace(Reconstruct.recreateNamespace(tempNamespace));
-                }
+                }            
 
                 newWalletAccount.multisigInfo = [];
-
+              
                 for(let x =0; x < tempAccount.multisigInfo.length; ++x){
                     let tempMultisigInfo = tempAccount.multisigInfo[x];
 
-                    newWalletAccount.multisigInfo.push(Reconstruct.recreateMutlisigInfo(tempMultisigInfo));
+                    newWalletAccount.multisigInfo.push(Reconstruct.recreateMultisigInfo(tempMultisigInfo));
                 }
-                
+                            
                 newWalletAccount.nis1Account = tempAccount.nis1Account ? Reconstruct.recreateNis1Account(tempAccount.nis1Account)  : null;
 
                 accounts.push(newWalletAccount);
@@ -156,7 +163,7 @@ class Reconstruct{
             
 
             let otherAccounts: OtherAccount[] = [];
-
+          
             for(let k =0; k < JSON_Wallets[i].others.length; ++k){
                 
                 let tempOtherAccount = JSON_Wallets[i].others[k];
@@ -184,11 +191,62 @@ class Reconstruct{
                 for(let x =0; x < tempOtherAccount.multisigInfo.length; ++x){
                     let tempMultisigInfo = tempOtherAccount.multisigInfo[x];
 
-                    newOtherAccount.multisigInfo.push(Reconstruct.recreateMutlisigInfo(tempMultisigInfo));
+                    newOtherAccount.multisigInfo.push(Reconstruct.recreateMultisigInfo(tempMultisigInfo));
                 }
 
                 otherAccounts.push(newOtherAccount);
             }
+    
+            let contacts: AddressBook[] = [];
+
+            for(let k =0; k < JSON_Wallets[i].contacts.length; ++k){
+                let tempContact = JSON_Wallets[i].contacts[k];
+
+                contacts.push(Reconstruct.recreateAddressBook(tempContact));
+            }
+            let labels :Label[] = []
+            if(JSON_Wallets[i].labels){
+                for(let k =0; k < JSON_Wallets[i].labels.length; ++k){
+                    let tempLabel = JSON_Wallets[i].labels[k];
+                    labels.push(Reconstruct.recreateLabel(tempLabel));
+                }
+            }
+            
+            let newWallet = new Wallet(JSON_Wallets[i].name, JSON_Wallets[i].networkName, accounts);
+            newWallet.others = otherAccounts;
+            newWallet.contacts = contacts;
+            newWallet.labels = labels;
+            wallets.push(newWallet);
+        }
+
+        return wallets;
+    }
+
+    static restructureMinimum(JSON_Wallets: Wallet[]): Wallet[]{
+        let wallets: Wallet[] = [];
+
+        for(let i =0; i < JSON_Wallets.length; ++i){
+
+            let accounts: WalletAccount[] = [];
+
+            for(let k =0; k < JSON_Wallets[i].accounts.length; ++k){
+                
+                let tempAccount = JSON_Wallets[i].accounts[k];
+
+                let newWalletAccount = Reconstruct.recreateWalletAccount(tempAccount);
+
+                newWalletAccount.assets = [];
+
+                newWalletAccount.namespaces = [];
+
+                newWalletAccount.multisigInfo = [];
+                
+                newWalletAccount.nis1Account = tempAccount.nis1Account ? Reconstruct.recreateNis1Account(tempAccount.nis1Account)  : null;
+
+                accounts.push(newWalletAccount);
+            }
+
+            let otherAccounts: OtherAccount[] = [];
 
             let contacts: AddressBook[] = [];
 
@@ -256,7 +314,7 @@ class Reconstruct{
         return newNamespace;
     }
 
-    static recreateMutlisigInfo(multisigInfo: MultisigInfo): MultisigInfo{
+    static recreateMultisigInfo(multisigInfo: MultisigInfo): MultisigInfo{
 
         let newMultisigInfo = new MultisigInfo(multisigInfo.publicKey, multisigInfo.level,  
             multisigInfo.cosignaturies, multisigInfo.multisigAccounts, 

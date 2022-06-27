@@ -161,6 +161,8 @@ export default defineComponent({
 
         let wallet = walletState.wallets.filterByNetworkNameAndName(networkState.chainNetworkName, selectedWallet.value);
         //WalletUtils.refreshAllAccountDetails(wallet, networkState.currentNetworkProfile);
+        wallet.fixNonManagableAccounts();
+        walletState.wallets.saveMyWalletOnlytoLocalStorage(wallet);
         WalletStateUtils.updateLoggedIn(wallet);
         NetworkStateUtils.updateLastAccessNetworkName(networkState.chainNetworkName);
         router.push({ name: "ViewDashboard"});

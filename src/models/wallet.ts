@@ -130,4 +130,21 @@ export class Wallet{
 
         account.default = true;
     }
+
+    createEmptifyVersion(){
+        let emptifiedAccounts = this.accounts.map(acc =>{
+
+            acc.assets = [];
+            acc.balance = 0;
+            acc.namespaces = [];
+            acc.multisigInfo = [];
+            return acc;
+        });
+
+        return new Wallet(this.name, this.networkName, emptifiedAccounts);
+    }
+
+    fixNonManagableAccounts(){
+        this.accounts = this.accounts.filter(acc => acc.encrypted);
+    }
 }
