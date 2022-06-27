@@ -4,13 +4,13 @@
       <div class="my-3 px-10 lg:px-5 3xl:px-10 font-txs text-gray-400 uppercase flex justify-between items-center">Default account<img src="@/assets/img/navi/icon-switch-account.svg" class="cursor-pointer" @click="triggerSetDefaultModal"></div>
       <div>
         <div class="cursor-pointer link_block flex items-center justify-between">
-          <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" class="flex items-center">
+          <router-link :to="{ name: 'ViewAccountAssets', params: { address: selectedAccountAddress }}" class="flex items-center">
             <div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center">
               <img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative">
             </div>
             <div class="truncate text-white">{{ selectedAccountName }}</div>
           </router-link>
-          <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}"  class="block p-2 z-20 text-xs">
+          <router-link :to="{ name: 'ViewAccountAssets', params: { address: selectedAccountAddress }}"  class="block p-2 z-20 text-xs">
             <img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class=" h-6 w-6 cursor-pointer " >
           </router-link>
         </div>

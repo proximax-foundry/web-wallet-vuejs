@@ -16,16 +16,16 @@
       <div class='border p-4 my-3 '>
        <div class="flex flex-col gap-2">
         <div v-for="(cosigner,index) in cosignerAccountsList" :key="index">
-            <div class="border w-full rounded-md p-3">
+            <div class="border w-full cursor-pointer rounded-md p-3" @click="navigate(cosigner.address)">
               <div class="text-txs font-semibold text-blue-primary">{{cosigner.name}}</div>
               <div class="flex">
                 <div :id="`cosignerAddress${index}`" :copyValue="cosigner.address" :copySubject="$t('general.address')" class="text-txs font-bold mt-1">{{cosigner.address}}</div>
-                <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy(`cosignerAddress${index}`)" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
-               <!--  <img src="@/assets/img/chevron_right.svg" class="w-5 h-5 ml-auto"> -->
+                <font-awesome-icon icon="copy" @mouseover="isHover = true" @mouseout="isHover = false" :title="$t('general.copy')" @click="copy(`cosignerAddress${index}`)" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+                <img v-if="findAccountWithAddress(cosigner.address)" class="w-5 h-5 ml-auto" src="@/assets/img/chevron_right.svg" >
               </div>
             </div>
-          </div>
         </div>
+       </div>
         <div v-if="!isMultisig" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
         <div class='flex text-txs w-9/12 ml-auto mr-auto text-gray-400 mt-1 text-center justify-center '>
           <span v-if="!isMultisig"> {{$t('multisig.noCosigner',{name:acc?acc.name:''})}}</span>
@@ -37,12 +37,12 @@
       <div class='border p-4 mt-3'>
         <div class="flex flex-col gap-2">
           <div v-for="(multisig,index) in multisigAccountsList" :key="index">
-            <div class="border w-full rounded-md p-3">
+            <div class="border w-full cursor-pointer rounded-md p-3" @click="navigate(multisig.address)">
               <div class="text-txs font-semibold text-blue-primary">{{multisig.name}}</div>
               <div class="flex">
                 <div :id="`multisigAddress${index}`" :copyValue="multisig.address" :copySubject="$t('general.address')" class="text-txs font-bold mt-1">{{multisig.address}}</div>
-                <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy(`multisigAddress${index}`)" class="ml-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
-                 <!-- <img src="@/assets/img/chevron_right.svg" class="w-5 h-5 ml-auto"> -->
+                <font-awesome-icon icon="copy" @mouseover="isHover = true" @mouseout="isHover = false" :title="$t('general.copy')" @click="copy(`multisigAddress${index}`)" class="ml-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+                  <img v-if="findAccountWithAddress(multisig.address)" class="w-5 h-5 ml-auto" src="@/assets/img/chevron_right.svg">
               </div>
             </div>
           </div>
@@ -69,6 +69,7 @@ import AccountComponent from "@/modules/account/components/AccountComponent.vue"
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 export default {
     name: "ViewMultisigHome",
     props: {
@@ -91,6 +92,17 @@ export default {
         }
         return acc
       })
+      const getPlainAddress = address => {
+        return Address.createFromRawAddress(address).plain()
+      }
+      const findAccountWithAddress = address =>{
+        let plainAddress = getPlainAddress(address)
+          const findAcc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==plainAddress) | walletState.currentLoggedInWallet.others.find(acc=>acc.address==plainAddress) 
+          if(findAcc==undefined){
+            return false
+          }
+          return true
+      }
       const isMultisig = ref(false) 
       const isCosigner = ref(false)
       const networkType = AppState.networkType
@@ -141,8 +153,17 @@ export default {
       copyToClipboard(stringToCopy);
       toast.add({severity:'info', detail: copySubject +' '+ t('general.copied'), group: 'br', life: 3000});
     };
-      
+    const isHover = ref(false)
+    const router = useRouter()
+    const navigate = (address) =>{
+      if(findAccountWithAddress(address) && !isHover.value){
+        router.push({ name: 'ViewAccountAssets', params: { address:getPlainAddress(address) }})
+      }
+    }
       return{
+        findAccountWithAddress,
+        isHover,
+        navigate,
         copy,
         isMultisig,
         acc,
