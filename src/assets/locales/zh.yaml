@@ -240,6 +240,7 @@ general:
   levy: Levy
   levyAmount: Levy amount
   levyRecipient: Levy recipient
+  limitExceed: Exceeding Message Limit
   link: 链接
   linkSuccess: 成功链接
   linkToNamespace: 链接到名称空间
@@ -514,6 +515,7 @@ swap:
   metamaskAcc: Metamask Account
   minimum51: (MINIMUM = 51 )
   networkErr: Network Error
+  noMetamask: MetaMask is not installed
   noOtherExtension: >-
     Please make sure there is no other crypto wallet extension currently being
     enabled except

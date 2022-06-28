@@ -9,9 +9,9 @@
         <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
         <router-link :to="{name: 'ViewAccountDetails',params:{address:accountAddress}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
         <router-link :to="{name:'ViewAccountAssets', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-        <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Metadata</router-link>
+        <router-link :to="{name:'ViewAccountNamespaces', params: { address: accountAddress}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
+        <router-link :to="{name:'ViewMetadata', params: { address: accountAddress}}" class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Metadata</router-link>
         <router-link :to="{name:'ViewMultisigHome', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-        <router-link v-if="targetAccIsMultisig" :to="{name:'ViewMultisigScheme', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.scheme')}}</router-link>
         </div>
         <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
             <div class="lg:col-span-2 py-6 px-6">
@@ -162,6 +162,7 @@ import { OtherAccount } from '@/models/otherAccount';
 import { toSvg } from 'jdenticon';
 import { ThemeStyleConfig } from '@/models/stores';
 import { WalletUtils } from '@/util/walletUtils';
+import isValidUTF8 from 'utf-8-validate';
 export default { 
   name: "ViewUpdateAccountMetadata",
   props:{
@@ -195,11 +196,7 @@ export default {
     const accountName = computed(()=>selectedAcc.value?walletState.currentLoggedInWallet.convertAddressToName(selectedAcc.value.address,true):'')
     const existingScopedMetadataKeys = ref<{value:string,type:number}[]>([])
 
-    const isASCII = (string :string)=> {
-        return /^[\x00-\x7F]*$/.test(string);
-    }
-
-    const removeDoubleZero = (string :string) =>{
+     const removeDoubleZero = (string :string) =>{
         let isZero = string.endsWith('00')
         if(isZero){
             string = string.substring(0, string.length - 2);
@@ -210,9 +207,9 @@ export default {
 
     const convertUtf8 = (scopedMetadataKey :string)=>{
         scopedMetadataKey =  removeDoubleZero(scopedMetadataKey )
-        let utf8 = Convert.decodeHexToUtf8(scopedMetadataKey )
-        if(isASCII(utf8)){
-            scopedMetadataKey  = utf8
+        let bytes = Convert.hexToUint8(scopedMetadataKey );
+        if(isValidUTF8(bytes)){
+            scopedMetadataKey  = Convert.decodeHexToUtf8(scopedMetadataKey)
         }
         return scopedMetadataKey
         

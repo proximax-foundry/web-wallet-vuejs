@@ -668,18 +668,26 @@ export default {
           err.value = "";
           updateRemoteAddress();
           changeGasStrategy(bscGasStrategy.value);
-          if((amount.value + gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
-            addErrorToast(t('swap.insufficientAmount'), t('swap.swapInsufficientAmount'), 5000);
-            return;
+          
+          if(selectedToken.value.name=='xpx'){
+            if((amount.value + gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
+              addErrorToast(t('swap.insufficientAmount'), t('swap.swapInsufficientAmount'), 5000);
+              return;
+            }
+          }else{
+            if((gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
+              addErrorToast(t('swap.insufficientAmount'), t('swap.swapInsufficientAmount'), 5000);
+              return;
+            }
           }
           disableTimer();
           let signedTransaction = SwapUtils.signTransaction(selectedAccountAddress.value, walletPasswd.value, aggreateCompleteTransaction);
           siriusTransactionHash.value = signedTransaction.hash;
           checkTokenBalance().then(balance=>{
-            if(amount.value<balance){
+            if(amount.value<=balance){
               callSwapServer(signedTransaction.payload);
             }else{
-              addErrorToast('Swap Server Error', 'Insufficient Balance from Swap Server', 5000);
+              addErrorToast('Swap Server Error', 'Insufficient Balance from Funding Account', 5000);
             }
           })
           

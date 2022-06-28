@@ -163,7 +163,7 @@ import { WalletAccount } from '@/models/walletAccount';
 import { OtherAccount } from '@/models/otherAccount';
 import { ThemeStyleConfig } from '@/models/stores';
 import { toSvg } from 'jdenticon';
-
+import isValidUTF8 from 'utf-8-validate';
 export default { 
   name: "ViewUpdateAssetMetadata",
   props:{
@@ -196,11 +196,7 @@ export default {
     const accountName = computed(()=>selectedAcc.value?walletState.currentLoggedInWallet.convertAddressToName(selectedAcc.value.address,true):'')
     const existingScopedMetadataKeys = ref<{value:string,type:number}[]>([])
 
-    const isASCII = (string :string)=> {
-        return /^[\x00-\x7F]*$/.test(string);
-    }
-
-    const removeDoubleZero = (string :string) =>{
+     const removeDoubleZero = (string :string) =>{
         let isZero = string.endsWith('00')
         if(isZero){
             string = string.substring(0, string.length - 2);
@@ -211,9 +207,9 @@ export default {
 
     const convertUtf8 = (scopedMetadataKey :string)=>{
         scopedMetadataKey =  removeDoubleZero(scopedMetadataKey )
-        let utf8 = Convert.decodeHexToUtf8(scopedMetadataKey )
-        if(isASCII(utf8)){
-            scopedMetadataKey  = utf8
+        let bytes = Convert.hexToUint8(scopedMetadataKey );
+        if(isValidUTF8(bytes)){
+            scopedMetadataKey  = Convert.decodeHexToUtf8(scopedMetadataKey)
         }
         return scopedMetadataKey
         
