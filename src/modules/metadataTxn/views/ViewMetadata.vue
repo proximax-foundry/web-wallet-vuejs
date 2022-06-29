@@ -4,7 +4,7 @@
         <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
             <AccountComponent :address="address" class="mb-10"/>
             <AccountTabs :address="address" selected="metadata"/>
-            <div class="border-2 border-t-0 filter shadow-lg px-6" >
+            <div class="border-2 border-t-0 px-6" >
                 <select class=" my-4" v-model="filterSelection">
                     <option value=0>ACCOUNT</option>
                     <option value=1>NAMESPACE</option>

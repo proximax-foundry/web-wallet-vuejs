@@ -3,7 +3,7 @@
   <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
   <AccountComponent :address="address" class="mb-10"/>
     <AccountTabs :address="address" selected="multisig"/>
-    <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
+    <div class="border-2 border-t-0 lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 pr-6">
         <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
         <div class='pl-6'>

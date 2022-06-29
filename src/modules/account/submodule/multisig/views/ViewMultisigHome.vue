@@ -4,7 +4,7 @@
   <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
     <AccountComponent :address="address" class="mb-10"/>
     <AccountTabs :address="address" selected="multisig"/>
-    <div class=' p-6 border-2 border-t-0 filter shadow-lg'>
+    <div class=' p-6 border-2 border-t-0 '>
       <div v-if="isMultisig" class="flex cursor-pointer">
         <div class="border-2 border-blue-primary p-1 mb-3 w-16 text-white bg-blue-primary text-xs text-center font-semibold ">{{$t('general.multisig')}}</div>
         <router-link :to="{name:'ViewMultisigScheme', params: { address: address}}" class="border-2 border-blue-primary p-1 mb-3 w-16 text-blue-primary text-xs text-center font-semibold ">{{$t('general.scheme')}}</router-link>
