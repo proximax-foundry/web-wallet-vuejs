@@ -39,6 +39,15 @@ export const AccountRoutes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/details-account/:address',
+    name: 'ViewAccountDetails',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccountDetails.vue'),
+    meta: {
+      title: "Account details",
+    }
+  },
+  {
     path: '/view-assets/:address',
     name: 'ViewAccountAssets',
     props: true,

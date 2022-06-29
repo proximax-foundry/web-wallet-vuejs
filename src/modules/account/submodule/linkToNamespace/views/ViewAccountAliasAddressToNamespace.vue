@@ -120,7 +120,7 @@
         <button v-if="selectAction== 'Link' " class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="aliasAddressToNamespace" :disabled="disableCreate">{{$t('general.linkToNamespace')}}</button>
         <button v-if="selectAction== 'Unlink'" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="aliasAddressToNamespace" :disabled="disableCreate">{{$t('namespace.unlinkNamespace')}}</button>
        <div class="text-center">
-          <router-link :to="{name: 'ViewAccountAssets',params:{address: address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
+          <router-link :to="{name: 'ViewAccountDetails',params:{address: address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
         </div>
       </div>
     </div>

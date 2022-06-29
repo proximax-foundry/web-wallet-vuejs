@@ -1,12 +1,12 @@
 <template>
-  <div class="border rounded-lg border-gray-200 p-3 filter shadow-lg cursor-pointer" @click="navigate()">
+  <div class="border rounded-lg border-gray-200 p-3 filter shadow-lg">
     <div class="flex gap-2 ">
       <div class="mt-auto mb-auto" v-html="svgString"></div>
       <div class="flex flex-col  ">
         <div class="text-blue-primary font-bold text-xs mb-0.5">{{accountName}}</div>
         <div class="flex justify-around">
           <div :id="account.address" :title="prettyAddress(account.address)" class="text-xs font-bold mt-0.5 mr-2 overflow-hidden md:overflow-visible truncate md:text-clip w-44 md:w-full" :copyValue="prettyAddress(account.address)" :copySubject="$t('general.address')">{{prettyAddress(account.address)}}</div>
-          <font-awesome-icon @mouseover="isHoverCopy = true" @mouseout="isHoverCopy = false" icon="copy" @click="copy(account.address)" class="w-5 h-5 text-blue-primary cursor-pointer inline-block"></font-awesome-icon>
+          <font-awesome-icon icon="copy" @click="copy(account.address)" class="w-5 h-5 text-blue-primary cursor-pointer inline-block"></font-awesome-icon>
         </div>
         <div class="flex">
           <div class = 'text-xs font-bold '>{{splitBalance.left}} </div>
@@ -40,8 +40,7 @@
         <div class="relative"  @mouseover="isHover = true" @mouseout="isHover = false">
           <div v-if="displayDefaultAccountMenu"  class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
             <div role="none" class="my-2">
-              <router-link v-if='!isMultiSig && !isNormalAcc' :to="{ name: 'ViewAccountConfirmedTransactions', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.details')}}</router-link>
-              <router-link v-else :to="{ name: 'ViewAccountAssets', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.details')}}</router-link>
+              <router-link :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.details')}}</router-link>
               <hr class="solid">
               <div class="p-2 z-20 text-xs text-gray-400">Change Labels</div>
               <div v-for="(label,index) in labels" :key="index">
@@ -71,7 +70,6 @@ import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { AppState} from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { Address } from 'tsjs-xpx-chain-sdk';
-import { useRouter } from 'vue-router';
 
 export default{
   name: 'AccountTile',
@@ -113,12 +111,12 @@ export default{
       let index = label.addresses.findIndex(add=>add==address)
       if (index>=0){
         label.removeAddress(index)
-        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
+        await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
         toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is removed as ' + name , group: 'br', life: 5000});
         return
       }
       label.addresses.push(address)
-      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
+      await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
       toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is added as ' + name , group: 'br', life: 5000});
     }
 
@@ -193,7 +191,6 @@ export default{
     };
 
     const isHover = ref(false)
-    const isHoverCopy = ref(false)
     emitter.on('PAGE_CLICK', () => {
       if(!isHover.value && !displayDefaultAccountMenu.value){
 
@@ -201,18 +198,6 @@ export default{
         displayDefaultAccountMenu.value = false
       }
     });
-    const router = useRouter()
-    const navigate = () =>{
-      if(isHover.value || isHoverCopy.value){
-        return
-      }
-      if(!isNormalAcc.value && !isMultiSig.value){
-        router.push({ name: 'ViewAccountConfirmedTransactions', params: { address: p.account.address }})
-      }else{
-        router.push({ name: 'ViewAccountAssets', params: { address: p.account.address }})
-      }
-      
-    }
 
 
     return {
@@ -227,11 +212,9 @@ export default{
       displayDefaultAccountMenu,
       multisig_add,
       isHover,
-      isHoverCopy,
       isNormalAcc,
       labels,
-      updateLabel,
-      navigate
+      updateLabel
     }
   },
 }

@@ -74,7 +74,7 @@ export default {
           let walletAccount = new WalletAccount(accountName.value, account.publicKey, account.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
           walletState.currentLoggedInWallet.accounts.push(walletAccount);
           walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
-          router.push({ name: "ViewAccountAssets", params: {address: account.address.address,accountCreated: true}});
+          router.push({ name: "ViewAccountDetails", params: {address: account.address.address,accountCreated: true}});
 
         }
       }else{
