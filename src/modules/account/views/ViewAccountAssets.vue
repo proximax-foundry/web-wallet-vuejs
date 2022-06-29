@@ -7,20 +7,20 @@
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
       <AccountComponent :address="address" class="mb-10"/>
       <AccountTabs :address="address" selected="assets"/>
-    <div class='border-2 border-t-0 px-6 py-3'>
+    <div class='border-2 border-t-0  pb-3'>
         <div v-if="mosaics.length==0" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
         <div v-if="mosaics.length==0" class='text-txs w-9/12 ml-auto mr-auto text-gray-400 text-center'>
           <span >{{$t('account.noAssets')}}</span>
         </div>
-        <div v-else class="grid grid-cols-7 text-gray-400 font-semibold text-xs uppercase mb-2">
+        <div v-else class="grid px-6 py-3 grid-cols-7 bg-gray-100 text-xs font-semibold text-gray-600 mb-2">
             <div class="col-span-2">ID</div>
             <div class="col-span-2">Namespace</div>
             <div class="col-span-2">Balance</div>
             <div>Creator</div>
         </div>
         <div v-for="(mosaic, index) in mosaics" :key="index">
-            <div class="grid grid-cols-7 text-xs my-4">
-                <a :href="explorerLink(mosaic.id)" target=_new class="col-span-2"><div  class="inline-block text-xs mt-1.5 cursor-pointer transition-all duration-200 break-all pr-7 ">{{mosaic.id}}</div></a>
+            <div class="grid grid-cols-7 text-xs my-4 px-6 items-center">
+                <a :href="explorerLink(mosaic.id)" target=_new class="col-span-2"><div  class="uppercase inline-block text-xs mt-1.5 cursor-pointer break-all text-blue-primary pr-7 ">{{mosaic.id}}</div></a>
                 <div class="col-span-2 break-all pr-7 ">
                     <img v-if="displayTokenName(mosaic.name).name=='XPX'" src="@/modules/account/img/proximax-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
                     <img v-else-if="displayTokenName(mosaic.name).name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
@@ -53,7 +53,7 @@
             </div>
             <div v-if="index != (mosaics.length - 1)" class='my-2 gray-line' ></div>
         </div>
-        <div class="flex mt-3" >
+        <div class="flex mt-5 px-6" >
             <router-link :to="{ name: 'ViewTransferCreate'}" class=" bg-blue-primary px-5 py-2 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-24 "><img src="@/assets/img/icon-transfer-white.svg" class="  inline-block w-4 h-4 mt-0.5  cursor-pointer mr-1">{{$t('general.transfer')}}</router-link>
             <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="ml-3 bg-blue-primary px-5 py-2 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-20 "><img src="@/assets/img/navi/icon-swap.svg" class="h-5 w-5 pt-0.5 inline-block relative mr-1">{{$t('general.swap')}}</router-link>
             <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="ml-3 bg-blue-primary px-5 py-2 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-44"><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2">{{$t('asset.createNewAsset')}}</router-link>
