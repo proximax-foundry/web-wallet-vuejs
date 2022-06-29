@@ -16,7 +16,7 @@
           <div class="col-span-2">ID</div>
           <div class="col-span-2">Name</div>
           <div class="col-span-3">LInked</div>
-          <div>Expiry</div>
+          <div class="invisible md:visible">Expiry</div>
           <div>Active</div>
         </div>
         <div v-for="(namespace, index) in namespaces" :key="index">
@@ -24,7 +24,7 @@
             <a :href="explorerLink(namespace.id)" class="col-span-2 break-all  pr-7" target=_new ><div class="uppercase text-blue-primary" >{{namespace.id}}</div></a>
             <div class="col-span-2 break-all pr-7" >{{namespace.name}}</div>
             <div class="col-span-3 break-all pr-7 uppercase">{{namespace.linkedAssetAddress}}</div>
-            <div class=" break-all pr-7">{{namespace.expiringBlock}}</div>
+            <div class=" break-all invisible md:visible pr-7">{{namespace.expiringBlock}}</div>
             <div class="flex">
               <div>
                 <img v-if="namespace.isActive" src="@/assets/img/icon-green-tick.svg" class="h-5 w-5 ml-1">
