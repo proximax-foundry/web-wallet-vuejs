@@ -411,7 +411,7 @@ export default {
           const account = Account.createFromPrivateKey(privateKey, AppState.networkType);
           let signedTxn = TransactionUtils.cosignTransaction(aggregateTxn, account);
           AppState.chainAPI.transactionAPI.announceAggregateBondedCosignature(signedTxn);
-          router.push({ name : 'ViewTransactionStatus', params: {transactionType: 'partial' }});
+          router.push({ name : 'ViewAccountPendingTransactions', params: {address:currentAddress.value }});
       }
       else{
         toast.add({severity: 'error', summary: t('transaction.waitForLoad'), life: 2000, group: 'br'})
