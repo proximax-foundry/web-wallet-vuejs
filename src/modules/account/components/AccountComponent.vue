@@ -29,14 +29,19 @@
         </div>
        
           <div class='my-4 gray-line'/>
-          <div class = 'mt-4 text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.currentBalance')}}</div>
-          <div class='flex my-1'>
-            <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
-            <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
-            <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
-            <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
-            <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
-            <div v-if="networkType ==168 " class='flex ml-auto gap-6 '>
+          <div class="flex flex-col sm:flex-row justify-between sm:items-center">
+            <div class="flex flex-col ">
+              <div class = ' text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.currentBalance')}}</div>
+              <div class="flex">
+                <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
+                <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
+                <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
+                <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
+                <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
+              </div>
+              <div class = 'text-txs text-gray-400 mt-0.5'>{{$t('general.estimateUSD')}} {{currencyConvert}}</div>
+            </div>
+            <div v-if="networkType ==168 " class='flex mt-2 sm:mt-0 '>
               <a  :href="topUpUrl" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
                 <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
                 <div class='text-xs mt-0.5 font-semibold text-white'>{{$t('general.topUp',{tokenName: currentNativeTokenName})}}</div>
@@ -44,7 +49,6 @@
               </a>
             </div>
           </div>
-          <div class = 'text-txs text-gray-400 '>{{$t('general.estimateUSD')}} {{currencyConvert}}</div>
           
           <div class = 'text-xxs text-blue-primary mt-2 font-semibold uppercase'>{{$t('general.publicKey')}}</div>
           <div class= 'flex'>
@@ -54,7 +58,7 @@
           <div  class="mt-2" v-if='!other_acc' >
           <div class = 'text-xxs text-blue-primary mt-0.5 font-semibold uppercase'>{{$t('general.privateKey')}}</div>
           <div class='flex '>
-            <div v-if="!showPwPK && !showPK" class='break-all font-semibold'>****************************************************************</div>
+            <div v-if="!showPwPK && !showPK" class='break-all font-semibold'>********************************************************</div>
             <PkPasswordModal v-if="!showPwPK && !showPK" :account = 'acc' />
           </div>
           <div class='flex'>
@@ -71,11 +75,20 @@
             <div class="text-xxs text-blue-primary mt-2 font-semibold uppercase">Linked Namespace</div>
             <div class="text-xs mt-1 font-semibold break-all">{{linkedNamespace}}</div>
           </div>
-          <div class='flex items-center mt-3'>
-            <PdfPasswordModal v-if='!other_acc' />
-            <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}" class="text-xs ml-3 blue-btn cursor-pointer py-3 px-3" ><img src="@/assets/img/link-icon.svg" class = 'h-4 w-4 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('general.linkToNamespace')}}</router-link>
-            <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address}}" class="ml-3 blue-btn cursor-pointer py-3 px-3"><img src="@/assets/img/icon-multisig.svg" class = 'h-3 w-3 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('delegate.delegateAcc')}}</router-link>
-            <DeleteAccountModal v-if="!isDefault && !other_acc " :account ='acc' />
+         
+            <div class="flex mt-3 flex-col w-full ml-auto mr-auto gap-2 md:flex-row md:items-center">
+              <PdfPasswordModal v-if='!other_acc' />
+              <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}" class="text-center text-xs px-3 blue-btn cursor-pointer py-3" ><img src="@/assets/img/link-icon.svg" class = 'h-3 w-3 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('general.linkToNamespace')}}</router-link>
+              <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address}}" class="text-center blue-btn cursor-pointer py-3 px-3"><img src="@/assets/img/icon-multisig.svg" class = 'h-3 w-3 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('delegate.delegateAcc')}}</router-link>
+              <DeleteAccountModal v-if="!isDefault && !other_acc "  :account ='acc' />
+            </div>
+            <div class="flex flex-col w-44 ml-auto mr-auto gap-3">
+              
+            </div>
+         
+          <div class='flex flex-col md:flex-row items-center mt-3 gap-2'>
+            
+            
           </div>
       </div>
     </div>

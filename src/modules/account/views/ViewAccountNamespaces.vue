@@ -8,8 +8,8 @@
       <AccountComponent :address="address" class="mb-10"/>
       <AccountTabs :address="address" selected="namespaces"/>
       <div class="border-2 border-t-0 pb-3" >
-        <div v-if="namespaces.length==0" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
-        <div v-if="namespaces.length==0" class='text-txs w-9/12 ml-auto mr-auto text-gray-400 text-center'>
+        <div v-if="namespaces.length==0" class='text-blue-primary text-xs text-center font-semibold pt-2'>{{$t('general.ntgToShow')}}</div>
+        <div v-if="namespaces.length==0" class='text-txs w-9/12 ml-auto mr-auto text-gray-400 text-center '>
           <span >You do not own any namespaces.</span>
         </div>
         <div v-else class="grid grid-cols-9 bg-gray-100 py-3 px-6 text-xs font-semibold text-gray-600 mb-2">
@@ -41,7 +41,7 @@
           </div>
           <div v-if="index != (namespaces.length - 1)" class='my-2 gray-line' ></div>
         </div>
-        <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class=" bg-blue-primary py-3 mx-6 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-52 "><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2">{{$t('namespace.registerNewNamespace')}}</router-link>
+        <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="mt-2 bg-blue-primary py-3 mx-6 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-52 "><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2">{{$t('namespace.registerNewNamespace')}}</router-link>
       </div>
         
     </div>

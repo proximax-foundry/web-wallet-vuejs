@@ -1,7 +1,7 @@
 <template>
-  <div @click=" toggleModal = !toggleModal" class='flex ml-auto' >
-    <img src='@/modules/account/img/delete-icon.svg' class='mt-3  w-3 h-3 cursor-pointer'>
-    <div class = 'pt-2.5 text-xs text-red-500 cursor-pointer ml-1 font-semibold'>{{$t('account.deleteThis')}}</div>
+  <div @click=" toggleModal = !toggleModal" class='flex items-center px-3 ml-auto' >
+    <img src='@/modules/account/img/delete-icon.svg' class='  w-4 h-4 cursor-pointer'>
+    <div class = 'text-xs text-red-500 cursor-pointer ml-2 font-semibold'>{{$t('account.deleteThis')}}</div>
   </div>
   <transition
       enter-active-class="animate__animated animate__fadeInDown"

@@ -1,5 +1,5 @@
 <template>
-    <div  class=" blue-btn cursor-pointer py-3 px-3 " @click=" toggleModal = !toggleModal">{{$t('general.downloadPaperWallet')}}</div>
+    <div  class=" blue-btn cursor-pointer py-3 px-3 text-center" @click=" toggleModal = !toggleModal">{{$t('general.downloadPaperWallet')}}</div>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
