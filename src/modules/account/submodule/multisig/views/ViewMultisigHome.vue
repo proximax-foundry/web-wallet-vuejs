@@ -1,9 +1,6 @@
 <template>
   <div>
-  <div class='flex cursor-pointer'>
-    <img src='@/assets/img/chevron_left.svg'>
-    <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
-  </div>
+  
   <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
     <AccountComponent :address="address" class="mb-10"/>
     <AccountTabs :address="address" selected="multisig"/>
@@ -19,7 +16,7 @@
             <div class="border w-full cursor-pointer rounded-md p-3" @click="navigate(cosigner.address)">
               <div class="text-txs font-semibold text-blue-primary">{{cosigner.name}}</div>
               <div class="flex">
-                <div :id="`cosignerAddress${index}`" :copyValue="cosigner.address" :copySubject="$t('general.address')" class="text-txs font-bold mt-1">{{cosigner.address}}</div>
+                <div :id="`cosignerAddress${index}`" :copyValue="cosigner.address" :copySubject="$t('general.address')" :title="cosigner.address" class="truncate md:text-clip w-44 md:w-full text-txs font-bold mt-1">{{cosigner.address}}</div>
                 <font-awesome-icon icon="copy" @mouseover="isHover = true" @mouseout="isHover = false" :title="$t('general.copy')" @click="copy(`cosignerAddress${index}`)" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
                 <img v-if="findAccountWithAddress(cosigner.address)" class="w-5 h-5 ml-auto" src="@/assets/img/chevron_right.svg" >
               </div>
@@ -40,7 +37,7 @@
             <div class="border w-full cursor-pointer rounded-md p-3" @click="navigate(multisig.address)">
               <div class="text-txs font-semibold text-blue-primary">{{multisig.name}}</div>
               <div class="flex">
-                <div :id="`multisigAddress${index}`" :copyValue="multisig.address" :copySubject="$t('general.address')" class="text-txs font-bold mt-1">{{multisig.address}}</div>
+                <div :id="`multisigAddress${index}`" :copyValue="multisig.address" :title="multisig.address" :copySubject="$t('general.address')" class="truncate md:text-clip w-44 md:w-full text-txs font-bold mt-1">{{multisig.address}}</div>
                 <font-awesome-icon icon="copy" @mouseover="isHover = true" @mouseout="isHover = false" :title="$t('general.copy')" @click="copy(`multisigAddress${index}`)" class="ml-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
                   <img v-if="findAccountWithAddress(multisig.address)" class="w-5 h-5 ml-auto" src="@/assets/img/chevron_right.svg">
               </div>

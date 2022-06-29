@@ -5,7 +5,7 @@
       <div class="flex flex-col  ">
         <div class="text-blue-primary font-bold text-xs mb-0.5">{{accountName}}</div>
         <div class="flex justify-around">
-          <div :id="account.address" :title="prettyAddress(account.address)" class="text-xs font-bold mt-0.5 mr-2 overflow-hidden md:overflow-visible truncate md:text-clip w-44 md:w-full" :copyValue="prettyAddress(account.address)" :copySubject="$t('general.address')">{{prettyAddress(account.address)}}</div>
+          <div :id="account.address" :title="prettyAddress(account.address)" class="text-xs font-bold mt-0.5 mr-2  truncate md:text-clip w-44 md:w-full" :copyValue="prettyAddress(account.address)" :copySubject="$t('general.address')">{{prettyAddress(account.address)}}</div>
           <font-awesome-icon @mouseover="isHoverCopy = true" @mouseout="isHoverCopy = false" icon="copy" @click="copy(account.address)" class="w-5 h-5 text-blue-primary cursor-pointer inline-block"></font-awesome-icon>
         </div>
         <div class="flex">
