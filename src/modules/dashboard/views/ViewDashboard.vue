@@ -102,6 +102,12 @@
       <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" :account="selectedAccount" />
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700 uppercase">{{$t('dashboard.recentTransactions')}}</b> ({{ accountConfirmedTxnsCount }} - {{$t('dashboard.viewAll')}})</div>
       <MixedTxnDataTable :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="recentTransactions" @openDecryptMsg="openDecryptMsgModal"></MixedTxnDataTable>
+      <div class="md:ml-200  md:h-9 sm:text-justify sm:flex text-xs sm:justify-end text-gray-900">
+        <div class="cursor-pointer flex items-center" @click="gotoAddressExplorer(selectedAccountAddressPlain)">
+            <div>{{$t('general.moreOnExplorer')}} </div>
+            <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block">
+        </div>
+      </div>  
       <div class="mt-10 md:flex ml-5 md:ml-0">
         <div class="w-full md:w-1/2">
           <div class="mb-8 font-bold uppercase text-txs">{{$t('dashboard.createSthNew')}}</div>
@@ -190,6 +196,12 @@
         <NamespaceTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.NAMESPACE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></NamespaceTxnDataTable>
         <RestrictionTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></RestrictionTxnDataTable>
         <SecretTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.SECRET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></SecretTxnDataTable>
+      <div class="md:ml-200  md:h-9 sm:text-justify sm:flex text-xs sm:justify-end text-gray-900">
+        <div class="cursor-pointer flex items-center" @click="gotoAddressExplorer(selectedAccountAddressPlain)">
+            <div>{{$t('general.moreOnExplorer')}} </div>
+            <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block">
+        </div>
+      </div>   
       </div>
       <div v-else class="border-t border-b border-gray-200 text-gray-400 text-xs mt-10">
         <div class="border-t border-b border-gray-200 my-3 py-6 px-2">
@@ -744,6 +756,10 @@ export default defineComponent({
     const addressExplorerURL = computed(()=> explorerBaseURL.value + networkState.currentNetworkProfile.chainExplorer.addressRoute);
     const hashExplorerURL = computed(()=> explorerBaseURL.value + networkState.currentNetworkProfile.chainExplorer.hashRoute);
 
+    const gotoAddressExplorer = (address)=>{
+      window.open(addressExplorerURL.value + "/" + address, "_blank");
+    }
+
     const recentTransferTxnRow = ref([]);
 
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
@@ -1053,6 +1069,7 @@ export default defineComponent({
       toSvg,
       addressExplorerURL,
       hashExplorerURL,
+      gotoAddressExplorer,
       currentBlock,
       displayBoard,
       copy,
