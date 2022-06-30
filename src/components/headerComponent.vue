@@ -1,68 +1,24 @@
 <template>
   <header class="z-10 fixed w-full">
     <div class="header-height flex items-stretch lg:pr-2 bg-gray-50 filter drop-shadow-xl" v-if="loginStatus">
-      <div class="header-height flex-none self-center flex pt-3 lg:pt-4 pl-2 sm:pl-4 bg-white lg:bg-navy-primary logo-header">
-        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-blacktxt.svg" class="w-40 lg:hidden"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40 hidden lg:inline-block"></router-link>
-      </div>
-      <div class="flex items-center w-16 lg:right-gray-line">
-        <div class="text-center w-full h-7">
-          <router-link :to="{name : 'ViewDashboard'}"><img src="@/assets/img/icon-home.svg" class="h-5 w-5 lg:h-7 lg:w-7 inline-block"></router-link>
+      <div class="w-12 lg:w-16 flex flex-row items-center left-gray-line lg:hidden ">
+        <div class="text-center w-full h-6" @mouseover="hoverOverNavigation" @mouseout="hoverOutNavigation">
+          <img src="@/assets/img/icon-menu.svg" class="h-4 w-4 opacity-80 hover:opacity-100 inline-block cursor-pointer" @click="toggleSidebar">
         </div>
       </div>
-      <div class="flex-none lg:flex items-center lg:ml-4 hidden lg:visible">
-        <img src="@/assets/img/icon-blockheight.svg" class="h-10 w-10 inline-block">
-        <div class="ml-3">
-          <div class="uppercase text-txs text-gray-400">{{$t('general.blockHeight')}}</div>
-          <div class="text-md mt-1" :class="currentBlockHeight==0?'text-gray-300':'text-gray-800 font-bold'">{{ currentBlockHeight==0?'Fetching...':currentBlockHeight }}</div>
-        </div>
+      <div class=" flex justify-center items-center lg:bg-navy-primary logo-header">
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}">
+          <img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40 hidden lg:inline-block">
+        </router-link>
       </div>
-
-      <div class="flex-grow"></div>
-      <div class="flex-none">
-        <div class="flex flex-row h-full">
-          <div class="flex-row items-center hidden lg:flex">
-            <div class="text-center w-full h-6 pr-2 lg:pr-10 mt-2 relative">
-              <div class="cursor-pointer text-blue-primary text-tsm" @mouseover="setHoverCreateToTrue" @mouseout="setHoverCreateToFalse">+{{$t('general.new')}}</div>
-              <div class="absolute z-20 w-60 text-left mt-2 bg-gray-50 shadow-sm rounded-md right-0 p-2 text-xs transition duration-200 block" v-if="isShowCreate" @mouseover="isShowCreate=true;isHoverCreatePanel=true;" @mouseout="hideCreatePanel">
-                <router-link :to="{ name: 'ViewTransferCreate'}" class="hover:bg-gray-200 p-2 block">
-                  <div class="inline-block mr-2">
-                    <img src="@/assets/img/icon-transfer.svg">
-                  </div>
-                  <div class="inline-block">
-                    <div class="font-bold mb-1">{{$t('general.transfer')}}</div>
-                    <div class="text-txs text-gray-400">{{$t('home.transferDescription')}}</div>
-                  </div>
-                </router-link>
-                <router-link :to="{ name: 'ViewServicesAssetsCreate'}" class="hover:bg-gray-200 p-2 block">
-                  <div class="inline-block mr-2">
-                    <img src="@/assets/img/icon-header-asset.svg">
-                  </div>
-                  <div class="inline-block">
-                    <div class="font-bold mb-1">{{$t('general.digitalAsset')}}</div>
-                    <div class="text-txs text-gray-400">{{$t('home.assetDescription')}}</div>
-                  </div>
-                </router-link>
-                <router-link :to="{ name: 'ViewServicesNamespaceCreate'}" class="hover:bg-gray-200 p-2 block">
-                  <div class="inline-block mr-2">
-                    <img src="@/assets/img/icon-header-namespace.svg">
-                  </div>
-                  <div class="inline-block">
-                    <div class="font-bold mb-1">{{$t('general.namespace')}}</div>
-                    <div class="text-txs text-gray-400">{{$t('home.namespaceDescription')}}</div>
-                  </div>
-                </router-link>
-                <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="hover:bg-gray-200 p-2 block">
-                  <div class="inline-block mr-2">
-                    <img src="@/assets/img/icon-header-account.svg">
-                  </div>
-                  <div class="inline-block">
-                    <div class="font-bold mb-1">{{$t('general.account')}}</div>
-                    <div class="text-txs text-gray-400">{{$t('home.accountDescription')}}</div>
-                  </div>
-                </router-link>
-              </div>
-            </div>
-          </div>
+      <div class=" flex items-center ml-auto mr-28 md:mr-auto md:ml-10 logo-header">
+        <div class="hidden lg:block" >Wallet {{walletName}}</div>
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}">
+          <img v-if="!wideScreen" src="@/assets/img/logo-blacktxt.svg" class="w-40 lg:hidden">
+        </router-link>
+      </div>
+      
+        <div class="flex flex-row ml-auto h-full">
           <div class="hidden lg:flex w-16 flex-row items-center left-gray-line relative">
             <div class="text-center w-full h-7 cursor-pointer" @mouseover="setHoverSupportToTrue" @mouseout="setHoverSupportToFalse">
               <img src="@/assets/img/icon-support-contact.svg" class="opacity-80 hover:opacity-100 inline-block h-4 w-4 lg:h-5 lg:w-5">
@@ -122,14 +78,10 @@
               <img src="@/assets/img/icon-testnet-block.svg" class="w-3 lg:w-7 block lg:inline-block" :title="chainAPIEndpoint" v-if="wideScreen"> <div class="block lg:inline-block text-txs text-white text-left lg:ml-2"><div class="text-xxs lg:text-tsm text-navy-primary">{{ networkState.chainNetworkName }}</div></div>
             </div>
           </div>
-          <div class="w-12 lg:w-16 flex flex-row items-center left-gray-line lg:hidden">
-            <div class="text-center w-full h-6" @mouseover="hoverOverNavigation" @mouseout="hoverOutNavigation">
-              <img src="@/assets/img/icon-menu.svg" class="h-4 w-4 opacity-80 hover:opacity-100 inline-block cursor-pointer" @click="toggleSidebar">
-            </div>
-          </div>
+          
         </div>
       </div>
-    </div>
+   
     <div class="container mx-auto header-height flex items-stretch bg-navy-primary" v-else>
       <div class="flex-none self-center flex items-end ml-2 lg:ml-0">
         <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 lg:w-40"></router-link>
@@ -341,7 +293,7 @@ export default defineComponent({
     // }, 60000);
 
     const currentNetworkType = computed(()=> networkState.currentNetworkProfile ? AppState.networkType : null);
-
+    const walletName = computed(()=>walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.name:'')
     const logout = () => {
       WalletStateUtils.doLogout();
       router.push({ name: "Home"});
@@ -742,6 +694,7 @@ export default defineComponent({
       currentBlockHeight,
       isNewNotification,
       newNotificationCount,
+      walletName
     };
   },
   created() {
