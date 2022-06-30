@@ -1,7 +1,7 @@
 <template>
   <div @click=" toggleModal = !toggleModal" class='flex items-center px-3 ml-auto' >
     <img src='@/modules/account/img/delete-icon.svg' class='  w-4 h-4 cursor-pointer'>
-    <div class = 'text-xs text-red-500 cursor-pointer ml-2 font-semibold'>{{$t('account.deleteThis')}}</div>
+    <div class = 'text-xs text-red-500 cursor-pointer ml-2 font-semibold'>Delete Account</div>
   </div>
   <transition
       enter-active-class="animate__animated animate__fadeInDown"

@@ -41,29 +41,51 @@
         <div class='my-6 gray-line'></div>
         <div class = 'text-xxs text-blue-primary mt-2 font-semibold uppercase'>{{$t('general.publicKey')}}</div>
           <div class= 'flex'>
-            <div id="public" class="text-xs font-semibold mt-1 break-all truncate md:text-clip w-44 md:w-full" :copyValue="acc?acc.publicKey:''" :title="acc?acc.publicKey:''" :copySubject="$t('general.publicKey')">{{acc?acc.publicKey:''}}</div>
+            <div id="public" class="text-xs font-semibold mt-1 break-all truncate md:text-clip md:w-auto" :copyValue="acc?acc.publicKey:''" :title="acc?acc.publicKey:''" :copySubject="$t('general.publicKey')">{{acc?acc.publicKey:''}}</div>
             <font-awesome-icon icon="copy" @click="copy('public')" :title="$t('general.copy')" class="ml-2 mt-0.5 pb-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
           </div>
           <div v-if='!other_acc' class='my-6 gray-line'></div>
           <div v-if='!other_acc' >
             <div class = 'text-xxs text-blue-primary mt-0.5 font-semibold uppercase'>{{$t('general.privateKey')}}</div>
             <div class='flex '>
-              <div v-if="!showPwPK && !showPK" class='break-all font-semibold truncate md:text-clip w-44 md:w-full'>****************************************************************</div>
+              <div v-if="!showPwPK && !showPK" class='break-all font-semibold truncate md:text-clip md:w-auto'>****************************************************************</div>
               <PkPasswordModal v-if="!showPwPK && !showPK" :account = 'acc' />
             </div>
             <div class='flex'>
-              <div id="private" class="text-xs mt-1 font-semibold break-all truncate md:text-clip w-44 md:w-full" type="text" :copyValue="privateKey" :title="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
+              <div id="private" class="text-xs mt-1 font-semibold break-all truncate md:text-clip md:w-full" type="text" :copyValue="privateKey" :title="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
               <font-awesome-icon title='Copy' icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link cursor-pointer " v-if="showPK"></font-awesome-icon>
               <font-awesome-icon icon="eye-slash" title='Hide Private Key' class="text-blue-link relative cursor-pointer ml-1" @click="showPwPK = false; showPK = false" v-if="showPK"></font-awesome-icon>
             </div>
             <div class = 'text-txs mt-2 text-red-400 border px-1.5 py-2 border-red-400 rounded-md'>{{$t('general.pkWarning')}}</div>
         </div>
-        <div class='my-6 gray-line' v-if="!other_acc "></div>
-        <div class="flex mt-3 flex-col w-full ml-auto mr-auto gap-2 md:flex-row md:items-center">
+        <div class='my-6 gray-line'  ></div>
+      
+          <div  class="flex  flex-col">
+            <div class="text-xxs text-blue-primary font-semibold uppercase ">Linked Account</div>
+            <div class="flex items-center">
+              <div v-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" class="text-xs mt-1 font-semibold break-all  truncate md:text-clip md:w-auto">{{linkedAccountKey}}</div>
+              <div v-else class="text-xs "> - </div>
+              <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">
+                <font-awesome-icon title="Delegate account" icon="link"  class="ml-2 w-4 h-4 text-blue-primary cursor-pointer"></font-awesome-icon>
+              </router-link>
+              
+            </div>
+          </div>
+        <div class='my-6 gray-line' ></div>
+          <div class="flex  flex-col">
+            <div class="text-xxs text-blue-primary font-semibold uppercase">Alias</div>
+            <div class="flex items-center">
+              <div v-if="linkedNamespace==''" class="text-xs "> - </div>
+              <div class="text-xs mt-1 font-semibold break-all">{{linkedNamespace}}</div>
+              <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address}}" >
+                 <font-awesome-icon title="Alias to namespace" icon="link"  class="ml-2 w-4 h-4 mt-0.5 text-blue-primary cursor-pointer"></font-awesome-icon>
+              </router-link>
+            </div>
+          </div>
+        <div class="flex mt-6 flex-col sm:flex-row w-auto gap-10 sm:gap-0 justify-between ">
           <PdfPasswordModal v-if='!other_acc' />
-          <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}" class="text-center text-xs px-3 blue-btn cursor-pointer py-3" ><img src="@/assets/img/link-icon.svg" class = 'h-3 w-3 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('general.linkToNamespace')}}</router-link>
-          <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address}}" class="text-center blue-btn cursor-pointer py-3 px-3"><img src="@/assets/img/icon-multisig.svg" class = 'h-3 w-3 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('delegate.delegateAcc')}}</router-link>
-          <div class="h-3 md:hidden"/>
+          <!-- <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}" class="text-center text-xs px-3 blue-btn cursor-pointer py-3" ><img src="@/assets/img/link-icon.svg" class = 'h-3 w-3 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('general.linkToNamespace')}}</router-link>
+          <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address}}" class="text-center blue-btn cursor-pointer py-3 px-3"><img src="@/assets/img/icon-multisig.svg" class = 'h-3 w-3 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('delegate.delegateAcc')}}</router-link> -->
           <DeleteAccountModal v-if="!isDefault && !other_acc "  :account ='acc' />
         </div>
       </div>
@@ -94,6 +116,7 @@ import DeleteAccountModal from '@/modules/account/components/DeleteAccountModal.
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { AppState } from '@/state/appState';
+import { Address } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: "ViewAccountDetails",
@@ -289,6 +312,42 @@ export default {
       }
     }) 
 
+    const linkedAccountKey = ref('')
+    const linkedNamespace = ref('')
+    const getLinkedAccountKey = async() =>{
+      const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(acc.value.address))
+      if(accInfo.linkedAccountKey!=undefined){
+        linkedAccountKey.value = accInfo.linkedAccountKey 
+      }
+    }
+    const getLinkedNamespace = async() =>{
+      const names = await AppState.chainAPI.accountAPI.getAccountsNames([Address.createFromRawAddress(acc.value.address)])
+      if(names[0].names[0]){
+        linkedNamespace.value = names[0].names[0].name
+      }
+    }
+    const init = async() =>{ 
+      if(!acc.value){
+        return
+      }
+      await getLinkedAccountKey()
+      getLinkedNamespace()
+    }
+   
+    if(AppState.isReady){
+      if(!acc.value){
+        return
+      }
+      init();
+    }else{
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
+          init();
+          readyWatcher();
+        }
+      });
+    }
+
     emitter.on("revealPK", (e) => {
       showPK.value = e;
     });
@@ -302,6 +361,8 @@ export default {
    
 
     return {
+      linkedAccountKey,
+      linkedNamespace,
       topUpUrl,
       networkState,
       showModal,
