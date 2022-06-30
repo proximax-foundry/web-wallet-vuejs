@@ -64,8 +64,8 @@
             <div class="text-xxs text-blue-primary font-semibold uppercase ">Linked Account</div>
             <div class="flex items-center">
               <div v-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" class="text-xs mt-1 font-semibold break-all  truncate md:text-clip md:w-auto">{{linkedAccountKey}}</div>
-              <div v-else class="text-xs "> - </div>
-              <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}">
+              <div v-else class="text-xs ">No Linked Account</div>
+              <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address}}">
                 <font-awesome-icon title="Delegate account" icon="link"  class="ml-2 w-4 h-4 text-blue-primary cursor-pointer"></font-awesome-icon>
               </router-link>
               
@@ -75,9 +75,9 @@
           <div class="flex  flex-col">
             <div class="text-xxs text-blue-primary font-semibold uppercase">Alias</div>
             <div class="flex items-center">
-              <div v-if="linkedNamespace==''" class="text-xs "> - </div>
+              <div v-if="linkedNamespace==''" class="text-xs "> No Alias </div>
               <div class="text-xs mt-1 font-semibold break-all">{{linkedNamespace}}</div>
-              <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address}}" >
+              <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}" >
                  <font-awesome-icon title="Alias to namespace" icon="link"  class="ml-2 w-4 h-4 mt-0.5 text-blue-primary cursor-pointer"></font-awesome-icon>
               </router-link>
             </div>
