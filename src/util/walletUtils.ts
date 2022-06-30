@@ -12,8 +12,8 @@ import { SecretKeyPair } from "../models/interface/secretKeyPair"
 import { MultisigInfo } from "../models/multisigInfo"
 import {
     SimpleWallet, Password, RawAddress, Convert, Crypto,
-    WalletAlgorithm, PublicAccount, Account, NetworkType, 
-    AggregateTransaction, CosignatureTransaction, MosaicNonce,
+    WalletAlgorithm, PublicAccount, Account, NetworkType,
+    AggregateTransaction, CosignatureTransaction, MosaicNonce, NamespaceInfo,
     NamespaceId, Address, AccountInfo, MosaicId, AliasType, Transaction,
     MultisigAccountGraphInfo,MultisigAccountInfo,QueryParams, TransactionQueryParams
 } from "tsjs-xpx-chain-sdk"
@@ -27,8 +27,10 @@ import { TransactionUtils } from "./transactionUtils"
 import { AddressBook } from "@/models/addressBook"
 import {AppState} from "@/state/appState";
 import { Label } from "@/models/label"
+import { AssetInfo } from "@/models/assetInfo"
 
 const config = require("@/../config/config.json");
+const dataPerRequest = 50;
 
 export class WalletUtils {
 
@@ -121,8 +123,12 @@ export class WalletUtils {
                         for (const mosaic of singleAccInfo.mosaics) {
                             if (mosaic.id.toHex() === nativeNetworkMosaicId.toHex()) {
                                 amount = mosaic.amount.compact();
-                                const newAsset = new Asset(mosaic.id.toHex(), currentNetworkProfile.network.currency.divisibility, false, true);
-                                newAsset.amount = amount;
+                                const newAsset = new Asset(mosaic.id.toHex());
+                                newAsset.divisibility = currentNetworkProfile.network.currency.divisibility;
+                                newAsset.transferable = true;
+                                newAsset.supplyMutable = false;
+                                newAsset.rawAmount = amount;
+                                newAsset.updateExactAmount();
                                 account.assets.push(newAsset);
                                 account.updateBalance(nativeNetworkMosaicId.toHex());
                             } else {
@@ -133,7 +139,11 @@ export class WalletUtils {
 
                         AppState.chainAPI.assetAPI.getMosaics(mosaicList).then((mosaicInfo) => {
                             mosaicInfo.forEach((asset) => {
-                                const newAsset = new Asset(asset.mosaicId.toHex(), asset.divisibility, asset.isSupplyMutable(), asset.isTransferable(), asset.owner.publicKey);
+                                const newAsset = new Asset(asset.mosaicId.toHex());
+                                newAsset.divisibility = asset.divisibility;
+                                newAsset.supplyMutable = asset.isSupplyMutable();
+                                newAsset.transferable = asset.isTransferable();
+                                newAsset.creator = asset.owner.publicKey;
                                 newAsset.supply = asset.supply.compact();
                                 newAsset.amount = mosaicAmount[newAsset.idHex]
                                 newAsset.duration = asset.duration ? asset.duration.compact() : null;
@@ -724,10 +734,9 @@ export class WalletUtils {
     static async getMultisigDetails(addressInString: string): Promise<MultisigInfo[]>{
 
         const address = Helper.createAddress(addressInString);
+        let multisigInfos: MultisigInfo[] = [];
 
         const graphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(address);
-
-        let multisigInfos: MultisigInfo[] = [];
 
         graphInfo.multisigAccounts.forEach((value, key)=>{
             const level = key;
@@ -775,7 +784,7 @@ export class WalletUtils {
 
                 let address = publicAccount.address.plain();
 
-                let stripedAddress = address.substr(-4);
+                let stripedAddress = address.substring(address.length -4);
 
                 let newOtherAccount = new OtherAccount("MULTISIG-" + stripedAddress, publicKeys[y], address, Helper.getOtherWalletAccountType().MULTISIG_CHILD);
             
@@ -786,33 +795,48 @@ export class WalletUtils {
         wallet.others = wallet.others.filter((otherAcc)=> othersList.includes(otherAcc.publicKey) || otherAcc.type === Helper.getOtherWalletAccountType().DELEGATE_VALIDATE )
     }
 
-    static async updateWalletAccountDetails(wallet: Wallet, addInLinkedAccount: boolean = false): Promise<void>{
+    static async updateWalletAccountsInfo(wallet: Wallet, addInLinkedAccount: boolean = false): Promise<MosaicId[]>{
 
-        let tempAssets: Asset[] = [];
+        let tempAssets: MosaicId[] = [];
         let tempLinkedList: string[] = [];
+        const list1: Address[] = wallet.accounts.map((acc)=> PublicAccount.createFromPublicKey(acc.publicKey, AppState.networkType).address)
+        const list2: Address[] = wallet.others.map((acc)=> PublicAccount.createFromPublicKey(acc.publicKey, AppState.networkType).address);
+        let accountAddressList = list1.concat(list2);
+        let accountsInfo: AccountInfo[] = [];
 
-        for(let i = 0; i < wallet.accounts.length; ++i ){
+        let numOfRequest = Math.ceil(accountAddressList.length / dataPerRequest);
 
-            let account = wallet.accounts[i];
+        for(let i = 0; i < numOfRequest; ++i){
+            let startIndex = i * dataPerRequest;
+            let endIndex = (i + 1) * dataPerRequest;
 
-            let publicAccount = Helper.createPublicAccount(account.publicKey, AppState.networkType) 
-
-            let accountInfo;
+            let requestData = accountAddressList.slice(startIndex, endIndex);
 
             try {
-                accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(publicAccount.address);
+                let tempAccountsInfo = await AppState.chainAPI.accountAPI.getAccountsInfo(requestData);
+
+                accountsInfo.concat(tempAccountsInfo)
             } catch (error) {
                 continue;
             }
+        }
 
-            if(accountInfo.linkedAccountKey !== "0".repeat(64) && addInLinkedAccount){
+        for(let i = 0; i < wallet.accounts.length; ++i ){
+
+            let accountInfo = accountsInfo.find(x => x.publicKey === wallet.accounts[i].publicKey);
+
+            if(!accountInfo){
+                continue;
+            }
+
+            if(addInLinkedAccount && accountInfo.linkedAccountKey !== "0".repeat(64)){
 
                 tempLinkedList.push(accountInfo.linkedAccountKey);
 
                 let linkedPublicAccount = Helper.createPublicAccount(accountInfo.linkedAccountKey, AppState.networkType);
 
                 let newAddress = linkedPublicAccount.address.plain();
-                let stripedAddress = newAddress.substr(-4);
+                let stripedAddress = newAddress.substring(newAddress.length-4);
 
                 let newOtherAccount = new OtherAccount("ACCOUNT-LINK-" + stripedAddress, accountInfo.linkedAccountKey, newAddress, Helper.getOtherWalletAccountType().DELEGATE_VALIDATE);
             
@@ -821,96 +845,170 @@ export class WalletUtils {
                 }
             }
 
-            let namespaceInfos = await AppState.chainAPI.namespaceAPI.getNamespacesFromAccount(publicAccount.address);
+            let assets: Asset[] = [];
+            //let assetAmount: LooseObject = [];
 
-            let namespaces: Namespace[] = [];
-            let tempNamespaceIds: NamespaceId[] = [];
+            for(let i=0; i < accountInfo.mosaics.length; ++i){
+                let asset = accountInfo.mosaics[i];
+                let assetIdHex = asset.id.toHex();
 
-            for(let i=0; i < namespaceInfos.length; ++i){
+                let newAsset = new Asset(assetIdHex);
+                newAsset.rawAmount = asset.amount.compact();
 
-                let namespaceId = namespaceInfos[i].id;
+                let knowAssetInfo = AppState.assetsInfo.find(x => x.idHex === assetIdHex);
 
-                tempNamespaceIds.push(namespaceId);
-
-                let newNamespace = new Namespace(namespaceInfos[i].id.toHex());
-                newNamespace.active = namespaceInfos[i].active;
-
-                if(namespaceInfos[i].isSubnamespace()){
-                    newNamespace.parentId = namespaceInfos[i].parentNamespaceId().toHex();
+                if(knowAssetInfo){
+                    WalletUtils.assetUpdateFromAssetInfo(knowAssetInfo, newAsset);
+                    newAsset.updateExactAmount();
+                    newAsset.updateExpirationBlock();
                 }
-
-                newNamespace.startHeight = namespaceInfos[i].startHeight.compact();
-                newNamespace.endHeight = namespaceInfos[i].endHeight.compact();
-                
-                if(namespaceInfos[i].hasAlias()){
-                    newNamespace.linkType = namespaceInfos[i].alias.type.valueOf();
-
-                    switch (newNamespace.linkType) {
-                        case AliasType.Mosaic:
-                            newNamespace.linkedId = namespaceInfos[i].alias.mosaicId.toHex()
-                            break;
-                        case AliasType.Address:
-                            newNamespace.linkedId = namespaceInfos[i].alias.address.plain();
-                            break;
-                    
-                        default:
-                            break;
+                else{
+                    if(!tempAssets.find(x => x.toHex() === assetIdHex)){
+                        tempAssets.push(new MosaicId(assetIdHex));
                     }
                 }
 
-                namespaces.push(newNamespace);
+                assets.push(newAsset);
             }
+            wallet.accounts[i].assets= assets;
+            wallet.accounts[i].updateBalance(AppState.nativeToken.assetId);
+        }
 
-            let namespaceNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(tempNamespaceIds);
+        for(let i = 0; i < wallet.others.length; ++i ){
 
-            for(let i = 0; i < namespaceNames.length; ++i){
-                let existingNamespace = namespaces.find((ns)=> ns.idHex === namespaceNames[i].namespaceId.toHex())
+            let accountInfo = accountsInfo.find(x => x.publicKey === wallet.others[i].publicKey);
 
-                existingNamespace.name = namespaceNames[i].name;
+            if(!accountInfo){
+                continue;
             }
-
-            account.namespaces = namespaces;
 
             let assets: Asset[] = [];
             //let assetAmount: LooseObject = [];
 
             for(let i=0; i < accountInfo.mosaics.length; ++i){
-                let mosaic = accountInfo.mosaics[i];
-                let mosaicIdHex = mosaic.id.toHex();
+                let asset = accountInfo.mosaics[i];
+                let assetIdHex = asset.id.toHex();
 
-                let existingAsset = tempAssets.find((asset)=> asset.idHex === mosaicIdHex);
+                let newAsset = new Asset(assetIdHex);
+                newAsset.rawAmount = asset.amount.compact();
 
-                if(existingAsset){
-                    let newAsset = existingAsset.duplicateNewInstance(); 
-                    newAsset.amount = mosaic.amount.compact();
-                    assets.push(newAsset);
+                let knowAssetInfo = AppState.assetsInfo.find(x => x.idHex === assetIdHex);
+
+                if(knowAssetInfo){
+                    WalletUtils.assetUpdateFromAssetInfo(knowAssetInfo, newAsset);
+                    newAsset.updateExactAmount();
+                    newAsset.updateExpirationBlock();
                 }
                 else{
-                    let assetInfo = await AppState.chainAPI.assetAPI.getMosaic(mosaic.id);
-                    let newTempAsset = new Asset(mosaicIdHex, assetInfo.divisibility, assetInfo.isSupplyMutable(), assetInfo.isTransferable(), assetInfo.owner.publicKey);
-                    newTempAsset.duration = assetInfo.duration.compact();
-                    newTempAsset.supply = assetInfo.supply.compact();
-                    newTempAsset.height = assetInfo.height.compact();
-
-                    let assetNames = await AppState.chainAPI.assetAPI.getMosaicsNames([mosaic.id])
-
-                    if(assetNames[0].names.length){
-                        newTempAsset.namespaceNames = assetNames[0].names.map(nsName => nsName.name);
+                    if(!tempAssets.find(x => x.toHex() === assetIdHex)){
+                        tempAssets.push(new MosaicId(assetIdHex));
                     }
-
-                    tempAssets.push(newTempAsset);
-
-                    let newAsset = newTempAsset.duplicateNewInstance();
-                    newAsset.amount = mosaic.amount.compact();
-                    assets.push(newAsset);
                 }
+
+                assets.push(newAsset);
             }
-            account.assets= assets;
+            wallet.others[i].assets= assets;
+            wallet.others[i].updateBalance(AppState.nativeToken.assetId);
         }
 
         if(addInLinkedAccount){
             wallet.others = wallet.others.filter((otherAcc)=> tempLinkedList.includes(otherAcc.publicKey) || otherAcc.type === Helper.getOtherWalletAccountType().MULTISIG_CHILD);
         }
+
+        return tempAssets;
+    }
+
+    static async updateWalletAccountsNamespaceInfo(wallet: Wallet): Promise<NamespaceInfo[]>{
+
+        const list1: Address[] = wallet.accounts.map((acc)=> PublicAccount.createFromPublicKey(acc.publicKey, AppState.networkType).address)
+        const list2: Address[] = wallet.others.map((acc)=> PublicAccount.createFromPublicKey(acc.publicKey, AppState.networkType).address);
+        let accountAddressList = list1.concat(list2);
+        let namespacesInfo: NamespaceInfo[] = [];
+
+        let numOfRequest = Math.ceil(accountAddressList.length / dataPerRequest);
+
+        for(let i = 0; i < numOfRequest; ++i){
+            let startIndex = i * dataPerRequest;
+            let endIndex = (i + 1) * dataPerRequest;
+
+            let requestData = accountAddressList.slice(startIndex, endIndex);
+
+            try {
+                let tempNamespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespacesFromAccounts(requestData);
+
+                namespacesInfo.concat(tempNamespaceInfo)
+            } catch (error) {
+                continue;
+            }
+        }
+
+        for(let i = 0; i < wallet.accounts.length; ++i ){
+
+            let allOwnerNamespace = namespacesInfo.filter(x => x.owner.publicKey === wallet.accounts[i].publicKey);
+
+            if(allOwnerNamespace.length){
+                let namespacesInstance = allOwnerNamespace.map((nsInfo)=>{
+                    return WalletUtils.namespaceInfoToNamespace(nsInfo);
+                });
+                wallet.accounts[i].namespaces = namespacesInstance;
+            }
+        }
+
+        for(let i = 0; i < wallet.others.length; ++i ){
+
+            let allOwnerNamespace = namespacesInfo.filter(x => x.owner.publicKey === wallet.others[i].publicKey);
+
+            if(allOwnerNamespace.length){
+                let namespacesInstance = allOwnerNamespace.map((nsInfo)=>{
+                    return WalletUtils.namespaceInfoToNamespace(nsInfo);
+                });
+                wallet.others[i].namespaces = namespacesInstance;
+            }
+        }
+
+        return namespacesInfo;
+    }
+
+    static assetInfoToAsset(assetInfo: AssetInfo): Asset{
+        let asset = new Asset(assetInfo.idHex);
+        asset.divisibility = assetInfo.divisibility;
+        asset.supplyMutable = assetInfo.supplyMutable;
+        asset.transferable = assetInfo.transferable;
+        asset.supply = assetInfo.supply;
+        asset.creator = assetInfo.creator;
+        asset.duration = assetInfo.duration;
+        asset.height = assetInfo.height;
+        asset.namespaceNames = assetInfo.namespaceNames;
+
+        return asset;
+    }
+
+    static assetUpdateFromAssetInfo(assetInfo: AssetInfo, asset: Asset): void{
+        asset.divisibility = assetInfo.divisibility;
+        asset.supplyMutable = assetInfo.supplyMutable;
+        asset.transferable = assetInfo.transferable;
+        asset.supply = assetInfo.supply;
+        asset.creator = assetInfo.creator;
+        asset.duration = assetInfo.duration;
+        asset.height = assetInfo.height;
+        asset.namespaceNames = assetInfo.namespaceNames;
+    }
+
+    static namespaceInfoToNamespace(nsInfo: NamespaceInfo): Namespace{
+
+        let namespace = new Namespace(nsInfo.id.toHex());
+        namespace.active = nsInfo.active;
+        namespace.startHeight = nsInfo.startHeight.compact();
+        namespace.endHeight = nsInfo.endHeight.compact();
+        namespace.owner = nsInfo.owner.publicKey;
+        namespace.parentId = nsInfo.isSubnamespace() ? nsInfo.parentNamespaceId().toHex() : "";
+        namespace.linkType = nsInfo.alias.type;
+        if(nsInfo.alias.type !== AliasType.None){
+            namespace.linkedId = nsInfo.alias.type === AliasType.Address ? 
+                    nsInfo.alias.address.plain(): nsInfo.alias.mosaicId.toHex()
+        }
+
+        return namespace;
     }
 
     static async updateOtherAccountDetails(wallet: Wallet): Promise<void>{
@@ -993,7 +1091,11 @@ export class WalletUtils {
                 else{
                     let assetInfo = await AppState.chainAPI.assetAPI.getMosaic(mosaic.id);
 
-                    let newTempAsset = new Asset(mosaicIdHex, assetInfo.divisibility, assetInfo.isSupplyMutable(), assetInfo.isTransferable(), assetInfo.owner.publicKey);
+                    let newTempAsset = new Asset(mosaicIdHex);
+                    newTempAsset.divisibility = assetInfo.divisibility;
+                    newTempAsset.supplyMutable = assetInfo.isSupplyMutable(); 
+                    newTempAsset.transferable = assetInfo.isTransferable();
+                    newTempAsset.creator = assetInfo.owner.publicKey;
                     newTempAsset.duration = assetInfo.duration.compact();
                     newTempAsset.supply = assetInfo.supply.compact();
 
@@ -1020,15 +1122,15 @@ export class WalletUtils {
         }
         //wallet.others = [];
 
-        await WalletUtils.updateWalletMultisigInfo(wallet);
-        WalletUtils.populateOtherAccountTypeMultisig(wallet);
-        await WalletUtils.updateWalletAccountDetails(wallet, true);
-        await WalletUtils.updateWalletOtherAccountMultisigInfo(wallet);
-        await WalletUtils.updateOtherAccountDetails(wallet);
+        //await WalletUtils.updateWalletMultisigInfo(wallet);
+        //WalletUtils.populateOtherAccountTypeMultisig(wallet);
+        //await WalletUtils.updateWalletAccountsInfo(wallet, true);
+        //await WalletUtils.updateWalletOtherAccountMultisigInfo(wallet);
+        //await WalletUtils.updateOtherAccountDetails(wallet);
 
-        WalletUtils.updateAllAccountBalance(wallet, currencyMosaicId);
+        //WalletUtils.updateAllAccountBalance(wallet, currencyMosaicId);
 
-        walletState.wallets.saveMyWalletOnlytoLocalStorage(wallet);
+        //walletState.wallets.saveMyWalletOnlytoLocalStorage(wallet);
     }
 
     static async refreshAllAccountDetails(wallet: Wallet, networkProfile: ChainProfile): Promise<void>{
@@ -1040,20 +1142,46 @@ export class WalletUtils {
         wallet.isReady = false;
         wallet.others = [];
 
-        await WalletUtils.updateWalletMultisigInfo(wallet);
-        WalletUtils.populateOtherAccountTypeMultisig(wallet);
-        await WalletUtils.updateWalletAccountDetails(wallet, true);
-        await WalletUtils.updateWalletOtherAccountMultisigInfo(wallet);
-        await WalletUtils.updateOtherAccountDetails(wallet);
-
         try {
             let assetId = await ChainUtils.getLinkedMosaicId(Helper.createNamespaceId(networkProfile.network.currency.namespace));
+            let nativeAssetInfo = await AppState.chainAPI.assetAPI.getMosaic(assetId);
 
             AppState.nativeToken.assetId = assetId.toHex();
+            AppState.nativeToken.creator = nativeAssetInfo.owner.publicKey;
+            AppState.nativeToken.divisibility = nativeAssetInfo.divisibility;
             networkProfile.network.currency.assetId = assetId.toHex();
+            networkProfile.network.currency.divisibility = nativeAssetInfo.divisibility;
             networkProfile.saveToLocalStorage();
 
+            let firstAssetInfo = new AssetInfo(
+                assetId.toHex(), nativeAssetInfo.divisibility, 
+                nativeAssetInfo.isSupplyMutable(),
+                nativeAssetInfo.isTransferable(),
+                nativeAssetInfo.owner.publicKey
+            );
+
+            firstAssetInfo.namespaceNames = [AppState.nativeToken.fullNamespace];
+
+            if(!AppState.assetsInfo.find(x => x.idHex === firstAssetInfo.idHex)){
+                AppState.assetsInfo.push(firstAssetInfo);
+            }
+
+            console.time("getMultisig");
+            await WalletUtils.updateWalletMultisigInfo(wallet);
+            WalletUtils.populateOtherAccountTypeMultisig(wallet);
+            await WalletUtils.updateWalletOtherAccountMultisigInfo(wallet);
+            console.timeEnd("getMultisig");
+            console.time("getAccountDetails");
+            let pendingAssetsId = await WalletUtils.updateWalletAccountsInfo(wallet, true);
+            let namespacesInfo = await WalletUtils.updateWalletAccountsNamespaceInfo(wallet);
+            console.timeEnd("getAccountDetails");
+            // console.time("getOtherAccountDetails");
+            // await WalletUtils.updateOtherAccountDetails(wallet);
+            // console.time("getOtherAccountDetails");
+
             WalletUtils.updateAllAccountBalance(wallet, assetId.toHex());
+
+            
         } catch (error) {
             console.log(error);   
         }

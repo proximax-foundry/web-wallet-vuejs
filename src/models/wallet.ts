@@ -134,10 +134,10 @@ export class Wallet{
     createEmptifyVersion(){
         let emptifiedAccounts = this.accounts.map(acc =>{
 
-            acc.assets = [];
-            acc.balance = 0;
-            acc.namespaces = [];
-            acc.multisigInfo = [];
+            // acc.assets = [];
+            // acc.balance = 0;
+            // acc.namespaces = [];
+            // acc.multisigInfo = [];
             return acc;
         });
 

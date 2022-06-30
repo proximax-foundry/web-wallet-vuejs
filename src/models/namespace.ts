@@ -10,6 +10,7 @@ export class Namespace{
     startHeight: number | null; 
     endHeight: number | null;
     active: boolean = true;
+    owner: string = "";
 
     constructor(idHex: string, name?: string){
         

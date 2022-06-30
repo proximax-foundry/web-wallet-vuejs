@@ -34,6 +34,10 @@ export class TransactionAPI {
     }
 
     announceAggregateBondedCosignature(cosignatureSignedTransaction: CosignatureSignedTransaction): Promise<TransactionAnnounceResponse>{
+        let txnHash = cosignatureSignedTransaction.parentHash;
+        if(!AppState.trackingTxnHash.includes(txnHash)){
+            AppState.trackingTxnHash.push(txnHash);
+        }
         let authHeader = RequestAuth.getAuthHeader();
         return this.transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction, authHeader).toPromise();
     }

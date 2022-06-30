@@ -134,7 +134,7 @@ export default {
                 id: i.idHex,
                 name: (i.namespaceNames.length>0?i.namespaceNames[0]:'-'),
                 balance: Helper.amountFormatterSimple(i.amount,i.divisibility),
-                isCreator: acc.value? (i.owner == acc.value.publicKey? true:false):false
+                isCreator: acc.value? (i.creator == acc.value.publicKey? true:false):false
             });
             });
             

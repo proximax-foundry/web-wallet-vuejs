@@ -19,10 +19,13 @@ import {
     TransactionQueryParams,
     MetadataQueryParams,
     TransactionGroupType,
+    MosaicQueryParams,
     MetadataType,
     Order,
     TransactionSortingField,
     TransactionFieldOrder,
+    MosaicFieldOrder,
+    MosaicSortingField,
     Order_v2
 } from "tsjs-xpx-chain-sdk";
 import Base64 from 'crypto-js/enc-base64';
@@ -124,7 +127,11 @@ export class Helper{
     }
 
     static createTransactionFieldOrder(order: Order_v2, sortingField: TransactionSortingField): TransactionFieldOrder{
-        return new TransactionFieldOrder(order, sortingField);
+        return new TransactionFieldOrder(sortingField, order);
+    }
+
+    static createAssetFieldOrder(sortingField: MosaicSortingField, order: Order_v2): MosaicFieldOrder{
+        return new MosaicFieldOrder(sortingField, order);
     }
 
     static getQueryParamOrder(): typeof Order{
@@ -137,6 +144,10 @@ export class Helper{
 
     static getTransactionSortField(): typeof TransactionSortingField{
         return TransactionSortingField;
+    }
+
+    static getAssetSortField(): typeof MosaicSortingField{
+        return MosaicSortingField;
     }
 
     static getTransactionGroupType(): typeof TransactionGroupType{

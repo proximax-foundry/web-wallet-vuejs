@@ -274,12 +274,17 @@ class Reconstruct{
     }
 
     static recreateAsset(tempAsset: Asset): Asset{
-        let newAsset = new Asset(tempAsset.idHex, tempAsset.divisibility, tempAsset.supplyMutable, tempAsset.transferable, tempAsset.owner);
+        let newAsset = new Asset(tempAsset.idHex); 
+        
+        newAsset.transferable = tempAsset.transferable ? tempAsset.transferable : true;
+        newAsset.supplyMutable = tempAsset.supplyMutable ? tempAsset.supplyMutable : true;
+        newAsset.rawAmount = tempAsset.rawAmount ? tempAsset.rawAmount : 0;
+        newAsset.divisibility = tempAsset.divisibility ? tempAsset.divisibility : 0;
         newAsset.amount = tempAsset.amount ? tempAsset.amount : 0;
         newAsset.duration = tempAsset.duration ? tempAsset.duration : null;
         newAsset.expirationBlock = tempAsset.expirationBlock ? tempAsset.expirationBlock : null;
         newAsset.namespaceNames = tempAsset.namespaceNames ? tempAsset.namespaceNames : [];
-        newAsset.owner = tempAsset.owner ? tempAsset.owner : null;
+        newAsset.creator = tempAsset.creator ? tempAsset.creator : null;
         newAsset.supply = tempAsset.supply ? tempAsset.supply : 0;
 
         return newAsset;
