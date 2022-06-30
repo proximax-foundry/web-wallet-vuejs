@@ -40,8 +40,8 @@
         <div class="relative"  @mouseover="isHover = true" @mouseout="isHover = false">
           <div v-if="displayDefaultAccountMenu"  class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
             <div role="none" class="my-2">
-              <router-link  :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.details')}}</router-link>
-              <hr class="solid">
+              <!-- <router-link  :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.details')}}</router-link> -->
+              <!-- <hr class="solid"> -->
               <div class="p-2 z-20 text-xs text-gray-400">Change Labels</div>
               <div v-for="(label,index) in labels" :key="index">
                 <div @click="updateLabel(label.name)"  class="flex justify-between p-2 cursor-pointer ">
@@ -187,13 +187,21 @@ export default{
       }
     });
     const router = useRouter()
+    const setDefaultAcc = ()=>{
+      try {
+        walletState.currentLoggedInWallet.setDefaultAccountByName(p.account.name)
+      } catch (error) {
+      }
+    }
     const navigate = () =>{
       if(isHover.value || isHoverCopy.value){
         return
       }
+      setDefaultAcc()
       router.push({ name: 'ViewAccountDetails', params: { address: p.account.address }})     
       
     }
+    
     return {
       currentNativeTokenName,
       splitBalance,

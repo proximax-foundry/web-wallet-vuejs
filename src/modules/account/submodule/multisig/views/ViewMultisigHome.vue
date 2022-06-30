@@ -152,8 +152,19 @@ export default {
     };
     const isHover = ref(false)
     const router = useRouter()
+     const setDefaultAcc = (name)=>{
+      try {
+        walletState.currentLoggedInWallet.setDefaultAccountByName(name)
+      } catch (error) {
+      }
+    }
+    const getAccountNameByAddress = (address)=>{
+      let findAcc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address ==address) || walletState.currentLoggedInWallet.others.find(acc=>acc.address ==address)
+      return findAcc.name
+    }
     const navigate = (address) =>{
       if(findAccountWithAddress(address) && !isHover.value){
+        setDefaultAcc(getAccountNameByAddress(Address.createFromRawAddress(address).plain()))
         router.push({ name: 'ViewAccountDetails', params: { address:getPlainAddress(address) }})
       }
     }
