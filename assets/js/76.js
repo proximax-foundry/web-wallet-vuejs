@@ -44,14 +44,14 @@ eval("module.exports = __webpack_require__.p + \"assets/img/icon-more-options.54
 
 /***/ }),
 
-/***/ "./src/modules/dashboard/img/icon-sda.svg":
-/*!************************************************!*\
-  !*** ./src/modules/dashboard/img/icon-sda.svg ***!
-  \************************************************/
+/***/ "./src/modules/dashboard/img/icon-proximax-logo-gray.svg":
+/*!***************************************************************!*\
+  !*** ./src/modules/dashboard/img/icon-proximax-logo-gray.svg ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/icon-sda.5be71878.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/icon-sda.svg?");
+eval("module.exports = __webpack_require__.p + \"assets/img/icon-proximax-logo-gray.dd8a329d.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/icon-proximax-logo-gray.svg?");
 
 /***/ })
 
