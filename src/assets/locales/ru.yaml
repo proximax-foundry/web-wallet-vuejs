@@ -254,6 +254,7 @@ general:
   modifySupply: Modify Supply
   month: Month | Months
   more: More
+  moreOnExplorer: Full History on Explorer
   multisig: Multisig
   multisigTitle: This is a multisig account
   name: Name

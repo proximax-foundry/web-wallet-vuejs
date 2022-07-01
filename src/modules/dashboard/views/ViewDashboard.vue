@@ -102,6 +102,12 @@
       <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" :account="selectedAccount" />
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700 uppercase">{{$t('dashboard.recentTransactions')}}</b> ({{ accountConfirmedTxnsCount }} - {{$t('dashboard.viewAll')}})</div>
       <MixedTxnDataTable :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="recentTransactions" @openDecryptMsg="openDecryptMsgModal"></MixedTxnDataTable>
+      <div class="md:ml-200  md:h-9 sm:text-justify sm:flex text-xs sm:justify-end text-gray-900">
+        <div class="cursor-pointer flex items-center" @click="gotoAddressExplorer(selectedAccountAddressPlain)">
+            <div>{{$t('general.moreOnExplorer')}} </div>
+            <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block">
+        </div>
+      </div>  
       <div class="mt-10 md:flex ml-5 md:ml-0">
         <div class="w-full md:w-1/2">
           <div class="mb-8 font-bold uppercase text-txs">{{$t('dashboard.createSthNew')}}</div>
@@ -190,6 +196,12 @@
         <NamespaceTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.NAMESPACE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></NamespaceTxnDataTable>
         <RestrictionTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></RestrictionTxnDataTable>
         <SecretTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.SECRET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></SecretTxnDataTable>
+      <div class="md:ml-200  md:h-9 sm:text-justify sm:flex text-xs sm:justify-end text-gray-900">
+        <div class="cursor-pointer flex items-center" @click="gotoAddressExplorer(selectedAccountAddressPlain)">
+            <div>{{$t('general.moreOnExplorer')}} </div>
+            <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block">
+        </div>
+      </div>   
       </div>
       <div v-else class="border-t border-b border-gray-200 text-gray-400 text-xs mt-10">
         <div class="border-t border-b border-gray-200 my-3 py-6 px-2">
@@ -221,7 +233,6 @@ import MetadataTxnDataTable from '@/modules/dashboard/components/TransactionData
 import NamespaceTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/NamespaceTxnDT.vue';
 import RestrictionTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/RestrictionTxnDT.vue';
 import SecretTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/SecretTxnDT.vue';
-
 import DashboardAssetDataTable from '@/modules/dashboard/components/DashboardAssetDataTable.vue';
 import DashboardNamespaceDataTable from '@/modules/dashboard/components/DashboardNamespaceDataTable.vue';
 import AddressQRModal from '@/modules/dashboard/components/AddressQRModal.vue';
@@ -246,7 +257,6 @@ import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
 import {AppState} from '@/state/appState'
 import { useI18n } from 'vue-i18n';
-
 export default defineComponent({
   name: 'ViewDashboard',
   props:{
@@ -271,19 +281,15 @@ export default defineComponent({
     DashboardNamespaceDataTable,
     AddressQRModal,
   },
-
   setup(props){
     const {t} = useI18n();
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-
     const displayBoard = ref('overview');
-
     const showAddressQRModal = ref(false);
     const showMessageModal = ref(false);
     const showDecryptMessageModal  = ref(false);
-
     const displayConvertion = ref(false);
     const showCosignModal = ref(false);
     const txMessage = ref("");
@@ -299,7 +305,6 @@ export default defineComponent({
     const isInitialSender = ref(false);
     const cosignModalKey = ref(0);
     const decryptMessageKey = ref(0);
-
     if(props.type == 'transaction'){
       displayBoard.value = 'transaction';
     }
@@ -308,12 +313,10 @@ export default defineComponent({
         displayBoard.value = 'transaction';
       }
     });
-
     const openMessageModal = (message)=>{
       messagePayload.value = message;
       showMessageModal.value = true;
     }
-
     const openDecryptMsgModal = async (data)=>{
       let txType = data.txType;
       let recipient = data.recipient;
@@ -326,33 +329,26 @@ export default defineComponent({
       publicKeyToUse.value = "";
       manualPublicKey.value = false;
       //recipientAddress.value = data.recipient;
-
       if(txType === "Transfer" || txType === "Aggregate Complete"){
         autoRecipientPublicKey = true;
-
         let senderAccount = WalletUtils.findWalletAccountByPublicKey(walletState.currentLoggedInWallet, txSender);
-
         if(senderAccount){
           isInitialSender.value = true;
         }
       }
       else{
         let senderAccount = WalletUtils.findWalletAccountByPublicKey(walletState.currentLoggedInWallet, initialSignerPublicKey.value);
-
         if(senderAccount){
           isInitialSender.value = true;
         }
       }
-
       if(recipientType === "address"){
         let accountPublicKey = WalletUtils.findAccountPublicKeyByAddress(walletState.currentLoggedInWallet, recipient);
-
         if(accountPublicKey){
           publicKeyToUse.value = accountPublicKey;
         }
         else{
           let accountInfo = await ChainUtils.getAccountInfo(Helper.createAddress(recipient));
-
           if(accountInfo.publicKey === "0".repeat(64)){
             manualPublicKey.value = true;
           }
@@ -363,16 +359,13 @@ export default defineComponent({
       }
       else{
         let address = await ChainUtils.getNamespaceLinkedAddress(recipient);
-
         if(address){
           let accountPublicKey = WalletUtils.findAccountPublicKeyByAddress(walletState.currentLoggedInWallet, recipient);
-
           if(accountPublicKey){
             publicKeyToUse.value = accountPublicKey;
           }
           else{
             let accountInfo = await ChainUtils.getAccountInfo(address);
-
             if(accountInfo.publicKey === "0".repeat(64)){
               manualPublicKey.value = true;
             }
@@ -385,42 +378,31 @@ export default defineComponent({
           manualPublicKey.value = true;
         }
       }
-
       if(!autoRecipientPublicKey){
         manualPublicKey.value = true;
       }
-
       decryptMessageKey.value++;
       showDecryptMessageModal.value = true;
     }
-
     const selectedCosignHash = ref("");
-
     const cosignAggregateBondedTransaction = (signedAggregateBondedTransaction, account) => {
       const cosignatureTransaction = Helper.createCosignatureTransaction(signedAggregateBondedTransaction);
       return account.signCosignatureTransaction(cosignatureTransaction);
     };
-
     // const cosignTransaction = (account)=>{
-
     //   let selectedPartialTx = rawPartialTransactions.value.find((x)=> x.transactionInfo.hash === selectedCosignHash.value);
-
     //   if(selectedPartialTx){
     //     let cosignatureSignedTransaction = cosignAggregateBondedTransaction(selectedPartialTx, account);
     //     ChainUtils.announceCosignTransaction(cosignatureSignedTransaction);
     //   }
-
     //   showCosignModal.value = false;
     // }
-
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const currentNativeTokenId = computed(()=> AppState.nativeToken.assetId);
-
     const displyFaucet = computed(() => {
       return (AppState.networkType == 168)?true:false;
     });
-
     const faucetLink = computed(() => {
       if(displyFaucet.value){
         if(networkState.chainNetworkName == 'Sirius Testnet 1'){
@@ -438,14 +420,10 @@ export default defineComponent({
         }
       }
     });
-
     let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
     currentAccount.default = true;
-
     const selectedAccount = ref(currentAccount);
-
     const currentBlock = computed(() => listenerState.currentBlock);
-
     const selectedAccountPublicKey = computed(()=> selectedAccount.value.publicKey);
     // const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty().substring(0, 13) + '....' + Helper.createAddress(selectedAccount.value.address).pretty().substring(Helper.createAddress(selectedAccount.value.address).pretty().length - 11));
     const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty());
@@ -458,7 +436,6 @@ export default defineComponent({
     });
     const selectedAccountDirectChilds = computed(()=> {
       let multisigInfo = selectedAccount.value.multisigInfo.find((x)=> x.level === 0);
-
       if(multisigInfo){
         return multisigInfo.getMultisigAccountsAddress(AppState.networkType);
       }
@@ -466,41 +443,34 @@ export default defineComponent({
         return [];
       }
     });
-
     const selectedAccountNamespaceCount = computed(()=>{
       return selectedAccount.value.namespaces.length;
     });
-
     const selectedAccountAssetsCount = computed(()=>{
       return selectedAccount.value.assets.filter(x => x.idHex !== currentNativeTokenId.value).length;
     });
-
     const selectedAccountBalance = computed(
       () => {
         return Helper.toCurrencyFormat(selectedAccount.value.balance, currentNativeTokenDivisibility.value);
       }
     );
-
     const selectedAccountBalanceFront = computed(
       () => {
         let balance = selectedAccountBalance.value.split('.');
         return balance[0];
       }
     );
-
     const selectedAccountBalanceBack = computed(
       () => {
         let balance = selectedAccountBalance.value.split('.');
         return balance[1];
       }
     );
-
     const selectedAccountName = computed(
       () => {
         return selectedAccount.value.name;
       }
     );
-
     const addressQR = computed(
       () => {
         let qr = qrcode(15, 'H');
@@ -509,40 +479,30 @@ export default defineComponent({
         return qr.createDataURL();
       }
     )
-
     const isDefault = computed(()=> selectedAccount.value.default ? true : false );
     let isMultisig = computed(()=> selectedAccount.value.multisigInfo.find((multisigInfo)=> multisigInfo.level == 1) ? true : false);
-
     const getCurrencyPrice = () => {
       let balance = selectedAccount.value.balance;
       getXPXcurrencyPrice(balance).then((total) => {
         currencyConvert.value = Helper.toCurrencyFormat(total, 6);
       });
     };
-
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
-
     let accountConfirmedTxnsCount = ref(0);
-
     let updateAccountTransactionCount = async()=>{
       let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
       accountConfirmedTxnsCount.value = transactionsCount.confirmed;
     };
-
     /*
     emitter.on("TXN_UNCONFIRMED", (num)=>{
-
       let newUnconfirmedTxnCount = num;
       let newTxs = [];
       let unconfirmedTxHashes = listenerState.allUnconfirmedTransactionsHash.slice(-newUnconfirmedTxnCount);
-
       txHashLoop:
       for(let i = 0; i < unconfirmedTxHashes.length; ++i){
-
         if(allUnconfirmedTransactions.value.find((tx)=> tx.hash === unconfirmedTxHashes[i])){
           continue;
         }
-
         addressTransactionLoop:
         for(let x = 0; x < listenerState.unconfirmedTransactions.length; ++x){
           let foundTx = listenerState.unconfirmedTransactions[i].unconfirmedTransactions.find((tx)=> unconfirmedTxHashes.includes(tx.transactionInfo.hash));
@@ -553,26 +513,19 @@ export default defineComponent({
           }
         }
       }
-
       if(newTxs.length > 0){
         let formatedTxs = dashboardService.formatUnconfirmedWithTransaction(newTxs);
         allUnconfirmedTransactions.value = formatedTxs.concat(allUnconfirmedTransactions.value);
-
         allPartialTransactions.value = allPartialTransactions.value.filter((tx)=> !listenerState.allUnconfirmedTransactionsHash.includes(tx.hash));
       }
     });
-
     emitter.on("COSIGNER_SIGNED", (num)=>{
-
       let newCosignTxnCount = num;
       let cosignTxns = listenerState.allCosignatureAdded.slice(-newCosignTxnCount);
-
       txHashLoop:
       for(let i = 0; i < cosignTxns.length; ++i){
-
         if(allPartialTransactions.value.find((tx)=> tx.hash === cosignTxns[i])){
           let partialTransaction = allPartialTransactions.value.find((tx)=> tx.hash === cosignTxns[i]);
-
           for(let x = 0; x < partialTransaction.innerTransactions.length; ++x){
             partialTransaction.innerTransactions[x].signedPublicKeys = partialTransaction.innerTransactions[x].signedPublicKeys.concat(cosignTxns[i].signer);
           }
@@ -580,19 +533,15 @@ export default defineComponent({
       }
       //refreshPartialTransaction();
     });
-
     emitter.on("ABT_ADDED", (num)=>{
       let newPartialTxnCount = num;
       let newTxs = [];
       let partialTxHashes = listenerState.allAggregateBondedTransactionHash.slice(-newPartialTxnCount);
-
       txHashLoop:
       for(let i = 0; i < partialTxHashes.length; ++i){
-
         if(allPartialTransactions.value.find((tx)=> tx.hash === partialTxHashes[i])){
           continue;
         }
-
         addressTransactionLoop:
         for(let x = 0; x < listenerState.aggregateBondedTransaction.length; ++x){
           let foundTx = listenerState.aggregateBondedTransaction[i].aggregateBonded.find((tx)=> partialTxHashes[i] === tx.transactionInfo.hash);
@@ -603,7 +552,6 @@ export default defineComponent({
           }
         }
       }
-
       if(newTxs.length > 0){
         rawPartialTransactions.value = rawPartialTransactions.value.concat(newTxs)
         let formatedTxs = dashboardService.formatUnconfirmedWithTransaction(newTxs);
@@ -611,7 +559,6 @@ export default defineComponent({
         updatePartialTransaction();
       }
     });
-
     emitter.on("TXN_ERROR", (hash)=>{
       allUnconfirmedTransactions.value = allUnconfirmedTransactions.value.filter((tx)=> ![hash].includes(tx.hash));
       allPartialTransactions.value = allPartialTransactions.value.filter((tx)=> ![hash].includes(tx.hash));
@@ -621,24 +568,19 @@ export default defineComponent({
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-
       toast.add({severity:'info', detail: copySubject + ' ' +t('general.copied'), group: 'br', life: 3000});
     };
-
     // get USD conversion
     const currencyConvert = ref('');
-
     const updatePricing = () =>{
       if(AppState.nativeToken.label=== "XPX"){
         displayConvertion.value = true;
         getCurrencyPrice();
-
         watch(selectedAccountBalance, () => {
           getCurrencyPrice();
         });
       }
     }
-
     // setup transaction loading
     const recentTransactions = ref([]);
     const searchedTransactions = ref([]);
@@ -651,26 +593,20 @@ export default defineComponent({
     let endOfRecords = false;
     let searchingTxn = ref(false);
     let boolIsTxnFetched = ref(true);
-
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
-
     allTxnQueryParams.updateFieldOrder(blockDescOrderSortingField);
     allTxnQueryParams.embedded = true;
-
     let loadRecentTransactions = async()=>{
       let txnQueryParams = Helper.createTransactionQueryParams();
       txnQueryParams.pageSize = 1;
       txnQueryParams.publicKey = selectedAccount.value.publicKey;
       txnQueryParams.embedded = true;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
-
       let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
-
       let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
       recentTransactions.value = formattedTxns.slice(0, 5);
       searchedTransactions.value = formattedTxns;
     };
-
     let loadRecentTransferTransactions = async()=>{
       let txnQueryParams = Helper.createTransactionQueryParams();
       txnQueryParams.pageSize = 20;
@@ -678,46 +614,33 @@ export default defineComponent({
       txnQueryParams.publicKey = selectedAccount.value.publicKey;
       txnQueryParams.embedded = true;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
-
       let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
-
       if(transactionSearchResult.transactions.length){
         let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
-
         recentTransferTransactions.value = formattedTxns;
         recentTransferTxnRow.value = formatRecentTransfer(formattedTxns).slice(0, 3);
       }
     };
-
     const reloadSearchTxns = () =>{
       allTxnQueryParams.pageNumber = 1;
       endOfRecords = false;
-
       searchTransactions();
     }
-
     const loadMoreTxns = () =>{
       searchTransactions(true);
     }
-
     const searchTransaction = async(loadMore = false) =>{
-
       allTxnQueryParams.pageNumber = loadMore ? allTxnQueryParams.pageSize + 1 : 1;
       allTxnQueryParams.publicKey = selectedAccount.value.publicKey;
       searchingTxn.value = true;
-
       let transactionSearchResult = await dashboardService.searchTxns(selectedTxnGroupType, allTxnQueryParams);
-
       if(transactionSearchResult.pagination.pageNumber <= allTxnQueryParams.pageNumber){
         endOfRecords = true;
       }else{
         endOfRecords = false;
       }
-
       searchingTxn.value = false;
-
       let formattedTxns = [];
-
       switch (selectedTxnGroupType) {
         case transactionGroupType.CONFIRMED:
           formattedTxns = await formatConfirmedTransaction(transactionSearchResult.transactions);
@@ -729,7 +652,6 @@ export default defineComponent({
           formattedTxns = await formatPartialTransaction(transactionSearchResult.transactions);
           break;
       }
-
       if(loadMore){
         let tempTxns = searchedTransactions.value.concat(formattedTxns);
         searchedTransactions.value = removeDuplicateTxn(tempTxns);
@@ -743,17 +665,16 @@ export default defineComponent({
     const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
     const addressExplorerURL = computed(()=> explorerBaseURL.value + networkState.currentNetworkProfile.chainExplorer.addressRoute);
     const hashExplorerURL = computed(()=> explorerBaseURL.value + networkState.currentNetworkProfile.chainExplorer.hashRoute);
-
+    const gotoAddressExplorer = (address)=>{
+      window.open(addressExplorerURL.value + "/" + address, "_blank");
+    }
     const recentTransferTxnRow = ref([]);
-
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
     const jdenticonConfig = themeConfig.jdenticonConfig;
-
     const formatRecentTransfer = (transactions) => {
       let transferTxn = [];
       let nativeTokenTxns = transactions.filter(txn => txn.amountTransfer > 0);
-
       for(const txn of nativeTokenTxns){
         let formattedTransferTxn = {};
         if(selectedAccountAddressPlain.value == txn.sender && selectedAccountAddressPlain.value == txn.recipient){
@@ -777,11 +698,8 @@ export default defineComponent({
       }
       return transferTxn;
     }
-
     const formatConfirmedTransaction = async(transactions)=>{
-
       let formattedTxns = [];
-
       switch(selectedTxnType.value){
         case TransactionFilterType.TRANSFER:
           formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactions);
@@ -826,14 +744,10 @@ export default defineComponent({
           formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactions);
           break;
       }
-
       return formattedTxns;
     }
-
     const formatUnconfirmedTransaction = async(transactions)=>{
-
       let formattedTxns = [];
-
       switch(selectedTxnType.value){
         case TransactionFilterType.TRANSFER:
           formattedTxns = await dashboardService.formatUnconfirmedMixedTxns(transactions);
@@ -875,14 +789,10 @@ export default defineComponent({
           formattedTxns = await dashboardService.formatUnconfirmedNamespaceTransaction(transactions);
           break;
       }
-
       return formattedTxns;
     }
-
     const formatPartialTransaction = async(transactions)=>{
-
       let formattedTxns = [];
-
       switch(selectedTxnType.value){
         case TransactionFilterType.TRANSFER:
           formattedTxns = await dashboardService.formatPartialMixedTxns(transactions);
@@ -924,14 +834,10 @@ export default defineComponent({
           formattedTxns = await dashboardService.formatPartialNamespaceTransaction(transactions);
           break;
       }
-
       return formattedTxns;
     }
-
     const changeTxnGroupType = (txnGroupType) =>{
-
       searchedTransactions.value = [];
-
       switch (txnGroupType) {
         case transactionGroupType.CONFIRMED:
           selectedTxnGroupType = transactionGroupType.CONFIRMED;
@@ -943,15 +849,12 @@ export default defineComponent({
           selectedTxnGroupType = transactionGroupType.PARTIAL;
           break;
       }
-
       searchTransaction();
     }
-
     const changeSearchTxnType = () =>{
       boolIsTxnFetched.value = false;
       searchedTransactions.value = [];
       let txnFilterGroup = selectedTxnType.value;
-
       switch (txnFilterGroup) {
         case TransactionFilterType.TRANSFER:
           allTxnQueryParams.type = TransactionFilterTypes.getTransferTypes();
@@ -996,10 +899,8 @@ export default defineComponent({
           allTxnQueryParams.type = undefined;
           break;
       }
-
       searchTransaction();
     }
-
     const removeDuplicateTxn = (txns) =>{
       let result = txns.filter((value, index, self) =>
         index === self.findIndex((t) => (
@@ -1008,25 +909,21 @@ export default defineComponent({
       )
       return result;
     }
-
     const triggerSetDefaultModal = () => {
       emitter.emit('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', true);
     }
-
     emitter.on('CLOSE_MODAL', () => {
       showAddressQRModal.value = false;
       showMessageModal.value = false;
       showCosignModal.value = false;
       showDecryptMessageModal.value = false;
     });
-
     const init = ()=>{
       updateAccountTransactionCount();
       loadRecentTransactions();
       loadRecentTransferTransactions();
       updatePricing();
     }
-
     if(AppState.isReady){
       init();
     }
@@ -1038,7 +935,6 @@ export default defineComponent({
         }
       });
     }
-
     emitter.on('DEFAULT_ACCOUNT_SWITCHED', payload => {
       currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
       currentAccount.default = true;
@@ -1048,11 +944,11 @@ export default defineComponent({
       loadRecentTransactions();
       loadRecentTransferTransactions();
     });
-
     return {
       toSvg,
       addressExplorerURL,
       hashExplorerURL,
+      gotoAddressExplorer,
       currentBlock,
       displayBoard,
       copy,
@@ -1114,23 +1010,18 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-
 .address_div{
   top: 4px;
 }
-
 .p-dialog .p-dialog-header{
   padding: 1rem 1.25rem;
 }
-
 .p-dialog .p-dialog-header .p-dialog-title{
   font-size: 1rem;
 }
-
 #address{
   @extend .text-xs !optional;
 }
-
 .default-div{
   @apply text-gray-100;
   background: #33344A;
@@ -1139,34 +1030,26 @@ export default defineComponent({
   background-size: 250px;
   height: 184px;
 }
-
 .balance-div{
   height: 184px;
 }
-
 .transaction-div{
   height: 184px;
 }
-
-
 @media (min-width: 640px) {
   .address_div{
     top: 0px;
   }
 }
-
 @media (min-width: 1280px) {
   .address_div{
     top: 4px;
   }
-
   #address{
     @extend .text-sm !optional;
   }
 }
-
 .dashboard-link{
   position: relative; top: -4px;
 }
-
 </style>
