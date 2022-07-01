@@ -6,13 +6,7 @@
   </div>
   <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
     <AccountComponent :address="address" class="mb-10"/>
-    <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-      <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center border-b-2 pb-3 border-yellow-500'>{{$t('account.accountDetails')}}</router-link>
-      <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-      <router-link :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
-      <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
-      <router-link :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-    </div>
+    <AccountTabs :address="address" selected="details"/>
     <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 px-6">
         <div v-if="isMultiSig" class="text-left mt-2 mb-5 "> 
@@ -123,9 +117,8 @@
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" v-model="walletPassword" icon="lock"  :disabled="disableNamespace"  />
         <div class="mt-3"></div>
-        <button v-if="selectAction== 'Link' && !pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="aliasAddressToNamespace" :disabled="disableCreate">{{$t('general.linkToNamespace')}}</button>
-        <button v-if="selectAction== 'Unlink' && !pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="aliasAddressToNamespace" :disabled="disableCreate">{{$t('namespace.unlinkNamespace')}}</button>
-         <button v-if="pending" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="aliasAddressToNamespace" :disabled="disableCreate">{{$t('general.waitConfirmTx')}}</button>
+        <button v-if="selectAction== 'Link' " class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="aliasAddressToNamespace" :disabled="disableCreate">{{$t('general.linkToNamespace')}}</button>
+        <button v-if="selectAction== 'Unlink'" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="aliasAddressToNamespace" :disabled="disableCreate">{{$t('namespace.unlinkNamespace')}}</button>
        <div class="text-center">
           <router-link :to="{name: 'ViewAccountDetails',params:{address: address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
         </div>
@@ -148,11 +141,13 @@ import { ref, computed, watch } from "vue";
 import { Helper } from "@/util/typeHelper";
 import { useI18n } from 'vue-i18n'
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
+import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { multiSign } from '@/util/multiSignatory';
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import { listenerState } from '@/state/listenerState';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
+import { useRouter } from 'vue-router';
 export default {
   name: 'ViewAccountAliasAddressToNamespace',
 
@@ -160,7 +155,8 @@ export default {
     PasswordInput,
     SelectInputPluginClean,
     AccountComponent,
-    AddressInputClean
+    AddressInputClean,
+    AccountTabs
   },
   props: {
     address: String,
@@ -169,7 +165,7 @@ export default {
   setup(p) {
     const { t } = useI18n();
     const totalAcc = computed(()=>{
-
+    
     if(!walletState.currentLoggedInWallet){
       return [];
     }
@@ -264,8 +260,6 @@ export default {
     })
     const toast = useToast();   
     const walletName = walletState.currentLoggedInWallet? walletState.currentLoggedInWallet.name:''
-    let txHash = ref('')
-    let pending = ref(false)
     let recordAction = ref('')
     
     const trxFee = ref(0)
@@ -282,8 +276,6 @@ export default {
         return trxFee.value
       }
     })
-    const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
-    const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
     
     const accountBalance = computed(() => {
       if(!acc.value){
@@ -454,7 +446,7 @@ export default {
          showAddressError.value = true;
       } 
     });
-   
+    const router = useRouter()
     const aliasAddressToNamespace = () =>{
       if(!WalletUtils.verifyWalletPassword(walletName,networkState.chainNetworkName,walletPassword.value)){
         err.value = t('general.walletPasswordInvalid',{name : walletName}) ;  
@@ -463,10 +455,10 @@ export default {
         let acc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address)? walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address) : walletState.currentLoggedInWallet.others.find(acc=>acc.address==p.address) 
         err.value = "";  
         recordAction.value = selectAction.value
-        let signedTx = accountUtils.linkNamespaceToAddress(selectedCosignPublicKey.value,isMultiSig.value,acc,walletPassword.value,selectNamespace.value, selectAction.value, namespaceAddress.value)
-        txHash.value = signedTx.hash.toUpperCase()   
+        accountUtils.linkNamespaceToAddress(selectedCosignPublicKey.value,isMultiSig.value,acc,walletPassword.value,selectNamespace.value, selectAction.value, namespaceAddress.value)
+          
         clearInput();
-        pending.value = true
+        router.push({ name: "ViewAccountPendingTransactions",params:{address:p.address} })
       }
     }
 
@@ -481,26 +473,6 @@ export default {
       namespaceAddress.value = "";
      
     };
-
-    watch(confirmedTxLength, (n, o) => {
-      if (n != o){ 
-        if(listenerState.allConfirmedTransactionsHash.find(hash=> hash ==txHash.value)){
-          txHash.value=""
-          pending.value=false
-          if(recordAction.value!=""){
-            toast.add({severity:'success', summary: t('general.notification'), detail: recordAction.value =="Link"? t('general.linkSuccess') : t('general.unlinkSuccess'), group: 'br', life: 5000})
-          }
-          checkIsPartial()
-          /* showSuccess.value=true */
-        }
-      }
-    })
-
-     watch(aggregateBondedTxLength, (n, o) => {
-      if (n != o){
-        checkIsPartial()
-      }
-    })
     const networkType = computed(()=>AppState.networkType)
 
     const topUpUrl = computed(()=>{
@@ -548,7 +520,6 @@ export default {
       aliasAddressToNamespace,
       isCosigner,
       lockFund,
-      pending,
       totalFee,
       onPartial,
       walletCosignerList,

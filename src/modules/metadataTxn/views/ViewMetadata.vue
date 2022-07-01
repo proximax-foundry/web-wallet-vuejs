@@ -6,13 +6,7 @@
         </div>
         <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
             <AccountComponent :address="address" class="mb-10"/>
-            <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-                <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-                <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-                <router-link :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
-                <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Metadata</div>
-                <router-link :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-            </div>
+            <AccountTabs :address="address" selected="metadata"/>
             <div class="border-2 border-t-0 filter shadow-lg px-6" >
                 <select class=" my-4" v-model="filterSelection">
                     <option value=0>ACCOUNT</option>
@@ -128,6 +122,7 @@ import { walletState } from "@/state/walletState"
 import { Convert, MetadataQueryParams, MetadataType, MosaicId, NamespaceId, PublicAccount } from "tsjs-xpx-chain-sdk"
 import { computed, ref, watch } from "vue"
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
+import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import isValidUTF8 from 'utf-8-validate';
     const props = defineProps({
         address: String

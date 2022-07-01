@@ -6,13 +6,7 @@
     </div>
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
         <AccountComponent :address="accountAddress" class="mb-10"/>
-        <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-        <router-link :to="{name: 'ViewAccountDetails',params:{address:accountAddress}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-        <router-link :to="{name:'ViewAccountAssets', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-        <router-link :to="{name:'ViewAccountNamespaces', params: { address: accountAddress}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
-        <router-link :to="{name:'ViewMetadata', params: { address: accountAddress}}" class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Metadata</router-link>
-        <router-link :to="{name:'ViewMultisigHome', params: { address: accountAddress}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-        </div>
+        <AccountTabs :address="accountAddress" selected="metadata" />
         <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
             <div class="lg:col-span-2 py-6 px-6">
                 <div class='pl-6'>
@@ -152,6 +146,7 @@ import { TransactionUtils } from "@/util/transactionUtils";
 import { AppState } from '@/state/appState';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import MetadataInput from '@/modules/metadataTxn/components/MetadataInput.vue'
+import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { 
   PublicAccount, Convert, AccountMetadataTransactionBuilder, 
   AggregateTransaction, AggregateBondedTransactionBuilder, UInt64,
@@ -163,6 +158,7 @@ import { toSvg } from 'jdenticon';
 import { ThemeStyleConfig } from '@/models/stores';
 import { WalletUtils } from '@/util/walletUtils';
 import isValidUTF8 from 'utf-8-validate';
+import { useRouter } from 'vue-router';
 export default { 
   name: "ViewUpdateAccountMetadata",
   props:{
@@ -173,9 +169,10 @@ export default {
     AccountComponent,
     MetadataInput,
     PasswordInput,
-    
+    AccountTabs
   },
   setup(props) {
+    const router = useRouter()
     let showKeys = ref(false)
     let scopedMetadataKeySelectable = ref(true);
     let scopedMetadataKeyType = ref(1);
@@ -515,6 +512,7 @@ export default {
       oldValue.value = ""
       newValue.value=""
       walletPassword.value=""
+      router.push({ name: "ViewAccountPendingTransactions",params:{address:targetPublicAccount.value.address.plain()} })
     }
     const aggregateFee = ref(0);
     const totalFee = computed(()=>{

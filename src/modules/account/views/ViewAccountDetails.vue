@@ -19,13 +19,7 @@
           </div>
         </div>
       </div>
-      <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-        <div class= 'w-32 text-center border-b-2 pb-3 border-yellow-500'>{{$t('account.accountDetails')}}</div>
-        <router-link v-if="!isDelegate()" :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-        <router-link v-if="!isDelegate()" :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
-        <router-link v-if="!isDelegate()" :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
-        <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-      </div>
+      <AccountTabs :address="address" selected="details"/>
       <div class='border-2 border-t-0 pb-6 px-6 pt-2'>
         <div class = 'mt-4 text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.currentBalance')}}</div>
         <div class='flex my-1'>
@@ -81,6 +75,7 @@ import { watch, ref, computed, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import TextInput from "@/components/TextInput.vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
+import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { walletState } from "@/state/walletState";
@@ -105,7 +100,8 @@ export default {
     PkPasswordModal,
     PdfPasswordModal,
     DeleteAccountModal,
-    AccountComponent
+    AccountComponent,
+    AccountTabs
   },
   props: {
     address: String,

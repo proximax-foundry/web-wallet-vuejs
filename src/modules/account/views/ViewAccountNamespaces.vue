@@ -6,13 +6,7 @@
     </div>
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
       <AccountComponent :address="address" class="mb-10"/>
-      <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-        <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-        <router-link v-if="!isDelegate()" :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-        <div class= 'w-24 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.namespace',2)}}</div>
-        <router-link v-if="!isDelegate()" :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
-        <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-      </div>
+      <AccountTabs :address="address" selected="namespaces"/>
       <div class="border-2 border-t-0 filter shadow-lg px-6 py-3" >
         <div v-if="namespaces.length==0" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
         <div v-if="namespaces.length==0" class='text-txs w-9/12 ml-auto mr-auto text-gray-400 text-center'>
@@ -61,6 +55,7 @@ import { networkState } from "@/state/networkState";
 import { walletState } from "@/state/walletState";
 import { Address, AliasType } from "tsjs-xpx-chain-sdk";
 import { computed, getCurrentInstance, ref, watch } from "vue";
+import AccountTabs from "@/modules/account/components/AccountTabs.vue"
     
   const props = defineProps({
     address: String

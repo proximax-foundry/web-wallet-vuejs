@@ -12,7 +12,7 @@
                 </div>
                 <div class= 'flex'>
                     <div id="address" :copyValue="prettyAddress" :copySubject="$t('general.address')" class = 'text-xs font-semibold mt-1'>{{prettyAddress}} </div>
-                    <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy('address')" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+                    <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy('address')" class="mx-3 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
                 </div>
                 <div class='flex gap-2'> 
                     <div  v-if='isDefault' class = ' px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm' :title="$t('general.defaultTitle')">

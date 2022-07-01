@@ -6,13 +6,7 @@
     </div>
     <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
       <AccountComponent :address="address" class="mb-10"/>
-      <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-        <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-        <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-        <router-link :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
-        <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
-        <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.multisig')}}</div>
-      </div>
+     <AccountTabs :address="address" selected="multisig"/>
       <div class=' p-6 border-2 border-t-0 filter shadow-lg mb-6'>
         <div class="flex cursor-pointer">
           <router-link :to="{name:'ViewMultisigHome', params: { address: address}}" class="border-2 border-blue-primary p-1 mb-3 w-16 text-blue-primary text-xs text-center font-semibold ">{{$t('general.multisig')}}</router-link>
@@ -82,6 +76,7 @@ import { networkState } from '@/state/networkState';
 import { Address, PublicAccount } from 'tsjs-xpx-chain-sdk';
 import { Helper } from '@/util/typeHelper';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
+import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { AppState } from '@/state/appState';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
@@ -89,7 +84,8 @@ import { useI18n } from 'vue-i18n';
 export default {
   name:"ViewMultisigScheme",
   components:{
-    AccountComponent
+    AccountComponent,
+    AccountTabs
   },
   props: {
     address: String,
