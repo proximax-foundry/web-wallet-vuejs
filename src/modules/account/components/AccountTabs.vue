@@ -7,19 +7,6 @@
     <router-link :class="`${selected=='multisig'?'border-b-2  text-blue-primary border-blue-primary':''}`" v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 py-3 text-center word-break'>{{$t('general.multisig')}}</router-link>
     <router-link :class="`${selected=='txn'?'border-b-2  text-blue-primary border-blue-primary':''}`" :to="{name:'ViewAccountConfirmedTransactions', params: { address: address}}" class= 'w-18 py-3 text-center word-break'>{{$t('general.transaction',2)}}</router-link>
 </div>
-<!-- <div class = 'flex flex-col sm:flex-row text-xs font-semibold border-b-2 menu_title_div'>
-  <div class="flex">
-    <router-link :class="`${selected=='details'?'border-b-2  text-blue-primary border-blue-primary':''}`" :to="{name:'ViewAccountDetails', params: { address: address}}" class= 'w-32 text-center pb-3'>{{$t('account.accountDetails')}}</router-link>
-    <router-link :class="`${selected=='assets'?'border-b-2  text-blue-primary border-blue-primary':''}`" v-if="!isDelegate()" :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center pb-3'>{{$t('general.asset',2)}}</router-link>
-    <router-link :class="`${selected=='namespaces'?'border-b-2  text-blue-primary border-blue-primary':''}`" v-if="!isDelegate()" :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center pb-3'>{{$t('general.namespace',2)}}</router-link>
-  </div>
-  <div class="flex"> 
-    <router-link :class="`${selected=='metadata'?'border-b-2  text-blue-primary border-blue-primary':''}`" v-if="!isDelegate()" :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center py-3'>Metadata</router-link>
-    <router-link :class="`${selected=='multisig'?'border-b-2  text-blue-primary border-blue-primary':''}`" v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center py-3'>{{$t('general.multisig')}}</router-link>
-    <router-link :class="`${selected=='txn'?'border-b-2  text-blue-primary border-blue-primary':''}`" :to="{name:'ViewAccountConfirmedTransactions', params: { address: address}}" class= 'w-18 text-center py-3'>{{$t('general.transaction',2)}}</router-link>
-  </div>
-   
-</div> -->
 
 </template>
 

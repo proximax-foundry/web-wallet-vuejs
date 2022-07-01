@@ -91,6 +91,7 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInputClean from '@/components/SupplyInputClean.vue';
 import CheckInput from '@/components/CheckInput.vue';
 import NumberInputClean from '@/modules/services/submodule/assets/components/NumberInputClean.vue';
+import {useI18n} from 'vue-i18n'
 import { ChainProfileConfig } from "@/models/stores/";
 import { Wallet } from "@/models/wallet";
 import { walletState } from "@/state/walletState";
@@ -122,6 +123,7 @@ export default {
     const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const showSupplyErr = ref(false);
     const walletPassword = ref('');
+    const {t} = useI18n();
     const err = ref('');
     const currentSelectedName = ref('');
     const divisibility = ref('0');

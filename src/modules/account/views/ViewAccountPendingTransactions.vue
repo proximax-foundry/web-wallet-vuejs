@@ -4,8 +4,8 @@
         <AccountComponent :address="address" class="mb-6"/>
         <AccountTabs :address='address' selected='txn' />
          <div class="flex my-2  gap-5 flex-none text-xs md:text-sm">
-            <router-link :to="{name:'ViewAccountConfirmedTransactions', params: { address: address}}" class="border opacity-60 hover:opacity-100 cursor-pointer border-black rounded-md text-white py-2 px-4" style="background: #007CFF">Confirmed</router-link>
-            <div  class="border border-black rounded-md text-white py-2 px-5" style="background: #f3a91d">Pending</div>
+            <router-link :to="{name:'ViewAccountConfirmedTransactions', params: { address: address}}" class="border opacity-60 hover:opacity-100 cursor-pointer rounded-md text-white py-2 px-4" style="background: #007CFF">Confirmed</router-link>
+            <div  class="border rounded-md text-white py-2 px-5" style="background: #f3a91d">Pending</div>
         </div>
         <PendingDataTable :transaction="transactions" />
     </div>
