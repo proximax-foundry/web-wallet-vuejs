@@ -26,7 +26,7 @@
                     <img v-else-if="displayTokenName(mosaic.name).name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
                     <img v-else-if="displayTokenName(mosaic.name).name=='METX'" src="@/modules/account/img/metx-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
                     <div v-else-if="mosaic.name=='-'"/>
-                    <img v-else  src="@/modules/dashboard/img/icon-sda.svg" class='inline-block h-6 w-6 mr-2 '>
+                    <img v-else  src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class='inline-block h-6 w-6 mr-2 '>
                     <div v-if="displayTokenName(mosaic.name).registered" class="inline-block text-xs ml-2 mt-1">{{displayTokenName(mosaic.name).name}}</div>
                     <div v-else class="inline-block text-xs ml-2 cursor-pointer mt-1">{{mosaic.name}}</div>
                 </div>
