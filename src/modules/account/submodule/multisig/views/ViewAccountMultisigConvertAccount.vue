@@ -1,7 +1,7 @@
 <template>
  <div>
   <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
-  <AccountComponent :address="address" class="mb-10"/>
+  <AccountComponent :address="address" class="mb-6"/>
     <AccountTabs :address="address" selected="multisig"/>
     <div class="border-2 border-t-0 lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 pr-6">

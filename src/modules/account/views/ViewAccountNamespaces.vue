@@ -2,7 +2,7 @@
 <div>
     
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
-      <AccountComponent :address="address" class="mb-10"/>
+      <AccountComponent :address="address" class="mb-6"/>
       <AccountTabs :address="address" selected="namespaces"/>
       <div class="border-2 border-t-0 pb-3" >
         <div v-if="namespaces.length==0" class='text-blue-primary text-xs text-center font-semibold pt-2'>{{$t('general.ntgToShow')}}</div>

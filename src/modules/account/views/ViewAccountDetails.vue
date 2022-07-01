@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
-      <AccountComponent :address="address" class="mb-10"/>
+      <AccountComponent :address="address" class="mb-6"/>
        <div v-if="showModal" class="mb-8">
         <div class="border border-green-300 pl-6 pb-3 bg-green-50">
           <div class="flex items-center gap-3">
@@ -66,7 +66,8 @@
               <div v-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" class="text-xs mt-1 font-semibold break-all  truncate md:text-clip md:w-auto">{{linkedAccountKey}}</div>
               <div v-else class="text-xs ">No Linked Account</div>
               <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address}}">
-                <font-awesome-icon title="Delegate account" icon="link"  class="ml-2 w-4 h-4 text-blue-primary cursor-pointer"></font-awesome-icon>
+                <font-awesome-icon v-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" title="Unlink account" icon="unlink"  class="ml-2 w-4 h-4 text-blue-primary cursor-pointer"></font-awesome-icon>
+                <font-awesome-icon v-else title="Delegate account" icon="link"  class="ml-2 w-4 h-4 text-blue-primary cursor-pointer"></font-awesome-icon>
               </router-link>
               
             </div>
@@ -78,7 +79,8 @@
               <div v-if="linkedNamespace==''" class="text-xs "> No Alias </div>
               <div class="text-xs mt-1 font-semibold break-all">{{linkedNamespace}}</div>
               <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}" >
-                 <font-awesome-icon title="Alias to namespace" icon="link"  class="ml-2 w-4 h-4 mt-0.5 text-blue-primary cursor-pointer"></font-awesome-icon>
+                 <font-awesome-icon v-if="linkedNamespace==''" title="Alias to namespace" icon="link"  class="ml-2 w-4 h-4 mt-0.5 text-blue-primary cursor-pointer"></font-awesome-icon>
+                 <font-awesome-icon v-else title="Unlink namespace" icon="unlink"  class="ml-2 w-4 h-4 mt-0.5 text-blue-primary cursor-pointer"></font-awesome-icon>
               </router-link>
             </div>
           </div>

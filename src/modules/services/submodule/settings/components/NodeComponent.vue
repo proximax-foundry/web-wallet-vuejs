@@ -1,55 +1,43 @@
 <template>
-  <div>
-    <div class="ml-2 mr-2 w-full lg:ml-auto lg:mr-auto mt-5">
-      <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
-        <div class="flex justify-between text-sm mb-5">
-          <div><span class="text-gray-700">{{$t('node.nodes')}}</span></div>
-        </div>
-        <div class="border border-gray-200 filter drop-shadow-xl py-2 sm:py-14 px-2 sm:px-28 text-center bg-white">
-
-          <div class="border border-gray-200 px-2 py-1 h-12">
-            <div class="uppercase text-gray-400 font-light text-txs text-left mb-2">{{ $t('general.blockHeight') }}</div>
-            <input disabled="true" v-model="blockHeight" type="text" class="text_input">
-          </div>
-
-          <div class="border border-gray-200 px-2 py-1 h-12 mt-5">
-            <div class="uppercase text-gray-400 font-light text-txs text-left mb-2">{{ $t('node.currentNode') }}</div>
-            <input disabled="true" v-model="currentNode" type="text" class="text_input">
-          </div>
-
-          <div class="mt-5 border border-gray-200 px-2 py-1">
-            <div class="h-5 text-left">
-              <transition enter-active-class="animate__animated animate__fadeInUp">
-                <span v-if="showSelectTitle" class="uppercase text-gray-400 font-light text-txs text-left">{{ placeholder }}</span>
-              </transition>
-            </div>
-            <div class="select selectPlugin" style="position: relative">
-              <Multiselect
-                :placeholder="placeholder"
-                :options="options"
-                mode="single"
-                :canDeselect="canDeselect"
-                v-model="selected"
-                :maxHeight="maxHeight"
-                @select="makeNodeSelection"
-                @close="closeSelection"
-                label="name"
-              >
-                <template v-slot:singlelabel="{ value }">
-                  <div class="multiselect-single-label">
-                    <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 mr-2"> {{ value.name }}
-                  </div>
-                </template>
-                <template v-slot:option="{ option }">
-                  <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 mr-2"> {{ option.name }}
-                </template>
-              </Multiselect>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="border border-gray-200 px-2 py-1 h-12">
+        <div class="uppercase text-gray-400 font-light text-txs text-left mb-2">{{ $t('general.blockHeight') }}</div>
+        <input disabled="true" v-model="blockHeight" type="text" class="text_input">
     </div>
-  </div>
+
+    <div class="border border-gray-200 px-2 py-1 h-12 mt-5">
+        <div class="uppercase text-gray-400 font-light text-txs text-left mb-2">{{ $t('node.currentNode') }}</div>
+        <input disabled="true" v-model="currentNode" type="text" class="text_input">
+    </div>
+
+    <div class="mt-5 border border-gray-200 px-2 py-1">
+        <div class="h-5 text-left">
+            <transition enter-active-class="animate__animated animate__fadeInUp">
+            <span v-if="showSelectTitle" class="uppercase text-gray-400 font-light text-txs text-left">{{ placeholder }}</span>
+            </transition>
+        </div>
+        <div class="select selectPlugin" style="position: relative">
+            <Multiselect
+            :placeholder="placeholder"
+            :options="options"
+            mode="single"
+            :canDeselect="canDeselect"
+            v-model="selected"
+            :maxHeight="maxHeight"
+            @select="makeNodeSelection"
+            @close="closeSelection"
+            label="name"
+            >
+            <template v-slot:singlelabel="{ value }">
+                <div class="multiselect-single-label">
+                <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 mr-2"> {{ value.name }}
+                </div>
+            </template>
+            <template v-slot:option="{ option }">
+                <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 mr-2"> {{ option.name }}
+            </template>
+            </Multiselect>
+        </div>
+    </div>
 </template>
 <script>
 import Multiselect from '@vueform/multiselect';
@@ -62,7 +50,7 @@ import {WalletUtils} from '@/util/walletUtils';
 import { useI18n } from 'vue-i18n';
 
 export default {
-  name: 'ViewServicesNodes',
+  name: 'NodeComponent',
 
   components: {
     Multiselect,
@@ -81,6 +69,9 @@ export default {
     const selected = ref('');
 
     const options = computed(() => {
+      if(!networkState.currentNetworkProfile){
+        return []
+      }
       let nodeList = [];
 
      networkState.currentNetworkProfile.apiNodes.forEach((node) => {
@@ -90,7 +81,7 @@ export default {
     });
 
     const currentNode = computed(() =>  NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint))
-    const blockHeight = computed(() => networkState.currentNetworkProfileConfig.chainHeight);
+    const blockHeight = computed(() => networkState.currentNetworkProfileConfig?networkState.currentNetworkProfileConfig.chainHeight:0);
 
     const makeNodeSelection = (endpoint) => {
       if(endpoint != networkState.selectedAPIEndpoint){

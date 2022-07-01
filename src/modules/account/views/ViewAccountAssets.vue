@@ -2,7 +2,7 @@
   <div>
     
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
-      <AccountComponent :address="address" class="mb-10"/>
+      <AccountComponent :address="address" class="mb-6"/>
       <AccountTabs :address="address" selected="assets"/>
     <div class='border-2 border-t-0  pb-3'>
         <div v-if="mosaics.length==0" class='pt-2 text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>

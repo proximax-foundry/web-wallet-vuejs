@@ -6,14 +6,13 @@
                 <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
                 <div class= 'text-center mt-2 text-xs font-semibold'>Change Name</div>
                 <TextInput class="mt-3" :placeholder="$t('account.namePlaceholder')" :errorMessage="$t('account.enterAccountName')" v-model="accountName" icon="wallet" />
-                <PasswordInput class = 'my-3' v-model= 'walletPasswd' :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')"/>
-                <div class="flex justify-center">
+                <div class="flex justify-center mt-3">
                     <button @click="changeName()"  class = ' blue-btn font-semibold py-2 cursor-pointer text-center w-7/12 disabled:opacity-50 disabled:cursor-auto' :disabled="disabledConfirm">{{$t('general.confirm')}}</button>
                 </div>
             </div>
             <div v-else-if="isOther && !isEdit">
                 <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
-                <div class= 'text-center mt-2 text-xs font-semibold'>Add Address Book</div>
+                <div class= 'text-center mt-2 text-xs font-semibold'>Add to Address Book</div>
                 <TextInputClean :placeholder="$t('general.name')" :errorMessage="$t('general.nameRequired')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" class="w-full md:w-96 inline-block mt-3  mr-2" />
                 <TextInputClean :placeholder="$t('general.address')" :errorMessage="addErr" v-model="address" :disabled="true" icon="wallet" class="w-full md:w-96 inline-block mr-2" />
                 <div class="flex justify-center">
@@ -50,12 +49,11 @@ const props = defineProps({
     address: String
 })
 const {t} = useI18n() 
-const passwdPattern = "^[^ ]{8,}$";
 const disabledConfirm = computed(()=>{ 
-    if(accountName.value.trim()!="" && !walletPasswd.value.match(passwdPattern) ){
-        return true
-    }else{
+    if(accountName.value.trim()!=""  ){
         return false
+    }else{
+        return true
     }
 })
 const disabledAdd = computed(()=>{
@@ -68,7 +66,6 @@ const disabledAdd = computed(()=>{
 const toggleModal = ref(false)
 const contactName = ref('')
 const accountName = ref('')
-const walletPasswd = ref('')
 const err = ref('')
 const changeName = () => {
     if (accountName.value.trim()) {
@@ -87,7 +84,6 @@ const changeName = () => {
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         err.value=""
         accountName.value = ""
-        walletPasswd.value= ""
         toggleModal.value = false
     } else if (exist_account || exist_other_account) {
         err.value = t('account.nameTaken');
@@ -112,7 +108,7 @@ const saveContact = () => {
     }
     const rawAddress = Address.createFromRawAddress(props.address); 
     // let addressBook = new AddressBook(contactName.value, rawAddress.address);
-    let addressBook = new AddressBook(contactName.value.trim(), rawAddress.plain(),'')
+    let addressBook = new AddressBook(contactName.value.trim(), rawAddress.plain(),'-none-')
     const wallet = walletState.currentLoggedInWallet;
 
     // check for existing account name in wallet
@@ -151,7 +147,7 @@ const editContact = ()=>{
     }else if(findAddressInTempContact!=undefined){
         err.value = t('addressBook.addressExist');
     }else{
-        walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value.trim(), address: Address.createFromRawAddress(props.address).plain(),group:''});
+        walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value.trim(), address: Address.createFromRawAddress(props.address).plain(),group:'-none-'});
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         err.value = '';
         contactName.value = ''

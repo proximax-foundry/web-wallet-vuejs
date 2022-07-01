@@ -1,7 +1,7 @@
 <template>
 <div>
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
-        <AccountComponent :address="address" class="mb-10"/>
+        <AccountComponent :address="address" class="mb-6"/>
         <AccountTabs :address='address' selected='txn' />
          <div class="flex my-2  gap-5 flex-none text-xs md:text-sm">
             <router-link :to="{name:'ViewAccountConfirmedTransactions', params: { address: address}}" class="border opacity-60 hover:opacity-100 cursor-pointer border-black rounded-md text-white py-2 px-4" style="background: #007CFF">Confirmed</router-link>

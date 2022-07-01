@@ -5,7 +5,7 @@
       <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
     </div>
     <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
-      <AccountComponent :address="address" class="mb-10"/>
+      <AccountComponent :address="address" class="mb-6"/>
      <AccountTabs :address="address" selected="multisig"/>
       <div class=' p-6 border-2 border-t-0 filter shadow-lg mb-6'>
         <div class="flex cursor-pointer">
