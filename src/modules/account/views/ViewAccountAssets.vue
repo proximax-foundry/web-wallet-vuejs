@@ -71,14 +71,14 @@
   </div>
 </template>
 
-<script>
+<script >
 import { watch, ref, computed, getCurrentInstance, onMounted } from "vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import { walletState } from '@/state/walletState';
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { networkState } from '@/state/networkState';
-import { MosaicId, PublicAccount, TransactionGroupType, TransactionQueryParams, TransactionType } from 'tsjs-xpx-chain-sdk';
+import { MosaicId, MosaicQueryParams,PublicAccount, TransactionGroupType, TransactionQueryParams, TransactionType } from 'tsjs-xpx-chain-sdk';
 export default {
     name:'ViewAccountAssets',
     components:{
@@ -125,14 +125,12 @@ export default {
             if(!acc.value){
                 return 
             }
-            let txnAPI = AppState.chainAPI.transactionAPI
-            let txnQueryParams = new TransactionQueryParams
-            txnQueryParams.embedded = true
-            txnQueryParams.type = [TransactionType.MOSAIC_DEFINITION]
-            txnQueryParams.publicKey = publicAccount
-            let searchedTxn = await txnAPI.searchTransactions(TransactionGroupType.CONFIRMED,txnQueryParams)
-            searchedTxn.transactions.forEach(async(txn)=>{
-                let mosaicId = new MosaicId([txn.mosaicId.id.lower,txn.mosaicId.id.higher])
+            let assetAPI = AppState.chainAPI.assetAPI
+            let mosaicQueryParams = new MosaicQueryParams
+            mosaicQueryParams.ownerPubKey = publicAccount
+            let ownerAssets = await assetAPI.searchMosaics(mosaicQueryParams)
+            ownerAssets.mosaicsInfo.forEach(mosaic=>{
+                let mosaicId = new MosaicId([mosaic.mosaicId.id.lower,mosaic.mosaicId.id.higher])
                 let findAsset =  acc.value.assets.find(asset=>asset.idHex == mosaicId.id.toHex())
                 if(!findAsset){
                     

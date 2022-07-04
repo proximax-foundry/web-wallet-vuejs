@@ -1,6 +1,6 @@
 import { 
     MosaicHttp, NetworkHttp,
-    MosaicId, MosaicInfo, MosaicNames, RichlistEntry, PageQueryParams, MosaicLevy
+    MosaicId, MosaicInfo, MosaicNames, RichlistEntry, PageQueryParams, MosaicLevy, MosaicQueryParams, MosaicSearch
 } from "tsjs-xpx-chain-sdk";
 import {RequestAuth} from './auth';
 
@@ -35,5 +35,9 @@ export class AssetAPI {
     getMosaicLevy(mosaicId: MosaicId): Promise<MosaicLevy>{
         let authHeader = RequestAuth.getAuthHeader();
         return this.mosaicHttp.getMosaicLevy(mosaicId, authHeader).toPromise();
+    }
+    searchMosaics(mosaicQueryParams :MosaicQueryParams):Promise<MosaicSearch>{
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.mosaicHttp.searchMosaics(mosaicQueryParams, authHeader).toPromise();
     }
 }
