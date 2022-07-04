@@ -124,7 +124,7 @@ export class Helper{
     }
 
     static createTransactionFieldOrder(order: Order_v2, sortingField: TransactionSortingField): TransactionFieldOrder{
-        return new TransactionFieldOrder(order, sortingField);
+        return new TransactionFieldOrder(sortingField, order);
     }
 
     static getQueryParamOrder(): typeof Order{
