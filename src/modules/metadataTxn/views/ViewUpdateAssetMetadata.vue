@@ -164,6 +164,7 @@ import { OtherAccount } from '@/models/otherAccount';
 import { ThemeStyleConfig } from '@/models/stores';
 import { toSvg } from 'jdenticon';
 import isValidUTF8 from 'utf-8-validate';
+import { useRouter } from 'vue-router';
 export default { 
   name: "ViewUpdateAssetMetadata",
   props:{
@@ -175,6 +176,7 @@ export default {
     PasswordInput,
   },
   setup(props) { 
+    const router = useRouter()
     let showKeys = ref(false)
     let scopedMetadataKeySelectable = ref(true);
     let scopedMetadataKeyType = ref(1);
@@ -541,7 +543,7 @@ export default {
       oldValue.value = ""
       newValue.value=""
       walletPassword.value=""
-      
+      router.push({ name: "ViewAccountPendingTransactions",params:{address:targetPublicAccount.value.address.plain()} })
       
     }
 

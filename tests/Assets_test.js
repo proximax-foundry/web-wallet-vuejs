@@ -1,6 +1,6 @@
 var name = "Selenium"
 var password = "abcd1234"
-var supply = "1"
+var supply = "0.000001"
 var divisibility = "6"
 var forasset = "694D033164D2E96BF383F071AD0FCE9AE4A0520862F296EF18215D99BDC5F857"
 

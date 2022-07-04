@@ -1,36 +1,27 @@
 <template>
 <div>
-    <div class='flex cursor-pointer'>
-      <img src='@/assets/img/chevron_left.svg'>
-      <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>Back</router-link>
-    </div>
+    
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
-      <AccountComponent :address="address" class="mb-10"/>
-      <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-        <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-        <router-link v-if="!isDelegate()" :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-        <div class= 'w-24 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.namespace',2)}}</div>
-        <router-link v-if="!isDelegate()" :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
-        <router-link v-if="!isDelegate()" :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-      </div>
-      <div class="border-2 border-t-0 filter shadow-lg px-6 py-3" >
-        <div v-if="namespaces.length==0" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
-        <div v-if="namespaces.length==0" class='text-txs w-9/12 ml-auto mr-auto text-gray-400 text-center'>
+      <AccountComponent :address="address" class="mb-6"/>
+      <AccountTabs :address="address" selected="namespaces"/>
+      <div class="border-2 border-t-0 pb-3" >
+        <div v-if="namespaces.length==0" class='text-blue-primary text-xs text-center font-semibold pt-2'>{{$t('general.ntgToShow')}}</div>
+        <div v-if="namespaces.length==0" class='text-txs w-9/12 ml-auto mr-auto text-gray-400 text-center '>
           <span >You do not own any namespaces.</span>
         </div>
-        <div v-else class="grid grid-cols-9 text-gray-400 font-semibold text-xs uppercase mb-2">
-          <div class="col-span-2">NAME</div>
+        <div v-else class="grid grid-cols-9 bg-gray-100 py-3 px-6 text-xs font-semibold text-gray-600 mb-2">
           <div class="col-span-2">ID</div>
-          <div class="col-span-3">LINKED</div>
-          <div>EXPIRY</div>
-          <div>ACTIVE</div>
+          <div class="col-span-2">Name</div>
+          <div class="col-span-3">LInked</div>
+          <div class="invisible md:visible">Expiry</div>
+          <div>Active</div>
         </div>
         <div v-for="(namespace, index) in namespaces" :key="index">
-          <div class="grid grid-cols-9 text-xs my-4 ">
+          <div class="grid grid-cols-9 text-xs my-3 px-6 items-center">
+            <a :href="explorerLink(namespace.id)" class="col-span-2 break-all  pr-7" target=_new ><div class="uppercase text-blue-primary" >{{namespace.id}}</div></a>
             <div class="col-span-2 break-all pr-7" >{{namespace.name}}</div>
-            <a :href="explorerLink(namespace.id)" class="col-span-2 break-all pr-7" target=_new ><div >{{namespace.id}}</div></a>
-            <div class="col-span-3 break-all pr-7">{{namespace.linkedAssetAddress}}</div>
-            <div class=" break-all pr-7">{{namespace.expiringBlock}}</div>
+            <div class="col-span-3 break-all pr-7 uppercase">{{namespace.linkedAssetAddress}}</div>
+            <div class=" break-all invisible md:visible pr-7">{{namespace.expiringBlock}}</div>
             <div class="flex">
               <div>
                 <img v-if="namespace.isActive" src="@/assets/img/icon-green-tick.svg" class="h-5 w-5 ml-1">
@@ -47,7 +38,7 @@
           </div>
           <div v-if="index != (namespaces.length - 1)" class='my-2 gray-line' ></div>
         </div>
-        <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class=" bg-blue-primary py-3 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-52 "><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2">{{$t('namespace.registerNewNamespace')}}</router-link>
+        <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="mt-2 bg-blue-primary py-3 mx-6 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-52 "><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2">{{$t('namespace.registerNewNamespace')}}</router-link>
       </div>
         
     </div>
@@ -61,6 +52,7 @@ import { networkState } from "@/state/networkState";
 import { walletState } from "@/state/walletState";
 import { Address, AliasType } from "tsjs-xpx-chain-sdk";
 import { computed, getCurrentInstance, ref, watch } from "vue";
+import AccountTabs from "@/modules/account/components/AccountTabs.vue"
     
   const props = defineProps({
     address: String

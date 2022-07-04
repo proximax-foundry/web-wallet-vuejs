@@ -127,7 +127,7 @@
       <Column :header="$t('dashboard.sda')" headerStyle="width:30px; text-align:center;width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="flex justify-center">
-            <img src="@/modules/dashboard/img/icon-sda.svg" v-if="data.assetId" class="inline-block" v-tooltip.left="'<tiptitle>'+ $t('general.sdaFull')+ '</tiptitle><tiptext>' + constructSDA(data.assetId, data.amount, data.namespaceName) + '</tiptext>'">
+            <img src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" v-if="data.assetId" class="inline-block" v-tooltip.left="'<tiptitle>'+ $t('general.sdaFull')+ '</tiptitle><tiptext>' + constructSDA(data.assetId, data.amount, data.namespaceName) + '</tiptext>'">
           </div>
         </template>
       </Column>

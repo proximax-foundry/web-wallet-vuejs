@@ -23,7 +23,7 @@ interface Notification {
   timestamp: number,
 }
 
-const currentBlock = computed(() => listenerState.currentBlock);
+// const currentBlock = computed(() => listenerState.currentBlock);
 
 const fetchPartialTxn = async(account: WalletAccount):Promise<Notification[]> => {
   const notifications:Array<Notification> = [];
@@ -56,13 +56,13 @@ const loadPartialTransactions = async(): Promise<Notification[]> => {
       namespaces: acc.namespaces,
     };
   });
-  let othersAddress = walletState.currentLoggedInWallet.others.map((acc)=> {
-    return { 
-      address: acc.address,
-      namespaces: acc.namespaces,
-    };
-  });
-  accounts = accountsAddress.concat(othersAddress);
+  // let othersAddress = walletState.currentLoggedInWallet.others.map((acc)=> {
+  //   return { 
+  //     address: acc.address,
+  //     namespaces: acc.namespaces,
+  //   };
+  // });
+  // accounts = accountsAddress.concat(othersAddress);
 
   for (const account of accounts) {
     let noti = await fetchPartialTxn(account);
@@ -73,7 +73,8 @@ const loadPartialTransactions = async(): Promise<Notification[]> => {
   return notifications;
 };
 
-const loadExpiringNamespace = (): Notification[] => {
+const loadExpiringNamespace = async(): Promise<Notification[]> => {
+  let currentBlock = await AppState.chainAPI.chainAPI.getBlockchainHeight();
   let accounts = [];
   let notifications:Array<Notification> = [];
 
@@ -89,17 +90,17 @@ const loadExpiringNamespace = (): Notification[] => {
       namespaces: acc.namespaces,
     };
   });
-  let othersAddress = walletState.currentLoggedInWallet.others.map((acc)=> {
-    return { 
-      address: acc.address,
-      namespaces: acc.namespaces,
-    };
-  });
-  accounts = accountsAddress.concat(othersAddress);
+  // let othersAddress = walletState.currentLoggedInWallet.others.map((acc)=> {
+  //   return { 
+  //     address: acc.address,
+  //     namespaces: acc.namespaces,
+  //   };
+  // });
+  // accounts = accountsAddress.concat(othersAddress);
   accounts.forEach(account => {
     account.namespaces.forEach(namespace => {
       let differenceHeight = namespace.endHeight - namespace.startHeight;
-      let remainingBlockHeight = namespace.endHeight - currentBlock.value;
+      let remainingBlockHeight = namespace.endHeight - currentBlock;
       if(differenceHeight < minBlockBeforeExpire){
         notifications.push({
           id: namespace.idHex,
@@ -161,7 +162,7 @@ export class NotificationUtils {
   }
 
   static async getNotification(){
-    let expiringNamespaceNotifications = loadExpiringNamespace();
+    let expiringNamespaceNotifications = await loadExpiringNamespace();
     let partialTxnNotifications = await loadPartialTransactions()
     let notifications = [];
     if(partialTxnNotifications.length > 0){

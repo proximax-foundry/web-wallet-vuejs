@@ -240,6 +240,7 @@ general:
   levy: Levy
   levyAmount: Levy amount
   levyRecipient: Levy recipient
+  limitExceed: Exceeding Message Limit
   link: 链接
   linkSuccess: 成功链接
   linkToNamespace: 链接到名称空间
@@ -254,6 +255,7 @@ general:
   modifySupply: 修改供应
   month: 月|月
   more: 更多
+  moreOnExplorer: Full History on Explorer
   multisig: 多重认证
   multisigTitle: 这是一个多重认证账户
   name: 名称
@@ -352,7 +354,7 @@ home:
   siriusChain: 什么是天狼星链？
   siriusChainTitle: 开始在ProximaX天狼星区块链层上构建应用程序
   switchDefault: 你的默认账户已切换为
-  title: ProximaX Sirius Wallet 1.0
+  title: ProximaX Sirius Wallet
   titleDescription: >-
     A highly secure and intuitive wallet and gateway to the ProximaX Sirius platform
   transferDescription: 发送资产到另一个账户

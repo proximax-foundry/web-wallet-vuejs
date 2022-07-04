@@ -5,7 +5,7 @@ import { AttestationRoutes } from '@/modules/services/submodule/attestation/rout
 import { VotingRoutes } from '@/modules/services/submodule/voting/routingVoting';
 import { StorageRoutes } from '@/modules/services/submodule/storage/routingStorage';
 import { SiriusGiftRoutes } from '@/modules/services/submodule/siriusGift/routingSiriusGift';
-import { NodesRoutes } from '@/modules/services/submodule/nodes/routingNodes';
+import { SettingsRoutes } from '@/modules/services/submodule/settings/routingSettings';
 import { AssetsRoutes } from '@/modules/services/submodule/assets/routingAssets';
 import { AggregateTransactions } from '@/modules/services/submodule/aggregateTransactions/routingAggregateTransactions';
 import { RouteRecordRaw } from 'vue-router'
@@ -26,7 +26,7 @@ export const ServiceRoutes: RouteRecordRaw[] = [
   ...VotingRoutes,
   ...StorageRoutes,
   ...SiriusGiftRoutes,
-  ...NodesRoutes,
+  ...SettingsRoutes,
   ...AssetsRoutes,
   ...AggregateTransactions,
 ];

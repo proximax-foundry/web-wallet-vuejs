@@ -1,19 +1,10 @@
 <template>
   <div>
-  <div class='flex cursor-pointer'>
-    <img src='@/assets/img/chevron_left.svg'>
-    <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
-  </div>
+  
   <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
-    <AccountComponent :address="address" class="mb-10"/>
-    <div class="flex text-xs font-semibold border-b-2 menu_title_div">
-      <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-      <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-      <router-link :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
-      <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
-      <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.multisig')}}</div>
-    </div>
-    <div class=' p-6 border-2 border-t-0 filter shadow-lg'>
+    <AccountComponent :address="address" class="mb-6"/>
+    <AccountTabs :address="address" selected="multisig"/>
+    <div class=' p-6 border-2 border-t-0 '>
       <div v-if="isMultisig" class="flex cursor-pointer">
         <div class="border-2 border-blue-primary p-1 mb-3 w-16 text-white bg-blue-primary text-xs text-center font-semibold ">{{$t('general.multisig')}}</div>
         <router-link :to="{name:'ViewMultisigScheme', params: { address: address}}" class="border-2 border-blue-primary p-1 mb-3 w-16 text-blue-primary text-xs text-center font-semibold ">{{$t('general.scheme')}}</router-link>
@@ -22,16 +13,16 @@
       <div class='border p-4 my-3 '>
        <div class="flex flex-col gap-2">
         <div v-for="(cosigner,index) in cosignerAccountsList" :key="index">
-            <div class="border w-full rounded-md p-3">
+            <div class="border w-full cursor-pointer rounded-md p-3" @click="navigate(cosigner.address)">
               <div class="text-txs font-semibold text-blue-primary">{{cosigner.name}}</div>
               <div class="flex">
-                <div :id="`cosignerAddress${index}`" :copyValue="cosigner.address" :copySubject="$t('general.address')" class="text-txs font-bold mt-1">{{cosigner.address}}</div>
-                <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy(`cosignerAddress${index}`)" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
-               <!--  <img src="@/assets/img/chevron_right.svg" class="w-5 h-5 ml-auto"> -->
+                <div :id="`cosignerAddress${index}`" :copyValue="cosigner.address" :copySubject="$t('general.address')" :title="cosigner.address" class="truncate md:text-clip md:w-auto text-txs font-bold mt-1">{{cosigner.address}}</div>
+                <font-awesome-icon icon="copy" @mouseover="isHover = true" @mouseout="isHover = false" :title="$t('general.copy')" @click="copy(`cosignerAddress${index}`)" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+                <img v-if="findAccountWithAddress(cosigner.address)" class="w-5 h-5 ml-auto" src="@/assets/img/chevron_right.svg" >
               </div>
             </div>
-          </div>
         </div>
+       </div>
         <div v-if="!isMultisig" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
         <div class='flex text-txs w-9/12 ml-auto mr-auto text-gray-400 mt-1 text-center justify-center '>
           <span v-if="!isMultisig"> {{$t('multisig.noCosigner',{name:acc?acc.name:''})}}</span>
@@ -43,12 +34,12 @@
       <div class='border p-4 mt-3'>
         <div class="flex flex-col gap-2">
           <div v-for="(multisig,index) in multisigAccountsList" :key="index">
-            <div class="border w-full rounded-md p-3">
+            <div class="border w-full cursor-pointer rounded-md p-3" @click="navigate(multisig.address)">
               <div class="text-txs font-semibold text-blue-primary">{{multisig.name}}</div>
               <div class="flex">
-                <div :id="`multisigAddress${index}`" :copyValue="multisig.address" :copySubject="$t('general.address')" class="text-txs font-bold mt-1">{{multisig.address}}</div>
-                <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy(`multisigAddress${index}`)" class="ml-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
-                 <!-- <img src="@/assets/img/chevron_right.svg" class="w-5 h-5 ml-auto"> -->
+                <div :id="`multisigAddress${index}`" :copyValue="multisig.address" :title="multisig.address" :copySubject="$t('general.address')" class="truncate md:text-clip md:w-auto text-txs font-bold mt-1">{{multisig.address}}</div>
+                <font-awesome-icon icon="copy" @mouseover="isHover = true" @mouseout="isHover = false" :title="$t('general.copy')" @click="copy(`multisigAddress${index}`)" class="ml-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+                  <img v-if="findAccountWithAddress(multisig.address)" class="w-5 h-5 ml-auto" src="@/assets/img/chevron_right.svg">
               </div>
             </div>
           </div>
@@ -72,15 +63,18 @@ import { multiSign } from '@/util/multiSignatory';
 import {Address, PublicAccount} from  "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
+import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 export default {
     name: "ViewMultisigHome",
     props: {
         address: String
     },
     components:{
-      AccountComponent
+      AccountComponent,
+      AccountTabs
     },
     setup(p){
       const {t} = useI18n()
@@ -95,6 +89,17 @@ export default {
         }
         return acc
       })
+      const getPlainAddress = address => {
+        return Address.createFromRawAddress(address).plain()
+      }
+      const findAccountWithAddress = address =>{
+        let plainAddress = getPlainAddress(address)
+          const findAcc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==plainAddress) | walletState.currentLoggedInWallet.others.find(acc=>acc.address==plainAddress) 
+          if(findAcc==undefined){
+            return false
+          }
+          return true
+      }
       const isMultisig = ref(false) 
       const isCosigner = ref(false)
       const networkType = AppState.networkType
@@ -145,8 +150,28 @@ export default {
       copyToClipboard(stringToCopy);
       toast.add({severity:'info', detail: copySubject +' '+ t('general.copied'), group: 'br', life: 3000});
     };
-      
+    const isHover = ref(false)
+    const router = useRouter()
+     const setDefaultAcc = (name)=>{
+      try {
+        walletState.currentLoggedInWallet.setDefaultAccountByName(name)
+      } catch (error) {
+      }
+    }
+    const getAccountNameByAddress = (address)=>{
+      let findAcc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address ==address) || walletState.currentLoggedInWallet.others.find(acc=>acc.address ==address)
+      return findAcc.name
+    }
+    const navigate = (address) =>{
+      if(findAccountWithAddress(address) && !isHover.value){
+        setDefaultAcc(getAccountNameByAddress(Address.createFromRawAddress(address).plain()))
+        router.push({ name: 'ViewAccountDetails', params: { address:getPlainAddress(address) }})
+      }
+    }
       return{
+        findAccountWithAddress,
+        isHover,
+        navigate,
         copy,
         isMultisig,
         acc,
