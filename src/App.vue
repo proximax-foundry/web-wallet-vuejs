@@ -41,7 +41,7 @@
     <div v-if="!login" class="w-full items-center px-2" :class="`${ overflowScreen?'relative':'2xl:absolute bottom-0' }`">
       <footer class="mx-auto h-12 mt-20 text-center  lg:flex text-txs lg:text-xs lg:justify-between container text-white pb-5">
         <div class="ml-2 sm:ml-0">{{$t('home.copyright')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-white hover:underline">{{$t('home.helpdesk')}}</a></div>
-        <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span> {{$t('home.version')}}{{ versioning }}</span></div>
+        <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span> {{$t('home.version')}} {{ versioning }}</span></div>
       </footer>
     </div>
   </div>
