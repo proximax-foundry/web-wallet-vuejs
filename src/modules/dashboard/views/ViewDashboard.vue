@@ -91,18 +91,18 @@
       <div class="transition-all flex items-end">
         <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='overview'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='overview'">{{$t('general.overview')}}</div>
         <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='asset'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='asset'">{{$t('general.asset',2)}}</div>
-        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='namespace'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='namespace'">{{$t('general.namespace',2)}}</div>
-        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='transaction'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='transaction'">{{$t('dashboard.allTransactions')}}</div>
+        <!-- <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='namespace'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='namespace'">{{$t('general.namespace',2)}}</div> -->
+       <!--  <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='transaction'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='transaction'">{{$t('dashboard.allTransactions')}}</div> -->
       </div>
     </div>
-    <div class="bg-white px-2 sm:px-10 pt-12" v-if="displayBoard=='overview'">
-      <div class="text-txs text-gray-400"><b class="text-gray-700 uppercase">{{$t('general.asset',2)}}</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">{{$t('dashboard.viewAll')}}</span>)</div>
+    <div class="bg-white px-2 sm:px-10 " v-if="displayBoard=='overview'">
+     <!--  <div class="text-txs text-gray-400"><b class="text-gray-700 uppercase">{{$t('general.asset',2)}}</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">{{$t('dashboard.viewAll')}}</span>)</div>
       <DashboardAssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700 uppercase">{{$t('general.namespace',2)}}</b> ({{ selectedAccountNamespaceCount }} - {{$t('dashboard.viewAll')}})</div>
-      <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" :account="selectedAccount" />
-      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700 uppercase">{{$t('dashboard.recentTransactions')}}</b> ({{ accountConfirmedTxnsCount }} - {{$t('dashboard.viewAll')}})</div>
+      <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" :account="selectedAccount" /> -->
+      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700 uppercase">{{$t('dashboard.recentTransactions')}}</b> <!-- ({{ accountConfirmedTxnsCount }} - {{$t('dashboard.viewAll')}}) --></div>
       <MixedTxnDataTable :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="recentTransactions" @openDecryptMsg="openDecryptMsgModal"></MixedTxnDataTable>
-      <div class="mt-10 md:flex ml-5 md:ml-0">
+      <!-- <div class="mt-10 md:flex ml-5 md:ml-0">
         <div class="w-full md:w-1/2">
           <div class="mb-8 font-bold uppercase text-txs">{{$t('dashboard.createSthNew')}}</div>
           <div class="flex flex-wrap">
@@ -144,15 +144,15 @@
             <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new>{{$t('general.assetQues')}} <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='asset'">
       <DashboardAssetDataTable :assets="selectedAccount.assets" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
     </div>
-    <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='namespace'">
+    <!-- <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='namespace'">
       <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" :account="selectedAccount" />
-    </div>
-    <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='transaction'">
+    </div> -->
+   <!--  <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='transaction'">
       <div class="flex justify-between items-center">
         <div>
           <div v-if="selectedTxnType === TransactionFilterType.ACCOUNT" class="flex items-center">
@@ -199,7 +199,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -252,7 +252,7 @@ export default defineComponent({
   },
   components: {
     MixedTxnDataTable,
-    TransferTxnDataTable,
+    /* TransferTxnDataTable,
     AccountTxnDataTable,
     AggregateTxnDataTable,
     AliasTxnDataTable,
@@ -264,9 +264,9 @@ export default defineComponent({
     MetadataTxnDataTable,
     NamespaceTxnDataTable,
     RestrictionTxnDataTable,
-    SecretTxnDataTable,
+    SecretTxnDataTable, */
     DashboardAssetDataTable,
-    DashboardNamespaceDataTable,
+    /* DashboardNamespaceDataTable, */
     AddressQRModal,
   },
   setup(props){

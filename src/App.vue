@@ -32,8 +32,8 @@
           <router-view class="lg:ml-60 mt-10 lg:mt-16 flex-grow px-5 pt-5" v-else-if="login" :key="$route.path"></router-view>
           <router-view class="mt-12 sm:mt-0 flex-grow px-2 pt-5 sm:p-0" v-else></router-view>
           <footer class="md:ml-60 md:h-9 mt-10 text-center sm:text-justify sm:flex text-txs md:text-xs sm:justify-between text-gray-700 px-10 flex-grow-0" v-if="login">
-            <div class="ml-2 sm:ml-0">{{$t('home.copyright')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary hover:underline">{{$t('home.helpdesk')}}</a> <selectLanguageModal class="inline-block" /></div>
-            <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span> {{$t('home.version')}} {{ versioning }}</span></div>
+            <div class="ml-2 sm:ml-0">{{$t('home.copyright')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary hover:underline">{{$t('home.helpdesk')}}</a> </div>
+            <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span> {{$t('home.version')}}{{ versioning }}</span></div>
           </footer>
         </div>
       </div>
@@ -49,7 +49,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, getCurrentInstance, provide, watch, ref, reactive, onUnmounted, onMounted } from "vue";
-import selectLanguageModal from '@/modules/home/components/selectLanguageModal.vue';
 import packageData from "../package.json";
 import headerComponent from '@/components/headerComponent.vue'
 import NavigationMenu from '@/components/NavigationMenu.vue'
@@ -72,7 +71,6 @@ export default defineComponent({
     NavigationMenu,
     ConfirmDialog,
     Toast,
-    selectLanguageModal,
     Loading
   },
 

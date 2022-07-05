@@ -1,18 +1,16 @@
 <template>
 <div>
-    <div class='flex cursor-pointer'>
-        <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'><img src="@/assets/img/chevron_left.svg" class="w-5 inline-block">{{$t('general.back')}}</router-link>
-    </div>
+    
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
-        <AccountComponent :address="address" class="mb-10"/>
+        <AccountComponent :address="address" class="mb-6"/>
         <AccountTabs :address="address" selected='txn' />
         <div class="flex my-2  gap-5 flex-none text-xs md:text-sm">
-            <div class="border border-black rounded-md text-white py-2 px-4" style="background: #007CFF">Confirmed</div>
-            <router-link :to="{name:'ViewAccountPendingTransactions', params: { address: address}}" class="border opacity-60 hover:opacity-100 cursor-pointer border-black rounded-md text-white py-2 px-5" style="background: #f3a91d">Pending</router-link>
+            <div class="border rounded-md text-white py-2 px-4" style="background: #007CFF">Confirmed</div>
+            <router-link :to="{name:'ViewAccountPendingTransactions', params: { address: address}}" class="border opacity-60 hover:opacity-100 cursor-pointer  rounded-md text-white py-2 px-5" style="background: #f3a91d">Pending</router-link>
         </div>
         <div class="bg-white px-2 " >
-            <div class="flex justify-between items-center">
-                <div>
+            <div class="flex flex-col gap-3 mt-3">
+               
                 <div v-if="selectedTxnType === TransactionFilterType.ACCOUNT" class="flex items-center">
                     <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">{{$t('dashboard.accountAdded')}}</span>
                     <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">{{$t('dashboard.accountRemoved')}}</span>
@@ -25,13 +23,13 @@
                     <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">{{$t('general.enabled')}}</span>
                     <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">{{$t('general.disabled')}}</span>
                 </div>
-                </div>
-                <div class="bg-gray-50">
-                <select v-model="selectedTxnType" @change="changeSearchTxnType" class="border border-gray-200 px-2 py-1 focus:outline-none">
+                
+                
+                <select v-model="selectedTxnType" @change="changeSearchTxnType" class="w-36 border border-gray-200 px-2 py-1 focus:outline-none">
                     <option value="all" class="text-sm">All</option>
                     <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm">{{ txnType.label}}</option>
                 </select>
-                </div>
+                
             </div>
             <div v-if="boolIsTxnFetched">
                 <MixedTxnDataTable v-if="selectedTxnType === 'all'" :selectedGroupType="transactionGroupType.CONFIRMED"  :transactions="searchedTransactions" :currentAddress="accAddress"></MixedTxnDataTable>
@@ -57,6 +55,7 @@
                     </div>
                 </div>
             </div>
+            <a :href="linkToExplorer()" target=_new v-if="searchedTransactions.length==10"><div class="text-right text-xs text-blue-primary mt-3" >View more...</div></a>
         </div>
     </div>
 </div>
@@ -86,6 +85,7 @@ import SecretTxnDataTable from '@/modules/dashboard/components/TransactionDataTa
 import { AppState } from "@/state/appState";
 import { Transaction } from "tsjs-xpx-chain-sdk";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
+import { networkState } from "@/state/networkState";
 
     const props = defineProps({
         address: String
@@ -217,8 +217,15 @@ import AccountTabs from "@/modules/account/components/AccountTabs.vue";
       searchTransaction();
     }
 
-    const searchTransaction = async() =>{
+    const linkToExplorer = ()=>{ 
+        if(!networkState.currentNetworkProfile){ 
+            return ''
+        }
+        return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.addressRoute + '/' + props.address
+      }
 
+    const searchTransaction = async() =>{
+        allTxnQueryParams.pageSize = 1
         allTxnQueryParams.pageNumber = 1;
         allTxnQueryParams.publicKey = acc.value.publicKey;
         let transactionSearchResult = await dashboardService.searchTxns(selectedTxnGroupType, allTxnQueryParams);

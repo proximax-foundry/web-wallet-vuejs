@@ -5,7 +5,7 @@
       <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
     </div>
     <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
-      <AccountComponent :address="address" class="mb-10"/>
+      <AccountComponent :address="address" class="mb-6"/>
      <AccountTabs :address="address" selected="multisig"/>
       <div class=' p-6 border-2 border-t-0 filter shadow-lg mb-6'>
         <div class="flex cursor-pointer">
@@ -15,11 +15,11 @@
         <div class="overflow-auto w-full border-2  " :style="`${viewType2==1?' transform: rotate(180deg);':'' }`">
           <blocks-tree :data="graph" :horizontal="viewType==0"  :collapsable="collapsable" :props="{label: 'label', name: 'name', balance: 'balance', numApproveTx:'numApproveTx',numRemoval:'numRemoval',children: 'children'}">
             <template #node="{data}">
-              <div class="flex flex-col justify-center p-1.5 h-20" :style="`${viewType2==1?' transform: rotate(180deg);':'' }width: 16.5rem`" >
+              <div class="flex flex-col justify-center p-1.5 h-20 cursor-pointer " @click="navigate(prettyAddress(data.label))"  :style="`${viewType2==1?' transform: rotate(180deg);':'' }width: 16.5rem`" >
                 <div class="text-xs text-left text-blue-500 font-bold">{{data.name}}</div>
                 <div class="flex gap-1">
-                  <div :id="data.label" :copyValue="prettyAddress(data.label)" :copySubject="$t('general.address')" class="font-bold text-left text-xs mt-0.5">{{displayAddress(data.label)}}</div>
-                  <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy(data.label)" class="w-5 h-5 text-blue-primary cursor-pointer "></font-awesome-icon>
+                  <div :id="data.label" :copyValue="prettyAddress(data.label)"  :copySubject="$t('general.address')" class="font-bold text-left text-xs mt-0.5">{{displayAddress(data.label)}}</div>
+                  <font-awesome-icon icon="copy" :title="$t('general.copy')" @mouseover="isHover = true" @mouseout="isHover = false"  @click="copy(data.label)" class="w-5 h-5 text-blue-primary cursor-pointer "></font-awesome-icon>
                 </div>
                 <div v-if="data.balance!=-1" class="flex">
                     <div class = 'text-xs font-bold '>{{splitBalance(data.balance).left}} </div>
@@ -81,6 +81,7 @@ import { AppState } from '@/state/appState';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 export default {
   name:"ViewMultisigScheme",
   components:{
@@ -93,6 +94,7 @@ export default {
 setup(p){
   const toast = useToast();
   const {t} = useI18n();
+  const isHover = ref(false)
   const wallet = walletState.currentLoggedInWallet 
   const currentAccount = computed(()=>{
     if(!wallet){
@@ -140,8 +142,11 @@ setup(p){
     return multisigAccounts.value.find(account=>account.publicKey == publicKey).cosignaturies.length
   };
 
-  const findAccountWithAddress = address =>{
+  const findAccountWithAddress = (address, includeOthers? :boolean) =>{
     let plainAddress = Address.createFromRawAddress(address).plain()
+    if(includeOthers){
+      return wallet.accounts.find(account=>account.address == plainAddress) || wallet.others.find(account=>account.address == plainAddress)
+    }
     return wallet.accounts.find(account=>account.address == plainAddress)
   }
 
@@ -257,7 +262,27 @@ setup(p){
   const viewType = ref(0)
   const viewType2 = ref(1)
   const collapsable = ref(false)
+  const router = useRouter() 
+  const setDefaultAcc = (name)=>{
+    try {
+      walletState.currentLoggedInWallet.setDefaultAccountByName(name)
+    } catch (error) {
+    }
+  }
+  const getAccountNameByAddress = (address)=>{
+    let findAcc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address ==address) || walletState.currentLoggedInWallet.others.find(acc=>acc.address ==address)
+    return findAcc.name
+  }
+  const navigate = address =>{
+
+    if(findAccountWithAddress(address,true) && !isHover.value ){
+        setDefaultAcc(getAccountNameByAddress(Address.createFromRawAddress(address).plain()))
+        router.push({ name: 'ViewAccountDetails', params: { address:Address.createFromRawAddress(address).plain() }})
+      }
+  }
   return{
+    isHover,
+    navigate,
     viewType,
     viewType2,
     collapsable,

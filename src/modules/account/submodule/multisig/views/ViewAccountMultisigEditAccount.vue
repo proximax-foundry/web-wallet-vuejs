@@ -1,13 +1,9 @@
 <template>
 <div>
-  <div class='flex cursor-pointer'>
-    <img src='@/assets/img/chevron_left.svg'>
-    <router-link :to="{name: 'ViewMultisigHome',params:{address:address}}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
-  </div>
   <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5 '>
-    <AccountComponent :address="address" class="mb-10"/>
+    <AccountComponent :address="address" class="mb-6"/>
     <AccountTabs :address="address" selected="multisig"/>
-    <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
+    <div class="border-2 border-t-0 lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 pr-6">
         <div class="text-left mt-2 mb-5 ml-6"> 
             <div v-if="walletCosignerList.length > 0">

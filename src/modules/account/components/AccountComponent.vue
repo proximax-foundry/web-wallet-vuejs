@@ -1,5 +1,5 @@
 <template>
-    <div class='border-2 shadow-lg filter'>
+    <div class='border-2 py-3 px-6'>
         <div class='flex'>
             <div v-html='svgString'></div>
             <div class='flex flex-col justify-center ml-4'>
@@ -7,12 +7,11 @@
                 <div class='flex '>
                     <div class = '  font-semibold text-md' v-if='showName'>{{ accountNameDisplay }}</div>
                     <input class='outline-none ml-4 font-semibold text-md'  v-model='accountName' v-if='!showName'/>
-                    <img src="@/modules/account/img/edit-icon.svg"  v-if='showName && !other_acc' @click='showName=!showName' :title="$t('account.editName')" class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
-                    <img src="@/modules/account/img/edit-icon.svg"  v-if='!showName'  @click="changeName()" :title="$t('account.confirmName')" class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
+                    <changeNameModal :address="address" :isOther="other_acc==null?false:true"/>
                 </div>
-                <div class= 'flex'>
-                    <div id="address" :copyValue="prettyAddress" :copySubject="$t('general.address')" class = 'text-xs font-semibold mt-1'>{{prettyAddress}} </div>
-                    <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy('address')" class="mx-3 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+                <div class= 'flex gap-2'>
+                    <div id="address" :copyValue="prettyAddress" :title="prettyAddress" :copySubject="$t('general.address')" class = 'truncate md:text-clip w-44 md:w-full text-xs font-semibold mt-1'>{{prettyAddress}} </div>
+                    <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy('address')" class=" w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
                 </div>
                 <div class='flex gap-2'> 
                     <div  v-if='isDefault' class = ' px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm' :title="$t('general.defaultTitle')">
@@ -38,10 +37,14 @@ import { useI18n } from 'vue-i18n';
 import { Helper } from '@/util/typeHelper';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import changeNameModal from './ChangeNameModal.vue'
 export default {
 name:"AccountComponent",
 props:{
     address: String
+},
+components:{
+  changeNameModal
 },
 setup(p){
     const {t} = useI18n();
@@ -97,7 +100,7 @@ setup(p){
       }
       return walletState.currentLoggedInWallet.convertAddressToName(p.address,true)
     });
-    const svgString = ref(toSvg(p.address, 100, themeConfig.jdenticonConfig));    
+    const svgString = ref(toSvg(p.address, 75, themeConfig.jdenticonConfig));    
     const showName = ref(true);
     const changeName = () => {
       if (accountName.value.trim()) {

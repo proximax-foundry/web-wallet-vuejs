@@ -1,13 +1,10 @@
 <template>
     <div>
-        <div class='flex cursor-pointer'>
-            <img src='@/assets/img/chevron_left.svg'>
-            <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
-        </div>
+        
         <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
-            <AccountComponent :address="address" class="mb-10"/>
+            <AccountComponent :address="address" class="mb-6"/>
             <AccountTabs :address="address" selected="metadata"/>
-            <div class="border-2 border-t-0 filter shadow-lg px-6" >
+            <div class="border-2 border-t-0 px-6" >
                 <select class=" my-4" v-model="filterSelection">
                     <option value=0>ACCOUNT</option>
                     <option value=1>NAMESPACE</option>
@@ -123,7 +120,7 @@ import { Convert, MetadataQueryParams, MetadataType, MosaicId, NamespaceId, Publ
 import { computed, ref, watch } from "vue"
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
-import isValidUTF8 from 'utf-8-validate';
+import UTF8 from 'utf-8';
     const props = defineProps({
         address: String
     })
@@ -232,7 +229,7 @@ import isValidUTF8 from 'utf-8-validate';
     const convertUtf8 = (scopedMetadataKey :string)=>{
         scopedMetadataKey =  removeDoubleZero(scopedMetadataKey )
         let bytes = Convert.hexToUint8(scopedMetadataKey );
-        if(isValidUTF8(bytes)){
+        if(!UTF8.isNotUTF8(bytes)){
             scopedMetadataKey  = Convert.decodeHexToUtf8(scopedMetadataKey)
         }
         return scopedMetadataKey

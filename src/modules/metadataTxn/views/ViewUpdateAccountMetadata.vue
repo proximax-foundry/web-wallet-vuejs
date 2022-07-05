@@ -157,7 +157,7 @@ import { OtherAccount } from '@/models/otherAccount';
 import { toSvg } from 'jdenticon';
 import { ThemeStyleConfig } from '@/models/stores';
 import { WalletUtils } from '@/util/walletUtils';
-import isValidUTF8 from 'utf-8-validate';
+import UTF8 from 'utf-8';
 import { useRouter } from 'vue-router';
 export default { 
   name: "ViewUpdateAccountMetadata",
@@ -205,7 +205,7 @@ export default {
     const convertUtf8 = (scopedMetadataKey :string)=>{
         scopedMetadataKey =  removeDoubleZero(scopedMetadataKey )
         let bytes = Convert.hexToUint8(scopedMetadataKey );
-        if(isValidUTF8(bytes)){
+        if(!UTF8.isNotUTF8(bytes)){
             scopedMetadataKey  = Convert.decodeHexToUtf8(scopedMetadataKey)
         }
         return scopedMetadataKey

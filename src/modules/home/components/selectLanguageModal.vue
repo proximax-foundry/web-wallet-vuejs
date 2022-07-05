@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a @click="toggleModal = !toggleModal" class="w-16 text-center inline-block"><img v-if='loginStatus' src="@/assets/img/globe.svg" class="h-4 w-4 inline-block relative mr-2 " style="top: -1px"><img v-if='!loginStatus' src="@/assets/img/globe-white.svg" class="h-4 w-4 inline-block relative mr-2 " style="top: -1px">{{ $i18n.locale.toUpperCase() }}</a>
+    <a @click="toggleModal = !toggleModal" ><img v-if='!loginStatus' src="@/assets/img/globe-white.svg" class="h-4 w-4 inline-block relative mr-2 " style="top: -1px">{{ $i18n.locale.toUpperCase() }}</a>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
