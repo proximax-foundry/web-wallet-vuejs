@@ -55,6 +55,7 @@
                     </div>
                 </div>
             </div>
+            <a :href="linkToExplorer()" target=_new v-if="searchedTransactions.length==10"><div class="text-right text-xs text-blue-primary mt-3" >View more...</div></a>
         </div>
     </div>
 </div>
@@ -84,6 +85,7 @@ import SecretTxnDataTable from '@/modules/dashboard/components/TransactionDataTa
 import { AppState } from "@/state/appState";
 import { Transaction } from "tsjs-xpx-chain-sdk";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
+import { networkState } from "@/state/networkState";
 
     const props = defineProps({
         address: String
@@ -214,6 +216,13 @@ import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 
       searchTransaction();
     }
+
+    const linkToExplorer = ()=>{ 
+        if(!networkState.currentNetworkProfile){ 
+            return ''
+        }
+        return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.addressRoute + '/' + props.address
+      }
 
     const searchTransaction = async() =>{
         allTxnQueryParams.pageSize = 1
