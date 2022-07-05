@@ -120,7 +120,7 @@ import { Convert, MetadataQueryParams, MetadataType, MosaicId, NamespaceId, Publ
 import { computed, ref, watch } from "vue"
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
-import isValidUTF8 from 'utf-8-validate';
+import UTF8 from 'utf-8';
     const props = defineProps({
         address: String
     })
@@ -229,7 +229,7 @@ import isValidUTF8 from 'utf-8-validate';
     const convertUtf8 = (scopedMetadataKey :string)=>{
         scopedMetadataKey =  removeDoubleZero(scopedMetadataKey )
         let bytes = Convert.hexToUint8(scopedMetadataKey );
-        if(isValidUTF8(bytes)){
+        if(!UTF8.isNotUTF8(bytes)){
             scopedMetadataKey  = Convert.decodeHexToUtf8(scopedMetadataKey)
         }
         return scopedMetadataKey
