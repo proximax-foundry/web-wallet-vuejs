@@ -63,7 +63,9 @@
           <div  class="flex  flex-col">
             <div class="text-xxs text-blue-primary font-semibold uppercase ">Linked Account</div>
             <div class="flex items-center">
-              <div v-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" class="text-xs mt-1 font-semibold break-all  truncate md:text-clip md:w-auto">{{linkedAccountKey}}</div>
+              <router-link class="truncate" v-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" :to="{ name: 'ViewAccountDetails', params: { address: findAccountAddress(linkedAccountKey)}}">
+                <div class="text-xs mt-1 font-semibold break-all  truncate md:text-clip md:w-auto">{{linkedAccountKey}}</div>
+              </router-link>
               <div v-else class="text-xs ">No Linked Account</div>
               <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address}}">
                 <font-awesome-icon v-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" title="Unlink account" icon="unlink"  class="ml-2 w-4 h-4 text-blue-primary cursor-pointer"></font-awesome-icon>
@@ -76,10 +78,14 @@
           <div class="flex  flex-col">
             <div class="text-xxs text-blue-primary font-semibold uppercase">Alias</div>
             <div class="flex items-center">
-              <div v-if="linkedNamespace==''" class="text-xs "> No Alias </div>
-              <div class="text-xs mt-1 font-semibold break-all">{{linkedNamespace}}</div>
+              <div v-if="!linkedNamespace.length" class="text-xs "> No Alias </div>
+              <div v-for="(name,index) of linkedNamespace" :key="index" class="text-xs mt-1 font-semibold break-all">
+                <a :href="explorerLink(name)" target=_new>
+                  <div class="cursor-pointer">{{name}}<span v-if="index!=linkedNamespace.length-1">,</span></div> 
+                  </a>
+              </div>
               <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}" >
-                 <font-awesome-icon v-if="linkedNamespace==''" title="Alias to namespace" icon="link"  class="ml-2 w-4 h-4 mt-0.5 text-blue-primary cursor-pointer"></font-awesome-icon>
+                 <font-awesome-icon v-if="!linkedNamespace.length" title="Alias to namespace" icon="link"  class="ml-2 w-4 h-4 mt-0.5 text-blue-primary cursor-pointer"></font-awesome-icon>
                  <font-awesome-icon v-else title="Unlink namespace" icon="unlink"  class="ml-2 w-4 h-4 mt-0.5 text-blue-primary cursor-pointer"></font-awesome-icon>
               </router-link>
             </div>
@@ -315,7 +321,7 @@ export default {
     }) 
 
     const linkedAccountKey = ref('')
-    const linkedNamespace = ref('')
+    const linkedNamespace = ref([])
     const getLinkedAccountKey = async() =>{
       const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(acc.value.address))
       if(accInfo.linkedAccountKey!=undefined){
@@ -323,10 +329,26 @@ export default {
       }
     }
     const getLinkedNamespace = async() =>{
-      const names = await AppState.chainAPI.accountAPI.getAccountsNames([Address.createFromRawAddress(acc.value.address)])
-      if(names[0].names[0]){
-        linkedNamespace.value = names[0].names[0].name
+      const accountNames = await AppState.chainAPI.accountAPI.getAccountsNames([Address.createFromRawAddress(acc.value.address)])
+        accountNames[0].names.forEach(name=>{
+          linkedNamespace.value.push(name.name)
+        })
+    }
+    
+    const explorerLink = namespace=>{ 
+          if(!networkState.currentNetworkProfile){
+              return ''
+          }
+          return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespace
       }
+
+    const findAccountAddress = publicKey=>{ 
+        if(!walletState.currentLoggedInWallet){
+            return ''
+        }
+        let account =  walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey) || walletState.currentLoggedInWallet.others.find(acc=>acc.publicKey==publicKey)
+        return account.address
+
     }
     const init = async() =>{ 
       if(!acc.value){
@@ -363,6 +385,7 @@ export default {
    
 
     return {
+      findAccountAddress,
       linkedAccountKey,
       linkedNamespace,
       topUpUrl,
@@ -390,7 +413,8 @@ export default {
       showSavePaperWallet,
       walletPasswdWalletPaper,
       saveWalletPaper,
-      networkType
+      networkType,
+      explorerLink
     };
   }
 };
