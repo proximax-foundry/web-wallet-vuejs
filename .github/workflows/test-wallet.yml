@@ -2,7 +2,8 @@ name: test-wallet
 
 on:
   push:
-    branches: 
+    branches:
+      - fix-automated-tests #remove this branch when fixed
       - develop
 
 jobs:
