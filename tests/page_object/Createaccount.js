@@ -13,7 +13,8 @@ const elements = {
     input_walletpassword: 'input.w-full',
     input_walletpassword_pk: 'div.ml-auto.mr-auto.mt-3 > div:nth-child(3) > div > input',
     input_privatekey: 'div.bg-white.py-2.border.flex.justify-between > input.w-full.text-placeholder.text-left.ml-2',
-    home_icon: 'div.text-center.w-full.h-7 > a[href="#/dashboard"] > img',
+    home: 'img.w-24',
+    //home_icon: 'div.text-center.w-full.h-7 > a[href="#/dashboard"] > img',
     empty_accountname: '.error-text',
     empty_accountname_pk: '.error-text',
     empty_walletpassword: '.error-password',
@@ -37,7 +38,7 @@ const commands = {
         return this
         .click("@create_account")
         .assert.urlEquals(browser + 'select-type-creation-account', 'When Create New Account is clicked, user is navigated to select account selection type page.')
-        .click("@home_icon")
+        .click("@home")
         .assert.urlEquals(browser + 'dashboard', 'When home icon is clicked, user is navigated back to dashboard page.')
         .click("@create_account")
 
