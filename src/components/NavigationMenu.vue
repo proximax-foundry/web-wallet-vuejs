@@ -28,7 +28,7 @@
       </div>
     </div> -->
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10  3xl:px-10 text-gray-400 uppercase">{{$t('home.quickAction')}}</div>
+      <div class="my-3 px-10  3xl:px-10 text-gray-400 uppercase">{{$t('general.createNew')}}</div>
       <router-link :to="{ name : 'ViewTransferCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-transfer.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.transfer')}}</router-link>
       <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.namespace')}}</router-link>
       <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.asset')}}</router-link>

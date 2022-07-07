@@ -191,6 +191,9 @@ export class NotificationUtils {
   static saveVisitedNotification(){
     const notifications = SessionService.getJSONParse('notification');
     let notificationID = [];
+    if(!notifications){
+      return
+    }
     notifications.forEach(notification => {
       notificationID.push(notification.id);
     });

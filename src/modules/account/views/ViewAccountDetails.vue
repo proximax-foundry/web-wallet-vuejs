@@ -94,7 +94,7 @@
           <PdfPasswordModal v-if='!other_acc' />
           <!-- <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}" class="text-center text-xs px-3 blue-btn cursor-pointer py-3" ><img src="@/assets/img/link-icon.svg" class = 'h-3 w-3 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('general.linkToNamespace')}}</router-link>
           <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address}}" class="text-center blue-btn cursor-pointer py-3 px-3"><img src="@/assets/img/icon-multisig.svg" class = 'h-3 w-3 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('delegate.delegateAcc')}}</router-link> -->
-          <DeleteAccountModal v-if="!isDefault && !other_acc "  :account ='acc' />
+          <!-- <DeleteAccountModal v-if="!isDefault && !other_acc "  :account ='acc' /> -->
         </div>
       </div>
     </div>
@@ -132,7 +132,7 @@ export default {
     /* TextInput, */
     PkPasswordModal,
     PdfPasswordModal,
-    DeleteAccountModal,
+    /* DeleteAccountModal, */
     AccountComponent,
     AccountTabs
   },
