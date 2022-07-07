@@ -41,6 +41,7 @@ const commands = {
         .setValue("@input_divisibility", divisibility)
         .click("@transferable")
         .click("@supply_mutable")
+        .click("@input_password")
         .setValue("@input_password", password)
         .click("@createasset_button")
         .pause(5000)
