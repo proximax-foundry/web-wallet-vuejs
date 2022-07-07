@@ -1,9 +1,5 @@
 <template>
  <div>
-  <div class="flex cursor-pointer mt-8 ml-8 lg:ml-0 lg:absolute">
-    <img src='@/assets/img/chevron_left.svg'>
-    <router-link :to="{name: 'ViewServicesAssets'}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
-  </div>
   <div class='w-10/12 ml-auto mr-auto'>
     <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
       <div class="xl:col-span-2 p-12">

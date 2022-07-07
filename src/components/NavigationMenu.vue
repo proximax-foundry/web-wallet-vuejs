@@ -30,8 +30,8 @@
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
       <div class="my-3 px-10  3xl:px-10 text-gray-400 uppercase">{{$t('home.quickAction')}}</div>
       <router-link :to="{ name : 'ViewTransferCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-transfer.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.transfer')}}</router-link>
-      <router-link :to="{ name : 'ViewServicesNamespace'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.namespace')}}</router-link>
-      <router-link :to="{ name : 'ViewServicesAssets'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.asset')}}</router-link>
+      <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.namespace')}}</router-link>
+      <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.asset')}}</router-link>
       <router-link :to="{ name : 'ViewServicesMainnetSwap'}" class="link_block flex items-center text-white" @click="closeNavi" v-if="isDisplaySwap"><img src="@/assets/img/navi/icon-swap.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.swap')}}</router-link>
       <!-- <router-link :to="{ name : 'ViewServices'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-services.svg" class="h-3 w-3 inline-block relative mr-2">Other Services</router-link> -->
     </div>

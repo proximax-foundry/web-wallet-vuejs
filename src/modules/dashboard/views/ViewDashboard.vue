@@ -89,13 +89,16 @@
 
     <div class="text-left px-2 sm:px-10 bg-gray-200">
       <div class="transition-all flex items-end">
-        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='overview'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='overview'">{{$t('general.overview')}}</div>
         <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='asset'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='asset'">{{$t('general.asset',2)}}</div>
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='overview'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='overview'">Activities</div>
+        
         <!-- <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='namespace'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='namespace'">{{$t('general.namespace',2)}}</div> -->
        <!--  <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='transaction'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='transaction'">{{$t('dashboard.allTransactions')}}</div> -->
       </div>
     </div>
     <div class="bg-white px-2 sm:px-10 " v-if="displayBoard=='overview'">
+      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700 uppercase">Pending Transactions</b></div>
+      <PendingDataTable :transaction="pendingTransactions" />
      <!--  <div class="text-txs text-gray-400"><b class="text-gray-700 uppercase">{{$t('general.asset',2)}}</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">{{$t('dashboard.viewAll')}}</span>)</div>
       <DashboardAssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
       <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700 uppercase">{{$t('general.namespace',2)}}</b> ({{ selectedAccountNamespaceCount }} - {{$t('dashboard.viewAll')}})</div>
@@ -204,6 +207,7 @@
 </template>
 
 <script>
+import PendingDataTable from "@/modules/account/components/PendingDataTable.vue"
 import { computed, defineComponent, ref, getCurrentInstance, watch } from 'vue';
 import {ResolvedNamespace} from '@/modules/dashboard/model/resolvedNamespace';
 import { TransactionFilterType, TransactionFilterTypes } from '@/modules/dashboard/model/transactions/transaction';
@@ -251,6 +255,7 @@ export default defineComponent({
     type: String
   },
   components: {
+    PendingDataTable,
     MixedTxnDataTable,
     /* TransferTxnDataTable,
     AccountTxnDataTable,
@@ -274,7 +279,7 @@ export default defineComponent({
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const displayBoard = ref('overview');
+    const displayBoard = ref('asset');
     const showAddressQRModal = ref(false);
     const showMessageModal = ref(false);
     const showDecryptMessageModal  = ref(false);
@@ -903,11 +908,88 @@ export default defineComponent({
       showCosignModal.value = false;
       showDecryptMessageModal.value = false;
     });
-    const init = ()=>{
+    
+    emitter.on('DEFAULT_ACCOUNT_SWITCHED',async(payload) => {
+      currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
+      currentAccount.default = true;
+      selectedAccount.value = currentAccount;
+      // recentTransferTxn();
+      updateAccountTransactionCount();
+      loadRecentTransactions();
+      loadRecentTransferTransactions();
+      await loadUnconfirmedTransactions();
+      await loadPartialTransactions();
+      loadInQueueTransactions();
+    });
+
+    const unconfirmedTxns = ref([])
+    const partialTxns = ref([])
+    const inQueueTxns = ref([])
+    const pendingTransactions = computed(()=>{
+        return unconfirmedTxns.value.concat(inQueueTxns.value).concat(partialTxns.value)
+    }) 
+    let loadUnconfirmedTransactions = async()=>{
+        if(!selectedAccount.value){
+            return
+        }
+        let txnQueryParams = Helper.createTransactionQueryParams(); 
+        txnQueryParams.pageSize = 1;
+        txnQueryParams.address = selectedAccountAddressPlain.value
+        txnQueryParams.embedded = true;
+        txnQueryParams.updateFieldOrder(blockDescOrderSortingField); 
+        let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.UNCONFIRMED, txnQueryParams);
+        let formattedTxns = await dashboardService.formatUnconfirmedMixedTxns(transactionSearchResult.transactions);
+        //groupType = 'unconfirmed'
+        unconfirmedTxns.value = formattedTxns
+    }
+
+    let loadPartialTransactions = async() => {
+        if(!selectedAccount.value){
+            return
+        }
+        let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
+        let txnQueryParams = Helper.createTransactionQueryParams();
+        txnQueryParams.pageSize = 100;
+        txnQueryParams.address = selectedAccountAddressPlain.value
+        let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.PARTIAL, txnQueryParams);
+        let formattedTxns = await dashboardService.formatPartialMixedTxns(transactionSearchResult.transactions);
+        //groupType = 'partial'
+        partialTxns.value  = formattedTxns
+    };
+
+    let loadInQueueTransactions = ()=>{
+        if(!selectedAccount.value){
+            return
+        }
+        let txns = []
+        listenerState.autoAnnounceSignedTransaction.forEach((tx)=>{
+            let txn = TransactionMapping.createFromPayload(tx.signedTransaction.payload)
+            let aggregateTxn = TransactionUtils.castToAggregate(txn)
+            if (aggregateTxn.innerTransactions.find(tx=>tx.signer.address.plain()==props.address)!=undefined ||
+            tx.signedTransaction.signer == acc.value.publicKey){
+                txns.push({
+                    type: 'Aggregate Bonded',
+                    hash: tx.signedTransaction.hash,
+                    deadline: txn.deadline.value,
+                    groupType: 'In Queue',
+                    recipient: '',
+                    sender: '',
+                    amount: '',
+                    message: '',
+                    sda: ''
+                })
+            }
+        })
+        inQueueTxns.value =txns
+    }
+    const init = async()=>{
       updateAccountTransactionCount();
       loadRecentTransactions();
       loadRecentTransferTransactions();
       updatePricing();
+      await loadUnconfirmedTransactions();
+      await loadPartialTransactions();
+      loadInQueueTransactions();
     }
     if(AppState.isReady){
       init();
@@ -920,16 +1002,8 @@ export default defineComponent({
         }
       });
     }
-    emitter.on('DEFAULT_ACCOUNT_SWITCHED', payload => {
-      currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
-      currentAccount.default = true;
-      selectedAccount.value = currentAccount;
-      // recentTransferTxn();
-      updateAccountTransactionCount();
-      loadRecentTransactions();
-      loadRecentTransferTransactions();
-    });
     return {
+      pendingTransactions,
       toSvg,
       addressExplorerURL,
       hashExplorerURL,

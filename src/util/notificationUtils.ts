@@ -62,7 +62,7 @@ const loadPartialTransactions = async(): Promise<Notification[]> => {
   //     namespaces: acc.namespaces,
   //   };
   // });
-  // accounts = accountsAddress.concat(othersAddress);
+  accounts = accountsAddress
 
   for (const account of accounts) {
     let noti = await fetchPartialTxn(account);
@@ -96,7 +96,8 @@ const loadExpiringNamespace = async(): Promise<Notification[]> => {
   //     namespaces: acc.namespaces,
   //   };
   // });
-  // accounts = accountsAddress.concat(othersAddress);
+  accounts = accountsAddress
+  
   accounts.forEach(account => {
     account.namespaces.forEach(namespace => {
       let differenceHeight = namespace.endHeight - namespace.startHeight;

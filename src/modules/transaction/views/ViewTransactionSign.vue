@@ -1,9 +1,5 @@
 <template>
   <div>
-    <div class='flex cursor-pointer'>
-      <img src='@/assets/img/chevron_left.svg'>
-      <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
-    </div>
     <div class='md:w-8/12 lg:w-10/12 xl:w-6/12 ml-2 mr-2 md:ml-auto md:mr-auto mt-5'>
       <div class='border-2 border-gray-200'>
         <div class='w-full text-center pt-10 pl-10 pr-10' v-if="isSigned">
@@ -104,11 +100,11 @@
         </transition>
       </div>
       <div class="flex items-center h-14 lg:h-28 justify-center" v-if="!isSigned">
-        <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class="text-gray-600 bg-white px-5 py-2 lg:px-10 lg:py-3 rounded-md text-xs lg:text-tsm inline-block border-2 border-gray-200 mr-5">{{$t('transaction.doThisLater')}}</router-link>
+        <router-link :to='{name:"ViewAccountPendingTransactions", params: {address: currentAddress }}' class="text-gray-600 bg-white px-5 py-2 lg:px-10 lg:py-3 rounded-md text-xs lg:text-tsm inline-block border-2 border-gray-200 mr-5">{{$t('transaction.doThisLater')}}</router-link>
         <CosignPasswordModal :transactionHash = 'txnHash' :disabled="invalidCosigner || isSigned" @return-password="signAggTxn" />
       </div>
       <div class="flex items-center h-14 lg:h-28 justify-center" v-else>
-        <router-link :to='{name:"ViewTransactionStatus", params: {transactionType: "partial" }}' class="text-gray-600 bg-white px-5 py-2 lg:px-10 lg:py-3 rounded-md text-xs lg:text-tsm inline-block border-2 border-gray-200 mr-5">{{$t('general.close')}}</router-link>
+        <router-link :to='{name:"ViewAccountPendingTransactions", params: {address: currentAddress }}' class="text-gray-600 bg-white px-5 py-2 lg:px-10 lg:py-3 rounded-md text-xs lg:text-tsm inline-block border-2 border-gray-200 mr-5">{{$t('general.close')}}</router-link>
       </div>
     </div>
   </div>
@@ -419,6 +415,7 @@ export default {
     }
 
     return {
+      currentAddress,
       showModal,
       innerTransactions,
       innerTransactionsSimple,

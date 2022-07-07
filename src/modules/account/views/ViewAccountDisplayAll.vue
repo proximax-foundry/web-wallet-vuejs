@@ -2,7 +2,7 @@
   <div>
     <div class='my-4 w-11/12 ml-auto mr-auto flex flex-col sm:flex-row justify-between'>
       <LabelComponent />
-      <div class="absolute invisible 2xl:visible text-gray-500 mt-1" style="margin-left: 40rem;">Labels</div>
+      <div class="absolute invisible 2xl:visible text-gray-500 mt-1 explicitLeft" >Labels</div>
       <router-link :to="{name:'ViewAccountCreateSelectType'}" >
         <div class="mt-3 sm:mt-0 text-center w-44 text-white bg-blue-primary rounded-md font-semibold text-xs p-2">+ {{$t('general.createNewAcc')}}</div>
       </router-link>
@@ -216,3 +216,10 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.explicitLeft{
+  @media (min-width: 1024px) { margin-left: 40rem}
+  
+}
+</style>

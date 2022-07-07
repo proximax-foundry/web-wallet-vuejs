@@ -52,7 +52,7 @@
               <PkPasswordModal v-if="!showPwPK && !showPK" :account = 'acc' />
             </div>
             <div class='flex'>
-              <div id="private" class="text-xs mt-1 font-semibold break-all truncate md:text-clip md:w-full" type="text" :copyValue="privateKey" :title="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
+              <div id="private" class="text-xs mt-1 font-semibold break-all truncate md:text-clip md:w-auto" type="text" :copyValue="privateKey" :title="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
               <font-awesome-icon title='Copy' icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link cursor-pointer " v-if="showPK"></font-awesome-icon>
               <font-awesome-icon icon="eye-slash" title='Hide Private Key' class="text-blue-link relative cursor-pointer ml-1" @click="showPwPK = false; showPK = false" v-if="showPK"></font-awesome-icon>
             </div>
