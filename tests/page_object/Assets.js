@@ -17,8 +17,7 @@ const commands = {
 
     navigation_assets(browser){
         return this
-        .pause(10000)
-        .pause(5000)
+        .pause(3000)
         .click("@assets_tab")
         .assert.urlEquals(browser + 'assets', 'User is navigated to assets page')
         .click("@createnew_asset")
@@ -26,7 +25,7 @@ const commands = {
     },
     empty_password(){
         return this
-        .pause(5000)
+        .pause(3000)
         .click("@input_password")
         .setValue("@input_password", '\ue004')
         .isVisible('@error_emptypassword', callback = result => {
@@ -49,6 +48,7 @@ const commands = {
             this.assert.equal(result.value, true, "A notification is shown saying transaction is confirmed after creating asset")
         })
         .pause(30000)
+        .click("@assets_tab")
         .assert.visible('@asset_id', 'Asset is successfully created with id')
     },
     

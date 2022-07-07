@@ -84,6 +84,7 @@ const commands = {
             this.assert.equal(result.value, true, "A notification is shown after the transaction is processed")
         })
         .pause(4000)
+        .click("@transfer_tab")
     },
 
     transfer_asset(amount1, amount2){
