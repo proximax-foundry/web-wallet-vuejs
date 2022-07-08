@@ -73,7 +73,10 @@ export class NetworkStateUtils{
     AppState.nativeToken.label = chainProfile.network.currency.name;
     AppState.nativeToken.fullNamespace = chainProfile.network.currency.namespace;
     AppState.networkType = ChainUtils.getNetworkType(chainProfile.network.type);
-    AppState.trackingTxnHash = [];
+    // AppState.trackingTxnHash = [];
+    AppState.txnActivityLog = [];
+    AppState.txnCosignLog = [];
+    AppState.txnSwapLog = [];
     if(AppState.networkType === NetworkType.PRIVATE || AppState.networkType === NetworkType.PRIVATE_TEST){
       AppState.buildTxn = new BuildTransactions(chainProfile.network.type, chainProfile.generationHash, FeeCalculationStrategy.ZeroFeeCalculationStrategy);
     }
@@ -172,6 +175,7 @@ export class NetworkStateUtils{
   }
 
   static updateLastAccessNetworkName(networkName: string): void{
+    sessionStorage.setItem("lastNetworkName", networkName);
     localStorage.setItem(lastAccessNetworkName, networkName);
   }
 

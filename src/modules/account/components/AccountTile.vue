@@ -112,12 +112,12 @@ export default{
       if (index>=0){
         label.removeAddress(index)
         await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
-        toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is removed as ' + name , group: 'br', life: 5000});
+        toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is removed as ' + name , group: 'br-custom', life: 5000});
         return
       }
       label.addresses.push(address)
       await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
-      toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is added as ' + name , group: 'br', life: 5000});
+      toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is added as ' + name , group: 'br-custom', life: 5000});
     }
 
     const accountName = computed(() => {
@@ -169,7 +169,7 @@ export default{
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
 
-      toast.add({severity:'info', detail: copySubject + ' '+ t('general.copied'), group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject + ' '+ t('general.copied'), group: 'br-custom', life: 3000});
     };   
 
     const isMultiSig = computed(() => {

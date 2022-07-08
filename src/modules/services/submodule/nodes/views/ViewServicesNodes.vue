@@ -96,9 +96,10 @@ export default {
       if(endpoint != networkState.selectedAPIEndpoint){
         showSelectTitle.value = true;
         NetworkStateUtils.updateChainNode(endpoint);
+        console.log("Why you running ?");
         WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
-        emitter.emit('listener:reconnect');
-        toast.add({severity:'success', summary: t('nodes.nodes'), detail: t('node.nodeUpdated'), group: 'br', life: 5000});
+        //emitter.emit('listener:reconnect');
+        toast.add({severity:'success', summary: t('nodes.nodes'), detail: t('node.nodeUpdated'), group: 'br-custom', life: 5000});
       }
     };
 

@@ -23,7 +23,7 @@ interface Notification {
   timestamp: number,
 }
 
-const currentBlock = computed(() => listenerState.currentBlock);
+const currentBlock = computed(() => AppState.readBlockHeight);
 
 const fetchPartialTxn = async(account: WalletAccount):Promise<Notification[]> => {
   const notifications:Array<Notification> = [];

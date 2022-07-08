@@ -42,7 +42,7 @@ import { ChainUtils } from '@/util/chainUtils';
 import { AssetsUtils } from '@/util/namespaceUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import NamespaceDataTable from '@/modules/services/submodule/namespaces/components/NamespaceDataTable.vue';
-import { listenerState } from '@/state/listenerState';
+import { Appstate } from '@/state/appState';
 
 export default {
   name: 'ViewServicesNamespace',
@@ -58,7 +58,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
-    const currentBlock = computed(() => listenerState.currentBlock);
+    const currentBlock = computed(() => Appstate.readBlockHeight);
 
     // get namespaces
     const namespaces = ref([]);

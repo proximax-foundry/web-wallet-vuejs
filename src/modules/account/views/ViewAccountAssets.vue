@@ -133,7 +133,7 @@ export default {
             mosaicOption.push({
                 id: i.idHex,
                 name: (i.namespaceNames.length>0?i.namespaceNames[0]:'-'),
-                balance: Helper.amountFormatterSimple(i.amount,i.divisibility),
+                balance: Helper.toCurrencyFormat(i.amount,i.divisibility),
                 isCreator: acc.value? (i.creator == acc.value.publicKey? true:false):false
             });
             });

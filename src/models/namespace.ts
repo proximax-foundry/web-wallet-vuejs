@@ -8,7 +8,7 @@ export class Namespace{
     linkedId: string = "";
     parentId: string = "";
     startHeight: number | null; 
-    endHeight: number | null;
+    endHeight: number | string | null;
     active: boolean = true;
     owner: string = "";
 

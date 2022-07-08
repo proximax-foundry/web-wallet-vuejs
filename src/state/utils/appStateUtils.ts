@@ -27,4 +27,23 @@ export class AppStateUtils{
       AppState.isReady = true;
     }
   }
+
+  static updateActivityLogNum(){
+    AppState.txnActivityLogNum = AppState.txnActivityLog.length;
+  }
+
+  static updateCosignLogNum(){
+    AppState.txnCosignLogNum = AppState.txnCosignLog.length;
+  }
+
+  static doLogout(){
+    AppState.pendingAssetsInfo = [];
+    AppState.pendingNamespacesName = [];
+    AppState.readBlockHeight = 0;
+    AppState.txnActivityLog = [];
+    AppState.txnCosignLog = [];
+    AppState.txnSwapLog = [];
+    AppState.txnActivityLogNum = 0;
+    AppState.txnCosignLogNum = 0;
+  }
 }

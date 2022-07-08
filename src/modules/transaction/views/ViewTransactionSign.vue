@@ -414,7 +414,7 @@ export default {
           router.push({ name : 'ViewTransactionStatus', params: {transactionType: 'partial' }});
       }
       else{
-        toast.add({severity: 'error', summary: t('transaction.waitForLoad'), life: 2000, group: 'br'})
+        toast.add({severity: 'error', summary: t('transaction.waitForLoad'), life: 2000, group: 'br-custom'})
       }
     }
 

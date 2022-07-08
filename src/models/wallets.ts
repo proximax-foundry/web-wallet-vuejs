@@ -7,8 +7,11 @@ import { Address, AliasType } from "tsjs-xpx-chain-sdk";
 import { MultisigInfo } from './multisigInfo';
 import { nis1Account } from './nis1Account';
 import { AddressBook } from './addressBook';
-import { WalletAcountType } from './const/otherAccountType';
+import { OtherAcountType } from './const/otherAccountType';
 import { Label } from './label';
+import { SimpleWallet } from './simpleWallet';
+import { SimpleAccount } from './simpleAccount';
+import { SimpleWallets } from './simpleWallets';
 
 const walletKey = "sw";
 const walletUpdateTimeKey = "sw_updated"
@@ -22,17 +25,12 @@ export class Wallets {
         this.fetchFromLocalStorage();
     }
 
-    static fetchUpdateTime(): number{
-        const tempUpdateTime = localStorage.getItem(walletUpdateTimeKey);
-        return tempUpdateTime ?  parseInt(tempUpdateTime) : 0;
-    }
-
     fetchFromLocalStorage(): void{
         const tempWallets = localStorage.getItem(walletKey);
 
         try {
             if(tempWallets){
-                this.wallets = Reconstruct.reconstructAll(JSON.parse(tempWallets));
+                this.wallets = Reconstruct.restructureFromSimpleWallets(JSON.parse(tempWallets));
             }
             else{
                 this.wallets = [];
@@ -41,45 +39,24 @@ export class Wallets {
             this.wallets = [];
         }
         this.isReady = true;
-
-        const tempUpdateTime = localStorage.getItem(walletUpdateTimeKey);
-
-        this.updateTime = tempUpdateTime ?  parseInt(tempUpdateTime) : new Date().getTime();
-    }
-
-    isWalletOutdated(): boolean{
-
-        if(this.updateTime < Wallets.fetchUpdateTime()){
-            return true;
-        }
-
-        return false;
     }
 
     savetoLocalStorage(): void{
-        let tempWallet = new Wallets();
-        // tempWallet.fetchFromLocalStorage();
-        tempWallet.wallets = this.wallets.map(wallet => {
-            let tempWallet = wallet.createEmptifyVersion();
-            return tempWallet;
-        });
-        localStorage.setItem(walletKey, JSON.stringify(tempWallet.wallets));
-        this.updateTime = new Date().getTime();
-        localStorage.setItem(walletUpdateTimeKey, this.updateTime.toString());
+        let simpleWallets = this.convertToSimpleWallets();
+        localStorage.setItem(walletKey, JSON.stringify(simpleWallets.wallets));
     }
 
     saveMyWalletOnlytoLocalStorage(myWallet: Wallet): void{
 
         let newWalletsInstance = new Wallets();
-        // newWalletsInstance.fetchFromLocalStorage();
 
         let walletIndex = newWalletsInstance.wallets.findIndex((wallet)=> wallet.name === myWallet.name && wallet.networkName === myWallet.networkName)
 
-        newWalletsInstance.wallets[walletIndex] = myWallet.createEmptifyVersion();
+        newWalletsInstance.wallets[walletIndex] = myWallet;
 
-        localStorage.setItem(walletKey, JSON.stringify(newWalletsInstance.wallets));
-        this.updateTime = new Date().getTime();
-        localStorage.setItem(walletUpdateTimeKey, this.updateTime.toString());
+        let simpleWallets = newWalletsInstance.convertToSimpleWallets();
+
+        localStorage.setItem(walletKey, JSON.stringify(simpleWallets.wallets));
     }
 
     removeWallet(index: number): void{
@@ -111,6 +88,18 @@ export class Wallets {
 
     filterByNetworkNameAndName (networkName: string, name: string): Wallet{
         return this.wallets.find((wallet)=> wallet.networkName == networkName && wallet.name == name)
+    }
+
+    convertToSimpleWallets(): SimpleWallets{
+        let simpleWallets: SimpleWallet[] = this.wallets.map(x => {
+            return x.convertToSimpleWallet();
+        });
+
+        let newSimpleWallets = new SimpleWallets();
+
+        newSimpleWallets.wallets = simpleWallets;
+
+        return newSimpleWallets;
     }
 }
 
@@ -159,8 +148,6 @@ class Reconstruct{
 
                 accounts.push(newWalletAccount);
             }
-
-            
 
             let otherAccounts: OtherAccount[] = [];
           
@@ -222,7 +209,7 @@ class Reconstruct{
         return wallets;
     }
 
-    static restructureMinimum(JSON_Wallets: Wallet[]): Wallet[]{
+    static restructureFromSimpleWallets(JSON_Wallets: SimpleWallet[]): Wallet[]{
         let wallets: Wallet[] = [];
 
         for(let i =0; i < JSON_Wallets.length; ++i){
@@ -233,7 +220,7 @@ class Reconstruct{
                 
                 let tempAccount = JSON_Wallets[i].accounts[k];
 
-                let newWalletAccount = Reconstruct.recreateWalletAccount(tempAccount);
+                let newWalletAccount = Reconstruct.recreateWalletAccountFromSimpleAccount(tempAccount);
 
                 newWalletAccount.assets = [];
 
@@ -241,10 +228,12 @@ class Reconstruct{
 
                 newWalletAccount.multisigInfo = [];
                 
-                newWalletAccount.nis1Account = tempAccount.nis1Account ? Reconstruct.recreateNis1Account(tempAccount.nis1Account)  : null;
+                newWalletAccount.nis1Account = null;
 
                 accounts.push(newWalletAccount);
             }
+
+            accounts[0].default = true;
 
             let otherAccounts: OtherAccount[] = [];
 
@@ -345,17 +334,17 @@ class Reconstruct{
 
     static recreateOtherAccount(tempAccount: OtherAccount): OtherAccount{
 
-        let accountType: WalletAcountType = WalletAcountType.MULTISIG_CHILD;
+        let accountType: OtherAcountType = OtherAcountType.MULTISIG_CHILD;
 
         switch(tempAccount.type){
-            case WalletAcountType.MULTISIG_CHILD:
-                accountType = WalletAcountType.MULTISIG_CHILD;
+            case OtherAcountType.MULTISIG_CHILD:
+                accountType = OtherAcountType.MULTISIG_CHILD;
                 break;
-            case WalletAcountType.DELEGATE_VALIDATE:
-                accountType = WalletAcountType.DELEGATE_VALIDATE;
+            case OtherAcountType.DELEGATE_VALIDATE:
+                accountType = OtherAcountType.DELEGATE_VALIDATE;
                 break;
             default:
-                accountType = WalletAcountType.MULTISIG_CHILD;
+                accountType = OtherAcountType.MULTISIG_CHILD;
                 break;
         }
 
@@ -374,6 +363,17 @@ class Reconstruct{
         newAccount.balance = tempAccount.balance ? tempAccount.balance : 0;
         newAccount.default = tempAccount.default ? tempAccount.default : false;
         newAccount.isBrain = tempAccount.isBrain ? tempAccount.isBrain : false;
+
+        return newAccount;
+    }
+
+    static recreateWalletAccountFromSimpleAccount(tempAccount: SimpleAccount): WalletAccount{
+        let newAccount = new WalletAccount(tempAccount.name, tempAccount.publicKey, 
+            tempAccount.address, tempAccount.algo, tempAccount.encrypted, tempAccount.iv);
+
+        newAccount.balance = 0;
+        newAccount.default = false;
+        newAccount.isBrain = false;
 
         return newAccount;
     }

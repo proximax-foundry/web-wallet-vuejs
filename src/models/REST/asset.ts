@@ -37,7 +37,7 @@ export class AssetAPI {
         return this.mosaicHttp.getMosaicLevy(mosaicId, authHeader).toPromise();
     }
 
-    searchMosaic(queryParams: MosaicQueryParams): Promise<MosaicSearch>{
+    searchMosaics(queryParams: MosaicQueryParams): Promise<MosaicSearch>{
         let authHeader = RequestAuth.getAuthHeader();
         return this.mosaicHttp.searchMosaics(queryParams, authHeader).toPromise();
     }

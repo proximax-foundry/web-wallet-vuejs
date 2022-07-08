@@ -444,7 +444,7 @@ export default defineComponent({
 
     const selectedAccount = ref(currentAccount);
 
-    const currentBlock = computed(() => listenerState.currentBlock);
+    const currentBlock = computed(() => AppState.readBlockHeight);
 
     const selectedAccountPublicKey = computed(()=> selectedAccount.value.publicKey);
     // const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty().substring(0, 13) + '....' + Helper.createAddress(selectedAccount.value.address).pretty().substring(Helper.createAddress(selectedAccount.value.address).pretty().length - 11));
@@ -622,7 +622,7 @@ export default defineComponent({
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
 
-      toast.add({severity:'info', detail: copySubject + ' ' +t('general.copied'), group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject + ' ' +t('general.copied'), group: 'br-custom', life: 3000});
     };
 
     // get USD conversion

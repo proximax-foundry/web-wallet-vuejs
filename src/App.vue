@@ -7,17 +7,76 @@
     <Toast position="center" group="center" />
     <Toast position="bottom-left" group="bl" />
     <Toast position="bottom-right" group="br" style="word-break: break-all;" />
-    <Toast position="bottom-right" group="brt">
+    <Toast position="top-right" group="tr-wait">
       <template #message="slotProps">
         <div style="width: 100%" class="grid grid-cols-12">
           <div class="col-span-2">
-            <i class="pi pi-exclamation-triangle" style="font-size: 2.5rem"></i>
+            <i class="pi pi-spin pi-spinner" style="font-size: 2.5rem"></i>
           </div>
           <div class="col-span-10">
-            <h3>{{slotProps.message.summary}}</h3>
-            <p>{{slotProps.message.detail}}</p>
-            <p>{{slotProps.message.detail2}}</p>
-          </div>  
+            <div class="font-semibold">{{slotProps.message.summary}}</div>
+          </div>
+          <div class="col-span-12">
+            <div class="text-sm">{{slotProps.message.detail}}</div>
+            <div class="mt-1 text-xs">{{slotProps.message.detail2}}</div>
+            <div :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize: 0.5}rem`" v-if="slotProps.message.url">
+              <a :href="slotProps.message.url" target="_blank">
+              {{slotProps.message.detail3}}
+              </a>
+            </div>
+            <div :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize : 0.5}rem`" v-else>{{slotProps.message.detail3}}</div>
+          </div> 
+        </div>
+      </template>
+    </Toast>
+    <Toast position="top-right" group="tr-custom">
+      <template #message="slotProps">
+        <div style="width: 100%" class="grid grid-cols-12">
+          <div class="col-span-2">
+            <i v-if="slotProps.message.severity === 'success'" class="pi pi-check-circle" style="font-size: 2.5rem"></i>
+            <i v-else-if="slotProps.message.severity === 'error'" class="pi pi-times-circle" style="font-size: 2.5rem"></i>
+            <i v-else-if="slotProps.message.severity === 'info'" class="pi pi-info-circle" style="font-size: 2.5rem"></i>
+            <i v-else-if="slotProps.message.severity === 'warn'" class="pi pi-exclamation-circle" style="font-size: 2.5rem"></i>
+          </div>
+          <div class="col-span-10">
+            <div class="font-semibold">{{slotProps.message.summary}}</div>
+          </div>
+          <div class="col-span-12">
+            <div class="text-sm">{{slotProps.message.detail}}</div>
+            <div class="mt-1 text-xs">{{slotProps.message.detail2}}</div>
+            <div :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize: 0.5}rem`" v-if="slotProps.message.url">
+              <a :href="slotProps.message.url" target="_blank">
+              {{slotProps.message.detail3}}
+              </a>
+            </div>
+            <div :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize : 0.5}rem`" v-else>{{slotProps.message.detail3}}</div>
+          </div> 
+        </div>
+      </template>
+    </Toast>
+    <Toast position="bottom-right" group="br-custom">
+      <template #message="slotProps">
+        <div style="width: 100%" class="grid grid-cols-12">
+          <div class="col-span-2">
+            <i v-if="slotProps.message.severity === 'success'" class="pi pi-check-circle" style="font-size: 2.5rem"></i>
+            <i v-else-if="slotProps.message.severity === 'error'" class="pi pi-times-circle" style="font-size: 2.5rem"></i>
+            <i v-else-if="slotProps.message.severity === 'info'" class="pi pi-info-circle" style="font-size: 2.5rem"></i>
+            <i v-else-if="slotProps.message.severity === 'warn'" class="pi pi-exclamation-circle" style="font-size: 2.5rem"></i>
+          </div>
+          <div class="col-span-10">
+            <div class="font-semibold">{{slotProps.message.summary}}</div>
+          </div>
+          <div class="col-span-12">
+            <div class="text-sm">{{slotProps.message.detail}}</div>
+            <div class="mt-1 text-xs">{{slotProps.message.detail2}}</div>
+            <div :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize: 0.5}rem`" v-if="slotProps.message.url">
+              <a :href="slotProps.message.url" target="_blank">
+              {{slotProps.message.detail3}}
+              </a>
+            </div>
+            <div :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize : 0.5}rem`" v-else>{{slotProps.message.detail3}}</div>
+            <div :style="`font-size: ${slotProps.message.detail4 && slotProps.message.detail4.length > 64 ? 0.4 : 0.5}rem`" >{{slotProps.message.detail4}}</div>
+          </div> 
         </div>
       </template>
     </Toast>

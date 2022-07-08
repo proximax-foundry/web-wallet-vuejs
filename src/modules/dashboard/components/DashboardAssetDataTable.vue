@@ -175,7 +175,7 @@ export default{
             i: i,
             idHex: assetId,
             owner: assets[i].creator,
-            address: PublicAccount.createFromPublicKey(assets[i].creator, AppState.networkType).address.pretty(),
+            address: assets[i].creator ? PublicAccount.createFromPublicKey(assets[i].creator, AppState.networkType).address.pretty(): "",
             amount: Helper.toCurrencyFormat(assets[i].amount, assets[i].divisibility),
             supply: Helper.toCurrencyFormat(assets[i].getExactSupply(), assets[i].divisibility),
             linkedNamespace: namespaceAlias,

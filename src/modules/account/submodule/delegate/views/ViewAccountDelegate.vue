@@ -395,7 +395,7 @@ export default {
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-      toast.add({severity:'info', detail: copySubject + ' '+ t('general.copied'), group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject + ' '+ t('general.copied'), group: 'br-custom', life: 3000});
     };
 
     const verifyDelegateAcc = async() => {
@@ -477,7 +477,7 @@ export default {
           unlinking.value = false
           txHash.value=""
           pending.value=false
-          toast.add({severity:'success', summary: t('general.notification'), detail: delegateValue.value? t('general.unlinkSuccess') : t('general.linkSuccess'), group: 'br', life: 5000})
+          toast.add({severity:'success', summary: t('general.notification'), detail: delegateValue.value? t('general.unlinkSuccess') : t('general.linkSuccess'), group: 'br-custom', life: 5000})
           /* showSuccess.value=true */
         }
         verifyDelegateAcc()

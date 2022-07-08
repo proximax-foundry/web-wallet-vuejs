@@ -488,7 +488,7 @@ export default {
           txHash.value=""
           pending.value=false
           if(recordAction.value!=""){
-            toast.add({severity:'success', summary: t('general.notification'), detail: recordAction.value =="Link"? t('general.linkSuccess') : t('general.unlinkSuccess'), group: 'br', life: 5000})
+            toast.add({severity:'success', summary: t('general.notification'), detail: recordAction.value =="Link"? t('general.linkSuccess') : t('general.unlinkSuccess'), group: 'br-custom', life: 5000})
           }
           checkIsPartial()
           /* showSuccess.value=true */
