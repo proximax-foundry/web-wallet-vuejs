@@ -207,6 +207,8 @@ export default defineComponent({
 
     const isNewNotification = ref(false);
     const newNotificationCount = ref(0);
+    const notificationLoading = ref(false);
+    let notificationTimeout = 0;
     const isHoverCreate = ref(false);
     const isShowCreate = ref(false);
     const isHoverCreatePanel = ref(false);
@@ -352,8 +354,9 @@ export default defineComponent({
     const logout = () => {
       WalletStateUtils.doLogout();
       AppState.doLogout();
+      ListenerStateUtils.reset();
       router.push({ name: "Home"});
-      console.log('logout')
+      console.log('logout');
     };
 
     const totalBalance = computed(()=>{
@@ -413,13 +416,30 @@ export default defineComponent({
     const doLogin = async () =>{
       if(loginStatus.value && AppState.isReady){
         await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
-        let notification = await NotificationUtils.getNotification();
-        newNotificationCount.value = notification.length;
-        isNewNotification.value = NotificationUtils.highlightNewNotification();
+        doGetNotification();
         //connectListener();
       }
       else if(loginStatus.value && !AppState.isReady){
         setTimeout(doLogin, 100);
+      }
+    }
+
+    const doGetNotification = async()=>{
+      if(loginStatus.value && AppState.isReady && notificationLoading.value === false){
+        if(notificationTimeout !== null){
+          try {
+            clearTimeout(notificationTimeout);  
+          } catch (error) {
+            
+          }
+        }
+        notificationLoading.value = true;
+        let notification = await NotificationUtils.getNotification();
+        newNotificationCount.value = notification.length;
+        isNewNotification.value = NotificationUtils.highlightNewNotification(); 
+
+        notificationLoading.value = false;
+        notificationTimeout = setTimeout(doGetNotification, 90000); // 1.5 minutes- 90 seconds
       }
     }
 
@@ -502,6 +522,7 @@ export default defineComponent({
               }
               else if(txnActivity.status === transactionGroupType.CONFIRMED){
                 txnHashesConfirmed.push(txnActivity.txnHash);
+                listenerState.allConfirmedTransactionsHash.push(txnActivity.txnHash);
               }
 
               addTxnToastMessage(txnActivity.status, transactionStatuses[i].hash, txnActivity.statusMsg);
@@ -518,6 +539,7 @@ export default defineComponent({
               }
               else if(txnActivity.status === transactionGroupType.CONFIRMED){
                 txnHashesConfirmed.push(txnActivity.txnHash);
+                listenerState.allConfirmedTransactionsHash.push(txnActivity.txnHash);
               }
 
               addTxnToastMessage(txnCosign.status, transactionStatuses[i].hash, txnCosign.statusMsg);
@@ -534,6 +556,7 @@ export default defineComponent({
               }
               else if(txnActivity.status === transactionGroupType.CONFIRMED){
                 txnHashesConfirmed.push(txnActivity.txnHash);
+                listenerState.allConfirmedTransactionsHash.push(txnActivity.txnHash);
               }
 
               addTxnToastMessage(txnSwap.status, transactionStatuses[i].hash, txnSwap.statusMsg, "swap");
@@ -541,6 +564,9 @@ export default defineComponent({
           }
         }
 
+        if(txnHashesConfirmed.length){
+          ListenerStateUtils.fireRecountConfirmed();
+        }
         WalletUtils.transactionConfirmed(txnHashesConfirmed);
 
         let txnsHashNotFound = allTransasctionHash.filter(x => !txnsHashFound.includes(x));
@@ -976,9 +1002,7 @@ export default defineComponent({
     //  });
 
      emitter.on("VIEW_NOTIFICATION", async() => {
-       let notification = await NotificationUtils.getNotification();
-        newNotificationCount.value = notification.length;
-        isNewNotification.value = NotificationUtils.highlightNewNotification();
+       doGetNotification();
      });
 
     return {

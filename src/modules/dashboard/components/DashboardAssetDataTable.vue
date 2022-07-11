@@ -69,8 +69,8 @@
       <Column field="creator" :header="$t('dashboard.creator')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase font-bold text-txs">{{ data.creator == currentPublicKey ? $t('general.yes'): $t('general.no')}}</span>
-          <img v-if="data.creator == currentPublicKey" src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer" v-tooltip.bottom="'<tiptitle>' + $t('general.walletAddress') +'</tiptitle><tiptext>' + data.address + '</tiptext><tipbottom>'+ $t('dashboard.myPersonalAcc') +'<img src=&quot;/icons/icon-personal-blue.png&quot;></tipbottom>'">
-          <img v-else src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer " v-tooltip.bottom="'<tiptitle>'+ $t('general.walletAddress') +'</tiptitle><tiptext>' + data.address + '</tiptext>'">
+          <img v-if="data.creator == currentPublicKey" src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer" v-tooltip.bottom="{ value: '<tiptitle>' + $t('general.walletAddress') +'</tiptitle><tiptext>' + data.address + '</tiptext><tipbottom>'+ $t('dashboard.myPersonalAcc') +'<img src=&quot;/icons/icon-personal-blue.png&quot;></tipbottom>', escape: true}">
+          <img v-else src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer " v-tooltip.bottom="{ value: '<tiptitle>'+ $t('general.walletAddress') +'</tiptitle><tiptext>' + data.address + '</tiptext>', escape: true}">
         </template>
       </Column>
       <Column field="height" :header="$t('general.blockHeight')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">

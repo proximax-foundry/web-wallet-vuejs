@@ -246,6 +246,7 @@ import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
 import {AppState} from '@/state/appState'
 import { useI18n } from 'vue-i18n';
+import { TransactionType } from 'tsjs-xpx-chain-sdk';
 
 export default defineComponent({
   name: 'ViewDashboard',
@@ -693,17 +694,25 @@ export default defineComponent({
       allTxnQueryParams.pageNumber = 1;
       endOfRecords = false;
 
-      searchTransactions();
+      searchTransaction();
     }
 
     const loadMoreTxns = () =>{
-      searchTransactions(true);
+      searchTransaction(true);
     }
 
     const searchTransaction = async(loadMore = false) =>{
 
       allTxnQueryParams.pageNumber = loadMore ? allTxnQueryParams.pageSize + 1 : 1;
       allTxnQueryParams.publicKey = selectedAccount.value.publicKey;
+      if(allTxnQueryParams.type.length === 0 || 
+        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_COMPLETE) ||
+        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_BONDED)){
+        allTxnQueryParams.firstLevel = false;
+      }
+      else{
+        allTxnQueryParams.firstLevel = true;
+      }
       searchingTxn.value = true;
 
       let transactionSearchResult = await dashboardService.searchTxns(selectedTxnGroupType, allTxnQueryParams);

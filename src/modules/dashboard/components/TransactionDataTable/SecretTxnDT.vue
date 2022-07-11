@@ -113,21 +113,21 @@
       <Column :header="$t('dashboard.secret')" headerStyle="width:40pxwidth:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="flex justify-center">
-            <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>Secret</tiptitle><tiptext>' + data.secret + '</tiptext>'" class="inline-block">
+            <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="{value: '<tiptitle>Secret</tiptitle><tiptext>' + data.secret + '</tiptext>', escape: true}" class="inline-block">
           </div>
         </template>
       </Column>
       <Column :header="$t('dashboard.proof')" headerStyle="width:40pxwidth:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="flex justify-center">
-            <img src="@/modules/dashboard/img/icon-message.svg" v-if="data.proof" v-tooltip.left="'<tiptitle>Proof</tiptitle><tiptext>' + data.proof + '</tiptext>'" class="inline-block">
+            <img src="@/modules/dashboard/img/icon-message.svg" v-if="data.proof" v-tooltip.left="{value:'<tiptitle>Proof</tiptitle><tiptext>' + data.proof + '</tiptext>', escape: true}" class="inline-block">
           </div>
         </template>
       </Column>
       <Column :header="$t('dashboard.sda')" headerStyle="width:30px; text-align:center;width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="flex justify-center">
-            <img src="@/modules/dashboard/img/icon-sda.svg" v-if="data.assetId" class="inline-block" v-tooltip.left="'<tiptitle>'+ $t('general.sdaFull')+ '</tiptitle><tiptext>' + constructSDA(data.assetId, data.amount, data.namespaceName) + '</tiptext>'">
+            <img src="@/modules/dashboard/img/icon-sda.svg" v-if="data.assetId" class="inline-block" v-tooltip.left="{value:'<tiptitle>'+ $t('general.sdaFull')+ '</tiptitle><tiptext>' + constructSDA(data.assetId, data.amount, data.namespaceName) + '</tiptext>', escape: true}">
           </div>
         </template>
       </Column>

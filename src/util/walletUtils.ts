@@ -214,10 +214,27 @@ export class WalletUtils {
         }
     }
 
+    static getAllAccs(wallet: Wallet): MyAccount[]{
+
+        let accs = wallet.accounts.map(x => x as MyAccount);
+        let othersAcc = wallet.others.map(x => x as MyAccount);
+
+        return accs.concat(othersAcc);
+    }
+
     static async recheckAssetsNames(){
 
-        let data = AppState.assetsInfo.map(x => new MosaicId(x.idHex));
-        let dataPlain = AppState.assetsInfo.map(x => x.idHex);
+        if(walletState.currentLoggedInWallet === null){
+            return;
+        }
+
+        let wallet = walletState.currentLoggedInWallet;
+
+        let accs = WalletUtils.getAllAccs(wallet);
+        let accsPubKey = accs.map(x => x.publicKey);
+        let nonCreatorAssetsInfo = AppState.assetsInfo.filter(x => !accsPubKey.includes(x.creator));
+        let data = nonCreatorAssetsInfo.map(x => new MosaicId(x.idHex));
+        let dataPlain = nonCreatorAssetsInfo.map(x => x.idHex);
 
         let numOfRequest = Math.ceil(data.length / dataPerRequest);
 
@@ -905,12 +922,7 @@ export class WalletUtils {
 
     static export(wallet: Wallet): string {
 
-        const exportingData = {
-            name: wallet.name,
-            networkName: wallet.networkName,
-            accounts: wallet.accounts,
-            contacts: wallet.contacts
-        };
+        const exportingData = wallet.convertToSimpleWallet();
 
         const walletJSON = JSON.stringify(exportingData);
 
@@ -919,14 +931,11 @@ export class WalletUtils {
 
     static exportAccount(wallet: Wallet, exportingPublicKey: string): string {
 
-        const exportingData = {
-            name: wallet.name,
-            networkName: wallet.networkName,
-            accounts: wallet.accounts.find(acc => acc.publicKey === exportingPublicKey),
-            contacts: wallet.contacts
-        };
+        let dataToExport = wallet.convertToSimpleWallet();
 
-        const walletJSON = JSON.stringify(exportingData);
+        dataToExport.accounts = dataToExport.accounts.filter(acc => acc.publicKey === exportingPublicKey);
+
+        const walletJSON = JSON.stringify(dataToExport);
 
         return Helper.base64encode(walletJSON);
     }
