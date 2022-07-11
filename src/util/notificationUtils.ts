@@ -209,7 +209,7 @@ export class NotificationUtils {
   }
 
   static async getNotification(){
-    let expiringNamespaceNotifications = loadExpiringNamespace();
+    let expiringNamespaceNotifications = await loadExpiringNamespace();
     let partialTxnNotifications = await loadPartialTransactions()
     let notifications = [];
     

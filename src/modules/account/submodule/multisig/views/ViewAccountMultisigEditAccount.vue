@@ -1,20 +1,9 @@
 <template>
 <div>
-  <div class='flex cursor-pointer'>
-    <img src='@/assets/img/chevron_left.svg'>
-    <router-link :to="{name: 'ViewMultisigHome',params:{address:address}}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
-  </div>
   <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5 '>
-    <AccountComponent :address="address" class="mb-10"/>
-    <div class = 'flex text-xs font-semibold border-b-2'>
-      <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-      <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-      <router-link :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
-      <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
-      <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>{{$t('general.multisig')}}</div>
-    </div>
-    
-    <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
+    <AccountComponent :address="address" class="mb-6"/>
+    <AccountTabs :address="address" selected="multisig"/>
+    <div class="border-2 border-t-0 lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 pr-6">
         <div class="text-left mt-2 mb-5 ml-6"> 
             <div v-if="walletCosignerList.length > 0">
@@ -186,12 +175,14 @@ import { Helper } from '@/util/typeHelper';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import { TransactionUtils } from '@/util/transactionUtils';
 import { AppState } from '@/state/appState';
+import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 export default {
   name: 'ViewMultisigEditAccount',
   components: {
     PasswordInput,
     TextInput,
-    AccountComponent
+    AccountComponent,
+    AccountTabs
   },
   props: {
     address: String,
@@ -386,6 +377,7 @@ export default {
         /* var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play(); */
         clear();
+        router.push({ name: "ViewAccountPendingTransactions",params:{address:p.address} })
       }
     };
     watch(() => [...coSign.value], (n) => {

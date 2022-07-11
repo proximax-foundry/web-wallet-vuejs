@@ -1,17 +1,28 @@
 <template>
   <div :class="disabled?'opacity-50':''">
-    <div class="border border-gray-200 px-2 py-1 h-14 rounded-md flex justify-between">
-      <div>
-        <div class="uppercase text-gray-500 text-txs text-left mb-2">{{ placeholder }} <img src="@/assets/img/icon-info.svg" class="inline-block ml-1 relative cursor-pointer" style="top: -1px;" v-tooltip.bottom="{ value:'<tiptext>' + toolTip + '</tiptext>', escape: true}" v-if="toolTip"></div>
-        <input v-if="decimal==0" v-maska="'#*'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-        <input v-else-if="decimal==1" v-maska="'#*.#'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-        <input v-else-if="decimal==2" v-maska="'#*.##'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-        <input v-else-if="decimal==3" v-maska="'#*.###'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-        <input v-else-if="decimal==4" v-maska="'#*.####'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-        <input v-else-if="decimal==5" v-maska="'#*.#####'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
-        <input v-else v-maska="'#*.######'" :disabled="disabled == true"  class="supply_input" :value="parseFloat(modelValue)" @change="checkBalance($event);" @input="$emit('update:modelValue', $event.target.value? parseFloat($event.target.value) : 0)" :placeholder="placeholder" @click="clickInputText()" @keyup="checkBalance($event)" @paste="checkBalance($event)" @focus="$event.target.select()" @blur="blurInputText()">
+    <div class="border border-gray-200 px-2 py-1 h-14 rounded-md ">
+      <div class=" uppercase text-gray-500 text-txs  text-left mb-1">{{ placeholder }} <img src="@/assets/img/icon-info.svg" class="inline-block ml-1 relative cursor-pointer" style="top: -1px;" v-tooltip.bottom="'<tiptext>' + toolTip + '</tiptext>'" v-if="toolTip"></div>
+      <div class="flex justify-between items-center">
+        <AutoNumericVue 
+        :value="modelValue"
+        class="supply_input "  
+        :options="{
+          showWarnings : false,
+          digitGroupSeparator: ',',
+          decimalCharacter: '.',
+          currencySymbol: '',
+          allowDecimalPadding: false,
+          decimalPlaces: decimal,
+          roundingMethod: 'U',
+          minimumValue: '0'
+        }"
+        @input="$emit('update:modelValue',parseFloat($event.target.value.replace(/,/g, '')) )"
+        @keyup="checkBalance($event)"
+        @focus="$event.target.select()" 
+        @blur="blurInputText()"
+        ></AutoNumericVue>
+        <button :disabled="disabled == true" class="w-24 cursor-pointer focus:outline-none text-blue-primary text-xs font-bold" @click="showRemark();$emit('clickedMaxAvailable', true);clearAllError()">{{$t('swap.maxAmount')}}</button>
       </div>
-      <button :disabled="disabled == true" class="cursor-pointer focus:outline-none text-blue-primary text-xs font-bold" @click="showRemark();$emit('clickedMaxAvailable', true);clearAllError()">{{$t('swap.maxAmount')}}</button>
     </div>
     <div class="h-3 mb-2 error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div>
     <div class="h-3 mb-2 error error-text text-left" v-if="emptyErr">{{ emptyErrorMessage }}</div>
@@ -20,12 +31,11 @@
 </template>
 
 <script>
-import { ref } from 'vue';
-import { maska } from 'maska';
 import Tooltip from 'primevue/tooltip';
+import AutoNumericVue from 'autonumeric-vue/src/components/AutoNumericVue';
 export default{
-  directives: { maska, 'tooltip': Tooltip },
-  props: {
+directives: {'tooltip': Tooltip },
+props: {
     placeholder: String,
     errorMessage: String,
     emptyErrorMessage: String,
@@ -34,7 +44,6 @@ export default{
     modelValue: Number,
     title: String,
     disabled: Boolean,
-    balance: Number,
     maxAmount: Number,
     remarkOption: Boolean,
     transactionFee: String,
@@ -42,21 +51,14 @@ export default{
     toolTip: String,
     decimal: Number,
   },
-
-  setup (props) {
-    const formatMask = ref("'#*." + ('#')^props.decimal + "'");
-    return {
-      formatMask,
-    }
+  components:{
+    AutoNumericVue
   },
-
   emits:[
     'update:modelValue',
     'clickedMaxAvailable',
   ],
-
   name: 'SwapInputClean',
-
   data() {
     return {
       inputText: "",
@@ -66,7 +68,6 @@ export default{
       emptyErr: false
     };
   },
-
   watch:{
     modelValue: function(val){
       if(val == this.maxAmount){
@@ -76,24 +77,20 @@ export default{
       }
     }
   },
-
   methods: {
     showRemark: function() {
       this.isShowRemark = true;
     },
-
     clearAllError: function(){
       this.textErr = false;
       this.emptyErr = false;
       this.borderColor = 'border-2 border-gray-300';
     },
-
     clickInputText: function() {
       if(!this.pswdErr){
         this.borderColor = 'border-2 border-blue-primary';
       }
     },
-
     blurInputText: function() {
       if(!this.disabled){
         if(this.modelValue == '' || this.modelValue == 0 || this.modelValue == '0'){
@@ -105,7 +102,6 @@ export default{
         }
       }
     },
-
     checkBalance: function(evt){
       evt.target.value =  evt.target.value? evt.target.value : 0;
       if(this.maxAmount < evt.target.value){
@@ -117,14 +113,12 @@ export default{
       }
     },
   },
-
   mounted() {
     this.emitter.on("CLEAR_TEXT", payload => {
       this.inputText = payload;
       this.textErr = false;
       this.borderColor = 'border border-gray-300';
     });
-
     this.emitter.on("CLOSE_MOSAIC_INSUFFICIENT_ERR", payload => {
       this.textErr = payload;
     });
@@ -132,19 +126,16 @@ export default{
 }
 </script>
 <style lang="scss" scoped>
-
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-
 /* Firefox */
 input[type=number] {
   -moz-appearance: textfield;
 }
-
 .supply_input{
   @apply w-full flex border-0 outline-none border-white drop-shadow-none filter focus:outline-none text-sm text-gray-600 font-bold disabled:opacity-50;
 }

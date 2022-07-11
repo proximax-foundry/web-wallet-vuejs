@@ -339,7 +339,7 @@ export default {
       }else{
         NamespaceUtils.extendNamespace(selectedAccAdd.value, walletPassword.value, selectNamespace.value, duration.value);
       }
-      router.push({ name: "ViewServicesNamespace", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()}});
+      router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
     };
 
     const fetchAccount = (publicKey) => {

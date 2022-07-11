@@ -324,7 +324,7 @@ export default {
       }else{
         AssetsUtils.changeAssetSupply(selectedAccAdd.value, walletPassword.value, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value);
       }
-      router.push({ name: "ViewServicesAssets", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()}});
+      router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
     };
 
     watch(selectIncreaseDecrease, (n) => {
