@@ -1,4 +1,4 @@
-import { SimpleAccount } from './SimpleAccount';
+import { SimpleAccount } from './simpleAccount';
 import { AddressBook } from './addressBook';
 import {Label} from './label';
 
