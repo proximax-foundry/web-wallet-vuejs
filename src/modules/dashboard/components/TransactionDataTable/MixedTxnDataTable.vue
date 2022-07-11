@@ -31,7 +31,7 @@
             <div class="uppercase font-bold text-txs">
               <span v-if="data.recipient === '' || data.recipient === null"></span>
               <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else-if="data.recipientNamespaceName" class="truncate inline-block text-txs">{{ data.recipientNamespaceName }}</span>
-              <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.recipient).substring(0, 20) }}</span>
+              <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.convertAddressToNamePretty(data.recipient).substring(0, 20): "" }}</span>
             </div>
           </div>
         </template>
@@ -48,7 +48,7 @@
               <span v-if="data.sender === '' || data.sender === null"></span>
               <span v-else v-tooltip.right="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
                 <a :href="getPublicKeyExplorerUrl(data.sender)" target="_blank">
-                  {{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.sender).substring(0, 20) }}
+                  {{ walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.convertAddressToNamePretty(data.sender).substring(0, 20): "" }}
                 </a>
               </span>
             </div>
@@ -92,7 +92,7 @@
           <span v-if="data.sender === '' || data.sender === null"></span>
           <span v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
             <a :href="getPublicKeyExplorerUrl(data.sender)" target="_blank">
-              {{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.sender).substring(0, 20) }}
+              {{ walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.convertAddressToNamePretty(data.sender).substring(0, 20): '' }}
             </a>
           </span>
         </template>
@@ -101,7 +101,7 @@
         <template #body="{data}">
           <span v-if="data.recipient === '' || data.recipient === null"></span>
           <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else-if="data.recipientNamespaceName" class="truncate inline-block text-txs">{{ data.recipientNamespaceName }}</span>
-          <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.recipient).substring(0, 20) }}</span>
+          <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.convertAddressToNamePretty(data.recipient).substring(0, 20): '' }}</span>
         </template>
       </Column>
       <Column :header="$t('dashboard.txFee')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:90px;text-transform:uppercase">
@@ -117,7 +117,7 @@
       <Column :header="$t('general.sda')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-center">
-            <img src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="'<tiptitle>' + $t('general.sdaFull') + '</tiptitle><tiptext>' + displaySDAs(data.sda) + '</tiptext>'">
+            <img src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="{ value: '<tiptitle>' + $t('general.sdaFull') + '</tiptitle><tiptext>' + displaySDAs(data.sda) + '</tiptext>', escape: true}">
             <span v-else>-</span>
           </div>
         </template>
@@ -125,7 +125,7 @@
       <Column :header="$t('general.message')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div>
-            <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>'" class="inline-block" v-if="data.message && data.messageType !== 1">
+            <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="{ value: '<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>', escape: true}" class="inline-block" v-if="data.message && data.messageType !== 1">
             <DecryptMessageModal v-if="data.message && data.messageType !== 0"  :messageTypeTitle="data.messageTypeTitle" :message="data.message" :recipientAddress="data.recipient" :initiator="data.initiator"/>
             <div v-else class="w-full text-center">-</div>
           </div>

@@ -65,6 +65,7 @@ AppStateUtils.addNewReadyStates('chainProfile');
 AppStateUtils.addNewReadyStates('theme');
 AppStateUtils.addNewReadyStates('checkSession');
 AppStateUtils.addNewReadyStates('walletMigration');
+AppStateUtils.addNewReadyStates('loadLoadedData');
 
 const loadThemeConfig = async () => {
   try {
@@ -268,16 +269,24 @@ const runWalletMigration = async () => {
 runWalletMigration();
 
 
+
+
 // check from session when page refreshed
 if (!walletState.currentLoggedInWallet) {
+  // reload loaded data
+  WalletStateUtils.checkSessionLoadedData();
+  AppStateUtils.setStateReady('loadLoadedData');
+
   // check sessionStorage
   if (!WalletStateUtils.checkFromSession()) {
     NetworkStateUtils.checkSession();
     AppStateUtils.setStateReady('checkSession');
+
     router.push({ name: "Home" });
   }
 
   AppStateUtils.setStateReady('checkSession');
+  AppStateUtils.setStateReady('loadLoadedData');
 }
 
 // NetworkStateUtils.checkDefaultNetwork();

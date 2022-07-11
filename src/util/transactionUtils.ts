@@ -1,4 +1,5 @@
 import {
+  Address,
   Account,
   EncryptedMessage,
   Mosaic,
@@ -18,7 +19,13 @@ import {
   TransactionSearch,
   TransactionHash,
   HashLockTransaction,
-  TransactionAnnounceResponse
+  TransactionAnnounceResponse,
+  AddExchangeOfferTransaction,
+  ExchangeOfferTransaction,
+  AccountLinkTransaction,
+  ModifyMultisigAccountTransaction,
+  SecretProofTransaction,
+  TransferTransaction
 } from "tsjs-xpx-chain-sdk";
 import { AppState } from "@/state/appState";
 import { ChainConfigUtils } from "./chainConfigUtils";
@@ -373,5 +380,103 @@ export class TransactionUtils {
     return tx as AggregateTransaction;
   }
   
+  static extractConfirmedRelatedAddressByTransactionType(txn: Transaction): Address[]{
+    let addresses: Address[] = [];
+
+    addresses.push(txn.signer.address);
+
+    switch(txn.type){
+      case TransactionType.AGGREGATE_BONDED:{
+        let aggregateBondedTxn = txn as AggregateTransaction; 
+        let addressInDeep = aggregateBondedTxn.innerTransactions.map(x =>{
+          return TransactionUtils.extractConfirmedRelatedAddressByTransactionType(aggregateBondedTxn);
+        });
+        let allNewAddress = addressInDeep.flat();
+        addresses = addresses.concat(allNewAddress);
+      }  break;
+      case TransactionType.AGGREGATE_COMPLETE:{
+        let aggregateCompleteTxn = txn as AggregateTransaction; 
+        let addressInDeep = aggregateCompleteTxn.innerTransactions.map(x =>{
+          return TransactionUtils.extractConfirmedRelatedAddressByTransactionType(aggregateCompleteTxn);
+        });
+        let allNewAddress = addressInDeep.flat();
+        addresses = addresses.concat(allNewAddress);
+      }  break;
+      case TransactionType.ACCOUNT_METADATA_V2:
+        break;
+      case TransactionType.ADDRESS_ALIAS:
+        break;
+      case TransactionType.ADD_EXCHANGE_OFFER:{
+      }
+        break;
+      case TransactionType.CHAIN_CONFIGURE:
+        break;
+      case TransactionType.CHAIN_UPGRADE:
+        break;
+      case TransactionType.EXCHANGE_OFFER:{
+        let exchangeOffer = txn as ExchangeOfferTransaction;
+        let allNewAddress = exchangeOffer.offers.map(x => x.owner.address);
+        addresses = addresses.concat(allNewAddress);
+      }
+        break;
+      case TransactionType.LINK_ACCOUNT:{
+        let tempTxn = txn as AccountLinkTransaction;
+        let linkAccountAddress = PublicAccount.createFromPublicKey(tempTxn.remoteAccountKey, AppState.networkType).address;
+        addresses.push(linkAccountAddress);
+      }
+        break;
+      case TransactionType.LOCK:
+        break;
+      case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS:
+        break;
+      case TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC:
+        break;
+      case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:
+        break;
+      case TransactionType.MODIFY_MOSAIC_LEVY:
+        break;
+      case TransactionType.MODIFY_MULTISIG_ACCOUNT:
+        break;
+      // case TransactionType.MODIFY_MOSAIC_METADATA:
+      //   break;
+      // case TransactionType.MODIFY_NAMESPACE_METADATA:
+      //   break;
+      // case TransactionType.MODIFY_ACCOUNT_METADATA:
+      //   break;
+      case TransactionType.MOSAIC_DEFINITION:
+        break;
+      case TransactionType.MOSAIC_ALIAS:
+        break;
+      case TransactionType.MOSAIC_METADATA_V2:
+        break;
+      case TransactionType.MOSAIC_SUPPLY_CHANGE:
+        break;
+      case TransactionType.NAMESPACE_METADATA_V2:
+        break;
+      case TransactionType.REGISTER_NAMESPACE:
+        break;
+      case TransactionType.REMOVE_EXCHANGE_OFFER:
+        break;
+      case TransactionType.REMOVE_MOSAIC_LEVY:
+        break;
+      case TransactionType.SECRET_LOCK:
+        break;
+      case TransactionType.SECRET_PROOF:{
+        let tempTxn = txn as SecretProofTransaction;
+        let recipientAddress = tempTxn.recipient;
+        addresses.push(recipientAddress);
+      }
+        break;
+      case TransactionType.TRANSFER:{
+        let tempTxn = txn as TransferTransaction;
+        if(tempTxn.recipient instanceof Address){
+          let recipientAddress = tempTxn.recipient as Address;
+          addresses.push(recipientAddress);
+        }
+      }  break;
+    }
+
+    return addresses;
+  }
 }
 

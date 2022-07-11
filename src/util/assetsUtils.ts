@@ -76,8 +76,8 @@ export class AssetsUtils {
     const assetSelection: Array<assetSelectionInterface> = [];
     const account = walletState.currentLoggedInWallet.accounts.find(account => account.address === address);
     const other = walletState.currentLoggedInWallet.others.find(account => account.address === address);
-    const filterAccountAsset = account?account.assets.filter((asset) => asset.owner === account.publicKey):[];
-    const filterOtherAsset = other?other.assets.filter((asset) => asset.owner === other.publicKey):[];
+    const filterAccountAsset = account?account.assets.filter((asset) => asset.creator === account.publicKey):[];
+    const filterOtherAsset = other?other.assets.filter((asset) => asset.creator === other.publicKey):[];
     if(filterAccountAsset.length > 0){
       filterAccountAsset.forEach((asset) => {
         assetSelection.push({
@@ -101,8 +101,8 @@ export class AssetsUtils {
     const assetSelection: Array<assetSelectionInterface> = [];
     const account = walletState.currentLoggedInWallet.accounts.find(account => account.address === address);
     const other = walletState.currentLoggedInWallet.others.find(account => account.address === address);
-    const filterAccountAsset = account?account.assets.filter(asset => (asset.owner === account.publicKey && asset.supplyMutable === true)):[];
-    const filterOtherAsset = other?other.assets.filter(asset => (asset.owner === other.publicKey && asset.supplyMutable === true)):[];
+    const filterAccountAsset = account?account.assets.filter(asset => (asset.creator === account.publicKey && asset.supplyMutable === true)):[];
+    const filterOtherAsset = other?other.assets.filter(asset => (asset.creator === other.publicKey && asset.supplyMutable === true)):[];
     if(filterAccountAsset.length > 0){
       filterAccountAsset.forEach((asset) => {
         assetSelection.push({

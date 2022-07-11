@@ -68,9 +68,9 @@
       </Column>
       <Column field="creator" :header="$t('dashboard.creator')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
-          <span class="uppercase font-bold text-txs">{{ data.owner == currentPublicKey ? $t('general.yes'): $t('general.no')}}</span>
-          <img v-if="data.owner == currentPublicKey" src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer" v-tooltip.bottom="'<tiptitle>' + $t('general.walletAddress') +'</tiptitle><tiptext>' + data.address + '</tiptext><tipbottom>'+ $t('dashboard.myPersonalAcc') +'<img src=&quot;/icons/icon-personal-blue.png&quot;></tipbottom>'">
-          <img v-else src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer " v-tooltip.bottom="'<tiptitle>'+ $t('general.walletAddress') +'</tiptitle><tiptext>' + data.address + '</tiptext>'">
+          <span class="uppercase font-bold text-txs">{{ data.creator == currentPublicKey ? $t('general.yes'): $t('general.no')}}</span>
+          <img v-if="data.creator == currentPublicKey" src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer" v-tooltip.bottom="{ value: '<tiptitle>' + $t('general.walletAddress') +'</tiptitle><tiptext>' + data.address + '</tiptext><tipbottom>'+ $t('dashboard.myPersonalAcc') +'<img src=&quot;/icons/icon-personal-blue.png&quot;></tipbottom>', escape: true}">
+          <img v-else src="@/modules/dashboard/img/icon-info.svg" class="ml-2 inline-block cursor-pointer " v-tooltip.bottom="{ value: '<tiptitle>'+ $t('general.walletAddress') +'</tiptitle><tiptext>' + data.address + '</tiptext>', escape: true}">
         </template>
       </Column>
       <Column field="height" :header="$t('general.blockHeight')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
@@ -174,9 +174,9 @@ export default{
           let data = {
             i: i,
             idHex: assetId,
-            owner: assets[i].owner,
-            address: PublicAccount.createFromPublicKey(assets[i].owner, AppState.networkType).address.pretty(),
-            amount: Helper.toCurrencyFormat(assets[i].getExactAmount(), assets[i].divisibility),
+            owner: assets[i].creator,
+            address: assets[i].creator ? PublicAccount.createFromPublicKey(assets[i].creator, AppState.networkType).address.pretty(): "",
+            amount: Helper.toCurrencyFormat(assets[i].amount, assets[i].divisibility),
             supply: Helper.toCurrencyFormat(assets[i].getExactSupply(), assets[i].divisibility),
             linkedNamespace: namespaceAlias,
             height: assets[i].height,

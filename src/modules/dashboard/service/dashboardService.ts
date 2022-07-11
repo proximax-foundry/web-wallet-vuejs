@@ -1113,7 +1113,11 @@ export class DashboardService {
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedAggregateTransaction, formattedTxn) as UnconfirmedAggregateTransaction;
 
             if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
-                let aggregateTxn = await this.autoFindAggregateTransaction(txn.hash);
+                let aggregateTxn = txns[i] as AggregateTransaction;
+
+                if(aggregateTxn.innerTransactions.length === 0){
+                    aggregateTxn = await this.autoFindAggregateTransaction(txn.hash);
+                }
                 txn.aggregateLength = aggregateTxn.innerTransactions.length;
                 txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
                 
@@ -1150,7 +1154,11 @@ export class DashboardService {
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedAggregateTransaction, formattedTxn) as ConfirmedAggregateTransaction;
             
             if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
-                let aggregateTxn = await this.autoFindAggregateTransaction(txn.hash);
+                let aggregateTxn = txns[i] as AggregateTransaction;
+
+                if(aggregateTxn.innerTransactions.length === 0){
+                    aggregateTxn = await this.autoFindAggregateTransaction(txn.hash);
+                }
                 txn.aggregateLength = aggregateTxn.innerTransactions.length;
                 txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
                 
@@ -1187,7 +1195,11 @@ export class DashboardService {
             let txn = PartialTransaction.convertToSubClass(PartialAggregateTransaction, formattedTxn) as PartialAggregateTransaction;
             
             if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
-                let aggregateTxn = await this.autoFindAggregateTransaction(txn.hash);
+                let aggregateTxn = txns[i] as AggregateTransaction;
+
+                if(aggregateTxn.innerTransactions.length === 0){
+                    aggregateTxn = await this.autoFindAggregateTransaction(txn.hash);
+                }
                 txn.aggregateLength = aggregateTxn.innerTransactions.length;
                 txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
                 
@@ -2806,7 +2818,13 @@ export class DashboardService {
             //deadline = aggregateTxn.deadline.adjustedValue.compact();
         }
         else if(txn.type === TransactionType.AGGREGATE_BONDED || txn.type === TransactionType.AGGREGATE_COMPLETE){
-            let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
+
+            let aggregateTxn = txn as AggregateTransaction;
+
+            if(aggregateTxn.innerTransactions.length === 0){
+                aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
+            }
+             
             blockHeight = aggregateTxn.transactionInfo.height.compact();
             txnBytes = aggregateTxn.serialize().length / 2;
             deadline = aggregateTxn.deadline.adjustedValue.compact();

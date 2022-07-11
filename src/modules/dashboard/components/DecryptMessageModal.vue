@@ -1,5 +1,5 @@
 <template>
-    <img src="@/modules/dashboard/img/encrypted-icon-message.svg" v-tooltip.left="'<tiptitle>' + messageTypeTitle + '</tiptitle><tiptext>' + message + '</tiptext>'" class=" cursor-pointer w-6 h-6 inline-block" @click="showModal = true" >
+    <img src="@/modules/dashboard/img/encrypted-icon-message.svg" v-tooltip.left="{ value: '<tiptitle>' + messageTypeTitle + '</tiptitle><tiptext>' + message + '</tiptext>', escape: true}" class=" cursor-pointer w-6 h-6 inline-block" @click="showModal = true" >
       <div v-if="showModal && showPassword" class="popup-outer fixed flex z-50">
         <div class="modal-popup-box ">
           <div >

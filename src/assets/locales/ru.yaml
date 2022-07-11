@@ -660,7 +660,7 @@ transaction:
   txErrMsg: 'Status: {0} - Hash: {1}'
   txError: Transaction Error
   txInfo: Transaction information
-  txUnconfirmed: transaction in unconfirmed state | transactions in unconfirmed state
+  txUnconfirmed: Transaction in unconfirmed state | Transactions in unconfirmed state
   unconfirmedTx: Unconfirmed Transactions
   unconfirmedTxOf: 'Unconfirmed transactions of {name}'
   waitForLoad: 'It is still loading, please wait.'
