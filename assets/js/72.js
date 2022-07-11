@@ -1,13 +1,13 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([[72],{
 
-/***/ "./src/modules/services/submodule/namespaces/img/icon-namespace.svg":
-/*!**************************************************************************!*\
-  !*** ./src/modules/services/submodule/namespaces/img/icon-namespace.svg ***!
-  \**************************************************************************/
+/***/ "./src/modules/services/submodule/mainnetSwap/img/bsc.svg":
+/*!****************************************************************!*\
+  !*** ./src/modules/services/submodule/mainnetSwap/img/bsc.svg ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/icon-namespace.8f06d34d.svg\";\n\n//# sourceURL=webpack:///./src/modules/services/submodule/namespaces/img/icon-namespace.svg?");
+eval("module.exports = __webpack_require__.p + \"assets/img/bsc.6b130f35.svg\";\n\n//# sourceURL=webpack:///./src/modules/services/submodule/mainnetSwap/img/bsc.svg?");
 
 /***/ })
 
