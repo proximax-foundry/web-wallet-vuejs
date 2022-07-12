@@ -1,13 +1,13 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([[67],{
 
-/***/ "./src/assets/img/icon-info.svg":
-/*!**************************************!*\
-  !*** ./src/assets/img/icon-info.svg ***!
-  \**************************************/
+/***/ "./src/modules/dashboard/img/icon-xpx.svg":
+/*!************************************************!*\
+  !*** ./src/modules/dashboard/img/icon-xpx.svg ***!
+  \************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/icon-info.c16cc71f.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/icon-info.svg?");
+eval("module.exports = __webpack_require__.p + \"assets/img/icon-xpx.853b72ba.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/icon-xpx.svg?");
 
 /***/ })
 
