@@ -107,7 +107,7 @@
                         </div>
                     </div>
                 </div>
-                <router-link :to="{name: 'ViewUpdateAccountMetadata',params:{targetPublicKey:acc?acc.publicKey:'0'.repeat(64)}}"><button  class="my-4 blue-btn py-3 px-3 " >Create New Account Metadata</button></router-link>
+                <router-link :to="{name: 'ViewUpdateAccountMetadata',params:{targetPublicKey:acc?acc.publicKey:'0'.repeat(64)}}"><button  class="my-4 blue-btn py-3 px-3 flex items-center" ><img src="@/assets/img/icon-plus.svg" class="inline-block w-4 h-4 mr-2">Create New Account Metadata</button></router-link>
             </div>
         </div>
     </div>

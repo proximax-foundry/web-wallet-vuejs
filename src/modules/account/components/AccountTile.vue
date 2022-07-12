@@ -30,7 +30,7 @@
           </div>
         </div>
       </div>
-        <div class="absolute flex invisible 2xl:visible pt-4" style="margin-left: 39.3rem;">
+        <div class="absolute flex invisible 2xl:visible pt-4 explicitLeft" >
           <div v-for="(label,index) in labels" :key="index" >
             <div v-if="label.isLabeled" class="text-xs mr-3 border bg-gray-300 rounded-md p-1">{{label.name}}</div>
           </div>
@@ -239,4 +239,9 @@ export default{
   -moz-transform:rotate(45deg);
   -webkit-transform:rotate(45deg);
 }
+.explicitLeft{
+  @media (min-width: 1024px) { margin-left: 39.3rem}
+  
+}
+
 </style>

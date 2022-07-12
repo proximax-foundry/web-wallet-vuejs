@@ -55,11 +55,11 @@
           <div class="w-12 lg:w-16 flex flex-row items-center left-gray-line">
             <router-link :to="{name : 'ViewNotification'}" class="text-center w-full h-7 relative">
               <span class="flex h-5 w-5 items-center justify-center absolute notification_counter" v-if="isNewNotification">
-                <span class="animate-ping absolute inline-flex rounded-full bg-blue-primary opacity-75 h-4 w-4"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-primary"></span>
+                <span class="animate-ping absolute inline-flex rounded-full bg-orange-primary opacity-75 h-4 w-4"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-orange-primary"></span>
               </span>
               <span class="flex items-center justify-center absolute notification_counter" v-else>
-                <span class="relative inline-flex rounded-full z-20 h-4 w-4 bg-blue-primary text-xxs text-white items-center justify-center">{{ newNotificationCount }}</span>
+                <span v-if="newNotificationCount>0" class="relative inline-flex rounded-full z-20 h-4 w-4 bg-orange-primary text-xxs text-white items-center justify-center">{{ newNotificationCount }}</span>
               </span>
               <div class="mt-2 h-3 w-3 lg:mt-1 lg:h-5 lg:w-5 inline-block">
                 <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100">

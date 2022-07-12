@@ -52,7 +52,7 @@
               <PkPasswordModal v-if="!showPwPK && !showPK" :account = 'acc' />
             </div>
             <div class='flex'>
-              <div id="private" class="text-xs mt-1 font-semibold break-all truncate md:text-clip md:w-full" type="text" :copyValue="privateKey" :title="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
+              <div id="private" class="text-xs mt-1 font-semibold break-all truncate md:text-clip md:w-auto" type="text" :copyValue="privateKey" :title="privateKey" copySubject="Private Key" v-if="showPK">{{privateKey}}</div>
               <font-awesome-icon title='Copy' icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link cursor-pointer " v-if="showPK"></font-awesome-icon>
               <font-awesome-icon icon="eye-slash" title='Hide Private Key' class="text-blue-link relative cursor-pointer ml-1" @click="showPwPK = false; showPK = false" v-if="showPK"></font-awesome-icon>
             </div>
@@ -94,7 +94,7 @@
           <PdfPasswordModal v-if='!other_acc' />
           <!-- <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountAliasAddressToNamespace', params: { address: address}}" class="text-center text-xs px-3 blue-btn cursor-pointer py-3" ><img src="@/assets/img/link-icon.svg" class = 'h-3 w-3 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('general.linkToNamespace')}}</router-link>
           <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address}}" class="text-center blue-btn cursor-pointer py-3 px-3"><img src="@/assets/img/icon-multisig.svg" class = 'h-3 w-3 mr-1 inline-block' style= "transform: rotateY(180deg)" >{{$t('delegate.delegateAcc')}}</router-link> -->
-          <DeleteAccountModal v-if="!isDefault && !other_acc "  :account ='acc' />
+          <!-- <DeleteAccountModal v-if="!isDefault && !other_acc "  :account ='acc' /> -->
         </div>
       </div>
     </div>
@@ -132,7 +132,7 @@ export default {
     /* TextInput, */
     PkPasswordModal,
     PdfPasswordModal,
-    DeleteAccountModal,
+    /* DeleteAccountModal, */
     AccountComponent,
     AccountTabs
   },
