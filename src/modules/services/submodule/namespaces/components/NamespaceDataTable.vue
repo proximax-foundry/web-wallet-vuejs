@@ -66,7 +66,7 @@
       </Column>
       <Column field="Account" :header="$t('general.account')" headerStyle="text-transform:uppercase" bodyStyle="text-align: center; overflow: visible" style="`wideScreen?'min-width: 60px'?'width: 60px'`" v-if="wideScreen">>
         <template #body="{data}">
-          <div v-html="data.icon" class="inline-block" v-tooltip.bottom="'<tiptitle>WALLET ADDRESS</tiptitle><tiptext>' + data.address + '</tiptext>'"></div>
+          <div v-html="data.icon" class="inline-block" v-tooltip.bottom="{ value: '<tiptitle>WALLET ADDRESS</tiptitle><tiptext>' + data.address + '</tiptext>', escape: true}"></div>
         </template>
       </Column>
       <Column style="width: 30px">

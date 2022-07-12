@@ -95,7 +95,7 @@ export default {
             // }  
             
             walletState.currentLoggedInWallet.accounts.push(walletAccount);
-            await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
+            await WalletUtils.reloadAddedAccount(walletAccount.name);
             walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet),
             
             router.push({ name: "ViewAccountDetails", params: {address: account.address.address, accountCreated: true }})

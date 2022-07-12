@@ -141,7 +141,7 @@ export default {
       }
     })
 
-    const blockListener = computed(()=> listenerState.currentBlock);
+    const blockListener = computed(()=> AppState.readBlockHeight);
 
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 

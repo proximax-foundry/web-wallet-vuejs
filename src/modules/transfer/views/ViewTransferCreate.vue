@@ -590,7 +590,7 @@ export default {
     );
     
     if (mosaic != undefined) {
-      return mosaic.getExactAmount();
+      return mosaic.amount;
     } else {
       return 0;
     }

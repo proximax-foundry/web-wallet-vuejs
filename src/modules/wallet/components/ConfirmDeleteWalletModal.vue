@@ -58,7 +58,7 @@ export default{
       var result = WalletUtils.verifyWalletPassword(walletName, networkName, walletPassword.value);
         if (result == true) {
           walletState.wallets.removeWalletByNetworkNameAndName(networkName, walletName);
-          toast.add({severity:'success', summary: t('general.notification'), detail: t('wallet.walletRemoved'), group: 'br', life: 5000});
+          toast.add({severity:'success', summary: t('general.notification'), detail: t('wallet.walletRemoved'), group: 'br-custom', life: 5000});
         } else {
           err.value = t('general.walletPasswordInvalid',{name:walletName});
           walletPassword.value = "";

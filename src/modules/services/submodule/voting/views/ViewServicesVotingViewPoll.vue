@@ -89,11 +89,11 @@ export default {
 
     if(p.pollid == '23543543535435'){
       voted.value = true;
-      toast.add({severity:'info', summary: 'Voted', detail: 'You have already voted in this poll', group: 'br', life: 5000});  
+      toast.add({severity:'info', summary: 'Voted', detail: 'You have already voted in this poll', group: 'br-custom', life: 5000});  
     }
     if(p.pollid == '945675463458'){
       voteEnded.value = true;
-      toast.add({severity:'info', summary: 'Voting ended', detail: 'This poll has ended', group: 'br', life: 5000});  
+      toast.add({severity:'info', summary: 'Voting ended', detail: 'This poll has ended', group: 'br-custom', life: 5000});  
     }
 
     emitter.on("CLOSE_MODAL", payload => {

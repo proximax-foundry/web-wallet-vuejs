@@ -4,6 +4,9 @@ import { OtherAccount } from './otherAccount';
 import { Address } from 'tsjs-xpx-chain-sdk';
 import { Helper } from '@/util/typeHelper';
 import {Label} from './label'
+import { SimpleWallet } from './simpleWallet';
+import { SimpleAccount } from './simpleAccount';
+
 export class Wallet{
 
     name: string;
@@ -27,7 +30,17 @@ export class Wallet{
     removeAccount(accountName: string): void{
         const index = this.accounts.findIndex((account)=> account.name == accountName);
 
-        this.accounts.splice(index, 1);
+        if(index > -1){
+            this.accounts.splice(index, 1);
+        }
+    }
+
+    removeOtherAccount(pubKey: string): void{
+        const index = this.others.findIndex((account)=> account.publicKey == pubKey);
+
+        if(index > -1){
+            this.others.splice(index, 1);
+        }
     }
 
     convertAddressToName(address: string, includeOthers: boolean = false): string{
@@ -129,5 +142,17 @@ export class Wallet{
         let account: WalletAccount = this.accounts.find((account)=> account.name === name);
 
         account.default = true;
+    }
+
+    fixNonManagableAccounts(){
+        this.accounts = this.accounts.filter(acc => acc.encrypted);
+    }
+
+    convertToSimpleWallet(): SimpleWallet{
+        let simpleAccounts: SimpleAccount[] = this.accounts.map(x =>{
+            return x.convertToSimpleAccount();
+        });
+
+        return new SimpleWallet(this.name, this.networkName, simpleAccounts);
     }
 }

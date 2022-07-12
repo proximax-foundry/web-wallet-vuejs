@@ -249,6 +249,8 @@ import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
 import {AppState} from '@/state/appState'
 import { useI18n } from 'vue-i18n';
+import { TransactionType } from 'tsjs-xpx-chain-sdk';
+
 export default defineComponent({
   name: 'ViewDashboard',
   props:{
@@ -416,7 +418,9 @@ export default defineComponent({
     let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
     currentAccount.default = true;
     const selectedAccount = ref(currentAccount);
-    const currentBlock = computed(() => listenerState.currentBlock);
+
+    const currentBlock = computed(() => AppState.readBlockHeight);
+
     const selectedAccountPublicKey = computed(()=> selectedAccount.value.publicKey);
     // const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty().substring(0, 13) + '....' + Helper.createAddress(selectedAccount.value.address).pretty().substring(Helper.createAddress(selectedAccount.value.address).pretty().length - 11));
     const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty());
@@ -561,7 +565,8 @@ export default defineComponent({
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-      toast.add({severity:'info', detail: copySubject + ' ' +t('general.copied'), group: 'br', life: 3000});
+
+      toast.add({severity:'info', detail: copySubject + ' ' +t('general.copied'), group: 'br-custom', life: 3000});
     };
     // get USD conversion
     const currencyConvert = ref('');
@@ -617,14 +622,23 @@ export default defineComponent({
     const reloadSearchTxns = () =>{
       allTxnQueryParams.pageNumber = 1;
       endOfRecords = false;
-      searchTransactions();
+
+      searchTransaction();
     }
     const loadMoreTxns = () =>{
-      searchTransactions(true);
+      searchTransaction(true);
     }
     const searchTransaction = async(loadMore = false) =>{
       allTxnQueryParams.pageNumber = loadMore ? allTxnQueryParams.pageSize + 1 : 1;
       allTxnQueryParams.publicKey = selectedAccount.value.publicKey;
+      if(allTxnQueryParams.type.length === 0 || 
+        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_COMPLETE) ||
+        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_BONDED)){
+        allTxnQueryParams.firstLevel = false;
+      }
+      else{
+        allTxnQueryParams.firstLevel = true;
+      }
       searchingTxn.value = true;
       let transactionSearchResult = await dashboardService.searchTxns(selectedTxnGroupType, allTxnQueryParams);
       if(transactionSearchResult.pagination.pageNumber <= allTxnQueryParams.pageNumber){

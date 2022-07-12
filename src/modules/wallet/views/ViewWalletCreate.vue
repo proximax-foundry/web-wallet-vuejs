@@ -139,7 +139,7 @@ export default defineComponent({
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-      toast.add({severity:'info', detail: copySubject +' '+  t('general.copied'), group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject +' '+  t('general.copied'), group: 'br-custom', life: 3000});
     };
     const disableCreate = computed(
       () => !(
@@ -170,9 +170,6 @@ export default defineComponent({
         let account = Account.createFromPrivateKey(privateKey.value,selectedNetworkType.value)
         address.value = account.address.pretty()
         publicKey.value = account.publicKey
-        
-        
-       
       }
     };
     const generateQR = (url, size = 2, margin = 0) => {

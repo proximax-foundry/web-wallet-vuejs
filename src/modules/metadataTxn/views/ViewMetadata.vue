@@ -193,7 +193,7 @@ import UTF8 from 'utf-8';
         }
         let assets :{id:string,name:string}[] = [] 
         acc.value.assets.forEach(asset=>{
-            if(asset.owner==acc.value.publicKey){
+            if(asset.creator==acc.value.publicKey){
                 assets.push({
                     id:asset.idHex,
                     name:asset.namespaceNames[0]??''

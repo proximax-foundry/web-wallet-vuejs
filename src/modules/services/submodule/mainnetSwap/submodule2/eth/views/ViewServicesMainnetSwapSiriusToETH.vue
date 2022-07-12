@@ -623,7 +623,7 @@ export default {
             severity:'warn',
             summary: 'Service is unavailable',
             detail: 'Please try again later',
-            group: 'br'
+            group: 'br-custom'
           });
           swapInProgress.value = false;
           isDisabledCancel.value = false;
@@ -662,7 +662,7 @@ export default {
           severity:'error',
           summary: summary,
           detail: detail,
-          group: 'br',
+          group: 'br-custom',
           life: life
       });
     }

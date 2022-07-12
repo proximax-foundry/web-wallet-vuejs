@@ -162,7 +162,7 @@ export default {
       }else{
         walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value.trim(), address: Address.createFromRawAddress(address.value).plain(), group: selectContactGroups.value });
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
-        toast.add({severity:'info', summary: t('general.addressBook'), detail: t('addressBook.contactUpdated'), group: 'br', life: 5000});
+        toast.add({severity:'info', summary: t('general.addressBook'), detail: t('addressBook.contactUpdated'), group: 'br-custom', life: 5000});
         router.push({name: "ViewServicesAddressBook"});
       }
 

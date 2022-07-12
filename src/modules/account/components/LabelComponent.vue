@@ -106,7 +106,7 @@ import { useToast } from 'primevue/usetoast';
         await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
         err.value = ''
         labelName.value = ""
-        toast.add({severity:'info', summary: 'Label', detail: 'New Label is Created', group: 'br', life: 5000});
+        toast.add({severity:'info', summary: 'Label', detail: 'New Label is Created', group: 'br-custom', life: 5000});
         toggleModal.value = false
     }
 
@@ -116,7 +116,7 @@ import { useToast } from 'primevue/usetoast';
         }
         walletState.currentLoggedInWallet.removeLabel(index)
         await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
-        toast.add({severity:'info', summary: 'Label', detail: 'Label is removed', group: 'br', life: 5000});
+        toast.add({severity:'info', summary: 'Label', detail: 'Label is removed', group: 'br-custom', life: 5000});
         isHover.value = false
     }
 
