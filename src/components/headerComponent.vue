@@ -393,6 +393,9 @@ export default defineComponent({
         notificationLoading.value = false;
         notificationTimeout = setTimeout(doGetNotification, 90000); // 1.5 minutes- 90 seconds
       }
+      else if(loginStatus.value && !AppState.isReady){
+        setTimeout(doGetNotification, 100);
+      }
     }
 
     const targetBlockSeconds = computed(()=>{
