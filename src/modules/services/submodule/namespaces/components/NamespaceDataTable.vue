@@ -94,14 +94,12 @@
 </template>
 
 <script>
-import { getCurrentInstance, ref, computed, watch, onMounted, toRefs, onUnmounted  } from "vue";
+import { getCurrentInstance, ref, computed, onMounted, toRefs, onUnmounted  } from "vue";
 import { Address } from "tsjs-xpx-chain-sdk";
 import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { walletState } from "@/state/walletState";
-import {Namespace} from '@/models/namespace';
-import { listenerState } from '@/state/listenerState';
 import { Helper } from '@/util/typeHelper';
 import { networkState } from "@/state/networkState";
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
@@ -116,7 +114,6 @@ export default{
   components: { DataTable, Column, SelectInputPluginClean },
   name: 'NamespaceDataTable',
   props: {
-    currentBlockHeight: Number,
     account: WalletAccount,
     address: String,
   },
@@ -144,7 +141,11 @@ export default{
       window.removeEventListener("resize", screenResizeHandler);
     });
 
-    const { currentBlockHeight, address } = toRefs(props);
+    const currentBlockHeight = computed(() => {
+      return AppState.readBlockHeight ? AppState.readBlockHeight : 0
+    });
+
+    const { address } = toRefs(props);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     // const accountNamespaces = ref();
@@ -282,45 +283,53 @@ export default{
               break;
           }
 
-          let blockDifference = namespaces[i].namespace.endHeight - currentBlockHeight.value;
-          let blockTargetTimeByDay = Math.floor((60 * 60 * 24) / blockTargetTime);
-          let blockTargetTimeByHour = Math.floor((60 * 60) / blockTargetTime);
-          let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
-          let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
-          let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
+          let expiryStatus, expiryDate, expiryRelativeTimeEstimate;
 
-          let expiryStatus;
-          if(blockDifference > 0){
-            if((blockDifference < (blockTargetTimeByDay * 14))){
-              expiryStatus = 'expiring';
-            }else{
-              expiryStatus = 'valid';
+          if(typeof namespaces[i].namespace.endHeight === 'string'){
+            expiryStatus = 'valid';
+            if(namespaces[i].namespace.endHeight === "F".repeat(16)){
+              expiryDate = 'Never';
+              expiryRelativeTimeEstimate = "Never";
             }
-          }else{
-            expiryStatus = 'expired';
           }
+          else{
+            let blockDifference = namespaces[i].namespace.endHeight - currentBlockHeight.value;
+            let blockTargetTimeByDay = Math.floor((60 * 60 * 24) / blockTargetTime);
+            let blockTargetTimeByHour = Math.floor((60 * 60) / blockTargetTime);
+            let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
+            let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
+            let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
 
-          let expiryDate;
-          if(expiryDay > 0 || expiryHour > 0 ||  expiryMin > 0){
-            expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
-          }else{
-            expiryDate = 'None';
-            // expiryStatus = 'valid';
-          }
-
-          let expiryRelativeTimeEstimate;
-          if(currentBlockHeight){
             if(blockDifference > 0){
-              expiryRelativeTimeEstimate = relativeTime(expiryDay, expiryHour, expiryMin);
-            }else{
-              if(expiryDate != '-'){
-                expiryRelativeTimeEstimate = t('general.expired');
+              if((blockDifference < (blockTargetTimeByDay * 14))){
+                expiryStatus = 'expiring';
               }else{
-                expiryRelativeTimeEstimate = '-';
+                expiryStatus = 'valid';
               }
+            }else{
+              expiryStatus = 'expired';
             }
-          }else{
-            expiryRelativeTimeEstimate = '';
+          
+            if(expiryDay > 0 || expiryHour > 0 ||  expiryMin > 0){
+              expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
+            }else{
+              expiryDate = 'None';
+              // expiryStatus = 'valid';
+            }
+
+            if(currentBlockHeight.value){
+              if(blockDifference > 0){
+                expiryRelativeTimeEstimate = relativeTime(expiryDay, expiryHour, expiryMin);
+              }else{
+                if(expiryDate != '-'){
+                  expiryRelativeTimeEstimate = t('general.expired');
+                }else{
+                  expiryRelativeTimeEstimate = '-';
+                }
+              }
+            }else{
+              expiryRelativeTimeEstimate = '';
+            }
           }
 
           let data = {

@@ -2,7 +2,7 @@
   <div>
     <div class='ml-2 mr-2 w-full lg:ml-auto lg:mr-auto mt-5'>
       <div v-if="namespaces.length > 0">
-        <NamespaceDataTable class="mt-10 w-full" :key="defaultIndex" :currentBlockHeight="currentBlock" :address="address"></NamespaceDataTable>
+        <NamespaceDataTable class="mt-10 w-full" :key="defaultIndex" :address="address"></NamespaceDataTable>
         <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="mt-10 lg:mt-0 bg-blue-primary px-5 py-3 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-60"><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2">{{$t('namespace.registerNewNamespace')}}</router-link>
       </div>
       <div v-else class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
@@ -42,7 +42,6 @@ import { ChainUtils } from '@/util/chainUtils';
 import { AssetsUtils } from '@/util/namespaceUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import NamespaceDataTable from '@/modules/services/submodule/namespaces/components/NamespaceDataTable.vue';
-import { Appstate } from '@/state/appState';
 
 export default {
   name: 'ViewServicesNamespace',
@@ -57,8 +56,6 @@ export default {
     const defaultIndex = ref(0);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-
-    const currentBlock = computed(() => Appstate.readBlockHeight);
 
     // get namespaces
     const namespaces = ref([]);
@@ -75,7 +72,6 @@ export default {
         });
       });
     }
-    
 
     emitter.on("TXN_CONFIRMED", txLength => {
       setTimeout(() => {
@@ -86,7 +82,7 @@ export default {
     return {
       namespaces,
       defaultIndex,
-      currentBlock,
+      // currentBlock,
     }
   },
 

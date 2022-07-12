@@ -56,7 +56,7 @@ interface appStateInterface {
     // trackingTxnHash: string[],
     assetsInfo: AssetInfo[],
     namespacesInfo: Namespace[],
-    pendingAssetsInfo: MosaicId[],
+    pendingAssetsInfo: string[],
     pendingNamespacesName: NamespaceInfo[],
     readBlockHeight: number,
     txnActivityLog: TxnActivityLog[],
