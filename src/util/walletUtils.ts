@@ -1853,6 +1853,9 @@ export class WalletUtils {
         if(updateNames){
             assetInfoToUpdate.namespaceNames = assetInfo.namespaceNames;
         }
+        if(assetInfo.doneChecking){
+            assetInfoToUpdate.doneChecking = assetInfo.doneChecking;
+        }
     }
 
     static namespaceInfoToNamespace(nsInfo: NamespaceInfo): Namespace {
@@ -2112,8 +2115,23 @@ export class WalletUtils {
         let assetList: AssetInfo[] = [];
 
         let accAssetPage: AccountAssetPage[] = [];
+        let allLoadedAssetInfoCreators = AppState.assetsInfo.map(x => x.creator);
+        let tempCreatorPubKey: string[] = [];
+        let cachedCount = [];
+        let accCreatorCount: LooseObject = {};
 
         for (let i = 0; i < wallet.accounts.length; ++i) {
+            let loadedCount = 0;
+
+            for(let y=0; y < allLoadedAssetInfoCreators.length; ++y){
+                if(allLoadedAssetInfoCreators[y] ===  wallet.accounts[i].publicKey){
+                    loadedCount++;
+                }
+            }
+            cachedCount.push(loadedCount);
+            accCreatorCount[wallet.accounts[i].publicKey] = loadedCount;
+            wallet.accounts[i].totalCreatedAsset = loadedCount;
+            tempCreatorPubKey.push(wallet.accounts[i].publicKey);
             queryParams.ownerPubKey = wallet.accounts[i].publicKey;
 
             assetSearchList.push(AppState.chainAPI.assetAPI.searchMosaics(queryParams));
@@ -2121,14 +2139,27 @@ export class WalletUtils {
             if (assetSearchList.length === 50) {
                 let assetSearches: MosaicSearch[] = await Promise.all<MosaicSearch>(assetSearchList);
 
-                WalletUtils.assignAccAssetPage(assetSearches, accAssetPage, assetList);
+                WalletUtils.assignAccAssetPage(assetSearches, accAssetPage, assetList, tempCreatorPubKey, cachedCount);
                 assetSearchList = [];
+                tempCreatorPubKey = [];
+                cachedCount = [];
 
                 await delay(250);
             }
         }
 
         for (let i = 0; i < wallet.others.length; ++i) {
+            let loadedCount = 0;
+
+            for(let y=0; y < allLoadedAssetInfoCreators.length; ++y){
+                if(allLoadedAssetInfoCreators[y] ===  wallet.others[i].publicKey){
+                    loadedCount++;
+                }
+            }
+            cachedCount.push(loadedCount);
+            accCreatorCount[wallet.others[i].publicKey] = loadedCount;
+            wallet.others[i].totalCreatedAsset = loadedCount;
+            tempCreatorPubKey.push(wallet.others[i].publicKey);
             queryParams.ownerPubKey = wallet.others[i].publicKey;
 
             assetSearchList.push(AppState.chainAPI.assetAPI.searchMosaics(queryParams));
@@ -2136,8 +2167,10 @@ export class WalletUtils {
             if (assetSearchList.length === 50) {
                 let assetSearches: MosaicSearch[] = await Promise.all<MosaicSearch>(assetSearchList);
 
-                WalletUtils.assignAccAssetPage(assetSearches, accAssetPage, assetList);
+                WalletUtils.assignAccAssetPage(assetSearches, accAssetPage, assetList, tempCreatorPubKey, cachedCount);
                 assetSearchList = [];
+                tempCreatorPubKey = [];
+                cachedCount = [];
 
                 await delay(250);
             }
@@ -2146,13 +2179,35 @@ export class WalletUtils {
         if (assetSearchList.length) {
             let assetSearches: MosaicSearch[] = await Promise.all<MosaicSearch>(assetSearchList);
 
-            WalletUtils.assignAccAssetPage(assetSearches, accAssetPage, assetList);
+            WalletUtils.assignAccAssetPage(assetSearches, accAssetPage, assetList, tempCreatorPubKey, cachedCount);
             assetSearchList = [];
+            tempCreatorPubKey = [];
+            cachedCount = [];
 
             await delay(250);
         }
 
         let allAccs: MyAccount[] = wallet.accounts.map(x => x as MyAccount).concat(wallet.others.map(x => x as MyAccount));
+        let publicKeyWithNewData = accAssetPage.map(x => x.publicKey);
+        let accsWithCachedData = allAccs.filter(x => !publicKeyWithNewData.includes(x.publicKey) && accCreatorCount[x.publicKey]);
+
+        if(accsWithCachedData.length){
+            let tempAssetInfo: AssetInfo[] = [];
+            for(let i = 0; i < accsWithCachedData.length; ++i){
+                let accPublicKey = accsWithCachedData[i].publicKey;
+    
+                let indexes = [], newI = -1;
+                while ((newI = allLoadedAssetInfoCreators.indexOf(accPublicKey, newI+1)) != -1){
+                    indexes.push(newI);
+                }
+
+                for(let y=0; y < indexes.length; ++y){
+                    tempAssetInfo.push(AppState.assetsInfo[indexes[y]]);
+                }
+            }
+            WalletUtils.updatePendingAssetInfo(tempAssetInfo);
+            WalletUtils.updateWalletNonHoldingAsset(wallet, tempAssetInfo);
+        }
 
         for(let i = 0; i < accAssetPage.length; ++i){
             let totalPages = accAssetPage[i].totalPages;
@@ -2291,6 +2346,10 @@ export class WalletUtils {
 
     static async updateWalletNonHoldingAsset(wallet: Wallet, assetList: AssetInfo[]){
 
+        if(assetList.length === 0){
+            return;
+        }
+
         for(let i =0; i < wallet.accounts.length; ++i){
 
             let creatorAssetsInfo = assetList.filter(x => x.creator === wallet.accounts[i].publicKey);
@@ -2309,11 +2368,15 @@ export class WalletUtils {
                         newAsset.updateExpirationBlock();
                         wallet.accounts[i].assets.push(newAsset);
                     }
+
+                    if(y !==0 && y % 50 === 0){
+                        await delay(50);
+                    }
                 }
-                wallet.accounts[i].totalCreatedAsset = creatorAssetInfoLength;
+                // wallet.accounts[i].totalCreatedAsset = creatorAssetInfoLength;
             }
             else{
-                wallet.accounts[i].totalCreatedAsset = 0;
+                // wallet.accounts[i].totalCreatedAsset = 0;
             }
         }
 
@@ -2340,15 +2403,19 @@ export class WalletUtils {
                         await delay(50);
                     }
                 }
-                wallet.others[i].totalCreatedAsset = creatorAssetInfoLength;
+                // wallet.others[i].totalCreatedAsset = creatorAssetInfoLength;
             }else{
-                wallet.others[i].totalCreatedAsset = 0;
+                // wallet.others[i].totalCreatedAsset = 0;
             }
         }
     }
 
     // part of list, not for whole list of Asset
     static updateAccsNonHoldingAsset(accs: MyAccount[], assetList: AssetInfo[]){
+
+        if(assetList.length === 0){
+            return;
+        }
 
         for(let i =0; i < accs.length; ++i){
 
@@ -2375,6 +2442,9 @@ export class WalletUtils {
 
     static updatePendingAssetInfo(assetsInfo: AssetInfo[]){
 
+        if(assetsInfo.length === 0){
+            return;
+        }
 
         let idToCompare = assetsInfo.map(x => x.idHex);
         let pendingAssetsInfo = Array.from(new Set(AppState.pendingAssetsInfo));
@@ -2392,6 +2462,10 @@ export class WalletUtils {
     }
 
     static addAppStateAssetInfo(assetsInfo: AssetInfo[]){
+
+        if(assetsInfo.length === 0){
+            return;
+        }
 
         let assetsInfoId = AppState.assetsInfo.map(x => x.idHex);
 
@@ -2436,16 +2510,20 @@ export class WalletUtils {
         }
     }
 
-    static assignAccAssetPage(assetsSearches: MosaicSearch[], accAssetPage: AccountAssetPage[], assetInfoList: AssetInfo[]){
+    static assignAccAssetPage(assetsSearches: MosaicSearch[], accAssetPage: AccountAssetPage[], assetInfoList: AssetInfo[], tempCreatorKey: string[], cachedCount: number[]){
 
         for(let i = 0; i < assetsSearches.length; ++i){
             if(assetsSearches[i].pagination.totalEntries){
                 let assetsInfo = assetsSearches[i].mosaicsInfo;
                 let newAccAssetPage: AccountAssetPage = {
-                    publicKey: assetsInfo[0].owner.publicKey,
+                    publicKey: tempCreatorKey[i],
                     totalPages: assetsSearches[i].pagination.totalPages,
                     totalEntries: assetsSearches[i].pagination.totalEntries,
                     currentPage: assetsSearches[i].pagination.pageNumber,
+                }
+
+                if(newAccAssetPage.totalEntries === cachedCount[i]){
+                    continue;
                 }
                 
                 accAssetPage.push(newAccAssetPage);
