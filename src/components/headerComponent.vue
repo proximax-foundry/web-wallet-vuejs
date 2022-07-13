@@ -161,6 +161,9 @@ export default defineComponent({
     const newNotificationCount = ref(0);
     const notificationLoading = ref(false);
     let notificationTimeout = 0;
+    let doRecheckAssetsNamesInterval = 0;
+    let doConfirmedTxnCheckingInterval = 0;
+    let doTxnCheckingInterval = 0;
     const isHoverCreate = ref(false);
     const isShowCreate = ref(false);
     const isHoverCreatePanel = ref(false);
@@ -300,10 +303,28 @@ export default defineComponent({
     //     }
     //   );
     // }, 60000);
+    const doLogout = ()=>{
+      try{
+        if(doRecheckAssetsNamesInterval){
+          clearInterval(doRecheckAssetsNamesInterval);
+        }
+
+        if(doConfirmedTxnCheckingInterval){
+          clearInterval(doConfirmedTxnCheckingInterval);
+        }
+
+        if(doTxnCheckingInterval){
+          clearInterval(doTxnCheckingInterval);
+        }
+      }catch(error){
+
+      }
+    }
 
     const currentNetworkType = computed(()=> networkState.currentNetworkProfile ? AppState.networkType : null);
     const walletName = computed(()=>walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.name:'')
     const logout = () => {
+      doLogout();
       WalletStateUtils.doLogout();
       AppState.doLogout();
       ListenerStateUtils.reset();
@@ -406,9 +427,7 @@ export default defineComponent({
 
       if(loginStatus.value && AppState.isReady){
 
-        await WalletUtils.checkConfirmedTxnChecking();
-
-        setTimeout(doConfirmedTxnChecking, 60000); // 1 minute
+        doConfirmedTxnCheckingInterval = setInterval(WalletUtils.checkConfirmedTxnChecking, 60000); // 1 minute
       }
       else if(loginStatus.value && !AppState.isReady){
         setTimeout(doConfirmedTxnChecking, 100);
@@ -419,23 +438,24 @@ export default defineComponent({
 
       if(loginStatus.value && AppState.isReady){
 
-        await WalletUtils.recheckAssetsNames();
-
-        setTimeout(doRecheckAssetsNames, 60000 * 5); // 5 minute
+        doRecheckAssetsNamesInterval = setInterval(WalletUtils.recheckAssetsNames, 60000 * 5); // 5 minute
       }
       else if(loginStatus.value && !AppState.isReady){
         setTimeout(doRecheckAssetsNames, 100);
       }
     }
 
-    const doTxnChecking = async ()=>{
-      if(loginStatus.value && AppState.isReady){
+    const checkTxnStatus = async ()=>{
 
-        let endStatuses = ["failed", transactionGroupType.CONFIRMED];
+      let endStatuses = ["failed", transactionGroupType.CONFIRMED];
         let txnsHash1 = AppState.txnActivityLog.filter(x => x.checkedNum < 10 && !endStatuses.includes(x.status)).map(x => x.txnHash);
         let txnsHash2 = AppState.txnCosignLog.filter(x => x.checkedNum < 10 && !endStatuses.includes(x.status)).map(x => x.txnHash);
         let txnsHash3 = AppState.txnSwapLog.filter(x => x.checkedNum < 10 && !endStatuses.includes(x.status)).map(x => x.txnHash);
         let allTransasctionHash = txnsHash1.concat(txnsHash2, txnsHash3);
+
+        if(allTransasctionHash.length === 0){
+          return;
+        }
 
         let dataPerRequest = 50;
 
@@ -540,8 +560,12 @@ export default defineComponent({
             txnSwap.checkedNum = txnSwap.checkedNum + 1;
           }
         }
+    }
 
-        setTimeout(doTxnChecking, targetBlockSeconds.value * 1000);
+    const doTxnChecking = async ()=>{
+      if(loginStatus.value && AppState.isReady){
+
+        doTxnCheckingInterval = setInterval(checkTxnStatus, targetBlockSeconds.value * 1000);
       }
       else if(loginStatus.value && !AppState.isReady){
         setTimeout(doTxnChecking, 100);
