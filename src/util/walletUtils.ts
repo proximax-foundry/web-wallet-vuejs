@@ -2476,7 +2476,7 @@ export class WalletUtils {
                 AppState.assetsInfo.push(assetsInfo[i]);
             }
             else{
-                let assetInfo = AppState.assetsInfo[index]
+                let assetInfo = AppState.assetsInfo[index];
                 WalletUtils.assetInfoUpdateFromAssetInfo(assetsInfo[i], assetInfo, assetsInfo[i].namespaceNames.length > 0);
             }
         }
