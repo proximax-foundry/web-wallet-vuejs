@@ -15,6 +15,8 @@
             <div class="col-span-2">Balance</div>
             <div>Creator</div>
         </div>
+        <input class="ml-6" type="checkbox" id="checkbox" value="showZeroBalance">
+        <label for="checkbox" class="ml-2 text-xs">Show 0 Balance</label><br>
         <div v-for="(mosaic, index) in mosaics" :key="index">
             <div class="grid grid-cols-7 text-xs my-4 px-6 items-center">
                 <a :href="explorerLink(mosaic.id)" target=_new class="col-span-2"><div  class="uppercase inline-block text-xs mt-1.5 cursor-pointer break-all text-blue-primary pr-7 ">{{mosaic.id}}</div></a>
@@ -61,7 +63,7 @@
 </template>
 
 <script>
-import { ref, computed, getCurrentInstance } from "vue";
+import { ref, computed, getCurrentInstance, shallowRef } from "vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import { walletState } from '@/state/walletState';
 import { Helper } from '@/util/typeHelper';
@@ -78,6 +80,7 @@ export default {
         address: String,
     },
     setup(p){
+        const showZeroBalance = shallowRef(false)
         const wallet = walletState.currentLoggedInWallet 
         const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
         const acc= computed(()=>{
@@ -130,8 +133,11 @@ export default {
                 isCreator: acc.value? (i.creator == acc.value.publicKey? true:false):false
             });
             });
-            
-            return mosaicOption;
+            if(showZeroBalance.value){
+                return mosaicOption
+            }else{
+                return mosaicOption.filter(asset=>asset.balance!=0)
+            }
         });
 
         const toggleMenu = ref([])
