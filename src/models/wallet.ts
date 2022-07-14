@@ -153,6 +153,10 @@ export class Wallet{
             return x.convertToSimpleAccount();
         });
 
-        return new SimpleWallet(this.name, this.networkName, simpleAccounts);
+        let newSimpleWallet = new SimpleWallet(this.name, this.networkName, simpleAccounts);
+        newSimpleWallet.contacts = this.contacts;
+        newSimpleWallet.labels = this.labels;
+
+        return newSimpleWallet;
     }
 }
