@@ -107,7 +107,7 @@
       <Column :header="$t('general.sda')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-center">
-            <img src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="{ value: '<tiptitle>' +t('general.sdaFull')+'</tiptitle><tiptext>' + displaySDAs(data.sda) + '</tiptext>', escape: true}">
+            <img src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="'<tiptitle>' +t('general.sdaFull')+'</tiptitle><tiptext>' + displayAsset(data.sda) + '</tiptext>'">
             <span v-else>-</span>
           </div>
         </template>
@@ -161,6 +161,7 @@ import { AppState } from '@/state/appState';
     const props = defineProps({
         transaction: Array
     })
+    const nativeToken = computed(()=>AppState.nativeToken.label)
     const wideScreen = ref(false) 
     const screenResizeHandler = () => {
         if(window.innerWidth < 1024){
