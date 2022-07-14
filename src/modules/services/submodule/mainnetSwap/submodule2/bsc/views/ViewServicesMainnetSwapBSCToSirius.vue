@@ -87,9 +87,24 @@
             </div>
           </div>
           <SupplyInputClean :disabled="disableAmount" v-model="amount" :balance="balance" :placeholder="'BEP20 ' + `${selectedToken?selectedToken.name:''}`" type="text" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':amount>=minAmount?$t('swap.insufficientTokenBalance'):`Min. amount is ${minAmount}(${feeAmount} ${selectedToken.name.toUpperCase()} will deducted for transaction fee)`" :decimal="tokenDivisibility"  />
-          <div class="text-left">
-            <SelectInputAccount v-model="siriusAddress" :placeholder="$t('swap.toSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
+          <div class="flex">
+            <AddressInputClean :placeholder="$t('transfer.transferPlaceholder')" v-model="siriusAddress" v-debounce:1000="checkRecipient" :showError="showAddressError" />
+            <div @click="toggleContact=!toggleContact" class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 ' >
+              <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
+              <div class='text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.select')}}</div>
+            </div>
           </div>
+           <div v-if="toggleContact" class=" border ">
+          <div class='text-xxs text-left text-gray-300 font-semibold py-2 px-2 uppercase'>{{$t('general.importFromAB')}}</div>
+          <div v-for="(item, number) in contacts" :key="number" class="cursor-pointer">
+            <div @click="siriusAddress=item.value;toggleContact=false" class="flex justify-between">
+              <div v-if="number%2==0" class="text-xs py-2 bg-gray-100 pl-2 w-full text-left">{{item.label}}</div>
+              <div v-if="number%2==1" class="text-xs py-2 pl-2 w-full text-left">{{item.label}}</div>
+              <div v-if="number%2==0" class="ml-auto pr-2 text-xxs py-2 font-semibold text-blue-primary bg-gray-100 uppercase">{{$t('general.select')}}</div>
+              <div v-if="number%2==1" class="ml-auto mr-2 text-xxs py-2 font-semibold text-blue-primary uppercase">{{$t('general.select')}}</div>
+            </div>
+          </div>
+        </div>
           <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center">
             {{ amountReceived }} {{selectedToken?selectedToken.name.toUpperCase():''}}
             <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken?selectedToken.name=='metx'?true:false:false" class=" w-5 h-5 ml-4"> 
@@ -262,13 +277,13 @@
   </div>
 </template>
 <script>
-import { computed, ref, watch, onBeforeUnmount } from "vue";
+import { computed, ref, watch, onBeforeUnmount, shallowRef } from "vue";
 import SupplyInputClean from '@/components/SupplyInputClean.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
-import SelectInputAccount from '@/components/SelectInputAccount.vue';
 import { walletState } from '@/state/walletState';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import { ethers } from 'ethers';
 import { abi, SwapUtils } from '@/util/swapUtils';
 import { networkState } from '@/state/networkState';
@@ -276,25 +291,119 @@ import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
+import { NamespaceUtils } from '@/util/namespaceUtils';
+import { ChainUtils } from '@/util/chainUtils';
+import {Address} from 'tsjs-xpx-chain-sdk'
 
 export default {
   name: 'ViewServicesMainnetSwapBSCToSirius',
 
   components: {
+    AddressInputClean,
     SupplyInputClean,
     SwapCertificateComponent,
-    SelectInputAccount,
   },
 
   setup() {
     let verifyingTxn;
     const {t} = useI18n();
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+    const toggleContact = shallowRef(false)
+    const verifyMetaMaskPlugin = ref(true); 
+    const siriusAddress = ref('');
+    const showAddressError = shallowRef(true); 
+     const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+    watch(siriusAddress,n=>{
+      if(n.length==40 || n.length==46){
+        checkRecipient()
+      }else{
+        showAddressError.value = true
+      }
+    })
+  const checkNamespace = async (nsId)=>{
+    return await NamespaceUtils.getLinkedAddress(nsId, chainAPIEndpoint.value);
+  } 
+  const checkRecipient = () =>{
+    if(!walletState.currentLoggedInWallet){
+        return;
+    }
+    try {
+      let recipientAddress = Helper.createAddress(siriusAddress.value);
+      let networkOk = Helper.checkAddressNetwork(recipientAddress, AppState.networkType);
+      if(!networkOk){
+        showAddressError.value = true;
+      }
+      else{
+        showAddressError.value = false;
+      }
+    } catch (error) {
+      try{
+        let namespaceId = Helper.createNamespaceId(siriusAddress.value);
+        checkNamespace(namespaceId).then((address)=>{
+          siriusAddress.value = address.plain();
+          showAddressError.value = false;
+        }).catch((error)=>{
+          showAddressError.value = true;
+        });
+      }
+      catch(error){
+        showAddressError.value = true;
+      }
+    }
+  }
 
-    const verifyMetaMaskPlugin = ref(true);
-    
-    
-
+  const accounts = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return [];
+      }
+      let accounts = walletState.currentLoggedInWallet.accounts.map(
+        (acc)=>{ 
+          return { 
+            name: acc.name,
+            balance: acc.balance,
+            address: acc.address,
+            publicKey: acc.publicKey,
+            isMultisig: acc.getDirectParentMultisig().length ? true: false
+          }; 
+        });
+        
+       
+       let otherAccounts =walletState.currentLoggedInWallet.others.filter((acc)=> acc.type === "MULTISIG").map(
+        (acc)=>{ 
+          return { 
+            name: acc.name,
+            balance: acc.balance,
+            address: acc.address,
+            publicKey: acc.publicKey,
+            isMultisig: true
+          }; 
+        });
+        return accounts.concat(otherAccounts);
+      
+    });
+   const contacts = computed(() => {
+      if(!walletState.currentLoggedInWallet){
+        return [];
+      }
+      const wallet = walletState.currentLoggedInWallet;
+      var contact = [];
+      accounts.value.forEach((element) => {
+        contact.push({ 
+          value: Address.createFromRawAddress(element.address).pretty() ,
+          label: element.name + " - "+t('general.ownerAcc'),
+        });
+      });
+      if (wallet.contacts != undefined) {
+        wallet.contacts.forEach((element) => {
+          contact.push({
+            value: Address.createFromRawAddress(element.address).pretty(),
+            label: element.name + " - "+t('general.contact'),
+          });
+        });
+      }
+      return contact;
+     
+    });
     onBeforeUnmount(() => {
        if(verifyingTxn){
          clearInterval(verifyingTxn);
@@ -562,21 +671,22 @@ export default {
       }
     })
     const disableAmount = ref(false);
-    const siriusAddress = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
+   
     const err = ref('');
     const serviceErr = ref('');
     const isDisabledSwap = computed(() =>
       // verify it has been connected to MetaMask too
-      !(amount.value > 0 && siriusAddress.value != '' && !err.value && (balance.value >= amount.value) && amount.value>=minAmount.value)
+      !(amount.value > 0 && showAddressError.value == false && !err.value && (balance.value >= amount.value) && amount.value>=minAmount.value)
     );
     const amount = ref('0');
 
     const siriusName = computed(() => {
-      let accountSelected = walletState.currentLoggedInWallet.accounts.find(account => account.address == siriusAddress.value);
-      if(!accountSelected){
-        accountSelected = walletState.currentLoggedInWallet.others.find(account => account.address == siriusAddress.value);
+      let accountSelected = walletState.currentLoggedInWallet.accounts.find(account => account.address == siriusAddress.value) || walletState.currentLoggedInWallet.others.find(account => account.address == siriusAddress.value)
+      if(accountSelected){
+        return accountSelected.name;
+      }else{
+        return 'ACCOUNT-' + siriusAddress.value.substring(siriusAddress.value.length-4,siriusAddress.value.length)
       }
-      return accountSelected.name;
     });
 
     const amountReceived = computed(() => {
@@ -784,6 +894,7 @@ export default {
 
     return {
       recheckMetamask,
+      contacts,
       err,
       balance,
       isInstallMetamask,
@@ -802,6 +913,7 @@ export default {
       disableAmount,
       isDisabledSwap,
       savedCheck,
+      toggleContact,
       step1,
       step2,
       step3,
@@ -844,7 +956,9 @@ export default {
       feeAmount,
       tokenDivisibility,
       tokenList,
-      selectedToken
+      selectedToken,
+      checkRecipient,
+      showAddressError,
     };
   },
 }
