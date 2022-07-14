@@ -93,9 +93,12 @@ import AccountTabs from "@/modules/account/components/AccountTabs.vue"
 
   const isHover = ref([])
 
-  const namespaces = ref<{name:string,id: string,linkType :AliasType,linkedAssetAddress:string,expiringBlock: number,isActive: boolean}[]>([])
+  const namespaces = ref<{name:string,id: string,linkType :AliasType,linkedAssetAddress:string,expiringBlock: number | string,isActive: boolean}[]>([])
   
   const getNamespaceInfo = () =>{
+    if(!acc.value){
+      return
+    }
     acc.value.namespaces.forEach(namespace=>{
       namespaces.value.push({
         name:namespace.name,
