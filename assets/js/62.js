@@ -1,24 +1,13 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([[62],{
 
-/***/ "./src/modules/dashboard/img/icon-link-new.svg":
-/*!*****************************************************!*\
-  !*** ./src/modules/dashboard/img/icon-link-new.svg ***!
-  \*****************************************************/
+/***/ "./src/assets/img/icon-info.svg":
+/*!**************************************!*\
+  !*** ./src/assets/img/icon-info.svg ***!
+  \**************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("module.exports = __webpack_require__.p + \"assets/img/icon-link-new.d756c673.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/icon-link-new.svg?");
-
-/***/ }),
-
-/***/ "./src/modules/dashboard/img/icon-more-options.svg":
-/*!*********************************************************!*\
-  !*** ./src/modules/dashboard/img/icon-more-options.svg ***!
-  \*********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-eval("module.exports = __webpack_require__.p + \"assets/img/icon-more-options.54384d4a.svg\";\n\n//# sourceURL=webpack:///./src/modules/dashboard/img/icon-more-options.svg?");
+eval("module.exports = __webpack_require__.p + \"assets/img/icon-info.c16cc71f.svg\";\n\n//# sourceURL=webpack:///./src/assets/img/icon-info.svg?");
 
 /***/ })
 
