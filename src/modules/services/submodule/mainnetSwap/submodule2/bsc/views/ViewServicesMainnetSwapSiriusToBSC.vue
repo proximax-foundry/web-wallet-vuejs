@@ -27,7 +27,6 @@
           </option>
         </select>
         <div class="text-sm my-5 font-bold">{{$t('general.transactionDetails')}}</div>
-        <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <div class="error error_box mb-5" v-if="xpxFeeErr">{{$t('swap.failCoverTxFee')}}</div>
         <SelectInputAccountOutgoingSwap :otherToken='selectedToken.namespace' :otherTokenId='selectedToken.assetId' :name='selectedToken.name' v-model="siriusAddress" :placeholder="$t('swap.fromSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" :divisibility="tokenDivisibility"/>
         <div class="relative">
@@ -65,6 +64,7 @@
           </div>
           <div class="mb-5">Total Transaction Fee: {{minBalanceAmount}} {{currentNativeTokenName}}</div>
           <PasswordInputClean :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
+          <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
           <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center uppercase">
             {{ amount }} {{selectedToken.name}} 
             <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken.name=='metx'" class="w-5 h-5 ml-4"> 
