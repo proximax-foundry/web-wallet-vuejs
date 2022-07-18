@@ -55,11 +55,11 @@
           <div class="w-12 lg:w-16 flex flex-row items-center left-gray-line">
             <router-link :to="{name : 'ViewNotification'}" class="text-center w-full h-7 relative">
               <span class="flex h-5 w-5 items-center justify-center absolute notification_counter" v-if="isNewNotification">
-                <span class="animate-ping absolute inline-flex rounded-full bg-blue-primary opacity-75 h-4 w-4"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-primary"></span>
+                <span class="animate-ping absolute inline-flex rounded-full bg-orange-primary opacity-75 h-4 w-4"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-orange-primary"></span>
               </span>
               <span class="flex items-center justify-center absolute notification_counter" v-else>
-                <span class="relative inline-flex rounded-full z-20 h-4 w-4 bg-blue-primary text-xxs text-white items-center justify-center">{{ newNotificationCount }}</span>
+                <span v-if="newNotificationCount>0" class="relative inline-flex rounded-full z-20 h-4 w-4 bg-orange-primary text-xxs text-white items-center justify-center">{{ newNotificationCount }}</span>
               </span>
               <div class="mt-2 h-3 w-3 lg:mt-1 lg:h-5 lg:w-5 inline-block">
                 <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100">
@@ -133,6 +133,8 @@ import { WalletUtils } from "@/util/walletUtils";
 import {useI18n} from 'vue-i18n'
 import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
 import { NotificationUtils } from '@/util/notificationUtils';
+import { UnitConverter } from '@/util/unitConverter';
+import { TimeUnit } from '@/models/const/timeUnit';
 
 export default defineComponent({
   components: {
@@ -157,9 +159,17 @@ export default defineComponent({
 
     const isNewNotification = ref(false);
     const newNotificationCount = ref(0);
+    const notificationLoading = ref(false);
+    let notificationTimeout = 0;
+    let doRecheckAssetsNamesInterval = 0;
+    let doConfirmedTxnCheckingInterval = 0;
+    let doTxnCheckingInterval = 0;
     const isHoverCreate = ref(false);
     const isShowCreate = ref(false);
     const isHoverCreatePanel = ref(false);
+
+    const transactionGroupType = Helper.getTransactionGroupType(); 
+
     const setHoverCreateToTrue = () => {
       isHoverCreate.value = true;
       isShowCreate.value = true;
@@ -215,7 +225,7 @@ export default defineComponent({
       // }
       walletState.currentLoggedInWallet.setDefaultAccountByName(data.name);
       walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
-      toast.add({severity:'success', summary: t('home.switchDefault') , detail: data.name, group: 'br', life: 3000});
+      toast.add({severity:'success', summary: t('home.switchDefault') , detail: data.name, group: 'br-custom', life: 3000});
     }
 
     emitter.on('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', (payload) => {
@@ -244,6 +254,7 @@ export default defineComponent({
       return options;
     });
 
+    /*
     watch(()=> networkState.availableNetworks, (availableNetworks)=>{
       let options = [];
 
@@ -254,6 +265,7 @@ export default defineComponent({
       }
       chainsNetworks.value = options;
     }, true);
+    */
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
 
@@ -291,13 +303,33 @@ export default defineComponent({
     //     }
     //   );
     // }, 60000);
+    const doLogout = ()=>{
+      try{
+        if(doRecheckAssetsNamesInterval){
+          clearInterval(doRecheckAssetsNamesInterval);
+        }
+
+        if(doConfirmedTxnCheckingInterval){
+          clearInterval(doConfirmedTxnCheckingInterval);
+        }
+
+        if(doTxnCheckingInterval){
+          clearInterval(doTxnCheckingInterval);
+        }
+      }catch(error){
+
+      }
+    }
 
     const currentNetworkType = computed(()=> networkState.currentNetworkProfile ? AppState.networkType : null);
     const walletName = computed(()=>walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.name:'')
     const logout = () => {
+      doLogout();
       WalletStateUtils.doLogout();
+      AppState.doLogout();
+      ListenerStateUtils.reset();
       router.push({ name: "Home"});
-      console.log('logout')
+      console.log('logout');
     };
 
     const totalBalance = computed(()=>{
@@ -317,53 +349,226 @@ export default defineComponent({
       return totalAmount;
     });
 
-    let listener = ref(new Connector("", []));
+    // let listener = ref(new Connector("", []));
 
-    const connectListener = (skipIfEndpointHaveValue = true)=>{
+    // const connectListener = (skipIfEndpointHaveValue = true)=>{
 
-      if(skipIfEndpointHaveValue && listener.value.endpoint !== ""){
-        return;
-      }
-      //listener.connectNewEndpoint(ChainUtils.buildWSEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
-      if(listener.value.endpoint){
-        ListenerStateUtils.lightReset();
-      }
-      else{
-        ListenerStateUtils.reset();
-      }
-      listener.value.terminate();
+    //   if(skipIfEndpointHaveValue && listener.value.endpoint !== ""){
+    //     return;
+    //   }
+    //   //listener.connectNewEndpoint(ChainUtils.buildWSEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+    //   if(listener.value.endpoint){
+    //     ListenerStateUtils.lightReset();
+    //   }
+    //   else{
+    //     ListenerStateUtils.reset();
+    //   }
+    //   listener.value.terminate();
 
-      if(walletState.currentLoggedInWallet === null || walletState.currentLoggedInWallet === undefined){
-        return;
-      }
+    //   if(walletState.currentLoggedInWallet === null || walletState.currentLoggedInWallet === undefined){
+    //     return;
+    //   }
 
-      let accountsAddress = walletState.currentLoggedInWallet.accounts.map((acc)=> acc.address);
-      let othersAddress = walletState.currentLoggedInWallet.others.map((acc)=> acc.address);
+    //   let accountsAddress = walletState.currentLoggedInWallet.accounts.map((acc)=> acc.address);
+    //   let othersAddress = walletState.currentLoggedInWallet.others.map((acc)=> acc.address);
 
-      let allAddress = Array.from(new Set(accountsAddress.concat(othersAddress)));
+    //   let allAddress = Array.from(new Set(accountsAddress.concat(othersAddress)));
 
-      //listener.addresses = allAddress;
-      //console.log(allAddress);
-      listener.value = new Connector(AppState.wsNodeFullURL, allAddress);
+    //   //listener.addresses = allAddress;
+    //   //console.log(allAddress);
+    //   listener.value = new Connector(AppState.wsNodeFullURL, allAddress);
 
-      listener.value.startListen();
-    }
+    //   listener.value.startListen();
+    // }
 
-    const terminateListener = () =>{
-      listener.value.endpoint = "";
-      listener.value.terminate();
-    }
+    // const terminateListener = () =>{
+    //   listener.value.endpoint = "";
+    //   listener.value.terminate();
+    // }
 
     const doLogin = async () =>{
       if(loginStatus.value && AppState.isReady){
         await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
-        let notification = await NotificationUtils.getNotification();
-        newNotificationCount.value = notification.length;
-        isNewNotification.value = NotificationUtils.highlightNewNotification();
-        connectListener();
+        doGetNotification();
+        //connectListener();
       }
       else if(loginStatus.value && !AppState.isReady){
         setTimeout(doLogin, 100);
+      }
+    }
+
+    const doGetNotification = async()=>{
+      if(loginStatus.value && AppState.isReady && notificationLoading.value === false){
+        if(notificationTimeout !== null){
+          try {
+            clearTimeout(notificationTimeout);  
+          } catch (error) {
+            
+          }
+        }
+        notificationLoading.value = true;
+        let notification = await NotificationUtils.getNotification();
+        newNotificationCount.value = notification.length;
+        isNewNotification.value = NotificationUtils.highlightNewNotification(); 
+
+        notificationLoading.value = false;
+        notificationTimeout = setTimeout(doGetNotification, 90000); // 1.5 minutes- 90 seconds
+      }
+      else if(loginStatus.value && !AppState.isReady){
+        setTimeout(doGetNotification, 100);
+      }
+    }
+
+    const targetBlockSeconds = computed(()=>{
+      return UnitConverter.configReturn(networkState.currentNetworkProfileConfig.blockGenerationTargetTime, TimeUnit.SECOND);
+    })
+
+    const doConfirmedTxnChecking = async ()=>{
+
+      if(loginStatus.value && AppState.isReady){
+
+        doConfirmedTxnCheckingInterval = setInterval(WalletUtils.checkConfirmedTxnChecking, 60000); // 1 minute
+      }
+      else if(loginStatus.value && !AppState.isReady){
+        setTimeout(doConfirmedTxnChecking, 100);
+      }
+    }
+
+    const doRecheckAssetsNames = async ()=>{
+
+      if(loginStatus.value && AppState.isReady){
+
+        doRecheckAssetsNamesInterval = setInterval(WalletUtils.recheckAssetsNames, 60000 * 5); // 5 minute
+      }
+      else if(loginStatus.value && !AppState.isReady){
+        setTimeout(doRecheckAssetsNames, 100);
+      }
+    }
+
+    const checkTxnStatus = async ()=>{
+
+      let endStatuses = ["failed", transactionGroupType.CONFIRMED];
+        let txnsHash1 = AppState.txnActivityLog.filter(x => x.checkedNum < 10 && !endStatuses.includes(x.status)).map(x => x.txnHash);
+        let txnsHash2 = AppState.txnCosignLog.filter(x => x.checkedNum < 10 && !endStatuses.includes(x.status)).map(x => x.txnHash);
+        let txnsHash3 = AppState.txnSwapLog.filter(x => x.checkedNum < 10 && !endStatuses.includes(x.status)).map(x => x.txnHash);
+        let allTransasctionHash = txnsHash1.concat(txnsHash2, txnsHash3);
+
+        if(allTransasctionHash.length === 0){
+          return;
+        }
+
+        let dataPerRequest = 50;
+
+        let numOfRequest = Math.ceil(allTransasctionHash.length / dataPerRequest);
+
+        let requests = [];
+
+        for(let i =0; i < numOfRequest; ++i){
+          let startIndex = i * dataPerRequest;
+          let endIndex = (i + 1) * dataPerRequest;
+
+          let requestData = allTransasctionHash.slice(startIndex, endIndex);
+
+          try {
+            requests.push(AppState.chainAPI.transactionAPI.getTransactionsStatuses(requestData));
+          } catch (error) {
+            continue;
+          }
+        }
+
+        let tempTransactionStatuses = await Promise.all(requests);
+
+        let transactionStatuses= tempTransactionStatuses.flat();
+         
+        let txnsHashFound = [];
+        let txnHashesConfirmed = [];
+
+        for(let i=0; i < transactionStatuses.length; ++i){
+          txnsHashFound.push(transactionStatuses[i].hash);
+
+          if(txnsHash1.includes(transactionStatuses[i].hash)){
+            let txnActivity = AppState.txnActivityLog.find(x => x.txnHash === transactionStatuses[i].hash);
+
+            if(txnActivity.status !== transactionStatuses[i].group){
+              txnActivity.status = transactionStatuses[i].group;
+             
+              if(txnActivity.status === "failed"){
+                txnActivity.statusMsg = transactionStatuses[i].status;
+              }
+              else if(txnActivity.status === transactionGroupType.CONFIRMED){
+                txnHashesConfirmed.push(txnActivity.txnHash);
+                listenerState.allConfirmedTransactionsHash.push(txnActivity.txnHash);
+              }
+
+              addTxnToastMessage(txnActivity.status, transactionStatuses[i].hash, txnActivity.statusMsg);
+            }
+          }
+          else if(txnsHash2.includes(transactionStatuses[i].hash)){
+            let txnCosign = AppState.txnCosignLog.find(x => x.txnHash === transactionStatuses[i].hash);
+
+            if(txnCosign.status !== transactionStatuses[i].group){
+              txnCosign.status = transactionStatuses[i].group;
+             
+              if(txnCosign.status === "failed"){
+                txnCosign.statusMsg = transactionStatuses[i].status;
+              }
+              else if(txnActivity.status === transactionGroupType.CONFIRMED){
+                txnHashesConfirmed.push(txnActivity.txnHash);
+                listenerState.allConfirmedTransactionsHash.push(txnActivity.txnHash);
+              }
+
+              addTxnToastMessage(txnCosign.status, transactionStatuses[i].hash, txnCosign.statusMsg);
+            }
+          }
+          else{
+            let txnSwap = AppState.txnSwapLog.find(x => x.txnHash === transactionStatuses[i].hash);
+
+            if(txnSwap.status !== transactionStatuses[i].group){
+              txnSwap.status = transactionStatuses[i].group;
+             
+              if(txnSwap.status === "failed"){
+                txnSwap.statusMsg = transactionStatuses[i].status;
+              }
+              else if(txnActivity.status === transactionGroupType.CONFIRMED){
+                txnHashesConfirmed.push(txnActivity.txnHash);
+                listenerState.allConfirmedTransactionsHash.push(txnActivity.txnHash);
+              }
+
+              addTxnToastMessage(txnSwap.status, transactionStatuses[i].hash, txnSwap.statusMsg, "swap");
+            }
+          }
+        }
+
+        if(txnHashesConfirmed.length){
+          ListenerStateUtils.fireRecountConfirmed();
+        }
+        WalletUtils.transactionConfirmed(txnHashesConfirmed);
+
+        let txnsHashNotFound = allTransasctionHash.filter(x => !txnsHashFound.includes(x));
+
+        for(let i =0; i < txnsHashNotFound.length; ++i){
+          if(txnsHash1.includes(txnsHashNotFound[i])){
+            let txnActivity = AppState.txnActivityLog.find(x => x.txnHash === txnsHashNotFound[i]);
+            txnActivity.checkedNum = txnActivity.checkedNum + 1;
+          }
+          else if(txnsHash2.includes(txnsHashNotFound[i])){
+            let txnCosign = AppState.txnCosignLog.find(x => x.txnHash === txnsHashNotFound[i]);
+            txnCosign.checkedNum = txnCosign.checkedNum + 1; 
+          }
+          else{
+            let txnSwap = AppState.txnSwapLog.find(x => x.txnHash === txnsHashNotFound[i]);
+            txnSwap.checkedNum = txnSwap.checkedNum + 1;
+          }
+        }
+    }
+
+    const doTxnChecking = async ()=>{
+      if(loginStatus.value && AppState.isReady){
+
+        doTxnCheckingInterval = setInterval(checkTxnStatus, targetBlockSeconds.value * 1000);
+      }
+      else if(loginStatus.value && !AppState.isReady){
+        setTimeout(doTxnChecking, 100);
       }
     }
 
@@ -380,27 +585,33 @@ export default defineComponent({
     }
 
     doLogin();
+    doTxnChecking();
+    doConfirmedTxnChecking();
+    doRecheckAssetsNames();
 
     watch(()=> loginStatus.value, async (newValue)=>{
       if(newValue){
         doLogin();
+        doTxnChecking();
+        doConfirmedTxnChecking();
+        doRecheckAssetsNames();
         emitter.emit('LOGIN');
       }
       else{
-        terminateListener();
+        // terminateListener();
         emitter.emit('LOGOUT');
       }
     })
 
     //const newBlockLength = computed(()=> listenerState.blockLength);
-    const currentBlockHeight = computed(()=> listenerState.currentBlock);
-    const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
-    const unconfirmedTxLength = computed(()=> listenerState.unconfirmedTxLength);
-    const transactionStatusLength = computed(()=> listenerState.transactionStatusLength);
-    const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
-    const cosignatureAddedTxLength = computed(()=> listenerState.cosignatureAddedTxLength);
+    const currentBlockHeight = computed(()=> AppState.readBlockHeight);
+    // const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
+    // const unconfirmedTxLength = computed(()=> listenerState.unconfirmedTxLength);
+    // const transactionStatusLength = computed(()=> listenerState.transactionStatusLength);
+    // const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
+    // const cosignatureAddedTxLength = computed(()=> listenerState.cosignatureAddedTxLength);
     const totalPendingNum = ref(0);
-    const transactionGroupType = Helper.getTransactionGroupType(); 
+    
 
     const doAutoAnnounce = async () => {
       if(!AppState.isReady){
@@ -475,7 +686,7 @@ export default defineComponent({
         setTimeout(doAutoAnnounce, 5000);
       }
       else{
-        toast.removeGroup("tr");
+        toast.removeGroup("tr-wait");
       }
     }, {immediate: true});
 
@@ -483,7 +694,7 @@ export default defineComponent({
       let newLength = newValue.length;
 
       if(newLength !== totalPendingNum.value){
-        toast.removeGroup("tr");
+        toast.removeGroup("tr-wait");
 
         if(newLength){
           let singularPluralText =  newLength > 1 ? "s" : "";
@@ -492,7 +703,7 @@ export default defineComponent({
                 severity:'info', 
                 summary: newLength +" "+ t('transaction.inQueue',newLength),
                 detail: t('transaction.dontRefresh'), 
-                group: 'tr'
+                group: 'tr-wait'
               }
           );
         }
@@ -501,162 +712,276 @@ export default defineComponent({
       totalPendingNum.value = newLength;
     }, {immediate: true});
 
-    watch(()=> currentBlockHeight.value, async()=>{
+    const createTxnHashExplorerLink = (txnHash)=>{
+      return `${networkState.currentNetworkProfile.chainExplorer.url}/${networkState.currentNetworkProfile.chainExplorer.hashRoute}/${txnHash}`;
+    }
 
-      listener.value.refreshTimer();
-    });
+    const addTxnToastMessage = (status, txnHash, statusMessage, extraData = "") =>{
+      let txnHashExplorerLink = createTxnHashExplorerLink(txnHash);
 
-     watch(()=> unconfirmedTxLength.value, (newValue, oldValue)=>{
-
-      if(newValue > oldValue){
-        let txLength = newValue - oldValue;
-        emitter.emit("TXN_UNCONFIRMED", txLength);
-        let singularPluralText =  txLength > 1 ? "s" : "";
+      if(status === "failed"){
+        toast.add({
+          severity:'error', 
+          summary: t('transaction.txError'), 
+          detail1: "Transaction Failed with error",
+          detail2: "Transaction Hash: ", 
+          detail3: txnHash,
+          detail4: statusMessage,
+          group: 'br-custom',
+          life: 10000
+       });
+      }
+      else if(status === transactionGroupType.UNCONFIRMED){
         toast.add(
           {
             severity:'warn', 
-            summary: t('transaction.txAdded',txLength), 
-            detail:  txLength+" "+t('transaction.txUnconfirmed',txLength),
-            group: 'br', 
+            summary: t('transaction.txAdded', 1), 
+            detail:  t('transaction.txUnconfirmed', 1),
+            detail2: "Transaction Hash: ",
+            detail3: txnHash,
+            url: txnHashExplorerLink,
+            group: 'br-custom', 
             life: 5000
           }
         );
       }
-     });
-
-     watch(()=> confirmedTxLength.value, (newValue, oldValue)=>{
-      if(newValue > oldValue){
-        WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, AppState.nativeToken.assetId);
-
-        let txLength = newValue - oldValue;
-
-        emitter.emit("TXN_CONFIRMED", txLength);
-
-        let transactionHashes = listenerState.allConfirmedTransactionsHash.slice(-txLength);
-
-        let swapTransactionsCount = 0;
-        let swapTransactionHash = [];
-
-        for(let i =0; i < listenerState.confirmedTransactions.length; ++i){
-          let txs = listenerState.confirmedTransactions[i].confirmedTransactions.filter((tx)=> transactionHashes.includes(tx.transactionInfo.hash));
-
-          for(let x=0; x < txs.length; ++x){
-            let tx = txs[x];
-            if(tx.type === TransactionType.TRANSFER && tx.message.payload && Helper.checkIsJSON(tx.message.payload)){
-              let parsedMessage = JSON.parse(tx.message.payload);
-
-              if(parsedMessage.type && parsedMessage.type.substr(0, 4) === "Swap"){
-                swapTransactionHash.push(tx.transactionInfo.hash);
-              }
-            }
-          }
-        }
-
-        swapTransactionsCount = new Set(swapTransactionHash).size;
-
-        let singularPluralText = swapTransactionsCount > 1 ? "s" : "";
-
-        if(swapTransactionsCount){
-          toast.add({
-              severity:'success', 
-              summary: t('transaction.swapTx',swapTransactionsCount),
-              detail:  swapTransactionsCount+" "+t('transaction.swapTx',swapTransactionsCount),
-              group: 'br', 
+      else if(status === transactionGroupType.PARTIAL){
+        toast.add({
+              severity:'warn', 
+              summary: t('transaction.partialAdded',1),
+              // detail:  t('transaction.partialAdded',1),
+              detail1: "Transaction Hash: ", 
+              detail3: txnHash,
+              url: txnHashExplorerLink,
+              group: 'br-custom', 
               life: 5000
+        });
+      }
+      else if(status === transactionGroupType.CONFIRMED){
+        if(extraData === "swap"){
+          toast.add({
+            severity:'success', 
+            summary: t('transaction.swapTx',1),
+            // detail:  t('transaction.swapTx',1),
+            detail1: "Transaction Hash: ", 
+            detail3: txnHash,
+            url: txnHashExplorerLink,
+            group: 'br-custom', 
+            life: 8000
           });
         }
-
-        let remainingTxLength = txLength - swapTransactionsCount;
-        if(remainingTxLength){
-          singularPluralText =  remainingTxLength > 1 ? "s" : "";
+        else{
           toast.add(
             {
               severity:'success', 
-              summary:  t('transaction.txConfirmed',remainingTxLength),
-              detail: txLength + " "+ t('transaction.txConfirmed',remainingTxLength), 
-              group: 'br', 
-              life: 5000
-          }
-        );
-        } 
-      }
-     });
-
-     watch(()=> transactionStatusLength.value, (newValue, oldValue)=>{
-
-      if(newValue > oldValue){
-        let txLength = newValue - oldValue;
-        let totalTxLength = listenerState.allTransactionStatus.length;
-        let lastIndex = totalTxLength - 1;
-
-        for(let i= 0; i < txLength; ++i){
-          let status = listenerState.allTransactionStatus[lastIndex - i].status;
-          let hash = listenerState.allTransactionStatus[lastIndex - i].hash;
-          emitter.emit("TXN_ERROR", hash);
-          if(AppState.trackingTxnHash.includes(hash)){
-            toast.add({
-              severity:'error', 
-              summary: t('transaction.txError'), 
-              detail:  t('transaction.txErrMsg',[status,hash]),
-              group: 'br', 
-              life: 10000
-            });
-          }
+              summary:  t('transaction.txConfirmed',1),
+              // detail: t('transaction.txConfirmed',1),
+              detail1: "Transaction Hash: ", 
+              detail3: txnHash, 
+              url: txnHashExplorerLink,
+              group: 'br-custom', 
+              life: 8000
+          });
         }
       }
-     });
+    }
 
-     watch(()=> cosignatureAddedTxLength.value, (newValue, oldValue)=>{
+    let txnActivityLogLength = computed(()=> AppState.txnActivityLogNum);
+    let txnCosignLogLength = computed(()=> AppState.txnCosignLogNum);
+
+    watch(()=> txnActivityLogLength.value, (newValue, oldValue)=>{
 
       if(newValue > oldValue){
-        let txLength = newValue - oldValue;
-        emitter.emit("COSIGNER_SIGNED", txLength);
-        let singularPluralText =  txLength > 1 ? "s" : "";
+
+        let data = AppState.txnActivityLog[newValue - 1];
+
         toast.add(
           {
             severity:'info', 
-            summary: t('transaction.cosignAdded'), 
-            detail: txLength + " " + t('transaction.cosignTxAdded',txLength),
-            group: 'br', 
+            summary: "Transaction announced",
+            detail1: "Transaction Hash:", 
+            detail3: data.txnHash,
+            group: 'br-custom', 
             life: 5000
           }
         );
       }
      });
 
-     watch(()=> aggregateBondedTxLength.value, async(newValue, oldValue)=>{
+     watch(()=> txnCosignLogLength.value, (newValue, oldValue)=>{
 
       if(newValue > oldValue){
-        let txLength = newValue - oldValue;
-        emitter.emit("ABT_ADDED", txLength);
-        let singularPluralText =  txLength > 1 ? "s" : "";
+
+        let data = AppState.txnCosignLog[newValue - 1];
+
         toast.add(
           {
-            severity:'warn', 
-            summary: t('transaction.partialAdded',txLength), 
-            detail: txLength + " " + t('transaction.partialAdded',txLength), 
-            group: 'br', 
+            severity:'info', 
+            summary: "Transaction Cosigned",
+            detail1: "Transaction Hash:", 
+            detail3: data.txnHash,
+            url: createTxnHashExplorerLink(data.txnHash),
+            group: 'br-custom', 
             life: 5000
           }
         );
-        let notification = await NotificationUtils.getNotification();
-        newNotificationCount.value = notification.length;
-        isNewNotification.value = NotificationUtils.highlightNewNotification();
       }
      });
 
-     emitter.on("listener:reconnect", ()=>{
-       connectListener(false);
-     });
+    // watch(()=> currentBlockHeight.value, async()=>{
 
-     emitter.on("listener:setEndpoint", endpoint =>{
-       listener.value.endpoint = endpoint;
-     });
+    //   listener.value.refreshTimer();
+    // });
+
+    //  watch(()=> unconfirmedTxLength.value, (newValue, oldValue)=>{
+
+    //   if(newValue > oldValue){
+    //     let txLength = newValue - oldValue;
+    //     emitter.emit("TXN_UNCONFIRMED", txLength);
+    //     let singularPluralText =  txLength > 1 ? "s" : "";
+    //     toast.add(
+    //       {
+    //         severity:'warn', 
+    //         summary: t('transaction.txAdded',txLength), 
+    //         detail:  txLength+" "+t('transaction.txUnconfirmed',txLength),
+    //         group: 'br-custom', 
+    //         life: 5000
+    //       }
+    //     );
+    //   }
+    //  });
+
+    //  watch(()=> confirmedTxLength.value, (newValue, oldValue)=>{
+      // if(newValue > oldValue){
+        //WalletUtils.confirmedTransactionRefresh(walletState.currentLoggedInWallet, AppState.nativeToken.assetId);
+
+        // let txLength = newValue - oldValue;
+
+        // emitter.emit("TXN_CONFIRMED", txLength);
+
+        // let transactionHashes = listenerState.allConfirmedTransactionsHash.slice(-txLength);
+
+        // let swapTransactionsCount = 0;
+        // let swapTransactionHash = [];
+
+        // for(let i =0; i < listenerState.confirmedTransactions.length; ++i){
+        //   let txs = listenerState.confirmedTransactions[i].confirmedTransactions.filter((tx)=> transactionHashes.includes(tx.transactionInfo.hash));
+
+        //   for(let x=0; x < txs.length; ++x){
+        //     let tx = txs[x];
+        //     if(tx.type === TransactionType.TRANSFER && tx.message.payload && Helper.checkIsJSON(tx.message.payload)){
+        //       let parsedMessage = JSON.parse(tx.message.payload);
+
+        //       if(parsedMessage.type && parsedMessage.type.substr(0, 4) === "Swap"){
+        //         swapTransactionHash.push(tx.transactionInfo.hash);
+        //       }
+        //     }
+        //   }
+        // }
+
+        // swapTransactionsCount = new Set(swapTransactionHash).size;
+
+        // let singularPluralText = swapTransactionsCount > 1 ? "s" : "";
+
+        // if(swapTransactionsCount){
+        //   toast.add({
+        //       severity:'success', 
+        //       summary: t('transaction.swapTx',swapTransactionsCount),
+        //       detail:  swapTransactionsCount+" "+t('transaction.swapTx',swapTransactionsCount),
+        //       group: 'br-custom', 
+        //       life: 5000
+        //   });
+        // }
+
+        // let remainingTxLength = txLength - swapTransactionsCount;
+        // if(remainingTxLength){
+        //   singularPluralText =  remainingTxLength > 1 ? "s" : "";
+        //   toast.add(
+        //     {
+        //       severity:'success', 
+        //       summary:  t('transaction.txConfirmed',remainingTxLength),
+        //       detail: txLength + " "+ t('transaction.txConfirmed',remainingTxLength), 
+        //       group: 'br-custom', 
+        //       life: 5000
+        //   }
+        // );
+        // } 
+      // }
+    //  });
+
+    //  watch(()=> transactionStatusLength.value, (newValue, oldValue)=>{
+
+    //   if(newValue > oldValue){
+    //     let txLength = newValue - oldValue;
+    //     let totalTxLength = listenerState.allTransactionStatus.length;
+    //     let lastIndex = totalTxLength - 1;
+
+    //     for(let i= 0; i < txLength; ++i){
+    //       let status = listenerState.allTransactionStatus[lastIndex - i].status;
+    //       let hash = listenerState.allTransactionStatus[lastIndex - i].hash;
+    //       emitter.emit("TXN_ERROR", hash);
+    //       if(AppState.trackingTxnHash.includes(hash)){
+    //         toast.add({
+    //           severity:'error', 
+    //           summary: t('transaction.txError'), 
+    //           detail3: status + " " + hash,
+    //           group: 'br-custom', 
+    //           life: 10000
+    //         });
+    //       }
+    //     }
+    //   }
+    //  });
+
+    //  watch(()=> cosignatureAddedTxLength.value, (newValue, oldValue)=>{
+
+    //   if(newValue > oldValue){
+    //     let txLength = newValue - oldValue;
+    //     emitter.emit("COSIGNER_SIGNED", txLength);
+    //     let singularPluralText =  txLength > 1 ? "s" : "";
+    //     toast.add(
+    //       {
+    //         severity:'info', 
+    //         summary: t('transaction.cosignAdded'), 
+    //         detail: txLength + " " + t('transaction.cosignTxAdded',txLength),
+    //         group: 'br-custom', 
+    //         life: 5000
+    //       }
+    //     );
+    //   }
+    //  });
+
+    //  watch(()=> aggregateBondedTxLength.value, async(newValue, oldValue)=>{
+
+    //   if(newValue > oldValue){
+    //     let txLength = newValue - oldValue;
+    //     emitter.emit("ABT_ADDED", txLength);
+    //     let singularPluralText =  txLength > 1 ? "s" : "";
+    //     toast.add(
+    //       {
+    //         severity:'warn', 
+    //         summary: t('transaction.partialAdded',txLength), 
+    //         detail: txLength + " " + t('transaction.partialAdded',txLength), 
+    //         group: 'br-custom', 
+    //         life: 5000
+    //       }
+    //     );
+    //     let notification = await NotificationUtils.getNotification();
+    //     newNotificationCount.value = notification.length;
+    //     isNewNotification.value = NotificationUtils.highlightNewNotification();
+    //   }
+    //  });
+
+    //  emitter.on("listener:reconnect", ()=>{
+    //    connectListener(false);
+    //  });
+
+    //  emitter.on("listener:setEndpoint", endpoint =>{
+    //    listener.value.endpoint = endpoint;
+    //  });
 
      emitter.on("VIEW_NOTIFICATION", async() => {
-       let notification = await NotificationUtils.getNotification();
-        newNotificationCount.value = notification.length;
-        isNewNotification.value = NotificationUtils.highlightNewNotification();
+       doGetNotification();
      });
 
     return {
@@ -676,7 +1001,7 @@ export default defineComponent({
       chainAPIEndpoint,
       chainsNetworkOption,
       currentNativeTokenName,
-      listener,
+      // listener,
       hoverOverNavigation,
       hoverOutNavigation,
       isHoverCreate,
@@ -702,7 +1027,7 @@ export default defineComponent({
     window.addEventListener("resize", this.headerMenuHandler);
   },
   beforeUnmount(){
-    this.listener.terminate();
+    // this.listener.terminate();
   },
   unmounted() {
     window.removeEventListener("resize", this.headerMenuHandler);

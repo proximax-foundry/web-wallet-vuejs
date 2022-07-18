@@ -38,7 +38,7 @@
           </div>
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('general.duration')}}</div>
-            <div class="uppercase font-bold text-txs" v-tooltip.bottom="'<tiptext>' + $t('general.approximately') + ' ' + durationTime(data.duration) + ' ' + $t('general.day',durationTime(data.duration)) + '</tiptext>'">{{data.duration ? data.duration + ' '+ $t('general.block',data.duration) : "-"}}</div>
+            <div class="uppercase font-bold text-txs" v-tooltip.bottom="{ value:'<tiptext>' + $t('general.approximately') + ' ' + durationTime(data.duration) + ' ' + $t('general.day',durationTime(data.duration)) + '</tiptext>', escape: true}">{{data.duration ? data.duration + ' '+ $t('general.block',data.duration) : "-"}}</div>
           </div>
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.refunded')}}</div>
@@ -78,7 +78,7 @@
       </Column>
       <Column :header="$t('general.duration')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-txs" v-tooltip.bottom="'<tiptext>' + $t('general.approximately') + ' ' + durationTime(data.duration) + ' ' + $t('general.day',durationTime(data.duration)) + '</tiptext>'">{{data.duration ? data.duration + ' '+ $t('general.block',data.duration) : "-"}}</span>
+          <span class="text-txs" v-tooltip.bottom="{ value: '<tiptext>' + $t('general.approximately') + ' ' + durationTime(data.duration) + ' ' + $t('general.day',durationTime(data.duration)) + '</tiptext>', escape: true}">{{data.duration ? data.duration + ' '+ $t('general.block',data.duration) : "-"}}</span>
         </template>
       </Column>
       <Column :header="$t('dashboard.refunded')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:40px;text-transform:uppercase">

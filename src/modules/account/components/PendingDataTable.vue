@@ -107,7 +107,7 @@
       <Column :header="$t('general.sda')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-center">
-            <img src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="'<tiptitle>' +t('general.sdaFull')+'</tiptitle><tiptext>' + displaySDAs(data.sda) + '</tiptext>'">
+            <img src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="'<tiptitle>' +t('general.sdaFull')+'</tiptitle><tiptext>' + displayAsset(data.sda) + '</tiptext>'">
             <span v-else>-</span>
           </div>
         </template>
@@ -115,7 +115,7 @@
       <Column :header="$t('general.message')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div>
-            <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>'" class="inline-block" v-if="data.message && data.messageType !== 1">
+            <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="{ value: '<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>', escape: true }" class="inline-block" v-if="data.message && data.messageType !== 1">
             <div v-else class="w-full text-center">-</div>
           </div>
         </template>
@@ -161,6 +161,7 @@ import { AppState } from '@/state/appState';
     const props = defineProps({
         transaction: Array
     })
+    const nativeToken = computed(()=>AppState.nativeToken.label)
     const wideScreen = ref(false) 
     const screenResizeHandler = () => {
         if(window.innerWidth < 1024){
@@ -178,6 +179,7 @@ import { AppState } from '@/state/appState';
     onUnmounted(() => {
       window.removeEventListener("resize", screenResizeHandler);
     });
+
     const hashExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.hashRoute);
     const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
     const publicKeyExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.publicKeyRoute);

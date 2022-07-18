@@ -107,7 +107,7 @@
                         </div>
                     </div>
                 </div>
-                <router-link :to="{name: 'ViewUpdateAccountMetadata',params:{targetPublicKey:acc?acc.publicKey:'0'.repeat(64)}}"><button  class="my-4 blue-btn py-3 px-3 " >Create New Account Metadata</button></router-link>
+                <router-link :to="{name: 'ViewUpdateAccountMetadata',params:{targetPublicKey:acc?acc.publicKey:'0'.repeat(64)}}"><button  class="my-4 blue-btn py-3 px-3 flex items-center" ><img src="@/assets/img/icon-plus.svg" class="inline-block w-4 h-4 mr-2">Create New Account Metadata</button></router-link>
             </div>
         </div>
     </div>
@@ -193,7 +193,7 @@ import UTF8 from 'utf-8';
         }
         let assets :{id:string,name:string}[] = [] 
         acc.value.assets.forEach(asset=>{
-            if(asset.owner==acc.value.publicKey){
+            if(asset.creator==acc.value.publicKey){
                 assets.push({
                     id:asset.idHex,
                     name:asset.namespaceNames[0]??''

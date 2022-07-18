@@ -30,7 +30,7 @@
           </div>
         </div>
       </div>
-        <div class="absolute flex invisible 2xl:visible pt-4" style="margin-left: 39.3rem;">
+        <div class="absolute flex invisible 2xl:visible pt-4 explicitLeft" >
           <div v-for="(label,index) in labels" :key="index" >
             <div v-if="label.isLabeled" class="text-xs mr-3 border bg-gray-300 rounded-md p-1">{{label.name}}</div>
           </div>
@@ -110,13 +110,13 @@ export default{
       let index = label.addresses.findIndex(add=>add==address)
       if (index>=0){
         label.removeAddress(index)
-        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
-        toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is removed as ' + name , group: 'br', life: 5000});
+        await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
+        toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is removed as ' + name , group: 'br-custom', life: 5000});
         return
       }
       label.addresses.push(address)
-      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
-      toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is added as ' + name , group: 'br', life: 5000});
+      await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
+      toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is added as ' + name , group: 'br-custom', life: 5000});
     }
     const accountName = computed(() => {
       // check if address is in adress book
@@ -161,7 +161,8 @@ export default{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-      toast.add({severity:'info', detail: copySubject + ' '+ t('general.copied'), group: 'br', life: 3000});
+
+      toast.add({severity:'info', detail: copySubject + ' '+ t('general.copied'), group: 'br-custom', life: 3000});
     };   
     const isMultiSig = computed(() => {
       let isMulti = p.account.getDirectParentMultisig().length? true: false
@@ -238,4 +239,9 @@ export default{
   -moz-transform:rotate(45deg);
   -webkit-transform:rotate(45deg);
 }
+.explicitLeft{
+  @media (min-width: 1024px) { margin-left: 39.3rem}
+  
+}
+
 </style>

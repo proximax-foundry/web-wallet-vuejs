@@ -279,7 +279,7 @@ export default {
     const addOption = () => {
       let existOption = options.value.find((element) => element.name === optionText.value);
       if(existOption){
-        toast.add({severity:'error', summary: 'Option', detail: 'This option is already exist', group: 'br', life: 5000});
+        toast.add({severity:'error', summary: 'Option', detail: 'This option is already exist', group: 'br-custom', life: 5000});
       }else{
         options.value.push({ name: optionText.value });
         optionText.value = '';

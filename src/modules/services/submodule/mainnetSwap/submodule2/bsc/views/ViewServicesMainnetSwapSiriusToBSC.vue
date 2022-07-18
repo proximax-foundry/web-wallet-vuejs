@@ -725,6 +725,16 @@ export default {
           body: stringifyData, // body data type must match "Content-Type" header
         });
         if(response.ok){
+          if(!AppState.txnSwapLog.find(x => x.txnHash === siriusTransactionHash.value)){
+            AppState.txnSwapLog.push({
+              txnHash: siriusTransactionHash.value,
+              accPubKey: selectedAccountPublicKey.value,
+              status: "",
+              statusMsg: "",
+              relatedAddress: [],
+              checkedNum: 0
+            });
+          }
           const res = await response.json();
           certTransactionHash.value = res.data.txHash;
           swapLink.value = bscScanUrl + res.data.txHash;
@@ -751,7 +761,7 @@ export default {
             severity:'warn',
             summary: t('swap.serviceUnavailable'),
             detail: errorMessage ? errorMessage : t('swap.tryAgain'),
-            group: 'br'
+            group: 'br-custom'
           });
           swapInProgress.value = false;
           isDisabledCancel.value = false;
@@ -790,7 +800,7 @@ export default {
           severity:'error',
           summary: summary,
           detail: detail,
-          group: 'br',
+          group: 'br-custom',
           life: life
       });
     }

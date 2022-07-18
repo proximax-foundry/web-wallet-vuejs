@@ -23,7 +23,7 @@ export class AccountAPI {
 
     aggregateBondedTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<AggregateTransaction[]>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.accountHttp.aggregateBondedTransactions(publicAccount, true, queryParams, authHeader).toPromise();
+        return this.accountHttp.aggregateBondedTransactions(publicAccount, queryParams, authHeader).toPromise();
     }
 
     getAccountRestrictions(address: Address): Promise<AccountRestrictionsInfo>{

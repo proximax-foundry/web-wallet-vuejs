@@ -486,7 +486,7 @@ export default {
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-      toast.add({severity:'info', summary: copySubject + ' ' + t('general.copied'), detail: stringToCopy , group: 'br', life: 3000});
+      toast.add({severity:'info', summary: copySubject + ' ' + t('general.copied'), detail: stringToCopy , group: 'br-custom', life: 3000});
     };
 
     const currentPage = ref(1);
