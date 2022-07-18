@@ -22,6 +22,7 @@
 
 <script>
 import { defineComponent, inject, ref, computed } from 'vue';
+import { useRouter } from "vue-router";
 import CryptoJS from 'crypto-js';
 import IntroTextComponent from '@/components/IntroTextComponent.vue'
 import { useConfirm } from "primevue/useconfirm";
@@ -42,6 +43,7 @@ export default defineComponent({
   setup(){
     const confirm = useConfirm();
     const toast = useToast();
+    const router = useRouter();
     const {t} = useI18n();
     // comparing with default networktype 168 till multiple network selection interface is added
     const selectedNetworkType = computed(()=> AppState.networkType);
@@ -65,6 +67,7 @@ export default defineComponent({
               accept: () => {
                 var importResult = importBackup(dataDecryp);
                 toast.add({severity: importResult.status, detail: importResult.msg, group: 'br-custom', life: 3000});
+                router.push({ name: "Home"});
               },
             });
           }
