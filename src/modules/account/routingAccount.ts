@@ -41,7 +41,7 @@ export const AccountRoutes: RouteRecordRaw[] = [
   {
     path: '/details-account/:address',
     name: 'ViewAccountDetails',
-    props: true,
+    props: (route) =>{ return { address: route.params.address, accountCreated: route.params.accountCreated === 'true'}},
     component: () => import('@/modules/account/views/ViewAccountDetails.vue'),
     meta: {
       title: "Account details",
