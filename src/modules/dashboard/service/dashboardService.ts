@@ -5322,7 +5322,7 @@ export class DashboardService {
                 let typeInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Type",
-                    value: registerNamespaceFormat.registerTypeName + registerNamespaceFormat.isExtend ? ' (Extend)' : ' (Register)'
+                    value: registerNamespaceFormat.registerTypeName + (registerNamespaceFormat.isExtend ? ' (Extend)' : ' (Register)')
                 };
 
                 infos.push(typeInfo);
