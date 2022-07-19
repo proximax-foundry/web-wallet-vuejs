@@ -482,6 +482,7 @@ export default defineComponent({
          
         let txnsHashFound = [];
         let txnHashesConfirmed = [];
+        let displayedTxn = [];
 
         for(let i=0; i < transactionStatuses.length; ++i){
           txnsHashFound.push(transactionStatuses[i].hash);
@@ -500,6 +501,7 @@ export default defineComponent({
                 listenerState.allConfirmedTransactionsHash.push(txnActivity.txnHash);
               }
 
+              displayedTxn.push(transactionStatuses[i].hash);
               addTxnToastMessage(txnActivity.status, transactionStatuses[i].hash, txnActivity.statusMsg);
             }
           }
@@ -512,12 +514,14 @@ export default defineComponent({
               if(txnCosign.status === "failed"){
                 txnCosign.statusMsg = transactionStatuses[i].status;
               }
-              else if(txnActivity.status === transactionGroupType.CONFIRMED){
-                txnHashesConfirmed.push(txnActivity.txnHash);
-                listenerState.allConfirmedTransactionsHash.push(txnActivity.txnHash);
+              else if(txnCosign.status === transactionGroupType.CONFIRMED){
+                txnHashesConfirmed.push(txnCosign.txnHash);
+                listenerState.allConfirmedTransactionsHash.push(txnCosign.txnHash);
               }
 
-              addTxnToastMessage(txnCosign.status, transactionStatuses[i].hash, txnCosign.statusMsg);
+              if(!displayedTxn.includes(transactionStatuses[i].hash)){
+                addTxnToastMessage(txnCosign.status, transactionStatuses[i].hash, txnCosign.statusMsg);
+              }
             }
           }
           else{
@@ -529,9 +533,9 @@ export default defineComponent({
               if(txnSwap.status === "failed"){
                 txnSwap.statusMsg = transactionStatuses[i].status;
               }
-              else if(txnActivity.status === transactionGroupType.CONFIRMED){
-                txnHashesConfirmed.push(txnActivity.txnHash);
-                listenerState.allConfirmedTransactionsHash.push(txnActivity.txnHash);
+              else if(txnSwap.status === transactionGroupType.CONFIRMED){
+                txnHashesConfirmed.push(txnSwap.txnHash);
+                listenerState.allConfirmedTransactionsHash.push(txnSwap.txnHash);
               }
 
               addTxnToastMessage(txnSwap.status, transactionStatuses[i].hash, txnSwap.statusMsg, "swap");
@@ -749,12 +753,11 @@ export default defineComponent({
         toast.add({
               severity:'warn', 
               summary: t('transaction.partialAdded',1),
-              // detail:  t('transaction.partialAdded',1),
               detail: "Transaction Hash: ", 
               detail3: txnHash,
               url: txnHashExplorerLink,
               group: 'br-custom', 
-              life: 5000
+              life: 6000
         });
       }
       else if(status === transactionGroupType.CONFIRMED){
@@ -762,7 +765,6 @@ export default defineComponent({
           toast.add({
             severity:'success', 
             summary: t('transaction.swapTx',1),
-            // detail:  t('transaction.swapTx',1),
             detail: "Transaction Hash: ", 
             detail3: txnHash,
             url: txnHashExplorerLink,
@@ -775,7 +777,6 @@ export default defineComponent({
             {
               severity:'success', 
               summary:  t('transaction.txConfirmed',1),
-              // detail: t('transaction.txConfirmed',1),
               detail: "Transaction Hash: ", 
               detail3: txnHash, 
               url: txnHashExplorerLink,
