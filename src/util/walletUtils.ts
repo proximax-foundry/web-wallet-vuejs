@@ -285,8 +285,8 @@ export class WalletUtils {
 
         let wallet = walletState.currentLoggedInWallet;
 
-        let relatedWalletAccs = wallet.accounts.filter(x => relatedAddress.includes(x));
-        let relatedOtherAccs = wallet.others.filter(x => relatedAddress.includes(x));
+        let relatedWalletAccs = wallet.accounts.filter(x => relatedAddress.includes(x.address));
+        let relatedOtherAccs = wallet.others.filter(x => relatedAddress.includes(x.address));
         let allAccounts: MyAccount[] = relatedWalletAccs.map(x => x as MyAccount).concat(relatedOtherAccs.map(x => x as MyAccount));
 
         WalletUtils.updateAccTxnEntries(allAccounts);
@@ -1665,21 +1665,21 @@ export class WalletUtils {
 
                 let removingNamespace = oldAccNamespace.filter(x => !stillValidNamespace.includes(x));
 
-                for(let i =0; i < namespacesInstance.length; ++i){
-                    let nsId = namespacesInstance[i].idHex;
+                for(let y =0; y < namespacesInstance.length; ++y){
+                    let nsId = namespacesInstance[y].idHex;
                     let existingNamespace = accs[i].namespaces.find(x => x.idHex === nsId)
 
                     if(existingNamespace){
-                        WalletUtils.namespaceToNamespaceSync(existingNamespace, namespacesInstance[i]);
+                        WalletUtils.namespaceToNamespaceSync(existingNamespace, namespacesInstance[y]);
                     }
                     else{
-                        accs[i].namespaces.push(namespacesInstance[i]);
+                        accs[i].namespaces.push(namespacesInstance[y]);
                     }
                 }
 
-                for(let i =0; i < removingNamespace.length; ++i){
+                for(let y =0; y < removingNamespace.length; ++y){
 
-                    accs[i].removeNamespace(removingNamespace[i]);
+                    accs[i].removeNamespace(removingNamespace[y]);
                 }
             }
         }
@@ -1949,7 +1949,7 @@ export class WalletUtils {
         await WalletUtils.refreshAccountsInfo(otherAccounts, false);
         await WalletUtils.refreshAccountsNamespaceInfo(otherAccounts);
         
-        WalletUtils.getAccsCreatorAssets(otherAccounts);  
+        await WalletUtils.getAccsCreatorAssets(otherAccounts);  
         WalletUtils.runAssetNamespaceInfoLoadBackground(false);
     }
 
@@ -2006,15 +2006,15 @@ export class WalletUtils {
         }
 
         if(newWalletAccs.length){
-            let addedAccPubKey2 = await WalletUtils.refreshAccountsInfo(newWalletAccs, true);
+            let newAddedAccPubKey = await WalletUtils.refreshAccountsInfo(newWalletAccs, true);
             await WalletUtils.refreshAccountsNamespaceInfo(newWalletAccs);
 
-            allAddedAccPubKey = allAddedAccPubKey.concat(addedAccPubKey2);
+            allAddedAccPubKey = allAddedAccPubKey.concat(newAddedAccPubKey);
 
             WalletUtils.syncAccNamespaceName();
         }
         
-        WalletUtils.getAccsCreatorAssets(newWalletAccs);
+        await WalletUtils.getAccsCreatorAssets(newWalletAccs);
         if(otherAccs.length){
             WalletUtils.refreshOtherAccounts(otherAccs)
         }
@@ -2592,6 +2592,8 @@ export class WalletUtils {
 
         let data: NamespaceInfo[] = AppState.pendingNamespacesName as NamespaceInfo[];
 
+        AppState.pendingNamespacesName = [];
+
         for (let i = 0; i < numOfRequest; ++i) {
             let startIndex = i * dataPerRequest;
             let endIndex = (i + 1) * dataPerRequest;
@@ -2626,6 +2628,8 @@ export class WalletUtils {
         let newAssetsInfo: AssetInfo[] = [];
 
         let data: MosaicId[] = AppState.pendingAssetsInfo.map(x => new MosaicId(x));
+
+        AppState.pendingAssetsInfo = [];
 
         for (let i = 0; i < numOfRequest; ++i) {
             let startIndex = i * dataPerRequest;

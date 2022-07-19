@@ -32,8 +32,8 @@ export class AppStateUtils{
     AppState.txnActivityLogNum = AppState.txnActivityLog.length;
   }
 
-  static updateCosignLogNum(){
-    AppState.txnCosignLogNum = AppState.txnCosignLog.length;
+  static addCosignLogNum(){
+    AppState.txnCosignLogNum = AppState.txnCosignLogNum + 1;
   }
 
   static doLogout(){

@@ -223,8 +223,8 @@ export default defineComponent({
       // }else{
       //   selectedAccount.value = walletState.currentLoggedInWallet.others.find((account)=> account.name === data.name);
       // }
-      walletState.currentLoggedInWallet.setDefaultAccountByName(data.name);
-      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+      // walletState.currentLoggedInWallet.setDefaultAccountByName(data.name);
+      // walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
       toast.add({severity:'success', summary: t('home.switchDefault') , detail: data.name, group: 'br-custom', life: 3000});
     }
 
@@ -482,6 +482,7 @@ export default defineComponent({
          
         let txnsHashFound = [];
         let txnHashesConfirmed = [];
+        let displayedTxn = [];
 
         for(let i=0; i < transactionStatuses.length; ++i){
           txnsHashFound.push(transactionStatuses[i].hash);
@@ -500,6 +501,7 @@ export default defineComponent({
                 listenerState.allConfirmedTransactionsHash.push(txnActivity.txnHash);
               }
 
+              displayedTxn.push(transactionStatuses[i].hash);
               addTxnToastMessage(txnActivity.status, transactionStatuses[i].hash, txnActivity.statusMsg);
             }
           }
@@ -512,12 +514,14 @@ export default defineComponent({
               if(txnCosign.status === "failed"){
                 txnCosign.statusMsg = transactionStatuses[i].status;
               }
-              else if(txnActivity.status === transactionGroupType.CONFIRMED){
-                txnHashesConfirmed.push(txnActivity.txnHash);
-                listenerState.allConfirmedTransactionsHash.push(txnActivity.txnHash);
+              else if(txnCosign.status === transactionGroupType.CONFIRMED){
+                txnHashesConfirmed.push(txnCosign.txnHash);
+                listenerState.allConfirmedTransactionsHash.push(txnCosign.txnHash);
               }
 
-              addTxnToastMessage(txnCosign.status, transactionStatuses[i].hash, txnCosign.statusMsg);
+              if(!displayedTxn.includes(transactionStatuses[i].hash)){
+                addTxnToastMessage(txnCosign.status, transactionStatuses[i].hash, txnCosign.statusMsg);
+              }
             }
           }
           else{
@@ -529,9 +533,9 @@ export default defineComponent({
               if(txnSwap.status === "failed"){
                 txnSwap.statusMsg = transactionStatuses[i].status;
               }
-              else if(txnActivity.status === transactionGroupType.CONFIRMED){
-                txnHashesConfirmed.push(txnActivity.txnHash);
-                listenerState.allConfirmedTransactionsHash.push(txnActivity.txnHash);
+              else if(txnSwap.status === transactionGroupType.CONFIRMED){
+                txnHashesConfirmed.push(txnSwap.txnHash);
+                listenerState.allConfirmedTransactionsHash.push(txnSwap.txnHash);
               }
 
               addTxnToastMessage(txnSwap.status, transactionStatuses[i].hash, txnSwap.statusMsg, "swap");
@@ -723,7 +727,7 @@ export default defineComponent({
         toast.add({
           severity:'error', 
           summary: t('transaction.txError'), 
-          detail1: "Transaction Failed with error",
+          detail: "Transaction Failed with error",
           detail2: "Transaction Hash: ", 
           detail3: txnHash,
           detail4: statusMessage,
@@ -749,12 +753,11 @@ export default defineComponent({
         toast.add({
               severity:'warn', 
               summary: t('transaction.partialAdded',1),
-              // detail:  t('transaction.partialAdded',1),
-              detail1: "Transaction Hash: ", 
+              detail: "Transaction Hash: ", 
               detail3: txnHash,
               url: txnHashExplorerLink,
               group: 'br-custom', 
-              life: 5000
+              life: 6000
         });
       }
       else if(status === transactionGroupType.CONFIRMED){
@@ -762,8 +765,7 @@ export default defineComponent({
           toast.add({
             severity:'success', 
             summary: t('transaction.swapTx',1),
-            // detail:  t('transaction.swapTx',1),
-            detail1: "Transaction Hash: ", 
+            detail: "Transaction Hash: ", 
             detail3: txnHash,
             url: txnHashExplorerLink,
             group: 'br-custom', 
@@ -775,8 +777,7 @@ export default defineComponent({
             {
               severity:'success', 
               summary:  t('transaction.txConfirmed',1),
-              // detail: t('transaction.txConfirmed',1),
-              detail1: "Transaction Hash: ", 
+              detail: "Transaction Hash: ", 
               detail3: txnHash, 
               url: txnHashExplorerLink,
               group: 'br-custom', 
@@ -799,7 +800,7 @@ export default defineComponent({
           {
             severity:'info', 
             summary: "Transaction announced",
-            detail1: "Transaction Hash:", 
+            detail: "Transaction Hash:", 
             detail3: data.txnHash,
             group: 'br-custom', 
             life: 5000
@@ -818,7 +819,7 @@ export default defineComponent({
           {
             severity:'info', 
             summary: "Transaction Cosigned",
-            detail1: "Transaction Hash:", 
+            detail: "Transaction Hash:", 
             detail3: data.txnHash,
             url: createTxnHashExplorerLink(data.txnHash),
             group: 'br-custom', 

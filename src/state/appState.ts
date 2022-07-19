@@ -25,7 +25,7 @@ interface TxnActivityLog{
 
 interface TxnCosignLog{
     txnHash: string,
-    accPubKey: string,
+    accPubKey: string[],
     announced: boolean,
     status: string,
     statusMsg: string,

@@ -59,9 +59,10 @@ export class TransactionAPI {
     announceAggregateBondedCosignature(cosignatureSignedTransaction: CosignatureSignedTransaction): Promise<TransactionAnnounceResponse>{
         let txnHash = cosignatureSignedTransaction.parentHash;
 
-        if(!AppState.txnCosignLog.find(x => x.txnHash === txnHash)){
+        let existingTxnCosignLog = AppState.txnCosignLog.find(x => x.txnHash === txnHash);
+        if(!existingTxnCosignLog){
             AppState.txnCosignLog.push({
-                accPubKey: cosignatureSignedTransaction.signer,
+                accPubKey: [cosignatureSignedTransaction.signer],
                 announced: true,
                 relatedAddress: [],
                 txnHash: txnHash,
@@ -70,7 +71,11 @@ export class TransactionAPI {
                 checkedNum: 0
             });
 
-            AppStateUtils.updateCosignLogNum();
+            AppStateUtils.addCosignLogNum();
+        }
+        else{
+            existingTxnCosignLog.accPubKey.push(cosignatureSignedTransaction.signer);
+            AppStateUtils.addCosignLogNum();
         }
         let authHeader = RequestAuth.getAuthHeader();
         return this.transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction, authHeader).toPromise();

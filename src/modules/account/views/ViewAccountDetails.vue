@@ -323,9 +323,8 @@ export default {
     const linkedAccountKey = ref('')
     const linkedNamespace = ref([])
     const getLinkedAccountKey = async() =>{
-      const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(acc.value.address))
-      if(accInfo.linkedAccountKey!=undefined){
-        linkedAccountKey.value = accInfo.linkedAccountKey 
+      if(acc.value){
+        linkedAccountKey.value = acc.value.linkedPublicKey;
       }
     }
     const getLinkedNamespace = async() =>{

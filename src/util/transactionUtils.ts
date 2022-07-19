@@ -389,7 +389,7 @@ export class TransactionUtils {
       case TransactionType.AGGREGATE_BONDED:{
         let aggregateBondedTxn = txn as AggregateTransaction; 
         let addressInDeep = aggregateBondedTxn.innerTransactions.map(x =>{
-          return TransactionUtils.extractConfirmedRelatedAddressByTransactionType(aggregateBondedTxn);
+          return TransactionUtils.extractConfirmedRelatedAddressByTransactionType(x);
         });
         let allNewAddress = addressInDeep.flat();
         addresses = addresses.concat(allNewAddress);
@@ -397,7 +397,7 @@ export class TransactionUtils {
       case TransactionType.AGGREGATE_COMPLETE:{
         let aggregateCompleteTxn = txn as AggregateTransaction; 
         let addressInDeep = aggregateCompleteTxn.innerTransactions.map(x =>{
-          return TransactionUtils.extractConfirmedRelatedAddressByTransactionType(aggregateCompleteTxn);
+          return TransactionUtils.extractConfirmedRelatedAddressByTransactionType(x);
         });
         let allNewAddress = addressInDeep.flat();
         addresses = addresses.concat(allNewAddress);

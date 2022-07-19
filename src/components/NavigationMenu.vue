@@ -208,7 +208,7 @@ export default{
       if(!walletState.currentLoggedInWallet){
         return
       }
-      selectedAccount.value = walletState.currentLoggedInWallet.selectDefaultAccount();
+      // selectedAccount.value = walletState.currentLoggedInWallet.selectDefaultAccount();
       updateAccountTransactionCount();
     });
 

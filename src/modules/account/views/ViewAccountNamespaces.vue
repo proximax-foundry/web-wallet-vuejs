@@ -12,7 +12,7 @@
         <div v-else class="grid grid-cols-9 bg-gray-100 py-3 px-6 text-xs font-semibold text-gray-600 mb-2">
           <div class="col-span-2">ID</div>
           <div class="col-span-2">Name</div>
-          <div class="col-span-3">LInked</div>
+          <div class="col-span-3">Linked</div>
           <div class="invisible md:visible">Expiry</div>
           <div>Active</div>
         </div>
