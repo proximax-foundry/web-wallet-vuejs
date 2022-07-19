@@ -2450,9 +2450,6 @@ export class WalletUtils {
         let pendingAssetsInfo = Array.from(new Set(AppState.pendingAssetsInfo));
         let newList: string[] = pendingAssetsInfo.filter(x => !idToCompare.includes(x));
 
-        console.log("New List:");
-        console.log(newList);
-
         // for(let i=0; i < AppState.pendingAssetsInfo.length; ++i){
         //     let foundPendingInfo = assetsInfo.find( x => x.idHex === AppState.pendingAssetsInfo[i]);
             
