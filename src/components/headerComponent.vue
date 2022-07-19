@@ -223,8 +223,8 @@ export default defineComponent({
       // }else{
       //   selectedAccount.value = walletState.currentLoggedInWallet.others.find((account)=> account.name === data.name);
       // }
-      walletState.currentLoggedInWallet.setDefaultAccountByName(data.name);
-      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+      // walletState.currentLoggedInWallet.setDefaultAccountByName(data.name);
+      // walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
       toast.add({severity:'success', summary: t('home.switchDefault') , detail: data.name, group: 'br-custom', life: 3000});
     }
 

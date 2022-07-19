@@ -925,7 +925,7 @@ export default defineComponent({
     
     emitter.on('DEFAULT_ACCOUNT_SWITCHED',async(payload) => {
       currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
-      currentAccount.default = true;
+      // currentAccount.default = true;
       selectedAccount.value = currentAccount;
       // recentTransferTxn();
       updateAccountTransactionCount();
