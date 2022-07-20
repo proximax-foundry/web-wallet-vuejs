@@ -455,7 +455,7 @@ swap:
   bsc: BSC
   bscAddress: BSC address receiving your swap
   bscAddressErr: Valid BSC address is required
-  bscAmountMsg: XPX amount to swap to BEP20
+  bscAmountMsg: '{token} amount to swap to BEP20'
   bscFull: Binance Smart Chain
   bscOutgoingMsg: >-
     Swap completion time will vary depending on the performance of the BSC
