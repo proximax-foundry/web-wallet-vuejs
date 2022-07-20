@@ -94,7 +94,7 @@ export default {
       }
       const findAccountWithAddress = address =>{
         let plainAddress = getPlainAddress(address)
-          const findAcc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==plainAddress) | walletState.currentLoggedInWallet.others.find(acc=>acc.address==plainAddress) 
+          const findAcc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==plainAddress) || walletState.currentLoggedInWallet.others.find(acc=>acc.address==plainAddress) 
           if(findAcc==undefined){
             return false
           }
@@ -152,10 +152,9 @@ export default {
     };
     const isHover = ref(false)
     const router = useRouter()
-     const setDefaultAcc = (name)=>{
-      try {
+    const setDefaultAcc = (name)=>{
+      if(walletState.currentLoggedInWallet.accounts.find(acc=>acc.name==name)){
         walletState.currentLoggedInWallet.setDefaultAccountByName(name)
-      } catch (error) {
       }
     }
     const getAccountNameByAddress = (address)=>{

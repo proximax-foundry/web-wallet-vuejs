@@ -2,7 +2,7 @@
 <div>
     <DataTable :value="assets" :paginator="true" class="p-datatable-customers" :rows="10"
         dataKey="id" :rowHover="true" 
-        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown" :rowsPerPageOptions="[10,25,50]"
+        paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown" :rowsPerPageOptions="[10,20,30,40,50]"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         responsiveLayout="scroll">
         <template #empty>
@@ -120,11 +120,27 @@ const hoverOutMenu = () => {
 <style lang="scss" scoped>
 ::v-deep(.p-paginator) {
     .p-paginator-current {
-        margin-left: auto;
+        
         padding: 1rem;
+        padding-right:0.5rem;
         color: gray;
         font-size: 12px;
-        margin-top:8px;
+        
+    }
+
+    .p-paginator-bottom {
+        display:flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    /* .p-paginator-last {
+        padding-right:0.5rem;
+    } */
+    .p-link{
+        margin-top: 0px;
+    }
+    .p-paginator-last.p-link{
+        margin-right:0.5rem;
     }
 }
 
@@ -132,25 +148,40 @@ const hoverOutMenu = () => {
 
 
 ::v-deep(.p-datatable.p-datatable-customers) {
-    .p-paginator {
-        padding-top: 1rem;
-        padding-bottom: 1rem;
+        
+    .p-dropdown{
+        margin-top:0px;
+    }
+    .p-dropdown-trigger{
+        margin-left: auto;
     }
     .p-dropdown-trigger-icon{
         width:50px
     }
+
+    .p-inputtext{
+        font-size:12px;
+        text-align: center;
+    }
     .p-paginator-rpp-options{
-        width:60px;
+        width: 60px;
         border:1px solid;
         border-color:gray;
         font-size: 12px;
     }
     .p-paginator-rpp-options:hover{
-        
         border-color: #007cff
-}
-
     }
+    .p-paginator-page.p-highlight{
+        background: #EFF6FF;
+        border-color: #EFF6FF;
+        color: #1D4ED8;
+        border-radius: 50%;
+    }
+}
+    
+
+
 
    
 </style>

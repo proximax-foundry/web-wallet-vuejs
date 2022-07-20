@@ -110,12 +110,12 @@ export default{
       let index = label.addresses.findIndex(add=>add==address)
       if (index>=0){
         label.removeAddress(index)
-        await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
+        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
         toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is removed as ' + name , group: 'br-custom', life: 5000});
         return
       }
       label.addresses.push(address)
-      await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
+      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
       toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is added as ' + name , group: 'br-custom', life: 5000});
     }
     const accountName = computed(() => {
@@ -189,9 +189,10 @@ export default{
     });
     const router = useRouter()
     const setDefaultAcc = ()=>{
-      try {
+      if(otherAccount(p.account.address)==undefined){
         walletState.currentLoggedInWallet.setDefaultAccountByName(p.account.name)
-      } catch (error) {
+      }else{
+        return
       }
     }
     const navigate = () =>{

@@ -264,9 +264,8 @@ setup(p){
   const collapsable = ref(false)
   const router = useRouter() 
   const setDefaultAcc = (name)=>{
-    try {
+    if(walletState.currentLoggedInWallet.accounts.find(acc=>acc.name==name)){
       walletState.currentLoggedInWallet.setDefaultAccountByName(name)
-    } catch (error) {
     }
   }
   const getAccountNameByAddress = (address)=>{
