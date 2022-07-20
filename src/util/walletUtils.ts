@@ -1359,14 +1359,14 @@ export class WalletUtils {
             let nonHoldingAssets = oldAccAssets.filter(x => !holdingAssets.includes(x));
             let removingAsset: string[] = [];
 
-            for(let i =0; i < nonHoldingAssets.length; ++i){
-                let index = oldAccAssets.indexOf(nonHoldingAssets[i]);
+            for(let y =0; y < nonHoldingAssets.length; ++y){
+                let index = oldAccAssets.indexOf(nonHoldingAssets[y]);
 
                 if(index > -1){
                     let asset = accs[i].assets[index];
 
                     if(asset.creator !== null && asset.creator !== accs[i].publicKey){
-                        removingAsset.push(nonHoldingAssets[i]);  
+                        removingAsset.push(nonHoldingAssets[y]);  
                     }
                     else{
                         asset.amount = 0;
@@ -1375,8 +1375,8 @@ export class WalletUtils {
                 }  
             }
 
-            for(let i =0; i < removingAsset.length; ++i){
-                accs[i].removeAsset(removingAsset[i]);
+            for(let y =0; y < removingAsset.length; ++y){
+                accs[i].removeAsset(removingAsset[y]);
             }
         }
 
