@@ -21,8 +21,8 @@
       </div>
       <div v-if="currentPage==1">
         <div class="text-sm my-5 font-bold">Select Asset</div>
-        <select class="" v-model="selectedToken">
-          <option v-for="(element, item) in  tokenList" :value="element" :key="item">
+        <select class="" v-model="selectedTokenName">
+          <option v-for="(element, item) in  tokenList" :value="element.name" :key="item">
             {{element.name.toUpperCase()}}
           </option>
         </select>
@@ -31,7 +31,7 @@
         <SelectInputAccountOutgoingSwap :otherToken='selectedToken.namespace' :otherTokenId='selectedToken.assetId' :name='selectedToken.name' v-model="siriusAddress" :placeholder="$t('swap.fromSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" :divisibility="tokenDivisibility"/>
         <div class="relative">
           <div class="opacity-90 w-full h-full absolute z-10 bg-white" v-if="!siriusAddress"></div>
-          <SwapInputClean class="mt-5" :disabled="disableAmount" :remarkOption="selectedToken.name=='xpx'" v-model="amount" :balance="selectedAccountBalance" :placeholder="`${selectedToken.name}` +' '+ $t('general.amount')" type="text" :showError="showAmountErr" :errorMessage="$t('general.insufficientBalance')" :emptyErrorMessage="$t('swap.amountEmpty')" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()"  :toolTip="$t('swap.bscAmountMsg')" :decimal="tokenDivisibility"/>
+          <SwapInputClean class="mt-5" :disabled="disableAmount" :remarkOption="selectedToken.name=='xpx'" v-model="amount" :balance="selectedAccountBalance" :placeholder="`${selectedToken.name}` +' '+ $t('general.amount')" type="text" :showError="showAmountErr" :errorMessage="$t('general.insufficientBalance')" :emptyErrorMessage="$t('swap.amountEmpty')" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()"  :toolTip="$t('swap.bscAmountMsg',{token: selectedTokenName.toUpperCase()})" :decimal="tokenDivisibility"/>
           <MetamaskAddressInput :placeholder="$t('swap.bscAddress')" :errorMessage="$t('swap.bscAddressErr')" class="mt-5" :showError="showAddressErr" v-model="bscAddress" />
           <div class="tex-center font-bold text-sm my-5">{{$t('general.transactionFee')}} ({{$t('swap.bsc')}} BEP20 {{$t('general.network')}}):</div>
           <div class="md:grid md:grid-cols-3 mb-4">
@@ -165,6 +165,7 @@ export default {
       --timerSeconds.value;
     }, 1000);
     const selectedToken = ref('')
+    const selectedTokenName = ref('');
     const timerStop = watch(()=> timerSeconds.value, (newValue)=>{
 
       if(newValue <= 0){
@@ -250,8 +251,6 @@ export default {
 
     const siriusAddress = ref('');
     
-   
-
     watch(siriusAddress, (address) => {
       if(address){
         let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
@@ -261,8 +260,9 @@ export default {
         selectedAccountName.value = account.name;
         selectedAccountAddress.value = account.address;
         
-        if(selectedToken.value.name!="xpx"){
-          selectedAccountBalance.value = account.assets.find(asset=>asset.idHex==selectedToken.value.assetId)? account.assets.find(asset=>asset.idHex==selectedToken.value.assetId).amount/Math.pow(10,tokenDivisibility.value) : 0
+        if(selectedToken.value.name.toUpperCase() !="XPX"){
+          let foundIndex = account.assets.findIndex(asset=>asset.idHex== selectedToken.value.assetId);
+          selectedAccountBalance.value = foundIndex > -1 ? account.assets[foundIndex].amount : 0;
           maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value , tokenDivisibility.value);
         }else{//if xpx
           selectedAccountBalance.value = account.balance
@@ -278,20 +278,30 @@ export default {
         selectedAccountPublicKey.value = '';
       }
     });
-    watch(selectedToken, (token) => {
-      if(token!=''&&siriusAddress.value!=''){
+    watch(selectedToken, async (token) => {
+      
+      let assetInfo = await AppState.chainAPI.assetAPI.getMosaic(new MosaicId(token.assetId));
+      
+      tokenDivisibility.value = assetInfo.divisibility;
+
+      if(siriusAddress.value!=''){
         let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == siriusAddress.value);
         if(!account){
           account = walletState.currentLoggedInWallet.others.find(account => account.address == siriusAddress.value);
         }
-        if(token.name!="xpx"){
-        selectedAccountBalance.value = account.assets.find(asset=>asset.idHex==selectedToken.value.assetId)? account.assets.find(asset=>asset.idHex==selectedToken.value.assetId).amount/Math.pow(10,tokenDivisibility.value) : 0
-        maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value , tokenDivisibility.value);
+        if(token.name.toUpperCase() !="XPX"){
+          let foundIndex = account.assets.findIndex(asset=>asset.idHex==token.assetId);
+          selectedAccountBalance.value = foundIndex > -1 ? account.assets[foundIndex].amount : 0;
+          maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value , tokenDivisibility.value);
         }else{
           selectedAccountBalance.value = account.balance
           
           maxSwapAmount.value = Helper.convertNumberMinimumFormat(account.balance - txFee.value - gasPriceInXPX.value, tokenDivisibility.value);
         }
+      }
+
+      if(amount.value>maxSwapAmount.value){
+        updateAmountToMax()
       }
     });
 
@@ -356,15 +366,16 @@ export default {
       let tokens = await SwapUtils.getSwapTokenList(swapServerUrl)
       if(tokens){
         
-        tokenList.value = tokens.map(token=>{
-          return {
-            name:token.name,
-            assetId: token.assetId,
-            contractAddress: token.contractAddress,
-            namespace: token.namespace,
-          }
-        })
-        selectedToken.value = tokenList.value[0]
+        tokenList.value = tokens; //.map(token=>{
+        //   return {
+        //     name:token.name,
+        //     assetId: token.assetId,
+        //     contractAddress: token.contractAddress,
+        //     namespace: token.namespace,
+        //   }
+        // })
+        selectedToken.value = tokenList.value[0];
+        selectedTokenName.value = tokenList.value[0].name;
         AppState.chainAPI.assetAPI.getMosaic(new MosaicId(selectedToken.value.assetId)).then(mosaic=>{
           tokenDivisibility.value =  mosaic.properties.divisibility
         })
@@ -540,15 +551,18 @@ export default {
       amount.value = maxSwapAmount.value;
     };
 
-    watch(selectedToken,n=>{
-      if(amount.value>maxSwapAmount.value){
-        updateAmountToMax()
-      }
-      AppState.chainAPI.assetAPI.getMosaic(new MosaicId(n.assetId)).then(mosaic=>{
-        tokenDivisibility.value =  mosaic.properties.divisibility
-      
-      })
-    })
+    watch(selectedTokenName,n=>{
+      selectedToken.value = tokenList.value.find(x => x.name === n);
+    });
+
+    // watch(selectedToken,n=>{
+    //   if(amount.value>maxSwapAmount.value){
+    //     updateAmountToMax()
+    //   }
+    //   AppState.chainAPI.assetAPI.getMosaic(new MosaicId(n.assetId)).then(mosaic=>{
+    //     tokenDivisibility.value = mosaic.properties.divisibility
+    //   })
+    // })
 
     
 
@@ -880,6 +894,7 @@ export default {
       tokenDivisibility,
       tokenList,
       selectedToken,
+      selectedTokenName
     };
   }
 }
