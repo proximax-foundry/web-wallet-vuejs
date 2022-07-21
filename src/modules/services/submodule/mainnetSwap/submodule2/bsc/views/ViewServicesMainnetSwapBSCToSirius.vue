@@ -269,7 +269,7 @@
             </label>
             <div class="sm:mt-3 text-center">
               <router-link :to="{ name: 'ViewServicesMainnetSwap' }">
-                <button type="submit" class="default-btn mr-5 focus:outline-none w-40 inline-block disabled:opacity-50" :disabled="isDisabledDone">{{$t('general.done')}}</button>          
+                <button type="submit" class="default-btn mr-5 focus:outline-none w-40 inline-block disabled:opacity-50" :disabled="!savedCheck">{{$t('general.done')}}</button>          
               </router-link>
             </div>
           </div>
@@ -894,10 +894,6 @@ export default {
 
     const savedCheck = ref(false);
 
-    const isDisabledDone = computed(() => (
-      (!savedCheck.value)
-    ));
-
     return {
       recheckMetamask,
       contacts,
@@ -918,7 +914,6 @@ export default {
       amount,
       disableAmount,
       isDisabledSwap,
-      isDisabledDone,
       savedCheck,
       toggleContact,
       step1,
