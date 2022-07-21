@@ -1,6 +1,6 @@
 <template>
     <div class="border border-gray-200 px-2 py-1 h-12">
-        <div class="uppercase text-gray-400 font-light text-txs text-left mb-2">{{ $t('general.blockHeight') }}</div>
+        <div class="uppercase text-gray-400 font-light text-txs text-left mb-2">{{ $t('general.block') }}</div>
         <input disabled="true" v-model="blockHeight" type="text" class="text_input">
     </div>
 
