@@ -9,7 +9,7 @@
           <div class="flex border border-gray-300 rounded-md filter shadow-md">
             <div class="flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=1?'bg-yellow-500':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-txs sm:text-sm font-bold" :class="`${ currentPage>=1?'text-white':'text-gray-400' }`">1</div></div>
             <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('general.transaction')}}</div>
-          </div>
+          </div> 
         </div>
         <div class="flex-grow self-center md:mx-4 h-0.5 bg-gray-100"></div>
         <div class="flex-none">
@@ -107,11 +107,11 @@
           </div>
           <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">{{$t('swap.swapMsg3')}}</div>
           <label class="inline-flex items-center mb-5">
-            <input type="checkbox" class="h-5 w-5 bg-blue-primary" value="true" v-model="savedCheck">
+            <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="savedCheck">
             <span class="ml-2 cursor-pointer text-xs font-bold">{{$t('swap.confirmDownloaded')}}</span>
           </label>
           <div class="sm:mt-5 text-center">
-            <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn mr-5 focus:outline-none w-40 inline-block mt-1" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">{{$t('general.done')}}</router-link>
+            <button type="submit" class="default-btn mr-5 focus:outline-none w-40 inline-block mt-1 disabled:opacity-50 mt-2" :disabled="isDisabledDone" @click="certificateDone">{{$t('general.done')}}</button>          
           </div>
         </div>
       </div>
@@ -568,6 +568,16 @@ export default {
 
     const savedCheck = ref(false);
 
+    const isDisabledDone = computed(() => (
+      (!savedCheck.value)
+    ));
+
+    const certificateDone = () => {
+      if(savedCheck.value) {
+        router.push({ name: "ViewServicesMainnetSwap"})
+      }
+    };
+    
     const bscGasStrategy = ref('');
 
     let selectedGasLimit = ref(0);
@@ -855,6 +865,8 @@ export default {
       err,
       swap,
       savedCheck,
+      isDisabledDone,
+      certificateDone,
       allAvailableAccounts,
       selectedAccount,
       selectedAccountName,
