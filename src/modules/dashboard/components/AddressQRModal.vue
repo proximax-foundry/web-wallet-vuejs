@@ -1,5 +1,5 @@
 <template>
-    <div class="my-2 flex items-center cursor-pointer" @click="toggleModal = !toggleModal"><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span class="text-xs font-bold" style="margin-top: 1px">{{$t('dashboard.scanQR')}}</span></div>
+    <div class="my-2 flex items-center cursor-pointer" @click="toggleModal = !toggleModal"><img src="@/modules/dashboard/img/icon-qr_code.svg" class="w-4 h-4 cursor-pointer mr-1 inline-block"><span v-if="notIncludeWord!=true" class="text-xs font-bold" style="margin-top: 1px">{{$t('dashboard.scanQR')}}</span></div>
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -19,9 +19,11 @@ import { ref } from "vue";
 export default {
     name: 'AddressQRModal',
     props:{
-      accountAddressQR: String
+      accountAddressQR: String,
+      notIncludeWord: Boolean
     },
-    setup(){
+    setup(p){
+      console.log(p.notIncludeWord)
       let toggleModal = ref(false)
 
      return{
