@@ -111,7 +111,9 @@
             <span class="ml-2 cursor-pointer text-xs font-bold">{{$t('swap.confirmDownloaded')}}</span>
           </label>
           <div class="sm:mt-5 text-center">
-            <button type="submit" class="default-btn mr-5 focus:outline-none w-40 inline-block mt-1 disabled:opacity-50 mt-2" :disabled="isDisabledDone" @click="certificateDone">{{$t('general.done')}}</button>          
+            <router-link :to="{ name: 'ViewServicesMainnetSwap' }">
+              <button type="submit" class="default-btn mr-5 focus:outline-none w-40 inline-block disabled:opacity-50" :disabled="isDisabledDone">{{$t('general.done')}}</button>          
+            </router-link>
           </div>
         </div>
       </div>
@@ -571,12 +573,6 @@ export default {
     const isDisabledDone = computed(() => (
       (!savedCheck.value)
     ));
-
-    const certificateDone = () => {
-      if(savedCheck.value) {
-        router.push({ name: "ViewServicesMainnetSwap"})
-      }
-    };
     
     const bscGasStrategy = ref('');
 
@@ -866,7 +862,6 @@ export default {
       swap,
       savedCheck,
       isDisabledDone,
-      certificateDone,
       allAvailableAccounts,
       selectedAccount,
       selectedAccountName,

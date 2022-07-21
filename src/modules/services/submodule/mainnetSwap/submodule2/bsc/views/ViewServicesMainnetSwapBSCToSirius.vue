@@ -267,8 +267,10 @@
               <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="savedCheck">
               <span class="ml-2 cursor-pointer text-xs font-bold">{{$t('swap.confirmDownloaded')}}</span>
             </label>
-            <div class="sm:mt-5 text-center">
-              <button type="submit" class="default-btn mr-5 focus:outline-none w-40 inline-block mt-1 disabled:opacity-50 mt-2" :disabled="isDisabledDone" @click="certificateDone">{{$t('general.done')}}</button>          
+            <div class="sm:mt-3 text-center">
+              <router-link :to="{ name: 'ViewServicesMainnetSwap' }">
+                <button type="submit" class="default-btn mr-5 focus:outline-none w-40 inline-block disabled:opacity-50" :disabled="isDisabledDone">{{$t('general.done')}}</button>          
+              </router-link>
             </div>
           </div>
         </div>
@@ -278,7 +280,6 @@
 </template>
 <script>
 import { computed, ref, watch, onBeforeUnmount, shallowRef } from "vue";
-import { useRouter } from "vue-router";
 import SupplyInputClean from '@/components/SupplyInputClean.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
 import { walletState } from '@/state/walletState';
@@ -308,7 +309,6 @@ export default {
   setup() {
     let verifyingTxn;
     const {t} = useI18n();
-    const router = useRouter();
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const toggleContact = shallowRef(false)
     const verifyMetaMaskPlugin = ref(true); 
@@ -898,12 +898,6 @@ export default {
       (!savedCheck.value)
     ));
 
-    const certificateDone = () => {
-      if(savedCheck.value) {
-        router.push({ name: "ViewServicesMainnetSwap"})
-      }
-    };
-
     return {
       recheckMetamask,
       contacts,
@@ -925,7 +919,6 @@ export default {
       disableAmount,
       isDisabledSwap,
       isDisabledDone,
-      certificateDone,
       savedCheck,
       toggleContact,
       step1,
