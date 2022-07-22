@@ -8,8 +8,12 @@
               <div class="text-center my-2"><div class="inline-block"><span class="font-bold text-xl">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-md">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-xl">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-6 h-6 ml-3 relative" style="top: -6px;"></div>
               <div class="inline-block text-xs font-bold text-blue-primary cursor-pointer" @click="triggerSetDefaultModal">{{ selectedAccountName }}<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></div>
               <div class="mb-8">
-                <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" :copySubject="$t('general.address')">{{ selectedAccountAddressShort }}</div>
-                <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
+                <div class="flex items-center justify-center">
+                  <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" :copySubject="$t('general.address')">{{ selectedAccountAddressShort }}</div>
+
+                  <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
+                  <AddressQRModal :accountAddressQR="addressQR" :notIncludeWord="true" />      
+                </div>
               </div>
               <div>
                 <a :href="faucetLink" target=_new class="inline-block text-center mr-2" v-if="faucetLink">
@@ -44,12 +48,18 @@
           <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded-lg balance-div flex flex-col justify-between bg-navy-primary text-white">
             <div class="mt-8">
               <div class="text-gray-300 text-txs uppercase">{{$t('general.currentBalance')}}</div>
-              <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
+              <div class="flex justify-between items-center">
+                 <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
+              <a :href="faucetLink" class="flex items-center" target=_new v-if="faucetLink"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">{{$t('general.topUp')}}</div></a>
+              </div>
+             
               <div class="text-gray-300 text-txs mt-1">{{$t('general.estimateUSD')}} {{ currencyConvert }}</div>
+
             </div>
             <div class="flex justify-between mt-2">
               <div>
-                <a :href="faucetLink" class="flex items-center mb-3" target=_new v-if="faucetLink"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">{{$t('general.topUp')}}</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></a>
+                <router-link :to="{ name: 'ViewTransferCreate'}" class="flex items-center "><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">{{$t('general.transfer',{tokenName: currentNativeTokenName})}}</div></router-link>
+                
               </div>
               <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-swap.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold text-white" style="margin-top: 1px">{{$t('general.swap')}}</div></router-link>
             </div>
@@ -81,7 +91,6 @@
                 <a class="text-tsm font-bold" :href="hashExplorerURL + '/' + txn.hash" target=_new><span :class="`${ (txn.amount[0] ==='-')?'text-red-500':'text-green-500' }`">{{ txn.amount }}</span> <span class="text-xxs font-normal">{{ currentNativeTokenName }}</span></a>
               </div>
             </div>
-            <router-link :to="{ name: 'ViewTransferCreate'}" class="flex items-center mt-5"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">{{$t('general.transfer',{tokenName: currentNativeTokenName})}}</div></router-link>
           </div>
         </div>
       </div>
@@ -150,7 +159,7 @@
       </div> -->
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='asset'">
-      <DashboardAssetDataTable :assets="selectedAccount.assets" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
+      <DashboardAssetDataTable :assets="accountAssets" />
     </div>
     <!-- <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='namespace'">
       <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" :account="selectedAccount" />
@@ -284,7 +293,7 @@ export default defineComponent({
     const displayBoard = ref('asset');
     const showAddressQRModal = ref(false);
     const showMessageModal = ref(false);
-    const showDecryptMessageModal  = ref(false);
+    const showDecryptMessageModal  = ref(false)
     const displayConvertion = ref(false);
     const showCosignModal = ref(false);
     const txMessage = ref("");
@@ -418,7 +427,11 @@ export default defineComponent({
     let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
     currentAccount.default = true;
     const selectedAccount = ref(currentAccount);
-
+    const accountAssets = computed(()=>{
+      let defaultAccAsset =walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount().assets : walletState.currentLoggedInWallet.accounts[0].assets
+      let filteredAsset = defaultAccAsset.filter(asset=>asset.amount!=0)
+      return filteredAsset 
+    })
     const currentBlock = computed(() => AppState.readBlockHeight);
 
     const selectedAccountPublicKey = computed(()=> selectedAccount.value.publicKey);
@@ -1077,6 +1090,7 @@ export default defineComponent({
       jdenticonConfig,
       faucetLink,
       boolIsTxnFetched,
+      accountAssets
     };
   }
 });
