@@ -5,10 +5,10 @@
         <div class="flex justify-between text-sm mb-5">
           <div><span class="text-gray-700">{{$t('general.notification',2)}}</span></div>
         </div>
-        <div v-if="notifications.length > 0">
+        <div v-if="notifications!=null && notifications.length > 0">
           <div v-for="notification, index in notifications" :key="index">
             <div v-if="notification.type=='Partial'">
-              <router-link :to="{ name : 'ViewTransactionStatus', params: {transactionType: 'partial' } }" @click="updateDefaultAccount(notification.address)" class="flex items-center border border-gray-100 w-full p-5 mb-3 text-tsm hover:bg-blue-50 transition-all duration-300">
+              <router-link :to="{ name : 'ViewAccountPendingTransactions', params: {address: notification.address } }" @click="updateDefaultAccount(notification.address)" class="flex items-center border border-gray-100 w-full p-5 mb-3 text-tsm hover:bg-blue-50 transition-all duration-300">
                 <div v-html="toSvg(notification.address, 40, themeStyleConfig)" class="mr-2"></div>
                 <div class="text-gray-600 text-xs">
                   <div class="mb-1 text-sm text-gray-700 font-bold">{{ walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.convertAddressToNamePretty(notification.address, true):'' }}</div>

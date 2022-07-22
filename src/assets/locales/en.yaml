@@ -257,6 +257,7 @@ general:
   modifySupply: Modify Supply
   month: Month | Months
   more: More
+  moreOnExplorer: Full History on Explorer
   multisig: Multisig
   multisigTitle: This is a multisig account
   name: Name
@@ -355,7 +356,7 @@ home:
   siriusChain: What is Sirius Chain?
   siriusChainTitle: Start building apps on the ProximaX Sirius blockchain layer
   switchDefault: Your default account has switched to
-  title: ProximaX Sirius Wallet 1.0
+  title: ProximaX Sirius Wallet
   titleDescription: >-
     A highly secure and intuitive wallet and gateway to the ProximaX Sirius platform
   transferDescription: Send assets to another account
@@ -456,7 +457,7 @@ swap:
   bsc: BSC
   bscAddress: BSC address receiving your swap
   bscAddressErr: Valid BSC address is required
-  bscAmountMsg: XPX amount to swap to BEP20
+  bscAmountMsg: '{token} amount to swap to BEP20'
   bscFull: Binance Smart Chain
   bscOutgoingMsg: >-
     Swap completion time will vary depending on the performance of the BSC
@@ -662,7 +663,7 @@ transaction:
   txErrMsg: 'Status: {0} - Hash: {1}'
   txError: Transaction Error
   txInfo: Transaction information
-  txUnconfirmed: transaction in unconfirmed state | transactions in unconfirmed state
+  txUnconfirmed: Transaction in unconfirmed state | Transactions in unconfirmed state
   unconfirmedTx: Unconfirmed Transactions
   unconfirmedTxOf: 'Unconfirmed transactions of {name}'
   waitForLoad: 'It is still loading, please wait.'

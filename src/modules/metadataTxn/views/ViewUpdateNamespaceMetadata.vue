@@ -1,9 +1,5 @@
 <template>
   <div>
-    <div class='flex cursor-pointer'>
-        <img src='@/assets/img/chevron_left.svg'>
-        <router-link :to="{name: 'ViewServicesNamespace'}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
-    </div>
     <div class='w-10/12 ml-auto mr-auto'>
         <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
             <div class="xl:col-span-2 p-12">
@@ -163,7 +159,8 @@ import { toSvg } from 'jdenticon';
 import { networkState } from '@/state/networkState';
 import MetadataInput from '@/modules/metadataTxn/components/MetadataInput.vue'
 import { WalletUtils } from '@/util/walletUtils';
-import isValidUTF8 from 'utf-8-validate';
+import UTF8 from 'utf-8';
+import { useRouter } from 'vue-router';
 export default { 
   name: "ViewUpdateNamespaceMetadata",
   props:{
@@ -175,6 +172,7 @@ export default {
     PasswordInput,
   },
   setup(props) {
+    const router = useRouter() 
     let showKeys = ref(false)
     let scopedMetadataKeySelectable = ref(true);
     let scopedMetadataKeyType = ref(1);
@@ -208,7 +206,7 @@ export default {
     const convertUtf8 = (scopedMetadataKey :string)=>{
         scopedMetadataKey =  removeDoubleZero(scopedMetadataKey )
         let bytes = Convert.hexToUint8(scopedMetadataKey );
-        if(isValidUTF8(bytes)){
+        if(!UTF8.isNotUTF8(bytes)){
             scopedMetadataKey  = Convert.decodeHexToUtf8(scopedMetadataKey)
         }
         return scopedMetadataKey
@@ -564,6 +562,7 @@ export default {
       oldValue.value = ""
       newValue.value=""
       walletPassword.value=""
+      router.push({name:'ViewAccountPendingTransactions',params:{address:targetPublicAccount.value.address.plain()}})
     }
 
     const totalFee = computed(()=>{

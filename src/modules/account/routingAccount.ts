@@ -41,7 +41,7 @@ export const AccountRoutes: RouteRecordRaw[] = [
   {
     path: '/details-account/:address',
     name: 'ViewAccountDetails',
-    props: true,
+    props: (route) =>{ return { address: route.params.address, accountCreated: route.params.accountCreated === 'true'}},
     component: () => import('@/modules/account/views/ViewAccountDetails.vue'),
     meta: {
       title: "Account details",
@@ -63,6 +63,24 @@ export const AccountRoutes: RouteRecordRaw[] = [
     component: () => import('@/modules/account/views/ViewAccountNamespaces.vue'),
     meta: {
       title: "Account Namespaces",
+    }
+  },
+  {
+    path: '/view-transactions/:address',
+    name: 'ViewAccountConfirmedTransactions',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccountConfirmedTransactions.vue'),
+    meta: {
+      title: "Account Confirmed Transactions",
+    }
+  },
+  {
+    path: '/view-pending-transactions/:address',
+    name: 'ViewAccountPendingTransactions',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccountPendingTransactions.vue'),
+    meta: {
+      title: "Account Pending Transactions",
     }
   },
   

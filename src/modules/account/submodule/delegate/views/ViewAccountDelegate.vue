@@ -1,18 +1,9 @@
 <template>
 <div>
-  <div class='flex cursor-pointer'>
-    <img src='@/assets/img/chevron_left.svg'>
-    <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
-  </div>
+  
   <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
-    <AccountComponent :address="address" class="mb-10"/>
-    <div class = 'flex text-xs font-semibold border-b-2 menu_title_div '>
-      <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center border-b-2 pb-3 border-yellow-500'>{{$t('account.accountDetails')}}</router-link>
-      <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-      <router-link :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
-      <router-link :to="{name:'ViewMetadata', params: { address: address}}" class= 'w-18 text-center'>Metadata</router-link>
-      <router-link :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-    </div>
+    <AccountComponent :address="address" class="mb-6"/>
+    <AccountTabs :address="address" selected="details"/>
     <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 pr-6">
         <div class='pl-6'>
@@ -142,9 +133,8 @@
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" />
         <div class="mt-3">
-          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="delegateValue && !unlinking" :disabled="disableLinkBtn">{{$t('delegate.unlinkAcc')}}</button>
-          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="!delegateValue && !pending" :disabled="disableLinkBtn">{{$t('delegate.delegateAcc')}}</button>
-          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  v-if="(pending | unlinking)" :disabled="true">{{$t('general.waitConfirmTx')}}</button>
+          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="delegateValue " :disabled="disableLinkBtn">{{$t('delegate.unlinkAcc')}}</button>
+          <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="!delegateValue " :disabled="disableLinkBtn">{{$t('delegate.delegateAcc')}}</button>
         </div>
         <div class="text-center">
           <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
@@ -177,13 +167,14 @@ import { listenerState } from '@/state/listenerState';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
-
+import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 export default {
   name: 'ViewAccountDelegate',
   components: {
     AccountComponent,
     PasswordInput,
-    PkInputClean
+    PkInputClean,
+    AccountTabs
   },
   props: {
     address: String,
@@ -196,12 +187,8 @@ export default {
     const walletPassword = ref("");
     const showPasswdError = ref(false);
     const err = ref(false); 
-    const confirmedTxLength = computed(()=> listenerState.confirmedTxLength);
-    const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
     let fromNew = ref(false)
     let fromPk = ref(false)
-    let txHash = ref("")
-    let pending =ref(false)
     let toggleSelection = ref(false)
     const acc = computed(()=>{
       if(!walletState.currentLoggedInWallet){
@@ -363,7 +350,6 @@ export default {
     const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
     const emitter = internalInstance.appContext.config.globalProperties.emitter;    
     const walletName = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.name:''
-    let unlinking = ref(false)
     const disableLinkBtn = computed(() => {
       if(onPartial.value || fundStatus.value || (!isCosigner.value && isMultisig.value) ){
         return true
@@ -395,7 +381,7 @@ export default {
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-      toast.add({severity:'info', detail: copySubject + ' '+ t('general.copied'), group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject + ' '+ t('general.copied'), group: 'br-custom', life: 3000});
     };
 
     const verifyDelegateAcc = async() => {
@@ -450,46 +436,21 @@ export default {
       }
       if (WalletUtils.verifyWalletPassword(walletName,networkState.chainNetworkName,walletPassword.value)) {
         if (delegateAcc.value !== "0".repeat(64)) { //unlink
-          let signedTx = accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
-          txHash.value = signedTx.hash.toUpperCase()
+          accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
           walletPassword.value=""
-          unlinking.value=true
           err.value=""
         } else if (AccPublicKey.value != "" && (fromPk.value || fromNew.value)) { //link
-          let signedTx = accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
-          txHash.value = signedTx.hash.toUpperCase()
+          accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
           walletPassword.value=""
-          pending.value=true
           err.value=""
         } else {
           
         }
+        router.push({ name: "ViewAccountPendingTransactions",params:{address:p.address} })
       } else {
         err.value = t('general.walletPasswordInvalid',{name : walletName});
       }
     };
-    
-    
-
-    watch(confirmedTxLength, (n, o) => {
-      if (n != o){
-        if(listenerState.allConfirmedTransactionsHash.find(hash=> hash ==txHash.value)){
-          unlinking.value = false
-          txHash.value=""
-          pending.value=false
-          toast.add({severity:'success', summary: t('general.notification'), detail: delegateValue.value? t('general.unlinkSuccess') : t('general.linkSuccess'), group: 'br', life: 5000})
-          /* showSuccess.value=true */
-        }
-        verifyDelegateAcc()
-        checkIsPartial()
-      }
-    })
-
-    watch(aggregateBondedTxLength, (n, o) => {
-      if (n != o){
-        checkIsPartial()
-      }
-    })
     
     const topUpUrl = computed(()=>{
       if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
@@ -505,7 +466,6 @@ export default {
     
 
     return {
-      unlinking,
       showPrivateKeyError,
       privateKey,
       fromNew,
@@ -528,7 +488,6 @@ export default {
       err,
       walletName,
       delegateValue,
-      pending,
       isCosigner,
       lockFund,
       transactionFee,

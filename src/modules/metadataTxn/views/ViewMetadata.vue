@@ -1,19 +1,10 @@
 <template>
     <div>
-        <div class='flex cursor-pointer'>
-            <img src='@/assets/img/chevron_left.svg'>
-            <router-link :to='{name:"ViewDashboard"}' class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
-        </div>
+        
         <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
-            <AccountComponent :address="address" class="mb-10"/>
-            <div class = 'flex text-xs font-semibold border-b-2 menu_title_div'>
-                <router-link :to="{name: 'ViewAccountDetails',params:{address:address}}" class= 'w-32 text-center '>{{$t('account.accountDetails')}}</router-link>
-                <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.asset',2)}}</router-link>
-                <router-link :to="{name:'ViewAccountNamespaces', params: { address: address}}" class= 'w-24 text-center'>{{$t('general.namespace',2)}}</router-link>
-                <div class= 'w-18 text-center border-b-2 pb-3 border-yellow-500'>Metadata</div>
-                <router-link :to="{name:'ViewMultisigHome', params: { address: address}}" class= 'w-18 text-center'>{{$t('general.multisig')}}</router-link>
-            </div>
-            <div class="border-2 border-t-0 filter shadow-lg px-6" >
+            <AccountComponent :address="address" class="mb-6"/>
+            <AccountTabs :address="address" selected="metadata"/>
+            <div class="border-2 border-t-0 px-6" >
                 <select class=" my-4" v-model="filterSelection">
                     <option value=0>ACCOUNT</option>
                     <option value=1>NAMESPACE</option>
@@ -116,7 +107,7 @@
                         </div>
                     </div>
                 </div>
-                <router-link :to="{name: 'ViewUpdateAccountMetadata',params:{targetPublicKey:acc?acc.publicKey:'0'.repeat(64)}}"><button  class="my-4 blue-btn py-3 px-3 " >Create New Account Metadata</button></router-link>
+                <router-link :to="{name: 'ViewUpdateAccountMetadata',params:{targetPublicKey:acc?acc.publicKey:'0'.repeat(64)}}"><button  class="my-4 blue-btn py-3 px-3 flex items-center" ><img src="@/assets/img/icon-plus.svg" class="inline-block w-4 h-4 mr-2">Create New Account Metadata</button></router-link>
             </div>
         </div>
     </div>
@@ -128,7 +119,8 @@ import { walletState } from "@/state/walletState"
 import { Convert, MetadataQueryParams, MetadataType, MosaicId, NamespaceId, PublicAccount } from "tsjs-xpx-chain-sdk"
 import { computed, ref, watch } from "vue"
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
-import isValidUTF8 from 'utf-8-validate';
+import AccountTabs from "@/modules/account/components/AccountTabs.vue";
+import UTF8 from 'utf-8';
     const props = defineProps({
         address: String
     })
@@ -201,7 +193,7 @@ import isValidUTF8 from 'utf-8-validate';
         }
         let assets :{id:string,name:string}[] = [] 
         acc.value.assets.forEach(asset=>{
-            if(asset.owner==acc.value.publicKey){
+            if(asset.creator==acc.value.publicKey){
                 assets.push({
                     id:asset.idHex,
                     name:asset.namespaceNames[0]??''
@@ -237,7 +229,7 @@ import isValidUTF8 from 'utf-8-validate';
     const convertUtf8 = (scopedMetadataKey :string)=>{
         scopedMetadataKey =  removeDoubleZero(scopedMetadataKey )
         let bytes = Convert.hexToUint8(scopedMetadataKey );
-        if(isValidUTF8(bytes)){
+        if(!UTF8.isNotUTF8(bytes)){
             scopedMetadataKey  = Convert.decodeHexToUtf8(scopedMetadataKey)
         }
         return scopedMetadataKey

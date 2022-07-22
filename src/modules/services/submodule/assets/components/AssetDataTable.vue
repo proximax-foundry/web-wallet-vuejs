@@ -54,7 +54,7 @@
             <div class="uppercase font-bold text-txs">{{data.supply}}</div>
             <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">{{$t('general.amount')}}</div>
             <div class="uppercase font-bold text-txs">{{data.amount}}</div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">{{$t('general.blockHeight')}}</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">{{$t('general.block')}}</div>
             <div class="uppercase font-bold text-txs">{{data.height}}</div>
           </div>
         </template>
@@ -96,7 +96,7 @@
           <span class="uppercase font-bold text-txs">{{data.amount}}</span>
         </template>
       </Column>
-      <Column field="height" :header="$t('general.blockHeight')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="height" :header="$t('general.block')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.height}}</span>
         </template>
@@ -210,17 +210,17 @@ export default{
         if(!account){
           return []
         }
-        account.assets.filter(asset => asset.owner === account.publicKey).forEach(asset => {
+        account.assets.filter(asset => asset.creator === account.publicKey).forEach(asset => {
           accountAssets.push({asset, account});
         });
       }else{
         walletState.currentLoggedInWallet.accounts.forEach(account => {
-          account.assets.filter(asset => asset.owner === account.publicKey).forEach(asset => {
+          account.assets.filter(asset => asset.creator === account.publicKey).forEach(asset => {
             accountAssets.push({asset, account});
           });
         });
         walletState.currentLoggedInWallet.others.forEach(other => {
-          other.assets.filter(asset => asset.owner === other.publicKey).forEach(asset => {
+          other.assets.filter(asset => asset.creator === other.publicKey).forEach(asset => {
             accountAssets.push({asset, account:other});
           });
         });
@@ -245,9 +245,9 @@ export default{
           let data = {
             i: i,
             idHex: assetId,
-            owner: accountAssets[i].asset.owner,
-            address: PublicAccount.createFromPublicKey(accountAssets[i].asset.owner, AppState.networkType).address.pretty(),
-            amount: Helper.toCurrencyFormat(accountAssets[i].asset.getExactAmount(), accountAssets[i].asset.divisibility),
+            owner: accountAssets[i].asset.creator,
+            address: PublicAccount.createFromPublicKey(accountAssets[i].asset.creator, AppState.networkType).address.pretty(),
+            amount: Helper.toCurrencyFormat(accountAssets[i].asset.amount, accountAssets[i].asset.divisibility),
             supply: Helper.toCurrencyFormat(accountAssets[i].asset.getExactSupply(), accountAssets[i].asset.divisibility),
             linkedNamespace: namespaceAlias,
             height: accountAssets[i].asset.height,

@@ -73,7 +73,6 @@ export class NamespaceUtils {
     if((accountNamespacesNum + otherNamespacesNum) > 0){
       if(accountNamespacesNum > 0){
         accountNamespaces.forEach((namespaceElement) => {
-          let blockDifference = namespaceElement.endHeight - listenerState.currentBlock;
 
           const level = namespaceElement.name.split('.');
           let isDisabled: boolean;
@@ -82,6 +81,19 @@ export class NamespaceUtils {
           }else{
             isDisabled = false;
           }
+
+          if(typeof namespaceElement.endHeight === 'string'){
+            namespacesArr.push({
+              value: namespaceElement.name,
+              label: namespaceElement.name,
+              disabled: isDisabled,
+              level: level
+            });
+            return;
+          }
+
+          let blockDifference = namespaceElement.endHeight - AppState.readBlockHeight;
+
           if (blockDifference > 0) {
             namespacesArr.push({
               value: namespaceElement.name,
@@ -95,8 +107,6 @@ export class NamespaceUtils {
 
       if(otherNamespacesNum > 0){
         otherNamespaces.forEach((namespaceElement) => {
-          let blockDifference = namespaceElement.endHeight - listenerState.currentBlock;
-
           const level = namespaceElement.name.split('.');
           let isDisabled: boolean;
           if(level.length > 2){
@@ -104,6 +114,19 @@ export class NamespaceUtils {
           }else{
             isDisabled = false;
           }
+
+          if(typeof namespaceElement.endHeight === 'string'){
+            namespacesArr.push({
+              value: namespaceElement.name,
+              label: namespaceElement.name,
+              disabled: isDisabled,
+              level: level
+            });
+            return;
+          }
+
+          let blockDifference = namespaceElement.endHeight - listenerState.currentBlock;
+  
           if (blockDifference > 0) {
             namespacesArr.push({
               value: namespaceElement.name,

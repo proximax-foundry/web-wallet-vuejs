@@ -6,6 +6,7 @@ import {
 } from "tsjs-xpx-chain-sdk";
 import {RequestAuth} from './auth';
 import {AppState} from '../../state/appState';
+import { AppStateUtils } from "@/state/utils/appStateUtils";
 
 export class TransactionAPI {
 
@@ -17,8 +18,19 @@ export class TransactionAPI {
 
     announce(signedTransaction: SignedTransaction): Promise<TransactionAnnounceResponse>{
         let txnHash = signedTransaction.hash;
-        if(!AppState.trackingTxnHash.includes(txnHash)){
-            AppState.trackingTxnHash.push(txnHash);
+
+        if(!AppState.txnActivityLog.find(x => x.txnHash === txnHash)){
+            AppState.txnActivityLog.push({
+                accPubKey: signedTransaction.signer,
+                announced: true,
+                relatedAddress: [],
+                txnHash: txnHash,
+                status: "",
+                statusMsg: "",
+                checkedNum: 0
+            });
+
+            AppStateUtils.updateActivityLogNum();
         }
         let authHeader = RequestAuth.getAuthHeader();
         return this.transactionHttp.announce(signedTransaction, authHeader).toPromise();
@@ -26,14 +38,45 @@ export class TransactionAPI {
 
     announceAggregateBonded(signedTransaction: SignedTransaction): Promise<TransactionAnnounceResponse>{
         let txnHash = signedTransaction.hash;
-        if(!AppState.trackingTxnHash.includes(txnHash)){
-            AppState.trackingTxnHash.push(txnHash);
+
+        if(!AppState.txnActivityLog.find(x => x.txnHash === txnHash)){
+            AppState.txnActivityLog.push({
+                accPubKey: signedTransaction.signer,
+                announced: true,
+                relatedAddress: [],
+                txnHash: txnHash,
+                status: "",
+                statusMsg: "",
+                checkedNum: 0
+            });
+
+            AppStateUtils.updateActivityLogNum();
         }
         let authHeader = RequestAuth.getAuthHeader();
         return this.transactionHttp.announceAggregateBonded(signedTransaction, authHeader).toPromise();
     }
 
     announceAggregateBondedCosignature(cosignatureSignedTransaction: CosignatureSignedTransaction): Promise<TransactionAnnounceResponse>{
+        let txnHash = cosignatureSignedTransaction.parentHash;
+
+        let existingTxnCosignLog = AppState.txnCosignLog.find(x => x.txnHash === txnHash);
+        if(!existingTxnCosignLog){
+            AppState.txnCosignLog.push({
+                accPubKey: [cosignatureSignedTransaction.signer],
+                announced: true,
+                relatedAddress: [],
+                txnHash: txnHash,
+                status: "",
+                statusMsg: "",
+                checkedNum: 0
+            });
+
+            AppStateUtils.addCosignLogNum();
+        }
+        else{
+            existingTxnCosignLog.accPubKey.push(cosignatureSignedTransaction.signer);
+            AppStateUtils.addCosignLogNum();
+        }
         let authHeader = RequestAuth.getAuthHeader();
         return this.transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction, authHeader).toPromise();
     }

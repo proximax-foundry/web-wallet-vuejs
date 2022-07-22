@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col" @mouseover="hoverOverNavigation" @mouseout="hoverOutNavigation">
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10 lg:px-5 3xl:px-10 font-txs text-gray-400 uppercase flex justify-between items-center">Default account<img src="@/assets/img/navi/icon-switch-account.svg" class="cursor-pointer" @click="triggerSetDefaultModal"></div>
+      <div class="my-3 px-10  3xl:px-10 font-txs text-gray-400 uppercase flex justify-between items-center">Default account<img src="@/assets/img/navi/icon-switch-account.svg" class="cursor-pointer" @click="triggerSetDefaultModal"></div>
       <div>
         <div class="cursor-pointer link_block flex items-center justify-between">
           <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" class="flex items-center">
@@ -17,29 +17,33 @@
         <!-- <div @click="updateDefaultAccount(item.name)" v-for="(item) in accounts" :key="item.address" class="cursor-pointer link_block flex items-center"><div class="mr-2 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center"><img src="@/assets/img/navi/icon-accounts-light.svg" class="h-3 w-3 inline-block relative"></div><span class="truncate overflow-hidden text-white">{{ item.name }}</span></div> -->
       </div>
       <!-- <router-link :to="{ name: 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" v-if="allAccountsCount > 5" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-4 w-4 inline-block mr-1 text-white">View all accounts</router-link> -->
-      <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="mt-2 block font-bold link_block text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-add.svg" class="h-4 w-4 inline-block relative mr-1">{{$t('general.createNewAcc')}}</router-link>
+      <!-- <router-link :to="{ name: 'ViewAccountCreateSelectType'}" class="mt-2 block font-bold link_block text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-add.svg" class="h-4 w-4 inline-block relative mr-1">{{$t('general.createNewAcc')}}</router-link> -->
     </div>
-    <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
+   <!--  <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
       <div class="my-3 px-10 lg:px-5 3xl:px-10 text-gray-400 uppercase">{{$t('general.transaction',2)}}</div>
       <div class="flex justify-start px-10 lg:px-5 3xl:px-10 mt-5">
         <router-link :to="{ name : 'ViewDashboard', params: {type: 'transaction' } }" class="relative mr-5"><div class="rounded-full h-8 w-8 flex items-center justify-center" style="background: #007CFF"><img src="@/assets/img/navi/icon-unconfirmed-transaction-white.svg" class="w-5 h-5"></div></router-link>
         <router-link :to="{ name : 'ViewTransactionStatus', params: {transactionType: 'unconfirmed' } }" class="relative mr-5"><div class="rounded-full h-8 w-8 flex items-center justify-center" style="background: #f3a91d"><img src="@/assets/img/navi/icon-unconfirmed-transaction-white.svg" class="w-5 h-5"></div><div class="absolute bg-gray-50 text-xxs rounded text-center" style="min-width: 15px; padding: 1px 2px; top: -5px; right: -8px;">{{ accountUnconfirmedTxnsCount }}</div></router-link>
         <router-link :to="{ name : 'ViewTransactionStatus', params: {transactionType: 'partial' } }" class="relative"><div class="rounded-full h-8 w-8 flex items-center justify-center" style="background: #f06623"><img src="@/assets/img/navi/icon-waiting-for-transaction-white.svg" class="w-5 h-5"></div><div class="absolute bg-gray-50 text-xxs rounded text-center" style="min-width: 15px; padding: 1px 2px; top: -5px; right: -8px;">{{ accountPartialTxnsCount }}</div></router-link>
       </div>
-    </div>
+    </div> -->
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10 lg:px-5 3xl:px-10 text-gray-400 uppercase">{{$t('home.quickAction')}}</div>
+      <div class="my-3 px-10  3xl:px-10 text-gray-400 uppercase">{{$t('general.createNew')}}</div>
       <router-link :to="{ name : 'ViewTransferCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-transfer.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.transfer')}}</router-link>
-      <router-link :to="{ name : 'ViewServicesNamespace'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.namespace')}}</router-link>
-      <router-link :to="{ name : 'ViewServicesAssets'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.asset')}}</router-link>
+      <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-namespace.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.namespace')}}</router-link>
+      <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-asset.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.asset')}}</router-link>
       <router-link :to="{ name : 'ViewServicesMainnetSwap'}" class="link_block flex items-center text-white" @click="closeNavi" v-if="isDisplaySwap"><img src="@/assets/img/navi/icon-swap.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.swap')}}</router-link>
+      <router-link :to="{ name : 'ViewAccountCreateSelectType'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.account',1)}}</router-link>
       <!-- <router-link :to="{ name : 'ViewServices'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-services.svg" class="h-3 w-3 inline-block relative mr-2">Other Services</router-link> -->
     </div>
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10 lg:px-5 3xl:px-10 text-gray-400 uppercase">{{$t('home.navigate')}}</div>
+      <div class="my-3 px-10  3xl:px-10 text-gray-400 uppercase">{{$t('home.navigate')}}</div>
       <router-link :to="{ name : 'ViewWallets'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-wallets.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.wallet',2)}}</router-link>
       <router-link :to="{ name : 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.account',2)}}</router-link>
       <router-link :to="{ name : 'ViewServicesAddressBook'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-address-book.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.addressBook')}}</router-link>
+      <router-link :to="{ name : 'ViewSettings'}" class="link_block flex items-center text-white" @click="closeNavi">
+        <img src="@/assets/img/icon-setting-white.svg" class="h-3 w-3 inline-block relative mr-2">Settings
+        </router-link>
     </div>
     <div class="flex-grow"></div>
     <div class="flex-glow-0 w-60 border-t border-gray-700">
@@ -205,7 +209,7 @@ export default{
       if(!walletState.currentLoggedInWallet){
         return
       }
-      selectedAccount.value = walletState.currentLoggedInWallet.selectDefaultAccount();
+      // selectedAccount.value = walletState.currentLoggedInWallet.selectDefaultAccount();
       updateAccountTransactionCount();
     });
 
@@ -239,7 +243,7 @@ export default{
     //   currentAccount = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === accountName);
     //   walletState.currentLoggedInWallet.setDefaultAccountByName(accountName);
     //   walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
-    //   toast.add({severity:'success', summary: 'Default account has switched to' , detail: accountName, group: 'br', life: 3000});
+    //   toast.add({severity:'success', summary: 'Default account has switched to' , detail: accountName, group: 'br-custom', life: 3000});
     //   emitter.emit('DEFAULT_ACCOUNT_SWITCHED', accountName);
     //   updateAccountTransactionCount();
     //   closeNavi();
@@ -288,11 +292,11 @@ export default{
 </script>
 <style lang="scss" scoped>
 .link_block{
-  @apply px-10 lg:px-5 3xl:px-10 hover:bg-navy-lighter py-2 transition-all duration-200;
+  @apply px-10  3xl:px-10 hover:bg-navy-lighter py-2 transition-all duration-200;
 }
 
 .signout_block{
-  @apply  px-10 lg:px-5 3xl:px-10 hover:bg-navy-lighter py-5 transition-all duration-200;
+  @apply  px-10  3xl:px-10 hover:bg-navy-lighter py-5 transition-all duration-200;
 }
 
 .pop-option:after {

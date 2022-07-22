@@ -159,7 +159,7 @@ export default{
             walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
             contactAdded.value = addContact.length;
             emitter.emit('REFRESH_CONTACT_LIST', true);
-            toast.add({severity:'info', summary: t('general.addressBook'), detail: t('addressBook.newContactImported',contactAdded.value) , group: 'br', life: 5000});
+            toast.add({severity:'info', summary: t('general.addressBook'), detail: t('addressBook.newContactImported',contactAdded.value) , group: 'br-custom', life: 5000});
           }
           contactInvalidAddress.value = errContact;
         },

@@ -150,6 +150,7 @@ import TransferInputClean from "@/modules/transfer/components/TransferInputClean
 import { AppState } from '@/state/appState';
 
 import { Address } from 'tsjs-xpx-chain-sdk';
+import { useRouter } from 'vue-router';
 export default { 
   name: "ViewTransferCreate",
   components: {
@@ -163,6 +164,7 @@ export default {
     MosaicInput
   },
   setup() {
+    const router = useRouter()
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const toggleContact = ref(false)
     const {t} = useI18n();
@@ -447,9 +449,11 @@ export default {
           // add new contact
           togglaAddContact.value = true;
         } else {
+          router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
           clearInput();
         }
         forceSend.value = false;
+        
       }
     }
   };
@@ -586,7 +590,7 @@ export default {
     );
     
     if (mosaic != undefined) {
-      return mosaic.getExactAmount();
+      return mosaic.amount;
     } else {
       return 0;
     }

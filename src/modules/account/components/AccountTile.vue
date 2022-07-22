@@ -1,12 +1,12 @@
 <template>
-  <div class="border rounded-lg border-gray-200 p-3 filter shadow-lg">
+  <div class="border rounded-lg border-gray-200 p-3 filter shadow-lg cursor-pointer" @click="navigate()">
     <div class="flex gap-2 ">
       <div class="mt-auto mb-auto" v-html="svgString"></div>
       <div class="flex flex-col  ">
         <div class="text-blue-primary font-bold text-xs mb-0.5">{{accountName}}</div>
         <div class="flex justify-around">
-          <div :id="account.address" :title="prettyAddress(account.address)" class="text-xs font-bold mt-0.5 mr-2 overflow-hidden md:overflow-visible truncate md:text-clip w-44 md:w-full" :copyValue="prettyAddress(account.address)" :copySubject="$t('general.address')">{{prettyAddress(account.address)}}</div>
-          <font-awesome-icon icon="copy" @click="copy(account.address)" class="w-5 h-5 text-blue-primary cursor-pointer inline-block"></font-awesome-icon>
+          <div :id="account.address" :title="prettyAddress(account.address)" class="text-xs font-bold mt-0.5 mr-2  truncate md:text-clip w-44 md:w-full" :copyValue="prettyAddress(account.address)" :copySubject="$t('general.address')">{{prettyAddress(account.address)}}</div>
+          <font-awesome-icon @mouseover="isHoverCopy = true" @mouseout="isHoverCopy = false" icon="copy" @click="copy(account.address)" class="w-5 h-5 text-blue-primary cursor-pointer inline-block"></font-awesome-icon>
         </div>
         <div class="flex">
           <div class = 'text-xs font-bold '>{{splitBalance.left}} </div>
@@ -30,7 +30,7 @@
           </div>
         </div>
       </div>
-        <div class="absolute flex invisible 2xl:visible pt-4" style="margin-left: 39.3rem;">
+        <div class="absolute flex invisible 2xl:visible pt-4 explicitLeft" >
           <div v-for="(label,index) in labels" :key="index" >
             <div v-if="label.isLabeled" class="text-xs mr-3 border bg-gray-300 rounded-md p-1">{{label.name}}</div>
           </div>
@@ -40,8 +40,8 @@
         <div class="relative"  @mouseover="isHover = true" @mouseout="isHover = false">
           <div v-if="displayDefaultAccountMenu"  class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
             <div role="none" class="my-2">
-              <router-link :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.details')}}</router-link>
-              <hr class="solid">
+              <!-- <router-link  :to="{ name: 'ViewAccountDetails', params: { address: account.address }}" @click="displayDefaultAccountMenu = false" class="block hover:bg-gray-100 transition duration-200 p-2 z-20 text-xs">{{$t('general.details')}}</router-link> -->
+              <!-- <hr class="solid"> -->
               <div class="p-2 z-20 text-xs text-gray-400">Change Labels</div>
               <div v-for="(label,index) in labels" :key="index">
                 <div @click="updateLabel(label.name)"  class="flex justify-between p-2 cursor-pointer ">
@@ -70,7 +70,7 @@ import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { AppState} from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { Address } from 'tsjs-xpx-chain-sdk';
-
+import { useRouter } from 'vue-router';
 export default{
   name: 'AccountTile',
   props: ['account'],
@@ -98,7 +98,6 @@ export default{
         return labels
       }
     })
-
     const updateLabel = async(name) =>{
       if(!walletState.currentLoggedInWallet){
         return
@@ -111,15 +110,14 @@ export default{
       let index = label.addresses.findIndex(add=>add==address)
       if (index>=0){
         label.removeAddress(index)
-        await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
-        toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is removed as ' + name , group: 'br', life: 5000});
+        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
+        toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is removed as ' + name , group: 'br-custom', life: 5000});
         return
       }
       label.addresses.push(address)
-      await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
-      toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is added as ' + name , group: 'br', life: 5000});
+      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
+      toast.add({severity:'info', summary: 'Label', detail: accountName.value +' is added as ' + name , group: 'br-custom', life: 5000});
     }
-
     const accountName = computed(() => {
       // check if address is in adress book
       const contact = walletState.currentLoggedInWallet.contacts.find((contact) => contact.address == p.account.address);
@@ -129,7 +127,6 @@ export default{
         return p.account.name;
       }
     })
-
     const isNormalAcc = computed(()=>{
       let isNormal = false
       let findAcc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.name==p.account.name)
@@ -140,7 +137,6 @@ export default{
       }
       return isNormal
     }) 
-
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const accountBalance = computed(
@@ -156,12 +152,9 @@ export default{
         return {left:split[0], right:null}
       }
     })
-
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
-
     const svgString = ref(toSvg(p.account.address, 50, themeConfig.jdenticonConfig));
-
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const copy = (id) =>{
@@ -169,14 +162,12 @@ export default{
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
 
-      toast.add({severity:'info', detail: copySubject + ' '+ t('general.copied'), group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject + ' '+ t('general.copied'), group: 'br-custom', life: 3000});
     };   
-
     const isMultiSig = computed(() => {
       let isMulti = p.account.getDirectParentMultisig().length? true: false
       return isMulti;
     });
-
     const otherAccount = (address) => {
       const other_account = walletState.currentLoggedInWallet.others.find(others => others.address == address);
       if(other_account != null && other_account.type == 'MULTISIG'){
@@ -184,22 +175,35 @@ export default{
       }
       return other_account;
     };
-
     const prettyAddress = (address) => {
       const prettierAddress = Helper.createAddress(address).pretty();
       return prettierAddress;    
     };
-
     const isHover = ref(false)
+    const isHoverCopy = ref(false)
     emitter.on('PAGE_CLICK', () => {
       if(!isHover.value && !displayDefaultAccountMenu.value){
-
       }else if(!isHover.value && displayDefaultAccountMenu.value){
         displayDefaultAccountMenu.value = false
       }
     });
-
-
+    const router = useRouter()
+    const setDefaultAcc = ()=>{
+      if(otherAccount(p.account.address)==undefined){
+        walletState.currentLoggedInWallet.setDefaultAccountByName(p.account.name)
+      }else{
+        return
+      }
+    }
+    const navigate = () =>{
+      if(isHover.value || isHoverCopy.value){
+        return
+      }
+      setDefaultAcc()
+      router.push({ name: 'ViewAccountDetails', params: { address: p.account.address }})     
+      
+    }
+    
     return {
       currentNativeTokenName,
       splitBalance,
@@ -212,9 +216,11 @@ export default{
       displayDefaultAccountMenu,
       multisig_add,
       isHover,
+      isHoverCopy,
       isNormalAcc,
       labels,
-      updateLabel
+      updateLabel,
+      navigate
     }
   },
 }
@@ -234,4 +240,9 @@ export default{
   -moz-transform:rotate(45deg);
   -webkit-transform:rotate(45deg);
 }
+.explicitLeft{
+  @media (min-width: 1024px) { margin-left: 39.3rem}
+  
+}
+
 </style>
