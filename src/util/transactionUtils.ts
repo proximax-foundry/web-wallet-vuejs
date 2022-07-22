@@ -436,6 +436,11 @@ export class TransactionUtils {
       case TransactionType.MODIFY_MOSAIC_LEVY:
         break;
       case TransactionType.MODIFY_MULTISIG_ACCOUNT:
+        let tempTxn = txn as ModifyMultisigAccountTransaction;
+        let affectedAddress = tempTxn.modifications.map(x=>{
+          return x.cosignatoryPublicAccount.address
+        });
+        addresses = addresses.concat(affectedAddress);
         break;
       // case TransactionType.MODIFY_MOSAIC_METADATA:
       //   break;
