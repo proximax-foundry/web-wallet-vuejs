@@ -264,11 +264,13 @@
             </div>
             <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">{{$t('swap.swapMsg2')}}</div>
             <label class="inline-flex items-center mb-5">
-              <input type="checkbox" class="h-5 w-5 bg-blue-primary" value="true" v-model="savedCheck">
+              <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="savedCheck">
               <span class="ml-2 cursor-pointer text-xs font-bold">{{$t('swap.confirmDownloaded')}}</span>
             </label>
-            <div class="sm:mt-5 text-center">
-              <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn mr-5 focus:outline-none w-40 inline-block mt-1" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">{{$t('general.done')}}</router-link>
+            <div class="sm:mt-3 text-center">
+              <router-link :to="{ name: 'ViewServicesMainnetSwap' }">
+                <button type="submit" class="default-btn mr-5 focus:outline-none w-40 inline-block disabled:opacity-50" :disabled="!savedCheck">{{$t('general.done')}}</button>          
+              </router-link>
             </div>
           </div>
         </div>
