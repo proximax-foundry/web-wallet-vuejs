@@ -163,6 +163,66 @@ export class WalletUtils {
         sessionStorage.setItem(assetInfoSessionKey, JSON.stringify(assetsInfo));
     }
 
+    static async updateAssetsInfo(assetsId: string[]){
+
+        if(assetsId.length === 0){
+            return;
+        }
+
+        let mosaicsId = assetsId.map(x => new MosaicId(x)); 
+
+        let assetsInfo = await AppState.chainAPI.assetAPI.getMosaics(mosaicsId);
+        let storedAssetsId = AppState.assetsInfo.map(x => x.idHex);
+
+        let appStateAssetInfoBind: LooseObject = {};
+
+        for(let assetInfo of assetsInfo){
+            let newTotalSupply = assetInfo.supply.compact();
+            let assetId = assetInfo.mosaicId.toHex();
+
+            let foundIndex = storedAssetsId.indexOf(assetId);
+
+            if(foundIndex > -1){
+                AppState.assetsInfo[foundIndex].supply = newTotalSupply;
+                appStateAssetInfoBind[assetId] = foundIndex;
+            }
+        }
+
+        sessionStorage.setItem(assetInfoSessionKey, JSON.stringify(AppState.assetsInfo));
+
+        if(walletState.currentLoggedInWallet){
+
+            let wallet = walletState.currentLoggedInWallet;
+            for(let acc of wallet.accounts){
+
+                let accAssetsId = acc.assets.map(x => x.idHex);
+
+                for(let assetId in appStateAssetInfoBind){
+                    let foundIndex = accAssetsId.indexOf(assetId);
+
+                    if(foundIndex > -1){
+                        let appStateIndex = appStateAssetInfoBind[assetId];
+                        acc.assets[foundIndex].supply = AppState.assetsInfo[appStateIndex].supply;
+                    }
+                }
+            }
+
+            for(let acc of wallet.others){
+
+                let accAssetsId = acc.assets.map(x => x.idHex);
+
+                for(let assetId in appStateAssetInfoBind){
+                    let foundIndex = accAssetsId.indexOf(assetId);
+
+                    if(foundIndex > -1){
+                        let appStateIndex = appStateAssetInfoBind[assetId];
+                        acc.assets[foundIndex].supply = AppState.assetsInfo[appStateIndex].supply;
+                    }
+                }
+            }
+        }
+    }
+
     static syncAccNamespaceName(){
 
         if(walletState.currentLoggedInWallet === null){
@@ -180,7 +240,11 @@ export class WalletUtils {
             for(let y =0; y < assetList.length; ++y){
                 let namespaceAlias = namespaces.filter(x => x.linkedId === assetList[y].idHex);
 
-                if(namespaceAlias.length === 0){
+                if(namespaceAlias.length === 0 && assetList[y].creator === wallet.accounts[i].publicKey){
+                    assetList[y].namespaceNames = [];
+                    continue;
+                }
+                else if(namespaceAlias.length === 0){
                     continue;
                 }
 
@@ -201,7 +265,11 @@ export class WalletUtils {
             for(let y =0; y < assetList.length; ++y){
                 let namespaceAlias = namespaces.filter(x => x.linkedId === assetList[y].idHex);
 
-                if(namespaceAlias.length === 0){
+                if(namespaceAlias.length === 0 && assetList[y].creator === wallet.others[i].publicKey){
+                    assetList[y].namespaceNames = [];
+                    continue;
+                }
+                else if(namespaceAlias.length === 0){
                     continue;
                 }
 
@@ -269,14 +337,17 @@ export class WalletUtils {
 
         let confirmedTransactions = await AppState.chainAPI.transactionAPI.getTransactions(txnHashes);
 
-        let relatedAddress = [];
+        let relatedAddress: string[] = [];
+        let assetsNeedRefresh: string[] = [];
 
         for(let i =0; i < confirmedTransactions.length; ++i){
             let txn = confirmedTransactions[i];
 
             let addresses = TransactionUtils.extractConfirmedRelatedAddressByTransactionType(txn);
+            let assetsNeedUpdate = TransactionUtils.extractConfirmedRelatedNewAssetInfoByTransactionType(txn);
 
-            relatedAddress = relatedAddress.concat(addresses.map(x=> x.plain()))
+            relatedAddress = relatedAddress.concat(addresses.map(x=> x.plain()));
+            assetsNeedRefresh = assetsNeedRefresh.concat(assetsNeedUpdate);
         }
 
         if(walletState.currentLoggedInWallet === null){
@@ -292,6 +363,7 @@ export class WalletUtils {
         WalletUtils.updateAccTxnEntries(allAccounts);
 
         WalletUtils.confirmedTransactionRefresh(allAccounts);
+        WalletUtils.updateAssetsInfo(assetsNeedRefresh);
     }
 
     static updateAllAccountsAssetNamespace(changedAssetId: string[]){
@@ -457,7 +529,7 @@ export class WalletUtils {
 
         let txnQP = new TransactionQueryParams();
 
-        txnQP.pageSize = 10;
+        txnQP.pageSize = 100;
         txnQP.embedded = true;
         txnQP.sortField = TransactionSortingField.BLOCK;
         txnQP.order = Order_v2.DESC;
@@ -498,6 +570,7 @@ export class WalletUtils {
         }
 
         let accsNeedUpdate: MyAccount[] = [];
+        let assetInfoNeedUpdate: string[] = [];
 
         for(let i = 0; i < txnSearchResults.length; ++i){
 
@@ -507,6 +580,17 @@ export class WalletUtils {
             let acc = allAccounts.find(x => x.publicKey === queryingPublicKey);
 
             if(acc.totalTxns !== -1 && acc.totalTxns !== totalEntries){
+                let newTxnCount = totalEntries - acc.totalTxns;
+                let newTxns = txnSearchResults[i].transactions.slice(0, newTxnCount);
+
+                for(let txn of newTxns){
+                   let relatedAssetInfoToUpdate = TransactionUtils.extractConfirmedRelatedNewAssetInfoByTransactionType(txn);
+
+                   if(relatedAssetInfoToUpdate.length){
+                    assetInfoNeedUpdate = assetInfoNeedUpdate.concat(relatedAssetInfoToUpdate);
+                   }
+                }
+                
                 accsNeedUpdate.push(acc);
             }
 
@@ -514,6 +598,7 @@ export class WalletUtils {
         }
 
         WalletUtils.confirmedTransactionRefresh(accsNeedUpdate);
+        WalletUtils.updateAssetsInfo(assetInfoNeedUpdate);
     }
 
     static checkLoadedDataUsable(networkName: string){

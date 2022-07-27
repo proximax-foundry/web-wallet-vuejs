@@ -25,7 +25,8 @@ import {
   AccountLinkTransaction,
   ModifyMultisigAccountTransaction,
   SecretProofTransaction,
-  TransferTransaction
+  TransferTransaction,
+  MosaicSupplyChangeTransaction
 } from "tsjs-xpx-chain-sdk";
 import { AppState } from "@/state/appState";
 import { ChainConfigUtils } from "./chainConfigUtils";
@@ -482,6 +483,94 @@ export class TransactionUtils {
     }
 
     return addresses;
+  }
+
+  static extractConfirmedRelatedNewAssetInfoByTransactionType(txn: Transaction): string[]{
+    let assetsId: string[] = [];
+
+    switch(txn.type){
+      case TransactionType.AGGREGATE_BONDED:{
+        let aggregateBondedTxn = txn as AggregateTransaction; 
+        let assetsInDeep = aggregateBondedTxn.innerTransactions.map(x =>{
+          return TransactionUtils.extractConfirmedRelatedNewAssetInfoByTransactionType(x);
+        });
+        let allAssetsId = assetsInDeep.flat();
+        assetsId = assetsId.concat(allAssetsId);
+      }  break;
+      case TransactionType.AGGREGATE_COMPLETE:{
+        let aggregateCompleteTxn = txn as AggregateTransaction; 
+        let assetsInDeep = aggregateCompleteTxn.innerTransactions.map(x =>{
+          return TransactionUtils.extractConfirmedRelatedNewAssetInfoByTransactionType(x);
+        });
+        let allAssetsId = assetsInDeep.flat();
+        assetsId = assetsId.concat(allAssetsId);
+      }  break;
+      case TransactionType.ACCOUNT_METADATA_V2:
+        break;
+      case TransactionType.ADDRESS_ALIAS:
+        break;
+      case TransactionType.ADD_EXCHANGE_OFFER:{
+      }
+        break;
+      case TransactionType.CHAIN_CONFIGURE:
+        break;
+      case TransactionType.CHAIN_UPGRADE:
+        break;
+      case TransactionType.EXCHANGE_OFFER:{
+      }
+        break;
+      case TransactionType.LINK_ACCOUNT:{
+      }
+        break;
+      case TransactionType.LOCK:
+        break;
+      case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS:
+        break;
+      case TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC:
+        break;
+      case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:
+        break;
+      case TransactionType.MODIFY_MOSAIC_LEVY:
+        break;
+      case TransactionType.MODIFY_MULTISIG_ACCOUNT:{
+      }
+        break;
+      // case TransactionType.MODIFY_MOSAIC_METADATA:
+      //   break;
+      // case TransactionType.MODIFY_NAMESPACE_METADATA:
+      //   break;
+      // case TransactionType.MODIFY_ACCOUNT_METADATA:
+      //   break;
+      case TransactionType.MOSAIC_DEFINITION:
+        break;
+      case TransactionType.MOSAIC_ALIAS:
+        break;
+      case TransactionType.MOSAIC_METADATA_V2:
+        break;
+      case TransactionType.MOSAIC_SUPPLY_CHANGE:{
+        let supplyChangeTxn = txn as MosaicSupplyChangeTransaction;
+        assetsId.push(supplyChangeTxn.mosaicId.toHex());
+      }
+        break;
+      case TransactionType.NAMESPACE_METADATA_V2:
+        break;
+      case TransactionType.REGISTER_NAMESPACE:
+        break;
+      case TransactionType.REMOVE_EXCHANGE_OFFER:
+        break;
+      case TransactionType.REMOVE_MOSAIC_LEVY:
+        break;
+      case TransactionType.SECRET_LOCK:
+        break;
+      case TransactionType.SECRET_PROOF:{
+      }
+        break;
+      case TransactionType.TRANSFER:{
+      }  
+        break;
+    }
+
+    return assetsId;
   }
 }
 

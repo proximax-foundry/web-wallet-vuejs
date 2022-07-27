@@ -427,6 +427,7 @@ export default defineComponent({
 
       if(loginStatus.value && AppState.isReady){
 
+        WalletUtils.checkConfirmedTxnChecking();
         doConfirmedTxnCheckingInterval = setInterval(WalletUtils.checkConfirmedTxnChecking, 60000); // 1 minute
       }
       else if(loginStatus.value && !AppState.isReady){
