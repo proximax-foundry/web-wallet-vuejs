@@ -179,9 +179,9 @@ export default {
     currentName.value = currentAccount.name;
 
     let displaySDA = asset=>{
-    let part1 = asset.slice(0,19)
-    let part2 = asset.slice(29,32)
-    return part1+"..."+part2
+      let part1 = asset.slice(0,19)
+      let part2 = asset.slice(29,32)
+      return part1+"..."+part2
   }
 
     const checkCosigner = ()=>{
