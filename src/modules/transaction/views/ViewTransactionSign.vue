@@ -91,7 +91,7 @@
                   </div>
                   <div v-if="item.sdas.length > 0">
                     <div>{{$t('general.sda',2)}}</div>
-                    <div>{{ item.sdas.join("<br>") }}</div>
+                    <div>{{displaySDA(item.sdas.join(", ")) }}</div>
                   </div>
                 </div>
               </div>
@@ -177,6 +177,12 @@ export default {
     currentAddress.value = currentAccount.address;
     let currentPublicKey = currentAccount.publicKey;
     currentName.value = currentAccount.name;
+
+    let displaySDA = asset=>{
+      let part1 = asset.slice(0,19)
+      let part2 = asset.slice(29,32)
+      return part1+"..."+part2
+  }
 
     const checkCosigner = ()=>{
       let foundCosigner = allCosigners.find(cosigner => cosigner === currentPublicKey);
@@ -429,6 +435,7 @@ export default {
       txnTypeLabel,
       invalidCosigner,
       signAggTxn,
+      displaySDA,
       isSigned,
       innerRelatedList,
       innerSignedList,
