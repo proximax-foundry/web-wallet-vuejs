@@ -1,7 +1,7 @@
 <template>
 <div>
-    <DataTable :value="assets" :paginator="true" class="p-datatable-customers" :rows="10"
-        dataKey="id" :rowHover="true" 
+    <DataTable :value="assets" :paginator="true"  :rows="10"
+        dataKey="id" 
         paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown" :rowsPerPageOptions="[10,20,30,40,50]"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         responsiveLayout="scroll">
@@ -12,13 +12,13 @@
             Loading assets data. Please wait.
         </template>
         <Column field="id" header="ID" >
-            <template #body="{data}">
-                <a :href="explorerLink(data.id)" target=_new class="col-span-2"><div  class="uppercase inline-block text-xs mt-1.5 cursor-pointer break-all text-blue-primary pr-7 ">{{data.id}}</div></a>
+            <template #body="{data}" headerClass="w-96">
+                <a :href="explorerLink(data.id)" target=_new class="col-span-2"><div  class="uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">{{data.id}}</div></a>
             </template>
         </Column>
         <Column field="namespace" header="Namespace" >
             <template #body="{data}">
-                <div class="col-span-2 break-all pr-7 ">
+                <div class="flex items-center  pr-7 ">
                     <img v-if="displayTokenName(data.name).name=='XPX'" src="@/modules/account/img/proximax-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
                     <img v-else-if="displayTokenName(data.name).name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
                     <img v-else-if="displayTokenName(data.name).name=='METX'" src="@/modules/account/img/metx-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
@@ -65,6 +65,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { networkState } from '@/state/networkState';
 import { getCurrentInstance, ref } from 'vue';
+
 
 const props = defineProps({
     assets: Array,
@@ -123,62 +124,21 @@ const hoverOutMenu = () => {
         
         padding: 1rem;
         padding-right:0.5rem;
-        color: gray;
         font-size: 12px;
         
     }
-
     .p-paginator-bottom {
         display:flex;
         align-items: center;
         justify-content: space-between;
     }
-    /* .p-paginator-last {
-        padding-right:0.5rem;
-    } */
-    .p-link{
-        margin-top: 0px;
-    }
-    .p-paginator-last.p-link{
-        margin-right:0.5rem;
-    }
-}
-
-
-
-
-::v-deep(.p-datatable.p-datatable-customers) {
-        
     .p-dropdown{
         margin-top:0px;
     }
-    .p-dropdown-trigger{
-        margin-left: auto;
-    }
-    .p-dropdown-trigger-icon{
-        width:50px
-    }
-
-    .p-inputtext{
-        font-size:12px;
-        text-align: center;
-    }
-    .p-paginator-rpp-options{
-        width: 60px;
-        border:1px solid;
-        border-color:gray;
-        font-size: 12px;
-    }
-    .p-paginator-rpp-options:hover{
-        border-color: #007cff
-    }
-    .p-paginator-page.p-highlight{
-        background: #EFF6FF;
-        border-color: #EFF6FF;
-        color: #1D4ED8;
-        border-radius: 50%;
-    }
+   
 }
+
+
     
 
 

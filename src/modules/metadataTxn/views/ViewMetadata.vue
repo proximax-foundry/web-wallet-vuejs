@@ -186,35 +186,51 @@ import UTF8 from 'utf-8';
             })
         })
     }
+    const delay = ms => new Promise(res => setTimeout(res, ms));
 
-    const fetchAssetMetadata = ()=>{
+    const fetchAssetMetadata = async()=>{
         if(!acc.value){
-            return
+            return 
         }
-        let assets :{id:string,name:string}[] = [] 
-        acc.value.assets.forEach(asset=>{
-            if(asset.creator==acc.value.publicKey){
-                assets.push({
-                    id:asset.idHex,
-                    name:asset.namespaceNames[0]??''
-                })
-            }
-        })
-        let metadataQueryParams = new MetadataQueryParams()
-        metadataQueryParams.metadataType = MetadataType.MOSAIC
-        assets.forEach( async(asset)=>{
-            metadataQueryParams.targetId = new MosaicId(asset.id)
-            let fetchMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
-            fetchMetadata.metadataEntries.forEach(metadataEntry=>{
-                assetMetadata.value.push({
-                    scopedMetadataKeyUtf8: metadataEntry.scopedMetadataKey.toHex() == convertUtf8(metadataEntry.scopedMetadataKey.toHex())?null:convertUtf8(metadataEntry.scopedMetadataKey.toHex()),
-                    scopedMetadataKeyHex: metadataEntry.scopedMetadataKey.toHex() ,
-                    name: asset.name.length?asset.name:asset.id,
-                    id: asset.id,
-                    value: metadataEntry.value
-                })
+        let metadataQueryParams = new MetadataQueryParams() 
+        metadataQueryParams.metadataType = MetadataType.MOSAIC 
+        metadataQueryParams.pageSize = 100;
+        metadataQueryParams.pageNumber = 1;
+        metadataQueryParams.targetKey = acc.value.publicKey
+        let searchedMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
+        for(let i = 0; i< searchedMetadata.metadataEntries.length; i++){
+            let metadataEntry = searchedMetadata.metadataEntries
+            assetMetadata.value.push({
+                scopedMetadataKeyUtf8: metadataEntry[i].scopedMetadataKey.toHex() == convertUtf8(metadataEntry[i].scopedMetadataKey.toHex())?null:convertUtf8(metadataEntry[i].scopedMetadataKey.toHex()),
+                scopedMetadataKeyHex: metadataEntry[i].scopedMetadataKey.toHex() ,
+                name: '',
+                id: metadataEntry[i].targetId.toHex(),
+                value: metadataEntry[i].value
             })
-        })
+        }
+        let totalPageNumber = searchedMetadata.pagination.totalPages
+
+        for (let i = 2; i <= totalPageNumber; i++) {   
+            let metadataQueryParams = new MetadataQueryParams() 
+            metadataQueryParams.metadataType = MetadataType.MOSAIC 
+            metadataQueryParams.pageSize = 100
+            metadataQueryParams.pageNumber = i;
+            metadataQueryParams.targetKey = acc.value.publicKey
+            let searchedMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
+            for(let i = 0; i< searchedMetadata.metadataEntries.length; i++){
+                let metadataEntry = searchedMetadata.metadataEntries
+                assetMetadata.value.push({
+                    scopedMetadataKeyUtf8: metadataEntry[i].scopedMetadataKey.toHex() == convertUtf8(metadataEntry[i].scopedMetadataKey.toHex())?null:convertUtf8(metadataEntry[i].scopedMetadataKey.toHex()),
+                    scopedMetadataKeyHex: metadataEntry[i].scopedMetadataKey.toHex() ,
+                    name: '',
+                    id: metadataEntry[i].targetId.toHex(),
+                    value: metadataEntry[i].value
+                })
+                await delay(250)
+            }
+
+        }
+
     }
 
     const removeDoubleZero = (string :string) =>{

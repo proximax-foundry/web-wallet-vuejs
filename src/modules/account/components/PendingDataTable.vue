@@ -10,7 +10,7 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column style="width: 200px" v-if="!wideScreen">
+      <Column style="width: 200px" headerClass="invisible" v-if="!wideScreen">
         <template #body="{data}">
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.txHash')}}</div>
@@ -39,7 +39,7 @@
           </div>
         </template>
       </Column>
-      <Column style="width: 200px" v-if="!wideScreen">
+      <Column style="width: 200px" headerClass="invisible" v-if="!wideScreen">
         <template #body="{data}">
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('general.sender')}}</div>
@@ -107,7 +107,7 @@
       <Column :header="$t('general.sda')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-center">
-            <img src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="'<tiptitle>' +t('general.sdaFull')+'</tiptitle><tiptext>' + displayAsset(data.sda) + '</tiptext>'">
+            <img src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="'<tiptitle>' +$t('general.sdaFull')+'</tiptitle><tiptext>' + displayAsset(data.sda) + '</tiptext>'">
             <span v-else>-</span>
           </div>
         </template>
@@ -120,7 +120,18 @@
           </div>
         </template>
       </Column>
-      <Column headerStyle="width:50px">
+      <Column headerStyle="width:50px" headerClass="invisible" v-if="!wideScreen">
+        <template #body="{data}">
+            <!-- <img v-if="data.groupType=='unconfirmed'" src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer"> -->
+            <div v-if="data.groupType=='unconfirmed'" class="cursor-pointer">Unconfirmed</div>
+            <router-link v-else-if="data.groupType=='partial'" :to="{ name: 'ViewTransactionSign', params: {txnHash: data.hash}}" class="bg-orange-action text-white font-bold text-xxs text-center p-3 flex items-center justify-center">
+                <img src="@/modules/transaction/img/icon-sign-own.svg" class="mr-2">
+                {{$t('transaction.waitingSignature_s')}}
+            </router-link>
+            <div v-if="data.groupType=='In Queue'">In Queue</div>
+        </template>
+      </Column>
+      <Column headerStyle="width:50px" v-if="wideScreen">
         <template #body="{data}">
             <!-- <img v-if="data.groupType=='unconfirmed'" src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer"> -->
             <div v-if="data.groupType=='unconfirmed'" class="cursor-pointer">Unconfirmed</div>
@@ -161,7 +172,7 @@ import { AppState } from '@/state/appState';
     const props = defineProps({
         transaction: Array
     })
-    const nativeToken = computed(()=>AppState.nativeToken.label)
+    const nativeTokenName = computed(()=>AppState.nativeToken.label)
     const wideScreen = ref(false) 
     const screenResizeHandler = () => {
         if(window.innerWidth < 1024){

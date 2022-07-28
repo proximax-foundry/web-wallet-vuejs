@@ -1,0 +1,143 @@
+<template>
+<div>
+    <DataTable :value="namespaces" :paginator="true"  :rows="10"
+        dataKey="id" 
+        paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown" :rowsPerPageOptions="[10,20,30,40,50]"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        responsiveLayout="scroll">
+        <template #empty>
+            No namespaces found.
+        </template>
+        <template #loading>
+            Loading namespaces data. Please wait.
+        </template>
+        <Column field="id" header="ID" >
+            <template #body="{data}" bodyStyle="	min-width: max-content;">
+                <a :href="explorerLink(data.id)" target=_new class="col-span-2"><div  class="min-w-min uppercase inline-block text-xs mt-1.5 cursor-pointer text-blue-primary pr-7 ">{{data.id}}</div></a>
+            </template>
+        </Column>
+        <Column field="name" header="Name" >
+            <template #body="{data}">
+                {{data.name}}
+            </template>
+            
+        </Column>
+        <Column field="linked" header="Linked Asset/Address" >
+            <template #body="{data}">
+                {{data.linkedAssetAddress}}
+            </template>
+        </Column>
+        <Column field="expiry" header="Expiry" >
+            <template #body="{data}">
+               {{data.expiringBlock}}
+            </template>
+        </Column>
+        <Column field="active" header="Active" >
+            <template #body="{data}">
+               <img v-if="data.isActive" src="@/assets/img/icon-green-tick.svg" class="h-5 w-5 ml-1">
+                <img v-else src="@/assets/img/icon-red-x.svg" class="h-5 w-5 ml-1">
+            </template>
+        </Column>
+        <Column field="actions" header="Actions" >
+            <template #body="{data,index}">
+                <img v-if="data.isActive" src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2 mt-0.5" @click="showMenu(index)"  @mouseover="hoverOverMenu(index)" @mouseout="hoverOutMenu">
+                <div v-if="isMenuShow[index]" class="mt-5 pop-option inline-block w-36 absolute rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" >
+                    <div class="my-2" >
+                        <router-link :to="{ name: 'ViewServicesNamespaceExtend', params: { address: address, namespaceId:data.id} }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.extendDuration')}}</router-link>
+                    <router-link :to="{ name: 'ViewUpdateNamespaceMetadata', params: { targetId: data.id } }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Update Metadata</router-link>
+                    </div>
+                </div>
+            </template>
+            
+        </Column>
+    </DataTable>
+</div>
+</template>
+
+<script lang="ts" setup>
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import { networkState } from '@/state/networkState';
+import { getCurrentInstance, ref } from 'vue';
+/* import 'primevue/resources/themes/saga-blue/theme.css'
+import 'primevue/resources/primevue.min.css'
+import 'primeicons/primeicons.css' */
+
+const props = defineProps({
+    namespaces: Array,
+    address: String
+})
+const explorerLink = assetId=>{  
+    if(!networkState.currentNetworkProfile){
+        return ''
+    }
+    return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + assetId
+}
+const displayTokenName = (name :string) =>{
+    if (name=='prx.xpx'){
+        return {name:'XPX',registered:true}
+    }else if (name=='prx.metx'){
+        return {name:'METX',registered:true}
+    }else if (name=='xarcade.xar'){
+        return {name:'XAR',registered:true}
+    }else{
+        return {name:name,registered:false}
+    }
+}
+const isMenuShow = ref([]);
+
+const currentMenu = ref(0); 
+const showMenu = (i) => {
+    currentMenu.value = i;
+    isMenuShow.value[i] = !isMenuShow.value[i];
+} 
+const internalInstance = getCurrentInstance(); 
+const emitter = internalInstance.appContext.config.globalProperties.emitter; 
+    // emitted from App.vue when click on any part of the page
+emitter.on('PAGE_CLICK', () => {
+    var k = 0;
+    while(k < isMenuShow.value.length){
+    if(k != currentMenu.value){
+        isMenuShow.value[k] = false;
+    }
+    k++;
+    }
+});
+
+const hoverOverMenu = (i) => {
+    currentMenu.value = i;
+};
+
+const hoverOutMenu = () => {
+    currentMenu.value = -1;
+};
+
+</script>
+
+<style lang="scss" scoped>
+::v-deep(.p-paginator) {
+    .p-paginator-current {
+        
+        padding: 1rem;
+        padding-right:0.5rem;
+        font-size: 12px;
+        
+    }
+    .p-paginator-bottom {
+        display:flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .p-dropdown{
+        margin-top:0px;
+    }
+   
+}
+
+
+    
+
+
+
+   
+</style>

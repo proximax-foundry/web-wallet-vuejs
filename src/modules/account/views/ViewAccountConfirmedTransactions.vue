@@ -31,7 +31,7 @@
                 </select>
                 
             </div>
-            <div v-if="boolIsTxnFetched">
+            <div v-if="boolIsTxnFetched" class="mt-3">
                 <MixedTxnDataTable v-if="selectedTxnType === 'all'" :selectedGroupType="transactionGroupType.CONFIRMED"  :transactions="searchedTransactions" :currentAddress="accAddress"></MixedTxnDataTable>
                 <TransferTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.TRANSFER" :selectedGroupType="transactionGroupType.CONFIRMED"  :transactions="searchedTransactions" :currentAddress="accAddress"></TransferTxnDataTable>
                 <AccountTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ACCOUNT" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></AccountTxnDataTable>
@@ -169,6 +169,9 @@ import { networkState } from "@/state/networkState";
       boolIsTxnFetched.value = false;
       searchedTransactions.value = [];
       let txnFilterGroup = selectedTxnType.value; 
+      allTxnQueryParams.embedded = true
+      /* allTxnQueryParams.firstLevel = false */
+
       switch (txnFilterGroup) {
         case TransactionFilterType.TRANSFER:
           allTxnQueryParams.type = TransactionFilterTypes.getTransferTypes();
@@ -211,6 +214,8 @@ import { networkState } from "@/state/networkState";
           break;
         default:
           allTxnQueryParams.type = undefined;
+          allTxnQueryParams.embedded = false
+          allTxnQueryParams.firstLevel = true
           break;
       }
 
@@ -225,13 +230,13 @@ import { networkState } from "@/state/networkState";
       }
 
     const searchTransaction = async() =>{
-        allTxnQueryParams.pageSize = 1
+        allTxnQueryParams.pageSize = 10
         allTxnQueryParams.pageNumber = 1;
         allTxnQueryParams.publicKey = acc.value.publicKey;
+        
         let transactionSearchResult = await dashboardService.searchTxns(selectedTxnGroupType, allTxnQueryParams);
         let formattedTxns = await formatConfirmedTransaction(transactionSearchResult.transactions);
         searchedTransactions.value = formattedTxns;
-        
         boolIsTxnFetched.value = true;
     }
     const init = ()=>{

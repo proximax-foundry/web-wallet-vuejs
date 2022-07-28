@@ -5,39 +5,7 @@
       <AccountComponent :address="address" class="mb-6"/>
       <AccountTabs :address="address" selected="namespaces"/>
       <div class="border-2 border-t-0 pb-3" >
-        <div v-if="namespaces.length==0" class='text-blue-primary text-xs text-center font-semibold pt-2'>{{$t('general.ntgToShow')}}</div>
-        <div v-if="namespaces.length==0" class='text-txs w-9/12 ml-auto mr-auto text-gray-400 text-center '>
-          <span >You do not own any namespaces.</span>
-        </div>
-        <div v-else class="grid grid-cols-9 bg-gray-100 py-3 px-6 text-xs font-semibold text-gray-600 mb-2">
-          <div class="col-span-2">ID</div>
-          <div class="col-span-2">Name</div>
-          <div class="col-span-3">Linked</div>
-          <div class="invisible md:visible">Expiry</div>
-          <div>Active</div>
-        </div>
-        <div v-for="(namespace, index) in namespaces" :key="index">
-          <div class="grid grid-cols-9 text-xs my-3 px-6 items-center">
-            <a :href="explorerLink(namespace.id)" class="col-span-2 break-all  pr-7" target=_new ><div class="uppercase text-blue-primary" >{{namespace.id}}</div></a>
-            <div class="col-span-2 break-all pr-7" >{{namespace.name}}</div>
-            <div class="col-span-3 break-all pr-7 uppercase">{{namespace.linkedAssetAddress}}</div>
-            <div class=" break-all invisible md:visible pr-7">{{namespace.expiringBlock}}</div>
-            <div class="flex">
-              <div>
-                <img v-if="namespace.isActive" src="@/assets/img/icon-green-tick.svg" class="h-5 w-5 ml-1">
-                <img v-else src="@/assets/img/icon-red-x.svg" class="h-5 w-5 ml-1">
-              </div>
-              <img v-if="namespace.isActive" src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2 mt-0.5" @mouseover="isHover[index] = true" @mouseout="isHover[index] = false" @click="toggleMenu[index]=!toggleMenu[index]">
-              <div v-if="toggleMenu[index]==true" class="mt-5 pop-option inline-block w-32 absolute rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" >
-                  <div class="my-2" >
-                    <router-link :to="{ name: 'ViewServicesNamespaceExtend', params: { address: address, namespaceId: namespace.id} }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.extendDuration')}}</router-link>
-                    <router-link :to="{ name: 'ViewUpdateNamespaceMetadata', params: { targetId: namespace.id } }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Update Metadata</router-link>
-                  </div>
-              </div>
-            </div>
-          </div>
-          <div v-if="index != (namespaces.length - 1)" class='my-2 gray-line' ></div>
-        </div>
+        <NamespaceDataTable :namespaces="namespaces" :address="address"/>
         <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="mt-2 bg-blue-primary py-3 mx-6 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center w-52 "><img src="@/assets/img/icon-plus.svg" class="inline-block mr-2">{{$t('namespace.registerNewNamespace')}}</router-link>
       </div>
         
@@ -53,6 +21,7 @@ import { walletState } from "@/state/walletState";
 import { Address, AliasType } from "tsjs-xpx-chain-sdk";
 import { computed, getCurrentInstance, ref, watch } from "vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue"
+import NamespaceDataTable from "../components/NamespaceDataTable.vue"
     
   const props = defineProps({
     address: String
@@ -93,14 +62,30 @@ import AccountTabs from "@/modules/account/components/AccountTabs.vue"
 
   const isHover = ref([])
 
-  const namespaces = ref<{name:string,id: string,linkType :AliasType,linkedAssetAddress:string,expiringBlock: number | string,isActive: boolean}[]>([])
-  
-  const getNamespaceInfo = () =>{
+  /* const namespaces = ref<{name:string,id: string,linkType :AliasType,linkedAssetAddress:string,expiringBlock: number | string,isActive: boolean}[]>([]) */
+  const namespaces = computed(()=>{
+    if(!acc.value){
+      return
+    }
+    let namespaces :{name:string,id: string,linkedAssetAddress:string,expiringBlock: number | string,isActive: boolean }[] =[]
+    for(let i=0;i<acc.value.namespaces.length;i++){
+      let namespace = acc.value.namespaces[i]
+       namespaces.push({
+        name:namespace.name,
+        id: namespace.idHex,
+        linkedAssetAddress: namespace.linkedId!=''?namespace.linkType==2?Address.createFromRawAddress(namespace.linkedId).pretty():namespace.linkedId:'-',
+        expiringBlock: namespace.endHeight,
+        isActive: namespace.active
+      })
+    }
+    return namespaces
+  })
+  /* const getNamespaceInfo = () =>{
     if(!acc.value){
       return
     }
     acc.value.namespaces.forEach(namespace=>{
-      namespaces.value.push({
+      namespaces.push({
         name:namespace.name,
         id: namespace.idHex,
         linkType: namespace.linkType,
@@ -109,10 +94,10 @@ import AccountTabs from "@/modules/account/components/AccountTabs.vue"
         isActive: namespace.active
       })
     })
-  }
+  } */
 
   const init = async() =>{
-    await getNamespaceInfo()
+    /* await getNamespaceInfo() */
     for(let i = 0;i<namespaces.value.length;i++){
       isHover.value.push(false)
       toggleMenu.value.push(false)

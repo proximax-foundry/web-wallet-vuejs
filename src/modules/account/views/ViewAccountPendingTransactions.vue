@@ -7,7 +7,7 @@
             <router-link :to="{name:'ViewAccountConfirmedTransactions', params: { address: address}}" class="border opacity-60 hover:opacity-100 cursor-pointer rounded-md text-white py-2 px-4" style="background: #007CFF">Confirmed</router-link>
             <div  class="border rounded-md text-white py-2 px-5" style="background: #f3a91d">Pending</div>
         </div>
-        <PendingDataTable :transaction="transactions" />
+        <PendingDataTable :transaction="transactions" class="mt-3" />
     </div>
    
 </div>

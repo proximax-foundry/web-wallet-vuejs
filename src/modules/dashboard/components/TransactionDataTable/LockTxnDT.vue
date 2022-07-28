@@ -10,11 +10,11 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       >
-      <Column style="width: 200px" v-if="!wideScreen">
+      <Column style="width: 200px" headerClass="invisible" v-if="!wideScreen">
         <template #body="{data}">
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.txHash')}}</div>
-            <div class="uppercase font-bold text-txs"><span class="text-txs" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span></div>
+            <div @click="gotoHashExplorer(data.hash)" class="uppercase font-bold text-txs"><span class="text-txs text-blue-primary cursor-pointer" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span></div>
           </div>
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.type')}}</div>
@@ -30,7 +30,7 @@
           </div>
         </template>
       </Column>
-      <Column style="width: 200px" v-if="!wideScreen">
+      <Column style="width: 200px" headerClass="invisible" v-if="!wideScreen">
         <template #body="{data}">
           <div v-if="selectedGroupType === transactionGroupType.CONFIRMED">
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.timestamp')}}</div>
@@ -48,7 +48,7 @@
       </Column>
       <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
+          <span @click="gotoHashExplorer(data.hash)" class="text-txs text-blue-primary cursor-pointer" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
       <Column field="timestamp" :header="$t('dashboard.timestamp')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
@@ -61,11 +61,11 @@
           <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
-      <Column field="block" :header="$t('general.block')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
+      <!-- <Column field="block" :header="$t('general.block')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
           <div class="text-txs">{{ data.block }}</div>
         </template>
-      </Column>
+      </Column> -->
       <Column :header="$t('dashboard.txFee')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
           <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
@@ -86,13 +86,13 @@
           <span class="text-txs">{{ data.isRefunded ?  $t('general.yes') : $t('general.no')}}</span>
         </template>
       </Column>
-      <Column header="" headerStyle="width:50px;text-transform:uppercase">
+      <!-- <Column header="" headerStyle="width:50px;text-transform:uppercase">
         <template #body="{data}">
           <div class="flex justify-center">
             <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">
           </div>
         </template>
-      </Column>
+      </Column> -->
       <template #empty>
         {{$t('general.noRecord')}}
       </template>

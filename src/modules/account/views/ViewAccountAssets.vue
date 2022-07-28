@@ -3,7 +3,7 @@
     <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
       <AccountComponent :address="address" class="mb-6"/>
       <AccountTabs :address="address" selected="assets"/>
-    <div class='border-2 border-t-0  px-6'>
+    <div class='border-2 border-t-0  '>
         <AssetDataTable :assets="mosaics" :address="address" />
         <div class="flex my-3 px-6 flex-col w-full ml-auto mr-auto gap-2 sm:flex-row sm:items-center">
              <router-link :to="{ name: 'ViewTransferCreate'}" class=" bg-blue-primary px-5 py-2 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center "><img src="@/assets/img/icon-transfer-white.svg" class="  inline-block w-4 h-4 mt-0.5  cursor-pointer mr-1">{{$t('general.transfer')}}</router-link>
@@ -116,7 +116,7 @@ export default {
 </script>
 
 <style scoped>
-.p-paginator .p-paginator-current {
+/* .p-paginator .p-paginator-current {
         margin-left: auto;
     }
 
@@ -156,6 +156,6 @@ export default {
 
     .p-datatable.p-datatable-customers .p-dropdown-label:not(.p-placeholder) {
         text-transform: uppercase;
-    }
+    } */
 
 </style>
