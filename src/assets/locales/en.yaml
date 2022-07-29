@@ -259,11 +259,13 @@ general:
   more: More
   moreOnExplorer: Full History on Explorer
   multisig: Multisig
+  multisigAcc: Multisig Account
   multisigTitle: This is a multisig account
   name: Name
   nameRequired: Name is required
   namespace: Namespace | Namespaces
   namespaceId: Namespace ID
+  namespacerentalFee: Namespace Rental Fee
   namespaceQues: What is Namespace?
   network: Network
   new: New
@@ -306,6 +308,7 @@ general:
   showAll: Show All
   signed: Signed
   signer: Signer
+  signerAcc: Signer Account
   supply: Supply
   supplyMutable: Supply Mutable
   swap: Swap

@@ -33,30 +33,53 @@
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
-        <div class="font-semibold text-xxs text-blue-primary uppercase">{{$t('general.accCurrentBalance')}}</div>
-        <div class="flex text-gray-200 mb-5">
-          <span v-html="splitCurrency(balance)"></span>
+        <div v-if="!isMultiSig(selectedAccAdd)" class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
+        <div v-else class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.multisigAcc')}}</div>
+        <div class="flex text-gray-200 my-1">
+          <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase'>{{$t('general.currentBalance')}}</div>
+          <span class='ml-auto' v-html="splitCurrency(balance)"></span>
           <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
         </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-          <div class="font-semibold">{{$t('general.transactionFee')}}</div>
-          <div v-html="splitCurrency(transactionFee)"></div>
+        <div v-if="!isMultiSig(selectedAccAdd)" class='border-b-2 border-gray-600 my-2'/>
+        <div v-else class='border-b-2 border-gray-600 mt-2'/>
+        <div class="flex justify-between items-center text-gray-200 text-xs pt-2">
+            <div class="font-semibold">{{$t('general.namespacerentalFee')}}</div>
+            <div v-html="splitCurrency(rentalFeeCurrency)"></div>
+          </div>
+        <div v-if="!isMultiSig(selectedAccAdd)">
+          <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
+            <div class="font-semibold">{{$t('general.transactionFee')}}</div>
+            <div v-html="splitCurrency(transactionFee)"></div>
+          </div>
+          <div class="flex justify-between border-gray-600 text-white text-xs py-5">
+            <div class="font-bold uppercase">{{$t('general.total')}}</div>
+            <div v-html="splitCurrency(totalFeeFormatted)"></div>
+          </div>
         </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-          <div class="font-semibold">{{$t('general.rentalFee')}}</div>
-          <div v-html="splitCurrency(rentalFeeCurrency)"></div>
-        </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-semibold">{{$t('general.lockFund')}}</div>
-          <div v-html="splitCurrency(lockFundCurrency)"></div>
-        </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-semibold">{{$t('general.lockFundTxFee')}}</div>
-          <div v-html="splitCurrency(lockFundTxFee)"></div>
-        </div>
-        <div class="flex justify-between border-gray-600 text-white text-xs py-5">
-          <div class="font-bold uppercase">{{$t('general.total')}}</div>
-          <div v-html="splitCurrency(totalFeeFormatted)"></div>
+        <div v-else>
+        <div class="flex justify-between border-600 border-b items-center text-gray-200 text-xs my-5" />
+          <div class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
+          <div class="flex text-gray-200 my-1">
+            <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase'>{{$t('general.currentBalance')}}</div>
+            <span class='ml-auto' v-if="getMultiSigCosigner.cosignerList.length == 1">{{ currentNativeTokenName }}</span>
+            <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
+          </div>
+          <div class="flex justify-between items-center text-gray-200 text-xs py-3">
+            <div class="font-semibold">{{$t('general.transactionFee')}}</div>
+            <div v-html="splitCurrency(transactionFee)"></div>
+          </div>
+          <div class="flex justify-between items-center text-gray-200 text-xs py-3">
+            <div class="font-semibold">{{$t('general.lockFund')}}</div>
+            <div v-html="splitCurrency(lockFundCurrency)"></div>
+          </div>
+          <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
+            <div class="font-semibold">{{$t('general.lockFundTxFee')}}</div>
+            <div v-html="splitCurrency(lockFundTxFee)"></div>
+          </div>
+          <div class="flex justify-between border-gray-600 text-white text-xs py-5">
+            <div class="font-bold uppercase">{{$t('general.total')}}</div>
+            <div v-html="splitCurrency(totalFeeFormatted)"></div>
+          </div>
         </div>
         <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
