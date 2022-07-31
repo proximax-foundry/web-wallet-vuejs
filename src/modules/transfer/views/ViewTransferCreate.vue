@@ -29,7 +29,7 @@
               </div>
             </div>
             <div class="error" v-else>
-             {{$t('general.initiateBy')}} 
+             {{$t('general.noCosigner')}} 
             </div>
           </div>
         <div class="flex mt-3 gap-1">
