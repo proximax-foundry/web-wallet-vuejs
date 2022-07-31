@@ -17,7 +17,7 @@
         <template #body="{data}">
           <div>
             <div class="uppercase text-xxs font-bold mb-1">ID</div>
-            <div class="uppercase cursor-pointer font-bold text-txs ">
+            <div class="uppercase cursor-pointer font-bold text-txs  ">
                 <a :href="explorerLink(data.id)" target=_new class="col-span-2"><div  class=" uppercase inline-block text-xs mt-1.5 cursor-pointer text-blue-primary pr-7 ">{{data.id}}</div></a>
             </div>
           </div>
@@ -68,7 +68,7 @@
 
         <Column field="id" header="ID" v-if="wideScreen">
             <template #body="{data}" headerClass="w-96">
-                <a :href="explorerLink(data.id)" target=_new class="col-span-2"><div  class="uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">{{data.id}}</div></a>
+                <a :href="explorerLink(data.id)" target=_new class="col-span-2"><div  class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">{{data.id}}</div></a>
             </template>
         </Column>
         <Column field="namespace" header="Namespace" v-if="wideScreen">
