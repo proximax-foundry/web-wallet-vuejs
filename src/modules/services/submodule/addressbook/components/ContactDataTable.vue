@@ -25,7 +25,7 @@
         paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
         currentPageReportTemplate=""
         :globalFilterFields="['name','address']">
-        <Column field="name" headerStyle="width:95%">
+        <Column field="name" headerStyle="width:95%" headerClass="hidden">
           <template #body="{data}">
             <div class="flex items-center">
               <div v-html="data.svgString" class="mr-2 inline-block"></div>
@@ -36,9 +36,9 @@
             </div>
           </template>
         </Column>
-        <Column style="width: 50px;">
+        <Column style="width: 50px;" headerClass="hidden">
           <template #body="{data}">
-            <div class="text-txs text-center lg:mr-2" @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
+            <div class="text-txs text-center " @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
               <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
               <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 <div role="none" class="my-2">

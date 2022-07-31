@@ -11,37 +11,86 @@
         <template #loading>
             Loading namespaces data. Please wait.
         </template>
-        <Column field="id" header="ID" >
+
+
+        <Column style="width: 200px" headerClass="hidden" v-if="!wideScreen">
+        <template #body="{data}">
+          <div>
+            <div class="uppercase text-xxs font-bold mb-1">ID</div>
+            <div class="uppercase cursor-pointer font-bold text-txs ">
+                <a :href="explorerLink(data.id)" target=_new class="col-span-2"><div  class=" uppercase inline-block text-xs mt-1.5 cursor-pointer text-blue-primary pr-7 ">{{data.id}}</div></a>
+            </div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Namespace</div>
+            <div class="flex items-center">
+              <div class="uppercase font-bold text-txs mr-2">{{data.name}}</div>
+            </div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Linked Asset/Address</div>
+            <div class="uppercase font-bold text-txs truncate">{{data.linkedAssetAddress}}</div>
+          </div>
+        </template>
+      </Column>
+      <Column style="width: 200px" headerClass="hidden" v-if="!wideScreen">
+        <template #body="{data,index}">
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Expiry</div>
+            <div class="uppercase font-bold text-txs">{{data.expiringBlock}}</div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Active</div>
+            <div class="uppercase font-bold text-txs">
+                <img v-if="data.isActive" src="@/assets/img/icon-green-tick.svg" class="h-5 w-5 ml-1">
+                <img v-else src="@/assets/img/icon-red-x.svg" class="h-5 w-5 ml-1">
+            </div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Actions</div>
+            <img v-if="data.isActive" src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2 mt-0.5" @click="showMenu(index)"  @mouseover="hoverOverMenu(index)" @mouseout="hoverOutMenu">
+                <div v-if="isMenuShow[index]" class=" w-36 absolute rounded-sm shadow-lg bg-white focus:outline-none z-10 text-left " >
+                    <div class="my-2" >
+                        <router-link :to="{ name: 'ViewServicesNamespaceExtend', params: { address: address, namespaceId:data.id} }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.extendDuration')}}</router-link>
+                        <router-link :to="{ name: 'ViewNamespaceMetadata', params: { namespaceId: data.name, address: address } }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">View Metadata</router-link>
+                    </div>
+                </div>
+          </div>
+        </template>
+      </Column>
+
+
+        <Column field="id" header="ID" v-if="wideScreen">
             <template #body="{data}" bodyStyle="	min-width: max-content;">
                 <a :href="explorerLink(data.id)" target=_new class="col-span-2"><div  class="min-w-min uppercase inline-block text-xs mt-1.5 cursor-pointer text-blue-primary pr-7 ">{{data.id}}</div></a>
             </template>
         </Column>
-        <Column field="name" header="Name" >
+        <Column field="name" header="Name" v-if="wideScreen" >
             <template #body="{data}">
                 {{data.name}}
             </template>
             
         </Column>
-        <Column field="linked" header="Linked Asset/Address" >
+        <Column field="linked" header="Linked Asset/Address" v-if="wideScreen">
             <template #body="{data}">
                 <div class="truncate">{{data.linkedAssetAddress}}</div>
             </template>
         </Column>
-        <Column field="expiry" header="Expiry" >
+        <Column field="expiry" header="Expiry" v-if="wideScreen">
             <template #body="{data}">
                {{data.expiringBlock}}
             </template>
         </Column>
-        <Column field="active" header="Active" >
+        <Column field="active" header="Active" v-if="wideScreen" >
             <template #body="{data}">
                <img v-if="data.isActive" src="@/assets/img/icon-green-tick.svg" class="h-5 w-5 ml-1">
                 <img v-else src="@/assets/img/icon-red-x.svg" class="h-5 w-5 ml-1">
             </template>
         </Column>
-        <Column field="actions" header="Actions" >
+        <Column field="actions" header="Actions" v-if="wideScreen">
             <template #body="{data,index}">
                 <img v-if="data.isActive" src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2 mt-0.5" @click="showMenu(index)"  @mouseover="hoverOverMenu(index)" @mouseout="hoverOutMenu">
-                <div v-if="isMenuShow[index]" class="mt-5 pop-option inline-block w-36 absolute rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" >
+                <div v-if="isMenuShow[index]" class=" w-36 absolute rounded-sm shadow-lg bg-white focus:outline-none z-10 text-left " >
                     <div class="my-2" >
                         <router-link :to="{ name: 'ViewServicesNamespaceExtend', params: { address: address, namespaceId:data.id} }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.extendDuration')}}</router-link>
                         <router-link :to="{ name: 'ViewNamespaceMetadata', params: { namespaceId: data.name, address: address } }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">View Metadata</router-link>
@@ -58,9 +107,25 @@
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { networkState } from '@/state/networkState';
-import { getCurrentInstance, ref } from 'vue';
+import { getCurrentInstance, onMounted, onUnmounted, ref } from 'vue';
 
+const wideScreen = ref(false);
+const screenResizeHandler = () => {
+    if(window.innerWidth < 1024){
+    wideScreen.value = false;
+    }else{
+    wideScreen.value = true;
+    }
+};
+screenResizeHandler();
 
+onUnmounted(() => { 
+    window.removeEventListener("resize", screenResizeHandler);
+});
+
+onMounted(() => {
+    window.addEventListener("resize", screenResizeHandler);
+});
 const props = defineProps({
     namespaces: Array,
     address: String
@@ -130,6 +195,10 @@ const hoverOutMenu = () => {
         margin-top:0px;
     }
    
+}
+
+.transform{
+     
 }
 
 
