@@ -45,12 +45,14 @@
         </Column>
         <Column field="actions" header="Actions" >
             <template #body="{data}">
-                <img v-if="data.isCreator" src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2 mt-0.5" @click="showMenu(data.i)"  @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
+                <img  src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2 mt-0.5" @click="showMenu(data.i)"  @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
                 <div v-if="isMenuShow[data.i]" class="mt-5 pop-option inline-block w-36 absolute rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" >
                     <div class="my-2" >
-                        <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
-                        <router-link :to="{ name: 'ViewServicesAssetsLinkToNamespace', params: {assetId: data.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.linkToNamespace')}}</router-link>
-                        <router-link :to="{ name: 'ViewUpdateAssetMetadata', params: {targetId: data.id} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Update Metadata</router-link>
+                        <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
+                        <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsLinkToNamespace', params: {assetId: data.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.linkToNamespace')}}</router-link>
+                        <router-link :to="{ name: 'ViewAssetMetadata', params: {assetId: data.id, address: address} }">
+                            <div class="block hover:bg-gray-100 transition duration-200 p-2 z-20 cursor-pointer">View Metadata</div>
+                        </router-link> 
                     </div>
                 </div>
             </template>
@@ -65,7 +67,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { networkState } from '@/state/networkState';
 import { getCurrentInstance, ref } from 'vue';
-
+/* import AssetMetadataDatatableVue from '@/modules/metadataTxn/views/ViewAssetMetadata.vue'; */
 
 const props = defineProps({
     assets: Array,

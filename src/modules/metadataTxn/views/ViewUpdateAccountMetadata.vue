@@ -127,7 +127,7 @@
                     Update Account Metadata
                 </button>
                 <div class="text-center">
-                    <router-link :to="{name: 'ViewMetadata', params: { address: accountAddress}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
+                    <router-link :to="{name: 'ViewAccountMetadata', params: { address: accountAddress}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
                 </div>
             </div>
         </div>

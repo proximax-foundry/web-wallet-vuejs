@@ -28,12 +28,30 @@ export const MetadataTransactionRoutes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/view-metadata/:address',
-    name: 'ViewMetadata',
+    path: '/view-account-metadata/:address',
+    name: 'ViewAccountMetadata',
     props: true,
-    component: () => import('@/modules/metadataTxn/views/ViewMetadata.vue'),
+    component: () => import('@/modules/metadataTxn/views/ViewAccountMetadata.vue'),
     meta: {
-      title: "View Metadata",
+      title: "View Account Metadata",
+    }
+  },
+  {
+    path: '/view-asset-metadata/:address/:assetId',
+    name: 'ViewAssetMetadata',
+    props: true,
+    component: () => import('@/modules/metadataTxn/views/ViewAssetMetadata.vue'),
+    meta: {
+      title: "View Asset Metadata",
+    }
+  },
+  {
+    path: '/view-namespace-metadata/:address/:namespaceId',
+    name: 'ViewNamespaceMetadata',
+    props: true,
+    component: () => import('@/modules/metadataTxn/views/ViewNamespaceMetadata.vue'),
+    meta: {
+      title: "View Namespace Metadata",
     }
   }
 ];

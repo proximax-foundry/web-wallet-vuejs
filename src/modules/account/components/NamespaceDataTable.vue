@@ -24,7 +24,7 @@
         </Column>
         <Column field="linked" header="Linked Asset/Address" >
             <template #body="{data}">
-                {{data.linkedAssetAddress}}
+                <div class="truncate">{{data.linkedAssetAddress}}</div>
             </template>
         </Column>
         <Column field="expiry" header="Expiry" >
@@ -44,7 +44,7 @@
                 <div v-if="isMenuShow[index]" class="mt-5 pop-option inline-block w-36 absolute rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" >
                     <div class="my-2" >
                         <router-link :to="{ name: 'ViewServicesNamespaceExtend', params: { address: address, namespaceId:data.id} }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.extendDuration')}}</router-link>
-                    <router-link :to="{ name: 'ViewUpdateNamespaceMetadata', params: { targetId: data.id } }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Update Metadata</router-link>
+                        <router-link :to="{ name: 'ViewNamespaceMetadata', params: { namespaceId: data.name, address: address } }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">View Metadata</router-link>
                     </div>
                 </div>
             </template>
@@ -59,9 +59,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { networkState } from '@/state/networkState';
 import { getCurrentInstance, ref } from 'vue';
-/* import 'primevue/resources/themes/saga-blue/theme.css'
-import 'primevue/resources/primevue.min.css'
-import 'primeicons/primeicons.css' */
+
 
 const props = defineProps({
     namespaces: Array,

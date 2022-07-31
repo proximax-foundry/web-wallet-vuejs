@@ -10,12 +10,12 @@
       >
       <Column field="assetId" :header="$t('general.assetId')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 200px'?'width: 200px'  ` " >
         <template #body="{data}">
-          <span class="uppercase font-bold text-txs">{{data.namespaceNames[0]? data.namespaceNames[0] : data.idHex}}</span>
+          <span class="uppercase font-semibold text-xs">{{data.namespaceNames[0]? data.namespaceNames[0] : data.idHex}}</span>
         </template>
       </Column>
       <Column field="amount" :header="$t('general.amount')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" >
         <template #body="{data}">
-          <span class="uppercase font-bold text-txs">{{data.amount}}</span>
+          <span class="uppercase font-semibold text-xs">{{data.amount}}</span>
         </template>
       </Column>
       <template #empty>
@@ -39,12 +39,6 @@ defineProps({
 </script>
 
 <style lang="scss" scoped>
-.p-datatable-tbody{
-  td{
-    font-size: 11px;
-  }
-}
-
 .pop-option:after {
   content: '';
   display: block;
