@@ -58,7 +58,7 @@
           </div>
         </template>
       </Column>
-      <Column :header="$t('dashboard.inOut')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('dashboard.inOut')" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
           <div>
             <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block" v-if="data.in_out === true">
@@ -66,23 +66,23 @@
           </div>
         </template>
       </Column>
-      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px" v-if="wideScreen">
         <template #body="{data}">
           <span v-if="data.groupType!='In Queue'" @click="gotoHashExplorer(data.hash)" class="cursor-pointer text-txs text-blue-primary" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
           <span v-else class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="type" :header="$t('dashboard.type')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="type" :header="$t('dashboard.type')" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
-      <Column field="formattedDeadline" :header="$t('general.deadline')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="formattedDeadline" :header="$t('general.deadline')" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{Helper.formatDeadline(data.deadline)}}</span>
         </template>
       </Column>
-      <Column field="signer" :header="$t('general.sender')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="signer" :header="$t('general.sender')" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span v-if="data.sender === '' || data.sender === null"></span>
           <span v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
@@ -92,19 +92,19 @@
           </span>
         </template>
       </Column>
-      <Column field="recipient" :header="$t('general.recipient')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="recipient" :header="$t('general.recipient')" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span v-if="data.recipient === '' || data.recipient === null"></span>
           <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else-if="data.recipientNamespaceName" class="truncate inline-block text-txs">{{ data.recipientNamespaceName }}</span>
           <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column :header="$t('general.amount')" headerStyle="width:90px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('general.amount')" headerStyle="width:90px" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-txs" >{{ data.amountTransfer ? data.amountTransfer:'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
-      <Column :header="$t('general.sda')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('general.sda')" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-center">
             <img src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="'<tiptitle>' +$t('general.sdaFull')+'</tiptitle><tiptext>' + displayAsset(data.sda) + '</tiptext>'">
@@ -112,7 +112,7 @@
           </div>
         </template>
       </Column>
-      <Column :header="$t('general.message')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('general.message')" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
           <div>
             <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="{ value: '<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>', escape: true }" class="inline-block" v-if="data.message && data.messageType !== 1">

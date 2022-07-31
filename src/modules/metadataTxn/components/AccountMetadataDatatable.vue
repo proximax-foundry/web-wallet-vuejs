@@ -8,7 +8,7 @@
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         responsiveLayout="scroll"
       >
-      <Column field="scopedMetadataKey" header="Scoped Metadata Key" headerStyle="text-transform:uppercase"  >
+      <Column field="scopedMetadataKey" header="Scoped Metadata Key"   >
         <template #body="{data}">
             <div class="flex">
                 <div>{{data.scopedMetadataKeyHex}}</div>
@@ -20,12 +20,12 @@
         </div>
         </template>
       </Column>
-      <Column field="currentValue" header="Current Value" headerStyle="text-transform:uppercase" >
+      <Column field="currentValue" header="Current Value"  >
         <template #body="{data}">
           <span class="  text-xs">{{data.value}}</span>
         </template>
       </Column>
-      <Column field="action" header="Action" headerStyle="text-transform:uppercase" >
+      <Column field="action" header="Action"  >
         <template #body="{data}">
             <router-link :to="{name: 'ViewUpdateAccountMetadata',params:{targetPublicKey:publicKey,scopedMetadataKey:data.scopedMetadataKeyUtf8?data.scopedMetadataKeyUtf8:data.scopedMetadataKeyHex}}">
                 <img src="@/modules/account/img/edit-icon.svg" title="Update Metadata" class="inline-block w-3 h-3 text-black cursor-pointer  ml-1" >

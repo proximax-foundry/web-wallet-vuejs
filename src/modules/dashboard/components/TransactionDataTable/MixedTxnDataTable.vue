@@ -59,7 +59,7 @@
           </div>
         </template>
       </Column>
-      <Column :header="$t('dashboard.inOut')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('dashboard.inOut')" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
           <div>
             <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block" v-if="data.in_out === true">
@@ -67,27 +67,27 @@
           </div>
         </template>
       </Column>
-      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px" v-if="wideScreen">
         <template #body="{data}">
           <span @click="gotoHashExplorer(data.hash)" class="text-txs text-blue-primary cursor-pointer" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="timestamp" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" :header="$t('dashboard.timestamp')" headerStyle="width:110px;text-transform:uppercase">
+      <Column field="timestamp" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" :header="$t('dashboard.timestamp')" headerStyle="width:110px">
         <template #body="{data}">
           <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
       </Column>
-      <Column field="type" :header="$t('dashboard.type')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="type" :header="$t('dashboard.type')" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
-      <!-- <Column field="block" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" :header="$t('general.block')" headerStyle="width:60px;text-transform:uppercase">
+      <!-- <Column field="block" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" :header="$t('general.block')" headerStyle="width:60px">
         <template #body="{data}">
           <div class="text-txs">{{ data.block }}</div>
         </template>
       </Column> -->
-      <Column field="signer" :header="$t('general.sender')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="signer" :header="$t('general.sender')" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span v-if="data.sender === '' || data.sender === null"></span>
           <span v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
@@ -97,24 +97,24 @@
           </span>
         </template>
       </Column>
-      <Column field="recipient" :header="$t('general.recipient')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="recipient" :header="$t('general.recipient')" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span v-if="data.recipient === '' || data.recipient === null"></span>
           <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else-if="data.recipientNamespaceName" class="truncate inline-block text-txs">{{ data.recipientNamespaceName }}</span>
           <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.convertAddressToNamePretty(data.recipient).substring(0, 20): '' }}</span>
         </template>
       </Column>
-      <Column :header="$t('dashboard.txFee')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:90px;text-transform:uppercase">
+      <Column :header="$t('dashboard.txFee')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:90px">
         <template #body="{data}">
           <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
-      <Column :header="$t('general.amount')" headerStyle="width:90px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('general.amount')" headerStyle="width:90px" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-txs" >{{ data.amountTransfer ? data.amountTransfer:'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
-      <Column :header="$t('general.sda')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('general.sda')" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
           <div class="flex items-center">
             <img src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="{ value: '<tiptitle>' +$t('general.sdaFull')+ '</tiptitle><tiptext>' + displaySDAs(data.sda) + '</tiptext>', escape: true}">
@@ -122,7 +122,7 @@
           </div>
         </template>
       </Column>
-      <Column :header="$t('general.message')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('general.message')" headerStyle="width:40px" v-if="wideScreen">
         <template #body="{data}">
           <div class="flex justify-center">
             <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>'" class="inline-block" v-if="data.message && data.messageType !== 1">

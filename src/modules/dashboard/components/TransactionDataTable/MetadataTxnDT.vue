@@ -54,22 +54,22 @@
           </div>
         </template>
       </Column>
-      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;" v-if="wideScreen">
         <template #body="{data}">
           <span @click="gotoHashExplorer(data.hash)" class="text-txs text-blue-primary cursor-pointer" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="timestamp" :header="$t('dashboard.timestamp')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
+      <Column field="timestamp" :header="$t('dashboard.timestamp')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;">
         <template #body="{data}">
           <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
       </Column>
-      <Column field="typeName" :header="$t('dashboard.type')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="typeName" :header="$t('dashboard.type')" headerStyle="width:110px;" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
-      <!-- <Column field="block" :header="$t('general.block')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
+      <!-- <Column field="block" :header="$t('general.block')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;">
         <template #body="{data}">
           <div class="text-txs">{{ data.block }}</div>
         </template>
@@ -79,12 +79,12 @@
           <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
-      <Column :header="$t('dashboard.scopedMetadataKey')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('dashboard.scopedMetadataKey')" headerStyle="width:110px;" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-txs">{{ data.scopedMetadataKey }}</div>
         </template>
       </Column>
-      <Column :header="$t('dashboard.target')" headerStyle="width:60px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('dashboard.target')" headerStyle="width:60px;" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-if="data.metadataTypeName === 'Account'" v-tooltip.bottom="data.targetPublicKey">
             {{data.targetPublicKey.substring(0, 20) }}...

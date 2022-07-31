@@ -53,7 +53,7 @@
           </div>
         </template>
       </Column>
-      <Column :header="$t('dashboard.inOut')" headerStyle="width:30px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('dashboard.inOut')" headerStyle="width:30px;" v-if="wideScreen">
         <template #body="{data}">
           <div class="ml-2" v-if="data.recipient">
             <img src="@/modules/dashboard/img/icon-txn-in.svg" class="inline-block w-6" v-if="isRecipient(data.recipient, currentAddress)">
@@ -61,12 +61,12 @@
           </div>
         </template>
       </Column>
-      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;" v-if="wideScreen">
         <template #body="{data}">
           <span  @click="gotoHashExplorer(data.hash)" class="text-txs text-blue-primary cursor-pointer" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="timestamp" :header="$t('dashboard.timestamp')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
+      <Column field="timestamp" :header="$t('dashboard.timestamp')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;">
         <template #body="{data}">
           <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
@@ -76,7 +76,7 @@
           <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
-      <!-- <Column field="block" :header="$t('general.block')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:70px;text-transform:uppercase">
+      <!-- <Column field="block" :header="$t('general.block')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:70px;">
         <template #body="{data}">
           <div class="text-txs">{{ data.block }}</div>
         </template>
@@ -91,7 +91,7 @@
           </span>
         </template>
       </Column> -->
-      <Column field="recipient" :header="$t('general.recipient')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="recipient" :header="$t('general.recipient')" headerStyle="width:110px;" v-if="wideScreen">
         <template #body="{data}">
           <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" class="truncate inline-block text-txs">
             <a :href="getAddressExplorerUrl(data.recipient)" target="_blank">
@@ -100,38 +100,38 @@
           </span>
         </template>
       </Column>
-      <Column :header="$t('dashboard.txFee')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:80pxwidth:40px;text-transform:uppercase">
+      <Column :header="$t('dashboard.txFee')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:80pxwidth:40px;">
         <template #body="{data}">
           <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
-      <Column :header="$t('dashboard.hashType')" headerStyle="width:40pxwidth:40px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('dashboard.hashType')" headerStyle="width:40pxwidth:40px;" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-txs">{{ data.hashType }}</div>
         </template>
       </Column>
-      <Column :header="$t('dashboard.secret')" headerStyle="width:40pxwidth:40px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('dashboard.secret')" headerStyle="width:40pxwidth:40px;" v-if="wideScreen">
         <template #body="{data}">
           <div class="flex justify-center">
             <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="{value: '<tiptitle>Secret</tiptitle><tiptext>' + data.secret + '</tiptext>', escape: true}" class="inline-block">
           </div>
         </template>
       </Column>
-      <Column :header="$t('dashboard.proof')" headerStyle="width:40pxwidth:40px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('dashboard.proof')" headerStyle="width:40pxwidth:40px;" v-if="wideScreen">
         <template #body="{data}">
           <div class="flex justify-center">
             <img src="@/modules/dashboard/img/icon-message.svg" v-if="data.proof" v-tooltip.left="{value:'<tiptitle>Proof</tiptitle><tiptext>' + data.proof + '</tiptext>', escape: true}" class="inline-block">
           </div>
         </template>
       </Column>
-      <Column :header="$t('dashboard.sda')" headerStyle="width:30px; text-align:center;width:40px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('dashboard.sda')" headerStyle="width:30px; text-align:center;width:40px;" v-if="wideScreen">
         <template #body="{data}">
           <div class="flex justify-center">
             <img src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" v-if="data.assetId" class="inline-block" v-tooltip.left="{value:'<tiptitle>'+ $t('general.sdaFull')+ '</tiptitle><tiptext>' + constructSDA(data.assetId, data.amount, data.namespaceName) + '</tiptext>', escape: true}">
           </div>
         </template>
       </Column>
-      <Column :header="$t('dashboard.info')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('dashboard.info')" headerStyle="width:40px;" v-if="wideScreen">
         <template #body="{data}">
           <!-- <span class="inline-block bg-blue-500 text-white py-1 px-1 my-1 mx-1">{{ `Hash Type: ${data.hashType}` }}</span> -->
           <span class="inline-block bg-blue-200 text-blue-700 rounded py-1 px-2 my-1 mx-1 text-txs font-bold" v-if="data.duration">{{ `Duration: ${data.duration} blocks` }}</span>

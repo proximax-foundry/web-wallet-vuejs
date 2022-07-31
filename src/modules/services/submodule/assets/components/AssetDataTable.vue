@@ -61,12 +61,12 @@
       </Column>
       <Column style="width: 50px" v-if="wideScreen">
       </Column>
-      <Column field="assetId" :header="$t('general.assetId')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
+      <Column field="assetId" :header="$t('general.assetId')"  style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase font-bold text-txs">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedNamespace" :header="$t('general.namespace')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="linkedNamespace" :header="$t('general.namespace')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <div v-if="data.linkedNamespace.length > 0">
             <div v-if="data.linkedNamespace.length == 1">
@@ -86,17 +86,17 @@
           <div v-else>{{$t('general.noLinkedNamespace')}}</div>
         </template>
       </Column>
-      <Column field="supply" :header="$t('general.supply')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="supply" :header="$t('general.supply')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase text-txs">{{data.supply}}</span>
         </template>
       </Column>
-      <Column field="amount" :header="$t('general.amount')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="amount" :header="$t('general.amount')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase font-bold text-txs">{{data.amount}}</span>
         </template>
       </Column>
-      <Column field="height" :header="$t('general.block')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="height" :header="$t('general.block')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.height}}</span>
         </template>

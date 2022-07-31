@@ -61,51 +61,51 @@
           </div>
         </template>
       </Column>
-      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;text-transform:uppercase"  v-if="wideScreen">
+      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;"  v-if="wideScreen">
         <template #body="{data}">
           <span @click="gotoHashExplorer(data.hash)" class="text-txs text-blue-primary cursor-pointer" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="timestamp" :header="$t('dashboard.timestamp')" headerStyle="width:110px;text-transform:uppercase"  v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" >
+      <Column field="timestamp" :header="$t('dashboard.timestamp')" headerStyle="width:110px;"  v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" >
         <template #body="{data}">
           <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
       </Column>
-      <Column field="typeName" :header="$t('dashboard.type')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="typeName" :header="$t('dashboard.type')" headerStyle="width:110px;" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
-      <!-- <Column field="block" :header="$t('general.block')"  v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
+      <!-- <Column field="block" :header="$t('general.block')"  v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;">
         <template #body="{data}">
           <div class="text-txs">{{ data.block }}</div>
         </template>
       </Column> -->
-      <Column :header="$t('dashboard.txFee')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
+      <Column :header="$t('dashboard.txFee')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;">
         <template #body="{data}">
           <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
-      <Column :header="$t('general.account')" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('general.account')" headerStyle="width:110px;" v-if="wideScreen">
         <template #body="{data}">
           <div class="text-txs truncate inline-block" v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(data.signerAddress) }}</div>
         </template>
       </Column>
-      <Column :header="$t('dashboard.approvalDelta')" headerStyle="width:60px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('dashboard.approvalDelta')" headerStyle="width:60px;" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">
             {{ data.oldApprovalNumber ? data.oldApprovalNumber + " " : '' }}{{ data.approvalDelta > 0 ? `+${data.approvalDelta}`: data.approvalDelta }}
           </span>
         </template>
       </Column>
-      <Column :header="$t('dashboard.removalDelta')" headerStyle="width:60px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('dashboard.removalDelta')" headerStyle="width:60px;" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">
             {{ data.oldRemovalNumber ? data.oldRemovalNumber + " " : '' }}{{ data.removalDelta > 0 ? `+${data.removalDelta}`: data.removalDelta }}
           </span>
         </template>
       </Column>
-      <Column :header="$t('dashboard.info')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('dashboard.info')" headerStyle="width:40px;" v-if="wideScreen">
         <template #body="{data}">
           <span v-bind:key="cosigner" v-tooltip.bottom="$t('dashboard.addingAcc') +'<br><br>' + cosigner" v-for="cosigner in data.addedCosigner" class="inline-block bg-green-200 font-bold text-green-700 text-txs rounded py-1 px-2 my-1 mx-1">
             {{ cosigner.substring(0, 20) }}...

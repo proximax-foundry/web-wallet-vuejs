@@ -28,7 +28,7 @@
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             responsiveLayout="scroll"
         >
-            <Column field="scopedMetadataKey" header="Scoped Metadata Key" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 200px'?'width: 200px'  ` " >
+            <Column field="scopedMetadataKey" header="Scoped Metadata Key"  style="`wideScreen?'min-width: 200px'?'width: 200px'  ` " >
                 <template #body="{data}">
                     <div class="flex">
                         <div>{{data.scopedMetadataKeyHex}}</div>
@@ -40,12 +40,12 @@
                 </div>
                 </template>
             </Column>
-            <Column field="currentValue" header="Current Value" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" >
+            <Column field="currentValue" header="Current Value"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" >
                 <template #body="{data}">
                 <span class="  text-xs">{{data.value}}</span>
                 </template>
             </Column>
-            <Column field="action" header="Action" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" >
+            <Column field="action" header="Action"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" >
                 <template #body="{data}">
                     <router-link :to="{name: 'ViewUpdateAssetMetadata',params:{targetId:assetId ,scopedMetadataKey:data.scopedMetadataKeyUtf8?data.scopedMetadataKeyUtf8:data.scopedMetadataKeyHex}}">
                         <img src="@/modules/account/img/edit-icon.svg" title="Update Metadata" class="inline-block w-3 h-3 text-black cursor-pointer  ml-1" >

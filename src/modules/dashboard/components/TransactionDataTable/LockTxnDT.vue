@@ -46,12 +46,12 @@
           </div>
         </template>
       </Column>
-      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px;" v-if="wideScreen">
         <template #body="{data}">
           <span @click="gotoHashExplorer(data.hash)" class="text-txs text-blue-primary cursor-pointer" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column field="timestamp" :header="$t('dashboard.timestamp')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
+      <Column field="timestamp" :header="$t('dashboard.timestamp')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;">
         <template #body="{data}">
           <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
@@ -61,32 +61,32 @@
           <span class="text-txs">{{data.type}}</span>
         </template>
       </Column>
-      <!-- <Column field="block" :header="$t('general.block')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
+      <!-- <Column field="block" :header="$t('general.block')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;">
         <template #body="{data}">
           <div class="text-txs">{{ data.block }}</div>
         </template>
       </Column> -->
-      <Column :header="$t('dashboard.txFee')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
+      <Column :header="$t('dashboard.txFee')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;">
         <template #body="{data}">
           <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
-      <Column :header="$t('dashboard.lockHash')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('dashboard.lockHash')" headerStyle="width:40px;" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-tooltip.bottom="data.lockHash">{{data.lockHash.substring(0, 20) }}...</span>
         </template>
       </Column>
-      <Column :header="$t('general.duration')" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
+      <Column :header="$t('general.duration')" headerStyle="width:40px;" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" v-tooltip.bottom="{ value: '<tiptext>' + $t('general.approximately') + ' ' + durationTime(data.duration) + ' ' + $t('general.day',durationTime(data.duration)) + '</tiptext>', escape: true}">{{data.duration ? data.duration + ' '+ $t('general.block',data.duration) : "-"}}</span>
         </template>
       </Column>
-      <Column :header="$t('dashboard.refunded')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:40px;text-transform:uppercase">
+      <Column :header="$t('dashboard.refunded')" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:40px;">
         <template #body="{data}">
           <span class="text-txs">{{ data.isRefunded ?  $t('general.yes') : $t('general.no')}}</span>
         </template>
       </Column>
-      <!-- <Column header="" headerStyle="width:50px;text-transform:uppercase">
+      <!-- <Column header="" headerStyle="width:50px;">
         <template #body="{data}">
           <div class="flex justify-center">
             <img src="@/modules/dashboard/img/icon-open_in_new_black.svg" @click="gotoHashExplorer(data.hash)" class="cursor-pointer">

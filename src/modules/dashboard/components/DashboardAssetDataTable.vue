@@ -8,12 +8,12 @@
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         responsiveLayout="scroll"
       >
-      <Column field="assetId" :header="$t('general.assetId')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 200px'?'width: 200px'  ` " >
+      <Column field="assetId" :header="$t('general.assetId')"  style="`wideScreen?'min-width: 200px'?'width: 200px'  ` " >
         <template #body="{data}">
           <span class="uppercase font-semibold text-xs">{{data.namespaceNames[0]? data.namespaceNames[0] : data.idHex}}</span>
         </template>
       </Column>
-      <Column field="amount" :header="$t('general.amount')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" >
+      <Column field="amount" :header="$t('general.amount')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" >
         <template #body="{data}">
           <span class="uppercase font-semibold text-xs">{{data.amount}}</span>
         </template>
