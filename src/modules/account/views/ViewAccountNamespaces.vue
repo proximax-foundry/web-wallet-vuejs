@@ -152,3 +152,24 @@ import NamespaceDataTable from "../components/NamespaceDataTable.vue"
   });
 </script>
 
+<style lang="scss" scoped>
+
+::v-deep(.p-paginator) {
+    .p-paginator-current {
+        
+        padding: 1rem;
+        padding-right:0.5rem;
+        font-size: 12px;
+        
+    }
+    .p-paginator-bottom {
+        display:flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .p-dropdown{
+        margin-top:0px;
+    }
+   
+}
+</style>

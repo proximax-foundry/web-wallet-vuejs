@@ -188,6 +188,9 @@ else{
     .p-dropdown{
         margin-top:0px;
     }
+    .p-highlight{
+      border-radius: 9999px;
+    }
    
 }
 </style>

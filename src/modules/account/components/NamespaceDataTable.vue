@@ -178,6 +178,7 @@ const hoverOutMenu = () => {
 </script>
 
 <style lang="scss" scoped>
+
 ::v-deep(.p-paginator) {
     .p-paginator-current {
         
@@ -194,17 +195,9 @@ const hoverOutMenu = () => {
     .p-dropdown{
         margin-top:0px;
     }
+    .p-highlight{
+      border-radius: 9999px;
+    }
    
 }
-
-.transform{
-     
-}
-
-
-    
-
-
-
-   
 </style>
