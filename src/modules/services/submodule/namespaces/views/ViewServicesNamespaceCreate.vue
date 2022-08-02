@@ -21,7 +21,12 @@
               <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('general.insufficientBalance')}}</div>
             </div>
           </div>
-          <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace" ref="nsRef" v-model="selectNamespace" :address="selectedAccAdd" class="mt-5" :disabled="disableSelectNamespace" />
+          <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace" ref="nsRef" v-model="selectNamespace" :address="selectedAccAdd" class="mt-5" :disabled="disableSelectNamespace" required/>
+          <div class="h-3 mb-2">
+            <div class="error error-text text-left">
+              <div v-if="!selectNamespace">{{$t('general.selectOption')}}</div>
+            </div>
+          </div>
           <div class="lg:grid lg:grid-cols-2 mt-5">
             <div class="mb-5 lg:mb-0 lg:mr-2">
               <TextInputTooltip :disabled="disableNamespaceName" :placeholder="$t('general.name')" :errorMessage="namespaceErrorMessage" v-model="namespaceName" v-debounce:1000="checkNamespace" icon="id-card-alt" :showError="showNamespaceNameError" class="w-full inline-block" :toolTip="$t('namespace.namespaceNameMsg1') + '<br><br>' + $t('namespace.namespaceNameMsg2') + '<br><br>' + $t('namespace.namespaceNameMsg3')" />
