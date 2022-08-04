@@ -1,21 +1,35 @@
 <template>
-  <div>
+<div>
     <DataTable
-    :value="assets"
+    :value="accMetadata"
      :paginator="true"  :rows="10"
         dataKey="id" 
         paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown" :rowsPerPageOptions="[10,20,30,40,50]"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         responsiveLayout="scroll"
       >
-      <Column field="assetId" :header="$t('general.assetId')"  style="`wideScreen?'min-width: 200px'?'width: 200px'  ` " >
+      <Column field="scopedMetadataKey" header="Scoped Metadata Key"   >
         <template #body="{data}">
-          <span class="uppercase font-semibold text-xs">{{data.namespaceNames[0]? data.namespaceNames[0] : data.idHex}}</span>
+            <div class="flex">
+                <div>{{data.scopedMetadataKeyHex}}</div>
+                <div class="ml-3 text-gray-400 font-semibold" v-if="data.scopedMetadataKeyUtf8">hex</div>
+            </div>
+            <div class="flex" v-if="data.scopedMetadataKeyUtf8">
+                <div>{{data.scopedMetadataKeyUtf8}}</div>
+                <div class="ml-3 text-gray-400 font-semibold">utf-8</div>
+        </div>
         </template>
       </Column>
-      <Column field="amount" :header="$t('general.amount')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" >
+      <Column field="currentValue" header="Current Value"  >
         <template #body="{data}">
-          <span class="uppercase font-semibold text-xs">{{data.amount}}</span>
+          <span class="  text-xs">{{data.value}}</span>
+        </template>
+      </Column>
+      <Column field="action" header="Action"  >
+        <template #body="{data}">
+            <router-link :to="{name: 'ViewUpdateAccountMetadata',params:{targetPublicKey:publicKey,scopedMetadataKey:data.scopedMetadataKeyUtf8?data.scopedMetadataKeyUtf8:data.scopedMetadataKeyHex}}">
+                <img src="@/modules/account/img/edit-icon.svg" title="Update Metadata" class="inline-block w-3 h-3 text-black cursor-pointer  ml-1" >
+            </router-link>
         </template>
       </Column>
       <template #empty>
@@ -25,35 +39,20 @@
          {{$t('dashboard.fetchingTx')}}
       </template>
     </DataTable>
-  </div>
+</div>
 </template>
 
 <script lang="ts" setup>
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import Tooltip from 'primevue/tooltip';
 
-defineProps({
-  assets: Array
+const props = defineProps({
+  accMetadata: Array,
+  publicKey: String
 })
 </script>
 
 <style lang="scss" scoped>
-.pop-option:after {
-  content: '';
-  display: block;
-  position: absolute;
-  top: -6px;
-  right: 20px;
-  width: 10px;
-  height: 10px;
-  background: #FFFFFF;
-  border-left:1px solid #E4E4E4;
-  border-top:1px solid #E4E4E4;
-  -moz-transform:rotate(45deg);
-  -webkit-transform:rotate(45deg);
-  z-index: 2;
-}
 
 ::v-deep(.p-paginator) {
     .p-paginator-current {

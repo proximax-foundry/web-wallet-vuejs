@@ -34,29 +34,29 @@
           </div>
         </template>
       </Column>
-      <Column field="name" :header="$t('general.name')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 160px'?'width: 160px'`" v-if="wideScreen">
+      <Column field="name" :header="$t('general.name')"  style="`wideScreen?'min-width: 160px'?'width: 160px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-xs">{{data.name}}</span>
         </template>
       </Column>
-      <Column field="namespaceId" :header="$t('general.namespaceId')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="namespaceId" :header="$t('general.namespaceId')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-xs uppercase">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedId" :header="$t('general.linkedAssetAddress')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
+      <Column field="linkedId" :header="$t('general.linkedAssetAddress')"  style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase text-xs" v-if="data.linkedId">{{ data.linkedId }}</span>
           <span class="text-xs" v-else>No linked asset</span>
         </template>
       </Column>
-      <Column field="linkType" :header="$t('general.expires')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 150px'?'width: 150px'`" v-if="wideScreen">
+      <Column field="linkType" :header="$t('general.expires')"  style="`wideScreen?'min-width: 150px'?'width: 150px'`" v-if="wideScreen">
         <template #body="{data}">
           <div class="data.expiryRelative text-xs" v-if="data.expiryRelative">{{ data.expiryRelative }}</div>
           <div class="text-gray-300 text-xs" v-else>{{$t('dashboard.fetching')}}</div>
         </template>
       </Column>
-      <Column field="Active" :header="$t('dashboard.expirationEstimate')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 210px'?'width: 210px'`" v-if="wideScreen">
+      <Column field="Active" :header="$t('dashboard.expirationEstimate')"  style="`wideScreen?'min-width: 210px'?'width: 210px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-xs" :class="data.expiring=='expired'?'text-red-500':(data.expiring=='expiring'?'text-yellow-500':'text-green-500')">{{ data.expiry }}</span>
         </template>

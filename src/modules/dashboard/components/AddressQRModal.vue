@@ -23,7 +23,6 @@ export default {
       notIncludeWord: Boolean
     },
     setup(p){
-      console.log(p.notIncludeWord)
       let toggleModal = ref(false)
 
      return{

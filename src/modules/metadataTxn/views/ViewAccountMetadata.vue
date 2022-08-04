@@ -4,8 +4,9 @@
         <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
             <AccountComponent :address="address" class="mb-6"/>
             <AccountTabs :address="address" selected="metadata"/>
-            <div class="border-2 border-t-0 px-6" >
-                <select class=" my-4" v-model="filterSelection">
+            <div class="border-2 border-t-0 " >
+                <AccountMetadataDatatableVue  :publicKey = "acc?acc.publicKey:'0'.repeat(64)" :accMetadata = "accountMetadata" />
+                <!-- <select class=" my-4" v-model="filterSelection">
                     <option value=0>ACCOUNT</option>
                     <option value=1>NAMESPACE</option>
                     <option value=2>ASSET</option>
@@ -106,8 +107,8 @@
                             <div v-if="index != (assetMetadata.length - 1)" class='my-2 gray-line' ></div>
                         </div>
                     </div>
-                </div>
-                <router-link :to="{name: 'ViewUpdateAccountMetadata',params:{targetPublicKey:acc?acc.publicKey:'0'.repeat(64)}}"><button  class="my-4 blue-btn py-3 px-3 flex items-center" ><img src="@/assets/img/icon-plus.svg" class="inline-block w-4 h-4 mr-2">Create New Account Metadata</button></router-link>
+                </div> -->
+                <router-link :to="{name: 'ViewUpdateAccountMetadata',params:{targetPublicKey:acc?acc.publicKey:'0'.repeat(64)}}"><button  class="mx-6 my-4 blue-btn py-3 px-3 flex items-center" ><img src="@/assets/img/icon-plus.svg" class="inline-block w-4 h-4 mr-2">Create New Account Metadata</button></router-link>
             </div>
         </div>
     </div>
@@ -120,6 +121,7 @@ import { Convert, MetadataQueryParams, MetadataType, MosaicId, NamespaceId, Publ
 import { computed, ref, watch } from "vue"
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
+import AccountMetadataDatatableVue from "../components/AccountMetadataDatatable.vue";
 import UTF8 from 'utf-8';
     const props = defineProps({
         address: String
@@ -146,22 +148,7 @@ import UTF8 from 'utf-8';
     const accountMetadata = ref<{scopedMetadataKeyUtf8:string,scopedMetadataKeyHex: string,value:string}[]>([])
     const namespaceMetadata = ref<{scopedMetadataKeyUtf8:string,scopedMetadataKeyHex: string, id:string,value:string}[]>([])
     const assetMetadata = ref<{scopedMetadataKeyUtf8:string,scopedMetadataKeyHex: string,name:string,id:string,value:string}[]>([])
-    const fetchAccountMetadata = async()=>{
-        if(!acc.value){
-            return
-        }
-        let metadataQueryParams = new MetadataQueryParams()
-        metadataQueryParams.metadataType = MetadataType.ACCOUNT
-        metadataQueryParams.targetKey = PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)
-        let fetchMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
-        fetchMetadata.metadataEntries.forEach(metadataEntry=>{
-            accountMetadata.value.push({
-                scopedMetadataKeyUtf8: metadataEntry.scopedMetadataKey.toHex() == convertUtf8(metadataEntry.scopedMetadataKey.toHex())?null:convertUtf8(metadataEntry.scopedMetadataKey.toHex()),
-                scopedMetadataKeyHex: metadataEntry.scopedMetadataKey.toHex() ,
-                value: metadataEntry.value
-            })
-        })
-    }
+    
 
     const fetchNamespaceMetadata = async()=>{
         if(!acc.value){
@@ -186,35 +173,90 @@ import UTF8 from 'utf-8';
             })
         })
     }
+    const delay = ms => new Promise(res => setTimeout(res, ms));
 
-    const fetchAssetMetadata = ()=>{
+    const fetchAssetMetadata = async()=>{
+        if(!acc.value){
+            return 
+        }
+        let metadataQueryParams = new MetadataQueryParams() 
+        metadataQueryParams.metadataType = MetadataType.MOSAIC 
+        metadataQueryParams.pageSize = 100;
+        metadataQueryParams.pageNumber = 1;
+        metadataQueryParams.targetKey = acc.value.publicKey
+        let searchedMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
+        for(let i = 0; i< searchedMetadata.metadataEntries.length; i++){
+            let metadataEntry = searchedMetadata.metadataEntries
+            assetMetadata.value.push({
+                scopedMetadataKeyUtf8: metadataEntry[i].scopedMetadataKey.toHex() == convertUtf8(metadataEntry[i].scopedMetadataKey.toHex())?null:convertUtf8(metadataEntry[i].scopedMetadataKey.toHex()),
+                scopedMetadataKeyHex: metadataEntry[i].scopedMetadataKey.toHex() ,
+                name: '',
+                id: metadataEntry[i].targetId.toHex(),
+                value: metadataEntry[i].value
+            })
+        }
+        let totalPageNumber = searchedMetadata.pagination.totalPages
+
+        for (let i = 2; i <= totalPageNumber; i++) {   
+            let metadataQueryParams = new MetadataQueryParams() 
+            metadataQueryParams.metadataType = MetadataType.MOSAIC 
+            metadataQueryParams.pageSize = 100
+            metadataQueryParams.pageNumber = i;
+            metadataQueryParams.targetKey = acc.value.publicKey
+            let searchedMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
+            for(let i = 0; i< searchedMetadata.metadataEntries.length; i++){
+                let metadataEntry = searchedMetadata.metadataEntries
+                assetMetadata.value.push({
+                    scopedMetadataKeyUtf8: metadataEntry[i].scopedMetadataKey.toHex() == convertUtf8(metadataEntry[i].scopedMetadataKey.toHex())?null:convertUtf8(metadataEntry[i].scopedMetadataKey.toHex()),
+                    scopedMetadataKeyHex: metadataEntry[i].scopedMetadataKey.toHex() ,
+                    name: '',
+                    id: metadataEntry[i].targetId.toHex(),
+                    value: metadataEntry[i].value
+                })
+                await delay(250)
+            }
+
+        }
+
+    }
+
+    const fetchAccountMetadata = async()=>{
         if(!acc.value){
             return
         }
-        let assets :{id:string,name:string}[] = [] 
-        acc.value.assets.forEach(asset=>{
-            if(asset.creator==acc.value.publicKey){
-                assets.push({
-                    id:asset.idHex,
-                    name:asset.namespaceNames[0]??''
-                })
-            }
-        })
         let metadataQueryParams = new MetadataQueryParams()
-        metadataQueryParams.metadataType = MetadataType.MOSAIC
-        assets.forEach( async(asset)=>{
-            metadataQueryParams.targetId = new MosaicId(asset.id)
-            let fetchMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
-            fetchMetadata.metadataEntries.forEach(metadataEntry=>{
-                assetMetadata.value.push({
-                    scopedMetadataKeyUtf8: metadataEntry.scopedMetadataKey.toHex() == convertUtf8(metadataEntry.scopedMetadataKey.toHex())?null:convertUtf8(metadataEntry.scopedMetadataKey.toHex()),
-                    scopedMetadataKeyHex: metadataEntry.scopedMetadataKey.toHex() ,
-                    name: asset.name.length?asset.name:asset.id,
-                    id: asset.id,
-                    value: metadataEntry.value
-                })
+        metadataQueryParams.metadataType = MetadataType.ACCOUNT
+        metadataQueryParams.pageSize = 100;
+        metadataQueryParams.pageNumber = 1;
+        metadataQueryParams.targetKey = PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)
+        let searchedMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
+        for(let i = 0; i< searchedMetadata.metadataEntries.length; i++){
+            let metadataEntry = searchedMetadata.metadataEntries
+            accountMetadata.value.push({
+                scopedMetadataKeyUtf8: metadataEntry[i].scopedMetadataKey.toHex() == convertUtf8(metadataEntry[i].scopedMetadataKey.toHex())?null:convertUtf8(metadataEntry[i].scopedMetadataKey.toHex()),
+                scopedMetadataKeyHex: metadataEntry[i].scopedMetadataKey.toHex() ,
+                value: metadataEntry[i].value
             })
-        })
+        }
+        let totalPageNumber = searchedMetadata.pagination.totalPages
+        await delay(250)
+        for (let i = 2; i <= totalPageNumber; i++) {   
+            let metadataQueryParams = new MetadataQueryParams() 
+            metadataQueryParams.metadataType = MetadataType.ACCOUNT 
+            metadataQueryParams.pageSize = 100
+            metadataQueryParams.pageNumber = i;
+            metadataQueryParams.targetKey = acc.value.publicKey
+            let searchedMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams)
+            for(let i = 0; i< searchedMetadata.metadataEntries.length; i++){
+                let metadataEntry = searchedMetadata.metadataEntries
+                accountMetadata.value.push({
+                    scopedMetadataKeyUtf8: metadataEntry[i].scopedMetadataKey.toHex() == convertUtf8(metadataEntry[i].scopedMetadataKey.toHex())?null:convertUtf8(metadataEntry[i].scopedMetadataKey.toHex()),
+                    scopedMetadataKeyHex: metadataEntry[i].scopedMetadataKey.toHex() ,
+                    value: metadataEntry[i].value
+                })
+                await delay(250)
+            }
+        }
     }
 
     const removeDoubleZero = (string :string) =>{
@@ -237,8 +279,8 @@ import UTF8 from 'utf-8';
     }
      const init = async() =>{
         fetchAccountMetadata()
-        fetchNamespaceMetadata()
-        fetchAssetMetadata()
+        /* fetchNamespaceMetadata()
+        fetchAssetMetadata() */
         
     }
    

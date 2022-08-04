@@ -29,7 +29,7 @@
               </div>
             </div>
             <div class="error" v-else>
-             {{$t('general.initiateBy')}} 
+             {{$t('general.noCosigner')}} 
             </div>
           </div>
         <div class="flex mt-3 gap-1">
@@ -542,15 +542,22 @@ export default {
     ) ||  walletState.currentLoggedInWallet.others.find(
       (element) => element.name == selectedAccName.value)
     if (account.assets.length > 0) {
-      account.assets.forEach((i, index) => {
-        if(i.namespaceNames!= AppState.nativeToken.fullNamespace){
+      let index = 0;
+      for(let asset of account.assets){
+
+        if(asset.rawAmount === 0){
+          continue;
+        }
+
+        if(!asset.namespaceNames.includes(AppState.nativeToken.fullNamespace)){
           mosaicOption.push({
-            val: i.idHex,
-            text: (i.namespaceNames.length>0?i.namespaceNames:i.idHex) + " >"+t('general.balance') +": " +Helper.amountFormatterSimple(i.amount,i.divisibility),
+            val: asset.idHex,
+            text: (asset.namespaceNames.length>0?asset.namespaceNames:asset.idHex) + " >"+t('general.balance') +": " +Helper.toCurrencyFormat(asset.amount,asset.divisibility),
             id: index + 1,
           });
+          index += 1;
         }
-      });
+      }
     }
     return mosaicOption;
   });
