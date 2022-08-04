@@ -24,19 +24,6 @@
         </div>
         <br>
         <br>
-        <div class="border inline-block w-full shadow-md filter" :class="`${open['nis1']?'border-blue-500':'border-gray-200'}`" style="top: 0px;" @click="openMenu('nis1')">
-          <div class="flex items-center w-full px-5 h-20 cursor-pointer hover:bg-blue-50 transition-all duration-500" :class="`${open['nis1']?'bg-blue-50':'bg-white'}`">
-            <img src="@/modules/services/submodule/mainnetSwap/img/nem.svg" class="float-left">
-            <div class="text-left pl-5">
-              <div class="text-md font-bold">{{$t('nis1.nis1')}}</div>
-              <div class="text-xs">{{$t('nis1.nem')}}</div>
-            </div>
-          </div>
-          <div class="w-full text-left z-20 bg-white" v-if="open['nis1']">
-            <div class="bg-blue-100 border-blue-100 uppercase py-2 px-5 text-xxs">{{$t('general.selectOption')}}</div>
-            <router-link :to="{ name: 'ViewServicesMainnetSwapNIS1ToSirius' }" class="block py-3 px-5 text-sm font-bold hover:bg-blue-500 hover:text-white transition-all duration-500 cursor-pointer">{{$t('nis1.nis1ToSirius')}}</router-link>
-          </div>
-        </div>
         <br>
         <template>
        <!--  <div class="border inline-block w-full mt-4 rounded shadow-md filter" :class="`${open['eth']?'border-blue-500':'border-gray-200'}`" style="top: 95px;" @click="openMenu('eth')">
@@ -78,20 +65,27 @@ export default {
       const open = ref([]);
       open.value['nis1', 'eth', 'bsc'] = false;
       let type = ['nis1', 'eth', 'bsc'];
-      const openMenu = (coinType) => {
-        if(coinType == 'nis1' && !isOutgoingOptionDisabled.value['nis1']){
+      const openMenu = (remoteNetworkType) => {
+        if(remoteNetworkType == 'nis1' && !isOutgoingOptionDisabled.value['nis1']){
           open.value['nis1'] = !open.value['nis1'];
-        }else if(coinType == 'eth' && !isOutgoingOptionDisabled.value['eth']){
+        }else if(remoteNetworkType == 'eth' && !isOutgoingOptionDisabled.value['eth']){
           open.value['eth'] = !open.value['eth'];
-        }else if(coinType == 'bsc' && !isOutgoingOptionDisabled.value['bsc']){
+        }else if(remoteNetworkType == 'bsc' && !isOutgoingOptionDisabled.value['bsc']){
           open.value['bsc'] = !open.value['bsc'];
         }
       };
 
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
-
-    const baseURL = swapData.swap_XPX_ETH_URL;
+    const getBaseURL = remoteNetwork =>{
+      if(remoteNetwork=='bsc'){
+        return swapData.swap_XPX_BSC_URL;
+      }else if(remoteNetwork=='eth'){
+        return swapData.swap_XPX_ETH_URL;
+      }else{
+        return ''
+      }
+    }
     const priceURL = swapData.priceConsultURL;
     const router = useRouter();
     const isOutgoingOptionDisabled = ref([]);
@@ -138,59 +132,59 @@ export default {
       }
     });
 
-    const gotoOutgoingPage = async(coin)=> {
+    const gotoOutgoingPage = async(remoteNetwork)=> {
 
-      if(isChecking.value[coin]){
+      if(isChecking.value[remoteNetwork]){
         return;
       }
-      isOutgoingOptionDisabled.value[coin] = true;
+      isOutgoingOptionDisabled.value[remoteNetwork] = true;
       // outgoingText.value = "Getting your accounts. Please wait";
 
-      isChecking.value[coin] = true;
+      isChecking.value[remoteNetwork] = true;
 
-      displayWaitMessage.value[coin] = true;
-      displayConnectionMessage.value[coin] = false;
-      displayErrorMessage.value[coin] = false;
+      displayWaitMessage.value[remoteNetwork] = true;
+      displayConnectionMessage.value[remoteNetwork] = false;
+      displayErrorMessage.value[remoteNetwork] = false;
 
       try {
-        const response = await fetch(SwapUtils.checkSwapService(baseURL));
+        const response = await fetch(SwapUtils.checkSwapService(getBaseURL(remoteNetwork)));
         const priceResponse = await fetch(SwapUtils.checkSwapPrice(priceURL));
         const priceData = await priceResponse.json();
-
-        isChecking.value[coin] = false;
+        
+        isChecking.value[remoteNetwork] = false;
         let priceDataExternalCoin
-        if(coin == 'eth'){
+        if(remoteNetwork == 'eth'){
           priceDataExternalCoin = priceData.eth;
-        }else if(coin == 'bsc'){
+        }else if(remoteNetwork == 'bsc'){
           priceDataExternalCoin = priceData.bsc;
         }
 
         if(priceData.xpx === 0 || priceDataExternalCoin === 0){
-          displayWaitMessage.value[coin] = false;
-          displayErrorMessage.value[coin] = true;
-          isOutgoingOptionDisabled.value[coin] = false;
+          displayWaitMessage.value[remoteNetwork] = false;
+          displayErrorMessage.value[remoteNetwork] = true;
+          isOutgoingOptionDisabled.value[remoteNetwork] = false;
           return;
         }
 
         if(response.status == 200 && priceResponse.status == 200){
-          displayErrorMessage.value[coin] = false;
-          displayWaitMessage.value[coin] = false;
-          if(coin == 'eth'){
+          displayErrorMessage.value[remoteNetwork] = false;
+          displayWaitMessage.value[remoteNetwork] = false;
+          if(remoteNetwork == 'eth'){
             router.push({ name: "ViewServicesMainnetSwapSiriusToETH"});
-          }else if(coin == 'bsc'){
+          }else if(remoteNetwork == 'bsc'){
             router.push({ name: "ViewServicesMainnetSwapSiriusToBSC"});
           }
         }else{
-          displayWaitMessage.value[coin] = false;
-          displayErrorMessage.value[coin] = true;
+          displayWaitMessage.value[remoteNetwork] = false;
+          displayErrorMessage.value[remoteNetwork] = true;
           isOutgoingOptionDisabled.value = false;
         }
       } catch (error) {
-        displayWaitMessage.value[coin] = false;
-        displayErrorMessage.value[coin] = false;
-        displayConnectionMessage.value[coin] = true;
-        isOutgoingOptionDisabled.value[coin] = false;
-        isChecking.value[coin] = false;
+        displayWaitMessage.value[remoteNetwork] = false;
+        displayErrorMessage.value[remoteNetwork] = false;
+        displayConnectionMessage.value[remoteNetwork] = true;
+        isOutgoingOptionDisabled.value[remoteNetwork] = false;
+        isChecking.value[remoteNetwork] = false;
       }
     }
 

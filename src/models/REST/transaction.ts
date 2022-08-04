@@ -4,6 +4,9 @@ import {
     TransactionAnnounceResponse, Transaction, TransactionStatus, TransactionGroupType,
     TransactionQueryParams, TransactionType, TransactionSearch, TransactionCount
 } from "tsjs-xpx-chain-sdk";
+import {RequestAuth} from './auth';
+import {AppState} from '../../state/appState';
+import { AppStateUtils } from "@/state/utils/appStateUtils";
 
 export class TransactionAPI {
 
@@ -14,15 +17,68 @@ export class TransactionAPI {
     }
 
     announce(signedTransaction: SignedTransaction): Promise<TransactionAnnounceResponse>{
-        return this.transactionHttp.announce(signedTransaction).toPromise();
+        let txnHash = signedTransaction.hash;
+
+        if(!AppState.txnActivityLog.find(x => x.txnHash === txnHash)){
+            AppState.txnActivityLog.push({
+                accPubKey: signedTransaction.signer,
+                announced: true,
+                relatedAddress: [],
+                txnHash: txnHash,
+                status: "",
+                statusMsg: "",
+                checkedNum: 0
+            });
+
+            AppStateUtils.updateActivityLogNum();
+        }
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.transactionHttp.announce(signedTransaction, authHeader).toPromise();
     }
 
     announceAggregateBonded(signedTransaction: SignedTransaction): Promise<TransactionAnnounceResponse>{
-        return this.transactionHttp.announceAggregateBonded(signedTransaction).toPromise();
+        let txnHash = signedTransaction.hash;
+
+        if(!AppState.txnActivityLog.find(x => x.txnHash === txnHash)){
+            AppState.txnActivityLog.push({
+                accPubKey: signedTransaction.signer,
+                announced: true,
+                relatedAddress: [],
+                txnHash: txnHash,
+                status: "",
+                statusMsg: "",
+                checkedNum: 0
+            });
+
+            AppStateUtils.updateActivityLogNum();
+        }
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.transactionHttp.announceAggregateBonded(signedTransaction, authHeader).toPromise();
     }
 
     announceAggregateBondedCosignature(cosignatureSignedTransaction: CosignatureSignedTransaction): Promise<TransactionAnnounceResponse>{
-        return this.transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction).toPromise();
+        let txnHash = cosignatureSignedTransaction.parentHash;
+
+        let existingTxnCosignLog = AppState.txnCosignLog.find(x => x.txnHash === txnHash);
+        if(!existingTxnCosignLog){
+            AppState.txnCosignLog.push({
+                accPubKey: [cosignatureSignedTransaction.signer],
+                announced: true,
+                relatedAddress: [],
+                txnHash: txnHash,
+                status: "",
+                statusMsg: "",
+                checkedNum: 0
+            });
+
+            AppStateUtils.addCosignLogNum();
+        }
+        else{
+            existingTxnCosignLog.accPubKey.push(cosignatureSignedTransaction.signer);
+            AppStateUtils.addCosignLogNum();
+        }
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction, authHeader).toPromise();
     }
 
     /**
@@ -30,7 +86,8 @@ export class TransactionAPI {
      * @param transactionId - Transaction id or hash.
      */
     getTransaction(transactionId: string): Promise<Transaction>{
-        return this.transactionHttp.getTransaction(transactionId).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.transactionHttp.getTransaction(transactionId, authHeader).toPromise();
     }
 
     /**
@@ -38,7 +95,8 @@ export class TransactionAPI {
      * @param transactionId - Transaction id or hash.
      */
      getUnconfirmedTransaction(transactionId: string): Promise<Transaction>{
-        return this.transactionHttp.getUnconfirmedTransaction(transactionId).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.transactionHttp.getUnconfirmedTransaction(transactionId, authHeader).toPromise();
     }
 
     /**
@@ -46,7 +104,8 @@ export class TransactionAPI {
      * @param transactionId - Transaction id or hash.
      */
      getPartialTransaction(transactionId: string): Promise<Transaction>{
-        return this.transactionHttp.getPartialTransaction(transactionId).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.transactionHttp.getPartialTransaction(transactionId, authHeader).toPromise();
     }
 
     /**
@@ -55,7 +114,8 @@ export class TransactionAPI {
      *
      */
     getTransactions(transactionIds: string[]): Promise<Transaction[]>{
-        return this.transactionHttp.getTransactions(transactionIds).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.transactionHttp.getTransactions(transactionIds, undefined, authHeader).toPromise();
     }
 
     /**
@@ -63,22 +123,27 @@ export class TransactionAPI {
      * @param transactionId - Transaction id or hash.
      */
     getTransactionEffectiveFee(transactionId: string): Promise<number>{
-        return this.transactionHttp.getTransactionEffectiveFee(transactionId).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.transactionHttp.getTransactionEffectiveFee(transactionId, authHeader).toPromise();
     }
 
     getTransactionStatus(transactionHash: string): Promise<TransactionStatus>{
-        return this.transactionHttp.getTransactionStatus(transactionHash).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.transactionHttp.getTransactionStatus(transactionHash, authHeader).toPromise();
     }
 
     getTransactionsStatuses(transactionHashes: string[]): Promise<TransactionStatus[]>{
-        return this.transactionHttp.getTransactionsStatuses(transactionHashes).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.transactionHttp.getTransactionsStatuses(transactionHashes, authHeader).toPromise();
     }
 
     searchTransactions(transactionGroupType: TransactionGroupType, transactionQueryParams ?:TransactionQueryParams): Promise<TransactionSearch>{
-        return this.transactionHttp.searchTransactions(transactionGroupType, transactionQueryParams).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.transactionHttp.searchTransactions(transactionGroupType, transactionQueryParams, authHeader).toPromise();
     }
 
     getTransactionsCount(transactionTypes: TransactionType[], transactionGroupType: TransactionGroupType): Promise<TransactionCount[]> {
-        return this.transactionHttp.getTransactionsCount(transactionTypes, transactionGroupType).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.transactionHttp.getTransactionsCount(transactionTypes, transactionGroupType, authHeader).toPromise();
     }
 }

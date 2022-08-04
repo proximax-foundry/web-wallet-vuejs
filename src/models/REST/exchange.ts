@@ -3,6 +3,7 @@ import {
     Address, PublicAccount, MosaicId,
     ExchangeOfferType, MosaicExchange, AccountExchanges
 } from "tsjs-xpx-chain-sdk";
+import {RequestAuth} from './auth';
 
 export class ExchangeAPI {
 
@@ -13,14 +14,17 @@ export class ExchangeAPI {
     }
 
     getAccountExchanges(accountId: Address | PublicAccount): Promise<AccountExchanges>{
-        return this.exchangeHttp.getAccountExchanges(accountId).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.exchangeHttp.getAccountExchanges(accountId, authHeader).toPromise();
     }
 
     getExchangeOffers(offerType: ExchangeOfferType, mosaicId: MosaicId): Promise<MosaicExchange[]>{
-        return this.exchangeHttp.getExchangeOffers(offerType, mosaicId).toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.exchangeHttp.getExchangeOffers(offerType, mosaicId, authHeader).toPromise();
     }
 
     getExchangeList(): Promise<MosaicId[]>{
-        return this.exchangeHttp.getOfferList().toPromise();
+        let authHeader = RequestAuth.getAuthHeader();
+        return this.exchangeHttp.getOfferList(authHeader).toPromise();
     }
 }

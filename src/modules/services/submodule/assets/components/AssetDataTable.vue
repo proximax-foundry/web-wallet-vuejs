@@ -54,19 +54,19 @@
             <div class="uppercase font-bold text-txs">{{data.supply}}</div>
             <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">{{$t('general.amount')}}</div>
             <div class="uppercase font-bold text-txs">{{data.amount}}</div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">{{$t('general.blockHeight')}}</div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">{{$t('general.block')}}</div>
             <div class="uppercase font-bold text-txs">{{data.height}}</div>
           </div>
         </template>
       </Column>
       <Column style="width: 50px" v-if="wideScreen">
       </Column>
-      <Column field="assetId" :header="$t('general.assetId')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
+      <Column field="assetId" :header="$t('general.assetId')"  style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase font-bold text-txs">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedNamespace" :header="$t('general.namespace')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="linkedNamespace" :header="$t('general.namespace')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <div v-if="data.linkedNamespace.length > 0">
             <div v-if="data.linkedNamespace.length == 1">
@@ -86,17 +86,17 @@
           <div v-else>{{$t('general.noLinkedNamespace')}}</div>
         </template>
       </Column>
-      <Column field="supply" :header="$t('general.supply')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="supply" :header="$t('general.supply')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase text-txs">{{data.supply}}</span>
         </template>
       </Column>
-      <Column field="amount" :header="$t('general.amount')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="amount" :header="$t('general.amount')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase font-bold text-txs">{{data.amount}}</span>
         </template>
       </Column>
-      <Column field="height" :header="$t('general.blockHeight')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="height" :header="$t('general.block')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.height}}</span>
         </template>
@@ -109,6 +109,7 @@
               <div role="none" class="my-2">
                 <router-link :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.idHex, address: data.address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
                 <router-link :to="{ name: 'ViewServicesAssetsLinkToNamespace', params: {assetId: data.idHex, address: data.address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.linkToNamespace')}}</router-link>
+                <router-link :to="{ name: 'ViewUpdateAssetMetadata', params: {targetId: data.idHex} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Update Metadata</router-link>
                 <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>{{$t('general.viewInExplorer')}}<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
               </div>
             </div>
@@ -205,21 +206,21 @@ export default{
     const generateAssetDatatable = computed(() => {
       let accountAssets = [];
       if(filterAssets.value){
-        let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == filterAssets.value)
+        let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == filterAssets.value) || walletState.currentLoggedInWallet.others.find(account => account.address == filterAssets.value)
         if(!account){
-          account = walletState.currentLoggedInWallet.others.find(account => account.address == filterAssets.value)
+          return []
         }
-        account.assets.filter(asset => asset.owner === account.publicKey).forEach(asset => {
+        account.assets.filter(asset => asset.creator === account.publicKey).forEach(asset => {
           accountAssets.push({asset, account});
         });
       }else{
         walletState.currentLoggedInWallet.accounts.forEach(account => {
-          account.assets.filter(asset => asset.owner === account.publicKey).forEach(asset => {
+          account.assets.filter(asset => asset.creator === account.publicKey).forEach(asset => {
             accountAssets.push({asset, account});
           });
         });
         walletState.currentLoggedInWallet.others.forEach(other => {
-          other.assets.filter(asset => asset.owner === other.publicKey).forEach(asset => {
+          other.assets.filter(asset => asset.creator === other.publicKey).forEach(asset => {
             accountAssets.push({asset, account:other});
           });
         });
@@ -244,13 +245,13 @@ export default{
           let data = {
             i: i,
             idHex: assetId,
-            owner: accountAssets[i].asset.owner,
-            address: PublicAccount.createFromPublicKey(accountAssets[i].asset.owner, AppState.networkType).address.pretty(),
-            amount: Helper.toCurrencyFormat(accountAssets[i].asset.getExactAmount(), accountAssets[i].asset.divisibility),
+            owner: accountAssets[i].asset.creator,
+            address: PublicAccount.createFromPublicKey(accountAssets[i].asset.creator, AppState.networkType).address.pretty(),
+            amount: Helper.toCurrencyFormat(accountAssets[i].asset.amount, accountAssets[i].asset.divisibility),
             supply: Helper.toCurrencyFormat(accountAssets[i].asset.getExactSupply(), accountAssets[i].asset.divisibility),
             linkedNamespace: namespaceAlias,
             height: accountAssets[i].asset.height,
-            explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
+            explorerLink: AppState.isReady? networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId : ''
           };
           formattedAssets.push(data);
           // isMenuShow.value[i] = false;

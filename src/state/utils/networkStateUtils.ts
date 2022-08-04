@@ -73,6 +73,10 @@ export class NetworkStateUtils{
     AppState.nativeToken.label = chainProfile.network.currency.name;
     AppState.nativeToken.fullNamespace = chainProfile.network.currency.namespace;
     AppState.networkType = ChainUtils.getNetworkType(chainProfile.network.type);
+    // AppState.trackingTxnHash = [];
+    AppState.txnActivityLog = [];
+    AppState.txnCosignLog = [];
+    AppState.txnSwapLog = [];
     if(AppState.networkType === NetworkType.PRIVATE || AppState.networkType === NetworkType.PRIVATE_TEST){
       AppState.buildTxn = new BuildTransactions(chainProfile.network.type, chainProfile.generationHash, FeeCalculationStrategy.ZeroFeeCalculationStrategy);
     }
@@ -110,7 +114,9 @@ export class NetworkStateUtils{
         networkState.selectedAPIEndpoint = "";
       }
     }
-    SessionService.setNumber('nodePort', networkState.currentNetworkProfile?.httpPort || 3000);
+    let portNumber = networkState.currentNetworkProfile?.httpPort;
+
+    SessionService.setNumber('nodePort', portNumber !== null ? portNumber : 3000);
     SessionService.setRaw('selectedChainNode', networkState.selectedAPIEndpoint);
 
     AppState.nodeFullURL = NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint);
@@ -132,20 +138,16 @@ export class NetworkStateUtils{
   }
 
   static buildAPIEndpointURL(url: string): string{
-    const portNumber = networkState.currentNetworkProfile ? networkState.currentNetworkProfile.httpPort : 3000;
+    const portNumber = networkState.currentNetworkProfile !== null ? networkState.currentNetworkProfile.httpPort : 3000;
 
-    const protocols = ["https:", "file:"];
-
-    return protocols.includes(location.protocol) ? `https://${url}` : `http://${url}:${portNumber}`;
+    return ChainUtils.buildAPIEndpoint(url, portNumber);
   }
 
   static buildWSEndpointURL(url: string): string{
 
-    const portNumber = networkState.currentNetworkProfile ? networkState.currentNetworkProfile.httpPort : 3000;
+    const portNumber = networkState.currentNetworkProfile !== null ? networkState.currentNetworkProfile.httpPort : 3000;
 
-    const protocols = ["https:", "file:"];
-
-    return protocols.includes(location.protocol) ? `wss://${url}` : `ws://${url}:${portNumber}`;
+    return ChainUtils.buildWSEndpoint(url, portNumber);
   }
 
   static setLocalDefaultNetwork(networkName: string): void{
@@ -173,6 +175,46 @@ export class NetworkStateUtils{
   }
 
   static updateLastAccessNetworkName(networkName: string): void{
+    sessionStorage.setItem("lastNetworkName", networkName);
     localStorage.setItem(lastAccessNetworkName, networkName);
+  }
+
+  static async updateNetworkConfig(){
+    if(AppState.chainAPI === null){
+      return false;
+    }
+
+    try {
+      let chainAPICall = AppState.chainAPI as ChainAPICall;
+
+      const chainHeight = await chainAPICall.chainAPI.getBlockchainHeight();
+    
+      const config = await ChainUtils.getChainConfig(chainHeight, chainAPICall.chainConfigAPI);
+    
+      const chainProfileConfigStore = new ChainProfileConfig(networkState.chainNetworkName);
+    
+      chainProfileConfigStore.init();
+    
+      if (typeof config !== "string") {
+          config.chainHeight = chainHeight;
+          chainProfileConfigStore.updateConfig(config);
+          chainProfileConfigStore.saveToLocalStorage();
+          networkState.currentNetworkProfileConfig = chainProfileConfigStore;
+          return true;
+      }
+      else{
+        return false;
+      }
+    } catch (error) {
+      return false;
+    }
+  }
+
+  static checkSession(){
+    const sessionNetworkAuth = SessionService.getRaw("secured_auth");
+
+    if(sessionNetworkAuth){
+      networkState.currentNetworkProfile.apikey = sessionNetworkAuth;
+    }
   }
 }

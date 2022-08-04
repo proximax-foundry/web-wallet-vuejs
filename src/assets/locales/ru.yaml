@@ -53,9 +53,7 @@ addressBook:
   work: Work
 asset:
   assetAns: >-
-    Mosaics are part of what makes the Smart Asset System unique and flexible.
-    They are fixed assets on the Sirius Chain that can represent a set of
-    multiple identical things that do not change.
+    An asset is called Sirius Digital Asset (SDA) in our ecosystem. Assets represent anything that needs to be quantified and/or named. Each SDA group can have a quantity range from 1 to a maximum of 10^16 units (without decimals). Each SDA group can optionally be given a name.
   assetCreatedBy: Asset created by
   assetCreatedByAcc: Sirius Digital Assets created by account {accountName}
   assetCreatedInWallet: Sirius Digital Assets created in wallet {walletName}
@@ -158,12 +156,12 @@ general:
   addAccAddress: Add Account Address
   address: Address
   addressBook: Address Book
-  aggregateFee: Aggregate Fee
+  aggregateFee: Aggregate Tx Fee
   amount: Amount
   approximately: Approximately
   asset: Asset | Assets
   assetId: Asset ID
-  assetQues: What is Asset?
+  assetQues: What is an Asset?
   back: Back
   balance: Balance
   block: Block | Blocks
@@ -241,6 +239,7 @@ general:
   levy: Levy
   levyAmount: Levy amount
   levyRecipient: Levy recipient
+  limitExceed: Exceeding Message Limit
   link: Link
   linkSuccess: Linked Successfully
   linkToNamespace: Link to Namespace
@@ -255,6 +254,7 @@ general:
   modifySupply: Modify Supply
   month: Month | Months
   more: More
+  moreOnExplorer: Full History on Explorer
   multisig: Multisig
   multisigTitle: This is a multisig account
   name: Name
@@ -337,7 +337,6 @@ home:
     properties
   assetDescription: Create your own unique token
   beginnerGuide: Beginner's Guide
-  beta: BETA
   contactTeam: Contact our support team
   copyright: Copyright 2022 ProximaX®. All rights reserved.
   gettingStarted: Getting Started
@@ -356,8 +355,7 @@ home:
   switchDefault: Your default account has switched to
   title: ProximaX Sirius Wallet
   titleDescription: >-
-    Build robust blockchain integrations that help you to get the most value out
-    of the ProximaX Sirius platform.
+    A highly secure and intuitive wallet and gateway to the ProximaX Sirius platform
   transferDescription: Send assets to another account
   version: Version
 multisig:
@@ -456,7 +454,7 @@ swap:
   bsc: BSC
   bscAddress: BSC address receiving your swap
   bscAddressErr: Valid BSC address is required
-  bscAmountMsg: XPX amount to swap to BEP20
+  bscAmountMsg: '{token} amount to swap to BEP20'
   bscFull: Binance Smart Chain
   bscOutgoingMsg: >-
     Swap completion time will vary depending on the performance of the BSC
@@ -517,6 +515,7 @@ swap:
   metamaskAcc: Metamask Account
   minimum51: (MINIMUM = 51 )
   networkErr: Network Error
+  noMetamask: MetaMask is not installed
   noOtherExtension: >-
     Please make sure there is no other crypto wallet extension currently being
     enabled except
@@ -661,7 +660,7 @@ transaction:
   txErrMsg: 'Status: {0} - Hash: {1}'
   txError: Transaction Error
   txInfo: Transaction information
-  txUnconfirmed: transaction in unconfirmed state | transactions in unconfirmed state
+  txUnconfirmed: Transaction in unconfirmed state | Transactions in unconfirmed state
   unconfirmedTx: Unconfirmed Transactions
   unconfirmedTxOf: 'Unconfirmed transactions of {name}'
   waitForLoad: 'It is still loading, please wait.'

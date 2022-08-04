@@ -34,6 +34,9 @@ export default {
     const list = ref([]);
 
     const refreshList = () => {
+      if(!walletState.currentLoggedInWallet){
+        return 
+      }
       list.value = [];
       if(walletState.currentLoggedInWallet.contacts != undefined){
         if(walletState.currentLoggedInWallet.contacts.length > 0){

@@ -14,7 +14,7 @@ module.exports = {
         browser.fullscreenWindow(function(result) {
             console.log(result);
         });
-
+          
         // create wallet
         create
             .navigate()
@@ -69,7 +69,7 @@ module.exports = {
         // account details
         account
             .navigate_accountdetails()
-            .download_walletpaper(password, password2)
+         // .download_walletpaper(password, password2)
 
     }
 

@@ -86,7 +86,8 @@ export default defineComponent({
     const exportWallet = (walletName) => {
       var networkName = networkState.chainNetworkName;
       const wallet = walletState.wallets.filterByNetworkNameAndName(networkName,walletName);
-      let wordArray = CryptoJS.enc.Utf8.parse(JSON.stringify(wallet));
+      const simpleWallet = wallet.convertToSimpleWallet();
+      let wordArray = CryptoJS.enc.Utf8.parse(JSON.stringify(simpleWallet));
       let file = CryptoJS.enc.Base64.stringify(wordArray);
       const now = Date.now()
       const date = new Date(now);

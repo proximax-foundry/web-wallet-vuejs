@@ -8,7 +8,7 @@ var privatekey1 = 'D3AE97B58C1E1A417E11A51232A8FCEDA2137405CC6AEDFDB21F2B088A4F4
 
 module.exports = {
     
-    "Create-wallet_test": (browser) => {
+    /*"Create-wallet_test": (browser) => {
         var create = browser.page.Createwallet();
 
         browser.fullscreenWindow(function(result) {
@@ -29,7 +29,7 @@ module.exports = {
             .create_wallet(name, password)
             .existing_name(name, password)
             .eye_icon()
-    },
+    },*/
 
     "Create-pkwallet_test": (browser) => {
         var create = browser.page.Createwallet();

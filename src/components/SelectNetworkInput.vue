@@ -71,6 +71,7 @@ export default defineComponent({
         toggleSelection.value = !toggleSelection.value
       //}
     }
+    /*
     watch(()=> networkState.availableNetworks, (availableNetworks)=>{
       let options = [];
 
@@ -81,7 +82,7 @@ export default defineComponent({
       }
       chainNetworks.value = options;
     }, true);
-
+    */
     return {
       selectNetwork,
       selectedNetwork,

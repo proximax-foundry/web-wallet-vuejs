@@ -34,6 +34,8 @@
             </option>
           </select>
           <div class="text-lg my-7 font-bold">{{$t('general.transactionDetails')}}</div>
+          <div class="error error_box mb-5" v-if="!isInstallMetamask">{{$t('swap.noMetamask')}}</div>
+          <button @click="recheckMetamask()" v-if="!isInstallMetamask" class="text-xs blue-btn p-2 mb-3">Recheck MetaMask</button>
           <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">{{$t('swap.noOtherExtension')}} <b>{{$t('swap.metamask')}}</b>.<div class="my-2">{{$t('swap.referTo')}}<a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">{{$t('swap.walkthrough')}}<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a>{{$t('swap.forMoreDetails')}}</div>{{$t('swap.refreshMsg')}}</div>
           <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
           <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
@@ -85,9 +87,24 @@
             </div>
           </div>
           <SupplyInputClean :disabled="disableAmount" v-model="amount" :balance="balance" :placeholder="'BEP20 ' + `${selectedToken?selectedToken.name:''}`" type="text" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':amount>=minAmount?$t('swap.insufficientTokenBalance'):`Min. amount is ${minAmount}(${feeAmount} ${selectedToken.name.toUpperCase()} will deducted for transaction fee)`" :decimal="tokenDivisibility"  />
-          <div class="text-left">
-            <SelectInputAccount v-model="siriusAddress" :placeholder="$t('swap.toSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
+          <div class="flex">
+            <AddressInputClean :placeholder="$t('transfer.transferPlaceholder')" v-model="siriusAddress" v-debounce:1000="checkRecipient" :showError="showAddressError" />
+            <div @click="toggleContact=!toggleContact" class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 ' >
+              <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
+              <div class='text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.select')}}</div>
+            </div>
           </div>
+           <div v-if="toggleContact" class=" border ">
+          <div class='text-xxs text-left text-gray-300 font-semibold py-2 px-2 uppercase'>{{$t('general.importFromAB')}}</div>
+          <div v-for="(item, number) in contacts" :key="number" class="cursor-pointer">
+            <div @click="siriusAddress=item.value;toggleContact=false" class="flex justify-between">
+              <div v-if="number%2==0" class="text-xs py-2 bg-gray-100 pl-2 w-full text-left">{{item.label}}</div>
+              <div v-if="number%2==1" class="text-xs py-2 pl-2 w-full text-left">{{item.label}}</div>
+              <div v-if="number%2==0" class="ml-auto pr-2 text-xxs py-2 font-semibold text-blue-primary bg-gray-100 uppercase">{{$t('general.select')}}</div>
+              <div v-if="number%2==1" class="ml-auto mr-2 text-xxs py-2 font-semibold text-blue-primary uppercase">{{$t('general.select')}}</div>
+            </div>
+          </div>
+        </div>
           <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center">
             {{ amountReceived }} {{selectedToken?selectedToken.name.toUpperCase():''}}
             <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken?selectedToken.name=='metx'?true:false:false" class=" w-5 h-5 ml-4"> 
@@ -247,11 +264,13 @@
             </div>
             <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">{{$t('swap.swapMsg2')}}</div>
             <label class="inline-flex items-center mb-5">
-              <input type="checkbox" class="h-5 w-5 bg-blue-primary" value="true" v-model="savedCheck">
+              <input type="checkbox" class="h-5 w-5 bg-blue-primary" v-model="savedCheck">
               <span class="ml-2 cursor-pointer text-xs font-bold">{{$t('swap.confirmDownloaded')}}</span>
             </label>
-            <div class="sm:mt-5 text-center">
-              <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="default-btn mr-5 focus:outline-none w-40 inline-block mt-1" :class="!savedCheck?'opacity-50':''" :is="!savedCheck?'span':'router-link'" tag="button">{{$t('general.done')}}</router-link>
+            <div class="sm:mt-3 text-center">
+              <router-link :to="{ name: 'ViewServicesMainnetSwap' }">
+                <button type="submit" class="default-btn mr-5 focus:outline-none w-40 inline-block disabled:opacity-50" :disabled="!savedCheck">{{$t('general.done')}}</button>          
+              </router-link>
             </div>
           </div>
         </div>
@@ -260,13 +279,13 @@
   </div>
 </template>
 <script>
-import { computed, ref, watch, onBeforeUnmount } from "vue";
+import { computed, ref, watch, onBeforeUnmount, shallowRef } from "vue";
 import SupplyInputClean from '@/components/SupplyInputClean.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
-import SelectInputAccount from '@/components/SelectInputAccount.vue';
 import { walletState } from '@/state/walletState';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import { ethers } from 'ethers';
 import { abi, SwapUtils } from '@/util/swapUtils';
 import { networkState } from '@/state/networkState';
@@ -274,26 +293,119 @@ import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
+import { NamespaceUtils } from '@/util/namespaceUtils';
+import { ChainUtils } from '@/util/chainUtils';
+import {Address} from 'tsjs-xpx-chain-sdk'
 
 export default {
   name: 'ViewServicesMainnetSwapBSCToSirius',
 
   components: {
+    AddressInputClean,
     SupplyInputClean,
     SwapCertificateComponent,
-    SelectInputAccount,
   },
 
   setup() {
     let verifyingTxn;
     const {t} = useI18n();
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
-
-    const verifyMetaMaskPlugin = ref(true);
-    if(!window.ethereum.isMetaMask){
-      verifyMetaMaskPlugin.value = false;
+    const toggleContact = shallowRef(false)
+    const verifyMetaMaskPlugin = ref(true); 
+    const siriusAddress = ref('');
+    const showAddressError = shallowRef(true); 
+     const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
+    watch(siriusAddress,n=>{
+      if(n.length==40 || n.length==46){
+        checkRecipient()
+      }else{
+        showAddressError.value = true
+      }
+    })
+  const checkNamespace = async (nsId)=>{
+    return await NamespaceUtils.getLinkedAddress(nsId, chainAPIEndpoint.value);
+  } 
+  const checkRecipient = () =>{
+    if(!walletState.currentLoggedInWallet){
+        return;
     }
+    try {
+      let recipientAddress = Helper.createAddress(siriusAddress.value);
+      let networkOk = Helper.checkAddressNetwork(recipientAddress, AppState.networkType);
+      if(!networkOk){
+        showAddressError.value = true;
+      }
+      else{
+        showAddressError.value = false;
+      }
+    } catch (error) {
+      try{
+        let namespaceId = Helper.createNamespaceId(siriusAddress.value);
+        checkNamespace(namespaceId).then((address)=>{
+          siriusAddress.value = address.plain();
+          showAddressError.value = false;
+        }).catch((error)=>{
+          showAddressError.value = true;
+        });
+      }
+      catch(error){
+        showAddressError.value = true;
+      }
+    }
+  }
 
+  const accounts = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return [];
+      }
+      let accounts = walletState.currentLoggedInWallet.accounts.map(
+        (acc)=>{ 
+          return { 
+            name: acc.name,
+            balance: acc.balance,
+            address: acc.address,
+            publicKey: acc.publicKey,
+            isMultisig: acc.getDirectParentMultisig().length ? true: false
+          }; 
+        });
+        
+       
+       let otherAccounts =walletState.currentLoggedInWallet.others.filter((acc)=> acc.type === "MULTISIG").map(
+        (acc)=>{ 
+          return { 
+            name: acc.name,
+            balance: acc.balance,
+            address: acc.address,
+            publicKey: acc.publicKey,
+            isMultisig: true
+          }; 
+        });
+        return accounts.concat(otherAccounts);
+      
+    });
+   const contacts = computed(() => {
+      if(!walletState.currentLoggedInWallet){
+        return [];
+      }
+      const wallet = walletState.currentLoggedInWallet;
+      var contact = [];
+      accounts.value.forEach((element) => {
+        contact.push({ 
+          value: Address.createFromRawAddress(element.address).pretty() ,
+          label: element.name + " - "+t('general.ownerAcc'),
+        });
+      });
+      if (wallet.contacts != undefined) {
+        wallet.contacts.forEach((element) => {
+          contact.push({
+            value: Address.createFromRawAddress(element.address).pretty(),
+            label: element.name + " - "+t('general.contact'),
+          });
+        });
+      }
+      return contact;
+     
+    });
     onBeforeUnmount(() => {
        if(verifyingTxn){
          clearInterval(verifyingTxn);
@@ -381,40 +493,50 @@ export default {
     let provider;
     let signer;
 
-    if (typeof window.ethereum !== 'undefined') {
-      provider = new ethers.providers.Web3Provider(window.ethereum);
-      signer = provider.getSigner();
-
-      isInstallMetamask.value = true;
-      isMetamaskConnected.value = ethereum.isConnected()?true:false;
-
-      ethereum
-        .request({ method: 'eth_accounts' })
-        .then(fetchMetaAccount)
-        .catch((err) => {
-          console.error(err);
+    const initMetamask = ()=>{
+       if (typeof window.ethereum !== 'undefined') {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        isInstallMetamask.value = true;
+        isMetamaskConnected.value = ethereum.isConnected()?true:false;
+        ethereum
+          .request({ method: 'eth_accounts' })
+          .then(fetchMetaAccount)
+          .catch((err) => {
+            console.error(err);
+          });
+        ethereum
+          .request({ method: 'eth_chainId' })
+          .then((metaChainId) => {
+            verifyChain(metaChainId, false);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+        ethereum.on('accountsChanged', handleAccountsChanged);
+        ethereum.on('chainChanged', (metaChainId) => {
+          verifyChain(metaChainId, true);
         });
+      }else{
+        console.log('MetaMask not installed')
+      }
+    }
 
-      ethereum
-        .request({ method: 'eth_chainId' })
-        .then((metaChainId) => {
-          verifyChain(metaChainId, false);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+    initMetamask()
 
-      ethereum.on('accountsChanged', handleAccountsChanged);
+    if(window.ethereum){
+      if(!window.ethereum.isMetaMask){
+        verifyMetaMaskPlugin.value = false;
+      }
+    }
 
-      ethereum.on('chainChanged', (metaChainId) => {
-        verifyChain(metaChainId, true);
-      });
-
-      // ethereum.on('connect', (connectInfo) => {
-      //   console.log(connectInfo)
-      // });
-    }else{
-      console.log('MetaMask not installed')
+    const recheckMetamask = () =>{
+      if(window.ethereum){
+        initMetamask()
+        if(!window.ethereum.isMetaMask){
+          verifyMetaMaskPlugin.value = false;
+        }
+      }
     }
 
     function fetchMetaAccount(accounts) {
@@ -537,7 +659,7 @@ export default {
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-      toast.add({severity:'info', summary: copySubject + ' '+ t('general.copied'), detail: stringToCopy , group: 'br', life: 3000});
+      toast.add({severity:'info', summary: copySubject + ' '+ t('general.copied'), detail: stringToCopy , group: 'br-custom', life: 3000});
     };
 
     const currentPage = ref(1);
@@ -551,21 +673,22 @@ export default {
       }
     })
     const disableAmount = ref(false);
-    const siriusAddress = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
+   
     const err = ref('');
     const serviceErr = ref('');
     const isDisabledSwap = computed(() =>
       // verify it has been connected to MetaMask too
-      !(amount.value > 0 && siriusAddress.value != '' && !err.value && (balance.value >= amount.value) && amount.value>=minAmount.value)
+      !(amount.value > 0 && showAddressError.value == false && !err.value && (balance.value >= amount.value) && amount.value>=minAmount.value)
     );
     const amount = ref('0');
 
     const siriusName = computed(() => {
-      let accountSelected = walletState.currentLoggedInWallet.accounts.find(account => account.address == siriusAddress.value);
-      if(!accountSelected){
-        accountSelected = walletState.currentLoggedInWallet.others.find(account => account.address == siriusAddress.value);
+      let accountSelected = walletState.currentLoggedInWallet.accounts.find(account => account.address == siriusAddress.value) || walletState.currentLoggedInWallet.others.find(account => account.address == siriusAddress.value)
+      if(accountSelected){
+        return accountSelected.name;
+      }else{
+        return 'ACCOUNT-' + siriusAddress.value.substring(siriusAddress.value.length-4,siriusAddress.value.length)
       }
-      return accountSelected.name;
     });
 
     const amountReceived = computed(() => {
@@ -772,6 +895,8 @@ export default {
     const savedCheck = ref(false);
 
     return {
+      recheckMetamask,
+      contacts,
       err,
       balance,
       isInstallMetamask,
@@ -790,6 +915,7 @@ export default {
       disableAmount,
       isDisabledSwap,
       savedCheck,
+      toggleContact,
       step1,
       step2,
       step3,
@@ -832,7 +958,9 @@ export default {
       feeAmount,
       tokenDivisibility,
       tokenList,
-      selectedToken
+      selectedToken,
+      checkRecipient,
+      showAddressError,
     };
   },
 }

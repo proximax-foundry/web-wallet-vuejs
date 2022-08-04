@@ -1,9 +1,6 @@
 <template>
  <div>
-  <div class="flex cursor-pointer mt-8 ml-8 lg:ml-0 lg:absolute">
-    <img src='@/assets/img/chevron_left.svg'>
-    <router-link :to="{name: 'ViewServicesAssets'}" class='text-blue-primary text-xs mt-0.5'>{{$t('general.back')}}</router-link>
-  </div>
+  
   <div class='w-10/12 ml-auto mr-auto'>
     <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
       <div class="xl:col-span-2 p-6 lg:p-12">
@@ -43,19 +40,19 @@
         <div class="border border-gray-200 p-4 rounded mt-5">
           <div class="lg:grid lg:grid-cols-2">
             <div class="my-3">
-              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('asset.currentSupply')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="'<tiptext>'+$t('asset.supplyMsg2')+'<br>'+$t('asset.supplyMsg3')+'</tiptext>'"></div>
+              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('asset.currentSupply')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>'+$t('asset.supplyMsg2')+'<br>'+$t('asset.supplyMsg3')+'</tiptext>', escape: true}"></div>
               <div class="text-black font-bold text-sm">{{ assetSupply }}</div>
             </div>
             <div class="my-3">
-              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.divisibility')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="'<tiptext>' + $t('asset.divisibilityMsg4') + '<br><br>' + $t('asset.divisibilityMsg2') + '<br>' + $t('asset.divisibilityMsg3') + '</tiptext>'"></div>
+              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.divisibility')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>' + $t('asset.divisibilityMsg4') + '<br><br>' + $t('asset.divisibilityMsg2') + '<br>' + $t('asset.divisibilityMsg3') + '</tiptext>', escape: true}"></div>
               <div class="text-black font-bold text-sm">{{ assetDivisibility }}</div>
             </div>
             <div class="my-3">
-              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.transferable')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="'<tiptext>'+ $t('asset.transferableMsg')+'</tiptext>'"></div>
+              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.transferable')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>'+ $t('asset.transferableMsg')+'</tiptext>', escape: true}"></div>
               <div class="uppercase text-black font-bold text-sm">{{ assetTransferable?$t('general.yes'): $t('general.no') }}</div>
             </div>
             <div class="my-3">
-              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.supplyMutable')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="'<tiptext>'+ $t('asset.supplyMutableMsg')+'</tiptext>'"></div>
+              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.supplyMutable')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>'+ $t('asset.supplyMutableMsg')+'</tiptext>', escape: true}"></div>
               <div class="uppercase text-black font-bold text-sm">{{ assetMutable?$t('general.yes') : $t('general.no') }}</div>
             </div>
           </div>
@@ -91,7 +88,7 @@
         <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableModify" @click="modifyAsset">{{$t('asset.modifyAssetSupply')}}</button>
         <div class="text-center">
-          <router-link :to="{name: 'ViewServicesAssets'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
+          <router-link :to="{name: 'ViewDashboard'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
         </div>
       </div>
     </div>
@@ -155,8 +152,20 @@ export default {
     const cosignerAddress = ref('');
 
     const currencyName = computed(() => AppState.nativeToken.label);
-    const lockFund = computed(()=> Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
-    const lockFundCurrency = computed(()=> Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility))
+    const lockFund = computed(()=>{
+      if(networkState.currentNetworkProfileConfig){
+        return Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility)
+      }else{
+        return 0
+      }
+    })
+    const lockFundCurrency = computed(()=> {
+      if(networkState.currentNetworkProfileConfig){
+        return Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility)
+      }else{
+        return 0
+      }
+    })
 
     const lockFundTxFee = computed(()=>{ 
       if(networkState.currentNetworkProfile){ 
@@ -178,40 +187,42 @@ export default {
     const balanceNumber = ref(maxAmount);
 
     const isMultiSig = (address) => {
-      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address);
-      const other = walletState.currentLoggedInWallet.others.find((account) => account.address == address);
-      let isMulti = false;
-      const accountDirectParent = account?account.getDirectParentMultisig():[];
-      const otherDirectParent = other?other.getDirectParentMultisig():[];
-      if((accountDirectParent.length + otherDirectParent.length) > 0){
-        isMulti = true;
+      if(walletState.currentLoggedInWallet){
+        const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address) || walletState.currentLoggedInWallet.others.find((account) => account.address == address);
+        if(!account){
+          return false
+        }
+        const isMulti = account.getDirectParentMultisig().length>0?true:false
+        return isMulti
+      }else{
+        return false
       }
-      return isMulti;
     };
 
-    const isMultiSigBool = ref(isMultiSig(selectedAccAdd.value));
+   
 
     const supply = ref('0');
+    const plainAddress = Helper.createAddress(props.address).plain()
+    let account = computed(()=>{
+      if(walletState.currentLoggedInWallet){
+        return walletState.currentLoggedInWallet.accounts.find(account => account.address == plainAddress) || walletState.currentLoggedInWallet.others.find(account => account.address == plainAddress);
+      }else{
+        return null
+      }
+    })
 
-    let account = walletState.currentLoggedInWallet.accounts.find((account) => Helper.createAddress(account.address).pretty() == props.address);
-    if(!account){
-      account = walletState.currentLoggedInWallet.others.find((account) => Helper.createAddress(account.address).pretty() == props.address);
+    if(account.value){
+      selectedAccName.value = account.value.name;
+      selectedAccAdd.value = account.value.address;
+      selectedAccPublicKey.value = account.value.publicKey;
+      balance.value = Helper.toCurrencyFormat(account.value.balance, AppState.nativeToken.divisibility);
+      balanceNumber.value = account.value.balance;
     }
-
-    if(account != undefined){
-      selectedAccName.value = account.name;
-      selectedAccAdd.value = account.address;
-      selectedAccPublicKey.value = account.publicKey;
-      balance.value = Helper.toCurrencyFormat(account.balance, AppState.nativeToken.divisibility);
-      balanceNumber.value = account.balance;
-    }else{
-      router.push({ name: "ViewServicesAssets" });
-    }
-
+    const isMultiSigBool = ref(isMultiSig(selectedAccAdd.value));
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
 
-    const svgString = ref(toSvg(Helper.createAddress(selectedAccAdd.value).pretty(), 40, themeConfig.jdenticonConfig));
+    const svgString = ref(toSvg(props.address, 40, themeConfig.jdenticonConfig));
 
     const selectAsset = ref('');
     const assetDivisibility = ref(0);
@@ -221,8 +232,8 @@ export default {
     const assetMutable = ref(false);
     const selectIncreaseDecrease = ref('increase');
 
-    if(account){
-      let asset = account.assets.find( asset => asset.idHex === props.assetId);
+    if(account.value){
+      let asset = account.value.assets.find( asset => asset.idHex === props.assetId);
       if(asset != undefined){
         selectAsset.value = asset.idHex;
         assetTransferable.value = asset.transferable;
@@ -230,8 +241,6 @@ export default {
         assetDivisibility.value = asset.divisibility;
         assetSupply.value = Helper.convertToCurrency(asset.supply, asset.divisibility);
         assetSupplyExact.value = asset.supply, asset.divisibility;
-      }else{
-        router.push({ name: "ViewServicesAssets" });
       }
     }
 
@@ -241,21 +250,37 @@ export default {
     const fetchAccount = (publicKey) => {
       return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
     };
+    
+    const getMultiSigCosigner = computed(()=>{
+      if(!account.value){
+        return {hasCosigner:false,cosignerList: []}
+      }
+      if(networkState.currentNetworkProfileConfig){
+        let cosigners = multiSign.getCosignerInWallet(account.value?account.value.publicKey:'');
+        let list = [];
+        cosigners.cosignerList.forEach( publicKey => {
+          list.push({
+            publicKey,
+            name: fetchAccount(publicKey).name,
+            balance: fetchAccount(publicKey).balance,
+            address: fetchAccount(publicKey).address
+          });
+        });
+        cosigners.cosignerList = list;
+        
+        return{hasCosigner:cosigners.hasCosigner,cosignerList:cosigners.cosignerList}
+      }else{
+        return {hasCosigner:false,cosignerList: []}
+      }
+    })
 
-    let cosigners = multiSign.getCosignerInWallet(account.publicKey);
-    let list = [];
-    cosigners.cosignerList.forEach( publicKey => {
-      list.push({
-        publicKey,
-        name: fetchAccount(publicKey).name,
-        balance: fetchAccount(publicKey).balance,
-        address: fetchAccount(publicKey).address
-      });
-    });
-    cosigners.cosignerList = list;
-
-    const getMultiSigCosigner = ref(cosigners);
-
+    cosignerAddress.value = getMultiSigCosigner.value.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:''
+    
+    watch(getMultiSigCosigner,n=>{
+      if(n.cosignerList.length>0){
+        cosignerAddress.value = n.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:''
+      }
+    })
     const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
 
     const showNoBalance = computed(() => {
@@ -279,17 +304,24 @@ export default {
         return '';
       }
     });
-
+  try{
     transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
     transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
+  }catch{e=>console.log(e)}
+   
 
     const modifyAsset = () => {
+      let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
+      if(!verifyPassword){
+        err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
+        return
+      }
       if(cosigner.value){
         AssetsUtils.changeAssetSupplyMultiSig(cosigner.value, walletPassword.value, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value, selectedAccAdd.value);
       }else{
         AssetsUtils.changeAssetSupply(selectedAccAdd.value, walletPassword.value, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value);
       }
-      router.push({ name: "ViewServicesAssets", params: { address: Helper.createAddress(selectedAccAdd.value).pretty()}});
+      router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
     };
 
     watch(selectIncreaseDecrease, (n) => {

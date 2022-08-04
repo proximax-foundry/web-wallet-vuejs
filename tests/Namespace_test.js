@@ -8,9 +8,13 @@ module.exports = {
 
     "Namespace_test": function (browser) {
 
-        var create = browser.page.Createwallet()
-        var signin = browser.page.Signin()
-        var namespace = browser.page.Namespace()
+        var create = browser.page.Createwallet();
+        var signin = browser.page.Signin();
+        var namespace = browser.page.Namespace();
+
+        browser.fullscreenWindow(function(result) {
+            console.log(result);
+        });
 
         // create wallet
         create

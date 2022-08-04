@@ -29,7 +29,7 @@
               </div>
             </div>
             <div class="error" v-else>
-             {{$t('general.initiateBy')}} 
+             {{$t('general.noCosigner')}} 
             </div>
           </div>
         <div class="flex mt-3 gap-1">
@@ -60,7 +60,7 @@
           </button>
         </div>
         <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" :errorMessage="$t('general.insufficientBalance')" :decimal="6"  :disabled="disableSupply"/>
-        <TransferTextareaInput :placeholder="$t('general.message')" errorMessage="" v-model="messageText" :remainingChar="remainingChar" :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
+        <TransferTextareaInput :placeholder="$t('general.message')" :errorMessage="$t('general.limitExceed')" v-model="messageText" :remainingChar="remainingChar" :showError="showLimitErr"   :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
           <label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">
@@ -148,8 +148,9 @@ import SelectInputSender from "@/modules/transfer/components/SelectInputSender.v
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
 import { AppState } from '@/state/appState';
-import { PublicAccount } from 'nem-library';
+
 import { Address } from 'tsjs-xpx-chain-sdk';
+import { useRouter } from 'vue-router';
 export default { 
   name: "ViewTransferCreate",
   components: {
@@ -163,6 +164,7 @@ export default {
     MosaicInput
   },
   setup() {
+    const router = useRouter()
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const toggleContact = ref(false)
     const {t} = useI18n();
@@ -203,7 +205,7 @@ export default {
     const namespace = ref('');
     const networkType = AppState.networkType;
     const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
-    const walletName = walletState.currentLoggedInWallet.name
+    const walletName = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.name : ''
     const currencyName = computed(
       () => networkState.currentNetworkProfile.network.currency.name
     );
@@ -239,13 +241,14 @@ export default {
     const showAddressError = ref(true);
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
+    const showLimitErr = ref(false);
     
     
     const selectedAccName = ref(
-      walletState.currentLoggedInWallet.selectDefaultAccount().name
+      walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount().name : ''
     );
     const selectedAccAdd = ref(
-      walletState.currentLoggedInWallet.selectDefaultAccount().address
+      walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount().address : ''
     );
     const findAcc = (publicKey)=>{
       return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
@@ -446,9 +449,11 @@ export default {
           // add new contact
           togglaAddContact.value = true;
         } else {
+          router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
           clearInput();
         }
         forceSend.value = false;
+        
       }
     }
   };
@@ -521,7 +526,9 @@ export default {
         !showAddressError.value &&
         recipientInput.value.length > 0  &&
         (showAssetBalanceErr.value.every(value => value == false)) &&
-        !showBalanceErr.value
+        !showBalanceErr.value &&
+        !showLimitErr.value
+
       );
     });
 
@@ -535,15 +542,22 @@ export default {
     ) ||  walletState.currentLoggedInWallet.others.find(
       (element) => element.name == selectedAccName.value)
     if (account.assets.length > 0) {
-      account.assets.forEach((i, index) => {
-        if(i.namespaceNames!= AppState.nativeToken.fullNamespace){
+      let index = 0;
+      for(let asset of account.assets){
+
+        if(asset.rawAmount === 0){
+          continue;
+        }
+
+        if(!asset.namespaceNames.includes(AppState.nativeToken.fullNamespace)){
           mosaicOption.push({
-            val: i.idHex,
-            text: (i.namespaceNames.length>0?i.namespaceNames:i.idHex) + " >"+t('general.balance') +": " +Helper.amountFormatterSimple(i.amount,i.divisibility),
+            val: asset.idHex,
+            text: (asset.namespaceNames.length>0?asset.namespaceNames:asset.idHex) + " >"+t('general.balance') +": " +Helper.toCurrencyFormat(asset.amount,asset.divisibility),
             id: index + 1,
           });
+          index += 1;
         }
-      });
+      }
     }
     return mosaicOption;
   });
@@ -583,7 +597,7 @@ export default {
     );
     
     if (mosaic != undefined) {
-      return mosaic.getExactAmount();
+      return mosaic.amount;
     } else {
       return 0;
     }
@@ -715,6 +729,12 @@ export default {
       } else {
         remainingChar.value = TransactionUtils.getPlainMessageSize(messageText.value);
       }
+    if (messageText.value.length > messageLimit.value || remainingChar.value > messageLimit.value) {
+      showLimitErr.value = true;
+    }
+    else {
+      showLimitErr.value = false;
+      }
     }
   });
   const getMosaicBalanceById = (id) =>{
@@ -732,9 +752,21 @@ export default {
     if (n) {
       if (messageText.value) {
         remainingChar.value = TransactionUtils.getFakeEncryptedMessageSize(messageText.value);
+    if (messageText.value.length > messageLimit.value || remainingChar.value > messageLimit.value) {
+      showLimitErr.value = true;
+    }
+    else {
+      showLimitErr.value = false;
+       }
       }
     } else {
       remainingChar.value = TransactionUtils.getPlainMessageSize(messageText.value);
+          if (messageText.value.length > messageLimit.value || remainingChar.value > messageLimit.value) {
+      showLimitErr.value = true;
+    }
+    else {
+      showLimitErr.value = false;
+      }
     }
   });
 
@@ -847,6 +879,7 @@ export default {
       walletName,
       checkNamespace,
       currentNativeTokenName,
+      showLimitErr
     };
   },
 };

@@ -1,5 +1,5 @@
 <template>
-    <div class='border-2 shadow-lg filter'>
+    <div class='border-2 py-3 px-6'>
         <div class='flex'>
             <div v-html='svgString'></div>
             <div class='flex flex-col justify-center ml-4'>
@@ -7,12 +7,11 @@
                 <div class='flex '>
                     <div class = '  font-semibold text-md' v-if='showName'>{{ accountNameDisplay }}</div>
                     <input class='outline-none ml-4 font-semibold text-md'  v-model='accountName' v-if='!showName'/>
-                    <img src="@/modules/account/img/edit-icon.svg"  v-if='showName && !other_acc' @click='showName=!showName' :title="$t('account.editName')" class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
-                    <img src="@/modules/account/img/edit-icon.svg"  v-if='!showName'  @click="changeName()" :title="$t('account.confirmName')" class="w-4 h-4 text-black cursor-pointer mt-1 ml-1" >
+                    <changeNameModal :address="address" :isOther="other_acc==null?false:true"/>
                 </div>
-                <div class= 'flex'>
-                    <div id="address" :copyValue="prettyAddress" :copySubject="$t('general.address')" class = 'text-xs font-semibold mt-1'>{{prettyAddress}} </div>
-                    <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy('address')" class="ml-2 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+                <div class= 'flex gap-2'>
+                    <div id="address" :copyValue="prettyAddress" :title="prettyAddress" :copySubject="$t('general.address')" class = 'truncate md:text-clip w-44 md:w-full text-xs font-semibold mt-1'>{{prettyAddress}} </div>
+                    <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy('address')" class=" w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
                 </div>
                 <div class='flex gap-2'> 
                     <div  v-if='isDefault' class = ' px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm' :title="$t('general.defaultTitle')">
@@ -38,38 +37,70 @@ import { useI18n } from 'vue-i18n';
 import { Helper } from '@/util/typeHelper';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import changeNameModal from './ChangeNameModal.vue'
 export default {
 name:"AccountComponent",
 props:{
     address: String
 },
+components:{
+  changeNameModal
+},
 setup(p){
     const {t} = useI18n();
     const toast = useToast();
-    let acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address);
-    const other_acc = walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
-    if(!acc){
-      if(other_acc)
-      {
-        acc = other_acc;
+    const acc = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return null
       }
-    }
+      let acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == p.address) || walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
+      if(!acc){
+        return null
+      }
+      return acc
+    })
+   const other_acc = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
+     return walletState.currentLoggedInWallet.others.find((add) => add.address == p.address);
+   })
     let err = ref("")
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig'); 
-    const prettyAddress = Helper.createAddress(acc.address).pretty();
+    const prettyAddress = computed(()=>{
+      if(p.address){
+        try {
+           return Helper.createAddress(p.address).pretty()
+        } catch (error) {
+        }
+      }
+      return ''
+    })
     themeConfig.init();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const isDefault = (acc.default == true) ? true: false
+    const isDefault = computed(()=> {
+      if(!acc.value){
+        return false
+      }
+      return acc.value.default?true: false
+    })
     const isMultiSig = computed(() => {
-      let isMulti = acc.getDirectParentMultisig().length? true: false
+      if(!acc.value){
+        return false
+      }
+      let isMulti = acc.value.getDirectParentMultisig().length? true: false
       return isMulti;
-    });  
-    const accountName = ref(acc.name);
+    }); 
+    const accountName = ref('');
+    accountName.value = acc.value?acc.value.name: ''
     const accountNameDisplay = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return ''
+      }
       return walletState.currentLoggedInWallet.convertAddressToName(p.address,true)
     });
-    const svgString = ref(toSvg(acc.address, 100, themeConfig.jdenticonConfig));    
+    const svgString = ref(toSvg(p.address, 75, themeConfig.jdenticonConfig));    
     const showName = ref(true);
     const changeName = () => {
       if (accountName.value.trim()) {
@@ -104,7 +135,7 @@ setup(p){
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
 
-      toast.add({severity:'info', detail: copySubject +' '+ t('general.copied'), group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject +' '+ t('general.copied'), group: 'br-custom', life: 3000});
     };
     
     return{

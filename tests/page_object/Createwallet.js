@@ -10,7 +10,7 @@ const elements = {
     close: 'a.mt-4',
     continuelogin: 'a.ml-auto > div:nth-child(1)',
     next: 'a[href="#/create-wallet"]',
-    pknext: 'a[href="#/import-wallet"]',
+    pknext: '.mt-3',
     backupnext: 'a[href="#/backup-wallet"]',
     input_walletname: 'div:nth-child(1) > div > input',
     input_pkwalletname: 'form > div:nth-child(7) > div:nth-child(2) > div:nth-child(1) > input',
@@ -39,7 +39,7 @@ const elements = {
     error_invalidpk: 'form > div:nth-child(7) > div:nth-child(1) > div.error.error-password.text-left.my-2',
     error_pkduplicatename: 'form > div:nth-child(4) > div',
     signin_here: 'form > div:nth-child(8) > a',
-    signin_herepk: 'form > div:nth-child(10) > a',
+    signin_herepk: 'div.text-center:nth-child(10) > a:nth-child(1)',
     signin_herebackup: 'div.text-center:nth-child(9) > a:nth-child(1)',
     select_network: 'form > fieldset > div:nth-child(1)',
     testnet_1: 'form > fieldset > div:nth-child(2) > div:nth-child(1) > div:nth-child(3)',
@@ -56,21 +56,24 @@ const commands = {
 
     navigate_mainpage(){
         return this
-        .pause(5000)
+        .pause(2000)
         .waitForElementVisible("@back")
         .click("@back")
-        .pause(5000)
+        .pause(2000)
         .click("@back")
     },
 
     // create new wallet navigation
     navigate_createnewwallet(browser){
         return this
-        .pause(8000)
+        .pause(5000)
         .click("@createnew")
+        .pause(2000)
         .assert.urlEquals(browser + 'create', 'Create acc wallet is clicked, user is navigated to wallet selection type.')
         .click("@createnew_wallet")
+        .waitForElementVisible("@next")
         .click("@next")
+        .pause(4000)
         .assert.urlEquals(browser + 'create-wallet', 'When next is clicked, user is navigated to create new wallet screen.')
         .click("@signin_here")
         .assert.urlEquals(browser, 'When sign in here is clicked, user is navigated back to the main page for sign in.')
@@ -82,23 +85,43 @@ const commands = {
     // create pk wallet navigation
     navigate_createpkwallet(browser){
         return this
-        .pause(8000)
+        .pause(5000)
         .click("@createnew")
+        .pause(2000)
         .assert.urlEquals(browser + 'create', 'Create acc wallet is clicked, user is navigated to wallet selection type.')
         .click("@createnew_frompk")
+        .pause(2000)
         .click("@pknext")
+        .pause(4000)
         .assert.urlEquals(browser + 'import-wallet', 'When next is clicked, user is navigated to create pk wallet screen.')
-        .click("@signin_herepk")
+        .pause(2000)
+        .waitForElementVisible("@back")
+        .click("@back")
+        .pause(2000)
+        .click("@back")
         .assert.urlEquals(browser, 'When sign in here is clicked, user is navigated back to the main page for sign in.')
         .click("@createnew")
         .click("@createnew_frompk")
         .click("@pknext")
     },
 
+    navigate_createpkwallet2(browser){
+        return this
+        .pause(5000)
+        .click("@createnew")
+        .pause(2000)
+        .assert.urlEquals(browser + 'create', 'Create acc wallet is clicked, user is navigated to wallet selection type.')
+        .click("@createnew_frompk")
+        .pause(2000)
+        .click("@pknext")
+        .pause(2000)
+        .assert.urlEquals(browser + 'import-wallet', 'When next is clicked, user is navigated to create pk wallet screen.')
+    },
+
     // create backup wallet navigation
     navigate_createbackupwallet(browser){
         return this
-        .pause(8000)
+        .pause(5000)
         .click("@createnew")
         .assert.urlEquals(browser + 'create', 'Create acc wallet is clicked, user is navigated to wallet selection type.')
         .click("@createnew_backup")
@@ -181,7 +204,7 @@ const commands = {
         .setValue("@input_pkpassword", password)
         .setValue("@input_pkconfirmpassword", password)
         .click("@create")
-        .pause(1000)
+        .pause(3000)
         .click("@continuelogin")
         // .assert.visible('@createsuccessful_popup', 'Wallet is successfully created from private key when private key, wallet name, password and confirm password are valid')
         // .click("@close")
@@ -318,8 +341,6 @@ const commands = {
 module.exports = {
     elements: elements,
     commands: commands,
-    url: function () {
-        return '${this.api.launchUrl}'
-    }
+    url: 'https://proximax-foundry.github.io/web-wallet-vuejs/#/',
 
 }

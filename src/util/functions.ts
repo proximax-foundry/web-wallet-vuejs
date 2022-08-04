@@ -25,7 +25,7 @@ export const copyKeyFunc = (id:string, ):void => {
     titleType = 'Address';
   }
 
-  // toast.add({severity:'info', summary: titleType + ' copied', detail: copyText.value, group: 'br', life: 5000});
+  // toast.add({severity:'info', summary: titleType + ' copied', detail: copyText.value, group: 'br-custom', life: 5000});
 };
 
 

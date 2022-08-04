@@ -1,10 +1,9 @@
 name: test-wallet
 
 on:
- workflow_run:
-    workflows: ['deploy-stg']                     # runs after deploy-stg workflow
-    types:
-      - completed
+  push:
+    branches: 
+      - develop
 
 jobs:
   # This workflow contains a single job called "test"
@@ -50,3 +49,4 @@ jobs:
           name: test-results
           path: tests_output/*.xml
           reporter: java-junit
+          fail-on-error: 'failed'

@@ -51,7 +51,7 @@ function generateContact(selected :string,name: string) :{value: string,label:st
     }else{
       contact.push({
         value: element.publicKey,
-        label: element.name + ' - Owner account',
+        label: wallet.convertAddressToName(element.address,true)+ ' - Owner account',
       });
     }
       
@@ -230,6 +230,9 @@ function getMultisigAccountGraphInfo(address :string) :Promise<MultisigAccountGr
 function checkIsMultiSig(accountAddress :string) :boolean{
     /* let account = walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress)?walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress):  walletState.currentLoggedInWallet.others.find(element=>element.address ===accountAddress) */
     let wallet = walletState.currentLoggedInWallet
+    if(!wallet){
+      return false
+    }
     let account
       if (wallet.accounts.find(element => element.address ===accountAddress) === undefined && wallet.others.find(element => element.address ===accountAddress) === undefined){
         account = null
@@ -250,6 +253,9 @@ function checkIsMultiSig(accountAddress :string) :boolean{
 function checkHasMultiSig(accountAddress :string) :boolean{
   /* let account = walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress)?walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress):  walletState.currentLoggedInWallet.others.find(element=>element.address ===accountAddress) */
   let wallet = walletState.currentLoggedInWallet
+  if(!wallet){
+    return false
+  }
   let account
     if (wallet.accounts.find(element => element.address ===accountAddress) === undefined && wallet.others.find(element => element.address ===accountAddress) === undefined){
       account = null
@@ -271,6 +277,9 @@ function checkHasMultiSig(accountAddress :string) :boolean{
 
 
 function getCosignerInWallet(publicKey :string) :{hasCosigner:boolean,cosignerList:string[]}{
+  if(!walletState.currentLoggedInWallet){
+    return {hasCosigner:false,cosignerList: []}
+  }
   let accounts = walletState.currentLoggedInWallet.accounts.map(
     (acc)=>{ 
       return { 
@@ -291,6 +300,9 @@ function getCosignerInWallet(publicKey :string) :{hasCosigner:boolean,cosignerLi
 
     let totalAcc = accounts.concat(otherAccounts);
     let foundAcc = totalAcc.find(acc=>acc.publicKey==publicKey) 
+    if(!foundAcc){
+      return {hasCosigner:false,cosignerList: []}
+    }
     let allTopCosignerList = []
     totalAcc.forEach(acc=>{
       if (!acc.isMultisig && acc.multisigInfo.filter(acc=>acc.level==-1).length>0){

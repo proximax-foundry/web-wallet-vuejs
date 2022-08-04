@@ -20,7 +20,7 @@
           <PasswordInput class="mt-3" :placeholder="$t('wallet.enterPassword')" :errorMessage="$t('wallet.passwordErrMsg')" :showError="showPasswdError" icon="lock" v-model="passwd"  />
           <PasswordInput  class="mt-3" :placeholder="$t('wallet.confirmPassword')" :errorMessage="$t('wallet.confirmPasswordErrMsg')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd" />
         </div>
-        <button type="submit" class="mt-3 text-center  font-bold blue-btn py-3 block ml-auto mr-auto w-8/12 disabled:opacity-50" :disabled="disableCreate">{{$t('wallet.createWallet')}} {{$t('general.wallet')}}</button>
+        <button type="submit" class="mt-3 text-center  font-bold blue-btn py-3 block ml-auto mr-auto w-8/12 disabled:opacity-50" :disabled="disableCreate">{{$t('wallet.createWallet')}}</button>
         <div class ='mt-12 text-center text-xs mt-6 mb-1 '>{{$t('wallet.haveWallet')}}</div>
         <div class ="text-center  text-xs text-blue-primary font-semibold"><router-link :to="{ name: 'Home' }">{{$t('wallet.signInHere')}} ></router-link></div>
         <div class = 'h-20'></div>
@@ -147,7 +147,7 @@ export default defineComponent({
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-      toast.add({severity:'info', detail: copySubject +' '+ t('general.copied'), group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject +' '+ t('general.copied'), group: 'br-custom', life: 3000});
     };
     const disableCreate = computed(
       () => !(

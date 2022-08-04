@@ -21,6 +21,8 @@
         </div>
       <div v-if="currentPage==1">
           <div class="text-lg my-7 font-bold">{{$t('swap.checkSwapStatus')}}</div>
+          <div class="error error_box mb-5" v-if="!isInstallMetamask">{{$t('swap.noMetamask')}}</div>
+          <button @click="recheckMetamask()" v-if="!isInstallMetamask" class="text-xs blue-btn p-2 mb-3">Recheck MetaMask</button>
           <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">{{$t('swap.noOtherExtension')}} <b>{{$t('swap.metamask')}}</b>.<div class="my-2">{{$t('swap.referTo')}}<a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">{{$t('swap.walkthrough')}}<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a>{{$t('swap.forMoreDetails')}}</div>{{$t('swap.refreshMsg')}}</div>
           <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
           <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
@@ -188,8 +190,10 @@ export default {
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 
     const verifyMetaMaskPlugin = ref(true);
-    if(!window.ethereum.isMetaMask){
-      verifyMetaMaskPlugin.value = false;
+    if(window.ethereum){
+      if(!window.ethereum.isMetaMask){
+        verifyMetaMaskPlugin.value = false;
+      }
     }
 
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
@@ -213,6 +217,20 @@ export default {
       }
     })()
 
+    if(window.ethereum){
+      if(!window.ethereum.isMetaMask){
+        verifyMetaMaskPlugin.value = false;
+      }
+    }
+
+    const recheckMetamask = () =>{
+      if(window.ethereum){
+        initMetamask()
+        if(!window.ethereum.isMetaMask){
+          verifyMetaMaskPlugin.value = false;
+        }
+      }
+    }
     const siriusTxnHashPattern= "^[0-9A-Za-z]{64}$";
     const siriusTxnHash = ref('');
     const showTxnHashError = computed(()=> !siriusTxnHash.value.match(siriusTxnHashPattern) && siriusTxnHash.value.length > 0);
@@ -231,32 +249,38 @@ export default {
 
     let provider;
     let signer;
-    if (typeof window.ethereum !== 'undefined') {
-      provider = new ethers.providers.Web3Provider(window.ethereum);
-      signer = provider.getSigner();
-      isInstallMetamask.value = true;
-      isMetamaskConnected.value = ethereum.isConnected()?true:false;
-      ethereum
-        .request({ method: 'eth_accounts' })
-        .then(fetchMetaAccount)
-        .catch((err) => {
-          console.error(err);
-        });
-      ethereum
-        .request({ method: 'eth_chainId' })
-        .then((metaChainId) => {
+
+    const initMetamask = ()=>{
+       if (typeof window.ethereum !== 'undefined') {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        isInstallMetamask.value = true;
+        isMetamaskConnected.value = ethereum.isConnected()?true:false;
+        ethereum
+          .request({ method: 'eth_accounts' })
+          .then(fetchMetaAccount)
+          .catch((err) => {
+            console.error(err);
+          });
+        ethereum
+          .request({ method: 'eth_chainId' })
+          .then((metaChainId) => {
+            verifyChain(metaChainId);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+        ethereum.on('accountsChanged', handleAccountsChanged);
+        ethereum.on('chainChanged', (metaChainId) => {
           verifyChain(metaChainId);
-        })
-        .catch((err) => {
-          console.error(err);
         });
-      ethereum.on('accountsChanged', handleAccountsChanged);
-      ethereum.on('chainChanged', (metaChainId) => {
-        verifyChain(metaChainId);
-      });
-    }else{
-      console.log('MetaMask not installed')
+      }else{
+        console.log('MetaMask not installed')
+      }
     }
+
+    initMetamask()
+   
     function fetchMetaAccount(accounts) {
       if (accounts.length === 0) {
         // MetaMask is locked or the user has not connected any accounts
@@ -322,7 +346,7 @@ export default {
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
-      toast.add({severity:'info', summary: copySubject + ' '+t('general.copied'), detail: stringToCopy , group: 'br', life: 3000});
+      toast.add({severity:'info', summary: copySubject + ' '+t('general.copied'), detail: stringToCopy , group: 'br-custom', life: 3000});
     };
 
     const currentPage = ref(1);
@@ -441,6 +465,7 @@ export default {
     });
 
     return {
+      recheckMetamask,
       err,
       isInstallMetamask,
       connectMetamask,

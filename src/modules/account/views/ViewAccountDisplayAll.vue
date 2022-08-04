@@ -1,16 +1,10 @@
 <template>
   <div>
-    <div class='mt-4 w-11/12 ml-auto mr-auto border-b-2 '>
-      <div class = 'flex text-xxs md:text-xs font-semibold '>
-        <div class= 'w-18 text-center border-b-2 pb-4 lg:pb-3 border-yellow-500'>{{$t('general.overview')}}</div>
-        <router-link :to="{ name: 'ViewNormalAccount'}"  class=" w-28 text-center "  style="width:6.5rem">{{$t('account.myAcc')}}</router-link>
-        <router-link :to="{ name: 'ViewMultisigAccount'}" class="text-center " style="width:9rem">{{$t('account.multisigAcc')}}</router-link>
-        <router-link :to="{ name: 'ViewOtherAccount'}" class="text-center " style="width:8rem">{{$t('account.otherAcc')}}</router-link>
-      </div>
-    </div>
-    <div class='my-4 w-11/12 ml-auto mr-auto '>
+    <div class='my-4 w-11/12 ml-auto mr-auto flex flex-col sm:flex-row justify-between'>
+      <LabelComponent />
+      <div class="absolute invisible 2xl:visible text-gray-500 mt-1 explicitLeft" >Labels</div>
       <router-link :to="{name:'ViewAccountCreateSelectType'}" >
-          <div class="float-right mb-4 text-center w-44 text-white bg-blue-primary rounded-md font-semibold text-xs p-2">+ {{$t('general.createNewAcc')}}</div>
+        <div class="mt-3 sm:mt-0 text-center w-44 text-white bg-blue-primary rounded-md font-semibold text-xs p-2">+ {{$t('general.createNewAcc')}}</div>
       </router-link>
     </div>
     <div class='mt-2 py-3 '>
@@ -18,21 +12,25 @@
         <AccountTile :key="index" :account="item" v-for="(item, index) in accounts" />
       </div>
     </div>
+    <div class="mb-36"/>
   </div>
 </template>
 <script>
-import { computed } from "vue";
+import { ref,computed, getCurrentInstance } from "vue";
 import AccountTile from '@/modules/account/components/AccountTile.vue';
 import { walletState } from '@/state/walletState';
 import { AppState } from '@/state/appState';
-
+import LabelComponent from'@/modules/account/components/LabelComponent.vue'
 export default {
   name:"ViewAccountDisplayAll",
   components: {
     AccountTile,
+    LabelComponent
   },
 
-  setup() {
+  setup() { 
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const totalAcc = computed(()=>{
 
       if(!walletState.currentLoggedInWallet){
@@ -94,10 +92,10 @@ export default {
       return found
     }
     
-
-    
     const accountStructure = computed(()=>{
-     
+      if(!walletState.currentLoggedInWallet){
+        return []
+      }
       let accountStructure = {normalAcc:[],multisig:[]}
       
       totalAcc.value.forEach(account=>{
@@ -159,16 +157,47 @@ export default {
       return accountStructure
     },{deep:true})
 
-    console.log(accountStructure.value)
-
+    const labelNames = ref([])
     const accounts = computed(
       () => {
         if(walletState.currentLoggedInWallet){
           if(walletState.currentLoggedInWallet.others){
             const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
-            return concatOther;
+            let filteredAcc = []
+            labelNames.value.forEach(name=>{
+              let findLabel = walletState.currentLoggedInWallet.labels.find(label=>label.name==name)
+              if(findLabel){
+                findLabel.addresses.forEach(address=>{
+                  let findAcc = concatOther.find(acc=>acc.address==address)
+                  filteredAcc.push(findAcc)
+                })
+              }
+            })
+            filteredAcc =  Array.from(new Set(filteredAcc))
+            if(labelNames.value.length){
+              return filteredAcc
+            }else{
+              return concatOther
+            }
           } else{
-            return walletState.currentLoggedInWallet.accounts;
+            const accounts =  walletState.currentLoggedInWallet.accounts;
+            let filteredAcc = []
+            labelNames.value.forEach(name=>{
+              let findLabel = walletState.currentLoggedInWallet.labels.find(label=>label.name==name)
+              if(findLabel){
+                findLabel.addresses.forEach(address=>{
+                  let findAcc = accounts.find(acc=>acc.address==address)
+                  filteredAcc.push(findAcc)
+                })
+              }
+              
+            })
+            filteredAcc =  Array.from(new Set(filteredAcc))
+            if(labelNames.value.length){
+              return filteredAcc
+            }else{
+              return accounts
+            }
           }
         } else{
           return null;
@@ -176,9 +205,21 @@ export default {
       }
     );
 
+    emitter.on('filterByLabel',e=>{
+      labelNames.value = e
+    })
+    
+
     return {
       accounts,
     };
   },
 }
 </script>
+
+<style scoped>
+.explicitLeft{
+  @media (min-width: 1024px) { margin-left: 40rem}
+  
+}
+</style>

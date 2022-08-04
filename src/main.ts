@@ -8,6 +8,7 @@ import { VuePassword } from 'vue-password';
 import mitt from 'mitt';
 import PrimeVue from 'primevue/config';
 import "primeicons/primeicons.css";
+import { appSetting } from '@/config/appSetting';
 // import "primevue/resources/primevue.min.css";
 // import "primevue/resources/themes/saga-blue/theme.css";
 import ConfirmationService from 'primevue/confirmationservice';
@@ -18,13 +19,14 @@ import { NetworkStateUtils } from './state/utils/networkStateUtils';
 import { ChainUtils } from './util/chainUtils';
 import { ChainAPICall } from './models/REST/chainAPICall';
 import { AppStateUtils } from './state/utils/appStateUtils';
-import {WalletMigration} from './models/walletMigration';
+import { WalletMigration } from './models/walletMigration';
 import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainSwapConfig, ThemeStyleConfig, ChainProfileName } from "./models/stores/"
 
 // Import Font Awesome Icons
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { fas,faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
-  faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore, faFileExport, faFileImport, faArrowRight, faArrowCircleRight,faAngleRight, faAt, faEquals, faNotEqual, faLink, faUnlink,
+import {
+  fas, faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
+  faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore, faFileExport, faFileImport, faArrowRight, faArrowCircleRight, faAngleRight, faAt, faEquals, faNotEqual, faLink, faUnlink,
   faExternalLinkAlt, faHashtag
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
@@ -34,14 +36,17 @@ import i18n from './i18n';
 import VWave from 'v-wave';
 import VueBlocksTree from 'vue3-blocks-tree';
 import 'vue3-blocks-tree/dist/vue3-blocks-tree.css';
-
+import { RequestOptions } from "tsjs-xpx-chain-sdk";
+import 'primevue/resources/themes/saga-blue/theme.css'
+import 'primevue/resources/primevue.min.css'
+import 'primeicons/primeicons.css' 
 library.add(
-  fas,faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
+  fas, faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
   faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore, faFileExport, faFileImport, faArrowRight, faArrowCircleRight, faAngleRight, faAt, faEquals, faNotEqual, faLink, faUnlink, faExternalLinkAlt, faHashtag
 );
 const app = createApp(App);
 const emitter = mitt();
-let defaultoptions = {treeName:'blocks-tree'}
+let defaultoptions = { treeName: 'blocks-tree' }
 app.config.globalProperties.emitter = emitter;
 app.use(router)
 app.use(PrimeVue);
@@ -50,7 +55,7 @@ app.use(ToastService);
 app.use(i18n);
 app.use(VWave);
 app.use(vueDebounce);
-app.use(VueBlocksTree,defaultoptions)
+app.use(VueBlocksTree, defaultoptions)
 app.mount('#app');
 // Use Components
 app.component('ConfirmDialog', ConfirmDialog);
@@ -62,15 +67,23 @@ AppStateUtils.addNewReadyStates('chainProfile');
 AppStateUtils.addNewReadyStates('theme');
 AppStateUtils.addNewReadyStates('checkSession');
 AppStateUtils.addNewReadyStates('walletMigration');
+AppStateUtils.addNewReadyStates('loadLoadedData');
 
-const loadThemeConfig = async() => {
+const loadThemeConfig = async () => {
   try {
-    let config = await fetch('./themeConfig.json', {
-      headers: {
-        'Cache-Control': 'no-store',
-        'Pragma' : 'no-cache'
-      }
-    }).then((res) => res.json()).then((configInfo) => { return configInfo });
+    let config: any;
+
+    if (location.protocol === "file:") {
+      config = appSetting.theme;
+    }
+    else {
+      config = await fetch('./themeConfig.json', {
+        headers: {
+          'Cache-Control': 'no-store',
+          'Pragma': 'no-cache'
+        }
+      }).then((res) => res.json()).then((configInfo) => { return configInfo });
+    }
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.updateConfig(config);
     themeConfig.saveToLocalStorage();
@@ -80,16 +93,24 @@ const loadThemeConfig = async() => {
     console.error(e);
   }
 }
-loadThemeConfig();
 
 const chainProfileIntegration = async () => {
   try {
-      let networksInfo = await fetch('./chainProfile.json', {
-      headers: {
-        'Cache-Control': 'no-store',
-        'Pragma' : 'no-cache'
-      }
-    }).then((res) => res.json()).then((networksInfo) => { return networksInfo });
+    let networksInfo: ChainProfile[];
+    let isLocalAccess = false;
+
+    if (location.protocol === "file:") {
+      networksInfo = appSetting.chainProfile;
+      isLocalAccess = true;
+    }
+    else {
+      networksInfo = await fetch('./chainProfile.json', {
+        headers: {
+          'Cache-Control': 'no-store',
+          'Pragma': 'no-cache'
+        }
+      }).then((res) => res.json()).then((networksInfo) => { return networksInfo });
+    }
 
     const chainProfilesData = networksInfo;
     const chainProfileNames = Object.keys(networksInfo);
@@ -98,7 +119,7 @@ const chainProfileIntegration = async () => {
 
     const chainNameArray: ChainProfileName[] = [];
 
-    for(let i = 0; i < chainProfileNames.length; ++i){
+    for (let i = 0; i < chainProfileNames.length; ++i) {
       chainNameArray.push({
         name: chainProfileNames[i],
         isPreset: true
@@ -106,95 +127,85 @@ const chainProfileIntegration = async () => {
     }
 
     try {
-      let customChainProfile = chainProfileNamesStore.names.filter(data =>{
-        if (typeof data === 'string' || data instanceof String){
+      let customChainProfile = chainProfileNamesStore.names.filter(data => {
+        if (typeof data === 'string' || data instanceof String) {
           return false;
         }
-        else{
+        else {
           return !data.isPreset;
         }
       });
 
       chainNameArray.concat(customChainProfile);
     } catch (error) {
-      
+
     }
 
-    // let namesUpdate = 0;
-
-    // if(chainProfileNamesStore.names.length !== 0){
-      
-    //   switch (chainProfileNames.length) {
-    //     case 1:
-    //       namesUpdate = chainProfileNamesStore.replaceFirstNames(chainProfileNames);
-    //       break;
-    //     case 2:
-    //       namesUpdate = chainProfileNamesStore.replaceFirst2Names(chainProfileNames);
-    //       break;
-    //     case 3:
-    //       namesUpdate = chainProfileNamesStore.replaceFirst3Names(chainProfileNames);
-    //       break;
-    //     default:
-    //       break;
-    //   }
-    // }
-    // else{
-    //   chainProfileNamesStore.names = chainProfileNames;
-    //   namesUpdate = 1;
-    // }
-
     chainProfileNamesStore.names = chainNameArray;
-    
+
     chainProfileNamesStore.saveToLocalStorage();
 
-    for(const chainProfileName of chainProfileNames){
+    for (const chainProfileName of chainProfileNames) {
       const chainProfileStore = new ChainProfile(chainProfileName);
 
       chainProfileStore.init();
       const chainProfileData = chainProfilesData[chainProfileName];
 
-      // if(chainProfileData['swapData']){
-      //   let chainSwapConfig = new ChainSwapConfig(chainProfileName);
-      //   chainSwapConfig.updateConfig(chainProfileData['swapData']);
-
-      //   chainSwapConfig.saveToLocalStorage();
-      // }
-
-      if(chainProfileStore.getVersion() !== chainProfileData['version']){
+      if (chainProfileStore.getVersion() !== chainProfileData['version']) {
 
         chainProfileStore.version = chainProfileData['version'];
         chainProfileStore.apiNodes = chainProfileData['apiNodes'];
+        chainProfileStore.secured = chainProfileData['secured'];
         chainProfileStore.chainExplorer = chainProfileData['chainExplorer'];
         chainProfileStore.generationHash = chainProfileData['generationHash'];
         chainProfileStore.httpPort = chainProfileData['httpPort'];
         chainProfileStore.network = chainProfileData['network'];
 
-        chainProfileStore.saveToLocalStorage();
-
-        const endpoint = ChainUtils.buildAPIEndpoint(chainProfileStore.apiNodes[0], chainProfileStore.httpPort);
-
-        const chainAPICall = new ChainAPICall(endpoint);
-
-        try {
-          const chainHeight = await chainAPICall.chainAPI.getBlockchainHeight();
-
-          const config = await ChainUtils.getChainConfig(chainHeight, chainAPICall.chainConfigAPI.chainConfigHttp)
-
-          const chainProfileConfigStore = new ChainProfileConfig(chainProfileName);
-
-          chainProfileConfigStore.init()
-  
-          if(typeof config !== "string"){
-            config.chainHeight = chainHeight;
-            chainProfileConfigStore.updateConfig(config);
-            chainProfileConfigStore.saveToLocalStorage();
+        if(isLocalAccess){
+          if(chainProfileData['apikey']){
+            chainProfileStore.apikey = chainProfileData['apikey'];
           }
           else{
-            console.error(config);
+            chainProfileStore.apikey = "";
           }
-          
-        } catch (error) {
-          console.log(error);
+        }
+
+        chainProfileStore.saveToLocalStorage();
+
+        if(!chainProfileStore.secured || (chainProfileStore.apikey && chainProfileStore.secured)){
+          const endpoint = ChainUtils.buildAPIEndpoint(chainProfileStore.apiNodes[0], chainProfileStore.httpPort);
+
+          const chainAPICall = new ChainAPICall(endpoint);
+
+          try {
+            let requestOptions: RequestOptions | undefined = undefined; 
+            
+            if(chainProfileStore.apikey){
+              requestOptions = new RequestOptions({apikey: chainProfileStore.apikey});
+              chainAPICall.chainAPI.requestOptions = requestOptions;
+              chainAPICall.chainConfigAPI.requestOptions = requestOptions;
+            }
+            
+            const chainHeight = await chainAPICall.chainAPI.getBlockchainHeight();
+  
+            const config = await ChainUtils.getChainConfig(chainHeight, chainAPICall.chainConfigAPI)
+  
+            const chainProfileConfigStore = new ChainProfileConfig(chainProfileName);
+  
+            chainProfileConfigStore.init()
+  
+            if (typeof config !== "string") {
+              config.chainHeight = chainHeight;
+              chainProfileConfigStore.updateConfig(config);
+              chainProfileConfigStore.saveToLocalStorage();
+            }
+            else {
+              console.error(config);
+            }
+  
+          } catch (error) {
+            console.log(error);
+          }
         }
       }
     }
@@ -208,35 +219,44 @@ const chainProfileIntegration = async () => {
   AppStateUtils.setStateReady('chainProfile');
 }
 
-chainProfileIntegration();
+
 
 const chainSwapIntegration = async () => {
   try {
-    let swapInfo = await fetch('./chainSwapProfile.json', {
-      headers: {
-        'Cache-Control': 'no-store',
-        'Pragma' : 'no-cache'
-      }
-    }).then((res) => res.json()).then((swapInfo) => { return swapInfo });
+    let swapInfo: ChainSwapConfig[];
+
+    if (location.protocol === "file:") {
+      swapInfo = appSetting.chainSwap;
+    }
+    else {
+      swapInfo = await fetch('./chainSwapProfile.json', {
+        headers: {
+          'Cache-Control': 'no-store',
+          'Pragma': 'no-cache'
+        }
+      }).then((res) => res.json()).then((swapInfo) => { return swapInfo });
+    }
 
     const chainSwapProfilesData = swapInfo;
     const chainSwapProfileNames = Object.keys(swapInfo);
 
-    for(const chainSwapProfileName of chainSwapProfileNames){
+    for (const chainSwapProfileName of chainSwapProfileNames) {
       const chainSwapProfileData = chainSwapProfilesData[chainSwapProfileName];
 
-      if(chainSwapProfileData['swapData']){
+      if (chainSwapProfileData['swapData']) {
         let chainSwapConfig = new ChainSwapConfig(chainSwapProfileName);
         chainSwapConfig.updateConfig(chainSwapProfileData['swapData']);
 
         chainSwapConfig.saveToLocalStorage();
       }
     }
-  }catch (e) {
+  } catch (e) {
     console.error(e);
   }
 };
 
+loadThemeConfig();
+chainProfileIntegration();
 chainSwapIntegration();
 
 const runWalletMigration = async () => {
@@ -251,15 +271,24 @@ const runWalletMigration = async () => {
 runWalletMigration();
 
 
+
+
 // check from session when page refreshed
 if (!walletState.currentLoggedInWallet) {
+  // reload loaded data
+  WalletStateUtils.checkSessionLoadedData();
+  AppStateUtils.setStateReady('loadLoadedData');
+
   // check sessionStorage
-  if(!WalletStateUtils.checkFromSession()){
+  if (!WalletStateUtils.checkFromSession()) {
+    NetworkStateUtils.checkSession();
     AppStateUtils.setStateReady('checkSession');
-    router.push({ name: "Home"});
+
+    router.push({ name: "Home" });
   }
 
   AppStateUtils.setStateReady('checkSession');
+  AppStateUtils.setStateReady('loadLoadedData');
 }
 
 // NetworkStateUtils.checkDefaultNetwork();

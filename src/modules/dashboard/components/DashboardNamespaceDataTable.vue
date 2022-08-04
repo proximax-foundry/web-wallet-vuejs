@@ -34,29 +34,29 @@
           </div>
         </template>
       </Column>
-      <Column field="name" :header="$t('general.name')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 160px'?'width: 160px'`" v-if="wideScreen">
+      <Column field="name" :header="$t('general.name')"  style="`wideScreen?'min-width: 160px'?'width: 160px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-xs">{{data.name}}</span>
         </template>
       </Column>
-      <Column field="namespaceId" :header="$t('general.namespaceId')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="namespaceId" :header="$t('general.namespaceId')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-xs uppercase">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedId" :header="$t('general.linkedAssetAddress')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
+      <Column field="linkedId" :header="$t('general.linkedAssetAddress')"  style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase text-xs" v-if="data.linkedId">{{ data.linkedId }}</span>
           <span class="text-xs" v-else>No linked asset</span>
         </template>
       </Column>
-      <Column field="linkType" :header="$t('general.expires')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 150px'?'width: 150px'`" v-if="wideScreen">
+      <Column field="linkType" :header="$t('general.expires')"  style="`wideScreen?'min-width: 150px'?'width: 150px'`" v-if="wideScreen">
         <template #body="{data}">
           <div class="data.expiryRelative text-xs" v-if="data.expiryRelative">{{ data.expiryRelative }}</div>
           <div class="text-gray-300 text-xs" v-else>{{$t('dashboard.fetching')}}</div>
         </template>
       </Column>
-      <Column field="Active" :header="$t('dashboard.expirationEstimate')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 210px'?'width: 210px'`" v-if="wideScreen">
+      <Column field="Active" :header="$t('dashboard.expirationEstimate')"  style="`wideScreen?'min-width: 210px'?'width: 210px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-xs" :class="data.expiring=='expired'?'text-red-500':(data.expiring=='expiring'?'text-yellow-500':'text-green-500')">{{ data.expiry }}</span>
         </template>
@@ -95,6 +95,7 @@ import { networkState } from "@/state/networkState";
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 import { WalletAccount } from '@/models/walletAccount';
 import { useI18n } from 'vue-i18n';
+import { AppState } from '@/state/appState';
 
 export default{
   components: { DataTable, Column },
@@ -137,89 +138,7 @@ export default{
 
     onMounted(() => {
       window.addEventListener("resize", screenResizeHandler);
-      accountNamespaces.value = generateDatatable(namespaces.value, currentBlockHeight.value, account.value);
     });
-
-    const generateDatatable = (namespaces, currentBlockHeight, account) => {
-      let formattedNamespaces = [];
-
-      if(namespaces.length > 0){
-
-        for(let i=0; i < namespaces.length; ++i){
-          let linkName = "";
-
-          switch (namespaces[i].linkType) {
-            case 1:
-              linkName = "Asset";
-              break;
-            case 2:
-              linkName = "Address";
-              break;
-            default:
-              break;
-          }
-
-          let blockDifference = namespaces[i].endHeight - currentBlockHeight;
-          let blockTargetTimeByDay = Math.floor((60 * 60 * 24) / blockTargetTime);
-          let blockTargetTimeByHour = Math.floor((60 * 60) / blockTargetTime);
-          let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
-          let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
-          let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
-
-          let expiryStatus;
-          if(blockDifference > 0){
-            if((blockDifference < (blockTargetTimeByDay * 14))){
-              expiryStatus = 'expiring';
-            }else{
-              expiryStatus = 'valid';
-            }
-          }else{
-            expiryStatus = 'expired';
-          }
-
-          let expiryDate;
-          if(expiryDay > 0 || expiryHour > 0 ||  expiryMin > 0){
-            expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
-          }else{
-            expiryDate = '-';
-            expiryStatus = 'valid';
-          }
-
-          let expiryRelativeTimeEstimate;
-          if(currentBlockHeight){
-            if(blockDifference > 0){
-              expiryRelativeTimeEstimate = relativeTime(expiryDay, expiryHour, expiryMin);
-            }else{
-              if(expiryDate != '-'){
-                expiryRelativeTimeEstimate = t('general.expired');
-              }else{
-                expiryRelativeTimeEstimate = '-';
-              }
-            }
-          }else{
-            expiryRelativeTimeEstimate = '';
-          }
-
-          let data = {
-            i: i,
-            idHex: namespaces[i].idHex,
-            name: namespaces[i].name,
-            linkType: linkName,
-            linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
-            endHeight: namespaces[i].endHeight,
-            expiring: expiryStatus,
-            expiryRelative: expiryRelativeTimeEstimate,
-            expiry: currentBlockHeight?expiryDate:'',
-            explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].idHex,
-            address: Helper.createAddress(account.address).pretty()
-          };
-          formattedNamespaces.push(data);
-          isMenuShow.value[i] = false;
-        }
-      }
-      return formattedNamespaces;
-    }
-
     const calculateExpiryDate = (day, hour, min) => {
       let current = new Date();
       current.setTime(current.getTime() + (day * 24 * 60 * 60 * 1000 ));
@@ -271,6 +190,104 @@ export default{
         return timeDiff.mins + ' ' + t('general.minute',timeDiff.mins);
       }
     }
+    
+    const generateDatatable = (namespaces, currentBlockHeight, account) => {
+      let formattedNamespaces = [];
+
+      if(namespaces.length > 0){
+
+        for(let i=0; i < namespaces.length; ++i){
+          let linkName = "";
+
+          switch (namespaces[i].linkType) {
+            case 1:
+              linkName = "Asset";
+              break;
+            case 2:
+              linkName = "Address";
+              break;
+            default:
+              break;
+          }
+
+          let blockDifference = namespaces[i].endHeight - currentBlockHeight;
+          let blockTargetTimeByDay = Math.floor((60 * 60 * 24) / blockTargetTime);
+          let blockTargetTimeByHour = Math.floor((60 * 60) / blockTargetTime);
+          let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
+          let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
+          let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
+
+          let expiryStatus;
+          if(blockDifference > 0){
+            if((blockDifference < (blockTargetTimeByDay * 14))){
+              expiryStatus = 'expiring';
+            }else{
+              expiryStatus = 'valid';
+            }
+          }else{
+            expiryStatus = 'expired';
+          }
+
+          let expiryDate;
+          if(expiryDay > 0 || expiryHour > 0 ||  expiryMin > 0){
+            expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
+          }else{
+            expiryDate = '-';
+            // expiryStatus = 'valid';
+          }
+
+          let expiryRelativeTimeEstimate;
+          if(currentBlockHeight){
+            if(blockDifference > 0){
+              expiryRelativeTimeEstimate = relativeTime(expiryDay, expiryHour, expiryMin);
+            }else{
+              if(expiryDate != '-'){
+                expiryRelativeTimeEstimate = t('general.expired');
+              }else{
+                expiryRelativeTimeEstimate = '-';
+              }
+            }
+          }else{
+            expiryRelativeTimeEstimate = '';
+          }
+
+          let data = {
+            i: i,
+            idHex: namespaces[i].idHex,
+            name: namespaces[i].name,
+            linkType: linkName,
+            linkedId: linkName === "Address" ? Helper.createAddress(namespaces[i].linkedId).pretty() : namespaces[i].linkedId,
+            endHeight: namespaces[i].endHeight,
+            expiring: expiryStatus,
+            expiryRelative: expiryRelativeTimeEstimate,
+            expiry: currentBlockHeight?expiryDate:'',
+            explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].idHex,
+            address: Helper.createAddress(account.address).pretty()
+          };
+          formattedNamespaces.push(data);
+          isMenuShow.value[i] = false;
+        }
+      }
+      return formattedNamespaces;
+    }
+
+    const init =() => {
+      accountNamespaces.value = generateDatatable(namespaces.value, currentBlockHeight.value, account.value);
+    }
+
+
+    if(AppState.isReady){ 
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
+          init();
+          readyWatcher();
+        }
+      });
+      }
+    
 
     const showMenu = (i) => {
       currentMenu.value = i;

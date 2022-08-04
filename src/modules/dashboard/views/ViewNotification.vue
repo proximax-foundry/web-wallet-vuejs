@@ -5,13 +5,13 @@
         <div class="flex justify-between text-sm mb-5">
           <div><span class="text-gray-700">{{$t('general.notification',2)}}</span></div>
         </div>
-        <div v-if="notifications.length > 0">
+        <div v-if="notifications!=null && notifications.length > 0">
           <div v-for="notification, index in notifications" :key="index">
             <div v-if="notification.type=='Partial'">
-              <router-link :to="{ name : 'ViewTransactionStatus', params: {transactionType: 'partial' } }" @click="updateDefaultAccount(notification.address)" class="flex items-center border border-gray-100 w-full p-5 mb-3 text-tsm hover:bg-blue-50 transition-all duration-300">
+              <router-link :to="{ name : 'ViewAccountPendingTransactions', params: {address: notification.address } }" @click="updateDefaultAccount(notification.address)" class="flex items-center border border-gray-100 w-full p-5 mb-3 text-tsm hover:bg-blue-50 transition-all duration-300">
                 <div v-html="toSvg(notification.address, 40, themeStyleConfig)" class="mr-2"></div>
                 <div class="text-gray-600 text-xs">
-                  <div class="mb-1 text-sm text-gray-700 font-bold">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(notification.address, true) }}</div>
+                  <div class="mb-1 text-sm text-gray-700 font-bold">{{ walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.convertAddressToNamePretty(notification.address, true):'' }}</div>
                   {{ notification.label }} {{$t('notification.pendingSignature',{time:NotificationUtils.relativeTime(notification.timestamp)})}}
                 </div>
               </router-link>
@@ -21,7 +21,7 @@
                 <div v-html="toSvg(notification.address, 40, themeStyleConfig)" class="mr-2"></div>
                 <div class="text-gray-600 text-xs">
                   <div class="mb-1 text-sm text-gray-700 font-bold">{{ walletState.currentLoggedInWallet.convertAddressToNamePretty(notification.address, true) }}</div>
-                  {{$t('general.namespace')}} <b>{{ notification.label }}</b> {{$t('notification.isExpiring',{time:NotificationUtils.relativeTime(notification.timestamp)})}} 
+                  {{$t('general.namespace')}} <b>{{ notification.label }}</b> <span v-if="currentTimestamp() > notification.timestamp">has expired</span><span v-else>{{$t('notification.isExpiring',{time:NotificationUtils.relativeTime(notification.timestamp)})}}</span>
                 </div>
               </router-link>
             </div>
@@ -72,12 +72,20 @@ export default {
     }
 
     const updateDefaultAccount = (address) => {
+      if(!walletState.currentLoggedInWallet){
+        return
+      }
       walletState.currentLoggedInWallet.setDefaultAccountByAddress(address);
-      const name = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
+      var name = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
       if(!name){
-        name = walletState.currentLoggedInWallet.others.find(account => account.address == address);
+        name = ''
       }
       emitter.emit("DEFAULT_ACCOUNT_SWITCHED", name);
+    }
+
+    const currentTimestamp = () => {
+      let current = new Date();
+      return current.getTime();
     }
 
     const init = async() =>{
@@ -104,6 +112,7 @@ export default {
       themeStyleConfig,
       toSvg,
       walletState,
+      currentTimestamp,
     }
   },
 

@@ -7,6 +7,10 @@ module.exports = {
         var create = browser.page.Createwallet();
         var signin = browser.page.Signin();
 
+        browser.fullscreenWindow(function(result) {
+            console.log(result);
+        });
+
         // to create wallet
         create
             .navigate()

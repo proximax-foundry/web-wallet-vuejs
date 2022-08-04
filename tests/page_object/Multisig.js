@@ -1,7 +1,7 @@
 const elements = {
 
     account_ellipsis: 'img.h-6:nth-child(1)',
-    multisig_selection: 'a[href="#/multisig-settings/Primary"]',
+    multisig_selection: 'a.w-18:nth-child(5)',
     managecosign_button: '.blue-btn', 
     addcosign_button: 'button.pl-6',
     input_publickey: 'div.flex.flex-col.gap-2 > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > input',
@@ -28,10 +28,22 @@ const commands = {
     navigation_multisig(browser){
         return this
         .click("@account_ellipsis")
+        .waitForElementVisible("@multisig_selection")
         .click("@multisig_selection")
-        .assert.urlEquals(browser + 'multisig-settings/Primary', 'User is navigated to multisig page')
+        .assert.urlEquals(browser + 'multisig-settings/VBTSTBLWIZGSDZTFTAPTYYREMYKJCAKMJY6IM4Z5', 'User is navigated to multisig page')
         .click("@managecosign_button")
-        .assert.urlEquals(browser + 'convert-account-multisign/Primary', 'User is navigated to convert account to multisig page')
+        .assert.urlEquals(browser + 'convert-account-multisign/VBTSTBLWIZGSDZTFTAPTYYREMYKJCAKMJY6IM4Z5', 'User is navigated to convert account to multisig page')
+    
+    },
+
+    navigation_multisig_2(browser){
+        return this
+        .click("@account_ellipsis")
+        .waitForElementVisible("@multisig_selection")
+        .click("@multisig_selection")
+        .assert.urlEquals(browser + 'multisig-settings/VDDZ5HBHL5AALCM3MVHYBCBYTBUDL7OSO4RBHRGZ', 'User is navigated to multisig page')
+        .click("@managecosign_button")
+        .assert.urlEquals(browser + 'convert-account-multisign/VDDZ5HBHL5AALCM3MVHYBCBYTBUDL7OSO4RBHRGZ', 'User is navigated to convert account to multisig page')
     
     },
 
@@ -67,7 +79,7 @@ const commands = {
             this.assert.equal(result.value, true, "If password has no input, an error is shown")
         })
         .click("@cancel_button")
-        .assert.urlEquals(browser + 'multisig-settings/Primary', 'User is navigated back to multisig page')
+        .assert.urlEquals(browser + 'multisig-settings/VBTSTBLWIZGSDZTFTAPTYYREMYKJCAKMJY6IM4Z5', 'User is navigated back to multisig page')
         .pause(10000)
         .end()
         

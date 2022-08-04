@@ -59,17 +59,20 @@ export default {
 
     // get assets
     const assets = ref([]);
-    walletState.currentLoggedInWallet.accounts.forEach(account => {
-      account.assets.forEach(asset => {
-        assets.value.push(asset);
+    if(walletState.currentLoggedInWallet){
+       walletState.currentLoggedInWallet.accounts.forEach(account => {
+        account.assets.forEach(asset => {
+          assets.value.push(asset);
+        });
       });
-    });
 
-    walletState.currentLoggedInWallet.others.forEach(account => {
-      account.assets.forEach(asset => {
-        assets.value.push(asset);
+      walletState.currentLoggedInWallet.others.forEach(account => {
+        account.assets.forEach(asset => {
+          assets.value.push(asset);
+        });
       });
-    });
+    }
+   
 
     emitter.on("TXN_CONFIRMED", txLength => {
       setTimeout(() => {

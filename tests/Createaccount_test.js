@@ -14,6 +14,10 @@ module.exports = {
         var signin = browser.page.Signin();
         var account = browser.page.Createaccount();
 
+        browser.fullscreenWindow(function(result) {
+            console.log(result);
+        });
+
         // create wallet
         create
             .navigate()
@@ -42,6 +46,10 @@ module.exports = {
         var create = browser.page.Createwallet();
         var signin = browser.page.Signin();
         var account = browser.page.Createaccount();
+
+        browser.fullscreenWindow(function(result) {
+            console.log(result);
+        });
 
         // create wallet
         create

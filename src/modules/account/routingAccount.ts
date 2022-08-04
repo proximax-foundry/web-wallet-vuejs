@@ -14,33 +14,6 @@ export const AccountRoutes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/view-my-accounts',
-    name: 'ViewNormalAccount',
-    props: true,
-    component: () => import('@/modules/account/views/ViewNormalAccount.vue'),
-    meta: {
-      title: "View normal accounts",
-    }
-  },
-  {
-    path: '/view-multisig-accounts',
-    name: 'ViewMultisigAccount',
-    props: true,
-    component: () => import('@/modules/account/views/ViewMultisigAccount.vue'),
-    meta: {
-      title: "View multisig accounts",
-    }
-  },
-  {
-    path: '/view-other-accounts',
-    name: 'ViewOtherAccount',
-    props: true,
-    component: () => import('@/modules/account/views/ViewOtherAccount.vue'),
-    meta: {
-      title: "View other accounts",
-    }
-  },
-  {
     path: '/select-type-creation-account',
     name: 'ViewAccountCreateSelectType',
     props: true,
@@ -68,19 +41,10 @@ export const AccountRoutes: RouteRecordRaw[] = [
   {
     path: '/details-account/:address',
     name: 'ViewAccountDetails',
-    props: true,
+    props: (route) =>{ return { address: route.params.address, accountCreated: route.params.accountCreated === 'true'}},
     component: () => import('@/modules/account/views/ViewAccountDetails.vue'),
     meta: {
       title: "Account details",
-    }
-  },
-  {
-    path: '/swap-account/:address',
-    name: 'ViewAccountSwap',
-    props: true,
-    component: () => import('@/modules/account/views/ViewAccountSwap.vue'),
-    meta: {
-      title: "NIS1 Swap",
     }
   },
   {
@@ -92,6 +56,34 @@ export const AccountRoutes: RouteRecordRaw[] = [
       title: "Account Assets",
     }
   },
+  {
+    path: '/view-namespaces/:address',
+    name: 'ViewAccountNamespaces',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccountNamespaces.vue'),
+    meta: {
+      title: "Account Namespaces",
+    }
+  },
+  {
+    path: '/view-transactions/:address',
+    name: 'ViewAccountConfirmedTransactions',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccountConfirmedTransactions.vue'),
+    meta: {
+      title: "Account Confirmed Transactions",
+    }
+  },
+  {
+    path: '/view-pending-transactions/:address',
+    name: 'ViewAccountPendingTransactions',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccountPendingTransactions.vue'),
+    meta: {
+      title: "Account Pending Transactions",
+    }
+  },
+  
   ...DelegateRoutes,
   ...LinkToNamespaceRoutes,
   ...MultisigRoutes,

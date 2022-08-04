@@ -37,6 +37,12 @@ import {
     MultisigCosignatoryModification,
     MosaicAliasTransaction,
     MosaicAliasTransactionBuilder,
+    AccountMetadataTransaction,
+    AccountMetadataTransactionBuilder,
+    MosaicMetadataTransaction,
+    MosaicMetadataTransactionBuilder,
+    NamespaceMetadataTransaction,
+    NamespaceMetadataTransactionBuilder,
     LinkAction,
     Message,
     EmptyMessage,
@@ -288,6 +294,53 @@ export class BuildTransactions {
     registersubNamespaceBuilder(): RegisterSubNamespaceTransactionBuilder {
 
         return this.transactionBuilderFactory.registerSubNamespace();
+    }
+
+    accountMetadataBuilder(): AccountMetadataTransactionBuilder{
+        return this.transactionBuilderFactory.accountMetadata();
+    }
+
+    accountMetadata(oldValue: string, newValue: string, scopedMetadataKey: UInt64, targetPublicKey: PublicAccount): AccountMetadataTransaction{
+        return this.transactionBuilderFactory.accountMetadata()
+            .deadline(Deadline.create())
+            .oldValue(oldValue)
+            .value(newValue)
+            .scopedMetadataKey(scopedMetadataKey)
+            .targetPublicKey(targetPublicKey)
+            .calculateDifferences()
+            .build();
+    }
+
+    namespaceMetadataBuilder(): NamespaceMetadataTransactionBuilder{
+        return this.transactionBuilderFactory.namespaceMetadata();
+    }
+
+    namespaceMetadata(oldValue: string, newValue: string, scopedMetadataKey: UInt64, targetId: NamespaceId, targetPublicKey: PublicAccount): NamespaceMetadataTransaction{
+        return this.transactionBuilderFactory.namespaceMetadata()
+            .deadline(Deadline.create())
+            .oldValue(oldValue)
+            .value(newValue)
+            .scopedMetadataKey(scopedMetadataKey)
+            .targetPublicKey(targetPublicKey)
+            .targetNamespaceId(targetId)
+            .calculateDifferences()
+            .build();
+    }
+
+    assetMetadataBuilder(): MosaicMetadataTransactionBuilder{
+        return this.transactionBuilderFactory.mosaicMetadata();
+    }
+
+    assetMetadata(oldValue: string, newValue: string, scopedMetadataKey: UInt64, targetId: MosaicId, targetPublicKey: PublicAccount): MosaicMetadataTransaction{
+        return this.transactionBuilderFactory.mosaicMetadata()
+            .deadline(Deadline.create())
+            .oldValue(oldValue)
+            .value(newValue)
+            .scopedMetadataKey(scopedMetadataKey)
+            .targetPublicKey(targetPublicKey)
+            .targetMosaicId(targetId)
+            .calculateDifferences()
+            .build();
     }
 
     getFeeStrategy(): FeeCalculationStrategy {

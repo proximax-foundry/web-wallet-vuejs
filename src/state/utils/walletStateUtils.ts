@@ -1,4 +1,5 @@
 import { walletState } from "../walletState";
+import { AppState } from "../appState";
 import { AppStateUtils } from "../utils/appStateUtils";
 import { Wallets } from "../../models/wallets"
 import { Wallet } from "../../models/wallet";
@@ -22,11 +23,6 @@ export class WalletStateUtils{
     walletState.isLogin = true;
     let walletToken = WalletSessionToken.create(wallet.name, wallet.networkName);
     SessionService.setRaw(sessionWalletKey, walletToken);
-  }
-
-  static checkWalletUpdate(): void{
-    if(walletState.wallets.isWalletOutdated())
-      walletState.wallets = new Wallets();
   }
 
   static doLogout(): void{
@@ -63,6 +59,30 @@ export class WalletStateUtils{
     }
     else{
       return false;
+    }
+  }
+
+  static checkSessionLoadedData(){
+    const sessionAssetsInfo = SessionService.getRaw("assetsInfo");
+    const sessionNamespacesInfo = SessionService.getRaw("namespacesInfo");
+
+    try {
+      if(sessionAssetsInfo){
+        AppState.assetsInfo = JSON.parse(sessionAssetsInfo);
+      }
+      
+      
+    } catch (error) {
+      console.log("Error when parsing session assets info");
+    }
+
+    try {
+      if(sessionNamespacesInfo){
+        AppState.namespacesInfo = JSON.parse(sessionNamespacesInfo);
+      }
+      
+    } catch (error) {
+      console.log("Error when parsing session namespaces info");
     }
   }
 }

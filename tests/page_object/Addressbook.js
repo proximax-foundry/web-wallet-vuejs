@@ -2,8 +2,10 @@ const elements = {
 
     address_book: 'a[href="#/address-book"]',
     addnew_button: 'a[href="#/add-contact"]',
-    input_name: '.w-52 > div:nth-child(1) > input:nth-child(2)',
-    input_address: '.w-96 > div:nth-child(1) > input:nth-child(2)',
+    input_name: 'div.w-full:nth-child(1) > div:nth-child(1) > input:nth-child(2)',
+    input_name_filled:'.w-52 > div:nth-child(1) > input:nth-child(2)',
+    input_address: 'div.w-full:nth-child(2) > div:nth-child(1) > input:nth-child(2)',
+    input_address_filled:'.w-96 > div:nth-child(1) > input:nth-child(2)',
     input_group: '.multiselect-input',
     inputgroup_value: '.multiselect-single-label',
     save_address: '.default-btn',
@@ -44,7 +46,9 @@ const commands = {
     empty_name(address){
         return this
         .click("@addnew_button")
+        .click("@input_name")
         .setValue("@input_name", "\ue004")
+        .click("@input_address")
         .setValue("@input_address", address)
         .isVisible('@error_emptyname', callback = (result) => {
             this.assert.equal(result.value, true, 'If name has no input, an error is shown')
@@ -55,7 +59,9 @@ const commands = {
     existing_address(name, address){
         return this
         .click("@addnew_button")
+        .click("@input_name")
         .setValue("@input_name", name)
+        .click("@input_address")
         .setValue("@input_address", address)
         .click("@save_address")
         .isVisible('@error_duplicateaddress', callback = (result) => {
@@ -65,12 +71,15 @@ const commands = {
 
     edit_contact(name, address, address2){
         return this
+        .pause(5000)
         .click("@ellipsis_icon")
         .click("@edit_button")
-        .clearValue("@input_name")
-        .setValue("@input_name", name)
-        .clearValue("@input_address")
-        .setValue("@input_address", address)
+        .click("@input_name_filled")
+        .clearValue("@input_name_filled")
+        .setValue("@input_name_filled", name)
+        .click("@input_address_filled")
+        .clearValue("@input_address_filled")
+        .setValue("@input_address_filled", address)
         .click("@save_address")
         .isVisible('@contactupdated_popup', callback = (result) => {
             this.assert.equal(result.value, true, 'If contact is successfully updated, a notification is shown')
@@ -78,33 +87,38 @@ const commands = {
         .pause(1000)
         .click("@ellipsis_icon")
         .click("@edit_button")
-        .setValue("@input_name", '\ue003\ue003\ue003\ue003')
-        .isVisible('@error_emptyname', callback = (result) => {
-            this.assert.equal(result.value, true, 'If name field has no input, an error is shown')
-        })
-        .clearValue("@input_address")
-        .setValue("@input_address", address2)
+        .click("@input_name_filled")
+        .clearValue("@input_name_filled")
+        .setValue("@input_name_filled",'\ue004')
+        .click("@input_address_filled")
+        .clearValue("@input_address_filled")
+        .setValue("@input_address_filled", address2)
         .isVisible('@error_invalidaddress', callback = (result) => {
             this.assert.equal(result.value, true, 'If address is invalid, an error is shown')
         })
-
+        .isVisible('@error_emptyname', callback = (result) => {
+            this.assert.equal(result.value, true, 'If name field has no input, an error is shown')
+        })
     },
 
     invalid_address(address1, address2, address3){
         return this
         .click("@addnew_button")
+        .click("@input_address")
         .setValue("@input_address", address1)
         .isVisible('@error_invalidaddress', callback = (result) => {
             this.assert.equal(result.value, true, 'If address is invalid, an error is shown')
         })
         .click("@address_book")
         .click("@addnew_button")
+        .click("@input_address")
         .setValue("@input_address", address2)
         .isVisible('@error_invalidaddress', callback = (result) => {
             this.assert.equal(result.value, true, 'If address is less than required values, an error is shown')
         })
         .click("@address_book")
         .click("@addnew_button")
+        .click("@input_address")
         .setValue("@input_address", address3)
         .isVisible('@error_invalidaddress', callback = (result) => {
             this.assert.equal(result.value, true, 'If address is more than required values, an error is shown')
@@ -131,14 +145,17 @@ const commands = {
             this.assert.equal(result.value, true, 'If user clicks remove, a remove contact pop up box is shown')
         })
         .click("@removecontact_button")
-        .assert.containsText('@nocontacts_available', emptycontact, 'Nothing to show')
+        .assert.textContains('@nocontacts_available', emptycontact, 'Nothing to show')
     },
 
     add_newcontact(browser, name, address, custom){
         return this
         .click("@addnew_button")
         .assert.urlEquals(browser + 'add-contact', 'User is navigated to add contact page')
+        .pause(10000)
+        .click("@input_name")
         .setValue("@input_name", name)
+        .click("@input_address")
         .setValue("@input_address", address)
         .click("@input_group")
         .click("@custom_button")
@@ -147,14 +164,14 @@ const commands = {
         })
         .setValue("@input_customgroup", custom)
         .click("@addcustom_button")
-        .assert.containsText('@inputgroup_value', custom, 'Custom group is successfully added.')
+        .assert.textContains('@inputgroup_value', custom, 'Custom group is successfully added.')
         .click("@save_address")
         .isVisible('@add_addresssuccessful', callback = (result) => {
             this.assert.equal(result.value, true, 'If user clicks save address, a notification is shown')
         })
         .assert.urlEquals(browser + 'address-book', 'User is navigated back to address book page')
-        .assert.containsText('@addressname_value', name, 'New address name is successfully added.')
-        .assert.containsText('@address_value', address, 'New address is successfully added.')
+        .assert.textContains('@addressname_value', name, 'New address name is successfully added.')
+        .assert.textContains('@address_value', address, 'New address is successfully added.')
 
     }
 

@@ -8,8 +8,12 @@
               <div class="text-center my-2"><div class="inline-block"><span class="font-bold text-xl">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-md">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-xl">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-6 h-6 ml-3 relative" style="top: -6px;"></div>
               <div class="inline-block text-xs font-bold text-blue-primary cursor-pointer" @click="triggerSetDefaultModal">{{ selectedAccountName }}<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></div>
               <div class="mb-8">
-                <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" :copySubject="$t('general.address')">{{ selectedAccountAddressShort }}</div>
-                <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
+                <div class="flex items-center justify-center">
+                  <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" :copySubject="$t('general.address')">{{ selectedAccountAddressShort }}</div>
+
+                  <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
+                  <AddressQRModal :accountAddressQR="addressQR" :notIncludeWord="true" />      
+                </div>
               </div>
               <div>
                 <a :href="faucetLink" target=_new class="inline-block text-center mr-2" v-if="faucetLink">
@@ -44,12 +48,18 @@
           <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded-lg balance-div flex flex-col justify-between bg-navy-primary text-white">
             <div class="mt-8">
               <div class="text-gray-300 text-txs uppercase">{{$t('general.currentBalance')}}</div>
-              <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
+              <div class="flex justify-between items-center">
+                 <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
+              <a :href="faucetLink" class="flex items-center" target=_new v-if="faucetLink"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">{{$t('general.topUp')}}</div></a>
+              </div>
+             
               <div class="text-gray-300 text-txs mt-1">{{$t('general.estimateUSD')}} {{ currencyConvert }}</div>
+
             </div>
             <div class="flex justify-between mt-2">
               <div>
-                <a :href="faucetLink" class="flex items-center mb-3" target=_new v-if="faucetLink"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">{{$t('general.topUp')}}</div><img src="@/modules/dashboard/img/icon-info.svg" class="w-3 h-3 ml-2 inline-block"></a>
+                <router-link :to="{ name: 'ViewTransferCreate'}" class="flex items-center "><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">{{$t('general.transfer',{tokenName: currentNativeTokenName})}}</div></router-link>
+                
               </div>
               <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-swap.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold text-white" style="margin-top: 1px">{{$t('general.swap')}}</div></router-link>
             </div>
@@ -64,7 +74,7 @@
             </div>
             <div class="flex justify-between w-full">
               <AddressQRModal :accountAddressQR="addressQR" />
-              <router-link :to="{ name: 'ViewMultisigHome', params: { name: selectedAccountName }}" class="my-2 flex items-center" v-if="!isMultisig"><img src="@/modules/dashboard/img/icon-multisig-blue.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">{{$t('general.convertMultisig')}}</div></router-link>
+              <router-link :to="{ name: 'ViewMultisigHome', params: { address: selectedAccountAddressPlain }}" class="my-2 flex items-center" v-if="!isMultisig"><img src="@/modules/dashboard/img/icon-multisig-blue.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">{{$t('general.convertMultisig')}}</div></router-link>
             </div>
           </div>
         </div>
@@ -81,7 +91,6 @@
                 <a class="text-tsm font-bold" :href="hashExplorerURL + '/' + txn.hash" target=_new><span :class="`${ (txn.amount[0] ==='-')?'text-red-500':'text-green-500' }`">{{ txn.amount }}</span> <span class="text-xxs font-normal">{{ currentNativeTokenName }}</span></a>
               </div>
             </div>
-            <router-link :to="{ name: 'ViewTransferCreate'}" class="flex items-center mt-5"><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">{{$t('general.transfer',{tokenName: currentNativeTokenName})}}</div></router-link>
           </div>
         </div>
       </div>
@@ -89,163 +98,47 @@
 
     <div class="text-left px-2 sm:px-10 bg-gray-200">
       <div class="transition-all flex items-end">
-        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='overview'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='overview'">{{$t('general.overview')}}</div>
         <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='asset'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='asset'">{{$t('general.asset',2)}}</div>
-        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='namespace'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='namespace'">{{$t('general.namespace',2)}}</div>
-        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='transaction'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='transaction'">{{$t('dashboard.allTransactions')}}</div>
+        <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='overview'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='overview'">Activities</div>
       </div>
     </div>
-    <div class="bg-white px-2 sm:px-10 pt-12" v-if="displayBoard=='overview'">
-      <div class="text-txs text-gray-400"><b class="text-gray-700 uppercase">{{$t('general.asset',2)}}</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">{{$t('dashboard.viewAll')}}</span>)</div>
-      <DashboardAssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
-      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700 uppercase">{{$t('general.namespace',2)}}</b> ({{ selectedAccountNamespaceCount }} - {{$t('dashboard.viewAll')}})</div>
-      <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" :account="selectedAccount" />
-      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700 uppercase">{{$t('dashboard.recentTransactions')}}</b> ({{ accountConfirmedTxnsCount }} - {{$t('dashboard.viewAll')}})</div>
+    <div class="bg-white px-2 sm:px-10 " v-if="displayBoard=='overview'">
+      <div class="text-txs text-gray-400 mt-10 mb-2"><b class="text-gray-700 uppercase ">Pending Transactions</b></div>
+      <PendingDataTable :transaction="pendingTransactions" />
+      <div class="text-txs text-gray-400 mt-10 mb-2"><b class="text-gray-700 uppercase">{{$t('dashboard.recentTransactions')}}</b> </div>
       <MixedTxnDataTable :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="recentTransactions" @openDecryptMsg="openDecryptMsgModal"></MixedTxnDataTable>
-      <div class="mt-10 md:flex ml-5 md:ml-0">
-        <div class="w-full md:w-1/2">
-          <div class="mb-8 font-bold uppercase text-txs">{{$t('dashboard.createSthNew')}}</div>
-          <div class="flex flex-wrap">
-            <div class="flex items-center w-80 mb-2">
-              <div class="w-12 h-12 inline-block">
-                <img src="@/assets/img/icon-header-namespace.svg" class="w-12 h-12">
-              </div>
-              <div class="inline-block ml-4 dashboard-link">
-                <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">{{$t('general.createNamespace')}}</router-link>
-                <p class="text-txs w-60">{{$t('home.namespaceAns')}}</p>
-              </div>
-            </div>
-            <div class="flex items-center w-80 mb-2">
-              <div class="w-12 h-12 inline-block">
-                <img src="@/assets/img/icon-header-asset.svg" class="w-12 h-12">
-              </div>
-              <div class="inline-block ml-4 dashboard-link">
-                <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">{{$t('dashboard.createAsset')}}</router-link>
-                <p class="text-txs w-60">{{$t('home.assetAns')}}</p>
-              </div>
-            </div>
-            <div class="flex items-center w-80 mb-2">
-              <div class="w-12 h-12 inline-block">
-                <img src="@/assets/img/icon-header-account.svg" class="w-12 h-12">
-              </div>
-              <div class="inline-block ml-4 dashboard-link">
-                <router-link :to="{ name : 'ViewAccountCreateSelectType'}" class="text-tsm mb-1 relative top-1 text-blue-link">{{$t('general.createNewAcc')}}</router-link>
-                <p class="text-txs w-60">{{$t('dashboard.accDescription')}}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="w-full md:w-1/2 mt-7 md:mt-0">
-          <div class="mb-8 font-bold text-txs uppercase">{{$t('dashboard.gettingStartedGuide')}}</div>
-          <div class="text-xs sm:text-tsm">
-            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/" target=_new>{{$t('dashboard.guideOverview')}} <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/getting-started/what-is-proximax-sirius-chain/" target=_new>{{$t('dashboard.siriusChainQues')}}<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new>{{$t('general.namespaceQues')}} <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new>{{$t('general.assetQues')}} <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-          </div>
-        </div>
-      </div>
+      
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='asset'">
-      <DashboardAssetDataTable :assets="selectedAccount.assets" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
+      <DashboardAssetDataTable :assets="accountAssets" />
     </div>
-    <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='namespace'">
-      <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" :account="selectedAccount" />
-    </div>
-    <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='transaction'">
-      <div class="flex justify-between items-center">
-        <div>
-          <div v-if="selectedTxnType === TransactionFilterType.ACCOUNT" class="flex items-center">
-            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">{{$t('dashboard.accountAdded')}}</span>
-            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">{{$t('dashboard.accountRemoved')}}</span>
-          </div>
-          <div v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE" class="flex items-center">
-            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">{{$t('dashboard.buyOffer')}}</span>
-            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">{{$t('dashboard.sellOffer')}}</span>
-          </div>
-          <div v-if="selectedTxnType === TransactionFilterType.ASSET" class="flex items-center">
-            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">{{$t('general.enabled')}}</span>
-            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">{{$t('general.disabled')}}</span>
-          </div>
-        </div>
-        <div class="bg-gray-50">
-          <select v-model="selectedTxnType" @change="changeSearchTxnType" class="border border-gray-200 px-2 py-1 focus:outline-none">
-            <option value="all" class="text-sm">All</option>
-            <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm">{{ txnType.label}}</option>
-          </select>
-        </div>
-      </div>
-      <div v-if="boolIsTxnFetched">
-        <MixedTxnDataTable v-if="selectedTxnType === 'all'" :selectedGroupType="transactionGroupType.CONFIRMED" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></MixedTxnDataTable>
-        <TransferTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.TRANSFER" :selectedGroupType="transactionGroupType.CONFIRMED" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></TransferTxnDataTable>
-        <AccountTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ACCOUNT" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AccountTxnDataTable>
-        <AggregateTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.AGGREGATE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AggregateTxnDataTable>
-        <AliasTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ALIAS" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AliasTxnDataTable>
-        <AssetTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ASSET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AssetTxnDataTable>
-        <ChainTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.CHAIN" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></ChainTxnDataTable>
-        <ExchangeTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></ExchangeTxnDataTable>
-        <LinkTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LINK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></LinkTxnDataTable>
-        <LockTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LOCK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></LockTxnDataTable>
-        <MetadataTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.METADATA" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></MetadataTxnDataTable>
-        <NamespaceTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.NAMESPACE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></NamespaceTxnDataTable>
-        <RestrictionTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></RestrictionTxnDataTable>
-        <SecretTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.SECRET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></SecretTxnDataTable>
-      </div>
-      <div v-else class="border-t border-b border-gray-200 text-gray-400 text-xs mt-10">
-        <div class="border-t border-b border-gray-200 my-3 py-6 px-2">
-          <div class="flex justify-center items-center border-gray-400">
-            <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-navy-primary mr-2"></div>
-            {{$t('dashboard.fetchingTx')}}
-          </div>
-        </div>
-      </div>
-    </div>
+    
   </div>
 </template>
 
 <script>
+import PendingDataTable from "@/modules/account/components/PendingDataTable.vue"
 import { computed, defineComponent, ref, getCurrentInstance, watch } from 'vue';
-import {ResolvedNamespace} from '@/modules/dashboard/model/resolvedNamespace';
 import { TransactionFilterType, TransactionFilterTypes } from '@/modules/dashboard/model/transactions/transaction';
 import MixedTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/MixedTxnDataTable.vue';
-import TransferTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/TransferTxnDataTable.vue';
-import AccountTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AccountTxnDT.vue';
-import AggregateTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AggregateTxnDT.vue';
-import AliasTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AliasTxnDT.vue';
-import AssetTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AssetTxnDT.vue';
-import ChainTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/ChainTxnDT.vue';
-import ExchangeTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/ExchangeTxnDT.vue';
-import LinkTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/LinkTxnDT.vue';
-import LockTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/LockTxnDT.vue';
-import MetadataTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/MetadataTxnDT.vue';
-import NamespaceTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/NamespaceTxnDT.vue';
-import RestrictionTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/RestrictionTxnDT.vue';
-import SecretTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/SecretTxnDT.vue';
-
 import DashboardAssetDataTable from '@/modules/dashboard/components/DashboardAssetDataTable.vue';
-import DashboardNamespaceDataTable from '@/modules/dashboard/components/DashboardNamespaceDataTable.vue';
 import AddressQRModal from '@/modules/dashboard/components/AddressQRModal.vue';
-import MessageModal from '@/modules/dashboard/components/MessageModal.vue';
-import DecryptMessageModal from '@/modules/dashboard/components/DecryptMessageModal.vue';
 import { copyToClipboard, getXPXcurrencyPrice } from '@/util/functions';
 import { Helper } from '@/util/typeHelper';
 // eslint-disable-next-line no-unused-vars
 import { useToast } from "primevue/usetoast";
-import { Wallet } from "@/models/wallet";
 import { walletState } from '@/state/walletState';
 import { ChainUtils } from '@/util/chainUtils';
 import { networkState } from "@/state/networkState";
-import { AccountAPI } from '@/models/REST/account';
-import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 import qrcode from 'qrcode-generator';
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
-//import Dialog from 'primevue/dialog';
 import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
 import {AppState} from '@/state/appState'
 import { useI18n } from 'vue-i18n';
+import { TransactionType } from 'tsjs-xpx-chain-sdk';
 
 export default defineComponent({
   name: 'ViewDashboard',
@@ -253,37 +146,20 @@ export default defineComponent({
     type: String
   },
   components: {
+    PendingDataTable,
     MixedTxnDataTable,
-    TransferTxnDataTable,
-    AccountTxnDataTable,
-    AggregateTxnDataTable,
-    AliasTxnDataTable,
-    AssetTxnDataTable,
-    ChainTxnDataTable,
-    ExchangeTxnDataTable,
-    LinkTxnDataTable,
-    LockTxnDataTable,
-    MetadataTxnDataTable,
-    NamespaceTxnDataTable,
-    RestrictionTxnDataTable,
-    SecretTxnDataTable,
     DashboardAssetDataTable,
-    DashboardNamespaceDataTable,
     AddressQRModal,
   },
-
   setup(props){
     const {t} = useI18n();
     const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-
-    const displayBoard = ref('overview');
-
+    const displayBoard = ref('asset');
     const showAddressQRModal = ref(false);
     const showMessageModal = ref(false);
-    const showDecryptMessageModal  = ref(false);
-
+    const showDecryptMessageModal  = ref(false)
     const displayConvertion = ref(false);
     const showCosignModal = ref(false);
     const txMessage = ref("");
@@ -299,7 +175,6 @@ export default defineComponent({
     const isInitialSender = ref(false);
     const cosignModalKey = ref(0);
     const decryptMessageKey = ref(0);
-
     if(props.type == 'transaction'){
       displayBoard.value = 'transaction';
     }
@@ -308,12 +183,10 @@ export default defineComponent({
         displayBoard.value = 'transaction';
       }
     });
-
     const openMessageModal = (message)=>{
       messagePayload.value = message;
       showMessageModal.value = true;
     }
-
     const openDecryptMsgModal = async (data)=>{
       let txType = data.txType;
       let recipient = data.recipient;
@@ -326,33 +199,26 @@ export default defineComponent({
       publicKeyToUse.value = "";
       manualPublicKey.value = false;
       //recipientAddress.value = data.recipient;
-
       if(txType === "Transfer" || txType === "Aggregate Complete"){
         autoRecipientPublicKey = true;
-
         let senderAccount = WalletUtils.findWalletAccountByPublicKey(walletState.currentLoggedInWallet, txSender);
-
         if(senderAccount){
           isInitialSender.value = true;
         }
       }
       else{
         let senderAccount = WalletUtils.findWalletAccountByPublicKey(walletState.currentLoggedInWallet, initialSignerPublicKey.value);
-
         if(senderAccount){
           isInitialSender.value = true;
         }
       }
-
       if(recipientType === "address"){
         let accountPublicKey = WalletUtils.findAccountPublicKeyByAddress(walletState.currentLoggedInWallet, recipient);
-
         if(accountPublicKey){
           publicKeyToUse.value = accountPublicKey;
         }
         else{
           let accountInfo = await ChainUtils.getAccountInfo(Helper.createAddress(recipient));
-
           if(accountInfo.publicKey === "0".repeat(64)){
             manualPublicKey.value = true;
           }
@@ -363,16 +229,13 @@ export default defineComponent({
       }
       else{
         let address = await ChainUtils.getNamespaceLinkedAddress(recipient);
-
         if(address){
           let accountPublicKey = WalletUtils.findAccountPublicKeyByAddress(walletState.currentLoggedInWallet, recipient);
-
           if(accountPublicKey){
             publicKeyToUse.value = accountPublicKey;
           }
           else{
             let accountInfo = await ChainUtils.getAccountInfo(address);
-
             if(accountInfo.publicKey === "0".repeat(64)){
               manualPublicKey.value = true;
             }
@@ -385,42 +248,31 @@ export default defineComponent({
           manualPublicKey.value = true;
         }
       }
-
       if(!autoRecipientPublicKey){
         manualPublicKey.value = true;
       }
-
       decryptMessageKey.value++;
       showDecryptMessageModal.value = true;
     }
-
     const selectedCosignHash = ref("");
-
     const cosignAggregateBondedTransaction = (signedAggregateBondedTransaction, account) => {
       const cosignatureTransaction = Helper.createCosignatureTransaction(signedAggregateBondedTransaction);
       return account.signCosignatureTransaction(cosignatureTransaction);
     };
-
     // const cosignTransaction = (account)=>{
-
     //   let selectedPartialTx = rawPartialTransactions.value.find((x)=> x.transactionInfo.hash === selectedCosignHash.value);
-
     //   if(selectedPartialTx){
     //     let cosignatureSignedTransaction = cosignAggregateBondedTransaction(selectedPartialTx, account);
     //     ChainUtils.announceCosignTransaction(cosignatureSignedTransaction);
     //   }
-
     //   showCosignModal.value = false;
     // }
-
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const currentNativeTokenId = computed(()=> AppState.nativeToken.assetId);
-
     const displyFaucet = computed(() => {
       return (AppState.networkType == 168)?true:false;
     });
-
     const faucetLink = computed(() => {
       if(displyFaucet.value){
         if(networkState.chainNetworkName == 'Sirius Testnet 1'){
@@ -438,13 +290,15 @@ export default defineComponent({
         }
       }
     });
-
     let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
     currentAccount.default = true;
-
     const selectedAccount = ref(currentAccount);
-
-    const currentBlock = computed(() => listenerState.currentBlock);
+    const accountAssets = computed(()=>{
+      let defaultAccAsset =walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount().assets : walletState.currentLoggedInWallet.accounts[0].assets
+      let filteredAsset = defaultAccAsset.filter(asset=>asset.amount!=0)
+      return filteredAsset 
+    })
+    const currentBlock = computed(() => AppState.readBlockHeight);
 
     const selectedAccountPublicKey = computed(()=> selectedAccount.value.publicKey);
     // const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty().substring(0, 13) + '....' + Helper.createAddress(selectedAccount.value.address).pretty().substring(Helper.createAddress(selectedAccount.value.address).pretty().length - 11));
@@ -458,7 +312,6 @@ export default defineComponent({
     });
     const selectedAccountDirectChilds = computed(()=> {
       let multisigInfo = selectedAccount.value.multisigInfo.find((x)=> x.level === 0);
-
       if(multisigInfo){
         return multisigInfo.getMultisigAccountsAddress(AppState.networkType);
       }
@@ -466,41 +319,34 @@ export default defineComponent({
         return [];
       }
     });
-
     const selectedAccountNamespaceCount = computed(()=>{
       return selectedAccount.value.namespaces.length;
     });
-
     const selectedAccountAssetsCount = computed(()=>{
       return selectedAccount.value.assets.filter(x => x.idHex !== currentNativeTokenId.value).length;
     });
-
     const selectedAccountBalance = computed(
       () => {
         return Helper.toCurrencyFormat(selectedAccount.value.balance, currentNativeTokenDivisibility.value);
       }
     );
-
     const selectedAccountBalanceFront = computed(
       () => {
         let balance = selectedAccountBalance.value.split('.');
         return balance[0];
       }
     );
-
     const selectedAccountBalanceBack = computed(
       () => {
         let balance = selectedAccountBalance.value.split('.');
         return balance[1];
       }
     );
-
     const selectedAccountName = computed(
       () => {
         return selectedAccount.value.name;
       }
     );
-
     const addressQR = computed(
       () => {
         let qr = qrcode(15, 'H');
@@ -509,136 +355,38 @@ export default defineComponent({
         return qr.createDataURL();
       }
     )
-
     const isDefault = computed(()=> selectedAccount.value.default ? true : false );
     let isMultisig = computed(()=> selectedAccount.value.multisigInfo.find((multisigInfo)=> multisigInfo.level == 1) ? true : false);
-
     const getCurrencyPrice = () => {
       let balance = selectedAccount.value.balance;
       getXPXcurrencyPrice(balance).then((total) => {
         currencyConvert.value = Helper.toCurrencyFormat(total, 6);
       });
     };
-
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
-
     let accountConfirmedTxnsCount = ref(0);
-
     let updateAccountTransactionCount = async()=>{
       let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
       accountConfirmedTxnsCount.value = transactionsCount.confirmed;
     };
-
-    /*
-    emitter.on("TXN_UNCONFIRMED", (num)=>{
-
-      let newUnconfirmedTxnCount = num;
-      let newTxs = [];
-      let unconfirmedTxHashes = listenerState.allUnconfirmedTransactionsHash.slice(-newUnconfirmedTxnCount);
-
-      txHashLoop:
-      for(let i = 0; i < unconfirmedTxHashes.length; ++i){
-
-        if(allUnconfirmedTransactions.value.find((tx)=> tx.hash === unconfirmedTxHashes[i])){
-          continue;
-        }
-
-        addressTransactionLoop:
-        for(let x = 0; x < listenerState.unconfirmedTransactions.length; ++x){
-          let foundTx = listenerState.unconfirmedTransactions[i].unconfirmedTransactions.find((tx)=> unconfirmedTxHashes.includes(tx.transactionInfo.hash));
-        
-          if(foundTx){
-            newTxs.push(foundTx);
-            break addressTransactionLoop;
-          }
-        }
-      }
-
-      if(newTxs.length > 0){
-        let formatedTxs = dashboardService.formatUnconfirmedWithTransaction(newTxs);
-        allUnconfirmedTransactions.value = formatedTxs.concat(allUnconfirmedTransactions.value);
-
-        allPartialTransactions.value = allPartialTransactions.value.filter((tx)=> !listenerState.allUnconfirmedTransactionsHash.includes(tx.hash));
-      }
-    });
-
-    emitter.on("COSIGNER_SIGNED", (num)=>{
-
-      let newCosignTxnCount = num;
-      let cosignTxns = listenerState.allCosignatureAdded.slice(-newCosignTxnCount);
-
-      txHashLoop:
-      for(let i = 0; i < cosignTxns.length; ++i){
-
-        if(allPartialTransactions.value.find((tx)=> tx.hash === cosignTxns[i])){
-          let partialTransaction = allPartialTransactions.value.find((tx)=> tx.hash === cosignTxns[i]);
-
-          for(let x = 0; x < partialTransaction.innerTransactions.length; ++x){
-            partialTransaction.innerTransactions[x].signedPublicKeys = partialTransaction.innerTransactions[x].signedPublicKeys.concat(cosignTxns[i].signer);
-          }
-        }
-      }
-      //refreshPartialTransaction();
-    });
-
-    emitter.on("ABT_ADDED", (num)=>{
-      let newPartialTxnCount = num;
-      let newTxs = [];
-      let partialTxHashes = listenerState.allAggregateBondedTransactionHash.slice(-newPartialTxnCount);
-
-      txHashLoop:
-      for(let i = 0; i < partialTxHashes.length; ++i){
-
-        if(allPartialTransactions.value.find((tx)=> tx.hash === partialTxHashes[i])){
-          continue;
-        }
-
-        addressTransactionLoop:
-        for(let x = 0; x < listenerState.aggregateBondedTransaction.length; ++x){
-          let foundTx = listenerState.aggregateBondedTransaction[i].aggregateBonded.find((tx)=> partialTxHashes[i] === tx.transactionInfo.hash);
-        
-          if(foundTx){
-            newTxs.push(foundTx);
-            break addressTransactionLoop;
-          }
-        }
-      }
-
-      if(newTxs.length > 0){
-        rawPartialTransactions.value = rawPartialTransactions.value.concat(newTxs)
-        let formatedTxs = dashboardService.formatUnconfirmedWithTransaction(newTxs);
-        allPartialTransactions.value = formatedTxs.concat(allPartialTransactions.value);
-        updatePartialTransaction();
-      }
-    });
-
-    emitter.on("TXN_ERROR", (hash)=>{
-      allUnconfirmedTransactions.value = allUnconfirmedTransactions.value.filter((tx)=> ![hash].includes(tx.hash));
-      allPartialTransactions.value = allPartialTransactions.value.filter((tx)=> ![hash].includes(tx.hash));
-    });
-    */
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
       copyToClipboard(stringToCopy);
 
-      toast.add({severity:'info', detail: copySubject + ' ' +t('general.copied'), group: 'br', life: 3000});
+      toast.add({severity:'info', detail: copySubject + ' ' +t('general.copied'), group: 'br-custom', life: 3000});
     };
-
     // get USD conversion
     const currencyConvert = ref('');
-
     const updatePricing = () =>{
       if(AppState.nativeToken.label=== "XPX"){
         displayConvertion.value = true;
         getCurrencyPrice();
-
         watch(selectedAccountBalance, () => {
           getCurrencyPrice();
         });
       }
     }
-
     // setup transaction loading
     const recentTransactions = ref([]);
     const searchedTransactions = ref([]);
@@ -651,26 +399,20 @@ export default defineComponent({
     let endOfRecords = false;
     let searchingTxn = ref(false);
     let boolIsTxnFetched = ref(true);
-
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
-
     allTxnQueryParams.updateFieldOrder(blockDescOrderSortingField);
     allTxnQueryParams.embedded = true;
-
     let loadRecentTransactions = async()=>{
       let txnQueryParams = Helper.createTransactionQueryParams();
       txnQueryParams.pageSize = 1;
       txnQueryParams.publicKey = selectedAccount.value.publicKey;
       txnQueryParams.embedded = true;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
-
       let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
-
       let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
       recentTransactions.value = formattedTxns.slice(0, 5);
       searchedTransactions.value = formattedTxns;
     };
-
     let loadRecentTransferTransactions = async()=>{
       let txnQueryParams = Helper.createTransactionQueryParams();
       txnQueryParams.pageSize = 20;
@@ -678,46 +420,42 @@ export default defineComponent({
       txnQueryParams.publicKey = selectedAccount.value.publicKey;
       txnQueryParams.embedded = true;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
-
       let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
-
       if(transactionSearchResult.transactions.length){
         let formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactionSearchResult.transactions);
-
         recentTransferTransactions.value = formattedTxns;
         recentTransferTxnRow.value = formatRecentTransfer(formattedTxns).slice(0, 3);
       }
     };
-
     const reloadSearchTxns = () =>{
       allTxnQueryParams.pageNumber = 1;
       endOfRecords = false;
 
-      searchTransactions();
+      searchTransaction();
     }
-
     const loadMoreTxns = () =>{
-      searchTransactions(true);
+      searchTransaction(true);
     }
-
     const searchTransaction = async(loadMore = false) =>{
-
       allTxnQueryParams.pageNumber = loadMore ? allTxnQueryParams.pageSize + 1 : 1;
       allTxnQueryParams.publicKey = selectedAccount.value.publicKey;
+      if(allTxnQueryParams.type.length === 0 || 
+        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_COMPLETE) ||
+        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_BONDED)){
+        allTxnQueryParams.firstLevel = false;
+      }
+      else{
+        allTxnQueryParams.firstLevel = true;
+      }
       searchingTxn.value = true;
-
       let transactionSearchResult = await dashboardService.searchTxns(selectedTxnGroupType, allTxnQueryParams);
-
       if(transactionSearchResult.pagination.pageNumber <= allTxnQueryParams.pageNumber){
         endOfRecords = true;
       }else{
         endOfRecords = false;
       }
-
       searchingTxn.value = false;
-
       let formattedTxns = [];
-
       switch (selectedTxnGroupType) {
         case transactionGroupType.CONFIRMED:
           formattedTxns = await formatConfirmedTransaction(transactionSearchResult.transactions);
@@ -729,7 +467,6 @@ export default defineComponent({
           formattedTxns = await formatPartialTransaction(transactionSearchResult.transactions);
           break;
       }
-
       if(loadMore){
         let tempTxns = searchedTransactions.value.concat(formattedTxns);
         searchedTransactions.value = removeDuplicateTxn(tempTxns);
@@ -743,17 +480,13 @@ export default defineComponent({
     const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
     const addressExplorerURL = computed(()=> explorerBaseURL.value + networkState.currentNetworkProfile.chainExplorer.addressRoute);
     const hashExplorerURL = computed(()=> explorerBaseURL.value + networkState.currentNetworkProfile.chainExplorer.hashRoute);
-
     const recentTransferTxnRow = ref([]);
-
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
     const jdenticonConfig = themeConfig.jdenticonConfig;
-
     const formatRecentTransfer = (transactions) => {
       let transferTxn = [];
       let nativeTokenTxns = transactions.filter(txn => txn.amountTransfer > 0);
-
       for(const txn of nativeTokenTxns){
         let formattedTransferTxn = {};
         if(selectedAccountAddressPlain.value == txn.sender && selectedAccountAddressPlain.value == txn.recipient){
@@ -777,11 +510,8 @@ export default defineComponent({
       }
       return transferTxn;
     }
-
     const formatConfirmedTransaction = async(transactions)=>{
-
       let formattedTxns = [];
-
       switch(selectedTxnType.value){
         case TransactionFilterType.TRANSFER:
           formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactions);
@@ -826,14 +556,10 @@ export default defineComponent({
           formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactions);
           break;
       }
-
       return formattedTxns;
     }
-
     const formatUnconfirmedTransaction = async(transactions)=>{
-
       let formattedTxns = [];
-
       switch(selectedTxnType.value){
         case TransactionFilterType.TRANSFER:
           formattedTxns = await dashboardService.formatUnconfirmedMixedTxns(transactions);
@@ -875,14 +601,10 @@ export default defineComponent({
           formattedTxns = await dashboardService.formatUnconfirmedNamespaceTransaction(transactions);
           break;
       }
-
       return formattedTxns;
     }
-
     const formatPartialTransaction = async(transactions)=>{
-
       let formattedTxns = [];
-
       switch(selectedTxnType.value){
         case TransactionFilterType.TRANSFER:
           formattedTxns = await dashboardService.formatPartialMixedTxns(transactions);
@@ -924,14 +646,10 @@ export default defineComponent({
           formattedTxns = await dashboardService.formatPartialNamespaceTransaction(transactions);
           break;
       }
-
       return formattedTxns;
     }
-
     const changeTxnGroupType = (txnGroupType) =>{
-
       searchedTransactions.value = [];
-
       switch (txnGroupType) {
         case transactionGroupType.CONFIRMED:
           selectedTxnGroupType = transactionGroupType.CONFIRMED;
@@ -943,15 +661,12 @@ export default defineComponent({
           selectedTxnGroupType = transactionGroupType.PARTIAL;
           break;
       }
-
       searchTransaction();
     }
-
     const changeSearchTxnType = () =>{
       boolIsTxnFetched.value = false;
       searchedTransactions.value = [];
       let txnFilterGroup = selectedTxnType.value;
-
       switch (txnFilterGroup) {
         case TransactionFilterType.TRANSFER:
           allTxnQueryParams.type = TransactionFilterTypes.getTransferTypes();
@@ -996,10 +711,8 @@ export default defineComponent({
           allTxnQueryParams.type = undefined;
           break;
       }
-
       searchTransaction();
     }
-
     const removeDuplicateTxn = (txns) =>{
       let result = txns.filter((value, index, self) =>
         index === self.findIndex((t) => (
@@ -1008,25 +721,98 @@ export default defineComponent({
       )
       return result;
     }
-
     const triggerSetDefaultModal = () => {
       emitter.emit('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', true);
     }
-
     emitter.on('CLOSE_MODAL', () => {
       showAddressQRModal.value = false;
       showMessageModal.value = false;
       showCosignModal.value = false;
       showDecryptMessageModal.value = false;
     });
+    
+    emitter.on('DEFAULT_ACCOUNT_SWITCHED',async(payload) => {
+      currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
+      // currentAccount.default = true;
+      selectedAccount.value = currentAccount;
+      // recentTransferTxn();
+      updateAccountTransactionCount();
+      loadRecentTransactions();
+      loadRecentTransferTransactions();
+      await loadUnconfirmedTransactions();
+      await loadPartialTransactions();
+      loadInQueueTransactions();
+    });
 
-    const init = ()=>{
+    const unconfirmedTxns = ref([])
+    const partialTxns = ref([])
+    const inQueueTxns = ref([])
+    const pendingTransactions = computed(()=>{
+        return unconfirmedTxns.value.concat(inQueueTxns.value).concat(partialTxns.value)
+    }) 
+    let loadUnconfirmedTransactions = async()=>{
+        if(!selectedAccount.value){
+            return
+        }
+        let txnQueryParams = Helper.createTransactionQueryParams(); 
+        txnQueryParams.pageSize = 1;
+        txnQueryParams.address = selectedAccountAddressPlain.value
+        txnQueryParams.embedded = true;
+        txnQueryParams.updateFieldOrder(blockDescOrderSortingField); 
+        let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.UNCONFIRMED, txnQueryParams);
+        let formattedTxns = await dashboardService.formatUnconfirmedMixedTxns(transactionSearchResult.transactions);
+        //groupType = 'unconfirmed'
+        unconfirmedTxns.value = formattedTxns
+    }
+
+    let loadPartialTransactions = async() => {
+        if(!selectedAccount.value){
+            return
+        }
+        let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
+        let txnQueryParams = Helper.createTransactionQueryParams();
+        txnQueryParams.pageSize = 100;
+        txnQueryParams.address = selectedAccountAddressPlain.value
+        let transactionSearchResult = await dashboardService.searchTxns(transactionGroupType.PARTIAL, txnQueryParams);
+        let formattedTxns = await dashboardService.formatPartialMixedTxns(transactionSearchResult.transactions);
+        //groupType = 'partial'
+        partialTxns.value  = formattedTxns
+    };
+
+    let loadInQueueTransactions = ()=>{
+        if(!selectedAccount.value){
+            return
+        }
+        let txns = []
+        listenerState.autoAnnounceSignedTransaction.forEach((tx)=>{
+            let txn = TransactionMapping.createFromPayload(tx.signedTransaction.payload)
+            let aggregateTxn = TransactionUtils.castToAggregate(txn)
+            if (aggregateTxn.innerTransactions.find(tx=>tx.signer.address.plain()==props.address)!=undefined ||
+            tx.signedTransaction.signer == acc.value.publicKey){
+                txns.push({
+                    type: 'Aggregate Bonded',
+                    hash: tx.signedTransaction.hash,
+                    deadline: txn.deadline.value,
+                    groupType: 'In Queue',
+                    recipient: '',
+                    sender: '',
+                    amount: '',
+                    message: '',
+                    sda: ''
+                })
+            }
+        })
+        inQueueTxns.value =txns
+    }
+    const init = async()=>{
       updateAccountTransactionCount();
       loadRecentTransactions();
       loadRecentTransferTransactions();
       updatePricing();
+      await loadUnconfirmedTransactions();
+      await loadPartialTransactions();
+      loadInQueueTransactions();
     }
-
     if(AppState.isReady){
       init();
     }
@@ -1038,18 +824,8 @@ export default defineComponent({
         }
       });
     }
-
-    emitter.on('DEFAULT_ACCOUNT_SWITCHED', payload => {
-      currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
-      currentAccount.default = true;
-      selectedAccount.value = currentAccount;
-      // recentTransferTxn();
-      updateAccountTransactionCount();
-      loadRecentTransactions();
-      loadRecentTransferTransactions();
-    });
-
     return {
+      pendingTransactions,
       toSvg,
       addressExplorerURL,
       hashExplorerURL,
@@ -1109,28 +885,24 @@ export default defineComponent({
       jdenticonConfig,
       faucetLink,
       boolIsTxnFetched,
+      accountAssets
     };
   }
 });
 </script>
 <style lang="scss" scoped>
-
 .address_div{
   top: 4px;
 }
-
 .p-dialog .p-dialog-header{
   padding: 1rem 1.25rem;
 }
-
 .p-dialog .p-dialog-header .p-dialog-title{
   font-size: 1rem;
 }
-
 #address{
   @extend .text-xs !optional;
 }
-
 .default-div{
   @apply text-gray-100;
   background: #33344A;
@@ -1139,34 +911,26 @@ export default defineComponent({
   background-size: 250px;
   height: 184px;
 }
-
 .balance-div{
   height: 184px;
 }
-
 .transaction-div{
   height: 184px;
 }
-
-
 @media (min-width: 640px) {
   .address_div{
     top: 0px;
   }
 }
-
 @media (min-width: 1280px) {
   .address_div{
     top: 4px;
   }
-
   #address{
     @extend .text-sm !optional;
   }
 }
-
 .dashboard-link{
   position: relative; top: -4px;
 }
-
 </style>

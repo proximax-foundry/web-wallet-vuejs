@@ -37,36 +37,36 @@
           </div>
         </template>
       </Column>
-      <Column field="name" :header="$t('general.name')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 160px'?'width: 160px'`" v-if="wideScreen">
+      <Column field="name" :header="$t('general.name')"  style="`wideScreen?'min-width: 160px'?'width: 160px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs">{{data.name}}</span>
         </template>
       </Column>
-      <Column field="namespaceId" :header="$t('general.namespaceId')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+      <Column field="namespaceId" :header="$t('general.namespaceId')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs uppercase">{{data.idHex}}</span>
         </template>
       </Column>
-      <Column field="linkedId" :header="$t('general.linkedAssetAddress')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
+      <Column field="linkedId" :header="$t('general.linkedAssetAddress')"  style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="uppercase text-txs" v-if="data.linkedId">{{ data.linkedId }}</span>
           <span class="text-txs" v-else>{{$t('general.noLinkedAsset')}}</span>
         </template>
       </Column>
-      <Column field="linkType" :header="$t('general.expires')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 150px'?'width: 150px'`" v-if="wideScreen">
+      <Column field="linkType" :header="$t('general.expires')"  style="`wideScreen?'min-width: 150px'?'width: 150px'`" v-if="wideScreen">
         <template #body="{data}">
           <div class="data.expiryRelative text-txs" v-if="data.expiryRelative">{{ data.expiryRelative }}</div>
           <div class="text-gray-300 text-txs" v-else>{{$t('dashboard.fetching')}}</div>
         </template>
       </Column>
-      <Column field="Active" :header="$t('dashboard.expirationEstimate')" headerStyle="text-transform:uppercase" style="`wideScreen?'min-width: 210px'?'width: 210px'`" v-if="wideScreen">
+      <Column field="Active" :header="$t('dashboard.expirationEstimate')"  style="`wideScreen?'min-width: 210px'?'width: 210px'`" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-txs" :class="data.expiring=='expired'?'text-red-500':(data.expiring=='expiring'?'text-yellow-500':'text-green-500')">{{ data.expiry }}</span>
         </template>
       </Column>
-      <Column field="Account" :header="$t('general.account')" headerStyle="text-transform:uppercase" bodyStyle="text-align: center; overflow: visible" style="`wideScreen?'min-width: 60px'?'width: 60px'`" v-if="wideScreen">>
+      <Column field="Account" :header="$t('general.account')"  bodyStyle="text-align: center; overflow: visible" style="`wideScreen?'min-width: 60px'?'width: 60px'`" v-if="wideScreen">>
         <template #body="{data}">
-          <div v-html="data.icon" class="inline-block" v-tooltip.bottom="'<tiptitle>WALLET ADDRESS</tiptitle><tiptext>' + data.address + '</tiptext>'"></div>
+          <div v-html="data.icon" class="inline-block" v-tooltip.bottom="{ value: '<tiptitle>WALLET ADDRESS</tiptitle><tiptext>' + data.address + '</tiptext>', escape: true}"></div>
         </template>
       </Column>
       <Column style="width: 30px">
@@ -76,6 +76,7 @@
             <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div role="none" class="my-2">
                 <router-link :to="{ name: 'ViewServicesNamespaceExtend', params: { address: data.address, namespaceId: data.idHex } }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.extendDuration')}}</router-link>
+                <router-link :to="{ name: 'ViewUpdateNamespaceMetadata', params: { targetId: data.idHex } }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">Update Metadata</router-link>
                 <a :href="data.explorerLink" class="block hover:bg-gray-100 transition duration-200 p-2 z-20" target=_new>{{$t('general.viewInExplorer')}}<img src="@/modules/dashboard/img/icon-link-new.svg" class="inline-block ml-2 relative -top-1"></a>
               </div>
             </div>
@@ -93,14 +94,12 @@
 </template>
 
 <script>
-import { getCurrentInstance, ref, computed, watch, onMounted, toRefs, onUnmounted  } from "vue";
+import { getCurrentInstance, ref, computed, onMounted, toRefs, onUnmounted  } from "vue";
 import { Address } from "tsjs-xpx-chain-sdk";
 import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { walletState } from "@/state/walletState";
-import {Namespace} from '@/models/namespace';
-import { listenerState } from '@/state/listenerState';
 import { Helper } from '@/util/typeHelper';
 import { networkState } from "@/state/networkState";
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
@@ -109,12 +108,12 @@ import { toSvg } from "jdenticon";
 import Tooltip from 'primevue/tooltip';
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { useI18n } from 'vue-i18n';
+import { AppState } from '@/state/appState';
 
 export default{
   components: { DataTable, Column, SelectInputPluginClean },
   name: 'NamespaceDataTable',
   props: {
-    currentBlockHeight: Number,
     account: WalletAccount,
     address: String,
   },
@@ -142,7 +141,11 @@ export default{
       window.removeEventListener("resize", screenResizeHandler);
     });
 
-    const { currentBlockHeight, address } = toRefs(props);
+    const currentBlockHeight = computed(() => {
+      return AppState.readBlockHeight ? AppState.readBlockHeight : 0
+    });
+
+    const { address } = toRefs(props);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     // const accountNamespaces = ref();
@@ -280,45 +283,53 @@ export default{
               break;
           }
 
-          let blockDifference = namespaces[i].namespace.endHeight - currentBlockHeight.value;
-          let blockTargetTimeByDay = Math.floor((60 * 60 * 24) / blockTargetTime);
-          let blockTargetTimeByHour = Math.floor((60 * 60) / blockTargetTime);
-          let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
-          let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
-          let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
+          let expiryStatus, expiryDate, expiryRelativeTimeEstimate;
 
-          let expiryStatus;
-          if(blockDifference > 0){
-            if((blockDifference < (blockTargetTimeByDay * 14))){
-              expiryStatus = 'expiring';
-            }else{
-              expiryStatus = 'valid';
-            }
-          }else{
-            expiryStatus = 'expired';
-          }
-
-          let expiryDate;
-          if(expiryDay > 0 || expiryHour > 0 ||  expiryMin > 0){
-            expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
-          }else{
-            expiryDate = 'None';
+          if(typeof namespaces[i].namespace.endHeight === 'string'){
             expiryStatus = 'valid';
-          }
-
-          let expiryRelativeTimeEstimate;
-          if(currentBlockHeight){
-            if(blockDifference > 0){
-              expiryRelativeTimeEstimate = relativeTime(expiryDay, expiryHour, expiryMin);
-            }else{
-              if(expiryDate != '-'){
-                expiryRelativeTimeEstimate = t('general.expired');
-              }else{
-                expiryRelativeTimeEstimate = '-';
-              }
+            if(namespaces[i].namespace.endHeight === "F".repeat(16)){
+              expiryDate = 'Never';
+              expiryRelativeTimeEstimate = "Never";
             }
-          }else{
-            expiryRelativeTimeEstimate = '';
+          }
+          else{
+            let blockDifference = namespaces[i].namespace.endHeight - currentBlockHeight.value;
+            let blockTargetTimeByDay = Math.floor((60 * 60 * 24) / blockTargetTime);
+            let blockTargetTimeByHour = Math.floor((60 * 60) / blockTargetTime);
+            let expiryDay = Math.floor(blockDifference / blockTargetTimeByDay);
+            let expiryHour = Math.floor((blockDifference % blockTargetTimeByDay ) / blockTargetTimeByHour);
+            let expiryMin = (blockDifference % blockTargetTimeByDay ) % blockTargetTimeByHour;
+
+            if(blockDifference > 0){
+              if((blockDifference < (blockTargetTimeByDay * 14))){
+                expiryStatus = 'expiring';
+              }else{
+                expiryStatus = 'valid';
+              }
+            }else{
+              expiryStatus = 'expired';
+            }
+          
+            if(expiryDay > 0 || expiryHour > 0 ||  expiryMin > 0){
+              expiryDate = Helper.convertDisplayDateTimeFormat24(calculateExpiryDate(expiryDay, expiryHour, expiryMin));
+            }else{
+              expiryDate = 'None';
+              // expiryStatus = 'valid';
+            }
+
+            if(currentBlockHeight.value){
+              if(blockDifference > 0){
+                expiryRelativeTimeEstimate = relativeTime(expiryDay, expiryHour, expiryMin);
+              }else{
+                if(expiryDate != '-'){
+                  expiryRelativeTimeEstimate = t('general.expired');
+                }else{
+                  expiryRelativeTimeEstimate = '-';
+                }
+              }
+            }else{
+              expiryRelativeTimeEstimate = '';
+            }
           }
 
           let data = {
@@ -331,7 +342,7 @@ export default{
             expiring: expiryStatus,
             expiryRelative: expiryRelativeTimeEstimate,
             expiry: currentBlockHeight.value?expiryDate:'',
-            explorerLink: networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].namespace.idHex,
+            explorerLink: AppState.isReady?networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaces[i].namespace.idHex : '',
             address: Helper.createAddress(namespaces[i].account.address).pretty(),
             icon: toSvg(namespaces[i].account.address, 30, themeConfig.jdenticonConfig)
           };
@@ -384,11 +395,11 @@ export default{
       currentMenu.value = 'e';
     };
 
-    const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
-    const publicKeyExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.publicKeyRoute);
-    const addressExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.addressRoute);
-    const namespaceExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute);
-    const assetExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.assetInfoRoute);
+    const explorerBaseURL = computed(()=> AppState.isReady?networkState.currentNetworkProfile.chainExplorer.url:'');
+    const publicKeyExplorerURL = computed(()=> AppState.isReady?networkState.currentNetworkProfile.chainExplorer.publicKeyRoute:'');
+    const addressExplorerURL = computed(()=> AppState.isReady?networkState.currentNetworkProfile.chainExplorer.addressRoute:'');
+    const namespaceExplorerURL = computed(()=> AppState.isReady?networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute:'');
+    const assetExplorerURL = computed(()=> AppState.isReady?networkState.currentNetworkProfile.chainExplorer.assetInfoRoute:'');
 
     return {
       addressExplorerURL,
