@@ -41,6 +41,7 @@ import { AppState } from "@/state/appState";
 import { Label } from "@/models/label"
 import { AssetInfo } from "@/models/assetInfo"
 import { OtherAcountType } from "@/models/const/otherAccountType"
+import { falseDependencies } from "mathjs"
 
 const config = require("@/../config/config.json");
 const dataPerRequest = 50;
@@ -1861,7 +1862,7 @@ export class WalletUtils {
     static namespaceInfoToNamespace(nsInfo: NamespaceInfo): Namespace {
 
         let namespace = new Namespace(nsInfo.id.toHex());
-        namespace.active = nsInfo.active;
+        
         namespace.startHeight = nsInfo.startHeight.compact();
         namespace.endHeight = nsInfo.endHeight.compact();
         namespace.owner = nsInfo.owner.publicKey;
@@ -1871,7 +1872,12 @@ export class WalletUtils {
             namespace.linkedId = nsInfo.alias.type === AliasType.Address ?
                 nsInfo.alias.address.plain() : nsInfo.alias.mosaicId.toHex()
         }
-
+        if (AppState.readBlockHeight > namespace.endHeight){
+            namespace.active = false
+        }
+        else {
+            namespace.active = true
+        }
         return namespace;
     }
 
