@@ -21,10 +21,10 @@
               <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('general.insufficientBalance')}}</div>
             </div>
           </div>
-          <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace" ref="nsRef" v-model="selectNamespace" :address="selectedAccAdd" class="mt-5" :disabled="disableSelectNamespace" required/>
+          <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace" ref="nsRef" v-model="selectNamespace" :address="selectedAccAdd" class="mt-5" :disabled="disableSelectNamespace" @click="active=true"/>
           <div class="h-3 mb-2">
             <div class="error error-text text-left">
-              <div v-if="!selectNamespace">{{$t('general.selectOption')}}</div>
+              <div v-if="!selectNamespace && active==true">{{$t('general.selectOption')}}</div>
             </div>
           </div>
           <div class="lg:grid lg:grid-cols-2 mt-5">
