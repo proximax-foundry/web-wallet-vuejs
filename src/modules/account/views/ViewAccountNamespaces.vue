@@ -70,6 +70,12 @@ import NamespaceDataTable from "../components/NamespaceDataTable.vue"
     let namespaces :{name:string,id: string,linkedAssetAddress:string,expiringBlock: number | string,isActive: boolean }[] =[]
     for(let i=0;i<acc.value.namespaces.length;i++){
       let namespace = acc.value.namespaces[i]
+      if (AppState.readBlockHeight > namespace.endHeight){
+            namespace.active = false
+        }
+        else {
+            namespace.active = true
+        }
        namespaces.push({
         name:namespace.name,
         id: namespace.idHex,
