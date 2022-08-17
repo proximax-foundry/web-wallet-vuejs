@@ -527,6 +527,9 @@ export default {
         showNamespaceNameError.value = true;
         namespaceErrorMessage.value = t('namespace.validName');
       }
+      else{
+        return false;
+      }
     }
 
     return {
