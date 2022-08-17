@@ -79,7 +79,7 @@
         </div>
          <div class="flex mt-4 text-white">
           <div class='text-xs '>{{$t('transfer.transferAmount')}}</div>
-          <div v-if="isNaN(sendXPX)" class="text-xs  ml-auto">{{checkNaN(sendXPX)}}</div>
+          <div v-if="isNaN(sendXPX)" class="text-xs  ml-auto">{{0}}</div>
           <div v-else class="text-xs  ml-auto">{{sendXPX}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
@@ -103,7 +103,7 @@
         <div class='border-b-2 border-gray-600 my-2'/>
         <div class="flex text-white">
           <div class=' font-bold text-xs uppercase'>{{$t('general.total')}}</div>
-          <div v-if="isNaN(totalFee)" class="text-xs  ml-auto">{{checkNaN(totalFee)}}</div>
+          <div v-if="isNaN(totalFee)" class="text-xs  ml-auto">{{0}}</div>
           <div v-else class="text-xs  ml-auto">{{totalFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
@@ -604,12 +604,6 @@ export default {
       return 0;
     }
   };
-
-  const checkNaN = (number) => {
-    number= NaN;
-    number = number || 0;
-    return number
-  }
   
   watch(selectedAccAdd, (n, o) => {
     showAssetBalanceErr.value = []
@@ -887,8 +881,7 @@ export default {
       walletName,
       checkNamespace,
       currentNativeTokenName,
-      showLimitErr,
-      checkNaN
+      showLimitErr
     };
   },
 };
