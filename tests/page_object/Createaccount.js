@@ -13,7 +13,7 @@ const elements = {
     input_walletpassword: 'input.w-full',
     input_walletpassword_pk: 'div.ml-auto.mr-auto.mt-3 > div:nth-child(3) > div > input',
     input_privatekey: 'div.bg-white.py-2.border.flex.justify-between > input.w-full.text-placeholder.text-left.ml-2',
-    home_icon: 'div.text-center.w-full.h-7 > a[href="#/dashboard"] > img',
+    home_icon: 'a[href="#/dashboard"]',
     empty_accountname: '.error-text',
     empty_accountname_pk: '.error-text',
     empty_walletpassword: '.error-password',

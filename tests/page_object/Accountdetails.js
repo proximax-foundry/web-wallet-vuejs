@@ -2,41 +2,43 @@ const elements = {
 
     account_ellipsis: 'div.link_block > a:nth-child(1) > div:nth-child(2)',
     details_selection: 'a.block:nth-child(1)',
-    accountdetails_tab: 'div.w-32:nth-child(1)', 
+    accountdetails_tab: 'a.w-32:nth-child(1)', 
     accountname_value: 'div.justify-center:nth-child(2) > div:nth-child(1) > div:nth-child(1)',
     change_default: '.font-txs > img:nth-child(1)',
     new_account: 'div.p-2:nth-child(2)',
     back: 'a[href="#/dashboard"]',
     copy_address: 'div.justify-center:nth-child(2) > div:nth-child(2) > svg:nth-child(2) > path:nth-child(2)',
-    copyaddress_popup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
+    copyaddress_popup: 'div.p-toast:nth-child(12) > div:nth-child(1) > div:nth-child(1)',
     copy_publickey: '.pb-1 > path:nth-child(2)',
-    copypublickey_popup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
-    copy_privatekey: 'div.border-2:nth-child(3) > div:nth-child(8) > div:nth-child(3) > svg:nth-child(2) > path:nth-child(2)',
+    copypublickey_popup: 'div.p-toast:nth-child(12) > div:nth-child(1) > div:nth-child(1)',
+    copy_privatekey: 'div.border-2:nth-child(3) > div:nth-child(6) > div:nth-child(3) > svg:nth-child(2) > path:nth-child(2)',
     confirm_button_pk: 'div.blue-btn:nth-child(3)',
     confirm_button_wp: 'div.blue-btn:nth-child(3)',
     confirm_button_wp_2: 'div.blue-btn:nth-child(4)',
-    cancel_button_pk: 'div.text-center:nth-child(4)',
+    confirm_button_edit: 'button.blue-btn:nth-child(1)',
+    cancel_button_pk: 'div.modal-popup-box > div.text-center:nth-child(4)',
     cancel_button_pk_2:'div.cursor-pointer:nth-child(5)',
     cancel_button_wp: 'div.text-center:nth-child(4)',
     cancel_button_wp_2:'div.cursor-pointer:nth-child(5)',
+    cancel_button_edit:'div.modal-popup-box > div:nth-child(2)',
     delete_successfulpopup: 'body > div:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
     download_button: '.blue-btn',    
     download_passwordpopup: '.z-50 > div:nth-child(1)',
     edit_nameicon: 'img.w-4:nth-child(2)',
     enter_passwordpopup: 'div.popup-outer-lang:nth-child(3) > div:nth-child(1)',
-    error_emptyname: '.text-red-500',
-    error_existingname: '.text-red-500',
+    error_emptyname: '.error-text',
+    error_existingname: '.error_box',
     error_emptypassword_pk: 'div.error:nth-child(2)',
     error_emptypassword_wp: 'div.error:nth-child(2)',
     error_wrongpassword_pk: '.error',
     error_wrongpassword_wp: '.error',
-    input_accountname: '.outline-none',
+    input_accountname: 'input.text-placeholder:nth-child(1)',
     input_password: 'input.w-full',
     input_password_wp: 'input.w-full',
     password_eyeicon_pk: '.text-gray-500 > path:nth-child(1)',
     wallet_paper: '#outerContainer',
     private_keyhidden: 'div.border-2:nth-child(3) > div:nth-child(8) > div:nth-child(2) > div:nth-child(1)',    
-    pk_successfulpopup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
+    pk_successfulpopup: 'div.p-toast:nth-child(12) > div:nth-child(1) > div:nth-child(1)',
     transfer_button: 'div.flex:nth-child(5) > a:nth-child(1) > div:nth-child(2)',
     view_privatekey: '.fa-eye > path:nth-child(2)',
     private_key: '#private',
@@ -58,7 +60,7 @@ const commands = {
         .click("@edit_nameicon")
         .click("@input_accountname")
         .setValue('@input_accountname','\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003')
-        .click("@edit_nameicon")
+        .click("div.modal-popup-box > div:nth-child(1) > div:nth-child(1)")
         .assert.elementPresent('@error_emptyname', 'When account name is empty, error is shown')
         .pause(2000)
     },
@@ -68,8 +70,9 @@ const commands = {
         .click("@edit_nameicon")
         .setValue('@input_accountname','\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003')
         .setValue("@input_accountname", name)
-        .click("@edit_nameicon")
+        .click("@confirm_button_edit")
         .assert.elementPresent('@error_existingname',' When account name is already taken, error is shown')
+        .click("@cancel_button_edit")
         .click("@back")
         .click("@account_ellipsis")
 
@@ -77,6 +80,7 @@ const commands = {
 
     edit_accountname(name){
         return this
+        .click("@cancel_button_edit")
         .click("@back")
         .click("@account_ellipsis")
         .click("@edit_nameicon")
@@ -84,7 +88,7 @@ const commands = {
         .click("@input_accountname")
         .setValue('@input_accountname','\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003')
         .setValue("@input_accountname", name)
-        .click("@edit_nameicon")
+        .click("@confirm_button_edit")
         .pause(2000)
         .assert.textContains('@accountname_value', name, 'Account name has successfully edited.')
     
