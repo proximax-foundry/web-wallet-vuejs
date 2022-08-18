@@ -110,7 +110,12 @@
       
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='asset'">
-      <DashboardAssetDataTable :assets="accountAssets" />
+      <div v-if="loading" class="flex justify-center items-center mt-10">
+        <div class="w-16 h-16 border-b-2 border-gray-900 rounded-full animate-spin"></div>
+      </div>
+        <div v-else>
+            <DashboardAssetDataTable :assets="accountAssets" />
+        </div>
     </div>
     
   </div>
@@ -139,6 +144,7 @@ import { WalletUtils } from '@/util/walletUtils';
 import {AppState} from '@/state/appState'
 import { useI18n } from 'vue-i18n';
 import { TransactionType } from 'tsjs-xpx-chain-sdk';
+import { setTimeout } from 'timers';
 
 export default defineComponent({
   name: 'ViewDashboard',
@@ -824,6 +830,12 @@ export default defineComponent({
         }
       });
     }
+
+    const loading = ref(true);
+    setTimeout(() => {
+      loading.value = false
+    }, 1500);
+
     return {
       pendingTransactions,
       toSvg,
@@ -885,7 +897,8 @@ export default defineComponent({
       jdenticonConfig,
       faucetLink,
       boolIsTxnFetched,
-      accountAssets
+      accountAssets,
+      loading
     };
   }
 });
