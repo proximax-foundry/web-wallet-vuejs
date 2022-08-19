@@ -14,6 +14,7 @@
                   digitGroupSeparator: ',',
                   decimalCharacter: '.',
                   currencySymbol: '',
+                  emptyInputBehavior: 'zero',
                   allowDecimalPadding: false,
                   decimalPlaces: decimal,
                   roundingMethod: 'U',
