@@ -65,7 +65,7 @@
             <div class="text-xs  mt-2 inline-block">{{$t('delegate.linked')}}</div>
           </div>
           
-          <div class="border border-blue-300 rounded-md ml-6 p-3 mt-3 bg-blue-50">
+          <div class="border border-blue-300 rounded-md ml-6 p-3 mt-3 bg-blue-50 overflow-x-auto">
             <div class="text-xs inline-block">{{$t('delegate.publicKeyOfDelegate')}}</div>
             <font-awesome-icon icon="copy" @click="copy('delegatePublicKey')" :title="$t('general.copy')" class="inline-block float-right mt-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
             <div class="text-xs mt-0.5 font-semibold" id="delegatePublicKey" :copyValue="delegateAcc" :copySubject="$t('delegate.delegatePublicKey')">{{delegateAcc}}</div>

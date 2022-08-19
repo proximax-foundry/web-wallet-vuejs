@@ -8,7 +8,7 @@ const elements = {
     createnew_backup: 'div.radio-toolbar.text-center > label:nth-child(6)',
     createsuccessful_popup: '.popup-outer-create-wallet > div:nth-child(1)',
     close: 'a.mt-4',
-    continuelogin: 'a.ml-auto > div:nth-child(1)',
+    continuelogin: 'a > div',
     next: 'a[href="#/create-wallet"]',
     pknext: '.mt-3',
     backupnext: 'a[href="#/backup-wallet"]',
