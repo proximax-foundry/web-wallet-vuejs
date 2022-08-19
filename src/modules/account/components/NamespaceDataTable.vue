@@ -89,7 +89,7 @@
         </Column>
         <Column field="actions" header="Actions" v-if="wideScreen">
             <template #body="{data,index}">
-                <img v-if="data.isActive" src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2 mt-0.5" @click="showMenu(index)"  @mouseover="hoverOverMenu(index)" @mouseout="hoverOutMenu">
+                <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block ml-2 mt-0.5" @click="showMenu(index)"  @mouseover="hoverOverMenu(index)" @mouseout="hoverOutMenu">
                 <div v-if="isMenuShow[index]" class=" w-36 absolute rounded-sm shadow-lg bg-white focus:outline-none z-10 text-left " >
                     <div class="my-2" >
                         <router-link :to="{ name: 'ViewServicesNamespaceExtend', params: { address: address, namespaceId:data.id} }"  class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.extendDuration')}}</router-link>
