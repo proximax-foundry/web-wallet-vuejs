@@ -59,7 +59,6 @@ import TextInput from "@/components/TextInput.vue";
 import { walletState } from "@/state/walletState";
 import { AddressBook } from "@/models/addressBook";
 import { useI18n } from 'vue-i18n';
-import router from "@/router";
 
 export default {
   name: "SignInModal",
@@ -87,9 +86,6 @@ export default {
 
     const showNameErr = ref(false);
 
-    const selectedAccAdd = ref(
-      walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount().address : ''
-    );
     
     // watch(address, ()=>{
     //   const verifyAdd = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), address.value);
@@ -116,7 +112,7 @@ export default {
     const clearInput = () => (contactName.value = "");
 
     const closeModal = () => {
-      router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
+      
       emitter.emit("CLOSE_CONTACT_MODAL", false);
     };
 

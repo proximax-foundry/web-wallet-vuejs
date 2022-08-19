@@ -784,6 +784,7 @@ export default {
     }, {deep:true});
   emitter.on("CLOSE_CONTACT_MODAL", (payload) => {
     togglaAddContact.value = payload;
+    router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
     clearInput();
   });
   emitter.on("select-account", (address) => {
