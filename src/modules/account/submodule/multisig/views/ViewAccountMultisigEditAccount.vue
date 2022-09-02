@@ -274,10 +274,11 @@ export default {
       cosignaturies.value.forEach(publicKey=>{
         let address = Address.createFromPublicKey(publicKey,AppState.networkType).plain()
         let contact = walletState.currentLoggedInWallet.contacts.find((contact) => contact.address==address);
-        if(wallet.accounts.find(acc=>acc.publicKey ===publicKey)){
-          name.push(wallet.accounts.find(acc=>acc.publicKey ==publicKey).name)
-        }else if(contact){
+        if(contact){
           name.push(contact.name)
+        }
+        else if(wallet.accounts.find(acc=>acc.publicKey ===publicKey)){
+          name.push(wallet.accounts.find(acc=>acc.publicKey ==publicKey).name)
         }else{
           let address = Address.createFromPublicKey(publicKey,AppState.networkType).plain().substr(-4)
           name.push(t('general.cosigner')+'-' +address)
