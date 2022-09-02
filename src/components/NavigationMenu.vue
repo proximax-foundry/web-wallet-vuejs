@@ -1,7 +1,6 @@
 <template>
   <div class="flex flex-col" @mouseover="hoverOverNavigation" @mouseout="hoverOutNavigation">
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10  3xl:px-10 font-txs text-gray-400 uppercase flex justify-between items-center">Default account<img src="@/assets/img/navi/icon-switch-account.svg" class="cursor-pointer" @click="triggerSetDefaultModal"></div>
       <div>
         <div class="cursor-pointer link_block flex items-center justify-between">
           <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" class="flex items-center">
