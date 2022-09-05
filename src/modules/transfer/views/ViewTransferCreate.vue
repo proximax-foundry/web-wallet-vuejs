@@ -39,9 +39,10 @@
             <div class='text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.select')}}</div>
           </div>
         </div>
-        <div v-if="toggleContact" class=" border ">
+        <div v-if="toggleContact" class=" border max-h-40 overflow-auto">
           <div class='text-xxs text-gray-300 font-semibold py-2 px-2 uppercase'>{{$t('general.importFromAB')}}</div>
-          <div v-for="(item, number) in contacts" :key="number" class="cursor-pointer">
+          <input v-model="filterQuery" type="text" class="py-2 px-2 outline-none text-xs text-black" :placeholder="$t('general.search')">
+          <div v-for="(item, number) in filteredContacts" :key="number" class="cursor-pointer overflow-auto">
             <div @click="recipientInput=item.value;toggleContact=false" class="flex justify-center">
               <div v-if="number%2==0" class="text-xs py-2 bg-gray-100 pl-2 w-full">{{item.label}}</div>
               <div v-if="number%2==1" class="text-xs py-2 pl-2 w-full">{{item.label}}</div>
@@ -163,6 +164,23 @@ export default {
     AddContactModal,
     ConfirmSendModal,
     MosaicInput
+  },
+  data(){
+    return {
+      filterQuery: "",
+    }   
+  },
+  computed: {
+  filteredContacts() {
+      const query = this.filterQuery.toLowerCase();
+      if(this.filterQuery == ""){
+        return this.contacts;
+      }
+      return this.contacts.filter((item) =>{
+        return Object.values(item).some((word) =>
+          String(word).toLowerCase().includes(query));
+      });
+    }
   },
   setup() {
     const router = useRouter()
