@@ -59,7 +59,7 @@
         </div>
         <div class="lg:grid lg:grid-cols-2 mt-5">
           <SelectModificationType :title="$t('asset.modificationType')" class="lg:mr-4" v-model="selectIncreaseDecrease" />
-          <SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="balanceNumber" :placeholder="$t('asset.quantityOf',{value:selectIncreaseDecrease})" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)? $t('general.requiredField'): $t('general.insufficientBalance')" :decimal="Number(assetDivisibility)" ckass="lg:ml-4" />
+          <SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="(maxAssetSupply - assetSupply.value)" :placeholder="$t('asset.quantityOf',{value:selectIncreaseDecrease})" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)? $t('general.requiredField'): $t('general.insufficientBalance')" :decimal="Number(assetDivisibility)" class="lg:ml-4" />
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
@@ -217,6 +217,7 @@ export default {
       selectedAccPublicKey.value = account.value.publicKey;
       balance.value = Helper.toCurrencyFormat(account.value.balance, AppState.nativeToken.divisibility);
       balanceNumber.value = account.value.balance;
+
     }
     const isMultiSigBool = ref(isMultiSig(selectedAccAdd.value));
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
@@ -231,6 +232,8 @@ export default {
     const assetTransferable = ref(false);
     const assetMutable = ref(false);
     const selectIncreaseDecrease = ref('increase');
+    let maxAssetSupply = 900000000000000;
+    const currentSupply = ref ('assetSupply')
 
     if(account.value){
       let asset = account.value.assets.find( asset => asset.idHex === props.assetId);
@@ -243,7 +246,7 @@ export default {
         assetSupplyExact.value = asset.supply, asset.divisibility;
       }
     }
-
+   
     const transactionFee = ref('0.000000');
     const transactionFeeExact = ref(0);
 
@@ -330,7 +333,8 @@ export default {
         transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
       }
       if(n== 'increase'){
-        showSupplyErr.value = supply.value > (balanceNumber.value - totalFee.value);
+        showSupplyErr.value = supply.value > (maxAssetSupply - assetSupply.value);
+
       }else{
         showSupplyErr.value = supply.value > Helper.convertToExact(assetSupplyExact.value, assetDivisibility.value);
       }
@@ -341,8 +345,8 @@ export default {
         transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(selectAsset.value, selectIncreaseDecrease.value, n, assetDivisibility.value), AppState.nativeToken.divisibility);
         transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, selectIncreaseDecrease.value, n, assetDivisibility.value), AppState.nativeToken.divisibility);
       }
-      if(selectIncreaseDecrease.value == 'increase'){
-        showSupplyErr.value = supply.value > (balanceNumber.value - totalFee.value);
+      if(selectIncreaseDecrease.value == 'increase'){ 
+        showSupplyErr.value = supply.value > (maxAssetSupply - assetSupply.value);
       }else{
         showSupplyErr.value = n > Helper.convertToExact(assetSupplyExact.value, assetDivisibility.value);
       }
@@ -446,6 +450,8 @@ export default {
       splitCurrency,
       Helper,
       svgString,
+      maxAmount,
+      maxAssetSupply
     }
   },
 
