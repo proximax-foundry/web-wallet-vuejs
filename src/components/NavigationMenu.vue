@@ -200,10 +200,6 @@ export default{
       }
     });
 
-    const triggerSetDefaultModal = () => {
-      emitter.emit('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', true);
-    }
-
     emitter.on('DEFAULT_ACCOUNT_SWITCHED', payload => {
       if(!walletState.currentLoggedInWallet){
         return
@@ -282,7 +278,6 @@ export default{
       selectedAccountName,
       openSetDefaultModal,
       selectedAccountAddress,
-      triggerSetDefaultModal,
       isMultiSig,
       selectedAccountPublicKey
     };
