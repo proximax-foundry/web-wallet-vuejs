@@ -165,23 +165,6 @@ export default {
     ConfirmSendModal,
     MosaicInput
   },
-  data(){
-    return {
-      filterQuery: "",
-    }   
-  },
-  computed: {
-  filteredContacts() {
-      const query = this.filterQuery.toLowerCase();
-      if(this.filterQuery == ""){
-        return this.contacts;
-      }
-      return this.contacts.filter((item) =>{
-        return Object.values(item).some((word) =>
-          String(word).toLowerCase().includes(query));
-      });
-    }
-  },
   setup() {
     const router = useRouter()
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
@@ -834,6 +817,17 @@ export default {
       makeTransfer();
     }
   });
+  const filterQuery = ref("");
+  const filteredContacts = computed(() => {
+    const query = filterQuery.value.toLowerCase();
+      if(filterQuery.value == ""){
+        return contacts.value;
+      }
+      return contacts.value.filter((item) =>{
+        return Object.values(item).some((word) =>
+          String(word).toLowerCase().includes(query));
+      });
+  });
     return {
       showAssetBalanceErr,
       findAcc,
@@ -904,7 +898,9 @@ export default {
       walletName,
       checkNamespace,
       currentNativeTokenName,
-      showLimitErr
+      showLimitErr,
+      filterQuery,
+      filteredContacts
     };
   },
 };

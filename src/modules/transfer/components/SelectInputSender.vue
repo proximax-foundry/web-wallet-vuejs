@@ -44,26 +44,6 @@ props: [
     'modelValue',
     'selectDefault'
   ],
-
-data(){
-  return {
-    filterQuery: "",
-  }   
-},
-
-computed: {
-  filteredAccounts() {
-      const query = this.filterQuery.toLowerCase();
-      if(this.filterQuery == ""){
-        return this.accounts;
-      }
-      return this.accounts.filter((items) =>{
-        return Object.values(items).some((word) =>
-          String(word).toLowerCase().includes(query));
-      });
-    }
-},
-
 setup(p){
     const toggleSelection = ref(false);
     const internalInstance = getCurrentInstance();
@@ -98,6 +78,17 @@ setup(p){
       selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
       toggleSelection.value = !toggleSelection.value;
     };
+    const filterQuery = ref("");
+    const filteredAccounts = computed(() => {
+      const query = filterQuery.value.toLowerCase();
+      if(filterQuery.value == ""){
+        return accounts.value;
+      }
+      return accounts.value.filter((items) =>{
+        return Object.values(items).some((word) =>
+          String(word).toLowerCase().includes(query));
+      });
+    });
    
   
     return {
@@ -108,7 +99,9 @@ setup(p){
       toggleSelection,
       selectedAccount,
       jdenticonConfig,
-      toSvg
+      toSvg,
+      filterQuery,
+      filteredAccounts
     };
 }
 })
