@@ -97,7 +97,7 @@
           <div class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
           <div class="flex text-gray-200 my-1">
             <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase'>{{$t('general.currentBalance')}}</div>
-            <span class='ml-auto' v-if="getWalletCosigner.cosignerList.length == 1">{{  getWalletCosigner.cosignerList[0].balance }}{{ currentNativeTokenName }}</span>
+            <span class='ml-auto font-bold' v-if="getWalletCosigner.cosignerList.length == 1">{{  getWalletCosigner.cosignerList[0].balance }} {{ currentNativeTokenName }}</span>
             <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
           </div>
         </div>
@@ -526,9 +526,9 @@ export default {
       }
     }else {
       if(tokenDivisibility== 0){
-        return Math.trunc((checkIsNaN(parseFloat(sendXPX.value.replace(/,/g, ''))) + parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value))
+        return Math.trunc((parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value))
       }else{
-        return Math.round((checkIsNaN(parseFloat(sendXPX.value.replace(/,/g, ''))) + parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value)*Math.pow(10,tokenDivisibility))/ Math.pow(10,tokenDivisibility)
+        return Math.round((parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value)*Math.pow(10,tokenDivisibility))/ Math.pow(10,tokenDivisibility)
       }
     }
   })
