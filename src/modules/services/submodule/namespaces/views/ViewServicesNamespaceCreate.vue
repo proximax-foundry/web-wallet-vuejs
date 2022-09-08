@@ -32,7 +32,7 @@
           </div>
         </div>
       </div>
-      <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
+      <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
         <div v-if="!isMultiSig(selectedAccAdd)" class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
         <div v-else class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.multisigAcc')}}</div>
         <div class="flex text-gray-200 my-1">
@@ -61,7 +61,7 @@
           <div class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
           <div class="flex text-gray-200 my-1">
             <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase'>{{$t('general.currentBalance')}}</div>
-            <span class='ml-auto' v-if="getMultiSigCosigner.cosignerList.length == 1">{{ currentNativeTokenName }}</span>
+            <span class='ml-auto' v-if="getMultiSigCosigner.cosignerList.length == 1">{{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }}{{ currentNativeTokenName }}</span>
             <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
           </div>
           <div class="flex justify-between items-center text-gray-200 text-xs py-3">
