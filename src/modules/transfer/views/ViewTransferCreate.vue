@@ -29,7 +29,7 @@
               </div>
             </div>
             <div class="error" v-else>
-             {{$t('general.initiateBy')}} 
+             {{$t('general.noCosigner')}} 
             </div>
           </div>
         <div class="flex mt-3 gap-1">
@@ -82,7 +82,8 @@
         <div class='border-b-2 border-gray-600 my-2'/>
          <div class="flex mt-4 text-white">
           <div class='text-xs '>{{$t('transfer.transferAmount')}}</div>
-          <div class="text-xs  ml-auto">{{sendXPX}}</div>
+          <div v-if="isNaN(parseFloat(sendXPX))" class="text-xs  ml-auto">0</div>
+          <div v-else class="text-xs  ml-auto">{{sendXPX}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class="flex mt-0.5 text-white">
@@ -105,7 +106,7 @@
         <div class='border-b-2 border-gray-600 my-2'/>
         <div class="flex text-white">
           <div class=' font-bold text-xs uppercase'>{{$t('general.total')}}</div>
-          <div class="text-xs  ml-auto">{{totalFee}}</div>
+          <div  class="text-xs  ml-auto">{{totalFee}}</div>
           <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
         </div>
         <div class="flex text-white"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
@@ -495,19 +496,24 @@ export default {
       return true;
     }
   });
+
+  const checkIsNaN = string =>{
+    return isNaN(parseFloat(string))? 0 : parseFloat(string)
+  }
   const totalFee = computed(()=>{
     let tokenDivisibility = AppState.nativeToken.divisibility
+
     if(!isMultiSig(selectedAccAdd.value) ){
       if(tokenDivisibility==0){
-        return Math.trunc(parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value))
+        return Math.trunc(checkIsNaN(parseFloat(sendXPX.value.replace(/,/g, ''))) + parseFloat(effectiveFee.value))
       }else{
-        return Math.round((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value))*Math.pow(10,tokenDivisibility))/Math.pow(10,tokenDivisibility)
+        return Math.round((checkIsNaN(parseFloat(sendXPX.value.replace(/,/g, ''))) + parseFloat(effectiveFee.value))*Math.pow(10,tokenDivisibility))/Math.pow(10,tokenDivisibility)
       }
     }else {
       if(tokenDivisibility== 0){
-        return Math.trunc((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value))
+        return Math.trunc((checkIsNaN(parseFloat(sendXPX.value.replace(/,/g, ''))) + parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value))
       }else{
-        return Math.round((parseFloat(sendXPX.value.replace(/,/g, '')) + parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value)*Math.pow(10,tokenDivisibility))/ Math.pow(10,tokenDivisibility)
+        return Math.round((checkIsNaN(parseFloat(sendXPX.value.replace(/,/g, ''))) + parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value)*Math.pow(10,tokenDivisibility))/ Math.pow(10,tokenDivisibility)
       }
     }
   })
@@ -791,6 +797,7 @@ export default {
     }, {deep:true});
   emitter.on("CLOSE_CONTACT_MODAL", (payload) => {
     togglaAddContact.value = payload;
+    router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
     clearInput();
   });
   emitter.on("select-account", (address) => {

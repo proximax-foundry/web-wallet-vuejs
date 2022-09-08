@@ -86,6 +86,7 @@ export default {
 
     const showNameErr = ref(false);
 
+    
     // watch(address, ()=>{
     //   const verifyAdd = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), address.value);
     //   verifyAdd.value = verifyAdd.verify.value;
@@ -101,7 +102,7 @@ export default {
           walletState.currentLoggedInWallet.addAddressBook(
             new AddressBook(contactName.value, address.value,'-none-')
           );
-
+          walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
           err.value = "";
           isSuccessAdded.value = true;
         }
@@ -111,6 +112,7 @@ export default {
     const clearInput = () => (contactName.value = "");
 
     const closeModal = () => {
+      
       emitter.emit("CLOSE_CONTACT_MODAL", false);
     };
 

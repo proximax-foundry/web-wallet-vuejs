@@ -13,7 +13,7 @@ const elements = {
     custom_popup: '.z-50 > div:nth-child(1)',
     input_customgroup: 'input.border',
     addcustom_button: 'button.rounded-md', 
-    add_addresssuccessful: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
+    add_addresssuccessful: 'div.p-toast:nth-child(12) > div:nth-child(1) > div:nth-child(1)',
     addressname_value: '.p-datatable-tbody > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)',
     address_value: '.p-datatable-tbody > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2)',
     error_emptyname: '.error',
@@ -29,7 +29,7 @@ const elements = {
     error_duplicateaddress: '.error',
     close_button: '.svg-inline--fa > path:nth-child(1)',
     edit_button: 'a.block:nth-child(1)',
-    contactupdated_popup: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
+    contactupdated_popup: 'div.p-toast:nth-child(12) > div:nth-child(1) > div:nth-child(1)',
 
 }
 

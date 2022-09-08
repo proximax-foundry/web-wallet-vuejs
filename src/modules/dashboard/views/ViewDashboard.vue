@@ -100,160 +100,40 @@
       <div class="transition-all flex items-end">
         <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='asset'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='asset'">{{$t('general.asset',2)}}</div>
         <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='overview'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='overview'">Activities</div>
-        
-        <!-- <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='namespace'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='namespace'">{{$t('general.namespace',2)}}</div> -->
-       <!--  <div class="text-xs inline-block px-3 rounded-t-sm py-3" :class="`${ displayBoard=='transaction'?'bg-white text-gray-primary':'cursor-pointer' }`" @click="displayBoard='transaction'">{{$t('dashboard.allTransactions')}}</div> -->
       </div>
     </div>
     <div class="bg-white px-2 sm:px-10 " v-if="displayBoard=='overview'">
-      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700 uppercase">Pending Transactions</b></div>
+      <div class="text-txs text-gray-400 mt-10 mb-2"><b class="text-gray-700 uppercase ">Pending Transactions</b></div>
       <PendingDataTable :transaction="pendingTransactions" />
-     <!--  <div class="text-txs text-gray-400"><b class="text-gray-700 uppercase">{{$t('general.asset',2)}}</b> ({{ selectedAccountAssetsCount }} - <span class="cursor-pointer" @click="displayBoard='asset'">{{$t('dashboard.viewAll')}}</span>)</div>
-      <DashboardAssetDataTable :assets="selectedAccount.assets.slice(0, 5)" :account="selectedAccount" :currentPublicKey="selectedAccountPublicKey" />
-      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700 uppercase">{{$t('general.namespace',2)}}</b> ({{ selectedAccountNamespaceCount }} - {{$t('dashboard.viewAll')}})</div>
-      <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces.slice(0, 5)" :currentBlockHeight="currentBlock" :account="selectedAccount" /> -->
-      <div class="text-txs text-gray-400 mt-10"><b class="text-gray-700 uppercase">{{$t('dashboard.recentTransactions')}}</b> <!-- ({{ accountConfirmedTxnsCount }} - {{$t('dashboard.viewAll')}}) --></div>
+      <div class="text-txs text-gray-400 mt-10 mb-2"><b class="text-gray-700 uppercase">{{$t('dashboard.recentTransactions')}}</b> </div>
       <MixedTxnDataTable :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="recentTransactions" @openDecryptMsg="openDecryptMsgModal"></MixedTxnDataTable>
-      <!-- <div class="mt-10 md:flex ml-5 md:ml-0">
-        <div class="w-full md:w-1/2">
-          <div class="mb-8 font-bold uppercase text-txs">{{$t('dashboard.createSthNew')}}</div>
-          <div class="flex flex-wrap">
-            <div class="flex items-center w-80 mb-2">
-              <div class="w-12 h-12 inline-block">
-                <img src="@/assets/img/icon-header-namespace.svg" class="w-12 h-12">
-              </div>
-              <div class="inline-block ml-4 dashboard-link">
-                <router-link :to="{ name : 'ViewServicesNamespaceCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">{{$t('general.createNamespace')}}</router-link>
-                <p class="text-txs w-60">{{$t('home.namespaceAns')}}</p>
-              </div>
-            </div>
-            <div class="flex items-center w-80 mb-2">
-              <div class="w-12 h-12 inline-block">
-                <img src="@/assets/img/icon-header-asset.svg" class="w-12 h-12">
-              </div>
-              <div class="inline-block ml-4 dashboard-link">
-                <router-link :to="{ name : 'ViewServicesAssetsCreate'}" class="text-tsm mb-1 relative top-1 text-blue-link">{{$t('dashboard.createAsset')}}</router-link>
-                <p class="text-txs w-60">{{$t('home.assetAns')}}</p>
-              </div>
-            </div>
-            <div class="flex items-center w-80 mb-2">
-              <div class="w-12 h-12 inline-block">
-                <img src="@/assets/img/icon-header-account.svg" class="w-12 h-12">
-              </div>
-              <div class="inline-block ml-4 dashboard-link">
-                <router-link :to="{ name : 'ViewAccountCreateSelectType'}" class="text-tsm mb-1 relative top-1 text-blue-link">{{$t('general.createNewAcc')}}</router-link>
-                <p class="text-txs w-60">{{$t('dashboard.accDescription')}}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="w-full md:w-1/2 mt-7 md:mt-0">
-          <div class="mb-8 font-bold text-txs uppercase">{{$t('dashboard.gettingStartedGuide')}}</div>
-          <div class="text-xs sm:text-tsm">
-            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/" target=_new>{{$t('dashboard.guideOverview')}} <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/getting-started/what-is-proximax-sirius-chain/" target=_new>{{$t('dashboard.siriusChainQues')}}<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new>{{$t('general.namespaceQues')}} <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-            <div class="mb-2"><a href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/" target=_new>{{$t('general.assetQues')}} <img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a></div>
-          </div>
-        </div>
-      </div> -->
+      
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='asset'">
       <DashboardAssetDataTable :assets="accountAssets" />
     </div>
-    <!-- <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='namespace'">
-      <DashboardNamespaceDataTable :namespaces="selectedAccount.namespaces" :currentBlockHeight="currentBlock" :account="selectedAccount" />
-    </div> -->
-   <!--  <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='transaction'">
-      <div class="flex justify-between items-center">
-        <div>
-          <div v-if="selectedTxnType === TransactionFilterType.ACCOUNT" class="flex items-center">
-            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">{{$t('dashboard.accountAdded')}}</span>
-            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">{{$t('dashboard.accountRemoved')}}</span>
-          </div>
-          <div v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE" class="flex items-center">
-            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">{{$t('dashboard.buyOffer')}}</span>
-            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">{{$t('dashboard.sellOffer')}}</span>
-          </div>
-          <div v-if="selectedTxnType === TransactionFilterType.ASSET" class="flex items-center">
-            <div class="h-3 w-3 bg-green-300 inline-block mr-1"></div> <span class="text-xs text-gray-500">{{$t('general.enabled')}}</span>
-            <div class="h-3 w-3 bg-red-300 inline-block mr-1 ml-3"></div> <span class="text-xs text-gray-500">{{$t('general.disabled')}}</span>
-          </div>
-        </div>
-        <div class="bg-gray-50">
-          <select v-model="selectedTxnType" @change="changeSearchTxnType" class="border border-gray-200 px-2 py-1 focus:outline-none">
-            <option value="all" class="text-sm">All</option>
-            <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm">{{ txnType.label}}</option>
-          </select>
-        </div>
-      </div>
-      <div v-if="boolIsTxnFetched">
-        <MixedTxnDataTable v-if="selectedTxnType === 'all'" :selectedGroupType="transactionGroupType.CONFIRMED" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></MixedTxnDataTable>
-        <TransferTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.TRANSFER" :selectedGroupType="transactionGroupType.CONFIRMED" @openMessage="openMessageModal" @openDecryptMsg="openDecryptMsgModal" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></TransferTxnDataTable>
-        <AccountTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ACCOUNT" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AccountTxnDataTable>
-        <AggregateTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.AGGREGATE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AggregateTxnDataTable>
-        <AliasTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ALIAS" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AliasTxnDataTable>
-        <AssetTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ASSET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></AssetTxnDataTable>
-        <ChainTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.CHAIN" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></ChainTxnDataTable>
-        <ExchangeTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></ExchangeTxnDataTable>
-        <LinkTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LINK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></LinkTxnDataTable>
-        <LockTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LOCK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></LockTxnDataTable>
-        <MetadataTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.METADATA" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></MetadataTxnDataTable>
-        <NamespaceTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.NAMESPACE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></NamespaceTxnDataTable>
-        <RestrictionTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></RestrictionTxnDataTable>
-        <SecretTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.SECRET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="selectedAccountAddressPlain"></SecretTxnDataTable>
-      </div>
-      <div v-else class="border-t border-b border-gray-200 text-gray-400 text-xs mt-10">
-        <div class="border-t border-b border-gray-200 my-3 py-6 px-2">
-          <div class="flex justify-center items-center border-gray-400">
-            <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-navy-primary mr-2"></div>
-            {{$t('dashboard.fetchingTx')}}
-          </div>
-        </div>
-      </div>
-    </div> -->
+    
   </div>
 </template>
 
 <script>
 import PendingDataTable from "@/modules/account/components/PendingDataTable.vue"
 import { computed, defineComponent, ref, getCurrentInstance, watch } from 'vue';
-import {ResolvedNamespace} from '@/modules/dashboard/model/resolvedNamespace';
 import { TransactionFilterType, TransactionFilterTypes } from '@/modules/dashboard/model/transactions/transaction';
 import MixedTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/MixedTxnDataTable.vue';
-import TransferTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/TransferTxnDataTable.vue';
-import AccountTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AccountTxnDT.vue';
-import AggregateTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AggregateTxnDT.vue';
-import AliasTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AliasTxnDT.vue';
-import AssetTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/AssetTxnDT.vue';
-import ChainTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/ChainTxnDT.vue';
-import ExchangeTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/ExchangeTxnDT.vue';
-import LinkTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/LinkTxnDT.vue';
-import LockTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/LockTxnDT.vue';
-import MetadataTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/MetadataTxnDT.vue';
-import NamespaceTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/NamespaceTxnDT.vue';
-import RestrictionTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/RestrictionTxnDT.vue';
-import SecretTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/SecretTxnDT.vue';
 import DashboardAssetDataTable from '@/modules/dashboard/components/DashboardAssetDataTable.vue';
-import DashboardNamespaceDataTable from '@/modules/dashboard/components/DashboardNamespaceDataTable.vue';
 import AddressQRModal from '@/modules/dashboard/components/AddressQRModal.vue';
-import MessageModal from '@/modules/dashboard/components/MessageModal.vue';
-import DecryptMessageModal from '@/modules/dashboard/components/DecryptMessageModal.vue';
 import { copyToClipboard, getXPXcurrencyPrice } from '@/util/functions';
 import { Helper } from '@/util/typeHelper';
 // eslint-disable-next-line no-unused-vars
 import { useToast } from "primevue/usetoast";
-import { Wallet } from "@/models/wallet";
 import { walletState } from '@/state/walletState';
 import { ChainUtils } from '@/util/chainUtils';
 import { networkState } from "@/state/networkState";
-import { AccountAPI } from '@/models/REST/account';
-import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 import qrcode from 'qrcode-generator';
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
-//import Dialog from 'primevue/dialog';
 import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
 import {AppState} from '@/state/appState'
@@ -268,21 +148,7 @@ export default defineComponent({
   components: {
     PendingDataTable,
     MixedTxnDataTable,
-    /* TransferTxnDataTable,
-    AccountTxnDataTable,
-    AggregateTxnDataTable,
-    AliasTxnDataTable,
-    AssetTxnDataTable,
-    ChainTxnDataTable,
-    ExchangeTxnDataTable,
-    LinkTxnDataTable,
-    LockTxnDataTable,
-    MetadataTxnDataTable,
-    NamespaceTxnDataTable,
-    RestrictionTxnDataTable,
-    SecretTxnDataTable, */
     DashboardAssetDataTable,
-    /* DashboardNamespaceDataTable, */
     AddressQRModal,
   },
   setup(props){
@@ -503,77 +369,6 @@ export default defineComponent({
       let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
       accountConfirmedTxnsCount.value = transactionsCount.confirmed;
     };
-    /*
-    emitter.on("TXN_UNCONFIRMED", (num)=>{
-      let newUnconfirmedTxnCount = num;
-      let newTxs = [];
-      let unconfirmedTxHashes = listenerState.allUnconfirmedTransactionsHash.slice(-newUnconfirmedTxnCount);
-      txHashLoop:
-      for(let i = 0; i < unconfirmedTxHashes.length; ++i){
-        if(allUnconfirmedTransactions.value.find((tx)=> tx.hash === unconfirmedTxHashes[i])){
-          continue;
-        }
-        addressTransactionLoop:
-        for(let x = 0; x < listenerState.unconfirmedTransactions.length; ++x){
-          let foundTx = listenerState.unconfirmedTransactions[i].unconfirmedTransactions.find((tx)=> unconfirmedTxHashes.includes(tx.transactionInfo.hash));
-        
-          if(foundTx){
-            newTxs.push(foundTx);
-            break addressTransactionLoop;
-          }
-        }
-      }
-      if(newTxs.length > 0){
-        let formatedTxs = dashboardService.formatUnconfirmedWithTransaction(newTxs);
-        allUnconfirmedTransactions.value = formatedTxs.concat(allUnconfirmedTransactions.value);
-        allPartialTransactions.value = allPartialTransactions.value.filter((tx)=> !listenerState.allUnconfirmedTransactionsHash.includes(tx.hash));
-      }
-    });
-    emitter.on("COSIGNER_SIGNED", (num)=>{
-      let newCosignTxnCount = num;
-      let cosignTxns = listenerState.allCosignatureAdded.slice(-newCosignTxnCount);
-      txHashLoop:
-      for(let i = 0; i < cosignTxns.length; ++i){
-        if(allPartialTransactions.value.find((tx)=> tx.hash === cosignTxns[i])){
-          let partialTransaction = allPartialTransactions.value.find((tx)=> tx.hash === cosignTxns[i]);
-          for(let x = 0; x < partialTransaction.innerTransactions.length; ++x){
-            partialTransaction.innerTransactions[x].signedPublicKeys = partialTransaction.innerTransactions[x].signedPublicKeys.concat(cosignTxns[i].signer);
-          }
-        }
-      }
-      //refreshPartialTransaction();
-    });
-    emitter.on("ABT_ADDED", (num)=>{
-      let newPartialTxnCount = num;
-      let newTxs = [];
-      let partialTxHashes = listenerState.allAggregateBondedTransactionHash.slice(-newPartialTxnCount);
-      txHashLoop:
-      for(let i = 0; i < partialTxHashes.length; ++i){
-        if(allPartialTransactions.value.find((tx)=> tx.hash === partialTxHashes[i])){
-          continue;
-        }
-        addressTransactionLoop:
-        for(let x = 0; x < listenerState.aggregateBondedTransaction.length; ++x){
-          let foundTx = listenerState.aggregateBondedTransaction[i].aggregateBonded.find((tx)=> partialTxHashes[i] === tx.transactionInfo.hash);
-        
-          if(foundTx){
-            newTxs.push(foundTx);
-            break addressTransactionLoop;
-          }
-        }
-      }
-      if(newTxs.length > 0){
-        rawPartialTransactions.value = rawPartialTransactions.value.concat(newTxs)
-        let formatedTxs = dashboardService.formatUnconfirmedWithTransaction(newTxs);
-        allPartialTransactions.value = formatedTxs.concat(allPartialTransactions.value);
-        updatePartialTransaction();
-      }
-    });
-    emitter.on("TXN_ERROR", (hash)=>{
-      allUnconfirmedTransactions.value = allUnconfirmedTransactions.value.filter((tx)=> ![hash].includes(tx.hash));
-      allPartialTransactions.value = allPartialTransactions.value.filter((tx)=> ![hash].includes(tx.hash));
-    });
-    */
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
