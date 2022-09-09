@@ -101,8 +101,7 @@
             <span class='ml-auto font-bold' v-else>{{ checkCosignBalance }} {{ currentNativeTokenName }}</span>
             <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
           </div>
-          <div v-if="!isMultiSig(selectedAccAdd)" class='border-b-2 border-gray-600 my-2'/>
-          <div v-else class='border-b-2 border-gray-600 mt-2'/>
+          <div class='border-b-2 border-gray-600 mt-2'/>
         </div>
         <div class="flex mt-0.5 text-white">
           <div v-if="!isMultiSig(selectedAccAdd)" class='text-xs '>{{$t('general.transactionFee')}}</div>
