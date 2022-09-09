@@ -228,16 +228,6 @@ export default defineComponent({
       toast.add({severity:'success', summary: t('home.switchDefault') , detail: data.name, group: 'br-custom', life: 3000});
     }
 
-    emitter.on('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', (payload) => {
-      openSetDefaultModal.value = payload;
-    });
-
-    emitter.on('CLOSE_SET_DEFAULT_ACCOUNT_MODAL', payload => {
-      if(payload){
-        openSetDefaultModal.value = false;
-      }
-    });
-
     const navigationSideBar = inject('navigationSideBar');
 
     const notificationMessage = ref('');
