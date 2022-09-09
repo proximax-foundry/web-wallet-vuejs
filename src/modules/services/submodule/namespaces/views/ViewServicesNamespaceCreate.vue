@@ -62,6 +62,7 @@
           <div class="flex text-gray-200 my-1">
             <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase'>{{$t('general.currentBalance')}}</div>
             <span class='ml-auto font-bold' v-if="getMultiSigCosigner.cosignerList.length == 1">{{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}</span>
+            <span class='ml-auto font-bold' v-else>{{ checkCosignBalance }} {{ currentNativeTokenName }}</span>
             <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
           </div>
           <div class="flex justify-between items-center text-gray-200 text-xs py-3">
@@ -458,6 +459,14 @@ export default {
       }
     })
 
+    const findAccWithAddress = address =>{
+      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)
+    }
+
+    const checkCosignBalance = computed(() => {
+      let cosignBalance = findAccWithAddress(cosignerAddress.value).balance;
+      return cosignBalance;
+    })
 
     const splitCurrency = (amount) => {
       let split = amount.toString().split(".")
@@ -597,7 +606,8 @@ export default {
       removeNamespace,
       setDefaultDuration,
       cosigner,
-      defaultAcc
+      defaultAcc,
+      checkCosignBalance
     }
   },
 

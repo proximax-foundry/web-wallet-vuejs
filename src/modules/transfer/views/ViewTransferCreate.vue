@@ -98,6 +98,7 @@
           <div class="flex text-gray-200 my-1">
             <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase'>{{$t('general.currentBalance')}}</div>
             <span class='ml-auto font-bold' v-if="getWalletCosigner.cosignerList.length == 1">{{  getWalletCosigner.cosignerList[0].balance }} {{ currentNativeTokenName }}</span>
+            <span class='ml-auto font-bold' v-else>{{ checkCosignBalance }} {{ currentNativeTokenName }}</span>
             <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
           </div>
         </div>
@@ -364,6 +365,11 @@ export default {
       }
     }
     
+    const checkCosignBalance = computed(() => {
+      let cosignBalance = findAccWithAddress(cosignAddress.value).balance;
+      return cosignBalance;
+    })
+
     const balance = computed(() => {
         if (walletState.currentLoggedInWallet) {
           if (accounts.value.find((element) => element.address === selectedAccAdd.value) == undefined){
@@ -908,7 +914,8 @@ export default {
       walletName,
       checkNamespace,
       currentNativeTokenName,
-      showLimitErr
+      showLimitErr,
+      checkCosignBalance
     };
   },
 };

@@ -162,6 +162,7 @@ general:
   asset: Asset | Assets
   assetId: Asset ID
   assetQues: What is an Asset?
+  assetRentalFee: Asset Rental Fee
   back: Back
   balance: Balance
   block: Block | Blocks

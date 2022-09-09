@@ -163,6 +163,7 @@ general:
   asset:  资产 | 资产
   assetId: 资产ID
   assetQues: 什么是资产？
+  assetRentalFee: Asset Rental Fee
   back: 返回
   balance: 余额
   block: 区块 | 区块
