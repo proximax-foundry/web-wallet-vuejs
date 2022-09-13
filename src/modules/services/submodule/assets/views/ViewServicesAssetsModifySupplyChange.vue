@@ -14,6 +14,9 @@
             </div>
           </div>
         </div>
+        <div v-if="!assetMutable" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
+          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{'Asset is immutable, no modify can be made.'}}</div>
+        </div>
         <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
           <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
         </div>
@@ -59,7 +62,7 @@
         </div>
         <div class="lg:grid lg:grid-cols-2 mt-5">
           <SelectModificationType :title="$t('asset.modificationType')" class="lg:mr-4" v-model="selectIncreaseDecrease" />
-          <SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="(maxAssetSupply - assetSupply.value)" :placeholder="$t('asset.quantityOf',{value:selectIncreaseDecrease})" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="(!supply)? $t('general.requiredField'): $t('general.insufficientBalance')" :decimal="Number(assetDivisibility)" class="lg:ml-4" />
+          <SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="(maxAssetSupply - assetSupply.value)" :placeholder="$t('asset.quantityOf',{value:selectIncreaseDecrease})" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="selectIncreaseDecrease == increase? ' Cannot increase asset supply. The total asset supply should not exceeding 900T' : ' You have exceed the maximum value for decrease asset supply.'" :decimal="Number(assetDivisibility)" class="lg:ml-4" />
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
@@ -118,6 +121,7 @@ import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
+import TransferInputCleanVue from '@/modules/transfer/components/TransferInputClean.vue';
 
 export default {
   name: 'ViewServicesAssetsModifySupplyChange',
@@ -199,8 +203,6 @@ export default {
       }
     };
 
-   
-
     const supply = ref('0');
     const plainAddress = Helper.createAddress(props.address).plain()
     let account = computed(()=>{
@@ -231,13 +233,16 @@ export default {
     const assetSupplyExact = ref(false);
     const assetTransferable = ref(false);
     const assetMutable = ref(false);
+    const assetAmount = ref(0);
     const selectIncreaseDecrease = ref('increase');
     let maxAssetSupply = 900000000000000;
-    const currentSupply = ref ('assetSupply')
+   
+
 
     if(account.value){
       let asset = account.value.assets.find( asset => asset.idHex === props.assetId);
       if(asset != undefined){
+        assetAmount.value = asset.amount;
         selectAsset.value = asset.idHex;
         assetTransferable.value = asset.transferable;
         assetMutable.value = asset.supplyMutable;
@@ -312,6 +317,11 @@ export default {
     transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
   }catch{e=>console.log(e)}
    
+  if (!assetMutable.value) {
+      disabledSelectIncreaseDecrease.value = true;
+      disabledSupply.value = true;
+      disabledPassword.value = true;
+    }
 
     const modifyAsset = () => {
       let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
@@ -334,9 +344,13 @@ export default {
       }
       if(n== 'increase'){
         showSupplyErr.value = supply.value > (maxAssetSupply - assetSupply.value);
-
       }else{
-        showSupplyErr.value = supply.value > Helper.convertToExact(assetSupplyExact.value, assetDivisibility.value);
+      if (assetSupply.value == assetAmount.value ){
+        showSupplyErr.value = supply.value > Helper.convertToExact((assetSupplyExact.value - 1), assetDivisibility.value);
+      }
+      else{
+          showSupplyErr.value = supply.value > (assetAmount.value);
+       }
       }
     });
 
@@ -347,8 +361,14 @@ export default {
       }
       if(selectIncreaseDecrease.value == 'increase'){ 
         showSupplyErr.value = supply.value > (maxAssetSupply - assetSupply.value);
-      }else{
-        showSupplyErr.value = n > Helper.convertToExact(assetSupplyExact.value, assetDivisibility.value);
+      }
+      else{
+      if (assetSupply.value == assetAmount.value ){
+        showSupplyErr.value = n > Helper.convertToExact((assetSupplyExact.value - 1), assetDivisibility.value);
+      }
+      else{
+            showSupplyErr.value = n > (assetAmount.value);
+        }
       }
     });
 
