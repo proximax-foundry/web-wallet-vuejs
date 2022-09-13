@@ -343,14 +343,13 @@ export default {
       }
       if(n== 'increase'){
         showSupplyErr.value = supply.value > (maxAssetSupply - assetSupply.value);
-      }else{
-      if (assetSupply.value == assetAmount.value ){
+      }
+      else if (assetSupply.value == assetAmount.value ){
         showSupplyErr.value = supply.value > Helper.convertToExact((assetSupplyExact.value - 1), assetDivisibility.value);
       }
       else{
           showSupplyErr.value = supply.value > (assetAmount.value);
        }
-      }
     });
 
     watch(supply, (n) => {
