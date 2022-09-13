@@ -62,7 +62,7 @@
         </div>
         <div class="lg:grid lg:grid-cols-2 mt-5">
           <SelectModificationType :title="$t('asset.modificationType')" class="lg:mr-4" v-model="selectIncreaseDecrease" />
-          <SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="(maxAssetSupply - assetSupply.value)" :placeholder="$t('asset.quantityOf',{value:selectIncreaseDecrease})" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="selectIncreaseDecrease == increase? ' Cannot increase asset supply. The total asset supply should not exceeding 900T' : ' You have exceed the maximum value for decrease asset supply.'" :decimal="Number(assetDivisibility)" class="lg:ml-4" />
+          <SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="(maxAssetSupply - assetSupply.value)" :placeholder="$t('asset.quantityOf',{value:selectIncreaseDecrease})" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="selectIncreaseDecrease == increase? ' Cannot increase asset supply. The total asset supply should not exceeding 900T' : ' You have exceeded the maximum value for decrease asset supply.'" :decimal="Number(assetDivisibility)" class="lg:ml-4" />
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
@@ -236,7 +236,6 @@ export default {
     const assetAmount = ref(0);
     const selectIncreaseDecrease = ref('increase');
     let maxAssetSupply = 900000000000000;
-   
 
 
     if(account.value){
@@ -362,14 +361,12 @@ export default {
       if(selectIncreaseDecrease.value == 'increase'){ 
         showSupplyErr.value = supply.value > (maxAssetSupply - assetSupply.value);
       }
-      else{
-      if (assetSupply.value == assetAmount.value ){
+      else if (assetSupply.value == assetAmount.value ){
         showSupplyErr.value = n > Helper.convertToExact((assetSupplyExact.value - 1), assetDivisibility.value);
       }
       else{
             showSupplyErr.value = n > (assetAmount.value);
         }
-      }
     });
 
     const totalFee = computed(() => {
