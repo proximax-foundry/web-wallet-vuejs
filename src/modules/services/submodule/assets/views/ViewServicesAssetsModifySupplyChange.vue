@@ -251,7 +251,7 @@ export default {
         assetSupplyExact.value = asset.supply, asset.divisibility;
       }
     }
-   
+
     const transactionFee = ref('0.000000');
     const transactionFeeExact = ref(0);
 
