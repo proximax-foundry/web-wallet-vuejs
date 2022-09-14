@@ -62,7 +62,7 @@
         </div>
         <div class="lg:grid lg:grid-cols-2 mt-5">
           <SelectModificationType :title="$t('asset.modificationType')" class="lg:mr-4" v-model="selectIncreaseDecrease" />
-          <SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="(maxAssetSupply - assetSupply.value)" :placeholder="$t('asset.quantityOf',{value:selectIncreaseDecrease})" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="selectIncreaseDecrease == increase? ' Cannot increase asset supply. The total asset supply should not exceeding 900T' : ' You have exceeded the maximum value for decrease asset supply.'" :decimal="Number(assetDivisibility)" class="lg:ml-4" />
+          <SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="(maxAssetSupply - assetSupply.value)" :placeholder="$t('asset.quantityOf',{value:selectIncreaseDecrease})" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="selectIncreaseDecrease == 'increase'? ' Cannot increase asset supply. The total asset supply should not exceeding 900T' : ' You have exceeded the maximum value for decrease asset supply.'" :decimal="Number(assetDivisibility)" class="lg:ml-4" />
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
@@ -139,7 +139,7 @@ export default {
     const {t} = useI18n();
     const router = useRouter();
     const toast = useToast();
-    let maxAmount = 9999999999.999999;
+    let maxAmount = 900000000000000;
 
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 
@@ -230,7 +230,6 @@ export default {
     const selectAsset = ref('');
     const assetDivisibility = ref(0);
     const assetSupply = ref(0);
-    const assetSupplyExact = ref(false);
     const assetTransferable = ref(false);
     const assetMutable = ref(false);
     const assetAmount = ref(0);
@@ -246,8 +245,7 @@ export default {
         assetTransferable.value = asset.transferable;
         assetMutable.value = asset.supplyMutable;
         assetDivisibility.value = asset.divisibility;
-        assetSupply.value = Helper.convertToCurrency(asset.supply, asset.divisibility);
-        assetSupplyExact.value = asset.supply, asset.divisibility;
+        assetSupply.value = asset.supply/Math.pow(10,asset.divisibility)//Helper.convertToCurrency(asset.supply, asset.divisibility);
       }
     }
 
@@ -341,15 +339,16 @@ export default {
         transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
         transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
       }
-      if(n== 'increase'){
-        showSupplyErr.value = supply.value > (maxAssetSupply - assetSupply.value);
+      if(n == 'increase'){
+        showSupplyErr.value = parseFloat(supply.value) > (maxAssetSupply - assetSupply.value);
+        
       }
-      else if (assetSupply.value == assetAmount.value ){
-        showSupplyErr.value = supply.value > Helper.convertToExact((assetSupplyExact.value - 1), assetDivisibility.value);
+      else { 
+        if (assetSupply.value == assetAmount.value ){
+          showSupplyErr.value = parseFloat(supply.value) > assetSupply.value-1
+        }
+        showSupplyErr.value = parseFloat(supply.value) > (assetAmount.value);
       }
-      else{
-          showSupplyErr.value = supply.value > (assetAmount.value);
-       }
     });
 
     watch(supply, (n) => {
@@ -358,14 +357,14 @@ export default {
         transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, selectIncreaseDecrease.value, n, assetDivisibility.value), AppState.nativeToken.divisibility);
       }
       if(selectIncreaseDecrease.value == 'increase'){ 
-        showSupplyErr.value = supply.value > (maxAssetSupply - assetSupply.value);
+        showSupplyErr.value = parseFloat(n) > (maxAssetSupply - assetSupply.value);
       }
-      else if (assetSupply.value == assetAmount.value ){
-        showSupplyErr.value = n > Helper.convertToExact((assetSupplyExact.value - 1), assetDivisibility.value);
-      }
-      else{
-            showSupplyErr.value = n > (assetAmount.value);
+      else { 
+        if (assetSupply.value == assetAmount.value ){
+          showSupplyErr.value = parseFloat(n) > assetSupply.value-1
         }
+        showSupplyErr.value = parseFloat(n) > (assetAmount.value);
+      } 
     });
 
     const totalFee = computed(() => {

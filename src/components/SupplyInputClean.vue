@@ -7,6 +7,7 @@
         :disabled ='disabled'
         class="supply_input"  
         :options="{
+          maximumValue:'900000000000000',
           showWarnings : false,
           digitGroupSeparator: ',',
           decimalCharacter: '.',
