@@ -15,7 +15,7 @@
           </div>
         </div>
         <div v-if="!assetMutable" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
-          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{'Asset is immutable, no modify can be made.'}}</div>
+          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">Asset is immutable</div>
         </div>
         <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
           <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
@@ -44,7 +44,7 @@
           <div class="lg:grid lg:grid-cols-2">
             <div class="my-3">
               <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('asset.currentSupply')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>'+$t('asset.supplyMsg2')+'<br>'+$t('asset.supplyMsg3')+'</tiptext>', escape: true}"></div>
-              <div class="text-black font-bold text-sm">{{ assetSupply }}</div>
+              <div class="text-black font-bold text-sm">{{ Helper.convertToCurrency(assetSupply,0) }}</div>
             </div>
             <div class="my-3">
               <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.divisibility')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>' + $t('asset.divisibilityMsg4') + '<br><br>' + $t('asset.divisibilityMsg2') + '<br>' + $t('asset.divisibilityMsg3') + '</tiptext>', escape: true}"></div>
@@ -62,7 +62,7 @@
         </div>
         <div class="lg:grid lg:grid-cols-2 mt-5">
           <SelectModificationType :title="$t('asset.modificationType')" class="lg:mr-4" v-model="selectIncreaseDecrease" />
-          <SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="(maxAssetSupply - assetSupply.value)" :placeholder="$t('asset.quantityOf',{value:selectIncreaseDecrease})" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="selectIncreaseDecrease == 'increase'? ' Cannot increase asset supply. The total asset supply should not exceeding 900T' : ' You have exceeded the maximum value for decrease asset supply.'" :decimal="Number(assetDivisibility)" class="lg:ml-4" />
+          <SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="(maxAssetSupply - assetSupply.value)" :placeholder="$t('asset.quantityOf',{value:selectIncreaseDecrease})" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="selectIncreaseDecrease == 'increase'? ' The total asset supply should not exceed 900T' : ' You have exceeded the maximum value for decrease asset supply.'" :decimal="Number(assetDivisibility)" class="lg:ml-4" />
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
@@ -104,13 +104,9 @@ import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInputClean from '@/components/SupplyInputClean.vue';
 import SelectModificationType from '@/modules/services/submodule/assets/components/SelectModificationType.vue';
-import { ChainProfileConfig } from "@/models/stores/";
-import { Wallet } from "@/models/wallet";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
-import { Currency } from "@/models/currency";
 import { Helper } from '@/util/typeHelper';
-import { ChainUtils } from '@/util/chainUtils';
 import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { toSvg } from "jdenticon";
@@ -121,7 +117,6 @@ import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
-import TransferInputCleanVue from '@/modules/transfer/components/TransferInputClean.vue';
 
 export default {
   name: 'ViewServicesAssetsModifySupplyChange',
@@ -140,9 +135,7 @@ export default {
     const router = useRouter();
     const toast = useToast();
     let maxAmount = 900000000000000;
-
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
-
     const showSupplyErr = ref(false);
     const walletPassword = ref('');
     const err = ref('');
@@ -184,11 +177,32 @@ export default {
       walletPassword.value.match(passwdPattern) && (supply.value > 0) && !showSupplyErr.value && !showNoBalance.value & !isNotCosigner.value
     ));
 
-    const selectedAccName = ref('');
-    const selectedAccAdd = ref('');
-    const selectedAccPublicKey = ref('');
-    const balance = ref('');
-    const balanceNumber = ref(maxAmount);
+    
+    const selectedAccName = computed(()=>{
+      if(!account.value){
+        return ''
+      }
+      return account.value.name
+    })
+    const selectedAccAdd = computed(()=>{
+      if(!account.value){
+        return ''
+      }
+      return account.value.address
+    })
+    const balanceNumber = computed(()=>{
+      if(!account.value){
+        return 0
+      }
+      return account.value.balance
+    })
+
+    const balance = computed(()=>{
+      if(!account.value){
+        return 
+      }
+      return Helper.toCurrencyFormat(account.value.balance, AppState.nativeToken.divisibility)
+    })
 
     const isMultiSig = (address) => {
       if(walletState.currentLoggedInWallet){
@@ -213,44 +227,61 @@ export default {
       }
     })
 
-    if(account.value){
-      selectedAccName.value = account.value.name;
-      selectedAccAdd.value = account.value.address;
-      selectedAccPublicKey.value = account.value.publicKey;
-      balance.value = Helper.toCurrencyFormat(account.value.balance, AppState.nativeToken.divisibility);
-      balanceNumber.value = account.value.balance;
-
-    }
+    
     const isMultiSigBool = ref(isMultiSig(selectedAccAdd.value));
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
 
     const svgString = ref(toSvg(props.address, 40, themeConfig.jdenticonConfig));
 
-    const selectAsset = ref('');
-    const assetDivisibility = ref(0);
-    const assetSupply = ref(0);
-    const assetTransferable = ref(false);
-    const assetMutable = ref(false);
-    const assetAmount = ref(0);
     const selectIncreaseDecrease = ref('increase');
     let maxAssetSupply = 900000000000000;
 
-
-    if(account.value){
-      let asset = account.value.assets.find( asset => asset.idHex === props.assetId);
-      if(asset != undefined){
-        assetAmount.value = asset.amount;
-        selectAsset.value = asset.idHex;
-        assetTransferable.value = asset.transferable;
-        assetMutable.value = asset.supplyMutable;
-        assetDivisibility.value = asset.divisibility;
-        assetSupply.value = asset.supply/Math.pow(10,asset.divisibility)//Helper.convertToCurrency(asset.supply, asset.divisibility);
+    const asset = computed(()=>{
+      if(!account.value){
+        return null
       }
-    }
+      return  account.value.assets.find( asset => asset.idHex === props.assetId);
+    })
+    const assetAmount = computed(()=>{
+      if(!asset.value){
+        return 0
+      }
+      return asset.value.amount
+    })
+    const selectAsset = computed(()=>{
+      if(!asset.value){
+        return ''
+      }
+      return asset.value.idHex
+    })
+    const assetTransferable = computed(()=>{
+      if(!asset.value){
+        return false
+      }
+      return asset.value.transferable
+    })
+    const assetMutable = computed(()=>{
+      if(!asset.value){
+        return false
+      }
+      return asset.value.supplyMutable
+    })
+    const assetDivisibility = computed(()=>{
+      if(!asset.value){
+        return 0
+      }
+      return asset.value.divisibility
+    })
 
-    const transactionFee = ref('0.000000');
-    const transactionFeeExact = ref(0);
+    const assetSupply = computed(()=>{
+      if(!asset.value){
+        return 0
+      }
+      return asset.value.supply/Math.pow(10,asset.value.divisibility)
+    })
+
+    
 
     const fetchAccount = (publicKey) => {
       return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
@@ -309,16 +340,32 @@ export default {
         return '';
       }
     });
-  try{
-    transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
-    transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
-  }catch{e=>console.log(e)}
-   
-  if (!assetMutable.value) {
-      disabledSelectIncreaseDecrease.value = true;
-      disabledSupply.value = true;
-      disabledPassword.value = true;
-    }
+
+    const transactionFee = computed(()=>{
+      if(!AppState.isReady){
+        return '0'
+      }
+      return Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(props.assetId, selectIncreaseDecrease.value, parseFloat(supply.value), assetDivisibility.value), AppState.nativeToken.divisibility);
+    })
+    const transactionFeeExact = computed(()=>{
+      if(!AppState.isReady){
+        return 0
+      }
+      return Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( props.assetId, selectIncreaseDecrease.value, parseFloat(supply.value), assetDivisibility.value), AppState.nativeToken.divisibility);
+    })
+  
+    watch(assetMutable,n=>{
+      if(!n){
+        disabledSelectIncreaseDecrease.value = true;
+        disabledSupply.value = true;
+        disabledPassword.value = true;
+      }else{
+        disabledSelectIncreaseDecrease.value = false;
+        disabledSupply.value = false;
+        disabledPassword.value = false;
+      }
+    },{immediate:true})
+ 
 
     const modifyAsset = () => {
       let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
@@ -335,13 +382,8 @@ export default {
     };
 
     watch(selectIncreaseDecrease, (n) => {
-      if(selectAsset.value){
-        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
-        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, n, supply.value, assetDivisibility.value), AppState.nativeToken.divisibility);
-      }
       if(n == 'increase'){
         showSupplyErr.value = parseFloat(supply.value) > (maxAssetSupply - assetSupply.value);
-        
       }
       else { 
         if (assetSupply.value == assetAmount.value ){
@@ -352,10 +394,6 @@ export default {
     });
 
     watch(supply, (n) => {
-      if(selectAsset.value){
-        transactionFee.value = Helper.convertToCurrency(AssetsUtils.getMosaicSupplyChangeTransactionFee(selectAsset.value, selectIncreaseDecrease.value, n, assetDivisibility.value), AppState.nativeToken.divisibility);
-        transactionFeeExact.value = Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( selectAsset.value, selectIncreaseDecrease.value, n, assetDivisibility.value), AppState.nativeToken.divisibility);
-      }
       if(selectIncreaseDecrease.value == 'increase'){ 
         showSupplyErr.value = parseFloat(n) > (maxAssetSupply - assetSupply.value);
       }
@@ -388,14 +426,8 @@ export default {
 
     watch(totalFee, (n) => {
       if(balance.value < n){
-        // if(!showNoAsset.value){
-        //   if(!isNotCosigner.value){
-        //     showNoBalance.value = true;
-        //   }
-        // }
         setFormInput(true);
       }else{
-        // showNoBalance.value = false;
         setFormInput(false);
       }
     });
