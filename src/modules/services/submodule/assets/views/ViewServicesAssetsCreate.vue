@@ -426,11 +426,17 @@ export default {
     })
 
     const findAccWithAddress = address =>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
       return walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)
     }
 
     const checkCosignBalance = computed(() => {
       let cosignBalance = findAccWithAddress(cosignerAddress.value).balance;
+      if(!cosignBalance){
+        return 0
+      }
       return cosignBalance;
     })
 
