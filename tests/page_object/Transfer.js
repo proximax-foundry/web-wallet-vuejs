@@ -14,7 +14,7 @@ const elements = {
     transfer_amount: '.supply_input',
     transfer_button: 'button.w-full',
     error_wrongpassword: '.error',
-    transaction_successful: 'div.p-toast:nth-child(9) > div:nth-child(1) > div:nth-child(1)',
+    transaction_successful: 'div.p-toast:nth-child(12) > div:nth-child(1) > div:nth-child(1)',
     password_eyeicon: 'svg.svg-inline--fa:nth-child(2) > path:nth-child(1)',
     add_asset: 'button.my-2',
     select_asset: 'select.text-gray-600',
@@ -88,6 +88,7 @@ const commands = {
 
     transfer_asset(amount1, amount2){
         return this
+        .click("@transfer_tab")
         .click("@add_asset")
         .click("@select_asset")
         .click("@asset")

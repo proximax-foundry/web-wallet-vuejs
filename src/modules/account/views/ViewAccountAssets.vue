@@ -82,7 +82,7 @@ export default {
             mosaicOption.push({
                 i:index,
                 id: i.idHex,
-                name: (i.namespaceNames.length>0?i.namespaceNames[0]:'-'),
+                name: (i.namespaceNames.length>0?formatNamespaceName(i.namespaceNames):'-'),
                 balance: Helper.toCurrencyFormat(i.amount,i.divisibility),
                 isCreator: acc.value? (i.creator == acc.value.publicKey? true:false):false
             });
@@ -92,6 +92,9 @@ export default {
             
         });
 
+        const formatNamespaceName = (namespaceNames) => {
+            return namespaceNames.join(" / ")
+        }
        
         const splitBalance = balance=>{
             let split = balance.split(".")
