@@ -15,7 +15,7 @@
       </Column>
       <Column field="amount" :header="$t('general.amount')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" >
         <template #body="{data}">
-          <span class="uppercase font-semibold text-xs">{{data.amount}}</span>
+          <span class="uppercase font-semibold text-xs">{{Number(data.amount).toLocaleString()}}</span>
         </template>
       </Column>
       <template #empty>
