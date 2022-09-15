@@ -365,7 +365,7 @@ export default {
         disabledPassword.value = false;
       }
     },{immediate:true})
- 
+    
 
     const modifyAsset = () => {
       let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
@@ -387,9 +387,11 @@ export default {
       }
       else { 
         if (assetSupply.value == assetAmount.value ){
-          showSupplyErr.value = parseFloat(supply.value) > assetSupply.value-1
+          showSupplyErr.value = parseFloat(supply.value) > assetSupply.value-1;
         }
-        showSupplyErr.value = parseFloat(supply.value) > (assetAmount.value);
+        else{
+          showSupplyErr.value = parseFloat(supply.value) > (assetAmount.value);
+        }
       }
     });
 
@@ -399,9 +401,11 @@ export default {
       }
       else { 
         if (assetSupply.value == assetAmount.value ){
-          showSupplyErr.value = parseFloat(n) > assetSupply.value-1
+          showSupplyErr.value = parseFloat(n) > assetSupply.value - 1;
         }
-        showSupplyErr.value = parseFloat(n) > (assetAmount.value);
+        else{
+          showSupplyErr.value = parseFloat(n) > (assetAmount.value);
+        }
       } 
     });
 
