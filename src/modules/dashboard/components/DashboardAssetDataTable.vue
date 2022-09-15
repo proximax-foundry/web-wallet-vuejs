@@ -15,7 +15,7 @@
       </Column>
       <Column field="amount" :header="$t('general.amount')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" >
         <template #body="{data}">
-          <span class="uppercase font-semibold text-xs">{{Number(data.amount).toLocaleString()}}</span>
+          <span class="uppercase font-semibold text-xs">{{ Helper.toCurrencyFormat(data.amount, data.divisibility)}}</span>
         </template>
       </Column>
       <template #empty>
@@ -32,6 +32,7 @@
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tooltip from 'primevue/tooltip';
+import {Helper} from '@/util/typeHelper';
 
 defineProps({
   assets: Array
