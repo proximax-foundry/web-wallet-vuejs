@@ -469,10 +469,7 @@ export default {
     }
 
     const checkCosignBalance = computed(() => {
-      let cosignBalance = findAccWithAddress(cosignerAddress.value).balance;
-      if(!cosignBalance){
-        return 0
-      }
+      let cosignBalance = findAccWithAddress(cosignerAddress.value)?findAccWithAddress(cosignerAddress.value).balance:0;
       return cosignBalance;
     })
 
