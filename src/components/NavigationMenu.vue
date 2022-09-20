@@ -1,7 +1,6 @@
 <template>
   <div class="flex flex-col" @mouseover="hoverOverNavigation" @mouseout="hoverOutNavigation">
     <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
-      <div class="my-3 px-10  3xl:px-10 font-txs text-gray-400 uppercase flex justify-between items-center">Default account<img src="@/assets/img/navi/icon-switch-account.svg" class="cursor-pointer" @click="triggerSetDefaultModal"></div>
       <div>
         <div class="cursor-pointer link_block flex items-center justify-between">
           <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddress }}" class="flex items-center">
@@ -201,10 +200,6 @@ export default{
       }
     });
 
-    const triggerSetDefaultModal = () => {
-      emitter.emit('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', true);
-    }
-
     emitter.on('DEFAULT_ACCOUNT_SWITCHED', payload => {
       if(!walletState.currentLoggedInWallet){
         return
@@ -283,7 +278,6 @@ export default{
       selectedAccountName,
       openSetDefaultModal,
       selectedAccountAddress,
-      triggerSetDefaultModal,
       isMultiSig,
       selectedAccountPublicKey
     };
