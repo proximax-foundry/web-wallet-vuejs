@@ -2,9 +2,10 @@
   <div class="block text-left">
     <div class="text-xs mb-2">{{ formLabel }}</div>
     <div class="flex justify-between">
-      <div>
+      <div class="flex items-center cursor-pointer" @click="displayTokenOption">
+        <font-awesome-icon icon="caret-down" class="mr-1 text-gray-700" />
         <img src="@/modules/services/submodule/stacking/img/tether-48.png" class="w-9 h-9 inline-block" />
-        <span>USDT (BEP20)</span>
+        <div class="ml-1 text-tsm">USDT (BEP20)</div>
       </div>
       <div>
         <div>
@@ -24,7 +25,7 @@
             @focus="$event.target.select()"
           />
         </div>
-        <div class="text-xs text-gray-400">Balance: {{ Helper.convertToCurrency(amount * 100, 2) }}</div>
+        <div class="text-xs text-gray-400 text-right">Balance: {{ Helper.convertToCurrency(amount * 100, 2) }}</div>
       </div>
     </div>
   </div>
@@ -44,10 +45,22 @@ export default {
   props: {
     formLabel: String,
     amount: Number,
-    modelValue: String
+    modelValue: Number
   },
-  setup(){
+  components:{
+    AutoNumericVue
+  },
+  emits:[
+    'displayTokenOptions'
+  ],
+  setup(props, { emit }){
+
+    const displayTokenOption = () => {
+      emit('displayTokenOptions')
+    }
+
     return {
+      displayTokenOption,
       Helper
     }
   }
@@ -55,6 +68,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 .supply_input{
-  @apply w-full flex border-0 outline-none border-white drop-shadow-none filter focus:outline-none text-sm text-gray-600 font-bold disabled:opacity-50;
+  @apply flex border-0 outline-none border-white drop-shadow-none filter focus:outline-none text-sm text-gray-600 font-bold disabled:opacity-50 mb-1 text-right;
 }
 </style>
