@@ -91,7 +91,16 @@
                   </div>
                   <div v-if="item.sdas.length > 0">
                     <div>{{$t('general.sda',2)}}</div>
-                    <div>{{displaySDA(item.sdas.join(", ")) }}</div>
+                    <div class="flex items-center">
+                      <div>{{displaySDA(item.sdas.join(", ")) }}</div>
+                      <img v-if="item.sdas.join(', ').toLowerCase().includes('xpx')" src="@/modules/account/img/proximax-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
+                      <img v-else-if="item.sdas.join(', ').toLowerCase().includes('xar')" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
+                      <img v-else-if="item.sdas.join(', ').toLowerCase().includes('met')" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
+                      <img v-else src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
+                      <span v-if="item.sdas.join(', ').toLowerCase().includes('xpx')">XPX</span>
+                      <span v-else-if="item.sdas.join(', ').toLowerCase().includes('xar')">XAR</span>
+                      <span v-else-if="item.sdas.join(', ').toLowerCase().includes('metx')">METX</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -179,9 +188,21 @@ export default {
     currentName.value = currentAccount.name;
 
     let displaySDA = asset=>{
-      let part1 = asset.slice(0,19)
-      let part2 = asset.slice(29,32)
-      return part1+"..."+part2
+      if(asset.toLowerCase().includes("xpx")){
+        let xpx = Helper.toCurrencyFormat(asset.slice(0,-3))
+        return xpx
+      }
+      else if(asset.toLowerCase().includes("metx")){
+        let metx = Helper.toCurrencyFormat(asset.slice(0,-27))
+        return metx
+      }
+      else if(asset.toLowerCase().includes("xar")){
+        let xar = Helper.toCurrencyFormat(asset.slice(0,-29))
+        return xar
+      }
+      else{
+        return asset
+      }
   }
 
     const checkCosigner = ()=>{
