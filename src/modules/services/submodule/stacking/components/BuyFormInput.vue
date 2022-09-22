@@ -4,7 +4,7 @@
     <div class="flex justify-between">
       <div class="flex items-center cursor-pointer" @click="displayTokenOption">
         <font-awesome-icon icon="caret-down" class="mr-1 text-gray-700" />
-        <img src="@/modules/services/submodule/stacking/img/tether-48.png" class="w-9 h-9 inline-block" />
+        <img src="@/modules/services/submodule/stacking/img/tokens/usdt-48.png" class="w-9 h-9 inline-block" />
         <div class="ml-1 text-tsm">USDT (BEP20)</div>
       </div>
       <div>
