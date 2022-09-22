@@ -91,16 +91,22 @@
                   </div>
                   <div v-if="item.sdas.length > 0">
                     <div>{{$t('general.sda',2)}}</div>
-                    <div class="flex items-center">
-                      <div>{{displaySDA(item.sdas.join(", ")) }}</div>
-                      <img v-if="item.sdas.join(', ').toLowerCase().includes('xpx')" src="@/modules/account/img/proximax-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
-                      <img v-else-if="item.sdas.join(', ').toLowerCase().includes('xar')" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
-                      <img v-else-if="item.sdas.join(', ').toLowerCase().includes('met')" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
-                      <img v-else src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
-                      <span v-if="item.sdas.join(', ').toLowerCase().includes('xpx')">XPX</span>
-                      <span v-else-if="item.sdas.join(', ').toLowerCase().includes('xar')">XAR</span>
-                      <span v-else-if="item.sdas.join(', ').toLowerCase().includes('metx')">METX</span>
-                    </div>
+                      <div>
+                        <div v-for="(element,transfer) in item.sdas" :key="transfer">
+                          <div class="flex items-center">
+                            <div>{{displaySDA(element) }}</div>
+                            <img v-if="element.toLowerCase().includes('xpx')" src="@/modules/account/img/proximax-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
+                            <img v-else-if="element.toLowerCase().includes('xar')" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
+                            <img v-else-if="element.toLowerCase().includes('met')" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
+                            <div v-else-if="element.split(' ').length==2" class="ml-2 text-gray-400">{{displayAssetID(element)}}</div>
+                            <img v-else src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
+                            <span v-if="element.toLowerCase().includes('xpx')" class="text-blue-600">XPX</span>
+                            <span v-else-if="element.toLowerCase().includes('xar')" class="text-blue-600">XAR</span>
+                            <span v-else-if="element.toLowerCase().includes('metx')" class="text-blue-600">METX</span>
+                            <span v-else class="text-blue-600">{{displayLinkNamespace(element)}}</span>
+                          </div>
+                        </div>
+                      </div>
                   </div>
                 </div>
               </div>
@@ -188,22 +194,19 @@ export default {
     currentName.value = currentAccount.name;
 
     let displaySDA = asset=>{
-      if(asset.toLowerCase().includes("xpx")){
-        let xpx = Helper.toCurrencyFormat(asset.slice(0,-3))
-        return xpx
-      }
-      else if(asset.toLowerCase().includes("metx")){
-        let metx = Helper.toCurrencyFormat(asset.slice(0,-27))
-        return metx
-      }
-      else if(asset.toLowerCase().includes("xar")){
-        let xar = Helper.toCurrencyFormat(asset.slice(0,-29))
-        return xar
-      }
-      else{
-        return asset
-      }
-  }
+        let SDAAmount = asset.split(" ")
+        return Helper.toCurrencyFormat(SDAAmount[0])
+    }
+
+    let displayAssetID = asset =>{
+      let AssetID = asset.split(" ")
+      return AssetID[1]
+    }
+
+    let displayLinkNamespace = asset => {
+      let linkNamespace = asset.replace(/\(/g,"").replace(/\)/g,"").split(" ")
+      return linkNamespace[2]
+    }
 
     const checkCosigner = ()=>{
       let foundCosigner = allCosigners.find(cosigner => cosigner === currentPublicKey);
@@ -457,6 +460,8 @@ export default {
       invalidCosigner,
       signAggTxn,
       displaySDA,
+      displayLinkNamespace,
+      displayAssetID,
       isSigned,
       innerRelatedList,
       innerSignedList,
