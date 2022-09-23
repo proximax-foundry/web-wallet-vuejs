@@ -12,44 +12,42 @@
           </div>
           <div class="mt-2">
             <div class="text-txs text-right mr-2 mt-2 text-gray-400">Balance</div>
-            <div class="mb-2 flex justify-between items-center hover:bg-blue-200 p-2 duration-200 transition-all cursor-pointer" v-for="token, index in tokens" :key="index">
+            <div class="mb-2 flex justify-between items-center hover:bg-blue-200 p-2 duration-200 transition-all cursor-pointer" v-for="token, index in displayTokens" :key="index" @click="$emit('selectToken', token.name)">
               <div class="text-xs text-gray-700"><img :src="require('@/modules/services/submodule/stacking/img/tokens/' + token.img)" class="inline-block w-6 h-6 mr-1" />{{ token.name }}</div>
               <div class="text-xs text-gray-700">{{ token.balance }}</div>
             </div>
           </div>
-          <div class='text-center cursor-pointer text-xs font-semibold text-blue-link mt-2' @click="closeModal">{{$t('general.close')}}</div>
+          <div class='text-center cursor-pointer text-xs font-semibold text-blue-link mt-2' @click="$emit('closeModal')">{{$t('general.close')}}</div>
         </div>
       </div>
     </transition>
     <div v-if="toggleModal" class="fixed inset-0 bg-opacity-60 bg-gray-100 z-20"></div>
 </template>
 <script>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 export default {
   name: 'SelectTokenModal',
-  emit: ['closeModal'],
   props:{
-    toggleModal: Boolean
+    toggleModal: Boolean,
+    tokens: Array,
   },
-  setup(props, {emit}){
-    const closeModal = () => {
-      emit('closeModal');
-    }
-
+  emits: ['closeModal', 'selectToken'],
+  setup(props){
     const strFilteredToken = ref('');
 
-    const tokens = [
-      { img: 'usdt-48.png', name: 'USDT', balance: 1234.5 },
-      { img: 'usdc-48.png', name: 'USDC', balance: 1234.5 },
-      { img: 'usdp-48.png', name: 'USDP', balance: 1234.5 },
-      { img: 'busd-48.png', name: 'BUSD', balance: 1234.5 },
-    ];
+    const displayTokens = computed(() => {
+      if(strFilteredToken.value.length > 0){
+        return props.tokens.filter(token => token.name.includes(strFilteredToken.value.toUpperCase()));
+      }else{
+        return props.tokens;
+      }
+    })
+
 
     return {
       strFilteredToken,
-      closeModal,
-      tokens,
+      displayTokens
     }
   }
 }

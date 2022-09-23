@@ -6,13 +6,13 @@
         <div>
           <div class="text-xs flex items-center justify-end"><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask-fox.svg" class="w-4 h-4 inline-block" />&nbsp;(BEP20)&nbsp;1234....1234</div>
           <div>
-            <BuyFormInput formLabel="From" v-model="fromInputAmount" :amount="fromAmount" @displayTokenOptions="isDisplayBuyTokenModal = true" />
-            <BuyFormInput formLabel="To" v-model="toInputAmount" :amount="toAmount" class="mt-5" />
+            <BuyFormInput formLabel="From" :tokens="fromTokens" v-model="fromInputAmount" :selectedToken="selectedFromToken" :amount="fromAmount" @confirmedSelectToken="selectFromToken" />
+            <BuyFormInput formLabel="To" :tokens="fromTokens" v-model="toInputAmount" :selectedToken="selectedToToken" :amount="toAmount" @confirmedSelectToken="selectToToken" class="mt-5" />
           </div>
         </div>
       </div>
     </div>
-    <SelectTokenModal @closeModal="isDisplayBuyTokenModal = false" :toggleModal="isDisplayBuyTokenModal" />
+    
   </div>
 </template>
 
@@ -22,28 +22,41 @@ import { useRouter } from "vue-router";
 import { networkState } from "@/state/networkState";
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { useI18n } from 'vue-i18n';
+import { availableTokens } from '@/modules/services/submodule/stacking/tokens';
 import BuyFormInput from '@/modules/services/submodule/stacking/components/BuyFormInput.vue';
-import SelectTokenModal from '@/modules/services/submodule/stacking/components/SelectTokenModal.vue';
+
 
 export default {
   name: "ViewServicesStackingBuy",
   components: {
     BuyFormInput,
-    SelectTokenModal
-},
+  },
   setup(){
+    const fromTokens = availableTokens;
     const toAmount = ref(12345.54);
     const fromAmount = ref(12345.87);
     const fromInputAmount = ref(0);
     const toInputAmount = ref(0);
-    const isDisplayBuyTokenModal = ref(false);
+
+    const selectedFromToken = ref('USDT');
+    const selectedToToken = ref('USDT');
+    const selectFromToken = (token) => {
+      selectedFromToken.value = token;
+    }
+    const selectToToken = (token) => {
+      selectedToToken.value = token;
+    }
 
     return {
+      fromTokens,
       toAmount,
       fromAmount,
       fromInputAmount,
       toInputAmount,
-      isDisplayBuyTokenModal,
+      selectedFromToken,
+      selectedToToken,
+      selectFromToken,
+      selectToToken,
     }
   }
 }
