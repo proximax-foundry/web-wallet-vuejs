@@ -11,7 +11,8 @@
             <img src="@/modules/services/submodule/addressbook/img/icon-search_black.svg" class="inline-block">
           </div>
           <div class="mt-2">
-            <div class="mb-2 flex justify-between items-center" v-for="token, index in tokens" :key="index">
+            <div class="text-txs text-right mr-2 mt-2 text-gray-400">Balance</div>
+            <div class="mb-2 flex justify-between items-center hover:bg-blue-200 p-2 duration-200 transition-all cursor-pointer" v-for="token, index in tokens" :key="index">
               <div class="text-xs text-gray-700"><img :src="require('@/modules/services/submodule/stacking/img/tokens/' + token.img)" class="inline-block w-6 h-6 mr-1" />{{ token.name }}</div>
               <div class="text-xs text-gray-700">{{ token.balance }}</div>
             </div>
