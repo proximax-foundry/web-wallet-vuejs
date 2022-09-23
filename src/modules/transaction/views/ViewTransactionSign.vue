@@ -102,8 +102,8 @@
                             <span v-if="element.toLowerCase().includes('xpx')" class="text-blue-600">XPX</span>
                             <span v-else-if="element.toLowerCase().includes('xar')" class="text-blue-600">XAR</span>
                             <span v-else-if="element.toLowerCase().includes('metx')" class="text-blue-600">METX</span>
-                            <span v-else-if="element.split(' ').length==2" class="text-gray-400">{{displayAssetId(element)}}</span>
-                            <span v-else class="text-blue-600">{{displayLinkNamespace(element)}}</span>
+                            <a :href="explorerLink(displayAssetId(element))" target=_new v-else-if="element.split(' ').length==2"><div class="text-gray-400 cursor-pointer">{{displayAssetId(element)}}</div></a>
+                            <a :href="explorerLink(displayAssetId(element))" target=_new v-else><div class="text-blue-600 cursor-pointer">{{displayLinkNamespace(element)}}</div></a>
                           </div>
                         </div>
                       </div>
@@ -207,6 +207,13 @@ export default {
       let linkNamespace = asset.replace(/\(/g,"").replace(/\)/g,"").split(" ")
       return linkNamespace[2]
     }
+
+    const explorerLink = assetId=>{  
+    if(!networkState.currentNetworkProfile){
+        return ''
+    }
+    return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
+}
 
     const checkCosigner = ()=>{
       let foundCosigner = allCosigners.find(cosigner => cosigner === currentPublicKey);
@@ -474,6 +481,7 @@ export default {
       isHasSigned,
       displayAccountLabel,
       displayAccountAddress,
+      explorerLink
     };
   }
 };
