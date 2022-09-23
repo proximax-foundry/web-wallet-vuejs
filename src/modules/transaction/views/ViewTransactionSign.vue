@@ -98,11 +98,11 @@
                             <img v-if="element.toLowerCase().includes('xpx')" src="@/modules/account/img/proximax-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
                             <img v-else-if="element.toLowerCase().includes('xar')" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
                             <img v-else-if="element.toLowerCase().includes('met')" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
-                            <div v-else-if="element.split(' ').length==2" class="ml-2 text-gray-400">{{displayAssetID(element)}}</div>
                             <img v-else src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
                             <span v-if="element.toLowerCase().includes('xpx')" class="text-blue-600">XPX</span>
                             <span v-else-if="element.toLowerCase().includes('xar')" class="text-blue-600">XAR</span>
                             <span v-else-if="element.toLowerCase().includes('metx')" class="text-blue-600">METX</span>
+                            <span v-else-if="element.split(' ').length==2" class="text-gray-400">{{displayAssetId(element)}}</span>
                             <span v-else class="text-blue-600">{{displayLinkNamespace(element)}}</span>
                           </div>
                         </div>
@@ -198,9 +198,9 @@ export default {
         return Helper.toCurrencyFormat(SDAAmount[0])
     }
 
-    let displayAssetID = asset =>{
-      let AssetID = asset.split(" ")
-      return AssetID[1]
+    let displayAssetId = asset =>{
+      let assetId = asset.split(" ")
+      return assetId[1]
     }
 
     let displayLinkNamespace = asset => {
@@ -461,7 +461,7 @@ export default {
       signAggTxn,
       displaySDA,
       displayLinkNamespace,
-      displayAssetID,
+      displayAssetId,
       isSigned,
       innerRelatedList,
       innerSignedList,
