@@ -75,11 +75,19 @@ import NamespaceDataTable from "../components/NamespaceDataTable.vue"
         id: namespace.idHex,
         linkedAssetAddress: namespace.linkedId!=''?namespace.linkType==2?Address.createFromRawAddress(namespace.linkedId).pretty():namespace.linkedId:'-',
         expiringBlock: namespace.endHeight,
-        isActive: typeof namespace.endHeight === "string" ? true : namespace.endHeight > AppState.readBlockHeight
+        isActive: validateExpiry(namespace.name)? true:  namespace.endHeight > AppState.readBlockHeight 
       })
     }
     return namespaces
   })
+
+  const validateExpiry = (name :string)=>{
+    if(name.includes('prx')){
+      return true
+    }
+    return false
+  }
+  
   /* const getNamespaceInfo = () =>{
     if(!acc.value){
       return

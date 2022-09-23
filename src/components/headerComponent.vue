@@ -108,7 +108,6 @@
       </div>
     </div>
   </header>
-  <SetAccountDefaultModal @dashboardSelectAccount="updateSelectedAccount" :toggleModal="openSetDefaultModal" />
 </template>
 
 <script> 
@@ -131,7 +130,6 @@ import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { TransactionType } from "tsjs-xpx-chain-sdk";
 import { WalletUtils } from "@/util/walletUtils";
 import {useI18n} from 'vue-i18n'
-import SetAccountDefaultModal from '@/modules/dashboard/components/SetAccountDefaultModal.vue';
 import { NotificationUtils } from '@/util/notificationUtils';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
@@ -140,7 +138,6 @@ export default defineComponent({
   components: {
     // Dropdown,
     selectLanguageModal,
-    SetAccountDefaultModal,
   },
 
   name: 'headerComponent',
@@ -215,7 +212,6 @@ export default defineComponent({
       }, 100);
     }
 
-    const openSetDefaultModal = ref(false);
 
     const updateSelectedAccount = (data)=>{
       // if(data.type == 0){
@@ -227,16 +223,6 @@ export default defineComponent({
       // walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
       toast.add({severity:'success', summary: t('home.switchDefault') , detail: data.name, group: 'br-custom', life: 3000});
     }
-
-    emitter.on('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', (payload) => {
-      openSetDefaultModal.value = payload;
-    });
-
-    emitter.on('CLOSE_SET_DEFAULT_ACCOUNT_MODAL', payload => {
-      if(payload){
-        openSetDefaultModal.value = false;
-      }
-    });
 
     const navigationSideBar = inject('navigationSideBar');
 
@@ -986,7 +972,6 @@ export default defineComponent({
      });
 
     return {
-      openSetDefaultModal,
       updateSelectedAccount,
       toggleSidebar,
       networkState,
