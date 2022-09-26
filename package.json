@@ -15,8 +15,10 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
     "@fortawesome/free-solid-svg-icons": "^5.15.2",
     "@fortawesome/vue-fontawesome": "^3.0.0-3",
+    "@myetherwallet/mewconnect-web-client": "^2.2.0-beta.16",
     "@tailwindcss/postcss7-compat": "^2.2.9",
     "@vueform/multiselect": "^1.5.0",
+    "@walletconnect/web3-provider": "^1.8.0",
     "animate.css": "^4.1.1",
     "autonumeric-vue": "^1.0.8",
     "chart.js": "^3.3.2",
@@ -40,6 +42,7 @@
     "primeicons": "^4.1.0",
     "primevue": "^3.15.0",
     "qrcode-generator": "^1.4.4",
+    "regenerator-runtime": "^0.13.9",
     "rxjs": "^6.6.6",
     "sass": "^1.46.0",
     "sass-loader": "^7.3.1",
@@ -58,7 +61,8 @@
     "vue-router": "^4.0.0-0",
     "vue-tippy": "^6.0.0-alpha.29",
     "vue3-blocks-tree": "^0.6.1",
-    "vue3-simple-file-input": "^1.0.3"
+    "vue3-simple-file-input": "^1.0.3",
+    "web3modal": "^1.9.9"
   },
   "devDependencies": {
     "@intlify/vue-i18n-loader": "^4.1.0",

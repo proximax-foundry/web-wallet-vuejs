@@ -196,15 +196,15 @@ export class NotificationUtils {
       timeDiff.months+=12;
     }
     if(timeDiff.years > 0){
-      return timeDiff.years + ' ' + t('general.year',timeDiff.years);
+      return timeDiff.years + ' ' + t('general.year',timeDiff.years.toString());
     }else if(timeDiff.months > 0){
-      return timeDiff.months + ' ' + t('general.month',timeDiff.months);
+      return timeDiff.months + ' ' + t('general.month',timeDiff.months.toString());
     }else if(timeDiff.days > 0){
-      return timeDiff.days + ' ' + t('general.day',timeDiff.days);
+      return timeDiff.days + ' ' + t('general.day',timeDiff.days.toString());
     }else if(timeDiff.hours > 0){
-      return timeDiff.hours + ' ' + t('general.hour',timeDiff.hours);
+      return timeDiff.hours + ' ' + t('general.hour',timeDiff.hours.toString());
     }else{
-      return timeDiff.mins + ' ' + t('general.minute',timeDiff.mins);
+      return timeDiff.mins + ' ' + t('general.minute',timeDiff.mins.toString());
     }
   }
 
