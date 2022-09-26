@@ -2,7 +2,7 @@
   <div>
     <div class='lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5'>
       <div class='mt-6 px-6 py-10 border filter shadow-lg text-center'>
-        <div class="text-md mb-3">Buy MetX</div>
+        <div class="text-md mb-3">Buy {{ selectedToToken }}</div>
         <div>
           <div class="text-xs flex items-center justify-end"><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask-fox.svg" class="w-4 h-4 inline-block" />&nbsp;(BEP20)&nbsp;1234....1234</div>
           <div>
@@ -10,9 +10,11 @@
             <BuyFormInput formLabel="To" :tokens="toTokens" v-model="toInputAmount" :selectedToken="selectedToToken" :amount="toAmount" @confirmedSelectToken="selectToToken" disabled="true" class="mt-5" />
           </div>
         </div>
+        <div class="flex justify-center mt-10">
+          <button class="blue-btn font-semibold py-2 cursor-pointer text-center w-32 disabled:opacity-50 disabled:cursor-auto" :disabled="disabledBuy">Buy</button>
+        </div>
       </div>
     </div>
-    
   </div>
 </template>
 
@@ -40,6 +42,10 @@ export default {
     const fromInputAmount = ref(0);
     const toInputAmount = ref(0);
 
+    const disabledBuy = computed(() => {
+      return fromInputAmount.value == 0
+    });
+
     const selectedFromToken = ref('USDT');
     const selectedToToken = ref('XPX');
     const selectFromToken = (token) => {
@@ -60,6 +66,7 @@ export default {
       selectedToToken,
       selectFromToken,
       selectToToken,
+      disabledBuy,
     }
   }
 }
