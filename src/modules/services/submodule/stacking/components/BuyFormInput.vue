@@ -20,10 +20,11 @@
               allowDecimalPadding: false,
               decimalPlaces: 2,
               minimumValue: '0',
-              maximumValue: tokenBalance
+              maximumValue: tokenBalance,
             }"
             @input="$emit('update:modelValue',parseFloat($event.target.value.replace(/,/g, '')) )"
             @focus="$event.target.select()"
+            :disabled="disabled?disabled:false"
           />
         </div>
         <div class="text-xs text-gray-400 text-right">Balance: {{ Helper.convertToCurrency(tokenBalance * 100, 2) }}</div>
@@ -42,6 +43,7 @@ import { useI18n } from 'vue-i18n';
 import { Helper } from '@/util/typeHelper';
 import AutoNumericVue from 'autonumeric-vue/src/components/AutoNumericVue';
 import SelectTokenModal from '@/modules/services/submodule/stacking/components/SelectTokenModal.vue';
+import { boolean } from 'mathjs';
 // import { availableTokens } from '@/modules/services/submodule/stacking/tokens';
 
 export default {
@@ -52,6 +54,7 @@ export default {
     modelValue: Number,
     selectedToken: String,
     tokens: Array,
+    disabled: boolean
   },
   components:{
     AutoNumericVue,

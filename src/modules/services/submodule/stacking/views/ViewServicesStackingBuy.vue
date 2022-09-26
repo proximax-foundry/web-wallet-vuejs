@@ -7,7 +7,7 @@
           <div class="text-xs flex items-center justify-end"><img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask-fox.svg" class="w-4 h-4 inline-block" />&nbsp;(BEP20)&nbsp;1234....1234</div>
           <div>
             <BuyFormInput formLabel="From" :tokens="fromTokens" v-model="fromInputAmount" :selectedToken="selectedFromToken" :amount="fromAmount" @confirmedSelectToken="selectFromToken" />
-            <BuyFormInput formLabel="To" :tokens="toTokens" v-model="toInputAmount" :selectedToken="selectedToToken" :amount="toAmount" @confirmedSelectToken="selectToToken" class="mt-5" />
+            <BuyFormInput formLabel="To" :tokens="toTokens" v-model="toInputAmount" :selectedToken="selectedToToken" :amount="toAmount" @confirmedSelectToken="selectToToken" disabled="true" class="mt-5" />
           </div>
         </div>
       </div>
