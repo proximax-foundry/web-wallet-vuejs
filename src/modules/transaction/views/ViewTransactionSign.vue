@@ -91,7 +91,22 @@
                   </div>
                   <div v-if="item.sdas.length > 0">
                     <div>{{$t('general.sda',2)}}</div>
-                    <div>{{displaySDA(item.sdas.join(", ")) }}</div>
+                      <div>
+                        <div v-for="(element,transfer) in item.sdas" :key="transfer">
+                          <div class="flex items-center">
+                            <div>{{displaySDA(element) }}</div>
+                            <img v-if="element.toLowerCase().includes('xpx')" src="@/modules/account/img/proximax-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
+                            <img v-else-if="element.toLowerCase().includes('xar')" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
+                            <img v-else-if="element.toLowerCase().includes('met')" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
+                            <img v-else src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
+                            <span v-if="element.toLowerCase().includes('xpx')" class="text-blue-600">XPX</span>
+                            <span v-else-if="element.toLowerCase().includes('xar')" class="text-blue-600">XAR</span>
+                            <span v-else-if="element.toLowerCase().includes('metx')" class="text-blue-600">METX</span>
+                            <a :href="explorerLink(displayAssetId(element))" target=_new v-else-if="element.split(' ').length==2"><div class="text-gray-400 cursor-pointer">{{displayAssetId(element)}}</div></a>
+                            <a :href="explorerLink(displayAssetId(element))" target=_new v-else><div class="text-blue-600 cursor-pointer">{{displayLinkNamespace(element)}}</div></a>
+                          </div>
+                        </div>
+                      </div>
                   </div>
                 </div>
               </div>
@@ -179,10 +194,26 @@ export default {
     currentName.value = currentAccount.name;
 
     let displaySDA = asset=>{
-      let part1 = asset.slice(0,19)
-      let part2 = asset.slice(29,32)
-      return part1+"..."+part2
-  }
+        let SDAAmount = asset.split(" ")
+        return Helper.toCurrencyFormat(SDAAmount[0])
+    }
+
+    let displayAssetId = asset =>{
+      let assetId = asset.split(" ")
+      return assetId[1]
+    }
+
+    let displayLinkNamespace = asset => {
+      let linkNamespace = asset.replace(/\(/g,"").replace(/\)/g,"").split(" ")
+      return linkNamespace[2]
+    }
+
+    const explorerLink = assetId=>{  
+    if(!networkState.currentNetworkProfile){
+        return ''
+    }
+    return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
+}
 
     const checkCosigner = ()=>{
       let foundCosigner = allCosigners.find(cosigner => cosigner === currentPublicKey);
@@ -436,6 +467,8 @@ export default {
       invalidCosigner,
       signAggTxn,
       displaySDA,
+      displayLinkNamespace,
+      displayAssetId,
       isSigned,
       innerRelatedList,
       innerSignedList,
@@ -448,6 +481,7 @@ export default {
       isHasSigned,
       displayAccountLabel,
       displayAccountAddress,
+      explorerLink
     };
   }
 };
