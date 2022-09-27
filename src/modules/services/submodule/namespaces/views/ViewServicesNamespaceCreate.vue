@@ -24,7 +24,7 @@
           <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace" ref="nsRef" v-model="selectNamespace" :address="selectedAccAdd" class="mt-5" :disabled="disableSelectNamespace" />
           <div class="lg:grid lg:grid-cols-2 mt-5">
             <div class="mb-5 lg:mb-0 lg:mr-2">
-              <TextInputTooltip :disabled="disableNamespaceName" :placeholder="$t('general.name')" :errorMessage="namespaceErrorMessage" v-model="namespaceName" v-debounce:1000="checkNamespace" icon="id-card-alt" :showError="showNamespaceNameError" class="w-full inline-block" :toolTip="$t('namespace.namespaceNameMsg1') + '<br><br>' + $t('namespace.namespaceNameMsg2') + '<br><br>' + $t('namespace.namespaceNameMsg3')" />
+              <TextInputTooltip :disabled="disableNamespaceName" :placeholder="$t('general.name')" :errorMessage="namespaceErrorMessage" v-model="namespaceName"  v-debounce:1000="checkNamespace" icon="id-card-alt" :showError="showNamespaceNameError" class="w-full inline-block" :toolTip="$t('namespace.namespaceNameMsg1') + '<br><br>' + $t('namespace.namespaceNameMsg2') + '<br><br>' + $t('namespace.namespaceNameMsg3')" tabindex="0"/>
             </div>
             <div class="mb-5 lg:mb-0 lg:ml-2">
               <DurationInputClean :disabled="disabledDuration" v-model="duration" :max="maxDurationInDays" :placeholder="$t('namespace.duration')" @set-default-duration="setDefaultDuration" :showError="showDurationErr" :toolTip="$t('namespace.durationMsg')+'<br>' +`${maxDurationInDays === 365 ? '1 ' + $t('general.year') : ''}` +' ('+`${maxDurationInDays}`+ $t('general.day',maxDurationInDays) +').'" />
@@ -366,6 +366,18 @@ export default {
       }
     };
 
+    watch(selectNamespace,n=>{
+      if(!n){
+        disableNamespaceName.value = true;
+        disabledDuration.value = true;
+        disabledPassword.value = true;
+      }else{
+        disableNamespaceName.value = false;
+        disabledDuration.value = false;
+        disabledPassword.value = false;
+      }
+    },{immediate:true})
+
     const clearNamespaceSelection = () => {
       duration.value = '0';
     };
@@ -597,7 +609,6 @@ export default {
     }
   });
     const checkNamespace = async () =>{
-      showNamespaceNameError.value = false;
       if(namespaceName.value.trim()){
         if(isReservedRootNamespace()){
           return;
@@ -636,6 +647,13 @@ export default {
         }
       }
     }
+
+    watch(namespaceName,n=>{
+      if(n.length==0){
+        showNamespaceNameError.value = true;
+        namespaceErrorMessage.value = t('namespace.validName');
+      }
+    })
 
     return {
       Helper,
