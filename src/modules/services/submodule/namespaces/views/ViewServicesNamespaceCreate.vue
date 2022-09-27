@@ -517,7 +517,85 @@ export default {
       }
       return false;
     }
-
+    if (isMultiSigBool.value) {
+      let cosigner = getMultiSigCosigner.value.cosignerList
+      if (cosigner.length > 0) {
+        cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
+        if (findAccWithAddress(cosignerAddress.value).balance < lockFundTotalFee.value ) {
+          disabledPassword.value = true;
+          disabledDuration.value = true;
+          disableNamespaceName.value = true;
+          disableSelectNamespace.value = true;
+          cosignerBalanceInsufficient.value = true;
+        } else {
+          disabledPassword.value = false;
+          disabledDuration.value = false;
+          disableNamespaceName.value = false;
+          disableSelectNamespace.value = false;
+          cosignerBalanceInsufficient.value = false;
+        }
+      } else {
+        disabledPassword.value = true;
+        disabledDuration.value = true;
+        disableNamespaceName.value = true;
+        disableSelectNamespace.value = true;
+      }
+    }
+    watch(selectedAccAdd, (n, o) => {
+      isMultiSigBool.value = isMultiSig(n);
+      if (isMultiSigBool.value) {
+        let cosigner = getMultiSigCosigner.value.cosignerList
+      if (cosigner.length > 0) {
+        cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
+        if (findAccWithAddress(cosignerAddress.value).balance < lockFundTotalFee.value ) {
+          disabledPassword.value = true;
+          disabledDuration.value = true;
+          disableNamespaceName.value = true;
+          disableSelectNamespace.value = true;
+          cosignerBalanceInsufficient.value = true;
+        } else {
+          disabledPassword.value = false;
+          disabledDuration.value = false;
+          disableNamespaceName.value = false;
+          disableSelectNamespace.value = false;
+          cosignerBalanceInsufficient.value = false;
+        }
+      } else {
+        disabledPassword.value = true;
+        disabledDuration.value = true;
+        disableNamespaceName.value = true;
+        disableSelectNamespace.value = true;
+        cosignerBalanceInsufficient.value = true;
+      }
+    } else{
+        disabledPassword.value = false;
+        disabledDuration.value = false;
+        disableNamespaceName.value = false;
+        disableSelectNamespace.value = false;
+        cosignerBalanceInsufficient.value = false;
+    }
+  });
+    watch(cosignerAddress, (n, o) => {
+    if (n != o) {
+        if (
+        accounts.value.find((element) => element.address == n).balance <
+        lockFundTotalFee.value
+      ) {
+        cosignerBalanceInsufficient.value = true;
+        disabledPassword.value = true;
+        disabledDuration.value = true;
+        disableNamespaceName.value = true;
+        disableSelectNamespace.value = true;
+      } else {
+        cosignerBalanceInsufficient.value = false;
+        disabledPassword.value = false;
+        disabledDuration.value = false;
+        disableNamespaceName.value = false;
+        disableSelectNamespace.value = false;
+      }
+      
+    }
+  });
     const checkNamespace = async () =>{
       showNamespaceNameError.value = false;
       if(namespaceName.value.trim()){

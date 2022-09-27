@@ -364,11 +364,11 @@ export default {
       }
       return isMulti;
     };
-    const isMultiSigBool = ref(
-          isMultiSig(
-            selectedAccAdd.value
-          )
-        );
+    const isMultiSigBool = computed(() => {
+          return isMultiSig(selectedAccAdd.value)
+      }
+    )
+        
 
     const effectiveFee = ref(isMultiSigBool.value?makeTransaction.calculate_aggregate_fee(
       messageText.value,

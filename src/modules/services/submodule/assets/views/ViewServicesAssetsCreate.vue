@@ -21,12 +21,12 @@
             </div>
           </div>
           <div class="lg:grid lg:grid-cols-2 mt-5">
-            <div class="lg:mr-2"><SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="Number.MAX_VALUE" :placeholder="$t('general.supply')" type="text" @show-error="updateSupplyErr"  :decimal="Number(divisibility)" :toolTip="$t('asset.supplyMsg1') +' <br><br>' + $t('asset.supplyMsg2') + '<br>' + $t('asset.supplyMsg3')" /></div>
-            <div class="lg:ml-2"><NumberInputClean :disabled="showNoBalance||isNotCosigner" v-model="divisibility" :max="6" :placeholder="$t('general.divisibility')" :showError="showDivisibilityErr"  :toolTip="$t('asset.divisibilityMsg1') +' <br><br>' + $t('asset.divisibilityMsg2') + '<br>' + $t('asset.divisibilityMsg3')" /></div>
+            <div class="lg:mr-2"><SupplyInputClean :disabled="showNoBalance||isNotCosigner||disabledInput" v-model="supply" :balance="Number.MAX_VALUE" :placeholder="$t('general.supply')" type="text" @show-error="updateSupplyErr"  :decimal="Number(divisibility)" :toolTip="$t('asset.supplyMsg1') +' <br><br>' + $t('asset.supplyMsg2') + '<br>' + $t('asset.supplyMsg3')" /></div>
+            <div class="lg:ml-2"><NumberInputClean :disabled="showNoBalance||isNotCosigner||disabledInput" v-model="divisibility" :max="6" :placeholder="$t('general.divisibility')" :showError="showDivisibilityErr"  :toolTip="$t('asset.divisibilityMsg1') +' <br><br>' + $t('asset.divisibilityMsg2') + '<br>' + $t('asset.divisibilityMsg3')" /></div>
           </div>
           <div class="lg:grid lg:grid-cols-2">
-            <div class="mb-5 lg:mb-0 lg:mr-2"><CheckInput :disabled="showNoBalance||isNotCosigner" v-model="isTransferable" :title="$t('general.transferable')" :toolTip="$t('asset.transferableMsg')" @click="!showNoBalance?(isTransferable = !isTransferable):''"/></div>
-            <div class="mb-5 lg:mb-0 lg:ml-2"><CheckInput :disabled="showNoBalance||isNotCosigner" v-model="isMutable" :title="$t('general.supplyMutable')" :toolTip="$t('asset.supplyMutableMsg')" @click="!showNoBalance?(isMutable = !isMutable):''" /></div>
+            <div class="mb-5 lg:mb-0 lg:mr-2"><CheckInput :disabled="showNoBalance||isNotCosigner||disabledInput" v-model="isTransferable" :title="$t('general.transferable')" :toolTip="$t('asset.transferableMsg')" @click="!showNoBalance?(isTransferable = !isTransferable):''"/></div>
+            <div class="mb-5 lg:mb-0 lg:ml-2"><CheckInput :disabled="showNoBalance||isNotCosigner||disabledInput" v-model="isMutable" :title="$t('general.supplyMutable')" :toolTip="$t('asset.supplyMutableMsg')" @click="!showNoBalance?(isMutable = !isMutable):''" /></div>
           </div>
         </div>
       </div>
@@ -152,7 +152,8 @@ export default {
     const showDivisibilityErr = ref(false);
     const isTransferable = ref(false);
     const isMutable = ref(false);
-    const disabledPassword = computed(() => showNoBalance.value||isNotCosigner.value);
+    const disabledPassword = computed(() => showNoBalance.value||isNotCosigner.value||disableAllInput.value);
+    const disabledInput = computed(() => disableAllInput.value)
     const disabledClear = ref(false);
     const disabledDuration = ref(false);
     const durationOption =ref('month');
@@ -164,6 +165,7 @@ export default {
     const cosignerBalanceInsufficient = ref(false);
     const cosignerAddress = ref('');
     const supply = ref('0');
+    const disableAllInput = ref(false);
 
     const currencyName = computed(() => AppState.nativeToken.label);
 
@@ -448,6 +450,59 @@ export default {
       }
     };
 
+    if (isMultiSigBool.value) {
+      let cosigner = getMultiSigCosigner.value.cosignerList
+      if (cosigner.length > 0) {
+        cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
+        if (findAccWithAddress(cosignerAddress.value).balance < lockFundTotalFee.value ) {
+          disableAllInput.value = true;
+          cosignerBalanceInsufficient.value = true;
+        } else {
+          disableAllInput.value = false;
+          cosignerBalanceInsufficient.value = false;
+        }
+      } else {
+        disableAllInput.value = true;
+      }
+    }
+    watch(selectedAccAdd, (n, o) => {
+      isMultiSigBool.value = isMultiSig(n);
+      if (isMultiSigBool.value) {
+        let cosigner = getMultiSigCosigner.value.cosignerList
+      if (cosigner.length > 0) {
+        cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
+        if (findAccWithAddress(cosignerAddress.value).balance < lockFundTotalFee.value ) {
+          disableAllInput.value = true;
+          cosignerBalanceInsufficient.value = true;
+        } else {
+          disableAllInput.value = false;
+          cosignerBalanceInsufficient.value = false;
+        }
+      } else {
+        disableAllInput.value = true;
+        cosignerBalanceInsufficient.value = true;
+      }
+    } else {
+      disableAllInput.value = false;
+      cosignerBalanceInsufficient.value = false;
+    }
+  });
+    watch(cosignerAddress, (n, o) => {
+    if (n != o) {
+        if (
+        accounts.value.find((element) => element.address == n).balance <
+        lockFundTotalFee.value
+      ) {
+        cosignerBalanceInsufficient.value = true;
+        disableAllInput.value = true;
+      } else {
+        cosignerBalanceInsufficient.value = false;
+        disableAllInput.value = false
+      }
+      
+    }
+  });
+
     return {
       fetchAccount,
       accounts,
@@ -499,7 +554,8 @@ export default {
       splitCurrency,
       updateSupplyErr,
       defaultAcc,
-      checkCosignBalance
+      checkCosignBalance,
+      disabledInput
     }
   },
 }
