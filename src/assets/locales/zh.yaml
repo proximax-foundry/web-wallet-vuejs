@@ -163,6 +163,7 @@ general:
   asset:  资产 | 资产
   assetId: 资产ID
   assetQues: 什么是资产？
+  assetRentalFee: Asset Rental Fee
   back: 返回
   balance: 余额
   block: 区块 | 区块
@@ -257,11 +258,13 @@ general:
   more: 更多
   moreOnExplorer: Full History on Explorer
   multisig: 多重认证
+  multisigAcc: Multisig Account
   multisigTitle: 这是一个多重认证账户
   name: 名称
   nameRequired: 请填写名称
   namespace: 命名空间 | 命名空间
   namespaceId: 命名空间ID
+  namespacerentalFee: Namespace Rental Fee
   namespaceQues: 什么是名称空间？
   network: 网络
   new: 新
@@ -304,6 +307,7 @@ general:
   showAll: 显示全部
   signed: 已签名
   signer: 签名者
+  signerAcc: Signer Account
   supply: 供应
   supplyMutable: 供给可变
   swap: 互换

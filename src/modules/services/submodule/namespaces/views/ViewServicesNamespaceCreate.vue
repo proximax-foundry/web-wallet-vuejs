@@ -32,31 +32,57 @@
           </div>
         </div>
       </div>
-      <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
-        <div class="font-semibold text-xxs text-blue-primary uppercase">{{$t('general.accCurrentBalance')}}</div>
-        <div class="flex text-gray-200 mb-5">
-          <span v-html="splitCurrency(balance)"></span>
+      <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
+        <div v-if="!isMultiSig(selectedAccAdd)" class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
+        <div v-else class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.multisigAcc')}}</div>
+        <div class="flex text-gray-200 my-1">
+          <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase'>{{$t('general.currentBalance')}}</div>
+          <span class='ml-auto' v-html="splitCurrency(balance)"></span>
           <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
         </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-          <div class="font-semibold">{{$t('general.transactionFee')}}</div>
-          <div v-html="splitCurrency(transactionFee)"></div>
+        <div class='border-b-2 border-gray-600 mt-2'/>
+        <div class="flex justify-between items-center text-gray-200 text-xs pt-2">
+            <div class="font-semibold">{{$t('general.namespacerentalFee')}}</div>
+            <div v-html="splitCurrency(rentalFeeCurrency)"></div>
+          </div>
+        <div v-if="!isMultiSig(selectedAccAdd)">
+          <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
+            <div class="font-semibold">{{$t('general.transactionFee')}}</div>
+            <div v-html="splitCurrency(transactionFee)"></div>
+          </div>
+          <div class="flex justify-between border-gray-600 text-white text-xs py-5">
+            <div class="font-bold uppercase">{{$t('general.total')}}</div>
+            <div v-html="splitCurrency(totalFeeFormatted)"></div>
+          </div>
         </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-          <div class="font-semibold">{{$t('general.rentalFee')}}</div>
-          <div v-html="splitCurrency(rentalFeeCurrency)"></div>
-        </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-semibold">{{$t('general.lockFund')}}</div>
-          <div v-html="splitCurrency(lockFundCurrency)"></div>
-        </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-semibold">{{$t('general.lockFundTxFee')}}</div>
-          <div v-html="splitCurrency(lockFundTxFee)"></div>
-        </div>
-        <div class="flex justify-between border-gray-600 text-white text-xs py-5">
-          <div class="font-bold uppercase">{{$t('general.total')}}</div>
-          <div v-html="splitCurrency(totalFeeFormatted)"></div>
+        <div v-else>
+          <div v-if="getMultiSigCosigner.cosignerList.length > 0">
+            <div class="flex justify-between border-600 border-b items-center text-gray-200 text-xs my-5" />
+              <div class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
+              <div class="flex text-gray-200 my-1">
+                <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase'>{{$t('general.currentBalance')}}</div>
+                <span class='ml-auto font-bold' v-if="getMultiSigCosigner.cosignerList.length == 1">{{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}</span>
+                <span class='ml-auto font-bold' v-else>{{ checkCosignBalance }} {{ currentNativeTokenName }}</span>
+                <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
+              </div>
+            <div class='border-b-2 border-gray-600 mt-2'/>
+            <div class="flex justify-between items-center text-gray-200 text-xs py-3">
+              <div class="font-semibold">{{$t('general.aggregateFee')}}</div>
+              <div v-html="splitCurrency(transactionFee)"></div>
+            </div>
+            <div class="flex justify-between items-center text-gray-200 text-xs py-3">
+              <div class="font-semibold">{{$t('general.lockFund')}}</div>
+              <div v-html="splitCurrency(lockFundCurrency)"></div>
+            </div>
+            <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
+              <div class="font-semibold">{{$t('general.lockFundTxFee')}}</div>
+              <div v-html="splitCurrency(lockFundTxFee)"></div>
+            </div>
+            <div class="flex justify-between border-gray-600 text-white text-xs py-5">
+              <div class="font-bold uppercase">{{$t('general.total')}}</div>
+              <div v-html="splitCurrency(totalFeeFormatted)"></div>
+            </div>
+          </div>
         </div>
         <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
@@ -381,7 +407,7 @@ export default {
     const totalFee = computed(() => {
       // if multisig
       if(isMultiSig(selectedAccAdd.value)){
-        return parseFloat(lockFundTotalFee.value) + rentalFee.value + transactionFeeExact.value;
+        return parseFloat(lockFundTotalFee.value) + transactionFeeExact.value;
       }else{
         return rentalFee.value + transactionFeeExact.value;
       }
@@ -435,6 +461,17 @@ export default {
       }
     })
 
+    const findAccWithAddress = address =>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
+      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)
+    }
+
+    const checkCosignBalance = computed(() => {
+      let cosignBalance = findAccWithAddress(cosignerAddress.value)?findAccWithAddress(cosignerAddress.value).balance:0;
+      return cosignBalance;
+    })
 
     const splitCurrency = (amount) => {
       let split = amount.toString().split(".")
@@ -480,7 +517,85 @@ export default {
       }
       return false;
     }
-
+    if (isMultiSigBool.value) {
+      let cosigner = getMultiSigCosigner.value.cosignerList
+      if (cosigner.length > 0) {
+        cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
+        if (findAccWithAddress(cosignerAddress.value).balance < lockFundTotalFee.value ) {
+          disabledPassword.value = true;
+          disabledDuration.value = true;
+          disableNamespaceName.value = true;
+          disableSelectNamespace.value = true;
+          cosignerBalanceInsufficient.value = true;
+        } else {
+          disabledPassword.value = false;
+          disabledDuration.value = false;
+          disableNamespaceName.value = false;
+          disableSelectNamespace.value = false;
+          cosignerBalanceInsufficient.value = false;
+        }
+      } else {
+        disabledPassword.value = true;
+        disabledDuration.value = true;
+        disableNamespaceName.value = true;
+        disableSelectNamespace.value = true;
+      }
+    }
+    watch(selectedAccAdd, (n, o) => {
+      isMultiSigBool.value = isMultiSig(n);
+      if (isMultiSigBool.value) {
+        let cosigner = getMultiSigCosigner.value.cosignerList
+      if (cosigner.length > 0) {
+        cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
+        if (findAccWithAddress(cosignerAddress.value).balance < lockFundTotalFee.value ) {
+          disabledPassword.value = true;
+          disabledDuration.value = true;
+          disableNamespaceName.value = true;
+          disableSelectNamespace.value = true;
+          cosignerBalanceInsufficient.value = true;
+        } else {
+          disabledPassword.value = false;
+          disabledDuration.value = false;
+          disableNamespaceName.value = false;
+          disableSelectNamespace.value = false;
+          cosignerBalanceInsufficient.value = false;
+        }
+      } else {
+        disabledPassword.value = true;
+        disabledDuration.value = true;
+        disableNamespaceName.value = true;
+        disableSelectNamespace.value = true;
+        cosignerBalanceInsufficient.value = true;
+      }
+    } else{
+        disabledPassword.value = false;
+        disabledDuration.value = false;
+        disableNamespaceName.value = false;
+        disableSelectNamespace.value = false;
+        cosignerBalanceInsufficient.value = false;
+    }
+  });
+    watch(cosignerAddress, (n, o) => {
+    if (n != o) {
+        if (
+        accounts.value.find((element) => element.address == n).balance <
+        lockFundTotalFee.value
+      ) {
+        cosignerBalanceInsufficient.value = true;
+        disabledPassword.value = true;
+        disabledDuration.value = true;
+        disableNamespaceName.value = true;
+        disableSelectNamespace.value = true;
+      } else {
+        cosignerBalanceInsufficient.value = false;
+        disabledPassword.value = false;
+        disabledDuration.value = false;
+        disableNamespaceName.value = false;
+        disableSelectNamespace.value = false;
+      }
+      
+    }
+  });
     const checkNamespace = async () =>{
       showNamespaceNameError.value = false;
       if(namespaceName.value.trim()){
@@ -574,7 +689,8 @@ export default {
       removeNamespace,
       setDefaultDuration,
       cosigner,
-      defaultAcc
+      defaultAcc,
+      checkCosignBalance
     }
   },
 
