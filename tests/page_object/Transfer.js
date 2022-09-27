@@ -2,8 +2,8 @@ const elements = {
 
     transfer_tab: 'a[href="#/create-transfer"]',
     sender_acc: 'div.ml-auto:nth-child(1)',
-    primary_acc: 'div.px-2:nth-child(2)',
-    second_acc: 'div.px-2:nth-child(3)', 
+    primary_acc: 'div.px-2:nth-child(3)',
+    second_acc: 'div.px-2:nth-child(4)', 
     receiver_acc: 'input.w-full:nth-child(2)',
     invalid_icon: '.text-red-400',
     select_contact: 'div.border:nth-child(2)',
