@@ -21,40 +21,66 @@
             </div>
           </div>
           <div class="lg:grid lg:grid-cols-2 mt-5">
-            <div class="lg:mr-2"><SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="Number.MAX_VALUE" :placeholder="$t('general.supply')" type="text" @show-error="updateSupplyErr"  :decimal="Number(divisibility)" :toolTip="$t('asset.supplyMsg1') +' <br><br>' + $t('asset.supplyMsg2') + '<br>' + $t('asset.supplyMsg3')" /></div>
-            <div class="lg:ml-2"><NumberInputClean :disabled="showNoBalance||isNotCosigner" v-model="divisibility" :max="6" :placeholder="$t('general.divisibility')" :showError="showDivisibilityErr"  :toolTip="$t('asset.divisibilityMsg1') +' <br><br>' + $t('asset.divisibilityMsg2') + '<br>' + $t('asset.divisibilityMsg3')" /></div>
+            <div class="lg:mr-2"><SupplyInputClean :disabled="showNoBalance||isNotCosigner||disabledInput" v-model="supply" :balance="Number.MAX_VALUE" :placeholder="$t('general.supply')" type="text" @show-error="updateSupplyErr"  :decimal="Number(divisibility)" :toolTip="$t('asset.supplyMsg1') +' <br><br>' + $t('asset.supplyMsg2') + '<br>' + $t('asset.supplyMsg3')" /></div>
+            <div class="lg:ml-2"><NumberInputClean :disabled="showNoBalance||isNotCosigner||disabledInput" v-model="divisibility" :max="6" :placeholder="$t('general.divisibility')" :showError="showDivisibilityErr"  :toolTip="$t('asset.divisibilityMsg1') +' <br><br>' + $t('asset.divisibilityMsg2') + '<br>' + $t('asset.divisibilityMsg3')" /></div>
           </div>
           <div class="lg:grid lg:grid-cols-2">
-            <div class="mb-5 lg:mb-0 lg:mr-2"><CheckInput :disabled="showNoBalance||isNotCosigner" v-model="isTransferable" :title="$t('general.transferable')" :toolTip="$t('asset.transferableMsg')" @click="!showNoBalance?(isTransferable = !isTransferable):''"/></div>
-            <div class="mb-5 lg:mb-0 lg:ml-2"><CheckInput :disabled="showNoBalance||isNotCosigner" v-model="isMutable" :title="$t('general.supplyMutable')" :toolTip="$t('asset.supplyMutableMsg')" @click="!showNoBalance?(isMutable = !isMutable):''" /></div>
+            <div class="mb-5 lg:mb-0 lg:mr-2"><CheckInput :disabled="showNoBalance||isNotCosigner||disabledInput" v-model="isTransferable" :title="$t('general.transferable')" :toolTip="$t('asset.transferableMsg')" @click="!showNoBalance?(isTransferable = !isTransferable):''"/></div>
+            <div class="mb-5 lg:mb-0 lg:ml-2"><CheckInput :disabled="showNoBalance||isNotCosigner||disabledInput" v-model="isMutable" :title="$t('general.supplyMutable')" :toolTip="$t('asset.supplyMutableMsg')" @click="!showNoBalance?(isMutable = !isMutable):''" /></div>
           </div>
         </div>
       </div>
-      <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
-        <div class="font-semibold text-xxs text-blue-primary uppercase">{{$t('general.accCurrentBalance')}}</div>
-        <div class="flex text-gray-200 mb-5">
-          <span v-html="splitCurrency(balance)"></span>
+      <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
+        <div v-if="!isMultiSig(selectedAccAdd)" class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
+        <div v-else class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.multisigAcc')}}</div>
+        <div class="flex text-gray-200 my-1">
+          <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase'>{{$t('general.currentBalance')}}</div>
+          <span class='ml-auto' v-html="splitCurrency(balance)"></span>
           <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
         </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-          <div class="font-semibold">{{$t('general.transactionFee')}}</div>
-          <div v-html="splitCurrency(transactionFee)"></div>
+        <div class='border-b-2 border-gray-600 mt-2'/>
+        <div class="flex justify-between items-center text-gray-200 text-xs pt-2">
+            <div class="font-semibold">{{$t('general.assetRentalFee')}}</div>
+            <div v-html="splitCurrency(rentalFeeCurrency)"></div>
+          </div>
+        <div v-if="!isMultiSig(selectedAccAdd)">
+          <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
+            <div class="font-semibold">{{$t('general.transactionFee')}}</div>
+            <div v-html="splitCurrency(transactionFee)"></div>
+          </div>
+          <div class="flex justify-between border-gray-600 text-white text-xs py-5">
+            <div class="font-bold uppercase">{{$t('general.total')}}</div>
+            <div v-html="splitCurrency(totalFeeFormatted)"></div>
+          </div>
         </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-          <div class="font-semibold">{{$t('general.rentalFee')}}</div>
-          <div v-html="splitCurrency(rentalFeeCurrency)"></div>
-        </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-semibold">{{$t('general.lockFund')}}</div>
-          <div v-html="splitCurrency(lockFundCurrency)"></div>
-        </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-semibold">{{$t('general.lockFundTxFee')}}</div>
-          <div v-html="splitCurrency(lockFundTxFee)"></div>
-        </div>
-        <div class="flex justify-between border-gray-600 text-white text-xs py-5">
-          <div class="font-bold uppercase">{{$t('general.total')}}</div>
-          <div v-html="splitCurrency(totalFeeFormatted)"></div>
+        <div v-else>
+          <div v-if="getMultiSigCosigner.cosignerList.length > 0">
+            <div class="flex justify-between border-600 border-b items-center text-gray-200 text-xs my-5" />
+              <div class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
+              <div class="flex text-gray-200 my-1">
+                <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase'>{{$t('general.currentBalance')}}</div>
+                <span class='ml-auto font-bold' v-if="getMultiSigCosigner.cosignerList.length == 1">{{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }}</span>
+                <span class='ml-auto font-bold' v-else>{{ checkCosignBalance }} {{ currentNativeTokenName }}</span>
+                <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
+              </div>
+            <div class='border-b-2 border-gray-600 mt-2'/>
+            <div class="flex justify-between items-center text-gray-200 text-xs py-3">
+              <div class="font-semibold">{{$t('general.aggregateFee')}}</div>
+              <div v-html="splitCurrency(transactionFee)"></div>
+            </div>
+            <div class="flex justify-between items-center text-gray-200 text-xs py-3">
+              <div class="font-semibold">{{$t('general.lockFund')}}</div>
+              <div v-html="splitCurrency(lockFundCurrency)"></div>
+            </div>
+            <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
+              <div class="font-semibold">{{$t('general.lockFundTxFee')}}</div>
+              <div v-html="splitCurrency(lockFundTxFee)"></div>
+            </div>
+            <div class="flex justify-between border-gray-600 text-white text-xs py-5">
+              <div class="font-bold uppercase">{{$t('general.total')}}</div>
+              <div v-html="splitCurrency(totalFeeFormatted)"></div>
+            </div>
+          </div>
         </div>
         <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
@@ -126,7 +152,8 @@ export default {
     const showDivisibilityErr = ref(false);
     const isTransferable = ref(false);
     const isMutable = ref(false);
-    const disabledPassword = computed(() => showNoBalance.value||isNotCosigner.value);
+    const disabledPassword = computed(() => showNoBalance.value||isNotCosigner.value||disableAllInput.value);
+    const disabledInput = computed(() => disableAllInput.value)
     const disabledClear = ref(false);
     const disabledDuration = ref(false);
     const durationOption =ref('month');
@@ -138,6 +165,7 @@ export default {
     const cosignerBalanceInsufficient = ref(false);
     const cosignerAddress = ref('');
     const supply = ref('0');
+    const disableAllInput = ref(false);
 
     const currencyName = computed(() => AppState.nativeToken.label);
 
@@ -335,7 +363,7 @@ export default {
     const totalFee = computed(() => {
       // if multisig
       if(isMultiSig(selectedAccAdd.value)){
-        return parseFloat(lockFundTotalFee.value) + rentalFee.value + transactionFeeExact.value;
+        return parseFloat(lockFundTotalFee.value) + transactionFeeExact.value;
       }else{
         return rentalFee.value + transactionFeeExact.value;
       }
@@ -400,6 +428,19 @@ export default {
         cosignerAddress.value = n.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:''
       }
     })
+
+    const findAccWithAddress = address =>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
+      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)
+    }
+
+    const checkCosignBalance = computed(() => {
+      let cosignBalance = findAccWithAddress(cosignerAddress.value)?findAccWithAddress(cosignerAddress.value).balance:0;
+      return cosignBalance;
+    })
+
     const splitCurrency = (amount) => {
       let split = amount.toString().split(".")
       if (split[1]!=undefined){
@@ -408,6 +449,59 @@ export default {
         return '<span class="font-semibold text-sm">' + split[0] + '</span> <span class="font-semibold text-xs">' + currentNativeTokenName.value + '</span>';
       }
     };
+
+    if (isMultiSigBool.value) {
+      let cosigner = getMultiSigCosigner.value.cosignerList
+      if (cosigner.length > 0) {
+        cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
+        if (findAccWithAddress(cosignerAddress.value).balance < lockFundTotalFee.value ) {
+          disableAllInput.value = true;
+          cosignerBalanceInsufficient.value = true;
+        } else {
+          disableAllInput.value = false;
+          cosignerBalanceInsufficient.value = false;
+        }
+      } else {
+        disableAllInput.value = true;
+      }
+    }
+    watch(selectedAccAdd, (n, o) => {
+      isMultiSigBool.value = isMultiSig(n);
+      if (isMultiSigBool.value) {
+        let cosigner = getMultiSigCosigner.value.cosignerList
+      if (cosigner.length > 0) {
+        cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
+        if (findAccWithAddress(cosignerAddress.value).balance < lockFundTotalFee.value ) {
+          disableAllInput.value = true;
+          cosignerBalanceInsufficient.value = true;
+        } else {
+          disableAllInput.value = false;
+          cosignerBalanceInsufficient.value = false;
+        }
+      } else {
+        disableAllInput.value = true;
+        cosignerBalanceInsufficient.value = true;
+      }
+    } else {
+      disableAllInput.value = false;
+      cosignerBalanceInsufficient.value = false;
+    }
+  });
+    watch(cosignerAddress, (n, o) => {
+    if (n != o) {
+        if (
+        accounts.value.find((element) => element.address == n).balance <
+        lockFundTotalFee.value
+      ) {
+        cosignerBalanceInsufficient.value = true;
+        disableAllInput.value = true;
+      } else {
+        cosignerBalanceInsufficient.value = false;
+        disableAllInput.value = false
+      }
+      
+    }
+  });
 
     return {
       fetchAccount,
@@ -459,7 +553,9 @@ export default {
       Helper,
       splitCurrency,
       updateSupplyErr,
-      defaultAcc
+      defaultAcc,
+      checkCosignBalance,
+      disabledInput
     }
   },
 }

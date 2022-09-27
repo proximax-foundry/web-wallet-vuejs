@@ -147,7 +147,7 @@ const loadExpiringNamespace = (): Notification[] => {
       let differenceHeight = namespace.endHeight - namespace.startHeight;
       let remainingBlockHeight = namespace.endHeight - AppState.readBlockHeight;
 
-      if(differenceHeight < minBlockBeforeExpire){
+      if(remainingBlockHeight < minBlockBeforeExpire){
         notifications.push({
           id: namespace.idHex,
           type: 'Namespace',
