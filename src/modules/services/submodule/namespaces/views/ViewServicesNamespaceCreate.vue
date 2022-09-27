@@ -340,6 +340,18 @@ export default {
       }
     };
 
+    watch(selectNamespace,n=>{
+      if(!n){
+        disableNamespaceName.value = true;
+        disabledDuration.value = true;
+        disabledPassword.value = true;
+      }else{
+        disableNamespaceName.value = false;
+        disabledDuration.value = false;
+        disabledPassword.value = false;
+      }
+    },{immediate:true})
+
     const clearNamespaceSelection = () => {
       duration.value = '0';
     };
