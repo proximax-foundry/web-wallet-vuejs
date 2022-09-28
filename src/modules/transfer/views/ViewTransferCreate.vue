@@ -116,7 +116,7 @@
         <div class="mt-0.5 text-white">
           <div v-if="!isMultiSig(selectedAccAdd)" class='grid grid-cols-4 text-xs'>
             <div class="text-xs">{{$t('general.transactionFee')}}</div>
-            <div class="text-xs  ml-auto">{{effectiveFee}}</div>
+            <div class="text-xs col-span-2 ml-auto">{{effectiveFee}}</div>
             <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
           </div>
           <div v-else>
