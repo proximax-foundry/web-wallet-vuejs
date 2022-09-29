@@ -15,8 +15,11 @@
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1">{{$t('dashboard.txHash')}}</div>
             <div class=" uppercase font-bold text-txs">
-              <span class="text-txs text-blue-primary cursor-pointer" v-if="data.groupType!='In Queue'"  @click="gotoHashExplorer(data.hash)" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span>
-              <span class="text-txs" v-else v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span>
+              <div class="flex items-center">
+                <span class="text-txs text-blue-primary cursor-pointer" v-if="data.groupType!='In Queue'"  @click="gotoHashExplorer(data.hash)" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span>
+                <span class="text-txs" v-else v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span>
+                <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy(data.hash)" class="ml-0.5 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+              </div>
             </div>
           </div>
           <div>
@@ -68,8 +71,11 @@
       </Column>
       <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px" v-if="wideScreen">
         <template #body="{data}">
-          <span v-if="data.groupType!='In Queue'" @click="gotoHashExplorer(data.hash)" class="cursor-pointer text-txs text-blue-primary" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
-          <span v-else class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
+          <div class="flex items-center">
+            <span v-if="data.groupType!='In Queue'" @click="gotoHashExplorer(data.hash)" class="cursor-pointer text-txs text-blue-primary" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
+            <span v-else class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
+            <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy(data.hash)" class="ml-0.5 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+          </div>
         </template>
       </Column>
       <Column field="type" :header="$t('dashboard.type')" headerStyle="width:110px" v-if="wideScreen">
@@ -168,6 +174,9 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { Helper } from '@/util/typeHelper';
 import { networkState } from '@/state/networkState';
 import { AppState } from '@/state/appState';
+import { copyToClipboard } from '@/util/functions';
+import { useToast } from 'primevue/usetoast';
+import { useI18n } from 'vue-i18n';
 
     const props = defineProps({
         transaction: Array
@@ -248,4 +257,13 @@ import { AppState } from '@/state/appState';
       }
       return asset_div;
     }
+    const toast = useToast();
+    const {t} = useI18n();
+    const copy = (data) =>{
+      let stringToCopy = data;
+      let copySubject = "tx Hash"
+      copyToClipboard(stringToCopy);
+
+      toast.add({severity:'info', detail: copySubject +' ' + t('general.copied'), group: 'br-custom', life: 3000});
+    };
 </script>

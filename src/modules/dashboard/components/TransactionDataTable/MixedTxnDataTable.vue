@@ -14,7 +14,10 @@
         <template #body="{data}">
           <div>
             <div class="uppercase text-xxs font-bold mb-1">{{$t('dashboard.txHash')}}</div>
-            <div @click="gotoHashExplorer(data.hash)" class="uppercase cursor-pointer font-bold text-txs text-blue-primary "><span class="text-txs" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span></div>
+            <div class="flex items-center">
+              <div @click="gotoHashExplorer(data.hash)" class="uppercase cursor-pointer font-bold text-txs text-blue-primary "><span class="text-txs" v-tooltip.right="data.hash">{{data.hash.substring(0, 20) }}...</span></div>
+              <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy(data.hash)" class="ml-0.5 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+            </div>
           </div>
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.type')}}</div>
@@ -69,7 +72,10 @@
       </Column>
       <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px" v-if="wideScreen">
         <template #body="{data}">
-          <span @click="gotoHashExplorer(data.hash)" class="text-txs text-blue-primary cursor-pointer" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
+          <div class="flex items-center">
+            <span @click="gotoHashExplorer(data.hash)" class="text-txs text-blue-primary cursor-pointer" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
+            <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy(data.hash)" class="ml-0.5 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
+          </div>  
         </template>
       </Column>
       <Column field="timestamp" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" :header="$t('dashboard.timestamp')" headerStyle="width:110px">
@@ -154,6 +160,9 @@ import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";
 import { walletState } from "@/state/walletState";
 import DecryptMessageModal from "@/modules/dashboard/components/DecryptMessageModal.vue"
+import { copyToClipboard } from '@/util/functions';
+import { useToast } from 'primevue/usetoast';
+import { useI18n } from 'vue-i18n';
 // import SplitButton from 'primevue/splitbutton';
 
 export default {
@@ -175,6 +184,8 @@ export default {
   },
   setup(p, context){
     const wideScreen = ref(false);
+    const toast = useToast();
+    const {t} = useI18n();
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
         wideScreen.value = false;
@@ -288,6 +299,14 @@ export default {
       return false;
     }
 
+    const copy = (data) =>{
+      let stringToCopy = data;
+      let copySubject = "Tx Hash"
+      copyToClipboard(stringToCopy);
+
+      toast.add({severity:'info', detail: copySubject +' ' + t('general.copied'), group: 'br-custom', life: 3000});
+    };
+
     return {
       borderColor,
       filterText,
@@ -317,6 +336,7 @@ export default {
       wideScreen,
       Helper,
       walletState,
+      copy
     }
   }
 }
