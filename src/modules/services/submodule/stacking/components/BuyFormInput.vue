@@ -5,20 +5,20 @@
       <div class="flex items-center cursor-pointer" @click="isDisplayBuyTokenModal = true">
         <font-awesome-icon icon="caret-down" class="mr-1 text-gray-700" />
         <img :src="require('@/modules/services/submodule/stacking/img/tokens/' + tokenImage)" class="w-9 h-9 inline-block" />
-        <div class="ml-1 text-tsm">{{ tokenName }} (BEP20)</div>
+        <div class="ml-1 text-tsm">{{ tokenName }} {{tokenType}}</div>
       </div>
       <div>
         <div>
           <AutoNumericVue
             :value="modelValue"
-            class="supply_input"
+            class="supply_input disabled:opacity-70"
             :options="{
               showWarnings : false,
               digitGroupSeparator: ',',
               decimalCharacter: '.',
               currencySymbol: '',
               allowDecimalPadding: false,
-              decimalPlaces: 2,
+              decimalPlaces: 6,
               minimumValue: '0',
               maximumValue: tokenBalance,
             }"
@@ -27,7 +27,7 @@
             :disabled="disabled?disabled:false"
           />
         </div>
-        <div class="text-xs text-gray-400 text-right">Balance: {{ Helper.convertToCurrency(tokenBalance * 100, 2) }}</div>
+        <div class="text-xs text-gray-400 text-right">Balance: {{ Helper.toCurrencyFormat(tokenBalance, 3) }}</div>
       </div>
     </div>
     <SelectTokenModal @closeModal="isDisplayBuyTokenModal = false" @selectToken="setToken" :tokens="tokens" :toggleModal="isDisplayBuyTokenModal" />
@@ -54,7 +54,8 @@ export default {
     modelValue: Number,
     selectedToken: String,
     tokens: Array,
-    disabled: boolean
+    tokenType: String,
+    disabled: Boolean
   },
   components:{
     AutoNumericVue,
@@ -63,7 +64,7 @@ export default {
   emits:[
     'confirmedSelectToken', 'update:modelValue'
   ],
-  setup(props, { emit }){
+  setup(props, { emit, expose }){
 
     const tokenName = computed(() => {
       return props.tokens.find(token => token.name === props.selectedToken).name;
@@ -73,9 +74,7 @@ export default {
       return props.tokens.find(token => token.name === props.selectedToken).img;
     });
 
-    const tokenBalance = computed(() => {
-      return props.tokens.find(token => token.name === props.selectedToken).balance;
-    });
+    const tokenBalance = ref(0);
 
     const displayTokenOption = () => {
       emit('displayTokenOptions')
@@ -87,6 +86,14 @@ export default {
       emit('confirmedSelectToken', token);
     }
 
+    const updateSeletectedTokenBalance = (tokenName)=>{
+      tokenBalance.value = props.tokens.find(token => token.name === tokenName).balance;
+    }
+
+    expose({ updateSeletectedTokenBalance });
+
+    updateSeletectedTokenBalance(props.selectedToken);
+
     return {
       isDisplayBuyTokenModal,
       displayTokenOption,
@@ -95,6 +102,7 @@ export default {
       tokenImage,
       tokenBalance,
       setToken,
+      updateSeletectedTokenBalance
     }
   }
 }

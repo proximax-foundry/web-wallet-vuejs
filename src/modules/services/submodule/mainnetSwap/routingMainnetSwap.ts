@@ -1,13 +1,6 @@
 import { RouteRecordRaw } from 'vue-router'
 export const MainnetSwapRoutes: RouteRecordRaw[] = [
   {
-    path: '/swap-connect',
-    name: 'ViewWalletConnect',
-    component: () => import('@/modules/services/submodule/mainnetSwap/views/ViewWalletConnect.vue'),
-    meta: {
-      title: "Swap",
-    }
-  },{
     path: '/swap',
     name: 'ViewServicesMainnetSwap',
     component: () => import('@/modules/services/submodule/mainnetSwap/views/ViewServicesMainnetSwap.vue'),
