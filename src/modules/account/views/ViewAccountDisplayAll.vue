@@ -9,7 +9,7 @@
     </div>
     <div class='mt-2 py-3 '>
       <div class="w-11/12 ml-auto mr-auto flex flex-col gap-3">
-          <div class="flex items-center col-span-2">
+          <div class="flex items-center">
             <font-awesome-icon icon="search" class="text-blue-link mr-1"></font-awesome-icon>
             <input v-model="filterQuery" type="text" class="py-2 px-2 outline-none text-xs text-black" :placeholder="$t('general.search')">
           </div>
