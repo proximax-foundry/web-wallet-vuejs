@@ -1,15 +1,22 @@
 <template>
   <div>
-    <div class='my-4 w-11/12 ml-auto mr-auto flex flex-col sm:flex-row justify-between'>
-      <LabelComponent />
-      <div class="absolute invisible 2xl:visible text-gray-500 mt-1 explicitLeft" >Labels</div>
+    <div class='my-4 w-11/12 ml-auto mr-auto flex flex-row-reverse'>
       <router-link :to="{name:'ViewAccountCreateSelectType'}" >
         <div class="mt-3 sm:mt-0 text-center w-44 text-white bg-blue-primary rounded-md font-semibold text-xs p-2">+ {{$t('general.createNewAcc')}}</div>
       </router-link>
     </div>
     <div class='mt-2 py-3 '>
       <div class="w-11/12 ml-auto mr-auto flex flex-col gap-3">
-        <AccountTile :key="index" :account="item" v-for="(item, index) in accounts" />
+        <div class="grid grid-cols-5">
+          <div class="flex items-center col-span-2">
+            <font-awesome-icon icon="search" class="text-blue-link mr-1"></font-awesome-icon>
+            <input v-model="filterQuery" type="text" class="py-2 px-2 outline-none text-xs text-black" :placeholder="$t('general.search')">
+          </div>
+          <div class="col-span-3">
+            <LabelComponent />
+          </div>
+        </div>
+        <AccountTile :key="index" :account="item" v-for="(item, index) in filteredAccounts" />
       </div>
     </div>
     <div class="mb-36"/>
@@ -208,10 +215,23 @@ export default {
     emitter.on('filterByLabel',e=>{
       labelNames.value = e
     })
-    
+
+    const filterQuery = ref("");
+    const filteredAccounts = computed(() => {
+    const query = filterQuery.value.toLowerCase();
+      if(filterQuery.value == ""){
+        return accounts.value;
+      }
+      return accounts.value.filter((item) =>{
+        return Object.values(item).some((word) =>
+          String(word).toLowerCase().includes(query));
+      });
+  });
 
     return {
       accounts,
+      filterQuery,
+      filteredAccounts
     };
   },
 }
