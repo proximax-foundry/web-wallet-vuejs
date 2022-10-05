@@ -67,6 +67,7 @@ export default {
      * - dynamic price for stable coins and sirius token
      * - tick box for user's acknowledgement
      * - sirius recipient's UI 
+     * - after click buy, lock/disable the button
      * - get confirmed transaction, send to swap server
      */
 
@@ -162,6 +163,7 @@ export default {
     }});
 
     const resetStableCoinsBalanceZero = ()=>{
+      fromInputAmount.value = 0;
       for(let i =0; i < stableCoins.length ;++i){
         stableCoins[i].balance = 0;
       }
@@ -196,23 +198,26 @@ export default {
       selectedStableCoins.value = contracts;
 
       let promises = [];
-      let contractAddresses = contracts.map(x => x.contractAddress);
-      let tokenDecimals = contracts.map(x => x.decimals);
       const web3Provider = new ethers.providers.Web3Provider(provider);
       const signer = web3Provider.getSigner();
       const address = await signer.getAddress();
 
-      for(let i=0; i < contractAddresses.length; ++i){
-        const contract = new ethers.Contract(contractAddresses[i], abi, web3Provider);
+      for(let i=0; i < contracts.length; ++i){
+        const contract = new ethers.Contract(contracts[i].contractAddress, abi, web3Provider);
+        const decimals= contracts[i].decimals;
+        const currentName = contracts[i].name;
 
         let newPromise = new Promise(async(resolve, reject)=>{
           const balance = await contract.balanceOf(address);
-          const decimals = tokenDecimals[i];//await contract.decimals();
 
           const balanceString = balance.toString();
           const fixedBalance = parseFloat(balanceString.length > decimals ? balanceString.slice(0, -decimals) + '.'+ balanceString.slice(-decimals) : '0.' + '0'.repeat(decimals - balanceString.length) + balanceString);
           let stableCoin = stableCoins.find(x => x.name === contracts[i].name);
+          if(selectedFromToken.value === currentName && fromInputAmount.value > fixedBalance){
+            fromInputAmount.value = fixedBalance;
+          }
           stableCoin.balance = fixedBalance;
+          
           resolve(true);
         });
         promises.push(newPromise);
@@ -330,12 +335,6 @@ export default {
             // Subscribe to provider disconnection
             provider.on("disconnect", handleDisconnect);
           }
-
-          // checkValidSelectedChainId();
-
-          // await searchAccountStableCoinsBalance();
-          // updateSelectedContractAddress();      
-          
       }catch(error){
         // console.log("Error");
         // console.log(error);
@@ -390,17 +389,44 @@ export default {
 
         const decimals = selectedStableCoins.value.find(x => x.contractAddress === selectedContractAddress.value).decimals;
 
+        /* for future references
+        let ABI = [
+        "function transfer(address to, uint amount)"
+        ];
+        let iface = new ethers.utils.Interface(ABI);
+        let dataPayload = iface.encodeFunctionData("transfer", [ address, ethers.utils.parseUnits(fromInputAmount.value.toString(), decimals) ])
+
+        console.log(dataPayload);
+        
+        const tx = {
+          // this could be provider.addresses[0] if it exists
+          from: address, 
+          // target address, this could be a smart contract address
+          to: selectedContractAddress.value, 
+          // optional if you want to specify the gas limit 
+          gasLimit: 57500, 
+          // optional if you are invoking say a payable function 
+          value: "0x00",
+          // this encodes the ABI of the method and the arguements
+          data: dataPayload
+        };
+
+        let receipt = await signer.sendTransaction(tx);
+
+        console.log(receipt);
+        */
+
         let options = {
           gasLimit: 57500,
         };
         const receipt = await contract.transfer(
           address,
-          ethers.utils.parseUnits(toInputAmount.value.toString(), decimals),//fromInputAmount.value, decimals),
+          ethers.utils.parseUnits(fromInputAmount.value.toString(), decimals),
           options,
         );
         let txnHash = receipt.hash;
 
-        console.log(txnHash);
+        console.log(receipt);
       } catch (error) {
         console.log(error);
         // let txnRejected = true; 
