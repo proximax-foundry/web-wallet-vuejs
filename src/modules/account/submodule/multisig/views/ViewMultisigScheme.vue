@@ -15,8 +15,7 @@
         <div class="overflow-auto w-full border-2  " :style="`${viewType2==1?' transform: rotate(180deg);':'' }`">
           <blocks-tree :data="graph" :horizontal="viewType==0"  :collapsable="collapsable" :props="{label: 'label', name: 'name', balance: 'balance', numApproveTx:'numApproveTx',numRemoval:'numRemoval',children: 'children'}">
             <template #node="{data}">
-              <a :href="explorerLink(prettyAddress(data.label))" target=_new>
-                <div class="flex flex-col justify-center p-1.5 h-20 cursor-pointer " @click="navigate(prettyAddress(data.label))"  :style="`${viewType2==1?' transform: rotate(180deg);':'' }width: 16.5rem`" >
+                <div class="flex flex-col justify-center p-1.5 h-20 cursor-pointer " @click="navigate(prettyAddress(data.label));explorerLink(prettyAddress(data.label))"  :style="`${viewType2==1?' transform: rotate(180deg);':'' }width: 16.5rem`" >
                   <div class="text-xs text-left text-blue-500 font-bold">{{data.name}}</div>
                   <div class="flex gap-1">
                     <div :id="data.label" :copyValue="prettyAddress(data.label)"  :copySubject="$t('general.address')" class="font-bold text-left text-xs mt-0.5">{{displayAddress(data.label)}}</div>
@@ -42,7 +41,6 @@
                       </div>
                   </div>
                 </div>
-              </a>
             </template>
           </blocks-tree>
         </div>
@@ -287,7 +285,7 @@ setup(p){
       return ''
     }
     if(!findAccountWithAddress(address,true)){
-      return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.addressRoute + '/' + address
+      window.open(networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.addressRoute + '/' + address)
     }
   }
   return{
