@@ -40,7 +40,8 @@
             </div>
           </div>
         </div>
-        <div class="flex justify-end mt-5">
+        <div class="flex justify-between mt-5">
+          <toggleSwitch v-model="isChecked" />
           <div class="bg-blue-50 p-3 rounded-md inline-block text-xs text-right">
             <div class="mb-1.5">Exchange Rate: 1 {{ selectedFromToken }} = {{ exchangeRate }} {{ selectedToToken }}</div>
             <div class="mb-1.5">{{ selectedFromToken }} Price: {{ selectedFromTokenPrice }} USD</div>
@@ -74,12 +75,14 @@ import { abi, SwapUtils } from '@/util/swapUtils';
 import { AppState } from "@/state/appState";
 import { walletState } from "@/state/walletState";
 import { Address } from 'tsjs-xpx-chain-sdk';
+import toggleSwitch from '@/modules/services/submodule/stacking/components/toggleSwitch.vue';
 
 export default {
   name: "ViewServicesStackingBuy",
   components: {
     BuyFormInput,
     AddressInputClean,
+    toggleSwitch,
   },
   setup(){
     /**
@@ -109,7 +112,7 @@ export default {
     let provider;
 
     const disabledBuy = computed(() => {
-      return !isChainIdValid.value || fromInputAmount.value < 1
+      return !isChainIdValid.value || fromInputAmount.value < 1 || !isChecked.value
     });
 
     const connectedAddress = ref("");
@@ -565,6 +568,8 @@ export default {
       }
     };
 
+    const isChecked = ref(false);
+
     return {
       stableCoins,
       siriusTokens,
@@ -596,6 +601,7 @@ export default {
       siriusAddress,
       checkRecipient,
       contacts,
+      isChecked,
     }
   }
 }
