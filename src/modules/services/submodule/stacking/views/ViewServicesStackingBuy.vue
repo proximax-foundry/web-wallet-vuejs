@@ -4,30 +4,48 @@
       <div class='mt-6 px-6 py-10 border filter shadow-lg text-center'>
         <div class="text-md mb-3">Buy {{ selectedToToken }}</div>
         <div>
-          <div v-if="isWalletConnected" class="text-xs flex items-center justify-end">
-            <span>
-              <button @click="manualDisconnect">Disconnect</button>
-            </span>
-            <span v-if="connectedWalletName === 'WC'">
-              <img src="@/modules/services/submodule/mainnetSwap/img/icon-walletconnect.svg" class="w-4 h-4 inline-block" />&nbsp;{{ tokenType(selectedChainId) }}&nbsp;{{ connectedAddress }}
-            </span>
-            <span v-else>
-              <img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask-fox.svg" class="w-4 h-4 inline-block" />&nbsp;{{ tokenType(selectedChainId) }}&nbsp;{{ connectedAddress }}
-            </span>
+          <div v-if="!isChainIdValid && isWalletConnected" class="error_box error error-text">
+            <div>Please select supported chain, ethereum mainnet/ bsc mainnet</div>
           </div>
-          <div v-else class="text-xs flex items-center justify-end"><button @click="connectWallet">Connect Wallet</button></div>
+          <div v-if="isWalletConnected" class="text-xs flex items-center justify-end">
+            <div v-if="connectedWalletName === 'WC'" class="flex items-center gray-text-300">
+              <img src="@/modules/services/submodule/mainnetSwap/img/icon-walletconnect.svg" class="w-4 h-4 inline-block" />&nbsp;{{ tokenType(selectedChainId) }}&nbsp;{{ connectedAddress }}
+            </div>
+            <div v-else class="flex items-center gray-text-300">
+              <img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask-fox.svg" class="w-4 h-4 inline-block" />&nbsp;{{ tokenType(selectedChainId) }}&nbsp;{{ connectedAddress }}
+            </div>
+            <button @click="manualDisconnect" class="ml-2 text-gray-500 flex items-center group hover:text-gray-900 border border-gray-500 p-1 rounded-md bg-gray-50">Disconnect <font-awesome-icon icon="times" class="text-gray-500 ml-1 group-hover:text-gray-900" /></button>
+          </div>
+          <div v-else class="text-xs flex items-center justify-end text-gray-500 hover:text-gray-900 group duration-200 transition-all"><button @click="connectWallet" class="border border-gray-500 p-1 rounded-md bg-gray-50 hover:bg-gray-200 transition-all duration-200">Connect Wallet <font-awesome-icon icon="wallet" class="text-gray-500 ml-2 group-hover:text-gray-900" /></button></div>
           <div>
             <BuyFormInput ref="buyFromComponent" formLabel="From" :tokens="stableCoins" v-model="fromInputAmount" :selectedToken="selectedFromToken" :amount="fromAmount" :tokenType="tokenType(selectedChainId)" @confirmedSelectToken="selectFromToken" />
             <BuyFormInput ref="buyToComponent" formLabel="To" :tokens="siriusTokens" v-model="toInputAmount" :selectedToken="selectedToToken" :amount="toAmount" @confirmedSelectToken="selectToToken" :disabled="true" class="mt-5" />
           </div>
+          <div class="flex mt-4">
+            <AddressInputClean :placeholder="$t('transfer.transferPlaceholder')" v-model="siriusAddress" v-debounce:1000="checkRecipient" :showError="showAddressError" />
+            <div @click="toggleContact=!toggleContact" class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 ' >
+              <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
+              <div class='text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.select')}}</div>
+            </div>
+          </div>
+          <div v-if="toggleContact" class=" border ">
+          <div class='text-xxs text-left text-gray-300 font-semibold py-2 px-2 uppercase'>{{$t('general.importFromAB')}}</div>
+            <div v-for="(item, number) in contacts" :key="number" class="cursor-pointer">
+              <div @click="siriusAddress=item.value;toggleContact=false" class="flex justify-between">
+                <div v-if="number%2==0" class="text-xs py-2 bg-gray-100 pl-2 w-full text-left">{{item.label}}</div>
+                <div v-if="number%2==1" class="text-xs py-2 pl-2 w-full text-left">{{item.label}}</div>
+                <div v-if="number%2==0" class="ml-auto pr-2 text-xxs py-2 font-semibold text-blue-primary bg-gray-100 uppercase">{{$t('general.select')}}</div>
+                <div v-if="number%2==1" class="ml-auto mr-2 text-xxs py-2 font-semibold text-blue-primary uppercase">{{$t('general.select')}}</div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div v-if="!isChainIdValid">
-          <div>Please select supported chain, ethereum mainnet/ bsc mainnet</div>
-        </div>
-        <div>
-          <div>Exchange Rate: 1 {{ selectedFromToken }} = {{ exchangeRate }} {{ selectedToToken }}</div>
-          <div>{{ selectedFromToken }} Price: {{ selectedFromTokenPrice }} USD</div>
-          <div>{{ selectedToToken }} Price: {{ selectedToTokenPrice }} USD</div>
+        <div class="flex justify-end mt-5">
+          <div class="bg-blue-50 p-3 rounded-md inline-block text-xs text-right">
+            <div class="mb-1.5">Exchange Rate: 1 {{ selectedFromToken }} = {{ exchangeRate }} {{ selectedToToken }}</div>
+            <div class="mb-1.5">{{ selectedFromToken }} Price: {{ selectedFromTokenPrice }} USD</div>
+            <div>{{ selectedToToken }} Price: {{ selectedToTokenPrice }} USD</div>
+          </div>
         </div>
         <div class="flex justify-center mt-10">
           <button class="blue-btn font-semibold py-2 cursor-pointer text-center w-32 disabled:opacity-50 disabled:cursor-auto" :disabled="disabledBuy" @click="buySiriusToken">Buy</button>
@@ -38,7 +56,7 @@
 </template>
 
 <script>
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, shallowRef } from "vue";
 import { useRouter } from "vue-router";
 import { networkState } from "@/state/networkState";
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
@@ -48,17 +66,20 @@ import { availableToTokens } from '@/modules/services/submodule/stacking/siriusT
 import { bscStableCoins } from '@/modules/services/submodule/stacking/bscStableCoins';
 import { ethStableCoins } from '@/modules/services/submodule/stacking/ethStableCoins';
 import BuyFormInput from '@/modules/services/submodule/stacking/components/BuyFormInput.vue';
+import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import Web3Modal from 'web3modal';
 import { ethers } from 'ethers';
 import { abi, SwapUtils } from '@/util/swapUtils';
 import { AppState } from "@/state/appState";
 import { walletState } from "@/state/walletState";
+import { Address } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: "ViewServicesStackingBuy",
   components: {
     BuyFormInput,
+    AddressInputClean,
   },
   setup(){
     /**
@@ -70,6 +91,7 @@ export default {
      * - after click buy, lock/disable the button
      * - get confirmed transaction, send to swap server
      */
+    const {t} = useI18n();
 
     const buyFromComponent = ref(null);
     let stableCoins = availableTokens;
@@ -246,7 +268,7 @@ export default {
     // events handler
     const handleAccountsChanged = (accounts) => {
       if(accounts[0]){
-        connectedAddress.value = accounts[0];
+        connectedAddress.value = accounts[0].substr(0, 5) + '...' + accounts[0].substr(-5);
       }
       else{
         disconnectWallet();
@@ -320,7 +342,7 @@ export default {
           // check if it is walletconnect
           if(provider.wc){
             selectedChainId.value = provider.chainId;
-            connectedAddress.value = provider.accounts[0];
+            connectedAddress.value = provider.accounts[0].substr(0, 5) + '...' + provider.accounts[0].substr(-5);
             connectedWalletName.value = "WC";
             // wc disconnect event
             // Subscribe to session disconnection
@@ -329,7 +351,7 @@ export default {
           else{
             // only for MetaMask Extension
             selectedChainId.value = parseInt(provider.chainId, 16);
-            connectedAddress.value = provider.selectedAddress;
+            connectedAddress.value = provider.selectedAddress.substr(0, 5) + '...' + provider.selectedAddress.substr(-5);
             connectedWalletName.value = "MM";
 
             // Subscribe to provider disconnection
@@ -452,6 +474,97 @@ export default {
     })
     // watcher section end
 
+    // address
+    const showAddressError = shallowRef(true);
+    const toggleContact = shallowRef(false);
+    const siriusAddress = ref('');
+    watch(siriusAddress, n => {
+      if(n.length==40 || n.length==46){
+        checkRecipient();
+      }else{
+        showAddressError.value = true;
+      }
+    });
+
+    const accounts = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return [];
+      }
+      let accounts = walletState.currentLoggedInWallet.accounts.map((acc)=>{
+        return {
+          name: acc.name,
+          balance: acc.balance,
+          address: acc.address,
+          publicKey: acc.publicKey,
+          isMultisig: acc.getDirectParentMultisig().length ? true: false
+        };
+      });
+
+      let otherAccounts =walletState.currentLoggedInWallet.others.filter((acc)=> acc.type === "MULTISIG").map((acc)=>{
+        return {
+          name: acc.name,
+          balance: acc.balance,
+          address: acc.address,
+          publicKey: acc.publicKey,
+          isMultisig: true
+        };
+      });
+
+      return accounts.concat(otherAccounts);
+    });
+
+    const contacts = computed(() => {
+      if(!walletState.currentLoggedInWallet){
+        return [];
+      }
+      const wallet = walletState.currentLoggedInWallet;
+      var contact = [];
+      accounts.value.forEach((element) => {
+        contact.push({ 
+          value: Address.createFromRawAddress(element.address).pretty() ,
+          label: element.name + " - "+t('general.ownerAcc'),
+        });
+      });
+      if (wallet.contacts != undefined) {
+        wallet.contacts.forEach((element) => {
+          contact.push({
+            value: Address.createFromRawAddress(element.address).pretty(),
+            label: element.name + " - "+t('general.contact'),
+          });
+        });
+      }
+      return contact;
+    });
+
+    const checkRecipient = () =>{
+      if(!walletState.currentLoggedInWallet){
+          return;
+      }
+      try {
+        let recipientAddress = Helper.createAddress(siriusAddress.value);
+        let networkOk = Helper.checkAddressNetwork(recipientAddress, AppState.networkType);
+        if(!networkOk){
+          showAddressError.value = true;
+        }
+        else{
+          showAddressError.value = false;
+        }
+      } catch (error) {
+        try{
+          let namespaceId = Helper.createNamespaceId(siriusAddress.value);
+          checkNamespace(namespaceId).then((address)=>{
+            siriusAddress.value = address.plain();
+            showAddressError.value = false;
+          }).catch((error)=>{
+            showAddressError.value = true;
+          });
+        }
+        catch(error){
+          showAddressError.value = true;
+        }
+      }
+    };
+
     return {
       stableCoins,
       siriusTokens,
@@ -477,7 +590,12 @@ export default {
       isChainIdValid,
       selectedFromTokenPrice,
       selectedToTokenPrice,
-      buySiriusToken
+      buySiriusToken,
+      showAddressError,
+      toggleContact,
+      siriusAddress,
+      checkRecipient,
+      contacts,
     }
   }
 }
