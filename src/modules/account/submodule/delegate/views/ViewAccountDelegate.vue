@@ -32,30 +32,26 @@
           <div class="mt-4"></div>
           <div class="ml-6 my-7 gray-line"/>
           <button v-if="!toggleSelection" @click="toggleSelection=!toggleSelection" class='ml-6 w-44 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto' >{{$t('delegate.selectAccToLink')}}</button>
-          <div v-if="toggleSelection && !fromNew && !fromPk">
+          <div v-if="toggleSelection && !fromNew">
             <div class='pl-6 text-xs font-semibold'>{{$t('general.selectCreationType')}}</div>
             <div class='mt-3'></div>
             <div class='flex gap-2 ml-6'>
-              <div class='border p-6 w-44 cursor-pointer'  @click="fromNew=true">
+              <div class='border p-6 w-44 cursor-pointer'  @click="fromNew=true; generatePrivateKey()">
                 <img src="@/modules/wallet/img/icon-add-new.svg" class="ml-auto mr-auto mt-4 mb-3 h-12 w-12 ">
                 <div class='text-center text-xs font-semibold'>{{$t('general.createNew')}}</div>
               </div>
-              <div class='border p-6 w-44 cursor-pointer' @click="fromPk=true">
-                <img src="@/modules/wallet/img/icon-private-key.svg" class=" ml-auto mr-auto mt-4 mb-3 h-12 w-12 ">
-                <div class='text-center text-xs font-semibold'>{{$t('general.fromPrivateKey')}}</div>
-              </div>
             </div> 
-          </div>
-          <div v-if="fromPk" class="pl-6">
-            <div class="text-xs font-semibold">{{$t('general.fromPrivateKey')}}</div>
-            <div class="text-xxs mt-2">{{$t('delegate.enterPk')}}</div>
-            <PkInputClean :placeholder="$t('general.privateKey')" class="my-3" v-model="privateKey" :showError="showPrivateKeyError" />
-            <div class="text-xs text-blue-primary font-semibold cursor-pointer" @click="fromPk=!fromPk">{{$t('general.back')}}</div>
           </div>
           <div v-if="fromNew" class="pl-6">
             <div class="text-xs font-semibold">{{$t('delegate.newAcc')}}</div>
             <div class="text-xxs my-2">{{$t('delegate.newAccSelected')}}</div>
-             <div class="text-xs text-blue-primary font-semibold cursor-pointer" @click="fromNew=!fromNew">{{$t('general.back')}}</div>
+            <div class = 'text-xxs text-blue-primary mt-0.5 font-semibold uppercase'>{{$t('general.privateKey')}}</div>
+            <div class="flex">
+              <div id="private" class="truncate text-xs mt-1 font-semibold" type="text" :copyValue="privateKey" :copySubject="$t('general.privateKey')">{{privateKey}}</div>
+              <font-awesome-icon :title="$t('general.copy')" icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link mt-0.5 cursor-pointer "></font-awesome-icon>
+            </div>
+            <div class = 'text-txs mt-1 text-red-400 border px-1.5 py-2 border-red-400 rounded-md'>{{$t('general.pkWarning')}}</div>
+             <div class="text-xs text-blue-primary font-semibold cursor-pointer mt-2" @click="fromNew=!fromNew">{{$t('general.back')}}</div>
           </div>
         </div>
         <div v-else>
@@ -148,7 +144,6 @@
 
 import { ref, computed, getCurrentInstance,watch } from "vue";
 import PasswordInput from '@/components/PasswordInput.vue';
-import PkInputClean from '@/modules/account/submodule/delegate/components/PkInputClean.vue';
 import { walletState } from '@/state/walletState';
 import { WalletUtils } from "@/util/walletUtils";
 import { networkState } from "@/state/networkState";
@@ -168,12 +163,12 @@ import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
+import { WalletAccount } from "@/models/walletAccount";
 export default {
   name: 'ViewAccountDelegate',
   components: {
     AccountComponent,
     PasswordInput,
-    PkInputClean,
     AccountTabs
   },
   props: {
@@ -342,6 +337,7 @@ export default {
     const delegateAcc = ref('');
     const AccPublicKey = ref("");
     const AccPrivateKey = ref("")
+    const accountName = ref("");
     const router = useRouter();
     const toast = useToast();
     const accAddress = ref(p.address);
@@ -415,25 +411,15 @@ export default {
       return delegateBoolean;
     });
 
+   const generatePrivateKey = async() =>{
+          privateKey.value= Account.generateNewAccount().privateKey;
+    }
     const createDelegate = async() => {
-      if(privateKey.value!=""){
-        const networkType = AppState.networkType;
-        const accountDetail = Account.createFromPrivateKey(privateKey.value, networkType);
-        const accountAPIResponse = await accountUtils.getValidAccount(accountDetail.address.address);
-        if(accountAPIResponse == true){        
-          if(accountDetail){
-            AccPublicKey.value = accountDetail.publicKey;
-          }      
-        } else {          
-          err.value = t('delegate.privateKeyErr')
-        }  
-      }else{
-        const account = WalletUtils.generateNewAccount(AppState.networkType);
-        if(account){
-          AccPublicKey.value = account.publicKey;
+      const account = WalletUtils.generateNewAccount(AppState.networkType);
+      if(account){
+        AccPublicKey.value = account.publicKey;
          
         }
-      }
       if (WalletUtils.verifyWalletPassword(walletName,networkState.chainNetworkName,walletPassword.value)) {
         if (delegateAcc.value !== "0".repeat(64)) { //unlink
           accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
@@ -499,7 +485,8 @@ export default {
       findAcc,
       fundStatus,
       topUpUrl,
-      networkType
+      networkType,
+      generatePrivateKey
     };
   },
 }
