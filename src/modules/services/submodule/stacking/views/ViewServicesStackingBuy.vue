@@ -106,13 +106,14 @@ export default {
     const fromInputAmount = ref(0);
     const toInputAmount = ref(0);
     const recipient = ref(walletState.currentLoggedInWallet.accounts.find(x => x.default).address);
+    const isSubmit = shallowRef(false);
     
     const isChainIdValid = ref(false);
     // const buyingToken = ref("METX");
     let provider;
 
     const disabledBuy = computed(() => {
-      return !isChainIdValid.value || fromInputAmount.value < 1 || !isChecked.value
+      return !isChainIdValid.value || fromInputAmount.value < 1 || !isChecked.value || isSubmit.value
     });
 
     const connectedAddress = ref("");
@@ -406,6 +407,7 @@ export default {
     const buySiriusToken = async ()=>{
 
       try {
+        isSubmit.value = true;
         const web3Provider = new ethers.providers.Web3Provider(provider);
         const signer = web3Provider.getSigner();
         const address = await signer.getAddress();
@@ -453,6 +455,7 @@ export default {
 
         console.log(receipt);
       } catch (error) {
+        isSubmit.value = false;
         console.log(error);
         // let txnRejected = true; 
       }
@@ -602,6 +605,7 @@ export default {
       checkRecipient,
       contacts,
       isChecked,
+      isSubmit,
     }
   }
 }
