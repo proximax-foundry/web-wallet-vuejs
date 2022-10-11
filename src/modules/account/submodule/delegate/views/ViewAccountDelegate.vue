@@ -183,7 +183,6 @@ export default {
     const showPasswdError = ref(false);
     const err = ref(false); 
     let fromNew = ref(false)
-    let fromPk = ref(false)
     let toggleSelection = ref(false)
     const acc = computed(()=>{
       if(!walletState.currentLoggedInWallet){
@@ -349,7 +348,7 @@ export default {
     const disableLinkBtn = computed(() => {
       if(onPartial.value || fundStatus.value || (!isCosigner.value && isMultisig.value) ){
         return true
-      }else if(!fromNew.value && !fromPk.value && !delegateValue.value){
+      }else if(!fromNew.value && !delegateValue.value){
         return true
       }else if(delegateValue.value){
         if(walletPassword.value.match(passwdPattern)){
@@ -359,12 +358,6 @@ export default {
         }
       }else if(fromNew.value){
         if(walletPassword.value.match(passwdPattern)){
-          return false
-        }else{
-          return true
-        }
-      }else if(fromPk.value){
-        if(walletPassword.value.match(passwdPattern) && showPrivateKeyError.value==false){
           return false
         }else{
           return true
@@ -425,7 +418,7 @@ export default {
           accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
           walletPassword.value=""
           err.value=""
-        } else if (AccPublicKey.value != "" && (fromPk.value || fromNew.value)) { //link
+        } else if (AccPublicKey.value != "" && fromNew.value) { //link
           accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
           walletPassword.value=""
           err.value=""
@@ -455,7 +448,6 @@ export default {
       showPrivateKeyError,
       privateKey,
       fromNew,
-      fromPk,
       toggleSelection,
       currentNativeTokenName,
       splitBalance,
