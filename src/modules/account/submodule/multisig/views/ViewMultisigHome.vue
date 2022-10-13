@@ -13,7 +13,7 @@
       <div class='border p-4 my-3 '>
        <div class="flex flex-col gap-2">
         <div v-for="(cosigner,index) in cosignerAccountsList" :key="index">
-            <div class="border w-full cursor-pointer rounded-md p-3" @click="navigate(cosigner.address)">
+            <div class="border w-full cursor-pointer rounded-md p-3" @click="navigate(cosigner.address);explorerLink(cosigner.address)">
               <div class="text-txs font-semibold text-blue-primary">{{cosigner.name}}</div>
               <div class="flex">
                 <div :id="`cosignerAddress${index}`" :copyValue="cosigner.address" :copySubject="$t('general.address')" :title="cosigner.address" class="truncate md:text-clip md:w-auto text-txs font-bold mt-1">{{cosigner.address}}</div>
@@ -34,12 +34,12 @@
       <div class='border p-4 mt-3'>
         <div class="flex flex-col gap-2">
           <div v-for="(multisig,index) in multisigAccountsList" :key="index">
-            <div class="border w-full cursor-pointer rounded-md p-3" @click="navigate(multisig.address)">
+            <div class="border w-full cursor-pointer rounded-md p-3" @click="navigate(multisig.address);explorerLink(multisig.address)">
               <div class="text-txs font-semibold text-blue-primary">{{multisig.name}}</div>
               <div class="flex">
                 <div :id="`multisigAddress${index}`" :copyValue="multisig.address" :title="multisig.address" :copySubject="$t('general.address')" class="truncate md:text-clip md:w-auto text-txs font-bold mt-1">{{multisig.address}}</div>
                 <font-awesome-icon icon="copy" @mouseover="isHover = true" @mouseout="isHover = false" :title="$t('general.copy')" @click="copy(`multisigAddress${index}`)" class="ml-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
-                  <img v-if="findAccountWithAddress(multisig.address)" class="w-5 h-5 ml-auto" src="@/assets/img/chevron_right.svg">
+                <img v-if="findAccountWithAddress(multisig.address)" class="w-5 h-5 ml-auto" src="@/assets/img/chevron_right.svg">
               </div>
             </div>
           </div>
@@ -167,6 +167,14 @@ export default {
         router.push({ name: 'ViewAccountDetails', params: { address:getPlainAddress(address) }})
       }
     }
+    const explorerLink = address =>{
+      if(!networkState.currentNetworkProfile){
+        return ''
+      }
+      if(!findAccountWithAddress(address,true)){
+        window.open(networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.addressRoute + '/' + address)
+      }
+    }
       return{
         findAccountWithAddress,
         isHover,
@@ -176,7 +184,8 @@ export default {
         acc,
         isCosigner,
         multisigAccountsList,
-        cosignerAccountsList
+        cosignerAccountsList,
+        explorerLink
       }
     }
 }
