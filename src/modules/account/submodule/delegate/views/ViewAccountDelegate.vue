@@ -31,27 +31,16 @@
           <div class="text-xxs pl-6 mt-2">{{$t('delegate.notLinked')}}</div>
           <div class="mt-4"></div>
           <div class="ml-6 my-7 gray-line"/>
-          <button v-if="!toggleSelection" @click="toggleSelection=!toggleSelection" class='ml-6 w-44 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto' >{{$t('delegate.selectAccToLink')}}</button>
-          <div v-if="toggleSelection && !fromNew">
-            <div class='pl-6 text-xs font-semibold'>{{$t('general.selectCreationType')}}</div>
-            <div class='mt-3'></div>
-            <div class='flex gap-2 ml-6'>
-              <div class='border p-6 w-44 cursor-pointer'  @click="fromNew=true; generatePrivateKey()">
-                <img src="@/modules/wallet/img/icon-add-new.svg" class="ml-auto mr-auto mt-4 mb-3 h-12 w-12 ">
-                <div class='text-center text-xs font-semibold'>{{$t('general.createNew')}}</div>
-              </div>
-            </div> 
-          </div>
+          <button v-if="!toggleSelection" @click="toggleSelection=!toggleSelection;fromNew=true; generatePrivateKey()" class='ml-6 w-44 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto' >{{$t('delegate.selectAccToLink')}}</button>
           <div v-if="fromNew" class="pl-6">
             <div class="text-xs font-semibold">{{$t('delegate.newAcc')}}</div>
-            <div class="text-xxs my-2">{{$t('delegate.newAccSelected')}}</div>
             <div class = 'text-xxs text-blue-primary mt-0.5 font-semibold uppercase'>{{$t('general.privateKey')}}</div>
             <div class="flex">
               <div id="private" class="truncate text-xs mt-1 font-semibold" type="text" :copyValue="privateKey" :copySubject="$t('general.privateKey')">{{privateKey}}</div>
               <font-awesome-icon :title="$t('general.copy')" icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link mt-0.5 cursor-pointer "></font-awesome-icon>
             </div>
             <div class = 'text-txs mt-1 text-red-400 border px-1.5 py-2 border-red-400 rounded-md'>{{$t('general.pkWarning')}}</div>
-             <div class="text-xs text-blue-primary font-semibold cursor-pointer mt-2" @click="fromNew=!fromNew">{{$t('general.back')}}</div>
+             <div class="text-xs text-blue-primary font-semibold cursor-pointer mt-2" @click="fromNew=!fromNew;toggleSelection=!toggleSelection">{{$t('general.back')}}</div>
           </div>
         </div>
         <div v-else>
