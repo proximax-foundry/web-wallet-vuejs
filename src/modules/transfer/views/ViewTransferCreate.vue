@@ -72,9 +72,9 @@
       <div class='bg-navy-primary p-6 lg:col-span-2'>
         <div v-if="!isMultiSig(selectedAccAdd)" class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
         <div v-else class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.multisigAcc')}}</div>
-        <div class="grid grid-cols-4 my-1 text-white">
-          <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase'>{{$t('general.currentBalance')}}</div>
-          <div class="flex ml-auto col-span-2">
+        <div class="lg:grid lg:grid-cols-5 grid grid-cols-7  my-1 text-white">
+          <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase lg:col-span-2 col-span-3'>{{$t('general.currentBalance')}}</div>
+          <div class="flex ml-auto lg:col-span-2 col-span-3">
             <div class = 'ml-auto text-md font-bold '>{{splitBalance.left}} </div>
             <div class = 'text-md font-bold ' v-if='splitBalance.right!=null'>.</div>
             <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
@@ -85,15 +85,15 @@
           </div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
-         <div class="grid grid-cols-4 mt-4 text-white">
-          <div class='text-xs '>{{$t('transfer.transferAmount')}}</div>
-          <div v-if="isNaN(parseFloat(sendXPX))" class="text-xs col-span-2 ml-auto">0</div>
-          <div v-else class="text-xs col-span-2 ml-auto">{{sendXPX}}</div>
+         <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 mt-4 text-white">
+          <div class='text-xs lg:col-span-2 col-span-3'>{{$t('transfer.transferAmount')}}</div>
+          <div v-if="isNaN(parseFloat(sendXPX))" class="text-xs lg:col-span-2 col-span-3 ml-auto">0</div>
+          <div v-else class="text-xs lg:col-span-2 col-span-3 ml-auto">{{sendXPX}}</div>
           <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
         </div>
         <div v-if="isMultiSig(selectedAccAdd)">
-          <div class="grid grid-cols-4 text-white"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
-            <div class="text-xs col-span-3 ml-auto">{{selectedMosaic[index].amount}}</div>
+          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
+            <div class="text-xs lg:col-span-4 col-span-6 ml-auto">{{selectedMosaic[index].amount}}</div>
             <div class="ml-1 text-xs text-blue-400" :index="index " :options="mosaics" :disableOptions="selectedMosaic"> {{displayAssetId(selectedMosaic[index].id)}} </div>
           </div>
         </div>
@@ -101,10 +101,10 @@
           <div v-if="getWalletCosigner.cosignerList.length > 0">
             <div class="flex justify-between border-600 border-b items-center text-gray-200 text-xs my-5" />
               <div class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
-              <div class="grid grid-cols-4 text-gray-200 my-1">
-                <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase'>{{$t('general.currentBalance')}}</div>
-                <span class='ml-auto font-bold col-span-2' v-if="getWalletCosigner.cosignerList.length == 1">{{  getWalletCosigner.cosignerList[0].balance }}</span>
-                <span class='ml-auto font-bold col-span-2' v-else>{{ checkCosignBalance }}</span>
+              <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-gray-200 my-1">
+                <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase lg:col-span-2 col-span-3'>{{$t('general.currentBalance')}}</div>
+                <span class='ml-auto font-bold lg:col-span-2 col-span-3' v-if="getWalletCosigner.cosignerList.length == 1">{{  getWalletCosigner.cosignerList[0].balance }}</span>
+                <span class='ml-auto font-bold lg:col-span-2 col-span-3' v-else>{{ checkCosignBalance }}</span>
                 <div class="flex">
                   <div class ='ml-1 font-bold text-blue-400'>{{currentNativeTokenName}}</div>
                   <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
@@ -114,49 +114,49 @@
           </div>
         </div>
         <div class="mt-0.5 text-white">
-          <div v-if="!isMultiSig(selectedAccAdd)" class='grid grid-cols-4 text-xs'>
-            <div class="text-xs">{{$t('general.transactionFee')}}</div>
-            <div class="text-xs col-span-2 ml-auto">{{effectiveFee}}</div>
+          <div v-if="!isMultiSig(selectedAccAdd)" class='lg:grid lg:grid-cols-5 grid grid-cols-7 text-xs'>
+            <div class="text-xs lg:col-span-2 col-span-3">{{$t('general.transactionFee')}}</div>
+            <div class="text-xs lg:col-span-2 col-span-3 ml-auto">{{effectiveFee}}</div>
             <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
           </div>
           <div v-else>
-            <div v-if="getWalletCosigner.cosignerList.length > 0" class="grid grid-cols-4 text-xs">
-              <div>{{$t('general.aggregateFee')}}</div>
-              <div class="text-xs col-span-2 ml-auto">{{effectiveFee}}</div>
+            <div v-if="getWalletCosigner.cosignerList.length > 0" class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-xs">
+              <div class="lg:col-span-2 col-span-3">{{$t('general.aggregateFee')}}</div>
+              <div class="text-xs lg:col-span-2 col-span-3 ml-auto">{{effectiveFee}}</div>
               <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
             </div>
           </div>
         </div>
         <div v-if="getWalletCosigner.cosignerList.length > 0">
-          <div v-if="isMultiSig(selectedAccAdd) " class="grid grid-cols-4 text-white">
-            <div class='text-xs '>{{$t('general.lockFund')}}</div>
-            <div class="text-xs col-span-2 ml-auto">{{lockFundCurrency}}</div>
+          <div v-if="isMultiSig(selectedAccAdd) " class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white">
+            <div class='text-xs lg:col-span-2 col-span-3'>{{$t('general.lockFund')}}</div>
+            <div class="text-xs lg:col-span-2 col-span-3 ml-auto">{{lockFundCurrency}}</div>
             <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
           </div>
-          <div v-if="isMultiSig(selectedAccAdd)" class="grid grid-cols-4  text-white">
-            <div class='text-xs '>{{$t('general.lockFundTxFee')}}</div>
-            <div class="text-xs col-span-2 ml-auto">{{lockFundTxFee}}</div>
+          <div v-if="isMultiSig(selectedAccAdd)" class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white">
+            <div class='text-xs lg:col-span-2 col-span-3'>{{$t('general.lockFundTxFee')}}</div>
+            <div class="text-xs lg:col-span-2 col-span-3 ml-auto">{{lockFundTxFee}}</div>
             <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
           </div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
         <div class="text-white">
-          <div v-if="!isMultiSig(selectedAccAdd)" class='grid grid-cols-4 text-xs'>
-            <div class=' font-bold text-xs uppercase'>{{$t('general.total')}}</div>
-            <div  class="text-xs col-span-2 ml-auto">{{totalFee}}</div>
+          <div v-if="!isMultiSig(selectedAccAdd)" class='lg:grid lg:grid-cols-5 grid grid-cols-7 text-xs'>
+            <div class=' font-bold text-xs uppercase lg:col-span-2 col-span-3'>{{$t('general.total')}}</div>
+            <div  class="text-xs lg:col-span-2 col-span-3 ml-auto">{{totalFee}}</div>
             <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
           </div>
           <div v-else>
-            <div v-if="getWalletCosigner.cosignerList.length > 0" class="grid grid-cols-4 text-xs">
-              <div class=' font-bold text-xs uppercase'>{{$t('general.total')}}</div>
-              <div  class="text-xs col-span-2 ml-auto">{{totalFee}}</div>
+            <div v-if="getWalletCosigner.cosignerList.length > 0" class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-xs">
+              <div class=' font-bold text-xs uppercase lg:col-span-2 col-span-3'>{{$t('general.total')}}</div>
+              <div  class="text-xs lg:col-span-2 col-span-3 ml-auto">{{totalFee}}</div>
               <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
             </div>
           </div>
         </div>
         <div v-if="!isMultiSig(selectedAccAdd)">
-          <div class="grid grid-cols-4 text-white"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
-            <div class="text-xs col-span-3 ml-auto">{{selectedMosaic[index].amount}}</div>
+          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
+            <div class="text-xs lg:col-span-4 col-span-6 ml-auto">{{selectedMosaic[index].amount}}</div>
             <div class="ml-1 text-xs text-blue-400" :index="index " :options="mosaics" :disableOptions="selectedMosaic"> {{displayAssetId(selectedMosaic[index].id)}}</div>
           </div>
         </div>
