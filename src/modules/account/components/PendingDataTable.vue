@@ -261,7 +261,7 @@ import { useI18n } from 'vue-i18n';
     const {t} = useI18n();
     const copy = (data) =>{
       let stringToCopy = data;
-      let copySubject = "tx Hash"
+      let copySubject = t('dashboard.txHash')
       copyToClipboard(stringToCopy);
 
       toast.add({severity:'info', detail: copySubject +' ' + t('general.copied'), group: 'br-custom', life: 3000});

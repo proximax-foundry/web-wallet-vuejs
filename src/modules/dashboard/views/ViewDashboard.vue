@@ -107,6 +107,7 @@
       <PendingDataTable :transaction="pendingTransactions" />
       <div class="text-txs text-gray-400 mt-10 mb-2"><b class="text-gray-700 uppercase">{{$t('dashboard.recentTransactions')}}</b> </div>
       <MixedTxnDataTable :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="recentTransactions" @openDecryptMsg="openDecryptMsgModal"></MixedTxnDataTable>
+      <a :href="linkToExplorer()" target=_new v-if="searchedTransactions.length==10"><div class="text-right text-xs text-blue-primary mt-3" >View more...</div></a>
       
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='asset'">
@@ -821,6 +822,14 @@ export default defineComponent({
         }
       });
     }
+
+    const linkToExplorer = ()=>{ 
+        if(!networkState.currentNetworkProfile){ 
+            return ''
+        }
+        return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.addressRoute + '/' + selectedAccount.value.address
+      }
+
     return {
       pendingTransactions,
       toSvg,
@@ -881,7 +890,8 @@ export default defineComponent({
       jdenticonConfig,
       faucetLink,
       boolIsTxnFetched,
-      accountAssets
+      accountAssets,
+      linkToExplorer
     };
   }
 });
