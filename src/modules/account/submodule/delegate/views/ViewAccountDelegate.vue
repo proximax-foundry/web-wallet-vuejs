@@ -31,16 +31,13 @@
           <div class="text-xxs pl-6 mt-2">{{$t('delegate.notLinked')}}</div>
           <div class="mt-4"></div>
           <div class="ml-6 my-7 gray-line"/>
-          <button v-if="!toggleSelection" @click="toggleSelection=!toggleSelection;fromNew=true; generatePrivateKey()" class='ml-6 w-44 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto' >{{$t('delegate.selectAccToLink')}}</button>
-          <div v-if="fromNew" class="pl-6">
-            <div class="text-xs font-semibold">{{$t('delegate.newAcc')}}</div>
-            <div class = 'text-xxs text-blue-primary mt-0.5 font-semibold uppercase'>{{$t('general.privateKey')}}</div>
+          <div class="pl-6">
+            <div class = 'text-xs text-blue-primary mt-0.5 font-semibold uppercase'>{{$t('general.privateKey')}}</div>
             <div class="flex">
               <div id="private" class="truncate text-xs mt-1 font-semibold" type="text" :copyValue="privateKey" :copySubject="$t('general.privateKey')">{{privateKey}}</div>
               <font-awesome-icon :title="$t('general.copy')" icon="copy" @click="copy('private')" class="ml-2 pb-1 w-5 h-5 text-blue-link mt-0.5 cursor-pointer "></font-awesome-icon>
             </div>
             <div class = 'text-txs mt-1 text-red-400 border px-1.5 py-2 border-red-400 rounded-md'>{{$t('general.pkWarning')}}</div>
-             <div class="text-xs text-blue-primary font-semibold cursor-pointer mt-2" @click="fromNew=!fromNew;toggleSelection=!toggleSelection">{{$t('general.back')}}</div>
           </div>
         </div>
         <div v-else>
@@ -171,8 +168,6 @@ export default {
     const walletPassword = ref("");
     const showPasswdError = ref(false);
     const err = ref(false); 
-    let fromNew = ref(false)
-    let toggleSelection = ref(false)
     const acc = computed(()=>{
       if(!walletState.currentLoggedInWallet){
         return null
@@ -337,15 +332,9 @@ export default {
     const disableLinkBtn = computed(() => {
       if(onPartial.value || fundStatus.value || (!isCosigner.value && isMultisig.value) ){
         return true
-      }else if(!fromNew.value && !delegateValue.value){
+      }else if(!delegateValue.value){
         return true
       }else if(delegateValue.value){
-        if(walletPassword.value.match(passwdPattern)){
-          return false
-        }else{
-          return true
-        }
-      }else if(fromNew.value){
         if(walletPassword.value.match(passwdPattern)){
           return false
         }else{
@@ -393,9 +382,11 @@ export default {
       return delegateBoolean;
     });
 
-   const generatePrivateKey = async() =>{
+    const generatePrivateKey = async() =>{
           privateKey.value= Account.generateNewAccount().privateKey;
     }
+    generatePrivateKey();
+
     const createDelegate = async() => {
       const account = WalletUtils.generateNewAccount(AppState.networkType);
       if(account){
@@ -407,7 +398,7 @@ export default {
           accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
           walletPassword.value=""
           err.value=""
-        } else if (AccPublicKey.value != "" && fromNew.value) { //link
+        } else if (AccPublicKey.value != "") { //link
           accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
           walletPassword.value=""
           err.value=""
@@ -436,8 +427,6 @@ export default {
     return {
       showPrivateKeyError,
       privateKey,
-      fromNew,
-      toggleSelection,
       currentNativeTokenName,
       splitBalance,
       isMultisig,
