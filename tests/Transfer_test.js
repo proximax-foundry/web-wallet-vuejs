@@ -46,7 +46,7 @@ module.exports = {
             .contact_dropdown()
             .empty_password()
             .create_transfer(amount, password1, password2)
-            // .transfer_asset(amount1, amount2)
+            .transfer_asset(amount1, amount2)
 
     }
 
