@@ -5,15 +5,6 @@ import { RouteRecordRaw } from 'vue-router';
 
 export const AccountRoutes: RouteRecordRaw[] = [
   {
-    path: '/view-portfolio',
-    name: 'ViewServicesPortfolio',
-    props: true,
-    component: () => import('@/modules/services/submodule/portfolio/views/ViewServicesPortfolio.vue'),
-    meta:{
-      title: "View Portfolio"
-    }
-  },
-  {
     path: '/view-all-accounts',
     name: 'ViewAccountDisplayAll',
     props: true,

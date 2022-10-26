@@ -40,7 +40,6 @@
       <router-link :to="{ name : 'ViewWallets'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-wallets.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.wallet',2)}}</router-link>
       <router-link :to="{ name : 'ViewAccountDisplayAll'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-accounts.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.account',2)}}</router-link>
       <router-link :to="{ name : 'ViewServicesAddressBook'}" class="link_block flex items-center text-white" @click="closeNavi"><img src="@/assets/img/navi/icon-address-book.svg" class="h-3 w-3 inline-block relative mr-2">{{$t('general.addressBook')}}</router-link>
-      <router-link :to="{ name : 'ViewServicesPortfolio'}" class="link_block flex items-center text-white" @click="closeNavi">Portfolio</router-link>
       <router-link :to="{ name : 'ViewSettings'}" class="link_block flex items-center text-white" @click="closeNavi">
         <img src="@/assets/img/icon-setting-white.svg" class="h-3 w-3 inline-block relative mr-2">Settings
         </router-link>
