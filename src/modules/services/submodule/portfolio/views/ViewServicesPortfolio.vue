@@ -6,8 +6,8 @@
       </div>
     </div>
       <div class='mt-2 py-3 '>
-        <div class="w-11/12 ml-auto mr-auto flex flex-col gap-3">
-          <AccountPortfolioComponent :key="index" :account="item" v-for="(item, index) in accounts" />
+        <div class="w-11/12 ml-auto mr-auto">
+          <PortfolioAssetDataTable :assets="mosaics" />
         </div>
       </div>
     <div class="mb-36"/>
@@ -15,50 +15,17 @@
 </template>
 
 <script>
-import AccountPortfolioComponent from '@/modules/services/submodule/portfolio/components/AccountPortfolioComponent.vue';
+import PortfolioAssetDataTable from '@/modules/services/submodule/portfolio/components/PortfolioAssetDataTable.vue';
 import { walletState } from '@/state/walletState';
 import { computed } from "vue";
 
 export default{
     name: "ViewServicesPortfolio",
     components:{
-        AccountPortfolioComponent
+      PortfolioAssetDataTable
     },
 
     setup(){
-      const totalAcc = computed(()=>{
-
-      if(!walletState.currentLoggedInWallet){
-        return [];
-      }
-      let accounts = walletState.currentLoggedInWallet.accounts.map(
-        (acc)=>{ 
-          return { 
-            name: acc.name,
-            balance: acc.balance,
-            address: acc.address,
-            publicKey: acc.publicKey,
-            isMultisig: acc.getDirectParentMultisig().length ? true: false,
-            multisigInfo: acc.multisigInfo,
-          }; 
-        });
-        
-      
-      let otherAccounts =walletState.currentLoggedInWallet.others.filter((acc)=> acc.type === "MULTISIG").map(
-        (acc)=>{ 
-          return { 
-            name: acc.name,
-            balance: acc.balance,
-            address: acc.address,
-            publicKey: acc.publicKey,
-            isMultisig: true,
-            multisigInfo: acc.multisigInfo,
-          }; 
-        });
-
-        return accounts.concat(otherAccounts);
-
-      });
     const accounts = computed(
       () => {
         if(!walletState.currentLoggedInWallet){
@@ -69,9 +36,32 @@ export default{
           }
         }
     );
+    const mosaics = computed(() =>{
+      var walletAsset = [];
+      var totalAsset = []
+      for(let j=0 ; j<accounts.value.length; j++){
+      accounts.value[j].assets.forEach((i,index) => {
+            walletAsset.push({
+                i:index,
+                id: i.idHex,
+                name: (i.namespaceNames.length>0?i.namespaceNames[0]:""),
+                balance: i.amount,
+            });
+            });
+        }
+      totalAsset = walletAsset.reduce((obj, item) => {  
+      let find = obj.find(i => i.name === item.name && i.id === item.id);  
+      let _d = {  
+       ...item
+      }
+      find ? (find.balance += item.balance ) : obj.push(_d);
+      return obj;
+      }, [])
+        return totalAsset
+    })
 
       return {
-        accounts
+        mosaics,
       }
     }
 
