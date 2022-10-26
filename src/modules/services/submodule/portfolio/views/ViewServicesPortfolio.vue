@@ -50,7 +50,7 @@ export default{
             });
         }
       totalAsset = walletAsset.reduce((obj, item) => {  
-      let find = obj.find(i => i.name === item.name && i.id === item.id);  
+      let find = obj.find(i => i.id === item.id);  
       let _d = {  
        ...item
       }
