@@ -390,7 +390,7 @@ export default {
     generatePrivateKey();
 
     const createDelegate = async() => {
-      const account = WalletUtils.createAccountFromPrivateKey(privateKey.value, AppState.networkType);
+      const account = WalletUtils.createAccountFromPrivateKey(privateKey.value , AppState.networkType);
       if(account){
         AccPublicKey.value = account.publicKey;
          
