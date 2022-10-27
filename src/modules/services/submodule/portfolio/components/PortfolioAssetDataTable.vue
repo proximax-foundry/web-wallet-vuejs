@@ -10,7 +10,7 @@
         >
         <Column field="assetId" :header="$t('general.assetId')">
             <template #body="{data}">
-                <span class="uppercase font-semibold text-xs">{{ data.id }}</span>
+                <a :href="explorerLink(data.id)" target=_blank><div  class=" uppercase inline-block text-xs mt-1.5 cursor-pointer text-blue-primary pr-7 ">{{data.id}}</div></a>
             </template>
         </Column>
         <Column field="alias" header="Alias">
@@ -39,6 +39,7 @@
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {Helper} from '@/util/typeHelper';
+import { networkState } from '@/state/networkState';
 
 defineProps({
   assets: Array
@@ -54,6 +55,12 @@ const displayTokenName = (name : string) =>{
     }else{
         return {name:name,registered:false}
     }
+}
+const explorerLink = assetId=>{  
+    if(!networkState.currentNetworkProfile){
+        return ''
+    }
+    return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
 }
 
 </script>
