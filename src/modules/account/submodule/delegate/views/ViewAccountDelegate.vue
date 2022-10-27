@@ -411,7 +411,6 @@ export default {
       } else {
         err.value = t('general.walletPasswordInvalid',{name : walletName});
       }
-      console.log(privateKey.value)
     };
     
     const topUpUrl = computed(()=>{
