@@ -149,7 +149,6 @@ import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
-import { WalletAccount } from "@/models/walletAccount";
 export default {
   name: 'ViewAccountDelegate',
   components: {
@@ -320,7 +319,6 @@ export default {
     const delegateAcc = ref('');
     const AccPublicKey = ref("");
     const AccPrivateKey = ref("")
-    const accountName = ref("");
     const router = useRouter();
     const toast = useToast();
     const accAddress = ref(p.address);
@@ -333,7 +331,11 @@ export default {
       if(onPartial.value || fundStatus.value || (!isCosigner.value && isMultisig.value) ){
         return true
       }else if(!delegateValue.value){
-        return true
+        if(walletPassword.value.match(passwdPattern)){
+          return false
+        }else{
+          return true
+        }
       }else if(delegateValue.value){
         if(walletPassword.value.match(passwdPattern)){
           return false
@@ -388,7 +390,7 @@ export default {
     generatePrivateKey();
 
     const createDelegate = async() => {
-      const account = WalletUtils.generateNewAccount(AppState.networkType);
+      const account = WalletUtils.createAccountFromPrivateKey(privateKey.value, AppState.networkType);
       if(account){
         AccPublicKey.value = account.publicKey;
          
@@ -409,6 +411,7 @@ export default {
       } else {
         err.value = t('general.walletPasswordInvalid',{name : walletName});
       }
+      console.log(privateKey.value)
     };
     
     const topUpUrl = computed(()=>{
