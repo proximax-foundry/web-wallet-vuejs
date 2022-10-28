@@ -219,9 +219,8 @@ export default {
       if(filterQuery.value == ""){
         return accounts.value;
       }
-      return accounts.value.filter((item) =>{
-        return Object.values(item).some((word) =>
-          String(word).toLowerCase().includes(query));
+      return accounts.value.filter(item => {
+        return item.name.toLowerCase().includes(query) || item.address.toLowerCase().includes(query.replace(/-/g, ""))
       });
   });
 
