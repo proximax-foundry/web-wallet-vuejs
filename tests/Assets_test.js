@@ -31,8 +31,8 @@ module.exports = {
         asset
             .navigation_assets(browser.launch_url)
             .empty_password()
-            // .create_asset(supply, divisibility, password)
-            //
+            .create_asset(supply, divisibility, password)
+            
 
     }
 
