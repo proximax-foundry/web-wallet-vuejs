@@ -12,6 +12,15 @@ import { RouteRecordRaw } from 'vue-router'
 
 export const ServiceRoutes: RouteRecordRaw[] = [
   {
+    path: '/view-portfolio',
+    name: 'ViewServicesPortfolio',
+    props: true,
+    component: () => import('@/modules/services/submodule/portfolio/views/ViewServicesPortfolio.vue'),
+    meta:{
+      title: "View Portfolio"
+    }
+  },
+  {
     path: '/services',
     name: 'ViewServices',
     component: () => import('@/modules/services/views/ViewServices.vue'),
