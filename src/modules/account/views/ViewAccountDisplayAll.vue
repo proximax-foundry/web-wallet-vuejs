@@ -4,7 +4,7 @@
       <LabelComponent />
       <div class="absolute invisible 2xl:visible text-gray-500 mt-1 explicitLeft" >Labels</div>
       <router-link :to="{name:'ViewAccountCreateSelectType'}" >
-        <div class="mt-3 sm:mt-0 text-center w-44 text-white bg-blue-primary rounded-md font-semibold text-xs p-2">+ {{ $t('general.createNewAcc') }}</div>
+        <div class="mt-3 sm:mt-0 text-center w-44 text-white bg-blue-primary rounded-md font-semibold text-xs p-2">+ {{$t('general.createNewAcc')}}</div>
       </router-link>
     </div>
     <div class='mt-2 py-3 '>
