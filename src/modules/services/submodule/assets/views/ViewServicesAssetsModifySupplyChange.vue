@@ -44,7 +44,7 @@
           <div class="lg:grid lg:grid-cols-2">
             <div class="my-3">
               <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('asset.currentSupply')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>'+$t('asset.supplyMsg2')+'<br>'+$t('asset.supplyMsg3')+'</tiptext>', escape: true}"></div>
-              <div class="text-black font-bold text-sm">{{ Helper.convertToCurrency(assetSupply,0) }}</div>
+              <div class="text-black font-bold text-sm">{{ assetBalance }}</div>
             </div>
             <div class="my-3">
               <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.divisibility')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>' + $t('asset.divisibilityMsg4') + '<br><br>' + $t('asset.divisibilityMsg2') + '<br>' + $t('asset.divisibilityMsg3') + '</tiptext>', escape: true}"></div>
@@ -129,6 +129,7 @@ export default {
   props: {
     assetId: String,
     address: String,
+    assetBalance: Number
   },
   setup(props){
     const {t} = useI18n();
