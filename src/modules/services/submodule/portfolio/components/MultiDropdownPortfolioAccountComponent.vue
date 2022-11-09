@@ -68,36 +68,3 @@ export default{
 }
 
 </script>
-
-<style lang="scss" scoped>
-.dropdown { 
-  position: relative; 
-  cursor: pointer;
-}
-
-.multiselect {
-  position: relative;
-  
-  ul {
-    border: 1px solid #ddd;
-    border-top: 0;
-    border-radius: 0 0 3px 3px;
-    left: 0px;
-    padding: 8px 8px;
-    position: absolute;
-    top: -1rem;
-    width: 100%;
-    list-style: none;
-    max-height: 150px;
-    overflow: auto;
-  }
-}
-
-.overselect {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-}
-</style>
