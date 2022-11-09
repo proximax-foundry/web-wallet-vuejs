@@ -1,13 +1,13 @@
 <template>
   <div class="flex flex-col">
-    <div class="border p-2 cursor-pointer w-52 bg-white text-xs flex justify-between" @click="show=!show">
+    <div class="border p-2 cursor-pointer w-40 bg-white text-xs flex justify-between" @click="show=!show">
         <div>Account</div>
         <img v-if="!show" src="@/modules/account/img/icon-arrow-down.svg" class="w-3 ml-2 h-3" style="margin-top: 0.12em;">
         <img v-else src="@/modules/account/img/icon-arrow-down.svg" class="w-3 ml-2 h-3" style="margin-top: 0.12em;transform: rotate(180deg);">
     </div>
     <div v-if="show" class="relative z-50">
-      <div class="absolute border-t-0 w-96 border bg-white">
-        <input v-model="filterQuery" type="text" class="pl-2 pt-4 text-xs outline-none text-black" :placeholder="$t('general.search')">
+      <div class="absolute w-60 border bg-white">
+        <input v-model="filterQuery" type="text" class="pl-2 pt-2 text-xs outline-none text-black" :placeholder="$t('general.search')">
         <div class="flex justify-between p-2 text-xs">
           <div v-if="selectedAccount.length == 0" @click="selectAll">Select all</div>
           <div v-if="selectedAccount.length > 0" @click="clearAll">Clear all</div>
