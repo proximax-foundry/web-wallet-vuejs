@@ -17,6 +17,7 @@
         </div>
       </div>
       <AccountTabs :address="address" selected="details"/>
+      <div v-if="splitBalance">
       <div class='border-2 border-t-0 pb-6 px-6 pt-2'>
         <div class="flex flex-col sm:flex-row justify-between sm:items-center mt-3">
           <div class="flex flex-col ">
@@ -97,6 +98,7 @@
           <!-- <DeleteAccountModal v-if="!isDefault && !other_acc "  :account ='acc' /> -->
         </div>
       </div>
+    </div>
     </div>
 </div>
 </template>
