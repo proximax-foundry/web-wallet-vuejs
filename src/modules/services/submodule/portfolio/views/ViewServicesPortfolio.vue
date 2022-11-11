@@ -36,11 +36,20 @@ export default{
       () => {
         if(!walletState.currentLoggedInWallet){
           return null;
-          }else{
+        }
+        else if(walletState.currentLoggedInWallet){
+          if(walletState.currentLoggedInWallet.others){
+          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+          return concatOther.filter(item => {
+            return item.type !== "DELEGATE";
+          })
+          }
+          else{
             const accounts =  walletState.currentLoggedInWallet.accounts;
             return accounts
           }
         }
+      }
     );
     const onCheck = (val) =>{
       selectedAccount.value = val
