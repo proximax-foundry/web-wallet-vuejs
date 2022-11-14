@@ -54,7 +54,7 @@
             <img  src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer ml-2 mt-0.5" @click="showMenu(data.i)"  @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
             <div v-if="isMenuShow[data.i]" class="mt-5  w-36 absolute rounded-sm shadow-lg bg-white focus:outline-none z-10 text-left " >
                 <div class="my-2" >
-                    <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
+                    <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.id, address: address, assetBalance: data.balance} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
                     <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsLinkToNamespace', params: {assetId: data.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.linkToNamespace')}}</router-link>
                     <router-link :to="{ name: 'ViewAssetMetadata', params: {assetId: data.id, address: address} }">
                         <div class="block hover:bg-gray-100 transition duration-200 p-2 z-20 cursor-pointer">View Metadata</div>
@@ -103,7 +103,7 @@
                 <img  src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer ml-2 mt-0.5" @click="showMenu(data.i)"  @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
                 <div v-if="isMenuShow[data.i]" class="mt-5  w-36 absolute rounded-sm shadow-lg bg-white focus:outline-none z-10 text-left " >
                     <div class="my-2" >
-                        <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
+                        <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.id, address: address, assetBalance: data.balance} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
                         <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsLinkToNamespace', params: {assetId: data.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.linkToNamespace')}}</router-link>
                         <router-link :to="{ name: 'ViewAssetMetadata', params: {assetId: data.id, address: address} }">
                             <div class="block hover:bg-gray-100 transition duration-200 p-2 z-20 cursor-pointer">View Metadata</div>
