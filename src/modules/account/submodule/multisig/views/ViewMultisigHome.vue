@@ -34,7 +34,7 @@
       <div class='border p-4 mt-3'>
         <div class="flex flex-col gap-2">
           <div v-for="(multisig,index) in multisigAccountsList" :key="index">
-            <div class="border w-full cursor-pointer rounded-md p-3" @click="navigate(multisig.address);explorerLink(multisig.address)">
+            <div class="border w-full cursor-pointer rounded-md p-3" @click="navigate(multisig.address)">
               <div class="text-txs font-semibold text-blue-primary">{{multisig.name}}</div>
               <div class="flex">
                 <div :id="`multisigAddress${index}`" :copyValue="multisig.address" :title="multisig.address" :copySubject="$t('general.address')" class="truncate md:text-clip md:w-auto text-txs font-bold mt-1">{{multisig.address}}</div>
