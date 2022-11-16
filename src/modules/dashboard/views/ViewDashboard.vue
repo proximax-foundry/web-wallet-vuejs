@@ -297,7 +297,13 @@ export default defineComponent({
     const accountAssets = computed(()=>{
       let defaultAccAsset =walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount().assets : walletState.currentLoggedInWallet.accounts[0].assets
       let filteredAsset = defaultAccAsset.filter(asset=>asset.amount!=0)
-      return filteredAsset 
+      var result = filteredAsset.reduce((unique, o) => {
+        if(!unique.some(obj => obj.amount === o.amount && obj.idHex === o.idHex)){
+          unique.push(o);
+        }
+        return unique;
+        },[]);
+        return result 
     })
     const currentBlock = computed(() => AppState.readBlockHeight);
 
