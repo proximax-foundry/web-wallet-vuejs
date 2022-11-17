@@ -88,9 +88,21 @@ export default {
             });
             });
             
+            mosaicOption=filterDuplicate(mosaicOption)
+            
             return mosaicOption
             
         });
+
+        function filterDuplicate(mosaics){
+            var result = mosaics.reduce((unique, o) => {
+        if(!unique.some(obj => obj.amount === o.amount && obj.id === o.id)){
+          unique.push(o);
+        }
+        return unique;
+        },[]);
+        return result 
+        }
 
         const formatNamespaceName = (namespaceNames) => {
             return namespaceNames.join(" / ")
