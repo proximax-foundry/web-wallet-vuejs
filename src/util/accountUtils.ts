@@ -1,6 +1,6 @@
 import { walletState } from "@/state/walletState";
 import { readonly } from "vue";
-import { Address, Account, SignedTransaction,PublicAccount, LinkAction, NamespaceId, AliasActionType, Password, AddressAliasTransaction, AccountLinkTransaction} from "tsjs-xpx-chain-sdk";
+import { Address, Account, SignedTransaction,PublicAccount, LinkAction, NamespaceId, AliasActionType, Password, AddressAliasTransaction, AccountLinkTransaction, AccountInfo, Mosaic} from "tsjs-xpx-chain-sdk";
 import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from "@/util/chainUtils";
 import { networkState } from "@/state/networkState";
@@ -9,6 +9,90 @@ import { OtherAccount } from "@/models/otherAccount";
 import { Namespace } from "@/models/namespace";
 import { AppState } from "@/state/appState";
 import { TransactionUtils } from "./transactionUtils";
+import {Helper} from '@/util/typeHelper';
+
+export interface AssetObj {
+  id: string;
+  name: [];
+  balance: number;
+  isActive: boolean;
+  isOwner: boolean;
+}
+
+const formatAccountAsset = async(assets: Mosaic[],publicKey: string): Promise<AssetObj[]> => {
+  let formattedAsset: any = [];
+    let currentBlock = await AppState.chainAPI.chainAPI.getBlockchainHeight();
+    let objAsset: AssetObj;
+    let assetName: any=[];
+    let namespaceId: string;
+    let isOwner: boolean = false;
+    let isActive: boolean = false;
+
+    let assetDetails;
+    for (let key in assets) {
+      assetDetails = await AppState.chainAPI.assetAPI.getMosaic(assets[key].id);
+      if ((assetDetails.height.compact() + assetDetails.duration.compact()) > currentBlock) {
+        isActive = true;
+      } else if (assetDetails.height.compact() == 1) {
+        isActive = true;
+      }
+
+      if (assetDetails.owner.publicKey == publicKey) {
+        isOwner = true;
+      }
+
+      let assetsNames = await TransactionUtils.getAssetsName([assets[key].id]);
+      if (assetsNames[0].names.length) {
+        assetName = assetsNames[0].names;
+      } else {
+        assetName = '';
+        namespaceId = '';
+      }
+      objAsset = {
+        id: assets[key].id.id.toHex(),
+        balance: Number(Helper.convertToCurrency(assets[key].amount.compact(), assetDetails.divisibility).replace(/,/g,"")),
+        name: assetName,
+        isOwner,
+        isActive,
+      }
+      formattedAsset.push(objAsset);  
+    }
+
+    // let get0balanceAsset = mosaicSearch.mosaicsInfo.filter(id => !assets.find(o => o.id.toHex() == id.mosaicId.id.toHex()));
+    
+    // for (let key in get0balanceAsset) {
+    //   isOwner = true;
+    //   isActive = true;
+    //   let assetsNames = await TransactionUtils.getAssetsName([get0balanceAsset[key].mosaicId]);
+    //   if (assetsNames[0].names.length) {
+    //     assetName = assetsNames[0].names;
+    //   } else {
+    //     assetName = '';
+    //     namespaceId = '';
+    //   }
+    //   objAsset = {
+    //     id: get0balanceAsset[key].mosaicId.toHex(),
+    //     balance: "0",
+    //     name: assetName,
+    //     isOwner,
+    //     isActive,
+    //   }
+    //   formattedAsset.push(objAsset);
+    // }      
+  return formattedAsset;
+}
+
+const getAccountFromAddress = async(address: string): Promise<AccountInfo | boolean> => {
+    try {
+      let addressobj = Address.createFromRawAddress(address);
+      let account = await ChainUtils.getAccountInfo(addressobj);
+      return account;
+    } catch (error) {
+      // console.log(error)
+      return false;
+    }
+  }
+
 
 const verifyPublicKey = async(add: string):Promise<boolean> => {
   const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
@@ -311,7 +395,9 @@ export const accountUtils = readonly({
   linkNamespaceToAddress,
   createDelegateTransaction,
   getValidAccount,
-  getDelegateFee
+  getDelegateFee,
+  getAccountFromAddress,
+  formatAccountAsset
   //getAccInfo
   //getAccInfoFromPrivateKey
 });

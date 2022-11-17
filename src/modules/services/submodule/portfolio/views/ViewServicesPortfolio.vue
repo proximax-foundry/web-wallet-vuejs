@@ -10,7 +10,7 @@
     </div>
       <div class='mt-2 py-3 '>
         <div class="w-11/12 ml-auto mr-auto border-2">
-          <PortfolioAssetDataTable :assets="mosaics" />
+          <AssetComponent :accountAsset="mosaics"/>
         </div>
       </div>
     <div class="mb-36"/>
@@ -18,20 +18,23 @@
 </template>
 
 <script>
-import PortfolioAssetDataTable from '@/modules/services/submodule/portfolio/components/PortfolioAssetDataTable.vue';
+import AssetComponent from '@/modules/services/submodule/portfolio/components/AssetComponent.vue';
 import { walletState } from '@/state/walletState';
 import { computed, ref } from "vue";
+import { accountUtils } from "@/util/accountUtils";
+import { AppState } from '@/state/appState';
 import MultiDropdownPortfolioAccountComponent from '@/modules/services/submodule/portfolio/components/MultiDropdownPortfolioAccountComponent.vue'
 
 export default{
     name: "ViewServicesPortfolio",
     components:{
-      PortfolioAssetDataTable,
+      AssetComponent,
       MultiDropdownPortfolioAccountComponent
     },
 
     setup(){
     const selectedAccount = ref([])
+    const mosaics = ref([])
     const accounts = computed(
       () => {
         if(!walletState.currentLoggedInWallet){
@@ -39,7 +42,22 @@ export default{
         }
         else if(walletState.currentLoggedInWallet){
           if(walletState.currentLoggedInWallet.others){
-          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+          const accounts = walletState.currentLoggedInWallet.accounts.map((acc)=>{
+            return {
+              name: acc.name,
+              publicKey: acc.publicKey,
+              address: acc.address
+            }
+          })
+          const otherAccounts = walletState.currentLoggedInWallet.others.map((acc)=>{
+            return {
+              name: acc.name,
+              publicKey: acc.publicKey,
+              address: acc.address,
+              type: acc.type
+            }
+          })
+          const concatOther = accounts.concat(otherAccounts)
           return concatOther.filter(item => {
             return item.type !== "DELEGATE";
           })
@@ -53,36 +71,29 @@ export default{
     );
     const onCheck = (val) =>{
       selectedAccount.value = val
+      loadWalletAsset()
     }
-    const mosaics = computed(() =>{
+    const loadWalletAsset = async() =>{
+      if(!AppState.isReady){
+        setTimeout(loadWalletAsset, 1000);
+        return; 
+      }
       var walletAsset = [];
-      var totalAsset = []
       for(let j=0 ; j<selectedAccount.value.length; j++){
-        selectedAccount.value[j].assets.forEach((i,index) => {
+        let account = await accountUtils.getAccountFromAddress(selectedAccount.value[j].address)
             walletAsset.push({
-                i:index,
-                id: i.idHex,
-                name: (i.namespaceNames.length>0?i.namespaceNames[0]:""),
-                balance: i.amount,
-            });
+                publicKey: selectedAccount.value[j].publicKey,
+                mosaics: account.mosaics
             });
         }
-      totalAsset = walletAsset.reduce((obj, item) => {  
-      let find = obj.find(i => i.id === item.id);  
-      let _d = {  
-       ...item
-      }
-      find ? (find.balance += item.balance ) : obj.push(_d);
-      return obj;
-      }, [])
-        return totalAsset
-    })
-    
+      mosaics.value = walletAsset
+    }
+    loadWalletAsset()
       return {
         mosaics,
         onCheck,
         accounts,
-        selectedAccount
+        selectedAccount,
       }
     }
 }

@@ -25,7 +25,9 @@ import {
   AccountLinkTransaction,
   ModifyMultisigAccountTransaction,
   SecretProofTransaction,
-  TransferTransaction
+  TransferTransaction,
+  MosaicId,
+  MosaicNames
 } from "tsjs-xpx-chain-sdk";
 import { AppState } from "@/state/appState";
 import { ChainConfigUtils } from "./chainConfigUtils";
@@ -157,6 +159,11 @@ export const transactionTypeName = {
 
 export class TransactionUtils {
 
+  static async getAssetsName(mosaicIds: MosaicId[]): Promise<MosaicNames[]>{
+    let assetNames = await AppState.chainAPI.assetAPI.getMosaicsNames(mosaicIds);
+
+    return assetNames;
+  }
 
   static getTransactionTypeNameByEnum(transactionType: TransactionType): string{
 
