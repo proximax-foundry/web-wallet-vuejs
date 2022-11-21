@@ -5,7 +5,10 @@
         <div class="text-md mb-3">Buy {{ selectedToToken }}</div>
         <div>
           <div v-if="!isChainIdValid && isWalletConnected" class="error_box error error-text">
-            <div>Please select supported chain, ethereum mainnet/ bsc mainnet</div>
+            <div>Please select supported chain, ethereum {{  remoteNetworkType }}/ bsc {{  remoteNetworkType }}</div>
+          </div>
+          <div v-if="!isSupportedChainId && isWalletConnected" class="error_box error error-text">
+            <div>Chain unsupported, please change to supported chain</div>
           </div>
           <div v-if="isWalletConnected" class="text-xs flex items-center justify-end">
             <div v-if="connectedWalletName === 'WC'" class="flex items-center gray-text-300">
@@ -48,6 +51,18 @@
             <div>{{ selectedToToken }} Price: {{ selectedToTokenPrice }} USD</div>
           </div>
         </div>
+        <div class="flex justify-center mt-10 error_box error error-text" v-if="tokenInvalid">
+          Unsupported token
+        </div>
+        <div class="flex justify-center mt-10 error_box error error-text" v-if="!settingDone">
+          Configuration error
+        </div>
+        <div class="flex justify-center mt-10 error_box error error-text" v-if="!submitFailed">
+          Submission failed
+        </div>
+        <div class="flex justify-center mt-10 success_box success success-text" v-if="processing">
+          Submission success
+        </div>
         <div class="flex justify-center mt-10">
           <button class="blue-btn font-semibold py-2 cursor-pointer text-center w-32 disabled:opacity-50 disabled:cursor-auto" :disabled="disabledBuy" @click="buySiriusToken">Buy</button>
         </div>
@@ -74,8 +89,9 @@ import { ethers } from 'ethers';
 import { abi, SwapUtils } from '@/util/swapUtils';
 import { AppState } from "@/state/appState";
 import { walletState } from "@/state/walletState";
-import { Address } from 'tsjs-xpx-chain-sdk';
+import { Address, NetworkType } from 'tsjs-xpx-chain-sdk';
 import toggleSwitch from '@/modules/services/submodule/stacking/components/toggleSwitch.vue';
+import { getCurrentPriceUSD } from "@/util/functions";
 
 export default {
   name: "ViewServicesStackingBuy",
@@ -85,17 +101,14 @@ export default {
     toggleSwitch,
   },
   setup(){
-    /**
-     * To do
-     * - toTokenAmount cannot higher than balance
-     * - dynamic price for stable coins and sirius token
-     * - tick box for user's acknowledgement
-     * - sirius recipient's UI 
-     * - after click buy, lock/disable the button
-     * - get confirmed transaction, send to swap server
-     */
+
     const {t} = useI18n();
 
+    let swapData = new ChainSwapConfig(networkState.chainNetworkName);
+    swapData.init();
+
+    const processing = ref(false);
+    const submitFailed = ref(false);
     const buyFromComponent = ref(null);
     let stableCoins = availableTokens;
     let siriusTokens = availableToTokens;
@@ -107,23 +120,33 @@ export default {
     const toInputAmount = ref(0);
     const recipient = ref(walletState.currentLoggedInWallet.accounts.find(x => x.default).address);
     const isSubmit = shallowRef(false);
+    const tokenInvalid = ref(false);
     
     const isChainIdValid = ref(false);
-    // const buyingToken = ref("METX");
     let provider;
 
     const disabledBuy = computed(() => {
-      return !isChainIdValid.value || fromInputAmount.value < 1 || !isChecked.value || isSubmit.value
+      return tokenInvalid.value || !settingDone.value || !isChainIdValid.value || !isSupportedChainId.value || fromInputAmount.value < 1 || !isChecked.value || isSubmit.value
     });
 
+    const selectedRemoteSinkAddress = ref("");
+    const bscSinkAddress = ref("");
+    const ethSinkAddress = ref("");
+    const isSupportedChainId = ref(false);
+    const bscDisabled = ref(true);
+    const ethDisabled = ref(true);
     const connectedAddress = ref("");
     const selectedFromToken = ref('USDT');
     const selectedToToken = ref('XPX');
+    const priceUpdated = ref(false);
+    const settingDone = ref(false);
     const selectedFromTokenPrice = computed(()=>{
+      priceUpdated.value; // just to trigger auto recompute
       return stableCoins.find(x => x.name === selectedFromToken.value).price;
     });
 
     const selectedToTokenPrice = computed(()=>{
+      priceUpdated.value; // just to trigger auto recompute
       return siriusTokens.find(x => x.name === selectedToToken.value).price;
     });
 
@@ -145,10 +168,10 @@ export default {
 
       let tokenType = "";
 
-      if(chainId === bscMainnetChainId){
+      if(chainId === bscChainId){
         tokenType = "(BEP20)";
       }
-      else if(chainId === ethereumMainnetChainId){
+      else if(chainId === ethereumChainId){
         tokenType = "(ERC20)";
       }
 
@@ -160,8 +183,9 @@ export default {
     }
 
     // connect wallet section
-    const ethereumMainnetChainId = 1;
-    const bscMainnetChainId = 56;
+    const ethereumChainId = networkState.chainNetwork === NetworkType.MAIN_NET ? 1 : 5;
+    const bscChainId = networkState.chainNetwork === NetworkType.MAIN_NET ? 56: 97;
+    const remoteNetworkType = ethereumChainId === 1 ? "mainnet": "testnet";
     const selectedChainId = ref(0);
     const isWalletConnected = ref(false);
     const connectedWalletName = ref("");
@@ -198,11 +222,27 @@ export default {
     }
 
     const checkValidSelectedChainId = ()=>{
-      if(selectedChainId.value === ethereumMainnetChainId || selectedChainId.value === bscMainnetChainId){
+      if(selectedChainId.value === ethereumChainId || selectedChainId.value === bscChainId){
         isChainIdValid.value = true;
+
+        if(selectedChainId.value === ethereumChainId){
+          selectedRemoteSinkAddress.value = ethSinkAddress.value;
+        }
+        else{
+          selectedRemoteSinkAddress.value = bscSinkAddress.value;
+        }
       }
       else{
         isChainIdValid.value = false;
+      }
+    }
+
+    const checkChainSupported = ()=>{
+      if(selectedChainId.value === ethereumChainId){
+        isSupportedChainId.value = !ethDisabled.value;
+      }
+      else if(selectedChainId.value === bscChainId){
+        isSupportedChainId.value = !bscDisabled.value;
       }
     }
 
@@ -210,10 +250,10 @@ export default {
 
       let contracts = [];
       
-      if(selectedChainId.value === ethereumMainnetChainId){
+      if(selectedChainId.value === ethereumChainId){
         contracts = ethStableCoins;
       }
-      else if(selectedChainId.value === bscMainnetChainId){
+      else if(selectedChainId.value === bscChainId){
         contracts = bscStableCoins;
       }
       else{
@@ -255,11 +295,100 @@ export default {
       })
     }
 
+    const checkSelectedTokenSupported = ()=>{
+      if(selectedChainId.value === ethereumChainId){
+        tokenInvalid.value = ethStableCoins.find(x => x.name === selectedFromToken.value).disabled;
+      }
+      else if(selectedChainId.value === bscChainId){
+        tokenInvalid.value = bscStableCoins.find(x => x.name === selectedFromToken.value).disabled;
+      }
+      else{
+        tokenInvalid.value = true;
+      }
+    }
+
     const updateSelectedContractAddress = ()=>{
       if(selectedStableCoins.value.length){
         selectedContractAddress.value = selectedStableCoins.value.find(x => x.name === selectedFromToken.value).contractAddress;
       }
     }
+
+    const fetchServiceInfo = async()=>{
+      try{
+        const serviceInfo = await SwapUtils.fetchAllSwapServiceInfo(swapData.swap_IN_SERVICE_URL);
+        bscSinkAddress.value = serviceInfo.data.bscInfo.sinkAddress;
+        ethSinkAddress.value = serviceInfo.data.ethInfo.sinkAddress;
+
+        if(bscSinkAddress.value !== "0x0000000000000000000000000000000000000000"){
+          bscDisabled.value = false;
+        }
+
+        if(ethSinkAddress.value !== "0x0000000000000000000000000000000000000000"){
+          ethDisabled.value = false;
+        }
+
+        for(let bscStableCoin of bscStableCoins){
+          bscStableCoin.disabled = true;
+        }
+
+        for(let ethStableCoin of ethStableCoins){
+          ethStableCoin.disabled = true;
+        }
+
+        const bscTokensInfo = serviceInfo.data.bscScAddressInfo;
+
+        for(let bscScAddress of bscTokensInfo){
+
+          let currentBscStableCoin = bscStableCoins.find(x => x.name == bscScAddress.name); 
+
+          if(currentBscStableCoin){
+            currentBscStableCoin.disabled = false;
+            currentBscStableCoin.contractAddress = bscScAddress.contractAddress;
+            currentBscStableCoin.decimals = bscScAddress.decimals;
+          }
+        }
+
+        const ethTokensInfo = serviceInfo.data.ethScAddressInfo;
+
+        for(let ethScAddress of ethTokensInfo){
+
+          let currentEthStableCoin = ethStableCoins.find(x => x.name == ethScAddress.name); 
+
+          if(currentEthStableCoin){
+            currentEthStableCoin.disabled = false;
+            currentEthStableCoin.contractAddress = ethScAddress.contractAddress;
+            currentEthStableCoin.decimals = ethScAddress.decimals;
+          }
+        }
+
+        settingDone.value = true;
+      }
+      catch(error){
+        settingDone.value = false;
+      }
+    }
+
+    const getCurrentPrice = async ()=>{
+
+      let prices = await getCurrentPriceUSD(SwapUtils.checkSwapPrice(swapData.priceConsultURL));
+
+      for(let siriusToken of siriusTokens){
+        if(prices[siriusToken.name.toLowerCase()]){
+          siriusToken.price = prices[siriusToken.name.toLowerCase()];
+        }
+      }
+
+      for(let stableCoin of stableCoins){
+        if(prices[stableCoin.name.toLowerCase()]){
+          stableCoin.price = prices[stableCoin.name.toLowerCase()];
+        }
+      }
+
+      priceUpdated.value = true;
+    };
+
+    getCurrentPrice();
+    fetchServiceInfo();
 
     const setDisconnected = ()=>{  
       provider = null;
@@ -412,6 +541,18 @@ export default {
         const signer = web3Provider.getSigner();
         const address = await signer.getAddress();
 
+        let signedMessageSignature;
+
+        if (provider.wc) {
+          signedMessageSignature = await provider.send(
+              'personal_sign',
+              [ ethers.utils.hexlify(ethers.utils.toUtf8Bytes(siriusAddress.value)), address.toLowerCase() ]
+          );
+        }
+        else { 
+          signedMessageSignature = await signer.signMessage(siriusAddress.value);
+        }
+
         const contract = new ethers.Contract(selectedContractAddress.value, abi, signer);
 
         const decimals = selectedStableCoins.value.find(x => x.contractAddress === selectedContractAddress.value).decimals;
@@ -447,13 +588,44 @@ export default {
           gasLimit: 57500,
         };
         const receipt = await contract.transfer(
-          address,
-          ethers.utils.parseUnits(fromInputAmount.value.toString(), decimals),
-          options,
+          selectedRemoteSinkAddress.value,
+          ethers.utils.parseUnits(fromInputAmount.value.toString(), decimals)
+          //options,
         );
         let txnHash = receipt.hash;
+        let nonce = receipt.nonce;
 
-        console.log(receipt);
+        const data = {
+          fromToken: selectedFromToken.value,
+          toToken: selectedToToken.value,
+          nonce: nonce,
+          recipient: siriusAddress.value,
+          signature: signedMessageSignature,
+          txnInfo: {
+            txnHash: txnHash,
+            network: selectedChainId.value === bscChainId ? "BSC" : "ETH"
+          }
+        };
+
+        const response = await fetch(SwapUtils.getIncoming_SwapTransfer_URL(swapData.swap_IN_SERVICE_URL), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+
+        if(response.status == 200 || response.status == 201){
+          const serverResponseData = await response.json();
+
+          console.log(serverResponseData);
+
+          processing.value = true; 
+        }
+        else{
+          submitFailed.value = true;
+        }
+
       } catch (error) {
         isSubmit.value = false;
         console.log(error);
@@ -470,13 +642,16 @@ export default {
 
     watch(selectedFromToken, (newValue)=>{
       updateSelectedContractAddress();
+      checkSelectedTokenSupported();
     });
 
     watch([selectedChainId, connectedAddress], (newChainId)=>{
       checkValidSelectedChainId();
+      checkChainSupported();
 
       searchAccountStableCoinsBalance();
-      updateSelectedContractAddress(); 
+      updateSelectedContractAddress();
+      checkSelectedTokenSupported(); 
     })
     // watcher section end
 
@@ -606,6 +781,12 @@ export default {
       contacts,
       isChecked,
       isSubmit,
+      isSupportedChainId,
+      remoteNetworkType,
+      settingDone,
+      tokenInvalid,
+      processing,
+      submitFailed
     }
   }
 }

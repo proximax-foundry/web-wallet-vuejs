@@ -777,12 +777,16 @@ export class SwapUtils {
     return `${baseUrl}/swap/${swapId}`;
   }
 
-  static getIncoming_ETHSwapTransfer_URL = (baseUrl: string): string => {
-    return `${baseUrl}/expx/transfer`;
+  static getIncoming_ETHSwapTransfer_URL = (baseUrl: string,tokenName: string): string => {
+    return `${baseUrl}/${tokenName}/transfer`;
   }
 
   static getIncoming_BSCSwapTransfer_URL = (baseUrl: string,tokenName: string): string => {
-    return `${baseUrl}/bxpx/${tokenName}/transfer`;
+    return `${baseUrl}/${tokenName}/transfer`;
+  }
+
+  static getIncoming_SwapTransfer_URL = (baseUrl: string): string => {
+    return `${baseUrl}/transfer`;
   }
 
   static checkSwapService = (baseUrl: string): string => {
@@ -798,11 +802,11 @@ export class SwapUtils {
   }
 
   static getIncoming_ETHCheckStatus_URL(baseUrl: string){
-    return `${baseUrl}/expx/swap-status`;
+    return `${baseUrl}/swap-status`;
   }
 
   static getIncoming_BSCCheckStatus_URL(baseUrl: string){
-    return `${baseUrl}/bxpx/swap-status`;
+    return `${baseUrl}/swap-status`;
   }
 
   static getOutgoing_ETHCheckStatus_URL(baseUrl: string){
@@ -817,16 +821,8 @@ export class SwapUtils {
     return fetch(url).then((res) => res.json()).then((data) => { return data });
   }
 
-  // static fetchETHServiceInfo = (baseUrl: string) :Promise<any> => {
-  //   return fetch(`${baseUrl}/expx/service-info`).then(res => res.json());
-  // }
-
-  // static fetchBSCServiceInfo = (baseUrl: string) :Promise<any> => {
-  //   return fetch(`${baseUrl}/bxpx/service-info`).then(res => res.json());
-  // }
-
   static fetchETHServiceInfo = async (baseUrl: string) :Promise<paramResponse> => {
-    const response = await fetch(`${baseUrl}/expx/service-info`);
+    const response = await fetch(`${baseUrl}/service-info`);
     let data = '';
     if(response.status == 200){
       data = await response.json();
@@ -838,8 +834,21 @@ export class SwapUtils {
     return returnResponse;
   }
 
-  static fetchBSCServiceInfo = async (baseUrl: string,tokenName: string) :Promise<paramResponse> => {
-    const response = await fetch(`${baseUrl}/bxpx/${tokenName}/service-info`);
+  static fetchAllSwapServiceInfo = async (baseUrl: string) :Promise<paramResponse> => {
+    const response = await fetch(`${baseUrl}/service-info`);
+    let data = '';
+    if(response.status == 200){
+      data = await response.json();
+    }
+    let returnResponse:paramResponse = {
+      status: response.status,
+      data: data
+    }
+    return returnResponse;
+  }
+
+  static fetchTokenServiceInfo = async (baseUrl: string,tokenName: string) :Promise<paramResponse> => {
+    const response = await fetch(`${baseUrl}/${tokenName}/service-info`);
     let data = '';
     if(response.status == 200){
       data = await response.json();
