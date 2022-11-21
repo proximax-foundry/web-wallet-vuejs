@@ -34,10 +34,7 @@ export default{
     const selectedAccount = ref([])
     const accounts = computed(
       () => {
-        if(!walletState.currentLoggedInWallet){
-          return null;
-        }
-        else if(walletState.currentLoggedInWallet){
+        if(walletState.currentLoggedInWallet){
           if(walletState.currentLoggedInWallet.others){
           const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
           return concatOther.filter(item => {
@@ -48,6 +45,8 @@ export default{
             const accounts =  walletState.currentLoggedInWallet.accounts;
             return accounts
           }
+        }else{
+          return null
         }
       }
     );
@@ -55,6 +54,7 @@ export default{
       selectedAccount.value = val
     }
     const mosaics = computed(() =>{
+      if(selectedAccount.value.length){
       var walletAsset = [];
       var totalAsset = []
       for(let j=0 ; j<selectedAccount.value.length; j++){
@@ -76,6 +76,9 @@ export default{
       return obj;
       }, [])
         return totalAsset
+      }else{
+        return null
+      }
     })
     
       return {

@@ -24,8 +24,8 @@
                         <img v-else-if="data.name=='prx.metx'" src="@/modules/account/img/metx-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
                         <div v-else-if="!data.name">-</div>
                         <img v-else  src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class='inline-block h-6 w-6 mr-2 '>
-                        <div v-if="displayTokenName(data.name).registered" class="inline-block text-xs ml-2 mt-1">{{displayTokenName(data.name).name}}</div>
-                        <div v-else class="inline-block text-xs ml-2 cursor-pointer mt-1">{{data.name}}</div>
+                        <div v-if="displayTokenName(data.name).registered" class="inline-block text-xs ml-2 mt-1 cursor-pointer text-blue-primary"><a :href="explorerNamespaceLink(data.name)" target=_blank>{{displayTokenName(data.name).name}}</a></div>
+                        <div v-else class="inline-block text-xs ml-2 cursor-pointer text-blue-primary mt-1"><a :href="explorerNamespaceLink(data.name)" target=_blank>{{data.name}}</a></div>
                     </div>
                 </div>
                 <div>
@@ -47,8 +47,8 @@
                     <img v-else-if="data.name=='prx.metx'" src="@/modules/account/img/metx-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
                     <div v-else-if="!data.name">-</div>
                     <img v-else  src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class='inline-block h-6 w-6 mr-2 '>
-                    <div v-if="displayTokenName(data.name).registered" class="inline-block text-xs ml-2 mt-1">{{displayTokenName(data.name).name}}</div>
-                    <div v-else class="inline-block text-xs ml-2 cursor-pointer mt-1">{{data.name}}</div>
+                    <div v-if="displayTokenName(data.name).registered" class="inline-block text-xs ml-2 mt-1 cursor-pointer text-blue-primary"><a :href="explorerNamespaceLink(data.name)" target=_blank>{{displayTokenName(data.name).name}}</a></div>
+                    <div v-else class="inline-block text-xs ml-2 cursor-pointer text-blue-primary mt-1"><a :href="explorerNamespaceLink(data.name)" target=_blank>{{data.name}}</a></div>
                 </div>
             </template> 
         </Column>
@@ -107,6 +107,13 @@ const explorerLink = assetId=>{
     }
     return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
 }
+
+const explorerNamespaceLink = namespace=>{ 
+          if(!networkState.currentNetworkProfile){
+              return ''
+          }
+          return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespace
+      }
 
 </script>
 
