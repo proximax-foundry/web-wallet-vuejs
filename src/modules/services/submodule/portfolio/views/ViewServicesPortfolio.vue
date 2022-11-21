@@ -55,26 +55,26 @@ export default{
     }
     const mosaics = computed(() =>{
       if(selectedAccount.value.length){
-      var walletAsset = [];
-      var totalAsset = []
-      for(let j=0 ; j<selectedAccount.value.length; j++){
-        selectedAccount.value[j].assets.forEach((i,index) => {
-            walletAsset.push({
-                i:index,
-                id: i.idHex,
-                name: (i.namespaceNames.length>0?i.namespaceNames[0]:""),
-                balance: i.amount,
-            });
-            });
+        var walletAsset = [];
+        var totalAsset = []
+        for(let j=0 ; j<selectedAccount.value.length; j++){
+          selectedAccount.value[j].assets.forEach((i,index) => {
+              walletAsset.push({
+                  i:index,
+                  id: i.idHex,
+                  name: (i.namespaceNames.length>0?i.namespaceNames[0]:""),
+                  balance: i.amount,
+              });
+              });
+          }
+        totalAsset = walletAsset.reduce((obj, item) => {  
+        let find = obj.find(i => i.id === item.id);  
+        let _d = {  
+        ...item
         }
-      totalAsset = walletAsset.reduce((obj, item) => {  
-      let find = obj.find(i => i.id === item.id);  
-      let _d = {  
-       ...item
-      }
-      find ? (find.balance += item.balance ) : obj.push(_d);
-      return obj;
-      }, [])
+        find ? (find.balance += item.balance ) : obj.push(_d);
+        return obj;
+        }, [])
         return totalAsset
       }else{
         return null
