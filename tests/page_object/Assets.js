@@ -1,6 +1,6 @@
 const elements = {
     back: 'a.text-blue-primary:nth-child(2)',
-    assets_tab: 'div.transition-all:nth-child(1) > div:nth-child(1)',
+    assets_tab: 'div.flex:nth-child(2) > a:nth-child(2)',
     activities_tab: 'div.transition-all:nth-child(1) > div:nth-child(2)',
     createnew_asset: 'a[href="#/create-asset"]',
     input_password: 'input.w-full',
@@ -11,7 +11,7 @@ const elements = {
     supply_mutable: 'div.mt-4 > div:nth-child(4) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1)',
     createasset_button: '.mt-3',
     transaction_confirmpopup: 'div.p-toast:nth-child(12) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)',
-    asset_id: '.p-datatable-tbody > tr:nth-child(1) > td:nth-child(2) > span:nth-child(1)',
+    asset_id: '.p-datatable-tbody > tr:nth-child(2)',
     confirmed_button: 'div:nth-child(3) > a.py-2.px-4:nth-child(1)',
 }
 
@@ -49,6 +49,8 @@ const commands = {
         })
         .pause(5000)
         .click("@confirmed_button")
+        .pause(10000)
+        .click("@assets_tab")
         .pause(5000)
         .assert.visible('@asset_id', 'Asset is successfully created with id')
     },

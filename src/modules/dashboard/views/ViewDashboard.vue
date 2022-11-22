@@ -6,7 +6,7 @@
           <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded flex flex-col bg-white text-black">
             <div class="text-center py-3">
               <div class="text-center my-2"><div class="inline-block"><span class="font-bold text-xl">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-md">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-xl">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-6 h-6 ml-3 relative" style="top: -6px;"></div>
-              <div class="inline-block text-xs font-bold text-blue-primary cursor-pointer" @click="triggerSetDefaultModal">{{ selectedAccountName }}<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></div>
+              <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddressPlain }}" class="inline-block text-xs font-bold text-blue-primary cursor-pointer">{{ selectedAccountName }}<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></router-link>
               <div class="mb-8">
                 <div class="flex items-center justify-center">
                   <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" :copySubject="$t('general.address')">{{ selectedAccountAddressShort }}</div>
@@ -115,6 +115,7 @@
       <PendingDataTable :transaction="pendingTransactions" />
       <div class="text-txs text-gray-400 mt-10 mb-2"><b class="text-gray-700 uppercase">{{$t('dashboard.recentTransactions')}}</b> </div>
       <MixedTxnDataTable :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="recentTransactions" @openDecryptMsg="openDecryptMsgModal"></MixedTxnDataTable>
+      <a :href="linkToExplorer()" target=_blank v-if="searchedTransactions.length==10"><div class="text-right text-xs text-blue-primary mt-3" >View more...</div></a>
       
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='asset'">
@@ -729,9 +730,6 @@ export default defineComponent({
       )
       return result;
     }
-    const triggerSetDefaultModal = () => {
-      emitter.emit('TRIGGER_SWITCH_DEFAULT_ACCOUNT_MODAL', true);
-    }
     emitter.on('CLOSE_MODAL', () => {
       showAddressQRModal.value = false;
       showMessageModal.value = false;
@@ -832,6 +830,14 @@ export default defineComponent({
         }
       });
     }
+
+    const linkToExplorer = ()=>{ 
+        if(!networkState.currentNetworkProfile){ 
+            return ''
+        }
+        return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.addressRoute + '/' + selectedAccount.value.address
+      }
+
     return {
       pendingTransactions,
       toSvg,
@@ -861,7 +867,6 @@ export default defineComponent({
       showDecryptMessageModal,
       selectedAccount,
       selectedAccountNamespaceCount,
-      triggerSetDefaultModal,
       // selectedAccountNamespaces,
       // selectedAccountAssets,
       selectedAccountAssetsCount,
@@ -893,7 +898,8 @@ export default defineComponent({
       jdenticonConfig,
       faucetLink,
       boolIsTxnFetched,
-      accountAssets
+      accountAssets,
+      linkToExplorer
     };
   }
 });

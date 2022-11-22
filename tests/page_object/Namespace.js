@@ -33,6 +33,8 @@ const commands = {
 
     invalid_name(name){
         return this
+        .click("@select_namespace")
+        .click("@newroot_namespace")
         .setValue("@input_name", name)
         .pause(1000)
         .isVisible('@error_invalidname', callback = result => {

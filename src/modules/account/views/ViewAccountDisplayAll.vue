@@ -9,7 +9,11 @@
     </div>
     <div class='mt-2 py-3 '>
       <div class="w-11/12 ml-auto mr-auto flex flex-col gap-3">
-        <AccountTile :key="index" :account="item" v-for="(item, index) in accounts" />
+          <div class="flex items-center">
+            <font-awesome-icon icon="search" class="text-blue-link mr-1"></font-awesome-icon>
+            <input v-model="filterQuery" type="text" class="py-2 px-2 outline-none text-xs text-black" :placeholder="$t('general.search')">
+          </div>
+        <AccountTile :key="index" :account="item" v-for="(item, index) in filteredAccounts" />
       </div>
     </div>
     <div class="mb-36"/>
@@ -208,10 +212,22 @@ export default {
     emitter.on('filterByLabel',e=>{
       labelNames.value = e
     })
-    
+
+    const filterQuery = ref("");
+    const filteredAccounts = computed(() => {
+    const query = filterQuery.value.toLowerCase();
+      if(filterQuery.value == ""){
+        return accounts.value;
+      }
+      return accounts.value.filter(item => {
+        return item.name.toLowerCase().includes(query) || item.address.toLowerCase().includes(query.replace(/-/g, ""))
+      });
+  });
 
     return {
       accounts,
+      filterQuery,
+      filteredAccounts
     };
   },
 }

@@ -278,7 +278,14 @@ setup(p){
         setDefaultAcc(getAccountNameByAddress(Address.createFromRawAddress(address).plain()))
         router.push({ name: 'ViewAccountDetails', params: { address:Address.createFromRawAddress(address).plain() }})
       }
+    if(!networkState.currentNetworkProfile){
+      return ''
+    }
+    if(!findAccountWithAddress(address,true)){
+      window.open(networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.addressRoute + '/' + address)
+    }
   }
+
   return{
     isHover,
     navigate,
@@ -293,7 +300,7 @@ setup(p){
     currentAccount,
     graph,
     copy,
-    prettyAddress
+    prettyAddress,
   }
 }
 }

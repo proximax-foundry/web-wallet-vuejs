@@ -42,7 +42,7 @@ const elements = {
     signin_herepk: 'div.text-center:nth-child(10) > a:nth-child(1)',
     signin_herebackup: 'div.text-center:nth-child(9) > a:nth-child(1)',
     select_network: 'form > fieldset > div:nth-child(1)',
-    testnet_1: 'form > fieldset > div:nth-child(2) > div:nth-child(1) > div:nth-child(3)',
+    testnet_2: 'form > fieldset > div:nth-child(2) > div:nth-child(1) > div:nth-child(4)',
 }
 
 const commands = {
@@ -51,7 +51,7 @@ const commands = {
         return this
         .pause(5000)
         .click("@select_network")
-        .click("@testnet_1")
+        .click("@testnet_2")
     },
 
     navigate_mainpage(){
