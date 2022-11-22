@@ -57,7 +57,7 @@
         <div class="flex justify-center mt-10 error_box error error-text" v-if="!settingDone">
           Configuration error
         </div>
-        <div class="flex justify-center mt-10 error_box error error-text" v-if="!submitFailed">
+        <div class="flex justify-center mt-10 error_box error error-text" v-if="submitFailed">
           Submission failed
         </div>
         <div class="flex justify-center mt-10 success_box success success-text" v-if="processing">
