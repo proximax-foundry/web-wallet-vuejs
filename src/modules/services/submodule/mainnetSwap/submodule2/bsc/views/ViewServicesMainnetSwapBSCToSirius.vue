@@ -477,12 +477,12 @@ export default {
     })
     
     watch(selectedToken,token=>{
-       SwapUtils.fetchBSCServiceInfo(swapData.swap_IN_SERVICE_URL,token.name).then(fetchService=>{
+       SwapUtils.fetchTokenServiceInfo(swapData.swap_IN_SERVICE_URL,token.name).then(fetchService=>{
           if(fetchService.status==200){
             tokenAddress.value = fetchService.data.bscInfo.scAddress;
             custodian.value = fetchService.data.bscInfo.sinkAddress;
             serviceErr.value = '';
-            tokenDivisibility.value = fetchService.data.siriusInfo.divisibility
+            tokenDivisibility.value = fetchService.data.siriusInfo.decimals;
             feeAmount.value = fetchService.data.siriusInfo.feeAmount/Math.pow(10,tokenDivisibility.value)
             minAmount.value = fetchService.data.siriusInfo.minAmount/Math.pow(10,tokenDivisibility.value) 
           }else{

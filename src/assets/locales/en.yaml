@@ -170,6 +170,7 @@ general:
   balance: Balance
   block: Block | Blocks
   blockHeight: Block Height
+  buy: Buy
   cancel: Cancel
   certificate: Certificate
   change: Change

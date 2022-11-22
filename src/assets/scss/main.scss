@@ -69,6 +69,16 @@ body{
   @apply bg-red-100 py-2 rounded-md px-2 my-3 ;
 }
 
+.success{
+  color: var(--green);
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.success_box{
+  @apply bg-green-100 py-2 rounded-md px-2 my-3 ;
+}
+
 .red-btn{
   @apply bg-red-primary text-xs text-white font-bold rounded-md transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
 }
