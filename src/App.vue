@@ -19,12 +19,12 @@
           <div class="col-span-12">
             <div class="text-sm">{{slotProps.message.detail}}</div>
             <div class="mt-1 text-xs">{{slotProps.message.detail2}}</div>
-            <div :style="`font-size: ${slotProps.message.detail3RemSize && slotProps.message.detail3RemSize.length > 64 ? 0.5 : 0.6}rem`" v-if="slotProps.message.url">
+            <div class="truncate ..." :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize : 0.7}rem`" v-if="slotProps.message.url">
               <a :href="slotProps.message.url" target="_blank">
               {{slotProps.message.detail3}}
               </a>
             </div>
-            <div :style="`font-size: ${slotProps.message.detail3RemSize &&  slotProps.message.detail3RemSize.length > 64 ? 0.5 : 0.6}rem`" v-else>{{slotProps.message.detail3}}</div>
+            <div class="truncate ..." :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize : 0.7}rem`" v-else>{{slotProps.message.detail3}}</div>
           </div> 
         </div>
       </template>
@@ -44,13 +44,12 @@
           <div class="col-span-12">
             <div class="text-sm">{{slotProps.message.detail}}</div>
             <div class="mt-1 text-xs">{{slotProps.message.detail2}}</div>
-            <div :style="`font-size: ${slotProps.message.detail3RemSize && slotProps.message.detail3RemSize.length > 64 ? 0.5 : 0.6}rem`" v-if="slotProps.message.url">
-
+            <div class="truncate ..." :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize : 0.7}rem`" v-if="slotProps.message.url">
               <a :href="slotProps.message.url" target="_blank">
               {{slotProps.message.detail3}}
               </a>
             </div>
-            <div :style="`font-size: ${slotProps.message.detail3RemSize && slotProps.message.detail3RemSize.length > 64 ?  0.5 : 0.6}rem`" v-else>{{slotProps.message.detail3}}</div>
+            <div class="truncate ..." :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize : 0.7}rem`" v-else>{{slotProps.message.detail3}}</div>
           </div> 
         </div>
       </template>
@@ -70,12 +69,12 @@
           <div class="col-span-12">
             <div class="text-sm">{{slotProps.message.detail}}</div>
             <div class="mt-1 text-xs">{{slotProps.message.detail2}}</div>
-            <div :style="`font-size: ${slotProps.message.detail3RemSize && slotProps.message.detail3RemSize > 64 ? 0.5 : 0.6}rem`" v-if="slotProps.message.url">
+            <div class="truncate ..." :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize : 0.7}rem`" v-if="slotProps.message.url">
               <a :href="slotProps.message.url" target="_blank">
               {{slotProps.message.detail3}}
               </a>
             </div>
-            <div :style="`font-size: ${slotProps.message.detail3RemSize && slotProps.message.detail3RemSize.length > 64 ?  0.5 : 0.6}rem`" v-else>{{slotProps.message.detail3}}</div>
+            <div class="truncate ..." :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize : 0.7}rem`" v-else>{{slotProps.message.detail3}}</div>
             <div :style="`font-size: ${slotProps.message.detail4 && slotProps.message.detail4.length > 64 ? 0.4 : 0.5}rem`" >{{slotProps.message.detail4}}</div>
           </div> 
         </div>
