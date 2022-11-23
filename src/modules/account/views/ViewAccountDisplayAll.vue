@@ -217,13 +217,23 @@ export default {
     const filteredAccounts = computed(() => {
     const query = filterQuery.value.toLowerCase();
       if(filterQuery.value == ""){
-        return accounts.value;
+        return filterDuplicate(accounts.value);
       }
       return accounts.value.filter((item) =>{
         return Object.values(item).some((word) =>
           String(word).toLowerCase().includes(query));
       });
   });
+
+  function filterDuplicate(data){
+        var result = data.reduce((unique, o) => {
+        if(!unique.some(obj => obj.address === o.address && obj.name === o.name)){
+          unique.push(o);
+        }
+        return unique;
+        },[]);
+        return result 
+        }
 
     return {
       accounts,
