@@ -316,7 +316,7 @@ export default {
 
     (async() => {
       try {
-        const fetchService = await SwapUtils.fetchTokenServiceInfo(swapData.swap_IN_SERVICE_URL,'xpx');
+        const fetchService = await SwapUtils.fetchOldBSCServiceInfo(swapData.swap_IN_SERVICE_URL,'xpx');
         if(fetchService.status==200){
           tokenAddress.value = fetchService.data.bscInfo.scAddress;
           custodian.value = fetchService.data.bscInfo.sinkAddress;
@@ -352,11 +352,12 @@ export default {
     const transactionNotFound = ref(false);
     const transactionFailed = ref(false);
     const transactionPending = ref(false);
+    const tokenName = ref('xpx');
     // const transactionSuccess = ref(false);
 
     const bscScanUrl = swapData.BSCScanUrl;
-    const checkSwapStatusUrl = SwapUtils.getIncoming_BSCCheckStatus_URL(swapData.swap_IN_SERVICE_URL);
-    const swapServerUrl = SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL);
+    const checkSwapStatusUrl = SwapUtils.getIncoming_OldBSCCheckStatus_URL(swapData.swap_IN_SERVICE_URL, tokenName.value);
+    const swapServerUrl = SwapUtils.getIncoming_OldBSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL);
 
 
     let provider;
