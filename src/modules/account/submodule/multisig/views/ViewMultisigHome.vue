@@ -39,7 +39,7 @@
               <div class="flex">
                 <div :id="`multisigAddress${index}`" :copyValue="multisig.address" :title="multisig.address" :copySubject="$t('general.address')" class="truncate md:text-clip md:w-auto text-txs font-bold mt-1">{{multisig.address}}</div>
                 <font-awesome-icon icon="copy" @mouseover="isHover = true" @mouseout="isHover = false" :title="$t('general.copy')" @click="copy(`multisigAddress${index}`)" class="ml-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
-                  <img v-if="findAccountWithAddress(multisig.address)" class="w-5 h-5 ml-auto" src="@/assets/img/chevron_right.svg">
+                <img v-if="findAccountWithAddress(multisig.address)" class="w-5 h-5 ml-auto" src="@/assets/img/chevron_right.svg">
               </div>
             </div>
           </div>
@@ -166,7 +166,14 @@ export default {
         setDefaultAcc(getAccountNameByAddress(Address.createFromRawAddress(address).plain()))
         router.push({ name: 'ViewAccountDetails', params: { address:getPlainAddress(address) }})
       }
+      if(!networkState.currentNetworkProfile){
+        return ''
+      }
+      if(!findAccountWithAddress(address,true)){
+        window.open(networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.addressRoute + '/' + address)
+      }
     }
+
       return{
         findAccountWithAddress,
         isHover,
@@ -176,7 +183,7 @@ export default {
         acc,
         isCosigner,
         multisigAccountsList,
-        cosignerAccountsList
+        cosignerAccountsList,
       }
     }
 }

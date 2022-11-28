@@ -32,13 +32,21 @@
                   </div><br>
                   <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.transfer')}}</div>
                 </router-link>
-                <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="inline-block text-center ml-2">
+                <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="inline-block text-center mx-2">
                   <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
                     <div class="h-full w-full flex items-center justify-center">
                       <img src="@/modules/dashboard/img/icon-swap-white.svg" class="w-5 h-5">
                     </div>
                   </div><br>
                   <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.swap')}}</div>
+                </router-link>
+                <router-link :to="{ name: 'ViewServicesStackingBuy'}" class="inline-block text-center ml-2">
+                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
+                    <div class="flex items-center justify-center h-full w-full">
+                      <font-awesome-icon icon="shopping-bag" class="h-5 w-5 text-white" />
+                    </div>
+                  </div><br>
+                  <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.buy')}}</div>
                 </router-link>
               </div>
             </div>
@@ -107,6 +115,7 @@
       <PendingDataTable :transaction="pendingTransactions" />
       <div class="text-txs text-gray-400 mt-10 mb-2"><b class="text-gray-700 uppercase">{{$t('dashboard.recentTransactions')}}</b> </div>
       <MixedTxnDataTable :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="recentTransactions" @openDecryptMsg="openDecryptMsgModal"></MixedTxnDataTable>
+      <a :href="linkToExplorer()" target=_blank v-if="searchedTransactions.length==10"><div class="text-right text-xs text-blue-primary mt-3" >View more...</div></a>
       
     </div>
     <div class="bg-white px-2 sm:px-10 pt-12" v-else-if="displayBoard=='asset'">
@@ -821,6 +830,14 @@ export default defineComponent({
         }
       });
     }
+
+    const linkToExplorer = ()=>{ 
+        if(!networkState.currentNetworkProfile){ 
+            return ''
+        }
+        return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.addressRoute + '/' + selectedAccount.value.address
+      }
+
     return {
       pendingTransactions,
       toSvg,
@@ -881,7 +898,8 @@ export default defineComponent({
       jdenticonConfig,
       faucetLink,
       boolIsTxnFetched,
-      accountAssets
+      accountAssets,
+      linkToExplorer
     };
   }
 });
