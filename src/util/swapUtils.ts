@@ -758,7 +758,6 @@ export class SwapUtils {
     }else{
       return `${baseUrl}/transfer`
     }
-    
   }
 
   static getSwapTokenList = (baseUrl: string): Promise<any> =>{
@@ -777,12 +776,37 @@ export class SwapUtils {
     return `${baseUrl}/swap/${swapId}`;
   }
 
+  static getOutgoing_ETHCheckStatus_URL(baseUrl: string){
+    return `${baseUrl}/eth/swapByTx/`;
+  }
+
+  static getOutgoing_BSCCheckStatus_URL(baseUrl: string){
+    return `${baseUrl}/bsc/swapByTx/`;
+  }
+
+  static getOutgoingSwapServiceInfo = (url: string): Promise<any>=> {
+    return fetch(url).then((res) => res.json()).then((data) => { return data });
+  }
+
+  // outgoing swap server service info
+  static getServiceInfoURL(baseUrl: string){
+    return `${baseUrl}/service-info`;
+  }
+
   static getIncoming_ETHSwapTransfer_URL = (baseUrl: string,tokenName: string): string => {
     return `${baseUrl}/${tokenName}/transfer`;
   }
 
   static getIncoming_BSCSwapTransfer_URL = (baseUrl: string,tokenName: string): string => {
     return `${baseUrl}/${tokenName}/transfer`;
+  }
+
+  static getIncoming_OldETHSwapTransfer_URL = (baseUrl: string,tokenName: string): string => {
+    return `${baseUrl}/expx/${tokenName}/transfer`;
+  }
+
+  static getIncoming_OldBSCSwapTransfer_URL = (baseUrl: string,tokenName: string): string => {
+    return `${baseUrl}/bxpx/${tokenName}/transfer`;
   }
 
   static getIncoming_SwapTransfer_URL = (baseUrl: string): string => {
@@ -797,10 +821,6 @@ export class SwapUtils {
     return `${baseUrl}/price/latest`;
   }
 
-  static getServiceInfoURL(baseUrl: string){
-    return `${baseUrl}/service-info`;
-  }
-
   static getIncoming_ETHCheckStatus_URL(baseUrl: string){
     return `${baseUrl}/swap-status`;
   }
@@ -809,20 +829,29 @@ export class SwapUtils {
     return `${baseUrl}/swap-status`;
   }
 
-  static getOutgoing_ETHCheckStatus_URL(baseUrl: string){
-    return `${baseUrl}/eth/swapByTx/`;
+  static getIncoming_OldETHCheckStatus_URL(baseUrl: string, tokenName: string){
+    return `${baseUrl}/expx/${tokenName}/swap-status`;
   }
 
-  static getOutgoing_BSCCheckStatus_URL(baseUrl: string){
-    return `${baseUrl}/bsc/swapByTx/`;
+  static getIncoming_OldBSCCheckStatus_URL(baseUrl: string, tokenName: string){
+    return `${baseUrl}/bxpx/${tokenName}/swap-status`;
   }
 
-  static getOutgoingSwapServiceInfo = (url: string): Promise<any>=> {
-    return fetch(url).then((res) => res.json()).then((data) => { return data });
+  static fetchOldETHServiceInfo = async (baseUrl: string,tokenName: string) :Promise<paramResponse> => {
+    const response = await fetch(`${baseUrl}/expx/${tokenName}/service-info`);
+    let data = '';
+    if(response.status == 200){
+      data = await response.json();
+    }
+    let returnResponse:paramResponse = {
+      status: response.status,
+      data: data
+    }
+    return returnResponse;
   }
 
-  static fetchETHServiceInfo = async (baseUrl: string) :Promise<paramResponse> => {
-    const response = await fetch(`${baseUrl}/service-info`);
+  static fetchOldBSCServiceInfo = async (baseUrl: string,tokenName: string) :Promise<paramResponse> => {
+    const response = await fetch(`${baseUrl}/bxpx/${tokenName}/service-info`);
     let data = '';
     if(response.status == 200){
       data = await response.json();

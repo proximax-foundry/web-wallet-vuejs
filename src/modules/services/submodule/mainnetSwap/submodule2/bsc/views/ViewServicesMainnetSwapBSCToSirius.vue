@@ -469,20 +469,20 @@ export default {
     const swapServerUrl = computed(()=>{
       
       if (selectedToken.value!=null){
-        console.log(SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL,selectedToken.value.name))
-        return SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL,selectedToken.value.name)
+        console.log(SwapUtils.getIncoming_OldBSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL,selectedToken.value.name))
+        return SwapUtils.getIncoming_OldBSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL,selectedToken.value.name)
       }else{
         return ''
       }
     })
     
     watch(selectedToken,token=>{
-       SwapUtils.fetchTokenServiceInfo(swapData.swap_IN_SERVICE_URL,token.name).then(fetchService=>{
+       SwapUtils.fetchOldBSCServiceInfo(swapData.swap_IN_SERVICE_URL,token.name).then(fetchService=>{
           if(fetchService.status==200){
             tokenAddress.value = fetchService.data.bscInfo.scAddress;
             custodian.value = fetchService.data.bscInfo.sinkAddress;
             serviceErr.value = '';
-            tokenDivisibility.value = fetchService.data.siriusInfo.decimals;
+            tokenDivisibility.value = fetchService.data.siriusInfo.divisibility;
             feeAmount.value = fetchService.data.siriusInfo.feeAmount/Math.pow(10,tokenDivisibility.value)
             minAmount.value = fetchService.data.siriusInfo.minAmount/Math.pow(10,tokenDivisibility.value) 
           }else{

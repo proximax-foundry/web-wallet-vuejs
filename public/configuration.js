@@ -123,7 +123,7 @@ dynamic_configuration = {
           "swapData":{
             "swap_XPX_ETH_URL": "https://bctestnet-swap-gateway.xpxsirius.io/eth",
             "swap_XPX_BSC_URL": "https://bctestnet-swap-gateway.xpxsirius.io/bsc",
-            "swap_IN_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io/sirius",
+            "swap_IN_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
             "swap_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
             "gasPriceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io/gas",
             "priceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io",

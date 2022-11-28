@@ -301,7 +301,7 @@ export default {
 
     (async() => {
       try {
-        const fetchService = await SwapUtils.fetchETHServiceInfo(swapData.swap_IN_SERVICE_URL);
+        const fetchService = await SwapUtils.fetchOldETHServiceInfo(swapData.swap_IN_SERVICE_URL);
         if(fetchService.status==200){
           tokenAddress.value = fetchService.data.ethInfo.scAddress;
           custodian.value = fetchService.data.ethInfo.sinkAddress;
@@ -330,7 +330,7 @@ export default {
     const disableRetrySwap = ref(false);
     const retrySwapButtonText = ref('Retry');
     const ethScanUrl = swapData.ETHScanUrl;
-    const swapServerUrl = SwapUtils.getIncoming_ETHSwapTransfer_URL(swapData.swap_IN_SERVICE_URL);
+    const swapServerUrl = SwapUtils.getIncoming_OldETHSwapTransfer_URL(swapData.swap_IN_SERVICE_URL);
     const transactionFailed = ref(false);
 
     const signatureMessage = computed(() => {

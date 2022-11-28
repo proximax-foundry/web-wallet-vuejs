@@ -319,7 +319,7 @@ export default {
 
     (async() => {
       try {
-        const fetchService = await SwapUtils.fetchETHServiceInfo(swapData.swap_IN_SERVICE_URL);
+        const fetchService = await SwapUtils.fetchOldETHServiceInfo(swapData.swap_IN_SERVICE_URL);
         if(fetchService.status==200){
           tokenAddress.value = fetchService.data.ethInfo.scAddress;
           custodian.value = fetchService.data.ethInfo.sinkAddress;
@@ -355,11 +355,12 @@ export default {
     const transactionNotFound = ref(false);
     const transactionFailed = ref(false);
     const transactionPending = ref(false);
+    const tokenName = ref('xpx');
     // const transactionSuccess = ref(false);
 
     const ethScanUrl = swapData.ETHScanUrl;
-    const checkSwapStatusUrl = SwapUtils.getIncoming_ETHCheckStatus_URL(swapData.swap_IN_SERVICE_URL);
-    const swapServerUrl = SwapUtils.getIncoming_ETHSwapTransfer_URL(swapData.swap_IN_SERVICE_URL);
+    const checkSwapStatusUrl = SwapUtils.getIncoming_OldETHCheckStatus_URL(swapData.swap_IN_SERVICE_URL, tokenName.value);
+    const swapServerUrl = SwapUtils.getIncoming_OldETHSwapTransfer_URL(swapData.swap_IN_SERVICE_URL);
 
 
     let provider;
