@@ -29,11 +29,11 @@
             >
             <template v-slot:singlelabel="{ value }">
                 <div class="multiselect-single-label">
-                <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 mr-2"> {{ value.name }}
+                <img src="@/modules/dashboard/img/sirius-icon.svg" class="w-5 h-5 mr-2"> {{ value.name }}
                 </div>
             </template>
             <template v-slot:option="{ option }">
-                <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 mr-2"> {{ option.name }}
+                <img src="@/modules/dashboard/img/sirius-icon.svg" class="w-5 h-5 mr-2"> {{ option.name }}
             </template>
             </Multiselect>
         </div>

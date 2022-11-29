@@ -8,13 +8,13 @@
       </div>
       <div class=" flex justify-center items-center lg:bg-navy-primary logo-header">
         <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}">
-          <img src="@/assets/img/logo-whitetxt.svg" class="w-24 tsm:w-40 hidden lg:inline-block">
+          <img src="@/assets/img/sirius-logo-whitetext.svg" class="w-24 tsm:w-40 hidden lg:inline-block">
         </router-link>
       </div>
       <div class=" flex items-center ml-auto mr-28 lg:mr-auto lg:ml-10 logo-header">
         <div class="hidden lg:block" >Wallet {{walletName}}</div>
         <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}">
-          <img  src="@/assets/img/logo-blacktxt.svg" class="w-40 lg:hidden">
+          <img  src="@/assets/img/sirius-logo-blacktext.svg" class="w-40 lg:hidden">
         </router-link>
       </div>
       
@@ -84,7 +84,7 @@
    
     <div class="container mx-auto header-height flex items-stretch bg-navy-primary" v-else>
       <div class="flex-none self-center flex items-end ml-2 lg:ml-0">
-        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/logo-whitetxt.svg" class="w-24 lg:w-40"></router-link>
+        <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}"><img src="@/assets/img/sirius-logo-whitetext.svg" class="w-24 lg:w-40"></router-link>
       </div>
       <div class="flex-grow"></div>
       <div class="flex-none self-center header-menu">

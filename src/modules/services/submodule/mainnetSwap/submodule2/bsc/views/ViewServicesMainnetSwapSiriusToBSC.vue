@@ -68,7 +68,7 @@
           <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center uppercase">
             {{ amount }} {{selectedToken.name}} 
             <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken.name=='metx'" class="w-5 h-5 ml-4"> 
-            <img v-if="selectedToken.name=='xpx'" src="@/modules/account/img/proximax-logo.svg" class='w-5 h-5 ml-4'>
+            <img v-if="selectedToken.name=='xpx'" src="@/modules/dashboard/img/sirius-icon.svg" class='w-5 h-5 ml-4'>
           </div>
           <div class="flex justify-center mt-3">
             <div class="text-xs text-gray-600 mt-2 max-w-screen-md">{{$t('swap.bscOutgoingMsg')}}</div>
@@ -97,7 +97,7 @@
             <div class="break-all">{{ Helper.createAddress(selectedAccountAddress).pretty() }}</div>
             <div class="mt-1 ">{{$t('swap.swapAmount')}} {{ amount }} {{selectedToken.name.toUpperCase()}} 
               <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken.name=='metx'" class="w-3 h-3 ml-2 inline relative" style="top: -2px"> 
-              <img v-if="selectedToken.name=='xpx'" src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
+              <img v-if="selectedToken.name=='xpx'" src="@/modules/dashboard/img/sirius-icon.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
             <div>
               <img src="@/modules/services/submodule/mainnetSwap/img/icon-dots.svg" class="inline-block h-8 my-2">
             </div>

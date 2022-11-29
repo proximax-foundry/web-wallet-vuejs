@@ -4,7 +4,7 @@
         <div class="flex flex-col">
             <div class="uppercase font-light text-gray-500 text-txs text-left mb-2">{{ placeholder }}</div>
             <div class="flex w-full">
-                <img v-if="logo" src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
+                <img v-if="logo" src="@/modules/dashboard/img/sirius-icon.svg" class='h-5 w-5 mt-0.5'>
                <AutoNumericVue 
                 :value="modelValue"
                 :disabled ='disabled'

@@ -27,13 +27,13 @@
               <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
               <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
               <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
-              <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
+              <img src="@/modules/dashboard/img/sirius-icon.svg" class='h-5 w-5 mt-0.5'>
             </div>
             <div class = 'text-txs text-gray-400 mt-0.5'>{{$t('general.estimateUSD')}} {{currencyConvert}}</div>
           </div>
           <div v-if="networkType ==168 " class='flex mt-2 sm:mt-0 '>
             <a  :href="topUpUrl" target="_blank" class='flex bg-navy-primary rounded-md py-0.5 px-3 cursor-pointer'>
-              <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5  cursor-pointer '>
+              <img src="@/modules/dashboard/img/sirius-icon.svg" class='h-5 w-5  cursor-pointer '>
               <div class='text-xs mt-0.5 font-semibold text-white'>{{$t('general.topUp',{tokenName: currentNativeTokenName})}}</div>
               <img src="@/modules/dashboard/img/icon-link-new-white.svg" class='h-5 w-5  cursor-pointer '>
             </a>
