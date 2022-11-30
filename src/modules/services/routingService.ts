@@ -21,6 +21,15 @@ export const ServiceRoutes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/view-nft',
+    name: 'ViewServicesNFT',
+    props: true,
+    component: () => import('@/modules/services/submodule/nft/views/ViewServicesNFT.vue'),
+    meta:{
+      title: "View Portfolio"
+    }
+  },
+  {
     path: '/services',
     name: 'ViewServices',
     component: () => import('@/modules/services/views/ViewServices.vue'),
