@@ -11,7 +11,6 @@
         <div class='mt-2 py-3 '>
           <div class="w-11/12 ml-auto mr-auto border-2">
             <DisplayNFTComponent :publicKeys="WalletPublicKeys" />
-            <div>{{publicKey}}</div>
           </div>
         </div>
       <div class="mb-36"/>
@@ -25,7 +24,7 @@ import { computed, ref } from "vue";
 import MultiDropdownPortfolioAccountComponent from '@/modules/services/submodule/portfolio/components/MultiDropdownPortfolioAccountComponent.vue'
 
 export default{
-    name: "ViewServicesPortfolio",
+    name: "ViewServicesNFT",
     components:{
       MultiDropdownPortfolioAccountComponent,
       DisplayNFTComponent
