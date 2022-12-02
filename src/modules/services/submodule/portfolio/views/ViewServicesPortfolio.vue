@@ -4,13 +4,37 @@
       <div class="flex">
         <div class='py-3 px-6 lg:flex items-center'>
           <div class="text-xl mr-2 mb-2">Portfolio</div>
-          <MultiDropdownPortfolioAccountComponent :account="accounts" @checked='onCheck'/>
+          <div>
+            <MultiSelect
+            v-model="selectedAccount"
+            :options=accounts
+            optionLabel="name"
+            placeholder="Select Accounts"
+            :filter="true"
+            class="multiselect-custom"
+            @change="loadWalletAsset()"
+            >
+              <template #value="slotProps">
+                <div class="account-item account-item-value" v-for="option of slotProps.value" :key="option.code">
+                  <div>{{option.name}}</div>
+                </div>
+                <template v-if="!slotProps.value || slotProps.value.length === 0">
+                  Select Accounts
+                </template>
+              </template>
+              <template #option="slotProps">
+                <div class="account-item">
+                  <div>{{slotProps.option.name}}</div>
+                </div>
+              </template>
+            </MultiSelect>
+          </div>
         </div>        
       </div>
     </div>
       <div class='mt-2 py-3 '>
         <div class="w-11/12 ml-auto mr-auto border-2">
-          <AssetComponent :accountAsset="mosaics"/>
+          <PortfolioAssetDataTable :assets="mosaics" />
         </div>
       </div>
     <div class="mb-36"/>
@@ -18,18 +42,18 @@
 </template>
 
 <script>
-import AssetComponent from '@/modules/services/submodule/portfolio/components/AssetComponent.vue';
+import PortfolioAssetDataTable from '@/modules/services/submodule/portfolio/components/PortfolioAssetDataTable.vue';
 import { walletState } from '@/state/walletState';
 import { computed, ref } from "vue";
 import { accountUtils } from "@/util/accountUtils";
 import { AppState } from '@/state/appState';
-import MultiDropdownPortfolioAccountComponent from '@/modules/services/submodule/portfolio/components/MultiDropdownPortfolioAccountComponent.vue'
+import MultiSelect from 'primevue/multiselect';
 
 export default{
     name: "ViewServicesPortfolio",
     components:{
-      AssetComponent,
-      MultiDropdownPortfolioAccountComponent
+      PortfolioAssetDataTable,
+      MultiSelect
     },
 
     setup(){
@@ -40,7 +64,7 @@ export default{
         if(!walletState.currentLoggedInWallet){
           return null;
         }
-        else if(walletState.currentLoggedInWallet){
+        else{
           if(walletState.currentLoggedInWallet.others){
           const accounts = walletState.currentLoggedInWallet.accounts.map((acc)=>{
             return {
@@ -63,16 +87,18 @@ export default{
           })
           }
           else{
-            const accounts =  walletState.currentLoggedInWallet.accounts;
+            const accounts =  walletState.currentLoggedInWallet.accounts.map((acc)=>{
+              return {
+                name: acc.name,
+                publicKey: acc.publicKey,
+                address: acc.address
+              }
+            })
             return accounts
           }
         }
       }
     );
-    const onCheck = (val) =>{
-      selectedAccount.value = val
-      loadWalletAsset()
-    }
     const loadWalletAsset = async() =>{
       if(!AppState.isReady){
         setTimeout(loadWalletAsset, 1000);
@@ -86,16 +112,63 @@ export default{
                 mosaics: account.mosaics
             });
         }
-      mosaics.value = walletAsset
+        let mosaics_list = [];
+        let AssetList = [];
+        let newAssetList = [];
+        let assetLength = 0;
+        let totalAssetList = [];
+        if(!walletAsset.length){
+          mosaics.value = [];
+        }else{
+          for(let j=0; j<walletAsset.length; j++){
+            mosaics_list = walletAsset[j].mosaics
+            assetLength += walletAsset[j],mosaics.length
+            AssetList[j] = await accountUtils.formatAccountAsset(mosaics_list, walletAsset[j].publicKey)
+            newAssetList = newAssetList.concat(AssetList[j])
+          }
+          totalAssetList = newAssetList.reduce((obj, item) => {  
+          let find = obj.find(i => i.id === item.id);  
+          let _d = {  
+          ...item
+          }
+          find ? (find.balance += item.balance ) : obj.push(_d);
+          return obj;
+          }, [])
+          mosaics.value = totalAssetList
+        }
+        console.log(typeof walletAsset)
+        console.log(walletAsset.length)
+        console.log(mosaics)
     }
     loadWalletAsset()
       return {
         mosaics,
-        onCheck,
         accounts,
         selectedAccount,
+        loadWalletAsset
       }
     }
 }
 
 </script>
+<style lang="scss" scoped>
+.p-multiselect {
+    width: 18rem;
+}
+
+::v-deep(.multiselect-custom) {
+    .p-multiselect-label:not(.p-placeholder) {
+        padding-top: .25rem;
+        padding-bottom: .25rem;
+    }
+
+    .account-item-value {
+        padding: .25rem .5rem;
+        border-radius: 3px;
+        display: inline-flex;
+        margin-right: .5rem;
+        background-color: var(--primary-color);
+        color: var(--primary-color-text);
+    }
+}
+</style>

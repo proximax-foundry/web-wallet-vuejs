@@ -15,8 +15,6 @@ export interface AssetObj {
   id: string;
   name: [];
   balance: number;
-  isActive: boolean;
-  isOwner: boolean;
 }
 
 const formatAccountAsset = async(assets: Mosaic[],publicKey: string): Promise<AssetObj[]> => {
@@ -25,21 +23,10 @@ const formatAccountAsset = async(assets: Mosaic[],publicKey: string): Promise<As
     let objAsset: AssetObj;
     let assetName: any=[];
     let namespaceId: string;
-    let isOwner: boolean = false;
-    let isActive: boolean = false;
 
     let assetDetails;
     for (let key in assets) {
       assetDetails = await AppState.chainAPI.assetAPI.getMosaic(assets[key].id);
-      if ((assetDetails.height.compact() + assetDetails.duration.compact()) > currentBlock) {
-        isActive = true;
-      } else if (assetDetails.height.compact() == 1) {
-        isActive = true;
-      }
-
-      if (assetDetails.owner.publicKey == publicKey) {
-        isOwner = true;
-      }
 
       let assetsNames = await TransactionUtils.getAssetsName([assets[key].id]);
       if (assetsNames[0].names.length) {
@@ -52,8 +39,6 @@ const formatAccountAsset = async(assets: Mosaic[],publicKey: string): Promise<As
         id: assets[key].id.id.toHex(),
         balance: Number(Helper.convertToCurrency(assets[key].amount.compact(), assetDetails.divisibility).replace(/,/g,"")),
         name: assetName,
-        isOwner,
-        isActive,
       }
       formattedAsset.push(objAsset);  
     }
