@@ -15,10 +15,11 @@
   </div>
 </template>
 
-<script>
-import { computed,} from "vue";
+<script lang="ts">
+import { computed, ref } from "vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import { walletState } from '@/state/walletState';
+import { Address, MosaicId } from "tsjs-xpx-chain-sdk"
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
@@ -65,32 +66,58 @@ export default {
                 return false
             }
         }
-        const mosaics = computed(() => {
-            
-            var mosaicOption = [];
-            if(!walletState.currentLoggedInWallet){
-                return mosaicOption;
+        const mosaics = ref([])
+
+        const fetchMosaic = async()=>{
+            if(!acc.value){
+                return null
             }
-            const account = walletState.currentLoggedInWallet.accounts.find(
-                (element) => element.address == p.address
-            ) ||  walletState.currentLoggedInWallet.others.find(
-                (element) => element.address == p.address)
-            if(!account){
-                return mosaicOption
+            let z =[]
+            let accInfo = await AppState.chainAPI.accountAPI.accountHttp.getAccountInfo(Address.createFromRawAddress(p.address)).toPromise()
+            accInfo.mosaics.forEach((acc,index)=>{
+                mosaics.value.push ({
+                    i: index,
+                    id: acc.id.toHex(),
+                })
+            })
+            let mosaicIds = mosaics.value.map(y=>new MosaicId(y.id) )
+            let mosaicNames = await AppState.chainAPI.assetAPI.getMosaicsNames(mosaicIds)
+            let mosaic = await AppState.chainAPI.assetAPI.getMosaics(mosaicIds)
+            for(let i =0; i< mosaicNames.length; i++){
+                let c=[]
+                if(mosaicNames[i].names.length>1){
+                    for(let j=mosaicNames[i].names.length-1; j>=0;j--){
+                        c.push(mosaicNames[i].names[j]?.name)
+                    }
+                    z.push(c)
+                }else{
+                    c.push(mosaicNames[i].names[0]?.name)
+                    z.push(c)
+                }
             }
-            account.assets.forEach((i,index) => {
-            mosaicOption.push({
-                i:index,
-                id: i.idHex,
-                name: (i.namespaceNames.length>0?formatNamespaceName(i.namespaceNames):'-'),
-                balance: Helper.toCurrencyFormat(i.amount,i.divisibility),
-                isCreator: acc.value? (i.creator == acc.value.publicKey? true:false):false
-            });
-            });
-            
-            return mosaicOption
-            
-        });
+            for(let i =0 ; i < mosaics.value.length; i ++){
+                let a = mosaics.value[i]
+                a.name = (mosaicNames[i].names.length>0?formatNamespaceName(z[i]):'-')
+                for(let j=0;j<mosaics.value.length; j ++){
+                    let amount
+                    if(accInfo.mosaics[i].id.toHex()===mosaic[j].mosaicId.id.toHex()){
+                        if(mosaic[j].divisibility === 0){
+                        amount = accInfo.mosaics[i].amount.compact();
+                    }else if(mosaic[j].divisibility !== null){
+                        amount = accInfo.mosaics[i].amount.compact() / Math.pow(10, mosaic[j].divisibility);
+                    }
+                    a.balance = Helper.toCurrencyFormat(amount,mosaic[j].divisibility) 
+                    }
+                }
+                a.isCreator = acc.value? (mosaic[mosaics.value.length-1-i].owner.publicKey == acc.value.publicKey? true:false):false
+
+            }
+            console.log(mosaics.value)
+
+        }
+
+        fetchMosaic()
+
 
         const formatNamespaceName = (namespaceNames) => {
             return namespaceNames.join(" / ")
