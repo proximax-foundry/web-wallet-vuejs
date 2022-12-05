@@ -24,11 +24,11 @@
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Namespace</div>
             <div class="flex items-center  pr-7 ">
-                    <img v-if="displayTokenName(data.name).name=='XPX'" src="@/modules/dashboard/img/sirius-icon.svg" class='font-semibold h-7 w-7 border-2 rounded-3xl'>
+                    <img v-if="displayTokenName(data.name).name=='XPX'" src="@/modules/account/img/proximax-logo.svg" class='font-semibold h-7 w-7 border-2 rounded-3xl'>
                     <img v-else-if="displayTokenName(data.name).name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class='font-semibold h-7 w-7 border-2 rounded-3xl'>
                     <img v-else-if="displayTokenName(data.name).name=='METX'" src="@/modules/account/img/metx-logo.svg" class='font-semibold h-7 w-7 border-2 rounded-3xl'>
                     <div v-else-if="data.name=='-'"/>
-                    <img v-else  src="@/modules/dashboard/img/sirius-icon.svg" class='h-6 w-6'>
+                    <img v-else  src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class='h-6 w-6'>
                     <div v-if="displayTokenName(data.name).registered" class="font-semibold text-xs ml-2 mt-1">{{displayTokenName(data.name).name}}</div>
                     <div v-else class="font-semibold text-xs  cursor-pointer mt-1 ml-1">{{data.name}}</div>
                 </div>
@@ -74,11 +74,11 @@
         <Column field="namespace" header="Namespace" v-if="wideScreen">
             <template #body="{data}">
                 <div class="flex items-center  pr-7 ">
-                    <img v-if="displayTokenName(data.name).name=='XPX'" src="@/modules/dashboard/img/sirius-icon.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
+                    <img v-if="displayTokenName(data.name).name=='XPX'" src="@/modules/account/img/proximax-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
                     <img v-else-if="displayTokenName(data.name).name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
                     <img v-else-if="displayTokenName(data.name).name=='METX'" src="@/modules/account/img/metx-logo.svg" class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
                     <div v-else-if="data.name=='-'"/>
-                    <img v-else  src="@/modules/dashboard/img/sirius-icon.svg" class='inline-block h-6 w-6 mr-2 '>
+                    <img v-else  src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class='inline-block h-6 w-6 mr-2 '>
                     <div v-if="displayTokenName(data.name).registered" class="inline-block text-xs ml-2 mt-1">{{displayTokenName(data.name).name}}</div>
                     <div v-else class="inline-block text-xs ml-2 cursor-pointer mt-1">{{data.name}}</div>
                 </div>

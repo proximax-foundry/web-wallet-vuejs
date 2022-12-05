@@ -101,7 +101,7 @@
           <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
           <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
           <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
-          <img src="@/modules/dashboard/img/sirius-icon.svg" class='ml-1 h-5 w-5 mt-0.5'>
+          <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
         </div>
         <div v-if="fundStatus" class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
           <div class="flex gap-2">

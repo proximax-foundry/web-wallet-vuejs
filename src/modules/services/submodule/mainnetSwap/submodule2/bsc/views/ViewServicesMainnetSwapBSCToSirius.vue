@@ -108,7 +108,7 @@
           <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center">
             {{ amountReceived }} {{selectedToken?selectedToken.name.toUpperCase():''}}
             <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken?selectedToken.name=='metx'?true:false:false" class=" w-5 h-5 ml-4"> 
-            <img v-if="selectedToken?selectedToken.name=='xpx'?true:false:false" src="@/modules/dashboard/img/sirius-icon.svg" class=" w-5 h-5 ml-4">
+            <img v-if="selectedToken?selectedToken.name=='xpx'?true:false:false" src="@/modules/dashboard/img/icon-xpx.svg" class=" w-5 h-5 ml-4">
           </div>
           <div class="my-4 text-xs">Total Amount of {{selectedToken?selectedToken.name.toUpperCase():''}} received after deducting transaction fee</div>
           <div class="mt-10 text-center">
@@ -260,7 +260,7 @@
               <div>{{ Helper.createAddress(siriusAddress).pretty() }}</div>
               <div class="mt-1">{{$t('swap.equivalentTo')}} {{ amountReceived }} {{selectedToken.name.toUpperCase()}} 
               <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken.name=='metx'" class="w-3 h-3 ml-2 inline relative" style="top: -2px"> 
-              <img v-else-if="selectedToken.name=='xpx'" src="@/modules/dashboard/img/sirius-icon.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
+              <img v-else-if="selectedToken.name=='xpx'" src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
             </div>
             <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">{{$t('swap.swapMsg2')}}</div>
             <label class="inline-flex items-center mb-5">

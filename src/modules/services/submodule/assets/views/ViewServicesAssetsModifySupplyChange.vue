@@ -69,7 +69,7 @@
         <div class="font-semibold text-xxs text-blue-primary uppercase">{{$t('general.accCurrentBalance')}}</div>
         <div class="flex text-gray-200 mb-5">
           <span v-html="splitCurrency(balance)"></span>
-          <img src="@/modules/dashboard/img/sirius-icon.svg" class='ml-1 h-5 w-5 mt-0.5'>
+          <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
         </div>
         <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
           <div class="font-semibold">{{$t('general.transactionFee')}}</div>

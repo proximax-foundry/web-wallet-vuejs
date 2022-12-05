@@ -255,7 +255,7 @@
               </div>
               <div class="text-blue-primary mb-1">{{$t('general.to')}}: {{ siriusAddressSelectedName }}</div>
               <div>{{ Helper.createAddress(siriusAddress).pretty() }}</div>
-              <div class="mt-1">{{$t('swap.equivalentTo')}} {{ amountReceived }} of {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/sirius-icon.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
+              <div class="mt-1">{{$t('swap.equivalentTo')}} {{ amountReceived }} of {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
             </div>
             <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">{{$t('swap.swapMsg2')}}</div>
             <label class="inline-flex items-center mb-5">

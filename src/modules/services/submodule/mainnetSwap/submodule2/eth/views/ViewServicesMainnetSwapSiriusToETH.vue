@@ -54,11 +54,11 @@
           <div class="text-tsm text-center mb-2 sm:mb-10">Fees are valid for: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
           <div class="tex-center font-bold text-sm mb-5">Transaction Fee (Sirius Network):</div>
           <div class="rounded bg-gray-100 p-5 mb-5">
-            <div class="inline-block mr-4 text-xs"><img src="@/modules/dashboard/img/sirius-icon.svg" class="w-3 inline mr-2 text-gray-500 relative" style="top: -2px">Transaction Fee: <span>{{ txFeeDisplay }}</span> {{ currentNativeTokenName }}</div>
+            <div class="inline-block mr-4 text-xs"><img src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 inline mr-2 text-gray-500 relative" style="top: -2px">Transaction Fee: <span>{{ txFeeDisplay }}</span> {{ currentNativeTokenName }}</div>
           </div>
           <PasswordInputClean placeholder="Insert wallet password" errorMessage="Wallet password required" :showError="showPasswdError" v-model="walletPasswd" />
           <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center">
-            {{ amount }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/sirius-icon.svg" class="w-5 h-5 ml-4">
+            {{ amount }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 ml-4">
           </div>
           <div class="flex justify-center mt-3">
             <div class="text-xs text-gray-600 mt-2 max-w-screen-md">Swap completion time will vary depending on the performance of the ETH network. The more ETH transaction fees you pay, the faster your swap will occur. Displayed ETH fees are valid for only three minutes due to the ETH network's fluctuating rates.</div>
@@ -84,7 +84,7 @@
           <div class="md:mx-20 lg:mx-10 xl:mx-40 border-2 border-gray-200 mt-4 p-5 text-xs font-bold filter shadow-lg">
             <div class="text-blue-primary mb-1">From: {{ selectedAccountName }}</div>
             <div class="break-all">{{ Helper.createAddress(selectedAccountAddress).pretty() }}</div>
-            <div class="mt-1">Swap Amount {{ amount }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/sirius-icon.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
+            <div class="mt-1">Swap Amount {{ amount }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
             <div>
               <img src="@/modules/services/submodule/mainnetSwap/img/icon-dots.svg" class="inline-block h-8 my-2">
             </div>

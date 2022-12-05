@@ -95,10 +95,10 @@
                         <div v-for="(element,transfer) in item.sdas" :key="transfer">
                           <div class="flex items-center">
                             <div>{{displaySDA(element) }}</div>
-                            <img v-if="element.toLowerCase().includes('xpx')" src="@/modules/dashboard/img/sirius-icon.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
+                            <img v-if="element.toLowerCase().includes('xpx')" src="@/modules/account/img/proximax-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
                             <img v-else-if="element.toLowerCase().includes('xar')" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
                             <img v-else-if="element.toLowerCase().includes('met')" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
-                            <img v-else src="@/modules/dashboard/img/sirius-icon.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
+                            <img v-else src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block h-7 w-7 mx-2 border-2 rounded-3xl">
                             <span v-if="element.toLowerCase().includes('xpx')" class="text-blue-600">XPX</span>
                             <span v-else-if="element.toLowerCase().includes('xar')" class="text-blue-600">XAR</span>
                             <span v-else-if="element.toLowerCase().includes('metx')" class="text-blue-600">METX</span>

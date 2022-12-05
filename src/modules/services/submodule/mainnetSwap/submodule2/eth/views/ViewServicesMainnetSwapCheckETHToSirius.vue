@@ -254,7 +254,7 @@
               </div>
               <div class="text-blue-primary mb-1">To: {{ siriusAddressSelectedName }}</div>
               <div>{{ Helper.createAddress(siriusAddress).pretty() }}</div>
-              <div class="mt-1">Equivalent to {{ amountReceived }} of {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/sirius-icon.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
+              <div class="mt-1">Equivalent to {{ amountReceived }} of {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
             </div>
             <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">Swap process may take a few hours to complete. Please save a copy of your certificate. It is needed in the event of an error.</div>
             <label class="inline-flex items-center mb-5">

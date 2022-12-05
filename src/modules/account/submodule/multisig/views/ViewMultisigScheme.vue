@@ -26,7 +26,7 @@
                     <div class = 'text-xs font-bold' v-if='splitBalance(data.balance).right!=null'>.</div>
                     <div class='text-xxs mt-0.5 '>{{splitBalance(data.balance).right}}</div>
                     <div class = 'ml-1 text-xs  font-bold'>{{currentNativeTokenName}}</div>
-                    <img src="@/modules/dashboard/img/sirius-icon.svg" class='h-4 w-4 '>
+                    <img src="@/modules/account/img/proximax-logo.svg" class='h-4 w-4 '>
                 </div>
                 <div class="flex gap-3">
                     <div class="text-xxs text-gray-500">{{$t('multisig.approvalScheme',{approval:data.numApproveTx,maxApproval:data.children.length})}}</div>

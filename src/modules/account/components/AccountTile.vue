@@ -13,7 +13,7 @@
           <div class = 'text-xs font-bold' v-if='splitBalance.right!=null'>.</div>
           <div class='text-xxs mt-0.5 '>{{splitBalance.right}}</div>
           <div class = 'ml-1 text-xs  font-bold'>{{currentNativeTokenName}}</div>
-          <img src="@/modules/dashboard/img/sirius-icon.svg" class='h-4 w-4 '>
+          <img src="@/modules/account/img/proximax-logo.svg" class='h-4 w-4 '>
         </div>
         <div class='flex gap-2 '> 
           <div  v-if='account.default' class = 'px-1 py-0.5 flex items-center bg-blue-primary rounded-sm' :title="$t('general.defaultTitle')">

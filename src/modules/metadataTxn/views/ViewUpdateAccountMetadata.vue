@@ -97,7 +97,7 @@
                     <div class = 'text-md font-bold ' v-if='splitBalance.right!=null'>.</div>
                     <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
                     <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
-                    <img src="@/modules/dashboard/img/sirius-icon.svg" class='h-5 w-5 mt-0.5'>
+                    <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
                 </div>
                 <div v-if="targetAccIsMultisig" class="flex  text-white">
                     <div class='text-xs '>{{$t('general.lockFund')}}</div>

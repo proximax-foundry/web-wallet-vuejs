@@ -84,7 +84,7 @@
             <SelectInputAccount v-model="siriusAddress" placeholder="To Sirius Chain Account" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
           </div>
           <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center">
-            {{ amountReceived }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/sirius-icon.svg" class="w-5 h-5 ml-4">
+            {{ amountReceived }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 ml-4">
           </div>
           <div class="my-4 text-xs">The fees for the transaction on Sirius Chain will be deducted from this amount, which is 50 {{ currentNativeTokenName }}</div>
           <div class="mt-10 text-center">
@@ -234,7 +234,7 @@
               </div>
               <div class="text-blue-primary mb-1">To: {{ siriusName }}</div>
               <div>{{ Helper.createAddress(siriusAddress).pretty() }}</div>
-              <div class="mt-1">Equivalent to {{ amountReceived }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/sirius-icon.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
+              <div class="mt-1">Equivalent to {{ amountReceived }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
             </div>
             <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">Swap process may take a few hours to complete. Please save a copy of your certificate. It is needed in the event of an error.</div>
             <label class="inline-flex items-center mb-5">
