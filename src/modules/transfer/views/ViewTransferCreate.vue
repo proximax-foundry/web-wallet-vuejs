@@ -303,6 +303,40 @@ export default {
         "key" : "1-3",
         "label" : "Potato",
         },
+        {
+        "key" : "1-4",
+        "label" : "TestContact3",
+        }
+        ,
+        {
+        "key" : "1-5",
+        "label" : "TestContact4",
+        }
+        ,
+        {
+        "key" : "1-6",
+        "label" : "TestContact5",
+        }
+        ,
+        {
+        "key" : "1-7",
+        "label" : "TestContact6",
+        }
+        ,
+        {
+        "key" : "1-8",
+        "label" : "TestContact7",
+        }
+        ,
+        {
+        "key" : "1-9",
+        "label" : "TestContact8",
+        }
+        ,
+        {
+        "key" : "1-10",
+        "label" : "TestContact9",
+        }
       ]
     }]
   },
