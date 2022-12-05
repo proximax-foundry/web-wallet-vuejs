@@ -201,7 +201,7 @@ export default {
 
     (async() => {
       try {
-        const fetchService = await SwapUtils.fetchOldETHServiceInfo(swapData.swap_IN_SERVICE_URL);
+        const fetchService = await SwapUtils.fetchTokenServiceInfo(swapData.swap_IN_SERVICE_URL, "xpx");
         if(fetchService.status==200){
           tokenAddress.value = fetchService.data.ethInfo.scAddress;
           custodian.value = fetchService.data.ethInfo.sinkAddress;
