@@ -112,8 +112,6 @@ export default {
                 a.isCreator = acc.value? (mosaic[mosaics.value.length-1-i].owner.publicKey == acc.value.publicKey? true:false):false
 
             }
-            console.log(mosaics.value)
-
         }
 
         fetchMosaic()
