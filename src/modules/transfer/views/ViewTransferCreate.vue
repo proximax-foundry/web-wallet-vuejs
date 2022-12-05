@@ -39,7 +39,11 @@
             <div class='text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.select')}}</div>
           </div>
         </div>
-        <div v-if="toggleContact" class=" border max-h-40 overflow-auto">
+        <!-- New Pop Up when select icon is clicked -->
+        <Sidebar v-model:visible="toggleContact" :baseZIndex="10000" position="full">
+          <Tree :value="nodes" :filter="true" filterMode="strict" @node-select="console.log(data)" selectionMode="single" ></Tree>
+        </Sidebar>
+        <!-- <div v-if="toggleContact" class=" border max-h-40 overflow-auto">
           <div class='text-xxs text-gray-300 font-semibold py-2 px-2 uppercase'>{{$t('general.importFromAB')}}</div>
           <input v-model="filterQuery" type="text" class="py-2 px-2 outline-none text-xs text-black" :placeholder="$t('general.search')">
           <div v-for="(item, number) in filteredContacts" :key="number" class="cursor-pointer overflow-auto">
@@ -50,7 +54,8 @@
               <div v-if="number%2==1" class="ml-auto mr-2 text-xxs py-2 font-semibold text-blue-primary uppercase">{{$t('general.select')}}</div>
             </div>
           </div>
-        </div>
+        </div> -->
+        
         <div v-for="(mosaic, index) in mosaicsCreated" :key="index">
           <MosaicInput :placeholder="$t('transfer.selectAsset')" errorMessage="" v-model="selectedMosaic[index].id" :index="index" :options="mosaics" :disableOptions="selectedMosaic" @show-mosaic-selection="updateMosaic" @remove-mosaic-selected="removeMosaic"/>
           <TransferInputClean v-if="selectedMosaic[index].id != 0" v-model="selectedMosaic[index].amount" :placeholder="$t('transfer.assetAmount')" type="text" :showError="showAssetBalanceErr[index]" :errorMessage="$t('general.insufficientBalance')" :decimal="mosaicSupplyDivisibility[index]"  />
@@ -217,6 +222,108 @@ export default {
     AddContactModal,
     ConfirmSendModal,
     MosaicInput
+  },
+  data() {
+    return {
+      nodes: null,
+      expandedKeys: {},
+    };
+  },
+  mounted() {
+      this.nodes = [{
+      "key" : "0",
+      "label" : 'Owner Account',
+      "children" : [
+        {
+        "key" : "0-0",
+        "label" : "TestOwner0",
+        },
+        {
+          "key" : "0-1",
+          "label" : "TestOwner1",
+        },
+        {
+        "key" : "0-2",
+        "label" : "TestOwner2",
+        },
+        {
+        "key" : "0-3",
+        "label" : "TestOwner3",
+        },
+        {
+        "key" : "0-4",
+        "label" : "TestOwner4",
+        },
+        {
+        "key" : "0-5",
+        "label" : "TestOwner5",
+        },
+        {
+        "key" : "0-6",
+        "label" : "TestOwner6",
+        },
+        {
+        "key" : "0-7",
+        "label" : "TestOwner7",
+        },
+        {
+        "key" : "0-8",
+        "label" : "TestOwner8",
+        },
+        {
+        "key" : "0-9",
+        "label" : "Test Owner9",
+        },
+        {
+        "key" : "0-10",
+        "label" : "TestOwner10",
+        }
+      ]
+    },{
+      "key" : "1",
+      "label" : "Contact",
+      "children" : [
+        {
+        "key" : "1-0",
+        "label" : "TestContact0",
+        },
+        {
+        "key" : "1-1",
+        "label" : "TestContact1",
+        },
+        {
+        "key" : "1-2",
+        "label" : "TestContact2",
+        },
+        {
+        "key" : "1-2",
+        "label" : "TestContactTestContactTestContactTestContactTestContactTestContactTestContact3",
+        },
+        {
+        "key" : "1-3",
+        "label" : "Potato",
+        },
+      ]
+    }]
+  },
+  methods: {
+    expandAll() {
+      for (let node of this.nodes) {
+          this.expandNode(node);
+      }
+      this.expandedKeys = {...this.expandedKeys};
+    },
+    collapseAll() {
+      this.expandedKeys = {};
+    },
+    expandNode(node) {
+      this.expandedKeys[node.key] = true;
+      if (node.children && node.children.length) {
+        for (let child of node.children) {
+          this.expandNode(child);
+        }
+      }
+    },
   },
   setup() {
     const router = useRouter()
