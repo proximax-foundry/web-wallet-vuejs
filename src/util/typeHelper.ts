@@ -273,6 +273,16 @@ export class Helper {
         const totalFee = feeTransaction + rental;
         return balanceAccount >= totalFee;
     }
+
+    static IsoTimeRemoveFormat(time: string){
+        let tempTime = time.substring(0, 19);
+
+        return tempTime.replace("T", " ");
+    }
+
+    static toUppercase(value: string){
+        return value.toUpperCase();
+    }
 }
 
 export interface LooseObject {
