@@ -243,7 +243,7 @@
           <div>
             <h1 class="default-title font-bold mt-5 mb-2">{{$t('general.congratz')}}</h1>
             <div class="text-tsm mb-7">{{$t('swap.swapStarted')}}</div>
-            <swap-certificate-component :networkTerm="$t('swap.bsc')" swapType="In" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="transactionHash" :siriusName="siriusName" :swappedAmount="amount" :siriusAddress="Helper.createAddress(siriusAddress).pretty()" :swapQr="swapQr" :swapLink="validationLink" />
+            <swap-certificate-component :networkTerm="$t('swap.bsc')" swapType="In" :swapToken="swapToken" :swapTimestamp="swapTimestamp" :transactionHash="transactionHash" :siriusName="siriusName" :swappedAmount="amount" :siriusAddress="Helper.createAddress(siriusAddress).pretty()" :swapQr="swapQr" :swapLink="validationLink" />
             <button type="button" class="w-40 hover:shadow-lg bg-blue-primary text-white text-xs hover:opacity-50 rounded font-bold px-4 py-3 border border-blue-primary outline-none mr-4 mt-6" @click="saveCertificate">{{$t('general.certificate')}}</button>
             <div class="mt-3">
               <a :href="validationLink" target=_new class="underline self-center text-xs font-bold text-blue-primary">{{$t('swap.viewTxInExplorer')}}<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a>
@@ -295,7 +295,7 @@ import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { NamespaceUtils } from '@/util/namespaceUtils';
 import { ChainUtils } from '@/util/chainUtils';
-import {Address} from 'tsjs-xpx-chain-sdk'
+import {Address} from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewServicesMainnetSwapBSCToSirius',
@@ -646,12 +646,12 @@ export default {
     const validationLink = ref('');
     const messageHash = ref('');
     const swapTimestamp = ref('');
-    const swapId = ref('');
+    const swapToken = ref('');
     const transactionHash = ref('');
     const swapQr = ref('');
 
     const saveCertificate = () => {
-      SwapUtils.generateIncomingPdfCert('BSC', swapTimestamp.value, siriusAddress.value, swapId.value, transactionHash.value, swapQr.value);
+      SwapUtils.generateIncomingPdfCert('BSC', swapTimestamp.value, siriusAddress.value, swapToken.value, transactionHash.value, swapQr.value);
     };
 
     const toast = useToast();
@@ -866,13 +866,24 @@ export default {
         if(response.status == 200 || response.status == 201){
           const data = await response.json();
           isInvalidSwapService.value = false;
-          transactionHash.value = data.remoteTxnHash;
-          swapTimestamp.value = data.timestamp;
-          swapId.value = data.ctxId;
+          transactionHash.value = data.transactionId;
+          swapTimestamp.value = Helper.IsoTimeRemoveFormat(data.timestamp);
+          swapToken.value = Helper.toUppercase(selectedToken.value.name);
           swapQr.value = SwapUtils.generateQRCode(validationLink.value);
           setTimeout( ()=> isDisabledValidate.value = false, 1000);
           swapServerErrIndex.value = 0;
-        }else if(response.status == 208){
+        }
+        else if(response.status == 202){
+          const data = await response.json();
+          isInvalidSwapService.value = false;
+          transactionHash.value = data.transactionId;
+          swapTimestamp.value = Helper.IsoTimeRemoveFormat(data.timestamp);
+          swapToken.value = Helper.toUppercase(selectedToken.value.name);
+          swapQr.value = SwapUtils.generateQRCode(validationLink.value);
+          setTimeout( ()=> isDisabledValidate.value = false, 1000);
+          swapServerErrIndex.value = 0;
+        }
+        else if(response.status == 208){
           console.log('208');
         }else{
           isInvalidSwapService.value = true;
@@ -928,7 +939,7 @@ export default {
       messageHash,
       transactionHash,
       swapTimestamp,
-      swapId,
+      swapToken,
       swapQr,
       saveCertificate,
       isInvalidConfirmedMeta,
