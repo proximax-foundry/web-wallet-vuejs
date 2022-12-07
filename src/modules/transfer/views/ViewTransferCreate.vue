@@ -41,7 +41,16 @@
         </div>
         <!-- New Pop Up when select icon is clicked -->
         <Sidebar v-model:visible="toggleContact" :baseZIndex="10000" position="full">
-          <Tree :value="nodes" :filter="true" filterMode="strict" @node-select="console.log(data)" selectionMode="single" ></Tree>
+          <Tree 
+          :value="nodes" 
+          selectionMode="single"  
+          :expandedKeys="expandedKeys" 
+          :filter="true"
+          filterMode="strict" 
+          @node-select="onNodeSelect"
+          @node-expand="expandKeys"
+          @node-collapse="collapseKeys">
+        </Tree>
         </Sidebar>
         <!-- <div v-if="toggleContact" class=" border max-h-40 overflow-auto">
           <div class='text-xxs text-gray-300 font-semibold py-2 px-2 uppercase'>{{$t('general.importFromAB')}}</div>
@@ -221,143 +230,10 @@ export default {
     PasswordInput,
     AddContactModal,
     ConfirmSendModal,
-    MosaicInput
-  },
-  data() {
-    return {
-      nodes: null,
-      expandedKeys: {},
-    };
+    MosaicInput,
   },
   mounted() {
-      this.nodes = [{
-      "key" : "0",
-      "label" : 'Owner Account',
-      "children" : [
-        {
-        "key" : "0-0",
-        "label" : "TestOwner0",
-        },
-        {
-          "key" : "0-1",
-          "label" : "TestOwner1",
-        },
-        {
-        "key" : "0-2",
-        "label" : "TestOwner2",
-        },
-        {
-        "key" : "0-3",
-        "label" : "TestOwner3",
-        },
-        {
-        "key" : "0-4",
-        "label" : "TestOwner4",
-        },
-        {
-        "key" : "0-5",
-        "label" : "TestOwner5",
-        },
-        {
-        "key" : "0-6",
-        "label" : "TestOwner6",
-        },
-        {
-        "key" : "0-7",
-        "label" : "TestOwner7",
-        },
-        {
-        "key" : "0-8",
-        "label" : "TestOwner8",
-        },
-        {
-        "key" : "0-9",
-        "label" : "Test Owner9",
-        },
-        {
-        "key" : "0-10",
-        "label" : "TestOwner10",
-        }
-      ]
-    },{
-      "key" : "1",
-      "label" : "Contact",
-      "children" : [
-        {
-        "key" : "1-0",
-        "label" : "TestContact0",
-        },
-        {
-        "key" : "1-1",
-        "label" : "TestContact1",
-        },
-        {
-        "key" : "1-2",
-        "label" : "TestContact2",
-        },
-        {
-        "key" : "1-2",
-        "label" : "TestContactTestContactTestContactTestContactTestContactTestContactTestContact3",
-        },
-        {
-        "key" : "1-3",
-        "label" : "Potato",
-        },
-        {
-        "key" : "1-4",
-        "label" : "TestContact3",
-        }
-        ,
-        {
-        "key" : "1-5",
-        "label" : "TestContact4",
-        }
-        ,
-        {
-        "key" : "1-6",
-        "label" : "TestContact5",
-        }
-        ,
-        {
-        "key" : "1-7",
-        "label" : "TestContact6",
-        }
-        ,
-        {
-        "key" : "1-8",
-        "label" : "TestContact7",
-        }
-        ,
-        {
-        "key" : "1-9",
-        "label" : "TestContact8",
-        }
-        ,
-        {
-        "key" : "1-10",
-        "label" : "TestContact9",
-        }
-      ]
-    }]
-  },
-  methods: {
-    expandAll() {
-      for (let node of this.nodes) {
-          this.expandNode(node);
-      }
-      this.expandedKeys = {...this.expandedKeys};
-    },
-    collapseAll() {
-      this.expandedKeys = {};
-    },
-    expandNode(node) {
-      this.expandedKeys[node.key] = true;
-      if (node.children && node.children.length) {
-        for (let child of node.children) {
-          this.expandNode(child);
-        }
-      }
-    },
+    this.nodes = this.contacts
   },
   setup() {
     const router = useRouter()
@@ -516,7 +392,6 @@ export default {
           return isMultiSig(selectedAccAdd.value)
       }
     )
-        
 
     const effectiveFee = ref(isMultiSigBool.value?makeTransaction.calculate_aggregate_fee(
       messageText.value,
@@ -573,31 +448,99 @@ export default {
     const moreThanOneAccount = computed(() => {
       return accounts.value.length> 1;
     });
- 
+
+    const nodes = ref(null)
+    const expandedKeys = ref({})
+
     const contacts = computed(() => {
       if(!walletState.currentLoggedInWallet){
         return [];
       }
       const wallet = walletState.currentLoggedInWallet;
       var contact = [];
+      // adding owner account
+      var contactNo = 0
+      var contactBookNo = 0
+      contact.push({
+        "key" : "0",
+        "label" : t('general.ownerAcc'),
+        "children" : []
+        }
+      )
       accounts.value.forEach((element) => {
-        contact.push({
-          value: Address.createFromRawAddress(element.address).pretty() ,
-          label: element.name + " - "+t('general.ownerAcc'),
-        });
-      });
+        contact[0].children.push(
+          {
+            "key" : "0-" + contactNo.toString(),
+            "label" : element.name,
+            "data" : Address.createFromRawAddress(element.address).pretty()
+          }
+        )
+        contactNo++
+      })
+      
+      // adding from contact book
+      contact.push({
+        "key" : "1",
+        "label" : t('general.contact'),
+        "children" : []
+        }
+      )
+
       if (wallet.contacts != undefined) {
         wallet.contacts.forEach((element) => {
-          contact.push({
-            value: Address.createFromRawAddress(element.address).pretty(),
-            label: element.name + " - "+t('general.contact'),
-          });
+          contact[1].children.push(
+          {
+            "key" : "1-" + contactBookNo.toString(),
+            "label" : element.name,
+            "data" : Address.createFromRawAddress(element.address).pretty()
+          }
+        )
+        contactBookNo++
         });
       }
-      return contact;
-     
+      return ref(contact)
     });
-  
+
+    const onNodeSelect = (node) => {
+      if (node.children !== undefined && expandedKeys.value[node.key] !== true) {
+        expandedKeys.value[node.key] = true;
+      } else if (node.children !== undefined &&expandedKeys.value[node.key] === true) {
+        expandedKeys.value[node.key] = false;
+      }
+      // children node is clicked
+      else if (node.children === undefined) {
+        // console.log(node.data)
+        // console.log(toggleContact)
+        recipientInput.value = node.data
+        toggleContact.value = false
+        // toggleContact = ref(false)
+        // emitter.emit(toggleContact, ref(false))
+      }
+    }
+    const expandKeys = (expanded) => {
+      expandedKeys.value = {}
+      expandedKeys.value[expanded.key] = true
+    }
+
+    const collapseKeys = () =>{
+      expandedKeys.value = {}
+    }
+    //   accounts.value.forEach((element) => {
+    //     contact.push({
+    //       value: Address.createFromRawAddress(element.address).pretty() ,
+    //       label: element.name + " - "+t('general.ownerAcc'),
+    //     });
+    //   });
+    //   if (wallet.contacts != undefined) {
+    //     wallet.contacts.forEach((element) => {
+    //       contact.push({
+    //         value: Address.createFromRawAddress(element.address).pretty(),
+    //         label: element.name + " - "+t('general.contact'),
+    //       });
+    //     });
+    //   }
+    //   return contact;
+
     const clearInput = () => {
       selectContact.value = "0";
       walletPassword.value = "";
@@ -1022,18 +965,6 @@ export default {
       makeTransfer();
     }
   });
-  const filterQuery = ref("");
-  const filteredContacts = computed(() => {
-    const query = filterQuery.value.toLowerCase();
-      if(filterQuery.value == ""){
-        return contacts.value;
-      }
-      return contacts.value.filter((item) =>{
-        return Object.values(item).some((word) =>
-          String(word).toLowerCase().includes(query));
-      });
-  });
-
   const displayAssetId = asset =>{
       let assetId = asset.toString()
       let part1 = assetId.slice(0,3)
@@ -1046,6 +977,11 @@ export default {
       findAcc,
       totalFee,
       contacts,
+      nodes,
+      onNodeSelect,
+      expandedKeys,
+      collapseKeys,
+      expandKeys,
       toggleContact,
       splitBalance,
       moreThanOneAccount,
@@ -1112,8 +1048,6 @@ export default {
       checkNamespace,
       currentNativeTokenName,
       showLimitErr,
-      filterQuery,
-      filteredContacts,
       checkCosignBalance,
       displayAssetId
     };
