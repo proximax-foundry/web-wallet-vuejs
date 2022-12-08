@@ -71,7 +71,7 @@
                 <span class='ml-auto font-bold col-span-2' v-else>{{ checkCosignBalance }}</span>
                 <div class="flex">
                   <div class ='ml-1 text-blue-400 font-bold'>{{currentNativeTokenName}}</div>
-                  <img src="@/modules/account/img/proximax-logo.svg" class='h-7 w-7'>
+                  <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
                   </div>
               </div>
             <div class='border-b-2 border-gray-600 mt-2'/>
