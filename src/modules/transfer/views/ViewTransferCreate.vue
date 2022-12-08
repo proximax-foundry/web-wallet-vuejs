@@ -229,7 +229,7 @@ export default {
     const nodes = ref()
     const expandedKeys = ref({})
     const selectedNode = ref({})
-    const keyIndex = ref()
+    const selectedNodeIndex = ref()
     const msgOption = ref("regular");
     const messageText = ref("");
     const walletPassword = ref("");
@@ -439,8 +439,7 @@ export default {
       }
       const wallet = walletState.currentLoggedInWallet;
       var contact = [];
-      var contactNo = 0
-      var contactBookNo = 0
+      var indexNo = 0
       contact.push({
         "key" : "0",
         "label" : t('general.ownerAcc'),
@@ -451,13 +450,14 @@ export default {
       accounts.value.forEach((element) => {
         contact[0].children.push(
           {
-            "key" : "0-" + contactNo.toString(),
+            "key" : "0-" + indexNo.toString(),
             "label" : element.name,
             "data" : Address.createFromRawAddress(element.address).pretty()
           }
         )
-        contactNo++
+        indexNo++
       })
+      indexNo = 0
       // adding from contact book
       contact.push({
         "key" : "1",
@@ -471,12 +471,12 @@ export default {
         wallet.contacts.forEach((element) => {
           contact[1].children.push(
           {
-            "key" : "1-" + contactBookNo.toString(),
+            "key" : "1-" + indexNo.toString(),
             "label" : element.name,
             "data" : Address.createFromRawAddress(element.address).pretty()
           }
         )
-        contactBookNo++
+        indexNo++
         });
       }
       return contact
@@ -493,8 +493,8 @@ export default {
     const makeNodeSelectable = () => {
       // if there is previously unselectable value make it selectable
       if (Object.keys(selectedNode.value).length !== 0){
-        keyIndex.value = Object.keys(selectedNode.value)[0].split('-')
-        nodes.value[keyIndex.value[0]].children[keyIndex.value[1]].selectable = true
+        selectedNodeIndex.value = Object.keys(selectedNode.value)[0].split('-')
+        nodes.value[selectedNodeIndex.value[0]].children[selectedNodeIndex.value[1]].selectable = true
       }
     }
 
@@ -1058,4 +1058,12 @@ export default {
 .optionDiv:hover {
   background: #d9ebff;
 }
+
+.p-tree::v-deep{
+  .p-tree-container .p-treenode .p-treenode-content{
+    padding-left:2px;
+    padding-top:2px
+  }
+}
+
 </style>
