@@ -41,7 +41,7 @@
         </div>
         <!-- Pop Up when select icon is clicked -->
         <Sidebar v-model:visible="toggleContact" :baseZIndex="10000" position="full">
-          <Tree :value="nodes" selectionMode="single" v-model:selectionKeys="selectedNode" :expandedKeys="expandedKeys" :filter="true" filterMode="strict" @node-select="onNodeSelect" @node-expand="expandTree" @node-collapse="collapseTree" >
+          <Tree :value="contacts" selectionMode="single" v-model:selectionKeys="selectedNode" :expandedKeys="expandedKeys" :filter="true" filterMode="strict" @node-select="onNodeSelect" @node-expand="expandTree" @node-collapse="collapseTree" >
         </Tree>
         </Sidebar>
         
@@ -212,9 +212,6 @@ export default {
     ConfirmSendModal,
     MosaicInput,
   },
-  mounted() {
-    this.nodes = this.contacts
-  },
   setup() {
     const router = useRouter()
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
@@ -226,7 +223,6 @@ export default {
     const showAssetBalanceErr = ref([])
     const selectContact = ref("0");
     const recipientInput = ref("");
-    const nodes = ref()
     const expandedKeys = ref({})
     const selectedNode = ref({})
     const selectedNodeIndex = ref()
@@ -433,7 +429,7 @@ export default {
       return accounts.value.length> 1;
     });
 
-    const contacts = ref(computed(() => {
+    const contacts = computed(() => {
       if(!walletState.currentLoggedInWallet){
         return [];
       }
@@ -480,7 +476,7 @@ export default {
         });
       }
       return contact
-    }));
+    });
 
     const onNodeSelect = (node) => {
       makeNodeSelectable()
@@ -494,7 +490,7 @@ export default {
       // if there is previously unselectable value make it selectable
       if (Object.keys(selectedNode.value).length !== 0){
         selectedNodeIndex.value = Object.keys(selectedNode.value)[0].split('-')
-        nodes.value[selectedNodeIndex.value[0]].children[selectedNodeIndex.value[1]].selectable = true
+        contacts.value[selectedNodeIndex.value[0]].children[selectedNodeIndex.value[1]].selectable = true
       }
     }
 
@@ -946,7 +942,6 @@ export default {
       findAcc,
       totalFee,
       contacts,
-      nodes,
       onNodeSelect,
       expandedKeys,
       collapseTree,
