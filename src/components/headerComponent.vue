@@ -8,7 +8,7 @@
       </div>
       <div class=" flex justify-center items-center lg:bg-navy-primary logo-header">
         <router-link :to="loginStatus? {name : 'ViewDashboard'}: {name: 'Home'}">
-          <img src="@/assets/img/sirius-logo-whitetext.svg" class="w-24 tsm:w-40 hidden lg:inline-block">
+          <img src="@/assets/img/sirius-logo-whitetext.svg" class="w-24 -ml-4 tsm:w-40 hidden lg:inline-block">
         </router-link>
       </div>
       <div class=" flex items-center ml-auto mr-28 lg:mr-auto lg:ml-10 logo-header">
