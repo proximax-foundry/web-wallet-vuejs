@@ -39,7 +39,7 @@
             <div class='text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.select')}}</div>
           </div>
         </div>
-        <!-- New Pop Up when select icon is clicked -->
+        <!-- Pop Up when select icon is clicked -->
         <Sidebar v-model:visible="toggleContact" :baseZIndex="10000" position="full">
           <Tree :value="nodes" selectionMode="single" v-model:selectionKeys="selectedNode" :expandedKeys="expandedKeys" :filter="true" filterMode="strict" @node-select="onNodeSelect" @node-expand="expandTree" @node-collapse="collapseTree" >
         </Tree>
@@ -951,13 +951,13 @@ export default {
       expandedKeys,
       collapseTree,
       expandTree,
+      selectedNode,
       toggleContact,
       splitBalance,
       moreThanOneAccount,
       showMenu,
       selectedAccName,
       selectedAccAdd,
-      selectedNode,
       showAddressError,
       balance,
       showBalanceErr,
