@@ -195,11 +195,34 @@ export default{
         return
       }
     }
+
+    const setDefaultAccInStorage = (address) =>{
+      let data = [{
+            walletName: walletState.currentLoggedInWallet.name,
+            defaultAcc: address
+          }]
+        sessionStorage.setItem('defaultAcc',JSON.stringify(data))
+      let currentStorage = sessionStorage.getItem('defaultAcc')
+      //unusual
+      if(!currentStorage){
+        let data = [{
+            walletName: walletState.currentLoggedInWallet.name,
+            defaultAcc: address
+          }]
+        sessionStorage.setItem('defaultAcc',JSON.stringify(data))
+        return
+      }
+      let datas = JSON.parse(currentStorage)
+      let findData = datas.find(data=>data.walletName == walletState.currentLoggedInWallet.name)
+      walletState.currentLoggedInWallet.setDefaultAccountByAddress(findData.defaultAcc)
+    }
+
     const navigate = () =>{
       if(isHover.value || isHoverCopy.value){
         return
       }
       setDefaultAcc()
+      setDefaultAccInStorage(p.account.address)
       router.push({ name: 'ViewAccountDetails', params: { address: p.account.address }})     
       
     }

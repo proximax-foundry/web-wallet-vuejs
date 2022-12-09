@@ -137,6 +137,28 @@ export default defineComponent({
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance!.appContext.config.globalProperties.emitter;
 
+  interface defaultAcc{
+    walletName: string,
+    defaultAcc: string
+  }
+    watch(walletState,n=>{
+      if(n.currentLoggedInWallet){
+        let findAcc = sessionStorage.getItem('defaultAcc')
+        //first time
+        if(!findAcc){
+          let data = [{
+            walletName: walletState.currentLoggedInWallet.name,
+            defaultAcc:walletState.currentLoggedInWallet.accounts[0].address
+          }]
+          sessionStorage.setItem('defaultAcc',JSON.stringify(data))
+          return
+        }
+        let datas :defaultAcc[] = JSON.parse(findAcc)
+        let findData = datas.find(data=>data.walletName == walletState.currentLoggedInWallet.name)
+        walletState.currentLoggedInWallet.setDefaultAccountByAddress(findData.defaultAcc)
+      }
+    },{immediate:true})
+
     const overflowScreen = ref(false);
     const mainFrame = ref(null);
     let contentHeight = ref(0);
