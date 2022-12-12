@@ -2,17 +2,35 @@
   <div>
     <div class="h-5 text-left">
       <transition enter-active-class="animate__animated animate__fadeInUp">
-        <span v-if="showSelectTitle" class="text-xs text-blue-400 ">{{ placeholder }}</span>
+        <span model-v="showSelectTitle" class="text-xs text-blue-400 ">{{ placeholder }}</span>
       </transition>
     </div>
     <div class="select mb-3" style="position: relative">
-      <font-awesome-icon icon="times" class="text-gray-400 hover:text-gray-600 cursor-pointer" style="display: inline-block; position: absolute; top: 9px; right: 25px;" @click="clearSelection()" v-if="displayClearIcon" />
+      <Dropdown
+      v-model="selectedMosaic"
+      :options="options"
+      :style="{'width':'100%'}"
+      :showClear="true" 
+      optionLabel="text" 
+      @change="makeSelection($event.value)"
+      />
+
+      <!-- v-model="modelValue" -->
+      <!-- @input="emit('update:modelValue', $event.value.val)" -->
+
+      <!-- $emit('update:modelValue', $event.value.val);makeSelection($event.value.id) -->
+
+
+      <!-- the clear button -->
+      <!-- <font-awesome-icon icon="times" class="text-gray-400 hover:text-gray-600 cursor-pointer" style="display: inline-block; position: absolute; top: 9px; right: 25px;" @click="clearSelection()" v-if="displayClearIcon" />
+      
       <select :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="text-gray-600 w-full border-solid border-b border-gray-200 p-2 mb-2 focus:outline-none" @change="makeSelection">
         <option value="0" disabled hidden key="0">{{ placeholder }}</option>
         <option v-for="i in options" :disabled="disableOptions.filter(obj => {return obj.id === i.val}).length >0" :value="i.val" :key="i.id" class="text-gray-800">{{ i.text }}</option>
       </select>
+    -->
+      </div>
     </div>
-  </div>
 </template>
 
 <script >
@@ -31,6 +49,7 @@ export default{
   name: 'MosaicInput',
   data() {
     return {
+      selectedMosaic: this.modelValue,
       showSelectTitle: false,
       selectErr: false,
       selectModel: 0,
@@ -46,11 +65,18 @@ export default{
       this.displayClearIcon = false;
     },
 
-    makeSelection: function() {
-      this.$emit("show-mosaic-selection", {index: this.index});
-      this.showSelectTitle = true;
-      this.selectErr = false;
-      this.displayClearIcon = true;
+    makeSelection: function(value) {
+      // if the clear button is pressed
+      if (value === null){
+        this.clearSelection()
+      }
+      else{
+        this.$emit('update:modelValue', value.val);
+        this.$emit("show-mosaic-selection", {index: this.index});
+        this.showSelectTitle = true;
+        this.selectErr = false;
+        this.displayClearIcon = true;
+      }
     },
   },
   mounted() {
@@ -60,7 +86,7 @@ export default{
       this.selectErr = false;
       this.displayClearIcon = false;
     });
-  }
+  },
 }
 </script>
 <style lang="scss">
