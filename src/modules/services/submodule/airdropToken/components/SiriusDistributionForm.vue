@@ -118,9 +118,6 @@ let distribute = async()=>{
   let aggregateTxns = Sirius.createDistributeAggregateTransactions(selectedAccount.value.publicKey, distributionList.value, aggregateNum.value, selectedSda!);
   let totalAggregateTxnsFee = sum(aggregateTxns.map(x=> x.maxFee.compact()));
   let totalInitiatorFee = sum(totalLockHashFee, totalLockHashToken, totalAggregateTxnsFee);
-  console.log(totalAggregateTxnsFee)
-  console.log(totalLockHashFee)
-  console.log(totalLockHashToken)
   let xpxNeeded = totalInitiatorFee / Math.pow(10, AppState.nativeToken.divisibility);
   const passwordInstance = WalletUtils.createPassword(walletPassword.value);
   let selectedCosign;
@@ -574,19 +571,19 @@ watch(totalDistributeAmount, (value) => {
         </div>
       </div>
     </div>
-    <div class="p-2" v-if="distributionList.length">
+    <div class="p-2 overflow-auto" v-if="distributionList.length">
       <div>
         <div class="table w-3/4">
           <div class="table-header-group">
             <div class="table-row">
-              <div class="table-cell border-b-2">Recipient (Public Key or Address)</div>
-              <div class="table-cell border-b-2">Amount</div>
+              <div class="table-cell border-b-2 font-semibold p-4 pt-0 pb-3">Recipient (Public Key or Address)</div>
+              <div class="table-cell border-b-2 font-semibold p-4 pt-0 pb-3">Amount</div>
             </div>
           </div>
           <div class="table-row-group">
             <div class="table-row" v-for="row, index in distributionList" :key="index">
-              <div class="table-cell border-b">{{ row.publicKeyOrAddress }}</div>
-              <div class="table-cell border-b">{{ row.amount }}</div>
+              <div class="table-cell border-b p-4 pt-0 pb-3">{{ row.publicKeyOrAddress }}</div>
+              <div class="table-cell border-b p-4 pt-0 pb-3">{{ row.amount }}</div>
             </div>
           </div>
         </div>
@@ -610,17 +607,17 @@ watch(totalDistributeAmount, (value) => {
         </div>
       </div>
     </div>
-    <div class="p-2" v-if="txnsHash.length">
+    <div class="p-2 overflow-auto" v-if="txnsHash.length">
       <div>
         <div class="table w-3/4">
           <div class="table-header-group">
             <div class="table-row">
-              <div class="table-cell border-b-2">Transaction Hash</div>
+              <div class="table-cell border-b-2 p-4 pt-0 pb-3">Transaction Hash</div>
             </div>
           </div>
           <div class="table-row-group">
             <div class="table-row" v-for="txnHash, index in txnsHash" :key="index">
-              <div class="table-cell border-b"><a :href="createTxnExplorerLink(txnHash)" >{{ txnHash }}</a></div>
+              <div class="table-cell border-b p-4 pt-0 pb-3"><a :href="createTxnExplorerLink(txnHash)" >{{ txnHash }}</a></div>
             </div>
           </div>
         </div>
