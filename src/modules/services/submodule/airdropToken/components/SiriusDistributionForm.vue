@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { 
   PublicAccount, NetworkType, MosaicId, Account,
   AccountHttp, MosaicHttp, Convert, Address
@@ -11,7 +11,24 @@ import {DistributeListInterface, Sirius} from "@/models/sirius"
 import { AppState } from '@/state/appState';
 import {networkState} from "@/state/networkState";
 import * as mathjs from "mathjs"
+import { walletState } from '@/state/walletState';
+import Dropdown from 'primevue/dropdown';
+import { multiSign } from "@/util/multiSignatory";
+import { Helper } from '@/util/typeHelper';
+import { TransactionUtils } from '@/util/transactionUtils';
+import { WalletUtils } from '@/util/walletUtils';
+import {useI18n} from 'vue-i18n'
+import PasswordInput from '@/components/PasswordInput.vue';
 
+const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
+const cosignerBalanceInsufficient = ref(false);
+const disableAllInput = ref(false);
+const cosignAddress = ref("");
+const showPasswdError = ref(false);
+const disablePassword = computed(() => disableAllInput.value);
+const walletPassword = ref("");
+const {t} = useI18n();
+const err = ref('');
 const distributePublicKey = ref("");
 let intiatorPrivateKey = ref('');
 
@@ -37,6 +54,8 @@ let fileError = ref(false);
 let assetNotEnough = ref(false);
 let assetWrongDivisibility = ref("");
 let distributeDone = ref(false);
+let sdaError = ref("");
+let recipientError = ref("");
 let distributionError = ref("");
 let distributing = ref(false);
 
@@ -55,7 +74,7 @@ let knownToken = [{
 let scanDistributorAsset = async() =>{
   noAssetFound.value = false;
   assetSelected.value = "";
-  let assets = await Sirius.scanAsset(distributePublicKey.value);
+  let assets = await Sirius.scanAsset(selectedAccount.value.publicKey);
 
   assetList.value = assets;
 
@@ -75,16 +94,19 @@ let distribute = async()=>{
     return;
   }
   else if(assetSelected.value === ""){
-    distributionError.value = "Please select SDA";
+    sdaError.value = "Please select SDA";
     return;
   }
   else if(totalRecipients.value === 0){
-    distributionError.value = "No recipient to distribute";
+    recipientError.value = "No recipient to distribute";
     return;
   }
-  else if(distributePublicKey.value === '' || distributePublicKey.value.length !== 64 || !Convert.isHexString(distributePublicKey.value)){
-    distributionError.value = "Please fill in distributor public key";
-    return;
+  else if(walletPassword.value){
+    let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
+      if(!verifyPassword){
+        err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
+        return
+      }
   }
 
   let totalLockHashTxn = Math.ceil(totalRecipients.value/ aggregateNum.value);
@@ -93,13 +115,32 @@ let distribute = async()=>{
   let totalLockHashToken = totalLockHashTxn * networkState.currentNetworkProfileConfig!.lockedFundsPerAggregate!;
 
   let selectedSda = assetList.value.find(x => x.id === assetSelected.value);
-  let aggregateTxns = Sirius.createDistributeAggregateTransactions(distributePublicKey.value, distributionList.value, aggregateNum.value, selectedSda!);
+  let aggregateTxns = Sirius.createDistributeAggregateTransactions(selectedAccount.value.publicKey, distributionList.value, aggregateNum.value, selectedSda!);
   let totalAggregateTxnsFee = sum(aggregateTxns.map(x=> x.maxFee.compact()));
   let totalInitiatorFee = sum(totalLockHashFee, totalLockHashToken, totalAggregateTxnsFee);
-
+  console.log(totalAggregateTxnsFee)
+  console.log(totalLockHashFee)
+  console.log(totalLockHashToken)
   let xpxNeeded = totalInitiatorFee / Math.pow(10, AppState.nativeToken.divisibility);
-
-  let initiator = Sirius.createAccount(intiatorPrivateKey.value);
+  const passwordInstance = WalletUtils.createPassword(walletPassword.value);
+  let selectedCosign;
+  if (isMultiSigBool.value) {
+   let selectedCosignList = getWalletCosigner.value.cosignerList;
+   if (selectedCosignList.length > 1) {
+      selectedCosign = cosignAddress.value;
+    } else {
+      selectedCosign = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==selectedCosignList[0].publicKey).address
+    }
+   }
+  let initiatorAcc;
+  if(!selectedCosign){
+    initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedAccount.value.address);
+  }else{
+    initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedCosign)
+  }
+  const walletPrivateKey = WalletUtils.decryptPrivateKey(passwordInstance,initiatorAcc.encrypted, initiatorAcc.iv);
+  let privateKey = walletPrivateKey.toUpperCase();
+  let initiator = Sirius.createAccount(privateKey);
   let initiatorSda = await Sirius.scanAsset(initiator.publicKey);
 
   let initiatorXPX = initiatorSda.find(x => x.namespaceName === AppState.nativeToken.fullNamespace.trim());
@@ -120,7 +161,6 @@ let distribute = async()=>{
   distributing.value = false;
 
   distributeDone.value = true;
-  intiatorPrivateKey.value = "";
 
   txnsHash.value = allTxnsHash;
 }
@@ -289,6 +329,150 @@ let checkDistributorAssetAmountDecimal = (selectedAssetId: string)=>{
     assetWrongDivisibility.value = "";
   }
 }
+interface Account{
+  name: string,
+  balance: number,
+  publicKey: string,
+  address: string,
+  type?: string,
+  encrypted?: string,
+  iv?: string,
+  isMultisig: boolean
+}
+const selectedAccount = ref<Account[]>([])
+const accounts = computed(
+      () => {
+        if(walletState.currentLoggedInWallet){
+          if(walletState.currentLoggedInWallet.others){
+          const accounts = walletState.currentLoggedInWallet.accounts.map((acc)=>{
+            return {
+              name: acc.name,
+              balance: acc.balance,
+              publicKey: acc.publicKey,
+              address: acc.address,
+              encrypted: acc.encrypted,
+              iv: acc.iv,
+              isMultisig: acc.getDirectParentMultisig().length ? true: false
+            }
+          })
+          const otherAccounts = walletState.currentLoggedInWallet.others.map((acc)=>{
+            return {
+              name: acc.name,
+              balance: acc.balance,
+              publicKey: acc.publicKey,
+              address: acc.address,
+              type: acc.type,
+              isMultisig: true
+            }
+          }).filter(item => {
+            return item.type !== "DELEGATE";
+          })
+          const concatOther = accounts.concat(otherAccounts)
+          return concatOther
+          }else{
+            const accounts =  walletState.currentLoggedInWallet.accounts.map((acc)=>{
+                return {
+                name: acc.name,
+                balance: acc.balance,
+                publicKey: acc.publicKey,
+                address: acc.address,
+                encrypted: acc.encrypted,
+                iv: acc.iv,
+                isMultisig: acc.getDirectParentMultisig().length ? true: false
+                }
+            });
+            return accounts
+          }
+        }else{
+            return null
+        }
+      }
+    );
+
+const isMultiSig = (address) => {
+  const account = accounts.value.find(
+    (account) => account.address === address
+  );
+  let isMulti = false;
+     
+  if (account != undefined) {
+    isMulti = account.isMultisig;
+  }
+  return isMulti;
+};
+const isMultiSigBool = computed(() => {
+      return isMultiSig(selectedAccount.value.address)
+  }
+)
+
+const findAcc = (publicKey)=>{
+      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
+    }
+
+const findAccWithAddress = address =>{
+  if(!walletState.currentLoggedInWallet){
+    return null
+  }
+  return walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)
+ }
+
+const getWalletCosigner = computed(() =>{
+      if(networkState.currentNetworkProfileConfig){
+      let cosigners= multiSign.getCosignerInWallet(accounts.value.find(acc=>acc.address==selectedAccount.value.address)?accounts.value.find(acc => acc.address == selectedAccount.value.address).publicKey:'')
+      let list =[]
+      
+      cosigners.cosignerList.forEach(publicKey=>{
+        list.push({publicKey:publicKey,name:findAcc(publicKey).name,balance:findAcc(publicKey).balance })
+      })
+      cosigners.cosignerList = list
+      return cosigners
+      }else{
+        return {hasCosigner:false,cosignerList:[]}
+      }
+    })
+
+const lockFund = computed(() =>
+  Helper.convertToExact(
+    networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
+    AppState.nativeToken.divisibility
+  )
+);
+const lockFundCurrency = computed(() =>
+  Helper.convertToCurrency(
+     networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
+    AppState.nativeToken.divisibility
+  )
+);
+    
+const lockFundTxFee = computed(()=>{
+  if(networkState.currentNetworkProfile){
+    return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
+  }
+  return 0;  
+});
+const lockFundTotalFee = computed(
+  () => lockFund.value + lockFundTxFee.value
+);
+
+if (isMultiSigBool.value) {
+  let cosigner = getWalletCosigner.value.cosignerList
+  if (cosigner.length > 0) {
+    cosignAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
+    // if (findAccWithAddress(cosignAddress.value).balance < lockFundTotalFee.value + Number(effectiveFee.value) ) {
+    //   disableAllInput.value = true;
+    //   cosignerBalanceInsufficient.value = true;
+    // } else {
+      disableAllInput.value = false;
+      cosignerBalanceInsufficient.value = false;
+    // }
+  } else {
+    disableAllInput.value = true;
+  }
+}
+
+const clearInput = () => {
+      walletPassword.value = "";
+    };
 
 watch(assetSelected, (value) => {
   checkDistributorAssetAmount(value);
@@ -305,14 +489,38 @@ watch(totalDistributeAmount, (value) => {
 <template>
   <div class="container">
     <div class="p-2">
-      <div>
+      <div class="flex flex-col">
         <label class="font-semibold">Distributor Account</label>
-        <div class="mb-3 w-3/4 flex justify-between">
+        <Dropdown v-model="selectedAccount" :options="accounts" optionLabel="name" placeholder="Select an account" @change="scanDistributorAsset()"/>
+        <!-- <div class="mb-3 w-3/4 flex justify-between">
           <input type="text" class="border border-gray-200 rounded-l-md w-3/4 px-2 py-1 font-sans" v-model="distributePublicKey" placeholder="Enter Distributor Account's Public Key" aria-label="Distributor Account's Public Key" 
           aria-describedby="button-addon">
           <button class="border rounded-r-md border-black w-1/4 px-2 py-1 hover:bg-gray-700 hover:text-white" @click="scanDistributorAsset()" type="button" id="button-addon">Scan SDAs</button>
+        </div> -->
+        <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4">
+          <div v-if="getWalletCosigner.cosignerList.length > 0">
+              <div class="text-tsm">
+                {{$t('general.initiateBy')}}:
+                <span class="font-bold" v-if="getWalletCosigner.cosignerList.length == 1"> 
+                  {{ getWalletCosigner.cosignerList[0].name }} ({{$t('general.balance')}}:{{  getWalletCosigner.cosignerList[0].balance }} {{ currentNativeTokenName }})
+                </span>
+                <span class="font-bold" v-else>
+                  <select class="" v-model="cosignAddress">
+                    <option v-for="(element, item) in  getWalletCosigner.cosignerList" :value="findAcc(element.publicKey).address" :key="item">
+                      {{ element.name }} ({{$t('general.balance')}}: {{ element.balance }} {{ currentNativeTokenName }})
+                    </option>
+                  </select>
+                </span>
+                <div v-if="cosignerBalanceInsufficient" class="error">
+                  {{$t('general.insufficientBalance')}}
+                </div>
+              </div>
+            </div>
+            <div class="error" v-else>
+             {{$t('general.noCosigner')}} 
+            </div>
         </div>
-        <div v-if="noAssetFound" class="font-semibold text-red-600" role="alert">
+        <div v-if="noAssetFound" class="error error_box" role="alert">
           No SDA found
         </div>
       </div>
@@ -320,6 +528,7 @@ watch(totalDistributeAmount, (value) => {
     <div class="p-2">
       <div>
         <div class="flex flex-col-reverse">
+          <div class="error error_box" v-if="sdaError!=''">{{ sdaError }}</div>
           <select class="w-3/4" v-model="assetSelected" aria-label="Floating label select example">
             <option value="" selected>Select SDA to distribute</option>
                       <option v-for='asset, index in assetList' :key='index' :value="asset.id">
@@ -348,18 +557,19 @@ watch(totalDistributeAmount, (value) => {
         <div class="border rounded-md border-gray-200 mb-3 w-3/4">
           <input type="file" class="form-control" @change="loadCSV" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
         </div>
+        <div class="error error_box" v-if="recipientError!=''">{{ recipientError }}</div>
       </div>
     </div>
     <div class="p-2">
       <div>
-        <div v-if="fileError" class="font-semibold text-red-600" role="alert">
+        <div v-if="fileError" class="error error_box" role="alert">
           Invalid file
         </div>
         
-        <div v-if="assetNotEnough" class="font-semibold text-red-600" role="alert">
+        <div v-if="assetNotEnough" class="error error_box" role="alert">
           Total distribution amount exceed selected asset amount (need {{ totalDistributeAmount }})
         </div>
-        <div v-if="assetWrongDivisibility" class="font-semibold text-red-600" role="alert">
+        <div v-if="assetWrongDivisibility" class="error error_box" role="alert">
           {{ assetWrongDivisibility }}
         </div>
       </div>
@@ -383,15 +593,10 @@ watch(totalDistributeAmount, (value) => {
       </div>
     </div>
     <div class="p-2">
-      <div>
-        <div class="flex flex-col-reverse border rounded-md border-gray-200 mb-3 w-3/4 px-2 py-1">
-          <input type="password" class="border-none outline-none" v-model="intiatorPrivateKey" autocomplete="off">
-          <label for="floatingPassword">Initiator Private Key</label>
-        </div>
-      </div>
-    </div>
-    <div class="p-2">
-      <div>
+      <div class="mb-3 w-3/4 px-2 py-1">
+        <div class='font-semibold'>Enter your password to continue</div>
+        <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3" :disabled="disablePassword"/>
+        <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <button type="button" @click="distribute()" v-if="!distributing" :disabled="distributing && !distributeDone" class="blue-btn px-3 py-3 text-md">Distribute</button>
         <button v-if="distributing" class="blue-btn px-3 py-3 text-md" type="button" disabled>
           <span class="animate-spin" role="status" aria-hidden="true"></span>
