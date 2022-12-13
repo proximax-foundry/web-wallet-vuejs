@@ -625,6 +625,7 @@ export default {
             val: asset.idHex,
             text: (asset.namespaceNames.length>0?asset.namespaceNames:asset.idHex) + " >"+t('general.balance') +": " +Helper.toCurrencyFormat(asset.amount,asset.divisibility),
             id: index + 1,
+            disabled: false
           });
           index += 1;
         }
@@ -647,11 +648,37 @@ export default {
     let mosaic = account.assets.find(
       (asset) => asset.idHex == selectedMosaic.value[e.index].id
     );
+    // disable options for PrimeVue dropdown
+    for (let i in mosaics.value){
+      mosaics.value[i].disabled = false
+    }
+    
+    mosaics.value.filter(o1 => selectedMosaic.value.some(o2 => {
+      if(o1.val == o2.id){
+        o1.disabled = true;
+      }
+    }));
+
+    // for (let i in selectedMosaic.value){
+    //   mosaicIndex.push(mosaics.value.findIndex(item => item.val === selectedMosaic.value[i].id))
+    // }
+    // for (let i in mosaics.value){
+    //   mosaics.value[i].disabled = false
+    // }
+    // for (let i in mosaicIndex){
+    //   if (mosaicIndex[i] != -1){
+    //     mosaics.value[mosaicIndex[i]].disabled = true
+    //   }
+    // }
+
     selectedMosaic.value[e.index].amount = "0";
     mosaicSupplyDivisibility.value[e.index] = mosaic.divisibility;
     emitter.emit("CLOSE_MOSAIC_INSUFFICIENT_ERR", false);
   };
+
   const removeMosaic = (e) => {
+    // enabling back the option
+    mosaics.value[mosaics.value.findIndex(item => item.val === selectedMosaic.value[e.index].id)].disabled = false
     mosaicsCreated.value.splice(e.index, 1);
     selectedMosaic.value.splice(e.index, 1);
     showAssetBalanceErr.value.splice(e.index,1)

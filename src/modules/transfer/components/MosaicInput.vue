@@ -10,8 +10,9 @@
       v-model="selectedMosaic"
       :options="options"
       :style="{'width':'100%'}"
-      :showClear="true" 
-      optionLabel="text" 
+      :showClear="true"
+      option-disabled="disabled"
+      optionLabel="text"
       @change="makeSelection($event.value)"
       />
 
