@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import { walletState } from '@/state/walletState';
 import { Address, MosaicId } from "tsjs-xpx-chain-sdk"
@@ -66,7 +66,7 @@ export default {
                 return false
             }
         }
-        const mosaics = ref([])
+        const mosaics =ref([])
 
         const fetchMosaic = async()=>{
             if(!acc.value){
@@ -74,33 +74,59 @@ export default {
             }
             let z =[]
             let accInfo = await AppState.chainAPI.accountAPI.accountHttp.getAccountInfo(Address.createFromRawAddress(p.address)).toPromise()
-            accInfo.mosaics.forEach((acc,index)=>{
-                mosaics.value.push ({
-                    i: index,
-                    id: acc.id.toHex(),
-                })
-            })
+            if(!mosaics.value.length){
+                if(accInfo.mosaics.length<100){
+                    for(let i=0;i<accInfo.mosaics.length;i++){
+                    mosaics.value.push({
+                        i: i,
+                        id: accInfo.mosaics[i]?.id.toHex()
+                    })
+                    }
+                }
+                else{
+                    for(let i=0;i<100;i++){
+                    mosaics.value.push({
+                        i: i,
+                        id: accInfo.mosaics[i]?.id.toHex()
+                    })
+                    }
+                }
+            }
+            else{
+                if(mosaics.value.length<accInfo.mosaics.length){
+                    let totalMosaics=mosaics.value.length
+                    for(let i=mosaics.value.length;i<=totalMosaics+99;i++){
+                        mosaics.value.push({
+                        i: i,
+                        id: accInfo.mosaics[i]?.id.toHex()
+                    })
+                    }  
+                }
+            } 
+
             let mosaicIds = mosaics.value.map(y=>new MosaicId(y.id) )
             let mosaicNames = await AppState.chainAPI.assetAPI.getMosaicsNames(mosaicIds)
             let mosaic = await AppState.chainAPI.assetAPI.getMosaics(mosaicIds)
+
+            if(mosaics.value.length<=100){
             for(let i =0; i< mosaicNames.length; i++){
                 let c=[]
                 if(mosaicNames[i].names.length>1){
                     for(let j=mosaicNames[i].names.length-1; j>=0;j--){
-                        c.push(mosaicNames[i].names[j]?.name)
+                        c.push(mosaicNames[i]?.names[j]?.name)
                     }
                     z.push(c)
                 }else{
-                    c.push(mosaicNames[i].names[0]?.name)
+                    c.push(mosaicNames[i]?.names[0]?.name)
                     z.push(c)
                 }
             }
             for(let i =0 ; i < mosaics.value.length; i ++){
                 let a = mosaics.value[i]
-                a.name = (mosaicNames[i].names.length>0?formatNamespaceName(z[i]):'-')
+                a.name = (mosaicNames[i]?.names.length>0?formatNamespaceName(z[i]):'-')
                 for(let j=0;j<mosaics.value.length; j ++){
                     let amount
-                    if(accInfo.mosaics[i].id.toHex()===mosaic[j].mosaicId.id.toHex()){
+                    if(accInfo.mosaics[i].id.toHex()===mosaic[j]?.mosaicId.id.toHex()){
                         if(mosaic[j].divisibility === 0){
                         amount = accInfo.mosaics[i].amount.compact();
                     }else if(mosaic[j].divisibility !== null){
@@ -109,12 +135,61 @@ export default {
                     a.balance = Helper.toCurrencyFormat(amount,mosaic[j].divisibility) 
                     }
                 }
-                a.isCreator = acc.value? (mosaic[mosaics.value.length-1-i].owner.publicKey == acc.value.publicKey? true:false):false
-
+                a.isCreator = acc.value? (mosaic[mosaics.value.length-1-i]?.owner.publicKey == acc.value.publicKey? true:false):false
+            }
+        }
+        else{
+            for(let i =mosaics.value.length-100; i< mosaics.value.length; i++){
+                let c=[]
+                if(mosaicNames[i].names.length>1){
+                    for(let j=mosaicNames[i].names.length-1; j>=0;j--){
+                        c.push(mosaicNames[i]?.names[j]?.name)
+                    }
+                    z.push(c)
+                }else{
+                    c.push(mosaicNames[i]?.names[0]?.name)
+                    z.push(c)
+                }
+            }
+            for(let i =mosaics.value.length-100 ; i < mosaics.value.length; i ++){
+                let a = mosaics.value[i]
+                a.name = (mosaicNames[i]?.names.length>0?formatNamespaceName(z[i]):'-')
+                for(let j=0;j<mosaics.value.length; j ++){
+                    let amount
+                    if(accInfo.mosaics[i].id.toHex()===mosaic[j]?.mosaicId.id.toHex()){
+                        if(mosaic[j].divisibility === 0){
+                        amount = accInfo.mosaics[i].amount.compact();
+                    }else if(mosaic[j].divisibility !== null){
+                        amount = accInfo.mosaics[i].amount.compact() / Math.pow(10, mosaic[j].divisibility);
+                    }
+                    a.balance = Helper.toCurrencyFormat(amount,mosaic[j].divisibility) 
+                    }
+                }
+                a.isCreator = acc.value? (mosaic[mosaics.value.length-1-i]?.owner.publicKey == acc.value.publicKey? true:false):false
+            }
             }
         }
 
-        fetchMosaic()
+        onMounted(async () => {
+            let mosaicsStorage= JSON.parse(sessionStorage.getItem("storeMosaics"))
+            let accInfo = await AppState.chainAPI.accountAPI.accountHttp.getAccountInfo(Address.createFromRawAddress(p.address)).toPromise()
+            if(!mosaicsStorage || mosaicsStorage.length!==accInfo.mosaics.length){
+                let updateAccountMosaics = async() => {
+                    setTimeout(await fetchMosaic(), 5000);
+                if(mosaics.value.length===accInfo.mosaics.length){
+                        clearInterval(runFirst)
+                        sessionStorage.setItem("storeMosaics", JSON.stringify(mosaics.value))
+                }
+                return ;
+            }
+            const runFirst = setInterval(updateAccountMosaics,5000)
+            }
+            else{
+                sessionStorage.setItem("storeMosaics", JSON.stringify(mosaicsStorage))
+                mosaics.value=JSON.parse(sessionStorage.getItem("storeMosaics"))
+            }
+            
+        })
 
 
         const formatNamespaceName = (namespaceNames) => {
