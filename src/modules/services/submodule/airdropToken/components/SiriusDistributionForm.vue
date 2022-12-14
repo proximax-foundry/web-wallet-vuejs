@@ -595,8 +595,11 @@ watch(totalDistributeAmount, (value) => {
         <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3" :disabled="disablePassword"/>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <button type="button" @click="distribute()" v-if="!distributing" :disabled="distributing && !distributeDone" class="blue-btn px-3 py-3 text-md">Distribute</button>
-        <button v-if="distributing" class="blue-btn px-3 py-3 text-md" type="button" disabled>
-          <span class="animate-spin" role="status" aria-hidden="true"></span>
+        <button v-if="distributing" class="blue-btn px-3 py-3 text-md flex items-center" type="button" disabled>
+          <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
           Distributing...
         </button>
         <div v-if="distributionError" class="font-semibold text-red-600 mt-2" role="alert">
