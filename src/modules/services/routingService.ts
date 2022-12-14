@@ -26,7 +26,7 @@ export const ServiceRoutes: RouteRecordRaw[] = [
     props: true,
     component: () => import('@/modules/services/submodule/nft/views/ViewServicesNFT.vue'),
     meta:{
-      title: "View Portfolio"
+      title: "View NFT"
     }
   },
   {
@@ -34,6 +34,15 @@ export const ServiceRoutes: RouteRecordRaw[] = [
     name: 'ViewServicesNFTDetails',
     props: true,
     component: () => import('@/modules/services/submodule/nft/views/ViewServicesNFTDetails.vue'),
+  },
+  {
+    path: '/view-airdrop-token',
+    name: 'ViewServicesAirdropToken',
+    props: true,
+    component: () => import('@/modules/services/submodule/airdropToken/views/ViewServicesAirdropToken.vue'),
+    meta:{
+      title: "Airdrop Token Utility"
+    }
   },
   {
     path: '/services',
