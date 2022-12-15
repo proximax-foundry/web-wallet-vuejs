@@ -141,7 +141,7 @@ export default {
         else{
             for(let i =mosaics.value.length-100; i< mosaics.value.length; i++){
                 let c=[]
-                if(mosaicNames[i].names.length>1){
+                if(mosaicNames[i]?.names.length>1){
                     for(let j=mosaicNames[i].names.length-1; j>=0;j--){
                         c.push(mosaicNames[i]?.names[j]?.name)
                     }
