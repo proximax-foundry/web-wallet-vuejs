@@ -217,6 +217,7 @@ export default{
     const logout = () => {
       WalletStateUtils.doLogout();
       router.push({ name: "Home"});
+      sessionStorage.removeItem("storeDashboardAsset");
       closeNavi();
     };
 

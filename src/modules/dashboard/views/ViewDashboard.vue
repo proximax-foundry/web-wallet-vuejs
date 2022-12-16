@@ -119,7 +119,7 @@
 
 <script>
 import PendingDataTable from "@/modules/account/components/PendingDataTable.vue"
-import { computed, defineComponent, ref, getCurrentInstance, watch } from 'vue';
+import { computed, defineComponent, ref, getCurrentInstance, watch, onMounted } from 'vue';
 import { TransactionFilterType, TransactionFilterTypes } from '@/modules/dashboard/model/transactions/transaction';
 import MixedTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/MixedTxnDataTable.vue';
 import DashboardAssetDataTable from '@/modules/dashboard/components/DashboardAssetDataTable.vue';
@@ -139,7 +139,7 @@ import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
 import {AppState} from '@/state/appState'
 import { useI18n } from 'vue-i18n';
-import { TransactionType } from 'tsjs-xpx-chain-sdk';
+import { TransactionType, Address, MosaicId } from 'tsjs-xpx-chain-sdk';
 
 export default defineComponent({
   name: 'ViewDashboard',
@@ -294,11 +294,129 @@ export default defineComponent({
     let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
     currentAccount.default = true;
     const selectedAccount = ref(currentAccount);
-    const accountAssets = computed(()=>{
-      let defaultAccAsset =walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount().assets : walletState.currentLoggedInWallet.accounts[0].assets
-      let filteredAsset = defaultAccAsset.filter(asset=>asset.amount!=0)
-      return filteredAsset 
-    })
+
+    const accountAssets =ref([])
+
+        const fetchAccountAssets = async()=>{
+          if(!selectedAccount.value){
+            return null
+          }
+            let z =[]
+            let accInfo = await AppState.chainAPI.accountAPI.accountHttp.getAccountInfo(Address.createFromRawAddress(selectedAccount.value.address)).toPromise()
+            if(!accountAssets.value.length){
+                if(accInfo.mosaics.length<100){
+                    for(let i=0;i<accInfo.mosaics.length;i++){
+                      accountAssets.value.push({
+                        id: accInfo.mosaics[i].id.toHex()
+                    })
+                    }
+                }
+                else{
+                    for(let i=0;i<100;i++){
+                      accountAssets.value.push({
+                        id: accInfo.mosaics[i].id.toHex()
+                    })
+                    }
+                }
+            }
+            else{
+                if(accountAssets.value.length<accInfo.mosaics.length){
+                    let totalMosaics=accountAssets.value.length
+                    for(let i=accountAssets.value.length;i<=totalMosaics+99;i++){
+                        accountAssets.value.push({
+                        id: accInfo.mosaics[i].id.toHex()
+                    })
+                    }  
+                }
+            } 
+
+            let mosaicIds = accountAssets.value.map(y=>new MosaicId(y.id))
+            let mosaicNames = await AppState.chainAPI.assetAPI.getMosaicsNames(mosaicIds)
+            let mosaic = await AppState.chainAPI.assetAPI.getMosaics(mosaicIds)
+
+            if(accountAssets.value.length<=100){
+              for(let i =0; i< mosaicNames.length; i++){
+                let c=[]
+                if(mosaicNames[i].names.length>1){
+                    for(let j=mosaicNames[i].names.length-1; j>=0;j--){
+                        c.push(mosaicNames[i].names[j].name)
+                    }
+                    z.push(c)
+                }else{
+                    c.push(mosaicNames[i].names[0]? mosaicNames[i].names[0].name:undefined)
+                    z.push(c)
+                }
+            }
+            for(let i =0 ; i < accountAssets.value.length; i ++){
+                let a = accountAssets.value[i]
+                a.namespaceNames = (mosaicNames[i].names.length>0?formatNamespaceName(z[i]):undefined)
+                for(let j=0;j<accountAssets.value.length; j ++){
+                    if(accInfo.mosaics[i].id.toHex()===mosaic[j].mosaicId.id.toHex()){
+                        if(mosaic[j].divisibility === 0){
+                        a.amount = accInfo.mosaics[i].amount.compact();
+                    }else if(mosaic[j].divisibility !== null){
+                        a.amount = accInfo.mosaics[i].amount.compact() / Math.pow(10, mosaic[j].divisibility);
+                    }
+                    a.divisibility=mosaic[j].divisibility
+                    }
+                }
+            }
+        }
+        else{
+          for(let i =accountAssets.value.length-100; i< accountAssets.value.length; i++){
+                let c=[]
+                if(mosaicNames[i].names.length>1){
+                    for(let j=mosaicNames[i].names.length-1; j>=0;j--){
+                        c.push(mosaicNames[i].names[j].name)
+                    }
+                    z.push(c)
+                }else{
+                    c.push(mosaicNames[i].names[0]? mosaicNames[i].names[0].name:undefined)
+                    z.push(c)
+                }
+            }
+            for(let i =accountAssets.value.length-100 ; i < accountAssets.value.length; i ++){
+                let a = accountAssets.value[i]
+                a.namespaceNames = (mosaicNames[i].names.length>0?formatNamespaceName(z[i]):undefined)
+                for(let j=0;j<accountAssets.value.length; j ++){
+                    if(accInfo.mosaics[i].id.toHex()===mosaic[j].mosaicId.id.toHex()){
+                        if(mosaic[j].divisibility === 0){
+                        a.amount = accInfo.mosaics[i].amount.compact();
+                    }else if(mosaic[j].divisibility !== null){
+                        a.amount = accInfo.mosaics[i].amount.compact() / Math.pow(10, mosaic[j].divisibility);
+                    }
+                    a.divisibility=mosaic[j].divisibility 
+                    }
+                }
+            }
+            }
+        }
+
+        onMounted(async () => {
+            let mosaicsStorage= JSON.parse(sessionStorage.getItem("storeDashboardAsset"))
+            let accInfo = await AppState.chainAPI.accountAPI.accountHttp.getAccountInfo(Address.createFromRawAddress(selectedAccount.value.address)).toPromise()
+            if(!mosaicsStorage || mosaicsStorage.length!==accInfo.mosaics.length){
+                let updateAccountMosaics = async() => {
+                    setTimeout(await fetchAccountAssets(), 5000);
+                if(accountAssets.value.length===accInfo.mosaics.length){
+                        clearInterval(runFirst)
+                        sessionStorage.setItem("storeDashboardAsset", JSON.stringify(accountAssets.value))
+                }
+                return ;
+            }
+            const runFirst = setInterval(updateAccountMosaics,5000)
+            }
+            else{
+                sessionStorage.setItem("storeDashboardAsset", JSON.stringify(mosaicsStorage))
+                accountAssets.value=JSON.parse(sessionStorage.getItem("storeDashboardAsset"))
+            }
+            
+        })
+
+        const formatNamespaceName = (namespaceNames) => {
+            return namespaceNames.join(" / ")
+        }
+
     const currentBlock = computed(() => AppState.readBlockHeight);
 
     const selectedAccountPublicKey = computed(()=> selectedAccount.value.publicKey);

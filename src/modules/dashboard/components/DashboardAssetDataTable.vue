@@ -10,7 +10,7 @@
       >
       <Column field="assetId" :header="$t('general.assetId')"  style="`wideScreen?'min-width: 200px'?'width: 200px'  ` " >
         <template #body="{data}">
-          <span class="uppercase font-semibold text-xs">{{data.namespaceNames[0]? data.namespaceNames[0] : data.idHex}}</span>
+          <span class="uppercase font-semibold text-xs">{{data.namespaceNames? data.namespaceNames : data.id}}</span>
         </template>
       </Column>
       <Column field="amount" :header="$t('general.amount')"  style="`wideScreen?'min-width: 180px'?'width: 180px'`" >
