@@ -9,13 +9,12 @@
       <Dropdown
       v-model="selectedMosaic"
       :options="options"
+      optionLabel="text"
       :style="{'width':'100%'}"
       :showClear="true"
       option-disabled="disabled"
-      optionLabel="text"
       @change="makeSelection($event.value)"
       />
-
       <!-- v-model="modelValue" -->
       <!-- @input="emit('update:modelValue', $event.value.val)" -->
 
@@ -68,9 +67,10 @@ export default{
 
     makeSelection: function(value) {
       // if the clear button is pressed
-      if (value === null){
+      if (value == null){
         this.clearSelection()
       }
+      // if dropdown is pressed
       else{
         this.$emit('update:modelValue', value.val);
         this.$emit("show-mosaic-selection", {index: this.index});
@@ -79,6 +79,29 @@ export default{
         this.displayClearIcon = true;
       }
     },
+  },
+  watch: {
+    // watch the length of the disable options 
+    'disableOptions.length':{
+      handler: function (val, old_val) { 
+        // if the number of assets is reduced, need to update all value
+        if (old_val-1 == val){
+          for (let i in this.disableOptions){
+            if (i == this.index){
+              // check if there is value in the index
+              if (this.disableOptions[this.index].id == 0){
+                this.selectedMosaic = 0
+              }
+              else{
+                const i = this.options.findIndex(item => item.val === this.disableOptions[this.index].id);
+                this.selectedMosaic = this.options[i]
+              }
+            }
+          }
+        }
+      },
+      deep: true
+    }
   },
   mounted() {
     this.emitter.on( "CLEAR_SELECT", payload => {
