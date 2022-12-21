@@ -8,29 +8,35 @@
     <div class="select mb-3" style="position: relative">
       <Dropdown
       v-model="selectedMosaic"
-      :options="options"
-      optionLabel="text"
+      :options="this.options"
       :style="{'width':'100%'}"
       :showClear="true"
+      :filter="true"
+      :filterFields="label"
+      :virtualScrollerOptions="{
+        itemSize:36, 
+        scrollHeight:`200px`,
+        style:`max-height: ` + (this.options.length * 36 + 36) + `px;`
+      }"
+      optionLabel="text"
       option-disabled="disabled"
-      @change="makeSelection($event.value)"
-      />
-      <!-- v-model="modelValue" -->
-      <!-- @input="emit('update:modelValue', $event.value.val)" -->
-
-      <!-- $emit('update:modelValue', $event.value.val);makeSelection($event.value.id) -->
-
-
-      <!-- the clear button -->
-      <!-- <font-awesome-icon icon="times" class="text-gray-400 hover:text-gray-600 cursor-pointer" style="display: inline-block; position: absolute; top: 9px; right: 25px;" @click="clearSelection()" v-if="displayClearIcon" />
-      
-      <select :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="text-gray-600 w-full border-solid border-b border-gray-200 p-2 mb-2 focus:outline-none" @change="makeSelection">
-        <option value="0" disabled hidden key="0">{{ placeholder }}</option>
-        <option v-for="i in options" :disabled="disableOptions.filter(obj => {return obj.id === i.val}).length >0" :value="i.val" :key="i.id" class="text-gray-800">{{ i.text }}</option>
-      </select>
-    -->
-      </div>
+      @change="makeSelection($event.value)">
+      <template class="asset-item asset-item-value" #value="slotProps">
+        <div v-if="slotProps.value">
+          <div style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">{{slotProps.value.text}}</div>
+        </div>
+        <span v-else>
+          {{this.placeholder}}
+        </span>
+      </template>
+        <template #option="slotProps">
+          <div class="asset-options">
+            <div class="text-sm">{{slotProps.option.text}}</div>
+          </div>
+      </template>
+      </Dropdown>
     </div>
+  </div>
 </template>
 
 <script >
@@ -50,10 +56,11 @@ export default{
   data() {
     return {
       selectedMosaic: this.modelValue,
+      label: ["label"],
       showSelectTitle: false,
       selectErr: false,
       selectModel: 0,
-      displayClearIcon: false
+      displayClearIcon: false,
     };
   },
   methods: {
@@ -81,7 +88,7 @@ export default{
     },
   },
   watch: {
-    // watch the length of the disable options 
+    // watch the length of the disable options so that each components can be updated
     'disableOptions.length':{
       handler: function (val, old_val) { 
         // if the number of assets is reduced, need to update all value
