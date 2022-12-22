@@ -393,24 +393,17 @@ export default defineComponent({
         }
 
         onMounted(async () => {
-            let mosaicsStorage= JSON.parse(sessionStorage.getItem("storeDashboardAsset"))
             let accInfo = await AppState.chainAPI.accountAPI.accountHttp.getAccountInfo(Address.createFromRawAddress(selectedAccount.value.address)).toPromise()
-            if(!mosaicsStorage || mosaicsStorage.length!==accInfo.mosaics.length){
+            if(!accountAssets.value.length){
                 let updateAccountMosaics = async() => {
                     setTimeout(await fetchAccountAssets(), 5000);
                 if(accountAssets.value.length===accInfo.mosaics.length){
-                        clearInterval(runFirst)
-                        sessionStorage.setItem("storeDashboardAsset", JSON.stringify(accountAssets.value))
+                        clearInterval(loadAccountMosaics)
                 }
                 return ;
             }
-            const runFirst = setInterval(updateAccountMosaics,5000)
-            }
-            else{
-                sessionStorage.setItem("storeDashboardAsset", JSON.stringify(mosaicsStorage))
-                accountAssets.value=JSON.parse(sessionStorage.getItem("storeDashboardAsset"))
-            }
-            
+            const loadAccountMosaics = setInterval(updateAccountMosaics,5000)
+            }      
         })
 
         const formatNamespaceName = (namespaceNames) => {
