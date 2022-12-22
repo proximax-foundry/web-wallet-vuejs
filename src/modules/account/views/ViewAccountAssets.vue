@@ -171,24 +171,17 @@ export default {
         }
 
         onMounted(async () => {
-            let mosaicsStorage= JSON.parse(sessionStorage.getItem("storeMosaics"))
             let accInfo = await AppState.chainAPI.accountAPI.accountHttp.getAccountInfo(Address.createFromRawAddress(p.address)).toPromise()
-            if(!mosaicsStorage || mosaicsStorage.length!==accInfo.mosaics.length){
+            if(!mosaics.value.length){
                 let updateAccountMosaics = async() => {
                     setTimeout(await fetchMosaic(), 5000);
                 if(mosaics.value.length===accInfo.mosaics.length){
-                        clearInterval(runFirst)
-                        sessionStorage.setItem("storeMosaics", JSON.stringify(mosaics.value))
+                        clearInterval(loadMosaics)
                 }
                 return ;
             }
-            const runFirst = setInterval(updateAccountMosaics,5000)
-            }
-            else{
-                sessionStorage.setItem("storeMosaics", JSON.stringify(mosaicsStorage))
-                mosaics.value=JSON.parse(sessionStorage.getItem("storeMosaics"))
-            }
-            
+            const loadMosaics = setInterval(updateAccountMosaics,5000)
+            }       
         })
 
 
