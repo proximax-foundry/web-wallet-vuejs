@@ -1,11 +1,13 @@
 <template>
   <div>
+    <!-- showing blue text of select assets -->
     <div class="h-5 text-left">
       <transition enter-active-class="animate__animated animate__fadeInUp">
         <span model-v="showSelectTitle" class="text-xs text-blue-400 ">{{ placeholder }}</span>
       </transition>
     </div>
-    <div class="select mb-3" style="position: relative">
+    <!-- for the dropdown -->
+    <div class="select mb-3" style="position: relative;">
       <Dropdown
       v-model="selectedMosaic"
       :options="this.options"
@@ -13,27 +15,28 @@
       :showClear="true"
       :filter="true"
       :filterFields="label"
-      :virtualScrollerOptions="{
-        itemSize:36, 
-        scrollHeight:`200px`,
-        style:`max-height: ` + (this.options.length * 36 + 36) + `px;`
-      }"
       optionLabel="text"
       option-disabled="disabled"
-      @change="makeSelection($event.value)">
-      <template class="asset-item asset-item-value" #value="slotProps">
+      :placeholder="this.placeholder"
+      @change="makeSelection($event.value)"
+      :virtualScrollerOptions="{
+        itemSize:32,
+        scrollHeight:`flex`,
+        style:`max-height: ` + (this.options.length * 32 + 35) + `px;`,
+      }">
+      <template  #value="slotProps">
         <div v-if="slotProps.value">
           <div style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">{{slotProps.value.text}}</div>
         </div>
         <span v-else>
-          {{this.placeholder}}
+          {{slotProps.placeholder}}
         </span>
       </template>
         <template #option="slotProps">
-          <div class="asset-options">
+          <div>
             <div class="text-sm">{{slotProps.option.text}}</div>
           </div>
-      </template>
+        </template>
       </Dropdown>
     </div>
   </div>
@@ -71,7 +74,6 @@ export default{
       this.selectErr = true;
       this.displayClearIcon = false;
     },
-
     makeSelection: function(value) {
       // if the clear button is pressed
       if (value == null){
@@ -88,14 +90,14 @@ export default{
     },
   },
   watch: {
-    // watch the length of the disable options so that each components can be updated
+    // watch the length of the disable options so that each components can be updated accordingly
     'disableOptions.length':{
       handler: function (val, old_val) { 
         // if the number of assets is reduced, need to update all value
         if (old_val-1 == val){
           for (let i in this.disableOptions){
             if (i == this.index){
-              // check if there is value in the index
+              // check if there is no value in the index
               if (this.disableOptions[this.index].id == 0){
                 this.selectedMosaic = 0
               }
@@ -121,10 +123,4 @@ export default{
 }
 </script>
 <style lang="scss">
-option{
-  padding: 13px; font: 15px calibri; display: block;
-}
-option:disabled{
-  color: #dedede;
-}
 </style>
