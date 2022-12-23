@@ -723,6 +723,7 @@ export default {
   onMounted(async () => {
             let accInfo = await AppState.chainAPI.accountAPI.accountHttp.getAccountInfo(Address.createFromRawAddress(selectedAccAdd.value)).toPromise()
             if(!tempOption.value.length){
+              if(accInfo.mosaics.length>100){
                 let updateAccountMosaics = async() => {
                     await fetchmosaics()
                 if(tempOption.value.length===accInfo.mosaics.length){
@@ -731,7 +732,11 @@ export default {
                 return ;
             }
             const loadAccountMosaics = setInterval(updateAccountMosaics,5000)
-            }      
+            }
+            else{
+              await fetchmosaics()
+            }
+          }      
         })
 
   for(let i=0;i<mosaics.value.length;i++){
