@@ -919,10 +919,8 @@ export default {
         for(let i =0 ; i < tempOption.value.length; i ++){
             if(tempOption.value[i].id===id){
                 amount = tempOption.value[i].amount
-                console.log(tempOption.value[i].divisibility)
               }
             }
-        console.log(amount)
     return amount
   }
   
