@@ -395,6 +395,7 @@ export default defineComponent({
         onMounted(async () => {
             let accInfo = await AppState.chainAPI.accountAPI.accountHttp.getAccountInfo(Address.createFromRawAddress(selectedAccount.value.address)).toPromise()
             if(!accountAssets.value.length){
+              if(accInfo.mosaics.length>100){
                 let updateAccountMosaics = async() => {
                     await fetchAccountAssets()
                 if(accountAssets.value.length===accInfo.mosaics.length){
@@ -403,7 +404,11 @@ export default defineComponent({
                 return ;
             }
             const loadAccountMosaics = setInterval(updateAccountMosaics,5000)
-            }      
+            }
+            else{
+              await fetchAccountAssets()
+            }
+          }    
         })
 
         const formatNamespaceName = (namespaceNames) => {
