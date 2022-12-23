@@ -396,7 +396,7 @@ export default defineComponent({
             let accInfo = await AppState.chainAPI.accountAPI.accountHttp.getAccountInfo(Address.createFromRawAddress(selectedAccount.value.address)).toPromise()
             if(!accountAssets.value.length){
                 let updateAccountMosaics = async() => {
-                    setTimeout(await fetchAccountAssets(), 5000);
+                    await fetchAccountAssets()
                 if(accountAssets.value.length===accInfo.mosaics.length){
                         clearInterval(loadAccountMosaics)
                 }
