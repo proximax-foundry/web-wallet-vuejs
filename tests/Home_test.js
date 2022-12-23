@@ -1,6 +1,8 @@
 var name = "Selenium"
 var password = "abcd1234"
 var account = "Primary"
+var name2 = "Selenium2"
+var labelname = "TestingLabel"
 
 module.exports = {
 
@@ -20,6 +22,8 @@ module.exports = {
         .change_network()
         .navigate_createnewwallet(browser.launch_url)
         .create_wallet(name, password)
+        .navigate_createnewwallet(browser.launch_url)
+        .create_wallet(name2, password)
 
       // sign in
       signin
@@ -38,7 +42,25 @@ module.exports = {
         .click_tabs()
         .home(browser.launch_url)
         .click_headercomponents(browser.launch_url)
-        // .delete_wallet(browser.launch_url)
+        .home(browser.launch_url)
+        .navigation_beginner()
+        .gettingstarted_tab()
+        .siriuschain_tab()
+        .namespaceAns_tab()
+        .assetAns_tab()
+        .navigation_notification(browser.launch_url)
+        .navigation_settings(browser.launch_url)
+        .navigation_swap(browser.launch_url)
+        .home(browser.launch_url)
+        .scanQR_code()
+        .navigation_multisig(browser.launch_url)
+        .navigation_accounts(browser.launch_url)
+        .copy_instancesatviewall()
+        .navigation_createnewaccount(browser.launch_url)
+        .navigation_accounts(browser.launch_url)
+        .label_test(browser.launch_url, labelname)
+        .navigate_accountdetails()
+        .delete_wallet(browser.launch_url, password)
 
     },
     

@@ -6,7 +6,7 @@ const elements = {
     createnew_wallet: 'div.radio-toolbar.text-center > label:nth-child(2)',
     createnew_frompk: 'div.radio-toolbar.text-center > label:nth-child(4)',                                    
     createnew_backup: 'div.radio-toolbar.text-center > label:nth-child(6)',
-    createsuccessful_popup: '.popup-outer-create-wallet > div:nth-child(1)',
+    createsuccessful_message: '.text-green-500',
     close: 'a.mt-4',
     continuelogin: 'a > div',
     next: 'a[href="#/create-wallet"]',
@@ -140,6 +140,12 @@ const commands = {
         .end()
     },
 
+    specialinput_wallet(password){
+        return this
+        .setValue("@input_password", password)
+        .setValue("@input_confirmpassword", password)
+    },
+
     // checks for empty input (create wallet)
     emptyinput_wallet(){
         return this
@@ -189,6 +195,9 @@ const commands = {
         .setValue("@input_confirmpassword", password)
         .click("@create")
         .pause(1000)
+        .isVisible('@createsuccessful_message', callback = (result) => {
+            this.assert.equal(result.value, true, 'When create is clicked, a congratulations message is shown')
+        })
         .click("@continuelogin")
         // .assert.visible('@createsuccessful_popup', 'Wallet is successfully created when wallet name, password and confirm password are valid')
         // .click("@close")
@@ -204,7 +213,10 @@ const commands = {
         .setValue("@input_pkpassword", password)
         .setValue("@input_pkconfirmpassword", password)
         .click("@create")
-        .pause(3000)
+        .pause(1000)
+        .isVisible('@createsuccessful_message', callback = (result) => {
+            this.assert.equal(result.value, true, 'When create is clicked, a congratulations message is shown')
+        })
         .click("@continuelogin")
         // .assert.visible('@createsuccessful_popup', 'Wallet is successfully created from private key when private key, wallet name, password and confirm password are valid')
         // .click("@close")
@@ -307,8 +319,7 @@ const commands = {
     password_length(name, password){
         return this
         .setValue("@input_walletname", name)
-        .setValue("@input_password", password)
-        .setValue("@input_password", "\ue004")
+        .setValue("@input_password", [password, "\ue004"])
         .isVisible('@error_passwordlength', callback = (result) => {
             this.assert.equal(result.value, true, 'If password length is less than required minimum, error is shown')
         })
@@ -319,8 +330,7 @@ const commands = {
         return this
         .setValue("@input_privatekey", privatekey)
         .setValue("@input_pkwalletname", name)
-        .setValue("@input_pkpassword", password)
-        .setValue("@input_pkpassword", "\ue004")
+        .setValue("@input_pkpassword", [password, "\ue004"])
         .isVisible('@error_pkpasswordlength', callback = (result) => {
             this.assert.equal(result.value, true, 'If password length is less than required minimum, error is shown')
         })
@@ -332,7 +342,7 @@ const commands = {
         .click("@input_privatekey")
         .setValue("@input_privatekey", privatekey)
         .isVisible('@error_invalidpk', callback = (result) => {
-            this.assert.equal(result.value, true, 'If password length is less than required minimum, error is shown')
+            this.assert.equal(result.value, true, 'If private key is invalid, error is shown')
         })
     }
 

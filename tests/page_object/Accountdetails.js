@@ -11,7 +11,7 @@ const elements = {
     copyaddress_popup: 'div.p-toast:nth-child(12) > div:nth-child(1) > div:nth-child(1)',
     copy_publickey: '.pb-1 > path:nth-child(2)',
     copypublickey_popup: 'div.p-toast:nth-child(12) > div:nth-child(1) > div:nth-child(1)',
-    copy_privatekey: 'div.border-2:nth-child(3) > div:nth-child(6) > div:nth-child(3) > svg:nth-child(2) > path:nth-child(2)',
+    copy_privatekey: 'div.border-t-0 > div:nth-child(6) > div:nth-child(3) > svg.fa-copy > path',
     confirm_button_pk: 'div.blue-btn:nth-child(3)',
     confirm_button_wp: 'div.blue-btn:nth-child(3)',
     confirm_button_wp_2: 'div.blue-btn:nth-child(4)',
@@ -42,7 +42,13 @@ const elements = {
     transfer_button: 'div.flex:nth-child(5) > a:nth-child(1) > div:nth-child(2)',
     view_privatekey: '.fa-eye > path:nth-child(2)',
     private_key: '#private',
-
+    linkaccount_icon: 'div.inline-block.flex-grow.overflow-hidden > div > div > div > div:nth-child(3) > div > div:nth-child(8) > div.flex.items-center > a > svg > path',
+    privatekey_warning: 'div.border-red-400',
+    linkpasswordinput: 'input.w-full.text-placeholder.text-left.ml-2',
+    delegate_button: 'button.w-full.blue-btn',
+    delegate_notification: 'div.p-toast:nth-child(12) > div:nth-child(1) > div:nth-child(1)',
+    unlink_icon: 'svg.fa-unlink',
+    linked_account: 'div.bg-green-100',
 }
 
 const commands = {
@@ -191,6 +197,39 @@ const commands = {
         .click("@copy_privatekey")
         .isVisible('@pk_successfulpopup', callback = result => {
             this.assert.equal(result.value, true, "If user clicks to copy private key, a notification is shown")
+        })
+
+    },
+
+    delegate_account(password){
+        return this
+        .click('@linkaccount_icon')
+        .isVisible('@privatekey_warning', callback = result => {
+            this.assert.equal(result.value, true, "If user clicks the link icon for link account, user is directed to delegate page with private key for user to store")
+        })
+        .setValue('@linkpasswordinput', password)
+        .click('@delegate_button')
+        .isVisible('@delegate_notification', callback = result => {
+            this.assert.equal(result.value, true, "If user clicks to delegate account, a notification is shown")
+        })
+        .pause(60000)
+        .click('@accountdetails_tab')
+        .isVisible('@unlink_icon', callback = result => {
+            this.assert.equal(result.value, true, "User successfully linked an account")
+        })
+        .click('@unlink_icon')
+        .isVisible('@linked_account', callback = result => {
+            this.assert.equal(result.value, true, "If user clicks the unlink icon for link account, user is directed to delegate page which show the current linked account public key")
+        })
+        .setValue('@linkpasswordinput', password)
+        .click('@delegate_button')
+        .isVisible('@delegate_notification', callback = result => {
+            this.assert.equal(result.value, true, "If user clicks to unlink account, a notification is shown")
+        })
+        .pause(60000)
+        .click('@accountdetails_tab')
+        .isVisible('@linkaccount_icon', callback = result => {
+            this.assert.equal(result.value, true, "User successfully unlinked an account")
         })
 
     },

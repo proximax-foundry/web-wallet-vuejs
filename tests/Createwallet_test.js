@@ -5,10 +5,11 @@ var shortpassword = 'abc'
 var longpassword = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl'
 var privatekey = 'D3AE97B58C1E1A417E11A51232A8FCEDA2137405CC6AEDFDB21F2B088A4F44E0'
 var privatekey1 = 'D3AE97B58C1E1A417E11A51232A8FCEDA2137405CC6AEDFDB21F2B088A4F44E'
+var specialpassword = '@@@@@@@@@@'
 
 module.exports = {
     
-    /*"Create-wallet_test": (browser) => {
+    "Create-wallet_test": (browser) => {
         var create = browser.page.Createwallet();
 
         browser.fullscreenWindow(function(result) {
@@ -20,6 +21,9 @@ module.exports = {
             .change_network()
             .navigate_createnewwallet(browser.launch_url)
             .emptyinput_wallet()
+            .navigate_mainpage()
+            .navigate_createnewwallet(browser.launch_url)
+            .specialinput_wallet(specialpassword)
             .different_password(name, password, password2)
             .navigate_mainpage()
             .navigate_createnewwallet(browser.launch_url)
@@ -29,7 +33,7 @@ module.exports = {
             .create_wallet(name, password)
             .existing_name(name, password)
             .eye_icon()
-    },*/
+    },
 
     "Create-pkwallet_test": (browser) => {
         var create = browser.page.Createwallet();
