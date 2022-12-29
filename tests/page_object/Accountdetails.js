@@ -212,7 +212,7 @@ const commands = {
         .isVisible('@delegate_notification', callback = result => {
             this.assert.equal(result.value, true, "If user clicks to delegate account, a notification is shown")
         })
-        .pause(60000)
+        .pause(120000)
         .click('@accountdetails_tab')
         .isVisible('@unlink_icon', callback = result => {
             this.assert.equal(result.value, true, "User successfully linked an account")

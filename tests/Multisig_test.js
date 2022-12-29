@@ -53,7 +53,8 @@ module.exports = {
             .add_cosignatory()
             .scheme_validation()
             .invalid_password(password2)
-            .empty_password(browser.launch_url)            
+            .empty_password(browser.launch_url)
+            .end()          
 
     },
 
@@ -82,6 +83,7 @@ module.exports = {
         multisig
             .navigation_multisig_2(browser.launch_url)
             .insufficient_xpx()
+            .end()
 
     },
 

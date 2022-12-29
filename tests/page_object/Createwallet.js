@@ -195,9 +195,6 @@ const commands = {
         .setValue("@input_confirmpassword", password)
         .click("@create")
         .pause(1000)
-        .isVisible('@createsuccessful_message', callback = (result) => {
-            this.assert.equal(result.value, true, 'When create is clicked, a congratulations message is shown')
-        })
         .click("@continuelogin")
         // .assert.visible('@createsuccessful_popup', 'Wallet is successfully created when wallet name, password and confirm password are valid')
         // .click("@close")
@@ -214,9 +211,6 @@ const commands = {
         .setValue("@input_pkconfirmpassword", password)
         .click("@create")
         .pause(1000)
-        .isVisible('@createsuccessful_message', callback = (result) => {
-            this.assert.equal(result.value, true, 'When create is clicked, a congratulations message is shown')
-        })
         .click("@continuelogin")
         // .assert.visible('@createsuccessful_popup', 'Wallet is successfully created from private key when private key, wallet name, password and confirm password are valid')
         // .click("@close")

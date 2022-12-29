@@ -76,7 +76,7 @@ const commands = {
         return this
         .setValue('@password_input', password)
         .click('@confirmswap_button')
-        .pause(30000)
+        .pause(60000)
         .isVisible('@confirm_message', callback = result =>{
             this.assert.equal(result.value, true, 'If swap is successful, a congratulations title is shown')
         })

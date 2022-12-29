@@ -1,5 +1,3 @@
-const { divide } = require("mathjs")
-
 const elements = {
 
     account_ellipsis: 'img.h-6:nth-child(1)',
@@ -99,7 +97,6 @@ const commands = {
         })
         .click("@cancel_button")
         .assert.urlContains(browser + 'multisig-settings', 'User is navigated back to multisig page')
-        
     },
 
     scheme_validation(){
