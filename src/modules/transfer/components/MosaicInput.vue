@@ -26,15 +26,16 @@
       }">
       <template  #value="slotProps">
         <div v-if="slotProps.value">
-          <div style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">{{slotProps.value.text}}</div>
+          <div style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">{{slotProps.value.label}} <span class="text-tsm text-gray-400"> ({{slotProps.value.balance}})</span></div>
         </div>
         <span v-else>
           {{slotProps.placeholder}}
         </span>
       </template>
         <template #option="slotProps">
-          <div>
-            <div class="text-sm">{{slotProps.option.text}}</div>
+          <div style="display: flex;justify-content: space-between;">
+            <span class="text-sm">{{slotProps.option.label}}</span>
+            <span class="text-tsm text-gray-500">{{slotProps.option.balance}}</span>
           </div>
         </template>
       </Dropdown>

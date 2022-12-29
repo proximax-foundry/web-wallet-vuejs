@@ -623,7 +623,7 @@ export default {
         if(!asset.namespaceNames.includes(AppState.nativeToken.fullNamespace)){
           mosaicOption.push({
             val: asset.idHex,
-            text: (asset.namespaceNames.length>0?asset.namespaceNames:asset.idHex) + " >"+t('general.balance') +": " +Helper.toCurrencyFormat(asset.amount,asset.divisibility),
+            balance: t('general.balance')+":"+Helper.toCurrencyFormat(asset.amount,asset.divisibility),
             label: (asset.namespaceNames.length>0?asset.namespaceNames[0]:asset.idHex),
             id: index + 1,
             disabled: false
