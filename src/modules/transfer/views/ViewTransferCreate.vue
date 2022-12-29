@@ -8,7 +8,7 @@
         <div class="text-sm font-semibold ">{{$t('transfer.newTransfer')}}</div>
         <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <div class="mt-4"/>
-        <SelectInputSender  v-model="selectedAccAdd" :selectDefault="selectedAccAdd"/>
+        <SelectInputAccount v-model="selectedAccAdd" :selectDefault="selectedAccAdd"/>
         <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4"> 
             <div v-if="getWalletCosigner.cosignerList.length > 0">
               <div class="text-tsm">
@@ -199,7 +199,7 @@ import { TransactionUtils } from "@/util/transactionUtils";
 import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from '@/util/chainUtils';
 import { NamespaceUtils } from '@/util/namespaceUtils';
-import SelectInputSender from "@/modules/transfer/components/SelectInputSender.vue";
+import SelectInputAccount from "@/components/SelectInputAccount.vue";
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
 import { AppState } from '@/state/appState';
@@ -210,7 +210,7 @@ export default {
   name: "ViewTransferCreate",
   components: {
     AddressInputClean,
-    SelectInputSender,
+    SelectInputAccount,
     TransferInputClean,
     TransferTextareaInput,
     PasswordInput,
