@@ -43,6 +43,8 @@ import 'primeicons/primeicons.css'
 
 // Import dialog from PrimeVue
 import Dropdown from 'primevue/dropdown';
+import Sidebar from 'primevue/sidebar';
+import Tree from 'primevue/tree'
 
 library.add(
   fas, faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
@@ -67,6 +69,8 @@ app.component('Toast', Toast);
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.component(VuePassword);
 app.component('Dropdown', Dropdown);
+app.component('Sidebar', Sidebar);
+app.component('Tree',Tree);
 
 AppStateUtils.addNewReadyStates('chainProfile');
 AppStateUtils.addNewReadyStates('theme');

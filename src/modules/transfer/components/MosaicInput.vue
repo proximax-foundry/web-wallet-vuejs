@@ -8,14 +8,14 @@
     </div>
     <!-- for the dropdown -->
     <div class="select mb-3" style="position: relative;">
-      <Dropdown
+      <Dropdown v-if="this.options.length < 20"
       v-model="selectedMosaic"
       :options="this.options"
       :style="{'width':'100%'}"
       :showClear="true"
       :filter="true"
       :filterFields="label"
-      optionLabel="text"
+      optionLabel="label"
       option-disabled="disabled"
       :placeholder="this.placeholder"
       @change="makeSelection($event.value)"
@@ -26,7 +26,7 @@
       }">
       <template  #value="slotProps">
         <div v-if="slotProps.value">
-          <div style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">{{slotProps.value.text}}</div>
+          <div style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">{{slotProps.value.label}}</div>
         </div>
         <span v-else>
           {{slotProps.placeholder}}
@@ -34,10 +34,39 @@
       </template>
         <template #option="slotProps">
           <div>
-            <div class="text-sm">{{slotProps.option.text}}</div>
+            <div class="text-sm">{{slotProps.option.label}}</div>
           </div>
         </template>
       </Dropdown>
+      <!-- if the length of the assets is more than 20 -->
+      <Dropdown v-else
+        v-model="selectedMosaic"
+        :style="{'width':'100%'}"
+        :showClear="true"
+        @focus="test"
+        @change="makeSelection($event.value)"
+        :placeholder="this.placeholder">
+        <template  #value="slotProps">
+          <div v-if="slotProps.value">
+            <div style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">{{slotProps.value.label}}</div>
+          </div>
+          <span v-else>
+            {{slotProps.placeholder}}
+          </span>
+        </template>
+      </Dropdown>
+      <!-- Pagination for the assets -->
+      <Sidebar v-model:visible="this.overlayVisible" position="full">
+        <!--v-model:selection-keys="this.selectedMosaic"-->
+        <Tree 
+        :value="this.options" 
+        selectionMode="single" 
+        v-model="this.selectedMosaic" 
+        :filter="true" 
+        filterMode="strict" 
+        @node-select="makeSelection"
+        />
+      </Sidebar>
     </div>
   </div>
 </template>
@@ -59,14 +88,18 @@ export default{
   data() {
     return {
       selectedMosaic: this.modelValue,
-      label: ["label"],
+      label: ["flabel"],
       showSelectTitle: false,
       selectErr: false,
       selectModel: 0,
       displayClearIcon: false,
+      overlayVisible: false,
     };
   },
   methods: {
+    test: function(){
+      this.overlayVisible = true;
+    },
     clearSelection: function() {
       this.selectModel = 0;
       this.$emit("remove-mosaic-selected", { index: this.index })
@@ -75,17 +108,23 @@ export default{
       this.displayClearIcon = false;
     },
     makeSelection: function(value) {
+      this.overlayVisible = false
       // if the clear button is pressed
       if (value == null){
         this.clearSelection()
       }
       // if dropdown is pressed
       else{
-        this.$emit('update:modelValue', value.val);
+        // value.val
+        this.$emit('update:modelValue', value.data);
+        // this.$emit('update:modelValue', value.val);
         this.$emit("show-mosaic-selection", {index: this.index});
         this.showSelectTitle = true;
         this.selectErr = false;
         this.displayClearIcon = true;
+        if (!(this.options.length < 20)){
+          this.selectedMosaic = value
+        }
       }
     },
   },
@@ -102,7 +141,8 @@ export default{
                 this.selectedMosaic = 0
               }
               else{
-                const i = this.options.findIndex(item => item.val === this.disableOptions[this.index].id);
+                // const i = this.options.findIndex(item => item.val === this.disableOptions[this.index].id);
+                const i = this.options.findIndex(item => item.data === this.disableOptions[this.index].id);
                 this.selectedMosaic = this.options[i]
               }
             }
