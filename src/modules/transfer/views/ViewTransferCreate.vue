@@ -81,7 +81,7 @@
           </div>
           <div class="flex">
             <div class = 'ml-1 font-bold text-blue-400'>{{currentNativeTokenName}}</div>
-            <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
+            <img src="@/modules/account/img/proximax-logo.svg" class='h-7 w-7'>
           </div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
