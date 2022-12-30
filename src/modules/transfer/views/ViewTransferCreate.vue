@@ -654,7 +654,7 @@ export default {
       mosaics.value[i].disabled = false
     }
     // disable all the options choosen
-    mosaics.value.filter(o1 => selectedMosaic.value.some(o2 => {
+    mosaics.value.forEach(o1 => selectedMosaic.value.some(o2 => {
       if(o1.val == o2.id){
         o1.disabled = true;
       }
@@ -666,7 +666,7 @@ export default {
   };
 
   const removeMosaic = (e) => {
-    if(selectedMosaic.value[e.index].id != 0){
+    if(selectedMosaic.value[e.index]!= undefined && selectedMosaic.value[e.index].id != 0){
       // enabling back the option
       mosaics.value[mosaics.value.findIndex(item => item.val === selectedMosaic.value[e.index].id)].disabled = false
     }

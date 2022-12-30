@@ -3,7 +3,7 @@
     <!-- showing blue text of select assets -->
     <div class="h-5 text-left">
       <transition enter-active-class="animate__animated animate__fadeInUp">
-        <span model-v="showSelectTitle" class="text-xs text-blue-400 ">{{ placeholder }}</span>
+        <span class="text-xs text-blue-400 ">{{ placeholder }}</span>
       </transition>
     </div>
     <!-- for the dropdown -->
@@ -61,7 +61,6 @@ export default{
     return {
       selectedMosaic: this.modelValue,
       label: ["label"],
-      showSelectTitle: false,
       selectErr: false,
       selectModel: 0,
       displayClearIcon: false,
@@ -71,7 +70,6 @@ export default{
     clearSelection: function() {
       this.selectModel = 0;
       this.$emit("remove-mosaic-selected", { index: this.index })
-      this.showSelectTitle = false;
       this.selectErr = true;
       this.displayClearIcon = false;
     },
@@ -84,7 +82,6 @@ export default{
       else{
         this.$emit('update:modelValue', value.val);
         this.$emit("show-mosaic-selection", {index: this.index});
-        this.showSelectTitle = true;
         this.selectErr = false;
         this.displayClearIcon = true;
       }
@@ -116,7 +113,6 @@ export default{
   mounted() {
     this.emitter.on( "CLEAR_SELECT", payload => {
       this.selectModel = payload;
-      this.showSelectTitle = false;
       this.selectErr = false;
       this.displayClearIcon = false;
     });
