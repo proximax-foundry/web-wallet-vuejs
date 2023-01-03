@@ -205,10 +205,10 @@ export default{
       let currentStorage = sessionStorage.getItem('defaultAcc')
       //unusual
       if(!currentStorage){
-        let data = [{
+        let data = {
             walletName: walletState.currentLoggedInWallet.name,
             defaultAcc: address
-          }]
+          }
         sessionStorage.setItem('defaultAcc',JSON.stringify(data))
         return
       }
