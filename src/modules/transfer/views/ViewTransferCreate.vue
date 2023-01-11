@@ -10,6 +10,9 @@
         <div v-if="showBalanceErr" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
           <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
         </div>
+        <div v-else-if="isNotCosigner" class="rounded-md bg-yellow-200 w-full p-2 flex items-center justify-center">
+          <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.noCosigner')}}</div>
+        </div>
         <div class="mt-4"/>
         <SelectInputSender  v-model="selectedAccAdd" :selectDefault="selectedAccAdd"/>
         <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4"> 
@@ -30,9 +33,6 @@
                   {{$t('general.insufficientBalance')}}
                 </div>
               </div>
-            </div>
-            <div class="error" v-else>
-             {{$t('general.noCosigner')}} 
             </div>
           </div>
         <div class="flex mt-3 gap-1">
@@ -246,8 +246,9 @@ export default {
     const encryptedMsgDisable = ref(true);
     const toggleConfirm = ref(false);
     const forceSend = ref(false);
-    
+    const isNotCosigner = ref(false);
     const cosignAddress = ref("");
+    
     const disableAllInput = ref(false);
     const disableRecipient = computed(() => disableAllInput.value);
     const disableSupply = computed(() => disableAllInput.value);
@@ -733,6 +734,7 @@ export default {
       
         let cosigner = getWalletCosigner.value.cosignerList
         if (cosigner.length > 0) {
+          isNotCosigner.value = false
           cosignAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey== cosigner[0].publicKey).address;
           if (cosigner[0].balance < lockFundTotalFee.value) {
             disableAllInput.value = true;
@@ -740,6 +742,7 @@ export default {
             disableAllInput.value = false;
           }
         } else {
+          isNotCosigner.value = true
           disableAllInput.value = true;
         }
     }
@@ -995,6 +998,7 @@ export default {
       isMultiSig,
       isMultiSigBool,
       effectiveFee,
+      isNotCosigner,
       cosignAddress,
       getWalletCosigner,
       disableRecipient,
