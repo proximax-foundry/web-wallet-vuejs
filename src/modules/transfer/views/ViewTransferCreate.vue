@@ -7,6 +7,9 @@
       <div class="lg:col-span-3 py-6 px-6">
         <div class="text-sm font-semibold ">{{$t('transfer.newTransfer')}}</div>
         <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
+        <div v-if="showBalanceErr" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
+          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
+        </div>
         <div class="mt-4"/>
         <SelectInputSender  v-model="selectedAccAdd" :selectDefault="selectedAccAdd"/>
         <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4"> 
@@ -47,14 +50,14 @@
         
         <div v-for="(mosaic, index) in mosaicsCreated" :key="index">
           <MosaicInput :placeholder="$t('transfer.selectAsset')" errorMessage="" v-model="selectedMosaic[index].id" :index="index" :options="mosaics" :disableOptions="selectedMosaic" @show-mosaic-selection="updateMosaic" @remove-mosaic-selected="removeMosaic"/>
-          <TransferInputClean v-if="selectedMosaic[index].id != 0" v-model="selectedMosaic[index].amount" :placeholder="$t('transfer.assetAmount')" type="text" :showError="showAssetBalanceErr[index]" :errorMessage="$t('general.insufficientBalance')" :decimal="mosaicSupplyDivisibility[index]"  />
+          <TransferInputClean v-if="selectedMosaic[index].id != 0" v-model="selectedMosaic[index].amount" :placeholder="$t('transfer.assetAmount')" type="text" :showError="showAssetBalanceErr[index]" :decimal="mosaicSupplyDivisibility[index]"  />
         </div>
         <div>
           <button class="my-2 font-semibold text-xs text-blue-primary outline-none focus:outline-none disabled:opacity-50" :disabled="addMosaicsButton || mosaics.length==0" @click="displayMosaicsOption">
            + {{$t('transfer.addAssets')}}
           </button>
         </div>
-        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" :errorMessage="$t('general.insufficientBalance')" :decimal="6"  :disabled="disableSupply"/>
+        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" :decimal="6"  :disabled="disableSupply"/>
         <TransferTextareaInput :placeholder="$t('general.message')" :errorMessage="$t('general.limitExceed')" v-model="messageText" :remainingChar="remainingChar" :showError="showLimitErr"   :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
@@ -624,13 +627,13 @@ export default {
 
   const showBalanceErr = computed(()=>{
     if(isMultiSigBool.value){
-      if (sendXPX.value>balance.value){
+      if (sendXPX.value>balance.value || !(showAssetBalanceErr.value.every(value => value == false))){
         return true
       }else{
         return false
       }
     }else{
-      if(totalFee.value > balance.value){
+      if(totalFee.value > balance.value || !(showAssetBalanceErr.value.every(value => value == false))){
         return true
       }else{
         return false
@@ -893,15 +896,15 @@ export default {
    watch(() => [...selectedMosaic.value], (n) => {
      updateFee()
       for(let i = 0; i < n.length; i++){
-           if(n[i].amount> getMosaicBalanceById(n[i].id)){
+          if(n[i].amount> getMosaicBalanceById(n[i].id)){
           showAssetBalanceErr.value[i]= true
           }else{
             showAssetBalanceErr.value[i]= false
           }
-         
-        
       }
     }, {deep:true});
+    
+
   emitter.on("CLOSE_CONTACT_MODAL", (payload) => {
     togglaAddContact.value = payload;
     router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
