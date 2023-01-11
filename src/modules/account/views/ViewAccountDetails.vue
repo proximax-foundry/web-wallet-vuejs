@@ -64,7 +64,10 @@
           <div  class="flex  flex-col">
             <div class="text-xxs text-blue-primary font-semibold uppercase ">Linked Account</div>
             <div class="flex items-center">
-              <router-link class="truncate" v-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" :to="{ name: 'ViewAccountDetails', params: { address: findAccountAddress(linkedAccountKey)}}">
+              <div v-if="other_acc">
+                <a :href="explorerAccountLink(linkedAccountKey)" target="_blank"  class="text-xs mt-1 font-semibold break-all text-black truncate md:text-clip md:w-auto">{{linkedAccountKey}}</a>
+              </div>
+              <router-link class="truncate" v-else-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" :to="{ name: 'ViewAccountDetails', params: { address: findAccountAddress(linkedAccountKey)}}">
                 <div class="text-xs mt-1 font-semibold break-all  truncate md:text-clip md:w-auto">{{linkedAccountKey}}</div>
               </router-link>
               <div v-else class="text-xs ">No Linked Account</div>
@@ -343,6 +346,13 @@ export default {
           return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespace
       }
 
+      const explorerAccountLink = publicKey=>{ 
+          if(!networkState.currentNetworkProfile){
+              return ''
+          }
+          return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.publicKeyRoute + '/' + publicKey
+      }
+
     const findAccountAddress = publicKey=>{ 
         if(!walletState.currentLoggedInWallet){
             return ''
@@ -415,7 +425,8 @@ export default {
       walletPasswdWalletPaper,
       saveWalletPaper,
       networkType,
-      explorerLink
+      explorerLink,
+      explorerAccountLink
     };
   }
 };
