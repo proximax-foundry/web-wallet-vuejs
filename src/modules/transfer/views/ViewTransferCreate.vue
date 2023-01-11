@@ -58,7 +58,7 @@
           </button>
         </div>
         <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" :decimal="6"  :disabled="disableSupply"/>
-        <TransferTextareaInput :placeholder="$t('general.message')" :errorMessage="$t('general.limitExceed')" v-model="messageText" :remainingChar="remainingChar" :showError="showLimitErr"   :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
+        <TransferTextareaInput class="pt-4" :placeholder="$t('general.message')" :errorMessage="$t('general.limitExceed')" v-model="messageText" :remainingChar="remainingChar" :showError="showLimitErr"   :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
           <label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">
@@ -276,7 +276,7 @@ export default {
         AppState.nativeToken.divisibility
       )
     );
-    
+
     const lockFundTxFee = computed(()=>{
       if(networkState.currentNetworkProfile){
         return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
