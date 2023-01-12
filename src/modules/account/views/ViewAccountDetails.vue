@@ -65,7 +65,8 @@
             <div class="text-xxs text-blue-primary font-semibold uppercase ">Linked Account</div>
             <div class="flex items-center">
               <div v-if="other_acc">
-                <a :href="explorerAccountLink(linkedAccountKey)" target="_blank"  class="text-xs mt-1 font-semibold break-all text-black truncate md:text-clip md:w-auto">{{linkedAccountKey}}</a>
+                <a :href="explorerAccountLink(linkedAccountKey)" target="_blank" v-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" class="text-xs mt-1 font-semibold break-all text-black truncate md:text-clip md:w-auto">{{linkedAccountKey}}</a>
+                <div v-else class="text-xs ">No Linked Account</div>
               </div>
               <router-link class="truncate" v-else-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" :to="{ name: 'ViewAccountDetails', params: { address: findAccountAddress(linkedAccountKey)}}">
                 <div class="text-xs mt-1 font-semibold break-all  truncate md:text-clip md:w-auto">{{linkedAccountKey}}</div>
