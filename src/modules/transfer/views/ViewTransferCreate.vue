@@ -7,11 +7,11 @@
       <div class="lg:col-span-3 py-6 px-6">
         <div class="text-sm font-semibold ">{{$t('transfer.newTransfer')}}</div>
         <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <div v-if="showBalanceErr" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
-          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
-        </div>
-        <div v-else-if="isNotCosigner" class="rounded-md bg-yellow-200 w-full p-2 flex items-center justify-center">
+        <div v-if="isNotCosigner" class="rounded-md bg-yellow-200 w-full p-2 flex items-center justify-center">
           <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.noCosigner')}}</div>
+        </div>
+        <div v-else-if="showBalanceErr" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
+          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
         </div>
         <div class="mt-4"/>
         <SelectInputSender  v-model="selectedAccAdd" :selectDefault="selectedAccAdd"/>
@@ -725,6 +725,7 @@ export default {
   };
   
   watch(selectedAccAdd, (n, o) => {
+    isNotCosigner.value = false
     showAssetBalanceErr.value = []
     for(let i=0;i<mosaics.value.length;i++){
       showAssetBalanceErr.value.push(false)
