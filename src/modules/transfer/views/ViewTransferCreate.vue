@@ -735,7 +735,6 @@ export default {
       
         let cosigner = getWalletCosigner.value.cosignerList
         if (cosigner.length > 0) {
-          isNotCosigner.value = false
           cosignAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey== cosigner[0].publicKey).address;
           if (cosigner[0].balance < lockFundTotalFee.value) {
             disableAllInput.value = true;
