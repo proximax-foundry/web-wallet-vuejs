@@ -197,24 +197,22 @@ export default{
     }
 
     const setDefaultAccInStorage = (address) =>{
-      let data = [{
-            walletName: walletState.currentLoggedInWallet.name,
+      let setData = {
             defaultAcc: address
-          }]
-        sessionStorage.setItem('defaultAcc',JSON.stringify(data))
+          }
+        sessionStorage.setItem('defaultAcc',JSON.stringify(setData))
       let currentStorage = sessionStorage.getItem('defaultAcc')
       //unusual
       if(!currentStorage){
         let data = {
-            walletName: walletState.currentLoggedInWallet.name,
             defaultAcc: address
           }
         sessionStorage.setItem('defaultAcc',JSON.stringify(data))
         return
       }
-      let datas = JSON.parse(currentStorage)
-      let findData = datas.find(data=>data.walletName == walletState.currentLoggedInWallet.name)
-      walletState.currentLoggedInWallet.setDefaultAccountByAddress(findData.defaultAcc)
+      let data = JSON.parse(currentStorage)
+      let findData = Object.values(data).find(value=> value == address)
+      walletState.currentLoggedInWallet.setDefaultAccountByAddress(findData)
     }
 
     const navigate = () =>{

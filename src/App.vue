@@ -138,7 +138,6 @@ export default defineComponent({
     const emitter = internalInstance!.appContext.config.globalProperties.emitter;
 
   interface defaultAcc{
-    walletName: string,
     defaultAcc: string
   }
     watch(walletState,n=>{
@@ -146,16 +145,15 @@ export default defineComponent({
         let findAcc = sessionStorage.getItem('defaultAcc')
         //first time
         if(!findAcc){
-          let data = [{
-            walletName: walletState.currentLoggedInWallet.name,
+          let data = {
             defaultAcc:walletState.currentLoggedInWallet.accounts[0].address
-          }]
+          }
           sessionStorage.setItem('defaultAcc',JSON.stringify(data))
           return
         }
-        let datas :defaultAcc[] = JSON.parse(findAcc)
-        let findData = datas.find(data=>data.walletName == walletState.currentLoggedInWallet.name)
-        walletState.currentLoggedInWallet.setDefaultAccountByAddress(findData.defaultAcc)
+        let data :defaultAcc = JSON.parse(findAcc)
+        let findData = Object.values(data).find(value=> value == data.defaultAcc)
+        walletState.currentLoggedInWallet.setDefaultAccountByAddress(findData)
       }
     },{immediate:true})
 
