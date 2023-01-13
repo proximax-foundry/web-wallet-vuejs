@@ -216,6 +216,7 @@ export default{
 
     const logout = () => {
       WalletStateUtils.doLogout();
+      sessionStorage.removeItem("defaultAcc");
       router.push({ name: "Home"});
       closeNavi();
     };
