@@ -1,6 +1,7 @@
 var name = 'Selenium'
 var password = "abcd1234"
 var password2 = 'abcd12345'
+var password3 = 'abcd'
 
 module.exports = {
     "Sign In": browser => {
@@ -20,9 +21,10 @@ module.exports = {
 
         // sign in test
         signin
-           .empty_password()
+           .less_password(password3)
            .signin_dashboard(browser.launch_url, password)
            .signout_dashboard()
+           .empty_password()
            .wrong_password(password2)
            .eye_icon()
 

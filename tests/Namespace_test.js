@@ -2,6 +2,7 @@ var name = "Selenium"
 var shortname = "s"
 var namespace_input = "justatesting"
 var password = "abcd12345678"
+var password2 = "12345678"
 var privatekey = "0ACDDBF848D081613E665144FF48181EBE4E009D27F33C53AC32180D73A6C667"        // asset acc pk
 
 module.exports = {
@@ -32,8 +33,9 @@ module.exports = {
             .navigate_namespace(browser.launch_url)
             .invalid_name(shortname)
             .empty_password(namespace_input)
-            // .create_namespace(namespace_input, password)
-            // .link_namespace()
+            //.create_namespace(namespace_input, password)
+            //.edit_namespace(password, password2)
+            //.link_namespace()
 
     },
 

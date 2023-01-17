@@ -204,7 +204,7 @@ export default {
 
     (async() => {
       try {
-        const fetchService = await SwapUtils.fetchOldBSCServiceInfo(swapData.swap_IN_SERVICE_URL,'xpx');
+        const fetchService = await SwapUtils.fetchTokenServiceInfo(swapData.swap_IN_SERVICE_URL,'xpx');
         if(fetchService.status==200){
           tokenAddress.value = fetchService.data.bscInfo.scAddress;
           custodian.value = fetchService.data.bscInfo.sinkAddress;

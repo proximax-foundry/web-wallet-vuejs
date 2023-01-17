@@ -47,6 +47,7 @@
           <toggleSwitch v-model="isChecked" />
           <div class="bg-blue-50 p-3 rounded-md inline-block text-xs text-right">
             <div class="mb-1.5">Exchange Rate: 1 {{ selectedFromToken }} = {{ exchangeRate }} {{ selectedToToken }}</div>
+            <div class="mb-1.5">Fee: {{ fee }} {{ selectedToToken }}</div>
             <div class="mb-1.5">{{ selectedFromToken }} Price: {{ selectedFromTokenPrice }} USD</div>
             <div>{{ selectedToToken }} Price: {{ selectedToTokenPrice }} USD</div>
           </div>
@@ -60,8 +61,14 @@
         <div class="flex justify-center mt-10 error_box error error-text" v-if="submitFailed">
           Submission failed
         </div>
+        <div class="flex justify-center mt-10 error_box error error-text" v-if="customErrorMessage">
+          {{ customErrorMessage }}
+        </div>
         <div class="flex justify-center mt-10 success_box success success-text" v-if="processing">
           Submission success
+        </div>
+        <div class="flex justify-center mt-10 success_box success success-text" v-if="dispalyWaitForConfirmationMessage">
+          Please wait until transaction confirmed
         </div>
         <div class="flex justify-center mt-10">
           <button class="blue-btn font-semibold py-2 cursor-pointer text-center w-32 disabled:opacity-50 disabled:cursor-auto" :disabled="disabledBuy" @click="buySiriusToken">Buy</button>
@@ -92,6 +99,7 @@ import { walletState } from "@/state/walletState";
 import { Address, NetworkType } from 'tsjs-xpx-chain-sdk';
 import toggleSwitch from '@/modules/services/submodule/stacking/components/toggleSwitch.vue';
 import { getCurrentPriceUSD } from "@/util/functions";
+import { Utilities } from "@/util/utilities";
 
 export default {
   name: "ViewServicesStackingBuy",
@@ -129,6 +137,8 @@ export default {
       return tokenInvalid.value || !settingDone.value || !isChainIdValid.value || !isSupportedChainId.value || fromInputAmount.value < 1 || !isChecked.value || isSubmit.value
     });
 
+    const customErrorMessage = ref("");
+    const dispalyWaitForConfirmationMessage = ref(false);
     const selectedRemoteSinkAddress = ref("");
     const bscSinkAddress = ref("");
     const ethSinkAddress = ref("");
@@ -148,6 +158,11 @@ export default {
     const selectedToTokenPrice = computed(()=>{
       priceUpdated.value; // just to trigger auto recompute
       return siriusTokens.find(x => x.name === selectedToToken.value).price;
+    });
+
+    const fee = computed(()=>{
+      settingDone.value; // just to trigger auto recompute
+      return siriusTokens.find(x => x.name === selectedToToken.value).fee;
     });
 
     let siriusTokenAtomicUnits = 1000000;
@@ -325,6 +340,17 @@ export default {
 
         if(ethSinkAddress.value !== "0x0000000000000000000000000000000000000000"){
           ethDisabled.value = false;
+        }
+
+        const siriusTokensInfo = serviceInfo.data.siriusToken;
+
+        for(let siriusToken of siriusTokensInfo){
+
+          let currentSiriusToken = siriusTokens.find(x => x.name == siriusToken.name.toUpperCase()); 
+
+          if(currentSiriusToken){
+            currentSiriusToken.fee = siriusToken.feeAmount;
+          }
         }
 
         for(let bscStableCoin of bscStableCoins){
@@ -535,6 +561,8 @@ export default {
 
     const buySiriusToken = async ()=>{
 
+      customErrorMessage.value = "";
+
       try {
         isSubmit.value = true;
         const web3Provider = new ethers.providers.Web3Provider(provider);
@@ -592,6 +620,31 @@ export default {
           ethers.utils.parseUnits(fromInputAmount.value.toString(), decimals)
           //options,
         );
+
+        dispalyWaitForConfirmationMessage.value = true;
+
+        let loop = 1;
+        let receiptFound = false;
+
+        while(loop <= 15 && !receiptFound){
+          await Utilities.delay(2000);
+
+          let txnReceipt = await web3Provider.getTransactionReceipt(receipt.hash);
+          
+          if(txnReceipt){
+            receiptFound = true;
+            // console.log(txnReceipt);
+          }
+          ++loop;
+        }
+
+        dispalyWaitForConfirmationMessage.value = false;
+
+        if(!receiptFound){
+          customErrorMessage.value = "Transaction not confirmed";
+          throw "Transaction not confirmed";
+        }
+
         let txnHash = receipt.hash;
         let nonce = receipt.nonce;
 
@@ -615,12 +668,13 @@ export default {
           body: JSON.stringify(data)
         });
 
-        if(response.status == 200 || response.status == 201){
+        if(response.status == 200 || response.status == 201 || response.status == 202){
           const serverResponseData = await response.json();
 
           console.log(serverResponseData);
 
-          processing.value = true; 
+          processing.value = true;
+          searchAccountStableCoinsBalance();
         }
         else{
           submitFailed.value = true;
@@ -786,7 +840,10 @@ export default {
       settingDone,
       tokenInvalid,
       processing,
-      submitFailed
+      submitFailed,
+      fee,
+      dispalyWaitForConfirmationMessage,
+      customErrorMessage
     }
   }
 }
