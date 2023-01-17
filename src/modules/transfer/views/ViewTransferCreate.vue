@@ -669,8 +669,10 @@ export default {
         if(!asset.namespaceNames.includes(AppState.nativeToken.fullNamespace)){
           mosaicOption.push({
             val: asset.idHex,
-            text: (asset.namespaceNames.length>0?asset.namespaceNames:asset.idHex) + " >"+t('general.balance') +": " +Helper.toCurrencyFormat(asset.amount,asset.divisibility),
+            balance: t('general.balance')+":"+Helper.toCurrencyFormat(asset.amount,asset.divisibility),
+            label: (asset.namespaceNames.length>0?asset.namespaceNames[0]:asset.idHex),
             id: index + 1,
+            disabled: false
           });
           index += 1;
         }
@@ -693,15 +695,31 @@ export default {
     let mosaic = account.assets.find(
       (asset) => asset.idHex == selectedMosaic.value[e.index].id
     );
+    // enable back the option
+    for (let i in mosaics.value){
+      mosaics.value[i].disabled = false
+    }
+    // disable all the options choosen
+    mosaics.value.forEach(o1 => selectedMosaic.value.some(o2 => {
+      if(o1.val == o2.id){
+        o1.disabled = true;
+      }
+    }));
+
     selectedMosaic.value[e.index].amount = "0";
     mosaicSupplyDivisibility.value[e.index] = mosaic.divisibility;
     emitter.emit("CLOSE_MOSAIC_INSUFFICIENT_ERR", false);
   };
+
   const removeMosaic = (e) => {
-    mosaicsCreated.value.splice(e.index, 1);
+    if(selectedMosaic.value[e.index]!= undefined && selectedMosaic.value[e.index].id != 0){
+      // enabling back the option
+      mosaics.value[mosaics.value.findIndex(item => item.val === selectedMosaic.value[e.index].id)].disabled = false
+    }
     selectedMosaic.value.splice(e.index, 1);
     showAssetBalanceErr.value.splice(e.index,1)
     mosaicSupplyDivisibility.value.splice(e.index, 1);
+    mosaicsCreated.value.splice(e.index, 1);
   };
   
   const getSelectedMosaicBalance = (index) => {
